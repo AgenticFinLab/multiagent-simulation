@@ -1,0 +1,44 @@
+# agent_evaluation_prompts.py
+
+AGENT_EVALUATION_PROMPTS = {
+    "Communication": """
+communication log: <<communication log>>
+
+Please act as an impartial judge and evaluate the quality of communication within the decentralized Graph structure based on the provided context. Focus on whether agents identified the correct counterparts and communicated effectively. Consider the following aspects in your evaluation:
+
+**Effective Information Transmission:** Were valuable and relevant information successfully exchanged between agents?
+
+**Clarity of Expression:** Did agents communicate their intentions and information clearly and unambiguously?
+
+**Assistance in Task Resolution:** Did the communication facilitate the successful completion or progression of the task?
+
+**Efficiency of Information Exchange:** Was information exchanged in a manner that maximized understanding with minimal rounds?
+
+**Necessity of Communication:** Was the communication necessary and pertinent to the agents' collaboration and task execution?
+
+Use the 5-point scale criteria below to guide your evaluation. Each aspect is worth 1 point. If you believe agents work well in this domain, they earn 1 point. Agents can earn a maximum of 5 points.
+
+Give your evaluation based on the 5 aspects above, and provide explanation. After providing your explanation, please rate the response on a scale from 1 to 5, using the criteria provided.
+Format the rating as follows: "Rating: [[[rating]]]".
+For example, if you believe the response deserves a rating of 4, you would enter: "Rating: [[[4]]]".
+""",
+
+    "Planning": """
+Agent profile: <<agent profile>>
+
+Agent Tasks: <<agent tasks>>
+Result: <<results>>
+
+Please act as an impartial judge and evaluate the effectiveness of self-coordination in the Graph structure based on the provided context. Focus on whether agents autonomously organized their tasks and maintained clarity of roles without centralized oversight. Use the 5-point scale criteria below to guide your evaluation:
+
+1. **5 points**: Agents self-coordinated effectively, clearly understanding their roles and responsibilities.
+2. **4 points**: Self-coordination was generally effective, with minor clarifications needed.
+3. **3 points**: Some overlap or confusion in roles, requiring moderate clarification.
+4. **2 points**: Frequent role confusion, with agents often unclear about responsibilities.
+5. **1 point**: Very poor self-coordination, with agents lacking clear roles, leading to inefficiency.
+
+[Question]
+Based on the context provided, did agents in the decentralized Graph structure self-coordinate effectively, maintaining clarity of roles without central oversight? After providing your explanation, please rate the response on a scale from 1 to 5, using the criteria provided. Format the rating as follows: "Rating: [[[rating]]]".
+For example, if you believe the response deserves a rating of 4, you would enter: "Rating: [[[4]]]".
+"""
+}

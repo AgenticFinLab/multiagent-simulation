@@ -1,0 +1,26 @@
+pension_fund_alpha:
+  class: "llmgt.Demo.investor.general:GeneralInvestor"
+  market: ["equity_market", "bond_market"]
+  config:
+    risk_tolerance: 0.3
+    initial_capital: 500000000
+    strategy: "conservative"
+    entry_limit: 50
+    investment_horizon: "long_term"
+    sector_preference: ["utilities", "healthcare", "consumer_staples"]
+    max_position_size: 0.05
+    rebalancing_frequency: "monthly"
+
+hedge_fund_beta:
+  class: "llmgt.Demo.investor.general:GeneralInvestor"
+  market: ["equity_market", "forex_market"]
+  config:
+    risk_tolerance: 0.95
+    initial_capital: 100000000
+    strategy: "aggressive"
+    entry_limit: 100
+    investment_horizon: "short_term"
+    leverage_ratio: 3.0
+    stop_loss_threshold: 0.15
+    profit_taking_threshold: 0.25
+    algorithmic_trading: true

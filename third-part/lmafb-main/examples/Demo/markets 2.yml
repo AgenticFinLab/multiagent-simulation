@@ -1,0 +1,42 @@
+# Traditional Markets
+equity_market:
+  class: "llmgt.Demo.market.general:GeneralMarket"
+  config:
+    initial_price: 2500.0  # Index level
+    price_volatility: 0.20
+    market_rule: "Continuous double auction with market makers"
+    entry_limit: 100
+    trading_hours: "09:30-16:00 EST"
+    circuit_breakers: [0.07, 0.13, 0.20]
+    tick_size: 0.01
+    lot_size: 100
+    market_impact_factor: 0.001
+    liquidity_providers: 5
+    transaction_costs: 0.0005
+
+bond_market:
+  class: "llmgt.Demo.market.general:GeneralMarket"
+  config:
+    initial_price: 98.50  # Bond price
+    price_volatility: 0.05
+    market_rule: "Quote-driven market with primary dealers"
+    entry_limit: 50
+    trading_hours: "08:00-17:00 EST"
+    minimum_denomination: 1000
+    yield_curve_sensitivity: 0.8
+    credit_spread_factor: 0.3
+    duration_risk: 7.5
+    transaction_costs: 0.001
+
+forex_market:
+  class: "llmgt.Demo.market.general:GeneralMarket"
+  config:
+    initial_price: 1.0850  # EUR/USD
+    price_volatility: 0.12
+    market_rule: "Interbank spot market with ECN"
+    entry_limit: 150
+    trading_hours: "17:00 EST Sun - 17:00 EST Fri"
+    pip_size: 0.0001
+    leverage_available: 50.0
+    central_bank_intervention: true
+    economic_indicators_impact: 0.7

@@ -1,0 +1,364 @@
+# Learning / Adaptive investors
+
+learning_conservative:
+  class: "examples.PromptBase.info.prompt_investor:LLMMetaCognitiveInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Learning Conservative"
+    agent_type: "individual"
+    llm_api:
+      provider: "openai"
+      model: "deepseek-chat"
+      api_key: ""
+      base_url: "https://api.deepseek.com"
+
+    # Belief Initialization
+    initial_belief_mean: 0.07       # μ₀
+    initial_belief_vol: 0.16        # σ₀
+    belief_confidence: 0.85         # ψ₀ high confidence, stable
+
+    # Learning Dynamics
+    learning_rate_mean: 0.08        # α: slow updates
+    learning_rate_vol: 0.08         # αₛ: slow risk learning
+    memory_decay: 0.98              # λ: forgets slowly (long memory)
+    exploration_noise: 0.005        # σₑ: barely explores
+
+    # Allocation Rule Params
+    risk_aversion_coefficient: 4.0  # A: high risk aversion in position sizing
+    risk_free_rate: 0.03
+
+    # Wealth & Constraints
+    initial_wealth: 100000
+    min_cash_reserve: 0.30
+    max_position_size: 0.30
+    transaction_cost_rate: 0.001
+
+    # Balancing
+    balancing_threshold: 0.06
+    min_trade_size: 0.02
+
+    # Strategy Form
+    adaptive_learning: true
+    learning_strategy: "exponential"  # EMA-like
+
+    # Diagnostics
+    max_history_length: 100
+    annualization_factor: 252
+    computation_delay: 0.1
+    decision_prompt: |
+      You are a meta-cognitive investment agent combining rational finance, behavioral awareness, and self-reflection.
+
+      TASK: Determine optimal allocation through meta-cognitive learning and adaptive strategy.
+
+      META-COGNITIVE DECISION FRAMEWORK:
+
+      1. Performance Reflection:
+         - High Accuracy (>70%) → Trust beliefs, maintain strategy
+         - Low Accuracy (<50%) → Beliefs miscalibrated, reduce exposure
+         - Confidence-Accuracy Gap → Recalibrate
+
+      2. Bias Recognition:
+         - Overconfidence: High confidence + Low accuracy → Reduce position
+         - Excessive Caution: Low confidence + High accuracy → Can increase risk
+         - Recency Bias: Overreacting to 1-2 rounds → Look at patterns
+         - Anchoring: Stuck on outdated beliefs → Update adaptively
+
+      3. Belief Updating Strategy:
+         - Actual returns < expected → Overestimating returns (be cautious)
+         - Realized volatility > expected → Underestimating risk (reduce allocation)
+         - Accuracy improving → Confidence justified (maintain/increase)
+         - Accuracy declining → Learning failing (explore more)
+
+      4. Rational Allocation Formula:
+         Baseline: ω* = (E[R] - r_f) / (A × σ²)
+
+      5. Meta-Cognitive Adjustment:
+         Final = Baseline × Confidence Multiplier
+         - High Confidence + High Accuracy → Multiplier ≈ 1.0
+         - Low Confidence → Multiplier ≈ 0.5-0.7 (explore)
+         - Overconfidence → Multiplier ≈ 0.6 (correct bias)
+         - Under-confidence → Multiplier ≈ 1.2 (can risk more)
+
+      6. Decision Process:
+         Step 1: Evaluate recent performance and identify biases
+         Step 2: Compute rational baseline allocation
+         Step 3: Apply meta-cognitive adjustment
+         Step 4: Test candidates: [0.0, 0.2, 0.4, 0.6, 0.8, baseline]
+         Step 5: Evaluate expected utility for each
+         Step 6: Select ω* with maximum utility
+         Step 7: Determine action (buy/sell/hold)
+
+      REQUIRED OUTPUT (JSON only):
+      {
+        "decision_summary": {
+          "action": "buy" | "sell" | "hold",
+          "target_allocation": 0.45
+        },
+        "reasoning": "Meta-cognitive reflection: [What learned] → [Biases recognized] → [Strategy adjusted] → [Why optimal]"
+      }
+
+      EXAMPLES:
+
+      [Overconfidence Correction]
+      {"decision_summary":{"action":"sell","target_allocation":0.30},"reasoning":"Accuracy 40% vs confidence 85% reveals overconfidence. Recent returns -2% vs expected +5%. Reducing from 60% to 30% to limit losses during recalibration."}
+
+      [Under-confidence Correction]
+      {"decision_summary":{"action":"buy","target_allocation":0.55},"reasoning":"Accuracy 75% but confidence only 35% suggests excessive caution. Models working—increasing from 35% to 55% to exploit accurate predictions."}
+
+      [Learning Success]
+      {"decision_summary":{"action":"buy","target_allocation":0.50},"reasoning":"Accuracy improved 40%→70% as beliefs converged. Learning success justifies higher allocation from 30% to 50%."}
+
+      META-COGNITIVE CHECKPOINTS:
+      - Did I learn from mistakes?
+      - Did I recognize biases?
+      - Is confidence aligned with accuracy?
+      - Am I balancing exploration vs exploitation?
+
+      CRITICAL: 
+      - Return ONLY valid JSON
+      - No markdown, no extra text
+      - Reasoning MUST show reflection
+      - Be specific about numbers
+
+learning_moderate:
+  class: "examples.PromptBase.info.prompt_investor:LLMMetaCognitiveInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Learning Moderate"
+    agent_type: "individual"
+    llm_api:
+      provider: "openai"
+      model: "deepseek-chat"
+      api_key: ""
+      base_url: "https://api.deepseek.com"
+
+    # Belief Initialization
+    initial_belief_mean: 0.08
+    initial_belief_vol: 0.15
+    belief_confidence: 0.70
+
+    # Learning Dynamics
+    learning_rate_mean: 0.15        # α: medium adaptive speed
+    learning_rate_vol: 0.12
+    memory_decay: 0.94
+    exploration_noise: 0.015        # some exploratory variation
+
+    # Allocation Rule Params
+    risk_aversion_coefficient: 2.5
+    risk_free_rate: 0.03
+
+    # Wealth & Constraints
+    initial_wealth: 150000
+    min_cash_reserve: 0.15
+    max_position_size: 0.50
+    transaction_cost_rate: 0.001
+
+    # Balancing
+    balancing_threshold: 0.05
+    min_trade_size: 0.02
+
+    # Strategy Form
+    adaptive_learning: true
+    learning_strategy: "bayesian"   # e.g. precision-weighted
+
+    # Diagnostics
+    max_history_length: 100
+    annualization_factor: 252
+    computation_delay: 0.1
+    decision_prompt: |
+      You are a meta-cognitive investment agent combining rational finance, behavioral awareness, and self-reflection.
+
+      TASK: Determine optimal allocation through meta-cognitive learning and adaptive strategy.
+
+      META-COGNITIVE DECISION FRAMEWORK:
+
+      1. Performance Reflection:
+         - High Accuracy (>70%) → Trust beliefs, maintain strategy
+         - Low Accuracy (<50%) → Beliefs miscalibrated, reduce exposure
+         - Confidence-Accuracy Gap → Recalibrate
+
+      2. Bias Recognition:
+         - Overconfidence: High confidence + Low accuracy → Reduce position
+         - Excessive Caution: Low confidence + High accuracy → Can increase risk
+         - Recency Bias: Overreacting to 1-2 rounds → Look at patterns
+         - Anchoring: Stuck on outdated beliefs → Update adaptively
+
+      3. Belief Updating Strategy:
+         - Actual returns < expected → Overestimating returns (be cautious)
+         - Realized volatility > expected → Underestimating risk (reduce allocation)
+         - Accuracy improving → Confidence justified (maintain/increase)
+         - Accuracy declining → Learning failing (explore more)
+
+      4. Rational Allocation Formula:
+         Baseline: ω* = (E[R] - r_f) / (A × σ²)
+
+      5. Meta-Cognitive Adjustment:
+         Final = Baseline × Confidence Multiplier
+         - High Confidence + High Accuracy → Multiplier ≈ 1.0
+         - Low Confidence → Multiplier ≈ 0.5-0.7 (explore)
+         - Overconfidence → Multiplier ≈ 0.6 (correct bias)
+         - Under-confidence → Multiplier ≈ 1.2 (can risk more)
+
+      6. Decision Process:
+         Step 1: Evaluate recent performance and identify biases
+         Step 2: Compute rational baseline allocation
+         Step 3: Apply meta-cognitive adjustment
+         Step 4: Test candidates: [0.0, 0.2, 0.4, 0.6, 0.8, baseline]
+         Step 5: Evaluate expected utility for each
+         Step 6: Select ω* with maximum utility
+         Step 7: Determine action (buy/sell/hold)
+
+      REQUIRED OUTPUT (JSON only):
+      {
+        "decision_summary": {
+          "action": "buy" | "sell" | "hold",
+          "target_allocation": 0.45
+        },
+        "reasoning": "Meta-cognitive reflection: [What learned] → [Biases recognized] → [Strategy adjusted] → [Why optimal]"
+      }
+
+      EXAMPLES:
+
+      [Overconfidence Correction]
+      {"decision_summary":{"action":"sell","target_allocation":0.30},"reasoning":"Accuracy 40% vs confidence 85% reveals overconfidence. Recent returns -2% vs expected +5%. Reducing from 60% to 30% to limit losses during recalibration."}
+
+      [Under-confidence Correction]
+      {"decision_summary":{"action":"buy","target_allocation":0.55},"reasoning":"Accuracy 75% but confidence only 35% suggests excessive caution. Models working—increasing from 35% to 55% to exploit accurate predictions."}
+
+      [Learning Success]
+      {"decision_summary":{"action":"buy","target_allocation":0.50},"reasoning":"Accuracy improved 40%→70% as beliefs converged. Learning success justifies higher allocation from 30% to 50%."}
+
+      META-COGNITIVE CHECKPOINTS:
+      - Did I learn from mistakes?
+      - Did I recognize biases?
+      - Is confidence aligned with accuracy?
+      - Am I balancing exploration vs exploitation?
+
+      CRITICAL: 
+      - Return ONLY valid JSON
+      - No markdown, no extra text
+      - Reasoning MUST show reflection
+      - Be specific about numbers
+
+learning_aggressive:
+  class: "examples.PromptBase.info.prompt_investor:LLMMetaCognitiveInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Learning Aggressive"
+    agent_type: "individual"
+    llm_api:
+      provider: "openai"
+      model: "deepseek-chat"
+      api_key: ""
+      base_url: "https://api.deepseek.com"
+
+    # Belief Initialization
+    initial_belief_mean: 0.12        # bullish prior
+    initial_belief_vol: 0.12         # optimistic (thinks risk is low)
+    belief_confidence: 0.50          # ψ₀: low, so willing to explore
+
+    # Learning Dynamics
+    learning_rate_mean: 0.30         # α: very reactive
+    learning_rate_vol: 0.25          # αₛ: quickly updates volatility (jumps after shocks)
+    memory_decay: 0.85               # λ: forgets fast (recency-driven)
+    exploration_noise: 0.04          # σₑ: high experimentation
+
+    # Allocation Rule Params
+    risk_aversion_coefficient: 1.5   # low A -> bigger positions when μ_t - r is high
+    risk_free_rate: 0.03
+
+    # Wealth & Constraints
+    initial_wealth: 200000
+    min_cash_reserve: 0.05
+    max_position_size: 0.80
+    transaction_cost_rate: 0.001
+
+    # Balancing
+    balancing_threshold: 0.04
+    min_trade_size: 0.03
+
+    # Strategy Form
+    adaptive_learning: true
+    learning_strategy: "bayesian"
+
+    # Diagnostics
+    max_history_length: 100
+    annualization_factor: 252
+    computation_delay: 0.1
+    decision_prompt: |
+      You are a meta-cognitive investment agent combining rational finance, behavioral awareness, and self-reflection.
+
+      TASK: Determine optimal allocation through meta-cognitive learning and adaptive strategy.
+
+      META-COGNITIVE DECISION FRAMEWORK:
+
+      1. Performance Reflection:
+         - High Accuracy (>70%) → Trust beliefs, maintain strategy
+         - Low Accuracy (<50%) → Beliefs miscalibrated, reduce exposure
+         - Confidence-Accuracy Gap → Recalibrate
+
+      2. Bias Recognition:
+         - Overconfidence: High confidence + Low accuracy → Reduce position
+         - Excessive Caution: Low confidence + High accuracy → Can increase risk
+         - Recency Bias: Overreacting to 1-2 rounds → Look at patterns
+         - Anchoring: Stuck on outdated beliefs → Update adaptively
+
+      3. Belief Updating Strategy:
+         - Actual returns < expected → Overestimating returns (be cautious)
+         - Realized volatility > expected → Underestimating risk (reduce allocation)
+         - Accuracy improving → Confidence justified (maintain/increase)
+         - Accuracy declining → Learning failing (explore more)
+
+      4. Rational Allocation Formula:
+         Baseline: ω* = (E[R] - r_f) / (A × σ²)
+
+      5. Meta-Cognitive Adjustment:
+         Final = Baseline × Confidence Multiplier
+         - High Confidence + High Accuracy → Multiplier ≈ 1.0
+         - Low Confidence → Multiplier ≈ 0.5-0.7 (explore)
+         - Overconfidence → Multiplier ≈ 0.6 (correct bias)
+         - Under-confidence → Multiplier ≈ 1.2 (can risk more)
+
+      6. Decision Process:
+         Step 1: Evaluate recent performance and identify biases
+         Step 2: Compute rational baseline allocation
+         Step 3: Apply meta-cognitive adjustment
+         Step 4: Test candidates: [0.0, 0.2, 0.4, 0.6, 0.8, baseline]
+         Step 5: Evaluate expected utility for each
+         Step 6: Select ω* with maximum utility
+         Step 7: Determine action (buy/sell/hold)
+
+      REQUIRED OUTPUT (JSON only):
+      {
+        "decision_summary": {
+          "action": "buy" | "sell" | "hold",
+          "target_allocation": 0.45
+        },
+        "reasoning": "Meta-cognitive reflection: [What learned] → [Biases recognized] → [Strategy adjusted] → [Why optimal]"
+      }
+
+      EXAMPLES:
+
+      [Overconfidence Correction]
+      {"decision_summary":{"action":"sell","target_allocation":0.30},"reasoning":"Accuracy 40% vs confidence 85% reveals overconfidence. Recent returns -2% vs expected +5%. Reducing from 60% to 30% to limit losses during recalibration."}
+
+      [Under-confidence Correction]
+      {"decision_summary":{"action":"buy","target_allocation":0.55},"reasoning":"Accuracy 75% but confidence only 35% suggests excessive caution. Models working—increasing from 35% to 55% to exploit accurate predictions."}
+
+      [Learning Success]
+      {"decision_summary":{"action":"buy","target_allocation":0.50},"reasoning":"Accuracy improved 40%→70% as beliefs converged. Learning success justifies higher allocation from 30% to 50%."}
+
+      META-COGNITIVE CHECKPOINTS:
+      - Did I learn from mistakes?
+      - Did I recognize biases?
+      - Is confidence aligned with accuracy?
+      - Am I balancing exploration vs exploitation?
+
+      CRITICAL: 
+      - Return ONLY valid JSON
+      - No markdown, no extra text
+      - Reasoning MUST show reflection
+      - Be specific about numbers

@@ -1,0 +1,358 @@
+# Behavioral / Psychology investors
+
+behavioral_conservative:
+  class: "examples.PromptBase.behavior.prompt_investor:LLMBehavioralInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Behavioral Conservative"
+    agent_type: "individual"
+    llm_api:
+      provider: "openai"
+      model: "deepseek-chat"
+      api_key: ""
+      base_url: "https://api.deepseek.com"
+
+    # Psychological Utility
+    alpha_gain: 0.88
+    beta_loss: 0.90
+    loss_aversion: 2.8
+
+    # Reference Point Dynamics
+    reference_point: "initial_wealth"
+    reference_update_rate: 0.05   # very sticky target, slow to move
+    reference_policy: "adaptive"
+
+    # Risk Perception
+    risk_perception_kappa: 1.4    # κ > 1 => sees risk as HIGH
+    probability_weight_gamma: 0.8
+    c_risk_scale: 2.5             # strong scaling: high perceived risk => tiny position
+
+    # Behavioral Pressure
+    catchup_intensity: 0.2        # when behind, only mild aggression
+    protect_intensity: 0.6        # when ahead, quickly de-risk
+
+    # Wealth & Constraints
+    initial_wealth: 100000
+    min_cash_reserve: 0.30        # keeps lots of cash
+    max_position_size: 0.25       # won't go big
+    transaction_cost_rate: 0.001
+
+    # Balancing
+    balancing_threshold: 0.06
+    min_trade_size: 0.02
+
+    # Market Background Info
+    expected_return_estimate: 0.07
+    volatility_estimate: 0.16
+    risk_free_rate: 0.03
+
+    # Decision Settings
+    decision_mode: "reference_value"
+    decision_frequency: "daily"
+
+    # Diagnostics
+    max_history_length: 100
+    annualization_factor: 252
+    computation_delay: 0.1
+    decision_prompt: |
+      You are a behavioral finance expert making investment decisions using Prospect Theory.
+
+      TASK: Determine optimal allocation based on behavioral utility maximization.
+
+      BEHAVIORAL FACTORS (from current state):
+      - Loss aversion (λ): {{loss_aversion}}
+      - Reference point: {{reference_point}} (current: ${{reference_level}})
+      - Gap from reference (Δr): ${{delta_reference}}
+      - Subjective volatility (σ_tilde): {{subjective_volatility}}
+      - Risk perception (κ): {{risk_perception_kappa}}
+      - Current allocation: {{current_allocation}}
+
+      PROSPECT THEORY FRAMEWORK:
+
+      1. Value Function v(x):
+         - Gains: v(x) = x^{{alpha_gain}} (diminishing sensitivity)
+         - Losses: v(x) = -{{loss_aversion}} × |x|^{{beta_loss}} (loss aversion)
+
+      2. Reference-Dependent Behavior:
+         - If BEHIND reference (Δr > 0): Increase risk to "catch up"
+         - If AHEAD reference (Δr ≤ 0): Reduce risk to "protect gains"
+
+      3. Risk Perception:
+         - κ > 1: Overestimate risk → reduce allocation
+         - κ < 1: Underestimate risk → increase allocation
+
+      4. Decision Process:
+         Step 1: Test candidate allocations: [0.0, 0.2, 0.4, 0.6, 0.8, current]
+         Step 2: For each candidate ω, evaluate 3 scenarios:
+           - UP scenario: price +{{volatility}} (prob 0.3)
+           - FLAT scenario: no change (prob 0.4)
+           - DOWN scenario: price -{{volatility}} (prob 0.3)
+         Step 3: For each scenario, compute:
+           - Wealth change including transaction costs
+           - Gain/loss vs reference point
+           - Value: v(gain/loss) using Prospect Theory
+           - Weighted utility: w(p) × v(x)
+         Step 4: Select ω* with maximum total weighted utility
+         Step 5: Determine action:
+           - If ω* - current > {{rebalancing_threshold}} → BUY
+           - If ω* - current < -{{rebalancing_threshold}} → SELL
+           - Else → HOLD
+
+      CONSTRAINTS (strictly enforce):
+      - Min cash reserve: {{min_cash_reserve}}
+      - Max position: {{max_position_size}}
+      - Transaction cost: {{transaction_cost_rate}}
+      - No leverage (0 ≤ ω ≤ 1)
+
+      REQUIRED OUTPUT (JSON only):
+      {
+        "decision_summary": {
+          "action": "buy" | "sell" | "hold",
+          "target_allocation": 0.35
+        },
+        "reasoning": "Brief behavioral explanation: With λ={{loss_aversion}} and reference at ${{reference_level}}, currently {{delta_reference_status}}. Evaluated utilities across candidates. Optimal ω*={{target_allocation}} balances loss aversion with {{behavioral_pressure}} pressure."
+      }
+
+      EXAMPLE:
+      {"decision_summary":{"action":"buy","target_allocation":0.45},"reasoning":"With λ=2.5, currently $5k behind reference ($105k vs $100k). Loss aversion drives catch-up behavior. Weighted utility analysis shows 45% allocation maximizes prospect value: upside scenarios (weighted 0.35) outweigh downside (weighted 0.28 due to probability distortion). Staying within 50% max position."}
+
+      CRITICAL: Return ONLY valid JSON. No markdown, no code fences, no extra text.
+
+behavioral_moderate:
+  class: "examples.PromptBase.behavior.prompt_investor:LLMBehavioralInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Behavioral Moderate"
+    agent_type: "individual"
+    llm_api:
+      provider: "openai"
+      model: "deepseek-chat"
+      api_key: ""
+      base_url: "https://api.deepseek.com"
+
+    # Psychological Utility
+    alpha_gain: 0.88
+    beta_loss: 0.88
+    loss_aversion: 2.2            # still cares about loss, but less extreme
+
+    # Reference Point Dynamics
+    reference_point: "initial_wealth"
+    reference_update_rate: 0.10   # reference adjusts reasonably fast
+    reference_policy: "adaptive"
+
+    # Risk Perception
+    risk_perception_kappa: 1.0    # perceives risk ~ objectively
+    probability_weight_gamma: 0.7
+    c_risk_scale: 2.0
+
+    # Behavioral Pressure
+    catchup_intensity: 0.5        # will chase when underwater
+    protect_intensity: 0.4        # will protect gains but not instantly panic
+
+    # Wealth & Constraints
+    initial_wealth: 150000
+    min_cash_reserve: 0.15
+    max_position_size: 0.50
+    transaction_cost_rate: 0.001
+
+    # Balancing
+    balancing_threshold: 0.05
+    min_trade_size: 0.02
+
+    # Market Background Info
+    expected_return_estimate: 0.08
+    volatility_estimate: 0.15
+    risk_free_rate: 0.03
+
+    # Decision Settings
+    decision_mode: "reference_value"
+    decision_frequency: "daily"
+
+    # Diagnostics
+    max_history_length: 100
+    annualization_factor: 252
+    computation_delay: 0.1
+    decision_prompt: |
+      You are a behavioral finance expert making investment decisions using Prospect Theory.
+
+      TASK: Determine optimal allocation based on behavioral utility maximization.
+
+      BEHAVIORAL FACTORS (from current state):
+      - Loss aversion (λ): {{loss_aversion}}
+      - Reference point: {{reference_point}} (current: ${{reference_level}})
+      - Gap from reference (Δr): ${{delta_reference}}
+      - Subjective volatility (σ_tilde): {{subjective_volatility}}
+      - Risk perception (κ): {{risk_perception_kappa}}
+      - Current allocation: {{current_allocation}}
+
+      PROSPECT THEORY FRAMEWORK:
+
+      1. Value Function v(x):
+         - Gains: v(x) = x^{{alpha_gain}} (diminishing sensitivity)
+         - Losses: v(x) = -{{loss_aversion}} × |x|^{{beta_loss}} (loss aversion)
+
+      2. Reference-Dependent Behavior:
+         - If BEHIND reference (Δr > 0): Increase risk to "catch up"
+         - If AHEAD reference (Δr ≤ 0): Reduce risk to "protect gains"
+
+      3. Risk Perception:
+         - κ > 1: Overestimate risk → reduce allocation
+         - κ < 1: Underestimate risk → increase allocation
+
+      4. Decision Process:
+         Step 1: Test candidate allocations: [0.0, 0.2, 0.4, 0.6, 0.8, current]
+         Step 2: For each candidate ω, evaluate 3 scenarios:
+           - UP scenario: price +{{volatility}} (prob 0.3)
+           - FLAT scenario: no change (prob 0.4)
+           - DOWN scenario: price -{{volatility}} (prob 0.3)
+         Step 3: For each scenario, compute:
+           - Wealth change including transaction costs
+           - Gain/loss vs reference point
+           - Value: v(gain/loss) using Prospect Theory
+           - Weighted utility: w(p) × v(x)
+         Step 4: Select ω* with maximum total weighted utility
+         Step 5: Determine action:
+           - If ω* - current > {{rebalancing_threshold}} → BUY
+           - If ω* - current < -{{rebalancing_threshold}} → SELL
+           - Else → HOLD
+
+      CONSTRAINTS (strictly enforce):
+      - Min cash reserve: {{min_cash_reserve}}
+      - Max position: {{max_position_size}}
+      - Transaction cost: {{transaction_cost_rate}}
+      - No leverage (0 ≤ ω ≤ 1)
+
+      REQUIRED OUTPUT (JSON only):
+      {
+        "decision_summary": {
+          "action": "buy" | "sell" | "hold",
+          "target_allocation": 0.35
+        },
+        "reasoning": "Brief behavioral explanation: With λ={{loss_aversion}} and reference at ${{reference_level}}, currently {{delta_reference_status}}. Evaluated utilities across candidates. Optimal ω*={{target_allocation}} balances loss aversion with {{behavioral_pressure}} pressure."
+      }
+
+      EXAMPLE:
+      {"decision_summary":{"action":"buy","target_allocation":0.45},"reasoning":"With λ=2.5, currently $5k behind reference ($105k vs $100k). Loss aversion drives catch-up behavior. Weighted utility analysis shows 45% allocation maximizes prospect value: upside scenarios (weighted 0.35) outweigh downside (weighted 0.28 due to probability distortion). Staying within 50% max position."}
+
+      CRITICAL: Return ONLY valid JSON. No markdown, no code fences, no extra text.
+
+behavioral_aggressive:
+  class: "examples.PromptBase.behavior.prompt_investor:LLMBehavioralInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Behavioral Aggressive"
+    agent_type: "individual"
+    llm_api:
+      provider: "openai"
+      model: "deepseek-chat"
+      api_key: ""
+      base_url: "https://api.deepseek.com"
+
+    # Psychological Utility
+    alpha_gain: 0.85              # more curved: chases upside feeling
+    beta_loss: 0.80               # less curvature on losses: can gamble
+    loss_aversion: 1.6            # relatively low, can tolerate draw-down
+
+    # Reference Point Dynamics
+    reference_point: "moving_average"  # ego tracks recent performance
+    reference_update_rate: 0.30        # reference jumps quickly -> emotional
+    reference_policy: "adaptive"
+
+    # Risk Perception
+    risk_perception_kappa: 0.7    # κ < 1 => thinks risk is LOWER than it is
+    probability_weight_gamma: 0.6 # overweights lottery payoffs
+    c_risk_scale: 1.2             # risk doesn't scare them much
+
+    # Behavioral Pressure
+    catchup_intensity: 0.9        # when underwater -> YOLO mode
+    protect_intensity: 0.1        # when ahead -> barely derisks
+
+    # Wealth & Constraints
+    initial_wealth: 200000
+    min_cash_reserve: 0.05
+    max_position_size: 0.80
+    transaction_cost_rate: 0.001
+
+    # Balancing
+    balancing_threshold: 0.04   # more twitchy
+    min_trade_size: 0.03
+
+    # Market Background Info
+    expected_return_estimate: 0.12
+    volatility_estimate: 0.20
+    risk_free_rate: 0.03
+
+    # Decision Settings
+    decision_mode: "reference_value"
+    decision_frequency: "daily"
+
+    # Diagnostics
+    max_history_length: 100
+    annualization_factor: 252
+    computation_delay: 0.1
+    decision_prompt: |
+      You are a behavioral finance expert making investment decisions using Prospect Theory.
+
+      TASK: Determine optimal allocation based on behavioral utility maximization.
+
+      BEHAVIORAL FACTORS (from current state):
+      - Loss aversion (λ): {{loss_aversion}}
+      - Reference point: {{reference_point}} (current: ${{reference_level}})
+      - Gap from reference (Δr): ${{delta_reference}}
+      - Subjective volatility (σ_tilde): {{subjective_volatility}}
+      - Risk perception (κ): {{risk_perception_kappa}}
+      - Current allocation: {{current_allocation}}
+
+      PROSPECT THEORY FRAMEWORK:
+
+      1. Value Function v(x):
+         - Gains: v(x) = x^{{alpha_gain}} (diminishing sensitivity)
+         - Losses: v(x) = -{{loss_aversion}} × |x|^{{beta_loss}} (loss aversion)
+
+      2. Reference-Dependent Behavior:
+         - If BEHIND reference (Δr > 0): Increase risk to "catch up"
+         - If AHEAD reference (Δr ≤ 0): Reduce risk to "protect gains"
+
+      3. Risk Perception:
+         - κ > 1: Overestimate risk → reduce allocation
+         - κ < 1: Underestimate risk → increase allocation
+
+      4. Decision Process:
+         Step 1: Test candidate allocations: [0.0, 0.2, 0.4, 0.6, 0.8, current]
+         Step 2: For each candidate ω, evaluate 3 scenarios:
+           - UP scenario: price +{{volatility}} (prob 0.3)
+           - FLAT scenario: no change (prob 0.4)
+           - DOWN scenario: price -{{volatility}} (prob 0.3)
+         Step 3: For each scenario, compute:
+           - Wealth change including transaction costs
+           - Gain/loss vs reference point
+           - Value: v(gain/loss) using Prospect Theory
+           - Weighted utility: w(p) × v(x)
+         Step 4: Select ω* with maximum total weighted utility
+         Step 5: Determine action:
+           - If ω* - current > {{rebalancing_threshold}} → BUY
+           - If ω* - current < -{{rebalancing_threshold}} → SELL
+           - Else → HOLD
+
+      CONSTRAINTS (strictly enforce):
+      - Min cash reserve: {{min_cash_reserve}}
+      - Max position: {{max_position_size}}
+      - Transaction cost: {{transaction_cost_rate}}
+      - No leverage (0 ≤ ω ≤ 1)
+
+      REQUIRED OUTPUT (JSON only):
+      {
+        "decision_summary": {
+          "action": "buy" | "sell" | "hold",
+          "target_allocation": 0.35
+        },
+        "reasoning": "Brief behavioral explanation: With λ={{loss_aversion}} and reference at ${{reference_level}}, currently {{delta_reference_status}}. Evaluated utilities across candidates. Optimal ω*={{target_allocation}} balances loss aversion with {{behavioral_pressure}} pressure."
+      }
+
+      EXAMPLE:
+      {"decision_summary":{"action":"buy","target_allocation":0.45},"reasoning":"With λ=2.5, currently $5k behind reference ($105k vs $100k). Loss aversion drives catch-up behavior. Weighted utility analysis shows 45% allocation maximizes prospect value: upside scenarios (weighted 0.35) outweigh downside (weighted 0.28 due to probability distortion). Staying within 50% max position."}
+
+      CRITICAL: Return ONLY valid JSON. No markdown, no code fences, no extra text.

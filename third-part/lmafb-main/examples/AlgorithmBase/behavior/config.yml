@@ -1,0 +1,125 @@
+# Algorithmic Trading Simulation Configuration
+
+data:
+  data_name: "algorithmic_simulation"
+  data_path: "~/data"
+
+environment:
+  device_id: 0
+
+model:
+  model_name: "algorithmic_ray_simulation"
+  num_rounds: 5
+
+  simulation:
+    actor_prefix: "Algo"
+
+    markets: !include markets.yml
+    investors: !include investors.yml
+
+    ray:
+      address: "auto"
+      namespace: "algo-simulation"
+      include_dashboard: true
+
+    extras:
+      env_overrides: {}
+      random_seed: 42
+
+      # Simulation timestep
+      timestep_unit: "day"
+
+train:
+  epochs: 50
+  batch_size: 1
+
+logging:
+  basic_log_type: "info"
+  stdout_log_type: "info"
+  file_log_type: "debug"
+  checkpoint_path: "~/algo_checkpoints"
+  result_path: "~/algo_results"
+  logging_path: "~/algo_loggings"
+  visualization_path: "~/algo_visualizations"
+
+evaluation:
+  enabled: true
+
+  # Performance metrics to track
+  metrics:
+    # Market-level
+    - "market_efficiency"
+    - "price_volatility"
+    - "order_book_depth"
+    - "spread_analysis"
+    - "price_discovery"
+    - "market_impact"
+
+    # Investor-level
+    - "investor_performance"
+    - "sharpe_ratio"
+    - "max_drawdown"
+    - "cumulative_return"
+    - "portfolio_turnover"
+    - "transaction_costs"
+
+    # Strategy-level
+    - "momentum_effectiveness"
+    - "mean_reversion_performance"
+    - "belief_convergence"
+    - "rebalancing_frequency"
+
+extras:
+  env_overrides: {}
+
+  algorithmic_specific:
+    # === Data Export ===
+    save_detailed_logs: true
+    generate_plots: true
+    export_csv: true
+
+    # === Analysis ===
+    save_order_book_snapshots: true
+    track_technical_indicators: true
+    enable_risk_analytics: true
+    performance_benchmarking: true
+
+    # === Benchmarking ===
+    benchmarks: [ "buy_and_hold", "equal_weight", "risk_parity" ]
+
+    # === Risk Analytics ===
+    risk_analytics:
+      # VaR settings
+      calculate_var: true
+      var_confidence: 0.95
+      var_horizon: 1
+
+      # Stress testing
+      stress_test_scenarios:
+        - name: "market_crash"
+          price_shock: -0.20
+        - name: "volatility_spike"
+          volatility_multiplier: 2.0
+        - name: "liquidity_crisis"
+          spread_multiplier: 5.0
+
+      # Risk limits monitoring
+      monitor_risk_limits: true
+      alert_on_violation: true
+
+    # === Technical Indicators ===
+    technical_indicators:
+      # Moving averages
+      sma_periods: [10, 20, 50]
+      ema_periods: [12, 26]
+
+      # Momentum
+      rsi_period: 14
+      macd_fast: 12
+      macd_slow: 26
+      macd_signal: 9
+
+      # Volatility
+      bollinger_period: 20
+      bollinger_std: 2
+      atr_period: 14

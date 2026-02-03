@@ -1,0 +1,84 @@
+# Market-Reactive investors
+
+market_reactive_conservative:
+  class: "examples.AlgorithmBase.market_reactive.algorithmic_investor:MarketReactiveInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Market Reactive Conservative"
+    agent_type: "institutional_low_latency"
+
+    # Reaction Coefficients (Sensitivity to Signals)
+    beta_intercept: 0.05        # base tiny long bias
+    beta_momentum: 0.6          # follows trend, but weakly
+    beta_volume: 0.3            # volume expansion matters
+    beta_volatility: 1.2        # strong penalty for high realized vol
+    beta_spread: 1.0            # hates illiquidity / wide spreads
+    beta_demand: 0.002          # only mildly follows excess demand
+
+    # Position Bounds
+    min_allocation: 0.00        # never short, never levered
+    max_allocation: 0.25        # will not take big exposure
+
+    # Wealth & Trading Friction
+    initial_wealth: 100000
+    transaction_cost_rate: 0.001  # 0.1% cost per trade
+
+    # Computation / Timing
+    computation_delay: 0.1       # seconds of simulated latency
+
+
+market_reactive_moderate:
+  class: "examples.AlgorithmBase.market_reactive.algorithmic_investor:MarketReactiveInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Market Reactive Moderate"
+    agent_type: "institutional_execution_desk"
+
+    # Reaction Coefficients
+    beta_intercept: 0.10        # baseline willingness to be in market
+    beta_momentum: 1.0          # reacts to recent returns strongly
+    beta_volume: 0.6            # volume pop = conviction signal
+    beta_volatility: 0.8        # penalizes volatility, but tolerates some risk
+    beta_spread: 0.6            # avoids extremely illiquid prints
+    beta_demand: 0.004          # follows buy pressure more actively
+
+    # Position Bounds
+    min_allocation: 0.05        # will basically always have some exposure
+    max_allocation: 0.50        # can scale in up to 50%
+
+    # Wealth & Trading Friction
+    initial_wealth: 150000
+    transaction_cost_rate: 0.001
+
+    # Computation / Timing
+    computation_delay: 0.1
+
+
+market_reactive_aggressive:
+  class: "examples.AlgorithmBase.market_reactive.algorithmic_investor:MarketReactiveInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Market Reactive Aggressive"
+    agent_type: "high_freq_alpha_seeker"
+
+    # Reaction Coefficients
+    beta_intercept: 0.20         # assumes market wants to go up
+    beta_momentum: 1.8           # chases momentum hard
+    beta_volume: 1.0             # volume spike = jump in
+    beta_volatility: 0.3         # barely scared of volatility
+    beta_spread: 0.2             # tolerates wide spreads / thin liquidity
+    beta_demand: 0.010           # aggressively follows net buy pressure
+
+    # Position Bounds
+    min_allocation: 0.10         # almost always in the game
+    max_allocation: 0.80         # willing to concentrate heavily
+
+    # Wealth & Trading Friction
+    initial_wealth: 200000
+    transaction_cost_rate: 0.001
+
+    # Computation / Timing
+    computation_delay: 0.1

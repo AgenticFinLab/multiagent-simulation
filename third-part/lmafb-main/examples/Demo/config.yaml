@@ -1,0 +1,55 @@
+# Demo Simulation Configuration
+
+data:
+  data_name: "demo_simulation"
+  data_path: "~/data"
+
+environment:
+  device_id: 0
+
+model:
+  model_name: "demo_ray_simulation"
+  num_rounds: 5
+  simulation:
+  
+    actor_prefix: "Demo"
+
+    markets: !include markets.yml
+    investors: !include investors.yml
+
+    ray:
+      address: "auto"
+      namespace: "demo-simulation"
+      include_dashboard: false
+
+    extras:
+      api_keys: {}
+      env_overrides: {}
+
+train:
+  epochs: 10
+  batch_size: 1
+
+
+logging:
+  basic_log_type: "info"
+  stdout_log_type: "info"
+  file_log_type: "debug"
+  checkpoint_path: "~/demo_checkpoints"
+  result_path: "~/demo_results"
+  logging_path: "~/demo_loggings"
+  visualization_path: "~/demo_visualizations"
+
+
+evaluation:
+  enabled: true
+  metrics: ["market_efficiency", "investor_performance", "price_volatility"]
+
+
+extras:
+  api_keys: {}
+  env_overrides: {}
+  demo_specific:
+    save_detailed_logs: true
+    generate_plots: false
+    export_csv: true

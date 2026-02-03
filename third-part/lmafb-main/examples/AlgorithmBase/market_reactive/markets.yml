@@ -1,0 +1,65 @@
+# Algorithmic Market Configuration
+
+stock_market:
+  class: "examples.AlgorithmBase.market_reactive.algorithmic_market:AlgorithmicMarket"
+  config:
+    entry_limit: 1000
+    market_name: "Stock Market"
+
+    # Price Dynamics
+    initial_price: 100.0
+    price_floor: 0.01  # Minimum allowed price
+
+    # Risk-Free Rate
+    risk_free_rate: 0.03  # 3% annual
+
+    # True Underlying Parameters (Annual)
+    true_drift: 0.08  # μ: actual expected return
+    true_volatility: 0.15  # σ: actual volatility
+
+    # Time Discretization
+    dt: 0.003968254  # 1/252: daily timestep in annual terms
+    annual_trading_days: 252
+
+    # Price Model
+    price_model: "geometric_brownian_motion"  # dS = μS dt + σS dW
+
+    # === Market Mechanism ===
+    clearing_mechanism: "walrasian_auction"  # or "continuous_double_auction"
+
+    # Supply Dynamics
+    total_shares_outstanding: 5000
+    supply_elasticity: 0.5  # η: how supply responds to price
+
+    # Market Maker Parameters
+    has_market_maker: true
+    market_maker_spread: 0.001  # 0.1% bid-ask spread
+    market_maker_depth: 100  # shares at best bid/ask
+
+    # Information Release
+    dividend_yield: 0.02  # 2% annual
+    dividend_frequency: "quarterly"  # or "monthly", "annual", "none"
+
+    # Noise Traders
+    noise_trader_fraction: 0.10  # 10% of volume
+    noise_trader_volatility: 0.05  # order size randomness
+
+    # Price Impact Model
+    temporary_impact_coef: 0.5  # α
+    temporary_impact_exponent: 0.6  # β
+    permanent_impact_coef: 0.1  # γ
+
+    # Auction Parameters
+    auction_max_iterations: 50
+    auction_tolerance: 0.000001  # 1e-6
+    derivative_epsilon: 0.01  # for numerical derivatives
+    min_price_multiplier: 0.01  # lower bound: 1% of current price
+    max_price_multiplier: 10.0  # upper bound: 1000% of current price
+
+    # History Tracking
+    max_price_history: 252  # keep 1 year
+    max_volume_history: 100
+
+    # Performance
+    computation_delay: 0.05  # seconds (simulation only)
+    min_history_for_volatility: 20  # minimum data points for vol calculation

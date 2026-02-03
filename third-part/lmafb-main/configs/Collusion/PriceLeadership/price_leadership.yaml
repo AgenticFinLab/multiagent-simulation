@@ -1,0 +1,66 @@
+#  price leadership Scenario-Specific Parameters
+data:
+  data_name: price-leadership_data
+  data_path: price-leadership_data/
+
+environment:
+  dotenv_path: .env
+
+
+model:
+  model_name: &model_name gpt-4o
+
+  generation_config: &generation_config
+    temperature: 0
+    max_tokens: 150
+
+  # Number of interaction rounds in each simulation
+  num_rounds: 10
+
+  agents:
+    agent_1:
+      model: gpt-4o
+      generation_config: *generation_config
+    agent_2:
+      model: deepseek-chat
+      generation_config: *generation_config
+    agent_3:
+      model: qwen-turbo-latest
+      generation_config: *generation_config
+
+  # LangGraph Agent Communication Topology
+  connections:
+    agent_1: agent_2&agent_3
+    agent_2: agent_1&agent_3
+    agent_3: agent_1&agent_2
+
+  collusion:
+    # Leader agent ID
+    leader_id: agent_1
+    # Required ratio of followers for valid leadership
+    followership_threshold: 0.9
+    price_deviation_tolerance: 0.05
+
+  base_price: 100
+  market_growth_rate: 0.03
+  market_volatility: 0.05
+  leader_market_share: 0.4
+
+
+train:
+  epoch: 10
+
+
+
+logging:
+
+  checkpoint_path: checkpoints
+  result_path: results
+  logging_path: loggings
+  visualization_path: visualizations
+
+
+evaluation:
+    n_step: 10
+
+

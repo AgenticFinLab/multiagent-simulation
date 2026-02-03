@@ -1,0 +1,70 @@
+
+#  Dataset Configuration 
+data:
+  data_name: collusion_simulation_data       # Project-specific dataset name
+  data_path: collusion_simulation_data       # Project-specific data directory
+
+environment:
+  dotenv_path: .env     
+
+
+#  Agent & LLM Model Configuration 
+model:
+  model_name: collusion_simulation_model  # Project-specific model name
+
+  generation_config: &generation_config
+    temperature: 0
+    max_tokens: 150
+
+  num_rounds: 10                           # Number of interaction rounds in each simulation
+
+  agents:
+    agent_1:
+      model: gpt-4o
+      generation_config: *generation_config
+    agent_2:
+      model: deepseek-chat
+      generation_config: *generation_config
+    agent_3:
+      model: qwen-turbo-latest
+      generation_config: *generation_config
+
+  #  LangGraph Agent Communication Topology 
+  connections:
+    agent_1: agent_2&agent_3
+    agent_2: agent_1&agent_3
+    agent_3: agent_1&agent_2
+
+
+train:
+  epoch: 10
+
+logging:
+
+  checkpoint_path: checkpoints
+  result_path: results
+  logging_path: loggings
+  visualization_path: visualizations
+
+
+evaluation:
+    n_step: 10
+
+
+
+
+
+
+#  Environment Settings
+                   # Path to load environment variables
+
+#  Output & Logging Paths 
+logging:
+  checkpoint_path: checkpoints
+  result_path: results
+  logging_path: loggings
+  visualization_path: visualizations
+
+#  Evaluation Settings 
+evaluation:
+  n_step: 10

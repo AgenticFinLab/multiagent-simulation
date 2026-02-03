@@ -1,1 +1,1 @@
-cdemo: A python coding template to be used for a quick start.
+masim: A Codebase for the simulation with multiagent systems

@@ -1,0 +1,160 @@
+# Algorithmic Investors Configuration
+
+conservative_investor:
+  class: "examples.AlgorithmBase.rational.algorithmic_investor:RationalInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    # Identity
+    agent_name: "Conservative Investor"
+    agent_type: "individual"
+
+    # Risk Preference (CARA Model)
+    risk_aversion_coefficient: 5.0  # A: high risk aversion
+    loss_aversion: 2.5  # λ: Prospect Theory
+
+    # Wealth & Constraints
+    initial_wealth: 100000  # W₀
+    min_cash_reserve: 0.20  # always keep 20% in cash
+    max_position_size: 0.30  # max 30% in single asset
+
+    # Risk-Free Rate
+    risk_free_rate: 0.03  # must match market
+
+    # Beliefs about Market (Pessimistic)
+    expected_return_estimate: 0.06  # μ̂: lower than true (0.08)
+    volatility_estimate: 0.18  # σ̂: higher than true (0.15)
+    confidence_in_estimate: 0.80  # ψ: moderate confidence
+
+    # Belief Update Process
+    learning_rate: 0.10  # α: slow learner
+    memory_decay: 0.95  # λ: high weight on history
+    lookback_period: 20  # τ: days of historical data
+
+    # Transaction Costs
+    transaction_cost_rate: 0.001  # c: 0.1% per trade
+
+    # Behavioral Parameters
+    overconfidence_bias: 1.0  # no overconfidence
+    reference_point: "initial_wealth"  # or "moving_average"
+
+    # Balancing Rules
+    balancing_threshold: 0.05
+    min_trade_size: 0.01  # minimum 1% portfolio change to trade
+
+    # Decision Algorithm
+    decision_method: "mean_variance_optimization"  # or "CARA", "kelly_criterion"
+    decision_frequency: "daily"
+
+    # Kelly-specific (not used for MV)
+    kelly_fraction: 0.5  # safety factor if using Kelly
+
+    # Performance Tracking
+    max_history_length: 100  # portfolio value history
+    annualization_factor: 252  # for Sharpe ratio calculation
+
+    # Computation
+    computation_delay: 0.1  # seconds
+
+
+moderate_investor:
+  class: "examples.AlgorithmBase.rational.algorithmic_investor:RationalInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Moderate Investor"
+    agent_type: "individual"
+
+    # Risk Preference
+    risk_aversion_coefficient: 3.0  # A: moderate
+    # Wealth & Constraints
+    initial_wealth: 150000
+    min_cash_reserve: 0.10
+    max_position_size: 0.50
+
+    # Risk-Free Rate
+    risk_free_rate: 0.03
+
+    # Beliefs (Accurate)
+    expected_return_estimate: 0.08  # μ̂: accurate
+    volatility_estimate: 0.15  # σ̂: accurate
+    confidence_in_estimate: 0.70
+
+    # Learning
+    learning_rate: 0.15  # α: medium speed
+    memory_decay: 0.90
+    lookback_period: 30
+
+    # Costs
+    transaction_cost_rate: 0.001
+
+    # Behavioral
+    loss_aversion: 2.0
+    overconfidence_bias: 1.0
+    reference_point: "initial_wealth"
+
+    # Balancing
+    balancing_threshold: 0.08
+    min_trade_size: 0.02
+
+    # Algorithm
+    decision_method: "CARA"
+    decision_frequency: "daily"
+    kelly_fraction: 0.5
+
+    # Performance
+    max_history_length: 100
+    annualization_factor: 252
+    computation_delay: 0.1
+
+
+aggressive_investor:
+  class: "examples.AlgorithmBase.rational.algorithmic_investor:RationalInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Aggressive Investor"
+    agent_type: "individual"
+
+    # Risk Preference
+    risk_aversion_coefficient: 1.5  # A: low (but Kelly ignores this)
+    loss_aversion: 1.5  # less sensitive
+
+    # Wealth & Constraints
+    initial_wealth: 200000
+    min_cash_reserve: 0.05  # minimal cash
+    max_position_size: 0.80  # willing to concentrate
+
+    # Risk-Free Rate
+    risk_free_rate: 0.03
+
+    # Beliefs (Overoptimistic)
+    expected_return_estimate: 0.14  # μ̂: way too high
+    volatility_estimate: 0.12  # σ̂: underestimates risk
+    confidence_in_estimate: 0.90  # ψ: overconfident
+
+    # Learning
+    learning_rate: 0.25  # α: reacts quickly (chasing trends)
+    memory_decay: 0.85  # λ: short memory (recency bias)
+    lookback_period: 10  # τ: only recent data matters
+
+    # Costs
+    transaction_cost_rate: 0.001
+
+    # Behavioral
+    overconfidence_bias: 1.2  # multiplies confidence by 1.2
+    reference_point: "moving_average"
+
+    # Balancing
+    balancing_threshold: 0.10  # trades more frequently
+    min_trade_size: 0.05
+
+    # Algorithm
+    decision_method: "kelly_criterion"
+    decision_frequency: "daily"
+    kelly_fraction: 0.5  # half-Kelly for safety
+
+    # Performance
+    max_history_length: 100
+    annualization_factor: 252
+    computation_delay: 0.1

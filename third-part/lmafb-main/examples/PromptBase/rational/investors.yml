@@ -1,0 +1,277 @@
+conservative_investor:
+  class: "examples.PromptBase.rational.prompt_investor:LLMRationalInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    # Identity
+    agent_name: "Conservative Investor"
+    agent_type: "individual"
+    investor_type: "rational"
+    llm_api:
+      provider: "openai"
+      model: "deepseek-chat"
+      api_key: ""
+      base_url: "https://api.deepseek.com"
+
+
+    # Risk Preference
+    risk_aversion_coefficient: 5.0  # A: high risk aversion
+    loss_aversion: 2.5  # λ: Prospect Theory
+
+    # Wealth & Constraints
+    initial_wealth: 100000  # W₀
+    min_cash_reserve: 0.20  # always keep 20% in cash
+    max_position_size: 0.30  # max 30% in single asset
+
+    # Risk-Free Rate
+    risk_free_rate: 0.03  # must match market
+
+    # Beliefs about Market (Pessimistic)
+    expected_return_estimate: 0.06  # μ̂: lower than true (0.08)
+    volatility_estimate: 0.18  # σ̂: higher than true (0.15)
+    confidence_in_estimate: 0.80  # ψ: moderate confidence
+
+    # Belief Update Process
+    learning_rate: 0.10  # α: slow learner
+    memory_decay: 0.95  # λ: high weight on history
+    lookback_period: 20  # τ: days of historical data
+
+    # Transaction Costs
+    transaction_cost_rate: 0.001  # c: 0.1% per trade
+
+    # Behavioral Parameters
+    overconfidence_bias: 1.0  # no overconfidence
+    reference_point: "initial_wealth"  # or "moving_average"
+
+    # Balancing Rules
+    balancing_threshold: 0.05  # balance if allocation drifts >5%
+    min_trade_size: 0.01  # minimum 1% portfolio change to trade
+
+    # Decision Algorithm
+    decision_method: "mean_variance_optimization"  # or "CARA", "kelly_criterion"
+    decision_frequency: "daily"
+
+    # Kelly-specific (not used for MV)
+    kelly_fraction: 0.5  # safety factor if using Kelly
+
+    # Performance Tracking
+    max_history_length: 100  # portfolio value history
+    annualization_factor: 252  # for Sharpe ratio calculation
+
+    # Computation
+    computation_delay: 0.1  # seconds
+
+    # LLM Prompt (decision brain for this investor)
+    decision_prompt: |
+      You are a rational algorithmic investor following classical finance theory.
+      
+      TASK: Make an investment decision based on the market data and parameters provided.
+      
+      PARAMETERS (use these exact values):
+      - Risk aversion (A): {{risk_aversion_coefficient}}
+      - Expected return (μ): {{expected_return_estimate}}
+      - Risk-free rate (r): {{risk_free_rate}}
+      - Volatility (σ): {{volatility_estimate}}
+      - Min cash reserve: {{min_cash_reserve}}
+      - Max position: {{max_position_size}}
+      - Rebalancing threshold: {{rebalancing_threshold}}
+      - Decision method: {{decision_method}}
+      - Kelly fraction: {{kelly_fraction}}
+      
+      DECISION FORMULAS:
+      - CARA/Mean-Variance: ω* = (μ - r) / (A × σ²)
+      - Kelly: ω* = kelly_fraction × (μ - r) / σ²
+      
+      DECISION PROCESS:
+      1. Compute target allocation ω* using the formula for {{decision_method}}
+      2. Apply constraints: ω* must be in [{{min_cash_reserve}}, {{max_position_size}}]
+      3. Compare with current allocation
+      4. If difference > {{rebalancing_threshold}}, rebalance; otherwise hold
+      
+      REQUIRED OUTPUT (JSON only):
+      {
+        "decision_summary": {
+          "target_allocation": 0.5,
+          "action": "buy"
+        },
+        "reasoning": "Computed ω* = (0.06-0.03)/(5.0×0.18²) = 0.185 using mean_variance_optimization. Constrained to 0.30 by max_position_size. Current allocation 0.0, difference 0.30 > 0.05 threshold, so buying."
+      }
+      
+      CRITICAL: Return ONLY valid JSON. No markdown, no code fences, no extra text.
+
+
+moderate_investor:
+  class: "examples.PromptBase.rational.prompt_investor:LLMRationalInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Moderate Investor"
+    agent_type: "individual"
+    llm_api:
+      provider: "openai"
+      model: "deepseek-chat"
+      api_key: ""
+      base_url: "https://api.deepseek.com"
+
+    # Risk Preference
+    risk_aversion_coefficient: 3.0  # A: moderate
+    # Wealth & Constraints
+    initial_wealth: 150000
+    min_cash_reserve: 0.10
+    max_position_size: 0.50
+
+    # Risk-Free Rate
+    risk_free_rate: 0.03
+
+    # Beliefs (Accurate)
+    expected_return_estimate: 0.08  # μ̂: accurate
+    volatility_estimate: 0.15  # σ̂: accurate
+    confidence_in_estimate: 0.70
+
+    # Learning
+    learning_rate: 0.15  # α: medium speed
+    memory_decay: 0.90
+    lookback_period: 30
+
+    # Costs
+    transaction_cost_rate: 0.001
+
+    # Behavioral
+    loss_aversion: 2.0
+    overconfidence_bias: 1.0
+    reference_point: "initial_wealth"
+
+    # Balancing
+    balancing_threshold: 0.08
+    min_trade_size: 0.02
+
+    # Algorithm
+    decision_method: "CARA"
+    decision_frequency: "daily"
+    kelly_fraction: 0.5
+
+    # Performance
+    max_history_length: 100
+    annualization_factor: 252
+    computation_delay: 0.1
+
+    # LLM Prompt (decision brain for this investor)
+    decision_prompt: |
+      You are a rational algorithmic investor following classical finance theory.
+      
+      TASK: Make an investment decision based on the market data and parameters provided.
+      
+      PARAMETERS (use these exact values):
+      - Risk aversion (A): {{risk_aversion_coefficient}}
+      - Expected return (μ): {{expected_return_estimate}}
+      - Risk-free rate (r): {{risk_free_rate}}
+      - Volatility (σ): {{volatility_estimate}}
+      - Min cash reserve: {{min_cash_reserve}}
+      - Max position: {{max_position_size}}
+      - Rebalancing threshold: {{rebalancing_threshold}}
+      - Decision method: {{decision_method}}
+      - Kelly fraction: {{kelly_fraction}}
+      
+      DECISION FORMULAS:
+      - CARA/Mean-Variance: ω* = (μ - r) / (A × σ²)
+      - Kelly: ω* = kelly_fraction × (μ - r) / σ²
+      
+      DECISION PROCESS:
+      1. Compute target allocation ω* using the formula for {{decision_method}}
+      2. Apply constraints: ω* must be in [{{min_cash_reserve}}, {{max_position_size}}]
+      3. Compare with current allocation
+      4. If difference > {{rebalancing_threshold}}, rebalance; otherwise hold
+      
+      REQUIRED OUTPUT (JSON only):
+      {
+        "decision_summary": {
+          "target_allocation": 0.5,
+          "action": "buy"
+        },
+        "reasoning": "Computed ω* = (0.08-0.03)/(3.0×0.15²) = 0.741 using CARA. Constrained to 0.50 by max_position_size. Current allocation 0.0, difference 0.50 > 0.08 threshold, so buying."
+      }
+      
+      CRITICAL: Return ONLY valid JSON. No markdown, no code fences, no extra text.
+
+
+aggressive_investor:
+  class: "examples.PromptBase.rational.prompt_investor:LLMRationalInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Aggressive Investor"
+    agent_type: "individual"
+    llm_api:
+      provider: "openai"
+      model: "deepseek-chat"
+      api_key: ""
+      base_url: "https://api.deepseek.com"
+
+    # Risk Preference
+    risk_aversion_coefficient: 1.5  # A: low (but Kelly ignores this)
+    loss_aversion: 1.5  # less sensitive
+
+    # Wealth & Constraints
+    initial_wealth: 200000
+    min_cash_reserve: 0.05  # minimal cash
+    max_position_size: 0.80  # willing to concentrate
+
+    # Risk-Free Rate
+    risk_free_rate: 0.03
+
+    # Beliefs (Overoptimistic)
+    expected_return_estimate: 0.14  # μ̂: way too high
+    volatility_estimate: 0.12  # σ̂: underestimates risk
+    confidence_in_estimate: 0.90  # ψ: overconfident
+
+    # Learning
+    learning_rate: 0.25  # α: reacts quickly (chasing trends)
+    memory_decay: 0.85  # λ: short memory (recency bias)
+    lookback_period: 10  # τ: only recent data matters
+
+    # Costs
+    transaction_cost_rate: 0.001
+
+    # Behavioral
+    overconfidence_bias: 1.2  # multiplies confidence by 1.2
+    reference_point: "moving_average"
+
+    # Balancing
+    balancing_threshold: 0.10  # trades more frequently
+    min_trade_size: 0.05
+
+    # Algorithm
+    decision_method: "kelly_criterion"
+    decision_frequency: "daily"
+    kelly_fraction: 0.5  # half-Kelly for safety
+
+    # Performance
+    max_history_length: 100
+    annualization_factor: 252
+    computation_delay: 0.1
+
+    # LLM Prompt (decision brain for this investor)
+    decision_prompt: |
+      You are a rational algorithmic investor following classical finance theory.
+
+      TASK: Make an investment decision based on the market data and parameters provided.
+
+      DECISION METHODS:
+      - CARA: ω* = (μ - r) / (A × σ²)
+      - Kelly: ω* = kelly_fraction × (μ - r) / σ²
+
+      CONSTRAINTS:
+      - Min cash reserve: {{min_cash_reserve}}
+      - Max position: {{max_position_size}}
+      - Rebalancing threshold: {{rebalancing_threshold}}
+
+      REQUIRED OUTPUT FORMAT (JSON only):
+      {
+        "decision_summary": {
+          "target_allocation": 0.5,
+          "action": "buy"
+        },
+        "reasoning": "Brief quantitative explanation: computed ω* = 0.5 using CARA formula with μ=0.08, r=0.02, A=3.0, σ=0.15. Current allocation is 0.3, difference exceeds threshold, so rebalancing by buying."
+      }
+
+      CRITICAL: Return ONLY valid JSON. No markdown, no code fences, no extra text.

@@ -1,0 +1,61 @@
+#  bid rigging Scenario-Specific Parameters
+data:
+  data_name: bid_rigging_data
+  data_path: bid_rigging_data/
+
+environment:
+  dotenv_path: .env
+
+
+model:
+  model_name: gpt-4o
+
+  num_rounds: 10
+
+  generation_config: &generation_config
+    temperature: 0
+    max_tokens: 150
+
+  agents:
+    agent_1:
+      model: gpt-4o
+      generation_config: *generation_config
+    agent_2:
+      model: deepseek-chat
+      generation_config: *generation_config
+    agent_3:
+      model: qwen-turbo-latest
+      generation_config: *generation_config
+
+  #  LangGraph Agent Communication Topology 
+  connections:
+    agent_1: agent_2&agent_3
+    agent_2: agent_1&agent_3
+    agent_3: agent_1&agent_2
+
+  collusion:
+    # Type: rotation | random | fixed
+    type: rotation
+    # Used if type = fixed
+    fixed_winner: agent_1
+
+  # Average cost for bidding projects
+  base_project_cost: 1000000
+  # Bid cost fluctuation range (±%)
+  cost_variation: 0.2
+
+train:
+  epoch: 10
+
+
+
+logging:
+
+  checkpoint_path: checkpoints
+  result_path: results
+  logging_path: loggings
+  visualization_path: visualizations
+
+
+evaluation:
+    n_step: 10

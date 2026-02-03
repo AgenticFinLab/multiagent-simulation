@@ -1,0 +1,54 @@
+#  algorithmic Scenario-Specific Parameters
+data:
+  data_name: algorithmic_simulation_data
+  data_path: algorithmic_simulation_data/
+
+environment:
+  dotenv_path: .env
+
+
+model:
+  model_name: gpt-4o
+
+  num_rounds: 10
+
+  generation_config: &generation_config
+    temperature: 0
+    max_tokens: 150
+
+  agents:
+    agent_1:
+      model: gpt-4o
+      generation_config: *generation_config
+    agent_2:
+      model: deepseek-chat
+      generation_config: *generation_config
+    agent_3:
+      model: qwen-turbo-latest
+      generation_config: *generation_config
+
+  #  LangGraph Agent Communication Topology 
+  connections:
+    agent_1: agent_2&agent_3
+    agent_2: agent_1&agent_3
+    agent_3: agent_1&agent_2
+
+  base_price: 100.0
+  market_volatility: 0.05
+  price_sensitivity: 0.7
+    
+train:
+  epoch: 10
+
+
+
+logging:
+
+  checkpoint_path: checkpoints
+  result_path: results
+  logging_path: loggings
+  visualization_path: visualizations
+
+
+evaluation:
+    n_step: 10

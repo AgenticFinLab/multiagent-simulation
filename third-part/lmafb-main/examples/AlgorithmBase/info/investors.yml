@@ -1,0 +1,129 @@
+# Learning / Adaptive investors
+
+learning_conservative:
+  class: "examples.AlgorithmBase.info.algorithmic_investor:LearningInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Learning Conservative"
+    agent_type: "individual"
+
+    # === Belief Initialization ===
+    initial_belief_mean: 0.07       # μ₀
+    initial_belief_vol: 0.16        # σ₀
+    belief_confidence: 0.85         # ψ₀ high confidence, stable
+
+    # === Learning Dynamics ===
+    learning_rate_mean: 0.08        # α: slow updates
+    learning_rate_vol: 0.08         # αₛ: slow risk learning
+    memory_decay: 0.98              # λ: forgets slowly (long memory)
+    exploration_noise: 0.005        # σₑ: barely explores
+
+    # === Allocation Rule Params ===
+    risk_aversion_coefficient: 4.0  # A: high risk aversion in position sizing
+    risk_free_rate: 0.03
+
+    # === Wealth & Constraints ===
+    initial_wealth: 100000
+    min_cash_reserve: 0.30
+    max_position_size: 0.30
+    transaction_cost_rate: 0.001
+
+    # Balancing
+    balancing_threshold: 0.06
+    min_trade_size: 0.02
+
+    # Strategy Form
+    adaptive_learning: true
+    learning_strategy: "exponential"  # EMA-like
+
+    # Diagnostics
+    max_history_length: 100
+    annualization_factor: 252
+    computation_delay: 0.1
+
+
+learning_moderate:
+  class: "examples.AlgorithmBase.info.algorithmic_investor:LearningInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Learning Moderate"
+    agent_type: "individual"
+
+    # Belief Initialization
+    initial_belief_mean: 0.08
+    initial_belief_vol: 0.15
+    belief_confidence: 0.70
+
+    # Learning Dynamics
+    learning_rate_mean: 0.15        # α: medium adaptive speed
+    learning_rate_vol: 0.12
+    memory_decay: 0.94
+    exploration_noise: 0.015        # some exploratory variation
+
+    # Allocation Rule Params
+    risk_aversion_coefficient: 2.5
+    risk_free_rate: 0.03
+
+    # Wealth & Constraints
+    initial_wealth: 150000
+    min_cash_reserve: 0.15
+    max_position_size: 0.50
+    transaction_cost_rate: 0.001
+
+    # Balancing
+    balancing_threshold: 0.05
+    min_trade_size: 0.02
+
+    # Strategy Form
+    adaptive_learning: true
+    learning_strategy: "bayesian"   # e.g. precision-weighted
+
+    # Diagnostics
+    max_history_length: 100
+    annualization_factor: 252
+    computation_delay: 0.1
+
+
+learning_aggressive:
+  class: "examples.AlgorithmBase.info.algorithmic_investor:LearningInvestor"
+  market: ["stock_market"]
+  config:
+    entry_limit: 1000
+    agent_name: "Learning Aggressive"
+    agent_type: "individual"
+
+    # Belief Initialization
+    initial_belief_mean: 0.12        # bullish prior
+    initial_belief_vol: 0.12         # optimistic (thinks risk is low)
+    belief_confidence: 0.50          # ψ₀: low, so willing to explore
+
+    # Learning Dynamics
+    learning_rate_mean: 0.30         # α: very reactive
+    learning_rate_vol: 0.25          # αₛ: quickly updates volatility (jumps after shocks)
+    memory_decay: 0.85               # λ: forgets fast (recency-driven)
+    exploration_noise: 0.04          # σₑ: high experimentation
+
+    # Allocation Rule Params
+    risk_aversion_coefficient: 1.5   # low A -> bigger positions when μ_t - r is high
+    risk_free_rate: 0.03
+
+    # Wealth & Constraints
+    initial_wealth: 200000
+    min_cash_reserve: 0.05
+    max_position_size: 0.80
+    transaction_cost_rate: 0.001
+
+    # Balancing
+    balancing_threshold: 0.04
+    min_trade_size: 0.03
+
+    # Strategy Form
+    adaptive_learning: true
+    learning_strategy: "bayesian"
+
+    # Diagnostics
+    max_history_length: 100
+    annualization_factor: 252
+    computation_delay: 0.1

@@ -1,0 +1,61 @@
+#  market.yml (Common Defaults)
+markets:
+  market_1:
+    class: examples.Collusion.cartel.cartel_market:CartelMarket
+    config:
+      extras:
+        volatility: 0.1
+        demand_baseline: 1000
+        rule: "Set a fair product price for this round that avoids competition and reflects market stability."
+        #  Cartel Collusion Specific Market Parameter
+        initial_price: 100
+        base_demand: 1000
+        demand_amplitude: 200
+        demand_period: 12
+        demand_elasticity: 1.5
+        demand_trend: 0.02
+        base_price: 100
+        share_model: "softmax"
+        softmax_beta: 0.05
+        deviation_penalty_k: 0.5
+        consensus_threshold: 50.0
+        result_path: results
+
+investors:
+  agent_1:
+    class: examples.Collusion.cartel.cartel_investor:CartelInvestor
+    market: 
+      - market_1
+    config:
+      risk_aversion: 0.5
+      learning_rate: 0.1
+
+  agent_2:
+    class: examples.Collusion.cartel.cartel_investor:CartelInvestor
+    market: 
+      - market_1
+    config:
+      risk_aversion: 0.6
+      learning_rate: 0.3
+
+  agent_3:
+    class: examples.Collusion.cartel.cartel_investor:CartelInvestor
+    market: 
+      - market_1
+    config:
+      risk_aversion: 0.8
+      learning_rate: 0.5
+
+
+protocols:
+  m2i:
+    class: examples.Collusion.cartel.cartel_communication:CartelM2IProtocol
+  i2m:
+    class: examples.Collusion.cartel.cartel_communication:CartelI2MProtocol
+
+ray:
+  namespace: "sim-default"
+  include_dashboard: false
+
+extras:
+  env_overrides: {}
