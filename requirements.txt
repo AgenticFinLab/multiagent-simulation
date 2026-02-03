@@ -1,4 +1,7 @@
+# Core dependencies
+numpy
 pandas
+ray
 torch
 transformers
 selenium
