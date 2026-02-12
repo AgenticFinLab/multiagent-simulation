@@ -29,8 +29,6 @@ Usage:
 
 import logging
 import importlib
-from pathlib import Path
-from collections import deque
 from typing import Any, Dict, List, Optional
 
 import ray
@@ -40,7 +38,6 @@ from masim.simulator.base import (
     SimulationConfig,
     SimulatorStatus,
     RoundPhase,
-    ExecutionClock,
 )
 from masim.player.base import Action, Observation, PlayerConfig
 from masim.conductor.base import ConductorConfig
@@ -80,7 +77,7 @@ def ensure_ray(ray_config: Dict[str, Any]) -> None:
             "warning": logging.WARNING,
             "error": logging.ERROR,
         }
-        init_kwargs["logging_level"] = level_map.get(level_str, logging.INFO)
+        init_kwargs["logging_level"] = level_map[level_str]
 
     if "address" in ray_config and ray_config["address"]:
         init_kwargs["address"] = ray_config["address"]
@@ -148,19 +145,14 @@ class GeneralSimulator(BaseSimulator):
 
     This class provides:
     - Ray cluster initialization and management
-    - Persona launch as Ray actors
+    - Direct Persona creation as Ray actors from config (no intermediate instances)
     - Simulation lifecycle orchestration (setup, run_round, run, shutdown)
     - History management and status tracking
-    - Generic player/conductor creation from config
 
     The Simulator is a system-level orchestrator:
     - It does NOT generate observations (that's Conductor's responsibility)
     - It does NOT interpret actions (that's Environment's responsibility)
     - It ONLY orchestrates the flow between components
-
-    Subclasses may override:
-    - create_player_personas(): For custom persona creation logic
-    - create_conductor_persona(): For custom conductor creation
 
     Example:
         yaml_config = load_config("configs/Demo/simulation.yml")
@@ -178,33 +170,18 @@ class GeneralSimulator(BaseSimulator):
             config: Simulation configuration
         """
         super().__init__(config)
-
-        # Ray actor handles for Personas (NOT Player/Conductor!)
-        self._player_persona_handles: Dict[str, ray.actor.ActorHandle] = {}
-        self._conductor_persona_handle: Optional[ray.actor.ActorHandle] = None
-
-        # History management
-        self.history = deque(maxlen=config.setting["entry_limit"])
-
-        # Storage setup
-        self.storage_dir = Path(f"./simulation_results/{self.simulation_id}")
-        self.storage_dir.mkdir(parents=True, exist_ok=True)
-
-        logger.info("Simulator initialized: %s", self.simulation_id)
+        logger.info("GeneralSimulator initialized: %s", self.simulation_id)
 
     # =========================================================================
-    # Ray Actor Management (Personas)
+    # Ray Actor Management
     # =========================================================================
 
-    def _launch_player_personas(
-        self,
-        personas: Dict[str, PlayerPersona],
-    ) -> Dict[str, ray.actor.ActorHandle]:
+    def _launch_player_personas(self) -> Dict[str, ray.actor.ActorHandle]:
         """
-        Launch PlayerPersonas as Ray actors.
+        Create and launch PlayerPersonas as Ray actors directly from config.
 
-        Args:
-            personas: Dict of player_id -> PlayerPersona instance
+        Reads config.players, dynamically loads player classes, and creates
+        Ray actors in a single pass - no intermediate local instances.
 
         Returns:
             Dict of player_id -> Ray actor handle
@@ -212,21 +189,35 @@ class GeneralSimulator(BaseSimulator):
         ensure_ray(self.config.ray)
         handles = {}
 
-        # Create Ray actor class from PlayerPersona
         RemotePlayerPersona = ray.remote(PlayerPersona)
+        persona_config = PersonaConfig(
+            auto_checkpoint=self.config.setting["auto_checkpoint"],
+            debug_mode=self.config.setting["debug_mode"],
+        )
 
-        for player_id, persona in personas.items():
+        for player_id, player_cfg in self.config.players.items():
+            # Load player class dynamically
+            player_class = load_class(player_cfg["class"])
+
+            # Build PlayerConfig
+            cfg = player_cfg["config"]
+            player_config = PlayerConfig(
+                name=player_cfg["name"],
+                identity=cfg["identity"],
+                group_tags=cfg["group_tags"],
+                extras=cfg["extras"],
+            )
+
+            # Create Ray actor directly
             actor_name = get_actor_name(self.config.setting["name"], player_id)
-
-            # Re-create persona as Ray actor with same config
             handle = RemotePlayerPersona.options(
                 name=actor_name,
                 lifetime="detached",
                 namespace=self.config.ray["namespace"],
             ).remote(
-                player_class=persona._player_class,
-                player_config=persona._player_config,
-                persona_config=persona._config,
+                player_class=player_class,
+                player_config=player_config,
+                persona_config=persona_config,
             )
 
             handles[player_id] = handle
@@ -234,99 +225,28 @@ class GeneralSimulator(BaseSimulator):
 
         return handles
 
-    def _launch_conductor_persona(
-        self,
-        persona: ConductorPersona,
-    ) -> ray.actor.ActorHandle:
+    def _launch_conductor_persona(self) -> Optional[ray.actor.ActorHandle]:
         """
-        Launch ConductorPersona as Ray actor.
+        Create and launch ConductorPersona as Ray actor directly from config.
 
-        Args:
-            persona: ConductorPersona instance
+        Reads config.conductor, dynamically loads conductor class, and creates
+        a Ray actor in a single pass - no intermediate local instance.
 
         Returns:
-            Ray actor handle
-        """
-        ensure_ray(self.config.ray)
-
-        RemoteConductorPersona = ray.remote(ConductorPersona)
-        actor_name = get_actor_name(self.config.setting["name"], persona.identity)
-
-        handle = RemoteConductorPersona.options(
-            name=actor_name,
-            lifetime="detached",
-            namespace=self.config.ray["namespace"],
-        ).remote(
-            conductor_class=persona._conductor_class,
-            conductor_config=persona._conductor_config,
-            persona_config=persona._config,
-        )
-
-        logger.info("    Launched ConductorPersona: %s", actor_name)
-        return handle
-
-    # =========================================================================
-    # Persona Creation (from YAML config)
-    # =========================================================================
-
-    def create_player_personas(self) -> Dict[str, PlayerPersona]:
-        """
-        Create PlayerPersona instances from config.players.
-
-        Reads config.players and dynamically loads player classes.
-        Override this method for custom persona creation logic.
-
-        Returns:
-            Dict of player_id -> PlayerPersona instance
-        """
-        players_config = self.config.players
-        personas = {}
-        persona_config = PersonaConfig(
-            auto_checkpoint=self.config.setting["auto_checkpoint"],
-            debug_mode=self.config.setting["debug_mode"],
-        )
-
-        for player_id, player_cfg in players_config.items():
-            # Load player class dynamically
-            player_class = load_class(player_cfg["class"])
-
-            # Build PlayerConfig
-            cfg = player_cfg["config"]
-            player_config = PlayerConfig(
-                name=player_cfg["name"] if "name" in player_cfg else player_id,
-                identity=cfg["identity"],
-                group_tags=cfg["group_tags"] if "group_tags" in cfg else [],
-                extras=cfg["extras"] if "extras" in cfg else {},
-            )
-
-            # Create persona
-            persona = PlayerPersona(
-                player_class=player_class,
-                player_config=player_config,
-                persona_config=persona_config,
-            )
-            personas[player_id] = persona
-
-        return personas
-
-    def create_conductor_persona(self) -> Optional[ConductorPersona]:
-        """
-        Create ConductorPersona instance from config.conductor.
-
-        Reads config.conductor and dynamically loads conductor class.
-        Override this method for custom conductor creation logic.
-
-        Returns:
-            ConductorPersona instance, or None if no conductor configured
+            Ray actor handle, or None if no conductor configured
         """
         if not self.config.conductor:
             return None
 
-        conductor_cfg = self.config.conductor
+        ensure_ray(self.config.ray)
+
+        RemoteConductorPersona = ray.remote(ConductorPersona)
         persona_config = PersonaConfig(
             auto_checkpoint=self.config.setting["auto_checkpoint"],
             debug_mode=self.config.setting["debug_mode"],
         )
+
+        conductor_cfg = self.config.conductor
 
         # Load conductor class dynamically
         conductor_class = load_class(conductor_cfg["class"])
@@ -336,14 +256,25 @@ class GeneralSimulator(BaseSimulator):
         conductor_config = ConductorConfig(
             identity=cfg["identity"],
             coordination_mode=cfg["coordination_mode"],
-            extras=cfg["extras"] if "extras" in cfg else {},
+            extras=cfg["extras"],
         )
 
-        return ConductorPersona(
+        # Create Ray actor directly
+        actor_name = get_actor_name(
+            self.config.setting["name"], conductor_config.identity
+        )
+        handle = RemoteConductorPersona.options(
+            name=actor_name,
+            lifetime="detached",
+            namespace=self.config.ray["namespace"],
+        ).remote(
             conductor_class=conductor_class,
             conductor_config=conductor_config,
             persona_config=persona_config,
         )
+
+        logger.info("    Launched ConductorPersona: %s", actor_name)
+        return handle
 
     # =========================================================================
     # Simulation Lifecycle
@@ -351,29 +282,24 @@ class GeneralSimulator(BaseSimulator):
 
     async def setup(self) -> None:
         """
-        Set up the simulation: create Persona actors and initialize.
+        Set up the simulation: create and launch Persona Ray actors.
 
-        The Simulator creates Personas (which internally create Player/Conductor)
-        and launches them as Ray actors.
+        Creates Ray actors directly from config - no intermediate local instances.
         """
         logger.info("Setting up simulation: %s", self.simulation_id)
 
         # Initialize Ray
         ensure_ray(self.config.ray)
 
-        # Create and launch PlayerPersonas
-        player_personas = self.create_player_personas()
-        self._player_persona_handles = self._launch_player_personas(player_personas)
+        # Launch PlayerPersonas directly from config
+        self._player_persona_handles = self._launch_player_personas()
 
-        # Create and launch ConductorPersona (if configured)
-        conductor_persona = self.create_conductor_persona()
-        if conductor_persona:
-            self._conductor_persona_handle = self._launch_conductor_persona(
-                conductor_persona
-            )
+        # Launch ConductorPersona directly from config (if configured)
+        self._conductor_persona_handle = self._launch_conductor_persona()
 
+        if self._conductor_persona_handle:
             # Register all players with conductor
-            for player_id in self._player_persona_handles.keys():
+            for player_id in self._player_persona_handles:
                 ray.get(
                     self._conductor_persona_handle.register_player.remote(player_id)
                 )
@@ -496,11 +422,11 @@ class GeneralSimulator(BaseSimulator):
             }
         round_results["turn_results"] = turn_results
 
-        # Phase 3: ConductorPersona collects census and executes cycle()
+        # Phase 3: ConductorPersona collects response_pool and executes cycle()
         if self._conductor_persona_handle:
             self.current_phase = RoundPhase.COORDINATION
 
-            # Collect final actions from all turns and send to Conductor (census)
+            # Collect final actions from all turns and send to Conductor (response_pool)
             actions = []
             for tr in turn_results.values():
                 if tr["final_action"]:
@@ -527,7 +453,7 @@ class GeneralSimulator(BaseSimulator):
                     )
                     actions.append(action)
 
-            ray.get(self._conductor_persona_handle.receive_actions.remote(actions))
+            ray.get(self._conductor_persona_handle.receive_responses.remote(actions))
 
             # Conductor executes coordination cycle
             cycle_result = ray.get(self._conductor_persona_handle.cycle.remote())

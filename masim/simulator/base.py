@@ -1,6 +1,6 @@
 """Base Simulator module for the Multi-Agent Simulation (MASim) framework.
 
-This module provides abstract base classes and type definitions ONLY.
+This module provides abstract base classes and type definitions.
 For concrete implementations, see `general.py`.
 
 ================================================================================
@@ -16,7 +16,17 @@ Dataclasses:
     SimulationConfig    - Top-level config: setting, ray, players, conductor, topology
 
 Abstract Classes:
-    BaseSimulator       - Abstract orchestrator, subclasses implement setup/run/shutdown
+    BaseSimulator       - Abstract orchestrator with fundamental infrastructure:
+                          - Ray actor handles (_player_persona_handles, _conductor_persona_handle)
+                          - History management (deque for round results)
+                          - Storage directories (from config.logging)
+                          - Status/phase tracking
+
+                          Abstract methods (must be implemented by subclasses):
+                          Ray Actor:   _launch_player_personas(), _launch_conductor_persona()
+                          Lifecycle:   setup(), run_round(), run(), shutdown()
+                          Utilities:   get_status(), get_round_history(), get_player_handle(),
+                                       get_conductor_handle()
 
 ================================================================================
                             ARCHITECTURE
@@ -71,7 +81,7 @@ Simulator.run():
     │       └── Returns: TurnResult with final_action
     │
     ├── Phase 3: COORDINATION
-    │   ├── conductor.receive_actions(actions)  # Players → Conductor
+    │   ├── conductor.receive_responses(responses)  # Players → Conductor
     │   └── conductor.cycle()                    # collect → analyze → coordinate
     │       └── Returns: CycleResult with CoordinationDecision
     │
@@ -100,12 +110,15 @@ import uuid
 import logging
 from enum import Enum, auto
 from datetime import datetime
+from pathlib import Path
+from collections import deque
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     import ray
+    from ray.actor import ActorHandle
     from masim.persona.base import PlayerPersona, ConductorPersona
 
 
@@ -220,6 +233,8 @@ class SimulationConfig:
         players: Player configurations dict
         conductor: Conductor configuration dict
         topology: Communication topology dict
+        environment: Environment settings dict (dotenv_path, workspace)
+        logging: Logging/storage paths dict (checkpoint_path, result_path, etc.)
         simulation_id: Unique identifier (auto-generated if None)
     """
 
@@ -228,6 +243,8 @@ class SimulationConfig:
     players: Dict[str, Any] = field(default_factory=dict)
     conductor: Dict[str, Any] = field(default_factory=dict)
     topology: Dict[str, Any] = field(default_factory=dict)
+    environment: Dict[str, Any] = field(default_factory=dict)
+    logging: Dict[str, Any] = field(default_factory=dict)
 
     # Auto-generated
     simulation_id: Optional[str] = None
@@ -284,35 +301,23 @@ class BaseSimulator(ABC):
         # Hierarchical execution clock for round-level timing.
         self.round_clock: ExecutionClock = ExecutionClock()
 
-    # =========================================================================
-    # Abstract Methods (must be implemented by subclasses)
-    # =========================================================================
+        # Ray actor handles for Personas (NOT Player/Conductor directly!)
+        # Simulator interacts ONLY with Persona actors, never with domain objects.
+        self._player_persona_handles: Dict[str, "ActorHandle"] = {}
+        self._conductor_persona_handle: Optional["ActorHandle"] = None
 
-    @abstractmethod
-    def create_player_personas(self) -> Dict[str, "PlayerPersona"]:
-        """
-        Create PlayerPersona instances from configuration.
+        # History management for round results
+        self.history: deque = deque(maxlen=config.setting["entry_limit"])
 
-        Default implementation reads from config.players and
-        dynamically loads player classes. Override for custom behavior.
+        # Storage directories from logging config (must be specified in config)
+        self.storage_dir = Path(config.logging["result_path"]) / self.simulation_id
+        self.storage_dir.mkdir(parents=True, exist_ok=True)
 
-        Returns:
-            Dict of player_id -> PlayerPersona instance
-        """
-        raise NotImplementedError
+        self.checkpoint_dir = Path(config.logging["checkpoint_path"])
+        self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
-    @abstractmethod
-    def create_conductor_persona(self) -> Optional["ConductorPersona"]:
-        """
-        Create ConductorPersona instance from configuration.
-
-        Default implementation reads from config.conductor and
-        dynamically loads the conductor class. Override for custom behavior.
-
-        Returns:
-            ConductorPersona instance or None if no coordination needed
-        """
-        raise NotImplementedError
+        self.logging_dir = Path(config.logging["logging_path"])
+        self.logging_dir.mkdir(parents=True, exist_ok=True)
 
     # Note: generate_observations is NOT a Simulator responsibility.
     # Observations are generated by the Conductor or Environment.
@@ -321,6 +326,36 @@ class BaseSimulator(ABC):
     # Note: execute_actions is NOT a Simulator responsibility.
     # The Conductor handles coordination and environment interaction.
     # The Simulator is a pure orchestrator.
+
+    # =========================================================================
+    # Ray Actor Management (abstract - implemented in general.py)
+    # =========================================================================
+
+    @abstractmethod
+    def _launch_player_personas(self) -> Dict[str, "ActorHandle"]:
+        """
+        Create and launch PlayerPersonas as Ray actors from config.
+
+        Reads config.players, loads player classes dynamically, and creates
+        Ray actors directly - no intermediate local instances.
+
+        Returns:
+            Dict of player_id -> Ray actor handle
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def _launch_conductor_persona(self) -> Optional["ActorHandle"]:
+        """
+        Create and launch ConductorPersona as Ray actor from config.
+
+        Reads config.conductor, loads conductor class dynamically, and creates
+        a Ray actor directly - no intermediate local instance.
+
+        Returns:
+            Ray actor handle, or None if no conductor configured
+        """
+        raise NotImplementedError
 
     # =========================================================================
     # Lifecycle Methods (abstract - implemented in general.py)
@@ -374,4 +409,40 @@ class BaseSimulator(ABC):
     @abstractmethod
     def get_status(self) -> Dict[str, Any]:
         """Get current simulation status including round clock metrics."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_round_history(self, round_num: int) -> Optional[Dict[str, Any]]:
+        """
+        Get results from a specific round.
+
+        Args:
+            round_num: Round number to retrieve (1-indexed)
+
+        Returns:
+            Round results dict, or None if round not found
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_player_handle(self, player_id: str) -> Optional["ActorHandle"]:
+        """
+        Get Ray actor handle for a specific player.
+
+        Args:
+            player_id: Player identifier
+
+        Returns:
+            Ray actor handle, or None if player not found
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_conductor_handle(self) -> Optional["ActorHandle"]:
+        """
+        Get Ray actor handle for the conductor.
+
+        Returns:
+            Ray actor handle, or None if no conductor
+        """
         raise NotImplementedError

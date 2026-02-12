@@ -26,7 +26,6 @@ from masim.simulator.base import (
     # Execution clock
     ExecutionClock,
     # Configuration
-    RayConfig,
     SimulationConfig,
     # Abstract simulator
     BaseSimulator,
@@ -47,7 +46,6 @@ __all__ = [
     "SimulatorStatus",
     "RoundPhase",
     "ExecutionClock",
-    "RayConfig",
     "SimulationConfig",
     "BaseSimulator",
     # From general.py
