@@ -12,11 +12,11 @@ Enums:
 
 Dataclasses:
     CoordinationDecision - Behavioral output: decision_type, scope, parameters
-    CycleResult          - Result of one cycle: decision, census_size, timing
+    CycleResult          - Result of one cycle: decision, response_count, timing
     ConductorConfig      - Configuration: identity, coordination_mode, extras
 
 Classes:
-    ConductorState       - Globally visible state (census, player_registry)
+    ConductorState       - Globally visible state (response_pool, player_registry)
     BaseConductor        - Abstract base class for all Conductor implementations
 
 For concrete implementations, see general.py:
@@ -31,7 +31,7 @@ For concrete implementations, see general.py:
 
 - Conductor is defined by its behavioral OUTPUT contract: it generates CoordinationDecisions
 - Conductor CANNOT directly act on environment - only influences Players indirectly
-- Census-based fusion: collects outputs (census) from Players, then analyzes and coordinates
+- Response-based fusion: collects responses from Players, then analyzes and coordinates
 - State is globally visible (unlike Player's private state)
 
 ================================================================================
@@ -44,12 +44,12 @@ Four abstract methods define the Conductor's behavior:
         Notify players of round state (Conductor → Players)
         Called BEFORE players act
 
-    collect_census(actions) → None
-        Gather actions from Players (Players → Conductor)
+    collect_responses(responses) → None
+        Gather responses from Players (Players → Conductor)
         Called AFTER players act
 
     analyze() → Dict[str, Any]
-        Process the collected census
+        Process the collected response_pool
 
     coordinate(analysis_result) → CoordinationDecision
         Produce CoordinationDecision based on analysis
@@ -71,13 +71,13 @@ Round Flow:
 │   └── (Players act based on notifications)
 │
 ├── Phase 3: COORDINATION
-│   ├── ConductorPersona.receive_actions(actions)
-│   │   └── Conductor.on_action_received()  # Builds census
+│   ├── ConductorPersona.receive_responses(responses)
+│   │   └── Conductor.on_response_received()  # Builds response_pool
 │   │
 │   └── ConductorPersona.cycle()
 │       └── Conductor.cycle()  [internal]
-│           ├── collect_census()   ── Clear and process buffered actions
-│           ├── analyze()          ── Analyze census and system state
+│           ├── collect_responses()   ── Clear and process buffered responses
+│           ├── analyze()             ── Analyze response_pool and system state
 │           └── coordinate()       ── Produce CoordinationDecision
 │           └── Returns: CycleResult
 │
@@ -185,14 +185,14 @@ class CycleResult:
 
     Attributes:
         decision: The CoordinationDecision generated
-        census_size: Number of Actions collected in the census
+        response_count: Number of responses collected in the response_pool
         analysis_result: Output from the analyze() phase (for debugging)
         tick_cycle_count: Which cycle this is (1-indexed)
         tick_cycle_duration_ms: Duration of this cycle in milliseconds
     """
 
     decision: CoordinationDecision
-    census_size: int = 0
+    response_count: int = 0
     analysis_result: Dict[str, Any] = field(default_factory=dict)
     tick_cycle_count: int = 0
     tick_cycle_duration_ms: float = 0.0
@@ -200,7 +200,7 @@ class CycleResult:
     def to_dict(self) -> Dict[str, Any]:
         return {
             "decision": self.decision.to_dict(),
-            "census_size": self.census_size,
+            "response_count": self.response_count,
             "analysis_result": self.analysis_result,
             "tick_cycle_count": self.tick_cycle_count,
             "tick_cycle_duration_ms": round(self.tick_cycle_duration_ms, 3),
@@ -235,7 +235,7 @@ class ConductorState:
     Other components can query Conductor state for transparency.
 
     Key Concepts:
-    - census: Aggregated data collected from Players (Actions buffer)
+    - response_pool: Aggregated responses collected from Players
     - cycle: One complete notify→collect→analyze→coordinate sequence
 
     In the hierarchical execution model:
@@ -252,10 +252,10 @@ class ConductorState:
         # Maps player_id → metadata for coordination targeting.
         self.player_registry: Dict[str, Dict[str, Any]] = {}
 
-        # Census: Actions collected from Players during current round.
-        # "Census" emphasizes this is aggregated data from multiple Players.
+        # Response pool: Responses (Actions) collected from Players during current round.
+        # "response_pool" emphasizes aggregated responses from multiple Players.
         # Cleared at start of each coordination cycle.
-        self.census: List[Action] = []
+        self.response_pool: List[Action] = []
 
         # History of all CoordinationDecisions generated.
         # Used for analysis and debugging.
@@ -279,15 +279,15 @@ class ConductorState:
     def unregister_player(self, player_id: str) -> None:
         self.player_registry.pop(player_id, None)
 
-    def add_to_census(self, action: Action) -> None:
-        """Add an action to the census."""
-        self.census.append(action)
+    def add_to_response_pool(self, response: Action) -> None:
+        """Add a response to the response_pool."""
+        self.response_pool.append(response)
 
-    def clear_census(self) -> List[Action]:
-        """Clear and return the current census."""
-        actions = self.census.copy()
-        self.census.clear()
-        return actions
+    def clear_response_pool(self) -> List[Action]:
+        """Clear and return the current response_pool."""
+        responses = self.response_pool.copy()
+        self.response_pool.clear()
+        return responses
 
     def record_decision(self, decision: CoordinationDecision) -> None:
         """Record a decision and update cycle metrics."""
@@ -311,7 +311,7 @@ class ConductorState:
             "cycle_count": self.cycle_count,
             "player_count": len(self.player_registry),
             "player_ids": list(self.player_registry.keys()),
-            "census_size": len(self.census),
+            "response_count": len(self.response_pool),
             "decisions_made": len(self.decision_history),
             "cycle_last_duration_ms": round(self.cycle_last_duration_ms, 3),
             "cycle_total_duration_ms": round(self.cycle_total_duration_ms, 3),
@@ -357,7 +357,7 @@ class BaseConductor(ABC):
         self._identity: str = config.identity
         self.coordination_mode: str = config.coordination_mode
         self.config: ConductorConfig = config
-        self._state: ConductorState = ConductorState()
+        self.state: ConductorState = ConductorState()
 
         # Capability tags for resource access control (via Client)
         if "capabilities" in config.extras:
@@ -386,7 +386,7 @@ class BaseConductor(ABC):
         """
         Callback when a message is received via CommunicationProxy.
         """
-        self._state._message_inbox.append(message)
+        self.state._message_inbox.append(message)
 
     def save_state(self) -> Dict[str, Any]:
         """
@@ -396,9 +396,9 @@ class BaseConductor(ABC):
         Uses 'cycle_count' per hierarchical execution terminology.
         """
         return {
-            "cycle_count": self._state.cycle_count,
-            "player_registry": self._state.player_registry.copy(),
-            "custom_state": self._state.custom_state.copy(),
+            "cycle_count": self.state.cycle_count,
+            "player_registry": self.state.player_registry.copy(),
+            "custom_state": self.state.custom_state.copy(),
             # Note: decision_history may be too large; subclass can override
         }
 
@@ -418,14 +418,14 @@ class BaseConductor(ABC):
         """
         # Support both new and legacy key names
         if "cycle_count" in state:
-            self._state.cycle_count = state["cycle_count"]
+            self.state.cycle_count = state["cycle_count"]
         elif "round_count" in state:
-            self._state.cycle_count = state["round_count"]
+            self.state.cycle_count = state["round_count"]
         else:
             raise KeyError("State must contain 'cycle_count' or 'round_count'")
 
-        self._state.player_registry = state["player_registry"].copy()
-        self._state.custom_state = state["custom_state"].copy()
+        self.state.player_registry = state["player_registry"].copy()
+        self.state.custom_state = state["custom_state"].copy()
 
     def get_capabilities(self) -> List[str]:
         """
@@ -443,12 +443,12 @@ class BaseConductor(ABC):
         Uses 'cycle_count' per hierarchical execution terminology.
         """
         return {
-            "cycle_count": self._state.cycle_count,
-            "player_count": len(self._state.player_registry),
-            "census_size": len(self._state.census),
-            "total_decisions": len(self._state.decision_history),
-            "cycle_last_duration_ms": round(self._state.cycle_last_duration_ms, 3),
-            "cycle_total_duration_ms": round(self._state.cycle_total_duration_ms, 3),
+            "cycle_count": self.state.cycle_count,
+            "player_count": len(self.state.player_registry),
+            "response_count": len(self.state.response_pool),
+            "total_decisions": len(self.state.decision_history),
+            "cycle_last_duration_ms": round(self.state.cycle_last_duration_ms, 3),
+            "cycle_total_duration_ms": round(self.state.cycle_total_duration_ms, 3),
         }
 
     # =========================================================================
@@ -468,22 +468,6 @@ class BaseConductor(ABC):
             persona: The ConductorPersona instance to attach
         """
         self._persona = persona
-
-    # =========================================================================
-    # Player Management
-    # =========================================================================
-
-    def register_player(self, player_id: str, metadata: Dict[str, Any] = None) -> None:
-        """Register a Player with this Conductor."""
-        self._state.register_player(player_id, metadata)
-
-    def unregister_player(self, player_id: str) -> None:
-        """Unregister a Player from this Conductor."""
-        self._state.unregister_player(player_id)
-
-    def get_registered_players(self) -> List[str]:
-        """Get list of registered Player IDs."""
-        return list(self._state.player_registry.keys())
 
     # =========================================================================
     # Lifecycle
@@ -526,21 +510,21 @@ class BaseConductor(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def collect_census(self, actions: List[Action]) -> None:
+    async def collect_responses(self, responses: List[Action]) -> None:
         """
-        Collect census from player actions (Players → Conductor).
+        Collect responses from players (Players → Conductor).
 
         This is the inbound data collection from Players.
-        "Census" emphasizes aggregation from multiple sources.
+        "response_pool" emphasizes aggregated responses from multiple sources.
 
         Args:
-            actions: List of Actions collected from all Players
+            responses: List of responses (Actions) collected from all Players
         """
         raise NotImplementedError
 
     @abstractmethod
     async def analyze(self) -> Dict[str, Any]:
-        """Analyze the collected census and system state."""
+        """Analyze the collected response_pool and system state."""
         raise NotImplementedError
 
     @abstractmethod
@@ -564,8 +548,8 @@ class BaseConductor(ABC):
         - Conductor: cycle (collect→analyze→coordinate)  <-- THIS METHOD
 
         The cycle consists of three phases:
-        1. collect_census(): Process Actions collected from Players
-        2. analyze(): Examine system state and census
+        1. collect_responses(): Process responses collected from Players
+        2. analyze(): Examine system state and response_pool
         3. coordinate(): Generate a CoordinationDecision
 
         Note: notify() is called BEFORE the cycle, at round start.
@@ -573,20 +557,20 @@ class BaseConductor(ABC):
         Returns:
             CycleResult containing:
                 - decision: The CoordinationDecision generated
-                - census_size: Number of actions in the census
+                - response_count: Number of responses in the response_pool
                 - analysis_result: Output from analyze phase
                 - tick_cycle_count: Cycle number
                 - tick_cycle_duration_ms: Cycle duration
         """
         # Start cycle timing
-        self._state.cycle_tick_start()
+        self.state.cycle_tick_start()
 
-        # Phase 1: Collect census (clear and process buffered actions)
-        actions = self._state.clear_census()
-        census_size = len(actions)
-        await self.collect_census(actions)
+        # Phase 1: Collect responses (clear and process buffered responses)
+        responses = self.state.clear_response_pool()
+        response_count = len(responses)
+        await self.collect_responses(responses)
 
-        # Phase 2: Analyze census and system state
+        # Phase 2: Analyze response_pool and system state
         analysis_result = await self.analyze()
 
         # Phase 3: Generate coordination decision
@@ -594,17 +578,17 @@ class BaseConductor(ABC):
 
         # Validate and record
         self._validate_decision(decision)
-        self._state.record_decision(decision)
+        self.state.record_decision(decision)
 
         # End cycle timing
-        self._state.cycle_tick_end()
+        self.state.cycle_tick_end()
 
         return CycleResult(
             decision=decision,
-            census_size=census_size,
+            response_count=response_count,
             analysis_result=analysis_result,
-            tick_cycle_count=self._state.cycle_count,
-            tick_cycle_duration_ms=self._state.cycle_last_duration_ms,
+            tick_cycle_count=self.state.cycle_count,
+            tick_cycle_duration_ms=self.state.cycle_last_duration_ms,
         )
 
     def _validate_decision(self, decision: CoordinationDecision) -> None:
@@ -623,16 +607,16 @@ class BaseConductor(ABC):
             )
 
     # =========================================================================
-    # Census Intake (from Players)
+    # Response Intake (from Players)
     # =========================================================================
 
-    def on_action_received(self, action: Action) -> None:
-        """Callback for when an Action is pushed from a Player."""
-        self._state.add_to_census(action)
+    def on_response_received(self, response: Action) -> None:
+        """Callback for when a response is pushed from a Player."""
+        self.state.add_to_response_pool(response)
 
-    async def on_action_received_async(self, action: Action) -> None:
-        """Async callback for action receipt."""
-        self._state.add_to_census(action)
+    async def on_response_received_async(self, response: Action) -> None:
+        """Async callback for response receipt."""
+        self.state.add_to_response_pool(response)
 
     # =========================================================================
     # State Access (Globally Visible)
@@ -640,11 +624,11 @@ class BaseConductor(ABC):
 
     def get_state_snapshot(self) -> Dict[str, Any]:
         """Get a snapshot of Conductor state (globally visible)."""
-        return self._state.to_snapshot()
+        return self.state.to_snapshot()
 
     def get_decision_history(self) -> List[CoordinationDecision]:
         """Get the history of CoordinationDecisions."""
-        return self._state.decision_history.copy()
+        return self.state.decision_history.copy()
 
     # =========================================================================
     # Message Handling
@@ -652,8 +636,8 @@ class BaseConductor(ABC):
 
     def get_pending_messages(self) -> List["Message"]:
         """Get and clear pending messages from inbox."""
-        messages = self._state._message_inbox.copy()
-        self._state._message_inbox.clear()
+        messages = self.state._message_inbox.copy()
+        self.state._message_inbox.clear()
         return messages
 
     def __repr__(self) -> str:

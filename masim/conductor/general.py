@@ -9,8 +9,8 @@ Use GeneralConductor as:
 
 Conductor Contract:
 - notify(): Send round state to Players (Conductor → Players)
-- collect_census(): Gather actions from Players (Players → Conductor)
-- analyze(): Process the collected census
+- collect_responses(): Gather responses from Players (Players → Conductor)
+- analyze(): Process the collected response_pool
 - coordinate(): Produce CoordinationDecision
 
 For abstract definitions and documentation, see base.py.
@@ -37,7 +37,7 @@ class GeneralConductor(BaseConductor):
     Ready-to-use Conductor implementation with sensible defaults.
 
     GeneralConductor provides a minimal but complete implementation of the
-    notify → collect_census → analyze → coordinate cycle. It can be:
+    notify → collect_responses → analyze → coordinate cycle. It can be:
 
     1. Used directly for testing and prototyping
     2. Extended for domain-specific coordination
@@ -45,8 +45,8 @@ class GeneralConductor(BaseConductor):
     Default Behavior:
     -----------------
     - notify(): Broadcasts same data to all players
-    - collect_census(): Stores census in custom_state["census"]
-    - analyze(): Counts actions and computes basic statistics
+    - collect_responses(): Stores responses in custom_state["response_pool"]
+    - analyze(): Counts responses and computes basic statistics
     - coordinate(): Returns a global "continue" decision
 
     Extension Guide:
@@ -55,11 +55,11 @@ class GeneralConductor(BaseConductor):
 
         class MyMarketConductor(GeneralConductor):
             async def analyze(self) -> Dict[str, Any]:
-                census = self._state.custom_state["census"]
+                response_pool = self.state.custom_state["response_pool"]
                 # Custom analysis logic
                 buy_volume = sum(a.payload["qty"]
-                                 for a in census if a.action_type == "buy")
-                return {"buy_volume": buy_volume, "census_size": len(census)}
+                                 for a in response_pool if a.action_type == "buy")
+                return {"buy_volume": buy_volume, "response_count": len(response_pool)}
 
             async def coordinate(self, analysis: Dict) -> CoordinationDecision:
                 if analysis["buy_volume"] > 1000:
@@ -77,9 +77,9 @@ class GeneralConductor(BaseConductor):
         conductor = GeneralConductor(config)
         await conductor.initialize()
 
-        # Buffer some actions (builds census)
-        conductor.on_action_received(action1)
-        conductor.on_action_received(action2)
+        # Buffer some responses (builds response_pool)
+        conductor.on_response_received(action1)
+        conductor.on_response_received(action2)
 
         # Run coordination cycle
         result = await conductor.cycle()
@@ -106,8 +106,8 @@ class GeneralConductor(BaseConductor):
             Dict of player_id -> notification_dict
         """
         # Get broadcast data from coordinator state
-        if "broadcast_data" in self._state.custom_state:
-            data = self._state.custom_state["broadcast_data"]
+        if "broadcast_data" in self.state.custom_state:
+            data = self.state.custom_state["broadcast_data"]
         else:
             data = {"round": round_num}
 
@@ -123,38 +123,38 @@ class GeneralConductor(BaseConductor):
             }
         return notifications
 
-    async def collect_census(self, actions: List[Action]) -> None:
+    async def collect_responses(self, responses: List[Action]) -> None:
         """
-        Collect census from player actions (Players → Conductor).
+        Collect responses from players (Players → Conductor).
 
-        Default implementation stores census for analysis.
+        Default implementation stores responses for analysis.
 
         Args:
-            actions: List of Actions collected from Players (the census)
+            responses: List of responses (Actions) collected from Players
         """
-        # Store census for analysis
-        self._state.custom_state["census"] = actions
+        # Store response_pool for analysis
+        self.state.custom_state["response_pool"] = responses
 
     async def analyze(self) -> Dict[str, Any]:
         """
-        Analyze the collected census and system state.
+        Analyze the collected response_pool and system state.
 
         Default implementation computes basic statistics:
-        - census_size: Number of actions in the census
+        - response_count: Number of responses in the pool
         - action_types: Distribution of action types
         - player_count: Number of registered players
 
         Returns:
             Analysis result dictionary
         """
-        if "census" not in self._state.custom_state:
-            census = []
+        if "response_pool" not in self.state.custom_state:
+            response_pool = []
         else:
-            census = self._state.custom_state["census"]
+            response_pool = self.state.custom_state["response_pool"]
 
         # Count action types
         type_counts: Dict[str, int] = {}
-        for action in census:
+        for action in response_pool:
             action_type = action.action_type
             if action_type in type_counts:
                 type_counts[action_type] += 1
@@ -162,9 +162,9 @@ class GeneralConductor(BaseConductor):
                 type_counts[action_type] = 1
 
         return {
-            "census_size": len(census),
+            "response_count": len(response_pool),
             "action_types": type_counts,
-            "player_count": len(self._state.player_registry),
+            "player_count": len(self.state.player_registry),
         }
 
     async def coordinate(self, analysis_result: Dict[str, Any]) -> CoordinationDecision:
@@ -184,8 +184,8 @@ class GeneralConductor(BaseConductor):
             decision_type="continue",
             scope=DecisionScope.GLOBAL,
             parameters={
-                "census_size": analysis_result["census_size"],
-                "timestamp": self._state.cycle_count,
+                "response_count": analysis_result["response_count"],
+                "timestamp": self.state.cycle_count,
             },
             source_id=self.identity,
         )
@@ -228,28 +228,28 @@ class ThrottlingConductor(GeneralConductor):
         self._low_threshold = config.extras["low_threshold"]
 
     async def coordinate(self, analysis_result: Dict[str, Any]) -> CoordinationDecision:
-        """Apply throttling based on census size."""
-        census_size = analysis_result["census_size"]
+        """Apply throttling based on response count."""
+        response_count = analysis_result["response_count"]
 
-        if census_size > self._high_threshold:
+        if response_count > self._high_threshold:
             return CoordinationDecision(
                 decision_type="throttle",
                 scope=DecisionScope.GLOBAL,
                 parameters={
                     "rate_multiplier": 0.5,
                     "reason": "high_activity",
-                    "census_size": census_size,
+                    "response_count": response_count,
                 },
                 source_id=self.identity,
             )
-        elif census_size < self._low_threshold:
+        elif response_count < self._low_threshold:
             return CoordinationDecision(
                 decision_type="accelerate",
                 scope=DecisionScope.GLOBAL,
                 parameters={
                     "rate_multiplier": 1.5,
                     "reason": "low_activity",
-                    "census_size": census_size,
+                    "response_count": response_count,
                 },
                 source_id=self.identity,
             )
