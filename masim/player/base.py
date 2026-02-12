@@ -2,6 +2,27 @@
 Base Player module for the Multi-Agent Simulation (MASim) framework.
 
 ================================================================================
+                          MODULE CONTENTS
+================================================================================
+
+Dataclasses:
+    Action              - Behavioral output: action_type, payload, source_id
+    Observation         - Structured input: data, source_id, target_id, step
+    StepResult          - Result of one step: action, decision_payload, timing
+    TurnResult          - Result of a turn: list of StepResults, final_action
+    PlayerConfig        - Configuration: identity, group_tags, extras
+
+Classes:
+    PlayerState         - Private state container (invisible to other components)
+    BasePlayer          - Abstract base class for all Player implementations
+
+For concrete implementations, see general.py:
+    GeneralPlayer       - Configurable via extras["strategy"]
+    EchoPlayer          - Echoes observations as actions
+    NoOpPlayer          - Always produces no-op actions
+    ReactivePlayer      - Triggers actions based on extras["triggers"]
+
+================================================================================
                            MODULE OVERVIEW
 ================================================================================
 
@@ -155,11 +176,48 @@ The Ray wrapper (PlayerProxy in simulator/) handles distribution concerns.
 
     # 4. Run in simulation loop
     await player.initialize()
-    action = await player.step(observation)  # perceive → decide → act
+    # perceive → decide → act
+    action = await player.step(observation)
 
     # 5. Use Persona for infrastructure (Player has NO direct proxy access)
     data = await player.persona.fetch_resource("mcp://market/prices")
     await player.persona.checkpoint(label="before_trade")
+
+================================================================================
+                          EXECUTION FLOW
+================================================================================
+
+Player is called by PlayerPersona (which is called by Simulator):
+
+PlayerPersona.operate(observation, num_steps):
+│
+└── Player.turn(observation, num_steps)
+    │
+    ├── perceive(observation, prev_result=None)  # First step
+    │
+    └── for step_num in range(num_steps):
+        │
+        └── Player.step(observation, prev_result)
+            │
+            ├── perceive(observation, prev_result)  # Update internal state
+            │   └── Access: self._state.set_custom(key, value)
+            │
+            ├── decide()                            # Core decision logic
+            │   └── Returns: Dict[str, Any] (decision payload)
+            │
+            └── act(decision_payload)               # Produce Action
+                └── Returns: Action(action_type, payload, source_id)
+            │
+            └── Returns: StepResult
+    │
+    └── Returns: TurnResult(step_results, final_action)
+
+Abstract Methods (MUST implement):
+    perceive(observation, prev_result) → None    # Update internal state
+    decide()                           → Dict    # Core decision logic
+    act(decision_payload)              → Action  # Produce behavioral output
+
+The framework composes these into step() and turn() automatically.
 
 ================================================================================
 """
@@ -301,9 +359,12 @@ class Action:
     # -------------------------------------------------------------------------
     # Required Fields (must be provided)
     # -------------------------------------------------------------------------
-    action_type: str  # Semantic category of the action
-    payload: PayloadType  # Action parameters (domain-specific)
-    source_id: str  # ID of the generating Player
+    # Semantic category of the action
+    action_type: str
+    # Action parameters (domain-specific)
+    payload: PayloadType
+    # ID of the generating Player
+    source_id: str
 
     # -------------------------------------------------------------------------
     # Auto-generated Fields (with defaults)
@@ -336,10 +397,12 @@ class Action:
         - bytes: Raw binary for custom protocols
         """
         if self.payload is None:
-            return  # None is allowed (represents "no parameters")
+            # None is allowed (represents "no parameters")
+            return
 
         if isinstance(self.payload, (dict, list, np.ndarray, bytes)):
-            return  # Valid types
+            # Valid types
+            return
 
         raise TypeError(
             f"Action payload must be dict, list, numpy.ndarray, or bytes. "
@@ -359,7 +422,8 @@ class Action:
         # Handle numpy array conversion
         payload_data = self.payload
         if isinstance(self.payload, np.ndarray):
-            payload_data = self.payload.tolist()  # Convert to nested list
+            # Convert to nested list
+            payload_data = self.payload.tolist()
 
         return {
             "action_id": self.action_id,
@@ -368,7 +432,8 @@ class Action:
             "source_id": self.source_id,
             "timestamp": self.timestamp,
             "metadata": self.metadata,
-            "status": self.status.name,  # Enum → string
+            # Enum → string
+            "status": self.status.name,
         }
 
 
@@ -547,8 +612,8 @@ class TurnResult:
     Example:
         result = await player.turn(observation, num_steps=3)
         for step_result in result.step_results:
-            print(f"Step {step_result.tick_step_count}: {step_result.action}")
-        print(f"Final action: {result.final_action}")
+            logger.debug("Step %d: %s", step_result.tick_step_count, step_result.action)
+        logger.info("Final action: %s", result.final_action)
     """
 
     # List of StepResult from each step in this turn
@@ -833,20 +898,32 @@ class PlayerState:
             ),
         }
 
-    def get_custom(self, key: str, default: Any = None) -> Any:
+    def get_custom(self, key: str) -> Any:
         """
         Get a custom state value.
 
-        Provides safe access with default value support.
-
         Args:
             key: State key to retrieve
-            default: Value to return if key doesn't exist
 
         Returns:
-            The stored value or default
+            The stored value
+
+        Raises:
+            KeyError: If key does not exist
         """
-        return self.custom_state.get(key, default)
+        return self.custom_state[key]
+
+    def has_custom(self, key: str) -> bool:
+        """
+        Check if a custom state key exists.
+
+        Args:
+            key: State key to check
+
+        Returns:
+            True if key exists, False otherwise
+        """
+        return key in self.custom_state
 
     def set_custom(self, key: str, value: Any) -> None:
         """
@@ -973,12 +1050,12 @@ class BasePlayer(ABC):
                 obs: Observation,
                 prev_result: Optional[StepResult] = None,
             ) -> None:
-                self._state.set_custom("price", obs.data.get("price"))
+                self._state.set_custom("price", obs.data["price"])
                 if prev_result:
                     self._state.set_custom("last_action", prev_result.action)
 
             async def decide(self) -> Dict[str, Any]:
-                price = self._state.get_custom("price", 0)
+                price = self._state.get_custom("price")
                 return {"action": "buy" if price < 100 else "hold"}
 
             async def act(self, decision: Dict[str, Any]) -> Action:
@@ -997,7 +1074,7 @@ class BasePlayer(ABC):
                     thought = await self._think(iteration)
                     self._state.step_tick_end()
 
-                    if thought.get("confident"):
+                    if thought["confident"]:
                         break
 
                 return thought
@@ -1049,7 +1126,10 @@ class BasePlayer(ABC):
         # =====================================================================
         # Capabilities define which MCP resources this Player can access.
         # The Client's ResourceProxy checks capabilities before allowing fetch.
-        self._capabilities: List[str] = config.extras.get("capabilities", []).copy()
+        if "capabilities" in config.extras:
+            self._capabilities: List[str] = config.extras["capabilities"].copy()
+        else:
+            self._capabilities: List[str] = []
 
         # =====================================================================
         # Lifecycle Flags
@@ -1209,7 +1289,7 @@ class BasePlayer(ABC):
             state: Dictionary of state data (from save_state())
 
         Note:
-            Must handle missing keys gracefully (use .get() with defaults).
+            Must validate all expected keys are present.
             State dict may be from an older version with different keys.
             Supports both 'turn_count' (new) and 'step_count' (legacy).
 
@@ -1220,8 +1300,14 @@ class BasePlayer(ABC):
                     self._portfolio = Portfolio.from_dict(state["portfolio"])
         """
         # Support both new 'turn_count' and legacy 'step_count' keys
-        self._state.turn_count = state.get("turn_count", state.get("step_count", 0))
-        self._state.custom_state = state.get("custom_state", {}).copy()
+        if "turn_count" in state:
+            self._state.turn_count = state["turn_count"]
+        elif "step_count" in state:
+            self._state.turn_count = state["step_count"]
+        else:
+            raise KeyError("State must contain 'turn_count' or 'step_count'")
+
+        self._state.custom_state = state["custom_state"].copy()
 
     def get_capabilities(self) -> List[str]:
         """
@@ -1411,7 +1497,7 @@ class BasePlayer(ABC):
                 observation: Observation,
                 prev_result: Optional[StepResult] = None,
             ) -> None:
-                market_data = observation.data.get("market", {})
+                market_data = observation.data["market"]
                 self._state.set_custom("current_prices", market_data)
 
                 # Use previous step result if available
@@ -1440,10 +1526,10 @@ class BasePlayer(ABC):
 
         Example:
             async def decide(self) -> Dict[str, Any]:
-                prices = self._state.get_custom("current_prices", {})
+                prices = self._state.get_custom("current_prices")
 
                 # Simple momentum strategy
-                if prices.get("trend") == "up":
+                if prices["trend"] == "up":
                     return {"action": "buy", "quantity": 100}
                 else:
                     return {"action": "hold", "quantity": 0}
@@ -1476,7 +1562,7 @@ class BasePlayer(ABC):
                     action_type=decision["action"],
                     payload={
                         "quantity": decision["quantity"],
-                        "limit_price": decision.get("price")
+                        "limit_price": decision["price"]
                     },
                     source_id=self.identity,
                     metadata={"strategy": "momentum"}
@@ -1567,7 +1653,7 @@ class BasePlayer(ABC):
             # Execute 3 steps in one turn
             result = await player.turn(observation, num_steps=3)
             for step_result in result.step_results:
-                print(f"Step {step_result.tick_step_count}: {step_result.action}")
+                logger.debug("Step %d: %s", step_result.tick_step_count, step_result.action)
 
         Args:
             observation: The initial observation from environment

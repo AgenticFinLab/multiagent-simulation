@@ -1,16 +1,79 @@
 """
 Base Communication module for the Multi-Agent Simulation (MASim) framework.
 
-This module defines:
-- Message types and formats for cross-component communication
-- Communication protocols for encoding/decoding messages
-- Message routing and addressing abstractions
+This module provides message formats and routing abstractions ONLY.
+For concrete implementations, see `general.py`.
 
-Design Philosophy:
+================================================================================
+                          MODULE CONTENTS
+================================================================================
+
+Type Aliases:
+    PayloadType          - Union[Dict, np.ndarray, bytes, List]
+
+Enums:
+    MessageType          - OBSERVATION, ACTION, COORDINATION, PEER, SYSTEM, BROADCAST
+    MessagePriority      - LOW, NORMAL, HIGH, CRITICAL
+
+Dataclasses:
+    Message              - Standard message format: type, sender_id, payload, recipient_id
+
+Abstract Classes:
+    BaseProtocol         - Serialization interface: encode, decode
+    MessageRouter        - Routing interface: register_handler, route
+
+Concrete Classes:
+    JsonProtocol         - JSON-based serialization with numpy support
+
+Builder Functions:
+    build_observation_message()   - Create OBSERVATION message
+    build_action_message()        - Create ACTION message
+    build_coordination_message()  - Create COORDINATION message
+    build_peer_message()          - Create PEER message
+
+================================================================================
+                         DESIGN PHILOSOPHY
+================================================================================
+
 - All cross-component communication uses standard Message format
 - Protocol layer handles serialization (Arrow/JSON compatible)
 - Routing is decoupled from message content semantics
 - Ray-native transport with zero-copy optimization support
+
+================================================================================
+                          MESSAGE FLOW
+================================================================================
+
+    Sender                                           Receiver
+      │                                                 │
+      ├── build_*_message()                             │
+      │   └── Creates Message object                    │
+      │                                                 │
+      ├── CommunicationProxy.send(message)              │
+      │   └── Protocol.encode(message)                  │
+      │       └── Returns: bytes                        │
+      │                                                 │
+      │               [Network Transport]               │
+      │                                                 │
+      │                                      Protocol.decode(bytes)
+      │                                          └── Returns: Message
+      │                                                 │
+      │                                      MessageRouter.route(message)
+      │                                          └── handler(message)
+      │                                                 │
+      │                                      Owner.on_message(message)
+      └─────────────────────────────────────────────────┘
+
+================================================================================
+                          MESSAGE TYPES
+================================================================================
+
+    OBSERVATION  - Environment/Conductor → Players (round state notification)
+    ACTION       - Player → Environment/Conductor (behavioral output)
+    COORDINATION - Conductor → Players (coordination decision broadcast)
+    PEER         - Player ↔ Player (direct peer communication)
+    SYSTEM       - Framework internal control messages
+    BROADCAST    - One-to-many messages
 """
 
 import uuid
@@ -38,12 +101,18 @@ PayloadType = Union[Dict[str, Any], np.ndarray, bytes, List[Any]]
 class MessageType(Enum):
     """Types of messages in the framework."""
 
-    OBSERVATION = auto()  # Environment -> Players
-    ACTION = auto()  # Player -> Environment/Conductor
-    COORDINATION = auto()  # Conductor -> Players
-    PEER = auto()  # Player <-> Player
-    SYSTEM = auto()  # Framework internal
-    BROADCAST = auto()  # One-to-many
+    # Environment -> Players
+    OBSERVATION = auto()
+    # Player -> Environment/Conductor
+    ACTION = auto()
+    # Conductor -> Players
+    COORDINATION = auto()
+    # Player <-> Player
+    PEER = auto()
+    # Framework internal
+    SYSTEM = auto()
+    # One-to-many
+    BROADCAST = auto()
 
 
 class MessagePriority(Enum):
@@ -128,16 +197,29 @@ class Message:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Message":
         """Create Message from dictionary."""
+        # Validate required fields
+        if "message_type" not in data:
+            raise KeyError("Message data must have 'message_type' key")
+        if "sender_id" not in data:
+            raise KeyError("Message data must have 'sender_id' key")
         return cls(
-            message_id=data.get("message_id", str(uuid.uuid4())),
+            message_id=(
+                data["message_id"] if "message_id" in data else str(uuid.uuid4())
+            ),
             message_type=MessageType[data["message_type"]],
             sender_id=data["sender_id"],
-            recipient_id=data.get("recipient_id"),
-            payload=data.get("payload", {}),
-            timestamp=data.get("timestamp", datetime.now().isoformat()),
-            correlation_id=data.get("correlation_id"),
-            priority=MessagePriority(data.get("priority", 1)),
-            metadata=data.get("metadata", {}),
+            recipient_id=data["recipient_id"] if "recipient_id" in data else None,
+            payload=data["payload"] if "payload" in data else {},
+            timestamp=(
+                data["timestamp"] if "timestamp" in data else datetime.now().isoformat()
+            ),
+            correlation_id=data["correlation_id"] if "correlation_id" in data else None,
+            priority=(
+                MessagePriority(data["priority"])
+                if "priority" in data
+                else MessagePriority.NORMAL
+            ),
+            metadata=data["metadata"] if "metadata" in data else {},
         )
 
 
@@ -303,9 +385,11 @@ class MessageRouter:
 
     def unregister_entity(self, entity_id: str) -> None:
         """Unregister an entity from routing."""
-        info = self._entity_registry.pop(entity_id, None)
-        if info:
-            for tag in info.get("tags", []):
+        if entity_id not in self._entity_registry:
+            return
+        info = self._entity_registry.pop(entity_id)
+        if "tags" in info:
+            for tag in info["tags"]:
                 if tag in self._group_registry:
                     self._group_registry[tag] = [
                         eid for eid in self._group_registry[tag] if eid != entity_id
@@ -332,14 +416,17 @@ class MessageRouter:
         # Broadcast/scope-based routing
         recipients = []
         for entity_id, info in self._entity_registry.items():
-            if route_info.matches_scope(info.get("tags", [])):
+            entity_tags = info["tags"] if "tags" in info else []
+            if route_info.matches_scope(entity_tags):
                 recipients.append(entity_id)
 
         return recipients
 
     def get_entities_by_group(self, group_tag: str) -> List[str]:
         """Get all entity IDs in a group."""
-        return self._group_registry.get(group_tag, []).copy()
+        if group_tag not in self._group_registry:
+            return []
+        return self._group_registry[group_tag].copy()
 
     def get_all_entities(self) -> List[str]:
         """Get all registered entity IDs."""

@@ -106,6 +106,14 @@ from masim.persona import (
     PersonaConfig,
 )
 
+# Utils module
+from masim.utils import (
+    load_config,
+    validate_config,
+    build_connection_matrix,
+    ConnectionValidator,
+)
+
 __all__ = [
     "__version__",
     # Player types
@@ -159,4 +167,9 @@ __all__ = [
     "PlayerPersona",
     "ConductorPersona",
     "PersonaConfig",
+    # Utils
+    "load_config",
+    "validate_config",
+    "build_connection_matrix",
+    "ConnectionValidator",
 ]

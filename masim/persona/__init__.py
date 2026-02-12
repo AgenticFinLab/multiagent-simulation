@@ -1,5 +1,4 @@
-"""
-MASim Persona Layer - Infrastructure Coordination Facade
+"""MASim Persona Layer - Infrastructure Coordination Facade
 
 The Persona Layer is the "outer shell" of Player/Conductor entities,
 handling all infrastructure interactions so the core entity can focus
@@ -25,23 +24,30 @@ Three-Layer Architecture:
     │  • Communication, Storage, Resource, Observability  │
     └─────────────────────────────────────────────────────┘
 
-Public API:
+Base Classes (base.py):
     - BasePersona: Abstract base for infrastructure coordination
+    - PersonaConfig: Configuration options
+
+General Implementations (general.py):
     - PlayerPersona: Player-specific persona
     - ConductorPersona: Conductor-specific persona
-    - PersonaConfig: Configuration options
 """
 
 from masim.persona.base import (
     BasePersona,
-    PlayerPersona,
-    ConductorPersona,
     PersonaConfig,
 )
 
+from masim.persona.general import (
+    PlayerPersona,
+    ConductorPersona,
+)
+
 __all__ = [
+    # Base types
     "BasePersona",
+    "PersonaConfig",
+    # General implementations
     "PlayerPersona",
     "ConductorPersona",
-    "PersonaConfig",
 ]

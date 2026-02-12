@@ -1,17 +1,93 @@
 """Base Conductor module for the Multi-Agent Simulation (MASim) framework.
 
-This module defines:
-- Core data types: CoordinationDecision, DecisionScope, CycleResult
-- BaseConductor abstract class (coordination mechanism)
+This module provides abstract base classes and type definitions ONLY.
+For concrete implementations, see `general.py`.
 
-Design Philosophy:
+================================================================================
+                          MODULE CONTENTS
+================================================================================
+
+Enums:
+    DecisionScope        - Scope of coordination: GLOBAL, GROUP, INDIVIDUAL
+
+Dataclasses:
+    CoordinationDecision - Behavioral output: decision_type, scope, parameters
+    CycleResult          - Result of one cycle: decision, census_size, timing
+    ConductorConfig      - Configuration: identity, coordination_mode, extras
+
+Classes:
+    ConductorState       - Globally visible state (census, player_registry)
+    BaseConductor        - Abstract base class for all Conductor implementations
+
+For concrete implementations, see general.py:
+    GeneralConductor     - Configurable coordination logic
+    PassThroughConductor - No coordination, passes through
+    ThrottlingConductor  - Applies throttling based on activity
+    BroadcastConductor   - Broadcasts decisions to all players
+
+================================================================================
+                         DESIGN PHILOSOPHY
+================================================================================
+
 - Conductor is defined by its behavioral OUTPUT contract: it generates CoordinationDecisions
 - Conductor CANNOT directly act on environment - only influences Players indirectly
-- Passive fusion mode: receives outputs pushed by Players, does not poll
-- Implements ObservableEntity protocol for proxy access control
+- Census-based fusion: collects outputs (census) from Players, then analyzes and coordinates
 - State is globally visible (unlike Player's private state)
 
-Hierarchical Execution Model:
+================================================================================
+                        CONDUCTOR CONTRACT
+================================================================================
+
+Four abstract methods define the Conductor's behavior:
+
+    notify(round_num, player_ids) → Dict[str, Dict]
+        Notify players of round state (Conductor → Players)
+        Called BEFORE players act
+
+    collect_census(actions) → None
+        Gather actions from Players (Players → Conductor)
+        Called AFTER players act
+
+    analyze() → Dict[str, Any]
+        Process the collected census
+
+    coordinate(analysis_result) → CoordinationDecision
+        Produce CoordinationDecision based on analysis
+
+================================================================================
+                          EXECUTION FLOW
+================================================================================
+
+Conductor is called by ConductorPersona (which is called by Simulator):
+
+Round Flow:
+│
+├── Phase 1: NOTIFICATION
+│   └── ConductorPersona.notify(round_num, player_ids)
+│       └── Conductor.notify()  [internal]
+│           └── Returns: Dict[player_id → notification_dict]
+│
+├── Phase 2: PLAYER_DECISION
+│   └── (Players act based on notifications)
+│
+├── Phase 3: COORDINATION
+│   ├── ConductorPersona.receive_actions(actions)
+│   │   └── Conductor.on_action_received()  # Builds census
+│   │
+│   └── ConductorPersona.cycle()
+│       └── Conductor.cycle()  [internal]
+│           ├── collect_census()   ── Clear and process buffered actions
+│           ├── analyze()          ── Analyze census and system state
+│           └── coordinate()       ── Produce CoordinationDecision
+│           └── Returns: CycleResult
+│
+└── Phase 4: COMPLETE
+    └── Broadcast coordination decision to all players
+
+================================================================================
+                     HIERARCHICAL EXECUTION MODEL
+================================================================================
+
 - Simulator: round (orchestrates all entities)
 - PlayerPersona: operate (calls Player.turn internally)
 - Player: turn (for loop calling step)
@@ -109,14 +185,14 @@ class CycleResult:
 
     Attributes:
         decision: The CoordinationDecision generated
-        actions_processed: Number of Actions analyzed in this cycle
+        census_size: Number of Actions collected in the census
         analysis_result: Output from the analyze() phase (for debugging)
         tick_cycle_count: Which cycle this is (1-indexed)
         tick_cycle_duration_ms: Duration of this cycle in milliseconds
     """
 
     decision: CoordinationDecision
-    actions_processed: int = 0
+    census_size: int = 0
     analysis_result: Dict[str, Any] = field(default_factory=dict)
     tick_cycle_count: int = 0
     tick_cycle_duration_ms: float = 0.0
@@ -124,7 +200,7 @@ class CycleResult:
     def to_dict(self) -> Dict[str, Any]:
         return {
             "decision": self.decision.to_dict(),
-            "actions_processed": self.actions_processed,
+            "census_size": self.census_size,
             "analysis_result": self.analysis_result,
             "tick_cycle_count": self.tick_cycle_count,
             "tick_cycle_duration_ms": round(self.tick_cycle_duration_ms, 3),
@@ -158,8 +234,12 @@ class ConductorState:
     Unlike PlayerState, ConductorState is GLOBALLY VISIBLE.
     Other components can query Conductor state for transparency.
 
-    In the hierarchical execution model, Conductor uses 'cycle' terminology:
-    - cycle_count: Number of receive→analyze→coordinate cycles completed
+    Key Concepts:
+    - census: Aggregated data collected from Players (Actions buffer)
+    - cycle: One complete notify→collect→analyze→coordinate sequence
+
+    In the hierarchical execution model:
+    - cycle_count: Number of coordination cycles completed
     - cycle_clock: Timing metrics for cycle execution
     """
 
@@ -172,9 +252,10 @@ class ConductorState:
         # Maps player_id → metadata for coordination targeting.
         self.player_registry: Dict[str, Dict[str, Any]] = {}
 
-        # Buffer for Actions received from Players during current round.
+        # Census: Actions collected from Players during current round.
+        # "Census" emphasizes this is aggregated data from multiple Players.
         # Cleared at start of each coordination cycle.
-        self.action_buffer: List[Action] = []
+        self.census: List[Action] = []
 
         # History of all CoordinationDecisions generated.
         # Used for analysis and debugging.
@@ -198,12 +279,14 @@ class ConductorState:
     def unregister_player(self, player_id: str) -> None:
         self.player_registry.pop(player_id, None)
 
-    def buffer_action(self, action: Action) -> None:
-        self.action_buffer.append(action)
+    def add_to_census(self, action: Action) -> None:
+        """Add an action to the census."""
+        self.census.append(action)
 
-    def clear_action_buffer(self) -> List[Action]:
-        actions = self.action_buffer.copy()
-        self.action_buffer.clear()
+    def clear_census(self) -> List[Action]:
+        """Clear and return the current census."""
+        actions = self.census.copy()
+        self.census.clear()
         return actions
 
     def record_decision(self, decision: CoordinationDecision) -> None:
@@ -228,7 +311,7 @@ class ConductorState:
             "cycle_count": self.cycle_count,
             "player_count": len(self.player_registry),
             "player_ids": list(self.player_registry.keys()),
-            "pending_actions": len(self.action_buffer),
+            "census_size": len(self.census),
             "decisions_made": len(self.decision_history),
             "cycle_last_duration_ms": round(self.cycle_last_duration_ms, 3),
             "cycle_total_duration_ms": round(self.cycle_total_duration_ms, 3),
@@ -277,7 +360,10 @@ class BaseConductor(ABC):
         self._state: ConductorState = ConductorState()
 
         # Capability tags for resource access control (via Client)
-        self._capabilities: List[str] = config.extras.get("capabilities", []).copy()
+        if "capabilities" in config.extras:
+            self._capabilities: List[str] = config.extras["capabilities"].copy()
+        else:
+            self._capabilities: List[str] = []
 
         # Lifecycle flags
         self._is_initialized: bool = False
@@ -326,11 +412,20 @@ class BaseConductor(ABC):
         Restore state from persisted data.
 
         Supports both 'cycle_count' (new) and 'round_count' (legacy) for compatibility.
+
+        Raises:
+            KeyError: If required keys are missing from state
         """
         # Support both new and legacy key names
-        self._state.cycle_count = state.get("cycle_count", state.get("round_count", 0))
-        self._state.player_registry = state.get("player_registry", {}).copy()
-        self._state.custom_state = state.get("custom_state", {}).copy()
+        if "cycle_count" in state:
+            self._state.cycle_count = state["cycle_count"]
+        elif "round_count" in state:
+            self._state.cycle_count = state["round_count"]
+        else:
+            raise KeyError("State must contain 'cycle_count' or 'round_count'")
+
+        self._state.player_registry = state["player_registry"].copy()
+        self._state.custom_state = state["custom_state"].copy()
 
     def get_capabilities(self) -> List[str]:
         """
@@ -350,7 +445,7 @@ class BaseConductor(ABC):
         return {
             "cycle_count": self._state.cycle_count,
             "player_count": len(self._state.player_registry),
-            "pending_actions": len(self._state.action_buffer),
+            "census_size": len(self._state.census),
             "total_decisions": len(self._state.decision_history),
             "cycle_last_duration_ms": round(self._state.cycle_last_duration_ms, 3),
             "cycle_total_duration_ms": round(self._state.cycle_total_duration_ms, 3),
@@ -407,13 +502,45 @@ class BaseConductor(ABC):
     # =========================================================================
 
     @abstractmethod
-    async def receive_actions(self, actions: List[Action]) -> None:
-        """Process incoming Actions from Players (passive reception)."""
+    def notify(
+        self,
+        round_num: int,
+        player_ids: List[str],
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Notify players of round state (Conductor → Players).
+
+        This is the outbound communication from Conductor to Players.
+        The Conductor decides what each player should "see" this round.
+
+        Args:
+            round_num: Current simulation round
+            player_ids: List of player IDs to notify
+
+        Returns:
+            Dict of player_id -> notification_dict with required keys:
+            - data: Dict of data for the player
+            - source_id: Source entity ID (typically self.identity)
+            - num_steps: Number of steps for this turn
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    async def collect_census(self, actions: List[Action]) -> None:
+        """
+        Collect census from player actions (Players → Conductor).
+
+        This is the inbound data collection from Players.
+        "Census" emphasizes aggregation from multiple sources.
+
+        Args:
+            actions: List of Actions collected from all Players
+        """
         raise NotImplementedError
 
     @abstractmethod
     async def analyze(self) -> Dict[str, Any]:
-        """Analyze system state and buffered Actions."""
+        """Analyze the collected census and system state."""
         raise NotImplementedError
 
     @abstractmethod
@@ -434,17 +561,19 @@ class BaseConductor(ABC):
         - PlayerPersona: operate (calls Player.turn internally)
         - Player: turn (for loop calling step)
         - Player: step (perceive→decide→act)
-        - Conductor: cycle (receive→analyze→coordinate)  <-- THIS METHOD
+        - Conductor: cycle (collect→analyze→coordinate)  <-- THIS METHOD
 
         The cycle consists of three phases:
-        1. receive_actions(): Process buffered Actions from Players
-        2. analyze(): Examine system state and actions
+        1. collect_census(): Process Actions collected from Players
+        2. analyze(): Examine system state and census
         3. coordinate(): Generate a CoordinationDecision
+
+        Note: notify() is called BEFORE the cycle, at round start.
 
         Returns:
             CycleResult containing:
                 - decision: The CoordinationDecision generated
-                - actions_processed: Number of actions analyzed
+                - census_size: Number of actions in the census
                 - analysis_result: Output from analyze phase
                 - tick_cycle_count: Cycle number
                 - tick_cycle_duration_ms: Cycle duration
@@ -452,12 +581,12 @@ class BaseConductor(ABC):
         # Start cycle timing
         self._state.cycle_tick_start()
 
-        # Phase 1: Receive buffered actions
-        actions = self._state.clear_action_buffer()
-        actions_count = len(actions)
-        await self.receive_actions(actions)
+        # Phase 1: Collect census (clear and process buffered actions)
+        actions = self._state.clear_census()
+        census_size = len(actions)
+        await self.collect_census(actions)
 
-        # Phase 2: Analyze system state
+        # Phase 2: Analyze census and system state
         analysis_result = await self.analyze()
 
         # Phase 3: Generate coordination decision
@@ -472,7 +601,7 @@ class BaseConductor(ABC):
 
         return CycleResult(
             decision=decision,
-            actions_processed=actions_count,
+            census_size=census_size,
             analysis_result=analysis_result,
             tick_cycle_count=self._state.cycle_count,
             tick_cycle_duration_ms=self._state.cycle_last_duration_ms,
@@ -494,16 +623,16 @@ class BaseConductor(ABC):
             )
 
     # =========================================================================
-    # Action Intake (Passive Reception)
+    # Census Intake (from Players)
     # =========================================================================
 
     def on_action_received(self, action: Action) -> None:
         """Callback for when an Action is pushed from a Player."""
-        self._state.buffer_action(action)
+        self._state.add_to_census(action)
 
     async def on_action_received_async(self, action: Action) -> None:
         """Async callback for action receipt."""
-        self._state.buffer_action(action)
+        self._state.add_to_census(action)
 
     # =========================================================================
     # State Access (Globally Visible)
