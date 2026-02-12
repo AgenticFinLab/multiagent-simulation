@@ -1,0 +1,16 @@
+# =============================================================================
+# Demo Conductor Configuration - Simple Market
+# =============================================================================
+# A simple market that:
+# 1. Receives price submissions from all investors
+# 2. Calculates the average price
+# 3. Broadcasts the average back to all investors
+# =============================================================================
+
+class: "examples.Demo.conductor:SimpleMarket"
+name: "Simple Market"
+config:
+  identity: "market"
+  coordination_mode: "centralized"
+  extras:
+    initial_price: 100.0

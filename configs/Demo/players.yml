@@ -1,0 +1,35 @@
+# =============================================================================
+# Demo Players Configuration - Simple Investors
+# =============================================================================
+# 3 investors that:
+# 1. Receive average price from market
+# 2. Multiply by random factor, add to local price
+# 3. Submit new price to market
+# =============================================================================
+
+investor_1:
+  class: "examples.Demo.players:SimpleInvestor"
+  name: "Investor 1"
+  config:
+    identity: "investor_1"
+    group_tags: ["investors"]
+    extras:
+      initial_price: 100.0
+
+investor_2:
+  class: "examples.Demo.players:SimpleInvestor"
+  name: "Investor 2"
+  config:
+    identity: "investor_2"
+    group_tags: ["investors"]
+    extras:
+      initial_price: 100.0
+
+investor_3:
+  class: "examples.Demo.players:SimpleInvestor"
+  name: "Investor 3"
+  config:
+    identity: "investor_3"
+    group_tags: ["investors"]
+    extras:
+      initial_price: 100.0

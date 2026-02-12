@@ -1,0 +1,39 @@
+# =============================================================================
+# Communication Topology - Star (All via Market)
+# =============================================================================
+# All investors communicate only through the market (conductor).
+#
+#         investor_1 ──┐
+#                      │
+#         investor_2 ──┼──▶ market ──┬──▶ investor_1
+#                      │             ├──▶ investor_2
+#         investor_3 ──┘             └──▶ investor_3
+#
+# =============================================================================
+
+type: "star"
+
+# Explicit connections: source → [targets]
+# Only connected entities can send messages to each other
+connections:
+  # Market (conductor) → All investors
+  market:
+    - investor_1
+    - investor_2
+    - investor_3
+  
+  # Each investor → Market only
+  investor_1:
+    - market
+  
+  investor_2:
+    - market
+  
+  investor_3:
+    - market
+
+group_communication: false
+
+broadcast:
+  allowed_sources:
+    - "market"
