@@ -2,14 +2,14 @@
 
 A simple market that:
 1. Notifies investors with current market state
-2. Collects price submissions from all investors (census)
+2. Collects price submissions from all investors (response_pool)
 3. Calculates the average price
 4. Broadcasts the average back to all investors
 
 Conductor Contract:
 - notify(): Send round state to Players (Conductor → Players)
-- collect_census(): Gather actions from Players (Players → Conductor)
-- analyze(): Process the collected census
+- collect_responses(): Gather responses from Players (Players → Conductor)
+- analyze(): Process the collected response_pool
 - coordinate(): Produce CoordinationDecision
 """
 
@@ -32,7 +32,7 @@ class SimpleMarket(BaseConductor):
 
     Each round:
     1. notify(): Broadcast current avg_price to investors
-    2. collect_census(): Collect price submissions from investors
+    2. collect_responses(): Collect price submissions from investors
     3. analyze(): Calculate new average price
     4. coordinate(): Store new average for next round
     """
@@ -70,21 +70,23 @@ class SimpleMarket(BaseConductor):
             }
         return notifications
 
-    async def collect_census(self, actions: List[Action]) -> None:
-        """Collect price submissions from investors (census)."""
+    async def collect_responses(self, responses: List[Action]) -> None:
+        """Collect price submissions from investors (response_pool)."""
         prices = []
-        for action in actions:
-            if action.action_type == "submit_price":
-                price = action.payload["price"]
+        for response in responses:
+            if response.action_type == "submit_price":
+                price = response.payload["price"]
                 prices.append(price)
-                logger.debug("        Received from %s: %.2f", action.source_id, price)
+                logger.debug(
+                    "        Received from %s: %.2f", response.source_id, price
+                )
 
-        # Store census data for analysis
+        # Store response_pool data for analysis
         self._state.custom_state["prices"] = prices
-        self._state.custom_state["census_size"] = len(actions)
+        self._state.custom_state["response_count"] = len(responses)
 
     async def analyze(self) -> Dict[str, Any]:
-        """Analyze the census: calculate average price."""
+        """Analyze the response_pool: calculate average price."""
         if "prices" not in self._state.custom_state:
             prices = []
         else:

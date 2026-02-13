@@ -37,7 +37,7 @@
 │  │  PlayerPersona (Actor)         ConductorPersona (Actor)           │      │
 │  │  ┌─────────────────────┐       ┌─────────────────────┐            │      │
 │  │  │ - operate() 接口    │       │ - cycle() 接口      │            │      │
-│  │  │ - 管理 Proxy 生命周期│       │ - receive_actions() │            │      │
+│  │  │ - 管理 Proxy 生命周期│       │ - receive_responses() │            │      │
 │  │  │ - 状态快照/恢复     │       │ - 广播协调决策      │            │      │
 │  │  └──────────┬──────────┘       └──────────┬──────────┘            │      │
 │  │             │ (内部调用)                   │ (内部调用)             │      │
@@ -185,7 +185,7 @@ async def run_round(self, round_num: int) -> Dict[str, Any]:
     
     for player_id, obs_dict in observations.items():
         handle = self._player_persona_handles[player_id]
-        observation = Observation(data=obs_dict, ...)
+        observation = Observation(local=LocalObservation(data={}), conductor_notify=obs_dict, round=round_num)
         
         # remote() 调用是非阻塞的！
         # 这里只是把任务提交给 Ray，不等待执行完成
@@ -208,7 +208,7 @@ async def run_round(self, round_num: int) -> Dict[str, Any]:
     if self._conductor_persona_handle:
         # 收集所有 Action 发送给 Conductor
         actions = [tr.final_action for tr in turn_results.values()]
-        ray.get(self._conductor_persona_handle.receive_actions.remote(actions))
+        ray.get(self._conductor_persona_handle.receive_responses.remote(actions))
         
         # Conductor 执行协调
         cycle_result = ray.get(self._conductor_persona_handle.cycle.remote())
@@ -305,7 +305,7 @@ class BaseConductor:
         self._action_buffer.clear()
         
         # 2. 接收: 处理所有 Action
-        await self.receive_actions(actions)
+        await self.receive_responses(actions)
         
         # 3. 分析: 分析当前状态
         analysis_result = await self.analyze()
@@ -344,7 +344,7 @@ class BaseConductor:
 │                    │  ]                            │                        │
 │                    │                               │                        │
 │                    │  cycle():                     │                        │
-│                    │    receive_actions()          │                        │
+│                    │    receive_responses()          │                        │
 │                    │    analyze() → avg=100.5      │                        │
 │                    │    coordinate() → decision    │                        │
 │                    └───────────────────────────────┘                        │
@@ -406,7 +406,7 @@ async def run_round(self, round_num):
     
     # ===== 同步点 2: 等待 Conductor 接收 Actions =====
     ray.get(
-        self._conductor_persona_handle.receive_actions.remote(actions)
+        self._conductor_persona_handle.receive_responses.remote(actions)
     )  # <-- 同步点
     
     # ===== 同步点 3: 等待 Conductor 完成协调 =====
@@ -477,7 +477,7 @@ validator.validate_send("investor_1", "investor_2")  # ✗ ConnectionError!
 │  │  │                                                         │    │        │
 │  │  │   for investor_id in [investor_1, investor_2, investor_3]:   │        │
 │  │  │       validator.validate_send("market", investor_id)    │    │        │
-│  │  │       observation = Observation(data={avg_price: 100.0})│    │        │
+│  │  │       observation = Observation(local=LocalObservation(data={}), conductor_notify={avg_price: 100.0}, round=r)│    │        │
 │  │  │       # 发送观测到 Investor                              │    │        │
 │  │  └─────────────────────────────────────────────────────────┘    │        │
 │  │                         │                                       │        │
@@ -520,7 +520,7 @@ validator.validate_send("investor_1", "investor_2")  # ✗ ConnectionError!
 │  │  │                                                         │    │        │
 │  │  │   内部执行:                                              │    │        │
 │  │  │   ┌─────────────────────────────────────────────────┐   │    │        │
-│  │  │   │ receive_actions():                              │   │    │        │
+│  │  │   │ receive_responses():                              │   │    │        │
 │  │  │   │   prices = [action.payload["price"] for ...]    │   │    │        │
 │  │  │   │   state["prices"] = prices                      │   │    │        │
 │  │  │   │                                                 │   │    │        │
