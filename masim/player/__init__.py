@@ -7,8 +7,9 @@ Base Classes (base.py):
     - PlayerConfig: Configuration container for Player initialization
     - PlayerState: Private state container for Player entities
     - Action: Behavioral output contract (what Players produce)
-    - Observation: Structured input from environment
-    - StepResult: Result of one perceive→decide→act cycle
+    - LocalObservation: Player's own perception from environment
+    - Observation: Complete observation (local + conductor signals)
+    - StepResult: Result of one perceive-decide-act cycle
     - TurnResult: Result of a turn (multiple steps)
 
 General Implementations (general.py):
@@ -23,6 +24,7 @@ from masim.player.base import (
     PayloadType,
     ActionStatus,
     Action,
+    LocalObservation,
     Observation,
     StepResult,
     TurnResult,
@@ -45,6 +47,7 @@ __all__ = [
     "PayloadType",
     "ActionStatus",
     "Action",
+    "LocalObservation",
     "Observation",
     "StepResult",
     "TurnResult",

@@ -147,7 +147,7 @@ class PlayerPersona(BasePersona):
         await self._player.shutdown()
 
         # Log shutdown
-        step_count = self._player._state.step_count if self._player else 0
+        step_count = self._player.state.step_count if self._player else 0
         if self._observability:
             await self._observability.log_event(
                 "player_shutdown",
@@ -239,7 +239,7 @@ class PlayerPersona(BasePersona):
         if not self._player:
             return {"player_id": self.identity, "initialized": False}
 
-        state = self._player._state
+        state = self._player.state
         return {
             "player_id": self.identity,
             "initialized": True,
@@ -292,15 +292,15 @@ class ConductorPersona(BasePersona):
         - cycle(): Execute one coordination cycle
         - shutdown(): Clean up resources
         - register_player()/unregister_player(): Manage Players
-        - receive_actions(): Receive Actions from Players
+        - receive_responses(): Receive responses from Players
 
     The internal BaseConductor is completely hidden from Simulator.
 
     Conductor Contract:
-        notify() → Players act → receive_actions() → cycle()
+        notify() → Players act → receive_responses() → cycle()
         - notify(): Conductor → Players (outbound)
-        - receive_actions(): Players → Conductor (inbound, builds census)
-        - cycle(): collect_census → analyze → coordinate
+        - receive_responses(): Players → Conductor (inbound, builds response_pool)
+        - cycle(): collect_responses → analyze → coordinate
     """
 
     def __init__(
@@ -384,7 +384,7 @@ class ConductorPersona(BasePersona):
         await self._conductor.shutdown()
 
         # Log shutdown
-        cycle_count = self._conductor._state.cycle_count if self._conductor else 0
+        cycle_count = self._conductor.state.cycle_count if self._conductor else 0
         if self._observability:
             await self._observability.log_event(
                 "conductor_shutdown",
@@ -396,14 +396,12 @@ class ConductorPersona(BasePersona):
     # =========================================================================
 
     def register_player(self, player_id: str, metadata: Dict[str, Any] = None) -> None:
-        """Register a Player with this Conductor."""
-        if self._conductor:
-            self._conductor.register_player(player_id, metadata)
+        """Register a Player with this Conductor (direct state access)."""
+        self._conductor.state.player_registry[player_id] = metadata or {}
 
     def unregister_player(self, player_id: str) -> None:
-        """Unregister a Player from this Conductor."""
-        if self._conductor:
-            self._conductor.unregister_player(player_id)
+        """Unregister a Player from this Conductor (direct state access)."""
+        self._conductor.state.player_registry.pop(player_id, None)
 
     # =========================================================================
     #                    PLAYER NOTIFICATION (Conductor → Players)
@@ -431,42 +429,42 @@ class ConductorPersona(BasePersona):
         return self._conductor.notify(round_num, player_ids)
 
     # =========================================================================
-    #                    CENSUS INTAKE (Players → Conductor)
+    #                    RESPONSE INTAKE (Players → Conductor)
     # =========================================================================
 
-    def receive_action(self, action: "Action") -> None:
+    def receive_response(self, response: "Action") -> None:
         """
-        Receive a single Action from a Player (sync).
+        Receive a single response from a Player (sync).
 
-        Adds the action to the census for later processing.
+        Adds the response to the response_pool for later processing.
 
         Args:
-            action: The Action to add to census
+            response: The response (Action) to add to response_pool
         """
         if self._conductor:
-            self._conductor.on_action_received(action)
+            self._conductor.on_response_received(response)
 
-    async def receive_actions(self, actions: List["Action"]) -> None:
+    async def receive_responses(self, responses: List["Action"]) -> None:
         """
-        Receive Actions from Players (builds the census).
+        Receive responses from Players (builds the response_pool).
 
         Args:
-            actions: List of Action objects to add to census
+            responses: List of response (Action) objects to add to response_pool
         """
         if not self._conductor:
             return
 
-        for action in actions:
-            self._conductor.on_action_received(action)
+        for response in responses:
+            self._conductor.on_response_received(response)
 
-            # Log action receipt
+            # Log response receipt
             if self._observability:
                 await self._observability.record_metric(
-                    "census_action_received",
+                    "response_received",
                     {
                         "conductor_id": self.identity,
-                        "action_id": action.action_id,
-                        "source_id": action.source_id,
+                        "action_id": response.action_id,
+                        "source_id": response.source_id,
                     },
                 )
 
@@ -486,13 +484,13 @@ class ConductorPersona(BasePersona):
         - ConductorPersona: cycle (this method)  <-- Simulator calls this
         - Conductor: cycle (internal, hidden)    <-- Hidden from Simulator
 
-        The cycle processes the census (collected actions) and produces
+        The cycle processes the response_pool (collected responses) and produces
         a CoordinationDecision.
 
         Returns:
             CycleResult containing:
                 - decision: The CoordinationDecision generated
-                - census_size: Number of actions in the census
+                - response_count: Number of responses in the pool
                 - tick_cycle_count: Cycle number
                 - tick_cycle_duration_ms: Cycle duration
         """
@@ -516,7 +514,7 @@ class ConductorPersona(BasePersona):
                     "conductor_id": self.identity,
                     "cycle": cycle_result.tick_cycle_count,
                     "decision_type": cycle_result.decision.decision_type,
-                    "census_size": cycle_result.census_size,
+                    "response_count": cycle_result.response_count,
                     "duration_ms": duration,
                 },
             )

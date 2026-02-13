@@ -52,7 +52,7 @@ class GeneralPlayer(BasePlayer):
 
         class MyPlayer(GeneralPlayer):
             async def decide(self) -> Dict[str, Any]:
-                obs = self._state.get_custom("last_observation")
+                obs = self.state.get_custom("last_observation")
                 # Custom decision logic
                 return {"my_action": "do_something", "data": obs}
 
@@ -64,9 +64,9 @@ class GeneralPlayer(BasePlayer):
         await player.initialize()
 
         obs = Observation(
-            observation_type="market",
-            data={"price": 100.0},
-            target_id="player_001"
+            local=LocalObservation(data={"price": 100.0}),
+            conductor_notify={"phase": "trading"},
+            round=1,
         )
         result = await player.step(obs)
         # result.action.action_type == "default"
@@ -89,11 +89,11 @@ class GeneralPlayer(BasePlayer):
             prev_result: Result from the previous step (for multi-step turns)
         """
         # Store observation for access in decide()
-        self._state.set_custom("last_observation", observation.data)
+        self.state.set_custom("last_observation", observation.data)
 
         # Store previous action if available
         if prev_result and prev_result.action:
-            self._state.set_custom("prev_action", prev_result.action.to_dict())
+            self.state.set_custom("prev_action", prev_result.action.to_dict())
 
     async def decide(self) -> PayloadType:
         """
@@ -106,7 +106,7 @@ class GeneralPlayer(BasePlayer):
             Decision payload (passed to act())
         """
         # Default: pass through observation data
-        return self._state.get_custom("last_observation")
+        return self.state.get_custom("last_observation")
 
     async def act(self, decision_payload: PayloadType) -> Action:
         """
@@ -192,7 +192,7 @@ class ReactivePlayer(GeneralPlayer):
 
     async def decide(self) -> PayloadType:
         """Decide based on reactive triggers."""
-        obs = self._state.get_custom("last_observation")
+        obs = self.state.get_custom("last_observation")
 
         if self.should_react(obs):
             return self.create_reaction(obs)

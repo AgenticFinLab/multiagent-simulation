@@ -57,14 +57,14 @@ ConductorPersona (called by Simulator):
 │   └── Conductor.notify()  [internal]
 │       └── Returns: Dict[player_id → notification_dict]
 │
-├── receive_actions(actions)                # Players → Conductor (builds census)
-│   └── Conductor.on_action_received()  [internal]
+├── receive_responses(responses)               # Players → Conductor (builds response_pool)
+│   └── Conductor.on_response_received()  [internal]
 │
-└── cycle()                                 # Process census
+└── cycle()                                 # Process response_pool
     └── Conductor.cycle()  [internal]
         │
-        ├── collect_census()   ── Clear and process buffered actions
-        ├── analyze()          ── Analyze census and system state
+        ├── collect_responses()   ── Clear and process buffered responses
+        ├── analyze()             ── Analyze response_pool and system state
         └── coordinate()       ── Produce CoordinationDecision
         └── Returns: CycleResult
 

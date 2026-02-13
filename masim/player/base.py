@@ -65,7 +65,7 @@ Key Components:
    │                    VISIBILITY BOUNDARY                        │
    │                                                               │
    │   Conductor          ──────────────────────►  Globally Visible │
-   │   Player._state      ──────────────────────►  Private         │
+   │   Player.state       ──────────────────────►  Private         │
    │                                                               │
    │   This asymmetry is FUNDAMENTAL to multi-agent systems:       │
    │   - Enables strategic behavior                                │
@@ -142,12 +142,12 @@ The Ray wrapper (PlayerProxy in simulator/) handles distribution concerns.
             observation: Observation,
             prev_result: Optional[StepResult] = None,
         ) -> None:
-            self._state.set_custom("market_data", observation.data)
+            self.state.set_custom("market_data", observation.data)
             if prev_result:
-                self._state.set_custom("last_action", prev_result.action)
+                self.state.set_custom("last_action", prev_result.action)
 
         async def decide(self) -> Dict[str, Any]:
-            market = self._state.get_custom("market_data")
+            market = self.state.get_custom("market_data")
             # ... decision logic ...
             return {"action": "buy", "quantity": 100}
 
@@ -200,7 +200,7 @@ PlayerPersona.operate(observation, num_steps):
         └── Player.step(observation, prev_result)
             │
             ├── perceive(observation, prev_result)  # Update internal state
-            │   └── Access: self._state.set_custom(key, value)
+            │   └── Access: self.state.set_custom(key, value)
             │
             ├── decide()                            # Core decision logic
             │   └── Returns: Dict[str, Any] (decision payload)
@@ -438,125 +438,82 @@ class Action:
 
 
 @dataclass
-class Observation:
+class LocalObservation:
     """
-    Structured observation data from the environment to Players.
+    Player's own perception from environment/sensors.
 
-    ┌─────────────────────────────────────────────────────────────────────┐
-    │                     OBSERVATION FLOW                                 │
-    │                                                                      │
-    │  Environment ──► Observation ──► Player.perceive() ──► Internal State│
-    │                                                                      │
-    │  The environment generates observations that Players use to         │
-    │  update their internal understanding of the world.                  │
-    └─────────────────────────────────────────────────────────────────────┘
-
-    Design Principles:
-    ------------------
-    1. PARTIAL OBSERVABILITY: Each Player may receive different observations.
-       The environment controls what each Player can "see".
-
-    2. TEMPORAL CONTEXT: The `step` field enables sequence-dependent reasoning.
-       Players can track how observations change over time.
-
-    3. TARGETED DELIVERY: `target_id` allows unicast observations.
-       Without target_id, observation is broadcast to relevant Players.
+    This represents what the player directly observes, independent of
+    any coordinator signals. Think of it as the player's "eyes and ears".
 
     Attributes:
-        data: Observation content (domain-specific structure)
-        source_id: ID of the environment or component that generated this
-        observation_id: Unique identifier
-        target_id: Intended recipient (None = broadcast)
-        timestamp: ISO-8601 creation timestamp
-        step: Simulation step number (for temporal ordering)
-        metadata: Optional context (e.g., observation type, reliability)
-
-    Example:
-        # Market observation for a trading agent
-        Observation(
-            data={
-                "prices": {"AAPL": 150.0, "GOOGL": 2800.0},
-                "volumes": {"AAPL": 1000000, "GOOGL": 500000}
-            },
-            source_id="market_environment",
-            target_id="trader_001",
-            step=42
-        )
+        data: Actual observation data (market prices, sensor readings, etc.)
+        timestamp: When this observation was captured (ISO-8601 format)
     """
 
-    # -------------------------------------------------------------------------
-    # Required Fields
-    # -------------------------------------------------------------------------
-    # The actual observation content from the environment.
-    # Can be dict, list, numpy array, or bytes - same constraints as Action.payload.
     data: PayloadType
-
-    # Identifier of the environment or component that generated this observation.
-    # Used for debugging and multi-source observation scenarios.
-    source_id: str
-
-    # -------------------------------------------------------------------------
-    # Auto-generated/Optional Fields
-    # -------------------------------------------------------------------------
-    # Unique identifier for this observation instance.
-    # Auto-generated UUID if not provided.
-    observation_id: str = field(default_factory=lambda: str(uuid.uuid4()))
-
-    # Optional: Specific Player this observation is intended for.
-    # If None, the observation may be broadcast to all relevant Players.
-    target_id: Optional[str] = None
-
-    # Auto-generated ISO-8601 timestamp of when the observation was created.
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
 
-    # Optional: Simulation step number for temporal ordering.
-    # Enables sequence-dependent reasoning and replay functionality.
-    step: Optional[int] = None
-
-    # Optional: Additional context about the observation.
-    # Common keys: "observation_type", "reliability", "source_quality".
-    metadata: Dict[str, Any] = field(default_factory=dict)
-
     def __post_init__(self):
-        """Validate observation data after initialization."""
-        self._validate_data()
-
-    def _validate_data(self) -> None:
-        """
-        Validate data is serialization-friendly.
-
-        Same type constraints as Action.payload for consistency.
-        """
-        if self.data is None:
-            return
-
-        if isinstance(self.data, (dict, list, np.ndarray, bytes)):
-            return
-
-        raise TypeError(
-            f"Observation data must be dict, list, numpy.ndarray, or bytes. "
-            f"Got: {type(self.data).__name__}"
-        )
+        """Validate observation data."""
+        if self.data is not None and not isinstance(
+            self.data, (dict, list, np.ndarray, bytes)
+        ):
+            raise TypeError(
+                f"LocalObservation.data must be dict, list, numpy.ndarray, or bytes. "
+                f"Got: {type(self.data).__name__}"
+            )
 
     def to_dict(self) -> Dict[str, Any]:
-        """
-        Serialize Observation to dictionary.
-
-        Returns:
-            Dictionary representation for JSON serialization
-        """
+        """Serialize to dictionary."""
         data_serialized = self.data
         if isinstance(self.data, np.ndarray):
             data_serialized = self.data.tolist()
+        return {"data": data_serialized, "timestamp": self.timestamp}
 
+
+@dataclass
+class Observation:
+    """
+    Complete observation for a Player each round.
+
+    ┌─────────────────────────────────────────────────────────────┐
+    │                     OBSERVATION STRUCTURE                       │
+    │                                                                 │
+    │  Observation                                                    │
+    │  ├── local: LocalObservation  (player's own perception)        │
+    │  │   ├── data: PayloadType    (what player "sees")              │
+    │  │   └── timestamp: str       (when observed)                   │
+    │  ├── conductor_notify: Dict  (coordinator signals)              │
+    │  ├── round: int              (simulation round number)          │
+    │  └── extras: Dict            (extensibility)                    │
+    └─────────────────────────────────────────────────────────────┘
+
+    Attributes:
+        local: Player's own observation from environment
+        conductor_notify: Coordinator's notification/signals
+        round: Current simulation round (matches Simulator.current_round)
+        extras: Additional data for extensibility
+
+    Example:
+        Observation(
+            local=LocalObservation(data={"price": 100.0, "volume": 1000}),
+            conductor_notify={"phase": "trading", "time_remaining": 30},
+            round=5,
+        )
+    """
+
+    local: LocalObservation
+    conductor_notify: Dict[str, Any]
+    round: int
+    extras: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize to dictionary."""
         return {
-            "observation_id": self.observation_id,
-            "data": data_serialized,
-            "source_id": self.source_id,
-            "target_id": self.target_id,
-            "timestamp": self.timestamp,
-            "step": self.step,
-            "metadata": self.metadata,
+            "local": self.local.to_dict(),
+            "conductor_notify": self.conductor_notify,
+            "round": self.round,
+            "extras": self.extras,
         }
 
 
@@ -813,9 +770,9 @@ class PlayerState:
         Example:
             async def decide(self) -> Dict:
                 for i in range(3):
-                    self._state.step_tick_start()
+                    self.state.step_tick_start()
                     result = await self._think()
-                    self._state.step_tick_end()
+                    self.state.step_tick_end()
                 return result
         """
         self.step_clock_start = time.perf_counter()
@@ -1050,12 +1007,12 @@ class BasePlayer(ABC):
                 obs: Observation,
                 prev_result: Optional[StepResult] = None,
             ) -> None:
-                self._state.set_custom("price", obs.data["price"])
+                self.state.set_custom("price", obs.data["price"])
                 if prev_result:
-                    self._state.set_custom("last_action", prev_result.action)
+                    self.state.set_custom("last_action", prev_result.action)
 
             async def decide(self) -> Dict[str, Any]:
-                price = self._state.get_custom("price")
+                price = self.state.get_custom("price")
                 return {"action": "buy" if price < 100 else "hold"}
 
             async def act(self, decision: Dict[str, Any]) -> Action:
@@ -1070,9 +1027,9 @@ class BasePlayer(ABC):
             async def decide(self) -> Dict[str, Any]:
                 # Multiple internal reasoning steps within a turn
                 for iteration in range(3):
-                    self._state.step_tick_start()
+                    self.state.step_tick_start()
                     thought = await self._think(iteration)
-                    self._state.step_tick_end()
+                    self.state.step_tick_end()
 
                     if thought["confident"]:
                         break
@@ -1119,7 +1076,7 @@ class BasePlayer(ABC):
         # =====================================================================
         # PlayerState holds ALL internal state. This encapsulation ensures
         # that state access goes through well-defined interfaces.
-        self._state: PlayerState = PlayerState()
+        self.state: PlayerState = PlayerState()
 
         # =====================================================================
         # Capability Tags (for access control via Persona)
@@ -1236,7 +1193,7 @@ class BasePlayer(ABC):
                 else:
                     super().on_message(message)  # Default handling
         """
-        self._state._message_inbox.append(message)
+        self.state._message_inbox.append(message)
 
     def save_state(self) -> Dict[str, Any]:
         """
@@ -1266,8 +1223,8 @@ class BasePlayer(ABC):
                 return base
         """
         return {
-            "turn_count": self._state.turn_count,
-            "custom_state": self._state.custom_state.copy(),
+            "turn_count": self.state.turn_count,
+            "custom_state": self.state.custom_state.copy(),
         }
 
     def get_saveable_state(self) -> Dict[str, Any]:
@@ -1301,13 +1258,13 @@ class BasePlayer(ABC):
         """
         # Support both new 'turn_count' and legacy 'step_count' keys
         if "turn_count" in state:
-            self._state.turn_count = state["turn_count"]
+            self.state.turn_count = state["turn_count"]
         elif "step_count" in state:
-            self._state.turn_count = state["step_count"]
+            self.state.turn_count = state["step_count"]
         else:
             raise KeyError("State must contain 'turn_count' or 'step_count'")
 
-        self._state.custom_state = state["custom_state"].copy()
+        self.state.custom_state = state["custom_state"].copy()
 
     def get_capabilities(self) -> List[str]:
         """
@@ -1411,7 +1368,7 @@ class BasePlayer(ABC):
             async def initialize(self) -> None:
                 await super().initialize()
                 self._model = await self._load_model()
-                self._state.set_custom("model_loaded", True)
+                self.state.set_custom("model_loaded", True)
         """
         self._is_initialized = True
 
@@ -1487,7 +1444,7 @@ class BasePlayer(ABC):
         Implementation Guidelines:
             1. Extract relevant information from observation.data
             2. Optionally use prev_result for multi-step context
-            3. Update internal state via self._state.set_custom()
+            3. Update internal state via self.state.set_custom()
             4. DO NOT return anything (side-effect only)
             5. DO NOT make decisions here (that's decide()'s job)
 
@@ -1498,11 +1455,11 @@ class BasePlayer(ABC):
                 prev_result: Optional[StepResult] = None,
             ) -> None:
                 market_data = observation.data["market"]
-                self._state.set_custom("current_prices", market_data)
+                self.state.set_custom("current_prices", market_data)
 
                 # Use previous step result if available
                 if prev_result is not None:
-                    self._state.set_custom("last_action", prev_result.action)
+                    self.state.set_custom("last_action", prev_result.action)
         """
         raise NotImplementedError
 
@@ -1519,14 +1476,14 @@ class BasePlayer(ABC):
             This is NOT yet an Action - just the decision parameters.
 
         Implementation Guidelines:
-            1. Read state via self._state.get_custom()
+            1. Read state via self.state.get_custom()
             2. Apply decision logic (rules, ML model, optimization)
             3. Return decision parameters (dict, array, etc.)
             4. DO NOT create Action here (that's act()'s job)
 
         Example:
             async def decide(self) -> Dict[str, Any]:
-                prices = self._state.get_custom("current_prices")
+                prices = self.state.get_custom("current_prices")
 
                 # Simple momentum strategy
                 if prices["trend"] == "up":
@@ -1607,7 +1564,7 @@ class BasePlayer(ABC):
             abstract methods (perceive, decide, act) instead.
         """
         # Start step timing
-        self._state.step_tick_start()
+        self.state.step_tick_start()
 
         # Phase 1: Update internal state based on observation and prev result.
         await self.perceive(observation, prev_result)
@@ -1619,16 +1576,16 @@ class BasePlayer(ABC):
         action = await self.act(decision_payload)
 
         # Update internal state tracking
-        self._state.update_step(observation, action)
+        self.state.update_step(observation, action)
 
         # End step timing
-        self._state.step_tick_end()
+        self.state.step_tick_end()
 
         return StepResult(
             decision_payload=decision_payload,
             action=action,
-            tick_step_count=self._state.step_count,
-            tick_step_duration_ms=self._state.step_last_duration_ms,
+            tick_step_count=self.state.step_count,
+            tick_step_duration_ms=self.state.step_last_duration_ms,
         )
 
     async def turn(
@@ -1668,7 +1625,7 @@ class BasePlayer(ABC):
                 - tick_step_count: Number of steps executed
         """
         # Start turn timing
-        self._state.turn_tick_start()
+        self.state.turn_tick_start()
 
         step_results: List[StepResult] = []
         current_observation = observation
@@ -1686,17 +1643,17 @@ class BasePlayer(ABC):
             )
 
         # Update turn count
-        self._state.turn_count += 1
+        self.state.turn_count += 1
 
         # End turn timing
-        self._state.turn_tick_end()
+        self.state.turn_tick_end()
 
         return TurnResult(
             step_results=step_results,
             final_action=step_results[-1].action if step_results else None,
-            tick_turn_count=self._state.turn_count,
-            tick_turn_duration_ms=self._state.turn_last_duration_ms,
-            tick_turn_total_duration_ms=self._state.turn_total_duration_ms,
+            tick_turn_count=self.state.turn_count,
+            tick_turn_duration_ms=self.state.turn_last_duration_ms,
+            tick_turn_total_duration_ms=self.state.turn_total_duration_ms,
             tick_step_count=len(step_results),
         )
 
@@ -1747,8 +1704,8 @@ class BasePlayer(ABC):
                         self._apply_coordination(msg.payload)
                 # ... rest of decision logic
         """
-        messages = self._state._message_inbox.copy()
-        self._state._message_inbox.clear()
+        messages = self.state._message_inbox.copy()
+        self.state._message_inbox.clear()
         return messages
 
     # =========================================================================
@@ -1770,7 +1727,7 @@ class BasePlayer(ABC):
             Primarily for internal use and testing.
             Prefer save_state()/load_state() for persistence.
         """
-        return self._state
+        return self.state
 
     def in_group(self, tag: str) -> bool:
         """

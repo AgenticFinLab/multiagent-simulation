@@ -39,7 +39,7 @@ from masim.simulator.base import (
     SimulatorStatus,
     RoundPhase,
 )
-from masim.player.base import Action, Observation, PlayerConfig
+from masim.player.base import Action, LocalObservation, Observation, PlayerConfig
 from masim.conductor.base import ConductorConfig
 from masim.persona.general import PlayerPersona, ConductorPersona
 from masim.persona.base import PersonaConfig
@@ -362,38 +362,13 @@ class GeneralSimulator(BaseSimulator):
         operate_futures = {}
         for player_id, notif_dict in notifications.items():
             if player_id in self._player_persona_handles:
-                # Create Observation from notification and call persona.operate()
-                # All required keys must be present in notif_dict
-                if "data" not in notif_dict:
-                    raise KeyError(f"notif_dict for {player_id} must have 'data' key")
-                if "source_id" not in notif_dict:
-                    raise KeyError(
-                        f"notif_dict for {player_id} must have 'source_id' key"
-                    )
                 observation = Observation(
-                    data=notif_dict["data"],
-                    source_id=notif_dict["source_id"],
-                    observation_id=(
-                        notif_dict["observation_id"]
-                        if "observation_id" in notif_dict
-                        else None
-                    ),
-                    target_id=(
-                        notif_dict["target_id"]
-                        if "target_id" in notif_dict
-                        else player_id
-                    ),
-                    step=notif_dict["step"] if "step" in notif_dict else round_num,
-                    metadata=notif_dict["metadata"] if "metadata" in notif_dict else {},
+                    local=LocalObservation(data={}),
+                    conductor_notify=notif_dict,
+                    round=round_num,
                 )
-                # num_steps can be configured per-player in notif_dict
-                if "num_steps" not in notif_dict:
-                    raise KeyError(
-                        f"notif_dict for {player_id} must have 'num_steps' key"
-                    )
-                num_steps = notif_dict["num_steps"]
                 future = self._player_persona_handles[player_id].operate.remote(
-                    observation, num_steps
+                    observation, notif_dict["num_steps"]
                 )
                 operate_futures[player_id] = future
 
