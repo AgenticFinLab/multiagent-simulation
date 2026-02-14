@@ -44,12 +44,8 @@ Four abstract methods define the Conductor's behavior:
         Notify players of round state (Conductor → Players)
         Called BEFORE players act
 
-    collect_responses(responses) → None
-        Gather responses from Players (Players → Conductor)
-        Called AFTER players act
-
-    analyze() → Dict[str, Any]
-        Process the collected response_pool
+    analyze(responses) → Dict[str, Any]
+        Process the collected responses from Players
 
     coordinate(analysis_result) → CoordinationDecision
         Produce CoordinationDecision based on analysis
@@ -76,9 +72,8 @@ Round Flow:
 │   │
 │   └── ConductorPersona.cycle()
 │       └── Conductor.cycle()  [internal]
-│           ├── collect_responses()   ── Clear and process buffered responses
-│           ├── analyze()             ── Analyze response_pool and system state
-│           └── coordinate()       ── Produce CoordinationDecision
+│           ├── analyze(responses)   ── Analyze responses and system state
+│           └── coordinate()         ── Produce CoordinationDecision
 │           └── Returns: CycleResult
 │
 └── Phase 4: COMPLETE
@@ -510,26 +505,44 @@ class BaseConductor(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def collect_responses(self, responses: List[Action]) -> None:
+    async def analyze(self, responses: List[Action]) -> Dict[str, Any]:
         """
-        Collect responses from players (Players → Conductor).
-
-        This is the inbound data collection from Players.
-        "response_pool" emphasizes aggregated responses from multiple sources.
+        Analyze responses and system state.
 
         Args:
             responses: List of responses (Actions) collected from all Players
-        """
-        raise NotImplementedError
 
-    @abstractmethod
-    async def analyze(self) -> Dict[str, Any]:
-        """Analyze the collected response_pool and system state."""
+        Returns:
+            Analysis result dict for coordinate() to use
+        """
         raise NotImplementedError
 
     @abstractmethod
     async def coordinate(self, analysis_result: Dict[str, Any]) -> CoordinationDecision:
         """Generate a CoordinationDecision based on analysis."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def prepare_broadcast(self, cycle_result: "CycleResult") -> Dict[str, Any]:
+        """
+        Prepare the message to broadcast to Players after coordination.
+
+        This method allows Conductor to customize what information is sent
+        to Players after the coordination cycle completes. Override to
+        implement domain-specific broadcast content.
+
+        Example use cases:
+            - Send only decision parameters (default)
+            - Include market state summary
+            - Add player-specific information
+            - Filter sensitive coordination details
+
+        Args:
+            cycle_result: The complete CycleResult from cycle()
+
+        Returns:
+            Dict to be sent to each Player via receive_coordination()
+        """
         raise NotImplementedError
 
     # =========================================================================
@@ -545,12 +558,11 @@ class BaseConductor(ABC):
         - PlayerPersona: operate (calls Player.turn internally)
         - Player: turn (for loop calling step)
         - Player: step (perceive→decide→act)
-        - Conductor: cycle (collect→analyze→coordinate)  <-- THIS METHOD
+        - Conductor: cycle (analyze→coordinate)  <-- THIS METHOD
 
-        The cycle consists of three phases:
-        1. collect_responses(): Process responses collected from Players
-        2. analyze(): Examine system state and response_pool
-        3. coordinate(): Generate a CoordinationDecision
+        The cycle consists of two phases:
+        1. analyze(responses): Process responses and system state
+        2. coordinate(): Generate a CoordinationDecision
 
         Note: notify() is called BEFORE the cycle, at round start.
 
@@ -565,15 +577,14 @@ class BaseConductor(ABC):
         # Start cycle timing
         self.state.cycle_tick_start()
 
-        # Phase 1: Collect responses (clear and process buffered responses)
+        # Get responses from pool
         responses = self.state.clear_response_pool()
         response_count = len(responses)
-        await self.collect_responses(responses)
 
-        # Phase 2: Analyze response_pool and system state
-        analysis_result = await self.analyze()
+        # Phase 1: Analyze responses and system state
+        analysis_result = await self.analyze(responses)
 
-        # Phase 3: Generate coordination decision
+        # Phase 2: Generate coordination decision
         decision = await self.coordinate(analysis_result)
 
         # Validate and record
@@ -617,6 +628,33 @@ class BaseConductor(ABC):
     async def on_response_received_async(self, response: Action) -> None:
         """Async callback for response receipt."""
         self.state.add_to_response_pool(response)
+
+    def ready_responses(self, received_count: int, total_count: int) -> bool:
+        """
+        Decide whether enough responses received to proceed.
+
+        This method gives the Conductor full control over when to stop waiting
+        for Player responses and begin coordination. Override to implement
+        custom policies.
+
+        Framework calls this after each Player response arrives.
+        When this returns True, collection stops and coordination begins.
+
+        Example policies (override in subclass):
+            - Wait for all: return received_count >= total_count (default)
+            - Quorum: return received_count >= 3
+            - Majority: return received_count > total_count // 2
+            - First responder: return received_count >= 1
+            - Timeout-based: track start time, return True after N seconds
+
+        Args:
+            received_count: Number of responses received so far
+            total_count: Total number of Players expected
+
+        Returns:
+            True if ready to proceed, False to keep waiting
+        """
+        return received_count >= total_count
 
     # =========================================================================
     # State Access (Globally Visible)

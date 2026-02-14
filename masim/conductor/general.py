@@ -9,8 +9,7 @@ Use GeneralConductor as:
 
 Conductor Contract:
 - notify(): Send round state to Players (Conductor → Players)
-- collect_responses(): Gather responses from Players (Players → Conductor)
-- analyze(): Process the collected response_pool
+- analyze(responses): Process responses from Players
 - coordinate(): Produce CoordinationDecision
 
 For abstract definitions and documentation, see base.py.
@@ -23,6 +22,7 @@ from masim.conductor.base import (
     BaseConductor,
     ConductorConfig,
     CoordinationDecision,
+    CycleResult,
     DecisionScope,
 )
 
@@ -37,7 +37,7 @@ class GeneralConductor(BaseConductor):
     Ready-to-use Conductor implementation with sensible defaults.
 
     GeneralConductor provides a minimal but complete implementation of the
-    notify → collect_responses → analyze → coordinate cycle. It can be:
+    notify → analyze → coordinate cycle. It can be:
 
     1. Used directly for testing and prototyping
     2. Extended for domain-specific coordination
@@ -45,8 +45,7 @@ class GeneralConductor(BaseConductor):
     Default Behavior:
     -----------------
     - notify(): Broadcasts same data to all players
-    - collect_responses(): Stores responses in custom_state["response_pool"]
-    - analyze(): Counts responses and computes basic statistics
+    - analyze(): Receives responses directly, computes basic statistics
     - coordinate(): Returns a global "continue" decision
 
     Extension Guide:
@@ -54,12 +53,11 @@ class GeneralConductor(BaseConductor):
     Override any or all of the four methods:
 
         class MyMarketConductor(GeneralConductor):
-            async def analyze(self) -> Dict[str, Any]:
-                response_pool = self.state.custom_state["response_pool"]
+            async def analyze(self, responses: List[Action]) -> Dict[str, Any]:
                 # Custom analysis logic
                 buy_volume = sum(a.payload["qty"]
-                                 for a in response_pool if a.action_type == "buy")
-                return {"buy_volume": buy_volume, "response_count": len(response_pool)}
+                                 for a in responses if a.action_type == "buy")
+                return {"buy_volume": buy_volume, "response_count": len(responses)}
 
             async def coordinate(self, analysis: Dict) -> CoordinationDecision:
                 if analysis["buy_volume"] > 1000:
@@ -117,44 +115,30 @@ class GeneralConductor(BaseConductor):
                 "data": data,
                 "source_id": self.identity,
                 "target_id": player_id,
-                "step": round_num,
+                "round": round_num,
                 "num_steps": 1,
                 "metadata": {},
             }
         return notifications
 
-    async def collect_responses(self, responses: List[Action]) -> None:
+    async def analyze(self, responses: List[Action]) -> Dict[str, Any]:
         """
-        Collect responses from players (Players → Conductor).
-
-        Default implementation stores responses for analysis.
-
-        Args:
-            responses: List of responses (Actions) collected from Players
-        """
-        # Store response_pool for analysis
-        self.state.custom_state["response_pool"] = responses
-
-    async def analyze(self) -> Dict[str, Any]:
-        """
-        Analyze the collected response_pool and system state.
+        Analyze responses and system state.
 
         Default implementation computes basic statistics:
-        - response_count: Number of responses in the pool
+        - response_count: Number of responses received
         - action_types: Distribution of action types
         - player_count: Number of registered players
+
+        Args:
+            responses: List of responses (Actions) from Players
 
         Returns:
             Analysis result dictionary
         """
-        if "response_pool" not in self.state.custom_state:
-            response_pool = []
-        else:
-            response_pool = self.state.custom_state["response_pool"]
-
         # Count action types
         type_counts: Dict[str, int] = {}
-        for action in response_pool:
+        for action in responses:
             action_type = action.action_type
             if action_type in type_counts:
                 type_counts[action_type] += 1
@@ -162,7 +146,7 @@ class GeneralConductor(BaseConductor):
                 type_counts[action_type] = 1
 
         return {
-            "response_count": len(response_pool),
+            "response_count": len(responses),
             "action_types": type_counts,
             "player_count": len(self.state.player_registry),
         }
@@ -189,6 +173,21 @@ class GeneralConductor(BaseConductor):
             },
             source_id=self.identity,
         )
+
+    def prepare_broadcast(self, cycle_result: CycleResult) -> Dict[str, Any]:
+        """
+        Prepare the broadcast message from cycle result.
+
+        Default implementation sends the decision as a dict.
+        Override to customize what Players receive.
+
+        Args:
+            cycle_result: The complete CycleResult from cycle()
+
+        Returns:
+            Dict to be sent to each Player
+        """
+        return cycle_result.decision.to_dict() if cycle_result.decision else {}
 
 
 # =============================================================================
