@@ -25,6 +25,8 @@ Key Design Principles:
 import time
 from typing import Any, Dict, List, Optional, Type, TYPE_CHECKING
 
+import ray
+
 from masim.persona.base import BasePersona, PersonaConfig
 
 if TYPE_CHECKING:
@@ -32,7 +34,6 @@ if TYPE_CHECKING:
         BasePlayer,
         PlayerConfig,
         Action,
-        Observation,
         StepResult,
         TurnResult,
     )
@@ -160,7 +161,8 @@ class PlayerPersona(BasePersona):
 
     async def operate(
         self,
-        observation: "Observation",
+        conductor_notify: Dict[str, Any],
+        round_num: int,
         num_steps: int = 1,
     ) -> "TurnResult":
         """
@@ -173,10 +175,11 @@ class PlayerPersona(BasePersona):
         - Simulator: round (orchestrates all Personas)
         - PlayerPersona: operate (this method)  <-- Simulator calls this
         - Player: turn (for loop of steps)      <-- Hidden from Simulator
-        - Player: step (perceive→decide→act)   <-- Hidden from Simulator
+        - Player: step (perceive-decide-act)    <-- Hidden from Simulator
 
         Args:
-            observation: The current observation from environment
+            conductor_notify: Notification dict from Conductor
+            round_num: Current simulation round number
             num_steps: Number of steps to execute in this turn (default: 1)
 
         Returns:
@@ -196,7 +199,8 @@ class PlayerPersona(BasePersona):
             await self._observability.start_timer("operate_duration")
 
         # Delegate to internal Player.turn() (HIDDEN from Simulator)
-        turn_result = await self._player.turn(observation, num_steps)
+        # Player handles observation preparation via prepare_observation()
+        turn_result = await self._player.turn(conductor_notify, round_num, num_steps)
 
         # Log completion
         if self._observability:
@@ -205,14 +209,8 @@ class PlayerPersona(BasePersona):
                 "operate_completed",
                 {
                     "player_id": self.identity,
-                    "turn": turn_result.tick_turn_count,
-                    "steps_executed": turn_result.tick_step_count,
                     "duration_ms": duration,
-                    "final_action_type": (
-                        turn_result.final_action.action_type
-                        if turn_result.final_action
-                        else None
-                    ),
+                    **turn_result.to_dict(),
                 },
             )
 
@@ -300,7 +298,7 @@ class ConductorPersona(BasePersona):
         notify() → Players act → receive_responses() → cycle()
         - notify(): Conductor → Players (outbound)
         - receive_responses(): Players → Conductor (inbound, builds response_pool)
-        - cycle(): collect_responses → analyze → coordinate
+        - cycle(): analyze(responses) → coordinate
     """
 
     def __init__(
@@ -468,6 +466,64 @@ class ConductorPersona(BasePersona):
                     },
                 )
 
+    def collect_responses(
+        self,
+        futures: Dict[str, Any],
+        ref_to_player: Dict[Any, str],
+    ) -> Dict[str, Any]:
+        """
+        Collect player responses via streaming and decide when to proceed.
+
+        This method gives Conductor full control over response collection:
+        - Uses ray.wait() to receive results as they arrive
+        - Streams each result to Conductor via receive_response()
+        - Asks Conductor ready_responses() after each response
+        - Stops when Conductor decides to proceed
+
+        Args:
+            futures: Dict mapping player_id -> Ray ObjectRef
+            ref_to_player: Dict mapping ObjectRef -> player_id (reverse lookup)
+
+        Returns:
+            Dict containing:
+                - turn_results: Collected player results (only those received)
+                - pending_count: Number of players still pending
+        """
+        total_count = len(futures)
+        pending_refs = list(futures.values())
+        turn_results = {}
+        received_count = 0
+
+        while pending_refs:
+            # Wait for ANY result (with small timeout for responsiveness)
+            ready_refs, pending_refs = ray.wait(
+                pending_refs, num_returns=1, timeout=0.1
+            )
+
+            for ref in ready_refs:
+                turn_result = ray.get(ref)
+                player_id = ref_to_player[ref]
+
+                # Store result directly
+                turn_results[player_id] = turn_result
+
+                # Stream action to Conductor
+                if turn_result.final_action and self._conductor:
+                    self._conductor.on_response_received(turn_result.final_action)
+
+                received_count += 1
+
+            # Ask Conductor: ready to proceed?
+            if self._conductor and self._conductor.ready_responses(
+                received_count, total_count
+            ):
+                break
+
+        return {
+            "turn_results": turn_results,
+            "pending_count": len(pending_refs),
+        }
+
     # =========================================================================
     #                    MAIN INTERFACE (What Simulator Calls)
     # =========================================================================
@@ -512,10 +568,8 @@ class ConductorPersona(BasePersona):
                 "cycle_completed",
                 {
                     "conductor_id": self.identity,
-                    "cycle": cycle_result.tick_cycle_count,
-                    "decision_type": cycle_result.decision.decision_type,
-                    "response_count": cycle_result.response_count,
                     "duration_ms": duration,
+                    **cycle_result.to_dict(),
                 },
             )
 
@@ -528,6 +582,23 @@ class ConductorPersona(BasePersona):
             )
 
         return cycle_result
+
+    def prepare_broadcast(self, cycle_result: "CycleResult") -> Dict[str, Any]:
+        """
+        Prepare the broadcast message from cycle result.
+
+        Delegates to internal Conductor.prepare_broadcast() to allow
+        domain-specific customization of what Players receive.
+
+        Args:
+            cycle_result: The CycleResult from cycle()
+
+        Returns:
+            Dict to be sent to each Player via receive_coordination()
+        """
+        if not self._conductor:
+            return {}
+        return self._conductor.prepare_broadcast(cycle_result)
 
     # =========================================================================
     #                    STATE ACCESS

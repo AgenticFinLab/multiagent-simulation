@@ -93,7 +93,7 @@ class GeneralPlayer(BasePlayer):
 
         # Store previous action if available
         if prev_result and prev_result.action:
-            self.state.set_custom("prev_action", prev_result.action.to_dict())
+            self.state.set_custom("prev_action", prev_result.action)
 
     async def decide(self) -> PayloadType:
         """

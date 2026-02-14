@@ -146,12 +146,14 @@ class RoundPhase(Enum):
     1. NOTIFICATION: Conductor notifies all Players of round state
     2. PLAYER_DECISION: All PlayerPersonas execute operate()
     3. COORDINATION: ConductorPersona executes cycle()
-    4. COMPLETE: Round finishes, results recorded
+    4. BROADCAST: Broadcast coordination result to Players
+    5. COMPLETE: Round finishes, results recorded
     """
 
     NOTIFICATION = auto()
     PLAYER_DECISION = auto()
     COORDINATION = auto()
+    BROADCAST = auto()
     COMPLETE = auto()
 
 
@@ -178,7 +180,7 @@ class ExecutionClock:
     """
 
     # Number of completed executions.
-    count: int = 0
+    count_executions: int = 0
 
     # Performance counter timestamp when current execution started.
     start_time: Optional[float] = None
@@ -199,17 +201,19 @@ class ExecutionClock:
             elapsed = time.perf_counter() - self.start_time
             self.last_duration_ms = elapsed * 1000.0
             self.total_duration_ms += self.last_duration_ms
-            self.count += 1
+            self.count_executions += 1
             self.start_time = None
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialize clock state for reporting/logging."""
         return {
-            "count": self.count,
+            "count_executions": self.count_executions,
             "last_duration_ms": round(self.last_duration_ms, 3),
             "total_duration_ms": round(self.total_duration_ms, 3),
             "avg_duration_ms": (
-                round(self.total_duration_ms / self.count, 3) if self.count > 0 else 0.0
+                round(self.total_duration_ms / self.count_executions, 3)
+                if self.count_executions > 0
+                else 0.0
             ),
         }
 

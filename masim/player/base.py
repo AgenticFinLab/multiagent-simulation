@@ -448,10 +448,12 @@ class LocalObservation:
     Attributes:
         data: Actual observation data (market prices, sensor readings, etc.)
         timestamp: When this observation was captured (ISO-8601 format)
+        extras: Additional data for extensibility
     """
 
     data: PayloadType
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+    extras: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         """Validate observation data."""
@@ -468,7 +470,11 @@ class LocalObservation:
         data_serialized = self.data
         if isinstance(self.data, np.ndarray):
             data_serialized = self.data.tolist()
-        return {"data": data_serialized, "timestamp": self.timestamp}
+        return {
+            "data": data_serialized,
+            "timestamp": self.timestamp,
+            "extras": self.extras,
+        }
 
 
 @dataclass
@@ -590,6 +596,17 @@ class TurnResult:
 
     # Number of steps executed in this turn
     tick_step_count: int = 0
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        return {
+            "step_results": [sr.to_dict() for sr in self.step_results],
+            "final_action": self.final_action.to_dict() if self.final_action else None,
+            "tick_turn_count": self.tick_turn_count,
+            "tick_turn_duration_ms": round(self.tick_turn_duration_ms, 3),
+            "tick_turn_total_duration_ms": round(self.tick_turn_total_duration_ms, 3),
+            "tick_step_count": self.tick_step_count,
+        }
 
 
 # =============================================================================
@@ -1588,9 +1605,34 @@ class BasePlayer(ABC):
             tick_step_duration_ms=self.state.step_last_duration_ms,
         )
 
+    def prepare_observation(
+        self,
+        conductor_notify: Dict[str, Any],
+        round_num: int,
+    ) -> Observation:
+        """
+        Prepare the Observation for this turn.
+
+        This method constructs the Observation object from raw inputs.
+        Override to customize how the Player interprets incoming data.
+
+        Args:
+            conductor_notify: Notification dict from Conductor
+            round_num: Current simulation round number
+
+        Returns:
+            Observation with local perception and conductor signals
+        """
+        return Observation(
+            local=LocalObservation(data={}),
+            conductor_notify=conductor_notify,
+            round=round_num,
+        )
+
     async def turn(
         self,
-        observation: Observation,
+        conductor_notify: Dict[str, Any],
+        round_num: int,
         num_steps: int = 1,
     ) -> "TurnResult":
         """
@@ -1599,21 +1641,21 @@ class BasePlayer(ABC):
         In the hierarchical execution model:
         - Simulator: round (orchestrates all entities)
         - Player: turn (contains multiple steps)  <-- THIS METHOD
-        - Player: step (one perceive→decide→act cycle)
-        - Conductor: cycle (receive→analyze→coordinate)
+        - Player: step (one perceive-decide-act cycle)
+        - Conductor: cycle (receive-analyze-coordinate)
 
-        This is the main entry point called by the Simulator each round.
-        It executes multiple steps in sequence, passing each step's result
-        to the next step.
+        This is the main entry point called by PlayerPersona each round.
+        It first prepares the observation, then executes multiple steps
+        in sequence.
 
         Example:
-            # Execute 3 steps in one turn
-            result = await player.turn(observation, num_steps=3)
+            result = await player.turn(conductor_notify, round_num, num_steps=3)
             for step_result in result.step_results:
                 logger.debug("Step %d: %s", step_result.tick_step_count, step_result.action)
 
         Args:
-            observation: The initial observation from environment
+            conductor_notify: Notification dict from Conductor
+            round_num: Current simulation round number
             num_steps: Number of steps to execute in this turn (default: 1)
 
         Returns:
@@ -1624,6 +1666,9 @@ class BasePlayer(ABC):
                 - tick_turn_duration_ms: Total duration of this turn
                 - tick_step_count: Number of steps executed
         """
+        # Prepare observation (Player's responsibility)
+        observation = self.prepare_observation(conductor_notify, round_num)
+
         # Start turn timing
         self.state.turn_tick_start()
 

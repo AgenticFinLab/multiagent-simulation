@@ -29,7 +29,7 @@ Usage:
 
 import logging
 import importlib
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import ray
 
@@ -39,7 +39,7 @@ from masim.simulator.base import (
     SimulatorStatus,
     RoundPhase,
 )
-from masim.player.base import Action, LocalObservation, Observation, PlayerConfig
+from masim.player.base import Action, PlayerConfig
 from masim.conductor.base import ConductorConfig
 from masim.persona.general import PlayerPersona, ConductorPersona
 from masim.persona.base import PersonaConfig
@@ -315,141 +315,201 @@ class GeneralSimulator(BaseSimulator):
         self.status = SimulatorStatus.READY
         logger.info("    Setup complete")
 
+    def phase_notification(self, round_num: int) -> Dict[str, Dict[str, Any]]:
+        """
+        Phase 1: Conductor notifies Players of round state.
+
+        Args:
+            round_num: Current round number
+
+        Returns:
+            Notifications dict mapping player_id -> notification dict
+        """
+        self.current_phase = RoundPhase.NOTIFICATION
+        if self._conductor_persona_handle is None:
+            raise RuntimeError("Conductor is required for player notification")
+
+        notifications = ray.get(
+            self._conductor_persona_handle.notify.remote(
+                round_num, list(self._player_persona_handles.keys())
+            )
+        )
+        return notifications
+
+    def phase_player_decision(
+        self, round_num: int, notifications: Dict[str, Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """
+        Phase 2: Submit PlayerPersona operate() calls in parallel.
+
+        This phase only SUBMITS tasks - collection happens in phase_coordination
+        to enable streaming to Conductor.
+
+        Args:
+            round_num: Current round number
+            notifications: Notifications from conductor
+
+        Returns:
+            Dict containing:
+                - futures: Dict mapping player_id -> Ray ObjectRef
+                - ref_to_player: Dict mapping ObjectRef -> player_id (reverse lookup)
+        """
+        self.current_phase = RoundPhase.PLAYER_DECISION
+
+        # =================================================================
+        # PARALLEL EXECUTION via Ray - Submit Phase
+        # =================================================================
+        # .remote() returns immediately - all players START executing in parallel
+        operate_futures = {}
+        ref_to_player = {}
+        for player_id, notif_dict in notifications.items():
+            if player_id in self._player_persona_handles:
+                future = self._player_persona_handles[player_id].operate.remote(
+                    notif_dict, round_num, notif_dict["num_steps"]
+                )
+                operate_futures[player_id] = future
+                ref_to_player[future] = player_id
+
+        return {
+            "futures": operate_futures,
+            "ref_to_player": ref_to_player,
+        }
+
+    def phase_coordination(
+        self, player_decision_result: Dict[str, Any]
+    ) -> Tuple[Dict[str, Any], Any]:
+        """
+        Phase 3: Delegate response collection and coordination to ConductorPersona.
+
+        ConductorPersona owns the streaming collection logic:
+        - Uses ray.wait() to collect results as they arrive
+        - Streams each result to internal Conductor
+        - Conductor decides when to proceed via ready_responses()
+
+        This enables Conductor-controlled policies:
+        - Quorum-based processing (proceed after K responses)
+        - Timeout-based processing (proceed after N seconds)
+        - First-responder processing (proceed after 1 response)
+
+        Args:
+            player_decision_result: Output from phase_player_decision containing futures
+
+        Returns:
+            Tuple of (collection_result, cycle_result):
+                - collection_result: Dict with turn_results, pending_count
+                - cycle_result: CycleResult from Conductor.cycle()
+        """
+        if self._conductor_persona_handle is None:
+            return {"turn_results": {}, "pending_count": 0}, None
+
+        self.current_phase = RoundPhase.COORDINATION
+
+        futures = player_decision_result["futures"]
+        ref_to_player = player_decision_result["ref_to_player"]
+
+        # Delegate streaming collection to ConductorPersona
+        # Conductor controls when to proceed via ready_responses()
+        collection_result: Dict[str, Any] = ray.get(
+            self._conductor_persona_handle.collect_responses.remote(
+                futures, ref_to_player
+            )
+        )
+
+        # Conductor executes coordination cycle
+        cycle_result = ray.get(self._conductor_persona_handle.cycle.remote())
+
+        return collection_result, cycle_result
+
+    def phase_broadcast(
+        self,
+        collection_result: Dict[str, Any],
+        cycle_result: Any,
+    ) -> None:
+        """
+        Phase 4: Broadcast coordination result to Players.
+
+        Uses Conductor.prepare_broadcast() to customize what message
+        is sent to each Player. This allows domain-specific broadcast
+        content without changing the broadcast mechanism.
+
+        Args:
+            collection_result: Dict with turn_results from phase_coordination
+            cycle_result: CycleResult from Conductor.cycle()
+        """
+        if self._conductor_persona_handle is None or cycle_result is None:
+            return
+
+        self.current_phase = RoundPhase.BROADCAST
+
+        # Get customized broadcast message from Conductor
+        broadcast_msg = ray.get(
+            self._conductor_persona_handle.prepare_broadcast.remote(cycle_result)
+        )
+
+        # Broadcast to PlayerPersonas (only those that responded)
+        coord_futures = []
+        for player_id in collection_result["turn_results"].keys():
+            if player_id in self._player_persona_handles:
+                coord_futures.append(
+                    self._player_persona_handles[player_id].receive_coordination.remote(
+                        broadcast_msg
+                    )
+                )
+        if coord_futures:
+            ray.get(coord_futures)
+
     async def run_round(self, round_num: int) -> Dict[str, Any]:
         """
         Execute one simulation round.
 
         A round is the highest-level execution unit in the hierarchy:
-        - Round (Simulator) → Operate (PlayerPersona) → Cycle (ConductorPersona)
+        - Round (Simulator) -> Operate (PlayerPersona) -> Cycle (ConductorPersona)
 
         The Simulator orchestrates the flow but does NOT generate observations.
         Observations come from the Conductor (domain coordinator).
+
+        Streaming Response Collection:
+        - Players execute in parallel
+        - Results stream to Conductor as they arrive
+        - Conductor decides when to proceed (quorum, timeout, etc.)
 
         Args:
             round_num: Current round number (1-indexed)
 
         Returns:
             Round results containing:
-            - turn_results: Dict of player_id → TurnResult summary
+            - turn_results: Dict of player_id -> TurnResult summary
             - coordination: Conductor's coordination decision (if any)
-            - environment_result: Result of action execution
+            - pending_count: Players still pending when Conductor proceeded
             - round_clock: Timing metrics for this round
         """
-        # Start round timing
         self.round_clock.tick_start()
-
         self.current_round = round_num
-        round_results = {
-            "round": round_num,
-            "turn_results": {},
-            "coordination": None,
-        }
 
-        # Phase 1: Conductor notifies Players of round state
-        self.current_phase = RoundPhase.NOTIFICATION
-        if self._conductor_persona_handle is None:
-            raise RuntimeError("Conductor is required for player notification")
+        # Phase 1: Conductor notifies Players
+        notifications = self.phase_notification(round_num)
 
-        # Conductor notifies all registered players with round state
-        notifications = ray.get(
-            self._conductor_persona_handle.notify.remote(
-                round_num, list(self._player_persona_handles.keys())
-            )
+        # Phase 2: Submit player operate() calls (parallel, non-blocking)
+        player_decision_result = self.phase_player_decision(round_num, notifications)
+
+        # Phase 3: Stream results to Conductor, Conductor decides when to proceed
+        collection_result, cycle_result = self.phase_coordination(
+            player_decision_result
         )
 
-        # Phase 2: PlayerPersonas execute operate()
-        self.current_phase = RoundPhase.PLAYER_DECISION
-        operate_futures = {}
-        for player_id, notif_dict in notifications.items():
-            if player_id in self._player_persona_handles:
-                observation = Observation(
-                    local=LocalObservation(data={}),
-                    conductor_notify=notif_dict,
-                    round=round_num,
-                )
-                future = self._player_persona_handles[player_id].operate.remote(
-                    observation, notif_dict["num_steps"]
-                )
-                operate_futures[player_id] = future
+        # Phase 4: Broadcast coordination result to Players
+        self.phase_broadcast(collection_result, cycle_result)
 
-        # Collect turn results
-        turn_results = {}
-        for player_id, future in operate_futures.items():
-            turn_result = ray.get(future)
-            # Convert TurnResult to dict for serialization
-            turn_results[player_id] = {
-                "turn_count": turn_result.tick_turn_count,
-                "step_count": turn_result.tick_step_count,
-                "duration_ms": turn_result.tick_turn_duration_ms,
-                "final_action": (
-                    turn_result.final_action.to_dict()
-                    if turn_result.final_action
-                    else None
-                ),
-                "step_results": [
-                    {
-                        "decision_payload": sr.decision_payload,
-                        "action": sr.action.to_dict(),
-                        "step_count": sr.tick_step_count,
-                    }
-                    for sr in turn_result.step_results
-                ],
-            }
-        round_results["turn_results"] = turn_results
-
-        # Phase 3: ConductorPersona collects response_pool and executes cycle()
-        if self._conductor_persona_handle:
-            self.current_phase = RoundPhase.COORDINATION
-
-            # Collect final actions from all turns and send to Conductor (response_pool)
-            actions = []
-            for tr in turn_results.values():
-                if tr["final_action"]:
-                    action_dict = tr["final_action"]
-                    # Validate required keys
-                    if "action_type" not in action_dict:
-                        raise KeyError("action_dict must have 'action_type' key")
-                    if "payload" not in action_dict:
-                        raise KeyError("action_dict must have 'payload' key")
-                    if "source_id" not in action_dict:
-                        raise KeyError("action_dict must have 'source_id' key")
-                    action = Action(
-                        action_type=action_dict["action_type"],
-                        payload=action_dict["payload"],
-                        source_id=action_dict["source_id"],
-                        action_id=(
-                            action_dict["action_id"]
-                            if "action_id" in action_dict
-                            else None
-                        ),
-                        metadata=(
-                            action_dict["metadata"] if "metadata" in action_dict else {}
-                        ),
-                    )
-                    actions.append(action)
-
-            ray.get(self._conductor_persona_handle.receive_responses.remote(actions))
-
-            # Conductor executes coordination cycle
-            cycle_result = ray.get(self._conductor_persona_handle.cycle.remote())
-            round_results["coordination"] = cycle_result.to_dict()
-
-            # Broadcast coordination decision to PlayerPersonas
-            # Note: We send just the decision dict, not the full CycleResult
-            coord_futures = []
-            for handle in self._player_persona_handles.values():
-                coord_futures.append(
-                    handle.receive_coordination.remote(
-                        round_results["coordination"]["decision"]
-                    )
-                )
-            ray.get(coord_futures)
-
-        # End round timing and record
+        # Finalize round
         self.round_clock.tick_end()
-        round_results["round_clock"] = self.round_clock.to_dict()
-
         self.current_phase = RoundPhase.COMPLETE
+
+        round_results = {
+            **collection_result,
+            "cycle_result": cycle_result,
+            "round": round_num,
+            "round_clock": self.round_clock,
+        }
         self.history.append(round_results)
 
         return round_results

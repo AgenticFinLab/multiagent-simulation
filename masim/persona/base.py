@@ -63,9 +63,8 @@ ConductorPersona (called by Simulator):
 └── cycle()                                 # Process response_pool
     └── Conductor.cycle()  [internal]
         │
-        ├── collect_responses()   ── Clear and process buffered responses
-        ├── analyze()             ── Analyze response_pool and system state
-        └── coordinate()       ── Produce CoordinationDecision
+        ├── analyze(responses)   ── Analyze responses and system state
+        └── coordinate()         ── Produce CoordinationDecision
         └── Returns: CycleResult
 
 ================================================================================

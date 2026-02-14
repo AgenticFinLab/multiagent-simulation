@@ -8,8 +8,7 @@ A simple market that:
 
 Conductor Contract:
 - notify(): Send round state to Players (Conductor → Players)
-- collect_responses(): Gather responses from Players (Players → Conductor)
-- analyze(): Process the collected response_pool
+- analyze(responses): Process responses from Players
 - coordinate(): Produce CoordinationDecision
 """
 
@@ -19,6 +18,7 @@ from typing import Any, Dict, List
 from masim.conductor.base import (
     BaseConductor,
     CoordinationDecision,
+    CycleResult,
     DecisionScope,
 )
 from masim.player.base import Action
@@ -32,9 +32,8 @@ class SimpleMarket(BaseConductor):
 
     Each round:
     1. notify(): Broadcast current avg_price to investors
-    2. collect_responses(): Collect price submissions from investors
-    3. analyze(): Calculate new average price
-    4. coordinate(): Store new average for next round
+    2. analyze(responses): Calculate new average price from submissions
+    3. coordinate(): Store new average for next round
     """
 
     def notify(
@@ -53,8 +52,8 @@ class SimpleMarket(BaseConductor):
             Dict of player_id -> notification_dict
         """
         # Get current avg_price from state, or use initial price
-        if "avg_price" in self._state.custom_state:
-            avg_price = self._state.custom_state["avg_price"]
+        if "avg_price" in self.state.custom_state:
+            avg_price = self.state.custom_state["avg_price"]
         else:
             avg_price = self.config.extras["initial_price"]
 
@@ -64,14 +63,14 @@ class SimpleMarket(BaseConductor):
                 "data": {"avg_price": avg_price},
                 "source_id": self.identity,
                 "target_id": player_id,
-                "step": round_num,
+                "round": round_num,
                 "num_steps": 1,
                 "metadata": {},
             }
         return notifications
 
-    async def collect_responses(self, responses: List[Action]) -> None:
-        """Collect price submissions from investors (response_pool)."""
+    async def analyze(self, responses: List[Action]) -> Dict[str, Any]:
+        """Analyze responses: calculate average price from submissions."""
         prices = []
         for response in responses:
             if response.action_type == "submit_price":
@@ -80,17 +79,6 @@ class SimpleMarket(BaseConductor):
                 logger.debug(
                     "        Received from %s: %.2f", response.source_id, price
                 )
-
-        # Store response_pool data for analysis
-        self._state.custom_state["prices"] = prices
-        self._state.custom_state["response_count"] = len(responses)
-
-    async def analyze(self) -> Dict[str, Any]:
-        """Analyze the response_pool: calculate average price."""
-        if "prices" not in self._state.custom_state:
-            prices = []
-        else:
-            prices = self._state.custom_state["prices"]
 
         if prices:
             avg_price = sum(prices) / len(prices)
@@ -110,7 +98,7 @@ class SimpleMarket(BaseConductor):
         avg_price = analysis_result["avg_price"]
 
         # Store avg_price for next round's observations
-        self._state.custom_state["avg_price"] = avg_price
+        self.state.custom_state["avg_price"] = avg_price
 
         return CoordinationDecision(
             decision_type="price_broadcast",
@@ -120,7 +108,17 @@ class SimpleMarket(BaseConductor):
             },
             source_id=self.identity,
             metadata={
-                "cycle": self._state.cycle_count + 1,
+                "cycle": self.state.cycle_count + 1,
                 "num_prices": analysis_result["num_prices"],
             },
         )
+
+    def prepare_broadcast(self, cycle_result: CycleResult) -> Dict[str, Any]:
+        """
+        Prepare broadcast message for investors.
+
+        Send avg_price in a simple dict for investors to process.
+        """
+        if cycle_result.decision:
+            return {"avg_price": cycle_result.decision.parameters.get("avg_price")}
+        return {}
