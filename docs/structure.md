@@ -36,28 +36,104 @@ Every module follows the **base.py / general.py** convention:
 
 ## Three-Layer Architecture
 
+MASim employs a strict three-layer separation to isolate domain logic from infrastructure concerns:
+
 ```
-┌───────────────────────────────────────────────────────┐
-│  Player / Conductor  (What)                           │
-│  Pure domain logic — perceive → decide → act          │
-│  No infrastructure code whatsoever                    │
-└──────────────────────┬────────────────────────────────┘
-                       │  entity.persona.xxx()
-┌──────────────────────▼────────────────────────────────┐
-│  Persona  (When)                                      │
-│  Infrastructure coordination facade                   │
-│  Proxy aggregation, lifecycle hooks                   │
-└──────────────────────┬────────────────────────────────┘
-                       │  proxy.xxx()
-┌──────────────────────▼────────────────────────────────┐
-│  Proxy  (How)                                         │
-│  Communication, Storage, Resource, Observability      │
-└───────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────┐
+│  Layer 1: Player / Conductor  (WHAT)                               │
+│  Pure domain logic — perceive → decide → act                       │
+│  ZERO infrastructure knowledge, ZERO proxy references              │
+└───────────────────────┬───────────────────────────────────────────────┘
+                        │  self._persona.xxx()
+┌───────────────────────▼───────────────────────────────────────────────┐
+│  Layer 2: Persona  (WHEN)                                          │
+│  Infrastructure coordination facade                                │
+│  - Proxy aggregation (owns all 4 proxy types)                      │
+│  - Lifecycle management (init/shutdown)                            │
+│  - Timing policies (auto-checkpoint, retry, timeout)               │
+│  - Ray Actor interface (Simulator only sees Persona)               │
+└───────────────────────┬───────────────────────────────────────────────┘
+                        │  self._storage.checkpoint(), self._communication.send(), ...
+┌───────────────────────▼───────────────────────────────────────────────┐
+│  Layer 3: Proxy  (HOW)                                             │
+│  Single-responsibility infrastructure primitives                   │
+│  - CommunicationProxy: send, broadcast, subscribe                  │
+│  - StorageProxy: checkpoint, restore, list_checkpoints             │
+│  - ResourceProxy: fetch_resource, invoke_tool (MCP)                │
+│  - ObservabilityProxy: log_event, record_metric, get_metrics       │
+└───────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Player/Conductor** contain zero infrastructure knowledge. They access infrastructure solely through their attached Persona (`self._persona`).
-- **Persona** is the facade that aggregates all four proxy types and exposes convenience methods (`fetch_resource`, `log_event`, etc.).
-- **Proxy** provides single-responsibility infrastructure primitives, each with its own configuration and graceful degradation.
+### Why Three Layers? (Design Rationale)
+
+| Question                                     | Answer                                                                                                                                  |
+|----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| **Why not let Player use Proxies directly?** | Violates separation of concerns. Player would be polluted with infrastructure logic (when to checkpoint, how to retry, error handling). |
+| **Why not merge Persona into Player?**       | Player should be pure domain logic, easily testable without infrastructure. Persona handles Ray integration, lifecycle, and policies.   |
+| **Why not merge Proxy into Persona?**        | Different proxies have different implementations (storage backends, message protocols). Single-responsibility principle.                |
+| **Why does Persona own proxy_config?**       | Centralized configuration. Player/Conductor don't need to know proxy details. Changing storage backend only affects Persona config.     |
+
+### Layer Responsibilities
+
+| Layer                | Responsibility             | Knows About          | Hidden From                       |
+|----------------------|----------------------------|----------------------|-----------------------------------|
+| **Player/Conductor** | Domain logic (WHAT to do)  | Only `self._persona` | Proxies, Ray, configs             |
+| **Persona**          | Coordination (WHEN to do)  | All 4 proxies, Ray   | Implementation details of proxies |
+| **Proxy**            | Infrastructure (HOW to do) | Specific backend     | Domain logic                      |
+
+### Concrete Example: Checkpoint Flow
+
+```
+1. Simulator calls: player_persona.operate()
+2. Persona decides: "After this step, I should auto-checkpoint"
+3. Persona calls: self._storage.checkpoint(player.save_state())
+4. StorageProxy executes: Write to disk/S3/Redis (configurable)
+5. Player is UNAWARE that checkpoint happened
+```
+
+**Without Persona (BAD design):**
+```python
+class MyPlayer(BasePlayer):
+    async def decide(self):
+        # Player polluted with infrastructure concerns
+        await self._storage.checkpoint(...)  # WHEN to checkpoint? Error handling?
+        return {"action": "buy"}
+```
+
+**With Persona (GOOD design):**
+```python
+class MyPlayer(BasePlayer):
+    async def decide(self):
+        # Pure domain logic only
+        return {"action": "buy"}
+
+# Persona handles checkpoint automatically based on PersonaConfig.auto_checkpoint
+```
+
+### Configuration Ownership
+
+```
+SimulationConfig
+│
+├── setting: {total_rounds, steps_per_turn, ...}
+├── ray: {address, namespace, ...}
+│
+├── players:
+│   └── agent_1:
+│       ├── class: "module:PlayerClass"     # Player knows nothing about infra
+│       ├── config: {identity, extras}       # PlayerConfig (domain only)
+│       └── persona_config:                  # PersonaConfig (infra policies)
+│           ├── auto_checkpoint: true
+│           ├── proxy_config:                # Proxy configs (HOW)
+│           │   ├── storage: {backend: "file", path: "./data"}
+│           │   ├── communication: {protocol: "json"}
+│           │   └── observability: {log_level: "INFO"}
+│           └── env_overrides: {...}
+│
+└── conductor: (same structure)
+```
+
+**Key Rule**: `proxy_config` is EXCLUSIVELY owned by Persona. Player/Conductor never see it.
 
 ## Hierarchical Execution Model
 
@@ -78,7 +154,7 @@ A single **round** progresses through three phases:
 
 1. **NOTIFICATION** — Conductor notifies all Players of round state.
 2. **PLAYER_DECISION** — All PlayerPersonas execute `operate()` in parallel (Ray).
-3. **COORDINATION** — ConductorPersona collects census and executes `cycle()`, broadcasts decision.
+3. **COORDINATION** — ConductorPersona collects response_pool and executes `cycle()`, broadcasts decision.
 
 ## Execution Granularity
 
@@ -118,7 +194,7 @@ The framework uses a strict hierarchical time model where each level has its own
 | **operate** | PlayerPersona    | Facade method called by Simulator; invokes `turn()` internally             | TurnResult  | (delegates)   |
 | **turn**    | Player           | Batch of `step()` calls; iterates with `prev_result` chaining              | TurnResult  | `turn_clock`  |
 | **step**    | Player           | Atomic unit: `perceive() → decide() → act()`                               | StepResult  | `step_clock`  |
-| **cycle**   | ConductorPersona | Conductor's coordination unit: `collect_census → analyze → coordinate`     | CycleResult | `cycle_clock` |
+| **cycle**   | ConductorPersona | Conductor's coordination unit: `analyze(responses) → coordinate`           | CycleResult | `cycle_clock` |
 
 ### Time Tracking (ExecutionClock)
 
@@ -196,12 +272,12 @@ sim_config = SimulationConfig(**yaml_config)
 
 Persona is the **primary external interface** that the Simulator interacts with. Player and Conductor are completely hidden behind their respective Personas as internal implementation details.
 
-| Symbol             | Role                                                                                              |
-|--------------------|---------------------------------------------------------------------------------------------------|
-| `BasePersona`      | Abstract — proxy aggregation, `fetch_resource()`, `log_event()`                                   |
-| `PersonaConfig`    | `auto_checkpoint`, `debug_mode`, `env_overrides`                                                  |
-| `PlayerPersona`    | Wraps `BasePlayer`, exposes `operate()` / `initialize()` / `shutdown()` / `get_state_snapshot()`  |
-| `ConductorPersona` | Wraps `BaseConductor`, exposes `cycle()` / `notify()` / `receive_actions()` / `register_player()` |
+| Symbol             | Role                                                                                                |
+|--------------------|-----------------------------------------------------------------------------------------------------|
+| `BasePersona`      | Abstract — proxy aggregation, `fetch_resource()`, `log_event()`                                     |
+| `PersonaConfig`    | `auto_checkpoint`, `debug_mode`, `env_overrides`                                                    |
+| `PlayerPersona`    | Wraps `BasePlayer`, exposes `operate()` / `initialize()` / `shutdown()` / `get_state_snapshot()`    |
+| `ConductorPersona` | Wraps `BaseConductor`, exposes `cycle()` / `notify()` / `receive_responses()` / `register_player()` |
 
 At runtime, both Persona types are deployed as **Ray actors** with detached lifetime.
 
@@ -252,13 +328,13 @@ A Conductor is defined by its behavioral contract: it produces `CoordinationDeci
 
 ### Core Data Types
 
-| Type                   | Description                                                                   |
-|------------------------|-------------------------------------------------------------------------------|
-| `CoordinationDecision` | `decision_type`, `scope` (GLOBAL/GROUP/INDIVIDUAL), `parameters`, `source_id` |
-| `CycleResult`          | Result of one `collect_census → analyze → coordinate` cycle                   |
-| `DecisionScope`        | Enum: `GLOBAL`, `GROUP`, `INDIVIDUAL`                                         |
-| `ConductorConfig`      | `identity`, `coordination_mode`, `extras`                                     |
-| `ConductorState`       | Globally visible — cycle counter, player registry, census, decision history   |
+| Type                   | Description                                                                        |
+|------------------------|------------------------------------------------------------------------------------|
+| `CoordinationDecision` | `decision_type`, `scope` (GLOBAL/GROUP/INDIVIDUAL), `parameters`, `source_id`      |
+| `CycleResult`          | Result of one `analyze(responses) → coordinate` cycle                              |
+| `DecisionScope`        | Enum: `GLOBAL`, `GROUP`, `INDIVIDUAL`                                              |
+| `ConductorConfig`      | `identity`, `coordination_mode`, `extras`                                          |
+| `ConductorState`       | Globally visible — cycle counter, player registry, response_pool, decision history |
 
 ### Abstract Contract
 
@@ -266,20 +342,19 @@ Subclasses of `BaseConductor` implement:
 
 ```
 notify(round_num, player_ids)      → Dict[str, Dict]      # Conductor → Players
-collect_census(actions)            → None                 # Players → Conductor
-analyze()                          → Dict[str, Any]
+analyze(responses)                 → Dict[str, Any]       # Process responses
 coordinate(analysis_result)        → CoordinationDecision
 ```
 
-The framework composes `collect_census → analyze → coordinate` into `cycle()` automatically.
+The framework composes `analyze(responses) → coordinate` into `cycle()` automatically.
 
-Note: `notify()` is called BEFORE players act; `collect_census()` is called AFTER players act.
+Note: `notify()` is called BEFORE players act; responses are collected via streaming.
 
 ### Key Design Properties
 
 - **Global Visibility**: Conductor state is transparent (unlike Player's private state).
 - **Notification Ownership**: The Conductor notifies Players because it has global visibility and controls information asymmetry.
-- **Census-based Coordination**: Conductor collects "census" (aggregated actions from Players) before analysis.
+- **Response-based Coordination**: Conductor collects "response_pool" (aggregated responses from Players) before analysis.
 - **Contract Enforcement**: `_validate_decision()` rejects decision types that would directly act on the environment.
 
 ### Built-in Implementations
@@ -389,8 +464,8 @@ run_simple_simulation.py
 │       ├─ Phase 2: player_persona.operate() [parallel via Ray]
 │       │   └─ Player.turn() → step() × num_steps
 │       │       └─ perceive → decide → act → StepResult
-│       ├─ Phase 3: conductor.receive_actions() → cycle()  # Players → Conductor
-│       │   └─ collect_census → analyze → coordinate → CycleResult
+│       ├─ Phase 3: conductor.receive_responses() → cycle()  # Players → Conductor
+│       │   └─ analyze(responses) → coordinate → CycleResult
 │       └─ broadcast coordination decision to all players
 │
 └─ simulator.shutdown()
@@ -424,13 +499,9 @@ class MyMarket(BaseConductor):
         return {pid: {"data": {...}, "source_id": self.identity, "num_steps": 1}
                 for pid in player_ids}
 
-    async def collect_census(self, actions):
-        """Collect census from players (Players → Conductor)."""
-        self._state.custom_state["census"] = actions
-
-    async def analyze(self):
-        """Analyze the census."""
-        return {"summary": ...}
+    async def analyze(self, responses):
+        """Analyze responses from players."""
+        return {"summary": ..., "count": len(responses)}
 
     async def coordinate(self, analysis):
         """Produce CoordinationDecision."""

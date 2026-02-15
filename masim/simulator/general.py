@@ -376,7 +376,8 @@ class GeneralSimulator(BaseSimulator):
         }
 
     def phase_coordination(
-        self, player_decision_result: Dict[str, Any]
+        self,
+        player_decision_result: Dict[str, Any],
     ) -> Tuple[Dict[str, Any], Any]:
         """
         Phase 3: Delegate response collection and coordination to ConductorPersona.
