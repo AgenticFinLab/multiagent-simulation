@@ -43,7 +43,6 @@ from masim.proxy.base import (
     CommunicationProxy,
     # Storage
     StorageConfig,
-    Checkpoint,
     StorageProxy,
     # Resource
     ResourceConfig,
@@ -51,8 +50,6 @@ from masim.proxy.base import (
     # Observability
     ObservabilityConfig,
     ObservabilityProxy,
-    # Factory
-    ProxyFactory,
 )
 
 from masim.proxy.general import (
@@ -83,7 +80,6 @@ __all__ = [
     "CommunicationProxy",
     # Storage
     "StorageConfig",
-    "Checkpoint",
     "StorageProxy",
     # Resource
     "ResourceConfig",
@@ -91,8 +87,6 @@ __all__ = [
     # Observability
     "ObservabilityConfig",
     "ObservabilityProxy",
-    # Factory
-    "ProxyFactory",
     # Convenience functions
     "create_default_proxies",
     "create_minimal_proxies",

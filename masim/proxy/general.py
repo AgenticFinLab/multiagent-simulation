@@ -29,6 +29,7 @@ from masim.proxy.base import (
     ProxyType,
     ProxyConfig,
     OwnerType,
+    BaseProxy,
     # Proxies and Configs
     CommunicationConfig,
     CommunicationProxy,
@@ -38,8 +39,6 @@ from masim.proxy.base import (
     ResourceProxy,
     ObservabilityConfig,
     ObservabilityProxy,
-    # Factory
-    ProxyFactory,
 )
 
 if TYPE_CHECKING:
@@ -53,7 +52,7 @@ if TYPE_CHECKING:
 
 def create_default_proxies(
     owner: Optional[OwnerType] = None,
-) -> Dict[ProxyType, "BaseProxy"]:
+) -> Dict[ProxyType, BaseProxy]:
     """
     Create a complete set of proxies with default configurations.
 
@@ -72,16 +71,16 @@ def create_default_proxies(
         storage_proxy = proxies[ProxyType.STORAGE]
     """
     return {
-        ProxyType.COMMUNICATION: ProxyFactory.create_communication_proxy(owner=owner),
-        ProxyType.STORAGE: ProxyFactory.create_storage_proxy(owner=owner),
-        ProxyType.RESOURCE: ProxyFactory.create_resource_proxy(owner=owner),
-        ProxyType.OBSERVABILITY: ProxyFactory.create_observability_proxy(owner=owner),
+        ProxyType.COMMUNICATION: CommunicationProxy(CommunicationConfig(), owner),
+        ProxyType.STORAGE: StorageProxy(StorageConfig(), owner),
+        ProxyType.RESOURCE: ResourceProxy(ResourceConfig(), owner),
+        ProxyType.OBSERVABILITY: ObservabilityProxy(ObservabilityConfig(), owner),
     }
 
 
 def create_minimal_proxies(
     owner: Optional[OwnerType] = None,
-) -> Dict[ProxyType, "BaseProxy"]:
+) -> Dict[ProxyType, BaseProxy]:
     """
     Create a minimal proxy set with just storage and observability.
 
@@ -95,8 +94,8 @@ def create_minimal_proxies(
         Dictionary with STORAGE and OBSERVABILITY proxies
     """
     return {
-        ProxyType.STORAGE: ProxyFactory.create_storage_proxy(owner=owner),
-        ProxyType.OBSERVABILITY: ProxyFactory.create_observability_proxy(owner=owner),
+        ProxyType.STORAGE: StorageProxy(StorageConfig(), owner),
+        ProxyType.OBSERVABILITY: ObservabilityProxy(ObservabilityConfig(), owner),
     }
 
 
@@ -106,12 +105,12 @@ def create_proxies_for_owner(
     include_storage: bool = True,
     include_resource: bool = True,
     include_observability: bool = True,
-) -> Dict[ProxyType, "BaseProxy"]:
+) -> Dict[ProxyType, BaseProxy]:
     """
     Create a customized proxy set for a specific owner.
 
     Args:
-        owner: The owner entity (Player or Conductor)
+        owner: The owner entity (Player)
         include_communication: Include CommunicationProxy
         include_storage: Include StorageProxy
         include_resource: Include ResourceProxy
@@ -150,7 +149,7 @@ class SimpleStorageProxy(StorageProxy):
     """
     Simplified StorageProxy with sensible defaults.
 
-    Uses in-memory storage with 50 checkpoint limit.
+    Uses in-memory storage with default configuration.
     Ideal for development and testing.
     """
 
@@ -162,9 +161,9 @@ class SimpleStorageProxy(StorageProxy):
             owner: Optional owner entity
         """
         config = StorageConfig(
-            storage_backend="memory",
-            max_checkpoints=50,
-            encrypt_state=False,
+            checkpoint_dir="checkpoints",
+            result_path="results",
+            record_rounds=True,
         )
         super().__init__(config, owner)
 
@@ -193,9 +192,7 @@ class SimpleObservabilityProxy(ObservabilityProxy):
         super().__init__(config, owner)
 
 
-# Re-export BaseProxy for completeness
-from masim.proxy.base import BaseProxy
-
+# Re-export from base for completeness
 __all__ = [
     # Convenience functions
     "create_default_proxies",

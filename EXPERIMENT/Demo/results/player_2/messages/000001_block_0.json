@@ -1,0 +1,16 @@
+{
+  "000001_0000": {
+    "round_num": 1,
+    "seq": 0,
+    "direction": "sent",
+    "timestamp": "2026-02-19T19:16:12.615284",
+    "message": "Message(message_type=<MessageType.PEER: 4>, sender_id='player_2', payload={'content': {'from': 'player_2', 'round': 1, 'counter': 1, 'message': 'Response from player_2, counter=1'}, 'content_type': 'response', 'extras': {}}, message_id='bb2198d1-5415-486a-a3ff-423a755cfaa0', recipient_id='coordinator', timestamp='2026-02-19T19:16:12.615278', correlation_id=None, priority=<MessagePriority.NORMAL: 1>, metadata={})"
+  },
+  "000001_0001": {
+    "round_num": 1,
+    "seq": 1,
+    "direction": "received",
+    "timestamp": "2026-02-19T19:16:12.643798",
+    "message": "Message(message_type=<MessageType.PEER: 4>, sender_id='coordinator', payload={'content': {'message': 'Hello from Coordinator! Round 2', 'round': 2}, 'content_type': 'broadcast', 'extras': {}}, message_id='9cee6015-6c8b-49a6-9afd-dd12dc101e22', recipient_id='player_2', timestamp='2026-02-19T19:16:12.639904', correlation_id=None, priority=<MessagePriority.NORMAL: 1>, metadata={})"
+  }
+}

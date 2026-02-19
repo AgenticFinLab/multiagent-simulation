@@ -185,7 +185,7 @@ async def run_round(self, round_num: int) -> Dict[str, Any]:
     
     for player_id, obs_dict in observations.items():
         handle = self._player_persona_handles[player_id]
-        observation = Observation(local=LocalObservation(data={}), conductor_notify=obs_dict, round=round_num)
+        observation = Observation(local=LocalObservation(data={}), notification=obs_dict, round=round_num)
         
         # remote() 调用是非阻塞的！
         # 这里只是把任务提交给 Ray，不等待执行完成
@@ -204,21 +204,10 @@ async def run_round(self, round_num: int) -> Dict[str, Any]:
     # 也可以一次性等待所有:
     # all_results = ray.get(list(operate_futures.values()))
     
-    # ========== Phase 4: Conductor 协调 ==========
-    if self._conductor_persona_handle:
-        # 收集所有 Action 发送给 Conductor
-        actions = [tr.final_action for tr in turn_results.values()]
-        ray.get(self._conductor_persona_handle.receive_responses.remote(actions))
-        
-        # Conductor 执行协调
-        cycle_result = ray.get(self._conductor_persona_handle.cycle.remote())
-        
-        # 广播协调决策给所有 Player
-        broadcast_futures = []
-        for handle in self._player_persona_handles.values():
-            f = handle.receive_coordination.remote(cycle_result.decision)
-            broadcast_futures.append(f)
-        ray.get(broadcast_futures)  # 等待广播完成
+    # ========== Phase 4: Coordinator 协调 (if any) ==========
+    # Note: Coordinator is just a Player with role='coordinator'
+    # Coordination is done via topology-driven message passing
+    # No special receive_coordination method needed
     
     return round_results
 ```
@@ -409,17 +398,9 @@ async def run_round(self, round_num):
         self._conductor_persona_handle.receive_responses.remote(actions)
     )  # <-- 同步点
     
-    # ===== 同步点 3: 等待 Conductor 完成协调 =====
-    cycle_result = ray.get(
-        self._conductor_persona_handle.cycle.remote()
-    )  # <-- 同步点
-    
-    # ===== 同步点 4: 等待广播完成 =====
-    broadcast_futures = []
-    for handle in self._player_persona_handles.values():
-        f = handle.receive_coordination.remote(decision)
-        broadcast_futures.append(f)
-    ray.get(broadcast_futures)  # <-- 同步点
+    # ===== Coordinator 协调 (如果有的话) =====
+    # Note: Coordinator 只是具有 role='coordinator' 的 Player
+    # 协调通过拓扑驱动的消息传递完成
 ```
 
 ### 4.4 连接验证
@@ -477,7 +458,7 @@ validator.validate_send("investor_1", "investor_2")  # ✗ ConnectionError!
 │  │  │                                                         │    │        │
 │  │  │   for investor_id in [investor_1, investor_2, investor_3]:   │        │
 │  │  │       validator.validate_send("market", investor_id)    │    │        │
-│  │  │       observation = Observation(local=LocalObservation(data={}), conductor_notify={avg_price: 100.0}, round=r)│    │        │
+│  │  │       observation = Observation(local=LocalObservation(data={}), notification={avg_price: 100.0}, round=r)│    │        │
 │  │  │       # 发送观测到 Investor                              │    │        │
 │  │  └─────────────────────────────────────────────────────────┘    │        │
 │  │                         │                                       │        │

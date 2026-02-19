@@ -9,9 +9,19 @@ This module provides ready-to-use concrete implementations:
 For abstract base classes, see `base.py`.
 
 Architectural Note:
-    The Simulator is a system-level orchestrator. It does NOT generate
-    observations or produce any domain-specific data. Observations come
-    from the Conductor (which coordinates the simulation domain).
+    The Simulator is a system-level orchestrator. All agents are Players,
+    with some having role='coordinator' for multi-agent coordination.
+
+    The framework supports three modes:
+    1. Zero coordinators: Pure peer-to-peer simulation
+    2. One coordinator: Traditional hierarchical coordination
+    3. Multiple coordinators: Multi-level coordination hierarchy
+
+    Execution flow with coordinator(s):
+    1. COORDINATOR_NOTIFY: Coordinator sends initial messages to players
+    2. PLAYER_DECISION: All regular players execute in parallel
+    3. COORDINATOR_COLLECT: Coordinators collect player responses
+    4. COORDINATOR_BROADCAST: Coordinators broadcast results
 
 Usage:
     from masim.simulator.general import GeneralSimulator
@@ -29,7 +39,7 @@ Usage:
 
 import logging
 import importlib
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import ray
 
@@ -39,10 +49,9 @@ from masim.simulator.base import (
     SimulatorStatus,
     RoundPhase,
 )
-from masim.player.base import Action, PlayerConfig
-from masim.conductor.base import ConductorConfig
-from masim.persona.general import PlayerPersona, ConductorPersona
-from masim.persona.base import PersonaConfig
+from masim.player.base import PlayerConfig
+from masim.persona.general import PlayerPersona
+from masim.utils.topology import TopologyGraph
 
 # Module logger
 logger = logging.getLogger("masim.simulator")
@@ -103,7 +112,7 @@ def get_actor_name(prefix: str, entity_id: str) -> str:
 
     Args:
         prefix: Actor name prefix (usually simulation_id)
-        entity_id: Entity identifier (player_id or conductor_id)
+        entity_id: Entity identifier (player_id)
 
     Returns:
         Actor name in format "{prefix}::{entity_id}"
@@ -148,11 +157,22 @@ class GeneralSimulator(BaseSimulator):
     - Direct Persona creation as Ray actors from config (no intermediate instances)
     - Simulation lifecycle orchestration (setup, run_round, run, shutdown)
     - History management and status tracking
+    - Flexible coordinator support (zero, one, or multiple)
 
     The Simulator is a system-level orchestrator:
-    - It does NOT generate observations (that's Conductor's responsibility)
-    - It does NOT interpret actions (that's Environment's responsibility)
-    - It ONLY orchestrates the flow between components
+    - All agents are Players with perceive/decide/act pattern
+    - Players with role='coordinator' execute first and orchestrate others
+    - Regular players respond to coordinator notifications
+
+    Coordinator Flow (per round):
+        1. COORDINATOR_NOTIFY: Coordinator(s) run perceive/decide/act to send init messages
+        2. PLAYER_DECISION: Regular players run in parallel, respond to notifications
+        3. COORDINATOR_PROCESS: Coordinator(s) collect and process responses
+        4. COORDINATOR_BROADCAST: Coordinator(s) broadcast final results
+
+    No Coordinator Mode:
+        When no coordinator is configured, the Simulator sends default notifications
+        and all players run in parallel without centralized coordination.
 
     Example:
         yaml_config = load_config("configs/Demo/simulation.yml")
@@ -170,6 +190,7 @@ class GeneralSimulator(BaseSimulator):
             config: Simulation configuration
         """
         super().__init__(config)
+        self.topology: Optional[TopologyGraph] = None
         logger.info("GeneralSimulator initialized: %s", self.simulation_id)
 
     # =========================================================================
@@ -180,35 +201,23 @@ class GeneralSimulator(BaseSimulator):
         """
         Create and launch PlayerPersonas as Ray actors directly from config.
 
-        Reads config.players, dynamically loads player classes, and creates
-        Ray actors in a single pass - no intermediate local instances.
+        All players are equal - topology defines their communication targets.
+        No role-based separation; each player sends to their topology targets.
 
         Returns:
-            Dict of player_id -> Ray actor handle
+            Dict mapping player_id -> Ray actor handle
         """
         ensure_ray(self.config.ray)
         handles = {}
 
         RemotePlayerPersona = ray.remote(PlayerPersona)
-        persona_config = PersonaConfig(
-            auto_checkpoint=self.config.setting["auto_checkpoint"],
-            debug_mode=self.config.setting["debug_mode"],
-        )
 
         for player_id, player_cfg in self.config.players.items():
-            # Load player class dynamically
             player_class = load_class(player_cfg["class"])
-
-            # Build PlayerConfig
-            cfg = player_cfg["config"]
             player_config = PlayerConfig(
-                name=player_cfg["name"],
-                identity=cfg["identity"],
-                group_tags=cfg["group_tags"],
-                extras=cfg["extras"],
+                name=player_cfg["name"], **player_cfg["config"]
             )
 
-            # Create Ray actor directly
             actor_name = get_actor_name(self.config.setting["name"], player_id)
             handle = RemotePlayerPersona.options(
                 name=actor_name,
@@ -217,64 +226,13 @@ class GeneralSimulator(BaseSimulator):
             ).remote(
                 player_class=player_class,
                 player_config=player_config,
-                persona_config=persona_config,
+                persona_config=player_cfg["persona"],
             )
 
             handles[player_id] = handle
-            logger.info("    Launched PlayerPersona: %s", actor_name)
+            logger.info("    Launched: %s", actor_name)
 
         return handles
-
-    def _launch_conductor_persona(self) -> Optional[ray.actor.ActorHandle]:
-        """
-        Create and launch ConductorPersona as Ray actor directly from config.
-
-        Reads config.conductor, dynamically loads conductor class, and creates
-        a Ray actor in a single pass - no intermediate local instance.
-
-        Returns:
-            Ray actor handle, or None if no conductor configured
-        """
-        if not self.config.conductor:
-            return None
-
-        ensure_ray(self.config.ray)
-
-        RemoteConductorPersona = ray.remote(ConductorPersona)
-        persona_config = PersonaConfig(
-            auto_checkpoint=self.config.setting["auto_checkpoint"],
-            debug_mode=self.config.setting["debug_mode"],
-        )
-
-        conductor_cfg = self.config.conductor
-
-        # Load conductor class dynamically
-        conductor_class = load_class(conductor_cfg["class"])
-
-        # Build ConductorConfig
-        cfg = conductor_cfg["config"]
-        conductor_config = ConductorConfig(
-            identity=cfg["identity"],
-            coordination_mode=cfg["coordination_mode"],
-            extras=cfg["extras"],
-        )
-
-        # Create Ray actor directly
-        actor_name = get_actor_name(
-            self.config.setting["name"], conductor_config.identity
-        )
-        handle = RemoteConductorPersona.options(
-            name=actor_name,
-            lifetime="detached",
-            namespace=self.config.ray["namespace"],
-        ).remote(
-            conductor_class=conductor_class,
-            conductor_config=conductor_config,
-            persona_config=persona_config,
-        )
-
-        logger.info("    Launched ConductorPersona: %s", actor_name)
-        return handle
 
     # =========================================================================
     # Simulation Lifecycle
@@ -284,70 +242,85 @@ class GeneralSimulator(BaseSimulator):
         """
         Set up the simulation: create and launch Persona Ray actors.
 
-        Creates Ray actors directly from config - no intermediate local instances.
+        All players are equal - topology defines their communication.
         """
         logger.info("Setting up simulation: %s", self.simulation_id)
 
         # Initialize Ray
         ensure_ray(self.config.ray)
 
-        # Launch PlayerPersonas directly from config
-        self._player_persona_handles = self._launch_player_personas()
+        # Build topology graph for execution ordering
+        self.topology = TopologyGraph(self.config.topology)
 
-        # Launch ConductorPersona directly from config (if configured)
-        self._conductor_persona_handle = self._launch_conductor_persona()
-
-        if self._conductor_persona_handle:
-            # Register all players with conductor
-            for player_id in self._player_persona_handles:
-                ray.get(
-                    self._conductor_persona_handle.register_player.remote(player_id)
-                )
+        # Launch all PlayerPersonas (topology-driven, no role separation)
+        self.player_persona_handles = self._launch_player_personas()
 
         # Initialize all Persona actors
         init_futures = [
-            h.initialize.remote() for h in self._player_persona_handles.values()
+            h.initialize.remote() for h in self.player_persona_handles.values()
         ]
-        if self._conductor_persona_handle:
-            init_futures.append(self._conductor_persona_handle.initialize.remote())
         ray.get(init_futures)
 
+        # Setup topology connections for message passing
+        self._setup_topology()
+
+        logger.info("    Total players: %d", len(self.player_persona_handles))
         self.status = SimulatorStatus.READY
         logger.info("    Setup complete")
 
-    def phase_notification(self, round_num: int) -> Dict[str, Dict[str, Any]]:
+    def _setup_topology(self) -> None:
         """
-        Phase 1: Conductor notifies Players of round state.
+        Configure topology for all players.
+
+        Passes full topology config and peer handles to each Persona.
+        Each Persona extracts its own targets from the topology.
+        """
+        logger.info("    Setting up topology...")
+
+        # Pass topology config and peer handles to each persona
+        for _, handle in self.player_persona_handles.items():
+            ray.get(handle.set_topology.remote(self.config.topology))
+            ray.get(handle.set_peer_handles.remote(self.player_persona_handles))
+
+    def _prepare_notifications(
+        self, round_num: int, player_ids: List[str], source_id: str = "simulator"
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Prepare notifications for a set of players.
 
         Args:
             round_num: Current round number
+            player_ids: List of player IDs to prepare notifications for
+            source_id: ID of the notification source (simulator or coordinator)
 
         Returns:
             Notifications dict mapping player_id -> notification dict
         """
-        self.current_phase = RoundPhase.NOTIFICATION
-        if self._conductor_persona_handle is None:
-            raise RuntimeError("Conductor is required for player notification")
-
-        notifications = ray.get(
-            self._conductor_persona_handle.notify.remote(
-                round_num, list(self._player_persona_handles.keys())
-            )
-        )
+        notifications = {}
+        for player_id in player_ids:
+            notifications[player_id] = {
+                "data": {"round": round_num},
+                "source_id": source_id,
+                "target_id": player_id,
+                "round": round_num,
+                "num_steps": 1,
+                "metadata": {},
+            }
         return notifications
 
     def phase_player_decision(
-        self, round_num: int, notifications: Dict[str, Dict[str, Any]]
+        self,
+        round_num: int,
+        notifications: Dict[str, Dict[str, Any]],
+        player_handles: Dict[str, ray.actor.ActorHandle],
     ) -> Dict[str, Any]:
         """
-        Phase 2: Submit PlayerPersona operate() calls in parallel.
-
-        This phase only SUBMITS tasks - collection happens in phase_coordination
-        to enable streaming to Conductor.
+        Execute PlayerPersona operate() calls in parallel for specified players.
 
         Args:
             round_num: Current round number
-            notifications: Notifications from conductor
+            notifications: Notifications for each player
+            player_handles: Dict of player_id -> actor handle to execute
 
         Returns:
             Dict containing:
@@ -363,8 +336,8 @@ class GeneralSimulator(BaseSimulator):
         operate_futures = {}
         ref_to_player = {}
         for player_id, notif_dict in notifications.items():
-            if player_id in self._player_persona_handles:
-                future = self._player_persona_handles[player_id].operate.remote(
+            if player_id in player_handles:
+                future = player_handles[player_id].operate.remote(
                     notif_dict, round_num, notif_dict["num_steps"]
                 )
                 operate_futures[player_id] = future
@@ -375,104 +348,53 @@ class GeneralSimulator(BaseSimulator):
             "ref_to_player": ref_to_player,
         }
 
-    def phase_coordination(
+    def phase_collect_results(
         self,
         player_decision_result: Dict[str, Any],
-    ) -> Tuple[Dict[str, Any], Any]:
+    ) -> Dict[str, Any]:
         """
-        Phase 3: Delegate response collection and coordination to ConductorPersona.
-
-        ConductorPersona owns the streaming collection logic:
-        - Uses ray.wait() to collect results as they arrive
-        - Streams each result to internal Conductor
-        - Conductor decides when to proceed via ready_responses()
-
-        This enables Conductor-controlled policies:
-        - Quorum-based processing (proceed after K responses)
-        - Timeout-based processing (proceed after N seconds)
-        - First-responder processing (proceed after 1 response)
+        Collect all player results.
 
         Args:
             player_decision_result: Output from phase_player_decision containing futures
 
         Returns:
-            Tuple of (collection_result, cycle_result):
-                - collection_result: Dict with turn_results, pending_count
-                - cycle_result: CycleResult from Conductor.cycle()
+            Dict with turn_results mapping player_id -> TurnResult
         """
-        if self._conductor_persona_handle is None:
-            return {"turn_results": {}, "pending_count": 0}, None
-
         self.current_phase = RoundPhase.COORDINATION
 
         futures = player_decision_result["futures"]
         ref_to_player = player_decision_result["ref_to_player"]
 
-        # Delegate streaming collection to ConductorPersona
-        # Conductor controls when to proceed via ready_responses()
-        collection_result: Dict[str, Any] = ray.get(
-            self._conductor_persona_handle.collect_responses.remote(
-                futures, ref_to_player
+        # Collect all results
+        turn_results = {}
+        pending_refs = list(futures.values())
+
+        while pending_refs:
+            ready_refs, pending_refs = ray.wait(
+                pending_refs, num_returns=1, timeout=0.1
             )
-        )
+            for ref in ready_refs:
+                turn_result = ray.get(ref)
+                player_id = ref_to_player[ref]
+                turn_results[player_id] = turn_result
 
-        # Conductor executes coordination cycle
-        cycle_result = ray.get(self._conductor_persona_handle.cycle.remote())
-
-        return collection_result, cycle_result
-
-    def phase_broadcast(
-        self,
-        collection_result: Dict[str, Any],
-        cycle_result: Any,
-    ) -> None:
-        """
-        Phase 4: Broadcast coordination result to Players.
-
-        Uses Conductor.prepare_broadcast() to customize what message
-        is sent to each Player. This allows domain-specific broadcast
-        content without changing the broadcast mechanism.
-
-        Args:
-            collection_result: Dict with turn_results from phase_coordination
-            cycle_result: CycleResult from Conductor.cycle()
-        """
-        if self._conductor_persona_handle is None or cycle_result is None:
-            return
-
-        self.current_phase = RoundPhase.BROADCAST
-
-        # Get customized broadcast message from Conductor
-        broadcast_msg = ray.get(
-            self._conductor_persona_handle.prepare_broadcast.remote(cycle_result)
-        )
-
-        # Broadcast to PlayerPersonas (only those that responded)
-        coord_futures = []
-        for player_id in collection_result["turn_results"].keys():
-            if player_id in self._player_persona_handles:
-                coord_futures.append(
-                    self._player_persona_handles[player_id].receive_coordination.remote(
-                        broadcast_msg
-                    )
-                )
-        if coord_futures:
-            ray.get(coord_futures)
+        return {
+            "turn_results": turn_results,
+            "pending_count": 0,
+        }
 
     async def run_round(self, round_num: int) -> Dict[str, Any]:
         """
-        Execute one simulation round.
+        Execute one simulation round with level-based execution ordering.
 
-        A round is the highest-level execution unit in the hierarchy:
-        - Round (Simulator) -> Operate (PlayerPersona) -> Cycle (ConductorPersona)
+        Execution Flow (derived from topology seeds):
+        - Level 0: Seeds (e.g., coordinators) execute first
+        - Level 1: Successors of Level 0 execute
+        - Level N: Continue until all players have executed
 
-        The Simulator orchestrates the flow but does NOT generate observations.
-        Observations come from the Conductor (domain coordinator).
-
-        Streaming Response Collection:
-        - Players execute in parallel
-        - Results stream to Conductor as they arrive
-        - Conductor decides when to proceed (quorum, timeout, etc.)
+        Within each level, players execute in parallel.
+        Level N+1 only starts after Level N completes.
 
         Args:
             round_num: Current round number (1-indexed)
@@ -480,36 +402,51 @@ class GeneralSimulator(BaseSimulator):
         Returns:
             Round results containing:
             - turn_results: Dict of player_id -> TurnResult summary
-            - coordination: Conductor's coordination decision (if any)
-            - pending_count: Players still pending when Conductor proceeded
+            - round: Round number
             - round_clock: Timing metrics for this round
+            - execution_levels: List of levels executed
         """
         self.round_clock.tick_start()
         self.current_round = round_num
 
-        # Phase 1: Conductor notifies Players
-        notifications = self.phase_notification(round_num)
+        # =================================================================
+        # LEVEL-BASED EXECUTION
+        # Derive execution order from topology seeds via BFS
+        # =================================================================
+        execution_levels = self.topology.get_execution_levels()
+        all_turn_results = {}
 
-        # Phase 2: Submit player operate() calls (parallel, non-blocking)
-        player_decision_result = self.phase_player_decision(round_num, notifications)
+        for level_idx, level_players in enumerate(execution_levels):
+            logger.debug("        Level %d: %s", level_idx, level_players)
 
-        # Phase 3: Stream results to Conductor, Conductor decides when to proceed
-        collection_result, cycle_result = self.phase_coordination(
-            player_decision_result
-        )
+            # Prepare notifications for this level's players
+            level_notifications = self._prepare_notifications(round_num, level_players)
 
-        # Phase 4: Broadcast coordination result to Players
-        self.phase_broadcast(collection_result, cycle_result)
+            # Filter handles to only this level's players
+            level_handles = {
+                pid: self.player_persona_handles[pid]
+                for pid in level_players
+                if pid in self.player_persona_handles
+            }
+
+            # Execute this level in parallel
+            player_decision_result = self.phase_player_decision(
+                round_num, level_notifications, level_handles
+            )
+            collection_result = self.phase_collect_results(player_decision_result)
+
+            # Merge results
+            all_turn_results.update(collection_result["turn_results"])
 
         # Finalize round
         self.round_clock.tick_end()
         self.current_phase = RoundPhase.COMPLETE
 
         round_results = {
-            **collection_result,
-            "cycle_result": cycle_result,
+            "turn_results": all_turn_results,
             "round": round_num,
             "round_clock": self.round_clock,
+            "execution_levels": execution_levels,
         }
         self.history.append(round_results)
 
@@ -548,10 +485,8 @@ class GeneralSimulator(BaseSimulator):
 
         # Shutdown all Persona actors
         shutdown_futures = []
-        for handle in self._player_persona_handles.values():
+        for handle in self.player_persona_handles.values():
             shutdown_futures.append(handle.shutdown.remote())
-        if self._conductor_persona_handle:
-            shutdown_futures.append(self._conductor_persona_handle.shutdown.remote())
 
         ray.get(shutdown_futures)
 
@@ -579,17 +514,12 @@ class GeneralSimulator(BaseSimulator):
             "current_round": self.current_round,
             "current_phase": self.current_phase.name,
             "total_rounds": self.config.setting["total_rounds"],
-            "player_count": len(self._player_persona_handles),
-            "has_conductor": self._conductor_persona_handle is not None,
+            "player_count": len(self.player_persona_handles),
             "round_clock": self.round_clock.to_dict(),
         }
 
     def get_player_handle(self, player_id: str) -> Optional[ray.actor.ActorHandle]:
         """Get Ray actor handle for a specific player."""
-        if player_id not in self._player_persona_handles:
+        if player_id not in self.player_persona_handles:
             return None
-        return self._player_persona_handles[player_id]
-
-    def get_conductor_handle(self) -> Optional[ray.actor.ActorHandle]:
-        """Get Ray actor handle for the conductor."""
-        return self._conductor_persona_handle
+        return self.player_persona_handles[player_id]

@@ -25,15 +25,12 @@ Abstract Classes:
     ResourceProxy        - MCP integration: fetch_resource, invoke_tool
     ObservabilityProxy   - Metrics/logging: log_event, record_metric
 
-Factory:
-    ProxyFactory         - Batch creation of proxies from configuration
-
 ================================================================================
                            MODULE OVERVIEW
 ================================================================================
 
 This module defines the four micro-proxy types that provide infrastructure
-abstraction for Player and Conductor entities:
+abstraction for Player entities (including coordinators):
 
     1. CommunicationProxy - Message routing and reliable transmission
     2. StorageProxy       - State checkpoint and rollback
@@ -71,10 +68,10 @@ Key Components:
 
 2. COMPOSITION OVER INHERITANCE
    ----------------------------
-   Proxies are COMPOSED into entities (Player/Conductor), not inherited.
+   Proxies are COMPOSED into entities (Players), not inherited.
 
    ┌───────────────────────────────────────────────────────────────────┐
-   │  Owner (Player/Conductor)                                         │
+   │  Owner (Player - may have role='coordinator' or 'player')        │
    │      │                                                            │
    │      │  ┌─────────────────────┐                                  │
    │      ├──│ CommunicationProxy  │──┐                               │
@@ -167,23 +164,23 @@ arbitrary owner methods.
 │                      │ load_state()                │                        │
 │  ResourceProxy       │ identity, get_capabilities()│ Access control        │
 │  ObservabilityProxy  │ identity, get_system_metrics()│ Monitoring          │
-│                      │ (Conductor only)            │                        │
+│                      │                               │                        │
 │                                                                              │
 │  Proxies CANNOT access:                                                      │
 │  ✗ _internal_strategy()    ✗ _compute_decision()    ✗ _private_cache       │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ================================================================================
-                      PLAYER VS CONDUCTOR PROXY STRATEGIES
+                      PLAYER ROLE-BASED PROXY STRATEGIES
 ================================================================================
 
 While all proxies share the same interface, implementations can differ
-based on whether the owner is a Player or Conductor:
+based on the Player's role (coordinator vs regular player):
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │              DIFFERENTIATED PROXY STRATEGIES                                 │
 │                                                                              │
-│  Proxy Type      │ Player Strategy           │ Conductor Strategy           │
+│  Proxy Type      │ Regular Player Strategy   │ Coordinator Strategy         │
 │  ────────────────┼───────────────────────────┼─────────────────────────────│
 │  Communication   │ Point-to-point optimized  │ Broadcast/aggregate optimized│
 │                  │ Low latency focus         │ High throughput focus        │
@@ -255,10 +252,10 @@ Proxy lifecycle is tied to owner lifecycle through three phases:
 ================================================================================
 """
 
+import os
 import time
 import uuid
 import weakref
-import logging
 from abc import ABC, abstractmethod
 from enum import Enum, auto
 from datetime import datetime
@@ -274,10 +271,10 @@ from typing import (
     Protocol,
     runtime_checkable,
     TYPE_CHECKING,
-    Set,
 )
 
 from masim.communication.base import Message
+from lmbase.utils.tools import BlockBasedStoreManager
 
 # ---------------------------------------------------------------------------
 # TYPE_CHECKING Block
@@ -286,14 +283,13 @@ from masim.communication.base import Message
 # At runtime, they are NOT imported to avoid circular dependencies.
 #
 # Why this pattern?
-# - proxy/base.py needs to reference Player/Conductor types for type hints
-# - But player/base.py and conductor/base.py import from proxy/base.py
+# - proxy/base.py needs to reference Player types for type hints
+# - But player/base.py imports from proxy/base.py
 # - Circular import at runtime would crash Python
 # - TYPE_CHECKING is False at runtime, True during type checking
 # ---------------------------------------------------------------------------
 if TYPE_CHECKING:
     from masim.player.base import BasePlayer
-    from masim.conductor.base import BaseConductor
 
 
 # =============================================================================
@@ -323,8 +319,8 @@ class ObservableEntity(Protocol):
     │  Proxies can ONLY call methods defined in this protocol.           │
     │                                                                     │
     │  Any class implementing these methods can have proxies attached:   │
-    │  - BasePlayer implements ObservableEntity                          │
-    │  - BaseConductor implements ObservableEntity                       │
+    │  - BasePlayer implements ObservableEntity                            │
+    │  - Players with role='coordinator' also implement ObservableEntity   │
     │  - Test mocks can implement ObservableEntity                       │
     └─────────────────────────────────────────────────────────────────────┘
 
@@ -332,7 +328,7 @@ class ObservableEntity(Protocol):
     ------------------------------------------
     1. EXPLICIT BOUNDARIES: Clear contract of what proxies can access
     2. TESTABILITY: Mock objects need only implement this interface
-    3. DECOUPLING: Proxies don't depend on concrete Player/Conductor classes
+    3. DECOUPLING: Proxies don't depend on concrete Player classes
     4. DOCUMENTATION: Protocol IS the documentation of proxy-owner interface
 
     Access Control Matrix:
@@ -455,7 +451,7 @@ class ProxyError(Exception):
         operations that may legitimately fail (network, storage, etc.)
     """
 
-    pass
+    ...
 
 
 class ProxyNotInitializedError(ProxyError):
@@ -471,7 +467,7 @@ class ProxyNotInitializedError(ProxyError):
         await proxy.checkpoint()  # Raises ProxyNotInitializedError
     """
 
-    pass
+    ...
 
 
 class ProxyOperationError(ProxyError):
@@ -640,8 +636,8 @@ class ProxyConfig:
 
 
 # Type alias for owner entities
-# Union type allows proxies to work with either Player or Conductor
-OwnerType = Union["BasePlayer", "BaseConductor", ObservableEntity]
+# All owners are Players (regular or coordinator role)
+OwnerType = Union["BasePlayer", ObservableEntity]
 
 
 class BaseProxy(ABC):
@@ -685,7 +681,7 @@ class BaseProxy(ABC):
 
     Subclasses SHOULD:
         - Return ProxyResult from operations (not raise exceptions)
-        - Check _is_initialized before operations
+        - Check is_initialized before operations
         - Handle missing owner gracefully (owner may be GC'd)
     """
 
@@ -710,7 +706,7 @@ class BaseProxy(ABC):
         self.proxy_type = config.proxy_type
 
         # Lifecycle flag - set to True by initialize()
-        self._is_initialized: bool = False
+        self.is_initialized: bool = False
 
         # =====================================================================
         # WEAK REFERENCE to owner
@@ -718,36 +714,24 @@ class BaseProxy(ABC):
         # We use weakref.ref() to avoid circular reference between owner and
         # proxy. This allows the owner to be garbage collected normally.
         #
-        # If owner is GC'd, self._owner_ref() will return None instead of
+        # If owner is GC'd, self.owner_ref() will return None instead of
         # raising an error. Proxy operations should handle this gracefully.
         # =====================================================================
-        self._owner_ref: Optional[weakref.ref] = None
+        self.owner_ref: Optional[weakref.ref] = None
         if owner is not None:
-            self._owner_ref = weakref.ref(owner)
+            self.owner_ref = weakref.ref(owner)
 
-    def _get_owner(self) -> Optional[OwnerType]:
+    def get_owner(self) -> Optional[OwnerType]:
         """
         Get the owner entity via weak reference.
 
-        This method safely dereferences the weak reference to the owner.
         Returns None if:
-            - No owner was ever set (_owner_ref is None)
+            - No owner was ever set (owner_ref is None)
             - Owner has been garbage collected (weak ref returns None)
-
-        Returns:
-            The owner entity, or None if unavailable
-
-        Usage:
-            owner = self._get_owner()
-            if owner is not None:
-                owner.on_message(msg)  # Safe to call
-            else:
-                # Handle gracefully - owner was GC'd or never set
-                pass
         """
-        if self._owner_ref is None:
+        if self.owner_ref is None:
             return None
-        return self._owner_ref()  # Returns None if owner was GC'd
+        return self.owner_ref()  # Returns None if owner was GC'd
 
     def set_owner(self, owner: OwnerType) -> None:
         """
@@ -766,7 +750,7 @@ class BaseProxy(ABC):
                 self._storage_proxy = proxy  # Player holds strong ref
                 proxy.set_owner(self)        # Proxy holds weak ref
         """
-        self._owner_ref = weakref.ref(owner)
+        self.owner_ref = weakref.ref(owner)
 
     @property
     def owner_id(self) -> Optional[str]:
@@ -779,7 +763,7 @@ class BaseProxy(ABC):
         Returns:
             Owner's identity string, or None if owner unavailable
         """
-        owner = self._get_owner()
+        owner = self.get_owner()
         return owner.identity if owner else None
 
     @abstractmethod
@@ -790,7 +774,7 @@ class BaseProxy(ABC):
         Called once before the proxy is used. Subclasses should:
             - Establish connections (network, database)
             - Initialize caches
-            - Set _is_initialized = True
+            - Set is_initialized = True
 
         Raises:
             ProxyNotInitializedError: If initialization fails
@@ -806,7 +790,7 @@ class BaseProxy(ABC):
             - Close connections
             - Flush pending data (metrics, logs)
             - Release memory
-            - Set _is_initialized = False
+            - Set is_initialized = False
 
         Note:
             Should NOT raise exceptions - log errors instead
@@ -890,9 +874,9 @@ class CommunicationProxy(BaseProxy):
           │                              │◄────────receive()────────────│
           │                              │──return messages─────────────►│
 
-    Player vs Conductor Strategy:
-    - Player: Optimized for point-to-point (low latency)
-    - Conductor: Optimized for broadcast/aggregate (high throughput)
+    Player Role-based Strategy:
+    - Regular Player: Optimized for point-to-point (low latency)
+    - Coordinator: Optimized for broadcast/aggregate (high throughput)
     """
 
     def __init__(
@@ -913,21 +897,21 @@ class CommunicationProxy(BaseProxy):
         # =====================================================================
         # Internal State
         # =====================================================================
-        # _subscriptions: entity_id → callback for real-time delivery
-        # _pending_messages: entity_id → list of undelivered messages
+        # subscriptions: entity_id → callback for real-time delivery
+        # pending_messages: entity_id → list of undelivered messages
         # =====================================================================
-        self._subscriptions: Dict[str, Callable[[Message], Awaitable[None]]] = {}
-        self._pending_messages: Dict[str, List[Message]] = {}
+        self.subscriptions: Dict[str, Callable[[Message], Awaitable[None]]] = {}
+        self.pending_messages: Dict[str, List[Message]] = {}
 
     async def initialize(self) -> None:
         """Initialize communication resources (connection pools, etc.)."""
-        self._is_initialized = True
+        self.is_initialized = True
 
     async def shutdown(self) -> None:
         """Shutdown and release resources."""
-        self._subscriptions.clear()
-        self._pending_messages.clear()
-        self._is_initialized = False
+        self.subscriptions.clear()
+        self.pending_messages.clear()
+        self.is_initialized = False
 
     async def send(self, message: Message) -> ProxyResult:
         """
@@ -964,13 +948,13 @@ class CommunicationProxy(BaseProxy):
             )
 
         # Store in pending messages queue
-        if message.recipient_id not in self._pending_messages:
-            self._pending_messages[message.recipient_id] = []
-        self._pending_messages[message.recipient_id].append(message)
+        if message.recipient_id not in self.pending_messages:
+            self.pending_messages[message.recipient_id] = []
+        self.pending_messages[message.recipient_id].append(message)
 
         # Trigger callback if subscribed (real-time delivery)
-        if message.recipient_id in self._subscriptions:
-            await self._subscriptions[message.recipient_id](message)
+        if message.recipient_id in self.subscriptions:
+            await self.subscriptions[message.recipient_id](message)
 
         return ProxyResult.ok()
 
@@ -996,7 +980,7 @@ class CommunicationProxy(BaseProxy):
             # Broadcast coordination decision to all players
             await proxy.broadcast(Message(
                 message_type=MessageType.COORDINATION,
-                sender_id="conductor_001",
+                sender_id="coordinator_001",
                 payload={"instruction": "reduce_activity"}
             }, scope="group:market_makers")
         """
@@ -1004,11 +988,11 @@ class CommunicationProxy(BaseProxy):
         message.metadata["broadcast_scope"] = scope or "all"
 
         # Deliver to all registered recipients
-        for recipient_id in list(self._pending_messages.keys()):
-            self._pending_messages[recipient_id].append(message)
+        for recipient_id in list(self.pending_messages.keys()):
+            self.pending_messages[recipient_id].append(message)
             # Trigger callback if subscribed
-            if recipient_id in self._subscriptions:
-                await self._subscriptions[recipient_id](message)
+            if recipient_id in self.subscriptions:
+                await self.subscriptions[recipient_id](message)
 
         return ProxyResult.ok()
 
@@ -1029,14 +1013,14 @@ class CommunicationProxy(BaseProxy):
             This method never fails - returns empty list if no messages.
         """
         # Get and clear pending messages
-        if entity_id in self._pending_messages:
-            messages = self._pending_messages[entity_id].copy()
+        if entity_id in self.pending_messages:
+            messages = self.pending_messages[entity_id].copy()
         else:
             messages = []
-        self._pending_messages[entity_id] = []
+        self.pending_messages[entity_id] = []
 
         # Notify owner of received messages (if owner exists)
-        owner = self._get_owner()
+        owner = self.get_owner()
         if owner and hasattr(owner, "on_message"):
             for msg in messages:
                 owner.on_message(msg)
@@ -1065,10 +1049,10 @@ class CommunicationProxy(BaseProxy):
 
             await proxy.subscribe("player_001", handle_message)
         """
-        self._subscriptions[entity_id] = callback
+        self.subscriptions[entity_id] = callback
         # Initialize pending queue if not exists
-        if entity_id not in self._pending_messages:
-            self._pending_messages[entity_id] = []
+        if entity_id not in self.pending_messages:
+            self.pending_messages[entity_id] = []
         return True
 
     async def unsubscribe(self, entity_id: str) -> bool:
@@ -1084,7 +1068,7 @@ class CommunicationProxy(BaseProxy):
         Returns:
             True on success
         """
-        self._subscriptions.pop(entity_id, None)
+        self.subscriptions.pop(entity_id, None)
         return True
 
 
@@ -1106,112 +1090,23 @@ class CommunicationProxy(BaseProxy):
 
 @dataclass
 class StorageConfig(ProxyConfig):
-    """
-    Configuration for StorageProxy.
-
-    Attributes:
-        proxy_type: Fixed to STORAGE
-        storage_backend: Backend type ("memory", "file", "redis", "s3")
-        checkpoint_dir: Directory for file-based storage
-        max_checkpoints: Maximum checkpoints per entity (FIFO eviction)
-        encrypt_state: Whether to encrypt stored state (for Player privacy)
-
-    Example:
-        # Player config with encryption (private state)
-        player_storage = StorageConfig(
-            storage_backend="file",
-            checkpoint_dir="/data/checkpoints",
-            max_checkpoints=50,
-            encrypt_state=True  # Protect Player's private state
-        )
-
-        # Conductor config without encryption (global state)
-        conductor_storage = StorageConfig(
-            storage_backend="redis",
-            max_checkpoints=100,
-            encrypt_state=False  # State is globally visible anyway
-        )
-    """
+    """Configuration for StorageProxy."""
 
     proxy_type: ProxyType = field(default=ProxyType.STORAGE, init=False)
-    storage_backend: str = "memory"  # "memory", "file", "redis", "s3"
-    checkpoint_dir: Optional[str] = None  # Directory for file storage
-    max_checkpoints: int = 100  # Max checkpoints per entity
-    encrypt_state: bool = False  # Encrypt for Player privacy
-
-
-@dataclass
-class Checkpoint:
-    """
-    A state checkpoint record.
-
-    Represents a saved snapshot of entity state at a specific point in time.
-
-    Attributes:
-        checkpoint_id: Unique identifier (UUID)
-        entity_id: ID of the entity that owns this checkpoint
-        state: The saved state data (from entity.save_state())
-        timestamp: ISO-8601 timestamp when checkpoint was created
-        label: Optional human-readable label (e.g., "before_trade")
-    """
-
-    checkpoint_id: str  # Unique ID for this checkpoint
-    entity_id: str  # Owner entity ID
-    state: Dict[str, Any]  # Saved state data
-    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    label: Optional[str] = None  # Optional human-readable label
+    checkpoint_dir: Optional[str] = None
+    result_path: Optional[str] = None
+    record_rounds: bool = True
 
 
 class StorageProxy(BaseProxy):
-    """
-    Proxy for state checkpoint and rollback.
-
-    ┌─────────────────────────────────────────────────────────────────────┐
-    │                     STORAGE PROXY OVERVIEW                          │
-    │                                                                     │
-    │  Core Methods (≤5, micro-proxy pattern):                           │
-    │    1. checkpoint()         - Save current state                    │
-    │    2. restore()            - Restore from checkpoint               │
-    │    3. list_checkpoints()   - List available checkpoints            │
-    │    4. delete_checkpoint()  - Remove a checkpoint                   │
-    │    5. get_latest_checkpoint() - Get most recent                    │
-    │                                                                     │
-    │  Owner Interface (ObservableEntity):                               │
-    │    - save_state() called to get state for checkpoint              │
-    │    - load_state() called to restore state from checkpoint         │
-    │                                                                     │
-    │  Fault Isolation:                                                   │
-    │    - Returns ProxyResult (never raises exceptions)                 │
-    │    - Failures are logged, don't crash owner                        │
-    └─────────────────────────────────────────────────────────────────────┘
-
-    Checkpoint Flow:
-
-        Owner                      StorageProxy                    Storage
-          │                              │                            │
-          │──checkpoint(label)──────────►│                            │
-          │                              │──owner.save_state()────────│
-          │                              │◄──state dict────────────────│
-          │                              │──store(state)──────────────►│
-          │◄──ProxyResult.ok(id)─────────│                            │
-          │                              │                            │
-          │──restore(id)────────────────►│                            │
-          │                              │◄──retrieve(id)──────────────│
-          │                              │──owner.load_state(state)───│
-          │◄──ProxyResult.ok(state)──────│                            │
-
-    Player vs Conductor Strategy:
-    - Player: Encrypted private storage, per-step checkpointing
-    - Conductor: Global visible storage, distributed snapshots
-    """
+    """Proxy for state persistence using BlockBasedStoreManager."""
 
     def __init__(
         self,
         config: Optional[StorageConfig] = None,
         owner: Optional[OwnerType] = None,
     ):
-        """
-        Initialize StorageProxy.
+        """Initialize StorageProxy.
 
         Args:
             config: Storage configuration (uses defaults if None)
@@ -1219,202 +1114,78 @@ class StorageProxy(BaseProxy):
         """
         super().__init__(config or StorageConfig(), owner)
         self.config: StorageConfig = config or StorageConfig()
+        self._message_stores: Dict[str, BlockBasedStoreManager] = {}
+        self._turn_stores: Dict[str, BlockBasedStoreManager] = {}
+        self._message_seq: Dict[str, Dict[int, int]] = {}
 
-        # =====================================================================
-        # Internal Storage
-        # =====================================================================
-        # _checkpoints: checkpoint_id → Checkpoint object
-        # _entity_checkpoints: entity_id → list of checkpoint_ids (ordered)
-        # =====================================================================
-        self._checkpoints: Dict[str, Checkpoint] = {}
-        self._entity_checkpoints: Dict[str, List[str]] = {}
+    def _get_message_store(self, player_id: str) -> BlockBasedStoreManager:
+        """Get or create message store for player."""
+        if player_id not in self._message_stores:
+            msg_dir = os.path.join(self.config.result_path, player_id, "messages")
+            os.makedirs(msg_dir, exist_ok=True)
+            self._message_stores[player_id] = BlockBasedStoreManager(
+                folder=msg_dir, file_format="json", block_size=500
+            )
+        return self._message_stores[player_id]
+
+    def _get_turn_store(self, player_id: str) -> BlockBasedStoreManager:
+        """Get or create turn store for player."""
+        if player_id not in self._turn_stores:
+            turn_dir = os.path.join(self.config.result_path, player_id, "turns")
+            os.makedirs(turn_dir, exist_ok=True)
+            self._turn_stores[player_id] = BlockBasedStoreManager(
+                folder=turn_dir, file_format="json", block_size=500
+            )
+        return self._turn_stores[player_id]
+
+    def record_message(
+        self, player_id: str, round_num: int, message: Any, direction: str
+    ) -> None:
+        """Record a message using BlockBasedStoreManager."""
+        if not self.config.record_rounds:
+            return
+        if player_id not in self._message_seq:
+            self._message_seq[player_id] = {}
+        if round_num not in self._message_seq[player_id]:
+            self._message_seq[player_id][round_num] = 0
+        seq = self._message_seq[player_id][round_num]
+        self._message_seq[player_id][round_num] += 1
+
+        record = {
+            "round_num": round_num,
+            "seq": seq,
+            "direction": direction,
+            "timestamp": datetime.now().isoformat(),
+            "message": message,
+        }
+        self._get_message_store(player_id).save(
+            savename=f"{round_num:06d}_{seq:04d}", data=record
+        )
+
+    def record_turn_result(
+        self, player_id: str, round_num: int, turn_result: Any
+    ) -> None:
+        """Record turn result using BlockBasedStoreManager."""
+        if not self.config.record_rounds:
+            return
+        record = {
+            "round_num": round_num,
+            "timestamp": datetime.now().isoformat(),
+            "turn_result": turn_result,
+        }
+        self._get_turn_store(player_id).save(savename=f"{round_num:06d}", data=record)
 
     async def initialize(self) -> None:
-        """Initialize storage backend (connections, directories)."""
-        # TODO: Initialize actual backend based on config.storage_backend
-        self._is_initialized = True
+        """Initialize proxy - no-op for StorageProxy."""
+        self.is_initialized = True
 
     async def shutdown(self) -> None:
-        """Shutdown and persist pending data."""
-        # TODO: Flush to persistent storage if configured
-        self._is_initialized = False
-
-    async def checkpoint(
-        self,
-        entity_id: Optional[str] = None,
-        state: Optional[Dict[str, Any]] = None,
-        label: Optional[str] = None,
-    ) -> ProxyResult:
-        """
-        Create a state checkpoint.
-
-        Saves the current state of the owner entity. If state is not
-        provided, calls owner.save_state() to get it.
-
-        Args:
-            entity_id: Entity ID (defaults to owner's identity)
-            state: State to save (defaults to owner.save_state())
-            label: Optional human-readable label
-
-        Returns:
-            ProxyResult.ok(checkpoint_id) on success
-            ProxyResult.fail(error_code, message) on failure
-
-        Error Codes:
-            - NO_ENTITY_ID: No entity ID available
-            - CHECKPOINT_FAILED: Internal error
-
-        Example:
-            # Save checkpoint before risky operation
-            result = await storage.checkpoint(label="before_trade")
-            if result.success:
-                trade_result = await execute_trade()
-                if trade_failed:
-                    await storage.restore(result.data)  # Rollback!
-        """
-        # Determine entity ID (from parameter or owner)
-        eid = entity_id or self.owner_id
-        if not eid:
-            return ProxyResult.fail("NO_ENTITY_ID", "Entity ID required for checkpoint")
-
-        # Get state from owner if not provided
-        checkpoint_state = state
-        if checkpoint_state is None:
-            owner = self._get_owner()
-            if owner and hasattr(owner, "save_state"):
-                checkpoint_state = owner.save_state()
-            else:
-                checkpoint_state = {}
-
-        # Create checkpoint record
-        checkpoint_id = str(uuid.uuid4())
-        checkpoint = Checkpoint(
-            checkpoint_id=checkpoint_id,
-            entity_id=eid,
-            state=checkpoint_state.copy(),  # Copy to prevent mutation
-            label=label,
-        )
-        self._checkpoints[checkpoint_id] = checkpoint
-
-        # Track checkpoint for this entity
-        if eid not in self._entity_checkpoints:
-            self._entity_checkpoints[eid] = []
-        self._entity_checkpoints[eid].append(checkpoint_id)
-
-        # Enforce max checkpoints (FIFO eviction)
-        while len(self._entity_checkpoints[eid]) > self.config.max_checkpoints:
-            oldest_id = self._entity_checkpoints[eid].pop(0)
-            self._checkpoints.pop(oldest_id, None)
-
-        return ProxyResult.ok(checkpoint_id)
-
-    async def restore(self, checkpoint_id: str) -> ProxyResult:
-        """
-        Restore state from a checkpoint.
-
-        Retrieves the checkpoint and calls owner.load_state() to apply it.
-
-        Args:
-            checkpoint_id: ID of the checkpoint to restore
-
-        Returns:
-            ProxyResult.ok(state) with restored state data
-            ProxyResult.fail(error_code, message) on failure
-
-        Error Codes:
-            - NOT_FOUND: Checkpoint ID doesn't exist
-            - RESTORE_FAILED: Internal error
-
-        Example:
-            result = await storage.restore(checkpoint_id)
-            if result.success:
-                logger.info("    Restored state: %s", result.data)
-            else:
-                logger.warning("    Restore failed: %s", result.error_code)
-        """
-        # Find checkpoint
-        if checkpoint_id not in self._checkpoints:
-            return ProxyResult.fail(
-                "NOT_FOUND", f"Checkpoint {checkpoint_id} not found"
-            )
-        checkpoint = self._checkpoints[checkpoint_id]
-
-        # Copy state to prevent mutation
-        restored_state = checkpoint.state.copy()
-
-        # Apply to owner if available
-        owner = self._get_owner()
-        if owner and hasattr(owner, "load_state"):
-            owner.load_state(restored_state)
-
-        return ProxyResult.ok(restored_state)
-
-    async def list_checkpoints(
-        self, entity_id: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        """
-        List all checkpoints for an entity.
-
-        Args:
-            entity_id: Entity ID (defaults to owner's identity)
-
-        Returns:
-            List of checkpoint metadata dicts (id, timestamp, label)
-        """
-        eid = entity_id or self.owner_id or ""
-        if eid in self._entity_checkpoints:
-            checkpoint_ids = self._entity_checkpoints[eid]
-        else:
-            checkpoint_ids = []
-        return [
-            {
-                "checkpoint_id": cid,
-                "timestamp": self._checkpoints[cid].timestamp,
-                "label": self._checkpoints[cid].label,
-            }
-            for cid in checkpoint_ids
-            if cid in self._checkpoints
-        ]
-
-    async def delete_checkpoint(self, checkpoint_id: str) -> bool:
-        """
-        Delete a checkpoint.
-
-        Args:
-            checkpoint_id: ID of the checkpoint to delete
-
-        Returns:
-            True if deleted, False if not found
-        """
-        if checkpoint_id not in self._checkpoints:
-            return False
-        checkpoint = self._checkpoints.pop(checkpoint_id)
-        # Also remove from entity's checkpoint list
-        if checkpoint.entity_id in self._entity_checkpoints:
-            entity_cps = self._entity_checkpoints[checkpoint.entity_id]
-            if checkpoint_id in entity_cps:
-                entity_cps.remove(checkpoint_id)
-        return True
-
-    async def get_latest_checkpoint(
-        self, entity_id: Optional[str] = None
-    ) -> ProxyResult:
-        """
-        Get and restore the most recent checkpoint.
-
-        Args:
-            entity_id: Entity ID (defaults to owner's identity)
-
-        Returns:
-            ProxyResult with restored state, or error if no checkpoints
-        """
-        eid = entity_id or self.owner_id or ""
-        if eid not in self._entity_checkpoints:
-            return ProxyResult.fail("NO_CHECKPOINTS", "No checkpoints found")
-        checkpoint_ids = self._entity_checkpoints[eid]
-        if not checkpoint_ids:
-            return ProxyResult.fail("NO_CHECKPOINTS", "No checkpoints found")
-        return await self.restore(checkpoint_ids[-1])
+        """Shutdown proxy and flush stores."""
+        for store in self._message_stores.values():
+            store.flush()
+        for store in self._turn_stores.values():
+            store.flush()
+        self.is_initialized = False
 
 
 # =============================================================================
@@ -1507,9 +1278,9 @@ class ResourceProxy(BaseProxy):
           │                              │──cache response──────────────│
           │◄──ProxyResult.ok(data)───────│                              │
 
-    Player vs Conductor Strategy:
-    - Player: Capability-filtered access, local caching
-    - Conductor: Global coordination, request deduplication
+    Player Usage Strategy:
+    - Regular Players: Capability-filtered access, local caching
+    - Coordinator Players: Global coordination, request deduplication
     """
 
     def __init__(
@@ -1545,14 +1316,14 @@ class ResourceProxy(BaseProxy):
                 "config": server_config,
                 "connected": True,
             }
-        self._is_initialized = True
+        self.is_initialized = True
 
     async def shutdown(self) -> None:
         """Shutdown and close all connections."""
         # TODO: Close actual MCP connections
         self._connections.clear()
         self._resource_cache.clear()
-        self._is_initialized = False
+        self.is_initialized = False
 
     async def fetch_resource(self, resource_uri: str) -> ProxyResult:
         """
@@ -1585,7 +1356,7 @@ class ResourceProxy(BaseProxy):
                 return ProxyResult.ok(cached)
 
         # Parse URI: mcp://server/path → (server, path)
-        server_name, resource_path = self._parse_uri(resource_uri)
+        server_name, _ = self._parse_uri(resource_uri)
 
         # Check connection
         if server_name not in self._connections:
@@ -1789,6 +1560,7 @@ class ObservabilityConfig(ProxyConfig):
     proxy_type: ProxyType = field(default=ProxyType.OBSERVABILITY, init=False)
     metrics_backend: str = "memory"  # "memory", "prometheus", "statsd"
     logging_backend: str = "structured"  # "structured", "json", "console"
+    log_dir: Optional[str] = None  # Directory for log files
     enable_tracing: bool = True  # Distributed tracing
     log_level: str = "INFO"  # Minimum log level
 
@@ -1838,9 +1610,9 @@ class ObservabilityProxy(BaseProxy):
             "result_count": len(result)
         })
 
-    Player vs Conductor Strategy:
-    - Player: Individual behavior audit, strategy performance
-    - Conductor: System-level aggregation, coordination impact
+    Player Usage Strategy:
+    - Regular Players: Individual behavior audit, strategy performance
+    - Coordinator Players: System-level aggregation, coordination impact
     """
 
     def __init__(
@@ -1872,7 +1644,7 @@ class ObservabilityProxy(BaseProxy):
     async def initialize(self) -> None:
         """Initialize observability backend connections."""
         # TODO: Connect to actual backends (Prometheus, etc.)
-        self._is_initialized = True
+        self.is_initialized = True
 
     async def shutdown(self) -> None:
         """
@@ -1882,7 +1654,7 @@ class ObservabilityProxy(BaseProxy):
         backend before shutdown completes.
         """
         # TODO: Flush to actual backend
-        self._is_initialized = False
+        self.is_initialized = False
 
     async def record_metric(
         self, name: str, value: Any, tags: Optional[Dict[str, str]] = None
@@ -2031,114 +1803,3 @@ class ObservabilityProxy(BaseProxy):
         if event_type:
             result = [e for e in result if e["event_type"] == event_type]
         return result
-
-
-# =============================================================================
-#                           PROXY FACTORY
-# =============================================================================
-#
-# ProxyFactory provides convenient methods for creating proxy instances.
-# It encapsulates default configuration and enables consistent instantiation.
-#
-# While explicit proxy creation is preferred (composition pattern), the
-# factory can simplify common use cases.
-# =============================================================================
-
-
-class ProxyFactory:
-    """
-    Factory for creating proxy instances with optional owner binding.
-
-    ┌─────────────────────────────────────────────────────────────────────┐
-    │                     PROXY FACTORY PATTERN                           │
-    │                                                                     │
-    │  The factory provides convenient creation methods:                  │
-    │                                                                     │
-    │    # Instead of:
-    │    proxy = CommunicationProxy(CommunicationConfig(), player)       │
-    │                                                                     │
-    │    # You can write:                                                 │
-    │    proxy = ProxyFactory.create_communication_proxy(owner=player)   │
-    │                                                                     │
-    │  Benefits:                                                          │
-    │    - Encapsulates default configuration                            │
-    │    - Single point of customization                                 │
-    │    - Consistent proxy creation across codebase                     │
-    └─────────────────────────────────────────────────────────────────────┘
-
-    Note:
-        The explicit attachment pattern is still preferred for clarity:
-
-            proxy = ProxyFactory.create_storage_proxy()
-            player.attach_storage_proxy(proxy)  # Explicit attachment
-
-        Rather than passing owner to factory (which still requires attach).
-    """
-
-    @staticmethod
-    def create_communication_proxy(
-        config: Optional[CommunicationConfig] = None,
-        owner: Optional[OwnerType] = None,
-    ) -> CommunicationProxy:
-        """
-        Create a CommunicationProxy instance.
-
-        Args:
-            config: Optional configuration (uses defaults if None)
-            owner: Optional owner entity
-
-        Returns:
-            Configured CommunicationProxy instance
-        """
-        return CommunicationProxy(config, owner)
-
-    @staticmethod
-    def create_storage_proxy(
-        config: Optional[StorageConfig] = None,
-        owner: Optional[OwnerType] = None,
-    ) -> StorageProxy:
-        """
-        Create a StorageProxy instance.
-
-        Args:
-            config: Optional configuration (uses defaults if None)
-            owner: Optional owner entity
-
-        Returns:
-            Configured StorageProxy instance
-        """
-        return StorageProxy(config, owner)
-
-    @staticmethod
-    def create_resource_proxy(
-        config: Optional[ResourceConfig] = None,
-        owner: Optional[OwnerType] = None,
-    ) -> ResourceProxy:
-        """
-        Create a ResourceProxy instance.
-
-        Args:
-            config: Optional configuration (uses defaults if None)
-            owner: Optional owner entity
-
-        Returns:
-            Configured ResourceProxy instance
-        """
-        return ResourceProxy(config, owner)
-
-    @staticmethod
-    def create_observability_proxy(
-        config: Optional[ObservabilityConfig] = None,
-        owner: Optional[OwnerType] = None,
-    ) -> ObservabilityProxy:
-        """
-        Create an ObservabilityProxy instance.
-
-        Args:
-            config: Optional configuration (uses defaults if None)
-            owner: Optional owner entity
-
-        Returns:
-            Configured ObservabilityProxy instance
-        """
-        return ObservabilityProxy(config, owner)

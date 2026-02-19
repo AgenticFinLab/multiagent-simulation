@@ -4,14 +4,17 @@ Provides simulation orchestration with Ray-based distributed computing.
 
 Architecture:
     Simulator ─────► PlayerPersona (Ray Actor) ──► BasePlayer (hidden)
-    Simulator ─────► ConductorPersona (Ray Actor) ──► BaseConductor (hidden)
 
-Simulator interacts ONLY with Personas - Player/Conductor are internal details.
+All agents are Players. Coordinator functionality is implemented as a
+Player with role='coordinator' in config.
+
+Simulator interacts ONLY with Personas - Player internals are hidden.
 
 Hierarchical Execution Model:
 - Simulator: round (orchestrates all Personas)
-- PlayerPersona: step (internally calls Player.step)
-- ConductorPersona: cycle (internally calls Conductor.cycle)
+- PlayerPersona: operate (internally calls Player.turn)
+- Player: turn (for loop calling step)
+- Player: step (perceive→decide→act)
 
 Module Structure:
 - base.py: Abstract base classes, type definitions, enums (no implementation)

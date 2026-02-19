@@ -1,0 +1,7 @@
+{
+  "000003": {
+    "round_num": 3,
+    "timestamp": "2026-02-19T19:16:12.692893",
+    "turn_result": "TurnResult(step_results=[StepResult(decision_payload={'from': 'player_1', 'round': 3, 'counter': 3, 'message': 'Response from player_1, counter=3'}, action=Action(action_type='player_response', payload={'from': 'player_1', 'round': 3, 'counter': 3, 'message': 'Response from player_1, counter=3'}, source_id='player_1', action_id='a780e8d1-97bc-43b0-af7c-cc8b0392055b', timestamp='2026-02-19T19:16:12.685644', metadata={'role': 'player'}, status=<ActionStatus.CREATED: 1>), tick_step_count=3, tick_step_duration_ms=0.0830420758575201)], final_action=Action(action_type='player_response', payload={'from': 'player_1', 'round': 3, 'counter': 3, 'message': 'Response from player_1, counter=3'}, source_id='player_1', action_id='a780e8d1-97bc-43b0-af7c-cc8b0392055b', timestamp='2026-02-19T19:16:12.685644', metadata={'role': 'player'}, status=<ActionStatus.CREATED: 1>), tick_turn_count=3, tick_turn_duration_ms=0.08612498641014099, tick_turn_total_duration_ms=0.3660419024527073, tick_step_count=1)"
+  }
+}

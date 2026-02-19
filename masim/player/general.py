@@ -10,7 +10,7 @@ Use GeneralPlayer as:
 For abstract definitions and documentation, see base.py.
 """
 
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, Optional, TYPE_CHECKING
 
 from masim.player.base import (
     BasePlayer,
@@ -65,7 +65,7 @@ class GeneralPlayer(BasePlayer):
 
         obs = Observation(
             local=LocalObservation(data={"price": 100.0}),
-            conductor_notify={"phase": "trading"},
+            notification={"phase": "trading"},
             round=1,
         )
         result = await player.step(obs)

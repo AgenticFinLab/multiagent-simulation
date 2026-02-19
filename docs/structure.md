@@ -14,13 +14,10 @@ masim/
 │   └── general.py           # GeneralSimulator with Ray actor management
 ├── persona/                 # L2: Infrastructure coordination facade
 │   ├── base.py              # Abstract BasePersona, PersonaConfig
-│   └── general.py           # PlayerPersona, ConductorPersona
+│   └── general.py           # PlayerPersona (for all players including coordinators)
 ├── player/                  # L3: Autonomous agent domain logic
 │   ├── base.py              # Abstract BasePlayer, Action, Observation, PlayerConfig, PlayerState
 │   └── general.py           # GeneralPlayer, EchoPlayer, NoOpPlayer, ReactivePlayer
-├── conductor/               # L3: Coordination domain logic
-│   ├── base.py              # Abstract BaseConductor, CoordinationDecision, ConductorConfig
-│   └── general.py           # GeneralConductor, PassThroughConductor, BroadcastConductor
 ├── proxy/                   # Infrastructure primitives (micro-proxy pattern)
 │   ├── base.py              # Four proxy types + ProxyFactory
 │   └── general.py           # Convenience constructors, simplified wrappers
@@ -40,9 +37,10 @@ MASim employs a strict three-layer separation to isolate domain logic from infra
 
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
-│  Layer 1: Player / Conductor  (WHAT)                               │
+│  Layer 1: Player  (WHAT)                                          │
 │  Pure domain logic — perceive → decide → act                       │
 │  ZERO infrastructure knowledge, ZERO proxy references              │
+│  Coordinators are Players with role='coordinator'                  │
 └───────────────────────┬───────────────────────────────────────────────┘
                         │  self._persona.xxx()
 ┌───────────────────────▼───────────────────────────────────────────────┐
@@ -71,15 +69,15 @@ MASim employs a strict three-layer separation to isolate domain logic from infra
 | **Why not let Player use Proxies directly?** | Violates separation of concerns. Player would be polluted with infrastructure logic (when to checkpoint, how to retry, error handling). |
 | **Why not merge Persona into Player?**       | Player should be pure domain logic, easily testable without infrastructure. Persona handles Ray integration, lifecycle, and policies.   |
 | **Why not merge Proxy into Persona?**        | Different proxies have different implementations (storage backends, message protocols). Single-responsibility principle.                |
-| **Why does Persona own proxy_config?**       | Centralized configuration. Player/Conductor don't need to know proxy details. Changing storage backend only affects Persona config.     |
+| **Why does Persona own proxy_config?**       | Centralized configuration. Player doesn't need to know proxy details. Changing storage backend only affects Persona config.             |
 
 ### Layer Responsibilities
 
-| Layer                | Responsibility             | Knows About          | Hidden From                       |
-|----------------------|----------------------------|----------------------|-----------------------------------|
-| **Player/Conductor** | Domain logic (WHAT to do)  | Only `self._persona` | Proxies, Ray, configs             |
-| **Persona**          | Coordination (WHEN to do)  | All 4 proxies, Ray   | Implementation details of proxies |
-| **Proxy**            | Infrastructure (HOW to do) | Specific backend     | Domain logic                      |
+| Layer       | Responsibility             | Knows About          | Hidden From                       |
+|-------------|----------------------------|----------------------|-----------------------------------|
+| **Player**  | Domain logic (WHAT to do)  | Only `self._persona` | Proxies, Ray, configs             |
+| **Persona** | Coordination (WHEN to do)  | All 4 proxies, Ray   | Implementation details of proxies |
+| **Proxy**   | Infrastructure (HOW to do) | Specific backend     | Domain logic                      |
 
 ### Concrete Example: Checkpoint Flow
 
@@ -130,10 +128,10 @@ SimulationConfig
 │           │   └── observability: {log_level: "INFO"}
 │           └── env_overrides: {...}
 │
-└── conductor: (same structure)
+└── ... (more players with role='coordinator' or role='player')
 ```
 
-**Key Rule**: `proxy_config` is EXCLUSIVELY owned by Persona. Player/Conductor never see it.
+**Key Rule**: `proxy_config` is EXCLUSIVELY owned by Persona. Players never see it.
 
 ## Hierarchical Execution Model
 
@@ -145,16 +143,17 @@ SimulationConfig
 │  L2      │  PlayerPersona     │  operate  │  Calls Player.turn()         │
 │  L3      │  Player            │  turn     │  Loop of step() calls        │
 │  L4      │  Player            │  step     │  perceive → decide → act     │
-│  L2      │  ConductorPersona  │  cycle    │  receive → analyze →         │
-│          │                    │           │  coordinate                  │
 └──────────┴────────────────────┴───────────┴──────────────────────────────┘
 ```
 
-A single **round** progresses through three phases:
+Note: Coordinators are Players with `role='coordinator'` in their config.
+They execute first in each round, then regular players execute.
 
-1. **NOTIFICATION** — Conductor notifies all Players of round state.
-2. **PLAYER_DECISION** — All PlayerPersonas execute `operate()` in parallel (Ray).
-3. **COORDINATION** — ConductorPersona collects response_pool and executes `cycle()`, broadcasts decision.
+A single **round** progresses through these phases:
+
+1. **COORDINATION** (if coordinators exist) — Coordinators execute first.
+2. **PLAYER_DECISION** — All regular PlayerPersonas execute `operate()` in parallel (Ray).
+3. **COMPLETE** — Collect results and record history.
 
 ## Execution Granularity
 
@@ -164,15 +163,13 @@ The framework uses a strict hierarchical time model where each level has its own
 ╔═══════════════════════════════════════════════════════════════════════════╗
 ║  ROUND (Simulator)                                                       ║
 ║  • One complete simulation cycle across ALL entities                     ║
-║  • Progresses through phases: NOTIFICATION → PLAYER_DECISION → COORDINATION ║
+║  • Phases: COORDINATION (if coordinators) → PLAYER_DECISION → COMPLETE   ║
 ║  • Tracked by: round_clock (ExecutionClock)                              ║
-╠═════════════════════════════════════╣═════════════════════════════════════╣
-║  OPERATE (PlayerPersona)            ║  CYCLE (ConductorPersona)          ║
-║  • Simulator-facing interface       ║  • Simulator-facing interface       ║
-║  • Invokes Player.turn()            ║  • notify → collect → analyze      ║
-║  • Returns: TurnResult              ║    → coordinate                    ║
-║                                     ║  • Returns: CycleResult             ║
-╠═════════════════════════════════════╩═════════════════════════════════════╣
+╠═══════════════════════════════════════════════════════════════════════════╣
+║  OPERATE (PlayerPersona)                                                 ║
+║  • Simulator-facing interface for ALL players (coordinators & regular)   ║
+║  • Invokes Player.turn() internally                                      ║
+║  • Returns: TurnResult                                                   ║
 ║  TURN (Player)                                                           ║
 ║  • A batch of steps within one operate() call                           ║
 ║  • Iterative loop: step(prev_result) × num_steps                        ║
@@ -188,13 +185,12 @@ The framework uses a strict hierarchical time model where each level has its own
 
 ### Granularity Definitions
 
-| Term        | Owner            | Description                                                                | Output      | Clock         |
-|-------------|------------------|----------------------------------------------------------------------------|-------------|---------------|
-| **round**   | Simulator        | One complete simulation cycle; all players act, then conductor coordinates | RoundResult | `round_clock` |
-| **operate** | PlayerPersona    | Facade method called by Simulator; invokes `turn()` internally             | TurnResult  | (delegates)   |
-| **turn**    | Player           | Batch of `step()` calls; iterates with `prev_result` chaining              | TurnResult  | `turn_clock`  |
-| **step**    | Player           | Atomic unit: `perceive() → decide() → act()`                               | StepResult  | `step_clock`  |
-| **cycle**   | ConductorPersona | Conductor's coordination unit: `analyze(responses) → coordinate`           | CycleResult | `cycle_clock` |
+| Term        | Owner         | Description                                                             | Output      | Clock         |
+|-------------|---------------|-------------------------------------------------------------------------|-------------|---------------|
+| **round**   | Simulator     | One complete simulation cycle; coordinators first, then regular players | RoundResult | `round_clock` |
+| **operate** | PlayerPersona | Facade method called by Simulator; invokes `turn()` internally          | TurnResult  | (delegates)   |
+| **turn**    | Player        | Batch of `step()` calls; iterates with `prev_result` chaining           | TurnResult  | `turn_clock`  |
+| **step**    | Player        | Atomic unit: `perceive() → decide() → act()`                            | StepResult  | `step_clock`  |
 
 ### Time Tracking (ExecutionClock)
 
@@ -212,8 +208,11 @@ class ExecutionClock:
 
 ```
 Round 1
-├── Phase: NOTIFICATION
-│   └── conductor.notify() → {player_id: notification_dict}
+├── Phase: COORDINATION (if coordinators exist)
+│   └── PlayerPersona[coordinator].operate()
+│       └── Player.turn(num_steps=1)
+│           └── step: perceive → decide → act → StepResult
+│           → TurnResult (coordinator's action/broadcast)
 │
 ├── Phase: PLAYER_DECISION (parallel)
 │   ├── PlayerPersona[agent_1].operate()
@@ -225,15 +224,8 @@ Round 1
 │   │
 │   └── PlayerPersona[agent_2].operate() ... (parallel)
 │
-├── Phase: COORDINATION
-│   └── ConductorPersona.cycle()
-│       ├── collect_census(all_actions)
-│       ├── analyze() → analysis_result
-│       └── coordinate(analysis) → CoordinationDecision
-│       → CycleResult
-│
 └── Phase: COMPLETE
-    └── Broadcast decision to all players
+    └── Collect all results, record history
 
 Round 2 ...
 ```
@@ -242,9 +234,9 @@ Round 2 ...
 
 1. **Stateful Step Chaining**: Each `step()` receives `prev_result` from the previous step, enabling iterative refinement (e.g., multi-round negotiation, progressive reasoning).
 
-2. **Isolation Boundaries**: Simulator only sees `operate()` / `cycle()`; it has no knowledge of the internal `turn` / `step` structure. This preserves encapsulation.
+2. **Isolation Boundaries**: Simulator only sees `operate()`; it has no knowledge of the internal `turn` / `step` structure. This preserves encapsulation.
 
-3. **Parallel Execution**: All `PlayerPersona.operate()` calls within a round execute in parallel via Ray; the Conductor waits for all to complete before coordination.
+3. **Parallel Execution**: All `PlayerPersona.operate()` calls within a round execute in parallel via Ray; coordinators execute first if present.
 
 4. **Clock Hierarchy**: Each level tracks its own timing independently, enabling fine-grained performance analysis and debugging.
 
@@ -252,14 +244,14 @@ Round 2 ...
 
 The Simulator is a **pure orchestrator**. It does not generate observations, execute actions, or interpret domain semantics.
 
-| Symbol             | Role                                                                                                               |
-|--------------------|--------------------------------------------------------------------------------------------------------------------|
-| `SimulatorStatus`  | Enum: `INITIALIZING → READY → RUNNING → PAUSED → TERMINATED → ERROR`                                               |
-| `RoundPhase`       | Enum: `NOTIFICATION → PLAYER_DECISION → COORDINATION → COMPLETE`                                                   |
-| `ExecutionClock`   | Hierarchical time tracking (`tick_start` / `tick_end`)                                                             |
-| `SimulationConfig` | Dataclass whose fields match `simulation.yml` top-level keys: `setting`, `ray`, `players`, `conductor`, `topology` |
-| `BaseSimulator`    | Abstract — subclasses implement `create_player_personas()` and `create_conductor_persona()`                        |
-| `GeneralSimulator` | Concrete — Ray cluster init, actor launching, round loop                                                           |
+| Symbol             | Role                                                                                |
+|--------------------|-------------------------------------------------------------------------------------|
+| `SimulatorStatus`  | Enum: `INITIALIZING → READY → RUNNING → PAUSED → TERMINATED → ERROR`                |
+| `RoundPhase`       | Enum: `NOTIFICATION → PLAYER_DECISION → COORDINATION → COMPLETE`                    |
+| `ExecutionClock`   | Hierarchical time tracking (`tick_start` / `tick_end`)                              |
+| `SimulationConfig` | Dataclass: `setting`, `ray`, `players` (includes coordinators via role), `topology` |
+| `BaseSimulator`    | Abstract — subclasses implement `_launch_player_personas()`                         |
+| `GeneralSimulator` | Concrete — Ray cluster init, actor launching, round loop                            |
 
 Configuration loading:
 
@@ -270,16 +262,16 @@ sim_config = SimulationConfig(**yaml_config)
 
 ## Persona (`masim/persona/`)
 
-Persona is the **primary external interface** that the Simulator interacts with. Player and Conductor are completely hidden behind their respective Personas as internal implementation details.
+Persona is the **primary external interface** that the Simulator interacts with. Player is completely hidden behind Persona as internal implementation detail.
 
-| Symbol             | Role                                                                                                |
-|--------------------|-----------------------------------------------------------------------------------------------------|
-| `BasePersona`      | Abstract — proxy aggregation, `fetch_resource()`, `log_event()`                                     |
-| `PersonaConfig`    | `auto_checkpoint`, `debug_mode`, `env_overrides`                                                    |
-| `PlayerPersona`    | Wraps `BasePlayer`, exposes `operate()` / `initialize()` / `shutdown()` / `get_state_snapshot()`    |
-| `ConductorPersona` | Wraps `BaseConductor`, exposes `cycle()` / `notify()` / `receive_responses()` / `register_player()` |
+| Symbol          | Role                                                                                             |
+|-----------------|--------------------------------------------------------------------------------------------------|
+| `BasePersona`   | Abstract — proxy aggregation, `fetch_resource()`, `log_event()`                                  |
+| `PersonaConfig` | `auto_checkpoint`, `debug_mode`, `env_overrides`                                                 |
+| `PlayerPersona` | Wraps `BasePlayer`, exposes `operate()` / `initialize()` / `shutdown()` / `get_state_snapshot()` |
 
-At runtime, both Persona types are deployed as **Ray actors** with detached lifetime.
+All Personas (including coordinators) are deployed as **Ray actors** with detached lifetime.
+Coordinators are simply Players with `role='coordinator'` in their config.
 
 ## Player (`masim/player/`)
 
@@ -310,8 +302,9 @@ The framework composes these into `step()` and `turn()` automatically.
 
 ### Key Design Properties
 
-- **Information Asymmetry**: Player state is private and invisible to Conductor and other Players.
-- **Capability Parity**: Player and Conductor have equal infrastructure access (same proxy set via Persona); they differ only in output type.
+- **Information Asymmetry**: Player state is private and invisible to other Players.
+- **Role-Based Coordination**: Players with `role='coordinator'` execute first and can coordinate other players.
+- **Unified Interface**: All agents use the same `perceive → decide → act` pattern.
 
 ### Built-in Implementations
 
@@ -322,49 +315,39 @@ The framework composes these into `step()` and `turn()` automatically.
 | `NoOpPlayer`     | Always produces no-op actions                  |
 | `ReactivePlayer` | Triggers actions based on `extras["triggers"]` |
 
-## Conductor (`masim/conductor/`)
+## Coordination (Unified Player Architecture)
 
-A Conductor is defined by its behavioral contract: it produces `CoordinationDecision` objects that **indirectly influence** Players. It cannot directly act on the environment.
+In MASim, **coordinators are Players** with `role='coordinator'` in their config. There is no separate Conductor class.
 
-### Core Data Types
+### How Coordination Works
 
-| Type                   | Description                                                                        |
-|------------------------|------------------------------------------------------------------------------------|
-| `CoordinationDecision` | `decision_type`, `scope` (GLOBAL/GROUP/INDIVIDUAL), `parameters`, `source_id`      |
-| `CycleResult`          | Result of one `analyze(responses) → coordinate` cycle                              |
-| `DecisionScope`        | Enum: `GLOBAL`, `GROUP`, `INDIVIDUAL`                                              |
-| `ConductorConfig`      | `identity`, `coordination_mode`, `extras`                                          |
-| `ConductorState`       | Globally visible — cycle counter, player registry, response_pool, decision history |
+1. **Config-Based Role**: Players with `role='coordinator'` are distinguished at config level:
+   ```yaml
+   players:
+     market_coordinator:
+       role: coordinator  # <-- Executes first in each round
+       class: examples.Demo.coordinator:SimpleMarketCoordinator
+     player_1:
+       role: player       # <-- Executes after coordinators (default)
+   ```
 
-### Abstract Contract
+2. **Execution Order**: Coordinators execute first, then regular players.
 
-Subclasses of `BaseConductor` implement:
+3. **Same Interface**: Coordinators use the same `perceive → decide → act` pattern.
 
-```
-notify(round_num, player_ids)      → Dict[str, Dict]      # Conductor → Players
-analyze(responses)                 → Dict[str, Any]       # Process responses
-coordinate(analysis_result)        → CoordinationDecision
-```
+### Supported Coordination Modes
 
-The framework composes `analyze(responses) → coordinate` into `cycle()` automatically.
+| Mode                      | Description                                        |
+|---------------------------|----------------------------------------------------|
+| **No Coordinator**        | Peer-to-peer mode, all players execute in parallel |
+| **Single Coordinator**    | Traditional hierarchical coordination              |
+| **Multiple Coordinators** | Multi-level coordination hierarchy (future)        |
 
-Note: `notify()` is called BEFORE players act; responses are collected via streaming.
+### Design Properties
 
-### Key Design Properties
-
-- **Global Visibility**: Conductor state is transparent (unlike Player's private state).
-- **Notification Ownership**: The Conductor notifies Players because it has global visibility and controls information asymmetry.
-- **Response-based Coordination**: Conductor collects "response_pool" (aggregated responses from Players) before analysis.
-- **Contract Enforcement**: `_validate_decision()` rejects decision types that would directly act on the environment.
-
-### Built-in Implementations
-
-| Class                  | Behavior                             |
-|------------------------|--------------------------------------|
-| `GeneralConductor`     | Configurable coordination logic      |
-| `PassThroughConductor` | No coordination, passes through      |
-| `ThrottlingConductor`  | Applies throttling based on activity |
-| `BroadcastConductor`   | Broadcasts decisions to all players  |
+- **Information Asymmetry**: Coordinators can see aggregated player responses.
+- **Coordinator-First Execution**: Coordinators run first to prepare state for regular players.
+- **Same Infrastructure**: Coordinators use the same Persona/Proxy infrastructure as regular players.
 
 ## Proxy (`masim/proxy/`)
 
@@ -402,7 +385,7 @@ All cross-component messages conform to the `Message` format. Custom objects, cl
 | Symbol                      | Role                                                                                           |
 |-----------------------------|------------------------------------------------------------------------------------------------|
 | `load_config()`             | Load YAML with `!include` tag support and `${VAR:-default}` environment variable interpolation |
-| `validate_config()`         | Validate required sections, player/conductor structure, topology constraints                   |
+| `validate_config()`         | Validate required sections, player structure, topology constraints                             |
 | `build_connection_matrix()` | Build `source_id → {target_ids}` adjacency from topology config                                |
 | `ConnectionValidator`       | Enforce topology at runtime: `can_send()`, `can_broadcast()`, `validate_send()`                |
 | `setup_logging()`           | Configure Python logging with MASim defaults                                                   |
@@ -415,8 +398,7 @@ Configuration uses a modular `!include` pattern:
 ```
 configs/Demo/
 ├── simulation.yml    # Top-level: setting, ray, environment, logging
-├── players.yml       # Player definitions (class path + config)
-├── conductor.yml     # Conductor definition (class path + config)
+├── players.yml       # Player definitions (class path + config), includes coordinators
 └── topology.yml      # Communication topology (star/mesh/custom + connections)
 ```
 
@@ -425,8 +407,7 @@ configs/Demo/
 ```yaml
 setting:     # name, total_rounds, entry_limit, steps_per_turn, etc.
 ray:         # address, namespace, num_cpus, dashboard, actor_options, etc.
-players:     !include players.yml
-conductor:   !include conductor.yml
+players:     !include players.yml  # Includes coordinators with role='coordinator'
 topology:    !include topology.yml
 ```
 
@@ -436,7 +417,7 @@ MASim is **natively Ray-based** — there is no runtime-agnostic abstraction lay
 
 - `ensure_ray()` initializes the Ray cluster from the `ray` config dict.
 - `get_actor_name()` produces deterministic actor names: `{simulation_name}::{entity_id}`.
-- `load_class()` dynamically imports player/conductor classes from `"module.path:ClassName"` strings.
+- `load_class()` dynamically imports player classes from `"module.path:ClassName"` strings.
 - All Personas are launched as **detached Ray actors** within a shared namespace.
 - `ray.get()` is used for synchronous result collection; `ray.remote()` for parallel dispatch.
 
@@ -451,22 +432,18 @@ run_simple_simulation.py
 │
 ├─ simulator.setup()
 │   ├─ ensure_ray(config.ray)
-│   ├─ create_player_personas()     # load_class → PlayerPersona
 │   ├─ _launch_player_personas()    # ray.remote → detached actors
-│   ├─ create_conductor_persona()   # load_class → ConductorPersona
-│   ├─ _launch_conductor_persona()  # ray.remote → detached actor
-│   ├─ register all players with conductor
+│   │   └─ Separates coordinators from regular players
 │   └─ initialize all actors
 │
 ├─ simulator.run()
 │   └─ for round in 1..total_rounds:
-│       ├─ Phase 1: conductor.notify()           # Conductor → Players
+│       ├─ Phase 1: coordinator_persona.operate() (if coordinators exist)
+│       │   └─ Player.turn() → step() × num_steps
 │       ├─ Phase 2: player_persona.operate() [parallel via Ray]
 │       │   └─ Player.turn() → step() × num_steps
 │       │       └─ perceive → decide → act → StepResult
-│       ├─ Phase 3: conductor.receive_responses() → cycle()  # Players → Conductor
-│       │   └─ analyze(responses) → coordinate → CycleResult
-│       └─ broadcast coordination decision to all players
+│       └─ Phase 3: Collect results, record history
 │
 └─ simulator.shutdown()
     └─ shutdown all actor handles
@@ -490,39 +467,43 @@ class MyPlayer(BasePlayer):
         return Action(action_type="trade", payload=decision, source_id=self.identity)
 ```
 
-**2. Custom Conductor** — subclass `BaseConductor`:
+**2. Custom Coordinator** — subclass `BasePlayer` with `role='coordinator'`:
 
 ```python
-class MyMarket(BaseConductor):
-    def notify(self, round_num, player_ids):
-        """Notify players of round state (Conductor → Players)."""
-        return {pid: {"data": {...}, "source_id": self.identity, "num_steps": 1}
-                for pid in player_ids}
+class MyCoordinator(BasePlayer):
+    async def perceive(self, observation, prev_result=None):
+        """Process observations from simulator."""
+        self.state.set_custom("round", observation.step)
 
-    async def analyze(self, responses):
-        """Analyze responses from players."""
-        return {"summary": ..., "count": len(responses)}
+    async def decide(self):
+        """Prepare coordination message for players."""
+        return {"market_state": ..., "round": self.state.get_custom("round")}
 
-    async def coordinate(self, analysis):
-        """Produce CoordinationDecision."""
-        return CoordinationDecision(
-            decision_type="price_update", scope=DecisionScope.GLOBAL,
-            parameters=analysis, source_id=self.identity)
+    async def act(self, decision):
+        """Broadcast coordination decision."""
+        return Action(
+            action_type="coordinate", 
+            payload=decision, 
+            source_id=self.identity,
+            metadata={"role": "coordinator"}
+        )
 ```
 
 **3. YAML Configuration** — reference the classes via module path:
 
 ```yaml
 # players.yml
+market_coordinator:
+  class: "my_module.coordinator:MyCoordinator"
+  name: "Market Coordinator"
+  config:
+    identity: "coordinator"
+    role: coordinator  # <-- Executes first in each round
+
 agent_1:
   class: "my_module.players:MyPlayer"
   name: "Agent 1"
   config:
     identity: "agent_1"
-
-# conductor.yml
-class: "my_module.conductor:MyMarket"
-name: "My Market"
-config:
-  identity: "market"
+    role: player  # <-- Default, executes after coordinators
 ```

@@ -1,39 +1,36 @@
 # =============================================================================
-# Communication Topology - Star (All via Market)
+# Demo Topology - Star Pattern
 # =============================================================================
-# All investors communicate only through the market (conductor).
+# Coordinator as hub, all players communicate through coordinator.
 #
-#         investor_1 ──┐
-#                      │
-#         investor_2 ──┼──▶ market ──┬──▶ investor_1
-#                      │             ├──▶ investor_2
-#         investor_3 ──┘             └──▶ investor_3
+#         player_1 ──┐
+#                    │
+#         player_2 ──┼──▶ coordinator ──┬──▶ player_1
+#                    │                  └──▶ player_2
+#                    │
+#                    └──── (responses) ◀────────────┘
 #
+# Execution flow per round:
+#   Level 0: coordinator executes (sends to players)
+#   Level 1: player_1, player_2 execute in parallel (respond to coordinator)
 # =============================================================================
 
 type: "star"
 
-# Explicit connections: source → [targets]
-# Only connected entities can send messages to each other
+# Entry points for execution order derivation (BFS from seeds)
+seeds:
+  - coordinator
+
+# Explicit connections: sender → [targets]
 connections:
-  # Market (conductor) → All investors
-  market:
-    - investor_1
-    - investor_2
-    - investor_3
-  
-  # Each investor → Market only
-  investor_1:
-    - market
-  
-  investor_2:
-    - market
-  
-  investor_3:
-    - market
+  # Coordinator → All players (broadcasts)
+  coordinator:
+    - player_1
+    - player_2
 
-group_communication: false
+  # Each player → Coordinator only (responses)
+  player_1:
+    - coordinator
 
-broadcast:
-  allowed_sources:
-    - "market"
+  player_2:
+    - coordinator

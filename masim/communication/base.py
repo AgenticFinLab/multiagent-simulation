@@ -68,9 +68,9 @@ Builder Functions:
                           MESSAGE TYPES
 ================================================================================
 
-    OBSERVATION  - Environment/Conductor → Players (round state notification)
-    ACTION       - Player → Environment/Conductor (behavioral output)
-    COORDINATION - Conductor → Players (coordination decision broadcast)
+    OBSERVATION  - Environment → Players (round state notification)
+    ACTION       - Player → Environment (behavioral output)
+    COORDINATION - Player → Players (coordination decision broadcast)
     PEER         - Player ↔ Player (direct peer communication)
     SYSTEM       - Framework internal control messages
     BROADCAST    - One-to-many messages
@@ -103,9 +103,9 @@ class MessageType(Enum):
 
     # Environment -> Players
     OBSERVATION = auto()
-    # Player -> Environment/Conductor
+    # Player -> Environment
     ACTION = auto()
-    # Conductor -> Players
+    # Player -> Players (coordination)
     COORDINATION = auto()
     # Player <-> Player
     PEER = auto()
@@ -502,4 +502,39 @@ def build_peer_message(
         recipient_id=target_id,
         payload=content,
         correlation_id=correlation_id,
+    )
+
+
+def build_message_from_outbound(
+    outbound: Any,
+    sender_id: str,
+    target_id: str,
+) -> Message:
+    """
+    Convert content-focused Outbound to wire-ready Message.
+
+    This function bridges the gap between Player's content-focused Outbound
+    and Communication's transport-focused Message. All transport metadata
+    (sender_id, message_type, timestamp, etc.) is auto-configured.
+
+    Args:
+        outbound: The Outbound object containing payload, content_type, extras
+        sender_id: The sender's identity (auto-filled by Persona)
+        target_id: The target's identity (determined by Persona based on topology)
+
+    Returns:
+        A fully-configured Message ready for transmission
+    """
+    # Build payload with content structure
+    payload = {
+        "content": outbound.payload,
+        "content_type": getattr(outbound, "content_type", None),
+        "extras": getattr(outbound, "extras", {}),
+    }
+
+    return Message(
+        message_type=MessageType.PEER,
+        sender_id=sender_id,
+        recipient_id=target_id,
+        payload=payload,
     )

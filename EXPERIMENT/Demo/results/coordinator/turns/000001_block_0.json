@@ -1,0 +1,7 @@
+{
+  "000001": {
+    "round_num": 1,
+    "timestamp": "2026-02-19T19:16:12.568176",
+    "turn_result": "TurnResult(step_results=[StepResult(decision_payload={'broadcast_targets': 2, 'round': 1}, action=Action(action_type='coordinator_broadcast', payload={'broadcast_targets': 2, 'round': 1}, source_id='coordinator', action_id='1255bee3-02a0-4e57-9fce-dac54db9b188', timestamp='2026-02-19T19:16:12.560059', metadata={'role': 'coordinator'}, status=<ActionStatus.CREATED: 1>), tick_step_count=1, tick_step_duration_ms=0.13037514872848988)], final_action=Action(action_type='coordinator_broadcast', payload={'broadcast_targets': 2, 'round': 1}, source_id='coordinator', action_id='1255bee3-02a0-4e57-9fce-dac54db9b188', timestamp='2026-02-19T19:16:12.560059', metadata={'role': 'coordinator'}, status=<ActionStatus.CREATED: 1>), tick_turn_count=1, tick_turn_duration_ms=0.16850000247359276, tick_turn_total_duration_ms=0.16850000247359276, tick_step_count=1)"
+  }
+}

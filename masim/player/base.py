@@ -52,10 +52,10 @@ Key Components:
 
    This means:
    - Player → Action → Environment (direct interpretation)
-   - Conductor → CoordinationDecision → Players (indirect influence)
+   - Coordinator (role='coordinator') → Actions → Other Players (coordination)
 
-   Player outputs are COMMANDS that the environment executes.
-   Conductor outputs are SUGGESTIONS that Players may consider.
+   All Players produce Actions that the environment interprets.
+   Coordinators are Players that also orchestrate other Players.
 
 2. INFORMATION ASYMMETRY
    ----------------------
@@ -64,8 +64,8 @@ Key Components:
    ┌──────────────────────────────────────────────────────────────┐
    │                    VISIBILITY BOUNDARY                        │
    │                                                               │
-   │   Conductor          ──────────────────────►  Globally Visible │
-   │   Player.state       ──────────────────────►  Private         │
+   │   Coordinator       ──────────────────────►  May have global view  │
+   │   Player.state      ──────────────────────►  Private              │
    │                                                               │
    │   This asymmetry is FUNDAMENTAL to multi-agent systems:       │
    │   - Enables strategic behavior                                │
@@ -73,17 +73,23 @@ Key Components:
    │   - Prevents "omniscient coordinator" anti-pattern            │
    └──────────────────────────────────────────────────────────────┘
 
-3. CAPABILITY PARITY WITH CONDUCTOR
-   ---------------------------------
-   Player and Conductor have EQUAL capabilities (same proxy access).
-   They differ ONLY in their behavioral contracts:
+3. UNIFIED PLAYER ARCHITECTURE
+   ----------------------------
+   All agents are Players. The `role` field distinguishes behavior:
 
-   ┌─────────────────┬──────────────────────┬─────────────────────┐
-   │  Component      │  Output Type         │  Environment Impact │
-   ├─────────────────┼──────────────────────┼─────────────────────┤
-   │  Player         │  Action              │  DIRECT             │
-   │  Conductor      │  CoordinationDecision│  INDIRECT           │
-   └─────────────────┴──────────────────────┴─────────────────────┘
+   ┌───────────────────────────────────────────────────────────────┐
+   │  Role            │  Execution Order  │  Responsibilities      │
+   ├──────────────────┼───────────────────┼────────────────────────┤
+   │  coordinator     │  First           │  Send init, collect,   │
+   │                  │                  │  process, broadcast    │
+   ├──────────────────┼───────────────────┼────────────────────────┤
+   │  player          │  After coord     │  Receive, decide, act  │
+   └──────────────────┴───────────────────┴────────────────────────┘
+
+   Supported configurations:
+   - Zero coordinators: Pure peer-to-peer simulation
+   - One coordinator: Traditional hierarchical coordination
+   - Multiple coordinators: Multi-level coordination hierarchy
 
 4. THREE-LAYER ARCHITECTURE (Persona Pattern)
    --------------------------------------------
@@ -310,10 +316,9 @@ class Action:
     │                        ACTION CONTRACT                               │
     │                                                                      │
     │  An Action is a COMMAND that is DIRECTLY INTERPRETED by the         │
-    │  environment. This is the key distinction from CoordinationDecision.│
+    │  environment.                                                        │
     │                                                                      │
     │  Player ────► Action ────► Environment (DIRECT execution)           │
-    │  Conductor ──► CoordinationDecision ──► Players (INDIRECT influence)│
     └─────────────────────────────────────────────────────────────────────┘
 
     Design Principles:
@@ -489,27 +494,27 @@ class Observation:
     │  ├── local: LocalObservation  (player's own perception)        │
     │  │   ├── data: PayloadType    (what player "sees")              │
     │  │   └── timestamp: str       (when observed)                   │
-    │  ├── conductor_notify: Dict  (coordinator signals)              │
+    │  ├── notification: Dict       (round notification)              │
     │  ├── round: int              (simulation round number)          │
     │  └── extras: Dict            (extensibility)                    │
     └─────────────────────────────────────────────────────────────┘
 
     Attributes:
         local: Player's own observation from environment
-        conductor_notify: Coordinator's notification/signals
+        notification: Notification dict for this round
         round: Current simulation round (matches Simulator.current_round)
         extras: Additional data for extensibility
 
     Example:
         Observation(
             local=LocalObservation(data={"price": 100.0, "volume": 1000}),
-            conductor_notify={"phase": "trading", "time_remaining": 30},
+            notification={"phase": "trading", "time_remaining": 30},
             round=5,
         )
     """
 
     local: LocalObservation
-    conductor_notify: Dict[str, Any]
+    notification: Dict[str, Any]
     round: int
     extras: Dict[str, Any] = field(default_factory=dict)
 
@@ -517,8 +522,40 @@ class Observation:
         """Serialize to dictionary."""
         return {
             "local": self.local.to_dict(),
-            "conductor_notify": self.conductor_notify,
+            "notification": self.notification,
             "round": self.round,
+            "extras": self.extras,
+        }
+
+
+@dataclass
+class Outbound:
+    """
+    Content-focused outbound data that Player wants to send.
+
+    Player returns these in decide() result under 'outbound_messages' key.
+    Persona converts them to Message objects and handles routing via topology.
+
+    This design separates CONTENT (what to send) from ROUTING (where to send):
+    - Player: Declares content via Outbound (payload, content_type, extras)
+    - Persona: Handles routing based on topology configuration
+    - User never needs to care about routing details
+
+    Attributes:
+        payload: The actual content to send (must be serializable)
+        content_type: Optional categorization of the content (e.g., 'price_info', 'trade_request')
+        extras: Flexible additional fields for domain-specific data
+    """
+
+    payload: PayloadType
+    content_type: Optional[str] = None
+    extras: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize to dictionary."""
+        return {
+            "payload": self.payload,
+            "content_type": self.content_type,
             "extras": self.extras,
         }
 
@@ -545,6 +582,15 @@ class StepResult:
 
     # Duration of this step in milliseconds
     tick_step_duration_ms: float = 0.0
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        return {
+            "decision_payload": self.decision_payload,
+            "action": self.action.to_dict() if self.action else None,
+            "tick_step_count": self.tick_step_count,
+            "tick_step_duration_ms": round(self.tick_step_duration_ms, 3),
+        }
 
 
 @dataclass
@@ -627,22 +673,58 @@ class PlayerConfig:
     Attributes:
         name: Human-readable unique name for the Player (system-wide unique)
         identity: Technical identifier for the Player (used for routing, Ray naming)
+        role: Player role - 'player' (default) or 'coordinator'
         group_tags: Tags for group-based operations (routing, filtering)
         extras: Domain-specific configuration (passed through to implementation)
+
+    Role-Based Design:
+    ------------------
+    The framework uses a unified Player architecture where all agents are Players.
+    The `role` field distinguishes between regular players and coordinators:
+
+    - role='player': Default role for autonomous agents
+        - Receives observations from Simulator or coordinators
+        - Produces Actions that affect the environment
+        - State is PRIVATE (invisible to other players)
+
+    - role='coordinator': Special role for coordination agents
+        - Runs FIRST in each round (sends initial messages)
+        - Receives responses from all players
+        - Processes responses and broadcasts coordination decisions
+        - May have global visibility depending on implementation
+
+    This design supports:
+    - Zero coordinators (peer-to-peer simulation)
+    - One coordinator (traditional hierarchical coordination)
+    - Multiple coordinators (multi-level coordination hierarchy)
 
     Note:
         Proxy configuration is NOT here - it belongs to Persona, which manages
         all proxy infrastructure. Players focus purely on domain behavior.
 
     Example:
+        # Regular player configuration
         PlayerConfig(
             name="Alice the Market Maker",
             identity="trader_001",
+            role="player",  # default, can be omitted
             group_tags=["market_makers", "us_equities"],
             extras={
                 "capabilities": ["market_data", "order_book"],
                 "risk_limit": 1000000,
                 "strategy": "momentum"
+            }
+        )
+
+        # Coordinator configuration
+        PlayerConfig(
+            name="Market Coordinator",
+            identity="coordinator_001",
+            role="coordinator",
+            group_tags=["coordinators"],
+            extras={
+                "initial_price": 100.0,
+                "coordination_strategy": "average"
             }
         )
     """
@@ -657,13 +739,22 @@ class PlayerConfig:
     # Can be same as name, or a more technical ID (e.g., "player_001").
     identity: str
 
+    # Player role: 'player' (default) or 'coordinator'
+    # Coordinators execute first in each round and can orchestrate other players.
+    # Multiple coordinators are supported for multi-level coordination.
+    role: str = "player"
+
     # Optional: Tags for group-based message routing and coordination.
-    # Enables Conductor to target subsets of Players (e.g., ["market_makers"]).
+    # Enables coordinators to target subsets of Players (e.g., ["market_makers"]).
     group_tags: List[str] = field(default_factory=list)
 
     # Optional: Domain-specific configuration for subclass implementations.
     # Common keys: "capabilities" (for resource access), "strategy", "parameters".
     extras: Dict[str, Any] = field(default_factory=dict)
+
+    def is_coordinator(self) -> bool:
+        """Check if this player has coordinator role."""
+        return self.role == "coordinator"
 
 
 class PlayerState:
@@ -674,7 +765,7 @@ class PlayerState:
     │                    PRIVACY BOUNDARY                                  │
     │                                                                      │
     │  PlayerState is INVISIBLE to:                                       │
-    │    ✗ Conductor (cannot see Player's internal state)                 │
+    │    ✗ Coordinator players (cannot see other Player's internal state) │
     │    ✗ Other Players (no direct state access)                         │
     │    ✗ Environment (only sees Actions, not internal reasoning)        │
     │                                                                      │
@@ -691,13 +782,12 @@ class PlayerState:
     - last_observation: Most recent observation received
     - last_action: Most recent action generated
     - custom_state: Flexible key-value store for domain logic
-    - _message_inbox: Pending messages from CommunicationProxy
+    - message_inbox: Pending messages from CommunicationProxy
 
     In the hierarchical execution model:
     - Simulator: round (orchestrates all entities)
     - Player: turn (one perceive→decide→act cycle)  <-- THIS STATE
     - Player internal: step (iterations within decide())
-    - Conductor: cycle (receive→analyze→coordinate cycle)
 
     Note: This is a class (not dataclass) because it has mutable state
     that changes throughout simulation, not just configuration.
@@ -724,8 +814,14 @@ class PlayerState:
 
         # Queue for incoming messages from other entities via CommunicationProxy.
         # Messages accumulate here until processed by get_pending_messages().
-        # Prefixed with underscore to indicate it's managed internally.
-        self._message_inbox: List["Message"] = []
+        self.message_inbox: List["Message"] = []
+
+        # Queue for outbound messages declared by Player.
+        # Persona collects and clears after turn().
+        self.pending_outbounds: List["Outbound"] = []
+
+        # Expected message senders for topology-driven message passing.
+        self.expected_senders: set = set()
 
         # Execution clock for turn-level timing.
         # Tracks timing metrics for the perceive→decide→act cycle.
@@ -909,6 +1005,22 @@ class PlayerState:
         """
         self.custom_state[key] = value
 
+    # =========================================================================
+    #                    MESSAGE POOL
+    # =========================================================================
+
+    def is_ready_to_proceed(self) -> bool:
+        """
+        Check if player has received all expected messages and can proceed.
+
+        Returns:
+            True if all expected messages received (or no expectations set)
+        """
+        if not self.expected_senders:
+            return True
+        received = {msg.sender_id for msg in self.message_inbox}
+        return self.expected_senders.issubset(received)
+
 
 # =============================================================================
 #                          BASE PLAYER CLASS
@@ -991,7 +1103,7 @@ class BasePlayer(ABC):
 
     1. Remove Player → Environment cannot receive valid Actions ✓
     2. Player output (Action) is directly interpreted by environment ✓
-    3. Player state is invisible to Conductor (private) ✓
+    3. Player state is invisible to other players (private) ✓
 
     If Player could be removed without breaking environment interaction,
     the role boundary is incorrectly defined.
@@ -1074,11 +1186,10 @@ class BasePlayer(ABC):
         # Core Identity
         # =====================================================================
         # Human-readable unique name for the Player.
-        # This is the PRIMARY identifier recognized by the entire system.
-        self._name: str = config.name
+        self.name: str = config.name
 
         # Technical identifier used for message routing, storage keys, Ray naming.
-        self._identity: str = config.identity
+        self.identity: str = config.identity
 
         # Tags for group-based message routing and coordination.
         # Copied to prevent mutation of original config.
@@ -1101,93 +1212,61 @@ class BasePlayer(ABC):
         # Capabilities define which MCP resources this Player can access.
         # The Client's ResourceProxy checks capabilities before allowing fetch.
         if "capabilities" in config.extras:
-            self._capabilities: List[str] = config.extras["capabilities"].copy()
+            self.capabilities: List[str] = config.extras["capabilities"].copy()
         else:
-            self._capabilities: List[str] = []
+            self.capabilities: List[str] = []
 
         # =====================================================================
         # Lifecycle Flags
         # =====================================================================
         # Tracks whether initialize() has been called.
         # Some operations (e.g., turn()) require initialization first.
-        self._is_initialized: bool = False
+        self.is_initialized: bool = False
 
         # Tracks whether the Player is actively participating in simulation.
         # Set to True during run, False after shutdown.
-        self._is_running: bool = False
+        self.is_running: bool = False
 
         # =====================================================================
         # Persona Layer Reference (Infrastructure Facade)
         # =====================================================================
-        # The Persona Layer is the ONLY infrastructure interface for Player.
-        # Player has NO direct proxy references - all infrastructure access
-        # goes through the Persona.
+        # Player-Persona Architecture (Complete Decoupling)
+        # =====================================================================
+        # Player has NO reference to Persona. All communication is ONE-WAY:
+        #   - Persona → Player: on_message() callback
+        #   - Player → Persona: Returns outbound_messages in decide() result
         #
-        # Three-Layer Model (Complete Decoupling):
+        # Three-Layer Model:
         #   ┌─────────────────────────────────────────────┐
         #   │ Player (What): Pure domain logic              │
         #   │   - perceive() / decide() / act()             │
-        #   │   - NO proxy knowledge, NO infra code         │
-        #   └──────────────────────┬──────────────────────┘
-        #                          │ player.persona.xxx()
-        #   ┌──────────────────────▼──────────────────────┐
+        #   │   - Returns outbound_messages in decide()     │
+        #   └─────────────────────────────────────────────┘
+        #                          ▲ on_message()
+        #   ┌─────────────────────────────────────────────┐
         #   │ Persona (When): Infrastructure coordination   │
-        #   │   - Manages all proxies internally            │
-        #   └──────────────────────┬──────────────────────┘
+        #   │   - Owns topology, dispatches messages        │
+        #   │   - Reads decide() result for outbound msgs   │
+        #   └─────────────────────────────────────────────┘
         #                          │ proxy.xxx()
-        #   ┌──────────────────────▼──────────────────────┐
+        #   ┌─────────────────────────────────────────────┐
         #   │ Proxy (How): Infrastructure primitives        │
         #   │   - Communication, Storage, Resource, etc.    │
         #   └─────────────────────────────────────────────┘
         # =====================================================================
-        self._persona: Optional["PlayerPersona"] = None
+
+        # =====================================================================
+        # Topology Targets (read-only info for message building)
+        # =====================================================================
+        # List of player IDs this player can send messages to.
+        # Set by Persona.set_topology() during setup.
+        # Access directly via self.topology_targets.
+        # =====================================================================
+        self.topology_targets: List[str] = []
 
     # =========================================================================
     #          OBSERVABLEENTITY PROTOCOL IMPLEMENTATION
     # =========================================================================
-    # These methods define the MINIMAL INTERFACE that proxies can access.
-    # This is ACCESS CONTROL - proxies cannot call private methods.
-    # =========================================================================
-
-    @property
-    def identity(self) -> str:
-        """
-        Technical identifier for this Player.
-
-        Used by:
-            - All proxies (for logging, routing, storage keys)
-            - Simulator (for actor naming)
-            - Message routing (sender_id, recipient_id)
-
-        Returns:
-            The unique identity string
-        """
-        return self._identity
-
-    @property
-    def name(self) -> str:
-        """
-        Human-readable unique name for this Player.
-
-        This is the PRIMARY identifier recognized by the entire system.
-        Used for display, logging, and user-facing operations.
-
-        Returns:
-            The unique name string
-        """
-        return self._name
-
-    def get_name(self) -> str:
-        """
-        Get the unique name of this Player.
-
-        This is the unique identifier recognized by the entire simulation system.
-        Equivalent to accessing the `name` property.
-
-        Returns:
-            The unique name string
-        """
-        return self._name
 
     def on_message(self, message: "Message") -> None:
         """
@@ -1197,7 +1276,7 @@ class BasePlayer(ABC):
         calls this method when a message arrives for this Player.
 
         Default Behavior:
-            Stores message in _message_inbox for later processing.
+            Stores message in message_inbox for later processing.
             Subclasses can override for immediate message handling.
 
         Args:
@@ -1210,7 +1289,7 @@ class BasePlayer(ABC):
                 else:
                     super().on_message(message)  # Default handling
         """
-        self.state._message_inbox.append(message)
+        self.state.message_inbox.append(message)
 
     def save_state(self) -> Dict[str, Any]:
         """
@@ -1305,49 +1384,15 @@ class BasePlayer(ABC):
                     base.append("premium_data")
                 return base
         """
-        return self._capabilities.copy()
+        return self.capabilities.copy()
 
     # =========================================================================
-    #                     PERSONA LAYER (SOLE INFRASTRUCTURE ACCESS)
+    #                     RECEIVED MESSAGES (Set by Persona)
     # =========================================================================
-    # Player accesses ALL infrastructure through Persona - no direct proxy access.
-    #
-    # Benefits of this design:
-    # 1. COMPLETE DECOUPLING: Player code is 100% domain logic
-    # 2. SINGLE INTERFACE: One set_persona() instead of four attach_*_proxy()
-    # 3. TESTABILITY: Mock one Persona instead of four proxies
+    # Player receives messages via on_message() callback from Persona.
+    # Player reads messages via get_pending_messages() in decide().
+    # This is ONE-WAY: Persona → Player (no reverse dependency).
     # =========================================================================
-
-    @property
-    def persona(self) -> Optional["PlayerPersona"]:
-        """
-        Get the attached PlayerPersona (sole infrastructure interface).
-
-        Returns:
-            PlayerPersona if attached, None otherwise
-        """
-        return self._persona
-
-    def set_persona(self, persona: "PlayerPersona") -> None:
-        """
-        Attach a PlayerPersona as the sole infrastructure interface.
-
-        Args:
-            persona: The PlayerPersona instance to attach
-
-        Example:
-            player = MyPlayer(config)
-            persona = PlayerPersona(
-                player,
-                storage_proxy=StorageProxy(),
-                resource_proxy=ResourceProxy(),
-            )
-            player.set_persona(persona)
-
-            # Player uses Persona for all infrastructure
-            data = await player.persona.fetch_resource("mcp://market/prices")
-        """
-        self._persona = persona
 
     # =========================================================================
     #                           LIFECYCLE
@@ -1387,7 +1432,7 @@ class BasePlayer(ABC):
                 self._model = await self._load_model()
                 self.state.set_custom("model_loaded", True)
         """
-        self._is_initialized = True
+        self.is_initialized = True
 
     async def shutdown(self) -> None:
         """
@@ -1403,7 +1448,7 @@ class BasePlayer(ABC):
                 await self.client.checkpoint(label="final")
                 await super().shutdown()
         """
-        self._is_running = False
+        self.is_running = False
 
     # =========================================================================
     #              CORE BEHAVIORAL CONTRACT (ABSTRACT METHODS)
@@ -1589,6 +1634,18 @@ class BasePlayer(ABC):
         # Phase 2: Apply decision logic to generate action parameters.
         decision_payload = await self.decide()
 
+        # Extract outbound messages from decision and store in state
+        if (
+            isinstance(decision_payload, dict)
+            and "outbound_messages" in decision_payload
+        ):
+            raw_messages = decision_payload.pop("outbound_messages", [])
+            for msg in raw_messages:
+                if isinstance(msg, Outbound):
+                    self.state.pending_outbounds.append(msg)
+                elif isinstance(msg, dict):
+                    self.state.pending_outbounds.append(Outbound(**msg))
+
         # Phase 3: Transform decision payload into a concrete Action.
         action = await self.act(decision_payload)
 
@@ -1607,7 +1664,7 @@ class BasePlayer(ABC):
 
     def prepare_observation(
         self,
-        conductor_notify: Dict[str, Any],
+        notification: Dict[str, Any],
         round_num: int,
     ) -> Observation:
         """
@@ -1617,21 +1674,21 @@ class BasePlayer(ABC):
         Override to customize how the Player interprets incoming data.
 
         Args:
-            conductor_notify: Notification dict from Conductor
+            notification: Notification dict for this round
             round_num: Current simulation round number
 
         Returns:
-            Observation with local perception and conductor signals
+            Observation with local perception and notification
         """
         return Observation(
             local=LocalObservation(data={}),
-            conductor_notify=conductor_notify,
+            notification=notification,
             round=round_num,
         )
 
     async def turn(
         self,
-        conductor_notify: Dict[str, Any],
+        notification: Dict[str, Any],
         round_num: int,
         num_steps: int = 1,
     ) -> "TurnResult":
@@ -1642,19 +1699,18 @@ class BasePlayer(ABC):
         - Simulator: round (orchestrates all entities)
         - Player: turn (contains multiple steps)  <-- THIS METHOD
         - Player: step (one perceive-decide-act cycle)
-        - Conductor: cycle (receive-analyze-coordinate)
 
         This is the main entry point called by PlayerPersona each round.
         It first prepares the observation, then executes multiple steps
         in sequence.
 
         Example:
-            result = await player.turn(conductor_notify, round_num, num_steps=3)
+            result = await player.turn(notification, round_num, num_steps=3)
             for step_result in result.step_results:
                 logger.debug("Step %d: %s", step_result.tick_step_count, step_result.action)
 
         Args:
-            conductor_notify: Notification dict from Conductor
+            notification: Notification dict for this round
             round_num: Current simulation round number
             num_steps: Number of steps to execute in this turn (default: 1)
 
@@ -1667,7 +1723,7 @@ class BasePlayer(ABC):
                 - tick_step_count: Number of steps executed
         """
         # Prepare observation (Player's responsibility)
-        observation = self.prepare_observation(conductor_notify, round_num)
+        observation = self.prepare_observation(notification, round_num)
 
         # Start turn timing
         self.state.turn_tick_start()
@@ -1749,30 +1805,38 @@ class BasePlayer(ABC):
                         self._apply_coordination(msg.payload)
                 # ... rest of decision logic
         """
-        messages = self.state._message_inbox.copy()
-        self.state._message_inbox.clear()
+        messages = self.state.message_inbox.copy()
+        self.state.message_inbox.clear()
         return messages
+
+    def is_ready_to_proceed(self) -> bool:
+        """
+        Check if player can proceed (all expected messages received).
+
+        Returns:
+            True if ready to proceed
+        """
+        return self.state.is_ready_to_proceed()
+
+    # =========================================================================
+    #                      TOPOLOGY ACCESS
+    # =========================================================================
+
+    def can_send_to(self, target_id: str) -> bool:
+        """
+        Check if this player can send to a specific target.
+
+        Args:
+            target_id: ID of potential target
+
+        Returns:
+            True if target is in topology connections
+        """
+        return target_id in self.topology_targets
 
     # =========================================================================
     #                          UTILITY
     # =========================================================================
-
-    def get_state(self) -> PlayerState:
-        """
-        Get the private state container.
-
-        This provides direct access to the PlayerState object.
-        Use with caution - this bypasses the save_state/load_state
-        protocol methods.
-
-        Returns:
-            The internal PlayerState object
-
-        Note:
-            Primarily for internal use and testing.
-            Prefer save_state()/load_state() for persistence.
-        """
-        return self.state
 
     def in_group(self, tag: str) -> bool:
         """

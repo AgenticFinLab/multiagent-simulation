@@ -1,15 +1,13 @@
-"""
-Demo Package - Simple Price Averaging Simulation
+"""Demo Package - Topology-Driven Message Passing
 
 Components:
-- SimpleInvestor: Investor that submits prices to market
-- SimpleMarket: Market that calculates and broadcasts average price
+- SimpleCoordinator: Hub that broadcasts to players and collects responses
+- SimplePlayer: Player that receives, processes, and responds
 """
 
-from .players import SimpleInvestor
-from .conductor import SimpleMarket
+from .players import SimpleCoordinator, SimplePlayer
 
 __all__ = [
-    "SimpleInvestor",
-    "SimpleMarket",
+    "SimpleCoordinator",
+    "SimplePlayer",
 ]

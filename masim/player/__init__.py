@@ -8,7 +8,7 @@ Base Classes (base.py):
     - PlayerState: Private state container for Player entities
     - Action: Behavioral output contract (what Players produce)
     - LocalObservation: Player's own perception from environment
-    - Observation: Complete observation (local + conductor signals)
+    - Observation: Complete observation (local + notification)
     - StepResult: Result of one perceive-decide-act cycle
     - TurnResult: Result of a turn (multiple steps)
 
@@ -26,6 +26,7 @@ from masim.player.base import (
     Action,
     LocalObservation,
     Observation,
+    Outbound,
     StepResult,
     TurnResult,
     # Config/State
@@ -49,6 +50,7 @@ __all__ = [
     "Action",
     "LocalObservation",
     "Observation",
+    "Outbound",
     "StepResult",
     "TurnResult",
     "PlayerConfig",

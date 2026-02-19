@@ -1,0 +1,9 @@
+{
+  "000000_0000": {
+    "round_num": 0,
+    "seq": 0,
+    "direction": "received",
+    "timestamp": "2026-02-19T19:16:12.564470",
+    "message": "Message(message_type=<MessageType.PEER: 4>, sender_id='coordinator', payload={'content': {'message': 'Hello from Coordinator! Round 1', 'round': 1}, 'content_type': 'broadcast', 'extras': {}}, message_id='e3385b9d-e971-476b-b809-d156099e87ae', recipient_id='player_1', timestamp='2026-02-19T19:16:12.560096', correlation_id=None, priority=<MessagePriority.NORMAL: 1>, metadata={})"
+  }
+}
