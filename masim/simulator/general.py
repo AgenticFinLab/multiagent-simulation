@@ -286,25 +286,27 @@ class GeneralSimulator(BaseSimulator):
         self, round_num: int, player_ids: List[str], source_id: str = "simulator"
     ) -> Dict[str, Dict[str, Any]]:
         """
-        Prepare notifications for a set of players.
+        Prepare execution trigger notifications for players.
+
+        NOTE: Notifications are EXECUTION TRIGGERS, not data carriers.
+        Actual data flows between players via message_inbox:
+        - Level N players send messages via outbound_messages in decide()
+        - Persona dispatches to targets via receive_message()
+        - Level N+1 players read from inbox via get_pending_messages()
 
         Args:
             round_num: Current round number
-            player_ids: List of player IDs to prepare notifications for
-            source_id: ID of the notification source (simulator or coordinator)
+            player_ids: List of player IDs to trigger
+            source_id: ID of the notification source
 
         Returns:
-            Notifications dict mapping player_id -> notification dict
+            Notifications dict mapping player_id -> trigger notification
         """
         notifications = {}
         for player_id in player_ids:
             notifications[player_id] = {
-                "data": {"round": round_num},
-                "source_id": source_id,
-                "target_id": player_id,
                 "round": round_num,
                 "num_steps": 1,
-                "metadata": {},
             }
         return notifications
 
@@ -312,7 +314,7 @@ class GeneralSimulator(BaseSimulator):
         self,
         round_num: int,
         notifications: Dict[str, Dict[str, Any]],
-        player_handles: Dict[str, ray.actor.ActorHandle],
+        handles: Dict[str, ray.actor.ActorHandle],
     ) -> Dict[str, Any]:
         """
         Execute PlayerPersona operate() calls in parallel for specified players.
@@ -320,14 +322,14 @@ class GeneralSimulator(BaseSimulator):
         Args:
             round_num: Current round number
             notifications: Notifications for each player
-            player_handles: Dict of player_id -> actor handle to execute
+            handles: Dict of player_id -> actor handle to execute
 
         Returns:
             Dict containing:
                 - futures: Dict mapping player_id -> Ray ObjectRef
                 - ref_to_player: Dict mapping ObjectRef -> player_id (reverse lookup)
         """
-        self.current_phase = RoundPhase.PLAYER_DECISION
+        self.current_phase = RoundPhase.EXECUTING
 
         # =================================================================
         # PARALLEL EXECUTION via Ray - Submit Phase
@@ -336,8 +338,8 @@ class GeneralSimulator(BaseSimulator):
         operate_futures = {}
         ref_to_player = {}
         for player_id, notif_dict in notifications.items():
-            if player_id in player_handles:
-                future = player_handles[player_id].operate.remote(
+            if player_id in handles:
+                future = handles[player_id].operate.remote(
                     notif_dict, round_num, notif_dict["num_steps"]
                 )
                 operate_futures[player_id] = future
@@ -350,21 +352,19 @@ class GeneralSimulator(BaseSimulator):
 
     def phase_collect_results(
         self,
-        player_decision_result: Dict[str, Any],
+        decision_result: Dict[str, Any],
     ) -> Dict[str, Any]:
         """
         Collect all player results.
 
         Args:
-            player_decision_result: Output from phase_player_decision containing futures
+            decision_result: Output from phase_player_decision containing futures
 
         Returns:
             Dict with turn_results mapping player_id -> TurnResult
         """
-        self.current_phase = RoundPhase.COORDINATION
-
-        futures = player_decision_result["futures"]
-        ref_to_player = player_decision_result["ref_to_player"]
+        futures = decision_result["futures"]
+        ref_to_player = decision_result["ref_to_player"]
 
         # Collect all results
         turn_results = {}
@@ -396,6 +396,12 @@ class GeneralSimulator(BaseSimulator):
         Within each level, players execute in parallel.
         Level N+1 only starts after Level N completes.
 
+        Data Flow Between Levels:
+        - Level N players declare outbound_messages in decide()
+        - Persona dispatches messages to topology targets (with ray.get wait)
+        - Level N+1 players read messages via get_pending_messages() in perceive()
+        - This enables coordinator -> players information flow
+
         Args:
             round_num: Current round number (1-indexed)
 
@@ -411,15 +417,16 @@ class GeneralSimulator(BaseSimulator):
 
         # =================================================================
         # LEVEL-BASED EXECUTION
-        # Derive execution order from topology seeds via BFS
+        # Derive execution order from topology seeds via BFS.
+        # Data flows via message_inbox (not notifications):
+        #   Level N: operate() -> decide() -> outbound_messages -> dispatch
+        #   Level N+1: perceive() -> get_pending_messages() -> read data
         # =================================================================
         execution_levels = self.topology.get_execution_levels()
         all_turn_results = {}
 
-        for level_idx, level_players in enumerate(execution_levels):
-            logger.debug("        Level %d: %s", level_idx, level_players)
-
-            # Prepare notifications for this level's players
+        for level_players in execution_levels:
+            # Trigger execution (notifications are minimal, data flows via inbox)
             level_notifications = self._prepare_notifications(round_num, level_players)
 
             # Filter handles to only this level's players

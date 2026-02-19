@@ -135,20 +135,16 @@ class SimulatorStatus(Enum):
 
 class RoundPhase(Enum):
     """
-    Phases within a simulation round.
+    High-level phases within a simulation round.
 
-    Each round progresses through these phases in order:
-    1. NOTIFICATION: Coordinator sends round state to Players (if exists)
-    2. PLAYER_DECISION: All PlayerPersonas execute operate()
-    3. COORDINATION: Collect results from coordinators and players
-    4. BROADCAST: (Optional) Coordinator broadcasts to Players
-    5. COMPLETE: Round finishes, results recorded
+    Simplified for level-based execution model:
+    - PENDING: Round not yet started
+    - EXECUTING: Levels being executed (one or more)
+    - COMPLETE: All levels finished, results recorded
     """
 
-    NOTIFICATION = auto()
-    PLAYER_DECISION = auto()
-    COORDINATION = auto()
-    BROADCAST = auto()
+    PENDING = auto()
+    EXECUTING = auto()
     COMPLETE = auto()
 
 
@@ -261,7 +257,7 @@ class BaseSimulator(ABC):
         # Status tracking
         self.status = SimulatorStatus.INITIALIZING
         self.current_round: int = 0
-        self.current_phase: RoundPhase = RoundPhase.NOTIFICATION
+        self.current_phase: RoundPhase = RoundPhase.PENDING
 
         # Hierarchical execution clock for round-level timing
         self.round_clock: ExecutionClock = ExecutionClock()
