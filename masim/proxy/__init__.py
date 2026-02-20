@@ -15,14 +15,14 @@ Proxy Implementations (base.py):
     - CommunicationProxy: Message routing and transmission
     - StorageProxy: State checkpoint and rollback
     - ResourceProxy: MCP resource access
-    - ObservabilityProxy: Metrics and structured logging
+    - MonitoringProxy: Metrics and structured logging
 
 Convenience Functions (general.py):
     - create_default_proxies(): Create all proxies with defaults
-    - create_minimal_proxies(): Create just storage and observability
+    - create_minimal_proxies(): Create just storage and monitoring
     - create_proxies_for_owner(): Create customized proxy set
     - SimpleStorageProxy: Simplified storage with defaults
-    - SimpleObservabilityProxy: Simplified observability with defaults
+    - SimpleMonitoringProxy: Simplified monitoring with defaults
 """
 
 from masim.proxy.base import (
@@ -47,9 +47,9 @@ from masim.proxy.base import (
     # Resource
     ResourceConfig,
     ResourceProxy,
-    # Observability
-    ObservabilityConfig,
-    ObservabilityProxy,
+    # Monitoring
+    MonitoringConfig,
+    MonitoringProxy,
 )
 
 from masim.proxy.general import (
@@ -59,7 +59,7 @@ from masim.proxy.general import (
     create_proxies_for_owner,
     # Simplified wrappers
     SimpleStorageProxy,
-    SimpleObservabilityProxy,
+    SimpleMonitoringProxy,
 )
 
 __all__ = [
@@ -84,14 +84,14 @@ __all__ = [
     # Resource
     "ResourceConfig",
     "ResourceProxy",
-    # Observability
-    "ObservabilityConfig",
-    "ObservabilityProxy",
+    # Monitoring
+    "MonitoringConfig",
+    "MonitoringProxy",
     # Convenience functions
     "create_default_proxies",
     "create_minimal_proxies",
     "create_proxies_for_owner",
     # Simplified wrappers
     "SimpleStorageProxy",
-    "SimpleObservabilityProxy",
+    "SimpleMonitoringProxy",
 ]

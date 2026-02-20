@@ -16,7 +16,7 @@ Dataclasses:
     CommunicationConfig  - Config for CommunicationProxy
     StorageConfig        - Config for StorageProxy
     ResourceConfig       - Config for ResourceProxy
-    ObservabilityConfig  - Config for ObservabilityProxy
+    ObservabilityConfig  - Config for MonitoringProxy
 
 Abstract Classes:
     BaseProxy            - Abstract base with owner weak reference pattern
@@ -1531,9 +1531,9 @@ class ResourceProxy(BaseProxy):
 
 
 @dataclass
-class ObservabilityConfig(ProxyConfig):
+class MonitoringConfig(ProxyConfig):
     """
-    Configuration for ObservabilityProxy.
+    Configuration for MonitoringProxy.
 
     Attributes:
         proxy_type: Fixed to OBSERVABILITY
@@ -1543,7 +1543,7 @@ class ObservabilityConfig(ProxyConfig):
         log_level: Minimum log level ("DEBUG", "INFO", "WARNING", "ERROR")
 
     Example:
-        config = ObservabilityConfig(
+        config = MonitoringConfig(
             metrics_backend="prometheus",
             logging_backend="json",
             enable_tracing=True,
@@ -1559,12 +1559,12 @@ class ObservabilityConfig(ProxyConfig):
     log_level: str = "INFO"  # Minimum log level
 
 
-class ObservabilityProxy(BaseProxy):
+class MonitoringProxy(BaseProxy):
     """
     Proxy for metrics collection and structured logging.
 
     ┌─────────────────────────────────────────────────────────────────────┐
-    │                   OBSERVABILITY PROXY OVERVIEW                      │
+    │                   MONITORING PROXY OVERVIEW                        │
     │                                                                     │
     │  Core Methods (≤5, micro-proxy pattern):                           │
     │    1. record_metric()  - Record a metric value                     │
@@ -1611,18 +1611,18 @@ class ObservabilityProxy(BaseProxy):
 
     def __init__(
         self,
-        config: Optional[ObservabilityConfig] = None,
+        config: Optional[MonitoringConfig] = None,
         owner: Optional[OwnerType] = None,
     ):
         """
-        Initialize ObservabilityProxy.
+        Initialize MonitoringProxy.
 
         Args:
-            config: Observability configuration (uses defaults if None)
+            config: Monitoring configuration (uses defaults if None)
             owner: Optional owner entity
         """
-        super().__init__(config or ObservabilityConfig(), owner)
-        self.config: ObservabilityConfig = config or ObservabilityConfig()
+        super().__init__(config or MonitoringConfig(), owner)
+        self.config: MonitoringConfig = config or MonitoringConfig()
 
         # =====================================================================
         # Internal Storage

@@ -282,91 +282,53 @@ class GeneralSimulator(BaseSimulator):
             ray.get(handle.set_topology.remote(self.config.topology))
             ray.get(handle.set_peer_handles.remote(self.player_persona_handles))
 
-    def _prepare_notifications(
-        self, round_num: int, player_ids: List[str], source_id: str = "simulator"
-    ) -> Dict[str, Dict[str, Any]]:
-        """
-        Prepare execution trigger notifications for players.
-
-        NOTE: Notifications are EXECUTION TRIGGERS, not data carriers.
-        Actual data flows between players via message_inbox:
-        - Level N players send messages via outbound_messages in decide()
-        - Persona dispatches to targets via receive_message()
-        - Level N+1 players read from inbox via get_pending_messages()
-
-        Args:
-            round_num: Current round number
-            player_ids: List of player IDs to trigger
-            source_id: ID of the notification source
-
-        Returns:
-            Notifications dict mapping player_id -> trigger notification
-        """
-        notifications = {}
-        for player_id in player_ids:
-            notifications[player_id] = {
-                "round": round_num,
-                "num_steps": 1,
-            }
-        return notifications
-
-    def phase_player_decision(
+    def phase_execute(
         self,
         round_num: int,
-        notifications: Dict[str, Dict[str, Any]],
         handles: Dict[str, ray.actor.ActorHandle],
     ) -> Dict[str, Any]:
         """
-        Execute PlayerPersona operate() calls in parallel for specified players.
+        PHASE 1: EXECUTE - Players run operate() in parallel.
+
+        Submits operate() calls to all players via Ray .remote().
+        Returns immediately - actual execution is parallel.
 
         Args:
             round_num: Current round number
-            notifications: Notifications for each player
             handles: Dict of player_id -> actor handle to execute
 
         Returns:
-            Dict containing:
-                - futures: Dict mapping player_id -> Ray ObjectRef
-                - ref_to_player: Dict mapping ObjectRef -> player_id (reverse lookup)
+            Dict with futures and ref_to_player for phase_collect()
         """
         self.current_phase = RoundPhase.EXECUTING
 
-        # =================================================================
-        # PARALLEL EXECUTION via Ray - Submit Phase
-        # =================================================================
-        # .remote() returns immediately - all players START executing in parallel
         operate_futures = {}
         ref_to_player = {}
-        for player_id, notif_dict in notifications.items():
-            if player_id in handles:
-                future = handles[player_id].operate.remote(
-                    notif_dict, round_num, notif_dict["num_steps"]
-                )
-                operate_futures[player_id] = future
-                ref_to_player[future] = player_id
+        for player_id, handle in handles.items():
+            future = handle.operate.remote(round_num)
+            operate_futures[player_id] = future
+            ref_to_player[future] = player_id
 
         return {
             "futures": operate_futures,
             "ref_to_player": ref_to_player,
         }
 
-    def phase_collect_results(
-        self,
-        decision_result: Dict[str, Any],
-    ) -> Dict[str, Any]:
+    def phase_collect(self, execute_result: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Collect all player results.
+        PHASE 2: COLLECT - Wait for all operate() to complete.
+
+        Gathers TurnResults from all players in this level.
 
         Args:
-            decision_result: Output from phase_player_decision containing futures
+            execute_result: Output from phase_execute() containing futures
 
         Returns:
             Dict with turn_results mapping player_id -> TurnResult
         """
-        futures = decision_result["futures"]
-        ref_to_player = decision_result["ref_to_player"]
+        futures = execute_result["futures"]
+        ref_to_player = execute_result["ref_to_player"]
 
-        # Collect all results
         turn_results = {}
         pending_refs = list(futures.values())
 
@@ -384,73 +346,116 @@ class GeneralSimulator(BaseSimulator):
             "pending_count": 0,
         }
 
+    def phase_dispatch(self, level_handles: Dict[str, ray.actor.ActorHandle]) -> None:
+        """
+        PHASE 3: DISPATCH - Send outbound messages to next level.
+
+        Calls dispatch_outbound_messages() on each player.
+        Blocks until all messages are delivered (ray.get).
+
+        This ensures Level N messages arrive before Level N+1 starts.
+
+        Args:
+            level_handles: Dict of player_id -> actor handle for this level
+        """
+        dispatch_refs = []
+        for handle in level_handles.values():
+            ref = handle.dispatch_outbound_messages.remote()
+            dispatch_refs.append(ref)
+
+        if dispatch_refs:
+            ray.get(dispatch_refs)
+
+    def phase_cleanup(self) -> None:
+        """
+        PHASE 4: CLEANUP - Clear message inboxes for next round.
+
+        Calls clear_message_inbox() on all players after round completes.
+        This resets message state so expected_senders can be re-evaluated
+        next round.
+        """
+        cleanup_refs = []
+        for handle in self.player_persona_handles.values():
+            ref = handle.clear_message_inbox.remote()
+            cleanup_refs.append(ref)
+
+        if cleanup_refs:
+            ray.get(cleanup_refs)
+
     async def run_round(self, round_num: int) -> Dict[str, Any]:
         """
         Execute one simulation round with level-based execution ordering.
 
-        Execution Flow (derived from topology seeds):
-        - Level 0: Seeds (e.g., coordinators) execute first
-        - Level 1: Successors of Level 0 execute
-        - Level N: Continue until all players have executed
-
-        Within each level, players execute in parallel.
-        Level N+1 only starts after Level N completes.
-
-        Data Flow Between Levels:
-        - Level N players declare outbound_messages in decide()
-        - Persona dispatches messages to topology targets (with ray.get wait)
-        - Level N+1 players read messages via get_pending_messages() in perceive()
-        - This enables coordinator -> players information flow
+        ┌─────────────────────────────────────────────────────────────────────┐
+        │                    ROUND EXECUTION FLOW                             │
+        ├─────────────────────────────────────────────────────────────────────┤
+        │  For each level (Level 0 → Level 1 → ... → Level N):               │
+        │                                                                     │
+        │  1. EXECUTE: Players run operate() in parallel                     │
+        │              └─► perceive() → decide() → act()                     │
+        │              └─► Messages read from inbox (from previous level)    │
+        │              └─► Outbound messages declared in decide()            │
+        │                                                                     │
+        │  2. COLLECT: Wait for all operate() to complete                    │
+        │              └─► Gather TurnResults from all players               │
+        │                                                                     │
+        │  3. DISPATCH: Send outbound messages to next level                 │
+        │              └─► dispatch_outbound_messages() on each player       │
+        │              └─► Messages arrive at targets via receive_message()  │
+        │              └─► Blocks until all delivered (ray.get)              │
+        │                                                                     │
+        │  Then proceed to next level...                                     │
+        ├─────────────────────────────────────────────────────────────────────┤
+        │  After all levels complete:                                         │
+        │                                                                     │
+        │  4. CLEANUP: Clear message inboxes for next round                  │
+        │              └─► clear_message_inbox() on all players              │
+        │              └─► Resets expected_senders for re-evaluation          │
+        └─────────────────────────────────────────────────────────────────────┘
 
         Args:
             round_num: Current round number (1-indexed)
 
         Returns:
-            Round results containing:
-            - turn_results: Dict of player_id -> TurnResult summary
-            - round: Round number
-            - round_clock: Timing metrics for this round
-            - execution_levels: List of levels executed
+            Round results containing round, round_clock, execution_levels
         """
         self.round_clock.tick_start()
         self.current_round = round_num
 
-        # =================================================================
-        # LEVEL-BASED EXECUTION
-        # Derive execution order from topology seeds via BFS.
-        # Data flows via message_inbox (not notifications):
-        #   Level N: operate() -> decide() -> outbound_messages -> dispatch
-        #   Level N+1: perceive() -> get_pending_messages() -> read data
-        # =================================================================
         execution_levels = self.topology.get_execution_levels()
-        all_turn_results = {}
 
         for level_players in execution_levels:
-            # Trigger execution (notifications are minimal, data flows via inbox)
-            level_notifications = self._prepare_notifications(round_num, level_players)
-
-            # Filter handles to only this level's players
             level_handles = {
                 pid: self.player_persona_handles[pid]
                 for pid in level_players
                 if pid in self.player_persona_handles
             }
 
-            # Execute this level in parallel
-            player_decision_result = self.phase_player_decision(
-                round_num, level_notifications, level_handles
-            )
-            collection_result = self.phase_collect_results(player_decision_result)
+            # ─────────────────────────────────────────────────────────────────
+            # PHASE 1: EXECUTE - Players run operate() in parallel
+            # ─────────────────────────────────────────────────────────────────
+            execute_result = self.phase_execute(round_num, level_handles)
 
-            # Merge results
-            all_turn_results.update(collection_result["turn_results"])
+            # ─────────────────────────────────────────────────────────────────
+            # PHASE 2: COLLECT - Wait for all operate() to complete
+            # ─────────────────────────────────────────────────────────────────
+            self.phase_collect(execute_result)
+
+            # ─────────────────────────────────────────────────────────────────
+            # PHASE 3: DISPATCH - Send outbound messages to next level
+            # ─────────────────────────────────────────────────────────────────
+            self.phase_dispatch(level_handles)
+
+        # ─────────────────────────────────────────────────────────────────────
+        # PHASE 4: CLEANUP - Clear message inboxes for next round
+        # ─────────────────────────────────────────────────────────────────────
+        self.phase_cleanup()
 
         # Finalize round
         self.round_clock.tick_end()
         self.current_phase = RoundPhase.COMPLETE
 
         round_results = {
-            "turn_results": all_turn_results,
             "round": round_num,
             "round_clock": self.round_clock,
             "execution_levels": execution_levels,

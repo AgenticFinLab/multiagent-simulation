@@ -37,7 +37,7 @@ Message Passing Architecture:
 
 import time
 import ray
-from typing import Any, Dict, List, Optional, Type, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from masim.persona.base import BasePersona
 from masim.communication.base import Message, build_message_from_outbound
@@ -49,8 +49,8 @@ from masim.proxy.base import (
     CommunicationConfig,
     ResourceProxy,
     ResourceConfig,
-    ObservabilityProxy,
-    ObservabilityConfig,
+    MonitoringProxy,
+    MonitoringConfig,
 )
 
 if TYPE_CHECKING:
@@ -90,37 +90,6 @@ class PlayerPersona(BasePersona):
                                                └──► Player.step() (perceive→decide→act)
     """
 
-    def __init__(
-        self,
-        player_class: Type["BasePlayer"],
-        player_config: "PlayerConfig",
-        persona_config: Optional[Dict[str, Any]] = None,
-    ):
-        """Initialize PlayerPersona with a Player class and config."""
-        super().__init__(persona_config)
-
-        # Store class and config for deferred creation
-        self.player_class = player_class
-        self.player_config = player_config
-
-        # Identity (extracted from config for direct access)
-        self.identity: str = player_config.identity
-
-        # Internal Player instance (HIDDEN from Simulator)
-        self.player: Optional["BasePlayer"] = None
-
-        # Operate timing
-        self.operate_start_time: Optional[float] = None
-
-        # Topology graph for message routing
-        self.topology: Optional[TopologyGraph] = None
-
-        # Peer actor handles for direct message passing
-        self.peer_handles: Dict[str, ray.actor.ActorHandle] = {}
-
-        # Current round number for message recording
-        self.current_round: int = 0
-
     # =========================================================================
     #                        LIFECYCLE
     # =========================================================================
@@ -144,8 +113,8 @@ class PlayerPersona(BasePersona):
         proxy_config = self.config["proxy"]
 
         self.storage = StorageProxy(StorageConfig(**proxy_config["storage"]))
-        self.observability = ObservabilityProxy(
-            ObservabilityConfig(**proxy_config["observability"])
+        self.monitoring = MonitoringProxy(
+            MonitoringConfig(**proxy_config["monitoring"])
         )
         self.communication = CommunicationProxy(
             CommunicationConfig(**proxy_config["communication"])
@@ -166,8 +135,8 @@ class PlayerPersona(BasePersona):
 
         # Log shutdown
         step_count = self.player.state.step_count if self.player else 0
-        if self.observability:
-            await self.observability.log_event(
+        if self.monitoring:
+            await self.monitoring.log_event(
                 "player_shutdown",
                 {"player_id": self.identity, "steps_completed": step_count},
             )
@@ -178,7 +147,6 @@ class PlayerPersona(BasePersona):
 
     async def operate(
         self,
-        notification: Dict[str, Any],
         round_num: int,
         num_steps: int = 1,
     ) -> "TurnResult":
@@ -187,24 +155,12 @@ class PlayerPersona(BasePersona):
 
         Internally delegates to the hidden Player.turn().
 
-        In the hierarchical execution model:
-        - Simulator: round (orchestrates all Personas)
-        - PlayerPersona: operate (this method)  <-- Simulator calls this
-        - Player: turn (for loop of steps)      <-- Hidden from Simulator
-        - Player: step (perceive-decide-act)    <-- Hidden from Simulator
-
         Args:
-            notification: Notification dict for this round
             round_num: Current simulation round number
             num_steps: Number of steps to execute in this turn (default: 1)
 
         Returns:
-            TurnResult containing:
-                - step_results: List of StepResult from each step
-                - final_action: The last action produced
-                - tick_turn_count: The turn number
-                - tick_turn_duration_ms: Duration of the turn
-                - tick_step_count: Number of steps executed
+            TurnResult from internal Player
         """
         if not self.player:
             raise RuntimeError("PlayerPersona not initialized")
@@ -212,15 +168,16 @@ class PlayerPersona(BasePersona):
         # Start timing
         self.operate_start_time = time.perf_counter()
         self.current_round = round_num
-        if self.observability:
-            await self.observability.start_timer("operate_duration")
+        if self.monitoring:
+            await self.monitoring.start_timer("operate_duration")
 
         # Delegate to internal Player.turn() (HIDDEN from Simulator)
         # Player reads messages from its own inbox via get_pending_messages()
-        turn_result = await self.player.turn(notification, round_num, num_steps)
+        turn_result = await self.player.turn(round_num, num_steps)
 
-        # Dispatch outbound messages declared by Player
-        await self._dispatch_outbound_messages()
+        # NOTE: Message dispatch is NOT done here.
+        # Simulator explicitly calls dispatch_outbound_messages() after operate()
+        # to control message timing between execution levels.
 
         # Record turn result via StorageProxy
         self.storage.record_turn_result(
@@ -230,9 +187,9 @@ class PlayerPersona(BasePersona):
         )
 
         # Record timing metric only (data already stored above)
-        if self.observability:
-            duration = await self.observability.stop_timer("operate_duration")
-            await self.observability.record_metric(
+        if self.monitoring:
+            duration = await self.monitoring.stop_timer("operate_duration")
+            await self.monitoring.record_metric(
                 "operate_completed",
                 {
                     "player_id": self.identity,
@@ -282,12 +239,14 @@ class PlayerPersona(BasePersona):
     #                    OUTBOUND MESSAGE DISPATCH
     # =========================================================================
 
-    async def _dispatch_outbound_messages(self) -> int:
+    def dispatch_outbound_messages(self) -> int:
         """
         Dispatch all outbound messages declared by Player.
 
+        Called by Simulator AFTER operate() to explicitly send messages.
+        This allows Simulator to control message timing between levels.
+
         Collects pending outbounds from Player.state and dispatches via topology.
-        This is the key mechanism for Player-Persona decoupling:
         - Player declares content via Outbound (payload, content_type, extras)
         - Persona collects and dispatches via topology
 
@@ -301,8 +260,8 @@ class PlayerPersona(BasePersona):
             return 0
 
         # Collect and clear outbounds from Player state
-        outbounds = self.player.state.pending_outbounds.copy()
-        self.player.state.pending_outbounds.clear()
+        outbounds = self.player.pending_outbounds.copy()
+        self.player.pending_outbounds.clear()
 
         # Collect all message delivery futures
         all_refs: List[ray.ObjectRef] = []
@@ -367,17 +326,22 @@ class PlayerPersona(BasePersona):
         """
         Set the topology configuration using NetworkX graph.
 
-        Creates a TopologyGraph from config, extracts targets for this player.
+        Creates a TopologyGraph from config, extracts targets and senders
+        for this player.
 
         Args:
             topology_config: Full topology config dict from topology.yml
         """
         self.topology = TopologyGraph(topology_config)
 
-        # Pass targets to internal Player
         if self.player:
+            # Set targets (who this player can send to)
             targets = self.topology.get_targets(self.identity)
             self.player.topology_targets = targets
+
+            # Set expected senders (who this player expects messages from)
+            senders = self.topology.get_senders(self.identity)
+            self.player.set_expected_senders(senders)
 
     def set_peer_handles(
         self,
@@ -428,29 +392,33 @@ class PlayerPersona(BasePersona):
             self.player.on_message(message)
 
     # =========================================================================
-    #                    MESSAGE POOL CONTROL
+    #                    MESSAGE READINESS CONTROL
     # =========================================================================
 
-    def is_ready_to_proceed(self) -> bool:
+    def has_received_expected_messages(self) -> bool:
         """
-        Check if player can proceed (all expected messages received).
+        Check if player has received all expected messages.
 
-        Returns:
-            True if ready to proceed
+        Delegates to internal Player's readiness check.
         """
         if not self.player:
             return True
-        return self.player.state.is_ready_to_proceed()
+        return self.player.has_received_expected_messages()
 
     def set_expected_senders(self, senders: List[str]) -> None:
-        """Set which senders this player expects messages from."""
-        if self.player:
-            self.player.state.expected_senders = set(senders)
+        """
+        Set which senders this player expects messages from.
 
-    def clear_message_pool(self) -> None:
-        """
-        Clear message inbox and reset expected senders.
+        Delegates to internal Player.
         """
         if self.player:
-            self.player.state.message_inbox.clear()
-            self.player.state.expected_senders = set()
+            self.player.set_expected_senders(senders)
+
+    def clear_message_inbox(self) -> None:
+        """
+        Clear message inbox after round processing.
+
+        Delegates to internal Player.
+        """
+        if self.player:
+            self.player.clear_message_inbox()

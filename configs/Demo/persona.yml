@@ -14,7 +14,7 @@ proxy:
     result_path: "EXPERIMENT/Demo/results"
     record_rounds: true
   
-  observability:
+  monitoring:
     metrics_backend: "memory"
     logging_backend: "structured"
     log_dir: "EXPERIMENT/Demo/logs"

@@ -57,7 +57,7 @@ class SimpleCoordinator(GeneralPlayer):
         """Store round info and check for received responses."""
         round_num = observation.round
         print(f"\n[Coordinator] === Round {round_num} ===")
-        self.state.set_custom("round", round_num)
+        self.state.custom_state["round"] = round_num
 
         # Check messages from inbox (immediately injected by Persona via on_message())
         messages = self.get_pending_messages()
@@ -70,7 +70,7 @@ class SimpleCoordinator(GeneralPlayer):
 
     async def decide(self) -> Dict[str, Any]:
         """Declare broadcast message to send to all players."""
-        round_num = self.state.get_custom("round")
+        round_num = self.state.custom_state["round"]
         message_content = {
             "message": f"Hello from Coordinator! Round {round_num}",
             "round": round_num,
@@ -121,7 +121,7 @@ class SimplePlayer(GeneralPlayer):
         """Check for messages from coordinator."""
         round_num = observation.round
         print(f"\n[{self.identity}] Round {round_num}")
-        self.state.set_custom("round", round_num)
+        self.state.custom_state["round"] = round_num
 
         # Check messages from inbox (immediately injected by Persona via on_message())
         messages = self.get_pending_messages()
@@ -129,17 +129,17 @@ class SimplePlayer(GeneralPlayer):
             print(f"[{self.identity}] Received {len(messages)} messages:")
             for msg in messages:
                 print(f"  - From {msg.sender_id}: {msg.payload}")
-                self.state.set_custom("coordinator_message", msg.payload)
+                self.state.custom_state["coordinator_message"] = msg.payload
 
     async def decide(self) -> Dict[str, Any]:
         """Declare response message to send to coordinator."""
-        round_num = self.state.get_custom("round")
+        round_num = self.state.custom_state["round"]
 
         # Increment local counter
-        if not self.state.has_custom("local_counter"):
-            self.state.set_custom("local_counter", 0)
-        counter = self.state.get_custom("local_counter") + 1
-        self.state.set_custom("local_counter", counter)
+        if "local_counter" not in self.state.custom_state:
+            self.state.custom_state["local_counter"] = 0
+        counter = self.state.custom_state["local_counter"] + 1
+        self.state.custom_state["local_counter"] = counter
 
         # Prepare response
         response = {

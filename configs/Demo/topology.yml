@@ -17,8 +17,8 @@
 
 type: "star"
 
-# Entry points for execution order derivation (BFS from seeds)
-seeds:
+# Entry points for execution order derivation (BFS from sources)
+sources:
   - coordinator
 
 # Explicit connections: sender → [targets]

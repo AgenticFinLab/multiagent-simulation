@@ -8,7 +8,7 @@ The proxy system follows the micro-proxy pattern:
     - CommunicationProxy: Message routing (send, broadcast, receive)
     - StorageProxy: State checkpoint/restore
     - ResourceProxy: MCP resource access
-    - ObservabilityProxy: Metrics and logging
+    - MonitoringProxy: Metrics and logging
 
 Usage:
 ------
@@ -37,8 +37,8 @@ from masim.proxy.base import (
     StorageProxy,
     ResourceConfig,
     ResourceProxy,
-    ObservabilityConfig,
-    ObservabilityProxy,
+    MonitoringConfig,
+    MonitoringProxy,
 )
 
 if TYPE_CHECKING:
@@ -74,7 +74,7 @@ def create_default_proxies(
         ProxyType.COMMUNICATION: CommunicationProxy(CommunicationConfig(), owner),
         ProxyType.STORAGE: StorageProxy(StorageConfig(), owner),
         ProxyType.RESOURCE: ResourceProxy(ResourceConfig(), owner),
-        ProxyType.OBSERVABILITY: ObservabilityProxy(ObservabilityConfig(), owner),
+        ProxyType.OBSERVABILITY: MonitoringProxy(MonitoringConfig(), owner),
     }
 
 
@@ -95,7 +95,7 @@ def create_minimal_proxies(
     """
     return {
         ProxyType.STORAGE: StorageProxy(StorageConfig(), owner),
-        ProxyType.OBSERVABILITY: ObservabilityProxy(ObservabilityConfig(), owner),
+        ProxyType.OBSERVABILITY: MonitoringProxy(MonitoringConfig(), owner),
     }
 
 
@@ -104,7 +104,7 @@ def create_proxies_for_owner(
     include_communication: bool = True,
     include_storage: bool = True,
     include_resource: bool = True,
-    include_observability: bool = True,
+    include_monitoring: bool = True,
 ) -> Dict[ProxyType, BaseProxy]:
     """
     Create a customized proxy set for a specific owner.
@@ -114,7 +114,7 @@ def create_proxies_for_owner(
         include_communication: Include CommunicationProxy
         include_storage: Include StorageProxy
         include_resource: Include ResourceProxy
-        include_observability: Include ObservabilityProxy
+        include_monitoring: Include MonitoringProxy
 
     Returns:
         Dictionary mapping ProxyType to proxy instance
@@ -132,10 +132,8 @@ def create_proxies_for_owner(
     if include_resource:
         proxies[ProxyType.RESOURCE] = ResourceProxy(ResourceConfig(), owner)
 
-    if include_observability:
-        proxies[ProxyType.OBSERVABILITY] = ObservabilityProxy(
-            ObservabilityConfig(), owner
-        )
+    if include_monitoring:
+        proxies[ProxyType.OBSERVABILITY] = MonitoringProxy(MonitoringConfig(), owner)
 
     return proxies
 
@@ -168,9 +166,9 @@ class SimpleStorageProxy(StorageProxy):
         super().__init__(config, owner)
 
 
-class SimpleObservabilityProxy(ObservabilityProxy):
+class SimpleMonitoringProxy(MonitoringProxy):
     """
-    Simplified ObservabilityProxy with sensible defaults.
+    Simplified MonitoringProxy with sensible defaults.
 
     Uses in-memory storage for metrics and events.
     Ideal for development and testing.
@@ -183,7 +181,7 @@ class SimpleObservabilityProxy(ObservabilityProxy):
         Args:
             owner: Optional owner entity
         """
-        config = ObservabilityConfig(
+        config = MonitoringConfig(
             metrics_backend="memory",
             logging_backend="structured",
             enable_tracing=False,
@@ -200,7 +198,7 @@ __all__ = [
     "create_proxies_for_owner",
     # Simplified wrappers
     "SimpleStorageProxy",
-    "SimpleObservabilityProxy",
+    "SimpleMonitoringProxy",
     # Re-export
     "BaseProxy",
 ]

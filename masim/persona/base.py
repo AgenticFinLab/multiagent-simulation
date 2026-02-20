@@ -12,19 +12,21 @@ For concrete implementations, see general.py.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Type, TYPE_CHECKING
 
 import ray
+
+from masim.utils.topology import TopologyGraph
 
 if TYPE_CHECKING:
     from masim.proxy.base import (
         CommunicationProxy,
         StorageProxy,
         ResourceProxy,
-        ObservabilityProxy,
+        MonitoringProxy,
     )
     from masim.communication.base import Message
-    from masim.player.base import TurnResult
+    from masim.player.base import BasePlayer, PlayerConfig, TurnResult
 
 
 # =============================================================================
@@ -40,17 +42,53 @@ class BasePersona(ABC):
     Concrete implementation is in general.py (PlayerPersona).
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-        """Initialize base Persona with config dict."""
-        self.config: Dict[str, Any] = config or {}
+    def __init__(
+        self,
+        player_class: Type["BasePlayer"],
+        player_config: "PlayerConfig",
+        persona_config: Optional[Dict[str, Any]] = None,
+    ):
+        """
+        Initialize BasePersona with Player class and configuration.
 
-        # Proxy references (access directly: self.storage, self.observability, etc.)
+        Args:
+            player_class: The Player class to instantiate
+            player_config: Configuration for the Player
+            persona_config: Optional Persona-specific configuration
+        """
+        # Configuration
+        self.config: Dict[str, Any] = persona_config or {}
+
+        # Store class and config for deferred Player creation
+        self.player_class: Type["BasePlayer"] = player_class
+        self.player_config: "PlayerConfig" = player_config
+
+        # Identity (extracted from config for direct access)
+        self.identity: str = player_config.identity
+
+        # Internal Player instance (HIDDEN from Simulator)
+        self.player: Optional["BasePlayer"] = None
+
+        # Proxy references
         self.communication: Optional["CommunicationProxy"] = None
         self.storage: Optional["StorageProxy"] = None
         self.resource: Optional["ResourceProxy"] = None
-        self.observability: Optional["ObservabilityProxy"] = None
+        self.monitoring: Optional["MonitoringProxy"] = None
 
+        # Lifecycle flag
         self.is_initialized: bool = False
+
+        # Operate timing
+        self.operate_start_time: Optional[float] = None
+
+        # Topology graph for message routing
+        self.topology: Optional[TopologyGraph] = None
+
+        # Peer actor handles for direct message passing
+        self.peer_handles: Dict[str, ray.actor.ActorHandle] = {}
+
+        # Current round number for message recording
+        self.current_round: int = 0
 
     # =========================================================================
     #                        LIFECYCLE
@@ -73,7 +111,6 @@ class BasePersona(ABC):
     @abstractmethod
     async def operate(
         self,
-        notification: Dict[str, Any],
         round_num: int,
         num_steps: int = 1,
     ) -> "TurnResult":
@@ -81,7 +118,6 @@ class BasePersona(ABC):
         Execute the Player's turn operation.
 
         Args:
-            notification: Notification dict for this round
             round_num: Current simulation round number
             num_steps: Number of steps to execute in this turn
 
@@ -129,20 +165,49 @@ class BasePersona(ABC):
         ...
 
     # =========================================================================
-    #                    MESSAGE POOL CONTROL
+    #                    MESSAGE DISPATCH (Called by Simulator)
     # =========================================================================
 
     @abstractmethod
-    def is_ready_to_proceed(self) -> bool:
-        """Check if player can proceed (all expected messages received)."""
+    def dispatch_outbound_messages(self) -> int:
+        """
+        Dispatch all outbound messages declared by Player.
+
+        Called by Simulator AFTER operate() to explicitly send messages.
+        This allows Simulator to control message timing between levels.
+
+        Returns:
+            Number of messages dispatched
+        """
+        ...
+
+    # =========================================================================
+    #                    MESSAGE READINESS CONTROL
+    # =========================================================================
+
+    @abstractmethod
+    def has_received_expected_messages(self) -> bool:
+        """
+        Check if player has received all expected messages.
+
+        Used by Simulator to verify readiness before execution.
+        """
         ...
 
     @abstractmethod
     def set_expected_senders(self, senders: List[str]) -> None:
-        """Set which senders this player expects messages from."""
+        """
+        Set which senders this player expects messages from.
+
+        Called by Simulator during topology setup based on sources.
+        """
         ...
 
     @abstractmethod
-    def clear_message_pool(self) -> None:
-        """Clear message inbox and reset expected senders."""
+    def clear_message_inbox(self) -> None:
+        """
+        Clear message inbox after round processing.
+
+        Called by Simulator at round end to reset message state.
+        """
         ...

@@ -1,11 +1,10 @@
-"""
-Topology Graph Utilities for MASim.
+"""Topology Graph Utilities for MASim.
 
 This module provides NetworkX-based topology management for the multi-agent
 simulation framework. It handles:
 - Building directed graphs from topology configuration
 - Querying targets (successors) and senders (predecessors)
-- Computing execution levels from seed nodes (BFS)
+- Computing execution levels from source nodes (BFS)
 - Topology visualization
 
 Usage:
@@ -14,7 +13,7 @@ Usage:
     graph = TopologyGraph(topology_config)
     targets = graph.get_targets("player_1")
     senders = graph.get_senders("player_1")
-    levels = graph.get_execution_levels()  # Uses seeds from config
+    levels = graph.get_execution_levels()  # Uses sources from config
     graph.visualize()
 """
 
@@ -30,11 +29,11 @@ class TopologyGraph:
     Wraps a directed graph where edges represent allowed message paths.
     An edge from A to B means A can send messages to B.
 
-    Supports execution level computation via BFS from seed nodes.
+    Supports execution level computation via BFS from source nodes.
 
     Attributes:
         graph: The underlying NetworkX DiGraph
-        seeds: List of seed player IDs for execution ordering
+        sources: List of source player IDs for execution ordering
     """
 
     def __init__(self, topology_config: Optional[Dict[str, Any]] = None):
@@ -42,11 +41,11 @@ class TopologyGraph:
         Initialize topology graph from configuration.
 
         Args:
-            topology_config: Topology config dict with 'connections' and optional 'seeds'.
+            topology_config: Topology config dict with 'connections' and optional 'sources'.
                             If None, creates empty graph.
         """
         self.graph: nx.DiGraph = nx.DiGraph()
-        self.seeds: List[str] = []
+        self.sources: List[str] = []
         if topology_config:
             self._build_from_config(topology_config)
 
@@ -56,11 +55,11 @@ class TopologyGraph:
 
         Args:
             config: Dict with 'connections' mapping player_id -> [target_ids]
-                   and optional 'seeds' list for execution ordering
+                   and optional 'sources' list for execution ordering
         """
-        # Extract seeds if present
-        if "seeds" in config:
-            self.seeds = list(config["seeds"])
+        # Extract sources if present
+        if "sources" in config:
+            self.sources = list(config["sources"])
 
         if "connections" not in config:
             return
@@ -125,18 +124,18 @@ class TopologyGraph:
 
     def get_execution_levels(self) -> List[List[str]]:
         """
-        Compute execution levels via BFS from seed nodes.
+        Compute execution levels via BFS from source nodes.
 
-        Seeds execute first (Level 0), then their successors (Level 1), etc.
+        Sources execute first (Level 0), then their successors (Level 1), etc.
         Players in the same level execute in parallel.
 
         Returns:
             List of levels, where each level is a list of player IDs.
-            Empty list if no seeds configured.
+            Empty list if no sources configured.
 
         Example:
             topology:
-              seeds: [coordinator]
+              sources: [coordinator]
               connections:
                 coordinator: [player_1, player_2]
                 player_1: [coordinator]
@@ -147,17 +146,17 @@ class TopologyGraph:
                 ['player_1', 'player_2']  # Level 1
             ]
         """
-        if not self.seeds:
-            # No seeds: all players in single level (parallel)
+        if not self.sources:
+            # No sources: all players in single level (parallel)
             all_players = self.get_all_players()
             return [all_players] if all_players else []
 
-        # BFS from seeds
+        # BFS from sources
         levels: List[List[str]] = []
         visited: set = set()
 
-        # Level 0: seeds
-        current_level = [s for s in self.seeds if s in self.graph]
+        # Level 0: sources
+        current_level = [s for s in self.sources if s in self.graph]
         if not current_level:
             return []
 
