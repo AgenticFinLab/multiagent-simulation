@@ -364,7 +364,7 @@ Each proxy follows a common pattern:
 
 - **`ProxyConfig`** subclass for typed configuration.
 - **`ProxyResult`** wrapper enabling `result.success` / `result.data` / `result.error_code` for graceful degradation.
-- **`ObservableEntity`** protocol — the minimal interface a proxy owner must expose (`identity`, `on_message()`, `save_state()`, `load_state()`, `get_capabilities()`).
+- **`ObservableEntity`** protocol — the minimal interface a proxy owner must expose (`identity`, `on_message()`, `save_state()`, `load_state()`, `capabilities`).
 - **`ProxyFactory`** for batch creation from configuration.
 
 ## Communication (`masim/communication/`)

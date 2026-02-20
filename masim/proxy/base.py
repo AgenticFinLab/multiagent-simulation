@@ -162,7 +162,7 @@ arbitrary owner methods.
 │  CommunicationProxy  │ identity, on_message()      │ Message routing       │
 │  StorageProxy        │ identity, save_state(),     │ State persistence     │
 │                      │ load_state()                │                        │
-│  ResourceProxy       │ identity, get_capabilities()│ Access control        │
+│  ResourceProxy       │ identity, capabilities    │ Access control        │
 │  ObservabilityProxy  │ identity, get_system_metrics()│ Monitoring          │
 │                      │                               │                        │
 │                                                                              │
@@ -339,7 +339,7 @@ class ObservableEntity(Protocol):
     | on_message()       | CommunicationProxy    | Message delivery callback  |
     | save_state()       | StorageProxy          | Get state for checkpoint   |
     | load_state()       | StorageProxy          | Restore state from checkpoint|
-    | get_capabilities() | ResourceProxy         | Access control for resources|
+    | capabilities      | ResourceProxy         | Access control for resources|
     """
 
     @property
@@ -407,22 +407,7 @@ class ObservableEntity(Protocol):
         """
         ...
 
-    def get_capabilities(self) -> List[str]:
-        """
-        Return capability tags for ResourceProxy access control.
-
-        Capabilities determine which MCP resources this entity can access.
-        ResourceProxy checks capabilities before allowing resource fetch.
-
-        Returns:
-            List of capability strings (e.g., ["market_data", "order_book"])
-
-        Example Access Control Flow:
-            1. Entity requests: fetch_resource("mcp://market/prices")
-            2. ResourceProxy checks: "market_data" in entity.get_capabilities()
-            3. If missing: ProxyResult.fail("ACCESS_DENIED", ...)
-        """
-        ...
+    # capabilities: List[str] - direct attribute access for ResourceProxy
 
 
 # =============================================================================
@@ -1151,12 +1136,17 @@ class StorageProxy(BaseProxy):
         seq = self._message_seq[player_id][round_num]
         self._message_seq[player_id][round_num] += 1
 
+        # Serialize Message if it has to_dict() method
+        serialized_message = (
+            message.to_dict() if hasattr(message, "to_dict") else message
+        )
+
         record = {
             "round_num": round_num,
             "seq": seq,
             "direction": direction,
             "timestamp": datetime.now().isoformat(),
-            "message": message,
+            "message": serialized_message,
         }
         self._get_message_store(player_id).save(
             savename=f"{round_num:06d}_{seq:04d}", data=record
@@ -1168,10 +1158,14 @@ class StorageProxy(BaseProxy):
         """Record turn result using BlockBasedStoreManager."""
         if not self.config.record_rounds:
             return
+        # Serialize TurnResult if it has to_dict() method
+        serialized_result = (
+            turn_result.to_dict() if hasattr(turn_result, "to_dict") else turn_result
+        )
         record = {
             "round_num": round_num,
             "timestamp": datetime.now().isoformat(),
-            "turn_result": turn_result,
+            "turn_result": serialized_result,
         }
         self._get_turn_store(player_id).save(savename=f"{round_num:06d}", data=record)
 
@@ -1201,7 +1195,7 @@ class StorageProxy(BaseProxy):
 # Key Design:
 # - URI-based resource addressing (mcp://server/resource)
 # - Response caching for performance
-# - Access control via owner.get_capabilities()
+# - Access control via owner.capabilities
 # =============================================================================
 
 

@@ -216,7 +216,7 @@ class PlayerPersona(BasePersona):
             await self.observability.start_timer("operate_duration")
 
         # Delegate to internal Player.turn() (HIDDEN from Simulator)
-        # Player handles observation preparation via prepare_observation()
+        # Player reads messages from its own inbox via get_pending_messages()
         turn_result = await self.player.turn(notification, round_num, num_steps)
 
         # Dispatch outbound messages declared by Player
@@ -409,7 +409,7 @@ class PlayerPersona(BasePersona):
         Receive a message from another player.
 
         This is called remotely by other PlayerPersona actors.
-        Records message immediately, then delivers to internal Player.
+        Messages are IMMEDIATELY injected to Player via on_message().
 
         Args:
             message: The received Message object
@@ -422,7 +422,8 @@ class PlayerPersona(BasePersona):
             direction="received",
         )
 
-        # Deliver to internal Player
+        # Immediately inject message to Player (NOT store in Persona)
+        # Player stores in its own inbox for retrieval via get_pending_messages()
         if self.player:
             self.player.on_message(message)
 
