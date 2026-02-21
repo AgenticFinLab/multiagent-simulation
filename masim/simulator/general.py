@@ -39,6 +39,7 @@ Usage:
 
 import logging
 import importlib
+import os
 from typing import Any, Dict, List, Optional
 
 import ray
@@ -282,10 +283,36 @@ class GeneralSimulator(BaseSimulator):
             ray.get(handle.set_topology.remote(self.config.topology))
             ray.get(handle.set_peer_handles.remote(self.player_persona_handles))
 
+    def _save_round_topology(self, round_num: int) -> None:
+        """
+        Save topology diagram for the current round.
+
+        Saves to: {record_path}/diagrams/topology_r{round:06d}.png
+
+        Args:
+            round_num: Current round number
+        """
+        if not self.topology:
+            return
+
+        # Get record_path from setting (simulation-level config)
+        record_path = self.config.setting.get("record_path")
+        if not record_path:
+            return
+
+        diagrams_dir = os.path.join(record_path, "diagrams")
+        try:
+            diagram_path = self.topology.save_round_diagram(
+                output_dir=diagrams_dir, round_num=round_num, format="png"
+            )
+            logger.debug("    Saved topology diagram: %s", diagram_path)
+        except Exception as e:
+            logger.warning("    Failed to save topology diagram: %s", e)
+
     def phase_execute(
         self,
         round_num: int,
-        handles: Dict[str, ray.actor.ActorHandle],
+        level_handles: Dict[str, ray.actor.ActorHandle],
     ) -> Dict[str, Any]:
         """
         PHASE 1: EXECUTE - Players run operate() in parallel.
@@ -295,7 +322,7 @@ class GeneralSimulator(BaseSimulator):
 
         Args:
             round_num: Current round number
-            handles: Dict of player_id -> actor handle to execute
+            level_handles: Dict of player_id -> actor handle to execute
 
         Returns:
             Dict with futures and ref_to_player for phase_collect()
@@ -304,7 +331,7 @@ class GeneralSimulator(BaseSimulator):
 
         operate_futures = {}
         ref_to_player = {}
-        for player_id, handle in handles.items():
+        for player_id, handle in level_handles.items():
             future = handle.operate.remote(round_num)
             operate_futures[player_id] = future
             ref_to_player[future] = player_id
@@ -450,6 +477,11 @@ class GeneralSimulator(BaseSimulator):
         # PHASE 4: CLEANUP - Clear message inboxes for next round
         # ─────────────────────────────────────────────────────────────────────
         self.phase_cleanup()
+
+        # ─────────────────────────────────────────────────────────────────────
+        # PHASE 5: RECORD - Save topology diagram for this round
+        # ─────────────────────────────────────────────────────────────────────
+        self._save_round_topology(round_num)
 
         # Finalize round
         self.round_clock.tick_end()

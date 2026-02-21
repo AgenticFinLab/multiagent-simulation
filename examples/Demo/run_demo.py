@@ -73,14 +73,11 @@ async def run_simulation(config_path: str):
     logger.info("-" * 60)
 
     for i, round_result in enumerate(results, 1):
-        logger.info("Round %d:", i)
-        turn_results = round_result["turn_results"]
-        for player_id, turn_result in turn_results.items():
-            if turn_result and hasattr(turn_result, "final_action"):
-                action = turn_result.final_action
-                logger.info(
-                    "    %s: %s - %s", player_id, action.action_type, action.payload
-                )
+        logger.info(
+            "Round %d: execution_levels=%s",
+            round_result["round"],
+            round_result["execution_levels"],
+        )
 
     # Shutdown: cleans up Ray actors
     logger.info("")

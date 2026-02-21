@@ -306,18 +306,27 @@ class BaseSimulator(ABC):
     # =========================================================================
 
     @abstractmethod
-    def phase_player_decision(
+    def phase_execute(
         self,
         round_num: int,
-        notifications: Dict[str, Dict[str, Any]],
-        handles: Dict[str, "ActorHandle"],
+        level_handles: Dict[str, "ActorHandle"],
     ) -> Dict[str, Any]:
-        """Execute player decision phase - all players operate in parallel."""
+        """Execute player operate() in parallel for a level."""
         ...
 
     @abstractmethod
-    def phase_collect_results(self, decision_result: Dict[str, Any]) -> Dict[str, Any]:
-        """Collect results from player decision phase."""
+    def phase_collect(self, execute_result: Dict[str, Any]) -> Dict[str, Any]:
+        """Collect results from execute phase."""
+        ...
+
+    @abstractmethod
+    def phase_dispatch(self, level_handles: Dict[str, "ActorHandle"]) -> None:
+        """Dispatch outbound messages for a level."""
+        ...
+
+    @abstractmethod
+    def phase_cleanup(self) -> None:
+        """Clear message inboxes after round."""
         ...
 
     # =========================================================================

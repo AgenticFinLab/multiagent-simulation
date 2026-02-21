@@ -11,7 +11,7 @@ debug_mode: true
 proxy:
   storage:
     checkpoint_dir: "EXPERIMENT/Demo/checkpoints"
-    result_path: "EXPERIMENT/Demo/results"
+    record_path: "EXPERIMENT/Demo/records"
     record_rounds: true
   
   monitoring:

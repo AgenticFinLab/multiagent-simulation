@@ -18,7 +18,11 @@ Usage:
 """
 
 from typing import Any, Dict, List, Optional
+import os
 
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import networkx as nx
 
 
@@ -181,42 +185,94 @@ class TopologyGraph:
         return levels
 
     def visualize(
-        self, save_path: Optional[str] = None, title: str = "Topology"
+        self,
+        save_path: Optional[str] = None,
+        title: str = "Topology",
+        show: bool = True,
     ) -> None:
         """
-        Visualize the topology graph.
+        Visualize the topology graph with differentiated edge styles.
+
+        Edge styles based on execution flow:
+        - Forward edges (sources → downstream): blue, solid, thick
+        - Backward edges (downstream → sources): red, dashed, thin
 
         Args:
             save_path: If provided, save figure to this path
             title: Title for the plot
+            show: Whether to display the plot (default: True)
         """
-        import matplotlib.pyplot as plt
+        if not show:
+            plt.switch_backend("Agg")
 
-        plt.figure(figsize=(10, 8))
-        plt.title(title)
+        plt.figure(figsize=(12, 9))
+        plt.title(title, fontsize=14, fontweight="bold")
 
         # Use spring layout for positioning
-        pos = nx.spring_layout(self.graph, k=2, iterations=50)
+        pos = nx.spring_layout(self.graph, k=2, iterations=50, seed=42)
+
+        # Classify edges: forward (out) vs backward (in)
+        # Forward: from earlier level to later level
+        # Backward: from later level back to earlier level
+        levels = self.get_execution_levels()
+        node_level = {}
+        for level_idx, level_nodes in enumerate(levels):
+            for node in level_nodes:
+                node_level[node] = level_idx
+
+        forward_edges = []  # out: blue, solid
+        backward_edges = []  # in: red, dashed
+
+        for u, v in self.graph.edges():
+            u_level = node_level.get(u, 0)
+            v_level = node_level.get(v, 0)
+            if u_level <= v_level:
+                forward_edges.append((u, v))
+            else:
+                backward_edges.append((u, v))
 
         # Draw nodes
         nx.draw_networkx_nodes(
             self.graph,
             pos,
             node_color="lightblue",
-            node_size=2000,
+            node_size=2500,
             alpha=0.9,
+            edgecolors="darkblue",
+            linewidths=2,
         )
 
-        # Draw edges with arrows
-        nx.draw_networkx_edges(
-            self.graph,
-            pos,
-            edge_color="gray",
-            arrows=True,
-            arrowsize=20,
-            arrowstyle="->",
-            connectionstyle="arc3,rad=0.1",
-        )
+        # Draw forward edges (out): blue, solid, thick
+        if forward_edges:
+            nx.draw_networkx_edges(
+                self.graph,
+                pos,
+                edgelist=forward_edges,
+                edge_color="blue",
+                style="solid",
+                width=2.5,
+                arrows=True,
+                arrowsize=25,
+                arrowstyle="-|>",
+                connectionstyle="arc3,rad=0.1",
+                alpha=0.8,
+            )
+
+        # Draw backward edges (in): red, dashed, thin
+        if backward_edges:
+            nx.draw_networkx_edges(
+                self.graph,
+                pos,
+                edgelist=backward_edges,
+                edge_color="red",
+                style="dashed",
+                width=1.5,
+                arrows=True,
+                arrowsize=20,
+                arrowstyle="-|>",
+                connectionstyle="arc3,rad=-0.1",
+                alpha=0.7,
+            )
 
         # Draw labels
         nx.draw_networkx_labels(
@@ -226,13 +282,61 @@ class TopologyGraph:
             font_weight="bold",
         )
 
+        # Add legend
+        legend_elements = [
+            Line2D(
+                [0],
+                [0],
+                color="blue",
+                linewidth=2.5,
+                linestyle="-",
+                label="Forward (out)",
+            ),
+            Line2D(
+                [0],
+                [0],
+                color="red",
+                linewidth=1.5,
+                linestyle="--",
+                label="Backward (in)",
+            ),
+        ]
+        plt.legend(handles=legend_elements, loc="upper left", fontsize=10)
+
         plt.axis("off")
         plt.tight_layout()
 
         if save_path:
             plt.savefig(save_path, dpi=150, bbox_inches="tight")
 
-        plt.show()
+        if show:
+            plt.show()
+        else:
+            plt.close()
+
+    def save_round_diagram(
+        self, output_dir: str, round_num: int, format: str = "png"
+    ) -> str:
+        """
+        Save topology diagram for a specific round.
+
+        Args:
+            output_dir: Directory to save the diagram
+            round_num: Round number for naming
+            format: Output format ("png" or "pdf")
+
+        Returns:
+            Path to saved diagram file
+        """
+        os.makedirs(output_dir, exist_ok=True)
+
+        filename = f"topology_r{round_num:06d}.{format}"
+        save_path = os.path.join(output_dir, filename)
+
+        title = f"Topology - Round {round_num}"
+        self.visualize(save_path=save_path, title=title, show=False)
+
+        return save_path
 
     def to_ascii(self) -> str:
         """

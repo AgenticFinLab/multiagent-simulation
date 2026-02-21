@@ -43,14 +43,16 @@ from masim.persona.base import BasePersona
 from masim.communication.base import Message, build_message_from_outbound
 from masim.utils.topology import TopologyGraph
 from masim.proxy.base import (
-    StorageProxy,
     StorageConfig,
-    CommunicationProxy,
     CommunicationConfig,
-    ResourceProxy,
     ResourceConfig,
-    MonitoringProxy,
     MonitoringConfig,
+)
+from masim.proxy.general import (
+    StorageProxy,
+    CommunicationProxy,
+    ResourceProxy,
+    MonitoringProxy,
 )
 
 if TYPE_CHECKING:

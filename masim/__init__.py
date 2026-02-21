@@ -72,8 +72,8 @@ from masim.proxy import (
     StorageProxy,
     ResourceConfig,
     ResourceProxy,
-    ObservabilityConfig,
-    ObservabilityProxy,
+    MonitoringConfig,
+    MonitoringProxy,
 )
 
 # Simulator module
@@ -130,8 +130,8 @@ __all__ = [
     "StorageProxy",
     "ResourceConfig",
     "ResourceProxy",
-    "ObservabilityConfig",
-    "ObservabilityProxy",
+    "MonitoringConfig",
+    "MonitoringProxy",
     # Simulator types
     "SimulatorStatus",
     "RoundPhase",

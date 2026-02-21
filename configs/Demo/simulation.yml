@@ -16,6 +16,8 @@ setting:
   total_rounds: 3
   entry_limit: 100
   steps_per_turn: 1
+  # Simulation-level records (diagrams, etc.)
+  record_path: "EXPERIMENT/Demo/records"
 
 # -----------------------------------------------------------------------------
 # Environment Settings
