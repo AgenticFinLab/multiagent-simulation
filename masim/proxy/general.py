@@ -2,7 +2,7 @@
 General Proxy Implementations for MASim Framework.
 
 This module provides concrete proxy implementations:
-    - CommunicationProxy: Message routing (send, broadcast, receive)
+    - SendReceiveProxy: Message routing (send, broadcast, receive)
     - StorageProxy: State checkpoint/restore using BlockBasedStoreManager
     - ResourceProxy: MCP resource access
     - MonitoringProxy: Metrics and logging
@@ -22,7 +22,7 @@ from masim.proxy.base import (
     BaseProxy,
     ProxyResult,
     # Configs
-    CommunicationConfig,
+    SendReceiveConfig,
     StorageConfig,
     ResourceConfig,
     MonitoringConfig,
@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 # =============================================================================
 
 
-class CommunicationProxy(BaseProxy):
+class SendReceiveProxy(BaseProxy):
     """
     Proxy for message routing and reliable transmission.
 
@@ -53,11 +53,11 @@ class CommunicationProxy(BaseProxy):
 
     def __init__(
         self,
-        config: Optional[CommunicationConfig] = None,
+        config: Optional[SendReceiveConfig] = None,
         owner: Optional[OwnerType] = None,
     ):
-        super().__init__(config or CommunicationConfig(), owner)
-        self.config: CommunicationConfig = config or CommunicationConfig()
+        super().__init__(config or SendReceiveConfig(), owner)
+        self.config: SendReceiveConfig = config or SendReceiveConfig()
         self.subscriptions: Dict[str, Callable[[Message], Awaitable[None]]] = {}
         self.pending_messages: Dict[str, List[Message]] = {}
 
@@ -440,7 +440,7 @@ def create_default_proxies(
 ) -> Dict[ProxyType, BaseProxy]:
     """Create a complete set of proxies with default configurations."""
     return {
-        ProxyType.COMMUNICATION: CommunicationProxy(CommunicationConfig(), owner),
+        ProxyType.COMMUNICATION: SendReceiveProxy(SendReceiveConfig(), owner),
         ProxyType.STORAGE: StorageProxy(StorageConfig(), owner),
         ProxyType.RESOURCE: ResourceProxy(ResourceConfig(), owner),
         ProxyType.OBSERVABILITY: MonitoringProxy(MonitoringConfig(), owner),
@@ -468,9 +468,7 @@ def create_proxies_for_owner(
     proxies = {}
 
     if include_communication:
-        proxies[ProxyType.COMMUNICATION] = CommunicationProxy(
-            CommunicationConfig(), owner
-        )
+        proxies[ProxyType.COMMUNICATION] = SendReceiveProxy(SendReceiveConfig(), owner)
 
     if include_storage:
         proxies[ProxyType.STORAGE] = StorageProxy(StorageConfig(), owner)
@@ -517,7 +515,7 @@ class SimpleMonitoringProxy(MonitoringProxy):
 # Re-export
 __all__ = [
     # Proxy implementations
-    "CommunicationProxy",
+    "SendReceiveProxy",
     "StorageProxy",
     "ResourceProxy",
     "MonitoringProxy",

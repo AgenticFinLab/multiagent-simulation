@@ -13,14 +13,14 @@ Protocols:
 
 Dataclasses:
     ProxyResult          - Result wrapper for graceful degradation (success, data, error)
-    CommunicationConfig  - Config for CommunicationProxy
+    SendReceiveConfig  - Config for SendReceiveProxy
     StorageConfig        - Config for StorageProxy
     ResourceConfig       - Config for ResourceProxy
     ObservabilityConfig  - Config for MonitoringProxy
 
 Abstract Classes:
     BaseProxy            - Abstract base with owner weak reference pattern
-    CommunicationProxy   - Message routing: send, broadcast, subscribe
+    SendReceiveProxy   - Message routing: send, broadcast, subscribe
     StorageProxy         - State persistence: checkpoint, restore
     ResourceProxy        - MCP integration: fetch_resource, invoke_tool
     ObservabilityProxy   - Metrics/logging: log_event, record_metric
@@ -32,7 +32,7 @@ Abstract Classes:
 This module defines the four micro-proxy types that provide infrastructure
 abstraction for Player entities (including coordinators):
 
-    1. CommunicationProxy - Message routing and reliable transmission
+    1. SendReceiveProxy - Message routing and reliable transmission
     2. StorageProxy       - State checkpoint and rollback
     3. ResourceProxy      - MCP (Model Context Protocol) connection management
     4. ObservabilityProxy - Metrics collection and structured logging
@@ -60,7 +60,7 @@ Key Components:
    ┌─────────────────────────────────────────────────────────────────────┐
    │                    MICRO-PROXY INTERFACES                           │
    │                                                                     │
-   │  CommunicationProxy: send, broadcast, receive, subscribe, unsubscribe
+   │  SendReceiveProxy: send, broadcast, receive, subscribe, unsubscribe
    │  StorageProxy:       checkpoint, restore, list, delete, get_latest  │
    │  ResourceProxy:      fetch, invoke, list, connect, disconnect       │
    │  ObservabilityProxy: record_metric, log_event, start/stop_timer    │
@@ -74,7 +74,7 @@ Key Components:
    │  Owner (Player - may have role='coordinator' or 'player')        │
    │      │                                                            │
    │      │  ┌─────────────────────┐                                  │
-   │      ├──│ CommunicationProxy  │──┐                               │
+   │      ├──│ SendReceiveProxy  │──┐                               │
    │      │  └─────────────────────┘  │                               │
    │      │  ┌─────────────────────┐  │                               │
    │      ├──│ StorageProxy        │──│ Each proxy holds             │
@@ -159,7 +159,7 @@ arbitrary owner methods.
 │                                                                              │
 │  Proxy Type          │ Allowed Owner Access        │ Purpose                │
 │  ────────────────────┼─────────────────────────────┼───────────────────────│
-│  CommunicationProxy  │ identity, on_message()      │ Message routing       │
+│  SendReceiveProxy  │ identity, on_message()      │ Message routing       │
 │  StorageProxy        │ identity, save_state(),     │ State persistence     │
 │                      │ load_state()                │                        │
 │  ResourceProxy       │ identity, capabilities    │ Access control        │
@@ -329,7 +329,7 @@ class ObservableEntity(Protocol):
     | Method             | Used By               | Purpose                    |
     |--------------------|-----------------------|----------------------------|
     | identity           | All proxies           | Entity identification      |
-    | on_message()       | CommunicationProxy    | Message delivery callback  |
+    | on_message()       | SendReceiveProxy    | Message delivery callback  |
     | save_state()       | StorageProxy          | Get state for checkpoint   |
     | load_state()       | StorageProxy          | Restore state from checkpoint|
     | capabilities      | ResourceProxy         | Access control for resources|
@@ -353,9 +353,9 @@ class ObservableEntity(Protocol):
 
     def on_message(self, message: Message) -> None:
         """
-        Callback invoked when a message arrives (CommunicationProxy).
+        Callback invoked when a message arrives (SendReceiveProxy).
 
-        This method is called by CommunicationProxy when a message
+        This method is called by SendReceiveProxy when a message
         is delivered to this entity. The owner decides how to handle it.
 
         Args:
@@ -780,7 +780,7 @@ class BaseProxy(ABC):
 #                         COMMUNICATION PROXY
 # =============================================================================
 #
-# CommunicationProxy handles message routing and reliable transmission.
+# SendReceiveProxy handles message routing and reliable transmission.
 # It provides a unified interface for point-to-point and broadcast messaging.
 #
 # Key Design:
@@ -791,9 +791,9 @@ class BaseProxy(ABC):
 
 
 @dataclass
-class CommunicationConfig(ProxyConfig):
+class SendReceiveConfig(ProxyConfig):
     """
-    Configuration for CommunicationProxy.
+    Configuration for SendReceiveProxy.
 
     Extends ProxyConfig with communication-specific settings.
 
@@ -802,12 +802,16 @@ class CommunicationConfig(ProxyConfig):
         message_timeout_ms: Timeout for message delivery (default: 5000ms)
         enable_compression: Whether to compress large messages (default: True)
         max_message_size_bytes: Maximum message size (default: 10MB)
+        record_path: Directory for message recording (default: None)
+        is_record_messages: Whether to record sent messages (default: True)
 
     Example:
-        config = CommunicationConfig(
+        config = SendReceiveConfig(
             message_timeout_ms=10000,  # 10 second timeout
             enable_compression=True,
-            max_message_size_bytes=50 * 1024 * 1024  # 50MB
+            max_message_size_bytes=50 * 1024 * 1024,  # 50MB
+            record_path="/path/to/records",
+            record_messages=True
         )
     """
 
@@ -816,6 +820,9 @@ class CommunicationConfig(ProxyConfig):
     message_timeout_ms: int = 5000  # 5 second default timeout
     enable_compression: bool = True  # Compress large messages
     max_message_size_bytes: int = 10 * 1024 * 1024  # 10MB default max
+    # Message recording configuration
+    record_path: Optional[str] = None  # Directory for message storage
+    is_record_messages: bool = True  # Whether to record sent messages
 
 
 # =============================================================================

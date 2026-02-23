@@ -21,10 +21,11 @@ from masim.player.base import (
     StepResult,
     TurnResult,
     Outbound,
+    Inbound,
 )
 
 if TYPE_CHECKING:
-    from masim.communication.base import Message
+    pass
 
 
 # =============================================================================
@@ -140,17 +141,22 @@ class GeneralPlayer(BasePlayer):
         )
 
     def prepare_observation(self, round_num: int) -> Observation:
-        """Prepare the Observation for this turn."""
+        """Prepare the Observation for this turn with local data + inbounds."""
+        inbounds = self.get_pending_inbounds()
         return Observation(
-            local=LocalObservation(data={}),
-            notification={},
+            local=self.get_local_observation(),
+            inbounds=inbounds,
             round=round_num,
         )
+
+    def get_local_observation(self) -> LocalObservation:
+        """Get player's local observation data. Override in subclass."""
+        return LocalObservation(data={})
 
     async def turn(
         self,
         round_num: int,
-        num_steps: int = 1,
+        **kwargs,
     ) -> "TurnResult":
         """Execute a turn consisting of multiple steps."""
         observation = self.prepare_observation(round_num)
@@ -160,6 +166,7 @@ class GeneralPlayer(BasePlayer):
         current_observation = observation
         prev_result: Optional[StepResult] = None
 
+        num_steps = self.config.steps_per_turn
         for _ in range(num_steps):
             step_result = await self.step(current_observation, prev_result)
             step_results.append(step_result)
@@ -220,44 +227,39 @@ class GeneralPlayer(BasePlayer):
         return target_id in self.topology_targets
 
     # =========================================================================
-    #                      MESSAGE HANDLING
+    #                      INBOUND HANDLING
     # =========================================================================
 
-    def on_message(self, message: "Message") -> None:
-        """Receive a message from another player."""
-        self.message_inbox.append(message)
+    def on_inbound(self, inbound: Inbound) -> None:
+        """Receive a decoded inbound from Persona."""
+        self.inbounds.append(inbound)
 
-    def get_pending_messages(self) -> List["Message"]:
-        """Get and clear pending messages from inbox."""
-        messages = self.message_inbox.copy()
-        self.message_inbox.clear()
-        return messages
+    def get_pending_inbounds(self) -> List[Inbound]:
+        """Get and clear pending inbounds."""
+        inbounds = self.inbounds.copy()
+        self.inbounds.clear()
+        return inbounds
 
-    def has_received_expected_messages(self) -> bool:
+    def is_received_ready(self, round_num: int, **kwargs) -> bool:
         """
-        Check if all expected messages have been received.
+        Check if player has received enough inbounds to proceed.
 
-        Returns True if:
-        - No expected senders configured (always ready), OR
-        - All expected senders have sent at least one message
+        Logic:
+        - If no expected_senders → ready immediately
+        - Otherwise check if all expected senders have sent
+
+        Args:
+            round_num: Current round number
+            **kwargs: Additional parameters for custom logic in subclasses
+
+        Returns:
+            True if ready to proceed with decision
         """
-        if not self.state.expected_senders:
+        if not self.expected_senders:
             return True
-        received_senders = {msg.sender_id for msg in self.message_inbox}
-        return self.state.expected_senders.issubset(received_senders)
 
-    def set_expected_senders(self, senders: List[str]) -> None:
-        """
-        Set which senders this player expects messages from.
-
-        Called by Persona during topology setup based on sources.
-        """
-        self.state.expected_senders = set(senders)
-
-    def clear_message_inbox(self) -> None:
-        """Clear message inbox after processing."""
-        self.message_inbox.clear()
-        self.state.expected_senders.clear()
+        received_senders = {inb.sender_id for inb in self.inbounds}
+        return self.expected_senders.issubset(received_senders)
 
     # =========================================================================
     #                          UTILITY
@@ -270,61 +272,3 @@ class GeneralPlayer(BasePlayer):
     def __repr__(self) -> str:
         """String representation for debugging."""
         return f"Player(id={self.identity}, groups={self.group_tags})"
-
-
-# =============================================================================
-#                       SPECIALIZED PLAYERS
-# =============================================================================
-
-
-class EchoPlayer(GeneralPlayer):
-    """A Player that echoes back observations with minimal processing."""
-
-    async def act(self, decision_payload: PayloadType) -> Action:
-        """Create an echo action with observation data."""
-        return Action(
-            action_type="echo",
-            payload={"echoed_data": decision_payload},
-            source_id=self.identity,
-            metadata={"player_name": self.name},
-        )
-
-
-class NoOpPlayer(GeneralPlayer):
-    """A Player that takes no action (returns empty actions)."""
-
-    async def decide(self) -> PayloadType:
-        """Always decide to do nothing."""
-        return {"noop": True}
-
-    async def act(self, decision_payload: PayloadType) -> Action:
-        """Create a no-op action."""
-        return Action(
-            action_type="noop",
-            payload={},
-            source_id=self.identity,
-        )
-
-
-class ReactivePlayer(GeneralPlayer):
-    """A Player that reacts based on observation triggers."""
-
-    async def decide(self) -> PayloadType:
-        """Decide based on reactive triggers."""
-        obs = self.state.custom_state["last_observation"]
-
-        if self.should_react(obs):
-            return self.create_reaction(obs)
-        return self.create_default_response(obs)
-
-    def should_react(self, observation: Dict[str, Any]) -> bool:
-        """Determine if a reaction is needed."""
-        return False
-
-    def create_reaction(self, observation: Dict[str, Any]) -> Dict[str, Any]:
-        """Create a reaction payload when triggered."""
-        return {"reaction": True, "triggered_by": observation}
-
-    def create_default_response(self, observation: Dict[str, Any]) -> Dict[str, Any]:
-        """Create default response when not reacting."""
-        return {"reaction": False, "hold": True}

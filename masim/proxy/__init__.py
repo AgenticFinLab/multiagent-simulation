@@ -9,11 +9,11 @@ Base Classes and Types (base.py):
     - ProxyType: Enum of proxy types
     - ProxyConfig: Base configuration for proxies
     - ProxyResult: Result wrapper for graceful degradation
-    - Config dataclasses: CommunicationConfig, StorageConfig, ResourceConfig, MonitoringConfig
+    - Config dataclasses: SendReceiveConfig, StorageConfig, ResourceConfig, MonitoringConfig
     - Error types: ProxyError, ProxyNotInitializedError, ProxyOperationError
 
 Proxy Implementations (general.py):
-    - CommunicationProxy: Message routing and transmission
+    - SendReceiveProxy: Message routing and transmission
     - StorageProxy: State checkpoint and rollback
     - ResourceProxy: MCP resource access
     - MonitoringProxy: Metrics and structured logging
@@ -40,7 +40,7 @@ from masim.proxy.base import (
     BaseProxy,
     OwnerType,
     # Config dataclasses
-    CommunicationConfig,
+    SendReceiveConfig,
     StorageConfig,
     ResourceConfig,
     MonitoringConfig,
@@ -48,7 +48,7 @@ from masim.proxy.base import (
 
 from masim.proxy.general import (
     # Proxy implementations
-    CommunicationProxy,
+    SendReceiveProxy,
     StorageProxy,
     ResourceProxy,
     MonitoringProxy,
@@ -75,8 +75,8 @@ __all__ = [
     "BaseProxy",
     "OwnerType",
     # Communication
-    "CommunicationConfig",
-    "CommunicationProxy",
+    "SendReceiveConfig",
+    "SendReceiveProxy",
     # Storage
     "StorageConfig",
     "StorageProxy",

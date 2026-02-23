@@ -15,7 +15,6 @@ setting:
   description: "Demo topology-driven message passing"
   total_rounds: 3
   entry_limit: 100
-  steps_per_turn: 1
   # Simulation-level records (diagrams, etc.)
   record_path: "EXPERIMENT/Demo/records"
 
@@ -60,3 +59,11 @@ players: !include players.yml
 # Communication Topology
 # -----------------------------------------------------------------------------
 topology: !include topology.yml
+
+# -----------------------------------------------------------------------------
+# Communication Channel Configuration
+# -----------------------------------------------------------------------------
+# Settings for the central communication channel (message dispatch and recording)
+communication:
+  # Storage path for message records (required)
+  storage_path: "EXPERIMENT/Demo/communication"

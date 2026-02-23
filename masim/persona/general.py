@@ -35,22 +35,26 @@ Message Passing Architecture:
      [process]             [process]             [process]
 """
 
+import asyncio
 import time
+from datetime import datetime
+
 import ray
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Set, TYPE_CHECKING
 
 from masim.persona.base import BasePersona
-from masim.communication.base import Message, build_message_from_outbound
+from masim.communication.base import Message
+from masim.player.base import Inbound
 from masim.utils.topology import TopologyGraph
 from masim.proxy.base import (
     StorageConfig,
-    CommunicationConfig,
+    SendReceiveConfig,
     ResourceConfig,
     MonitoringConfig,
 )
 from masim.proxy.general import (
     StorageProxy,
-    CommunicationProxy,
+    SendReceiveProxy,
     ResourceProxy,
     MonitoringProxy,
 )
@@ -118,8 +122,8 @@ class PlayerPersona(BasePersona):
         self.monitoring = MonitoringProxy(
             MonitoringConfig(**proxy_config["monitoring"])
         )
-        self.communication = CommunicationProxy(
-            CommunicationConfig(**proxy_config["communication"])
+        self.communication = SendReceiveProxy(
+            SendReceiveConfig(**proxy_config["communication"])
         )
         self.resource = ResourceProxy(ResourceConfig(**proxy_config["resource"]))
 
@@ -150,16 +154,17 @@ class PlayerPersona(BasePersona):
     async def operate(
         self,
         round_num: int,
-        num_steps: int = 1,
+        **kwargs,
     ) -> "TurnResult":
         """
         Execute the Player's turn operation.
 
-        Internally delegates to the hidden Player.turn().
+        Waits until Player.is_received_ready() returns True, then
+        delegates to the hidden Player.turn().
 
         Args:
             round_num: Current simulation round number
-            num_steps: Number of steps to execute in this turn (default: 1)
+            **kwargs: Additional parameters passed to Player.turn()
 
         Returns:
             TurnResult from internal Player
@@ -173,9 +178,12 @@ class PlayerPersona(BasePersona):
         if self.monitoring:
             await self.monitoring.start_timer("operate_duration")
 
+        # Wait until Player has received expected inbounds
+        while not self.player.is_received_ready(round_num, **kwargs):
+            await asyncio.sleep(0.01)
+
         # Delegate to internal Player.turn() (HIDDEN from Simulator)
-        # Player reads messages from its own inbox via get_pending_messages()
-        turn_result = await self.player.turn(round_num, num_steps)
+        turn_result = await self.player.turn(round_num, **kwargs)
 
         # NOTE: Message dispatch is NOT done here.
         # Simulator explicitly calls dispatch_outbound_messages() after operate()
@@ -238,87 +246,44 @@ class PlayerPersona(BasePersona):
             self.player.load_state(state)
 
     # =========================================================================
-    #                    OUTBOUND MESSAGE DISPATCH
+    #                    OUTBOUND COLLECTION
     # =========================================================================
 
-    def dispatch_outbound_messages(self) -> int:
+    def collect_outbounds(self) -> List[Dict[str, Any]]:
         """
-        Dispatch all outbound messages declared by Player.
+        Collect all raw outbounds declared by Player.
 
-        Called by Simulator AFTER operate() to explicitly send messages.
-        This allows Simulator to control message timing between levels.
-
-        Collects pending outbounds from Player.state and dispatches via topology.
-        - Player declares content via Outbound (payload, content_type, extras)
-        - Persona collects and dispatches via topology
-
-        IMPORTANT: This method BLOCKS until all messages are delivered.
-        This ensures Level N messages arrive before Level N+1 starts executing.
+        Collects pending outbounds from Player state and returns them
+        with sender/target info for Simulator to build Messages via channel.
 
         Returns:
-            Total number of messages sent
+            List of dicts with keys: outbound, sender_id, target_ids, round_num
         """
         if not self.player:
-            return 0
+            return []
+
+        if not self.topology:
+            return []
 
         # Collect and clear outbounds from Player state
         outbounds = self.player.pending_outbounds.copy()
         self.player.pending_outbounds.clear()
 
-        # Collect all message delivery futures
-        all_refs: List[ray.ObjectRef] = []
-        for outbound in outbounds:
-            refs = self._send_outbound_async(outbound)
-            all_refs.extend(refs)
-
-        # BLOCK until all messages are delivered
-        # This ensures intra-round message delivery (Level N → Level N+1)
-        if all_refs:
-            ray.get(all_refs)
-
-        return len(all_refs)
-
-    def _send_outbound_async(self, outbound: Any) -> List[ray.ObjectRef]:
-        """
-        Send an Outbound to all topology targets (non-blocking).
-
-        Routing is determined by topology configuration, not by Player.
-        Converts content-focused Outbound to wire-ready Message for each target.
-
-        Args:
-            outbound: The Outbound object with payload, content_type, extras
-
-        Returns:
-            List of Ray ObjectRefs for message delivery (caller must wait)
-        """
-        if not self.topology:
-            return []
-
-        refs: List[ray.ObjectRef] = []
+        # Get targets from topology
         targets = self.topology.get_targets(self.identity)
 
-        for target_id in targets:
-            if target_id in self.peer_handles:
-                # Convert Outbound to Message for each target
-                message = build_message_from_outbound(
-                    outbound=outbound,
-                    sender_id=self.identity,
-                    target_id=target_id,
-                )
+        result = []
+        for outbound in outbounds:
+            result.append(
+                {
+                    "outbound": outbound,
+                    "sender_id": self.identity,
+                    "target_ids": targets,
+                    "round_num": self.current_round,
+                }
+            )
 
-                self.storage.record_message(
-                    player_id=self.identity,
-                    round_num=self.current_round,
-                    message=message,
-                    direction="sent",
-                )
-
-                target_handle = self.peer_handles[target_id]
-                # Submit async, collect ref for later waiting
-                ref = target_handle.receive_message.remote(message)
-                refs.append(ref)
-
-        return refs
+        return result
 
     # =========================================================================
     #                    TOPOLOGY & MESSAGE PASSING
@@ -341,9 +306,8 @@ class PlayerPersona(BasePersona):
             targets = self.topology.get_targets(self.identity)
             self.player.topology_targets = targets
 
-            # Set expected senders (who this player expects messages from)
-            senders = self.topology.get_senders(self.identity)
-            self.player.set_expected_senders(senders)
+        # Set expected senders from topology sources
+        self.setup_expected_senders()
 
     def set_peer_handles(
         self,
@@ -374,11 +338,14 @@ class PlayerPersona(BasePersona):
         """
         Receive a message from another player.
 
+        Flow: encoded message → channel decode → Message → convert → Inbound
+
         This is called remotely by other PlayerPersona actors.
-        Messages are IMMEDIATELY injected to Player via on_message().
+        The Message has already been decoded from wire format by the channel.
+        Persona converts it to Inbound and injects to Player.
 
         Args:
-            message: The received Message object
+            message: The received Message object (already decoded from channel)
         """
         # Record received message immediately
         self.storage.record_message(
@@ -388,39 +355,43 @@ class PlayerPersona(BasePersona):
             direction="received",
         )
 
-        # Immediately inject message to Player (NOT store in Persona)
-        # Player stores in its own inbox for retrieval via get_pending_messages()
+        # Convert Message → Inbound and inject to Player
         if self.player:
-            self.player.on_message(message)
+            inbound = self.convert_message_to_inbound(message)
+            self.player.on_inbound(inbound)
 
-    # =========================================================================
-    #                    MESSAGE READINESS CONTROL
-    # =========================================================================
-
-    def has_received_expected_messages(self) -> bool:
+    def convert_message_to_inbound(self, message: Message) -> Inbound:
         """
-        Check if player has received all expected messages.
+        Convert channel Message to Player-ready Inbound.
 
-        Delegates to internal Player's readiness check.
+        Simply wraps the Message with reception metadata.
+
+        Args:
+            message: Message object from channel
+
+        Returns:
+            Inbound for Player consumption
+        """
+        return Inbound(
+            message=message,
+            time_received=datetime.now().isoformat(),
+        )
+
+    # =========================================================================
+    #                    EXPECTED SENDERS SETUP
+    # =========================================================================
+
+    def setup_expected_senders(self) -> None:
+        """
+        Derive expected_senders from topology senders and set on Player.
+
+        Called during initialization after topology is set.
         """
         if not self.player:
-            return True
-        return self.player.has_received_expected_messages()
+            return
 
-    def set_expected_senders(self, senders: List[str]) -> None:
-        """
-        Set which senders this player expects messages from.
-
-        Delegates to internal Player.
-        """
-        if self.player:
-            self.player.set_expected_senders(senders)
-
-    def clear_message_inbox(self) -> None:
-        """
-        Clear message inbox after round processing.
-
-        Delegates to internal Player.
-        """
-        if self.player:
-            self.player.clear_message_inbox()
+        if self.topology:
+            senders = self.topology.get_senders(self.identity)
+            self.player.expected_senders = set(senders)
+        else:
+            self.player.expected_senders = set()

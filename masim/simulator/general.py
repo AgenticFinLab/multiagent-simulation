@@ -52,6 +52,7 @@ from masim.simulator.base import (
 )
 from masim.player.base import PlayerConfig
 from masim.persona.general import PlayerPersona
+from masim.communication.general import GeneralCommunicationChannel
 from masim.utils.topology import TopologyGraph
 
 # Module logger
@@ -191,7 +192,9 @@ class GeneralSimulator(BaseSimulator):
             config: Simulation configuration
         """
         super().__init__(config)
-        self.topology: Optional[TopologyGraph] = None
+        # Initialize communication channel from config
+        comm_config = config.communication
+        self.communication = GeneralCommunicationChannel(comm_config)
         logger.info("GeneralSimulator initialized: %s", self.simulation_id)
 
     # =========================================================================
@@ -373,41 +376,57 @@ class GeneralSimulator(BaseSimulator):
             "pending_count": 0,
         }
 
-    def phase_dispatch(self, level_handles: Dict[str, ray.actor.ActorHandle]) -> None:
+    def phase_dispatch(
+        self,
+        level_handles: Dict[str, ray.actor.ActorHandle],
+    ) -> None:
         """
-        PHASE 3: DISPATCH - Send outbound messages to next level.
+        PHASE 3: DISPATCH - Send outbound messages via CommunicationChannel.
 
-        Calls dispatch_outbound_messages() on each player.
-        Blocks until all messages are delivered (ray.get).
+        Collects raw outbounds from each player's Persona, builds Messages
+        via CommunicationChannel, then dispatches them.
 
         This ensures Level N messages arrive before Level N+1 starts.
 
         Args:
             level_handles: Dict of player_id -> actor handle for this level
         """
-        dispatch_refs = []
+        # Step 1: Collect raw outbounds from all players in this level
+        collect_refs = []
         for handle in level_handles.values():
-            ref = handle.dispatch_outbound_messages.remote()
-            dispatch_refs.append(ref)
+            ref = handle.collect_outbounds.remote()
+            collect_refs.append(ref)
 
-        if dispatch_refs:
-            ray.get(dispatch_refs)
+        # Get all collected outbounds
+        all_outbound_lists = ray.get(collect_refs) if collect_refs else []
 
-    def phase_cleanup(self) -> None:
-        """
-        PHASE 4: CLEANUP - Clear message inboxes for next round.
+        # Step 2: Build Messages via CommunicationChannel
+        all_messages = []
+        for outbound_list in all_outbound_lists:
+            for outbound_data in outbound_list:
+                outbound = outbound_data["outbound"]
+                sender_id = outbound_data["sender_id"]
+                target_ids = outbound_data["target_ids"]
+                round_num = outbound_data["round_num"]
 
-        Calls clear_message_inbox() on all players after round completes.
-        This resets message state so expected_senders can be re-evaluated
-        next round.
-        """
-        cleanup_refs = []
-        for handle in self.player_persona_handles.values():
-            ref = handle.clear_message_inbox.remote()
-            cleanup_refs.append(ref)
+                for target_id in target_ids:
+                    message = self.communication.build_message_from_outbound(
+                        outbound=outbound,
+                        sender_id=sender_id,
+                        target_id=target_id,
+                        round_num=round_num,
+                    )
+                    all_messages.append(message)
 
-        if cleanup_refs:
-            ray.get(cleanup_refs)
+        # Step 3: Dispatch via CommunicationChannel
+        if all_messages:
+            dispatch_refs = self.communication.encode_and_deliver(
+                messages=all_messages,
+                handles=self.player_persona_handles,
+            )
+            # Wait for all messages to be delivered
+            if dispatch_refs:
+                ray.get(dispatch_refs)
 
     async def run_round(self, round_num: int) -> Dict[str, Any]:
         """
@@ -419,25 +438,20 @@ class GeneralSimulator(BaseSimulator):
         │  For each level (Level 0 → Level 1 → ... → Level N):               │
         │                                                                     │
         │  1. EXECUTE: Players run operate() in parallel                     │
+        │              └─► Waits for is_received_ready() before turn()        │
         │              └─► perceive() → decide() → act()                     │
-        │              └─► Messages read from inbox (from previous level)    │
+        │              └─► Inbounds included in Observation                   │
         │              └─► Outbound messages declared in decide()            │
         │                                                                     │
         │  2. COLLECT: Wait for all operate() to complete                    │
         │              └─► Gather TurnResults from all players               │
         │                                                                     │
         │  3. DISPATCH: Send outbound messages to next level                 │
-        │              └─► dispatch_outbound_messages() on each player       │
+        │              └─► Build Messages from Outbounds via Channel         │
         │              └─► Messages arrive at targets via receive_message()  │
-        │              └─► Blocks until all delivered (ray.get)              │
+        │              └─► Persona decodes to Inbounds for next level        │
         │                                                                     │
         │  Then proceed to next level...                                     │
-        ├─────────────────────────────────────────────────────────────────────┤
-        │  After all levels complete:                                         │
-        │                                                                     │
-        │  4. CLEANUP: Clear message inboxes for next round                  │
-        │              └─► clear_message_inbox() on all players              │
-        │              └─► Resets expected_senders for re-evaluation          │
         └─────────────────────────────────────────────────────────────────────┘
 
         Args:
@@ -474,12 +488,7 @@ class GeneralSimulator(BaseSimulator):
             self.phase_dispatch(level_handles)
 
         # ─────────────────────────────────────────────────────────────────────
-        # PHASE 4: CLEANUP - Clear message inboxes for next round
-        # ─────────────────────────────────────────────────────────────────────
-        self.phase_cleanup()
-
-        # ─────────────────────────────────────────────────────────────────────
-        # PHASE 5: RECORD - Save topology diagram for this round
+        # PHASE 4: RECORD - Save topology diagram for this round
         # ─────────────────────────────────────────────────────────────────────
         self._save_round_topology(round_num)
 

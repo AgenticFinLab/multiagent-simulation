@@ -20,7 +20,7 @@ from masim.utils.topology import TopologyGraph
 
 if TYPE_CHECKING:
     from masim.proxy.base import (
-        CommunicationProxy,
+        SendReceiveProxy,
         StorageProxy,
         ResourceProxy,
         MonitoringProxy,
@@ -70,7 +70,7 @@ class BasePersona(ABC):
         self.player: Optional["BasePlayer"] = None
 
         # Proxy references
-        self.communication: Optional["CommunicationProxy"] = None
+        self.communication: Optional["SendReceiveProxy"] = None
         self.storage: Optional["StorageProxy"] = None
         self.resource: Optional["ResourceProxy"] = None
         self.monitoring: Optional["MonitoringProxy"] = None
@@ -112,14 +112,12 @@ class BasePersona(ABC):
     async def operate(
         self,
         round_num: int,
-        num_steps: int = 1,
     ) -> "TurnResult":
         """
         Execute the Player's turn operation.
 
         Args:
             round_num: Current simulation round number
-            num_steps: Number of steps to execute in this turn
 
         Returns:
             TurnResult from internal Player
@@ -182,32 +180,14 @@ class BasePersona(ABC):
         ...
 
     # =========================================================================
-    #                    MESSAGE READINESS CONTROL
+    #                    EXPECTED SENDERS SETUP
     # =========================================================================
 
     @abstractmethod
-    def has_received_expected_messages(self) -> bool:
+    def setup_expected_senders(self) -> None:
         """
-        Check if player has received all expected messages.
+        Derive expected_senders from topology and set on Player.
 
-        Used by Simulator to verify readiness before execution.
-        """
-        ...
-
-    @abstractmethod
-    def set_expected_senders(self, senders: List[str]) -> None:
-        """
-        Set which senders this player expects messages from.
-
-        Called by Simulator during topology setup based on sources.
-        """
-        ...
-
-    @abstractmethod
-    def clear_message_inbox(self) -> None:
-        """
-        Clear message inbox after round processing.
-
-        Called by Simulator at round end to reset message state.
+        Called during initialization after topology is set.
         """
         ...

@@ -65,7 +65,7 @@ from abc import ABC, abstractmethod
 from enum import Enum, auto
 from datetime import datetime
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Set, Union, TYPE_CHECKING
 
 import numpy as np
 
@@ -205,25 +205,56 @@ class LocalObservation:
 
 
 @dataclass
+class Inbound:
+    """
+    Inbound wrapper for received messages.
+
+    Persona converts channel Message to Inbound for Player consumption.
+    Wraps the original Message with reception metadata.
+
+    Attributes:
+        message: The original Message object from channel
+        time_received: ISO timestamp when message was received
+    """
+
+    message: "Message"
+    time_received: str = field(default_factory=lambda: datetime.now().isoformat())
+
+    @property
+    def sender_id(self) -> str:
+        """Shortcut to message sender_id."""
+        return self.message.sender_id
+
+    @property
+    def payload(self) -> PayloadType:
+        """Shortcut to message payload."""
+        return self.message.payload
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize to dictionary."""
+        return {
+            "message": self.message.to_dict(),
+            "time_received": self.time_received,
+        }
+
+
+@dataclass
 class Observation:
     """
     Complete observation for a Player each round.
 
     Observation Structure:
     - local: LocalObservation (player's own perception)
-    - notification: Dict (round notification from coordinator/environment)
+    - inbounds: List[Inbound] (decoded messages from other players)
     - round: int (simulation round number)
-    - extras: Dict (extensibility)
 
-    Note: Messages from other players are NOT part of Observation.
-    Messages are stored in Player's message_inbox and accessed via
-    get_pending_messages().
+    Data Flow:
+        Channel → Message → Persona (decode) → Inbound → Observation
     """
 
     local: LocalObservation
-    notification: Dict[str, Any]
+    inbounds: List["Inbound"]
     round: int = 0
-    extras: Dict[str, Any] = field(default_factory=dict)
 
     @property
     def data(self) -> PayloadType:
@@ -234,9 +265,8 @@ class Observation:
         """Serialize to dictionary."""
         return {
             "local": self.local.to_dict(),
-            "notification": self.notification,
+            "inbounds": [inb.to_dict() for inb in self.inbounds],
             "round": self.round,
-            "extras": self.extras,
         }
 
 
@@ -334,6 +364,7 @@ class PlayerConfig:
         name: Human-readable unique name for the Player
         identity: Technical identifier for routing, storage, Ray naming
         role: 'player' (default) or 'coordinator'
+        steps_per_turn: Number of steps to execute per turn (default: 1)
         group_tags: Tags for group-based operations
         extras: Domain-specific configuration
     """
@@ -341,6 +372,7 @@ class PlayerConfig:
     name: str
     identity: str
     role: str = "player"
+    steps_per_turn: int = 1
     group_tags: List[str] = field(default_factory=list)
     extras: Dict[str, Any] = field(default_factory=dict)
 
@@ -377,10 +409,9 @@ class PlayerState:
     - turn_count, step_count: Execution counters
     - last_observation, last_action: Most recent data
     - custom_state: Domain-specific key-value store
-    - expected_senders: Message readiness tracking
     - Timing metrics: turn/step durations
 
-    Does NOT contain functional members like message_inbox or pending_outbounds
+    Does NOT contain functional members like inbounds, pending_outbounds, or expected_senders
     - those belong to the Player class directly.
     """
 
@@ -397,10 +428,6 @@ class PlayerState:
 
         # Flexible key-value store for domain-specific state.
         self.custom_state: Dict[str, Any] = {}
-
-        # Expected senders - players we expect to receive messages from.
-        # Set based on topology sources (predecessors).
-        self.expected_senders: set = set()
 
         # Execution clock for turn-level timing.
         self.turn_clock_start: Optional[float] = None
@@ -530,9 +557,14 @@ class BasePlayer(ABC):
         # Private State Container (status/metrics only)
         self.state: PlayerState = PlayerState()
 
-        # Message Queues (functional members)
+        # Inbound Queue (decoded messages from Persona)
+        self.inbounds: List["Inbound"] = []
+
+        # Outbound Queue (pending messages to send)
         self.pending_outbounds: List["Outbound"] = []
-        self.message_inbox: List["Message"] = []
+
+        # Expected Senders (set by Persona from topology sources)
+        self.expected_senders: Set[str] = set()
 
         # Capability Tags
         if "capabilities" in config.extras:
@@ -623,38 +655,28 @@ class BasePlayer(ABC):
     async def turn(
         self,
         round_num: int,
-        num_steps: int = 1,
+        **kwargs,
     ) -> "TurnResult":
         """Execute a turn consisting of multiple steps."""
         ...
 
     # =========================================================================
-    #                      MESSAGE HANDLING (Override in subclass)
+    #                      INBOUND HANDLING (Override in subclass)
     # =========================================================================
 
     @abstractmethod
-    def on_message(self, message: "Message") -> None:
-        """Receive a message from another player."""
+    def on_inbound(self, inbound: "Inbound") -> None:
+        """Receive a decoded inbound from Persona."""
         ...
 
     @abstractmethod
-    def get_pending_messages(self) -> List["Message"]:
-        """Get and clear pending messages from inbox."""
+    def get_pending_inbounds(self) -> List["Inbound"]:
+        """Get and clear pending inbounds."""
         ...
 
     @abstractmethod
-    def has_received_expected_messages(self) -> bool:
-        """Check if all expected messages have been received."""
-        ...
-
-    @abstractmethod
-    def set_expected_senders(self, senders: List[str]) -> None:
-        """Set which senders this player expects messages from."""
-        ...
-
-    @abstractmethod
-    def clear_message_inbox(self) -> None:
-        """Clear message inbox after processing."""
+    def is_received_ready(self, round_num: int, **kwargs) -> bool:
+        """Check if player has received enough inbounds to proceed."""
         ...
 
     # =========================================================================

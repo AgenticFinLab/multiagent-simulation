@@ -14,6 +14,7 @@ coordinator:
   config:
     identity: "coordinator"
     role: coordinator
+    steps_per_turn: 1
     group_tags:
       - coordinators
     extras: {}
@@ -28,6 +29,7 @@ player_1:
   config:
     identity: "player_1"
     role: player
+    steps_per_turn: 1
     group_tags:
       - players
     extras: {}
@@ -39,6 +41,7 @@ player_2:
   config:
     identity: "player_2"
     role: player
+    steps_per_turn: 1
     group_tags:
       - players
     extras: {}

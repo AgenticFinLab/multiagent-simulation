@@ -20,7 +20,7 @@ Core Design Principles:
    - Player: step (perceive→decide→act)
 
 4. Infrastructure Decoupling via Micro-Proxy Pattern:
-   - CommunicationProxy: Message routing and transmission
+   - SendReceiveProxy: Message routing and transmission
    - StorageProxy: State checkpoint and rollback
    - ResourceProxy: MCP protocol integration
    - ObservabilityProxy: Metrics and logging
@@ -29,9 +29,8 @@ Architecture:
     Simulator ─────► PlayerPersona (Ray Actor) ──► BasePlayer (hidden)
 
 Usage:
-    from masim import PlayerPersona, Action
+    from masim import PlayerPersona, Action, GeneralPlayer
     from masim.communication import Message, MessageType
-    from masim.proxy import CommunicationProxy, ResourceProxy
 """
 
 __version__ = "0.0.1"
@@ -42,11 +41,14 @@ from masim.player import (
     ActionStatus,
     Action,
     Observation,
+    Outbound,
+    Inbound,
     StepResult,
     TurnResult,
     PlayerConfig,
     PlayerState,
     BasePlayer,
+    GeneralPlayer,
 )
 
 # Communication module
@@ -54,11 +56,8 @@ from masim.communication import (
     MessageType,
     MessagePriority,
     Message,
-    ProtocolOutbound,
-    RouteInfo,
-    BaseProtocol,
-    JsonProtocol,
-    MessageRouter,
+    CommunicationChannel,
+    GeneralCommunicationChannel,
 )
 
 # Proxy module
@@ -66,8 +65,8 @@ from masim.proxy import (
     ProxyType,
     ProxyConfig,
     BaseProxy,
-    CommunicationConfig,
-    CommunicationProxy,
+    SendReceiveConfig,
+    SendReceiveProxy,
     StorageConfig,
     StorageProxy,
     ResourceConfig,
@@ -106,26 +105,26 @@ __all__ = [
     "ActionStatus",
     "Action",
     "Observation",
+    "Outbound",
+    "Inbound",
     "StepResult",
     "TurnResult",
     "PlayerConfig",
     "PlayerState",
     "BasePlayer",
+    "GeneralPlayer",
     # Communication types
     "MessageType",
     "MessagePriority",
     "Message",
-    "ProtocolOutbound",
-    "RouteInfo",
-    "BaseProtocol",
-    "JsonProtocol",
-    "MessageRouter",
+    "CommunicationChannel",
+    "GeneralCommunicationChannel",
     # Proxy types
     "ProxyType",
     "ProxyConfig",
     "BaseProxy",
-    "CommunicationConfig",
-    "CommunicationProxy",
+    "SendReceiveConfig",
+    "SendReceiveProxy",
     "StorageConfig",
     "StorageProxy",
     "ResourceConfig",

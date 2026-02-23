@@ -79,7 +79,7 @@ Simulator.run():
     │       └── Returns: TurnResult with coordinator's action
     │
     ├── Phase 2: PLAYER_DECISION
-    │   └── player_persona.operate(observation, num_steps)  [parallel]
+    │   └── player_persona.operate(round_num)  [parallel]
     │       └── Returns: TurnResult with final_action
     │
     └── Phase 3: COMPLETE
@@ -115,6 +115,8 @@ if TYPE_CHECKING:
     import ray
     from ray.actor import ActorHandle
     from masim.persona.base import PlayerPersona
+    from masim.utils.topology import TopologyGraph
+    from masim.communication.general import CommunicationChannel
 
 
 # =============================================================================
@@ -226,6 +228,7 @@ class SimulationConfig:
     players: Dict[str, Any] = field(default_factory=dict)
     topology: Dict[str, Any] = field(default_factory=dict)
     environment: Dict[str, Any] = field(default_factory=dict)
+    communication: Dict[str, Any] = field(default_factory=dict)
 
     simulation_id: Optional[str] = None
 
@@ -267,6 +270,12 @@ class BaseSimulator(ABC):
 
         # History management for round results
         self.history: deque = deque(maxlen=config.setting["entry_limit"])
+
+        # Communication topology (initialized by subclass setup)
+        self.topology: Optional["TopologyGraph"] = None
+
+        # Communication channel for message dispatch and recording
+        self.communication: Optional["CommunicationChannel"] = None
 
     # =========================================================================
     #                    RAY ACTOR MANAGEMENT

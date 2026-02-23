@@ -3,17 +3,17 @@
 This demonstrates the topology-driven message passing architecture where:
 - Players declare outbound messages in decide() result
 - Persona dispatches messages via topology after operate()
-- Players receive messages via on_message() (immediately injected by Persona)
-- Players access messages via get_pending_messages()
+- Players receive inbounds via Observation (decoded by Persona)
+- Observation contains local data + inbounds from other players
 
 Data Flow (Level-Based Execution):
 1. Level 0 (coordinator): execute -> declare outbound_messages -> dispatch
-2. Level 1 (players): receive via on_message() -> perceive() calls get_pending_messages()
+2. Level 1 (players): receive inbounds in Observation -> perceive() -> decide()
 3. Messages flow WITHIN THE SAME ROUND (intra-round delivery via ray.get)
 
 Key Design Pattern:
-- Notifications = execution triggers (minimal metadata)
-- Messages = actual data flow (via message_inbox, immediately injected by Persona)
+- Inbounds = decoded messages from other players (in Observation)
+- Outbounds = declared messages to send (in decide() result)
 - Player is PURE domain logic (no infrastructure coupling)
 - Routing is topology-driven (Player doesn't specify targets)
 - Persona handles ALL communication (receive/send), Player handles logic
@@ -21,7 +21,7 @@ Key Design Pattern:
 Architecture:
 - Demo players inherit from GeneralPlayer (general.py) not BasePlayer (base.py)
 - base.py = abstract contracts, general.py = ready-to-use implementations
-- Player has is_proceed() to check if ready based on received messages
+- Player has is_received_ready() to check if ready based on expected_senders
 """
 
 import logging
@@ -42,7 +42,7 @@ class SimpleCoordinator(GeneralPlayer):
     Coordinator that:
     1. Declares broadcast message in decide()
     2. Persona dispatches to all connected players
-    3. Receives responses via get_pending_messages()
+    3. Receives responses via Observation.inbounds
 
     Uses declarative message passing:
     - decide() returns 'outbound_messages' list
@@ -54,19 +54,16 @@ class SimpleCoordinator(GeneralPlayer):
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
-        """Store round info and check for received responses."""
+        """Store round info and check for received responses in inbounds."""
         round_num = observation.round
         print(f"\n[Coordinator] === Round {round_num} ===")
         self.state.custom_state["round"] = round_num
 
-        # Check messages from inbox (immediately injected by Persona via on_message())
-        messages = self.get_pending_messages()
-        if messages:
-            print(
-                f"[Coordinator] Received {len(messages)} messages from previous round:"
-            )
-            for msg in messages:
-                print(f"  - From {msg.sender_id}: {msg.payload}")
+        # Check inbounds from Observation (decoded by Persona)
+        if observation.inbounds:
+            print(f"[Coordinator] Received {len(observation.inbounds)} inbounds:")
+            for inb in observation.inbounds:
+                print(f"  - From {inb.sender_id}: {inb.payload}")
 
     async def decide(self) -> Dict[str, Any]:
         """Declare broadcast message to send to all players."""
@@ -103,8 +100,8 @@ class SimpleCoordinator(GeneralPlayer):
 class SimplePlayer(GeneralPlayer):
     """
     Player that:
-    1. Receives message from coordinator via on_message() (immediate injection)
-    2. Accesses messages in perceive() via get_pending_messages()
+    1. Receives message from coordinator via Observation.inbounds
+    2. Processes inbounds in perceive()
     3. Declares response message in decide()
     4. Persona dispatches response back to coordinator
 
@@ -118,18 +115,17 @@ class SimplePlayer(GeneralPlayer):
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
-        """Check for messages from coordinator."""
+        """Check for inbounds from coordinator in Observation."""
         round_num = observation.round
         print(f"\n[{self.identity}] Round {round_num}")
         self.state.custom_state["round"] = round_num
 
-        # Check messages from inbox (immediately injected by Persona via on_message())
-        messages = self.get_pending_messages()
-        if messages:
-            print(f"[{self.identity}] Received {len(messages)} messages:")
-            for msg in messages:
-                print(f"  - From {msg.sender_id}: {msg.payload}")
-                self.state.custom_state["coordinator_message"] = msg.payload
+        # Check inbounds from Observation (decoded by Persona)
+        if observation.inbounds:
+            print(f"[{self.identity}] Received {len(observation.inbounds)} inbounds:")
+            for inb in observation.inbounds:
+                print(f"  - From {inb.sender_id}: {inb.payload}")
+                self.state.custom_state["coordinator_message"] = inb.payload
 
     async def decide(self) -> Dict[str, Any]:
         """Declare response message to send to coordinator."""

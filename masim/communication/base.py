@@ -1,7 +1,6 @@
-"""
-Base Communication module for the Multi-Agent Simulation (MASim) framework.
+"""Base Communication module for the Multi-Agent Simulation (MASim) framework.
 
-This module provides message formats and routing abstractions ONLY.
+This module provides message formats and the CommunicationChannel base class.
 For concrete implementations, see `general.py`.
 
 ================================================================================
@@ -19,50 +18,35 @@ Dataclasses:
     Message              - Standard message format: type, sender_id, payload, recipient_id
 
 Abstract Classes:
-    BaseProtocol         - Serialization interface: encode, decode
-    MessageRouter        - Routing interface: register_handler, route
-
-Concrete Classes:
-    JsonProtocol         - JSON-based serialization with numpy support
-
-Builder Functions:
-    build_observation_message()   - Create OBSERVATION message
-    build_action_message()        - Create ACTION message
-    build_coordination_message()  - Create COORDINATION message
-    build_peer_message()          - Create PEER message
+    CommunicationChannel - Channel base class: dispatch, shutdown
 
 ================================================================================
                          DESIGN PHILOSOPHY
 ================================================================================
 
 - All cross-component communication uses standard Message format
-- Protocol layer handles serialization (Arrow/JSON compatible)
-- Routing is decoupled from message content semantics
-- Ray-native transport with zero-copy optimization support
+- CommunicationChannel is the central abstraction for message transmission
+- Concrete implementations (JsonProtocol, etc.) belong in general.py
 
 ================================================================================
-                          MESSAGE FLOW
+                    COMMUNICATION CHANNEL FLOW
 ================================================================================
 
-    Sender                                           Receiver
-      │                                                 │
-      ├── build_*_message()                             │
-      │   └── Creates Message object                    │
-      │                                                 │
-      ├── CommunicationProxy.send(message)              │
-      │   └── Protocol.encode(message)                  │
-      │       └── Returns: bytes                        │
-      │                                                 │
-      │               [Network Transport]               │
-      │                                                 │
-      │                                      Protocol.decode(bytes)
-      │                                          └── Returns: Message
-      │                                                 │
-      │                                      MessageRouter.route(message)
-      │                                          └── handler(message)
-      │                                                 │
-      │                                      Owner.on_message(message)
-      └─────────────────────────────────────────────────┘
+    Simulator
+        │
+        │  1. collect_outbound_messages() from all Personas
+        │
+        ▼
+    CommunicationChannel.encode_and_deliver(messages, handles)
+        │
+        ├── 2. encode(message) via Protocol
+        │
+        ├── 3. record(message) for persistence
+        │
+        └── 4. send to target via actor_handle.receive_message.remote()
+        │
+        ▼
+    Target Persona receives message
 
 ================================================================================
                           MESSAGE TYPES
@@ -76,14 +60,17 @@ Builder Functions:
     BROADCAST    - One-to-many messages
 """
 
+import os
 import uuid
 from abc import ABC, abstractmethod
 from enum import Enum, auto
 from datetime import datetime
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union, Iterable
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
+
+from lmbase.utils.tools import BlockBasedStoreManager
 
 
 # =============================================================================
@@ -125,7 +112,7 @@ class MessagePriority(Enum):
 
 
 # =============================================================================
-# Core Message Classes
+# Core Message Dataclass
 # =============================================================================
 
 
@@ -197,7 +184,6 @@ class Message:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Message":
         """Create Message from dictionary."""
-        # Validate required fields
         if "message_type" not in data:
             raise KeyError("Message data must have 'message_type' key")
         if "sender_id" not in data:
@@ -223,318 +209,153 @@ class Message:
         )
 
 
-@dataclass
-class ProtocolOutbound:
-    """
-    Protocol-level outbound package for wire transmission.
-
-    This is the intermediate carrier used by the protocol/transport layer.
-    It encapsulates the business message with routing and protocol metadata.
-
-    Attributes:
-        head: Routing/meta info (e.g., "player::id -> conductor::id")
-        data: Serialized message data (JSON string)
-        tail: Protocol meta info (e.g., "codec=json;checksum=<hex>")
-    """
-
-    head: str
-    data: str
-    tail: str = ""
-
-
 # =============================================================================
-# Protocol Interfaces
+# Communication Channel (Abstract Base Class)
 # =============================================================================
 
 
-class BaseProtocol(ABC):
+class CommunicationChannel(ABC):
     """
-    Abstract base class for communication protocols.
+    Abstract base class for communication channels.
 
-    Protocols handle encoding business messages into wire-format packages
-    and decoding them back. This abstraction allows different serialization
-    strategies (JSON, Arrow, Protobuf) to be used interchangeably.
+    A CommunicationChannel is the central message bus that the Simulator
+    uses to transmit messages between Personas. It is responsible for:
+
+    1. **Building**: Create Message objects from various sources
+    2. **Encoding**: Convert Message objects to wire format
+    3. **Recording**: Persist sent messages for debugging/replay
+    4. **Dispatching**: Send messages to target actors via Ray
+
+    Lifecycle:
+        1. Simulator creates CommunicationChannel with config
+        2. During each round, Simulator collects outbound messages from Personas
+        3. Simulator calls channel.encode_and_deliver(messages, handles)
+        4. On simulation end, Simulator calls channel.shutdown()
+
+    Subclasses must implement:
+        - dispatch(): Send messages to target actors
+        - shutdown(): Release resources and flush pending data
+
+    Config keys (passed to __init__):
+        - storage_path: Directory for message persistence (required)
     """
 
-    @abstractmethod
-    def encode(self, messages: Iterable[Message]) -> List[ProtocolOutbound]:
+    def __init__(self, config: Dict[str, Any]):
         """
-        Encode business messages into protocol-level outbound packages.
+        Initialize the communication channel.
 
         Args:
-            messages: Iterable of Message objects
-
-        Returns:
-            List of ProtocolOutbound packages for transmission
+            config: Configuration dict with channel settings
         """
-        raise NotImplementedError
+        self.config = config
+        self.storage_path = config["storage_path"]
 
-    @abstractmethod
-    def decode(self, outbounds: Iterable[ProtocolOutbound]) -> List[Message]:
+        # Initialize message store
+        os.makedirs(self.storage_path, exist_ok=True)
+        self.message_store = BlockBasedStoreManager(
+            folder=self.storage_path, file_format="json", block_size=500
+        )
+
+    # =========================================================================
+    #                    MESSAGE BUILDING
+    # =========================================================================
+
+    def build_message_from_outbound(
+        self,
+        outbound: Any,
+        sender_id: str,
+        target_id: str,
+        round_num: int = 0,
+    ) -> Message:
         """
-        Decode protocol-level packages back into business messages.
+        Convert Player's Outbound to wire-ready Message.
 
         Args:
-            outbounds: Iterable of ProtocolOutbound packages
+            outbound: The Outbound object containing payload, content_type, extras
+            sender_id: The sender's identity
+            target_id: The target's identity
+            round_num: Current simulation round
 
         Returns:
-            List of decoded Message objects
+            A fully-configured Message ready for transmission
         """
-        raise NotImplementedError
-
-
-class JsonProtocol(BaseProtocol):
-    """
-    JSON-based protocol implementation.
-
-    Simple and human-readable, suitable for debugging and
-    interoperability with external systems.
-    """
-
-    def __init__(self, pretty: bool = False):
-        import json
-
-        self._json = json
-        self._pretty = pretty
-
-    def encode(self, messages: Iterable[Message]) -> List[ProtocolOutbound]:
-        outbounds = []
-        for msg in messages:
-            head = f"{msg.sender_id} -> {msg.recipient_id or 'broadcast'}"
-
-            indent = 2 if self._pretty else None
-            data = self._json.dumps(msg.to_dict(), indent=indent, default=str)
-
-            tail = f"codec=json;type={msg.message_type.name}"
-            outbounds.append(ProtocolOutbound(head=head, data=data, tail=tail))
-        return outbounds
-
-    def decode(self, outbounds: Iterable[ProtocolOutbound]) -> List[Message]:
-        messages = []
-        for outbound in outbounds:
-            data = self._json.loads(outbound.data)
-            msg = Message.from_dict(data)
-            messages.append(msg)
-        return messages
-
-
-# =============================================================================
-# Message Routing
-# =============================================================================
-
-
-@dataclass
-class RouteInfo:
-    """
-    Routing information for message delivery.
-
-    Attributes:
-        source_id: Sender component ID
-        target_id: Recipient component ID (None for broadcast)
-        scope: Routing scope (e.g., "all", "group:sensors")
-        hops: Number of routing hops (for distributed tracing)
-    """
-
-    source_id: str
-    target_id: Optional[str] = None
-    scope: Optional[str] = None
-    hops: int = 0
-
-    def is_broadcast(self) -> bool:
-        return self.target_id is None
-
-    def matches_scope(self, entity_tags: List[str]) -> bool:
-        """Check if entity matches the routing scope."""
-        if self.scope is None or self.scope == "all":
-            return True
-        if self.scope.startswith("group:"):
-            group_tag = self.scope[6:]
-            return group_tag in entity_tags
-        if self.scope.startswith("entity:"):
-            entity_id = self.scope[7:]
-            return entity_id == self.target_id
-        return True
-
-
-class MessageRouter:
-    """
-    Message routing logic for the framework.
-
-    Handles routing decisions based on message metadata and
-    entity registrations. Works with Ray actor references for delivery.
-    """
-
-    def __init__(self):
-        self._entity_registry: Dict[str, Dict[str, Any]] = {}
-        self._group_registry: Dict[str, List[str]] = {}
-
-    def register_entity(
-        self, entity_id: str, tags: List[str] = None, metadata: Dict[str, Any] = None
-    ) -> None:
-        """Register an entity for message routing."""
-        self._entity_registry[entity_id] = {
-            "tags": tags or [],
-            "metadata": metadata or {},
+        payload = {
+            "content": outbound.payload,
+            "content_type": getattr(outbound, "content_type", None),
+            "extras": getattr(outbound, "extras", {}),
         }
-        # Update group registry
-        for tag in tags or []:
-            if tag not in self._group_registry:
-                self._group_registry[tag] = []
-            if entity_id not in self._group_registry[tag]:
-                self._group_registry[tag].append(entity_id)
+        return Message(
+            message_type=MessageType.PEER,
+            sender_id=sender_id,
+            recipient_id=target_id,
+            payload=payload,
+            timestamp=datetime.now().isoformat(),
+            metadata={"round_num": round_num},
+        )
 
-    def unregister_entity(self, entity_id: str) -> None:
-        """Unregister an entity from routing."""
-        if entity_id not in self._entity_registry:
-            return
-        info = self._entity_registry.pop(entity_id)
-        if "tags" in info:
-            for tag in info["tags"]:
-                if tag in self._group_registry:
-                    self._group_registry[tag] = [
-                        eid for eid in self._group_registry[tag] if eid != entity_id
-                    ]
+    # =========================================================================
+    #                    ABSTRACT METHODS (Must implement)
+    # =========================================================================
 
-    def resolve_recipients(self, route_info: RouteInfo) -> List[str]:
+    @abstractmethod
+    def encode_message(self, message: Message) -> str:
         """
-        Resolve the list of recipient IDs for a route.
+        Encode Message to wire format (JSON string).
 
         Args:
-            route_info: Routing information
+            message: Message object to encode
 
         Returns:
-            List of entity IDs that should receive the message
+            JSON string representation for transmission
         """
-        if route_info.target_id:
-            # Direct routing
-            return (
-                [route_info.target_id]
-                if route_info.target_id in self._entity_registry
-                else []
-            )
+        raise NotImplementedError
 
-        # Broadcast/scope-based routing
-        recipients = []
-        for entity_id, info in self._entity_registry.items():
-            entity_tags = info["tags"] if "tags" in info else []
-            if route_info.matches_scope(entity_tags):
-                recipients.append(entity_id)
+    @abstractmethod
+    def decode_message(self, data: str) -> Message:
+        """
+        Decode wire format (JSON string) back to Message.
 
-        return recipients
+        Args:
+            data: JSON string from transmission
 
-    def get_entities_by_group(self, group_tag: str) -> List[str]:
-        """Get all entity IDs in a group."""
-        if group_tag not in self._group_registry:
-            return []
-        return self._group_registry[group_tag].copy()
+        Returns:
+            Reconstructed Message object
+        """
+        raise NotImplementedError
 
-    def get_all_entities(self) -> List[str]:
-        """Get all registered entity IDs."""
-        return list(self._entity_registry.keys())
+    @abstractmethod
+    def encode_and_deliver(
+        self,
+        messages: List[Message],
+        handles: Dict[str, Any],
+    ) -> List[Any]:
+        """
+        Encode, record, decode, and deliver messages to target actors.
 
+        This is the main entry point called by Simulator. Implementations
+        should:
+        1. encode_message() → JSON string (wire format)
+        2. Record the encoded message to storage
+        3. decode_message() → reconstruct Message from wire format
+        4. Send decoded Message to target actor via Ray remote call
 
-# =============================================================================
-# Message Builders (Convenience Functions)
-# =============================================================================
+        Args:
+            messages: List of Message objects to send
+            handles: Dict mapping recipient_id -> Ray actor handle
 
+        Returns:
+            List of Ray ObjectRefs for delivery tracking
+        """
+        raise NotImplementedError
 
-def build_observation_message(
-    source_id: str,
-    observation_data: PayloadType,
-    target_id: Optional[str] = None,
-    step: Optional[int] = None,
-) -> Message:
-    """Build an Observation message."""
-    return Message(
-        message_type=MessageType.OBSERVATION,
-        sender_id=source_id,
-        recipient_id=target_id,
-        payload=observation_data,
-        metadata={"step": step} if step else {},
-    )
+    @abstractmethod
+    def shutdown(self) -> None:
+        """
+        Shutdown the channel and release resources.
 
-
-def build_action_message(
-    source_id: str,
-    action_type: str,
-    action_payload: PayloadType,
-    target_id: Optional[str] = None,
-) -> Message:
-    """Build an Action message."""
-    return Message(
-        message_type=MessageType.ACTION,
-        sender_id=source_id,
-        recipient_id=target_id,
-        payload={"action_type": action_type, "data": action_payload},
-    )
-
-
-def build_coordination_message(
-    source_id: str,
-    decision_type: str,
-    parameters: Dict[str, Any],
-    scope: str = "all",
-    target_id: Optional[str] = None,
-) -> Message:
-    """Build a Coordination message."""
-    return Message(
-        message_type=MessageType.COORDINATION,
-        sender_id=source_id,
-        recipient_id=target_id,
-        payload={
-            "decision_type": decision_type,
-            "parameters": parameters,
-            "scope": scope,
-        },
-    )
-
-
-def build_peer_message(
-    source_id: str,
-    target_id: str,
-    content: PayloadType,
-    correlation_id: Optional[str] = None,
-) -> Message:
-    """Build a Peer-to-peer message."""
-    return Message(
-        message_type=MessageType.PEER,
-        sender_id=source_id,
-        recipient_id=target_id,
-        payload=content,
-        correlation_id=correlation_id,
-    )
-
-
-def build_message_from_outbound(
-    outbound: Any,
-    sender_id: str,
-    target_id: str,
-) -> Message:
-    """
-    Convert content-focused Outbound to wire-ready Message.
-
-    This function bridges the gap between Player's content-focused Outbound
-    and Communication's transport-focused Message. All transport metadata
-    (sender_id, message_type, timestamp, etc.) is auto-configured.
-
-    Args:
-        outbound: The Outbound object containing payload, content_type, extras
-        sender_id: The sender's identity (auto-filled by Persona)
-        target_id: The target's identity (determined by Persona based on topology)
-
-    Returns:
-        A fully-configured Message ready for transmission
-    """
-    # Build payload with content structure
-    payload = {
-        "content": outbound.payload,
-        "content_type": getattr(outbound, "content_type", None),
-        "extras": getattr(outbound, "extras", {}),
-    }
-
-    return Message(
-        message_type=MessageType.PEER,
-        sender_id=sender_id,
-        recipient_id=target_id,
-        payload=payload,
-    )
+        Called by Simulator when simulation ends. Implementations should:
+        1. Flush any pending records to disk
+        2. Close any open connections
+        3. Clear internal state
+        """
+        raise NotImplementedError
