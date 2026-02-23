@@ -1,7 +1,14 @@
-"""
-MASim Communication Module.
+"""MASim Communication Module.
 
-Provides message types, protocols, and routing for cross-component communication.
+Provides message types and channel for cross-component communication.
+
+base.py exports:
+    - PayloadType, MessageType, MessagePriority (types/enums)
+    - Message (core dataclass)
+    - CommunicationChannel (abstract base class with message building methods)
+
+general.py exports:
+    - GeneralCommunicationChannel (concrete implementation)
 """
 
 from masim.communication.base import (
@@ -10,34 +17,24 @@ from masim.communication.base import (
     # Enums
     MessageType,
     MessagePriority,
-    # Core types
+    # Core dataclass
     Message,
-    ProtocolOutbound,
-    RouteInfo,
-    # Protocols
-    BaseProtocol,
-    JsonProtocol,
-    # Router
-    MessageRouter,
-    # Message builders
-    build_observation_message,
-    build_action_message,
-    build_coordination_message,
-    build_peer_message,
+    # Abstract base class
+    CommunicationChannel,
+)
+
+from masim.communication.general import (
+    # Concrete channel implementation
+    GeneralCommunicationChannel,
 )
 
 __all__ = [
+    # base.py - Types
     "PayloadType",
     "MessageType",
     "MessagePriority",
     "Message",
-    "ProtocolOutbound",
-    "RouteInfo",
-    "BaseProtocol",
-    "JsonProtocol",
-    "MessageRouter",
-    "build_observation_message",
-    "build_action_message",
-    "build_coordination_message",
-    "build_peer_message",
+    "CommunicationChannel",
+    # general.py - Channel
+    "GeneralCommunicationChannel",
 ]

@@ -34,7 +34,7 @@ class IncludeLoader(yaml.SafeLoader):
     Example:
         # In simulation.yml
         players: !include players.yml
-        conductor: !include conductor.yml
+        topology: !include topology.yml
 
         # Can also use subdirectories
         market_config: !include markets/equity.yml
@@ -107,7 +107,7 @@ def load_config(
 
         # Access nested configs loaded via !include
         players = cfg["players"]
-        conductor = cfg["conductor"]
+        topology = cfg["topology"]
     """
     config_path = Path(config_path)
 
@@ -183,7 +183,6 @@ def validate_config(config: Dict[str, Any]) -> None:
     Checks for:
         - Required top-level sections
         - Valid player configurations
-        - Valid conductor configuration
         - Valid topology settings
 
     Args:
@@ -193,14 +192,12 @@ def validate_config(config: Dict[str, Any]) -> None:
         ValueError: If configuration is invalid
     """
     # Check required sections
-    required_sections = ["simulation", "players", "conductor"]
+    required_sections = ["simulation", "players"]
     for section in required_sections:
         if section not in config:
             raise ValueError(f"Missing required configuration section: {section}")
 
     # Validate players
-    if "players" not in config:
-        raise ValueError("Missing required configuration section: players")
     players = config["players"]
     if not players:
         raise ValueError("At least one player must be defined")
@@ -210,13 +207,6 @@ def validate_config(config: Dict[str, Any]) -> None:
             raise ValueError(f"Player '{player_id}' missing 'class' field")
         if "config" not in player_cfg:
             raise ValueError(f"Player '{player_id}' missing 'config' field")
-
-    # Validate conductor
-    if "conductor" not in config:
-        raise ValueError("Missing required configuration section: conductor")
-    conductor = config["conductor"]
-    if "class" not in conductor:
-        raise ValueError("Conductor missing 'class' field")
 
     # Validate topology if present
     if "topology" in config:

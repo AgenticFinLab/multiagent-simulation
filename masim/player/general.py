@@ -14,11 +14,14 @@ from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from masim.player.base import (
     BasePlayer,
-    PlayerConfig,
     Action,
     Observation,
+    LocalObservation,
     PayloadType,
     StepResult,
+    TurnResult,
+    Outbound,
+    Inbound,
 )
 
 if TYPE_CHECKING:
@@ -34,8 +37,9 @@ class GeneralPlayer(BasePlayer):
     """
     Ready-to-use Player implementation with sensible defaults.
 
-    GeneralPlayer provides a minimal but complete implementation of the
-    perceive → decide → act cycle. It can be:
+    GeneralPlayer provides a complete implementation of the Player lifecycle
+    including initialization, step/turn execution, message handling, and
+    state management. It can be:
 
     1. Used directly for testing and prototyping
     2. Extended for domain-specific behavior
@@ -45,82 +49,61 @@ class GeneralPlayer(BasePlayer):
     - perceive(): Stores observation in custom_state["last_observation"]
     - decide(): Returns the observation data as-is
     - act(): Creates an Action with type "default" and the decision payload
-
-    Extension Guide:
-    ----------------
-    Override any or all of the three methods:
-
-        class MyPlayer(GeneralPlayer):
-            async def decide(self) -> Dict[str, Any]:
-                obs = self.state.get_custom("last_observation")
-                # Custom decision logic
-                return {"my_action": "do_something", "data": obs}
-
-    Example Usage:
-    --------------
-        # Quick prototyping
-        config = PlayerConfig(identity="player_001", name="Test Player")
-        player = GeneralPlayer(config)
-        await player.initialize()
-
-        obs = Observation(
-            local=LocalObservation(data={"price": 100.0}),
-            conductor_notify={"phase": "trading"},
-            round=1,
-        )
-        result = await player.step(obs)
-        # result.action.action_type == "default"
-        # result.action.payload == {"price": 100.0}
     """
+
+    # =========================================================================
+    #          OBSERVABLEENTITY PROTOCOL IMPLEMENTATION
+    # =========================================================================
+
+    def save_state(self) -> Dict[str, Any]:
+        """Return state that should be persisted by StorageProxy."""
+        return {
+            "turn_count": self.state.turn_count,
+            "custom_state": self.state.custom_state.copy(),
+        }
+
+    def load_state(self, state: Dict[str, Any]) -> None:
+        """Restore state from persisted data."""
+        if "turn_count" in state:
+            self.state.turn_count = state["turn_count"]
+        elif "step_count" in state:
+            self.state.turn_count = state["step_count"]
+        else:
+            raise KeyError("State must contain 'turn_count' or 'step_count'")
+        self.state.custom_state = state["custom_state"].copy()
+
+    # =========================================================================
+    #                           LIFECYCLE
+    # =========================================================================
+
+    async def initialize(self) -> None:
+        """Initialize the Player for simulation."""
+        self.is_initialized = True
+
+    async def shutdown(self) -> None:
+        """Shutdown the Player after simulation."""
+        self.is_running = False
+
+    # =========================================================================
+    #              CORE BEHAVIORAL CONTRACT (Override these)
+    # =========================================================================
 
     async def perceive(
         self,
         observation: Observation,
         prev_result: Optional["StepResult"] = None,
     ) -> None:
-        """
-        Process incoming observation and update internal state.
-
-        Default implementation stores the observation for later access
-        in decide().
-
-        Args:
-            observation: The current observation from environment
-            prev_result: Result from the previous step (for multi-step turns)
-        """
-        # Store observation for access in decide()
-        self.state.set_custom("last_observation", observation.data)
-
-        # Store previous action if available
+        """Process incoming observation and update internal state."""
+        self.state.custom_state["last_observation"] = observation.data
         if prev_result and prev_result.action:
-            self.state.set_custom("prev_action", prev_result.action)
+            self.state.custom_state["prev_action"] = prev_result.action
 
     async def decide(self) -> PayloadType:
-        """
-        Make a decision based on current state.
-
-        Default implementation returns the last observation data as-is.
-        Override this method to implement custom decision logic.
-
-        Returns:
-            Decision payload (passed to act())
-        """
-        # Default: pass through observation data
-        return self.state.get_custom("last_observation")
+        """Make a decision based on current state."""
+        return self.state.custom_state["last_observation"]
 
     async def act(self, decision_payload: PayloadType) -> Action:
-        """
-        Transform decision into an Action.
-
-        Default implementation creates an Action with type "default"
-        containing the decision payload.
-
-        Args:
-            decision_payload: Output from decide()
-
-        Returns:
-            Action object to be executed by environment
-        """
+        """Transform decision into an Action."""
         return Action(
             action_type="default",
             payload=(
@@ -131,110 +114,168 @@ class GeneralPlayer(BasePlayer):
             source_id=self.identity,
         )
 
+    # =========================================================================
+    #                        MAIN EXECUTION
+    # =========================================================================
 
-# =============================================================================
-#                       SPECIALIZED PLAYERS
-# =============================================================================
+    async def step(
+        self,
+        observation: Observation,
+        prev_result: Optional["StepResult"] = None,
+    ) -> "StepResult":
+        """Execute one atomic step: perceive → decide → act."""
+        self.state.step_tick_start()
 
+        await self.perceive(observation, prev_result)
+        decision_payload = await self.decide()
+        action = await self.act(decision_payload)
 
-class EchoPlayer(GeneralPlayer):
-    """
-    A Player that echoes back observations with minimal processing.
+        self.state.update_step(observation, action)
+        self.state.step_tick_end()
 
-    Useful for testing message flow and observing raw data.
-    """
-
-    async def act(self, decision_payload: PayloadType) -> Action:
-        """Create an echo action with observation data."""
-        return Action(
-            action_type="echo",
-            payload={"echoed_data": decision_payload},
-            source_id=self.identity,
-            metadata={"player_name": self.name},
+        return StepResult(
+            decision_payload=decision_payload,
+            action=action,
+            tick_step_count=self.state.step_count,
+            tick_step_duration_ms=self.state.step_last_duration_ms,
         )
 
-
-class NoOpPlayer(GeneralPlayer):
-    """
-    A Player that takes no action (returns empty actions).
-
-    Useful for placeholder players or testing.
-    """
-
-    async def decide(self) -> PayloadType:
-        """Always decide to do nothing."""
-        return {"noop": True}
-
-    async def act(self, decision_payload: PayloadType) -> Action:
-        """Create a no-op action."""
-        return Action(
-            action_type="noop",
-            payload={},
-            source_id=self.identity,
+    def prepare_observation(self, round_num: int) -> Observation:
+        """Prepare the Observation for this turn with local data + inbounds."""
+        inbounds = self.get_pending_inbounds()
+        return Observation(
+            local=self.get_local_observation(),
+            inbounds=inbounds,
+            round=round_num,
         )
 
+    def get_local_observation(self) -> LocalObservation:
+        """Get player's local observation data. Override in subclass."""
+        return LocalObservation(data={})
 
-class ReactivePlayer(GeneralPlayer):
-    """
-    A Player that reacts based on observation triggers.
+    async def turn(
+        self,
+        round_num: int,
+        **kwargs,
+    ) -> "TurnResult":
+        """Execute a turn consisting of multiple steps."""
+        observation = self.prepare_observation(round_num)
+        self.state.turn_tick_start()
 
-    Subclass and override should_react() and create_reaction() for
-    domain-specific reactive behavior.
+        step_results: List[StepResult] = []
+        current_observation = observation
+        prev_result: Optional[StepResult] = None
 
-    Example:
-        class PriceReactivePlayer(ReactivePlayer):
-            def should_react(self, observation: Dict) -> bool:
-                return observation["price"] > 100
+        num_steps = self.config.steps_per_turn
+        for _ in range(num_steps):
+            step_result = await self.step(current_observation, prev_result)
+            step_results.append(step_result)
+            prev_result = step_result
+            current_observation = self._update_observation_for_next_step(
+                current_observation, step_result
+            )
 
-            def create_reaction(self, observation: Dict) -> Dict:
-                return {"action": "sell", "reason": "price_threshold"}
-    """
+        self.state.turn_count += 1
+        self.state.turn_tick_end()
 
-    async def decide(self) -> PayloadType:
-        """Decide based on reactive triggers."""
-        obs = self.state.get_custom("last_observation")
+        # Prepare outbounds from step results (after turn completes)
+        self.prepare_outbounds(step_results)
 
-        if self.should_react(obs):
-            return self.create_reaction(obs)
-        return self.create_default_response(obs)
+        return TurnResult(
+            step_results=step_results,
+            final_action=step_results[-1].action if step_results else None,
+            tick_turn_count=self.state.turn_count,
+            tick_turn_duration_ms=self.state.turn_last_duration_ms,
+            tick_turn_total_duration_ms=self.state.turn_total_duration_ms,
+            tick_step_count=len(step_results),
+        )
 
-    def should_react(self, observation: Dict[str, Any]) -> bool:
+    def _update_observation_for_next_step(
+        self,
+        current_observation: Observation,
+        step_result: "StepResult",
+    ) -> Observation:
+        """Update observation for the next step."""
+        return current_observation
+
+    def prepare_outbounds(self, step_results: List["StepResult"]) -> None:
         """
-        Determine if a reaction is needed.
+        Extract outbound messages from step results.
 
-        Override this method to define reaction triggers.
+        Called after turn() completes to separate message preparation
+        from the core perceive → decide → act flow.
 
         Args:
-            observation: Current observation data
-
-        Returns:
-            True if should react, False otherwise
+            step_results: List of StepResult from the completed turn
         """
-        # Default: never react
-        return False
+        for result in step_results:
+            payload = result.decision_payload
+            if isinstance(payload, dict) and "outbound_messages" in payload:
+                raw_messages = payload.pop("outbound_messages", [])
+                for msg in raw_messages:
+                    if isinstance(msg, Outbound):
+                        self.pending_outbounds.append(msg)
+                    elif isinstance(msg, dict):
+                        self.pending_outbounds.append(Outbound(**msg))
 
-    def create_reaction(self, observation: Dict[str, Any]) -> Dict[str, Any]:
+    # =========================================================================
+    #                      TOPOLOGY ACCESS
+    # =========================================================================
+
+    def can_send_to(self, target_id: str) -> bool:
+        """Check if this player can send to a specific target."""
+        return target_id in self.topology_targets
+
+    # =========================================================================
+    #                      INBOUND HANDLING
+    # =========================================================================
+
+    def on_inbound(self, inbound: Inbound) -> None:
+        """Receive a decoded inbound from Persona."""
+        self.inbounds.append(inbound)
+
+    def get_pending_inbounds(self) -> List[Inbound]:
+        """Get and clear pending inbounds."""
+        inbounds = self.inbounds.copy()
+        self.inbounds.clear()
+        return inbounds
+
+    def is_received_ready(self, round_num: int, **kwargs) -> bool:
         """
-        Create a reaction payload when triggered.
+        Check if player has received enough inbounds to proceed.
 
-        Override this method to define reaction behavior.
+        Logic:
+        - Level 0 in Round 1: ready immediately (initiators don't wait)
+        - If no expected_senders → ready immediately
+        - Otherwise check if all expected senders have sent
 
         Args:
-            observation: Current observation data
+            round_num: Current round number
+            **kwargs: Additional parameters (level, etc.)
 
         Returns:
-            Reaction payload
+            True if ready to proceed with decision
         """
-        return {"reaction": True, "triggered_by": observation}
+        level = kwargs["level"]
 
-    def create_default_response(self, observation: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Create default response when not reacting.
+        # Level 0 nodes in Round 1 are initiators - they don't wait for messages
+        if round_num == 1 and level == 0:
+            return True
 
-        Args:
-            observation: Current observation data
+        if not self.expected_senders:
+            return True
 
-        Returns:
-            Default response payload
-        """
-        return {"reaction": False, "hold": True}
+        received_senders = {inb.sender_id for inb in self.inbounds}
+        return self.expected_senders.issubset(received_senders)
+
+    # =========================================================================
+    #                          UTILITY
+    # =========================================================================
+
+    def in_group(self, tag: str) -> bool:
+        """Check if this Player belongs to a specific group."""
+        return tag in self.group_tags
+
+    def __repr__(self) -> str:
+        """String representation for debugging."""
+        return f"Player(id={self.identity}, groups={self.group_tags})"

@@ -1,0 +1,89 @@
+# =============================================================================
+# Herd Effect Players Configuration
+# =============================================================================
+# 1 Market + 5 Investors with different strategies
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (central price setter)
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.HerdEffect.players:Market"
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras: {}
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Investors (different strategies)
+# -----------------------------------------------------------------------------
+
+investor_momentum:
+  name: "Momentum Investor"
+  class: "examples.HerdEffect.players:MomentumInvestor"
+  config:
+    identity: "investor_momentum"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: momentum
+  persona: !include persona.yml
+
+investor_contrarian:
+  name: "Contrarian Investor"
+  class: "examples.HerdEffect.players:ContrarianInvestor"
+  config:
+    identity: "investor_contrarian"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: contrarian
+  persona: !include persona.yml
+
+investor_risk_averse:
+  name: "Risk Averse Investor"
+  class: "examples.HerdEffect.players:RiskAverseInvestor"
+  config:
+    identity: "investor_risk_averse"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: risk_averse
+  persona: !include persona.yml
+
+investor_aggressive:
+  name: "Aggressive Investor"
+  class: "examples.HerdEffect.players:AggressiveInvestor"
+  config:
+    identity: "investor_aggressive"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: aggressive
+  persona: !include persona.yml
+
+investor_noise:
+  name: "Noise Trader"
+  class: "examples.HerdEffect.players:NoiseTrader"
+  config:
+    identity: "investor_noise"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: noise
+  persona: !include persona.yml

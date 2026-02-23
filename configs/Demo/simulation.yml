@@ -1,110 +1,69 @@
 # =============================================================================
 # Demo Simulation Configuration
 # =============================================================================
-# Complete configuration for a Demo MASim simulation.
-# This file composes players, conductor, and simulation settings.
+# Demonstrates topology-driven message passing architecture.
 #
 # Usage:
-#   from masim.utils.config import load_config
-#   cfg = load_config("configs/Demo/simulation.yml")
+#   python examples/Demo/run_demo.py -c configs/Demo/simulation.yml
 # =============================================================================
 
 # -----------------------------------------------------------------------------
-# Setting
+# Simulation Settings
 # -----------------------------------------------------------------------------
 setting:
-  name: "demo_trading_simulation"
-  description: "A demo multi-agent trading simulation with 3 players and 1 conductor"
-  total_rounds: 10
+  name: "demo_simulation"
+  description: "Demo topology-driven message passing"
+  total_rounds: 3
   entry_limit: 100
-  steps_per_turn: 1
-  auto_checkpoint: false
-  debug_mode: true
+  # Simulation-level records (diagrams, etc.)
+  record_path: "EXPERIMENT/Demo/records"
 
 # -----------------------------------------------------------------------------
 # Environment Settings
 # -----------------------------------------------------------------------------
 environment:
   dotenv_path: .env
-  workspace: "./demo_workspace"
+  workspace: "."
 
 # -----------------------------------------------------------------------------
 # Ray Cluster Configuration
 # -----------------------------------------------------------------------------
 ray:
-  # Cluster connection
-  # null = start local cluster, "auto" = connect to existing
   address: null
-  # Namespace for Ray actors
-  namespace: "demo_trading_simulation"
-  # null = use simulation name as prefix (pattern: {name}::{agent_id})
+  namespace: "demo_simulation"
   actor_prefix: null
-  
-  # Resource allocation
-  # null = use all available CPUs
-  num_cpus: null
-  # null = use all available GPUs
+  num_cpus: 2
   num_gpus: null
-  # Object store size in bytes (null = auto)
   object_store_memory: null
-  
-  # Dashboard and monitoring
-  # Enable Ray dashboard (http://localhost:8265)
   include_dashboard: false
-  dashboard_host: "0.0.0.0"
-  dashboard_port: 8265
-  
-  # Logging configuration
-  # debug | info | warning | error
-  logging_level: "info"
-  # Stream logs to driver process
+  logging_level: "warning"
   log_to_driver: true
-  
-  # Actor configuration
   actor_options:
-    # Max actor restart attempts on failure
     max_restarts: 3
-    # Max retries for failed tasks
     max_task_retries: 1
-    # Max concurrent tasks per actor
     max_concurrency: 10
-  
-  # Runtime environment
   runtime_env:
-    # Working directory for actors
     working_dir: null
-    # Additional pip packages
     pip: []
-    # Environment variables for actors
     env_vars: {}
-  
-  # Serialization
   serialization:
-    # Use Apache Arrow for efficient serialization
     use_arrow: true
     register_custom_serializers: true
 
 # -----------------------------------------------------------------------------
-# Players Configuration (loaded from external file)
+# Players Configuration
 # -----------------------------------------------------------------------------
-# Use !include to load from separate file for better modularity
 players: !include players.yml
 
 # -----------------------------------------------------------------------------
-# Conductor Configuration (loaded from external file)
-# -----------------------------------------------------------------------------
-conductor: !include conductor.yml
-
-# -----------------------------------------------------------------------------
-# Communication Topology (loaded from external file)
+# Communication Topology
 # -----------------------------------------------------------------------------
 topology: !include topology.yml
 
 # -----------------------------------------------------------------------------
-# Logging Configuration
+# Communication Channel Configuration
 # -----------------------------------------------------------------------------
-logging:
-  checkpoint_path: "./demo_checkpoints"
-  result_path: "./demo_results"
-  logging_path: "./demo_logs"
-  visualization_path: "./demo_viz"
+# Settings for the central communication channel (message dispatch and recording)
+communication:
+  # Storage path for message records (required)
+  storage_path: "EXPERIMENT/Demo/communication"

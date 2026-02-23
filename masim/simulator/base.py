@@ -13,38 +13,42 @@ Enums:
 
 Dataclasses:
     ExecutionClock      - Hierarchical time tracking for rounds/cycles
-    SimulationConfig    - Top-level config: setting, ray, players, conductor, topology
+    SimulationConfig    - Top-level config: setting, ray, players, topology
 
 Abstract Classes:
     BaseSimulator       - Abstract orchestrator with fundamental infrastructure:
-                          - Ray actor handles (_player_persona_handles, _conductor_persona_handle)
+                          - Ray actor handles (_player_persona_handles)
                           - History management (deque for round results)
-                          - Storage directories (from config.logging)
+                          - Storage directories (from config.proxy)
                           - Status/phase tracking
 
                           Abstract methods (must be implemented by subclasses):
-                          Ray Actor:   _launch_player_personas(), _launch_conductor_persona()
+                          Ray Actor:   _launch_player_personas()
                           Lifecycle:   setup(), run_round(), run(), shutdown()
-                          Utilities:   get_status(), get_round_history(), get_player_handle(),
-                                       get_conductor_handle()
+                          Utilities:   get_status(), get_round_history(), get_player_handle()
 
 ================================================================================
                             ARCHITECTURE
 ================================================================================
 
-The Simulator interacts ONLY with Personas - Player/Conductor are completely
-hidden as internal implementation details of their respective Personas.
+The Simulator interacts ONLY with Personas - Player implementation is hidden.
+All agents (including coordinators) use PlayerPersona with role-based execution.
 
     Simulator
         │
-        ├── PlayerPersona (Ray Actor) ──► BasePlayer (internal, hidden)
+        ├── Coordinator Personas (role='coordinator', execute first)
+        │       │
+        │       └── PlayerPersona (Ray Actor) ──► BasePlayer
         │
-        └── ConductorPersona (Ray Actor) ──► BaseConductor (internal, hidden)
+        └── Regular Player Personas (role='player', execute second)
+                │
+                └── PlayerPersona (Ray Actor) ──► BasePlayer
 
 Key Design Principles:
-- Simulator has ZERO knowledge of Player/Conductor implementation
+- Simulator has ZERO knowledge of Player implementation
 - All interaction goes through Persona's public interface
 - Personas are Ray actors (distributed computing)
+- Role-based execution: coordinators first, then regular players
 
 ================================================================================
                         HIERARCHICAL EXECUTION MODEL
@@ -57,9 +61,7 @@ Key Design Principles:
 │           │                   │           │  cycle (all personas)      │
 ├───────────┼───────────────────┼───────────┼────────────────────────────┤
 │  L2       │  PlayerPersona    │  operate  │  Simulator-facing interface│
-├───────────┼───────────────────┼───────────┼────────────────────────────┤
-│  L2       │  ConductorPersona │  cycle    │  notify→collect→analyze   │
-│           │                   │           │  →coordinate               │
+│           │  (role=coordinator)│          │  Coordinators run first    │
 └───────────┴───────────────────┴───────────┴────────────────────────────┘
 
 Each level has an ExecutionClock for temporal tracking.
@@ -72,21 +74,16 @@ Simulator.run():
 │
 └── for round_num in 1..total_rounds:
     │
-    ├── Phase 1: NOTIFICATION
-    │   └── conductor.notify(round_num, player_ids)  # Conductor → Players
-    │       └── Returns: Dict[player_id → notification_dict]
+    ├── Phase 1: COORDINATION (if coordinators exist)
+    │   └── coordinator_persona.operate()  # Coordinators run first
+    │       └── Returns: TurnResult with coordinator's action
     │
     ├── Phase 2: PLAYER_DECISION
-    │   └── player_persona.operate(observation, num_steps)  [parallel]
+    │   └── player_persona.operate(round_num)  [parallel]
     │       └── Returns: TurnResult with final_action
     │
-    ├── Phase 3: COORDINATION
-    │   ├── conductor.receive_responses(responses)  # Players → Conductor
-    │   └── conductor.cycle()                    # collect → analyze → coordinate
-    │       └── Returns: CycleResult with CoordinationDecision
-    │
-    └── Phase 4: COMPLETE
-        └── Broadcast coordination decision to all players
+    └── Phase 3: COMPLETE
+        └── Collect all results, record history
 
 ================================================================================
                               USAGE
@@ -107,10 +104,8 @@ Simulator.run():
 
 import time
 import uuid
-import logging
 from enum import Enum, auto
 from datetime import datetime
-from pathlib import Path
 from collections import deque
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
@@ -119,7 +114,9 @@ from typing import Any, Dict, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     import ray
     from ray.actor import ActorHandle
-    from masim.persona.base import PlayerPersona, ConductorPersona
+    from masim.persona.base import PlayerPersona
+    from masim.utils.topology import TopologyGraph
+    from masim.communication.general import CommunicationChannel
 
 
 # =============================================================================
@@ -140,20 +137,16 @@ class SimulatorStatus(Enum):
 
 class RoundPhase(Enum):
     """
-    Phases within a simulation round.
+    High-level phases within a simulation round.
 
-    Each round progresses through these phases in order:
-    1. NOTIFICATION: Conductor notifies all Players of round state
-    2. PLAYER_DECISION: All PlayerPersonas execute operate()
-    3. COORDINATION: ConductorPersona executes cycle()
-    4. BROADCAST: Broadcast coordination result to Players
-    5. COMPLETE: Round finishes, results recorded
+    Simplified for level-based execution model:
+    - PENDING: Round not yet started
+    - EXECUTING: Levels being executed (one or more)
+    - COMPLETE: All levels finished, results recorded
     """
 
-    NOTIFICATION = auto()
-    PLAYER_DECISION = auto()
-    COORDINATION = auto()
-    BROADCAST = auto()
+    PENDING = auto()
+    EXECUTING = auto()
     COMPLETE = auto()
 
 
@@ -169,8 +162,7 @@ class ExecutionClock:
 
     Used at all levels of the execution hierarchy:
     - Simulator: RoundClock tracks round execution
-    - PlayerPersona: StepClock tracks step execution
-    - ConductorPersona: CycleClock tracks cycle execution
+    - PlayerPersona: StepClock tracks step execution (all players including coordinators)
 
     Attributes:
         count: Number of completed executions
@@ -229,28 +221,15 @@ class SimulationConfig:
     Configuration for simulation initialization.
 
     Field names match exactly with simulation.yml top-level keys.
-    Use **load_config(path) to construct directly from YAML.
-
-    Attributes:
-        setting: Simulation settings dict (name, total_rounds, etc.)
-        ray: Ray cluster configuration dict
-        players: Player configurations dict
-        conductor: Conductor configuration dict
-        topology: Communication topology dict
-        environment: Environment settings dict (dotenv_path, workspace)
-        logging: Logging/storage paths dict (checkpoint_path, result_path, etc.)
-        simulation_id: Unique identifier (auto-generated if None)
     """
 
     setting: Dict[str, Any] = field(default_factory=dict)
     ray: Dict[str, Any] = field(default_factory=dict)
     players: Dict[str, Any] = field(default_factory=dict)
-    conductor: Dict[str, Any] = field(default_factory=dict)
     topology: Dict[str, Any] = field(default_factory=dict)
     environment: Dict[str, Any] = field(default_factory=dict)
-    logging: Dict[str, Any] = field(default_factory=dict)
+    communication: Dict[str, Any] = field(default_factory=dict)
 
-    # Auto-generated
     simulation_id: Optional[str] = None
 
     def __post_init__(self):
@@ -269,184 +248,109 @@ class BaseSimulator(ABC):
     """
     Abstract base class for simulation orchestration.
 
-    The Simulator is the top-level controller that:
-    - Initializes and manages Ray cluster
-    - Creates and manages Personas as Ray actors
-    - Orchestrates the simulation lifecycle (round → turn → step)
-    - Routes messages between components
-
-    IMPORTANT: Simulator is a pure orchestrator.
-    - It does NOT execute actions (that's Environment/Conductor domain)
-    - It does NOT generate observations (that's Conductor domain)
-    - It only coordinates the flow between Personas
-
-    Subclasses must implement:
-    - create_player_personas(): Create PlayerPersona instances
-    - create_conductor_persona(): Create ConductorPersona instance (optional)
-
-    For a ready-to-use implementation, see `GeneralSimulator` in `general.py`.
+    The Simulator is the top-level controller. It interacts ONLY with Personas.
+    For concrete implementation, see GeneralSimulator in general.py.
     """
 
     def __init__(self, config: SimulationConfig):
-        """
-        Initialize the simulator.
-
-        Args:
-            config: Simulation configuration
-        """
+        """Initialize the simulator."""
         self.config = config
         self.simulation_id = config.simulation_id
 
         # Status tracking
+        # Round numbering convention:
+        #   - Round 0: Setup phase (before simulation starts)
+        #   - Round 1+: Actual simulation rounds
         self.status = SimulatorStatus.INITIALIZING
-        self.current_round: int = 0
-        self.current_phase: RoundPhase = RoundPhase.NOTIFICATION
+        self.current_round: int = 0  # Starts at 0 (setup), advances to 1+ during run
+        self.current_phase: RoundPhase = RoundPhase.PENDING
 
-        # Hierarchical execution clock for round-level timing.
+        # Hierarchical execution clock for round-level timing
         self.round_clock: ExecutionClock = ExecutionClock()
 
-        # Ray actor handles for Personas (NOT Player/Conductor directly!)
-        # Simulator interacts ONLY with Persona actors, never with domain objects.
-        self._player_persona_handles: Dict[str, "ActorHandle"] = {}
-        self._conductor_persona_handle: Optional["ActorHandle"] = None
+        # Ray actor handles for Personas
+        self.player_persona_handles: Dict[str, "ActorHandle"] = {}
 
         # History management for round results
         self.history: deque = deque(maxlen=config.setting["entry_limit"])
 
-        # Storage directories from logging config (must be specified in config)
-        self.storage_dir = Path(config.logging["result_path"]) / self.simulation_id
-        self.storage_dir.mkdir(parents=True, exist_ok=True)
+        # Communication topology (initialized by subclass setup)
+        self.topology: Optional["TopologyGraph"] = None
 
-        self.checkpoint_dir = Path(config.logging["checkpoint_path"])
-        self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
-
-        self.logging_dir = Path(config.logging["logging_path"])
-        self.logging_dir.mkdir(parents=True, exist_ok=True)
-
-    # Note: generate_observations is NOT a Simulator responsibility.
-    # Observations are generated by the Conductor or Environment.
-    # The Simulator only orchestrates the flow between components.
-
-    # Note: execute_actions is NOT a Simulator responsibility.
-    # The Conductor handles coordination and environment interaction.
-    # The Simulator is a pure orchestrator.
+        # Communication channel for message dispatch and recording
+        self.communication: Optional["CommunicationChannel"] = None
 
     # =========================================================================
-    # Ray Actor Management (abstract - implemented in general.py)
+    #                    RAY ACTOR MANAGEMENT
     # =========================================================================
 
     @abstractmethod
     def _launch_player_personas(self) -> Dict[str, "ActorHandle"]:
-        """
-        Create and launch PlayerPersonas as Ray actors from config.
-
-        Reads config.players, loads player classes dynamically, and creates
-        Ray actors directly - no intermediate local instances.
-
-        Returns:
-            Dict of player_id -> Ray actor handle
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def _launch_conductor_persona(self) -> Optional["ActorHandle"]:
-        """
-        Create and launch ConductorPersona as Ray actor from config.
-
-        Reads config.conductor, loads conductor class dynamically, and creates
-        a Ray actor directly - no intermediate local instance.
-
-        Returns:
-            Ray actor handle, or None if no conductor configured
-        """
-        raise NotImplementedError
+        """Create and launch PlayerPersonas as Ray actors from config."""
+        ...
 
     # =========================================================================
-    # Lifecycle Methods (abstract - implemented in general.py)
+    #                    LIFECYCLE
     # =========================================================================
 
     @abstractmethod
     async def setup(self) -> None:
-        """
-        Set up the simulation: create Persona actors and initialize.
-
-        The Simulator creates Personas (which internally create Player/Conductor)
-        and launches them as Ray actors.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    async def run_round(self, round_num: int) -> Dict[str, Any]:
-        """
-        Execute one simulation round.
-
-        A round is the highest-level execution unit in the hierarchy:
-        - Round (Simulator) → Operate (PlayerPersona) → Cycle (ConductorPersona)
-
-        Args:
-            round_num: Current round number (1-indexed)
-
-        Returns:
-            Round results dictionary
-        """
-        raise NotImplementedError
+        """Set up simulation: create Persona actors and initialize."""
+        ...
 
     @abstractmethod
     async def run(self) -> List[Dict[str, Any]]:
-        """
-        Run the complete simulation.
+        """Run the complete simulation. Returns list of round results."""
+        ...
 
-        Returns:
-            List of all round results
-        """
-        raise NotImplementedError
+    @abstractmethod
+    async def run_round(self, round_num: int) -> Dict[str, Any]:
+        """Execute one simulation round."""
+        ...
 
     @abstractmethod
     async def shutdown(self) -> None:
         """Shutdown simulation and release resources."""
-        raise NotImplementedError
+        ...
 
     # =========================================================================
-    # Utility Methods (abstract)
+    #                    ROUND PHASES
+    # =========================================================================
+
+    @abstractmethod
+    def phase_execute(
+        self,
+        round_num: int,
+        level_handles: Dict[str, "ActorHandle"],
+    ) -> Dict[str, Any]:
+        """Execute player operate() in parallel for a level."""
+        ...
+
+    @abstractmethod
+    def phase_collect(self, execute_result: Dict[str, Any]) -> Dict[str, Any]:
+        """Collect results from execute phase."""
+        ...
+
+    @abstractmethod
+    def phase_dispatch(self, level_handles: Dict[str, "ActorHandle"]) -> None:
+        """Dispatch outbound messages for a level."""
+        ...
+
+    # =========================================================================
+    #                    UTILITIES
     # =========================================================================
 
     @abstractmethod
     def get_status(self) -> Dict[str, Any]:
-        """Get current simulation status including round clock metrics."""
-        raise NotImplementedError
+        """Get current simulation status."""
+        ...
 
     @abstractmethod
     def get_round_history(self, round_num: int) -> Optional[Dict[str, Any]]:
-        """
-        Get results from a specific round.
-
-        Args:
-            round_num: Round number to retrieve (1-indexed)
-
-        Returns:
-            Round results dict, or None if round not found
-        """
-        raise NotImplementedError
+        """Get results from a specific round."""
+        ...
 
     @abstractmethod
     def get_player_handle(self, player_id: str) -> Optional["ActorHandle"]:
-        """
-        Get Ray actor handle for a specific player.
-
-        Args:
-            player_id: Player identifier
-
-        Returns:
-            Ray actor handle, or None if player not found
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_conductor_handle(self) -> Optional["ActorHandle"]:
-        """
-        Get Ray actor handle for the conductor.
-
-        Returns:
-            Ray actor handle, or None if no conductor
-        """
-        raise NotImplementedError
+        """Get Ray actor handle for a specific player."""
+        ...

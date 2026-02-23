@@ -1,35 +1,48 @@
 # =============================================================================
-# Demo Players Configuration - Simple Investors
+# Demo Players Configuration
 # =============================================================================
-# 3 investors that:
-# 1. Receive average price from market
-# 2. Multiply by random factor, add to local price
-# 3. Submit new price to market
+# Each player has its own persona config (can be shared via !include).
+# All players are equal - topology defines communication targets.
 # =============================================================================
 
-investor_1:
-  class: "examples.Demo.players:SimpleInvestor"
-  name: "Investor 1"
+# -----------------------------------------------------------------------------
+# Coordinator (hub in star topology)
+# -----------------------------------------------------------------------------
+coordinator:
+  name: "Coordinator"
+  class: "examples.Demo.players:SimpleCoordinator"
   config:
-    identity: "investor_1"
-    group_tags: ["investors"]
-    extras:
-      initial_price: 100.0
+    identity: "coordinator"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - coordinators
+    extras: {}
+  persona: !include persona.yml
 
-investor_2:
-  class: "examples.Demo.players:SimpleInvestor"
-  name: "Investor 2"
+# -----------------------------------------------------------------------------
+# Regular Players
+# -----------------------------------------------------------------------------
+player_1:
+  name: "Player 1"
+  class: "examples.Demo.players:SimplePlayer"
   config:
-    identity: "investor_2"
-    group_tags: ["investors"]
-    extras:
-      initial_price: 100.0
+    identity: "player_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - players
+    extras: {}
+  persona: !include persona.yml
 
-investor_3:
-  class: "examples.Demo.players:SimpleInvestor"
-  name: "Investor 3"
+player_2:
+  name: "Player 2"
+  class: "examples.Demo.players:SimplePlayer"
   config:
-    identity: "investor_3"
-    group_tags: ["investors"]
-    extras:
-      initial_price: 100.0
+    identity: "player_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - players
+    extras: {}
+  persona: !include persona.yml

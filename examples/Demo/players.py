@@ -1,30 +1,39 @@
-"""Demo Players - Simple Investor Implementation
+"""Random Value Averaging Demo - Message Passing Architecture
 
-A simple investor that:
-1. Receives average price from market
-2. Updates local price: local_price += avg_price * random_factor
-3. Submits new price to market
+This demonstrates the topology-driven message passing architecture where:
+- Coordinator generates a random value and broadcasts to players
+- Players receive value, generate local random, compute average, send back
+- This repeats for 3 rounds
+
+Data Flow (Level-Based Execution per Round):
+1. Level 0 (coordinator): generate value -> broadcast to players
+2. Level 1 (players): receive value -> generate local -> average -> respond
+
+Algorithm:
+- Round 1: Coordinator generates random(0-1000), sends to players
+- Players: receive value V, generate local L, compute avg = (V + L) / 2, send back
+- Round 2+: Coordinator receives player averages, computes new value, broadcasts
 """
 
+import logging
 import random
 from typing import Any, Dict, Optional
 
+from masim.player.general import GeneralPlayer
 from masim.player.base import (
-    BasePlayer,
     Action,
     Observation,
     StepResult,
 )
 
+logger = logging.getLogger("RandomAvgDemo")
 
-class SimpleInvestor(BasePlayer):
+
+class SimpleCoordinator(GeneralPlayer):
     """
-    A simple investor that adjusts price based on market average.
-
-    Each round:
-    1. Receive market average price (observation)
-    2. Update local price: local += avg * random(-0.1, 0.1)
-    3. Submit new local price (action)
+    Coordinator that:
+    1. Round 1: Generates random value 0-1000, broadcasts to players
+    2. Round 2+: Receives player averages, computes new value, broadcasts
     """
 
     async def perceive(
@@ -32,44 +41,135 @@ class SimpleInvestor(BasePlayer):
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
-        """Receive market average price."""
-        avg_price = observation.data["avg_price"]
-        self._state.set_custom("market_avg", avg_price)
-        self._state.set_custom("round", observation.step)
+        """Process received values from players."""
+        round_num = observation.round
+        print(f"\n[Coordinator] === Round {round_num} ===")
+        self.state.custom_state["round"] = round_num
+
+        # Process inbounds from players
+        received_values = []
+        if observation.inbounds:
+            print(f"[Coordinator] Received {len(observation.inbounds)} responses:")
+            for inb in observation.inbounds:
+                value = inb.payload["average_value"]
+                received_values.append(value)
+                print(f"  - From {inb.sender_id}: average = {value:.2f}")
+
+        self.state.custom_state["received_values"] = received_values
 
     async def decide(self) -> Dict[str, Any]:
-        """Update local price based on market average."""
-        # Get current local price (must be initialized first round)
-        if self._state.has_custom("local_price"):
-            local_price = self._state.get_custom("local_price")
+        """Generate value and declare broadcast message."""
+        round_num = self.state.custom_state["round"]
+        received_values = self.state.custom_state["received_values"]
+
+        # Generate new value
+        if round_num == 1:
+            # Round 1: Generate initial random value
+            value = random.randint(0, 1000)
+            print(f"[Coordinator] Generated initial value: {value}")
         else:
-            local_price = self.config.extras["initial_price"]
+            # Round 2+: Compute average of received values
+            value = int(sum(received_values) / len(received_values))
+            print(f"[Coordinator] Computed average of {received_values}: {value}")
 
-        # Get market average (must be set in perceive)
-        market_avg = self._state.get_custom("market_avg")
+        self.state.custom_state["current_value"] = value
 
-        # Update: local_price += avg_price * random_factor
-        random_factor = random.uniform(-0.1, 0.1)
-        new_price = local_price + market_avg * random_factor
+        # Prepare broadcast message
+        message_content = {
+            "value": value,
+            "round": round_num,
+        }
 
-        # Store updated price
-        self._state.set_custom("local_price", new_price)
+        print(f"[Coordinator] Broadcasting value: {value}")
 
         return {
-            "price": new_price,
-            "random_factor": random_factor,
+            "outbound_messages": [
+                {"payload": message_content, "content_type": "value_broadcast"}
+            ],
+            "broadcast_value": value,
+            "round": round_num,
         }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        """Submit price to market."""
+        """Return action summarizing the broadcast."""
         return Action(
-            action_type="submit_price",
-            payload={
-                "price": decision_payload["price"],
-            },
+            action_type="coordinator_broadcast",
+            payload=decision_payload,
             source_id=self.identity,
-            metadata={
-                "round": self._state.get_custom("round"),
-                "random_factor": decision_payload["random_factor"],
-            },
+            extras={"role": "coordinator"},
+        )
+
+
+class SimplePlayer(GeneralPlayer):
+    """
+    Player that:
+    1. Receives value from coordinator
+    2. Generates local random value 0-1000
+    3. Computes average of (received + local)
+    4. Sends average back to coordinator
+    """
+
+    async def perceive(
+        self,
+        observation: Observation,
+        prev_result: Optional[StepResult] = None,
+    ) -> None:
+        """Receive value from coordinator."""
+        round_num = observation.round
+        print(f"\n[{self.identity}] Round {round_num}")
+        self.state.custom_state["round"] = round_num
+
+        # Get value from coordinator's inbound
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                received_value = inb.payload["value"]
+                self.state.custom_state["received_value"] = received_value
+                print(
+                    f"[{self.identity}] Received value from {inb.sender_id}: {received_value}"
+                )
+
+    async def decide(self) -> Dict[str, Any]:
+        """Generate local value, compute average, declare response."""
+        round_num = self.state.custom_state["round"]
+        received_value = self.state.custom_state["received_value"]
+
+        # Generate local random value
+        local_value = random.randint(0, 1000)
+        print(f"[{self.identity}] Generated local value: {local_value}")
+
+        # Compute average
+        average_value = (received_value + local_value) / 2
+        print(
+            f"[{self.identity}] Average of ({received_value} + {local_value}) / 2 = {average_value:.2f}"
+        )
+
+        # Store for logging
+        self.state.custom_state["local_value"] = local_value
+        self.state.custom_state["average_value"] = average_value
+
+        # Prepare response
+        response = {
+            "from": self.identity,
+            "round": round_num,
+            "received_value": received_value,
+            "local_value": local_value,
+            "average_value": average_value,
+        }
+
+        print(f"[{self.identity}] Sending average {average_value:.2f} to coordinator")
+
+        return {
+            **response,
+            "outbound_messages": [
+                {"payload": response, "content_type": "value_response"}
+            ],
+        }
+
+    async def act(self, decision_payload: Dict[str, Any]) -> Action:
+        """Return action with response info."""
+        return Action(
+            action_type="player_response",
+            payload=decision_payload,
+            source_id=self.identity,
+            extras={"role": "player"},
         )

@@ -1,8 +1,7 @@
-"""
-General Persona Implementation for MASim Framework.
+"""General Persona Implementation for MASim Framework.
 
 This module provides the concrete Persona implementations that wrap
-Player and Conductor entities with infrastructure coordination.
+Player entities with infrastructure coordination.
 
 For abstract definitions and documentation, see base.py.
 
@@ -11,23 +10,54 @@ Architecture:
                           │
                           └──► BasePlayer (internal, hidden)
 
-    Simulator ─────► ConductorPersona (Ray Actor)
-                          │
-                          └──► BaseConductor (internal, hidden)
-
 Key Design Principles:
-    1. ENCAPSULATION: Persona OWNS and hides Player/Conductor
+    1. ENCAPSULATION: Persona OWNS and hides Player
     2. FACADE PATTERN: Persona aggregates all proxies + domain logic
-    3. SINGLE INTERFACE: Simulator only sees Persona's operate()/cycle()
+    3. SINGLE INTERFACE: Simulator only sees Persona's operate()
     4. INFRASTRUCTURE: All observability, storage, communication via Persona
+    5. TOPOLOGY-DRIVEN: Message passing based on connection topology
+
+Message Passing Architecture:
+    Players send/receive messages through topology-defined connections.
+    No role-based execution order - players wait for expected messages
+    in their pool before processing.
+
+    ┌─────────┐  send_to  ┌─────────┐  send_to  ┌─────────┐
+    │Player A │ ────────► │Player B │ ────────► │Player C │
+    └────┬────┘           └────┬────┘           └────┬────┘
+         │                     │                     │
+         │ ◄── receive_msg ────┼── receive_msg ──►   │
+         │                     │                     │
+         ▼                     ▼                     ▼
+     [pool ready?]         [pool ready?]         [pool ready?]
+         │                     │                     │
+         ▼                     ▼                     ▼
+     [process]             [process]             [process]
 """
 
+import asyncio
 import time
-from typing import Any, Dict, List, Optional, Type, TYPE_CHECKING
+from datetime import datetime
 
 import ray
+from typing import Any, Dict, List, Optional, Set, TYPE_CHECKING
 
-from masim.persona.base import BasePersona, PersonaConfig
+from masim.persona.base import BasePersona
+from masim.communication.base import Message
+from masim.player.base import Inbound
+from masim.utils.topology import TopologyGraph
+from masim.proxy.base import (
+    StorageConfig,
+    SendReceiveConfig,
+    ResourceConfig,
+    MonitoringConfig,
+)
+from masim.proxy.general import (
+    StorageProxy,
+    SendReceiveProxy,
+    ResourceProxy,
+    MonitoringProxy,
+)
 
 if TYPE_CHECKING:
     from masim.player.base import (
@@ -36,12 +66,7 @@ if TYPE_CHECKING:
         Action,
         StepResult,
         TurnResult,
-    )
-    from masim.conductor.base import (
-        BaseConductor,
-        ConductorConfig,
-        CoordinationDecision,
-        CycleResult,
+        PayloadType,
     )
 
 
@@ -71,69 +96,36 @@ class PlayerPersona(BasePersona):
                                                └──► Player.step() (perceive→decide→act)
     """
 
-    def __init__(
-        self,
-        player_class: Type["BasePlayer"],
-        player_config: "PlayerConfig",
-        persona_config: Optional[PersonaConfig] = None,
-    ):
-        """
-        Initialize PlayerPersona with a Player class and config.
-
-        The Player instance is created internally and hidden from outside.
-
-        Args:
-            player_class: The BasePlayer subclass to instantiate
-            player_config: Configuration for the Player
-            persona_config: Configuration for the Persona
-        """
-        super().__init__(persona_config)
-
-        # Store class and config for deferred creation
-        self._player_class = player_class
-        self._player_config = player_config
-
-        # Internal Player instance (HIDDEN from Simulator)
-        self._player: Optional["BasePlayer"] = None
-
-        # Operate timing
-        self._operate_start_time: Optional[float] = None
-
-    # =========================================================================
-    #                        IDENTITY
-    # =========================================================================
-
-    @property
-    def identity(self) -> str:
-        """Get the Player's identity."""
-        return self._player_config.identity
-
     # =========================================================================
     #                        LIFECYCLE
     # =========================================================================
 
     async def initialize(self) -> None:
-        """
-        Initialize the Persona and its internal Player.
-
-        Called by Simulator during setup phase.
-        """
-        if self._is_initialized:
+        """Initialize the Persona and its internal Player."""
+        if self.is_initialized:
             return
 
         # Create the internal Player instance
-        self._player = self._player_class(self._player_config)
+        self.player = self.player_class(self.player_config)
+        await self.player.initialize()
 
-        # Initialize the Player
-        await self._player.initialize()
+        # Initialize proxies from config
+        await self._initialize_proxies()
 
-        self._is_initialized = True
+        self.is_initialized = True
 
-        # Log initialization
-        if self._observability:
-            await self._observability.log_event(
-                "player_initialized", {"player_id": self.identity}
-            )
+    async def _initialize_proxies(self) -> None:
+        """Initialize all proxies from proxy config."""
+        proxy_config = self.config["proxy"]
+
+        self.storage = StorageProxy(StorageConfig(**proxy_config["storage"]))
+        self.monitoring = MonitoringProxy(
+            MonitoringConfig(**proxy_config["monitoring"])
+        )
+        self.communication = SendReceiveProxy(
+            SendReceiveConfig(**proxy_config["communication"])
+        )
+        self.resource = ResourceProxy(ResourceConfig(**proxy_config["resource"]))
 
     async def shutdown(self) -> None:
         """
@@ -141,16 +133,16 @@ class PlayerPersona(BasePersona):
 
         Called by Simulator during teardown phase.
         """
-        if not self._player:
+        if not self.player:
             return
 
         # Shutdown the Player
-        await self._player.shutdown()
+        await self.player.shutdown()
 
         # Log shutdown
-        step_count = self._player.state.step_count if self._player else 0
-        if self._observability:
-            await self._observability.log_event(
+        step_count = self.player.state.step_count if self.player else 0
+        if self.monitoring:
+            await self.monitoring.log_event(
                 "player_shutdown",
                 {"player_id": self.identity, "steps_completed": step_count},
             )
@@ -161,65 +153,59 @@ class PlayerPersona(BasePersona):
 
     async def operate(
         self,
-        conductor_notify: Dict[str, Any],
         round_num: int,
-        num_steps: int = 1,
+        **kwargs,
     ) -> "TurnResult":
         """
         Execute the Player's turn operation.
 
-        This is the PRIMARY INTERFACE that Simulator calls.
-        Internally delegates to the hidden Player.turn().
-
-        In the hierarchical execution model:
-        - Simulator: round (orchestrates all Personas)
-        - PlayerPersona: operate (this method)  <-- Simulator calls this
-        - Player: turn (for loop of steps)      <-- Hidden from Simulator
-        - Player: step (perceive-decide-act)    <-- Hidden from Simulator
+        Waits until Player.is_received_ready() returns True, then
+        delegates to the hidden Player.turn().
 
         Args:
-            conductor_notify: Notification dict from Conductor
             round_num: Current simulation round number
-            num_steps: Number of steps to execute in this turn (default: 1)
+            **kwargs: Additional parameters (e.g., level) passed to Player
 
         Returns:
-            TurnResult containing:
-                - step_results: List of StepResult from each step
-                - final_action: The last action produced
-                - tick_turn_count: The turn number
-                - tick_turn_duration_ms: Duration of the turn
-                - tick_step_count: Number of steps executed
+            TurnResult from internal Player
         """
-        if not self._player:
+        if not self.player:
             raise RuntimeError("PlayerPersona not initialized")
 
         # Start timing
-        self._operate_start_time = time.perf_counter()
-        if self._observability:
-            await self._observability.start_timer("operate_duration")
+        self.operate_start_time = time.perf_counter()
+        self.current_round = round_num
+        if self.monitoring:
+            await self.monitoring.start_timer("operate_duration")
+
+        # Wait until Player has received expected inbounds
+        while not self.player.is_received_ready(round_num, **kwargs):
+            await asyncio.sleep(0.01)
 
         # Delegate to internal Player.turn() (HIDDEN from Simulator)
-        # Player handles observation preparation via prepare_observation()
-        turn_result = await self._player.turn(conductor_notify, round_num, num_steps)
+        turn_result = await self.player.turn(round_num, **kwargs)
 
-        # Log completion
-        if self._observability:
-            duration = await self._observability.stop_timer("operate_duration")
-            await self._observability.record_metric(
+        # NOTE: Message dispatch is handled by Simulator.
+        # Simulator calls collect_outbounds() to gather outbounds,
+        # then dispatches via CommunicationChannel.encode_and_deliver().
+
+        # Record turn result via StorageProxy
+        self.storage.record_turn_result(
+            player_id=self.identity,
+            round_num=round_num,
+            turn_result=turn_result,
+        )
+
+        # Record timing metric only (data already stored above)
+        if self.monitoring:
+            duration = await self.monitoring.stop_timer("operate_duration")
+            await self.monitoring.record_metric(
                 "operate_completed",
                 {
                     "player_id": self.identity,
+                    "round_num": round_num,
                     "duration_ms": duration,
-                    **turn_result.to_dict(),
                 },
-            )
-
-        # Auto-checkpoint if enabled
-        if self._config.auto_checkpoint and self._storage:
-            state = self._player.save_state()
-            await self._storage.checkpoint(
-                state=state,
-                label=f"turn_{turn_result.tick_turn_count}",
             )
 
         return turn_result
@@ -234,10 +220,10 @@ class PlayerPersona(BasePersona):
 
         Used by Simulator for debugging/monitoring, NOT for domain logic.
         """
-        if not self._player:
+        if not self.player:
             return {"player_id": self.identity, "initialized": False}
 
-        state = self._player.state
+        state = self.player.state
         return {
             "player_id": self.identity,
             "initialized": True,
@@ -250,388 +236,162 @@ class PlayerPersona(BasePersona):
 
     def save_state(self) -> Dict[str, Any]:
         """Get persistable state from internal Player."""
-        if not self._player:
+        if not self.player:
             return {}
-        return self._player.save_state()
+        return self.player.save_state()
 
     def load_state(self, state: Dict[str, Any]) -> None:
         """Restore state to internal Player."""
-        if self._player:
-            self._player.load_state(state)
+        if self.player:
+            self.player.load_state(state)
 
     # =========================================================================
-    #                    COORDINATION
+    #                    OUTBOUND COLLECTION
     # =========================================================================
 
-    async def receive_coordination(self, decision_dict: Dict[str, Any]) -> None:
+    def collect_outbounds(self) -> List[Dict[str, Any]]:
         """
-        Receive a CoordinationDecision from Conductor.
+        Collect all raw outbounds declared by Player.
 
-        Args:
-            decision_dict: Serialized CoordinationDecision data
+        Collects pending outbounds from Player state and returns them
+        with sender/target info for Simulator to build Messages via channel.
+
+        Returns:
+            List of dicts with keys: outbound, sender_id, target_ids, round_num
         """
-        if self._player:
-            self._player.get_state().set_custom("last_coordination", decision_dict)
+        if not self.player:
+            return []
 
+        if not self.topology:
+            return []
 
-# =============================================================================
-#                       CONDUCTOR PERSONA
-# =============================================================================
+        # Collect and clear outbounds from Player state
+        outbounds = self.player.pending_outbounds.copy()
+        self.player.pending_outbounds.clear()
 
+        # Get targets from topology
+        targets = self.topology.get_targets(self.identity)
 
-class ConductorPersona(BasePersona):
-    """
-    Persona for Conductor entities - the primary interface Simulator uses.
-
-    ConductorPersona OWNS and HIDES the BaseConductor instance. Simulator
-    interacts only with ConductorPersona's public methods:
-        - initialize(): Set up the Conductor
-        - notify(): Send round state to Players
-        - cycle(): Execute one coordination cycle
-        - shutdown(): Clean up resources
-        - register_player()/unregister_player(): Manage Players
-        - receive_responses(): Receive responses from Players
-
-    The internal BaseConductor is completely hidden from Simulator.
-
-    Conductor Contract:
-        notify() → Players act → receive_responses() → cycle()
-        - notify(): Conductor → Players (outbound)
-        - receive_responses(): Players → Conductor (inbound, builds response_pool)
-        - cycle(): analyze(responses) → coordinate
-    """
-
-    def __init__(
-        self,
-        conductor_class: Type["BaseConductor"],
-        conductor_config: "ConductorConfig",
-        persona_config: Optional[PersonaConfig] = None,
-    ):
-        """
-        Initialize ConductorPersona with a Conductor class and config.
-
-        The Conductor instance is created internally and hidden from outside.
-
-        Args:
-            conductor_class: The BaseConductor subclass to instantiate
-            conductor_config: Configuration for the Conductor
-            persona_config: Configuration for the Persona
-        """
-        super().__init__(persona_config)
-
-        # Store class and config for deferred creation
-        self._conductor_class = conductor_class
-        self._conductor_config = conductor_config
-
-        # Internal Conductor instance (HIDDEN from Simulator)
-        self._conductor: Optional["BaseConductor"] = None
-
-        # Cycle timing
-        self._cycle_start_time: Optional[float] = None
-
-    # =========================================================================
-    #                        IDENTITY
-    # =========================================================================
-
-    @property
-    def identity(self) -> str:
-        """Get the Conductor's identity."""
-        return self._conductor_config.identity
-
-    # =========================================================================
-    #                        LIFECYCLE
-    # =========================================================================
-
-    async def initialize(self) -> None:
-        """
-        Initialize the Persona and its internal Conductor.
-
-        Called by Simulator during setup phase.
-        """
-        if self._is_initialized:
-            return
-
-        # Create the internal Conductor instance
-        self._conductor = self._conductor_class(self._conductor_config)
-
-        # Initialize the Conductor
-        await self._conductor.initialize()
-
-        self._is_initialized = True
-
-        # Log initialization
-        if self._observability:
-            await self._observability.log_event(
-                "conductor_initialized",
+        result = []
+        for outbound in outbounds:
+            result.append(
                 {
-                    "conductor_id": self.identity,
-                    "mode": self._conductor.coordination_mode,
-                },
+                    "outbound": outbound,
+                    "sender_id": self.identity,
+                    "target_ids": targets,
+                    "round_num": self.current_round,
+                }
             )
 
-    async def shutdown(self) -> None:
-        """
-        Shutdown the Persona and its internal Conductor.
+        return result
 
-        Called by Simulator during teardown phase.
+    # =========================================================================
+    #                    TOPOLOGY & MESSAGE PASSING
+    # =========================================================================
+
+    def set_topology(self, topology_config: Optional[Dict[str, Any]]) -> None:
         """
-        if not self._conductor:
+        Set the topology configuration using NetworkX graph.
+
+        Creates a TopologyGraph from config, extracts targets and senders
+        for this player.
+
+        Args:
+            topology_config: Full topology config dict from topology.yml
+        """
+        self.topology = TopologyGraph(topology_config)
+
+        if self.player:
+            # Set targets (who this player can send to)
+            targets = self.topology.get_targets(self.identity)
+            self.player.topology_targets = targets
+
+        # Set expected senders from topology sources
+        self.setup_expected_senders()
+
+    def set_peer_handles(
+        self,
+        handles: Dict[str, ray.actor.ActorHandle],
+    ) -> None:
+        """
+        Set Ray actor handles for peer communication.
+
+        Only stores handles for targets defined in topology connections.
+        Called by Simulator after all actors are created.
+
+        Args:
+            handles: Dict mapping player_id -> Ray actor handle (all players)
+        """
+        if not self.topology:
+            self.peer_handles = {}
             return
 
-        # Shutdown the Conductor
-        await self._conductor.shutdown()
-
-        # Log shutdown
-        cycle_count = self._conductor.state.cycle_count if self._conductor else 0
-        if self._observability:
-            await self._observability.log_event(
-                "conductor_shutdown",
-                {"conductor_id": self.identity, "cycles_completed": cycle_count},
-            )
-
-    # =========================================================================
-    #                    PLAYER MANAGEMENT
-    # =========================================================================
-
-    def register_player(self, player_id: str, metadata: Dict[str, Any] = None) -> None:
-        """Register a Player with this Conductor (direct state access)."""
-        self._conductor.state.player_registry[player_id] = metadata or {}
-
-    def unregister_player(self, player_id: str) -> None:
-        """Unregister a Player from this Conductor (direct state access)."""
-        self._conductor.state.player_registry.pop(player_id, None)
-
-    # =========================================================================
-    #                    PLAYER NOTIFICATION (Conductor → Players)
-    # =========================================================================
-
-    def notify(
-        self,
-        round_num: int,
-        player_ids: List[str],
-    ) -> Dict[str, Dict[str, Any]]:
-        """
-        Notify players of round state (Conductor → Players).
-
-        Delegates to the internal Conductor's notify() method.
-
-        Args:
-            round_num: Current simulation round
-            player_ids: List of player IDs to notify
-
-        Returns:
-            Dict of player_id -> notification_dict
-        """
-        if not self._conductor:
-            raise RuntimeError("ConductorPersona not initialized")
-        return self._conductor.notify(round_num, player_ids)
-
-    # =========================================================================
-    #                    RESPONSE INTAKE (Players → Conductor)
-    # =========================================================================
-
-    def receive_response(self, response: "Action") -> None:
-        """
-        Receive a single response from a Player (sync).
-
-        Adds the response to the response_pool for later processing.
-
-        Args:
-            response: The response (Action) to add to response_pool
-        """
-        if self._conductor:
-            self._conductor.on_response_received(response)
-
-    async def receive_responses(self, responses: List["Action"]) -> None:
-        """
-        Receive responses from Players (builds the response_pool).
-
-        Args:
-            responses: List of response (Action) objects to add to response_pool
-        """
-        if not self._conductor:
-            return
-
-        for response in responses:
-            self._conductor.on_response_received(response)
-
-            # Log response receipt
-            if self._observability:
-                await self._observability.record_metric(
-                    "response_received",
-                    {
-                        "conductor_id": self.identity,
-                        "action_id": response.action_id,
-                        "source_id": response.source_id,
-                    },
-                )
-
-    def collect_responses(
-        self,
-        futures: Dict[str, Any],
-        ref_to_player: Dict[Any, str],
-    ) -> Dict[str, Any]:
-        """
-        Collect player responses via streaming and decide when to proceed.
-
-        This method gives Conductor full control over response collection:
-        - Uses ray.wait() to receive results as they arrive
-        - Streams each result to Conductor via receive_response()
-        - Asks Conductor ready_responses() after each response
-        - Stops when Conductor decides to proceed
-
-        Args:
-            futures: Dict mapping player_id -> Ray ObjectRef
-            ref_to_player: Dict mapping ObjectRef -> player_id (reverse lookup)
-
-        Returns:
-            Dict containing:
-                - turn_results: Collected player results (only those received)
-                - pending_count: Number of players still pending
-        """
-        total_count = len(futures)
-        pending_refs = list(futures.values())
-        turn_results = {}
-        received_count = 0
-
-        while pending_refs:
-            # Wait for ANY result (with small timeout for responsiveness)
-            ready_refs, pending_refs = ray.wait(
-                pending_refs, num_returns=1, timeout=0.1
-            )
-
-            for ref in ready_refs:
-                turn_result = ray.get(ref)
-                player_id = ref_to_player[ref]
-
-                # Store result directly
-                turn_results[player_id] = turn_result
-
-                # Stream action to Conductor
-                if turn_result.final_action and self._conductor:
-                    self._conductor.on_response_received(turn_result.final_action)
-
-                received_count += 1
-
-            # Ask Conductor: ready to proceed?
-            if self._conductor and self._conductor.ready_responses(
-                received_count, total_count
-            ):
-                break
-
-        return {
-            "turn_results": turn_results,
-            "pending_count": len(pending_refs),
+        # Only keep handles for targets in our topology
+        targets = self.topology.get_targets(self.identity)
+        self.peer_handles = {
+            target_id: handles[target_id]
+            for target_id in targets
+            if target_id in handles
         }
 
-    # =========================================================================
-    #                    MAIN INTERFACE (What Simulator Calls)
-    # =========================================================================
-
-    async def cycle(self) -> "CycleResult":
+    def receive_message(self, message: Message) -> None:
         """
-        Execute one coordination cycle.
+        Receive a message from another player.
 
-        This is the PRIMARY INTERFACE that Simulator calls.
-        Internally delegates to the hidden Conductor.cycle().
+        Flow: encoded message → channel decode → Message → convert → Inbound
 
-        In the hierarchical execution model:
-        - Simulator: round (orchestrates all Personas)
-        - ConductorPersona: cycle (this method)  <-- Simulator calls this
-        - Conductor: cycle (internal, hidden)    <-- Hidden from Simulator
-
-        The cycle processes the response_pool (collected responses) and produces
-        a CoordinationDecision.
-
-        Returns:
-            CycleResult containing:
-                - decision: The CoordinationDecision generated
-                - response_count: Number of responses in the pool
-                - tick_cycle_count: Cycle number
-                - tick_cycle_duration_ms: Cycle duration
-        """
-        if not self._conductor:
-            raise RuntimeError("ConductorPersona not initialized")
-
-        # Start timing
-        self._cycle_start_time = time.perf_counter()
-        if self._observability:
-            await self._observability.start_timer("cycle_duration")
-
-        # Delegate to internal Conductor (HIDDEN from Simulator)
-        cycle_result = await self._conductor.cycle()
-
-        # Log completion
-        if self._observability:
-            duration = await self._observability.stop_timer("cycle_duration")
-            await self._observability.record_metric(
-                "cycle_completed",
-                {
-                    "conductor_id": self.identity,
-                    "duration_ms": duration,
-                    **cycle_result.to_dict(),
-                },
-            )
-
-        # Auto-checkpoint if enabled
-        if self._config.auto_checkpoint and self._storage:
-            state = self._conductor.save_state()
-            await self._storage.checkpoint(
-                state=state,
-                label=f"cycle_{cycle_result.tick_cycle_count}",
-            )
-
-        return cycle_result
-
-    def prepare_broadcast(self, cycle_result: "CycleResult") -> Dict[str, Any]:
-        """
-        Prepare the broadcast message from cycle result.
-
-        Delegates to internal Conductor.prepare_broadcast() to allow
-        domain-specific customization of what Players receive.
+        This is called remotely by other PlayerPersona actors.
+        The Message has already been decoded from wire format by the channel.
+        Persona converts it to Inbound and injects to Player.
 
         Args:
-            cycle_result: The CycleResult from cycle()
+            message: The received Message object (already decoded from channel)
+        """
+        # Record received message immediately
+        self.storage.record_message(
+            player_id=self.identity,
+            round_num=self.current_round,
+            message=message,
+            direction="received",
+        )
+
+        # Convert Message → Inbound and inject to Player
+        if self.player:
+            inbound = self.convert_message_to_inbound(message)
+            self.player.on_inbound(inbound)
+
+    def convert_message_to_inbound(self, message: Message) -> Inbound:
+        """
+        Convert channel Message to Player-ready Inbound.
+
+        Simply wraps the Message with reception metadata.
+
+        Args:
+            message: Message object from channel
 
         Returns:
-            Dict to be sent to each Player via receive_coordination()
+            Inbound for Player consumption
         """
-        if not self._conductor:
-            return {}
-        return self._conductor.prepare_broadcast(cycle_result)
+        return Inbound(
+            message=message,
+            time_received=datetime.now().isoformat(),
+        )
 
     # =========================================================================
-    #                    STATE ACCESS
+    #                    EXPECTED SENDERS SETUP
     # =========================================================================
 
-    def get_state_snapshot(self) -> Dict[str, Any]:
+    def setup_expected_senders(self) -> None:
         """
-        Get a snapshot of Conductor state for monitoring.
+        Derive expected_senders from topology senders and set on Player.
 
-        Used by Simulator for debugging/monitoring, NOT for domain logic.
+        Called during initialization after topology is set.
         """
-        if not self._conductor:
-            return {"conductor_id": self.identity, "initialized": False}
+        if not self.player:
+            return
 
-        return {
-            "conductor_id": self.identity,
-            "initialized": True,
-            **self._conductor.get_state_snapshot(),
-        }
-
-    def save_state(self) -> Dict[str, Any]:
-        """Get persistable state from internal Conductor."""
-        if not self._conductor:
-            return {}
-        return self._conductor.save_state()
-
-    def load_state(self, state: Dict[str, Any]) -> None:
-        """Restore state to internal Conductor."""
-        if self._conductor:
-            self._conductor.load_state(state)
-
-    def get_system_metrics(self) -> Dict[str, Any]:
-        """Get system metrics from internal Conductor."""
-        if not self._conductor:
-            return {}
-        return self._conductor.get_system_metrics()
+        if self.topology:
+            senders = self.topology.get_senders(self.identity)
+            self.player.expected_senders = set(senders)
+        else:
+            self.player.expected_senders = set()

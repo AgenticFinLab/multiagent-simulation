@@ -3,12 +3,13 @@
 A domain-agnostic, behavior-semantics-driven multi-agent collaborative architecture.
 
 Core Design Principles:
-1. Role Semantics via Behavioral Contracts:
-   - Player outputs Action (directly interpreted by environment)
-   - Conductor outputs CoordinationDecision (influences Players indirectly)
+1. Role-Based Player Design:
+   - All agents are Players with perceive → decide → act pattern
+   - Coordinator functionality is a role configuration, not a separate type
+   - Players with role='coordinator' handle multi-agent coordination
 
 2. Three-Layer Abstraction Model:
-   - Player/Conductor (What): Core decision logic (HIDDEN)
+   - Player (What): Core decision logic (HIDDEN)
    - Persona (When): Primary interface for Simulator
    - Proxy (How): Infrastructure primitives
 
@@ -17,22 +18,19 @@ Core Design Principles:
    - PlayerPersona: operate (calls Player.turn internally)
    - Player: turn (for loop calling step)
    - Player: step (perceive→decide→act)
-   - ConductorPersona: cycle (calls Conductor.cycle internally)
 
 4. Infrastructure Decoupling via Micro-Proxy Pattern:
-   - CommunicationProxy: Message routing and transmission
+   - SendReceiveProxy: Message routing and transmission
    - StorageProxy: State checkpoint and rollback
    - ResourceProxy: MCP protocol integration
    - ObservabilityProxy: Metrics and logging
 
 Architecture:
     Simulator ─────► PlayerPersona (Ray Actor) ──► BasePlayer (hidden)
-    Simulator ─────► ConductorPersona (Ray Actor) ──► BaseConductor (hidden)
 
 Usage:
-    from masim import PlayerPersona, ConductorPersona, Action, CoordinationDecision
+    from masim import PlayerPersona, Action, GeneralPlayer
     from masim.communication import Message, MessageType
-    from masim.proxy import CommunicationProxy, ResourceProxy
 """
 
 __version__ = "0.0.1"
@@ -43,21 +41,14 @@ from masim.player import (
     ActionStatus,
     Action,
     Observation,
+    Outbound,
+    Inbound,
     StepResult,
     TurnResult,
     PlayerConfig,
     PlayerState,
     BasePlayer,
-)
-
-# Conductor module
-from masim.conductor import (
-    DecisionScope,
-    CoordinationDecision,
-    CycleResult,
-    ConductorConfig,
-    ConductorState,
-    BaseConductor,
+    GeneralPlayer,
 )
 
 # Communication module
@@ -65,11 +56,8 @@ from masim.communication import (
     MessageType,
     MessagePriority,
     Message,
-    ProtocolOutbound,
-    RouteInfo,
-    BaseProtocol,
-    JsonProtocol,
-    MessageRouter,
+    CommunicationChannel,
+    GeneralCommunicationChannel,
 )
 
 # Proxy module
@@ -77,15 +65,14 @@ from masim.proxy import (
     ProxyType,
     ProxyConfig,
     BaseProxy,
-    CommunicationConfig,
-    CommunicationProxy,
+    SendReceiveConfig,
+    SendReceiveProxy,
     StorageConfig,
     StorageProxy,
     ResourceConfig,
     ResourceProxy,
-    ObservabilityConfig,
-    ObservabilityProxy,
-    ProxyFactory,
+    MonitoringConfig,
+    MonitoringProxy,
 )
 
 # Simulator module
@@ -93,7 +80,6 @@ from masim.simulator import (
     SimulatorStatus,
     RoundPhase,
     ExecutionClock,
-    RayConfig,
     SimulationConfig,
     BaseSimulator,
 )
@@ -102,8 +88,6 @@ from masim.simulator import (
 from masim.persona import (
     BasePersona,
     PlayerPersona,
-    ConductorPersona,
-    PersonaConfig,
 )
 
 # Utils module
@@ -121,52 +105,41 @@ __all__ = [
     "ActionStatus",
     "Action",
     "Observation",
+    "Outbound",
+    "Inbound",
     "StepResult",
     "TurnResult",
     "PlayerConfig",
     "PlayerState",
     "BasePlayer",
-    # Conductor types
-    "DecisionScope",
-    "CoordinationDecision",
-    "CycleResult",
-    "ConductorConfig",
-    "ConductorState",
-    "BaseConductor",
+    "GeneralPlayer",
     # Communication types
     "MessageType",
     "MessagePriority",
     "Message",
-    "ProtocolOutbound",
-    "RouteInfo",
-    "BaseProtocol",
-    "JsonProtocol",
-    "MessageRouter",
+    "CommunicationChannel",
+    "GeneralCommunicationChannel",
     # Proxy types
     "ProxyType",
     "ProxyConfig",
     "BaseProxy",
-    "CommunicationConfig",
-    "CommunicationProxy",
+    "SendReceiveConfig",
+    "SendReceiveProxy",
     "StorageConfig",
     "StorageProxy",
     "ResourceConfig",
     "ResourceProxy",
-    "ObservabilityConfig",
-    "ObservabilityProxy",
-    "ProxyFactory",
+    "MonitoringConfig",
+    "MonitoringProxy",
     # Simulator types
     "SimulatorStatus",
     "RoundPhase",
     "ExecutionClock",
-    "RayConfig",
     "SimulationConfig",
     "BaseSimulator",
     # Persona types
     "BasePersona",
     "PlayerPersona",
-    "ConductorPersona",
-    "PersonaConfig",
     # Utils
     "load_config",
     "validate_config",

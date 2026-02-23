@@ -1,0 +1,48 @@
+# =============================================================================
+# Herd Effect Topology - Star Pattern
+# =============================================================================
+# Market as hub, all investors communicate through market.
+#
+#         investor_momentum ──────┐
+#         investor_contrarian ────┤
+#         investor_risk_averse ───┼──▶ market ──┬──▶ investor_momentum
+#         investor_aggressive ────┤             ├──▶ investor_contrarian
+#         investor_noise ─────────┘             ├──▶ investor_risk_averse
+#                                               ├──▶ investor_aggressive
+#                    (bids)                     └──▶ investor_noise
+#                                                    (price broadcast)
+#
+# Execution flow per round:
+#   Level 0: market executes (broadcasts price)
+#   Level 1: all investors execute in parallel (submit bids)
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  # Market → All investors (price broadcast)
+  market:
+    - investor_momentum
+    - investor_contrarian
+    - investor_risk_averse
+    - investor_aggressive
+    - investor_noise
+
+  # Each investor → Market only (bid submission)
+  investor_momentum:
+    - market
+
+  investor_contrarian:
+    - market
+
+  investor_risk_averse:
+    - market
+
+  investor_aggressive:
+    - market
+
+  investor_noise:
+    - market
