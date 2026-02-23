@@ -258,8 +258,11 @@ class BaseSimulator(ABC):
         self.simulation_id = config.simulation_id
 
         # Status tracking
+        # Round numbering convention:
+        #   - Round 0: Setup phase (before simulation starts)
+        #   - Round 1+: Actual simulation rounds
         self.status = SimulatorStatus.INITIALIZING
-        self.current_round: int = 0
+        self.current_round: int = 0  # Starts at 0 (setup), advances to 1+ during run
         self.current_phase: RoundPhase = RoundPhase.PENDING
 
         # Hierarchical execution clock for round-level timing
@@ -331,11 +334,6 @@ class BaseSimulator(ABC):
     @abstractmethod
     def phase_dispatch(self, level_handles: Dict[str, "ActorHandle"]) -> None:
         """Dispatch outbound messages for a level."""
-        ...
-
-    @abstractmethod
-    def phase_cleanup(self) -> None:
-        """Clear message inboxes after round."""
         ...
 
     # =========================================================================

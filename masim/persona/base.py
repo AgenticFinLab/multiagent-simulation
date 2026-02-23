@@ -88,6 +88,7 @@ class BasePersona(ABC):
         self.peer_handles: Dict[str, ray.actor.ActorHandle] = {}
 
         # Current round number for message recording
+        # Round 0 = setup (before simulation), Round 1+ = actual rounds
         self.current_round: int = 0
 
     # =========================================================================
@@ -112,12 +113,14 @@ class BasePersona(ABC):
     async def operate(
         self,
         round_num: int,
+        **kwargs,
     ) -> "TurnResult":
         """
         Execute the Player's turn operation.
 
         Args:
             round_num: Current simulation round number
+            **kwargs: Additional parameters (e.g., level)
 
         Returns:
             TurnResult from internal Player
@@ -167,15 +170,15 @@ class BasePersona(ABC):
     # =========================================================================
 
     @abstractmethod
-    def dispatch_outbound_messages(self) -> int:
+    def collect_outbounds(self) -> List[Dict[str, Any]]:
         """
-        Dispatch all outbound messages declared by Player.
+        Collect all raw outbounds declared by Player.
 
-        Called by Simulator AFTER operate() to explicitly send messages.
-        This allows Simulator to control message timing between levels.
+        Called by Simulator to gather outbound messages for dispatch
+        via CommunicationChannel.
 
         Returns:
-            Number of messages dispatched
+            List of dicts with keys: outbound, sender_id, target_ids, round_num
         """
         ...
 

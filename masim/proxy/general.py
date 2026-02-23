@@ -89,7 +89,7 @@ class SendReceiveProxy(BaseProxy):
         self, message: Message, scope: Optional[str] = None
     ) -> ProxyResult:
         """Broadcast a message to multiple recipients."""
-        message.metadata["broadcast_scope"] = scope or "all"
+        message.extras["broadcast_scope"] = scope or "all"
 
         for recipient_id in list(self.pending_messages.keys()):
             self.pending_messages[recipient_id].append(message)

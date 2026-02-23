@@ -209,8 +209,7 @@ class TopologyGraph:
 
     def visualize(
         self,
-        save_path: Optional[str] = None,
-        show: bool = True,
+        save_path: str,
     ) -> None:
         """
         Visualize the topology graph with differentiated edge styles.
@@ -222,11 +221,13 @@ class TopologyGraph:
         The edges use different arc radii to avoid overlap.
 
         Args:
-            save_path: If provided, save figure to this path
-            show: Whether to display the plot (default: True)
+            save_path: Path to save the figure
         """
-        if not show:
-            plt.switch_backend("Agg")
+        plt.switch_backend("Agg")
+
+        # Ensure levels are computed
+        if not self.levels:
+            self.get_execution_levels()
 
         fig, ax = plt.subplots(figsize=(12, 9))
 
@@ -244,8 +245,8 @@ class TopologyGraph:
         edge_levels = {}  # edge -> level label (source node's level)
 
         for u, v in self.graph.edges():
-            u_level = node_level.get(u, 0)
-            v_level = node_level.get(v, 0)
+            u_level = node_level[u]
+            v_level = node_level[v]
             # Edge label = source node's level (where the edge originates)
             edge_levels[(u, v)] = f"L{u_level}"
             if u_level <= v_level:
@@ -353,13 +354,8 @@ class TopologyGraph:
         ax.axis("off")
         fig.tight_layout()
 
-        if save_path:
-            fig.savefig(save_path, dpi=150, bbox_inches="tight")
-
-        if show:
-            plt.show()
-        else:
-            plt.close(fig)
+        fig.savefig(save_path, dpi=150, bbox_inches="tight")
+        plt.close(fig)
 
     def save_round_diagram(
         self, output_dir: str, round_num: int, format: str = "png"
@@ -379,7 +375,7 @@ class TopologyGraph:
 
         filename = f"topology_r{round_num:06d}.{format}"
         save_path = os.path.join(output_dir, filename)
-        self.visualize(save_path=save_path, show=False)
+        self.visualize(save_path=save_path)
 
         return save_path
 

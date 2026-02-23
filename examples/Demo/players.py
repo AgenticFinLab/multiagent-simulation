@@ -1,30 +1,22 @@
-"""Simple Coordinator Demo - Message Passing Architecture
+"""Random Value Averaging Demo - Message Passing Architecture
 
 This demonstrates the topology-driven message passing architecture where:
-- Players declare outbound messages in decide() result
-- Persona dispatches messages via topology after operate()
-- Players receive inbounds via Observation (decoded by Persona)
-- Observation contains local data + inbounds from other players
+- Coordinator generates a random value and broadcasts to players
+- Players receive value, generate local random, compute average, send back
+- This repeats for 3 rounds
 
-Data Flow (Level-Based Execution):
-1. Level 0 (coordinator): execute -> declare outbound_messages -> dispatch
-2. Level 1 (players): receive inbounds in Observation -> perceive() -> decide()
-3. Messages flow WITHIN THE SAME ROUND (intra-round delivery via ray.get)
+Data Flow (Level-Based Execution per Round):
+1. Level 0 (coordinator): generate value -> broadcast to players
+2. Level 1 (players): receive value -> generate local -> average -> respond
 
-Key Design Pattern:
-- Inbounds = decoded messages from other players (in Observation)
-- Outbounds = declared messages to send (in decide() result)
-- Player is PURE domain logic (no infrastructure coupling)
-- Routing is topology-driven (Player doesn't specify targets)
-- Persona handles ALL communication (receive/send), Player handles logic
-
-Architecture:
-- Demo players inherit from GeneralPlayer (general.py) not BasePlayer (base.py)
-- base.py = abstract contracts, general.py = ready-to-use implementations
-- Player has is_received_ready() to check if ready based on expected_senders
+Algorithm:
+- Round 1: Coordinator generates random(0-1000), sends to players
+- Players: receive value V, generate local L, compute avg = (V + L) / 2, send back
+- Round 2+: Coordinator receives player averages, computes new value, broadcasts
 """
 
 import logging
+import random
 from typing import Any, Dict, Optional
 
 from masim.player.general import GeneralPlayer
@@ -34,19 +26,14 @@ from masim.player.base import (
     StepResult,
 )
 
-logger = logging.getLogger("SimpleDemo")
+logger = logging.getLogger("RandomAvgDemo")
 
 
 class SimpleCoordinator(GeneralPlayer):
     """
     Coordinator that:
-    1. Declares broadcast message in decide()
-    2. Persona dispatches to all connected players
-    3. Receives responses via Observation.inbounds
-
-    Uses declarative message passing:
-    - decide() returns 'outbound_messages' list
-    - Persona handles actual dispatch via topology
+    1. Round 1: Generates random value 0-1000, broadcasts to players
+    2. Round 2+: Receives player averages, computes new value, broadcasts
     """
 
     async def perceive(
@@ -54,36 +41,52 @@ class SimpleCoordinator(GeneralPlayer):
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
-        """Store round info and check for received responses in inbounds."""
+        """Process received values from players."""
         round_num = observation.round
         print(f"\n[Coordinator] === Round {round_num} ===")
         self.state.custom_state["round"] = round_num
 
-        # Check inbounds from Observation (decoded by Persona)
+        # Process inbounds from players
+        received_values = []
         if observation.inbounds:
-            print(f"[Coordinator] Received {len(observation.inbounds)} inbounds:")
+            print(f"[Coordinator] Received {len(observation.inbounds)} responses:")
             for inb in observation.inbounds:
-                print(f"  - From {inb.sender_id}: {inb.payload}")
+                value = inb.payload["average_value"]
+                received_values.append(value)
+                print(f"  - From {inb.sender_id}: average = {value:.2f}")
+
+        self.state.custom_state["received_values"] = received_values
 
     async def decide(self) -> Dict[str, Any]:
-        """Declare broadcast message to send to all players."""
+        """Generate value and declare broadcast message."""
         round_num = self.state.custom_state["round"]
+        received_values = self.state.custom_state["received_values"]
+
+        # Generate new value
+        if round_num == 1:
+            # Round 1: Generate initial random value
+            value = random.randint(0, 1000)
+            print(f"[Coordinator] Generated initial value: {value}")
+        else:
+            # Round 2+: Compute average of received values
+            value = int(sum(received_values) / len(received_values))
+            print(f"[Coordinator] Computed average of {received_values}: {value}")
+
+        self.state.custom_state["current_value"] = value
+
+        # Prepare broadcast message
         message_content = {
-            "message": f"Hello from Coordinator! Round {round_num}",
+            "value": value,
             "round": round_num,
         }
 
-        # Get targets for logging
-        targets = self.topology_targets
-        print(f"[Coordinator] Topology targets: {targets}")
-        print("[Coordinator] Declaring broadcast message")
+        print(f"[Coordinator] Broadcasting value: {value}")
 
-        # Return outbound messages (Persona will dispatch to topology targets)
         return {
             "outbound_messages": [
-                {"payload": message_content, "content_type": "broadcast"}
+                {"payload": message_content, "content_type": "value_broadcast"}
             ],
-            "broadcast_targets": len(targets),
+            "broadcast_value": value,
             "round": round_num,
         }
 
@@ -93,21 +96,17 @@ class SimpleCoordinator(GeneralPlayer):
             action_type="coordinator_broadcast",
             payload=decision_payload,
             source_id=self.identity,
-            metadata={"role": "coordinator"},
+            extras={"role": "coordinator"},
         )
 
 
 class SimplePlayer(GeneralPlayer):
     """
     Player that:
-    1. Receives message from coordinator via Observation.inbounds
-    2. Processes inbounds in perceive()
-    3. Declares response message in decide()
-    4. Persona dispatches response back to coordinator
-
-    Uses declarative message passing:
-    - decide() returns 'outbound_messages' list
-    - Persona handles actual dispatch via topology
+    1. Receives value from coordinator
+    2. Generates local random value 0-1000
+    3. Computes average of (received + local)
+    4. Sends average back to coordinator
     """
 
     async def perceive(
@@ -115,53 +114,55 @@ class SimplePlayer(GeneralPlayer):
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
-        """Check for inbounds from coordinator in Observation."""
+        """Receive value from coordinator."""
         round_num = observation.round
         print(f"\n[{self.identity}] Round {round_num}")
         self.state.custom_state["round"] = round_num
 
-        # Check inbounds from Observation (decoded by Persona)
+        # Get value from coordinator's inbound
         if observation.inbounds:
-            print(f"[{self.identity}] Received {len(observation.inbounds)} inbounds:")
             for inb in observation.inbounds:
-                print(f"  - From {inb.sender_id}: {inb.payload}")
-                self.state.custom_state["coordinator_message"] = inb.payload
+                received_value = inb.payload["value"]
+                self.state.custom_state["received_value"] = received_value
+                print(
+                    f"[{self.identity}] Received value from {inb.sender_id}: {received_value}"
+                )
 
     async def decide(self) -> Dict[str, Any]:
-        """Declare response message to send to coordinator."""
+        """Generate local value, compute average, declare response."""
         round_num = self.state.custom_state["round"]
+        received_value = self.state.custom_state["received_value"]
 
-        # Increment local counter
-        if "local_counter" not in self.state.custom_state:
-            self.state.custom_state["local_counter"] = 0
-        counter = self.state.custom_state["local_counter"] + 1
-        self.state.custom_state["local_counter"] = counter
+        # Generate local random value
+        local_value = random.randint(0, 1000)
+        print(f"[{self.identity}] Generated local value: {local_value}")
+
+        # Compute average
+        average_value = (received_value + local_value) / 2
+        print(
+            f"[{self.identity}] Average of ({received_value} + {local_value}) / 2 = {average_value:.2f}"
+        )
+
+        # Store for logging
+        self.state.custom_state["local_value"] = local_value
+        self.state.custom_state["average_value"] = average_value
 
         # Prepare response
         response = {
             "from": self.identity,
             "round": round_num,
-            "counter": counter,
-            "message": f"Response from {self.identity}, counter={counter}",
+            "received_value": received_value,
+            "local_value": local_value,
+            "average_value": average_value,
         }
 
-        # Check targets for logging
-        targets = self.topology_targets
-        print(f"[{self.identity}] My targets: {targets}")
-
-        # Declare outbound message (Persona will dispatch to topology targets)
-        outbound = []
-        if self.can_send_to("coordinator"):
-            outbound.append({"payload": response, "content_type": "response"})
-            print(
-                f"[{self.identity}] Declaring response (will be sent to topology targets)"
-            )
-        else:
-            print(f"[{self.identity}] Cannot send to coordinator (not in topology)")
+        print(f"[{self.identity}] Sending average {average_value:.2f} to coordinator")
 
         return {
             **response,
-            "outbound_messages": outbound,
+            "outbound_messages": [
+                {"payload": response, "content_type": "value_response"}
+            ],
         }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
@@ -170,5 +171,5 @@ class SimplePlayer(GeneralPlayer):
             action_type="player_response",
             payload=decision_payload,
             source_id=self.identity,
-            metadata={"role": "player"},
+            extras={"role": "player"},
         )

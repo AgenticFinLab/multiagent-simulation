@@ -60,7 +60,6 @@ entity in the MASim framework. A Player represents any agent that can:
 """
 
 import time
-import uuid
 from abc import ABC, abstractmethod
 from enum import Enum, auto
 from datetime import datetime
@@ -122,18 +121,16 @@ class Action:
         action_type: Semantic category (e.g., "trade", "move", "communicate")
         payload: Action parameters (domain-specific structure)
         source_id: ID of the Player that generated this action
-        action_id: Unique identifier (auto-generated UUID)
         timestamp: ISO-8601 creation timestamp
-        metadata: Optional additional context
+        extras: Optional additional context
         status: Current lifecycle status
     """
 
     action_type: str
     payload: PayloadType
     source_id: str
-    action_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    extras: Dict[str, Any] = field(default_factory=dict)
     status: ActionStatus = ActionStatus.CREATED
 
     def __post_init__(self):
@@ -157,12 +154,11 @@ class Action:
         if isinstance(self.payload, np.ndarray):
             payload_data = self.payload.tolist()
         return {
-            "action_id": self.action_id,
             "action_type": self.action_type,
             "payload": payload_data,
             "source_id": self.source_id,
             "timestamp": self.timestamp,
-            "metadata": self.metadata,
+            "extras": self.extras,
             "status": self.status.name,
         }
 
@@ -227,8 +223,8 @@ class Inbound:
 
     @property
     def payload(self) -> PayloadType:
-        """Shortcut to message payload."""
-        return self.message.payload
+        """Extract actual content from message payload."""
+        return self.message.payload["content"]
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialize to dictionary."""

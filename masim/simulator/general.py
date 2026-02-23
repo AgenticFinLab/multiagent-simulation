@@ -278,6 +278,8 @@ class GeneralSimulator(BaseSimulator):
 
         Passes full topology config and peer handles to each Persona.
         Each Persona extracts its own targets from the topology.
+
+        Also saves the initial topology diagram as round 0 (before simulation starts).
         """
         logger.info("    Setting up topology...")
 
@@ -286,36 +288,15 @@ class GeneralSimulator(BaseSimulator):
             ray.get(handle.set_topology.remote(self.config.topology))
             ray.get(handle.set_peer_handles.remote(self.player_persona_handles))
 
-    def _save_round_topology(self, round_num: int) -> None:
-        """
-        Save topology diagram for the current round.
-
-        Saves to: {record_path}/diagrams/topology_r{round:06d}.png
-
-        Args:
-            round_num: Current round number
-        """
-        if not self.topology:
-            return
-
-        # Get record_path from setting (simulation-level config)
-        record_path = self.config.setting.get("record_path")
-        if not record_path:
-            return
-
-        diagrams_dir = os.path.join(record_path, "diagrams")
-        try:
-            diagram_path = self.topology.save_round_diagram(
-                output_dir=diagrams_dir, round_num=round_num, format="png"
-            )
-            logger.debug("    Saved topology diagram: %s", diagram_path)
-        except Exception as e:
-            logger.warning("    Failed to save topology diagram: %s", e)
+        # Save initial topology diagram as round 0 (before simulation starts)
+        diagrams_dir = os.path.join(self.config.setting["record_path"], "diagrams")
+        self.topology.save_round_diagram(diagrams_dir, round_num=0)
 
     def phase_execute(
         self,
         round_num: int,
         level_handles: Dict[str, ray.actor.ActorHandle],
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         PHASE 1: EXECUTE - Players run operate() in parallel.
@@ -326,6 +307,7 @@ class GeneralSimulator(BaseSimulator):
         Args:
             round_num: Current round number
             level_handles: Dict of player_id -> actor handle to execute
+            **kwargs: Additional parameters (e.g., level) passed to operate()
 
         Returns:
             Dict with futures and ref_to_player for phase_collect()
@@ -335,7 +317,7 @@ class GeneralSimulator(BaseSimulator):
         operate_futures = {}
         ref_to_player = {}
         for player_id, handle in level_handles.items():
-            future = handle.operate.remote(round_num)
+            future = handle.operate.remote(round_num, **kwargs)
             operate_futures[player_id] = future
             ref_to_player[future] = player_id
 
@@ -465,7 +447,7 @@ class GeneralSimulator(BaseSimulator):
 
         execution_levels = self.topology.get_execution_levels()
 
-        for level_players in execution_levels:
+        for level, level_players in enumerate(execution_levels):
             level_handles = {
                 pid: self.player_persona_handles[pid]
                 for pid in level_players
@@ -475,7 +457,7 @@ class GeneralSimulator(BaseSimulator):
             # ─────────────────────────────────────────────────────────────────
             # PHASE 1: EXECUTE - Players run operate() in parallel
             # ─────────────────────────────────────────────────────────────────
-            execute_result = self.phase_execute(round_num, level_handles)
+            execute_result = self.phase_execute(round_num, level_handles, level=level)
 
             # ─────────────────────────────────────────────────────────────────
             # PHASE 2: COLLECT - Wait for all operate() to complete
@@ -489,8 +471,9 @@ class GeneralSimulator(BaseSimulator):
 
         # ─────────────────────────────────────────────────────────────────────
         # PHASE 4: RECORD - Save topology diagram for this round
-        # ─────────────────────────────────────────────────────────────────────
-        self._save_round_topology(round_num)
+        # ─────────────────────────────────────────────────────────────────────────
+        diagrams_dir = os.path.join(self.config.setting["record_path"], "diagrams")
+        self.topology.save_round_diagram(diagrams_dir, round_num=round_num)
 
         # Finalize round
         self.round_clock.tick_end()

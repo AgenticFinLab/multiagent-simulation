@@ -61,7 +61,6 @@ Abstract Classes:
 """
 
 import os
-import uuid
 from abc import ABC, abstractmethod
 from enum import Enum, auto
 from datetime import datetime
@@ -128,23 +127,19 @@ class Message:
         message_type: Category of message
         sender_id: ID of the sending component
         payload: Message content (must be serializable)
-        message_id: Unique identifier
         recipient_id: Target recipient (None for broadcast)
         timestamp: ISO format timestamp
-        correlation_id: ID linking related messages
         priority: Message delivery priority
-        metadata: Routing and protocol metadata
+        extras: Additional context
     """
 
     message_type: MessageType
     sender_id: str
     payload: PayloadType
-    message_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     recipient_id: Optional[str] = None
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    correlation_id: Optional[str] = None
     priority: MessagePriority = MessagePriority.NORMAL
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    extras: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         self._validate_payload()
@@ -170,42 +165,26 @@ class Message:
         if isinstance(self.payload, np.ndarray):
             payload_data = self.payload.tolist()
         return {
-            "message_id": self.message_id,
             "message_type": self.message_type.name,
             "sender_id": self.sender_id,
             "recipient_id": self.recipient_id,
             "payload": payload_data,
             "timestamp": self.timestamp,
-            "correlation_id": self.correlation_id,
             "priority": self.priority.value,
-            "metadata": self.metadata,
+            "extras": self.extras,
         }
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Message":
         """Create Message from dictionary."""
-        if "message_type" not in data:
-            raise KeyError("Message data must have 'message_type' key")
-        if "sender_id" not in data:
-            raise KeyError("Message data must have 'sender_id' key")
         return cls(
-            message_id=(
-                data["message_id"] if "message_id" in data else str(uuid.uuid4())
-            ),
             message_type=MessageType[data["message_type"]],
             sender_id=data["sender_id"],
-            recipient_id=data["recipient_id"] if "recipient_id" in data else None,
-            payload=data["payload"] if "payload" in data else {},
-            timestamp=(
-                data["timestamp"] if "timestamp" in data else datetime.now().isoformat()
-            ),
-            correlation_id=data["correlation_id"] if "correlation_id" in data else None,
-            priority=(
-                MessagePriority(data["priority"])
-                if "priority" in data
-                else MessagePriority.NORMAL
-            ),
-            metadata=data["metadata"] if "metadata" in data else {},
+            recipient_id=data["recipient_id"],
+            payload=data["payload"],
+            timestamp=data["timestamp"],
+            priority=MessagePriority(data["priority"]),
+            extras=data["extras"],
         )
 
 
@@ -290,7 +269,7 @@ class CommunicationChannel(ABC):
             recipient_id=target_id,
             payload=payload,
             timestamp=datetime.now().isoformat(),
-            metadata={"round_num": round_num},
+            extras={"round_num": round_num},
         )
 
     # =========================================================================

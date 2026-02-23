@@ -245,16 +245,23 @@ class GeneralPlayer(BasePlayer):
         Check if player has received enough inbounds to proceed.
 
         Logic:
+        - Level 0 in Round 1: ready immediately (initiators don't wait)
         - If no expected_senders → ready immediately
         - Otherwise check if all expected senders have sent
 
         Args:
             round_num: Current round number
-            **kwargs: Additional parameters for custom logic in subclasses
+            **kwargs: Additional parameters (level, etc.)
 
         Returns:
             True if ready to proceed with decision
         """
+        level = kwargs["level"]
+
+        # Level 0 nodes in Round 1 are initiators - they don't wait for messages
+        if round_num == 1 and level == 0:
+            return True
+
         if not self.expected_senders:
             return True
 

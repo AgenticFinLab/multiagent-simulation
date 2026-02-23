@@ -164,7 +164,7 @@ class PlayerPersona(BasePersona):
 
         Args:
             round_num: Current simulation round number
-            **kwargs: Additional parameters passed to Player.turn()
+            **kwargs: Additional parameters (e.g., level) passed to Player
 
         Returns:
             TurnResult from internal Player
@@ -185,9 +185,9 @@ class PlayerPersona(BasePersona):
         # Delegate to internal Player.turn() (HIDDEN from Simulator)
         turn_result = await self.player.turn(round_num, **kwargs)
 
-        # NOTE: Message dispatch is NOT done here.
-        # Simulator explicitly calls dispatch_outbound_messages() after operate()
-        # to control message timing between execution levels.
+        # NOTE: Message dispatch is handled by Simulator.
+        # Simulator calls collect_outbounds() to gather outbounds,
+        # then dispatches via CommunicationChannel.encode_and_deliver().
 
         # Record turn result via StorageProxy
         self.storage.record_turn_result(
