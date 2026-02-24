@@ -1,7 +1,8 @@
 # =============================================================================
-# Herd Effect Topology - Star Pattern
+# Herd Effect Topology - Star Pattern (Emergent Herding Model)
 # =============================================================================
 # Market as hub, all investors communicate through market.
+# NO HerdingInvestor - herding EMERGES from positive feedback dynamics.
 #
 #         investor_momentum ──────┐
 #         investor_contrarian ────┤
@@ -9,12 +10,12 @@
 #         investor_aggressive ────┤             ├──▶ investor_contrarian
 #         investor_noise ─────────┘             ├──▶ investor_risk_averse
 #                                               ├──▶ investor_aggressive
-#                    (bids)                     └──▶ investor_noise
-#                                                    (price broadcast)
+#                    (orders: P,Q)              └──▶ investor_noise
+#                                                    (market data: price, volume)
 #
 # Execution flow per round:
-#   Level 0: market executes (broadcasts price)
-#   Level 1: all investors execute in parallel (submit bids)
+#   Level 0: market executes (broadcasts price + volume)
+#   Level 1: all investors execute in parallel (submit P,Q orders)
 # =============================================================================
 
 type: "star"
@@ -23,7 +24,7 @@ sources:
   - market
 
 connections:
-  # Market → All investors (price broadcast)
+  # Market → All investors (price + volume broadcast)
   market:
     - investor_momentum
     - investor_contrarian
@@ -31,7 +32,7 @@ connections:
     - investor_aggressive
     - investor_noise
 
-  # Each investor → Market only (bid submission)
+  # Each investor → Market only (order submission)
   investor_momentum:
     - market
 

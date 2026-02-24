@@ -12,6 +12,7 @@ Base classes and configs are in base.py; implementations are here.
 
 import os
 import time
+from collections import deque
 from datetime import datetime
 from typing import Any, Awaitable, Callable, Dict, List, Optional, TYPE_CHECKING
 
@@ -351,7 +352,17 @@ class ResourceProxy(BaseProxy):
 
 
 class MonitoringProxy(BaseProxy):
-    """Proxy for metrics collection and structured logging."""
+    """Proxy for metrics collection and structured logging.
+
+    Memory Optimization:
+    - Uses deque(maxlen=METRICS_LIMIT) to prevent unbounded memory growth
+    - Recent metrics/events kept in memory for quick access
+    - Old data automatically evicted (can be persisted separately if needed)
+    """
+
+    # Default limit for in-memory metrics/events
+    METRICS_LIMIT = 50
+    EVENTS_LIMIT = 50
 
     def __init__(
         self,
@@ -360,8 +371,9 @@ class MonitoringProxy(BaseProxy):
     ):
         super().__init__(config or MonitoringConfig(), owner)
         self.config: MonitoringConfig = config or MonitoringConfig()
-        self._metrics: List[Dict[str, Any]] = []
-        self._events: List[Dict[str, Any]] = []
+        # Use deque with maxlen to prevent unbounded memory growth
+        self._metrics: deque = deque(maxlen=self.METRICS_LIMIT)
+        self._events: deque = deque(maxlen=self.EVENTS_LIMIT)
         self._timers: Dict[str, float] = {}
 
     async def initialize(self) -> None:
