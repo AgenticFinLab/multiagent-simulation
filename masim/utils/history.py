@@ -155,6 +155,10 @@ class HistoryBuffer:
         """Return total count of items (hot + cold + pending)."""
         return self.total_count
 
+    def __iter__(self):
+        """Iterate over hot (recent) items only. For all items, use get_all()."""
+        return iter(self.hot)
+
     def __getitem__(self, index: Union[int, slice]) -> Any:
         """
         Access items by index or slice.

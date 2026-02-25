@@ -12,10 +12,8 @@ proxy:
     record_rounds: true
   
   monitoring:
-    metrics_backend: "memory"
-    logging_backend: "structured"
-    log_dir: "EXPERIMENT/HerdEffect/logs"
-    log_level: "INFO"
+    record_path: "EXPERIMENT/HerdEffect/monitoring"
+    entry_limit: 100
   
   communication:
     message_timeout_ms: 5000

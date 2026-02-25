@@ -15,10 +15,8 @@ proxy:
     record_rounds: true
   
   monitoring:
-    metrics_backend: "memory"
-    logging_backend: "structured"
-    log_dir: "EXPERIMENT/Demo/logs"
-    log_level: "INFO"
+    record_path: "EXPERIMENT/Demo/monitoring"
+    entry_limit: 100
   
   communication:
     message_timeout_ms: 5000

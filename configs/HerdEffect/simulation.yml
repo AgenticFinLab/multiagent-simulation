@@ -13,6 +13,7 @@ setting:
   total_rounds: 1000
   entry_limit: 100
   record_path: "EXPERIMENT/HerdEffect/records"
+  save_diagram_interval: 100  # Save diagram every N rounds (0 = disabled)
 
 environment:
   dotenv_path: .env

@@ -930,26 +930,19 @@ class MonitoringConfig(ProxyConfig):
 
     Attributes:
         proxy_type: Fixed to OBSERVABILITY
-        metrics_backend: Backend for metrics storage ("memory", "prometheus", "statsd")
-        logging_backend: Backend for logging ("structured", "json", "console")
-        enable_tracing: Whether to enable distributed tracing
-        log_level: Minimum log level ("DEBUG", "INFO", "WARNING", "ERROR")
+        record_path: Directory for HistoryBuffer persistence (REQUIRED)
+        entry_limit: Max entries in hot storage (memory)
 
     Example:
         config = MonitoringConfig(
-            metrics_backend="prometheus",
-            logging_backend="json",
-            enable_tracing=True,
-            log_level="INFO"
+            record_path="EXPERIMENT/Demo/monitoring",
+            entry_limit=100
         )
     """
 
     proxy_type: ProxyType = field(default=ProxyType.OBSERVABILITY, init=False)
-    metrics_backend: str = "memory"  # "memory", "prometheus", "statsd"
-    logging_backend: str = "structured"  # "structured", "json", "console"
-    log_dir: Optional[str] = None  # Directory for log files
-    enable_tracing: bool = True  # Distributed tracing
-    log_level: str = "INFO"  # Minimum log level
+    record_path: str = ""  # REQUIRED: Directory for HistoryBuffer persistence
+    entry_limit: int = 100  # Max entries in hot storage (memory)
 
 
 # MonitoringProxy implementation is in general.py

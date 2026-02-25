@@ -29,6 +29,7 @@ from masim.proxy.base import (
     MonitoringConfig,
 )
 from masim.communication.base import Message
+from masim.utils.history import HistoryBuffer
 from lmbase.utils.tools import BlockBasedStoreManager
 
 if TYPE_CHECKING:
@@ -352,17 +353,24 @@ class ResourceProxy(BaseProxy):
 
 
 class MonitoringProxy(BaseProxy):
-    """Proxy for metrics collection and structured logging.
-
-    Memory Optimization:
-    - Uses deque(maxlen=METRICS_LIMIT) to prevent unbounded memory growth
-    - Recent metrics/events kept in memory for quick access
-    - Old data automatically evicted (can be persisted separately if needed)
     """
+    Proxy for metrics collection and structured logging.
 
-    # Default limit for in-memory metrics/events
-    METRICS_LIMIT = 50
-    EVENTS_LIMIT = 50
+    Uses HistoryBuffer for memory-efficient hot/cold storage:
+    - Hot: Recent entries in memory (deque, fast access)
+    - Cold: Historical entries on disk (BlockBasedStoreManager)
+
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │  ┌─────────────────┐           ┌─────────────────────────────────┐  │
+    │  │  Hot (deque)    │  overflow │   Cold (BlockBasedStoreManager) │  │
+    │  │  maxlen=N       │ ───────►  │   (JSON blocks on disk)         │  │
+    │  └─────────────────┘           └─────────────────────────────────┘  │
+    │                                                                      │
+    │  API:                                                                │
+    │  - get_metrics()     → recent (hot only, fast)                      │
+    │  - get_all_metrics() → complete history (hot + cold)                │
+    └─────────────────────────────────────────────────────────────────────┘
+    """
 
     def __init__(
         self,
@@ -371,15 +379,28 @@ class MonitoringProxy(BaseProxy):
     ):
         super().__init__(config or MonitoringConfig(), owner)
         self.config: MonitoringConfig = config or MonitoringConfig()
-        # Use deque with maxlen to prevent unbounded memory growth
-        self._metrics: deque = deque(maxlen=self.METRICS_LIMIT)
-        self._events: deque = deque(maxlen=self.EVENTS_LIMIT)
+
+        # Initialize HistoryBuffer storage (record_path must be set in config)
+        entry_limit = self.config.entry_limit
+        record_path = self.config.record_path
+
+        metrics_dir = os.path.join(record_path, "metrics")
+        events_dir = os.path.join(record_path, "events")
+        self._metrics: HistoryBuffer = HistoryBuffer(
+            folder=metrics_dir, entry_limit=entry_limit
+        )
+        self._events: HistoryBuffer = HistoryBuffer(
+            folder=events_dir, entry_limit=entry_limit
+        )
+
         self._timers: Dict[str, float] = {}
 
     async def initialize(self) -> None:
         self.is_initialized = True
 
     async def shutdown(self) -> None:
+        self._metrics.flush()
+        self._events.flush()
         self.is_initialized = False
 
     async def record_metric(
@@ -426,8 +447,8 @@ class MonitoringProxy(BaseProxy):
     async def get_metrics(
         self, name_filter: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """Get recorded metrics."""
-        result = self._metrics
+        """Get recorded metrics (recent, from hot storage)."""
+        result = self._metrics.recent
         if name_filter:
             result = [m for m in result if m["name"].startswith(name_filter)]
         return result
@@ -435,11 +456,19 @@ class MonitoringProxy(BaseProxy):
     async def get_events(
         self, event_type: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """Get recorded events."""
-        result = self._events
+        """Get recorded events (recent, from hot storage)."""
+        result = self._events.recent
         if event_type:
             result = [e for e in result if e["event_type"] == event_type]
         return result
+
+    async def get_all_metrics(self) -> List[Dict[str, Any]]:
+        """Get ALL recorded metrics (hot + cold). Use sparingly."""
+        return self._metrics.get_all()
+
+    async def get_all_events(self) -> List[Dict[str, Any]]:
+        """Get ALL recorded events (hot + cold). Use sparingly."""
+        return self._events.get_all()
 
 
 # =============================================================================
@@ -514,12 +543,14 @@ class SimpleStorageProxy(StorageProxy):
 class SimpleMonitoringProxy(MonitoringProxy):
     """Simplified MonitoringProxy with sensible defaults."""
 
-    def __init__(self, owner: Optional[OwnerType] = None):
+    def __init__(
+        self,
+        record_path: str = "EXPERIMENT/default/monitoring",
+        owner: Optional[OwnerType] = None,
+    ):
         config = MonitoringConfig(
-            metrics_backend="memory",
-            logging_backend="structured",
-            enable_tracing=False,
-            log_level="INFO",
+            record_path=record_path,
+            entry_limit=100,
         )
         super().__init__(config, owner)
 

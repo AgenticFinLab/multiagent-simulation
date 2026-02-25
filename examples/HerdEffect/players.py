@@ -38,14 +38,15 @@ Flow per Round:
     Market broadcasts (price, volume) → Investors submit (P, Q) orders → Market clears
 """
 
+import os
 import random
 import math
 import numpy as np
-from collections import deque
 from typing import Any, Dict, List, Optional
 
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
+from masim.utils.history import HistoryBuffer
 
 
 # =============================================================================
@@ -67,9 +68,9 @@ class Market(GeneralPlayer):
     Price dynamics include mean reversion toward fundamental value.
 
     Memory Optimization:
-    - Uses deque(maxlen=HISTORY_LIMIT) to prevent unbounded memory growth
-    - Full history is persisted via StorageProxy.record_turn_result()
-    - Analysis can reconstruct from turn records if needed
+    - Uses HistoryBuffer (hot deque + cold disk) for bounded memory
+    - Full history persisted automatically via HistoryBuffer
+    - Requires record_path in config.extras
     """
 
     # Market parameters
@@ -93,15 +94,25 @@ class Market(GeneralPlayer):
         # Initialize on first round
         if "price" not in self.state.custom_state:
             self.state.custom_state["price"] = self.INITIAL_PRICE
-            # Use deque with maxlen to prevent unbounded memory growth
-            self.state.custom_state["price_history"] = deque(
-                [self.INITIAL_PRICE], maxlen=self.HISTORY_LIMIT
+            # Use HistoryBuffer: hot (memory) + cold (disk)
+            record_path = self.config.extras.get(
+                "record_path", "EXPERIMENT/HerdEffect/history"
             )
-            self.state.custom_state["volume_history"] = deque(
-                [0], maxlen=self.HISTORY_LIMIT
+            base_path = os.path.join(record_path, self.config.identity)
+            self.state.custom_state["price_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "price"),
+                entry_limit=self.HISTORY_LIMIT,
+                initial_values=[self.INITIAL_PRICE],
             )
-            self.state.custom_state["return_history"] = deque(
-                [0.0], maxlen=self.HISTORY_LIMIT
+            self.state.custom_state["volume_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "volume"),
+                entry_limit=self.HISTORY_LIMIT,
+                initial_values=[0],
+            )
+            self.state.custom_state["return_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "return"),
+                entry_limit=self.HISTORY_LIMIT,
+                initial_values=[0.0],
             )
 
         # Collect orders from investors
@@ -218,11 +229,11 @@ class BaseInvestor(GeneralPlayer):
     State:
     - cash: Available capital (starts at 10,000)
     - position: Current holdings (starts at 0)
-    - price_history: Track recent prices for volatility calculation (bounded deque)
+    - price_history: Track recent prices for volatility calculation (HistoryBuffer)
 
     Memory Optimization:
-    - Uses deque(maxlen=HISTORY_LIMIT) to prevent unbounded memory growth
-    - Only keeps recent history needed for strategy calculations
+    - Uses HistoryBuffer (hot deque + cold disk) for bounded memory
+    - Requires record_path in config.extras
     """
 
     STRATEGY_NAME = "base"
@@ -242,9 +253,19 @@ class BaseInvestor(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             self.state.custom_state["cash"] = self.INITIAL_CASH
             self.state.custom_state["position"] = self.INITIAL_POSITION
-            # Use deque with maxlen to prevent unbounded memory growth
-            self.state.custom_state["price_history"] = deque(maxlen=self.HISTORY_LIMIT)
-            self.state.custom_state["volume_history"] = deque(maxlen=self.HISTORY_LIMIT)
+            # Use HistoryBuffer: hot (memory) + cold (disk)
+            record_path = self.config.extras.get(
+                "record_path", "EXPERIMENT/HerdEffect/history"
+            )
+            base_path = os.path.join(record_path, self.config.identity)
+            self.state.custom_state["price_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "price"),
+                entry_limit=self.HISTORY_LIMIT,
+            )
+            self.state.custom_state["volume_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "volume"),
+                entry_limit=self.HISTORY_LIMIT,
+            )
 
         # Get market data
         if observation.inbounds:

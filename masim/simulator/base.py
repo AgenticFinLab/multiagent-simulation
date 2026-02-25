@@ -18,7 +18,7 @@ Dataclasses:
 Abstract Classes:
     BaseSimulator       - Abstract orchestrator with fundamental infrastructure:
                           - Ray actor handles (_player_persona_handles)
-                          - History management (deque for round results)
+                          - History management (HistoryBuffer for round results)
                           - Storage directories (from config.proxy)
                           - Status/phase tracking
 
@@ -102,14 +102,16 @@ Simulator.run():
     await simulator.shutdown()
 """
 
+import os
 import time
 import uuid
 from enum import Enum, auto
 from datetime import datetime
-from collections import deque
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
+
+from masim.utils.history import HistoryBuffer
 
 if TYPE_CHECKING:
     import ray
@@ -271,8 +273,12 @@ class BaseSimulator(ABC):
         # Ray actor handles for Personas
         self.player_persona_handles: Dict[str, "ActorHandle"] = {}
 
-        # History management for round results
-        self.history: deque = deque(maxlen=config.setting["entry_limit"])
+        # History management for round results (hot memory + cold disk)
+        history_folder = os.path.join(config.setting["record_path"], "history")
+        self.history: HistoryBuffer = HistoryBuffer(
+            folder=history_folder,
+            entry_limit=config.setting["entry_limit"],
+        )
 
         # Communication topology (initialized by subclass setup)
         self.topology: Optional["TopologyGraph"] = None

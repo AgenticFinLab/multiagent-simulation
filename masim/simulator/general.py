@@ -470,10 +470,12 @@ class GeneralSimulator(BaseSimulator):
             self.phase_dispatch(level_handles)
 
         # ─────────────────────────────────────────────────────────────────────
-        # PHASE 4: RECORD - Save topology diagram for this round
+        # PHASE 4: RECORD - Save topology diagram (rate-limited to reduce I/O)
         # ─────────────────────────────────────────────────────────────────────────
-        diagrams_dir = os.path.join(self.config.setting["record_path"], "diagrams")
-        self.topology.save_round_diagram(diagrams_dir, round_num=round_num)
+        save_interval = self.config.setting.get("save_diagram_interval", 100)
+        if save_interval > 0 and round_num % save_interval == 0:
+            diagrams_dir = os.path.join(self.config.setting["record_path"], "diagrams")
+            self.topology.save_round_diagram(diagrams_dir, round_num=round_num)
 
         # Finalize round
         self.round_clock.tick_end()
@@ -493,27 +495,27 @@ class GeneralSimulator(BaseSimulator):
         Run the complete simulation.
 
         Returns:
-            List of all round results
+            List of recent round results (from bounded history deque)
         """
         logger.info("Starting simulation: %s", self.simulation_id)
         self.status = SimulatorStatus.RUNNING
 
-        all_results = []
-
+        # NOTE: Don't accumulate all_results in memory - use self.history (HistoryBuffer)
+        # Full history is already persisted via HistoryBuffer cold storage
         for round_num in range(1, self.config.setting["total_rounds"] + 1):
             logger.info(
                 "    Round %d/%d", round_num, self.config.setting["total_rounds"]
             )
 
-            round_result = await self.run_round(round_num)
-            all_results.append(round_result)
+            await self.run_round(round_num)
 
             logger.debug("        Round %d complete", round_num)
 
         self.status = SimulatorStatus.TERMINATED
         logger.info("Simulation completed successfully")
 
-        return all_results
+        # Return recent history (from hot storage)
+        return self.history.recent
 
     async def shutdown(self) -> None:
         """Shutdown simulation and release resources."""
