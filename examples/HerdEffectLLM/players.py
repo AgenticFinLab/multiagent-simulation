@@ -76,9 +76,7 @@ class Market(GeneralPlayer):
         # Initialize on first round
         if "price" not in self.state.custom_state:
             self.state.custom_state["price"] = self.INITIAL_PRICE
-            record_path = self.config.extras.get(
-                "record_path", "EXPERIMENT/HerdEffectLLM/history"
-            )
+            record_path = self.config.extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
@@ -99,12 +97,10 @@ class Market(GeneralPlayer):
                 orders.append(
                     {
                         "investor": inb.sender_id,
-                        "price": order.get(
-                            "bid_price", self.state.custom_state["price"]
-                        ),
-                        "quantity": order.get("quantity", 0),
-                        "strategy": order.get("strategy", "unknown"),
-                        "reasoning": order.get("reasoning", ""),
+                        "price": order["bid_price"],
+                        "quantity": order["quantity"],
+                        "strategy": order["strategy"],
+                        "reasoning": order["reasoning"],
                     }
                 )
         self.state.custom_state["orders"] = orders
@@ -149,7 +145,7 @@ class Market(GeneralPlayer):
                     f"    {o['investor']:20s} [{o['strategy']:12s}]: "
                     f"P={o['price']:7.2f}, Q={o['quantity']:+7.2f}"
                 )
-                if o.get("reasoning"):
+                if o["reasoning"]:
                     print(f"      → {o['reasoning'][:80]}...")
 
         market_data = {
@@ -225,34 +221,22 @@ class LLMInvestor(GeneralPlayer):
 
             # Initialize LLM client via lmbase
             load_dotenv()
-            llm_config = self.config.extras.get("llm_api", {})
-            lm_name = llm_config.get("lm_name", self.DEFAULT_LM_NAME)
-            generation_config = llm_config.get(
-                "generation_config",
-                {
-                    "temperature": 0.3,
-                    "max_new_tokens": 500,
-                },
-            )
+            llm_config = self.config.extras["llm_api"]
+            lm_name = llm_config["lm_name"]
+            generation_config = llm_config["generation_config"]
 
             self.state.custom_state["lm_name"] = lm_name
             self.state.custom_state["generation_config"] = generation_config
 
             # Create LangChainAPIInference instance
-            try:
-                llm_client = LangChainAPIInference(
-                    lm_name=lm_name,
-                    generation_config=generation_config,
-                )
-                self.state.custom_state["llm_client"] = llm_client
-            except Exception as e:
-                print(f"[{self.identity}] Failed to init LLM: {e}")
-                self.state.custom_state["llm_client"] = None
+            llm_client = LangChainAPIInference(
+                lm_name=lm_name,
+                generation_config=generation_config,
+            )
+            self.state.custom_state["llm_client"] = llm_client
 
             # History buffer
-            record_path = self.config.extras.get(
-                "record_path", "EXPERIMENT/HerdEffectLLM/history"
-            )
+            record_path = self.config.extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
@@ -284,15 +268,11 @@ class LLMInvestor(GeneralPlayer):
         if hasattr(self, "state") and hasattr(self.state, "custom_state"):
             custom = self.state.custom_state
             if "lm_name" in custom and "llm_client" not in custom:
-                try:
-                    llm_client = LangChainAPIInference(
-                        lm_name=custom["lm_name"],
-                        generation_config=custom.get("generation_config", {}),
-                    )
-                    custom["llm_client"] = llm_client
-                except Exception as e:
-                    print(f"Failed to reinit LLM: {e}")
-                    custom["llm_client"] = None
+                llm_client = LangChainAPIInference(
+                    lm_name=custom["lm_name"],
+                    generation_config=custom["generation_config"],
+                )
+                custom["llm_client"] = llm_client
 
     def _build_prompt(self, market_data: Dict[str, Any]) -> str:
         """Build the user prompt with market data. Override in subclass."""
@@ -330,26 +310,25 @@ Make your trading decision. Respond with ONLY valid JSON:
 """
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
-        """Parse LLM response to extract JSON."""
+        """Parse LLM response to extract JSON. Raises ValueError if parsing fails."""
+        # Try direct JSON parse
         try:
-            # Try direct JSON parse
             return json.loads(response_text)
         except json.JSONDecodeError:
-            # Try to extract JSON from markdown code blocks
-            match = re.search(r"```(?:json)?\s*(.*?)\s*```", response_text, re.DOTALL)
-            if match:
-                return json.loads(match.group(1))
-            # Try to find JSON object
-            match = re.search(r"\{.*\}", response_text, re.DOTALL)
-            if match:
-                return json.loads(match.group(0))
-            # Return default
-            return {
-                "action": "hold",
-                "bid_price": 100.0,
-                "quantity": 0,
-                "reasoning": "Failed to parse LLM response",
-            }
+            pass
+
+        # Try to extract JSON from markdown code blocks
+        match = re.search(r"```(?:json)?\s*(.*?)\s*```", response_text, re.DOTALL)
+        if match:
+            return json.loads(match.group(1))
+
+        # Try to find JSON object
+        match = re.search(r"\{.*\}", response_text, re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
+
+        # Raise error - caller should retry
+        raise ValueError(f"Failed to parse LLM response: {response_text[:100]}")
 
     def _apply_constraints(
         self, bid_price: float, quantity: float, current_price: float
@@ -370,38 +349,37 @@ Make your trading decision. Respond with ONLY valid JSON:
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
-        llm_client = self.state.custom_state.get("llm_client")
+        llm_client = self.state.custom_state["llm_client"]
 
         # Build prompt
         user_prompt = self._build_prompt(market_data)
-        system_prompt = self.config.extras.get("system_prompt", self.SYSTEM_PROMPT)
+        system_prompt = (
+            self.config.extras["system_prompt"]
+            if "system_prompt" in self.config.extras
+            else self.SYSTEM_PROMPT
+        )
 
-        # Default decision
-        decision = {
-            "action": "hold",
-            "bid_price": market_data["price"],
-            "quantity": 0,
-            "reasoning": "No LLM response",
-        }
-
-        # Call LLM via lmbase
-        if llm_client:
+        # Call LLM with retry until valid response
+        max_retries = 3
+        for attempt in range(max_retries):
+            infer_input = InferInput(
+                system_msg=system_prompt,
+                user_msg=user_prompt,
+            )
+            infer_output = llm_client.run(infer_input)
             try:
-                # Create InferInput for lmbase
-                infer_input = InferInput(
-                    system_msg=system_prompt,
-                    user_msg=user_prompt,
-                )
-                # Run inference
-                infer_output = llm_client.run(infer_input)
-                # Parse response
                 decision = self._parse_llm_response(infer_output.response)
-            except Exception as e:
-                decision["reasoning"] = f"LLM error: {str(e)[:80]}"
+                break
+            except ValueError as e:
+                if attempt == max_retries - 1:
+                    raise RuntimeError(f"LLM failed after {max_retries} attempts: {e}")
+                print(
+                    f"[{self.identity}] LLM parse failed, retrying ({attempt + 1}/{max_retries})..."
+                )
 
-        # Extract and constrain values
-        bid_price = float(decision.get("bid_price", market_data["price"]))
-        quantity = float(decision.get("quantity", 0))
+        # Extract values (direct access, no defaults)
+        bid_price = float(decision["bid_price"])
+        quantity = float(decision["quantity"])
         quantity = self._apply_constraints(bid_price, quantity, market_data["price"])
 
         # Update position and cash
@@ -426,7 +404,7 @@ Make your trading decision. Respond with ONLY valid JSON:
             "quantity": quantity,
             "strategy": self.STRATEGY_NAME,
             "investor": self.identity,
-            "reasoning": decision.get("reasoning", "")[:100],
+            "reasoning": decision["reasoning"][:100],
             "cash": self.state.custom_state["cash"],
             "position": self.state.custom_state["position"],
         }

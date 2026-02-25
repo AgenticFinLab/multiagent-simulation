@@ -14,7 +14,7 @@
 setting:
   name: "herd_effect_llm_simulation"
   description: "LLM-based investors with ByteDance Doubao"
-  total_rounds: 30
+  total_rounds: 10
   entry_limit: 100
   record_path: "EXPERIMENT/HerdEffectLLM/records"
   save_diagram_interval: 10
