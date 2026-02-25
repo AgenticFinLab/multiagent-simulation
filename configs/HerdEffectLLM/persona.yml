@@ -1,0 +1,17 @@
+# =============================================================================
+# HerdEffectLLM Persona Configuration
+# =============================================================================
+# Shared persona configuration for all players in the simulation.
+# =============================================================================
+
+proxy:
+  storage:
+    record_path: "EXPERIMENT/HerdEffectLLM/storage"
+    storage_backend: "file"
+
+  monitoring:
+    record_path: "EXPERIMENT/HerdEffectLLM/monitoring"
+    entry_limit: 100
+
+  send_receive:
+    max_outbounds: 100

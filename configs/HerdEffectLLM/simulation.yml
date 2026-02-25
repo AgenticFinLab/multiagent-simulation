@@ -1,0 +1,52 @@
+# =============================================================================
+# HerdEffectLLM Simulation Configuration
+# =============================================================================
+# LLM-powered investors simulating emergent herding behavior.
+# Market is rule-based, investors use LLM for decision making.
+#
+# LLM Provider: ByteDance Doubao (via lmbase)
+# Environment Variable: ARK_API_KEY
+#
+# Usage:
+#   python examples/HerdEffectLLM/run_herd_llm.py -c configs/HerdEffectLLM/simulation.yml
+# =============================================================================
+
+setting:
+  name: "herd_effect_llm_simulation"
+  description: "LLM-based investors with ByteDance Doubao"
+  total_rounds: 30
+  entry_limit: 100
+  record_path: "EXPERIMENT/HerdEffectLLM/records"
+  save_diagram_interval: 10
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "herd_effect_llm"
+  actor_prefix: null
+  num_cpus: 4
+  num_gpus: null
+  object_store_memory: null
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: true
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/HerdEffectLLM/communication"

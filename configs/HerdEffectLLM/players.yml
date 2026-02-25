@@ -1,0 +1,127 @@
+# =============================================================================
+# HerdEffectLLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 LLM Investors
+#
+# LLM Provider: ByteDance Doubao (via lmbase)
+# Environment Variable: ARK_API_KEY
+#
+# LLM Investor Strategies (defined via system prompts):
+#   - LLMMomentum:   Trend following, buys rising prices (destabilizing)
+#   - LLMContrarian: Value investing, mean reversion (stabilizing)
+#   - LLMRiskAverse: Volatility sensitive, early exit (crash trigger)
+#   - LLMAggressive: Leveraged momentum, acceleration (extreme amplifier)
+#   - LLMNoise:      Random/uninformed trading (liquidity/trigger)
+#
+# Output format: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (rule-based, NOT LLM)
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.HerdEffectLLM.players:Market"
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras: {}
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Investors (5 types with different personalities)
+# Using lmbase with ByteDance Doubao
+# -----------------------------------------------------------------------------
+
+llm_momentum:
+  name: "LLM Momentum Investor"
+  class: "examples.HerdEffectLLM.players:LLMMomentumInvestor"
+  config:
+    identity: "llm_momentum"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: momentum
+      llm_api:
+        lm_name: "ark/ep-20250218212539-7r2k9"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_contrarian:
+  name: "LLM Contrarian Investor"
+  class: "examples.HerdEffectLLM.players:LLMContrarianInvestor"
+  config:
+    identity: "llm_contrarian"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: contrarian
+      llm_api:
+        lm_name: "ark/ep-20250218212539-7r2k9"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_risk_averse:
+  name: "LLM Risk Averse Investor"
+  class: "examples.HerdEffectLLM.players:LLMRiskAverseInvestor"
+  config:
+    identity: "llm_risk_averse"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: risk_averse
+      llm_api:
+        lm_name: "ark/ep-20250218212539-7r2k9"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_aggressive:
+  name: "LLM Aggressive Investor"
+  class: "examples.HerdEffectLLM.players:LLMAggressiveInvestor"
+  config:
+    identity: "llm_aggressive"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: aggressive
+      llm_api:
+        lm_name: "ark/ep-20250218212539-7r2k9"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_noise:
+  name: "LLM Noise Trader"
+  class: "examples.HerdEffectLLM.players:LLMNoiseTrader"
+  config:
+    identity: "llm_noise"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: noise
+      llm_api:
+        lm_name: "ark/ep-20250218212539-7r2k9"
+        generation_config:
+          temperature: 0.5  # Higher temperature for more randomness
+          max_new_tokens: 500
+  persona: !include persona.yml
