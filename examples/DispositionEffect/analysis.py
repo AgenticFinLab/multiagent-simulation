@@ -34,6 +34,8 @@ from masim.evaluation.finance import (
     plot_price_dynamics,
     create_figure,
     save_figure,
+    # Validation
+    validate_disposition_effect,
 )
 from masim.utils import load_config
 
@@ -278,9 +280,13 @@ def generate_summary(
     data: Dict[str, Any],
     strategy_results: Dict[str, Dict],
 ) -> Dict[str, Any]:
-    """Generate summary statistics."""
+    """Generate summary statistics with validation."""
     prices = np.array(data["prices"])
     returns = calculate_returns(prices) if len(prices) > 1 else np.array([])
+    prices_list = list(prices)
+    max_dd, peak_idx, trough_idx = (
+        calculate_max_drawdown(prices_list) if len(prices_list) > 1 else (0, 0, 0)
+    )
 
     # Find disposition investor
     disp_result = None
@@ -291,13 +297,38 @@ def generate_summary(
         if "rational" in res["strategy"]:
             rational_result = res
 
+    # Extract PGR and PLR for validation
+    pgr = disp_result["pgr"] if disp_result else 0
+    plr = disp_result["plr"] if disp_result else 0
+    disposition_coefficient = pgr - plr
+
+    # Run validation
+    validation = validate_disposition_effect(
+        pgr=pgr,
+        plr=plr,
+        disposition_coefficient=disposition_coefficient,
+    )
+
     return {
+        "scenario": "DispositionEffect",
+        "total_rounds": len(prices),
         "price_statistics": {
             "initial_price": float(prices[0]) if len(prices) > 0 else 0,
             "final_price": float(prices[-1]) if len(prices) > 0 else 0,
             "max_price": float(np.max(prices)) if len(prices) > 0 else 0,
             "min_price": float(np.min(prices)) if len(prices) > 0 else 0,
             "volatility": float(np.std(returns) * 100) if len(returns) > 0 else 0,
+        },
+        "metrics": {
+            "max_drawdown": round(max_dd, 4),
+            "peak_round": peak_idx,
+            "trough_round": trough_idx,
+        },
+        "disposition_metrics": {
+            "pgr": round(pgr, 4),
+            "plr": round(plr, 4),
+            "disposition_coefficient": round(disposition_coefficient, 4),
+            "disposition_ratio": round(pgr / plr, 4) if plr > 0 else None,
         },
         "disposition_investor": disp_result if disp_result else {},
         "rational_investor": rational_result if rational_result else {},
@@ -314,6 +345,7 @@ def generate_summary(
             for pid, res in strategy_results.items()
             if res["strategy"] != "market"
         },
+        "validation": validation.to_dict(),
     }
 
 
@@ -382,6 +414,8 @@ def main():
             if disp["plr"] > 0
             else ""
         )
+    print(f"\nVALIDATION: {summary['validation']['interpretation']}")
+    print(f"Fit Score: {summary['validation']['score']:.1%}")
 
     return summary
 

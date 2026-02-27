@@ -1,6 +1,19 @@
 # =============================================================================
 # DispositionEffect Players Configuration
 # =============================================================================
+# Prospect Theory Trading Simulation
+#
+# Phenomenon: Disposition Effect (Shefrin & Statman 1985)
+#   - Investors sell winners too early (realize gains prematurely)
+#   - Investors hold losers too long (reluctant to realize losses)
+#
+# Investor Types:
+#   - DispositionInvestor: Exhibits disposition effect (behavioral)
+#   - RationalInvestor: Expected utility maximizer (rational baseline)
+#   - TaxAwareInvestor: Tax loss harvesting (opposite of disposition)
+#   - IndexHolder: Passive buy-and-hold
+#   - InstitutionalInvestor: Professional, less prone to disposition
+# =============================================================================
 
 market:
   name: "Market"
@@ -13,6 +26,16 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/DispositionEffect/records"
+      # Market parameters
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.06
+      mean_reversion: 0.015
+      noise_std: 0.4
+      # News shock parameters
+      news_probability: 0.15
+      news_impact_range: 5.0
+      history_limit: 200
   persona: !include persona.yml
 
 disposition_investor_1:
@@ -25,8 +48,18 @@ disposition_investor_1:
     group_tags:
       - investors
     extras:
-      strategy: disposition_investor
       record_path: "EXPERIMENT/DispositionEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 30.0
+      initial_purchase_price: 100.0
+      history_limit: 50
+      # DispositionInvestor specific (Prospect Theory)
+      gain_threshold: 0.10        # Sell at 10% gain
+      loss_threshold: -0.30       # Only sell at 30% loss
+      loss_aversion: 2.25         # λ parameter
+      sell_fraction_gain: 0.6     # Sell 60% when gain threshold hit
+      sell_fraction_loss: 0.2     # Reluctantly sell only 20% at loss
   persona: !include persona.yml
 
 disposition_investor_2:
@@ -39,8 +72,18 @@ disposition_investor_2:
     group_tags:
       - investors
     extras:
-      strategy: disposition_investor
       record_path: "EXPERIMENT/DispositionEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 30.0
+      initial_purchase_price: 100.0
+      history_limit: 50
+      # DispositionInvestor specific
+      gain_threshold: 0.10
+      loss_threshold: -0.30
+      loss_aversion: 2.25
+      sell_fraction_gain: 0.6
+      sell_fraction_loss: 0.2
   persona: !include persona.yml
 
 rational_investor:
@@ -53,8 +96,15 @@ rational_investor:
     group_tags:
       - investors
     extras:
-      strategy: rational_investor
       record_path: "EXPERIMENT/DispositionEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 30.0
+      initial_purchase_price: 100.0
+      history_limit: 50
+      # RationalInvestor specific
+      target_allocation: 0.5
+      rebalance_threshold: 0.1
   persona: !include persona.yml
 
 tax_aware_investor:
@@ -67,8 +117,16 @@ tax_aware_investor:
     group_tags:
       - investors
     extras:
-      strategy: tax_aware_investor
       record_path: "EXPERIMENT/DispositionEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 30.0
+      initial_purchase_price: 100.0
+      history_limit: 50
+      # TaxAwareInvestor specific
+      tax_loss_threshold: -0.05     # Sell at 5% loss for tax benefit
+      capital_gains_hold: 0.20      # Hold until 20% gain (deferral benefit)
+      tax_harvest_fraction: 0.5     # Sell 50% when harvesting
   persona: !include persona.yml
 
 index_holder:
@@ -81,8 +139,12 @@ index_holder:
     group_tags:
       - investors
     extras:
-      strategy: index_holder
       record_path: "EXPERIMENT/DispositionEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 50.0        # Larger position for passive holder
+      initial_purchase_price: 100.0
+      history_limit: 50
   persona: !include persona.yml
 
 institutional_investor:
@@ -95,6 +157,14 @@ institutional_investor:
     group_tags:
       - investors
     extras:
-      strategy: institutional_investor
       record_path: "EXPERIMENT/DispositionEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 30.0
+      initial_purchase_price: 100.0
+      history_limit: 50
+      # InstitutionalInvestor specific (weaker disposition)
+      gain_threshold: 0.25          # Hold longer than retail
+      loss_threshold: -0.15         # Cut losses earlier than retail
+      sell_fraction: 0.4
   persona: !include persona.yml

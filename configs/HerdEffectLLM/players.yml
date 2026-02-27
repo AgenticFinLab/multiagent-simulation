@@ -12,8 +12,6 @@
 #   - LLMRiskAverse: Volatility sensitive, early exit (crash trigger)
 #   - LLMAggressive: Leveraged momentum, acceleration (extreme amplifier)
 #   - LLMNoise:      Random/uninformed trading (liquidity/trigger)
-#
-# Output format: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -28,7 +26,15 @@ market:
     steps_per_turn: 1
     group_tags:
       - market
-    extras: {}
+    extras:
+      record_path: "EXPERIMENT/HerdEffectLLM/records"
+      # Market parameters
+      initial_price: 100.0
+      fundamental_value: 100.0
+      supply_elasticity: 0.1
+      mean_reversion: 0.02
+      noise_std: 0.5
+      history_limit: 200
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -46,7 +52,10 @@ llm_momentum:
     group_tags:
       - llm_investors
     extras:
-      strategy: momentum
+      record_path: "EXPERIMENT/HerdEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.HerdEffectLLM.prompts:LLM_MOMENTUM_SYS"
         user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -67,7 +76,10 @@ llm_contrarian:
     group_tags:
       - llm_investors
     extras:
-      strategy: contrarian
+      record_path: "EXPERIMENT/HerdEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.HerdEffectLLM.prompts:LLM_CONTRARIAN_SYS"
         user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -88,7 +100,10 @@ llm_risk_averse:
     group_tags:
       - llm_investors
     extras:
-      strategy: risk_averse
+      record_path: "EXPERIMENT/HerdEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.HerdEffectLLM.prompts:LLM_RISK_AVERSE_SYS"
         user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -109,7 +124,10 @@ llm_aggressive:
     group_tags:
       - llm_investors
     extras:
-      strategy: aggressive
+      record_path: "EXPERIMENT/HerdEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.HerdEffectLLM.prompts:LLM_AGGRESSIVE_SYS"
         user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -130,7 +148,10 @@ llm_noise:
     group_tags:
       - llm_investors
     extras:
-      strategy: noise
+      record_path: "EXPERIMENT/HerdEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.HerdEffectLLM.prompts:LLM_NOISE_SYS"
         user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"

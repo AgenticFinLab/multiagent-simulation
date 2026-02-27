@@ -27,6 +27,17 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/MarketCrash/records"
+      # Price dynamics
+      fundamental_value: 100.0
+      initial_price: 100.0
+      base_price_impact: 0.08
+      mean_reversion: 0.01
+      noise_std: 0.5
+      # Liquidity dynamics
+      liquidity_decay: 0.1
+      liquidity_recovery: 0.05
+      min_liquidity: 0.1
+      history_limit: 300
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -42,8 +53,15 @@ risk_parity_fund:
     group_tags:
       - investors
     extras:
-      strategy: risk_parity_fund
       record_path: "EXPERIMENT/MarketCrash/records"
+      initial_cash: 10000.0
+      initial_position: 50.0         # Starts with position
+      history_limit: 50
+      # Risk parity specific
+      target_volatility: 2.0
+      vol_lookback: 5
+      rebalance_speed: 0.3
+      base_position: 50.0
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -59,8 +77,15 @@ leveraged_hedge_fund_1:
     group_tags:
       - investors
     extras:
-      strategy: leveraged_hedge_fund
       record_path: "EXPERIMENT/MarketCrash/records"
+      initial_cash: 5000.0
+      initial_position: 60.0         # Leveraged position
+      history_limit: 50
+      # Leverage specific
+      initial_leverage: 3.0
+      margin_call_level: 0.5
+      liquidation_level: 0.3
+      momentum_sensitivity: 0.5
   persona: !include persona.yml
 
 leveraged_hedge_fund_2:
@@ -73,8 +98,14 @@ leveraged_hedge_fund_2:
     group_tags:
       - investors
     extras:
-      strategy: leveraged_hedge_fund
       record_path: "EXPERIMENT/MarketCrash/records"
+      initial_cash: 5000.0
+      initial_position: 60.0
+      history_limit: 50
+      initial_leverage: 3.0
+      margin_call_level: 0.5
+      liquidation_level: 0.3
+      momentum_sensitivity: 0.5
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -90,8 +121,15 @@ market_maker:
     group_tags:
       - investors
     extras:
-      strategy: market_maker
       record_path: "EXPERIMENT/MarketCrash/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # Market maker specific
+      volatility_withdraw_threshold: 5.0
+      inventory_limit: 30.0
+      normal_quote_size: 20.0
+      spread_multiplier: 0.02
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -107,8 +145,13 @@ passive_investor:
     group_tags:
       - investors
     extras:
-      strategy: passive_investor
       record_path: "EXPERIMENT/MarketCrash/records"
+      initial_cash: 10000.0
+      initial_position: 30.0
+      history_limit: 50
+      # Passive specific
+      rebalance_frequency: 20
+      target_position: 30.0
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -124,8 +167,14 @@ panic_seller_1:
     group_tags:
       - investors
     extras:
-      strategy: panic_seller
       record_path: "EXPERIMENT/MarketCrash/records"
+      initial_cash: 10000.0
+      initial_position: 25.0
+      history_limit: 50
+      # Panic specific
+      loss_threshold: 0.10           # 10% loss triggers panic
+      crash_trigger: -0.03           # 3% daily drop triggers partial sell
+      panic_sell_fraction: 0.5
   persona: !include persona.yml
 
 panic_seller_2:
@@ -138,8 +187,13 @@ panic_seller_2:
     group_tags:
       - investors
     extras:
-      strategy: panic_seller
       record_path: "EXPERIMENT/MarketCrash/records"
+      initial_cash: 10000.0
+      initial_position: 25.0
+      history_limit: 50
+      loss_threshold: 0.10
+      crash_trigger: -0.03
+      panic_sell_fraction: 0.5
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -155,6 +209,13 @@ bottom_fisher:
     group_tags:
       - investors
     extras:
-      strategy: bottom_fisher
       record_path: "EXPERIMENT/MarketCrash/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # Bottom fishing specific
+      crash_buy_threshold: -0.03
+      discount_threshold: 0.10
+      buy_size: 15.0
+      lookback: 10
   persona: !include persona.yml

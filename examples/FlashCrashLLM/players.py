@@ -12,6 +12,24 @@ LLM Investor Types:
     - Stop-Loss Trader: Triggered selling at thresholds
     - Fundamental Trader: Stabilizing, buys during crash
     - Algorithmic Trader: Trend-following algorithm
+
+Market Parameters (from config.extras):
+    - record_path: Path for output records
+    - initial_price: Starting price
+    - fundamental_value: True value for mean reversion
+    - base_price_impact: Base price impact coefficient
+    - mean_reversion: Mean reversion strength
+    - noise_std: Random noise standard deviation
+    - low_liquidity_threshold: Threshold for high impact
+    - high_impact_multiplier: Impact multiplier when low liquidity
+    - history_limit: Maximum history buffer size
+
+Investor Parameters (from config.extras):
+    - record_path: Path for output records
+    - initial_cash: Starting cash balance
+    - initial_position: Starting share position
+    - history_limit: Maximum history buffer size
+    - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
 import os
@@ -37,16 +55,10 @@ def load_prompt(prompt_path: str) -> str:
 
 
 class Market(GeneralPlayer):
-    """Central market with liquidity-sensitive pricing."""
+    """Central market with liquidity-sensitive pricing.
 
-    FUNDAMENTAL_VALUE = 100.0
-    INITIAL_PRICE = 100.0
-    BASE_PRICE_IMPACT = 0.05
-    MEAN_REVERSION = 0.02
-    NOISE_STD = 0.3
-    LOW_LIQUIDITY_THRESHOLD = 50.0
-    HIGH_IMPACT_MULTIPLIER = 3.0
-    HISTORY_LIMIT = 200
+    All parameters read from config.extras (no class constants).
+    """
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
@@ -55,13 +67,16 @@ class Market(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "price" not in self.state.custom_state:
-            record_path = self.config.extras["record_path"]
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            self.state.custom_state["price"] = self.INITIAL_PRICE
+            history_limit = extras["history_limit"]
+
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["liquidity"] = 100.0
             self.state.custom_state["in_crash"] = False
             self.state.custom_state["price_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "price"), entry_limit=self.HISTORY_LIMIT
+                folder=os.path.join(base_path, "price"), entry_limit=history_limit
             )
 
         orders = []
@@ -80,10 +95,19 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
         liquidity = self.state.custom_state["liquidity"]
         orders = self.state.custom_state["orders"]
+
+        # Get parameters from config
+        fundamental_value = extras["fundamental_value"]
+        base_price_impact = extras["base_price_impact"]
+        mean_reversion_strength = extras["mean_reversion"]
+        noise_std = extras["noise_std"]
+        low_liquidity_threshold = extras["low_liquidity_threshold"]
+        high_impact_multiplier = extras["high_impact_multiplier"]
 
         total_buy = sum(o["quantity"] for o in orders if o["quantity"] > 0)
         total_sell = abs(sum(o["quantity"] for o in orders if o["quantity"] < 0))
@@ -97,13 +121,11 @@ class Market(GeneralPlayer):
 
         # Price impact increases when liquidity is low
         impact_multiplier = (
-            self.HIGH_IMPACT_MULTIPLIER
-            if liquidity < self.LOW_LIQUIDITY_THRESHOLD
-            else 1.0
+            high_impact_multiplier if liquidity < low_liquidity_threshold else 1.0
         )
-        price_impact = self.BASE_PRICE_IMPACT * impact_multiplier * net_demand
-        mean_reversion = self.MEAN_REVERSION * (self.FUNDAMENTAL_VALUE - current_price)
-        noise = random.gauss(0, self.NOISE_STD)
+        price_impact = base_price_impact * impact_multiplier * net_demand
+        mean_reversion = mean_reversion_strength * (fundamental_value - current_price)
+        noise = random.gauss(0, noise_std)
 
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
         price_return = (new_price - current_price) / current_price
@@ -131,7 +153,7 @@ class Market(GeneralPlayer):
             "return_pct": price_return * 100,
             "liquidity": liquidity,
             "in_crash": in_crash,
-            "fundamental": self.FUNDAMENTAL_VALUE,
+            "fundamental": fundamental_value,
             "round": round_num,
         }
         return {
@@ -150,12 +172,10 @@ class Market(GeneralPlayer):
 
 
 class LLMFlashCrashInvestor(GeneralPlayer):
-    """Base class for flash crash investors."""
+    """Base class for flash crash investors.
 
-    STRATEGY_NAME = "llm_flash_base"
-    SYSTEM_PROMPT = "You trade in a market prone to flash crashes."
-    INITIAL_CASH = 10000.0
-    INITIAL_POSITION = 50.0
+    All parameters read from config.extras (no class constants).
+    """
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
@@ -164,11 +184,12 @@ class LLMFlashCrashInvestor(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "cash" not in self.state.custom_state:
-            self.state.custom_state["cash"] = self.INITIAL_CASH
-            self.state.custom_state["position"] = self.INITIAL_POSITION
+            extras = self.config.extras
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
 
             load_dotenv()
-            llm_config = self.config.extras["llm"]
+            llm_config = extras["llm"]
             self.state.custom_state["lm_name"] = llm_config["lm_name"]
             self.state.custom_state["generation_config"] = llm_config[
                 "generation_config"
@@ -204,21 +225,19 @@ class LLMFlashCrashInvestor(GeneralPlayer):
 
     def _build_prompt(self, market_data: Dict[str, Any]) -> str:
         llm_config = self.config.extras["llm"]
-        if "user_message" in llm_config:
-            template = load_prompt(llm_config["user_message"])
-            return template.format(
-                price=market_data["price"],
-                prev_price=market_data["prev_price"],
-                return_pct=market_data["return_pct"],
-                liquidity=market_data["liquidity"],
-                in_crash=market_data["in_crash"],
-                fundamental=market_data["fundamental"],
-                cash=self.state.custom_state["cash"],
-                position=self.state.custom_state["position"],
-                portfolio_value=self.state.custom_state["cash"]
-                + self.state.custom_state["position"] * market_data["price"],
-            )
-        return f"Price: ${market_data['price']:.2f}, Liquidity: {market_data['liquidity']:.1f}"
+        template = load_prompt(llm_config["user_message"])
+        return template.format(
+            price=market_data["price"],
+            prev_price=market_data["prev_price"],
+            return_pct=market_data["return_pct"],
+            liquidity=market_data["liquidity"],
+            in_crash=market_data["in_crash"],
+            fundamental=market_data["fundamental"],
+            cash=self.state.custom_state["cash"],
+            position=self.state.custom_state["position"],
+            portfolio_value=self.state.custom_state["cash"]
+            + self.state.custom_state["position"] * market_data["price"],
+        )
 
     def _parse_response(self, text: str) -> Dict[str, Any]:
         try:
@@ -233,11 +252,7 @@ class LLMFlashCrashInvestor(GeneralPlayer):
         market_data = self.state.custom_state["market_data"]
         llm_client = self.state.custom_state["llm_client"]
         llm_config = self.config.extras["llm"]
-        system_prompt = (
-            load_prompt(llm_config["sys_message"])
-            if "sys_message" in llm_config
-            else self.SYSTEM_PROMPT
-        )
+        system_prompt = load_prompt(llm_config["sys_message"])
 
         for _ in range(3):
             try:
@@ -277,10 +292,11 @@ class LLMFlashCrashInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += abs(quantity) * bid_price
             self.state.custom_state["position"] += quantity
 
+        strategy_name = self.__class__.__name__
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": decision["reasoning"][:100],
         }
@@ -300,103 +316,28 @@ class LLMFlashCrashInvestor(GeneralPlayer):
 class LLMHighFrequencyTrader(LLMFlashCrashInvestor):
     """HFT - rapid momentum trading, can trigger cascades."""
 
-    STRATEGY_NAME = "llm_hft"
-    SYSTEM_PROMPT = """You are a HIGH-FREQUENCY TRADER executing in milliseconds.
-
-CORE BELIEF: "Speed is alpha - react before others."
-
-BEHAVIOR:
-- You detect micro-momentum and trade IMMEDIATELY
-- Return > 0: BUY quickly (expect continuation)
-- Return < 0: SELL quickly (expect continuation)
-- Low liquidity: INCREASE position size (more impact)
-- You can TRIGGER cascades with your fast selling
-
-WARNING: Your rapid selling during stress can cause flash crashes!
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMFlashMarketMaker(LLMFlashCrashInvestor):
     """Market Maker - provides liquidity, withdraws in stress."""
 
-    STRATEGY_NAME = "llm_market_maker"
-    SYSTEM_PROMPT = """You are a MARKET MAKER providing liquidity.
-
-CORE BELIEF: "I profit from spread, but I won't catch falling knives."
-
-BEHAVIOR:
-- Normal times: Buy dips, sell rallies (stabilizing)
-- During crash (in_crash=True): WITHDRAW immediately
-- Liquidity < 50: Be very cautious
-- You are RISK AVERSE during high volatility
-
-When WITHDRAWN: Hold or slowly reduce position
-When ACTIVE: Moderate contrarian trades
-
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-State "ACTIVE" or "WITHDRAWN" in reasoning.
-"""
+    pass
 
 
 class LLMStopLossTrader(LLMFlashCrashInvestor):
     """Stop-Loss Trader - mechanical selling at thresholds."""
 
-    STRATEGY_NAME = "llm_stop_loss"
-    SYSTEM_PROMPT = """You are a STOP-LOSS TRADER with automatic sell rules.
-
-CORE BELIEF: "Cut losses quickly - no exceptions."
-
-YOUR RULES (MANDATORY):
-- Price < $95: Sell 20% of position
-- Price < $90: Sell 50% of position
-- Price < $85: Sell ALL position
-
-BEHAVIOR:
-- You MUST follow your stop-loss rules mechanically
-- You do NOT buy during crashes
-- You may buy when price > $100
-
-Your stop-loss selling can AMPLIFY crashes!
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-Always state which stop-loss rule triggered in reasoning.
-"""
+    pass
 
 
 class LLMFundamentalTrader(LLMFlashCrashInvestor):
     """Fundamental Trader - stabilizing force during crashes."""
 
-    STRATEGY_NAME = "llm_fundamental"
-    SYSTEM_PROMPT = """You are a FUNDAMENTAL TRADER who stabilizes markets.
-
-CORE BELIEF: "Flash crashes create buying opportunities."
-
-BEHAVIOR:
-- You buy when price < fundamental (especially during crashes)
-- You are PATIENT - crashes are opportunities, not threats
-- Price < $90: Strong buy signal
-- Price < $85: Very strong buy - "blood in the streets"
-- You provide STABILIZING demand
-
-You are the buyer of last resort during flash crashes.
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMAlgorithmicTrader(LLMFlashCrashInvestor):
     """Algorithmic Trader - systematic trend following."""
 
-    STRATEGY_NAME = "llm_algo"
-    SYSTEM_PROMPT = """You are an ALGORITHMIC TRADER following systematic rules.
-
-CORE BELIEF: "The algorithm knows best."
-
-YOUR ALGORITHM:
-1. If return > 1%: Buy (trend following)
-2. If return < -1%: Sell (trend following)
-3. If -1% < return < 1%: Hold
-4. During crash: Follow rules more aggressively
-
-You don't think - you execute the algorithm.
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass

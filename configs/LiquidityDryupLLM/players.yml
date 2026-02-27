@@ -1,3 +1,7 @@
+# =============================================================================
+# LiquidityDryupLLM Players Configuration
+# =============================================================================
+
 market:
   name: "Market with Liquidity Dynamics"
   class: "examples.LiquidityDryupLLM.players:Market"
@@ -8,7 +12,13 @@ market:
     group_tags:
       - market
     extras:
-      price_model: "liquidity_dependent"
+      record_path: "EXPERIMENT/LiquidityDryupLLM/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.08
+      mean_reversion: 0.015
+      noise_std: 0.4
+      history_limit: 200
   persona: !include persona.yml
 
 llm_market_maker:
@@ -21,7 +31,10 @@ llm_market_maker:
     group_tags:
       - llm_investors
     extras:
-      strategy: market_maker
+      record_path: "EXPERIMENT/LiquidityDryupLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.LiquidityDryupLLM.prompts:LLM_MARKET_MAKER_SYS"
         user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"
@@ -42,7 +55,10 @@ llm_liquidity_demander:
     group_tags:
       - llm_investors
     extras:
-      strategy: liquidity_demander
+      record_path: "EXPERIMENT/LiquidityDryupLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.LiquidityDryupLLM.prompts:LLM_LIQUIDITY_DEMANDER_SYS"
         user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"
@@ -63,7 +79,10 @@ llm_arbitrageur:
     group_tags:
       - llm_investors
     extras:
-      strategy: arbitrageur
+      record_path: "EXPERIMENT/LiquidityDryupLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.LiquidityDryupLLM.prompts:LLM_ARBITRAGEUR_SYS"
         user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"
@@ -84,7 +103,10 @@ llm_value:
     group_tags:
       - llm_investors
     extras:
-      strategy: value
+      record_path: "EXPERIMENT/LiquidityDryupLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.LiquidityDryupLLM.prompts:LLM_VALUE_SYS"
         user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"
@@ -105,7 +127,10 @@ llm_forced_seller:
     group_tags:
       - llm_investors
     extras:
-      strategy: forced_seller
+      record_path: "EXPERIMENT/LiquidityDryupLLM/records"
+      initial_cash: 10000.0
+      initial_position: 100.0
+      history_limit: 100
       llm:
         sys_message: "examples.LiquidityDryupLLM.prompts:LLM_FORCED_SELLER_SYS"
         user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"

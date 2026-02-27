@@ -19,11 +19,14 @@ from masim.evaluation.finance import (
     calculate_volatility_persistence,
     calculate_return_clustering,
     detect_volatility_regimes,
+    calculate_max_drawdown,
+    calculate_autocorrelation,
     plot_price_dynamics,
     plot_volatility_analysis,
     plot_multi_panel_summary,
+    validate_volatility_clustering,
 )
-from masim.utils import load_config, load_simulation_data
+from masim.utils import load_config, load_simulation_data, get_investor_quantities
 
 
 def analyze_volatility_clustering(
@@ -53,6 +56,22 @@ def analyze_volatility_clustering(
     # Regime detection
     regimes = detect_volatility_regimes(volatility)
 
+    # Calculate max drawdown
+    prices_list = [market_prices[r] for r in sorted(market_prices.keys())]
+    max_dd, peak_idx, trough_idx = calculate_max_drawdown(prices_list)
+
+    # Clustering ratio
+    sq_acf = clustering.get("sq_return_autocorr_1", 0)
+    ret_acf = garch_result.get("return_autocorr_lag1", 0.001)
+    clustering_ratio = sq_acf / abs(ret_acf) if abs(ret_acf) > 0.001 else sq_acf * 100
+
+    # Run validation
+    validation = validate_volatility_clustering(
+        return_acf=ret_acf,
+        squared_return_acf=sq_acf,
+        clustering_ratio=clustering_ratio,
+    )
+
     # Generate plots
     print(f"Generating analysis plots in {output_dir}/")
 
@@ -73,21 +92,58 @@ def analyze_volatility_clustering(
         output_path=os.path.join(output_dir, "03_summary.png"),
     )
 
+    # Calculate returns statistics
+    returns_mean = sum(returns.values()) / len(returns) if returns else 0
+    returns_std = (
+        (sum((r - returns_mean) ** 2 for r in returns.values()) / len(returns)) ** 0.5
+        if returns
+        else 0
+    )
+
     # Compile summary
     summary = {
+        "scenario": "VolatilityClustering",
         "total_rounds": len(market_prices),
+        "price": {
+            "initial": round(prices_list[0], 4),
+            "final": round(prices_list[-1], 4),
+            "min": round(min(prices_list), 4),
+            "max": round(max(prices_list), 4),
+            "mean": round(sum(prices_list) / len(prices_list), 4),
+        },
+        "returns": {
+            "mean": round(returns_mean, 6),
+            "std": round(returns_std, 6),
+        },
+        "metrics": {
+            "max_drawdown": round(max_dd, 4),
+            "peak_round": peak_idx,
+            "trough_round": trough_idx,
+        },
         "garch_signature": {
             "has_signature": garch_result["has_garch_signature"],
             "interpretation": garch_result["interpretation"],
+            "return_acf_lag1": round(ret_acf, 4),
+            "squared_return_acf": round(sq_acf, 4),
+            "clustering_ratio": round(clustering_ratio, 2),
         },
-        "volatility_persistence": persistence,
-        "return_clustering": clustering,
+        "volatility_persistence": {
+            "vol_autocorr_1": round(persistence.get("vol_autocorr_1", 0), 4),
+            "vol_autocorr_5": round(persistence.get("vol_autocorr_5", 0), 4),
+        },
+        "return_clustering": {
+            "sq_return_autocorr_1": round(clustering.get("sq_return_autocorr_1", 0), 4),
+            "abs_return_autocorr_1": round(
+                clustering.get("abs_return_autocorr_1", 0), 4
+            ),
+        },
         "volatility_regimes": {
-            "avg_vol": regimes["avg_vol"],
-            "high_vol_episodes": len(regimes["high_vol_episodes"]),
-            "low_vol_episodes": len(regimes["low_vol_episodes"]),
-            "regime_persistence": regimes["regime_persistence"],
+            "avg_vol": round(regimes.get("avg_vol", 0), 6),
+            "high_vol_episodes": len(regimes.get("high_vol_episodes", [])),
+            "low_vol_episodes": len(regimes.get("low_vol_episodes", [])),
+            "regime_persistence": round(regimes.get("regime_persistence", 0), 4),
         },
+        "validation": validation.to_dict(),
     }
 
     with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as f:
@@ -98,9 +154,13 @@ def analyze_volatility_clustering(
     print("=" * 50)
     print(f"Has GARCH Signature: {garch_result['has_garch_signature']}")
     print(f"Interpretation: {garch_result['interpretation']}")
-    print(f"Vol Autocorr (lag-1): {persistence['vol_autocorr_1']:.4f}")
-    print(f"Squared Return Autocorr: {clustering['sq_return_autocorr_1']:.4f}")
-    print(f"High Vol Episodes: {len(regimes['high_vol_episodes'])}")
+    print(f"Return ACF (lag-1): {ret_acf:.4f}")
+    print(f"Squared Return ACF: {sq_acf:.4f}")
+    print(f"Clustering Ratio: {clustering_ratio:.2f}")
+    print(f"Vol Autocorr (lag-1): {persistence.get('vol_autocorr_1', 0):.4f}")
+    print(f"High Vol Episodes: {len(regimes.get('high_vol_episodes', []))}")
+    print(f"\nVALIDATION: {validation.interpretation}")
+    print(f"Fit Score: {validation.score:.1%}")
 
     return summary
 

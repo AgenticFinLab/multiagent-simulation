@@ -34,8 +34,7 @@ References:
 - De Long, J.B. et al. (1990): Noise trader risk
 - Markowitz, H. (1952): Mean-variance optimization
 
-Flow per Round:
-    Market broadcasts (price, volume) → Investors submit (P, Q) orders → Market clears
+All parameters are configured via players.yml config file.
 """
 
 import os
@@ -67,21 +66,10 @@ class Market(GeneralPlayer):
 
     Price dynamics include mean reversion toward fundamental value.
 
-    Memory Optimization:
-    - Uses HistoryBuffer (hot deque + cold disk) for bounded memory
-    - Full history persisted automatically via HistoryBuffer
-    - Requires record_path in config.extras
+    All parameters configured via extras in players.yml:
+        - initial_price, fundamental_value, supply_elasticity
+        - mean_reversion, noise_std, history_limit, record_path
     """
-
-    # Market parameters
-    INITIAL_PRICE = 100.0
-    FUNDAMENTAL_VALUE = 100.0  # True intrinsic value
-    SUPPLY_ELASTICITY = 0.1  # How much price responds to excess demand
-    MEAN_REVERSION = 0.02  # Speed of price correction toward fundamental
-    NOISE_STD = 0.5  # Market microstructure noise
-
-    # History buffer limit (prevents memory explosion)
-    HISTORY_LIMIT = 200
 
     async def perceive(
         self,
@@ -93,25 +81,26 @@ class Market(GeneralPlayer):
 
         # Initialize on first round
         if "price" not in self.state.custom_state:
-            self.state.custom_state["price"] = self.INITIAL_PRICE
-            # Use HistoryBuffer: hot (memory) + cold (disk)
-            record_path = self.config.extras.get(
-                "record_path", "EXPERIMENT/HerdEffect/history"
-            )
+            extras = self.config.extras
+            self.state.custom_state["price"] = extras["initial_price"]
+
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
+            history_limit = extras["history_limit"]
+
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=self.HISTORY_LIMIT,
-                initial_values=[self.INITIAL_PRICE],
+                entry_limit=history_limit,
+                initial_values=[extras["initial_price"]],
             )
             self.state.custom_state["volume_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volume"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
                 initial_values=[0],
             )
             self.state.custom_state["return_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "return"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
                 initial_values=[0.0],
             )
 
@@ -133,6 +122,7 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
         orders = self.state.custom_state["orders"]
@@ -151,13 +141,17 @@ class Market(GeneralPlayer):
 
         # Calculate clearing price using demand-supply imbalance
         # Price impact = supply elasticity × net demand
-        price_impact = self.SUPPLY_ELASTICITY * net_demand
+        supply_elasticity = extras["supply_elasticity"]
+        price_impact = supply_elasticity * net_demand
 
         # Mean reversion toward fundamental
-        mean_reversion = self.MEAN_REVERSION * (self.FUNDAMENTAL_VALUE - current_price)
+        fundamental_value = extras["fundamental_value"]
+        mean_reversion_rate = extras["mean_reversion"]
+        mean_reversion = mean_reversion_rate * (fundamental_value - current_price)
 
         # Market noise
-        noise = random.gauss(0, self.NOISE_STD)
+        noise_std = extras["noise_std"]
+        noise = random.gauss(0, noise_std)
 
         # New clearing price
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
@@ -227,19 +221,13 @@ class BaseInvestor(GeneralPlayer):
     Base class for all investors with realistic constraints.
 
     State:
-    - cash: Available capital (starts at 10,000)
-    - position: Current holdings (starts at 0)
+    - cash: Available capital (starts at initial_cash)
+    - position: Current holdings (starts at initial_position)
     - price_history: Track recent prices for volatility calculation (HistoryBuffer)
 
-    Memory Optimization:
-    - Uses HistoryBuffer (hot deque + cold disk) for bounded memory
-    - Requires record_path in config.extras
+    All parameters configured via extras in players.yml:
+        - initial_cash, initial_position, history_limit, record_path
     """
-
-    STRATEGY_NAME = "base"
-    INITIAL_CASH = 10000.0
-    INITIAL_POSITION = 0.0
-    HISTORY_LIMIT = 100  # Only need recent data for most strategies
 
     async def perceive(
         self,
@@ -251,20 +239,21 @@ class BaseInvestor(GeneralPlayer):
 
         # Initialize
         if "cash" not in self.state.custom_state:
-            self.state.custom_state["cash"] = self.INITIAL_CASH
-            self.state.custom_state["position"] = self.INITIAL_POSITION
-            # Use HistoryBuffer: hot (memory) + cold (disk)
-            record_path = self.config.extras.get(
-                "record_path", "EXPERIMENT/HerdEffect/history"
-            )
+            extras = self.config.extras
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
+
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
+            history_limit = extras["history_limit"]
+
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
             self.state.custom_state["volume_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volume"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
 
         # Get market data
@@ -308,8 +297,9 @@ class BaseInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += proceeds
             self.state.custom_state["position"] += quantity  # negative
 
+        strategy_name = self.__class__.__name__
         print(
-            f"[{self.identity:20s}] R{round_num} ({self.STRATEGY_NAME:12s}): "
+            f"[{self.identity:20s}] R{round_num} ({strategy_name:20s}): "
             f"P={bid_price:7.2f}, Q={quantity:+7.2f} | "
             f"Cash={self.state.custom_state['cash']:8.2f}, "
             f"Pos={self.state.custom_state['position']:+7.2f}"
@@ -318,7 +308,7 @@ class BaseInvestor(GeneralPlayer):
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
             "cash": self.state.custom_state["cash"],
             "position": self.state.custom_state["position"],
@@ -353,29 +343,32 @@ class MomentumInvestor(BaseInvestor):
 
     Where:
         r = last period return
-        λ = price aggressiveness (0.5)
-        β = capital allocation ratio (0.3)
+        λ = price aggressiveness (lambda_price)
+        β = capital allocation ratio (beta)
 
     Behavior: Buys when price rises, sells when price falls.
     Effect: DESTABILIZING - amplifies trends, creates momentum bubbles.
+
+    Parameters from config extras:
+        - lambda_price, beta
     """
 
-    STRATEGY_NAME = "momentum"
-    LAMBDA = 0.5  # Price aggressiveness
-    BETA = 0.3  # Capital allocation ratio
-
     def calculate_bid(self) -> tuple:
+        extras = self.config.extras
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         ret = market_data["return"]
         cash = self.state.custom_state["cash"]
 
+        lambda_price = extras["lambda_price"]
+        beta = extras["beta"]
+
         # P = P_last × (1 + λ × r)
-        bid_price = price * (1 + self.LAMBDA * ret)
+        bid_price = price * (1 + lambda_price * ret)
         bid_price = max(1.0, bid_price)
 
         # Q = β × r × cash / P
-        quantity = self.BETA * ret * cash / bid_price
+        quantity = beta * ret * cash / bid_price
 
         # Limit order size
         quantity = max(-50, min(50, quantity))
@@ -393,30 +386,33 @@ class ContrarianInvestor(BaseInvestor):
         Q = β × (F - P_last) / P_last × cash / P
 
     Where:
-        F = fundamental value (100)
-        β = value sensitivity (0.5)
+        F = fundamental value
+        β = value sensitivity (beta)
 
     Behavior: Buys when price < fundamental, sells when price > fundamental.
     Effect: STABILIZING - dampens trends, provides mean reversion.
+
+    Parameters from config extras:
+        - fundamental, beta, noise_std
     """
 
-    STRATEGY_NAME = "contrarian"
-    FUNDAMENTAL = 100.0
-    BETA = 0.5  # Value deviation sensitivity
-    NOISE_STD = 0.5  # Bid noise
-
     def calculate_bid(self) -> tuple:
+        extras = self.config.extras
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         cash = self.state.custom_state["cash"]
 
+        fundamental = extras["fundamental"]
+        beta = extras["beta"]
+        noise_std = extras["noise_std"]
+
         # P = F + ε (bid around fundamental)
-        bid_price = self.FUNDAMENTAL + random.gauss(0, self.NOISE_STD)
+        bid_price = fundamental + random.gauss(0, noise_std)
         bid_price = max(1.0, bid_price)
 
         # Q = β × (F - P) / P × cash / bid_price
-        deviation = (self.FUNDAMENTAL - price) / price
-        quantity = self.BETA * deviation * cash / bid_price
+        deviation = (fundamental - price) / price
+        quantity = beta * deviation * cash / bid_price
 
         # Limit order size
         quantity = max(-50, min(50, quantity))
@@ -442,26 +438,29 @@ class RiskAverseInvestor(BaseInvestor):
 
     Where:
         σ² = recent price variance
-        k = risk tolerance coefficient (0.5)
+        k = risk tolerance coefficient
 
     Behavior: Reduces position when volatility is high.
     Effect: Can trigger early exit from bubble (sell before crash).
+
+    Parameters from config extras:
+        - k, lookback
     """
 
-    STRATEGY_NAME = "risk_averse"
-    K = 0.5  # Risk tolerance coefficient
-    LOOKBACK = 5  # Periods for volatility calculation
-
     def calculate_bid(self) -> tuple:
+        extras = self.config.extras
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         cash = self.state.custom_state["cash"]
         price_history = self.state.custom_state["price_history"]
         position = self.state.custom_state["position"]
 
+        k = extras["k"]
+        lookback = extras["lookback"]
+
         # Calculate variance
-        if len(price_history) >= self.LOOKBACK:
-            recent = price_history[-self.LOOKBACK :]
+        if len(price_history) >= lookback:
+            recent = price_history[-lookback:]
             variance = np.var(recent)
         else:
             variance = 1.0  # Default low variance
@@ -474,7 +473,7 @@ class RiskAverseInvestor(BaseInvestor):
 
         # Q = k / σ² × cash / P
         # Position sizing inversely proportional to variance
-        target_value = self.K / variance * cash
+        target_value = k / variance * cash
         target_qty = target_value / price
 
         # Trade toward target
@@ -494,32 +493,35 @@ class NoiseTrader(BaseInvestor):
         Q ~ N(0, σ_qty²) - position × mean_reversion
 
     Where:
-        σ_price = price noise (2.0)
-        σ_qty = quantity noise (5.0)
-        mean_reversion = 0.1 (position mean reversion)
+        σ_price = price noise
+        σ_qty = quantity noise
+        mean_reversion = position mean reversion
 
     Behavior: Random trading, provides liquidity.
     Effect: Can accidentally trigger herd behavior when momentum traders
             misinterpret random noise as signal.
+
+    Parameters from config extras:
+        - price_noise_std, qty_noise_std, position_mean_reversion
     """
 
-    STRATEGY_NAME = "noise"
-    PRICE_NOISE_STD = 2.0
-    QTY_NOISE_STD = 5.0
-    POSITION_MEAN_REVERSION = 0.1
-
     def calculate_bid(self) -> tuple:
+        extras = self.config.extras
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         position = self.state.custom_state["position"]
 
+        price_noise_std = extras["price_noise_std"]
+        qty_noise_std = extras["qty_noise_std"]
+        position_mean_reversion = extras["position_mean_reversion"]
+
         # P ~ N(P_last, σ²)
-        bid_price = price + random.gauss(0, self.PRICE_NOISE_STD)
+        bid_price = price + random.gauss(0, price_noise_std)
         bid_price = max(1.0, bid_price)
 
         # Q ~ N(0, σ²) - position × mean_reversion
-        random_qty = random.gauss(0, self.QTY_NOISE_STD)
-        mean_reversion = -position * self.POSITION_MEAN_REVERSION
+        random_qty = random.gauss(0, qty_noise_std)
+        mean_reversion = -position * position_mean_reversion
         quantity = random_qty + mean_reversion
 
         return bid_price, quantity
@@ -539,38 +541,41 @@ class AggressiveInvestor(BaseInvestor):
         Q = β × r × cash / P + acceleration_bonus
 
     Where:
-        κ = aggressive price factor (1.0)
-        β = aggressive allocation (0.5)
+        κ = aggressive price factor (kappa)
+        β = aggressive allocation (beta)
         acceleration = second derivative of price
 
     Behavior: Amplified momentum with acceleration bonus.
     Effect: EXTREMELY DESTABILIZING - can create rapid bubbles.
+
+    Parameters from config extras:
+        - kappa, beta, accel_bonus
     """
 
-    STRATEGY_NAME = "aggressive"
-    KAPPA = 1.0  # Aggressive price factor
-    BETA = 0.5  # Aggressive capital allocation
-    ACCEL_BONUS = 0.3  # Acceleration trading bonus
-
     def calculate_bid(self) -> tuple:
+        extras = self.config.extras
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         ret = market_data["return"]
         cash = self.state.custom_state["cash"]
         price_history = self.state.custom_state["price_history"]
 
+        kappa = extras["kappa"]
+        beta = extras["beta"]
+        accel_bonus = extras["accel_bonus"]
+
         # P = P_last × (1 + κ × r)
-        bid_price = price * (1 + self.KAPPA * ret)
+        bid_price = price * (1 + kappa * ret)
         bid_price = max(1.0, bid_price)
 
         # Base quantity
-        quantity = self.BETA * ret * cash / bid_price
+        quantity = beta * ret * cash / bid_price
 
         # Add acceleration (2nd derivative) bonus
         if len(price_history) >= 3:
             p1, p2, p3 = price_history[-3:]
             acceleration = (p3 - p2) - (p2 - p1)
-            quantity += self.ACCEL_BONUS * acceleration
+            quantity += accel_bonus * acceleration
 
         quantity = max(-80, min(80, quantity))
 

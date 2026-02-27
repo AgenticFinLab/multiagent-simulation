@@ -17,11 +17,13 @@ from masim.evaluation.finance import (
     calculate_autocorrelation,
     calculate_rolling_autocorrelation,
     calculate_rolling_volatility,
+    calculate_max_drawdown,
     plot_price_dynamics,
     plot_returns_analysis,
     plot_multi_panel_summary,
+    validate_momentum_effect,
 )
-from masim.utils import load_config, load_simulation_data
+from masim.utils import load_config, load_simulation_data, get_investor_quantities
 
 
 def analyze_momentum(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
@@ -47,6 +49,31 @@ def analyze_momentum(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     # Momentum detection: positive short-lag autocorrelation
     momentum_detected = acf[0] > 0.1 if acf else False
 
+    # Calculate trend duration (average same-sign return streak)
+    trend_durations = []
+    current_streak = 1
+    for i in range(1, len(returns_list)):
+        if (returns_list[i] > 0) == (returns_list[i - 1] > 0):
+            current_streak += 1
+        else:
+            trend_durations.append(current_streak)
+            current_streak = 1
+    trend_durations.append(current_streak)
+    avg_trend_duration = (
+        sum(trend_durations) / len(trend_durations) if trend_durations else 0
+    )
+
+    # Run validation
+    validation = validate_momentum_effect(
+        autocorrelation_lag1=acf[0] if acf else 0,
+        trend_duration_avg=avg_trend_duration,
+        total_rounds=len(market_prices),
+    )
+
+    # Calculate max drawdown
+    prices_list = [market_prices[r] for r in sorted(market_prices.keys())]
+    max_dd, peak_idx, trough_idx = calculate_max_drawdown(prices_list)
+
     # Generate plots
     print(f"Generating analysis plots in {output_dir}/")
 
@@ -66,23 +93,48 @@ def analyze_momentum(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
         output_path=os.path.join(output_dir, "03_summary.png"),
     )
 
+    # Calculate returns statistics
+    returns_mean = sum(returns.values()) / len(returns) if returns else 0
+    returns_std = (
+        (sum((r - returns_mean) ** 2 for r in returns.values()) / len(returns)) ** 0.5
+        if returns
+        else 0
+    )
+
     summary = {
+        "scenario": "MomentumEffect",
         "total_rounds": len(market_prices),
         "momentum_detected": momentum_detected,
-        "autocorrelation": {
-            "lag_1": acf[0] if len(acf) > 0 else 0,
-            "lag_5": acf[4] if len(acf) > 4 else 0,
-            "lag_10": acf[9] if len(acf) > 9 else 0,
+        "price": {
+            "initial": round(prices_list[0], 4),
+            "final": round(prices_list[-1], 4),
+            "min": round(min(prices_list), 4),
+            "max": round(max(prices_list), 4),
+            "mean": round(sum(prices_list) / len(prices_list), 4),
         },
         "returns": {
-            "mean": sum(returns.values()) / len(returns) if returns else 0,
-            "total": sum(returns.values()) if returns else 0,
+            "mean": round(returns_mean, 6),
+            "std": round(returns_std, 6),
+            "total": round(sum(returns.values()), 6) if returns else 0,
+        },
+        "metrics": {
+            "max_drawdown": round(max_dd, 4),
+            "peak_round": peak_idx,
+            "trough_round": trough_idx,
+            "avg_trend_duration": round(avg_trend_duration, 2),
+        },
+        "autocorrelation": {
+            "lag_1": round(acf[0], 4) if len(acf) > 0 else None,
+            "lag_2": round(acf[1], 4) if len(acf) > 1 else None,
+            "lag_5": round(acf[4], 4) if len(acf) > 4 else None,
+            "lag_10": round(acf[9], 4) if len(acf) > 9 else None,
         },
         "interpretation": (
             "MOMENTUM: Winners continue winning"
             if momentum_detected
             else "No significant momentum"
         ),
+        "validation": validation.to_dict(),
     }
 
     with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as f:
@@ -92,9 +144,19 @@ def analyze_momentum(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     print("MOMENTUM ANALYSIS")
     print("=" * 50)
     print(f"Momentum Detected: {momentum_detected}")
-    print(f"Return Autocorr (lag-1): {summary['autocorrelation']['lag_1']:.4f}")
-    print(f"Return Autocorr (lag-5): {summary['autocorrelation']['lag_5']:.4f}")
-    print(f"Interpretation: {summary['interpretation']}")
+    print(
+        f"Return Autocorr (lag-1): {summary['autocorrelation']['lag_1']:.4f}"
+        if summary["autocorrelation"]["lag_1"]
+        else ""
+    )
+    print(
+        f"Return Autocorr (lag-5): {summary['autocorrelation']['lag_5']:.4f}"
+        if summary["autocorrelation"]["lag_5"]
+        else ""
+    )
+    print(f"Avg Trend Duration: {avg_trend_duration:.1f} rounds")
+    print(f"\nVALIDATION: {validation.interpretation}")
+    print(f"Fit Score: {validation.score:.1%}")
 
     return summary
 

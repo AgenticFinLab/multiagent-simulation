@@ -1,6 +1,16 @@
 # =============================================================================
 # MomentumEffect Players Configuration
 # =============================================================================
+# All parameters explicitly defined - no defaults in code.
+#
+# Investor Types:
+#   - MomentumTrader: Buys past winners, sells past losers (Jegadeesh & Titman 1993)
+#   - ContrarianTrader: Mean reversion - buys losers, sells winners
+#   - IndexFund: Passive baseline - fixed allocation
+#   - MarketMaker: Liquidity provision - inventory mean reversion
+#   - TechnicalTrader: Moving average crossover (golden/death cross)
+#   - FundamentalTrader: Value-based anchor toward intrinsic value
+# =============================================================================
 
 market:
   name: "Market"
@@ -13,6 +23,16 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/MomentumEffect/records"
+      # Market parameters
+      initial_price: 100.0
+      initial_fundamental: 100.0
+      price_impact: 0.08
+      mean_reversion: 0.01         # Slow - allows momentum to persist
+      noise_std: 0.3
+      # Fundamental drift (creates momentum opportunities)
+      drift_persistence: 0.95      # Autocorrelated drift
+      drift_volatility: 0.5
+      history_limit: 200
   persona: !include persona.yml
 
 momentum_trader_1:
@@ -25,8 +45,16 @@ momentum_trader_1:
     group_tags:
       - investors
     extras:
-      strategy: momentum_trader
       record_path: "EXPERIMENT/MomentumEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # MomentumTrader specific
+      lookback_window: 5
+      momentum_threshold: 0.02     # 2% threshold
+      scale: 3.0                   # Aggressiveness
+      max_position: 100.0
   persona: !include persona.yml
 
 momentum_trader_2:
@@ -39,8 +67,16 @@ momentum_trader_2:
     group_tags:
       - investors
     extras:
-      strategy: momentum_trader
       record_path: "EXPERIMENT/MomentumEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # MomentumTrader specific
+      lookback_window: 5
+      momentum_threshold: 0.02
+      scale: 3.0
+      max_position: 100.0
   persona: !include persona.yml
 
 contrarian_trader:
@@ -53,8 +89,15 @@ contrarian_trader:
     group_tags:
       - investors
     extras:
-      strategy: contrarian_trader
       record_path: "EXPERIMENT/MomentumEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # ContrarianTrader specific
+      reversion_threshold: 0.03    # 3% deviation
+      scale: 2.0
+      max_position: 80.0
   persona: !include persona.yml
 
 index_fund:
@@ -67,8 +110,14 @@ index_fund:
     group_tags:
       - investors
     extras:
-      strategy: index_fund
       record_path: "EXPERIMENT/MomentumEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # IndexFund specific
+      target_allocation: 0.6       # 60% equity
+      rebalance_threshold: 0.05    # 5% deviation triggers rebalance
   persona: !include persona.yml
 
 market_maker:
@@ -81,8 +130,14 @@ market_maker:
     group_tags:
       - investors
     extras:
-      strategy: market_maker
       record_path: "EXPERIMENT/MomentumEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # MarketMaker specific
+      inventory_target: 0.0
+      reversion_speed: 0.2
   persona: !include persona.yml
 
 technical_trader:
@@ -95,8 +150,16 @@ technical_trader:
     group_tags:
       - investors
     extras:
-      strategy: technical_trader
       record_path: "EXPERIMENT/MomentumEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 20.0       # Start with some position
+      history_limit: 50
+      # TechnicalTrader specific (MA crossover)
+      short_window: 3
+      long_window: 10
+      scale: 2.0
+      max_position: 60.0
   persona: !include persona.yml
 
 fundamental_trader:
@@ -109,6 +172,13 @@ fundamental_trader:
     group_tags:
       - investors
     extras:
-      strategy: fundamental_trader
       record_path: "EXPERIMENT/MomentumEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # FundamentalTrader specific
+      value_threshold: 0.05        # 5% mispricing
+      scale: 1.5
+      max_position: 50.0
   persona: !include persona.yml

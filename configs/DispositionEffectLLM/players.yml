@@ -1,3 +1,9 @@
+# =============================================================================
+# DispositionEffectLLM Players Configuration
+# =============================================================================
+# LLM-based Prospect Theory Trading Simulation
+# =============================================================================
+
 market:
   name: "Market with News Shocks"
   class: "examples.DispositionEffectLLM.players:Market"
@@ -8,7 +14,16 @@ market:
     group_tags:
       - market
     extras:
-      price_model: "news_shock"
+      record_path: "EXPERIMENT/DispositionEffectLLM/records"
+      # Market parameters
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.06
+      mean_reversion: 0.015
+      noise_std: 0.4
+      news_probability: 0.15
+      news_impact_range: 5.0
+      history_limit: 200
   persona: !include persona.yml
 
 llm_disposition_biased:
@@ -21,7 +36,10 @@ llm_disposition_biased:
     group_tags:
       - llm_investors
     extras:
-      strategy: disposition_biased
+      record_path: "EXPERIMENT/DispositionEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.DispositionEffectLLM.prompts:LLM_DISPOSITION_BIASED_SYS"
         user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -42,7 +60,10 @@ llm_rational:
     group_tags:
       - llm_investors
     extras:
-      strategy: rational
+      record_path: "EXPERIMENT/DispositionEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.DispositionEffectLLM.prompts:LLM_RATIONAL_SYS"
         user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -63,7 +84,10 @@ llm_tax_aware:
     group_tags:
       - llm_investors
     extras:
-      strategy: tax_aware
+      record_path: "EXPERIMENT/DispositionEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.DispositionEffectLLM.prompts:LLM_TAX_AWARE_SYS"
         user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -84,7 +108,10 @@ llm_institutional:
     group_tags:
       - llm_investors
     extras:
-      strategy: institutional
+      record_path: "EXPERIMENT/DispositionEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.DispositionEffectLLM.prompts:LLM_INSTITUTIONAL_SYS"
         user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -105,7 +132,10 @@ llm_loss_averse:
     group_tags:
       - llm_investors
     extras:
-      strategy: loss_averse
+      record_path: "EXPERIMENT/DispositionEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.DispositionEffectLLM.prompts:LLM_LOSS_AVERSE_SYS"
         user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"

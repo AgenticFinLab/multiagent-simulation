@@ -1,6 +1,16 @@
 # =============================================================================
 # FlashCrash Players Configuration
 # =============================================================================
+# Market Microstructure Simulation - Flash Crash (SEC/CFTC 2010)
+#
+# Investor Types:
+#   - HighFrequencyTrader: Rapid momentum, can trigger cascades
+#   - MarketMaker: Provides liquidity, withdraws in stress
+#   - AlgorithmicTrader: Trend-following algorithm
+#   - StopLossTrader: Triggered selling at price thresholds
+#   - FundamentalTrader: Stabilizing, buys during crash
+#   - RetailTrader: Slow, delayed reaction
+# =============================================================================
 
 market:
   name: "Market"
@@ -13,6 +23,17 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/FlashCrash/records"
+      # Market parameters
+      fundamental_value: 100.0
+      initial_price: 100.0
+      base_price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.3
+      # Liquidity sensitivity
+      low_liquidity_threshold: 50.0
+      high_impact_multiplier: 3.0
+      base_liquidity: 50.0
+      history_limit: 200
   persona: !include persona.yml
 
 hft_1:
@@ -25,8 +46,15 @@ hft_1:
     group_tags:
       - investors
     extras:
-      strategy: hft
       record_path: "EXPERIMENT/FlashCrash/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # HFT specific
+      lookback: 2
+      momentum_sensitivity: 3.0
+      base_position_size: 40.0
+      speed_advantage: 1.5
   persona: !include persona.yml
 
 hft_2:
@@ -39,8 +67,14 @@ hft_2:
     group_tags:
       - investors
     extras:
-      strategy: hft
       record_path: "EXPERIMENT/FlashCrash/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      lookback: 2
+      momentum_sensitivity: 3.0
+      base_position_size: 40.0
+      speed_advantage: 1.5
   persona: !include persona.yml
 
 market_maker_1:
@@ -53,8 +87,14 @@ market_maker_1:
     group_tags:
       - investors
     extras:
-      strategy: market_maker
       record_path: "EXPERIMENT/FlashCrash/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # MarketMaker specific
+      volatility_threshold: 0.02
+      base_liquidity: 30.0
+      spread_sensitivity: 0.5
   persona: !include persona.yml
 
 market_maker_2:
@@ -67,8 +107,13 @@ market_maker_2:
     group_tags:
       - investors
     extras:
-      strategy: market_maker
       record_path: "EXPERIMENT/FlashCrash/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      volatility_threshold: 0.02
+      base_liquidity: 30.0
+      spread_sensitivity: 0.5
   persona: !include persona.yml
 
 algo_trader:
@@ -81,8 +126,15 @@ algo_trader:
     group_tags:
       - investors
     extras:
-      strategy: algo
       record_path: "EXPERIMENT/FlashCrash/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # Algo specific
+      lookback: 3
+      trend_sensitivity: 2.0
+      base_position_size: 25.0
+      trend_multiplier: 10
   persona: !include persona.yml
 
 stop_loss_1:
@@ -95,8 +147,13 @@ stop_loss_1:
     group_tags:
       - investors
     extras:
-      strategy: stop_loss
       record_path: "EXPERIMENT/FlashCrash/records"
+      initial_cash: 10000.0
+      initial_position: 50.0         # Starts with position
+      history_limit: 50
+      # StopLoss specific
+      stop_loss_percent: 0.05        # Sell if price drops 5%
+      initial_buy_price: 100.0
   persona: !include persona.yml
 
 stop_loss_2:
@@ -109,8 +166,12 @@ stop_loss_2:
     group_tags:
       - investors
     extras:
-      strategy: stop_loss
       record_path: "EXPERIMENT/FlashCrash/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 50
+      stop_loss_percent: 0.05
+      initial_buy_price: 100.0
   persona: !include persona.yml
 
 fundamental_trader:
@@ -123,8 +184,15 @@ fundamental_trader:
     group_tags:
       - investors
     extras:
-      strategy: fundamental
       record_path: "EXPERIMENT/FlashCrash/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # Fundamental specific
+      value_threshold: 0.10
+      base_position_size: 30.0
+      value_sensitivity: 1.0
+      value_multiplier: 10
   persona: !include persona.yml
 
 retail_trader:
@@ -137,6 +205,12 @@ retail_trader:
     group_tags:
       - investors
     extras:
-      strategy: retail
       record_path: "EXPERIMENT/FlashCrash/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # Retail specific
+      trade_frequency: 5
+      noise_std: 8.0
+      position_mean_reversion: 0.1
   persona: !include persona.yml

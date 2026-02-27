@@ -8,7 +8,7 @@ Usage Pattern:
     buffer = HistoryBuffer(
         folder="records/market/price",
         entry_limit=100,
-        block_size=500,
+        block_size=50,
     )
 
     # Append data each round
@@ -48,7 +48,7 @@ class HistoryBuffer:
     │  HOT (Memory)              COLD (Disk)                              │
     │  ┌─────────────┐           ┌─────────────────────────────────┐      │
     │  │   deque     │  overflow │   BlockBasedStoreManager        │      │
-    │  │ maxlen=100  │ ───────►  │   (JSON blocks, block_size=500) │      │
+    │  │ maxlen=100  │ ───────►  │   (JSON blocks, block_size=50)  │      │
     │  └─────────────┘           └─────────────────────────────────┘      │
     │                                                                      │
     │  Access Pattern:                                                     │
@@ -72,7 +72,7 @@ class HistoryBuffer:
         self,
         folder: str,
         entry_limit: int = 100,
-        block_size: int = 500,
+        block_size: int = 50,
         initial_values: Optional[List[Any]] = None,
     ):
         """
@@ -81,7 +81,7 @@ class HistoryBuffer:
         Args:
             folder: Directory path for disk storage
             entry_limit: Max items in hot deque (default: 100)
-            block_size: Items per block file (default: 500)
+            block_size: Items per block file (default: 50)
             initial_values: Optional list of initial values to populate
         """
         self.folder = folder

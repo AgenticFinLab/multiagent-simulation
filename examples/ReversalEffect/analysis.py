@@ -15,29 +15,55 @@ from typing import Any, Dict
 from masim.evaluation.finance import (
     calculate_returns,
     calculate_autocorrelation,
+    calculate_rolling_volatility,
+    calculate_max_drawdown,
+    calculate_price_deviation,
     plot_price_dynamics,
     plot_returns_analysis,
+    plot_multi_panel_summary,
+    validate_reversal_effect,
 )
-from masim.utils import load_config, load_simulation_data
+from masim.utils import load_config, load_simulation_data, get_investor_quantities
 
 
 def analyze_reversal(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
+    """Perform reversal effect analysis."""
     os.makedirs(output_dir, exist_ok=True)
     market_prices = data["market_prices"]
     fundamentals = data["fundamentals"]
+    volumes = data.get("volumes", {})
+    investor_quantities = get_investor_quantities(data)
 
     if not market_prices:
+        print("No market price data found")
         return {}
 
     # Fundamental value from simulation data
     fundamental_value = sum(fundamentals.values()) / len(fundamentals)
 
+    # Calculate metrics
     returns = calculate_returns(market_prices)
+    volatility = calculate_rolling_volatility(market_prices, window=10)
     returns_list = list(returns.values())
     acf = calculate_autocorrelation(returns_list, max_lag=20)
+    prices_list = [market_prices[r] for r in sorted(market_prices.keys())]
+    max_dd, peak_idx, trough_idx = calculate_max_drawdown(prices_list)
+    deviation = calculate_price_deviation(market_prices, fundamental_value)
 
-    # Reversal: negative long-lag autocorrelation
-    reversal_detected = acf[9] < -0.1 if len(acf) > 9 else False
+    # Reversal: negative long-lag autocorrelation (De Bondt & Thaler 1985)
+    long_lag = 15 if len(acf) > 15 else (len(acf) - 1 if acf else 0)
+    long_lag_acf = acf[long_lag - 1] if long_lag > 0 and acf else 0
+    reversal_detected = long_lag_acf < -0.05 if acf else False
+
+    # Run validation
+    validation = validate_reversal_effect(
+        autocorrelation_long=long_lag_acf,
+        winner_loser_spread=None,  # Would need portfolio tracking
+        total_rounds=len(market_prices),
+    )
+
+    # Generate plots
+    print(f"Generating analysis plots in {output_dir}/")
 
     plot_price_dynamics(
         market_prices,
@@ -47,22 +73,73 @@ def analyze_reversal(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     plot_returns_analysis(
         market_prices, output_path=os.path.join(output_dir, "02_returns.png")
     )
+    plot_multi_panel_summary(
+        market_prices,
+        volatility=volatility,
+        investor_quantities=investor_quantities,
+        fundamental=fundamental_value,
+        output_path=os.path.join(output_dir, "03_summary.png"),
+    )
+
+    # Calculate returns statistics
+    returns_mean = sum(returns.values()) / len(returns) if returns else 0
+    returns_std = (
+        (sum((r - returns_mean) ** 2 for r in returns.values()) / len(returns)) ** 0.5
+        if returns
+        else 0
+    )
 
     summary = {
+        "scenario": "ReversalEffect",
+        "total_rounds": len(market_prices),
+        "fundamental_value": fundamental_value,
         "reversal_detected": reversal_detected,
+        "price": {
+            "initial": round(prices_list[0], 4),
+            "final": round(prices_list[-1], 4),
+            "min": round(min(prices_list), 4),
+            "max": round(max(prices_list), 4),
+            "mean": round(sum(prices_list) / len(prices_list), 4),
+        },
+        "returns": {
+            "mean": round(returns_mean, 6),
+            "std": round(returns_std, 6),
+        },
+        "metrics": {
+            "max_drawdown": round(max_dd, 4),
+            "peak_round": peak_idx,
+            "trough_round": trough_idx,
+            "max_deviation_pct": round(max(deviation.values()), 4) if deviation else 0,
+            "final_deviation_pct": (
+                round(list(deviation.values())[-1], 4) if deviation else 0
+            ),
+        },
         "autocorrelation": {
-            "lag_1": acf[0] if acf else 0,
-            "lag_10": acf[9] if len(acf) > 9 else 0,
+            "lag_1": round(acf[0], 4) if acf else None,
+            "lag_5": round(acf[4], 4) if len(acf) > 4 else None,
+            "lag_10": round(acf[9], 4) if len(acf) > 9 else None,
+            "lag_15": round(acf[14], 4) if len(acf) > 14 else None,
+            "lag_20": round(acf[19], 4) if len(acf) > 19 else None,
         },
         "interpretation": (
             "REVERSAL: Mean reversion detected" if reversal_detected else "No reversal"
         ),
+        "validation": validation.to_dict(),
     }
 
     with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
 
+    print("\n" + "=" * 50)
+    print("REVERSAL EFFECT ANALYSIS")
+    print("=" * 50)
     print(f"Reversal Detected: {reversal_detected}")
+    print(f"Short-lag ACF (lag-1): {acf[0]:.4f}" if acf else "")
+    print(f"Long-lag ACF (lag-{long_lag}): {long_lag_acf:.4f}")
+    print(f"Mean Reversion to Fundamental: {fundamental_value:.2f}")
+    print(f"\nVALIDATION: {validation.interpretation}")
+    print(f"Fit Score: {validation.score:.1%}")
+
     return summary
 
 

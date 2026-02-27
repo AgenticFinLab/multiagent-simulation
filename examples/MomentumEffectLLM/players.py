@@ -10,12 +10,23 @@ Theoretical Foundation:
     - Conservatism Bias: Underreaction to new information
     - Information Diffusion: Gradual incorporation of information
 
-LLM Investor Types:
-    - Momentum Trader: Buys past winners, sells past losers
-    - Contrarian Trader: Mean reversion strategy
-    - Technical Trader: Moving average crossovers
-    - Trend Follower: Strong directional bets
-    - Fundamental Anchor: Value-based reversion
+Market Parameters (from config.extras):
+    - record_path: Path for output records
+    - initial_price: Starting price
+    - initial_fundamental: Starting fundamental value
+    - price_impact: Price impact coefficient
+    - mean_reversion: Mean reversion strength
+    - noise_std: Random noise standard deviation
+    - drift_persistence: Drift autocorrelation
+    - drift_volatility: Drift innovation volatility
+    - history_limit: Maximum history buffer size
+
+Investor Parameters (from config.extras):
+    - record_path: Path for output records
+    - initial_cash: Starting cash balance
+    - initial_position: Starting share position
+    - history_limit: Maximum history buffer size
+    - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
 import os
@@ -40,22 +51,11 @@ def load_prompt(prompt_path: str) -> str:
     return getattr(module, var_name)
 
 
-# =============================================================================
-# Market - Coordinator
-# =============================================================================
-
-
 class Market(GeneralPlayer):
-    """Central market with momentum-aware dynamics."""
+    """Central market with momentum-aware dynamics.
 
-    INITIAL_PRICE = 100.0
-    INITIAL_FUNDAMENTAL = 100.0
-    PRICE_IMPACT = 0.08
-    MEAN_REVERSION = 0.01
-    NOISE_STD = 0.3
-    DRIFT_PERSISTENCE = 0.95
-    DRIFT_VOLATILITY = 0.5
-    HISTORY_LIMIT = 200
+    All parameters read from config.extras (no class constants).
+    """
 
     async def perceive(
         self,
@@ -66,17 +66,19 @@ class Market(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "price" not in self.state.custom_state:
-            record_path = self.config.extras["record_path"]
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
+            history_limit = extras["history_limit"]
 
-            self.state.custom_state["price"] = self.INITIAL_PRICE
-            self.state.custom_state["fundamental"] = self.INITIAL_FUNDAMENTAL
+            self.state.custom_state["price"] = extras["initial_price"]
+            self.state.custom_state["fundamental"] = extras["initial_fundamental"]
             self.state.custom_state["drift"] = 0.0
             self.state.custom_state["returns"] = []
 
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
 
         orders = []
@@ -95,6 +97,7 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
@@ -102,10 +105,15 @@ class Market(GeneralPlayer):
         orders = self.state.custom_state["orders"]
         returns = self.state.custom_state["returns"]
 
+        # Get parameters from config
+        price_impact_coef = extras["price_impact"]
+        mean_reversion_strength = extras["mean_reversion"]
+        noise_std = extras["noise_std"]
+        drift_persistence = extras["drift_persistence"]
+        drift_volatility = extras["drift_volatility"]
+
         # Update fundamental with drift (creates momentum opportunities)
-        new_drift = self.DRIFT_PERSISTENCE * drift + random.gauss(
-            0, self.DRIFT_VOLATILITY
-        )
+        new_drift = drift_persistence * drift + random.gauss(0, drift_volatility)
         new_fundamental = fundamental + new_drift
         new_fundamental = max(50, min(150, new_fundamental))
 
@@ -115,9 +123,9 @@ class Market(GeneralPlayer):
         net_demand = total_buy_qty - total_sell_qty
 
         # Price update
-        price_impact = self.PRICE_IMPACT * net_demand
-        mean_reversion = self.MEAN_REVERSION * (new_fundamental - current_price)
-        noise = random.gauss(0, self.NOISE_STD)
+        price_impact = price_impact_coef * net_demand
+        mean_reversion = mean_reversion_strength * (new_fundamental - current_price)
+        noise = random.gauss(0, noise_std)
 
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
         price_return = (new_price - current_price) / current_price
@@ -173,19 +181,11 @@ class Market(GeneralPlayer):
         )
 
 
-# =============================================================================
-# LLM Momentum Investor Base Class
-# =============================================================================
-
-
 class LLMMomentumInvestor(GeneralPlayer):
-    """Base class for LLM-powered momentum investors."""
+    """Base class for LLM-powered momentum investors.
 
-    STRATEGY_NAME = "llm_momentum_base"
-    SYSTEM_PROMPT = "You are an investor analyzing momentum patterns."
-    INITIAL_CASH = 10000.0
-    INITIAL_POSITION = 50.0
-    HISTORY_LIMIT = 100
+    All parameters read from config.extras (no class constants).
+    """
 
     async def perceive(
         self,
@@ -196,11 +196,13 @@ class LLMMomentumInvestor(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "cash" not in self.state.custom_state:
-            self.state.custom_state["cash"] = self.INITIAL_CASH
-            self.state.custom_state["position"] = self.INITIAL_POSITION
+            extras = self.config.extras
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
+            history_limit = extras["history_limit"]
 
             load_dotenv()
-            llm_config = self.config.extras["llm"]
+            llm_config = extras["llm"]
             lm_name = llm_config["lm_name"]
             generation_config = llm_config["generation_config"]
 
@@ -213,11 +215,11 @@ class LLMMomentumInvestor(GeneralPlayer):
             )
             self.state.custom_state["llm_client"] = llm_client
 
-            record_path = self.config.extras["record_path"]
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
 
         if observation.inbounds:
@@ -259,36 +261,20 @@ class LLMMomentumInvestor(GeneralPlayer):
         )
 
         llm_config = self.config.extras["llm"]
-        if "user_message" in llm_config:
-            template = load_prompt(llm_config["user_message"])
-            return template.format(
-                price=market_data["price"],
-                prev_price=market_data["prev_price"],
-                return_pct=market_data["return_pct"],
-                momentum_5=market_data["momentum_5"] * 100,
-                momentum_10=market_data["momentum_10"] * 100,
-                fundamental=market_data["fundamental"],
-                recent_returns=[f"{r*100:.2f}%" for r in market_data["recent_returns"]],
-                recent_prices=recent_prices,
-                cash=cash,
-                position=position,
-                portfolio_value=cash + position * market_data["price"],
-            )
-
-        return f"""
-Market Data:
-- Price: ${market_data['price']:.2f}, Return: {market_data['return_pct']:+.2f}%
-- Momentum (5-period): {market_data['momentum_5']*100:+.2f}%
-- Momentum (10-period): {market_data['momentum_10']*100:+.2f}%
-- Fundamental: ${market_data['fundamental']:.2f}
-- Recent Prices: {recent_prices}
-
-Your Portfolio:
-- Cash: ${cash:.2f}, Position: {position:.2f} shares
-- Portfolio Value: ${cash + position * market_data['price']:.2f}
-
-Respond with JSON: {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}}
-"""
+        template = load_prompt(llm_config["user_message"])
+        return template.format(
+            price=market_data["price"],
+            prev_price=market_data["prev_price"],
+            return_pct=market_data["return_pct"],
+            momentum_5=market_data["momentum_5"] * 100,
+            momentum_10=market_data["momentum_10"] * 100,
+            fundamental=market_data["fundamental"],
+            recent_returns=[f"{r*100:.2f}%" for r in market_data["recent_returns"]],
+            recent_prices=recent_prices,
+            cash=cash,
+            position=position,
+            portfolio_value=cash + position * market_data["price"],
+        )
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         try:
@@ -320,11 +306,7 @@ Respond with JSON: {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantit
 
         user_prompt = self._build_prompt(market_data)
         llm_config = self.config.extras["llm"]
-        system_prompt = (
-            load_prompt(llm_config["sys_message"])
-            if "sys_message" in llm_config
-            else self.SYSTEM_PROMPT
-        )
+        system_prompt = load_prompt(llm_config["sys_message"])
 
         max_retries = 3
         for attempt in range(max_retries):
@@ -348,14 +330,15 @@ Respond with JSON: {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantit
             self.state.custom_state["cash"] += abs(quantity) * bid_price
             self.state.custom_state["position"] += quantity
 
+        strategy_name = self.__class__.__name__
         print(
-            f"[{self.identity:20s}] R{round_num} ({self.STRATEGY_NAME:15s}): Q={quantity:+7.2f}"
+            f"[{self.identity:20s}] R{round_num} ({strategy_name:15s}): Q={quantity:+7.2f}"
         )
 
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": decision["reasoning"][:100],
         }
@@ -373,127 +356,31 @@ Respond with JSON: {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantit
         )
 
 
-# =============================================================================
-# LLM Momentum Investor Types
-# =============================================================================
-
-
 class LLMMomentumTrader(LLMMomentumInvestor):
     """Buys past winners, sells past losers."""
 
-    STRATEGY_NAME = "llm_momentum_trader"
-    SYSTEM_PROMPT = """You are a MOMENTUM TRADER following Jegadeesh & Titman's strategy.
-
-CORE BELIEF: "Winners keep winning, losers keep losing."
-
-YOUR STRATEGY:
-1. BUY when momentum is positive (price trending up)
-2. SELL when momentum is negative (price trending down)
-3. Stronger momentum = larger position
-
-SIGNALS:
-- Momentum_5 > 3%: Strong buy signal
-- Momentum_5 > 1%: Moderate buy
-- Momentum_5 < -3%: Strong sell signal
-- Momentum_5 < -1%: Moderate sell
-
-You believe in trend persistence. Don't fight the trend.
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMContrarianTrader(LLMMomentumInvestor):
     """Mean reversion strategy - opposing momentum."""
 
-    STRATEGY_NAME = "llm_contrarian"
-    SYSTEM_PROMPT = """You are a CONTRARIAN TRADER betting on mean reversion.
-
-CORE BELIEF: "What goes up must come down."
-
-YOUR STRATEGY:
-1. SELL when prices have risen too much (momentum too positive)
-2. BUY when prices have fallen too much (momentum too negative)
-3. You fade the trend
-
-SIGNALS:
-- Price > 110% of fundamental: Sell (overvalued)
-- Price < 90% of fundamental: Buy (undervalued)
-- Momentum_5 > 5%: Overbought - prepare to sell
-- Momentum_5 < -5%: Oversold - prepare to buy
-
-You provide stability by going against the crowd.
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMTechnicalTrader(LLMMomentumInvestor):
     """Moving average crossover strategy."""
 
-    STRATEGY_NAME = "llm_technical"
-    SYSTEM_PROMPT = """You are a TECHNICAL TRADER using price patterns.
-
-CORE BELIEF: "Price patterns predict future movements."
-
-YOUR STRATEGY:
-1. Track short-term vs long-term price averages
-2. BUY when short-term crosses above long-term (golden cross)
-3. SELL when short-term crosses below long-term (death cross)
-
-ANALYSIS:
-- Compare recent prices to earlier prices
-- Look for breakouts above recent highs
-- Look for breakdowns below recent lows
-- Momentum reversal = potential trend change
-
-You follow technical signals mechanically.
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMTrendFollower(LLMMomentumInvestor):
     """Aggressive trend following."""
 
-    STRATEGY_NAME = "llm_trend_follower"
-    SYSTEM_PROMPT = """You are an AGGRESSIVE TREND FOLLOWER.
-
-CORE BELIEF: "The trend is your friend until the end."
-
-YOUR STRATEGY:
-1. Identify the dominant trend
-2. Take LARGE positions in trend direction
-3. Cut losses quickly if trend reverses
-4. Let winners run
-
-RULES:
-- If momentum_10 > 0: You are BULLISH - buy aggressively
-- If momentum_10 < 0: You are BEARISH - sell aggressively
-- Trend reversal (momentum sign change) = reverse position immediately
-
-You are not afraid to take big positions.
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMFundamentalAnchor(LLMMomentumInvestor):
     """Value-based anchor providing fundamental gravity."""
 
-    STRATEGY_NAME = "llm_fundamental"
-    SYSTEM_PROMPT = """You are a FUNDAMENTAL VALUE INVESTOR.
-
-CORE BELIEF: "Price should reflect fundamental value."
-
-YOUR STRATEGY:
-1. Compare price to fundamental value
-2. BUY when price < fundamental (undervalued)
-3. SELL when price > fundamental (overvalued)
-4. You don't care about momentum - only value
-
-VALUE ZONES:
-- Price/Fundamental < 0.90: Strong buy
-- Price/Fundamental < 0.95: Moderate buy
-- Price/Fundamental > 1.10: Strong sell
-- Price/Fundamental > 1.05: Moderate sell
-
-You provide an anchor that eventually pulls prices back.
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass

@@ -26,6 +26,18 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/VolatilityClustering/records"
+      # Price dynamics
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      # GARCH parameters
+      garch_omega: 0.0001
+      garch_alpha: 0.15
+      garch_beta: 0.80
+      min_volatility: 0.5
+      max_volatility: 10.0
+      history_limit: 200
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -41,8 +53,15 @@ fundamentalist:
     group_tags:
       - investors
     extras:
-      strategy: fundamentalist
       record_path: "EXPERIMENT/VolatilityClustering/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # Fundamentalist specific
+      trade_frequency: 3
+      value_sensitivity: 0.5
+      base_position_size: 20.0
+      value_noise_std: 2.0
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -58,8 +77,16 @@ trend_follower_1:
     group_tags:
       - investors
     extras:
-      strategy: trend_follower
       record_path: "EXPERIMENT/VolatilityClustering/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # Trend follower specific
+      lookback_window: 3
+      base_position_size: 30.0
+      volatility_sensitivity: 0.8
+      baseline_volatility: 1.0
+      trend_threshold: 0.005
   persona: !include persona.yml
 
 trend_follower_2:
@@ -72,8 +99,15 @@ trend_follower_2:
     group_tags:
       - investors
     extras:
-      strategy: trend_follower
       record_path: "EXPERIMENT/VolatilityClustering/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      lookback_window: 3
+      base_position_size: 30.0
+      volatility_sensitivity: 0.8
+      baseline_volatility: 1.0
+      trend_threshold: 0.005
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -89,8 +123,13 @@ noise_trader_1:
     group_tags:
       - investors
     extras:
-      strategy: noise_trader
       record_path: "EXPERIMENT/VolatilityClustering/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # Noise trader specific
+      position_volatility: 15.0
+      mean_reversion_speed: 0.1
   persona: !include persona.yml
 
 noise_trader_2:
@@ -103,8 +142,12 @@ noise_trader_2:
     group_tags:
       - investors
     extras:
-      strategy: noise_trader
       record_path: "EXPERIMENT/VolatilityClustering/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      position_volatility: 15.0
+      mean_reversion_speed: 0.1
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -120,8 +163,14 @@ slow_adapter:
     group_tags:
       - investors
     extras:
-      strategy: slow_adapter
       record_path: "EXPERIMENT/VolatilityClustering/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # Slow adapter specific
+      lookback_window: 10
+      update_weight: 0.1
+      base_position_size: 10.0
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -137,6 +186,13 @@ volatility_trader:
     group_tags:
       - investors
     extras:
-      strategy: volatility_trader
       record_path: "EXPERIMENT/VolatilityClustering/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # Volatility trader specific
+      vol_lookback: 5
+      high_vol_threshold: 1.5
+      low_vol_threshold: 0.7
+      base_position_size: 15.0
   persona: !include persona.yml

@@ -849,6 +849,7 @@ class StorageConfig(ProxyConfig):
     checkpoint_dir: Optional[str] = None
     record_path: Optional[str] = None
     record_rounds: bool = True
+    entry_limit: int = 50  # Block size for BlockBasedStoreManager
 
 
 # =============================================================================

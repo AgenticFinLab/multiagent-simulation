@@ -106,6 +106,31 @@ from .visualization import (
     save_figure,
 )
 
+# Validation (scenario-specific reasonableness checks)
+from .validation import (
+    ValidationResult,
+    validate_asset_bubble,
+    validate_herd_effect,
+    validate_flash_crash,
+    validate_market_crash,
+    validate_momentum_effect,
+    validate_reversal_effect,
+    validate_volatility_clustering,
+    validate_short_squeeze,
+    validate_liquidity_dryup,
+    validate_disposition_effect,
+    validate_equity_premium,
+)
+
+# LLM-based Validation (rigorous financial theory prompts)
+from .validation_llm import (
+    LLMValidationResult,
+    LLMValidator,
+    validate_with_llm,
+    get_theory_prompt,
+    list_supported_scenarios,
+)
+
 __all__ = [
     # Metrics
     "calculate_autocorrelation",
@@ -148,4 +173,23 @@ __all__ = [
     "get_style_generator",
     "create_figure",
     "save_figure",
+    # Validation
+    "ValidationResult",
+    "validate_asset_bubble",
+    "validate_herd_effect",
+    "validate_flash_crash",
+    "validate_market_crash",
+    "validate_momentum_effect",
+    "validate_reversal_effect",
+    "validate_volatility_clustering",
+    "validate_short_squeeze",
+    "validate_liquidity_dryup",
+    "validate_disposition_effect",
+    "validate_equity_premium",
+    # LLM Validation
+    "LLMValidationResult",
+    "LLMValidator",
+    "validate_with_llm",
+    "get_theory_prompt",
+    "list_supported_scenarios",
 ]

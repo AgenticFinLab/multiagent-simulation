@@ -30,7 +30,15 @@ market:
     steps_per_turn: 1
     group_tags:
       - market
-    extras: {}
+    extras:
+      record_path: "EXPERIMENT/HerdEffect/records"
+      # Market parameters
+      initial_price: 100.0
+      fundamental_value: 100.0
+      supply_elasticity: 0.1
+      mean_reversion: 0.02
+      noise_std: 0.5
+      history_limit: 200
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -47,7 +55,14 @@ investor_momentum:
     group_tags:
       - investors
     extras:
-      strategy: momentum
+      record_path: "EXPERIMENT/HerdEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      # Momentum specific parameters
+      lambda_price: 0.5         # Price aggressiveness
+      beta: 0.3                 # Capital allocation ratio
   persona: !include persona.yml
 
 investor_contrarian:
@@ -60,7 +75,15 @@ investor_contrarian:
     group_tags:
       - investors
     extras:
-      strategy: contrarian
+      record_path: "EXPERIMENT/HerdEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      # Contrarian specific parameters
+      fundamental: 100.0
+      beta: 0.5                 # Value deviation sensitivity
+      noise_std: 0.5            # Bid noise
   persona: !include persona.yml
 
 # NOTE: HerdingInvestor REMOVED for Emergent Herding Model
@@ -76,7 +99,14 @@ investor_risk_averse:
     group_tags:
       - investors
     extras:
-      strategy: risk_averse
+      record_path: "EXPERIMENT/HerdEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      # RiskAverse specific parameters
+      k: 0.5                    # Risk tolerance coefficient
+      lookback: 5               # Periods for volatility calculation
   persona: !include persona.yml
 
 investor_aggressive:
@@ -89,7 +119,15 @@ investor_aggressive:
     group_tags:
       - investors
     extras:
-      strategy: aggressive
+      record_path: "EXPERIMENT/HerdEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      # Aggressive specific parameters
+      kappa: 1.0                # Aggressive price factor
+      beta: 0.5                 # Aggressive capital allocation
+      accel_bonus: 0.3          # Acceleration trading bonus
   persona: !include persona.yml
 
 investor_noise:
@@ -102,5 +140,13 @@ investor_noise:
     group_tags:
       - investors
     extras:
-      strategy: noise
+      record_path: "EXPERIMENT/HerdEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      # Noise specific parameters
+      price_noise_std: 2.0
+      qty_noise_std: 5.0
+      position_mean_reversion: 0.1
   persona: !include persona.yml

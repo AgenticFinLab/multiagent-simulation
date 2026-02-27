@@ -16,6 +16,8 @@ Key Dynamics:
     3. Arbitrageurs attempt to short → But face constraints
     4. Noise traders follow the crowd → Amplify bubble
     5. Eventually bubble bursts when speculators run out
+
+All parameters are configured via players.yml config file.
 """
 
 import os
@@ -49,21 +51,12 @@ class Market(GeneralPlayer):
         - High λ: Small excess demand causes big price moves
         - Low γ: Price doesn't quickly return to fundamental
         - This creates positive feedback loop
+
+    All parameters configured via extras in players.yml:
+        - fundamental_value, initial_price
+        - price_impact, mean_reversion, fundamental_growth, noise_std
+        - short_cost_rate, history_limit
     """
-
-    FUNDAMENTAL_VALUE = 100.0
-    INITIAL_PRICE = 100.0
-
-    # Bubble-prone parameters
-    PRICE_IMPACT = 0.15  # High: demand strongly affects price
-    MEAN_REVERSION = 0.005  # Low: slow correction to fundamental
-    FUNDAMENTAL_GROWTH = 0.001  # Slow fundamental appreciation
-    NOISE_STD = 0.3
-
-    # Short selling constraints (for arbitrageurs)
-    SHORT_COST_RATE = 0.02  # Cost of borrowing shares to short
-
-    HISTORY_LIMIT = 300
 
     async def perceive(
         self,
@@ -74,27 +67,29 @@ class Market(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "price" not in self.state.custom_state:
-            record_path = self.config.extras["record_path"]
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
 
-            self.state.custom_state["price"] = self.INITIAL_PRICE
-            self.state.custom_state["fundamental"] = self.FUNDAMENTAL_VALUE
+            self.state.custom_state["price"] = extras["initial_price"]
+            self.state.custom_state["fundamental"] = extras["fundamental_value"]
 
+            history_limit = extras["history_limit"]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
             self.state.custom_state["fundamental_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "fundamental"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
             self.state.custom_state["volume_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volume"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
             self.state.custom_state["bubble_metric_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "bubble_metric"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
 
         orders = []
@@ -112,13 +107,15 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
         current_fundamental = self.state.custom_state["fundamental"]
         orders = self.state.custom_state["orders"]
 
         # Update fundamental value (slow growth)
-        new_fundamental = current_fundamental * (1 + self.FUNDAMENTAL_GROWTH)
+        fundamental_growth = extras["fundamental_growth"]
+        new_fundamental = current_fundamental * (1 + fundamental_growth)
 
         # Aggregate orders
         buy_orders = [o for o in orders if o["quantity"] > 0]
@@ -130,9 +127,9 @@ class Market(GeneralPlayer):
         total_volume = total_buy_qty + total_sell_qty
 
         # Price dynamics - bubble prone
-        price_impact = self.PRICE_IMPACT * net_demand
-        mean_reversion = self.MEAN_REVERSION * (new_fundamental - current_price)
-        noise = random.gauss(0, self.NOISE_STD)
+        price_impact = extras["price_impact"] * net_demand
+        mean_reversion = extras["mean_reversion"] * (new_fundamental - current_price)
+        noise = random.gauss(0, extras["noise_std"])
 
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
         price_return = (new_price - current_price) / current_price
@@ -174,7 +171,7 @@ class Market(GeneralPlayer):
             "volume": total_volume,
             "net_demand": net_demand,
             "round": round_num,
-            "short_cost_rate": self.SHORT_COST_RATE,
+            "short_cost_rate": extras["short_cost_rate"],
         }
 
         return {
@@ -198,12 +195,12 @@ class Market(GeneralPlayer):
 
 
 class BaseInvestor(GeneralPlayer):
-    """Base class for bubble simulation investors."""
+    """
+    Base class for bubble simulation investors.
 
-    STRATEGY_NAME = "base"
-    INITIAL_CASH = 10000.0
-    INITIAL_POSITION = 0.0
-    HISTORY_LIMIT = 50
+    All parameters configured via extras in players.yml:
+        - initial_cash, initial_position, history_limit
+    """
 
     async def perceive(
         self,
@@ -214,15 +211,16 @@ class BaseInvestor(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "cash" not in self.state.custom_state:
-            record_path = self.config.extras["record_path"]
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
 
-            self.state.custom_state["cash"] = self.INITIAL_CASH
-            self.state.custom_state["position"] = self.INITIAL_POSITION
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["short_position"] = 0.0  # Shares borrowed & sold
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=extras["history_limit"],
             )
 
         if observation.inbounds:
@@ -297,25 +295,26 @@ class MomentumSpeculator(BaseInvestor):
     Formula:
         momentum = (price - MA_short) / MA_short
         quantity = aggressiveness × momentum × base_size
+
+    Parameters from config extras:
+        - lookback_short, aggressiveness, base_position_size, leverage_multiplier
     """
 
-    STRATEGY_NAME = "momentum_speculator"
-
-    # Speculator parameters - very aggressive
-    LOOKBACK_SHORT = 3
-    AGGRESSIVENESS = 2.0  # High: amplifies momentum signals
-    BASE_POSITION_SIZE = 50.0  # Large positions
-    LEVERAGE_MULTIPLIER = 1.5  # Uses leverage
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         price_history = self.state.custom_state["price_history"]
 
+        lookback_short = extras["lookback_short"]
+        aggressiveness = extras["aggressiveness"]
+        base_position_size = extras["base_position_size"]
+        leverage_multiplier = extras["leverage_multiplier"]
+
         # Calculate momentum
-        if len(price_history) >= self.LOOKBACK_SHORT:
-            recent_prices = list(price_history)[-self.LOOKBACK_SHORT :]
+        if len(price_history) >= lookback_short:
+            recent_prices = list(price_history)[-lookback_short:]
             ma_short = sum(recent_prices) / len(recent_prices)
             momentum = (price - ma_short) / ma_short
         else:
@@ -324,14 +323,11 @@ class MomentumSpeculator(BaseInvestor):
         # Aggressive momentum chasing
         if momentum > 0.01:  # Price rising
             quantity = (
-                self.AGGRESSIVENESS
-                * momentum
-                * self.BASE_POSITION_SIZE
-                * self.LEVERAGE_MULTIPLIER
+                aggressiveness * momentum * base_position_size * leverage_multiplier
             )
             quantity = min(quantity, 100)  # Cap at max
         elif momentum < -0.02:  # Price falling sharply - panic sell
-            quantity = self.AGGRESSIVENESS * momentum * self.BASE_POSITION_SIZE
+            quantity = aggressiveness * momentum * base_position_size
             quantity = max(quantity, -80)
         else:
             quantity = 0.0
@@ -342,8 +338,9 @@ class MomentumSpeculator(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
+        strategy_name = "momentum_speculator"
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:20s}): "
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} mom={momentum:+.3f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -352,7 +349,7 @@ class MomentumSpeculator(BaseInvestor):
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
         }
 
@@ -388,17 +385,13 @@ class RationalArbitrageur(BaseInvestor):
         deviation = (price - fundamental) / fundamental
         If deviation > threshold: short (with cost penalty)
         If deviation < -threshold: buy
+
+    Parameters from config extras:
+        - deviation_threshold, base_position_size, max_short_position, short_cost_sensitivity
     """
 
-    STRATEGY_NAME = "rational_arbitrageur"
-
-    # Arbitrageur parameters - conservative due to constraints
-    DEVIATION_THRESHOLD = 0.10  # Only act on >10% deviation
-    BASE_POSITION_SIZE = 25.0  # Moderate size (limited capital)
-    MAX_SHORT_POSITION = 40.0  # Limited short capacity
-    SHORT_COST_SENSITIVITY = 0.5  # How much short cost affects decision
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
@@ -406,25 +399,30 @@ class RationalArbitrageur(BaseInvestor):
         short_cost = market_data["short_cost_rate"]
         short_position = self.state.custom_state["short_position"]
 
+        deviation_threshold = extras["deviation_threshold"]
+        base_position_size = extras["base_position_size"]
+        max_short_position = extras["max_short_position"]
+        short_cost_sensitivity = extras["short_cost_sensitivity"]
+
         # Calculate mispricing
         deviation = (price - fundamental) / fundamental
 
-        if deviation > self.DEVIATION_THRESHOLD:
+        if deviation > deviation_threshold:
             # Overvalued - want to short
             # But face short-selling costs and limits
-            if short_position < self.MAX_SHORT_POSITION:
+            if short_position < max_short_position:
                 # Reduce position based on short cost
-                cost_penalty = 1.0 - self.SHORT_COST_SENSITIVITY * short_cost * 10
+                cost_penalty = 1.0 - short_cost_sensitivity * short_cost * 10
                 cost_penalty = max(0.2, cost_penalty)
 
-                short_size = deviation * self.BASE_POSITION_SIZE * cost_penalty
-                quantity = -min(short_size, self.MAX_SHORT_POSITION - short_position)
+                short_size = deviation * base_position_size * cost_penalty
+                quantity = -min(short_size, max_short_position - short_position)
             else:
                 quantity = 0.0  # Hit short limit
 
-        elif deviation < -self.DEVIATION_THRESHOLD:
+        elif deviation < -deviation_threshold:
             # Undervalued - buy
-            buy_size = abs(deviation) * self.BASE_POSITION_SIZE
+            buy_size = abs(deviation) * base_position_size
             quantity = min(buy_size, 30)
         else:
             quantity = 0.0
@@ -435,8 +433,9 @@ class RationalArbitrageur(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
+        strategy_name = "rational_arbitrageur"
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:20s}): "
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} dev={deviation:+.2%} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}, "
@@ -446,7 +445,7 @@ class RationalArbitrageur(BaseInvestor):
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
         }
 
@@ -475,33 +474,34 @@ class NoiseTrader(BaseInvestor):
         - Sentiment can flip, causing sudden selling
 
     Effect: DESTABILIZING - Amplifies bubbles through herding
+
+    Parameters from config extras:
+        - sentiment_volatility, herding_weight, base_position_size
     """
 
-    STRATEGY_NAME = "noise_trader"
-
-    # Noise trader parameters
-    SENTIMENT_VOLATILITY = 0.3
-    HERDING_WEIGHT = 0.6  # How much to follow recent returns
-    BASE_POSITION_SIZE = 20.0
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         price_return = market_data["return"]
 
+        sentiment_volatility = extras["sentiment_volatility"]
+        herding_weight = extras["herding_weight"]
+        base_position_size = extras["base_position_size"]
+
         # Generate sentiment: random + herding component
-        random_sentiment = random.gauss(0, self.SENTIMENT_VOLATILITY)
-        herding_sentiment = self.HERDING_WEIGHT * price_return * 10  # Amplified
+        random_sentiment = random.gauss(0, sentiment_volatility)
+        herding_sentiment = herding_weight * price_return * 10  # Amplified
 
         total_sentiment = random_sentiment + herding_sentiment
 
         # Trade based on sentiment
         if total_sentiment > 0.1:
-            quantity = total_sentiment * self.BASE_POSITION_SIZE
+            quantity = total_sentiment * base_position_size
             quantity = min(quantity, 40)
         elif total_sentiment < -0.1:
-            quantity = total_sentiment * self.BASE_POSITION_SIZE
+            quantity = total_sentiment * base_position_size
             quantity = max(quantity, -40)
         else:
             quantity = 0.0
@@ -512,8 +512,9 @@ class NoiseTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
+        strategy_name = "noise_trader"
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:20s}): "
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} sent={total_sentiment:+.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -522,7 +523,7 @@ class NoiseTrader(BaseInvestor):
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
         }
 
@@ -550,30 +551,31 @@ class FundamentalInvestor(BaseInvestor):
         - Provides weak anchoring force
 
     Effect: WEAKLY STABILIZING - Too slow to prevent bubbles
+
+    Parameters from config extras:
+        - trade_frequency, value_sensitivity, base_position_size
     """
 
-    STRATEGY_NAME = "fundamental_investor"
-
-    # Fundamental parameters - conservative
-    TRADE_FREQUENCY = 5  # Trade every N rounds
-    VALUE_SENSITIVITY = 0.3
-    BASE_POSITION_SIZE = 15.0
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         fundamental = market_data["fundamental"]
 
+        trade_frequency = extras["trade_frequency"]
+        value_sensitivity = extras["value_sensitivity"]
+        base_position_size = extras["base_position_size"]
+
         # Only trade at certain frequency
-        if round_num % self.TRADE_FREQUENCY != 0:
+        if round_num % trade_frequency != 0:
             quantity = 0.0
             bid_price = 0.0
         else:
             deviation = (fundamental - price) / price
 
             # Trade based on deviation
-            quantity = self.VALUE_SENSITIVITY * deviation * self.BASE_POSITION_SIZE
+            quantity = value_sensitivity * deviation * base_position_size
             quantity = max(-15, min(15, quantity))
             bid_price = price if quantity != 0 else 0.0
 
@@ -582,8 +584,9 @@ class FundamentalInvestor(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
+        strategy_name = "fundamental_investor"
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:20s}): "
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -592,7 +595,7 @@ class FundamentalInvestor(BaseInvestor):
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
         }
 
@@ -621,17 +624,13 @@ class LeveragedBuyer(BaseInvestor):
         - Forced to sell during downturns (procyclical)
 
     Effect: STRONGLY DESTABILIZING - Amplifies both bubbles and crashes
+
+    Parameters from config extras:
+        - leverage_ratio, margin_call_threshold, base_position_size, initial_equity
     """
 
-    STRATEGY_NAME = "leveraged_buyer"
-
-    # Leveraged parameters
-    LEVERAGE_RATIO = 2.0  # 2x leverage
-    MARGIN_CALL_THRESHOLD = 0.3  # Forced sell if equity drops 30%
-    BASE_POSITION_SIZE = 40.0
-    INITIAL_EQUITY = 10000.0
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
@@ -639,22 +638,27 @@ class LeveragedBuyer(BaseInvestor):
         position = self.state.custom_state["position"]
         cash = self.state.custom_state["cash"]
 
+        leverage_ratio = extras["leverage_ratio"]
+        margin_call_threshold = extras["margin_call_threshold"]
+        base_position_size = extras["base_position_size"]
+        initial_equity = extras["initial_equity"]
+
         # Calculate current equity and leverage
         portfolio_value = cash + position * price
-        equity_ratio = portfolio_value / self.INITIAL_EQUITY
+        equity_ratio = portfolio_value / initial_equity
 
         # Check for margin call
-        if equity_ratio < self.MARGIN_CALL_THRESHOLD and position > 0:
+        if equity_ratio < margin_call_threshold and position > 0:
             # Forced to deleverage - sell everything
             quantity = -position * 0.5  # Sell half
             print(f"    [MARGIN CALL] Forced deleveraging!")
         else:
             # Normal leveraged buying on positive momentum
             if price_return > 0.005:
-                quantity = price_return * self.BASE_POSITION_SIZE * self.LEVERAGE_RATIO
+                quantity = price_return * base_position_size * leverage_ratio
                 quantity = min(quantity, 60)
             elif price_return < -0.01:
-                quantity = price_return * self.BASE_POSITION_SIZE
+                quantity = price_return * base_position_size
                 quantity = max(quantity, -40)
             else:
                 quantity = 0.0
@@ -665,8 +669,9 @@ class LeveragedBuyer(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
+        strategy_name = "leveraged_buyer"
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:20s}): "
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} eq_ratio={equity_ratio:.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -675,7 +680,7 @@ class LeveragedBuyer(BaseInvestor):
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
         }
 
@@ -701,29 +706,30 @@ class ConservativeHolder(BaseInvestor):
         - Rebalances slowly
 
     Effect: VERY WEAKLY STABILIZING
+
+    Parameters from config extras:
+        - target_position, rebalance_frequency, rebalance_rate
     """
 
-    STRATEGY_NAME = "conservative_holder"
-
-    # Conservative parameters
-    TARGET_POSITION = 20.0  # Target holding
-    REBALANCE_FREQUENCY = 10  # Rebalance every N rounds
-    REBALANCE_RATE = 0.2  # Slowly rebalance
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         position = self.state.custom_state["position"]
 
+        target_position = extras["target_position"]
+        rebalance_frequency = extras["rebalance_frequency"]
+        rebalance_rate = extras["rebalance_rate"]
+
         # Only rebalance occasionally
-        if round_num % self.REBALANCE_FREQUENCY != 0:
+        if round_num % rebalance_frequency != 0:
             quantity = 0.0
             bid_price = 0.0
         else:
             # Slowly move toward target
-            gap = self.TARGET_POSITION - position
-            quantity = gap * self.REBALANCE_RATE
+            gap = target_position - position
+            quantity = gap * rebalance_rate
             quantity = max(-10, min(10, quantity))
             bid_price = price if quantity != 0 else 0.0
 
@@ -732,8 +738,9 @@ class ConservativeHolder(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
+        strategy_name = "conservative_holder"
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:20s}): "
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -742,7 +749,7 @@ class ConservativeHolder(BaseInvestor):
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
         }
 

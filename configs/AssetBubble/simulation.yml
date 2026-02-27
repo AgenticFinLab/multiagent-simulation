@@ -11,7 +11,7 @@ setting:
   name: "asset_bubble_simulation"
   description: "Asset bubble formation through speculative momentum and limited arbitrage"
   total_rounds: 300
-  entry_limit: 100
+  entry_limit: 10
   record_path: "EXPERIMENT/AssetBubble/records"
   save_diagram_interval: 50
 

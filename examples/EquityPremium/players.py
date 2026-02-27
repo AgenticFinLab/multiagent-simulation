@@ -7,11 +7,12 @@ Phenomenon: Equity Premium Puzzle (Mehra & Prescott, 1985)
       * Investors evaluate portfolios frequently
       * Losses hurt more than gains feel good (λ ≈ 2.25)
       * Short evaluation periods → stocks look risky → high premium demanded
+
+All parameters are configured via players.yml config file.
 """
 
 import os
 import random
-import math
 from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
@@ -19,27 +20,30 @@ from masim.utils.history import HistoryBuffer
 
 
 class Market(GeneralPlayer):
-    """Market with two assets: stock and bond."""
+    """
+    Market with two assets: stock and bond.
 
-    STOCK_EXPECTED_RETURN = 0.06 / 252  # ~6% annual / 252 trading days
-    BOND_RETURN = 0.01 / 252  # ~1% annual risk-free rate
-    STOCK_VOLATILITY = 0.15 / math.sqrt(252)  # ~15% annual volatility
-    INITIAL_STOCK_PRICE = 100.0
-    HISTORY_LIMIT = 200
+    Parameters from config extras:
+        - stock_expected_return, bond_return, stock_volatility
+        - initial_stock_price, history_limit, record_path
+    """
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
     ) -> None:
         self.state.custom_state["round"] = observation.round
         if "stock_price" not in self.state.custom_state:
-            record_path = self.config.extras["record_path"]
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            self.state.custom_state["stock_price"] = self.INITIAL_STOCK_PRICE
+            history_limit = extras["history_limit"]
+
+            self.state.custom_state["stock_price"] = extras["initial_stock_price"]
             self.state.custom_state["stock_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "stock"), entry_limit=self.HISTORY_LIMIT
+                folder=os.path.join(base_path, "stock"), entry_limit=history_limit
             )
             self.state.custom_state["volume_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "volume"), entry_limit=self.HISTORY_LIMIT
+                folder=os.path.join(base_path, "volume"), entry_limit=history_limit
             )
 
         orders = []
@@ -56,17 +60,20 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["stock_price"]
         orders = self.state.custom_state["orders"]
+
+        stock_expected_return = extras["stock_expected_return"]
+        bond_return = extras["bond_return"]
+        stock_volatility = extras["stock_volatility"]
 
         # Stock return with demand impact
         net_stock_demand = sum(o["stock_qty"] for o in orders)
         demand_impact = 0.001 * net_stock_demand
 
-        base_return = self.STOCK_EXPECTED_RETURN + random.gauss(
-            0, self.STOCK_VOLATILITY
-        )
+        base_return = stock_expected_return + random.gauss(0, stock_volatility)
         stock_return = base_return + demand_impact
 
         new_price = max(1.0, current_price * (1 + stock_return))
@@ -77,14 +84,14 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
 
         print(
-            f"\n[Market] R{round_num} Stock: {current_price:.2f}→{new_price:.2f} ({stock_return*100:+.3f}%) Bond: {self.BOND_RETURN*100:.4f}%"
+            f"\n[Market] R{round_num} Stock: {current_price:.2f}→{new_price:.2f} ({stock_return*100:+.3f}%) Bond: {bond_return*100:.4f}%"
         )
 
         market_data = {
             "stock_price": new_price,
             "prev_stock_price": current_price,
             "stock_return": stock_return,
-            "bond_return": self.BOND_RETURN,
+            "bond_return": bond_return,
             "round": round_num,
         }
         return {
@@ -103,22 +110,27 @@ class Market(GeneralPlayer):
 
 
 class BaseInvestor(GeneralPlayer):
-    STRATEGY_NAME = "base"
-    INITIAL_CASH = 10000.0
-    INITIAL_STOCK = 0.0
-    HISTORY_LIMIT = 50
+    """
+    Base class for equity premium investors.
+
+    Parameters from config extras:
+        - initial_cash, initial_stock, history_limit, record_path
+    """
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
     ) -> None:
         self.state.custom_state["round"] = observation.round
         if "cash" not in self.state.custom_state:
-            record_path = self.config.extras["record_path"]
-            self.state.custom_state["cash"] = self.INITIAL_CASH
-            self.state.custom_state["stock"] = self.INITIAL_STOCK
+            extras = self.config.extras
+            record_path = extras["record_path"]
+            history_limit = extras["history_limit"]
+
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["stock"] = extras["initial_stock"]
             self.state.custom_state["stock_history"] = HistoryBuffer(
                 folder=os.path.join(record_path, self.config.identity, "stock"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
         if observation.inbounds:
             for inb in observation.inbounds:
@@ -149,17 +161,13 @@ class BaseInvestor(GeneralPlayer):
 class MyopicLossAverseInvestor(BaseInvestor):
     """
     Myopic Loss Averse Investor (Benartzi & Thaler, 1995)
-    - Evaluates portfolio frequently (myopia)
-    - Loss aversion λ ≈ 2.25
-    - Demands high premium for risky stocks
+
+    Parameters from config extras:
+        - loss_aversion, evaluation_window, risk_aversion
     """
 
-    STRATEGY_NAME = "myopic_loss_averse"
-    LOSS_AVERSION = 2.25
-    EVALUATION_WINDOW = 5  # Short horizon (myopic)
-    RISK_AVERSION = 2.0
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         stock_price = market_data["stock_price"]
@@ -167,9 +175,14 @@ class MyopicLossAverseInvestor(BaseInvestor):
         cash = self.state.custom_state["cash"]
         stock = self.state.custom_state["stock"]
 
+        loss_aversion = extras["loss_aversion"]
+        evaluation_window = extras["evaluation_window"]
+        risk_aversion = extras["risk_aversion"]
+        strategy_name = self.__class__.__name__
+
         # Calculate recent volatility (myopic evaluation)
-        if len(stock_history) >= self.EVALUATION_WINDOW:
-            recent = list(stock_history)[-self.EVALUATION_WINDOW :]
+        if len(stock_history) >= evaluation_window:
+            recent = list(stock_history)[-evaluation_window:]
             returns = [
                 (recent[i] - recent[i - 1]) / recent[i - 1]
                 for i in range(1, len(recent))
@@ -185,17 +198,15 @@ class MyopicLossAverseInvestor(BaseInvestor):
             loss_prob = 0.5
 
         # Myopic loss aversion: weight losses more heavily
-        perceived_risk = vol * (1 + self.LOSS_AVERSION * loss_prob)
+        perceived_risk = vol * (1 + loss_aversion * loss_prob)
 
         # Target allocation based on perceived risk
-        target_stock_pct = max(0.1, 0.5 - self.RISK_AVERSION * perceived_risk)
+        target_stock_pct = max(0.1, 0.5 - risk_aversion * perceived_risk)
         portfolio_value = cash + stock * stock_price
         target_stock_value = target_stock_pct * portfolio_value
         current_stock_value = stock * stock_price
 
-        stock_qty = (
-            (target_stock_value - current_stock_value) / stock_price * 0.3
-        )  # Gradual
+        stock_qty = (target_stock_value - current_stock_value) / stock_price * 0.3
         stock_qty = max(-10, min(10, stock_qty))
 
         self._execute_trade(stock_qty, stock_price)
@@ -205,10 +216,10 @@ class MyopicLossAverseInvestor(BaseInvestor):
         )
         return {
             "stock_qty": stock_qty,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
-                    "payload": {"stock_qty": stock_qty, "strategy": self.STRATEGY_NAME},
+                    "payload": {"stock_qty": stock_qty, "strategy": strategy_name},
                     "content_type": "investor_bid",
                 }
             ],
@@ -216,19 +227,23 @@ class MyopicLossAverseInvestor(BaseInvestor):
 
 
 class LongHorizonInvestor(BaseInvestor):
-    """Long-horizon investor - less myopic, accepts more risk."""
+    """
+    Long-horizon investor - less myopic, accepts more risk.
 
-    STRATEGY_NAME = "long_horizon"
-    EVALUATION_WINDOW = 50  # Long horizon
+    Parameters from config extras:
+        - evaluation_window, target_stock_pct
+    """
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         market_data = self.state.custom_state["market_data"]
         stock_price = market_data["stock_price"]
         cash = self.state.custom_state["cash"]
         stock = self.state.custom_state["stock"]
 
-        # Long-horizon investors accept more stock
-        target_stock_pct = 0.6
+        target_stock_pct = extras["target_stock_pct"]
+        strategy_name = self.__class__.__name__
+
         portfolio_value = cash + stock * stock_price
         target_stock_value = target_stock_pct * portfolio_value
         current_stock_value = stock * stock_price
@@ -241,10 +256,10 @@ class LongHorizonInvestor(BaseInvestor):
         print(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
         return {
             "stock_qty": stock_qty,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
-                    "payload": {"stock_qty": stock_qty, "strategy": self.STRATEGY_NAME},
+                    "payload": {"stock_qty": stock_qty, "strategy": strategy_name},
                     "content_type": "investor_bid",
                 }
             ],
@@ -252,17 +267,24 @@ class LongHorizonInvestor(BaseInvestor):
 
 
 class RiskNeutralInvestor(BaseInvestor):
-    """Risk-neutral investor - theoretically optimal."""
+    """
+    Risk-neutral investor - theoretically optimal.
 
-    STRATEGY_NAME = "risk_neutral"
+    Parameters from config extras:
+        - excess_return_multiplier
+    """
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         market_data = self.state.custom_state["market_data"]
         stock_price = market_data["stock_price"]
 
+        excess_return_multiplier = extras["excess_return_multiplier"]
+        strategy_name = self.__class__.__name__
+
         # Expected excess return
         excess_return = market_data["stock_return"] - market_data["bond_return"]
-        stock_qty = excess_return * 500  # Buy if positive excess return
+        stock_qty = excess_return * excess_return_multiplier
         stock_qty = max(-20, min(20, stock_qty))
 
         self._execute_trade(stock_qty, stock_price)
@@ -270,10 +292,10 @@ class RiskNeutralInvestor(BaseInvestor):
         print(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
         return {
             "stock_qty": stock_qty,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
-                    "payload": {"stock_qty": stock_qty, "strategy": self.STRATEGY_NAME},
+                    "payload": {"stock_qty": stock_qty, "strategy": strategy_name},
                     "content_type": "investor_bid",
                 }
             ],
@@ -281,18 +303,23 @@ class RiskNeutralInvestor(BaseInvestor):
 
 
 class ConservativeInvestor(BaseInvestor):
-    """Conservative investor - prefers bonds."""
+    """
+    Conservative investor - prefers bonds.
 
-    STRATEGY_NAME = "conservative"
+    Parameters from config extras:
+        - target_stock_pct
+    """
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         market_data = self.state.custom_state["market_data"]
         stock_price = market_data["stock_price"]
         stock = self.state.custom_state["stock"]
-
-        # Very low stock allocation
-        target_stock_pct = 0.2
         cash = self.state.custom_state["cash"]
+
+        target_stock_pct = extras["target_stock_pct"]
+        strategy_name = self.__class__.__name__
+
         portfolio_value = cash + stock * stock_price
         target_stock_value = target_stock_pct * portfolio_value
         current_stock_value = stock * stock_price
@@ -305,10 +332,10 @@ class ConservativeInvestor(BaseInvestor):
         print(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
         return {
             "stock_qty": stock_qty,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
-                    "payload": {"stock_qty": stock_qty, "strategy": self.STRATEGY_NAME},
+                    "payload": {"stock_qty": stock_qty, "strategy": strategy_name},
                     "content_type": "investor_bid",
                 }
             ],
@@ -316,15 +343,22 @@ class ConservativeInvestor(BaseInvestor):
 
 
 class NoiseTrader(BaseInvestor):
-    """Noise trader with random allocation changes."""
+    """
+    Noise trader with random allocation changes.
 
-    STRATEGY_NAME = "noise"
+    Parameters from config extras:
+        - noise_std
+    """
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         market_data = self.state.custom_state["market_data"]
         stock_price = market_data["stock_price"]
 
-        stock_qty = random.gauss(0, 8)
+        noise_std = extras["noise_std"]
+        strategy_name = self.__class__.__name__
+
+        stock_qty = random.gauss(0, noise_std)
         stock_qty = max(-10, min(10, stock_qty))
 
         self._execute_trade(stock_qty, stock_price)
@@ -332,10 +366,10 @@ class NoiseTrader(BaseInvestor):
         print(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
         return {
             "stock_qty": stock_qty,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
-                    "payload": {"stock_qty": stock_qty, "strategy": self.STRATEGY_NAME},
+                    "payload": {"stock_qty": stock_qty, "strategy": strategy_name},
                     "content_type": "investor_bid",
                 }
             ],

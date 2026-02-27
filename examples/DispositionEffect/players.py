@@ -17,10 +17,7 @@ Investor Types:
     - IndexHolder: Passive buy-and-hold
     - InstitutionalInvestor: Professional, less prone to disposition
 
-Market Implications:
-    - Underreaction to news (momentum)
-    - Volume higher after price increases
-    - Predictable selling pressure at gain thresholds
+All parameters are configured via players.yml config file.
 """
 
 import os
@@ -39,19 +36,15 @@ from masim.utils.history import HistoryBuffer
 
 
 class Market(GeneralPlayer):
-    """Central market with standard price dynamics."""
+    """
+    Central market with standard price dynamics.
 
-    INITIAL_PRICE = 100.0
-    FUNDAMENTAL_VALUE = 100.0
-    PRICE_IMPACT = 0.06
-    MEAN_REVERSION = 0.015
-    NOISE_STD = 0.4
-
-    # Random news shocks (creates gain/loss situations)
-    NEWS_PROBABILITY = 0.15
-    NEWS_IMPACT_RANGE = 5.0
-
-    HISTORY_LIMIT = 200
+    Parameters from config extras:
+        - initial_price, fundamental_value
+        - price_impact, mean_reversion, noise_std
+        - news_probability, news_impact_range
+        - history_limit, record_path
+    """
 
     async def perceive(
         self,
@@ -62,15 +55,15 @@ class Market(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "price" not in self.state.custom_state:
-            record_path = self.config.extras.get(
-                "record_path", "EXPERIMENT/DispositionEffect/records"
-            )
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
 
-            self.state.custom_state["price"] = self.INITIAL_PRICE
+            self.state.custom_state["price"] = extras["initial_price"]
+            history_limit = extras["history_limit"]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
 
         orders = []
@@ -88,14 +81,17 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
         orders = self.state.custom_state["orders"]
 
         # Random news shock
+        news_probability = extras["news_probability"]
+        news_impact_range = extras["news_impact_range"]
         news_shock = 0.0
-        if random.random() < self.NEWS_PROBABILITY:
-            news_shock = random.uniform(-self.NEWS_IMPACT_RANGE, self.NEWS_IMPACT_RANGE)
+        if random.random() < news_probability:
+            news_shock = random.uniform(-news_impact_range, news_impact_range)
 
         # Aggregate orders
         total_buy_qty = sum(o["quantity"] for o in orders if o["quantity"] > 0)
@@ -104,9 +100,14 @@ class Market(GeneralPlayer):
         total_volume = total_buy_qty + total_sell_qty
 
         # Price dynamics
-        price_impact = self.PRICE_IMPACT * net_demand
-        mean_reversion = self.MEAN_REVERSION * (self.FUNDAMENTAL_VALUE - current_price)
-        noise = random.gauss(0, self.NOISE_STD)
+        price_impact_rate = extras["price_impact"]
+        mean_reversion_rate = extras["mean_reversion"]
+        fundamental_value = extras["fundamental_value"]
+        noise_std = extras["noise_std"]
+
+        price_impact = price_impact_rate * net_demand
+        mean_reversion = mean_reversion_rate * (fundamental_value - current_price)
+        noise = random.gauss(0, noise_std)
 
         new_price = max(
             1.0, current_price + price_impact + mean_reversion + noise + news_shock
@@ -164,13 +165,12 @@ class Market(GeneralPlayer):
 
 
 class BaseInvestor(GeneralPlayer):
-    """Base class with purchase price (reference point) tracking."""
+    """
+    Base class with purchase price (reference point) tracking.
 
-    STRATEGY_NAME = "base"
-    INITIAL_CASH = 10000.0
-    INITIAL_POSITION = 30.0  # Start with position to create gain/loss
-    INITIAL_PURCHASE_PRICE = 100.0  # Reference point
-    HISTORY_LIMIT = 50
+    Parameters from config extras:
+        - initial_cash, initial_position, initial_purchase_price, history_limit
+    """
 
     async def perceive(
         self,
@@ -181,11 +181,16 @@ class BaseInvestor(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "cash" not in self.state.custom_state:
-            self.state.custom_state["cash"] = self.INITIAL_CASH
-            self.state.custom_state["position"] = self.INITIAL_POSITION
-            self.state.custom_state["purchase_price"] = self.INITIAL_PURCHASE_PRICE
+            extras = self.config.extras
+            initial_cash = extras["initial_cash"]
+            initial_position = extras["initial_position"]
+            initial_purchase_price = extras["initial_purchase_price"]
+
+            self.state.custom_state["cash"] = initial_cash
+            self.state.custom_state["position"] = initial_position
+            self.state.custom_state["purchase_price"] = initial_purchase_price
             self.state.custom_state["total_cost"] = (
-                self.INITIAL_POSITION * self.INITIAL_PURCHASE_PRICE
+                initial_position * initial_purchase_price
             )
 
         market_data = None
@@ -230,35 +235,29 @@ class BaseInvestor(GeneralPlayer):
 
 class DispositionInvestor(BaseInvestor):
     """
-    Disposition Effect Investor (Prospect Theory):
+    Disposition Effect Investor (Prospect Theory).
 
     Behavior:
-        - Sells winners quickly (gain threshold ~10%)
-        - Holds losers stubbornly (loss threshold ~30%)
+        - Sells winners quickly (gain_threshold ~10%)
+        - Holds losers stubbornly (loss_threshold ~30%)
 
-    Value Function (Prospect Theory):
-        V(x) = x^α           if x ≥ 0  (gains, α ≈ 0.88)
-        V(x) = -λ(-x)^β      if x < 0  (losses, β ≈ 0.88, λ ≈ 2.25)
-
-    This creates asymmetric treatment of gains vs losses.
+    Parameters from config extras:
+        - gain_threshold, loss_threshold, loss_aversion
+        - sell_fraction_gain, sell_fraction_loss
     """
 
-    STRATEGY_NAME = "disposition_investor"
-    GAIN_THRESHOLD = 0.10  # Sell at 10% gain
-    LOSS_THRESHOLD = -0.30  # Only sell at 30% loss
-    LOSS_AVERSION = 2.25  # λ parameter
-    SELL_FRACTION_GAIN = 0.6  # Sell 60% when gain threshold hit
-    SELL_FRACTION_LOSS = 0.2  # Reluctantly sell only 20% at loss
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         purchase_price = self.state.custom_state["purchase_price"]
         market_data = self.state.custom_state["market_data"]
 
+        strategy_name = self.__class__.__name__
+
         if market_data is None:
-            return self._hold_order(round_num, cash, position, purchase_price)
+            return self._hold_order(round_num, strategy_name)
 
         price = market_data["price"]
 
@@ -268,17 +267,22 @@ class DispositionInvestor(BaseInvestor):
         else:
             gain_loss = 0
 
+        gain_threshold = extras["gain_threshold"]
+        loss_threshold = extras["loss_threshold"]
+        sell_fraction_gain = extras["sell_fraction_gain"]
+        sell_fraction_loss = extras["sell_fraction_loss"]
+
         quantity = 0.0
         action = "HOLD"
 
         # Disposition effect logic
-        if gain_loss >= self.GAIN_THRESHOLD and position > 0:
+        if gain_loss >= gain_threshold and position > 0:
             # SELL WINNERS quickly (realize gains)
-            quantity = -position * self.SELL_FRACTION_GAIN
+            quantity = -position * sell_fraction_gain
             action = "SELL_WINNER"
-        elif gain_loss <= self.LOSS_THRESHOLD and position > 0:
+        elif gain_loss <= loss_threshold and position > 0:
             # Reluctantly sell losers
-            quantity = -position * self.SELL_FRACTION_LOSS
+            quantity = -position * sell_fraction_loss
             action = "SELL_LOSER"
         elif gain_loss > 0.02 and position < 50:
             # Small buy when slightly positive
@@ -303,7 +307,7 @@ class DispositionInvestor(BaseInvestor):
                 quantity = 0
 
         print(
-            f"[{self.config.identity:24s}] R{round_num} ({self.STRATEGY_NAME:20s}): "
+            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} [{action:12s}] g/l={gain_loss*100:+.1f}% | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -312,34 +316,34 @@ class DispositionInvestor(BaseInvestor):
         return {
             "bid_price": price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
             ],
         }
 
-    def _hold_order(self, round_num, cash, position, ref_price):
+    def _hold_order(self, round_num, strategy_name):
         print(
-            f"[{self.config.identity:24s}] R{round_num} ({self.STRATEGY_NAME:20s}): "
+            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:20s}): "
             f"Q=   +0.00 [NO DATA]"
         )
         return {
             "bid_price": 0,
             "quantity": 0,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": 0,
                         "quantity": 0,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
@@ -354,39 +358,43 @@ class DispositionInvestor(BaseInvestor):
 
 class RationalInvestor(BaseInvestor):
     """
-    Rational Investor (Baseline):
+    Rational Investor (Baseline).
 
     Makes decisions based on expected future returns,
     NOT affected by sunk costs or reference points.
-    Rebalances to optimal allocation regardless of gain/loss.
+
+    Parameters from config extras:
+        - target_allocation, rebalance_threshold
     """
 
-    STRATEGY_NAME = "rational_investor"
-    TARGET_ALLOCATION = 0.5
-    REBALANCE_THRESHOLD = 0.1
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         market_data = self.state.custom_state["market_data"]
 
+        strategy_name = self.__class__.__name__
+
         if market_data is None:
-            return self._hold_order(round_num, cash, position)
+            return self._hold_order(round_num, strategy_name)
 
         price = market_data["price"]
+
+        target_allocation = extras["target_allocation"]
+        rebalance_threshold = extras["rebalance_threshold"]
 
         # Calculate current allocation
         equity_value = position * price
         total_value = cash + equity_value
         current_alloc = equity_value / total_value if total_value > 0 else 0
 
-        deviation = current_alloc - self.TARGET_ALLOCATION
+        deviation = current_alloc - target_allocation
         quantity = 0.0
 
         # Rebalance regardless of gain/loss
-        if abs(deviation) > self.REBALANCE_THRESHOLD:
-            target_equity = total_value * self.TARGET_ALLOCATION
+        if abs(deviation) > rebalance_threshold:
+            target_equity = total_value * target_allocation
             target_position = target_equity / price
             quantity = (target_position - position) * 0.5
 
@@ -407,7 +415,7 @@ class RationalInvestor(BaseInvestor):
                 quantity = 0
 
         print(
-            f"[{self.config.identity:24s}] R{round_num} ({self.STRATEGY_NAME:20s}): "
+            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} alloc={current_alloc*100:.1f}% | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -416,30 +424,30 @@ class RationalInvestor(BaseInvestor):
         return {
             "bid_price": price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
             ],
         }
 
-    def _hold_order(self, round_num, cash, position):
+    def _hold_order(self, round_num, strategy_name):
         return {
             "bid_price": 0,
             "quantity": 0,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": 0,
                         "quantity": 0,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
@@ -454,26 +462,28 @@ class RationalInvestor(BaseInvestor):
 
 class TaxAwareInvestor(BaseInvestor):
     """
-    Tax-Aware Investor:
+    Tax-Aware Investor.
 
     Opposite of disposition effect for tax optimization:
     - Sells losers to harvest tax losses
     - Holds winners to defer capital gains tax
+
+    Parameters from config extras:
+        - tax_loss_threshold, capital_gains_hold, tax_harvest_fraction
     """
 
-    STRATEGY_NAME = "tax_aware_investor"
-    TAX_LOSS_THRESHOLD = -0.05  # Sell at 5% loss for tax benefit
-    CAPITAL_GAINS_HOLD = 0.20  # Hold until 20% gain (deferral benefit)
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         purchase_price = self.state.custom_state["purchase_price"]
         market_data = self.state.custom_state["market_data"]
 
+        strategy_name = self.__class__.__name__
+
         if market_data is None:
-            return self._hold_order(round_num, cash, position)
+            return self._hold_order(round_num, strategy_name)
 
         price = market_data["price"]
 
@@ -482,14 +492,18 @@ class TaxAwareInvestor(BaseInvestor):
         else:
             gain_loss = 0
 
+        tax_loss_threshold = extras["tax_loss_threshold"]
+        capital_gains_hold = extras["capital_gains_hold"]
+        tax_harvest_fraction = extras["tax_harvest_fraction"]
+
         quantity = 0.0
         action = "HOLD"
 
-        if gain_loss <= self.TAX_LOSS_THRESHOLD and position > 0:
+        if gain_loss <= tax_loss_threshold and position > 0:
             # Tax loss harvesting - SELL losers
-            quantity = -position * 0.5
+            quantity = -position * tax_harvest_fraction
             action = "TAX_HARVEST"
-        elif gain_loss >= self.CAPITAL_GAINS_HOLD:
+        elif gain_loss >= capital_gains_hold:
             # Hold winners for tax deferral (opposite of disposition)
             action = "DEFER_GAINS"
 
@@ -510,7 +524,7 @@ class TaxAwareInvestor(BaseInvestor):
                 quantity = 0
 
         print(
-            f"[{self.config.identity:24s}] R{round_num} ({self.STRATEGY_NAME:20s}): "
+            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} [{action:12s}] g/l={gain_loss*100:+.1f}% | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -519,30 +533,30 @@ class TaxAwareInvestor(BaseInvestor):
         return {
             "bid_price": price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
             ],
         }
 
-    def _hold_order(self, round_num, cash, position):
+    def _hold_order(self, round_num, strategy_name):
         return {
             "bid_price": 0,
             "quantity": 0,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": 0,
                         "quantity": 0,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
@@ -558,14 +572,13 @@ class TaxAwareInvestor(BaseInvestor):
 class IndexHolder(BaseInvestor):
     """Passive buy-and-hold investor (no active trading)."""
 
-    STRATEGY_NAME = "index_holder"
-    INITIAL_POSITION = 50.0
-
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         market_data = self.state.custom_state["market_data"]
+
+        strategy_name = self.__class__.__name__
 
         price = market_data["price"] if market_data else 0
 
@@ -573,7 +586,7 @@ class IndexHolder(BaseInvestor):
         quantity = 0.0
 
         print(
-            f"[{self.config.identity:24s}] R{round_num} ({self.STRATEGY_NAME:20s}): "
+            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} [HOLD] | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -582,13 +595,13 @@ class IndexHolder(BaseInvestor):
         return {
             "bid_price": price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
@@ -603,27 +616,27 @@ class IndexHolder(BaseInvestor):
 
 class InstitutionalInvestor(BaseInvestor):
     """
-    Institutional Investor:
+    Institutional Investor.
 
     Professional money managers show weaker disposition effect
     due to training, oversight, and fiduciary duty.
+
+    Parameters from config extras:
+        - gain_threshold, loss_threshold, sell_fraction
     """
 
-    STRATEGY_NAME = "institutional_investor"
-    # Weaker disposition thresholds
-    GAIN_THRESHOLD = 0.25  # Hold longer than retail
-    LOSS_THRESHOLD = -0.15  # Cut losses earlier than retail
-    SELL_FRACTION = 0.4
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         purchase_price = self.state.custom_state["purchase_price"]
         market_data = self.state.custom_state["market_data"]
 
+        strategy_name = self.__class__.__name__
+
         if market_data is None:
-            return self._hold_order(round_num, cash, position)
+            return self._hold_order(round_num, strategy_name)
 
         price = market_data["price"]
 
@@ -632,15 +645,19 @@ class InstitutionalInvestor(BaseInvestor):
         else:
             gain_loss = 0
 
+        gain_threshold = extras["gain_threshold"]
+        loss_threshold = extras["loss_threshold"]
+        sell_fraction = extras["sell_fraction"]
+
         quantity = 0.0
         action = "HOLD"
 
         # More rational thresholds
-        if gain_loss >= self.GAIN_THRESHOLD and position > 0:
-            quantity = -position * self.SELL_FRACTION
+        if gain_loss >= gain_threshold and position > 0:
+            quantity = -position * sell_fraction
             action = "TAKE_PROFIT"
-        elif gain_loss <= self.LOSS_THRESHOLD and position > 0:
-            quantity = -position * self.SELL_FRACTION
+        elif gain_loss <= loss_threshold and position > 0:
+            quantity = -position * sell_fraction
             action = "CUT_LOSS"
 
         # Execute
@@ -660,7 +677,7 @@ class InstitutionalInvestor(BaseInvestor):
                 quantity = 0
 
         print(
-            f"[{self.config.identity:24s}] R{round_num} ({self.STRATEGY_NAME:20s}): "
+            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} [{action:12s}] g/l={gain_loss*100:+.1f}% | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -669,30 +686,30 @@ class InstitutionalInvestor(BaseInvestor):
         return {
             "bid_price": price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
             ],
         }
 
-    def _hold_order(self, round_num, cash, position):
+    def _hold_order(self, round_num, strategy_name):
         return {
             "bid_price": 0,
             "quantity": 0,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": 0,
                         "quantity": 0,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }

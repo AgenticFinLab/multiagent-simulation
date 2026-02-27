@@ -13,13 +13,25 @@ Theoretical Foundation:
     - GARCH volatility dynamics - Bollerslev (1986)
     - Positive feedback and delayed mean reversion
 
-Architecture:
-    - Market: Rule-based with GARCH(1,1) volatility dynamics
-    - LLMFundamentalist: Slow mean reversion (stabilizing, delayed)
-    - LLMTrendFollower: Fast momentum, vol-sensitive (destabilizing)
-    - LLMNoiseTrader: Random liquidity (neutral)
-    - LLMSlowAdapter: Conservative, delayed processing (weak stabilizing)
-    - LLMVolatilityTrader: Trades vol regime (weak stabilizing)
+Market Parameters (from config.extras):
+    - record_path: Path for output records
+    - fundamental_value: True value for mean reversion
+    - initial_price: Starting price
+    - price_impact: Price impact coefficient
+    - mean_reversion: Mean reversion strength
+    - garch_omega: GARCH constant term
+    - garch_alpha: GARCH return-squared coefficient
+    - garch_beta: GARCH variance persistence
+    - min_volatility: Minimum volatility floor
+    - max_volatility: Maximum volatility ceiling
+    - history_limit: Maximum history buffer size
+
+Investor Parameters (from config.extras):
+    - record_path: Path for output records
+    - initial_cash: Starting cash balance
+    - initial_position: Starting share position
+    - history_limit: Maximum history buffer size
+    - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
 import os
@@ -35,7 +47,6 @@ from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
 
-# lmbase for LLM inference
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
@@ -47,40 +58,11 @@ def load_prompt(prompt_path: str) -> str:
     return getattr(module, var_name)
 
 
-# =============================================================================
-# Market - Rule-Based with GARCH Volatility
-# =============================================================================
-
-
 class Market(GeneralPlayer):
+    """Central market with GARCH(1,1) volatility dynamics.
+
+    All parameters read from config.extras (no class constants).
     """
-    Central market with GARCH(1,1) volatility dynamics.
-
-    Price Model:
-        P(t+1) = P(t) + λ × NetDemand + γ × [F - P(t)] + σ(t) × ε
-
-    Volatility (GARCH):
-        σ²(t) = ω + α × r²(t-1) + β × σ²(t-1)
-
-    This creates volatility clustering: large returns increase future volatility.
-    """
-
-    FUNDAMENTAL_VALUE = 100.0
-    INITIAL_PRICE = 100.0
-
-    # Price dynamics
-    PRICE_IMPACT = 0.05
-    MEAN_REVERSION = 0.02
-
-    # GARCH parameters
-    GARCH_OMEGA = 0.0001
-    GARCH_ALPHA = 0.15
-    GARCH_BETA = 0.80
-
-    MIN_VOLATILITY = 0.5
-    MAX_VOLATILITY = 10.0
-
-    HISTORY_LIMIT = 200
 
     async def perceive(
         self,
@@ -91,24 +73,26 @@ class Market(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "price" not in self.state.custom_state:
-            record_path = self.config.extras["record_path"]
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
+            history_limit = extras["history_limit"]
 
-            self.state.custom_state["price"] = self.INITIAL_PRICE
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["volatility"] = 1.0
             self.state.custom_state["prev_return"] = 0.0
 
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
             self.state.custom_state["volatility_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volatility"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
             self.state.custom_state["volume_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volume"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
 
         orders = []
@@ -127,11 +111,22 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
         current_vol = self.state.custom_state["volatility"]
         prev_return = self.state.custom_state["prev_return"]
         orders = self.state.custom_state["orders"]
+
+        # Get parameters from config
+        fundamental_value = extras["fundamental_value"]
+        price_impact_coef = extras["price_impact"]
+        mean_reversion_strength = extras["mean_reversion"]
+        garch_omega = extras["garch_omega"]
+        garch_alpha = extras["garch_alpha"]
+        garch_beta = extras["garch_beta"]
+        min_volatility = extras["min_volatility"]
+        max_volatility = extras["max_volatility"]
 
         buy_orders = [o for o in orders if o["quantity"] > 0]
         sell_orders = [o for o in orders if o["quantity"] < 0]
@@ -143,16 +138,14 @@ class Market(GeneralPlayer):
 
         # GARCH(1,1) volatility update
         new_variance = (
-            self.GARCH_OMEGA
-            + self.GARCH_ALPHA * (prev_return**2)
-            + self.GARCH_BETA * (current_vol**2)
+            garch_omega + garch_alpha * (prev_return**2) + garch_beta * (current_vol**2)
         )
         new_vol = math.sqrt(new_variance)
-        new_vol = max(self.MIN_VOLATILITY, min(self.MAX_VOLATILITY, new_vol))
+        new_vol = max(min_volatility, min(max_volatility, new_vol))
 
         # Price dynamics
-        price_impact = self.PRICE_IMPACT * net_demand
-        mean_reversion = self.MEAN_REVERSION * (self.FUNDAMENTAL_VALUE - current_price)
+        price_impact = price_impact_coef * net_demand
+        mean_reversion = mean_reversion_strength * (fundamental_value - current_price)
         noise = random.gauss(0, new_vol)
 
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
@@ -192,7 +185,7 @@ class Market(GeneralPlayer):
             "volume": total_volume,
             "net_demand": net_demand,
             "round": round_num,
-            "fundamental": self.FUNDAMENTAL_VALUE,
+            "fundamental": fundamental_value,
         }
 
         return {
@@ -210,26 +203,11 @@ class Market(GeneralPlayer):
         )
 
 
-# =============================================================================
-# LLM Investor Base Class
-# =============================================================================
-
-
 class LLMInvestor(GeneralPlayer):
+    """Base class for LLM-powered investors using lmbase.
+
+    All parameters read from config.extras (no class constants).
     """
-    Base class for LLM-powered investors using lmbase.
-
-    Handles LLM client initialization, JSON parsing, and portfolio constraints.
-    Includes volatility data in prompts for volatility-aware decision making.
-    """
-
-    STRATEGY_NAME = "llm_base"
-    SYSTEM_PROMPT = "You are an investor making trading decisions."
-
-    DEFAULT_LM_NAME = "ark/ep-20250218212539-7r2k9"
-    INITIAL_CASH = 10000.0
-    INITIAL_POSITION = 0.0
-    HISTORY_LIMIT = 100
 
     async def perceive(
         self,
@@ -240,11 +218,13 @@ class LLMInvestor(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "cash" not in self.state.custom_state:
-            self.state.custom_state["cash"] = self.INITIAL_CASH
-            self.state.custom_state["position"] = self.INITIAL_POSITION
+            extras = self.config.extras
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
+            history_limit = extras["history_limit"]
 
             load_dotenv()
-            llm_config = self.config.extras["llm"]
+            llm_config = extras["llm"]
             lm_name = llm_config["lm_name"]
             generation_config = llm_config["generation_config"]
 
@@ -257,15 +237,15 @@ class LLMInvestor(GeneralPlayer):
             )
             self.state.custom_state["llm_client"] = llm_client
 
-            record_path = self.config.extras["record_path"]
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
             self.state.custom_state["volatility_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volatility"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
 
         if observation.inbounds:
@@ -313,44 +293,22 @@ class LLMInvestor(GeneralPlayer):
         )
 
         llm_config = self.config.extras["llm"]
-        if "user_message" in llm_config:
-            template = load_prompt(llm_config["user_message"])
-            return template.format(
-                price=market_data["price"],
-                prev_price=market_data["prev_price"],
-                return_pct=market_data["return_pct"],
-                volatility=market_data["volatility"],
-                prev_volatility=market_data["prev_volatility"],
-                volume=market_data["volume"],
-                net_demand=market_data["net_demand"],
-                fundamental=market_data["fundamental"],
-                recent_prices=recent_prices,
-                recent_vols=[f"{v:.3f}" for v in recent_vols],
-                cash=cash,
-                position=position,
-                portfolio_value=cash + position * market_data["price"],
-            )
-
-        return f"""
-Current Market Data:
-- Price: ${market_data['price']:.2f}
-- Previous Price: ${market_data['prev_price']:.2f}
-- Return: {market_data['return_pct']:+.2f}%
-- Volatility: {market_data['volatility']:.3f}
-- Volume: {market_data['volume']:.2f}
-- Net Demand: {market_data['net_demand']:+.2f}
-- Fundamental Value: ${market_data['fundamental']:.2f}
-- Recent Prices: {recent_prices}
-- Recent Volatilities: {recent_vols}
-
-Your Portfolio:
-- Cash: ${cash:.2f}
-- Position: {position:.2f} shares
-- Portfolio Value: ${cash + position * market_data['price']:.2f}
-
-Make your trading decision. Respond with ONLY valid JSON:
-{{"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}}
-"""
+        template = load_prompt(llm_config["user_message"])
+        return template.format(
+            price=market_data["price"],
+            prev_price=market_data["prev_price"],
+            return_pct=market_data["return_pct"],
+            volatility=market_data["volatility"],
+            prev_volatility=market_data["prev_volatility"],
+            volume=market_data["volume"],
+            net_demand=market_data["net_demand"],
+            fundamental=market_data["fundamental"],
+            recent_prices=recent_prices,
+            recent_vols=[f"{v:.3f}" for v in recent_vols],
+            cash=cash,
+            position=position,
+            portfolio_value=cash + position * market_data["price"],
+        )
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         try:
@@ -391,10 +349,7 @@ Make your trading decision. Respond with ONLY valid JSON:
         user_prompt = self._build_prompt(market_data)
 
         llm_config = self.config.extras["llm"]
-        if "sys_message" in llm_config:
-            system_prompt = load_prompt(llm_config["sys_message"])
-        else:
-            system_prompt = self.SYSTEM_PROMPT
+        system_prompt = load_prompt(llm_config["sys_message"])
 
         max_retries = 3
         for attempt in range(max_retries):
@@ -427,8 +382,9 @@ Make your trading decision. Respond with ONLY valid JSON:
             self.state.custom_state["cash"] += proceeds
             self.state.custom_state["position"] += quantity
 
+        strategy_name = self.__class__.__name__
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:15s}): "
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"P={bid_price:7.2f}, Q={quantity:+7.2f} | "
             f"Cash={self.state.custom_state['cash']:8.2f}, "
             f"Pos={self.state.custom_state['position']:+7.2f}"
@@ -437,7 +393,7 @@ Make your trading decision. Respond with ONLY valid JSON:
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": decision["reasoning"][:100],
             "cash": self.state.custom_state["cash"],
@@ -457,36 +413,31 @@ Make your trading decision. Respond with ONLY valid JSON:
         )
 
 
-# =============================================================================
-# LLM Investor Types
-# =============================================================================
-
-
 class LLMFundamentalist(LLMInvestor):
     """LLM-powered Fundamentalist - Slow mean reversion (STABILIZING, DELAYED)"""
 
-    STRATEGY_NAME = "llm_fundamentalist"
+    pass
 
 
 class LLMTrendFollower(LLMInvestor):
     """LLM-powered Trend Follower - Fast momentum, vol-sensitive (DESTABILIZING)"""
 
-    STRATEGY_NAME = "llm_trend_follower"
+    pass
 
 
 class LLMNoiseTrader(LLMInvestor):
     """LLM-powered Noise Trader - Random liquidity (NEUTRAL)"""
 
-    STRATEGY_NAME = "llm_noise_trader"
+    pass
 
 
 class LLMSlowAdapter(LLMInvestor):
     """LLM-powered Slow Adapter - Conservative, delayed (WEAK STABILIZING)"""
 
-    STRATEGY_NAME = "llm_slow_adapter"
+    pass
 
 
 class LLMVolatilityTrader(LLMInvestor):
     """LLM-powered Volatility Trader - Trades vol regime (WEAK STABILIZING)"""
 
-    STRATEGY_NAME = "llm_volatility_trader"
+    pass

@@ -5,12 +5,22 @@ Phenomenon: Short Squeeze
     - Creates positive feedback loop (cover → price rises → more covering)
     - GameStop 2021 is a famous example
 
-LLM Investor Types:
-    - Short Seller: Borrows and sells, forced to cover on losses
-    - Retail Coordinator: Triggers initial squeeze (Reddit style)
-    - Momentum Buyer: Buys on upward momentum
-    - Value Investor: Buys when undervalued
-    - Institutional Holder: Large passive holder
+Market Parameters (from config.extras):
+    - record_path: Path for output records
+    - fundamental_value: True value (typically low for shorted stocks)
+    - initial_price: Starting price (typically below fundamental)
+    - price_impact: Price impact coefficient
+    - mean_reversion: Mean reversion strength (weak to allow squeeze)
+    - noise_std: Random noise standard deviation
+    - initial_short_interest: Starting short interest percentage
+    - history_limit: Maximum history buffer size
+
+Investor Parameters (from config.extras):
+    - record_path: Path for output records
+    - initial_cash: Starting cash balance
+    - initial_position: Starting share position (negative for shorts)
+    - history_limit: Maximum history buffer size
+    - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
 import os
@@ -36,14 +46,10 @@ def load_prompt(prompt_path: str) -> str:
 
 
 class Market(GeneralPlayer):
-    """Market with short interest tracking."""
+    """Market with short interest tracking.
 
-    FUNDAMENTAL_VALUE = 50.0  # Low fundamental - typical for shorted stocks
-    INITIAL_PRICE = 30.0  # Trading below fundamental
-    PRICE_IMPACT = 0.1
-    MEAN_REVERSION = 0.005  # Weak - allows squeeze to develop
-    NOISE_STD = 0.5
-    HISTORY_LIMIT = 200
+    All parameters read from config.extras (no class constants).
+    """
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
@@ -52,15 +58,16 @@ class Market(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "price" not in self.state.custom_state:
-            record_path = self.config.extras["record_path"]
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            self.state.custom_state["price"] = self.INITIAL_PRICE
-            self.state.custom_state["short_interest"] = (
-                80.0  # Start with high short interest
-            )
+            history_limit = extras["history_limit"]
+
+            self.state.custom_state["price"] = extras["initial_price"]
+            self.state.custom_state["short_interest"] = extras["initial_short_interest"]
             self.state.custom_state["squeeze_pressure"] = 0.0
             self.state.custom_state["price_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "price"), entry_limit=self.HISTORY_LIMIT
+                folder=os.path.join(base_path, "price"), entry_limit=history_limit
             )
 
         orders = []
@@ -80,10 +87,18 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
         short_interest = self.state.custom_state["short_interest"]
         orders = self.state.custom_state["orders"]
+
+        # Get parameters from config
+        fundamental_value = extras["fundamental_value"]
+        initial_price = extras["initial_price"]
+        price_impact_coef = extras["price_impact"]
+        mean_reversion_strength = extras["mean_reversion"]
+        noise_std = extras["noise_std"]
 
         total_buy = sum(o["quantity"] for o in orders if o["quantity"] > 0)
         total_sell = abs(sum(o["quantity"] for o in orders if o["quantity"] < 0))
@@ -94,9 +109,9 @@ class Market(GeneralPlayer):
 
         # Short cover has extra price impact (forced buying)
         short_squeeze_impact = cover_buying * 0.05
-        price_impact = self.PRICE_IMPACT * net_demand + short_squeeze_impact
-        mean_reversion = self.MEAN_REVERSION * (self.FUNDAMENTAL_VALUE - current_price)
-        noise = random.gauss(0, self.NOISE_STD)
+        price_impact = price_impact_coef * net_demand + short_squeeze_impact
+        mean_reversion = mean_reversion_strength * (fundamental_value - current_price)
+        noise = random.gauss(0, noise_std)
 
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
         price_return = (new_price - current_price) / current_price
@@ -105,7 +120,7 @@ class Market(GeneralPlayer):
         short_interest = max(0.0, short_interest - cover_buying * 0.5)
 
         # Squeeze pressure indicator
-        squeeze_pressure = max(0.0, (new_price / self.INITIAL_PRICE - 1) * 100)
+        squeeze_pressure = max(0.0, (new_price / initial_price - 1) * 100)
 
         self.state.custom_state["price"] = new_price
         self.state.custom_state["short_interest"] = short_interest
@@ -131,7 +146,7 @@ class Market(GeneralPlayer):
             "return_pct": price_return * 100,
             "short_interest": short_interest,
             "squeeze_pressure": squeeze_pressure,
-            "fundamental": self.FUNDAMENTAL_VALUE,
+            "fundamental": fundamental_value,
             "round": round_num,
         }
         return {
@@ -150,12 +165,10 @@ class Market(GeneralPlayer):
 
 
 class LLMShortSqueezeInvestor(GeneralPlayer):
-    """Base class for short squeeze investors."""
+    """Base class for short squeeze investors.
 
-    STRATEGY_NAME = "llm_squeeze_base"
-    SYSTEM_PROMPT = "You trade in a heavily shorted stock."
-    INITIAL_CASH = 10000.0
-    INITIAL_POSITION = 0.0  # Start with no position
+    All parameters read from config.extras (no class constants).
+    """
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
@@ -164,12 +177,13 @@ class LLMShortSqueezeInvestor(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "cash" not in self.state.custom_state:
-            self.state.custom_state["cash"] = self.INITIAL_CASH
-            self.state.custom_state["position"] = self.INITIAL_POSITION
+            extras = self.config.extras
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["short_position"] = 0.0
 
             load_dotenv()
-            llm_config = self.config.extras["llm"]
+            llm_config = extras["llm"]
             self.state.custom_state["lm_name"] = llm_config["lm_name"]
             self.state.custom_state["generation_config"] = llm_config[
                 "generation_config"
@@ -205,22 +219,20 @@ class LLMShortSqueezeInvestor(GeneralPlayer):
 
     def _build_prompt(self, market_data: Dict[str, Any]) -> str:
         llm_config = self.config.extras["llm"]
-        if "user_message" in llm_config:
-            template = load_prompt(llm_config["user_message"])
-            return template.format(
-                price=market_data["price"],
-                prev_price=market_data["prev_price"],
-                return_pct=market_data["return_pct"],
-                short_interest=market_data["short_interest"],
-                squeeze_pressure=market_data["squeeze_pressure"],
-                fundamental=market_data["fundamental"],
-                cash=self.state.custom_state["cash"],
-                position=self.state.custom_state["position"],
-                short_position=self.state.custom_state["short_position"],
-                portfolio_value=self.state.custom_state["cash"]
-                + self.state.custom_state["position"] * market_data["price"],
-            )
-        return f"Price: ${market_data['price']:.2f}, Short Interest: {market_data['short_interest']:.1f}%"
+        template = load_prompt(llm_config["user_message"])
+        return template.format(
+            price=market_data["price"],
+            prev_price=market_data["prev_price"],
+            return_pct=market_data["return_pct"],
+            short_interest=market_data["short_interest"],
+            squeeze_pressure=market_data["squeeze_pressure"],
+            fundamental=market_data["fundamental"],
+            cash=self.state.custom_state["cash"],
+            position=self.state.custom_state["position"],
+            short_position=self.state.custom_state["short_position"],
+            portfolio_value=self.state.custom_state["cash"]
+            + self.state.custom_state["position"] * market_data["price"],
+        )
 
     def _parse_response(self, text: str) -> Dict[str, Any]:
         try:
@@ -235,11 +247,7 @@ class LLMShortSqueezeInvestor(GeneralPlayer):
         market_data = self.state.custom_state["market_data"]
         llm_client = self.state.custom_state["llm_client"]
         llm_config = self.config.extras["llm"]
-        system_prompt = (
-            load_prompt(llm_config["sys_message"])
-            if "sys_message" in llm_config
-            else self.SYSTEM_PROMPT
-        )
+        system_prompt = load_prompt(llm_config["sys_message"])
 
         for _ in range(3):
             try:
@@ -258,6 +266,7 @@ class LLMShortSqueezeInvestor(GeneralPlayer):
                     "action": "hold",
                     "bid_price": market_data["price"],
                     "quantity": 0,
+                    "is_short_cover": False,
                     "reasoning": "error",
                 }
 
@@ -281,10 +290,11 @@ class LLMShortSqueezeInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += abs(quantity) * bid_price
             self.state.custom_state["position"] += quantity
 
+        strategy_name = self.__class__.__name__
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
             "is_short_cover": is_short_cover,
             "reasoning": decision["reasoning"][:100],
@@ -305,103 +315,28 @@ class LLMShortSqueezeInvestor(GeneralPlayer):
 class LLMShortSeller(LLMShortSqueezeInvestor):
     """Short seller - forced to cover when squeezed."""
 
-    STRATEGY_NAME = "llm_short_seller"
-    INITIAL_POSITION = -50.0  # Start short
-
-    SYSTEM_PROMPT = """You are a SHORT SELLER who is SHORT this stock.
-
-CRITICAL: You have a SHORT position of 50 shares. If price rises too much, you MUST cover (buy to close).
-
-RISK MANAGEMENT:
-- Price > $40: Consider covering (20% loss on $30 short)
-- Price > $50: MUST cover half (66% loss)
-- Price > $60: MUST cover all (100%+ loss)
-- Squeeze pressure > 50%: DANGER - cover immediately
-
-When covering, set is_short_cover: true and quantity: positive (buying)
-
-You are at RISK of unlimited losses if squeezed!
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "is_short_cover": bool, "reasoning": string}
-"""
+    pass
 
 
 class LLMRetailCoordinator(LLMShortSqueezeInvestor):
     """Retail trader coordinating the squeeze (Reddit style)."""
 
-    STRATEGY_NAME = "llm_retail_coord"
-    SYSTEM_PROMPT = """You are a RETAIL TRADER coordinating a short squeeze (like Reddit/WSB).
-
-CORE BELIEF: "To the moon! Diamond hands! Squeeze the shorts!"
-
-YOUR STRATEGY:
-1. BUY aggressively to trigger the squeeze
-2. HOLD during dips ("diamond hands")
-3. Encourage momentum with large buys
-4. Target: Force short sellers to cover at higher prices
-
-TIMING:
-- Short interest > 50%: Prime for squeeze - BUY MORE
-- Squeeze pressure rising: Add to position
-- Price dipping but shorts still high: HOLD, don't sell
-
-You are trying to CREATE the squeeze!
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMMomentumBuyer(LLMShortSqueezeInvestor):
     """Momentum trader joining the squeeze."""
 
-    STRATEGY_NAME = "llm_momentum_buyer"
-    SYSTEM_PROMPT = """You are a MOMENTUM TRADER riding the squeeze.
-
-CORE BELIEF: "The trend is your friend - especially in a squeeze."
-
-STRATEGY:
-- Positive returns: BUY (momentum continuation)
-- Squeeze pressure > 30%: Increase buying
-- Price falling: Reduce or exit
-
-You don't coordinate - you just follow momentum.
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMValueInvestor(LLMShortSqueezeInvestor):
     """Value investor - cautious during squeeze."""
 
-    STRATEGY_NAME = "llm_value_investor"
-    SYSTEM_PROMPT = """You are a VALUE INVESTOR watching the squeeze skeptically.
-
-CORE BELIEF: "This is disconnected from fundamentals."
-
-YOUR VIEW:
-- Price < $50 (fundamental): May buy for value
-- Price > $50: Overvalued - stay out or sell
-- Squeeze is temporary - prices will revert
-
-You are CAUTIOUS about buying into mania.
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMInstitutionalHolder(LLMShortSqueezeInvestor):
     """Large institutional holder - can lend shares."""
 
-    STRATEGY_NAME = "llm_institutional"
-    INITIAL_POSITION = 100.0  # Large holder
-
-    SYSTEM_PROMPT = """You are a LARGE INSTITUTIONAL HOLDER with 100 shares.
-
-YOUR SITUATION:
-- You own shares and can profit from price increases
-- You may sell some to take profits
-- You are NOT short - no squeeze pressure on you
-
-STRATEGY:
-- Price increases significantly: Take some profits (sell 20-30%)
-- Squeeze seems unsustainable: Reduce position
-- You are a stabilizing force
-
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass

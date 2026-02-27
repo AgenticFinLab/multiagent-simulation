@@ -1,3 +1,7 @@
+# =============================================================================
+# MomentumEffectLLM Players Configuration
+# =============================================================================
+
 market:
   name: "Market with Momentum Dynamics"
   class: "examples.MomentumEffectLLM.players:Market"
@@ -8,7 +12,15 @@ market:
     group_tags:
       - market
     extras:
-      price_model: "momentum_aware"
+      record_path: "EXPERIMENT/MomentumEffectLLM/records"
+      initial_price: 100.0
+      initial_fundamental: 100.0
+      price_impact: 0.08
+      mean_reversion: 0.01
+      noise_std: 0.3
+      drift_persistence: 0.95
+      drift_volatility: 0.5
+      history_limit: 200
   persona: !include persona.yml
 
 llm_momentum_trader:
@@ -21,7 +33,10 @@ llm_momentum_trader:
     group_tags:
       - llm_investors
     extras:
-      strategy: momentum_trader
+      record_path: "EXPERIMENT/MomentumEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.MomentumEffectLLM.prompts:LLM_MOMENTUM_TRADER_SYS"
         user_message: "examples.MomentumEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -42,7 +57,10 @@ llm_contrarian:
     group_tags:
       - llm_investors
     extras:
-      strategy: contrarian
+      record_path: "EXPERIMENT/MomentumEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.MomentumEffectLLM.prompts:LLM_CONTRARIAN_SYS"
         user_message: "examples.MomentumEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -63,7 +81,10 @@ llm_technical:
     group_tags:
       - llm_investors
     extras:
-      strategy: technical
+      record_path: "EXPERIMENT/MomentumEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.MomentumEffectLLM.prompts:LLM_TECHNICAL_SYS"
         user_message: "examples.MomentumEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -84,7 +105,10 @@ llm_trend_follower:
     group_tags:
       - llm_investors
     extras:
-      strategy: trend_follower
+      record_path: "EXPERIMENT/MomentumEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.MomentumEffectLLM.prompts:LLM_TREND_FOLLOWER_SYS"
         user_message: "examples.MomentumEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -105,7 +129,10 @@ llm_fundamental:
     group_tags:
       - llm_investors
     extras:
-      strategy: fundamental
+      record_path: "EXPERIMENT/MomentumEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.MomentumEffectLLM.prompts:LLM_FUNDAMENTAL_SYS"
         user_message: "examples.MomentumEffectLLM.prompts:LLM_USER_TEMPLATE"

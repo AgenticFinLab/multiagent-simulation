@@ -1,53 +1,174 @@
+# =============================================================================
+# LiquidityDryup Players Configuration
+# =============================================================================
+# Market Maker Inventory Model Simulation
+#
+# Phenomenon: Liquidity Dry-up
+#   - Market makers withdraw liquidity during stress
+#   - Creates self-reinforcing cycles of illiquidity
+#   - Reference: Grossman & Miller (1988), Amihud & Mendelson (1986)
+#
+# Investor Types:
+#   - MarketMaker: Provides liquidity but withdraws in stress
+#   - LiquiditySeeker: Needs liquidity, struggles during dry-up
+#   - ValueTrader: Provides liquidity when mispricing detected
+#   - MomentumTrader: Can trigger liquidity crises
+#   - NoiseTrader: Random trades
+# =============================================================================
+
 market:
   name: "Market"
   class: "examples.LiquidityDryup.players:Market"
-  config: {identity: "market", role: coordinator, steps_per_turn: 1, group_tags: [market], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/LiquidityDryup/records"
+      # Market parameters
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.08
+      mean_reversion: 0.015
+      noise_std: 0.4
+      history_limit: 200
+      base_liquidity: 50.0
   persona: !include persona.yml
 
-mm_1:
+market_maker_1:
   name: "Market Maker 1"
   class: "examples.LiquidityDryup.players:MarketMaker"
-  config: {identity: "mm_1", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  config:
+    identity: "market_maker_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LiquidityDryup/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # MarketMaker specific
+      volatility_threshold: 0.02
+      base_liquidity: 30.0
+      withdraw_rebalance: 0.3
+      normal_rebalance: 0.2
   persona: !include persona.yml
 
-mm_2:
+market_maker_2:
   name: "Market Maker 2"
   class: "examples.LiquidityDryup.players:MarketMaker"
-  config: {identity: "mm_2", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  config:
+    identity: "market_maker_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LiquidityDryup/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      volatility_threshold: 0.02
+      base_liquidity: 30.0
+      withdraw_rebalance: 0.3
+      normal_rebalance: 0.2
   persona: !include persona.yml
 
-liq_seeker_1:
+liquidity_seeker_1:
   name: "Liquidity Seeker 1"
   class: "examples.LiquidityDryup.players:LiquiditySeeker"
-  config: {identity: "liq_seeker_1", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  config:
+    identity: "liquidity_seeker_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LiquidityDryup/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # LiquiditySeeker specific
+      target_volatility: 15.0
+      liquidity_base: 100.0
   persona: !include persona.yml
 
-liq_seeker_2:
+liquidity_seeker_2:
   name: "Liquidity Seeker 2"
   class: "examples.LiquidityDryup.players:LiquiditySeeker"
-  config: {identity: "liq_seeker_2", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  config:
+    identity: "liquidity_seeker_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LiquidityDryup/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      target_volatility: 15.0
+      liquidity_base: 100.0
   persona: !include persona.yml
 
 value_trader:
   name: "Value Trader"
   class: "examples.LiquidityDryup.players:ValueTrader"
-  config: {identity: "value_trader", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  config:
+    identity: "value_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LiquidityDryup/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # ValueTrader specific
+      liquidity_threshold: 0.05
+      trade_threshold: 0.03
+      base_liquidity_provision: 20
+      value_multiplier: 30
   persona: !include persona.yml
 
 momentum_trader:
   name: "Momentum Trader"
   class: "examples.LiquidityDryup.players:MomentumTrader"
-  config: {identity: "momentum_trader", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  config:
+    identity: "momentum_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LiquidityDryup/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # MomentumTrader specific
+      momentum_threshold: 0.01
+      momentum_multiplier: 200
   persona: !include persona.yml
 
-noise_1:
-  name: "Noise Trader 1"
+noise_trader:
+  name: "Noise Trader"
   class: "examples.LiquidityDryup.players:NoiseTrader"
-  config: {identity: "noise_1", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
-  persona: !include persona.yml
-
-noise_2:
-  name: "Noise Trader 2"
-  class: "examples.LiquidityDryup.players:NoiseTrader"
-  config: {identity: "noise_2", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  config:
+    identity: "noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LiquidityDryup/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 50
+      # NoiseTrader specific
+      noise_volatility: 10.0
   persona: !include persona.yml

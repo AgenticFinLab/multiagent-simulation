@@ -13,13 +13,24 @@ Theoretical Foundation:
     - Liquidity Spiral (Brunnermeier & Pedersen, 2009)
     - Fire Sales: Forced selling creates additional price pressure
 
-Key Crash Dynamics:
-    1. Initial shock → Price drops
-    2. Volatility rises → Risk parity reduces exposure
-    3. Leveraged funds hit margin → Forced liquidation
-    4. Market makers withdraw → Liquidity evaporates
-    5. Panic sellers add pressure → Crash accelerates
-    6. Bottom fishers provide eventual floor
+Market Parameters (from config.extras):
+    - record_path: Path for output records
+    - fundamental_value: True value for mean reversion
+    - initial_price: Starting price
+    - base_price_impact: Base price impact coefficient
+    - mean_reversion: Mean reversion strength
+    - noise_std: Random noise standard deviation
+    - liquidity_decay: Liquidity decay rate during selling
+    - liquidity_recovery: Liquidity recovery rate
+    - min_liquidity: Minimum liquidity floor
+    - history_limit: Maximum history buffer size
+
+Investor Parameters (from config.extras):
+    - record_path: Path for output records
+    - initial_cash: Starting cash balance
+    - initial_position: Starting share position
+    - history_limit: Maximum history buffer size
+    - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
 import os
@@ -45,35 +56,11 @@ def load_prompt(prompt_path: str) -> str:
     return getattr(module, var_name)
 
 
-# =============================================================================
-# Market - Rule-Based (Same as MarketCrash)
-# =============================================================================
-
-
 class Market(GeneralPlayer):
+    """Central market with liquidity-sensitive pricing.
+
+    All parameters read from config.extras (no class constants).
     """
-    Central market with liquidity-sensitive pricing.
-
-    Price Model:
-        P(t+1) = P(t) + λ(L) × NetDemand + γ × [F - P(t)] + σ × ε
-
-    Where λ(L) is liquidity-adjusted price impact:
-        - When liquidity is high: low impact
-        - When liquidity is low: high impact (accelerates crashes)
-    """
-
-    FUNDAMENTAL_VALUE = 100.0
-    INITIAL_PRICE = 100.0
-
-    BASE_PRICE_IMPACT = 0.08
-    MEAN_REVERSION = 0.01
-    NOISE_STD = 0.5
-
-    LIQUIDITY_DECAY = 0.1
-    LIQUIDITY_RECOVERY = 0.05
-    MIN_LIQUIDITY = 0.1
-
-    HISTORY_LIMIT = 300
 
     async def perceive(
         self,
@@ -84,21 +71,23 @@ class Market(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "price" not in self.state.custom_state:
-            record_path = self.config.extras["record_path"]
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
+            history_limit = extras["history_limit"]
 
-            self.state.custom_state["price"] = self.INITIAL_PRICE
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["liquidity"] = 1.0
             self.state.custom_state["volatility"] = 1.0
             self.state.custom_state["prev_return"] = 0.0
 
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
             self.state.custom_state["liquidity_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "liquidity"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
 
         orders = []
@@ -117,10 +106,20 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
         current_liquidity = self.state.custom_state["liquidity"]
         orders = self.state.custom_state["orders"]
+
+        # Get parameters from config
+        fundamental_value = extras["fundamental_value"]
+        base_price_impact = extras["base_price_impact"]
+        mean_reversion_strength = extras["mean_reversion"]
+        noise_std = extras["noise_std"]
+        liquidity_decay = extras["liquidity_decay"]
+        liquidity_recovery = extras["liquidity_recovery"]
+        min_liquidity = extras["min_liquidity"]
 
         # Aggregate orders
         total_buy_qty = sum(o["quantity"] for o in orders if o["quantity"] > 0)
@@ -131,23 +130,22 @@ class Market(GeneralPlayer):
         # Liquidity dynamics
         if net_demand < -5:  # Heavy selling
             new_liquidity = max(
-                self.MIN_LIQUIDITY, current_liquidity * (1 - self.LIQUIDITY_DECAY)
+                min_liquidity, current_liquidity * (1 - liquidity_decay)
             )
         else:
-            new_liquidity = min(1.0, current_liquidity + self.LIQUIDITY_RECOVERY)
+            new_liquidity = min(1.0, current_liquidity + liquidity_recovery)
 
         # Price impact increases as liquidity drops
-        liquidity_multiplier = 1.0 / max(new_liquidity, self.MIN_LIQUIDITY)
-        price_impact = self.BASE_PRICE_IMPACT * liquidity_multiplier * net_demand
+        liquidity_multiplier = 1.0 / max(new_liquidity, min_liquidity)
+        price_impact = base_price_impact * liquidity_multiplier * net_demand
 
-        mean_reversion = self.MEAN_REVERSION * (self.FUNDAMENTAL_VALUE - current_price)
-        noise = random.gauss(0, self.NOISE_STD)
+        mean_reversion = mean_reversion_strength * (fundamental_value - current_price)
+        noise = random.gauss(0, noise_std)
 
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
         price_return = (new_price - current_price) / current_price
 
         # Update volatility estimate
-        prev_return = self.state.custom_state["prev_return"]
         new_volatility = (
             0.9 * self.state.custom_state["volatility"] + 0.1 * abs(price_return) * 100
         )
@@ -186,7 +184,7 @@ class Market(GeneralPlayer):
             "volume": total_volume,
             "net_demand": net_demand,
             "round": round_num,
-            "fundamental": self.FUNDAMENTAL_VALUE,
+            "fundamental": fundamental_value,
         }
 
         return {
@@ -204,20 +202,11 @@ class Market(GeneralPlayer):
         )
 
 
-# =============================================================================
-# LLM Crash Investor Base Class
-# =============================================================================
-
-
 class LLMCrashInvestor(GeneralPlayer):
-    """Base class for LLM-powered crash investors."""
+    """Base class for LLM-powered crash investors.
 
-    STRATEGY_NAME = "llm_crash_base"
-    SYSTEM_PROMPT = "You are an investor in a potentially crashing market."
-
-    INITIAL_CASH = 10000.0
-    INITIAL_POSITION = 50.0  # Start with position to enable selling
-    HISTORY_LIMIT = 100
+    All parameters read from config.extras (no class constants).
+    """
 
     async def perceive(
         self,
@@ -228,11 +217,13 @@ class LLMCrashInvestor(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "cash" not in self.state.custom_state:
-            self.state.custom_state["cash"] = self.INITIAL_CASH
-            self.state.custom_state["position"] = self.INITIAL_POSITION
+            extras = self.config.extras
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
+            history_limit = extras["history_limit"]
 
             load_dotenv()
-            llm_config = self.config.extras["llm"]
+            llm_config = extras["llm"]
             lm_name = llm_config["lm_name"]
             generation_config = llm_config["generation_config"]
 
@@ -245,11 +236,11 @@ class LLMCrashInvestor(GeneralPlayer):
             )
             self.state.custom_state["llm_client"] = llm_client
 
-            record_path = self.config.extras["record_path"]
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
 
         if observation.inbounds:
@@ -290,43 +281,21 @@ class LLMCrashInvestor(GeneralPlayer):
         )
 
         llm_config = self.config.extras["llm"]
-        if "user_message" in llm_config:
-            template = load_prompt(llm_config["user_message"])
-            return template.format(
-                price=market_data["price"],
-                prev_price=market_data["prev_price"],
-                return_pct=market_data["return_pct"],
-                liquidity=market_data["liquidity"],
-                volatility=market_data["volatility"],
-                volume=market_data["volume"],
-                net_demand=market_data["net_demand"],
-                fundamental=market_data["fundamental"],
-                recent_prices=recent_prices,
-                cash=cash,
-                position=position,
-                portfolio_value=cash + position * market_data["price"],
-            )
-
-        return f"""
-Current Market Data:
-- Price: ${market_data['price']:.2f}
-- Previous Price: ${market_data['prev_price']:.2f}
-- Return: {market_data['return_pct']:+.2f}%
-- Liquidity: {market_data['liquidity']:.2f} (1.0=normal, lower=stress)
-- Volatility: {market_data['volatility']:.2f}
-- Volume: {market_data['volume']:.2f}
-- Net Demand: {market_data['net_demand']:+.2f}
-- Fundamental Value: ${market_data['fundamental']:.2f}
-- Recent Prices: {recent_prices}
-
-Your Portfolio:
-- Cash: ${cash:.2f}
-- Position: {position:.2f} shares
-- Portfolio Value: ${cash + position * market_data['price']:.2f}
-
-Respond with ONLY valid JSON:
-{{"action": "buy" | "sell" | "hold", "bid_price": <your price>, "quantity": <shares, +buy/-sell>, "reasoning": "<brief>"}}
-"""
+        template = load_prompt(llm_config["user_message"])
+        return template.format(
+            price=market_data["price"],
+            prev_price=market_data["prev_price"],
+            return_pct=market_data["return_pct"],
+            liquidity=market_data["liquidity"],
+            volatility=market_data["volatility"],
+            volume=market_data["volume"],
+            net_demand=market_data["net_demand"],
+            fundamental=market_data["fundamental"],
+            recent_prices=recent_prices,
+            cash=cash,
+            position=position,
+            portfolio_value=cash + position * market_data["price"],
+        )
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         try:
@@ -365,10 +334,7 @@ Respond with ONLY valid JSON:
         user_prompt = self._build_prompt(market_data)
 
         llm_config = self.config.extras["llm"]
-        if "sys_message" in llm_config:
-            system_prompt = load_prompt(llm_config["sys_message"])
-        else:
-            system_prompt = self.SYSTEM_PROMPT
+        system_prompt = load_prompt(llm_config["sys_message"])
 
         max_retries = 3
         for attempt in range(max_retries):
@@ -395,8 +361,9 @@ Respond with ONLY valid JSON:
             self.state.custom_state["cash"] += proceeds
             self.state.custom_state["position"] += quantity
 
+        strategy_name = self.__class__.__name__
         print(
-            f"[{self.identity:20s}] R{round_num} ({self.STRATEGY_NAME:15s}): "
+            f"[{self.identity:20s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+7.2f} | "
             f"Cash={self.state.custom_state['cash']:8.2f}, "
             f"Pos={self.state.custom_state['position']:+7.2f}"
@@ -405,7 +372,7 @@ Respond with ONLY valid JSON:
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": decision["reasoning"][:100],
         }
@@ -423,194 +390,31 @@ Respond with ONLY valid JSON:
         )
 
 
-# =============================================================================
-# LLM Crash Investor Types
-# =============================================================================
-
-
 class LLMPanicSeller(LLMCrashInvestor):
-    """
-    LLM Panic Seller - Accelerates crash through fear-driven selling.
+    """LLM Panic Seller - Accelerates crash through fear-driven selling."""
 
-    Behavioral Finance: Loss aversion + herding in crisis
-    """
-
-    STRATEGY_NAME = "llm_panic_seller"
-    SYSTEM_PROMPT = """You are a PANIC-PRONE RETAIL INVESTOR who is extremely fearful.
-
-CORE BELIEF: "I can't afford to lose any more money - I need to get out NOW!"
-
-YOUR BEHAVIOR:
-1. You PANIC when you see falling prices
-2. The more the price drops, the MORE urgently you want to sell
-3. You watch liquidity closely - low liquidity terrifies you
-4. You don't care about fundamental value during a crisis
-5. You SELL at ANY price just to exit
-
-PSYCHOLOGICAL PROFILE:
-- Extreme loss aversion (losses hurt 3x more than gains feel good)
-- You experience FOMO (fear of missing out) on selling
-- You follow the crowd - if others are selling, you sell harder
-- During normal times, you may hold or buy cautiously
-
-TRIGGERS FOR PANIC SELLING:
-- Price drop > 2% in a round
-- Liquidity below 0.7
-- Net demand strongly negative
-- Your portfolio value declining
-
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMRiskParityFund(LLMCrashInvestor):
-    """
-    LLM Risk Parity Fund - Volatility-sensitive forced selling.
+    """LLM Risk Parity Fund - Volatility-sensitive forced selling."""
 
-    Theory: Risk parity strategies reduce exposure when volatility rises,
-    which can accelerate crashes through synchronized selling.
-    """
-
-    STRATEGY_NAME = "llm_risk_parity"
-    SYSTEM_PROMPT = """You are a RISK PARITY FUND MANAGER following strict volatility targeting.
-
-CORE BELIEF: "We must maintain constant portfolio risk - when volatility rises, we MUST reduce exposure."
-
-YOUR RULES (MANDATORY - you cannot deviate):
-1. Target volatility: 1.5
-2. If current volatility > 2.0: You MUST reduce position significantly
-3. If current volatility > 3.0: You MUST sell aggressively to de-risk
-4. If volatility < 1.0: You MAY increase position
-
-CALCULATION:
-- position_adjustment = (target_vol - current_vol) * current_position * 0.3
-- Negative adjustment = MUST SELL
-
-BEHAVIOR:
-- You are NOT emotional - you follow rules mechanically
-- You don't care about price levels, only volatility
-- Your selling during high vol can CAUSE more volatility (feedback loop)
-- You cannot ignore your risk mandate
-
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-Note: Include your volatility calculation in reasoning.
-"""
+    pass
 
 
 class LLMLeveragedFund(LLMCrashInvestor):
-    """
-    LLM Leveraged Fund - Margin-triggered forced liquidation.
+    """LLM Leveraged Fund - Margin-triggered forced liquidation."""
 
-    Theory: Leverage creates forced selling at worst times.
-    """
-
-    STRATEGY_NAME = "llm_leveraged_fund"
-    INITIAL_POSITION = 80.0  # Higher leverage exposure
-
-    SYSTEM_PROMPT = """You are a LEVERAGED HEDGE FUND using 2x leverage.
-
-CORE BELIEF: "Leverage amplifies returns... until it amplifies losses."
-
-YOUR CONSTRAINTS:
-1. Starting leverage: 2x (you own $16000 worth on $10000 capital)
-2. MARGIN CALL: If portfolio value drops below $7500, you MUST liquidate 50%
-3. FORCED LIQUIDATION: If portfolio value drops below $5000, you MUST sell EVERYTHING
-
-CRITICAL: Calculate your current portfolio value each round:
-- Portfolio Value = Cash + Position × Price
-- If below thresholds, you HAVE NO CHOICE but to sell
-
-BEHAVIOR:
-- During normal times: May buy/hold to maintain leverage
-- During stress: MUST follow margin rules - no exceptions
-- Your forced selling adds to market pressure
-- You can trigger cascade if your liquidation pushes others to margin
-
-WARNING SIGNS:
-- Portfolio value approaching $7500 → prepare to cut
-- Rapid price decline → you may be forced out
-
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-Note: ALWAYS state your current portfolio value in reasoning.
-"""
+    pass
 
 
 class LLMMarketMaker(LLMCrashInvestor):
-    """
-    LLM Market Maker - Liquidity provider who withdraws in stress.
+    """LLM Market Maker - Liquidity provider who withdraws in stress."""
 
-    Theory: Market makers provide liquidity in normal times but
-    withdraw during crises, causing liquidity to evaporate.
-    """
-
-    STRATEGY_NAME = "llm_market_maker"
-    INITIAL_POSITION = 30.0
-
-    SYSTEM_PROMPT = """You are a MARKET MAKER providing liquidity for profit.
-
-CORE BELIEF: "I profit from the bid-ask spread, but I won't catch falling knives."
-
-YOUR BUSINESS MODEL:
-1. Normal times: You buy dips and sell rallies (stabilizing)
-2. Crisis times: You WITHDRAW to protect your capital
-
-WITHDRAWAL TRIGGERS (you STOP providing liquidity):
-- Liquidity < 0.5 (others are withdrawing)
-- Volatility > 3.0 (too dangerous)
-- Price drop > 5% in one round (catching falling knife)
-- Net demand < -10 (one-sided market)
-
-WHEN WITHDRAWN:
-- You may hold, or slowly reduce position
-- You do NOT buy until conditions normalize
-- You prioritize capital preservation over profit
-
-WHEN ACTIVE (normal conditions):
-- You buy when price dips (expecting mean reversion)
-- You sell when price spikes (taking profit)
-- Position size: moderate (10-25 shares)
-
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-Note: State whether you are "ACTIVE" or "WITHDRAWN" in reasoning.
-"""
+    pass
 
 
 class LLMBottomFisher(LLMCrashInvestor):
-    """
-    LLM Bottom Fisher - Value buyer who provides eventual floor.
+    """LLM Bottom Fisher - Value buyer who provides eventual floor."""
 
-    Theory: Eventually, prices become attractive enough that
-    value buyers step in and provide a floor.
-    """
-
-    STRATEGY_NAME = "llm_bottom_fisher"
-    INITIAL_POSITION = 10.0  # Light starting position
-
-    SYSTEM_PROMPT = """You are a BOTTOM FISHER / VALUE INVESTOR waiting for extreme bargains.
-
-CORE BELIEF: "Be greedy when others are fearful - but only at the RIGHT price."
-
-YOUR STRATEGY:
-1. You WAIT for extreme undervaluation
-2. You only buy when price < 0.8 × fundamental (20%+ discount)
-3. The LOWER the price, the MORE you buy
-4. You are PATIENT - you can wait many rounds
-
-BUYING CRITERIA:
-- Price < $80: Start buying cautiously (10-20 shares)
-- Price < $70: Buy moderately (20-40 shares)
-- Price < $60: Buy aggressively (40-60 shares)
-- Price > $90: Hold or reduce position
-
-BEHAVIOR:
-- You are NOT emotional - crashes are opportunities
-- You don't panic sell during crashes
-- You provide stabilizing demand when others panic
-- You are the "buyer of last resort"
-
-PATIENCE:
-- If conditions aren't right, just "hold"
-- Don't chase the market - let it come to you
-
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass

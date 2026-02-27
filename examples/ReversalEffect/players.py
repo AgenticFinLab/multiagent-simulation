@@ -5,25 +5,7 @@ Phenomenon: Reversal Effect (De Bondt & Thaler, 1985)
     - Market overreacts to information, then corrects
     - Creates predictable patterns in long-term returns
 
-Theoretical Foundation:
-    - Overreaction Hypothesis (De Bondt & Thaler, 1985)
-    - Representativeness Heuristic (Kahneman & Tversky)
-    - Investor Overconfidence (Daniel, Hirshleifer, Subrahmanyam, 1998)
-
-Architecture:
-    - Market: Order-based clearing with mean reversion
-    - ContrarianInvestor: Buys losers, sells winners (KEY driver)
-    - MomentumInvestor: Short-term trend following
-    - OverconfidentTrader: Overreacts to news
-    - NoiseTrader: Random liquidity
-    - ValueInvestor: Slow fundamental investor
-    - IndexTracker: Passive benchmark
-
-Key Dynamics:
-    1. Initial shock → Overreaction by OverconfidentTraders
-    2. Price deviates from fundamental
-    3. ContrarianInvestors recognize mispricing
-    4. Gradual reversal back to fundamental (3-5 year horizon)
+All parameters are configured via players.yml config file.
 """
 
 import os
@@ -36,29 +18,15 @@ from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
 
 
-# =============================================================================
-# Market - Coordinator
-# =============================================================================
-
-
 class Market(GeneralPlayer):
     """
     Central market with mean reversion dynamics.
 
-    Implements long-horizon price dynamics that allow:
-    - Initial overreaction to news
-    - Slow mean reversion toward fundamental
+    Parameters from config extras:
+        - fundamental_value, initial_price
+        - price_impact, mean_reversion, noise_std
+        - history_limit, record_path
     """
-
-    FUNDAMENTAL_VALUE = 100.0
-    INITIAL_PRICE = 100.0
-
-    # Price dynamics
-    PRICE_IMPACT = 0.08  # Impact of net demand
-    MEAN_REVERSION = 0.01  # Slow reversion to fundamental
-    NOISE_STD = 0.5
-
-    HISTORY_LIMIT = 200
 
     async def perceive(
         self,
@@ -69,23 +37,23 @@ class Market(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "price" not in self.state.custom_state:
-            record_path = self.config.extras.get(
-                "record_path", "EXPERIMENT/ReversalEffect/records"
-            )
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
 
-            self.state.custom_state["price"] = self.INITIAL_PRICE
+            self.state.custom_state["price"] = extras["initial_price"]
+            history_limit = extras["history_limit"]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
             self.state.custom_state["volume_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volume"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
             self.state.custom_state["return_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "return"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
 
         # Collect orders
@@ -104,6 +72,7 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
         orders = self.state.custom_state["orders"]
@@ -115,9 +84,14 @@ class Market(GeneralPlayer):
         total_volume = total_buy_qty + total_sell_qty
 
         # Price dynamics
-        price_impact = self.PRICE_IMPACT * net_demand
-        mean_reversion = self.MEAN_REVERSION * (self.FUNDAMENTAL_VALUE - current_price)
-        noise = random.gauss(0, self.NOISE_STD)
+        price_impact_rate = extras["price_impact"]
+        mean_reversion_rate = extras["mean_reversion"]
+        fundamental_value = extras["fundamental_value"]
+        noise_std = extras["noise_std"]
+
+        price_impact = price_impact_rate * net_demand
+        mean_reversion = mean_reversion_rate * (fundamental_value - current_price)
+        noise = random.gauss(0, noise_std)
 
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
         price_return = (new_price - current_price) / current_price
@@ -144,7 +118,7 @@ class Market(GeneralPlayer):
             "volume": total_volume,
             "net_demand": net_demand,
             "round": round_num,
-            "fundamental": self.FUNDAMENTAL_VALUE,
+            "fundamental": fundamental_value,
         }
 
         return {
@@ -162,18 +136,13 @@ class Market(GeneralPlayer):
         )
 
 
-# =============================================================================
-# Base Investor
-# =============================================================================
-
-
 class BaseInvestor(GeneralPlayer):
-    """Base class for reversal effect investors."""
+    """
+    Base class for reversal effect investors.
 
-    STRATEGY_NAME = "base"
-    INITIAL_CASH = 10000.0
-    INITIAL_POSITION = 0.0
-    HISTORY_LIMIT = 100
+    Parameters from config extras:
+        - initial_cash, initial_position, history_limit, record_path
+    """
 
     async def perceive(
         self,
@@ -184,16 +153,16 @@ class BaseInvestor(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "cash" not in self.state.custom_state:
-            record_path = self.config.extras.get(
-                "record_path", "EXPERIMENT/ReversalEffect/records"
-            )
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
 
-            self.state.custom_state["cash"] = self.INITIAL_CASH
-            self.state.custom_state["position"] = self.INITIAL_POSITION
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
+            history_limit = extras["history_limit"]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
 
         # Get market data
@@ -234,61 +203,46 @@ class BaseInvestor(GeneralPlayer):
         )
 
 
-# =============================================================================
-# ContrarianInvestor - KEY Driver of Reversal Effect
-# =============================================================================
-
-
 class ContrarianInvestor(BaseInvestor):
     """
     Contrarian investor exploiting mean reversion.
 
-    Theory: De Bondt & Thaler (1985) - Overreaction Hypothesis
-
-    Strategy:
-        - Buys past losers (prices below long-term average)
-        - Sells past winners (prices above long-term average)
-        - Uses long lookback window (3-5 years in theory, ~30-50 rounds here)
-
-    Effect: STABILIZING - drives long-term reversal toward fundamental
+    Parameters from config extras:
+        - lookback_window, reversal_threshold, base_position_size, value_sensitivity
     """
 
-    STRATEGY_NAME = "contrarian"
-
-    LOOKBACK_WINDOW = 30  # Long-term horizon
-    REVERSAL_THRESHOLD = 0.15  # 15% deviation triggers trade
-    BASE_POSITION_SIZE = 25.0
-    VALUE_SENSITIVITY = 0.6
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         fundamental = market_data["fundamental"]
         price_history = self.state.custom_state["price_history"]
 
+        lookback_window = extras["lookback_window"]
+        reversal_threshold = extras["reversal_threshold"]
+        base_position_size = extras["base_position_size"]
+        value_sensitivity = extras["value_sensitivity"]
+        strategy_name = self.__class__.__name__
+
         # Calculate long-term average
-        if len(price_history) >= self.LOOKBACK_WINDOW:
+        if len(price_history) >= lookback_window:
             long_term_avg = (
-                sum(list(price_history)[-self.LOOKBACK_WINDOW :]) / self.LOOKBACK_WINDOW
+                sum(list(price_history)[-lookback_window:]) / lookback_window
             )
         else:
             long_term_avg = price
 
         # Long-term cumulative return
-        if len(price_history) >= self.LOOKBACK_WINDOW:
-            old_price = list(price_history)[-self.LOOKBACK_WINDOW]
+        if len(price_history) >= lookback_window:
+            old_price = list(price_history)[-lookback_window]
             cumulative_return = (price - old_price) / old_price
         else:
             cumulative_return = 0.0
 
         # Contrarian signal: buy losers, sell winners
-        # Negative cumulative return = buy signal
-        if abs(cumulative_return) > self.REVERSAL_THRESHOLD:
-            # Counter-trend trading
-            quantity = (
-                -self.VALUE_SENSITIVITY * cumulative_return * self.BASE_POSITION_SIZE
-            )
+        if abs(cumulative_return) > reversal_threshold:
+            quantity = -value_sensitivity * cumulative_return * base_position_size
             quantity = max(-30, min(30, quantity))
             bid_price = price
         else:
@@ -301,7 +255,7 @@ class ContrarianInvestor(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:15s}): "
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} cum_ret={cumulative_return*100:+.1f}% | "
             f"Cash={self.state.custom_state['cash']:10.2f}"
         )
@@ -309,7 +263,7 @@ class ContrarianInvestor(BaseInvestor):
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
         }
 
@@ -319,41 +273,36 @@ class ContrarianInvestor(BaseInvestor):
         }
 
 
-# =============================================================================
-# MomentumInvestor - Short-term Trend Follower
-# =============================================================================
-
-
 class MomentumInvestor(BaseInvestor):
     """
     Short-term momentum investor.
 
-    Strategy: Follow recent price trends (Jegadeesh & Titman style)
-
-    Effect: Creates initial overreaction, setting up reversal opportunity
+    Parameters from config extras:
+        - lookback_window, momentum_threshold, base_position_size, momentum_multiplier
     """
 
-    STRATEGY_NAME = "momentum"
-
-    LOOKBACK_WINDOW = 5
-    MOMENTUM_THRESHOLD = 0.02
-    BASE_POSITION_SIZE = 20.0
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         price_history = self.state.custom_state["price_history"]
 
+        lookback_window = extras["lookback_window"]
+        momentum_threshold = extras["momentum_threshold"]
+        base_position_size = extras["base_position_size"]
+        momentum_multiplier = extras["momentum_multiplier"]
+        strategy_name = self.__class__.__name__
+
         # Short-term momentum
-        if len(price_history) >= self.LOOKBACK_WINDOW:
-            old_price = list(price_history)[-self.LOOKBACK_WINDOW]
+        if len(price_history) >= lookback_window:
+            old_price = list(price_history)[-lookback_window]
             momentum = (price - old_price) / old_price
         else:
             momentum = 0.0
 
-        if abs(momentum) > self.MOMENTUM_THRESHOLD:
-            quantity = momentum * self.BASE_POSITION_SIZE * 10  # Amplify momentum
+        if abs(momentum) > momentum_threshold:
+            quantity = momentum * base_position_size * momentum_multiplier
             quantity = max(-25, min(25, quantity))
             bid_price = price
         else:
@@ -366,14 +315,14 @@ class MomentumInvestor(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:15s}): "
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} mom={momentum*100:+.1f}%"
         )
 
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
         }
 
@@ -383,42 +332,31 @@ class MomentumInvestor(BaseInvestor):
         }
 
 
-# =============================================================================
-# OverconfidentTrader - Causes Initial Overreaction
-# =============================================================================
-
-
 class OverconfidentTrader(BaseInvestor):
     """
     Overconfident trader who overreacts to news.
 
-    Theory: Daniel, Hirshleifer, Subrahmanyam (1998)
-
-    Behavior:
-        - Overweights own information
-        - Trades aggressively on price changes
-        - Creates initial overreaction
-
-    Effect: DESTABILIZING - causes prices to overshoot
+    Parameters from config extras:
+        - overconfidence_factor, reaction_threshold, base_position_size, overconfidence_multiplier
     """
 
-    STRATEGY_NAME = "overconfident"
-
-    OVERCONFIDENCE_FACTOR = 2.5  # Overweights signals by 2.5x
-    REACTION_THRESHOLD = 0.01
-    BASE_POSITION_SIZE = 30.0
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         price_return = market_data["return"]
 
+        overconfidence_factor = extras["overconfidence_factor"]
+        reaction_threshold = extras["reaction_threshold"]
+        base_position_size = extras["base_position_size"]
+        overconfidence_multiplier = extras["overconfidence_multiplier"]
+        strategy_name = self.__class__.__name__
+
         # Overreact to recent return
-        if abs(price_return) > self.REACTION_THRESHOLD:
-            # Amplify the signal with overconfidence
-            signal = price_return * self.OVERCONFIDENCE_FACTOR
-            quantity = signal * self.BASE_POSITION_SIZE * 10
+        if abs(price_return) > reaction_threshold:
+            signal = price_return * overconfidence_factor
+            quantity = signal * base_position_size * overconfidence_multiplier
             quantity = max(-40, min(40, quantity))
             bid_price = price
         else:
@@ -431,14 +369,14 @@ class OverconfidentTrader(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:15s}): "
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} ret={price_return*100:+.1f}%"
         )
 
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
         }
 
@@ -448,27 +386,27 @@ class OverconfidentTrader(BaseInvestor):
         }
 
 
-# =============================================================================
-# NoiseTrader - Random Liquidity
-# =============================================================================
-
-
 class NoiseTrader(BaseInvestor):
-    """Noise trader providing random liquidity."""
+    """
+    Noise trader providing random liquidity.
 
-    STRATEGY_NAME = "noise"
-
-    POSITION_VOLATILITY = 10.0
-    MEAN_REVERSION = 0.1
+    Parameters from config extras:
+        - position_volatility, mean_reversion
+    """
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         position = self.state.custom_state["position"]
 
-        random_trade = random.gauss(0, self.POSITION_VOLATILITY)
-        reversion = -self.MEAN_REVERSION * position
+        position_volatility = extras["position_volatility"]
+        mean_reversion_rate = extras["mean_reversion"]
+        strategy_name = self.__class__.__name__
+
+        random_trade = random.gauss(0, position_volatility)
+        reversion = -mean_reversion_rate * position
 
         quantity = random_trade + reversion
         quantity = max(-20, min(20, quantity))
@@ -480,14 +418,14 @@ class NoiseTrader(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:15s}): "
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f}"
         )
 
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
         }
 
@@ -497,38 +435,35 @@ class NoiseTrader(BaseInvestor):
         }
 
 
-# =============================================================================
-# ValueInvestor - Slow Fundamental Investor
-# =============================================================================
-
-
 class ValueInvestor(BaseInvestor):
     """
     Value investor based on fundamental analysis.
 
-    Strategy: Buy when price < fundamental, sell when price > fundamental
+    Parameters from config extras:
+        - value_sensitivity, base_position_size, value_noise, value_threshold
     """
 
-    STRATEGY_NAME = "value"
-
-    VALUE_SENSITIVITY = 0.4
-    BASE_POSITION_SIZE = 15.0
-    VALUE_NOISE = 2.0
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         fundamental = market_data["fundamental"]
 
+        value_sensitivity = extras["value_sensitivity"]
+        base_position_size = extras["base_position_size"]
+        value_noise = extras["value_noise"]
+        value_threshold = extras["value_threshold"]
+        strategy_name = self.__class__.__name__
+
         # Estimate fundamental with noise
-        estimated_value = fundamental + random.gauss(0, self.VALUE_NOISE)
+        estimated_value = fundamental + random.gauss(0, value_noise)
 
         # Calculate mispricing
         deviation = (estimated_value - price) / price
 
-        if abs(deviation) > 0.03:  # 3% threshold
-            quantity = self.VALUE_SENSITIVITY * deviation * self.BASE_POSITION_SIZE
+        if abs(deviation) > value_threshold:
+            quantity = value_sensitivity * deviation * base_position_size
             quantity = max(-15, min(15, quantity))
             bid_price = price
         else:
@@ -541,14 +476,14 @@ class ValueInvestor(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:15s}): "
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} dev={deviation*100:+.1f}%"
         )
 
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
         }
 
@@ -558,33 +493,29 @@ class ValueInvestor(BaseInvestor):
         }
 
 
-# =============================================================================
-# IndexTracker - Passive Benchmark
-# =============================================================================
-
-
 class IndexTracker(BaseInvestor):
     """
     Passive index tracker for benchmarking.
 
-    Strategy: Maintains constant market exposure
+    Parameters from config extras:
+        - target_position, rebalance_threshold
     """
 
-    STRATEGY_NAME = "index"
-
-    TARGET_POSITION = 50.0  # Target position
-    REBALANCE_THRESHOLD = 0.1  # 10% deviation triggers rebalance
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         position = self.state.custom_state["position"]
 
-        # Check if rebalancing needed
-        position_diff = self.TARGET_POSITION - position
+        target_position = extras["target_position"]
+        rebalance_threshold = extras["rebalance_threshold"]
+        strategy_name = self.__class__.__name__
 
-        if abs(position_diff / self.TARGET_POSITION) > self.REBALANCE_THRESHOLD:
+        # Check if rebalancing needed
+        position_diff = target_position - position
+
+        if abs(position_diff / target_position) > rebalance_threshold:
             quantity = position_diff * 0.3  # Gradual rebalance
             quantity = max(-10, min(10, quantity))
             bid_price = price
@@ -598,14 +529,14 @@ class IndexTracker(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:15s}): "
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} pos={position:.1f}"
         )
 
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
         }
 

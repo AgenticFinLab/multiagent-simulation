@@ -27,6 +27,7 @@ from masim.evaluation.finance import (
     plot_herding_metrics,
     plot_volatility_analysis,
     plot_multi_panel_summary,
+    validate_herd_effect,
 )
 from masim.utils import (
     load_config,
@@ -147,46 +148,72 @@ def analyze_herding(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     )
 
     # ===========================================
-    # 5. Compile Summary Statistics
+    # 5. Run Validation
     # ===========================================
 
+    avg_cv = sum(cv_series.values()) / len(cv_series) if cv_series else 0
+    avg_agreement = (
+        sum(agreement_series.values()) / len(agreement_series)
+        if agreement_series
+        else 0
+    )
+    max_dev = max(deviation.values()) if deviation else 0
+
+    validation = validate_herd_effect(
+        avg_cv=avg_cv,
+        avg_agreement=avg_agreement,
+        max_deviation=max_dev,
+        herding_episodes=len(herding_episodes),
+        total_rounds=len(market_prices),
+    )
+
+    # ===========================================
+    # 6. Compile Summary Statistics
+    # ===========================================
+
+    prices_list = [market_prices[r] for r in sorted(market_prices.keys())]
+    returns_mean = sum(returns.values()) / len(returns) if returns else 0
+    returns_std = (
+        (sum((r - returns_mean) ** 2 for r in returns.values()) / len(returns)) ** 0.5
+        if returns
+        else 0
+    )
+
     summary = {
+        "scenario": "HerdEffect",
         "total_rounds": len(market_prices),
-        "price_range": {
-            "min": min(market_prices.values()) if market_prices else 0,
-            "max": max(market_prices.values()) if market_prices else 0,
-            "final": list(market_prices.values())[-1] if market_prices else 0,
+        "fundamental_value": fundamental_value,
+        "price": {
+            "initial": round(prices_list[0], 4) if prices_list else 0,
+            "final": round(prices_list[-1], 4) if prices_list else 0,
+            "min": round(min(prices_list), 4) if prices_list else 0,
+            "max": round(max(prices_list), 4) if prices_list else 0,
+            "mean": round(sum(prices_list) / len(prices_list), 4) if prices_list else 0,
         },
         "returns": {
-            "mean": sum(returns.values()) / len(returns) if returns else 0,
-            "std": (
-                (
-                    sum(
-                        (r - sum(returns.values()) / len(returns)) ** 2
-                        for r in returns.values()
-                    )
-                    / len(returns)
-                )
-                ** 0.5
-                if returns
-                else 0
-            ),
+            "mean": round(returns_mean, 6),
+            "std": round(returns_std, 6),
         },
-        "deviation_from_fundamental": {
-            "max": max(deviation.values()) if deviation else 0,
-            "final": list(deviation.values())[-1] if deviation else 0,
+        "metrics": {
+            "max_deviation_pct": round(max_dev, 4),
+            "max_drawdown": round(max_dd, 4),
+            "peak_round": peak_idx,
+            "trough_round": trough_idx,
         },
-        "max_drawdown": max_dd,
         "herding": {
-            "avg_cv": sum(cv_series.values()) / len(cv_series) if cv_series else 0,
-            "avg_agreement": (
-                sum(agreement_series.values()) / len(agreement_series)
-                if agreement_series
-                else 0
+            "avg_cv": round(avg_cv, 4),
+            "min_cv": round(min(cv_series.values()), 4) if cv_series else None,
+            "max_cv": round(max(cv_series.values()), 4) if cv_series else None,
+            "avg_agreement": round(avg_agreement, 4),
+            "max_agreement": (
+                round(max(agreement_series.values()), 4) if agreement_series else None
             ),
             "episodes_detected": len(herding_episodes),
+            "episode_rounds": herding_episodes,
         },
-        "bubble_magnitude_final": list(bubble.values())[-1] if bubble else 0,
+        "volume": volume_metrics if volume_metrics else {},
+        "bubble_magnitude_final": round(list(bubble.values())[-1], 4) if bubble else 0,
+        "validation": validation.to_dict(),
     }
 
     # Save summary to JSON
@@ -214,6 +241,8 @@ def analyze_herding(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     print(f"Avg Bid CV: {summary['herding']['avg_cv']:.4f}")
     print(f"Avg Directional Agreement: {summary['herding']['avg_agreement']:.4f}")
     print(f"Herding Episodes: {summary['herding']['episodes_detected']}")
+    print(f"\nVALIDATION: {validation.interpretation}")
+    print(f"Fit Score: {validation.score:.1%}")
 
     return summary
 

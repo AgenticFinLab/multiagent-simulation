@@ -14,13 +14,29 @@ LLM Investor Types:
     - Institutional Investor: Balanced allocation
     - Risk-Averse Saver: Prefers bonds
     - Rational Optimizer: Expected utility maximizer
+
+Market Parameters (from config.extras):
+    - record_path: Path for output records
+    - stock_expected_return: Daily expected stock return
+    - bond_return: Daily risk-free bond return
+    - stock_volatility: Daily stock volatility
+    - initial_stock_price: Starting stock price
+    - history_limit: Maximum history buffer size
+
+Investor Parameters (from config.extras):
+    - record_path: Path for output records
+    - initial_cash: Starting cash (used with ratios)
+    - initial_cash_ratio: Fraction of cash to hold
+    - initial_stock_shares: Starting stock shares
+    - initial_bond_ratio: Fraction in bonds
+    - history_limit: Maximum history buffer size
+    - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
 import os
 import json
 import random
 import re
-import math
 import importlib
 from typing import Any, Dict, Optional
 from dotenv import load_dotenv
@@ -40,24 +56,24 @@ def load_prompt(prompt_path: str) -> str:
 
 
 class Market(GeneralPlayer):
-    """Market with two assets: stock and bond."""
+    """Market with two assets: stock and bond.
 
-    STOCK_EXPECTED_RETURN = 0.06 / 252  # ~6% annual / 252 days
-    BOND_RETURN = 0.01 / 252  # ~1% annual risk-free
-    STOCK_VOLATILITY = 0.15 / math.sqrt(252)  # ~15% annual vol
-    INITIAL_STOCK_PRICE = 100.0
-    HISTORY_LIMIT = 200
+    All parameters read from config.extras (no class constants).
+    """
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
     ) -> None:
         self.state.custom_state["round"] = observation.round
         if "stock_price" not in self.state.custom_state:
-            record_path = self.config.extras["record_path"]
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            self.state.custom_state["stock_price"] = self.INITIAL_STOCK_PRICE
+            history_limit = extras["history_limit"]
+
+            self.state.custom_state["stock_price"] = extras["initial_stock_price"]
             self.state.custom_state["stock_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "stock"), entry_limit=self.HISTORY_LIMIT
+                folder=os.path.join(base_path, "stock"), entry_limit=history_limit
             )
 
         orders = []
@@ -75,20 +91,23 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["stock_price"]
         orders = self.state.custom_state["orders"]
 
+        # Get parameters from config
+        stock_expected_return = extras["stock_expected_return"]
+        bond_return = extras["bond_return"]
+        stock_volatility = extras["stock_volatility"]
+
         net_stock_demand = sum(o["stock_qty"] for o in orders)
         demand_impact = 0.001 * net_stock_demand
 
-        base_return = self.STOCK_EXPECTED_RETURN + random.gauss(
-            0, self.STOCK_VOLATILITY
-        )
+        base_return = stock_expected_return + random.gauss(0, stock_volatility)
         stock_return = base_return + demand_impact
 
         new_price = max(1.0, current_price * (1 + stock_return))
-        total_volume = sum(abs(o["stock_qty"]) for o in orders)
 
         self.state.custom_state["stock_price"] = new_price
         self.state.custom_state["stock_history"].append(new_price)
@@ -97,15 +116,15 @@ class Market(GeneralPlayer):
         print(
             f"[Market] Round {round_num}: Stock ${current_price:.2f} → ${new_price:.2f} ({stock_return*100:+.2f}%)"
         )
-        print(f"  Bond Return: {self.BOND_RETURN*100*252:.2f}% annual")
+        print(f"  Bond Return: {bond_return*100*252:.2f}% annual")
 
         market_data = {
             "stock_price": new_price,
             "prev_stock_price": current_price,
             "stock_return": stock_return,
             "stock_return_pct": stock_return * 100,
-            "bond_return": self.BOND_RETURN,
-            "bond_return_pct": self.BOND_RETURN * 100,
+            "bond_return": bond_return,
+            "bond_return_pct": bond_return * 100,
             "round": round_num,
         }
         return {
@@ -124,23 +143,28 @@ class Market(GeneralPlayer):
 
 
 class LLMEquityInvestor(GeneralPlayer):
-    """Base class for equity premium investors."""
+    """Base class for equity premium investors.
 
-    STRATEGY_NAME = "llm_equity_base"
-    SYSTEM_PROMPT = "You allocate between stocks and bonds."
-    INITIAL_CASH = 10000.0
+    All parameters read from config.extras (no class constants).
+    """
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
     ) -> None:
         self.state.custom_state["round"] = observation.round
         if "cash" not in self.state.custom_state:
-            self.state.custom_state["cash"] = self.INITIAL_CASH * 0.5  # 50% cash
-            self.state.custom_state["stocks"] = 50.0  # 50 shares
-            self.state.custom_state["bonds"] = self.INITIAL_CASH * 0.25  # 25% bonds
+            extras = self.config.extras
+            initial_cash = extras["initial_cash"]
+            self.state.custom_state["cash"] = (
+                initial_cash * extras["initial_cash_ratio"]
+            )
+            self.state.custom_state["stocks"] = extras["initial_stock_shares"]
+            self.state.custom_state["bonds"] = (
+                initial_cash * extras["initial_bond_ratio"]
+            )
 
             load_dotenv()
-            llm_config = self.config.extras["llm"]
+            llm_config = extras["llm"]
             self.state.custom_state["lm_name"] = llm_config["lm_name"]
             self.state.custom_state["generation_config"] = llm_config[
                 "generation_config"
@@ -184,20 +208,18 @@ class LLMEquityInvestor(GeneralPlayer):
         stock_pct = (stock_value / total_value) * 100 if total_value > 0 else 0
 
         llm_config = self.config.extras["llm"]
-        if "user_message" in llm_config:
-            template = load_prompt(llm_config["user_message"])
-            return template.format(
-                stock_price=market_data["stock_price"],
-                prev_stock_price=market_data["prev_stock_price"],
-                stock_return_pct=market_data["stock_return_pct"],
-                bond_return_pct=market_data["bond_return_pct"] * 252,
-                cash=self.state.custom_state["cash"],
-                stocks=self.state.custom_state["stocks"],
-                bonds=self.state.custom_state["bonds"],
-                stock_pct=stock_pct,
-                total_value=total_value,
-            )
-        return f"Stock: ${market_data['stock_price']:.2f}, Return: {market_data['stock_return_pct']:.2f}%"
+        template = load_prompt(llm_config["user_message"])
+        return template.format(
+            stock_price=market_data["stock_price"],
+            prev_stock_price=market_data["prev_stock_price"],
+            stock_return_pct=market_data["stock_return_pct"],
+            bond_return_pct=market_data["bond_return_pct"] * 252,
+            cash=self.state.custom_state["cash"],
+            stocks=self.state.custom_state["stocks"],
+            bonds=self.state.custom_state["bonds"],
+            stock_pct=stock_pct,
+            total_value=total_value,
+        )
 
     def _parse_response(self, text: str) -> Dict[str, Any]:
         try:
@@ -212,11 +234,7 @@ class LLMEquityInvestor(GeneralPlayer):
         market_data = self.state.custom_state["market_data"]
         llm_client = self.state.custom_state["llm_client"]
         llm_config = self.config.extras["llm"]
-        system_prompt = (
-            load_prompt(llm_config["sys_message"])
-            if "sys_message" in llm_config
-            else self.SYSTEM_PROMPT
-        )
+        system_prompt = load_prompt(llm_config["sys_message"])
 
         for _ in range(3):
             try:
@@ -252,9 +270,10 @@ class LLMEquityInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += abs(stock_qty) * price
             self.state.custom_state["stocks"] += stock_qty
 
+        strategy_name = self.__class__.__name__
         order = {
             "stock_qty": stock_qty,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": decision["reasoning"][:100],
         }
@@ -274,109 +293,28 @@ class LLMEquityInvestor(GeneralPlayer):
 class LLMMyopicLossAverse(LLMEquityInvestor):
     """Myopic loss averse - evaluates frequently, demands high premium."""
 
-    STRATEGY_NAME = "llm_myopic_loss_averse"
-    SYSTEM_PROMPT = """You are a MYOPIC LOSS-AVERSE INVESTOR (Benartzi & Thaler, 1995).
-
-YOUR PSYCHOLOGY:
-1. You evaluate your portfolio EVERY round (myopic)
-2. Losses hurt 2.25x more than gains feel good (loss aversion λ=2.25)
-3. Stocks look VERY risky to you because of daily volatility
-4. You demand HIGH premium (require stocks to have much higher expected return)
-
-BEHAVIOR:
-- After ANY negative return: Consider reducing stocks
-- After positive return: May increase slightly
-- You PREFER bonds because they feel safer
-- Target allocation: 30-50% stocks (low due to risk perception)
-
-Your frequent evaluation makes stocks seem riskier than they are!
-Respond with JSON: {"stock_qty": float, "reasoning": string}
-Positive = buy stocks, Negative = sell stocks
-"""
+    pass
 
 
 class LLMLongTermInvestor(LLMEquityInvestor):
     """Long-term investor - evaluates infrequently, more stocks."""
 
-    STRATEGY_NAME = "llm_long_term"
-    SYSTEM_PROMPT = """You are a LONG-TERM INVESTOR with annual evaluation horizon.
-
-YOUR PSYCHOLOGY:
-1. You evaluate performance over LONG periods (annual, not daily)
-2. Daily volatility doesn't bother you
-3. You focus on long-term expected returns
-4. You understand stocks outperform over time
-
-BEHAVIOR:
-- Daily returns are NOISE - you ignore them
-- You maintain HIGH stock allocation (60-80%)
-- You only rebalance when allocation drifts significantly
-- You BUY stocks when others panic (contrarian in short-term)
-
-Your long horizon makes stocks look less risky!
-Respond with JSON: {"stock_qty": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMInstitutionalInvestor(LLMEquityInvestor):
     """Institutional investor - balanced allocation."""
 
-    STRATEGY_NAME = "llm_institutional"
-    SYSTEM_PROMPT = """You are an INSTITUTIONAL INVESTOR with balanced mandate.
-
-YOUR APPROACH:
-1. Target allocation: 60% stocks, 40% bonds
-2. Rebalance when allocation drifts > 5%
-3. Process-driven, unemotional
-4. You represent pension funds, endowments
-
-BEHAVIOR:
-- Calculate current stock allocation
-- If > 65%: Sell stocks
-- If < 55%: Buy stocks
-- Otherwise: Hold
-
-Respond with JSON: {"stock_qty": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMRiskAverseSaver(LLMEquityInvestor):
     """Risk-averse saver - prefers bonds."""
 
-    STRATEGY_NAME = "llm_risk_averse"
-    SYSTEM_PROMPT = """You are a RISK-AVERSE SAVER who prefers safety.
-
-YOUR PSYCHOLOGY:
-1. You HATE volatility
-2. You prefer guaranteed returns (bonds)
-3. Target: 20-30% stocks maximum
-4. Sleep-at-night portfolio
-
-BEHAVIOR:
-- Any significant drop → reduce stocks
-- High stock allocation → sell to reduce
-- You demand VERY high premium for stock risk
-
-Respond with JSON: {"stock_qty": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMRationalOptimizer(LLMEquityInvestor):
     """Rational optimizer - expected utility maximizer."""
 
-    STRATEGY_NAME = "llm_rational"
-    SYSTEM_PROMPT = """You are a RATIONAL EXPECTED UTILITY MAXIMIZER.
-
-YOUR APPROACH:
-1. Stocks: ~6% expected return, 15% volatility
-2. Bonds: ~1% return, near-zero volatility
-3. You calculate optimal allocation based on risk-return tradeoff
-4. With reasonable risk aversion, optimal is 50-70% stocks
-
-DECISION:
-- Expected returns favor stocks significantly
-- Daily volatility is irrelevant for long-term
-- You maintain high stock allocation
-
-Respond with JSON: {"stock_qty": float, "reasoning": string}
-"""
+    pass

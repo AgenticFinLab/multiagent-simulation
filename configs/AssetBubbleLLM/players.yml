@@ -14,7 +14,17 @@ market:
     steps_per_turn: 1
     group_tags:
       - market
-    extras: {}
+    extras:
+      record_path: "EXPERIMENT/AssetBubbleLLM/records"
+      # Market parameters
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.15
+      mean_reversion: 0.005
+      fundamental_growth: 0.001
+      noise_std: 0.3
+      short_cost_rate: 0.02
+      history_limit: 300
   persona: !include persona.yml
 
 # LLM Greater Fool Speculator
@@ -28,7 +38,10 @@ llm_greater_fool:
     group_tags:
       - llm_investors
     extras:
-      strategy: greater_fool
+      record_path: "EXPERIMENT/AssetBubbleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.AssetBubbleLLM.prompts:LLM_GREATER_FOOL_SYS"
         user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"
@@ -50,7 +63,10 @@ llm_arbitrageur:
     group_tags:
       - llm_investors
     extras:
-      strategy: arbitrageur
+      record_path: "EXPERIMENT/AssetBubbleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.AssetBubbleLLM.prompts:LLM_ARBITRAGEUR_SYS"
         user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"
@@ -72,7 +88,10 @@ llm_sentiment:
     group_tags:
       - llm_investors
     extras:
-      strategy: sentiment
+      record_path: "EXPERIMENT/AssetBubbleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.AssetBubbleLLM.prompts:LLM_SENTIMENT_SYS"
         user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"
@@ -94,7 +113,10 @@ llm_value:
     group_tags:
       - llm_investors
     extras:
-      strategy: value
+      record_path: "EXPERIMENT/AssetBubbleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.AssetBubbleLLM.prompts:LLM_VALUE_SYS"
         user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"
@@ -116,7 +138,10 @@ llm_leveraged:
     group_tags:
       - llm_investors
     extras:
-      strategy: leveraged
+      record_path: "EXPERIMENT/AssetBubbleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
       llm:
         sys_message: "examples.AssetBubbleLLM.prompts:LLM_LEVERAGED_SYS"
         user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"

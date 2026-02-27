@@ -1,3 +1,7 @@
+# =============================================================================
+# ReversalEffectLLM Players Configuration
+# =============================================================================
+
 market:
   name: "Market with Mean Reversion"
   class: "examples.ReversalEffectLLM.players:Market"
@@ -8,7 +12,13 @@ market:
     group_tags:
       - market
     extras:
-      price_model: "mean_reversion"
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.08
+      mean_reversion: 0.01
+      noise_std: 0.5
+      history_limit: 200
   persona: !include persona.yml
 
 llm_contrarian:
@@ -21,7 +31,10 @@ llm_contrarian:
     group_tags:
       - llm_investors
     extras:
-      strategy: contrarian
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.ReversalEffectLLM.prompts:LLM_CONTRARIAN_SYS"
         user_message: "examples.ReversalEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -42,7 +55,10 @@ llm_overconfident:
     group_tags:
       - llm_investors
     extras:
-      strategy: overconfident
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.ReversalEffectLLM.prompts:LLM_OVERCONFIDENT_SYS"
         user_message: "examples.ReversalEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -63,7 +79,10 @@ llm_value:
     group_tags:
       - llm_investors
     extras:
-      strategy: value
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.ReversalEffectLLM.prompts:LLM_VALUE_SYS"
         user_message: "examples.ReversalEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -84,7 +103,10 @@ llm_momentum_chaser:
     group_tags:
       - llm_investors
     extras:
-      strategy: momentum_chaser
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.ReversalEffectLLM.prompts:LLM_MOMENTUM_CHASER_SYS"
         user_message: "examples.ReversalEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -105,7 +127,10 @@ llm_noise:
     group_tags:
       - llm_investors
     extras:
-      strategy: noise
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.ReversalEffectLLM.prompts:LLM_NOISE_SYS"
         user_message: "examples.ReversalEffectLLM.prompts:LLM_USER_TEMPLATE"

@@ -32,6 +32,8 @@ from masim.evaluation.finance import (
     # Visualization
     create_figure,
     save_figure,
+    # Validation
+    validate_short_squeeze,
 )
 from masim.utils import load_config
 
@@ -315,11 +317,30 @@ def generate_summary(
     squeeze_metrics: Dict[str, Any],
     phases: Dict[str, Dict],
 ) -> Dict[str, Any]:
-    """Generate summary statistics."""
+    """Generate summary statistics with validation."""
     prices = np.array(data["prices"])
     returns = calculate_returns(prices) if len(prices) > 1 else np.array([])
+    prices_list = list(prices)
+    max_dd, peak_idx, trough_idx = (
+        calculate_max_drawdown(prices_list) if len(prices_list) > 1 else (0, 0, 0)
+    )
+
+    # Detect feedback loop (price acceleration during squeeze phase)
+    short_covering_detected = squeeze_metrics.get("cover_ratio", 0) > 0.2
+    feedback_detected = (
+        squeeze_metrics.get("squeeze_ratio", 0) > 0.5 and short_covering_detected
+    )
+
+    # Run validation
+    validation = validate_short_squeeze(
+        max_price_spike=squeeze_metrics.get("squeeze_percentage", 0),
+        short_covering_detected=short_covering_detected,
+        feedback_loop_detected=feedback_detected,
+    )
 
     return {
+        "scenario": "ShortSqueeze",
+        "total_rounds": len(prices),
         "squeeze_metrics": squeeze_metrics,
         "phases": phases,
         "price_statistics": {
@@ -332,17 +353,28 @@ def generate_summary(
             ),
             "volatility": float(np.std(returns) * 100) if len(returns) > 0 else 0,
         },
-        "squeeze_detected": squeeze_metrics["squeeze_ratio"]
-        > 0.5,  # 50%+ = significant squeeze
+        "metrics": {
+            "max_drawdown": round(max_dd, 4),
+            "peak_round": peak_idx,
+            "trough_round": trough_idx,
+        },
+        "squeeze_detected": squeeze_metrics.get("squeeze_ratio", 0) > 0.5,
         "squeeze_intensity": (
             "EXTREME"
-            if squeeze_metrics["squeeze_ratio"] > 2.0
+            if squeeze_metrics.get("squeeze_ratio", 0) > 2.0
             else (
                 "STRONG"
-                if squeeze_metrics["squeeze_ratio"] > 1.0
-                else ("MODERATE" if squeeze_metrics["squeeze_ratio"] > 0.5 else "WEAK")
+                if squeeze_metrics.get("squeeze_ratio", 0) > 1.0
+                else (
+                    "MODERATE"
+                    if squeeze_metrics.get("squeeze_ratio", 0) > 0.5
+                    else "WEAK"
+                )
             )
         ),
+        "short_covering_detected": short_covering_detected,
+        "feedback_loop_detected": feedback_detected,
+        "validation": validation.to_dict(),
     }
 
 
@@ -412,6 +444,10 @@ def main():
     print(f"Squeeze Detected: {summary['squeeze_detected']}")
     print(f"Squeeze Intensity: {summary['squeeze_intensity']}")
     print(f"Max Squeeze: +{squeeze_metrics['squeeze_percentage']:.1f}%")
+    print(f"Short Covering: {'Yes' if summary['short_covering_detected'] else 'No'}")
+    print(f"Feedback Loop: {'Yes' if summary['feedback_loop_detected'] else 'No'}")
+    print(f"\nVALIDATION: {summary['validation']['interpretation']}")
+    print(f"Fit Score: {summary['validation']['score']:.1%}")
 
     return summary
 

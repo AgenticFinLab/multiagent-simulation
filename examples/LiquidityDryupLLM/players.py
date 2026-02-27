@@ -11,6 +11,22 @@ LLM Investor Types:
     - Arbitrageur: Profits from mispricings during illiquidity
     - Value Investor: Patient buyer waiting for extreme mispricings
     - Forced Seller: Must sell regardless of liquidity conditions
+
+Market Parameters (from config.extras):
+    - record_path: Path for output records
+    - fundamental_value: True value for mean reversion
+    - initial_price: Starting price
+    - price_impact: Base price impact coefficient
+    - mean_reversion: Mean reversion strength
+    - noise_std: Random noise standard deviation
+    - history_limit: Maximum history buffer size
+
+Investor Parameters (from config.extras):
+    - record_path: Path for output records
+    - initial_cash: Starting cash balance
+    - initial_position: Starting share position
+    - history_limit: Maximum history buffer size
+    - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
 import os
@@ -36,26 +52,25 @@ def load_prompt(prompt_path: str) -> str:
 
 
 class Market(GeneralPlayer):
-    """Market with liquidity-dependent pricing."""
+    """Market with liquidity-dependent pricing.
 
-    FUNDAMENTAL_VALUE = 100.0
-    INITIAL_PRICE = 100.0
-    PRICE_IMPACT = 0.08
-    MEAN_REVERSION = 0.015
-    NOISE_STD = 0.4
-    HISTORY_LIMIT = 200
+    All parameters read from config.extras (no class constants).
+    """
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
     ) -> None:
         self.state.custom_state["round"] = observation.round
         if "price" not in self.state.custom_state:
-            record_path = self.config.extras["record_path"]
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            self.state.custom_state["price"] = self.INITIAL_PRICE
+            history_limit = extras["history_limit"]
+
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["total_liquidity"] = 100.0
             self.state.custom_state["price_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "price"), entry_limit=self.HISTORY_LIMIT
+                folder=os.path.join(base_path, "price"), entry_limit=history_limit
             )
 
         orders = []
@@ -75,9 +90,16 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
         orders = self.state.custom_state["orders"]
+
+        # Get parameters from config
+        fundamental_value = extras["fundamental_value"]
+        price_impact_coef = extras["price_impact"]
+        mean_reversion_strength = extras["mean_reversion"]
+        noise_std = extras["noise_std"]
 
         liquidity_provided = sum(o["provides_liquidity"] for o in orders)
         total_liquidity = 50.0 + liquidity_provided
@@ -88,9 +110,9 @@ class Market(GeneralPlayer):
 
         # Illiquidity amplifies price impact
         liquidity_factor = 100.0 / max(total_liquidity, 10.0)
-        price_impact = self.PRICE_IMPACT * net_demand * liquidity_factor
-        mean_reversion = self.MEAN_REVERSION * (self.FUNDAMENTAL_VALUE - current_price)
-        noise = random.gauss(0, self.NOISE_STD)
+        price_impact = price_impact_coef * net_demand * liquidity_factor
+        mean_reversion = mean_reversion_strength * (fundamental_value - current_price)
+        noise = random.gauss(0, noise_std)
 
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
         price_return = (new_price - current_price) / current_price
@@ -118,7 +140,7 @@ class Market(GeneralPlayer):
             "return_pct": price_return * 100,
             "liquidity": total_liquidity,
             "liquidity_factor": liquidity_factor,
-            "fundamental": self.FUNDAMENTAL_VALUE,
+            "fundamental": fundamental_value,
             "round": round_num,
         }
         return {
@@ -137,23 +159,22 @@ class Market(GeneralPlayer):
 
 
 class LLMLiquidityInvestor(GeneralPlayer):
-    """Base class for liquidity dry-up investors."""
+    """Base class for liquidity dry-up investors.
 
-    STRATEGY_NAME = "llm_liquidity_base"
-    SYSTEM_PROMPT = "You trade in a market where liquidity can dry up."
-    INITIAL_CASH = 10000.0
-    INITIAL_POSITION = 50.0
+    All parameters read from config.extras (no class constants).
+    """
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
     ) -> None:
         self.state.custom_state["round"] = observation.round
         if "cash" not in self.state.custom_state:
-            self.state.custom_state["cash"] = self.INITIAL_CASH
-            self.state.custom_state["position"] = self.INITIAL_POSITION
+            extras = self.config.extras
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
 
             load_dotenv()
-            llm_config = self.config.extras["llm"]
+            llm_config = extras["llm"]
             self.state.custom_state["lm_name"] = llm_config["lm_name"]
             self.state.custom_state["generation_config"] = llm_config[
                 "generation_config"
@@ -189,21 +210,19 @@ class LLMLiquidityInvestor(GeneralPlayer):
 
     def _build_prompt(self, market_data: Dict[str, Any]) -> str:
         llm_config = self.config.extras["llm"]
-        if "user_message" in llm_config:
-            template = load_prompt(llm_config["user_message"])
-            return template.format(
-                price=market_data["price"],
-                prev_price=market_data["prev_price"],
-                return_pct=market_data["return_pct"],
-                liquidity=market_data["liquidity"],
-                liquidity_factor=market_data["liquidity_factor"],
-                fundamental=market_data["fundamental"],
-                cash=self.state.custom_state["cash"],
-                position=self.state.custom_state["position"],
-                portfolio_value=self.state.custom_state["cash"]
-                + self.state.custom_state["position"] * market_data["price"],
-            )
-        return f"Price: ${market_data['price']:.2f}, Liquidity: {market_data['liquidity']:.1f}"
+        template = load_prompt(llm_config["user_message"])
+        return template.format(
+            price=market_data["price"],
+            prev_price=market_data["prev_price"],
+            return_pct=market_data["return_pct"],
+            liquidity=market_data["liquidity"],
+            liquidity_factor=market_data["liquidity_factor"],
+            fundamental=market_data["fundamental"],
+            cash=self.state.custom_state["cash"],
+            position=self.state.custom_state["position"],
+            portfolio_value=self.state.custom_state["cash"]
+            + self.state.custom_state["position"] * market_data["price"],
+        )
 
     def _parse_response(self, text: str) -> Dict[str, Any]:
         try:
@@ -218,11 +237,7 @@ class LLMLiquidityInvestor(GeneralPlayer):
         market_data = self.state.custom_state["market_data"]
         llm_client = self.state.custom_state["llm_client"]
         llm_config = self.config.extras["llm"]
-        system_prompt = (
-            load_prompt(llm_config["sys_message"])
-            if "sys_message" in llm_config
-            else self.SYSTEM_PROMPT
-        )
+        system_prompt = load_prompt(llm_config["sys_message"])
 
         for _ in range(3):
             try:
@@ -241,6 +256,7 @@ class LLMLiquidityInvestor(GeneralPlayer):
                     "action": "hold",
                     "bid_price": market_data["price"],
                     "quantity": 0,
+                    "provides_liquidity": 0,
                     "reasoning": "error",
                 }
 
@@ -264,10 +280,11 @@ class LLMLiquidityInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += abs(quantity) * bid_price
             self.state.custom_state["position"] += quantity
 
+        strategy_name = self.__class__.__name__
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "investor": self.identity,
             "provides_liquidity": provides_liquidity,
             "reasoning": decision["reasoning"][:100],
@@ -288,102 +305,28 @@ class LLMLiquidityInvestor(GeneralPlayer):
 class LLMMarketMaker(LLMLiquidityInvestor):
     """Market maker - provides liquidity, withdraws in stress."""
 
-    STRATEGY_NAME = "llm_market_maker"
-    SYSTEM_PROMPT = """You are a MARKET MAKER providing liquidity for profit.
-
-YOUR ROLE:
-- You PROVIDE liquidity by standing ready to buy/sell
-- You profit from bid-ask spread
-- You set provides_liquidity > 0 when active
-
-WITHDRAWAL CONDITIONS (you STOP providing liquidity):
-- Liquidity < 50: Others withdrawing - you withdraw too
-- Liquidity factor > 1.5: Market stressed
-- Return magnitude > 3%: Too volatile
-
-When WITHDRAWN: provides_liquidity = 0, hold or small trades
-When ACTIVE: provides_liquidity = 20-40, buy dips/sell rallies
-
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "provides_liquidity": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMLiquidityDemander(LLMLiquidityInvestor):
     """Liquidity demander - takes liquidity, suffers from dry-up."""
 
-    STRATEGY_NAME = "llm_liquidity_demander"
-    SYSTEM_PROMPT = """You are a LIQUIDITY DEMANDER who needs to trade.
-
-YOUR SITUATION:
-- You NEED to trade for portfolio reasons
-- You TAKE liquidity (provides_liquidity = 0)
-- When liquidity is low, your trades move prices more
-
-STRATEGY:
-- If liquidity high (>70): Trade normally
-- If liquidity medium (50-70): Trade cautiously, smaller size
-- If liquidity low (<50): Trade only if necessary, accept price impact
-
-You suffer when liquidity dries up!
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMArbitrageur(LLMLiquidityInvestor):
     """Arbitrageur - profits from mispricings during illiquidity."""
 
-    STRATEGY_NAME = "llm_arbitrageur"
-    SYSTEM_PROMPT = """You are an ARBITRAGEUR profiting from liquidity dry-ups.
-
-YOUR STRATEGY:
-- When liquidity is low, prices deviate from fundamentals
-- You buy undervalued (price < fundamental) in illiquid markets
-- You sell overvalued (price > fundamental)
-- You PROVIDE liquidity when others withdraw
-
-TIMING:
-- Liquidity < 40: Prime opportunity for mispricing
-- Price deviation > 5% from fundamental: Trade opportunity
-- You are a stabilizing force
-
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "provides_liquidity": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMValueInvestor(LLMLiquidityInvestor):
     """Value investor - patient buyer during extreme mispricings."""
 
-    STRATEGY_NAME = "llm_value_investor"
-    SYSTEM_PROMPT = """You are a VALUE INVESTOR waiting for extreme mispricings.
-
-YOUR STRATEGY:
-- You only trade when price significantly deviates from fundamental
-- Liquidity dry-up creates opportunities
-- Price < 0.90 × fundamental: Buy
-- Price > 1.10 × fundamental: Sell
-- You are PATIENT - don't trade every round
-
-Respond with JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-"""
+    pass
 
 
 class LLMForcedSeller(LLMLiquidityInvestor):
     """Forced seller - must sell regardless of conditions."""
 
-    STRATEGY_NAME = "llm_forced_seller"
-    SYSTEM_PROMPT = """You are a FORCED SELLER who MUST sell.
-
-YOUR SITUATION:
-- You need to liquidate your position over time
-- You MUST sell 10-20 shares per round regardless of conditions
-- You cannot wait for better liquidity
-- You accept price impact as a cost
-
-BEHAVIOR:
-- Always sell, quantity = -10 to -20
-- Low liquidity = higher cost for you
-- You are a source of selling pressure
-
-Respond with JSON: {"action": "sell", "bid_price": float, "quantity": float, "reasoning": string}
-Note: quantity should be NEGATIVE (selling)
-"""
+    pass

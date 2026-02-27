@@ -12,6 +12,8 @@ Architecture:
     - ValueInvestor: Buys when undervalued
     - RetailTrader: Can trigger initial squeeze
     - InstitutionalHolder: Large passive holder
+
+All parameters are configured via players.yml config file.
 """
 
 import os
@@ -25,16 +27,14 @@ from masim.utils.history import HistoryBuffer
 
 
 class Market(GeneralPlayer):
-    """Market with short interest tracking."""
+    """
+    Market with short interest tracking.
 
-    FUNDAMENTAL_VALUE = 50.0  # Low fundamental - typical for shorted stocks
-    INITIAL_PRICE = 30.0  # Trading below fundamental
-
-    PRICE_IMPACT = 0.1
-    MEAN_REVERSION = 0.005  # Weak reversion - allows squeeze to develop
-    NOISE_STD = 0.5
-
-    HISTORY_LIMIT = 200
+    Parameters from config extras:
+        - fundamental_value, initial_price
+        - price_impact, mean_reversion, noise_std
+        - history_limit, record_path
+    """
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
@@ -43,18 +43,19 @@ class Market(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "price" not in self.state.custom_state:
-            record_path = self.config.extras.get(
-                "record_path", "EXPERIMENT/ShortSqueeze/records"
-            )
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
 
-            self.state.custom_state["price"] = self.INITIAL_PRICE
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["short_interest"] = 0.0
+
+            history_limit = extras["history_limit"]
             self.state.custom_state["price_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "price"), entry_limit=self.HISTORY_LIMIT
+                folder=os.path.join(base_path, "price"), entry_limit=history_limit
             )
             self.state.custom_state["volume_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "volume"), entry_limit=self.HISTORY_LIMIT
+                folder=os.path.join(base_path, "volume"), entry_limit=history_limit
             )
 
         orders = []
@@ -73,6 +74,7 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
         orders = self.state.custom_state["orders"]
@@ -80,9 +82,7 @@ class Market(GeneralPlayer):
         total_buy_qty = sum(o["quantity"] for o in orders if o["quantity"] > 0)
         total_sell_qty = abs(sum(o["quantity"] for o in orders if o["quantity"] < 0))
         cover_buying = sum(
-            o["quantity"]
-            for o in orders
-            if o.get("is_short_cover") and o["quantity"] > 0
+            o["quantity"] for o in orders if o["is_short_cover"] and o["quantity"] > 0
         )
         net_demand = total_buy_qty - total_sell_qty
         total_volume = total_buy_qty + total_sell_qty
@@ -90,9 +90,14 @@ class Market(GeneralPlayer):
         # Short cover buying has extra price impact (forced buying)
         short_squeeze_impact = cover_buying * 0.05  # Extra impact from covering
 
-        price_impact = self.PRICE_IMPACT * net_demand + short_squeeze_impact
-        mean_reversion = self.MEAN_REVERSION * (self.FUNDAMENTAL_VALUE - current_price)
-        noise = random.gauss(0, self.NOISE_STD)
+        price_impact_rate = extras["price_impact"]
+        mean_reversion_rate = extras["mean_reversion"]
+        fundamental_value = extras["fundamental_value"]
+        noise_std = extras["noise_std"]
+
+        price_impact = price_impact_rate * net_demand + short_squeeze_impact
+        mean_reversion = mean_reversion_rate * (fundamental_value - current_price)
+        noise = random.gauss(0, noise_std)
 
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
         price_return = (new_price - current_price) / current_price
@@ -115,7 +120,7 @@ class Market(GeneralPlayer):
             "return_pct": price_return * 100,
             "volume": total_volume,
             "round": round_num,
-            "fundamental": self.FUNDAMENTAL_VALUE,
+            "fundamental": fundamental_value,
         }
 
         return {
@@ -134,26 +139,26 @@ class Market(GeneralPlayer):
 
 
 class BaseInvestor(GeneralPlayer):
-    """Base investor class."""
+    """
+    Base investor class.
 
-    STRATEGY_NAME = "base"
-    INITIAL_CASH = 10000.0
-    INITIAL_POSITION = 0.0
-    HISTORY_LIMIT = 50
+    Parameters from config extras:
+        - initial_cash, initial_position, history_limit, record_path
+    """
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
     ) -> None:
         self.state.custom_state["round"] = observation.round
         if "cash" not in self.state.custom_state:
-            record_path = self.config.extras.get(
-                "record_path", "EXPERIMENT/ShortSqueeze/records"
-            )
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            self.state.custom_state["cash"] = self.INITIAL_CASH
-            self.state.custom_state["position"] = self.INITIAL_POSITION
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
+            history_limit = extras["history_limit"]
             self.state.custom_state["price_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "price"), entry_limit=self.HISTORY_LIMIT
+                folder=os.path.join(base_path, "price"), entry_limit=history_limit
             )
         if observation.inbounds:
             for inb in observation.inbounds:
@@ -186,36 +191,42 @@ class BaseInvestor(GeneralPlayer):
 
 
 class ShortSeller(BaseInvestor):
-    """Short seller who must cover when losses mount."""
+    """
+    Short seller who must cover when losses mount.
 
-    STRATEGY_NAME = "short_seller"
-    INITIAL_POSITION = -50.0  # Start with short position
-    COVER_THRESHOLD = 0.20  # Cover at 20% loss
+    Parameters from config extras:
+        - short_initial_position, short_entry_price, cover_threshold
+    """
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
     ) -> None:
         await super().perceive(observation, prev_result)
         if "short_entry_price" not in self.state.custom_state:
-            self.state.custom_state["short_entry_price"] = (
-                30.0  # Shorted at initial price
-            )
-            self.state.custom_state["position"] = self.INITIAL_POSITION
+            extras = self.config.extras
+            short_entry_price = extras["short_entry_price"]
+            short_initial_position = extras["short_initial_position"]
+            self.state.custom_state["short_entry_price"] = short_entry_price
+            self.state.custom_state["position"] = short_initial_position
             self.state.custom_state["cash"] += (
-                abs(self.INITIAL_POSITION) * 30.0
-            )  # Proceeds from short
+                abs(short_initial_position) * short_entry_price
+            )
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         position = self.state.custom_state["position"]
         entry_price = self.state.custom_state["short_entry_price"]
 
+        cover_threshold = extras["cover_threshold"]
+        strategy_name = self.__class__.__name__
+
         is_short_cover = False
         if position < 0:  # Have short position
             loss_pct = (price - entry_price) / entry_price
-            if loss_pct > self.COVER_THRESHOLD:
+            if loss_pct > cover_threshold:
                 # COVER - buy to close short
                 quantity = abs(position) * 0.5  # Cover half
                 is_short_cover = True
@@ -231,13 +242,13 @@ class ShortSeller(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:12s}): Q={quantity:+8.2f}"
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:12s}): Q={quantity:+8.2f}"
         )
         return {
             **{
                 "bid_price": bid_price,
                 "quantity": quantity,
-                "strategy": self.STRATEGY_NAME,
+                "strategy": strategy_name,
                 "investor": self.identity,
                 "is_short_cover": is_short_cover,
             },
@@ -246,7 +257,7 @@ class ShortSeller(BaseInvestor):
                     "payload": {
                         "bid_price": bid_price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                         "is_short_cover": is_short_cover,
                     },
                     "content_type": "investor_bid",
@@ -256,27 +267,40 @@ class ShortSeller(BaseInvestor):
 
 
 class MomentumBuyer(BaseInvestor):
-    """Momentum buyer who amplifies squeeze."""
+    """
+    Momentum buyer who amplifies squeeze.
 
-    STRATEGY_NAME = "momentum_buyer"
-    LOOKBACK = 3
-    BASE_SIZE = 25.0
+    Parameters from config extras:
+        - lookback, base_size, momentum_threshold, momentum_multiplier, max_quantity
+    """
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         price_history = self.state.custom_state["price_history"]
 
-        if len(price_history) >= self.LOOKBACK:
+        lookback = extras["lookback"]
+        base_size = extras["base_size"]
+        momentum_threshold = extras["momentum_threshold"]
+        momentum_multiplier = extras["momentum_multiplier"]
+        max_quantity = extras["max_quantity"]
+        strategy_name = self.__class__.__name__
+
+        if len(price_history) >= lookback:
             momentum = (
-                list(price_history)[-1] - list(price_history)[-self.LOOKBACK]
-            ) / list(price_history)[-self.LOOKBACK]
+                list(price_history)[-1] - list(price_history)[-lookback]
+            ) / list(price_history)[-lookback]
         else:
             momentum = 0.0
 
-        quantity = momentum * self.BASE_SIZE * 15 if momentum > 0.02 else 0.0
-        quantity = max(0, min(40, quantity))  # Only buy
+        quantity = (
+            momentum * base_size * momentum_multiplier
+            if momentum > momentum_threshold
+            else 0.0
+        )
+        quantity = max(0, min(max_quantity, quantity))  # Only buy
         bid_price = price if quantity > 0 else 0.0
 
         quantity = self._apply_constraints(bid_price, quantity)
@@ -284,21 +308,23 @@ class MomentumBuyer(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:12s}): Q={quantity:+8.2f} mom={momentum*100:+.1f}%"
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:12s}): Q={quantity:+8.2f} mom={momentum*100:+.1f}%"
         )
         return {
             **{
                 "bid_price": bid_price,
                 "quantity": quantity,
-                "strategy": self.STRATEGY_NAME,
+                "strategy": strategy_name,
                 "investor": self.identity,
+                "is_short_cover": False,
             },
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": bid_price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
+                        "is_short_cover": False,
                     },
                     "content_type": "investor_bid",
                 }
@@ -307,18 +333,27 @@ class MomentumBuyer(BaseInvestor):
 
 
 class RetailTrader(BaseInvestor):
-    """Retail trader who can trigger squeeze."""
+    """
+    Retail trader who can trigger squeeze.
 
-    STRATEGY_NAME = "retail"
-    NOISE_STD = 12.0
+    Parameters from config extras:
+        - noise_std, bullish_bias, min_quantity, max_quantity
+    """
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
 
-        quantity = random.gauss(5, self.NOISE_STD)  # Slightly bullish bias
-        quantity = max(-15, min(25, quantity))
+        noise_std = extras["noise_std"]
+        bullish_bias = extras["bullish_bias"]
+        min_quantity = extras["min_quantity"]
+        max_quantity = extras["max_quantity"]
+        strategy_name = self.__class__.__name__
+
+        quantity = random.gauss(bullish_bias, noise_std)
+        quantity = max(min_quantity, min(max_quantity, quantity))
         bid_price = price
 
         quantity = self._apply_constraints(bid_price, quantity)
@@ -326,21 +361,23 @@ class RetailTrader(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:12s}): Q={quantity:+8.2f}"
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:12s}): Q={quantity:+8.2f}"
         )
         return {
             **{
                 "bid_price": bid_price,
                 "quantity": quantity,
-                "strategy": self.STRATEGY_NAME,
+                "strategy": strategy_name,
                 "investor": self.identity,
+                "is_short_cover": False,
             },
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": bid_price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
+                        "is_short_cover": False,
                     },
                     "content_type": "investor_bid",
                 }
@@ -349,23 +386,33 @@ class RetailTrader(BaseInvestor):
 
 
 class ValueInvestor(BaseInvestor):
-    """Value investor buying undervalued stock."""
+    """
+    Value investor buying undervalued stock.
 
-    STRATEGY_NAME = "value"
-    VALUE_THRESHOLD = 0.15
-    BASE_SIZE = 20.0
+    Parameters from config extras:
+        - value_threshold, base_size, value_multiplier, max_quantity
+    """
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         fundamental = market_data["fundamental"]
 
+        value_threshold = extras["value_threshold"]
+        base_size = extras["base_size"]
+        value_multiplier = extras["value_multiplier"]
+        max_quantity = extras["max_quantity"]
+        strategy_name = self.__class__.__name__
+
         deviation = (fundamental - price) / fundamental
         quantity = (
-            deviation * self.BASE_SIZE * 5 if deviation > self.VALUE_THRESHOLD else 0.0
+            deviation * base_size * value_multiplier
+            if deviation > value_threshold
+            else 0.0
         )
-        quantity = max(0, min(30, quantity))
+        quantity = max(0, min(max_quantity, quantity))
         bid_price = price if quantity > 0 else 0.0
 
         quantity = self._apply_constraints(bid_price, quantity)
@@ -373,21 +420,23 @@ class ValueInvestor(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:12s}): Q={quantity:+8.2f}"
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:12s}): Q={quantity:+8.2f}"
         )
         return {
             **{
                 "bid_price": bid_price,
                 "quantity": quantity,
-                "strategy": self.STRATEGY_NAME,
+                "strategy": strategy_name,
                 "investor": self.identity,
+                "is_short_cover": False,
             },
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": bid_price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
+                        "is_short_cover": False,
                     },
                     "content_type": "investor_bid",
                 }
@@ -396,40 +445,36 @@ class ValueInvestor(BaseInvestor):
 
 
 class InstitutionalHolder(BaseInvestor):
-    """Large passive institutional holder."""
-
-    STRATEGY_NAME = "institutional"
-    INITIAL_POSITION = 100.0
-
-    async def perceive(
-        self, observation: Observation, prev_result: Optional[StepResult] = None
-    ) -> None:
-        await super().perceive(observation, prev_result)
-        if "initialized" not in self.state.custom_state:
-            self.state.custom_state["position"] = self.INITIAL_POSITION
-            self.state.custom_state["initialized"] = True
+    """
+    Large passive institutional holder.
+    Rarely trades, initial_position from config defines holdings.
+    """
 
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
+        strategy_name = self.__class__.__name__
+
         # Passive - rarely trades
         quantity = 0.0
         bid_price = 0.0
         print(
-            f"[{self.identity:25s}] R{round_num} ({self.STRATEGY_NAME:12s}): Q={quantity:+8.2f} (passive)"
+            f"[{self.identity:25s}] R{round_num} ({strategy_name:12s}): Q={quantity:+8.2f} (passive)"
         )
         return {
             **{
                 "bid_price": bid_price,
                 "quantity": quantity,
-                "strategy": self.STRATEGY_NAME,
+                "strategy": strategy_name,
                 "investor": self.identity,
+                "is_short_cover": False,
             },
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": bid_price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
+                        "is_short_cover": False,
                     },
                     "content_type": "investor_bid",
                 }

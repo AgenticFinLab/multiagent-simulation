@@ -33,6 +33,8 @@ from masim.evaluation.finance import (
     # Visualization
     create_figure,
     save_figure,
+    # Validation
+    validate_equity_premium,
 )
 from masim.utils import load_config
 
@@ -303,11 +305,33 @@ def generate_summary(
     loss_probs: Dict[int, float],
     allocations: Dict[str, Dict],
 ) -> Dict[str, Any]:
-    """Generate summary statistics."""
+    """Generate summary statistics with validation."""
     prices = np.array(data["prices"])
     returns = calculate_returns(prices) if len(prices) > 1 else np.array([])
+    prices_list = list(prices)
+    max_dd, peak_idx, trough_idx = (
+        calculate_max_drawdown(prices_list) if len(prices_list) > 1 else (0, 0, 0)
+    )
+
+    # Extract allocation data for validation
+    myopic_allocation = 0.2  # Default
+    long_horizon_allocation = 0.7  # Default
+    for pid, alloc in allocations.items():
+        if "myopic" in alloc["strategy"].lower():
+            myopic_allocation = alloc["implied_stock_allocation"]
+        if "long_horizon" in alloc["strategy"].lower():
+            long_horizon_allocation = alloc["implied_stock_allocation"]
+
+    # Run validation
+    validation = validate_equity_premium(
+        equity_premium=premium_metrics.get("equity_premium", 0),
+        myopic_allocation=myopic_allocation,
+        long_horizon_allocation=long_horizon_allocation,
+    )
 
     return {
+        "scenario": "EquityPremium",
+        "total_rounds": len(prices),
         "price_statistics": {
             "initial_price": float(prices[0]) if len(prices) > 0 else 0,
             "final_price": float(prices[-1]) if len(prices) > 0 else 0,
@@ -315,7 +339,20 @@ def generate_summary(
                 float((prices[-1] / prices[0] - 1) * 100) if len(prices) > 1 else 0
             ),
         },
-        "equity_premium": premium_metrics,
+        "metrics": {
+            "max_drawdown": round(max_dd, 4),
+            "peak_round": peak_idx,
+            "trough_round": trough_idx,
+        },
+        "equity_premium": {
+            "annual_return_pct": round(premium_metrics.get("annual_return", 0), 2),
+            "risk_free_rate_pct": round(premium_metrics.get("risk_free_rate", 0), 2),
+            "equity_premium_pct": round(premium_metrics.get("equity_premium", 0), 2),
+            "sharpe_ratio": round(premium_metrics.get("sharpe_ratio", 0), 2),
+            "annual_volatility_pct": round(
+                premium_metrics.get("annual_volatility", 0), 2
+            ),
+        },
         "loss_probability_by_horizon": {
             str(k): round(v, 2) for k, v in loss_probs.items()
         },
@@ -328,19 +365,25 @@ def generate_summary(
         },
         "myopic_loss_aversion_evidence": {
             "short_horizon_loss_prob": (
-                loss_probs[min(loss_probs.keys())] if loss_probs else 0
+                round(loss_probs[min(loss_probs.keys())], 2) if loss_probs else 0
             ),
             "long_horizon_loss_prob": (
-                loss_probs[max(loss_probs.keys())] if loss_probs else 0
+                round(loss_probs[max(loss_probs.keys())], 2) if loss_probs else 0
             ),
             "ratio": (
-                loss_probs[min(loss_probs.keys())] / loss_probs[max(loss_probs.keys())]
+                round(
+                    loss_probs[min(loss_probs.keys())]
+                    / loss_probs[max(loss_probs.keys())],
+                    2,
+                )
                 if loss_probs and loss_probs[max(loss_probs.keys())] > 0
                 else 0
             ),
+            "myopic_allocation_pct": round(myopic_allocation * 100, 1),
+            "long_horizon_allocation_pct": round(long_horizon_allocation * 100, 1),
         },
-        "puzzle_explained": premium_metrics["equity_premium"]
-        > 4.0,  # Standard puzzle threshold
+        "puzzle_explained": premium_metrics.get("equity_premium", 0) > 4.0,
+        "validation": validation.to_dict(),
     }
 
 
@@ -426,6 +469,8 @@ def main():
         print(f"Short-horizon P(Loss): {loss_probs[short_h]:.1f}%")
         print(f"Long-horizon P(Loss):  {loss_probs[long_h]:.1f}%")
         print("→ Myopic investors see more losses, demand higher premium")
+    print(f"\nVALIDATION: {summary['validation']['interpretation']}")
+    print(f"Fit Score: {summary['validation']['score']:.1%}")
 
     return summary
 

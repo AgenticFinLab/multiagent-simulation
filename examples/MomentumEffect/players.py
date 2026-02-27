@@ -17,6 +17,8 @@ Investor Types:
     - MarketMaker: Liquidity provision
     - TechnicalTrader: Moving average crossover
     - FundamentalTrader: Value-based anchor
+
+All parameters are configured via players.yml config file.
 """
 
 import os
@@ -42,20 +44,13 @@ class Market(GeneralPlayer):
         P(t+1) = P(t) + λ × NetDemand + γ × [F(t) - P(t)] + ε
 
     Fundamental value drifts slowly to create momentum opportunity.
+
+    Parameters from config extras:
+        - initial_price, initial_fundamental
+        - price_impact, mean_reversion, noise_std
+        - drift_persistence, drift_volatility
+        - history_limit, record_path
     """
-
-    INITIAL_PRICE = 100.0
-    INITIAL_FUNDAMENTAL = 100.0
-
-    PRICE_IMPACT = 0.08
-    MEAN_REVERSION = 0.01  # Slow - allows momentum to persist
-    NOISE_STD = 0.3
-
-    # Fundamental drift (creates momentum opportunities)
-    DRIFT_PERSISTENCE = 0.95  # Autocorrelated drift
-    DRIFT_VOLATILITY = 0.5
-
-    HISTORY_LIMIT = 200
 
     async def perceive(
         self,
@@ -66,22 +61,22 @@ class Market(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "price" not in self.state.custom_state:
-            record_path = self.config.extras.get(
-                "record_path", "EXPERIMENT/MomentumEffect/records"
-            )
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
 
-            self.state.custom_state["price"] = self.INITIAL_PRICE
-            self.state.custom_state["fundamental"] = self.INITIAL_FUNDAMENTAL
+            self.state.custom_state["price"] = extras["initial_price"]
+            self.state.custom_state["fundamental"] = extras["initial_fundamental"]
             self.state.custom_state["drift"] = 0.0
 
+            history_limit = extras["history_limit"]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
             self.state.custom_state["return_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "return"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
 
         orders = []
@@ -99,6 +94,7 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
@@ -106,9 +102,9 @@ class Market(GeneralPlayer):
         orders = self.state.custom_state["orders"]
 
         # Update fundamental with persistent drift (creates momentum)
-        new_drift = self.DRIFT_PERSISTENCE * drift + random.gauss(
-            0, self.DRIFT_VOLATILITY
-        )
+        drift_persistence = extras["drift_persistence"]
+        drift_volatility = extras["drift_volatility"]
+        new_drift = drift_persistence * drift + random.gauss(0, drift_volatility)
         new_fundamental = fundamental + new_drift
 
         # Aggregate orders
@@ -121,9 +117,13 @@ class Market(GeneralPlayer):
         total_volume = total_buy_qty + total_sell_qty
 
         # Price dynamics
-        price_impact = self.PRICE_IMPACT * net_demand
-        mean_reversion = self.MEAN_REVERSION * (new_fundamental - current_price)
-        noise = random.gauss(0, self.NOISE_STD)
+        price_impact_rate = extras["price_impact"]
+        mean_reversion_rate = extras["mean_reversion"]
+        noise_std = extras["noise_std"]
+
+        price_impact = price_impact_rate * net_demand
+        mean_reversion = mean_reversion_rate * (new_fundamental - current_price)
+        noise = random.gauss(0, noise_std)
 
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
         price_return = (
@@ -193,12 +193,12 @@ class Market(GeneralPlayer):
 
 
 class BaseInvestor(GeneralPlayer):
-    """Base class for all investors."""
+    """
+    Base class for all investors.
 
-    STRATEGY_NAME = "base"
-    INITIAL_CASH = 10000.0
-    INITIAL_POSITION = 0.0
-    HISTORY_LIMIT = 50
+    Parameters from config extras:
+        - initial_cash, initial_position, history_limit, record_path
+    """
 
     async def perceive(
         self,
@@ -209,16 +209,16 @@ class BaseInvestor(GeneralPlayer):
         self.state.custom_state["round"] = round_num
 
         if "cash" not in self.state.custom_state:
-            record_path = self.config.extras.get(
-                "record_path", "EXPERIMENT/MomentumEffect/records"
-            )
+            extras = self.config.extras
+            record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
 
-            self.state.custom_state["cash"] = self.INITIAL_CASH
-            self.state.custom_state["position"] = self.INITIAL_POSITION
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
+            history_limit = extras["history_limit"]
             self.state.custom_state["return_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "returns"),
-                entry_limit=self.HISTORY_LIMIT,
+                entry_limit=history_limit,
             )
 
         market_data = None
@@ -249,47 +249,51 @@ class MomentumTrader(BaseInvestor):
 
     Formula:
         signal = weighted average of past N returns
-        Q = SCALE × signal × (max_position - current_position) if signal > threshold
+        Q = scale × signal × (max_position - current_position) if signal > threshold
 
     Financial Theory:
         - Conservatism Bias: Investors underreact to news
         - Information Diffusion: News spreads gradually
         - Self-attribution Bias: Winners attribute success to skill
+
+    Parameters from config extras:
+        - lookback_window, momentum_threshold, scale, max_position
     """
 
-    STRATEGY_NAME = "momentum_trader"
-    LOOKBACK_WINDOW = 5
-    MOMENTUM_THRESHOLD = 0.02  # 2% threshold
-    SCALE = 3.0  # Aggressiveness
-    MAX_POSITION = 100.0
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         market_data = self.state.custom_state["market_data"]
 
+        strategy_name = self.__class__.__name__
+
         if market_data is None:
-            return self._hold_order(round_num, cash, position, 0)
+            return self._hold_order(round_num, strategy_name)
 
         price = market_data["price"]
         momentum = market_data["momentum_5"]
         self.state.custom_state["return_history"].append(market_data["return"])
 
+        momentum_threshold = extras["momentum_threshold"]
+        scale = extras["scale"]
+        max_position = extras["max_position"]
+
         # Momentum signal
         signal = momentum
         quantity = 0.0
 
-        if signal > self.MOMENTUM_THRESHOLD:
+        if signal > momentum_threshold:
             # BUY winner
             buy_capacity = (cash / price) * 0.8
-            target = min(buy_capacity, self.MAX_POSITION - position)
-            quantity = self.SCALE * signal * target
+            target = min(buy_capacity, max_position - position)
+            quantity = scale * signal * target
             quantity = max(0, min(quantity, buy_capacity))
-        elif signal < -self.MOMENTUM_THRESHOLD:
+        elif signal < -momentum_threshold:
             # SELL loser
             sell_capacity = position * 0.8
-            quantity = self.SCALE * signal * sell_capacity
+            quantity = scale * signal * sell_capacity
             quantity = max(-sell_capacity, min(0, quantity))
 
         # Update position
@@ -303,7 +307,7 @@ class MomentumTrader(BaseInvestor):
             self.state.custom_state["position"] += quantity
 
         print(
-            f"[{self.config.identity:24s}] R{round_num} ({self.STRATEGY_NAME:16s}): "
+            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q={quantity:+8.2f} mom={signal*100:+.1f}% | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -312,34 +316,34 @@ class MomentumTrader(BaseInvestor):
         return {
             "bid_price": price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
             ],
         }
 
-    def _hold_order(self, round_num, cash, position, momentum):
+    def _hold_order(self, round_num, strategy_name):
         print(
-            f"[{self.config.identity:24s}] R{round_num} ({self.STRATEGY_NAME:16s}): "
+            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q=   +0.00 [NO DATA]"
         )
         return {
             "bid_price": 0,
             "quantity": 0,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": 0,
                         "quantity": 0,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
@@ -361,38 +365,43 @@ class ContrarianTrader(BaseInvestor):
     Financial Theory:
         - Overreaction: Markets overshoot and correct
         - Mean reversion: Prices return to fundamentals
+
+    Parameters from config extras:
+        - reversion_threshold, scale, max_position
     """
 
-    STRATEGY_NAME = "contrarian_trader"
-    REVERSION_THRESHOLD = 0.03  # 3% deviation
-    SCALE = 2.0
-    MAX_POSITION = 80.0
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         market_data = self.state.custom_state["market_data"]
 
+        strategy_name = self.__class__.__name__
+
         if market_data is None:
-            return self._hold_order(round_num, cash, position)
+            return self._hold_order(round_num, strategy_name)
 
         price = market_data["price"]
         momentum = market_data["momentum_5"]
+
+        reversion_threshold = extras["reversion_threshold"]
+        scale = extras["scale"]
+        max_position = extras["max_position"]
 
         # Contrarian: opposite of momentum
         signal = -momentum
         quantity = 0.0
 
-        if abs(signal) > self.REVERSION_THRESHOLD:
+        if abs(signal) > reversion_threshold:
             if signal > 0:  # Buy losers
                 buy_capacity = (cash / price) * 0.6
-                target = min(buy_capacity, self.MAX_POSITION - position)
-                quantity = self.SCALE * signal * target
+                target = min(buy_capacity, max_position - position)
+                quantity = scale * signal * target
                 quantity = max(0, min(quantity, buy_capacity))
             else:  # Sell winners
                 sell_capacity = position * 0.6
-                quantity = self.SCALE * signal * sell_capacity
+                quantity = scale * signal * sell_capacity
                 quantity = max(-sell_capacity, min(0, quantity))
 
         # Update
@@ -406,7 +415,7 @@ class ContrarianTrader(BaseInvestor):
             self.state.custom_state["position"] += quantity
 
         print(
-            f"[{self.config.identity:24s}] R{round_num} ({self.STRATEGY_NAME:16s}): "
+            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q={quantity:+8.2f} signal={signal*100:+.1f}% | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -415,34 +424,34 @@ class ContrarianTrader(BaseInvestor):
         return {
             "bid_price": price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
             ],
         }
 
-    def _hold_order(self, round_num, cash, position):
+    def _hold_order(self, round_num, strategy_name):
         print(
-            f"[{self.config.identity:24s}] R{round_num} ({self.STRATEGY_NAME:16s}): "
+            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q=   +0.00 [NO DATA]"
         )
         return {
             "bid_price": 0,
             "quantity": 0,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": 0,
                         "quantity": 0,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
@@ -460,34 +469,39 @@ class IndexFund(BaseInvestor):
     Passive Index Fund:
         Maintains fixed allocation regardless of momentum
         Serves as baseline for performance comparison
+
+    Parameters from config extras:
+        - target_allocation, rebalance_threshold
     """
 
-    STRATEGY_NAME = "index_fund"
-    TARGET_ALLOCATION = 0.6  # 60% equity
-    REBALANCE_THRESHOLD = 0.05  # 5% deviation triggers rebalance
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         market_data = self.state.custom_state["market_data"]
 
+        strategy_name = self.__class__.__name__
+
         if market_data is None:
-            return self._hold_order(round_num, cash, position)
+            return self._hold_order(round_num, strategy_name)
 
         price = market_data["price"]
+
+        target_allocation = extras["target_allocation"]
+        rebalance_threshold = extras["rebalance_threshold"]
 
         # Calculate current allocation
         equity_value = position * price
         total_value = cash + equity_value
         current_allocation = equity_value / total_value if total_value > 0 else 0
 
-        deviation = current_allocation - self.TARGET_ALLOCATION
+        deviation = current_allocation - target_allocation
         quantity = 0.0
 
-        if abs(deviation) > self.REBALANCE_THRESHOLD:
+        if abs(deviation) > rebalance_threshold:
             # Rebalance
-            target_equity = total_value * self.TARGET_ALLOCATION
+            target_equity = total_value * target_allocation
             target_position = target_equity / price
             quantity = (target_position - position) * 0.5  # Gradual rebalance
 
@@ -508,7 +522,7 @@ class IndexFund(BaseInvestor):
                 quantity = 0
 
         print(
-            f"[{self.config.identity:24s}] R{round_num} ({self.STRATEGY_NAME:16s}): "
+            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q={quantity:+8.2f} alloc={current_allocation*100:.1f}% | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -517,30 +531,30 @@ class IndexFund(BaseInvestor):
         return {
             "bid_price": price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
             ],
         }
 
-    def _hold_order(self, round_num, cash, position):
+    def _hold_order(self, round_num, strategy_name):
         return {
             "bid_price": 0,
             "quantity": 0,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": 0,
                         "quantity": 0,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
@@ -557,26 +571,31 @@ class MarketMaker(BaseInvestor):
     """
     Market Maker providing liquidity.
     Mean-reverts inventory to zero.
+
+    Parameters from config extras:
+        - inventory_target, reversion_speed
     """
 
-    STRATEGY_NAME = "market_maker"
-    INVENTORY_TARGET = 0.0
-    REVERSION_SPEED = 0.2
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         market_data = self.state.custom_state["market_data"]
 
+        strategy_name = self.__class__.__name__
+
         if market_data is None:
-            return self._hold_order(round_num, cash, position)
+            return self._hold_order(round_num, strategy_name)
 
         price = market_data["price"]
 
+        inventory_target = extras["inventory_target"]
+        reversion_speed = extras["reversion_speed"]
+
         # Revert to target inventory
-        deviation = position - self.INVENTORY_TARGET
-        quantity = -self.REVERSION_SPEED * deviation
+        deviation = position - inventory_target
+        quantity = -reversion_speed * deviation
 
         # Apply constraints
         if quantity > 0:
@@ -597,7 +616,7 @@ class MarketMaker(BaseInvestor):
             self.state.custom_state["position"] += quantity
 
         print(
-            f"[{self.config.identity:24s}] R{round_num} ({self.STRATEGY_NAME:16s}): "
+            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q={quantity:+8.2f} [MM] | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -606,30 +625,30 @@ class MarketMaker(BaseInvestor):
         return {
             "bid_price": price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
             ],
         }
 
-    def _hold_order(self, round_num, cash, position):
+    def _hold_order(self, round_num, strategy_name):
         return {
             "bid_price": 0,
             "quantity": 0,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": 0,
                         "quantity": 0,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
@@ -647,26 +666,29 @@ class TechnicalTrader(BaseInvestor):
     Technical Analysis: Moving Average Crossover
         Buy when short MA > long MA (golden cross)
         Sell when short MA < long MA (death cross)
+
+    Parameters from config extras:
+        - short_window, long_window, scale, max_position
     """
 
-    STRATEGY_NAME = "technical_trader"
-    SHORT_WINDOW = 3
-    LONG_WINDOW = 10
-    SCALE = 2.0
-    MAX_POSITION = 60.0
-
-    INITIAL_POSITION = 20.0  # Start with some position
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         market_data = self.state.custom_state["market_data"]
 
+        strategy_name = self.__class__.__name__
+
         if market_data is None:
-            return self._hold_order(round_num, cash, position)
+            return self._hold_order(round_num, strategy_name)
 
         price = market_data["price"]
+
+        short_window = extras["short_window"]
+        long_window = extras["long_window"]
+        scale = extras["scale"]
+        max_position = extras["max_position"]
 
         # Store price for MA calculation
         if "ma_prices" not in self.state.custom_state:
@@ -674,28 +696,28 @@ class TechnicalTrader(BaseInvestor):
         self.state.custom_state["ma_prices"].append(price)
 
         # Keep limited history
-        if len(self.state.custom_state["ma_prices"]) > self.LONG_WINDOW:
+        if len(self.state.custom_state["ma_prices"]) > long_window:
             self.state.custom_state["ma_prices"] = self.state.custom_state["ma_prices"][
-                -self.LONG_WINDOW :
+                -long_window:
             ]
 
         prices = self.state.custom_state["ma_prices"]
         quantity = 0.0
 
-        if len(prices) >= self.LONG_WINDOW:
-            short_ma = sum(prices[-self.SHORT_WINDOW :]) / self.SHORT_WINDOW
+        if len(prices) >= long_window:
+            short_ma = sum(prices[-short_window:]) / short_window
             long_ma = sum(prices) / len(prices)
 
             signal = (short_ma - long_ma) / long_ma
 
             if signal > 0.01:  # Golden cross
                 buy_capacity = (cash / price) * 0.5
-                target = min(buy_capacity, self.MAX_POSITION - position)
-                quantity = self.SCALE * signal * target
+                target = min(buy_capacity, max_position - position)
+                quantity = scale * signal * target
                 quantity = max(0, min(quantity, buy_capacity))
             elif signal < -0.01:  # Death cross
                 sell_capacity = position * 0.5
-                quantity = self.SCALE * signal * sell_capacity
+                quantity = scale * signal * sell_capacity
                 quantity = max(-sell_capacity, min(0, quantity))
 
         # Update
@@ -709,7 +731,7 @@ class TechnicalTrader(BaseInvestor):
             self.state.custom_state["position"] += quantity
 
         print(
-            f"[{self.config.identity:24s}] R{round_num} ({self.STRATEGY_NAME:16s}): "
+            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q={quantity:+8.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -718,30 +740,30 @@ class TechnicalTrader(BaseInvestor):
         return {
             "bid_price": price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
             ],
         }
 
-    def _hold_order(self, round_num, cash, position):
+    def _hold_order(self, round_num, strategy_name):
         return {
             "bid_price": 0,
             "quantity": 0,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": 0,
                         "quantity": 0,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
@@ -758,39 +780,44 @@ class FundamentalTrader(BaseInvestor):
     """
     Fundamental Analysis: Trade toward intrinsic value.
     Provides weak stabilizing force against momentum.
+
+    Parameters from config extras:
+        - value_threshold, scale, max_position
     """
 
-    STRATEGY_NAME = "fundamental_trader"
-    VALUE_THRESHOLD = 0.05  # 5% mispricing
-    SCALE = 1.5
-    MAX_POSITION = 50.0
-
     async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         market_data = self.state.custom_state["market_data"]
 
+        strategy_name = self.__class__.__name__
+
         if market_data is None:
-            return self._hold_order(round_num, cash, position)
+            return self._hold_order(round_num, strategy_name)
 
         price = market_data["price"]
         fundamental = market_data["fundamental"]
+
+        value_threshold = extras["value_threshold"]
+        scale = extras["scale"]
+        max_position = extras["max_position"]
 
         # Value signal: positive if undervalued
         mispricing = (fundamental - price) / price
         quantity = 0.0
 
-        if mispricing > self.VALUE_THRESHOLD:
+        if mispricing > value_threshold:
             # Undervalued - buy
             buy_capacity = (cash / price) * 0.5
-            target = min(buy_capacity, self.MAX_POSITION - position)
-            quantity = self.SCALE * mispricing * target
+            target = min(buy_capacity, max_position - position)
+            quantity = scale * mispricing * target
             quantity = max(0, min(quantity, buy_capacity))
-        elif mispricing < -self.VALUE_THRESHOLD:
+        elif mispricing < -value_threshold:
             # Overvalued - sell
             sell_capacity = position * 0.5
-            quantity = self.SCALE * mispricing * sell_capacity
+            quantity = scale * mispricing * sell_capacity
             quantity = max(-sell_capacity, min(0, quantity))
 
         # Update
@@ -804,7 +831,7 @@ class FundamentalTrader(BaseInvestor):
             self.state.custom_state["position"] += quantity
 
         print(
-            f"[{self.config.identity:24s}] R{round_num} ({self.STRATEGY_NAME:16s}): "
+            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q={quantity:+8.2f} misp={mispricing*100:+.1f}% | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
             f"Pos={self.state.custom_state['position']:+8.2f}"
@@ -813,30 +840,30 @@ class FundamentalTrader(BaseInvestor):
         return {
             "bid_price": price,
             "quantity": quantity,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": price,
                         "quantity": quantity,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }
             ],
         }
 
-    def _hold_order(self, round_num, cash, position):
+    def _hold_order(self, round_num, strategy_name):
         return {
             "bid_price": 0,
             "quantity": 0,
-            "strategy": self.STRATEGY_NAME,
+            "strategy": strategy_name,
             "outbound_messages": [
                 {
                     "payload": {
                         "bid_price": 0,
                         "quantity": 0,
-                        "strategy": self.STRATEGY_NAME,
+                        "strategy": strategy_name,
                     },
                     "target": "market",
                 }

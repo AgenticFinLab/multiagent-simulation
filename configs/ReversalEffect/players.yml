@@ -2,6 +2,14 @@
 # ReversalEffect Players Configuration
 # =============================================================================
 # De Bondt & Thaler (1985) Overreaction Hypothesis
+#
+# Investor Types:
+#   - ContrarianInvestor: Buys losers, sells winners (KEY reversal driver)
+#   - MomentumInvestor: Short-term trend following (creates overreaction)
+#   - OverconfidentTrader: Overreacts to news (causes initial overshoot)
+#   - NoiseTrader: Random liquidity
+#   - ValueInvestor: Slow fundamental investor
+#   - IndexTracker: Passive benchmark
 # =============================================================================
 
 market:
@@ -15,6 +23,13 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/ReversalEffect/records"
+      # Market parameters
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.08
+      mean_reversion: 0.01         # Slow reversion to fundamental
+      noise_std: 0.5
+      history_limit: 200
   persona: !include persona.yml
 
 contrarian_1:
@@ -27,8 +42,16 @@ contrarian_1:
     group_tags:
       - investors
     extras:
-      strategy: contrarian
       record_path: "EXPERIMENT/ReversalEffect/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      # Contrarian specific (long-term reversal)
+      lookback_window: 30          # Long-term horizon
+      reversal_threshold: 0.15     # 15% deviation triggers trade
+      base_position_size: 25.0
+      value_sensitivity: 0.6
   persona: !include persona.yml
 
 contrarian_2:
@@ -41,8 +64,14 @@ contrarian_2:
     group_tags:
       - investors
     extras:
-      strategy: contrarian
       record_path: "EXPERIMENT/ReversalEffect/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      lookback_window: 30
+      reversal_threshold: 0.15
+      base_position_size: 25.0
+      value_sensitivity: 0.6
   persona: !include persona.yml
 
 momentum_1:
@@ -55,8 +84,15 @@ momentum_1:
     group_tags:
       - investors
     extras:
-      strategy: momentum
       record_path: "EXPERIMENT/ReversalEffect/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      # Momentum specific (short-term)
+      lookback_window: 5
+      momentum_threshold: 0.02
+      base_position_size: 20.0
+      momentum_multiplier: 10
   persona: !include persona.yml
 
 momentum_2:
@@ -69,8 +105,14 @@ momentum_2:
     group_tags:
       - investors
     extras:
-      strategy: momentum
       record_path: "EXPERIMENT/ReversalEffect/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      lookback_window: 5
+      momentum_threshold: 0.02
+      base_position_size: 20.0
+      momentum_multiplier: 10
   persona: !include persona.yml
 
 overconfident_1:
@@ -83,8 +125,15 @@ overconfident_1:
     group_tags:
       - investors
     extras:
-      strategy: overconfident
       record_path: "EXPERIMENT/ReversalEffect/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      # Overconfident specific
+      overconfidence_factor: 2.5   # Overweights signals by 2.5x
+      reaction_threshold: 0.01
+      base_position_size: 30.0
+      overconfidence_multiplier: 10
   persona: !include persona.yml
 
 overconfident_2:
@@ -97,8 +146,14 @@ overconfident_2:
     group_tags:
       - investors
     extras:
-      strategy: overconfident
       record_path: "EXPERIMENT/ReversalEffect/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      overconfidence_factor: 2.5
+      reaction_threshold: 0.01
+      base_position_size: 30.0
+      overconfidence_multiplier: 10
   persona: !include persona.yml
 
 noise_trader:
@@ -111,8 +166,13 @@ noise_trader:
     group_tags:
       - investors
     extras:
-      strategy: noise
       record_path: "EXPERIMENT/ReversalEffect/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      # Noise specific
+      position_volatility: 10.0
+      mean_reversion: 0.1
   persona: !include persona.yml
 
 value_investor:
@@ -125,8 +185,15 @@ value_investor:
     group_tags:
       - investors
     extras:
-      strategy: value
       record_path: "EXPERIMENT/ReversalEffect/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      # Value specific
+      value_sensitivity: 0.4
+      base_position_size: 15.0
+      value_noise: 2.0
+      value_threshold: 0.03
   persona: !include persona.yml
 
 index_tracker:
@@ -139,6 +206,11 @@ index_tracker:
     group_tags:
       - investors
     extras:
-      strategy: index
       record_path: "EXPERIMENT/ReversalEffect/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      # Index specific
+      target_position: 50.0
+      rebalance_threshold: 0.1
   persona: !include persona.yml

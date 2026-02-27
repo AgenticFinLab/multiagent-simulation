@@ -33,6 +33,8 @@ from masim.evaluation.finance import (
     # Visualization
     create_figure,
     save_figure,
+    # Validation
+    validate_liquidity_dryup,
 )
 from masim.utils import load_config
 
@@ -292,9 +294,13 @@ def generate_summary(
     liquidity_states: List[Dict],
     episodes: List[Dict],
 ) -> Dict[str, Any]:
-    """Generate summary statistics."""
+    """Generate summary statistics with validation."""
     prices = np.array(data["prices"])
     returns = calculate_returns(prices) if len(prices) > 1 else np.array([])
+    prices_list = list(prices)
+    max_dd, peak_idx, trough_idx = (
+        calculate_max_drawdown(prices_list) if len(prices_list) > 1 else (0, 0, 0)
+    )
 
     # Count state occurrences
     state_counts = defaultdict(int)
@@ -303,7 +309,38 @@ def generate_summary(
 
     total_rounds = len(liquidity_states)
 
+    # Calculate spread/depth/impact metrics for validation
+    if liquidity_states:
+        normal_liquidity = 100  # Baseline
+        min_liquidity = min(s["total_liquidity"] for s in liquidity_states)
+        max_impact = max(s["impact_factor"] for s in liquidity_states)
+        avg_liquidity = np.mean([s["total_liquidity"] for s in liquidity_states])
+
+        spread_increase = max_impact  # Impact factor is proxy for spread
+        depth_decrease = (
+            (normal_liquidity - min_liquidity) / normal_liquidity
+            if normal_liquidity > 0
+            else 0
+        )
+        impact_increase = max_impact
+    else:
+        spread_increase = 1.0
+        depth_decrease = 0.0
+        impact_increase = 1.0
+        avg_liquidity = 0
+        min_liquidity = 0
+        max_impact = 0
+
+    # Run validation
+    validation = validate_liquidity_dryup(
+        spread_increase_ratio=spread_increase,
+        depth_decrease_ratio=depth_decrease,
+        price_impact_increase=impact_increase,
+    )
+
     return {
+        "scenario": "LiquidityDryup",
+        "total_rounds": len(prices),
         "price_statistics": {
             "initial_price": float(prices[0]) if len(prices) > 0 else 0,
             "final_price": float(prices[-1]) if len(prices) > 0 else 0,
@@ -311,22 +348,17 @@ def generate_summary(
             "min_price": float(np.min(prices)) if len(prices) > 0 else 0,
             "volatility": float(np.std(returns) * 100) if len(returns) > 0 else 0,
         },
+        "metrics": {
+            "max_drawdown": round(max_dd, 4),
+            "peak_round": peak_idx,
+            "trough_round": trough_idx,
+        },
         "liquidity_statistics": {
-            "avg_liquidity": (
-                float(np.mean([s["total_liquidity"] for s in liquidity_states]))
-                if liquidity_states
-                else 0
-            ),
-            "min_liquidity": (
-                float(min(s["total_liquidity"] for s in liquidity_states))
-                if liquidity_states
-                else 0
-            ),
-            "max_impact": (
-                float(max(s["impact_factor"] for s in liquidity_states))
-                if liquidity_states
-                else 0
-            ),
+            "avg_liquidity": round(float(avg_liquidity), 2),
+            "min_liquidity": round(float(min_liquidity), 2),
+            "max_impact": round(float(max_impact), 2),
+            "spread_increase_ratio": round(spread_increase, 2),
+            "depth_decrease_ratio": round(depth_decrease, 4),
         },
         "state_distribution": {
             state: {
@@ -354,6 +386,7 @@ def generate_summary(
                 else "MILD" if len(episodes) > 0 else "NONE"
             )
         ),
+        "validation": validation.to_dict(),
     }
 
 
@@ -430,6 +463,8 @@ def main():
     print(
         f"Total Duration in Dry-up: {summary['dryup_episodes']['total_duration']} rounds"
     )
+    print(f"\nVALIDATION: {summary['validation']['interpretation']}")
+    print(f"Fit Score: {summary['validation']['score']:.1%}")
 
     return summary
 

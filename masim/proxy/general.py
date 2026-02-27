@@ -158,7 +158,7 @@ class StorageProxy(BaseProxy):
             msg_dir = os.path.join(self._get_base_path(player_id), "messages")
             os.makedirs(msg_dir, exist_ok=True)
             self._message_stores[player_id] = BlockBasedStoreManager(
-                folder=msg_dir, file_format="json", block_size=500
+                folder=msg_dir, file_format="json", block_size=self.config.entry_limit
             )
         return self._message_stores[player_id]
 
@@ -168,7 +168,7 @@ class StorageProxy(BaseProxy):
             turn_dir = os.path.join(self._get_base_path(player_id), "turns")
             os.makedirs(turn_dir, exist_ok=True)
             self._turn_stores[player_id] = BlockBasedStoreManager(
-                folder=turn_dir, file_format="json", block_size=500
+                folder=turn_dir, file_format="json", block_size=self.config.entry_limit
             )
         return self._turn_stores[player_id]
 

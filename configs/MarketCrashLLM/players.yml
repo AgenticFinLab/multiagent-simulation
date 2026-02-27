@@ -1,3 +1,7 @@
+# =============================================================================
+# MarketCrashLLM Players Configuration
+# =============================================================================
+
 market:
   name: "Market with Liquidity Dynamics"
   class: "examples.MarketCrashLLM.players:Market"
@@ -8,8 +12,16 @@ market:
     group_tags:
       - market
     extras:
-      price_model: "liquidity_adjusted"
+      record_path: "EXPERIMENT/MarketCrashLLM/records"
       fundamental_value: 100.0
+      initial_price: 100.0
+      base_price_impact: 0.08
+      mean_reversion: 0.01
+      noise_std: 0.5
+      liquidity_decay: 0.1
+      liquidity_recovery: 0.05
+      min_liquidity: 0.1
+      history_limit: 300
   persona: !include persona.yml
 
 llm_panic_seller:
@@ -22,7 +34,10 @@ llm_panic_seller:
     group_tags:
       - llm_investors
     extras:
-      strategy: panic_seller
+      record_path: "EXPERIMENT/MarketCrashLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.MarketCrashLLM.prompts:LLM_PANIC_SELLER_SYS"
         user_message: "examples.MarketCrashLLM.prompts:LLM_USER_TEMPLATE"
@@ -43,7 +58,10 @@ llm_risk_parity:
     group_tags:
       - llm_investors
     extras:
-      strategy: risk_parity
+      record_path: "EXPERIMENT/MarketCrashLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      history_limit: 100
       llm:
         sys_message: "examples.MarketCrashLLM.prompts:LLM_RISK_PARITY_SYS"
         user_message: "examples.MarketCrashLLM.prompts:LLM_USER_TEMPLATE"
@@ -64,7 +82,10 @@ llm_leveraged_fund:
     group_tags:
       - llm_investors
     extras:
-      strategy: leveraged_fund
+      record_path: "EXPERIMENT/MarketCrashLLM/records"
+      initial_cash: 10000.0
+      initial_position: 80.0
+      history_limit: 100
       llm:
         sys_message: "examples.MarketCrashLLM.prompts:LLM_LEVERAGED_FUND_SYS"
         user_message: "examples.MarketCrashLLM.prompts:LLM_USER_TEMPLATE"
@@ -85,7 +106,10 @@ llm_market_maker:
     group_tags:
       - llm_investors
     extras:
-      strategy: market_maker
+      record_path: "EXPERIMENT/MarketCrashLLM/records"
+      initial_cash: 10000.0
+      initial_position: 30.0
+      history_limit: 100
       llm:
         sys_message: "examples.MarketCrashLLM.prompts:LLM_MARKET_MAKER_SYS"
         user_message: "examples.MarketCrashLLM.prompts:LLM_USER_TEMPLATE"
@@ -106,7 +130,10 @@ llm_bottom_fisher:
     group_tags:
       - llm_investors
     extras:
-      strategy: bottom_fisher
+      record_path: "EXPERIMENT/MarketCrashLLM/records"
+      initial_cash: 10000.0
+      initial_position: 10.0
+      history_limit: 100
       llm:
         sys_message: "examples.MarketCrashLLM.prompts:LLM_BOTTOM_FISHER_SYS"
         user_message: "examples.MarketCrashLLM.prompts:LLM_USER_TEMPLATE"
