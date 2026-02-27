@@ -1,0 +1,53 @@
+market:
+  name: "Market"
+  class: "examples.EquityPremium.players:Market"
+  config: {identity: "market", role: coordinator, steps_per_turn: 1, group_tags: [market], extras: {record_path: "EXPERIMENT/EquityPremium/records"}}
+  persona: !include persona.yml
+
+mla_1:
+  name: "Myopic Loss Averse 1"
+  class: "examples.EquityPremium.players:MyopicLossAverseInvestor"
+  config: {identity: "mla_1", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/EquityPremium/records"}}
+  persona: !include persona.yml
+
+mla_2:
+  name: "Myopic Loss Averse 2"
+  class: "examples.EquityPremium.players:MyopicLossAverseInvestor"
+  config: {identity: "mla_2", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/EquityPremium/records"}}
+  persona: !include persona.yml
+
+mla_3:
+  name: "Myopic Loss Averse 3"
+  class: "examples.EquityPremium.players:MyopicLossAverseInvestor"
+  config: {identity: "mla_3", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/EquityPremium/records"}}
+  persona: !include persona.yml
+
+long_horizon_1:
+  name: "Long Horizon Investor"
+  class: "examples.EquityPremium.players:LongHorizonInvestor"
+  config: {identity: "long_horizon_1", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/EquityPremium/records"}}
+  persona: !include persona.yml
+
+risk_neutral:
+  name: "Risk Neutral Investor"
+  class: "examples.EquityPremium.players:RiskNeutralInvestor"
+  config: {identity: "risk_neutral", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/EquityPremium/records"}}
+  persona: !include persona.yml
+
+conservative_1:
+  name: "Conservative Investor 1"
+  class: "examples.EquityPremium.players:ConservativeInvestor"
+  config: {identity: "conservative_1", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/EquityPremium/records"}}
+  persona: !include persona.yml
+
+conservative_2:
+  name: "Conservative Investor 2"
+  class: "examples.EquityPremium.players:ConservativeInvestor"
+  config: {identity: "conservative_2", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/EquityPremium/records"}}
+  persona: !include persona.yml
+
+noise_1:
+  name: "Noise Trader"
+  class: "examples.EquityPremium.players:NoiseTrader"
+  config: {identity: "noise_1", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/EquityPremium/records"}}
+  persona: !include persona.yml

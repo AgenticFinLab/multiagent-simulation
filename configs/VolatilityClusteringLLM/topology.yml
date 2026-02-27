@@ -1,0 +1,53 @@
+# =============================================================================
+# VolatilityClusteringLLM Topology - Star Pattern
+# =============================================================================
+# Market as hub, all LLM investors communicate through market.
+#
+#         llm_fundamentalist ───────┐
+#         llm_trend_follower_1 ─────┤
+#         llm_trend_follower_2 ─────┼──▶ market ──┬──▶ llm_fundamentalist
+#         llm_noise_trader_1 ───────┤             ├──▶ llm_trend_follower_1
+#         llm_slow_adapter ─────────┤             ├──▶ llm_trend_follower_2
+#         llm_volatility_trader ────┘             ├──▶ llm_noise_trader_1
+#                                               ├──▶ llm_slow_adapter
+#                    (orders: P,Q)              └──▶ llm_volatility_trader
+#                                                    (market: price, volatility)
+#
+# Execution flow per round:
+#   Level 0: market executes (broadcasts price + volatility)
+#   Level 1: all LLM investors execute in parallel (LLM-based decisions)
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  # Market → All LLM investors (price + volatility broadcast)
+  market:
+    - llm_fundamentalist
+    - llm_trend_follower_1
+    - llm_trend_follower_2
+    - llm_noise_trader_1
+    - llm_slow_adapter
+    - llm_volatility_trader
+
+  # Each LLM investor → Market only (order submission)
+  llm_fundamentalist:
+    - market
+
+  llm_trend_follower_1:
+    - market
+
+  llm_trend_follower_2:
+    - market
+
+  llm_noise_trader_1:
+    - market
+
+  llm_slow_adapter:
+    - market
+
+  llm_volatility_trader:
+    - market

@@ -1,0 +1,13 @@
+type: "star"
+sources:
+  - market
+connections:
+  market: [short_seller_1, short_seller_2, momentum_buyer_1, momentum_buyer_2, retail_1, retail_2, value_investor, institutional]
+  short_seller_1: [market]
+  short_seller_2: [market]
+  momentum_buyer_1: [market]
+  momentum_buyer_2: [market]
+  retail_1: [market]
+  retail_2: [market]
+  value_investor: [market]
+  institutional: [market]

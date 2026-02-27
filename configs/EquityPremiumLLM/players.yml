@@ -1,0 +1,117 @@
+market:
+  name: "Market with Stock and Bond"
+  class: "examples.EquityPremiumLLM.players:Market"
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      price_model: "two_asset"
+  persona: !include persona.yml
+
+llm_myopic:
+  name: "LLM Myopic Loss-Averse"
+  class: "examples.EquityPremiumLLM.players:LLMMyopicLossAverse"
+  config:
+    identity: "llm_myopic"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: myopic_loss_averse
+      llm:
+        sys_message: "examples.EquityPremiumLLM.prompts:LLM_MYOPIC_LOSS_AVERSE_SYS"
+        user_message: "examples.EquityPremiumLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_long_term:
+  name: "LLM Long-Term Investor"
+  class: "examples.EquityPremiumLLM.players:LLMLongTermInvestor"
+  config:
+    identity: "llm_long_term"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: long_term
+      llm:
+        sys_message: "examples.EquityPremiumLLM.prompts:LLM_LONG_TERM_SYS"
+        user_message: "examples.EquityPremiumLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_institutional:
+  name: "LLM Institutional Investor"
+  class: "examples.EquityPremiumLLM.players:LLMInstitutionalInvestor"
+  config:
+    identity: "llm_institutional"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: institutional
+      llm:
+        sys_message: "examples.EquityPremiumLLM.prompts:LLM_INSTITUTIONAL_SYS"
+        user_message: "examples.EquityPremiumLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_risk_averse:
+  name: "LLM Risk-Averse Saver"
+  class: "examples.EquityPremiumLLM.players:LLMRiskAverseSaver"
+  config:
+    identity: "llm_risk_averse"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: risk_averse
+      llm:
+        sys_message: "examples.EquityPremiumLLM.prompts:LLM_RISK_AVERSE_SYS"
+        user_message: "examples.EquityPremiumLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_rational:
+  name: "LLM Rational Optimizer"
+  class: "examples.EquityPremiumLLM.players:LLMRationalOptimizer"
+  config:
+    identity: "llm_rational"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: rational
+      llm:
+        sys_message: "examples.EquityPremiumLLM.prompts:LLM_RATIONAL_SYS"
+        user_message: "examples.EquityPremiumLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml

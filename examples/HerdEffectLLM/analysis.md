@@ -299,6 +299,38 @@ Metrics:
 
 ---
 
+## Round and Agent Scaling (LLM-Specific)
+
+### Round Scaling Effects
+
+| Total Rounds   | LLM-Specific Observation                                                  |
+|----------------|---------------------------------------------------------------------------|
+| **10 rounds**  | Basic herding cycle; may see cascade but limited correction               |
+| **20 rounds**  | Full herding cycle with LLM reasoning evolution visible                   |
+| **50 rounds**  | Multiple herding episodes; LLM "learning" from past crashes may emerge    |
+| **100 rounds** | Long-term patterns; LLMs may develop consistent "personalities" over time |
+
+**LLM Context Window Considerations**:
+- Longer simulations provide more price history context
+- LLM reasoning quality may improve with more market context
+- Token limits may truncate very long price histories
+
+### Agent Scaling Effects
+
+| Agent Count              | LLM-Specific Observation                               |
+|--------------------------|--------------------------------------------------------|
+| **3-5 agents**           | Individual LLM "personalities" dominate; high variance |
+| **6-8 agents** (default) | Diverse reasoning produces emergent consensus          |
+| **10-15 agents**         | Stronger herding; more robust convergence patterns     |
+| **20+ agents**           | May approach "wisdom of crowds"; herding dampened      |
+
+**API Cost Considerations**:
+- Each agent makes LLM API call per round
+- Cost scales: `agents × rounds × tokens_per_call`
+- Recommend starting with 6-8 agents for cost-effective experiments
+
+---
+
 ## References
 
 ### Numerical Metrics

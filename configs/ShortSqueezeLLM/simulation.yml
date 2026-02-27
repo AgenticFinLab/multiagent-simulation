@@ -1,0 +1,3 @@
+simulation:
+  num_rounds: 50
+  description: "LLM-based Short Squeeze Simulation - GameStop Style"

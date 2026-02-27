@@ -1,0 +1,48 @@
+# =============================================================================
+# VolatilityClustering Simulation Configuration
+# =============================================================================
+# Demonstrates GARCH-like volatility clustering through heterogeneous agents.
+#
+# Usage:
+#   python examples/VolatilityClustering/run_volatility.py -c configs/VolatilityClustering/simulation.yml
+# =============================================================================
+
+setting:
+  name: "volatility_clustering_simulation"
+  description: "GARCH-like volatility dynamics through heterogeneous agents"
+  total_rounds: 200
+  entry_limit: 100
+  record_path: "EXPERIMENT/VolatilityClustering/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "volatility_clustering"
+  actor_prefix: null
+  num_cpus: 4
+  num_gpus: null
+  object_store_memory: null
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: true
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/VolatilityClustering/communication"

@@ -1,0 +1,160 @@
+# =============================================================================
+# AssetBubble Players Configuration
+# =============================================================================
+# Heterogeneous agents for asset bubble simulation
+#
+# Investor Types (with market impact):
+#   - Market: Rule-based coordinator (bubble-prone dynamics)
+#   - MomentumSpeculator: Aggressive trend chaser (DESTABILIZING)
+#   - RationalArbitrageur: Limited short seller (WEAK STABILIZING)
+#   - NoiseTrader: Sentiment/herd follower (DESTABILIZING)
+#   - FundamentalInvestor: Slow value anchor (WEAK STABILIZING)
+#   - LeveragedBuyer: Margin-amplified (STRONGLY DESTABILIZING)
+#   - ConservativeHolder: Long-term stable (VERY WEAK STABILIZING)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator)
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.AssetBubble.players:Market"
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/AssetBubble/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Momentum Speculators (Primary Bubble Drivers)
+# -----------------------------------------------------------------------------
+momentum_speculator_1:
+  name: "Momentum Speculator 1"
+  class: "examples.AssetBubble.players:MomentumSpeculator"
+  config:
+    identity: "momentum_speculator_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: momentum_speculator
+      record_path: "EXPERIMENT/AssetBubble/records"
+  persona: !include persona.yml
+
+momentum_speculator_2:
+  name: "Momentum Speculator 2"
+  class: "examples.AssetBubble.players:MomentumSpeculator"
+  config:
+    identity: "momentum_speculator_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: momentum_speculator
+      record_path: "EXPERIMENT/AssetBubble/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Rational Arbitrageur (Limited Corrective Force)
+# -----------------------------------------------------------------------------
+rational_arbitrageur:
+  name: "Rational Arbitrageur"
+  class: "examples.AssetBubble.players:RationalArbitrageur"
+  config:
+    identity: "rational_arbitrageur"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: rational_arbitrageur
+      record_path: "EXPERIMENT/AssetBubble/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Noise Traders (Herd Followers)
+# -----------------------------------------------------------------------------
+noise_trader_1:
+  name: "Noise Trader 1"
+  class: "examples.AssetBubble.players:NoiseTrader"
+  config:
+    identity: "noise_trader_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: noise_trader
+      record_path: "EXPERIMENT/AssetBubble/records"
+  persona: !include persona.yml
+
+noise_trader_2:
+  name: "Noise Trader 2"
+  class: "examples.AssetBubble.players:NoiseTrader"
+  config:
+    identity: "noise_trader_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: noise_trader
+      record_path: "EXPERIMENT/AssetBubble/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Fundamental Investor (Weak Anchor)
+# -----------------------------------------------------------------------------
+fundamental_investor:
+  name: "Fundamental Investor"
+  class: "examples.AssetBubble.players:FundamentalInvestor"
+  config:
+    identity: "fundamental_investor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: fundamental_investor
+      record_path: "EXPERIMENT/AssetBubble/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Leveraged Buyer (Amplifier)
+# -----------------------------------------------------------------------------
+leveraged_buyer:
+  name: "Leveraged Buyer"
+  class: "examples.AssetBubble.players:LeveragedBuyer"
+  config:
+    identity: "leveraged_buyer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: leveraged_buyer
+      record_path: "EXPERIMENT/AssetBubble/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Conservative Holder (Stability)
+# -----------------------------------------------------------------------------
+conservative_holder:
+  name: "Conservative Holder"
+  class: "examples.AssetBubble.players:ConservativeHolder"
+  config:
+    identity: "conservative_holder"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: conservative_holder
+      record_path: "EXPERIMENT/AssetBubble/records"
+  persona: !include persona.yml

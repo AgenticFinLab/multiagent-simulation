@@ -1,0 +1,142 @@
+# =============================================================================
+# FlashCrash Players Configuration
+# =============================================================================
+
+market:
+  name: "Market"
+  class: "examples.FlashCrash.players:Market"
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/FlashCrash/records"
+  persona: !include persona.yml
+
+hft_1:
+  name: "HFT 1"
+  class: "examples.FlashCrash.players:HighFrequencyTrader"
+  config:
+    identity: "hft_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: hft
+      record_path: "EXPERIMENT/FlashCrash/records"
+  persona: !include persona.yml
+
+hft_2:
+  name: "HFT 2"
+  class: "examples.FlashCrash.players:HighFrequencyTrader"
+  config:
+    identity: "hft_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: hft
+      record_path: "EXPERIMENT/FlashCrash/records"
+  persona: !include persona.yml
+
+market_maker_1:
+  name: "Market Maker 1"
+  class: "examples.FlashCrash.players:MarketMaker"
+  config:
+    identity: "market_maker_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: market_maker
+      record_path: "EXPERIMENT/FlashCrash/records"
+  persona: !include persona.yml
+
+market_maker_2:
+  name: "Market Maker 2"
+  class: "examples.FlashCrash.players:MarketMaker"
+  config:
+    identity: "market_maker_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: market_maker
+      record_path: "EXPERIMENT/FlashCrash/records"
+  persona: !include persona.yml
+
+algo_trader:
+  name: "Algorithmic Trader"
+  class: "examples.FlashCrash.players:AlgorithmicTrader"
+  config:
+    identity: "algo_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: algo
+      record_path: "EXPERIMENT/FlashCrash/records"
+  persona: !include persona.yml
+
+stop_loss_1:
+  name: "Stop Loss Trader 1"
+  class: "examples.FlashCrash.players:StopLossTrader"
+  config:
+    identity: "stop_loss_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: stop_loss
+      record_path: "EXPERIMENT/FlashCrash/records"
+  persona: !include persona.yml
+
+stop_loss_2:
+  name: "Stop Loss Trader 2"
+  class: "examples.FlashCrash.players:StopLossTrader"
+  config:
+    identity: "stop_loss_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: stop_loss
+      record_path: "EXPERIMENT/FlashCrash/records"
+  persona: !include persona.yml
+
+fundamental_trader:
+  name: "Fundamental Trader"
+  class: "examples.FlashCrash.players:FundamentalTrader"
+  config:
+    identity: "fundamental_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: fundamental
+      record_path: "EXPERIMENT/FlashCrash/records"
+  persona: !include persona.yml
+
+retail_trader:
+  name: "Retail Trader"
+  class: "examples.FlashCrash.players:RetailTrader"
+  config:
+    identity: "retail_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: retail
+      record_path: "EXPERIMENT/FlashCrash/records"
+  persona: !include persona.yml

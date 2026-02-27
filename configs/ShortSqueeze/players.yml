@@ -1,0 +1,53 @@
+market:
+  name: "Market"
+  class: "examples.ShortSqueeze.players:Market"
+  config: {identity: "market", role: coordinator, steps_per_turn: 1, group_tags: [market], extras: {record_path: "EXPERIMENT/ShortSqueeze/records"}}
+  persona: !include persona.yml
+
+short_seller_1:
+  name: "Short Seller 1"
+  class: "examples.ShortSqueeze.players:ShortSeller"
+  config: {identity: "short_seller_1", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/ShortSqueeze/records"}}
+  persona: !include persona.yml
+
+short_seller_2:
+  name: "Short Seller 2"
+  class: "examples.ShortSqueeze.players:ShortSeller"
+  config: {identity: "short_seller_2", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/ShortSqueeze/records"}}
+  persona: !include persona.yml
+
+momentum_buyer_1:
+  name: "Momentum Buyer 1"
+  class: "examples.ShortSqueeze.players:MomentumBuyer"
+  config: {identity: "momentum_buyer_1", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/ShortSqueeze/records"}}
+  persona: !include persona.yml
+
+momentum_buyer_2:
+  name: "Momentum Buyer 2"
+  class: "examples.ShortSqueeze.players:MomentumBuyer"
+  config: {identity: "momentum_buyer_2", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/ShortSqueeze/records"}}
+  persona: !include persona.yml
+
+retail_1:
+  name: "Retail Trader 1"
+  class: "examples.ShortSqueeze.players:RetailTrader"
+  config: {identity: "retail_1", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/ShortSqueeze/records"}}
+  persona: !include persona.yml
+
+retail_2:
+  name: "Retail Trader 2"
+  class: "examples.ShortSqueeze.players:RetailTrader"
+  config: {identity: "retail_2", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/ShortSqueeze/records"}}
+  persona: !include persona.yml
+
+value_investor:
+  name: "Value Investor"
+  class: "examples.ShortSqueeze.players:ValueInvestor"
+  config: {identity: "value_investor", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/ShortSqueeze/records"}}
+  persona: !include persona.yml
+
+institutional:
+  name: "Institutional Holder"
+  class: "examples.ShortSqueeze.players:InstitutionalHolder"
+  config: {identity: "institutional", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/ShortSqueeze/records"}}
+  persona: !include persona.yml

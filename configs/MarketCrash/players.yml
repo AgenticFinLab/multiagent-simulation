@@ -1,0 +1,160 @@
+# =============================================================================
+# MarketCrash Players Configuration
+# =============================================================================
+# Heterogeneous agents for market crash / liquidity spiral simulation
+#
+# Investor Types:
+#   - Market: Rule-based with liquidity-sensitive pricing
+#   - RiskParityFund: Volatility targeting (PROCYCLICAL)
+#   - LeveragedHedgeFund: Margin-constrained (PROCYCLICAL)
+#   - MarketMaker: Liquidity provider (WITHDRAWAL)
+#   - PassiveInvestor: Buy-and-hold (NEUTRAL)
+#   - PanicSeller: Loss-triggered (PROCYCLICAL)
+#   - BottomFisher: Contrarian buyer (STABILIZING)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator)
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.MarketCrash.players:Market"
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/MarketCrash/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Risk Parity Fund - Vol Targeting
+# -----------------------------------------------------------------------------
+risk_parity_fund:
+  name: "Risk Parity Fund"
+  class: "examples.MarketCrash.players:RiskParityFund"
+  config:
+    identity: "risk_parity_fund"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: risk_parity_fund
+      record_path: "EXPERIMENT/MarketCrash/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Leveraged Hedge Funds
+# -----------------------------------------------------------------------------
+leveraged_hedge_fund_1:
+  name: "Leveraged Hedge Fund 1"
+  class: "examples.MarketCrash.players:LeveragedHedgeFund"
+  config:
+    identity: "leveraged_hedge_fund_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: leveraged_hedge_fund
+      record_path: "EXPERIMENT/MarketCrash/records"
+  persona: !include persona.yml
+
+leveraged_hedge_fund_2:
+  name: "Leveraged Hedge Fund 2"
+  class: "examples.MarketCrash.players:LeveragedHedgeFund"
+  config:
+    identity: "leveraged_hedge_fund_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: leveraged_hedge_fund
+      record_path: "EXPERIMENT/MarketCrash/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Market Maker
+# -----------------------------------------------------------------------------
+market_maker:
+  name: "Market Maker"
+  class: "examples.MarketCrash.players:MarketMaker"
+  config:
+    identity: "market_maker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: market_maker
+      record_path: "EXPERIMENT/MarketCrash/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Passive Investor
+# -----------------------------------------------------------------------------
+passive_investor:
+  name: "Passive Investor"
+  class: "examples.MarketCrash.players:PassiveInvestor"
+  config:
+    identity: "passive_investor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: passive_investor
+      record_path: "EXPERIMENT/MarketCrash/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Panic Sellers
+# -----------------------------------------------------------------------------
+panic_seller_1:
+  name: "Panic Seller 1"
+  class: "examples.MarketCrash.players:PanicSeller"
+  config:
+    identity: "panic_seller_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: panic_seller
+      record_path: "EXPERIMENT/MarketCrash/records"
+  persona: !include persona.yml
+
+panic_seller_2:
+  name: "Panic Seller 2"
+  class: "examples.MarketCrash.players:PanicSeller"
+  config:
+    identity: "panic_seller_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: panic_seller
+      record_path: "EXPERIMENT/MarketCrash/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Bottom Fisher
+# -----------------------------------------------------------------------------
+bottom_fisher:
+  name: "Bottom Fisher"
+  class: "examples.MarketCrash.players:BottomFisher"
+  config:
+    identity: "bottom_fisher"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: bottom_fisher
+      record_path: "EXPERIMENT/MarketCrash/records"
+  persona: !include persona.yml

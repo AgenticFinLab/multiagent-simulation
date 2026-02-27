@@ -1,0 +1,128 @@
+# =============================================================================
+# AssetBubbleLLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 LLM Bubble Investors
+# =============================================================================
+
+# Market (rule-based)
+market:
+  name: "Market"
+  class: "examples.AssetBubbleLLM.players:Market"
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras: {}
+  persona: !include persona.yml
+
+# LLM Greater Fool Speculator
+llm_greater_fool:
+  name: "LLM Greater Fool Speculator"
+  class: "examples.AssetBubbleLLM.players:LLMGreaterFoolSpeculator"
+  config:
+    identity: "llm_greater_fool"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: greater_fool
+      llm:
+        sys_message: "examples.AssetBubbleLLM.prompts:LLM_GREATER_FOOL_SYS"
+        user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# LLM Rational Arbitrageur
+llm_arbitrageur:
+  name: "LLM Rational Arbitrageur"
+  class: "examples.AssetBubbleLLM.players:LLMRationalArbitrageur"
+  config:
+    identity: "llm_arbitrageur"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: arbitrageur
+      llm:
+        sys_message: "examples.AssetBubbleLLM.prompts:LLM_ARBITRAGEUR_SYS"
+        user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# LLM Sentiment Trader
+llm_sentiment:
+  name: "LLM Sentiment Trader"
+  class: "examples.AssetBubbleLLM.players:LLMSentimentTrader"
+  config:
+    identity: "llm_sentiment"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: sentiment
+      llm:
+        sys_message: "examples.AssetBubbleLLM.prompts:LLM_SENTIMENT_SYS"
+        user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# LLM Value Investor
+llm_value:
+  name: "LLM Value Investor"
+  class: "examples.AssetBubbleLLM.players:LLMValueInvestor"
+  config:
+    identity: "llm_value"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: value
+      llm:
+        sys_message: "examples.AssetBubbleLLM.prompts:LLM_VALUE_SYS"
+        user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# LLM Leveraged Speculator
+llm_leveraged:
+  name: "LLM Leveraged Speculator"
+  class: "examples.AssetBubbleLLM.players:LLMLeveragedSpeculator"
+  config:
+    identity: "llm_leveraged"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: leveraged
+      llm:
+        sys_message: "examples.AssetBubbleLLM.prompts:LLM_LEVERAGED_SYS"
+        user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml

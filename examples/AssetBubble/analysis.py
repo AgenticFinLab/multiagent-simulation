@@ -1,0 +1,142 @@
+"""AssetBubble Simulation Analysis
+
+Analyzes simulation results for bubble formation and crash dynamics.
+Detects positive feedback loops and price deviation from fundamental.
+
+Usage:
+    python examples/AssetBubble/analysis.py -c configs/AssetBubble/simulation.yml
+"""
+
+import argparse
+import json
+import os
+from typing import Any, Dict
+
+from masim.evaluation.finance import (
+    calculate_returns,
+    calculate_rolling_volatility,
+    calculate_price_deviation,
+    calculate_max_drawdown,
+    calculate_bubble_magnitude,
+    plot_price_dynamics,
+    plot_bubble_crash_analysis,
+    plot_multi_panel_summary,
+)
+from masim.utils import load_config, load_simulation_data, get_investor_quantities
+
+
+def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
+    """Perform bubble/crash analysis."""
+    os.makedirs(output_dir, exist_ok=True)
+
+    market_prices = data["market_prices"]
+    fundamentals = data["fundamentals"]
+    volumes = data["volumes"]
+    investor_quantities = get_investor_quantities(data)
+
+    if not market_prices:
+        print("No market price data found")
+        return {}
+
+    # Fundamental value must come from simulation data
+    fundamental_value = sum(fundamentals.values()) / len(fundamentals)
+
+    # Calculate metrics
+    returns = calculate_returns(market_prices)
+    volatility = calculate_rolling_volatility(market_prices, window=10)
+    deviation = calculate_price_deviation(market_prices, fundamental_value)
+    bubble = calculate_bubble_magnitude(market_prices, fundamental_value)
+
+    prices_list = [market_prices[r] for r in sorted(market_prices.keys())]
+    max_dd, peak_idx, trough_idx = calculate_max_drawdown(prices_list)
+
+    # Bubble detection
+    max_deviation = max(deviation.values()) if deviation else 0
+    max_bubble = max(bubble.values()) if bubble else 0
+    bubble_detected = max_deviation > 20  # >20% deviation = bubble
+
+    # Generate plots
+    print(f"Generating analysis plots in {output_dir}/")
+
+    plot_price_dynamics(
+        market_prices,
+        fundamental=fundamental_value,
+        output_path=os.path.join(output_dir, "01_price_dynamics.png"),
+    )
+
+    plot_bubble_crash_analysis(
+        market_prices,
+        fundamental=fundamental_value,
+        output_path=os.path.join(output_dir, "02_bubble_analysis.png"),
+    )
+
+    plot_multi_panel_summary(
+        market_prices,
+        volatility=volatility,
+        investor_quantities=investor_quantities,
+        fundamental=fundamental_value,
+        output_path=os.path.join(output_dir, "03_summary.png"),
+    )
+
+    summary = {
+        "total_rounds": len(market_prices),
+        "fundamental_value": fundamental_value,
+        "bubble_detected": bubble_detected,
+        "max_deviation_pct": max_deviation,
+        "max_bubble_magnitude": max_bubble,
+        "crash": {
+            "max_drawdown": max_dd,
+            "peak_round": peak_idx,
+            "trough_round": trough_idx,
+        },
+        "price_range": {
+            "min": min(market_prices.values()),
+            "max": max(market_prices.values()),
+            "final": list(market_prices.values())[-1],
+        },
+        "volume": {
+            "total": sum(volumes.values()) if volumes else 0,
+            "avg": sum(volumes.values()) / len(volumes) if volumes else 0,
+        },
+    }
+
+    with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2)
+
+    print("\n" + "=" * 50)
+    print("BUBBLE ANALYSIS")
+    print("=" * 50)
+    print(f"Bubble Detected: {bubble_detected}")
+    print(f"Max Price Deviation: {max_deviation:.2f}%")
+    print(f"Max Drawdown (Crash): {max_dd:.2f}%")
+    print(f"Peak Price: {max(market_prices.values()):.2f}")
+
+    return summary
+
+
+def main():
+    """Run AssetBubble analysis."""
+    parser = argparse.ArgumentParser(description="Analyze AssetBubble simulation")
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=str,
+        required=True,
+        help="Path to simulation configuration file (YAML)",
+    )
+    args = parser.parse_args()
+
+    # Load config and derive paths
+    config = load_config(args.config)
+    base_dir = os.path.dirname(config["setting"]["record_path"])
+    output_dir = os.path.join(base_dir, "analysis")
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Load data using generic loader
+    data = load_simulation_data(config)
+    summary = analyze_bubble(data, output_dir)
+    return summary
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,12 @@
+type: "star"
+sources: [market]
+connections:
+  market: [mm_1, mm_2, liq_seeker_1, liq_seeker_2, value_trader, momentum_trader, noise_1, noise_2]
+  mm_1: [market]
+  mm_2: [market]
+  liq_seeker_1: [market]
+  liq_seeker_2: [market]
+  value_trader: [market]
+  momentum_trader: [market]
+  noise_1: [market]
+  noise_2: [market]

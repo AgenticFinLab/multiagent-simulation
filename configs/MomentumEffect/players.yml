@@ -1,0 +1,114 @@
+# =============================================================================
+# MomentumEffect Players Configuration
+# =============================================================================
+
+market:
+  name: "Market"
+  class: "examples.MomentumEffect.players:Market"
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/MomentumEffect/records"
+  persona: !include persona.yml
+
+momentum_trader_1:
+  name: "Momentum Trader 1"
+  class: "examples.MomentumEffect.players:MomentumTrader"
+  config:
+    identity: "momentum_trader_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: momentum_trader
+      record_path: "EXPERIMENT/MomentumEffect/records"
+  persona: !include persona.yml
+
+momentum_trader_2:
+  name: "Momentum Trader 2"
+  class: "examples.MomentumEffect.players:MomentumTrader"
+  config:
+    identity: "momentum_trader_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: momentum_trader
+      record_path: "EXPERIMENT/MomentumEffect/records"
+  persona: !include persona.yml
+
+contrarian_trader:
+  name: "Contrarian Trader"
+  class: "examples.MomentumEffect.players:ContrarianTrader"
+  config:
+    identity: "contrarian_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: contrarian_trader
+      record_path: "EXPERIMENT/MomentumEffect/records"
+  persona: !include persona.yml
+
+index_fund:
+  name: "Index Fund"
+  class: "examples.MomentumEffect.players:IndexFund"
+  config:
+    identity: "index_fund"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: index_fund
+      record_path: "EXPERIMENT/MomentumEffect/records"
+  persona: !include persona.yml
+
+market_maker:
+  name: "Market Maker"
+  class: "examples.MomentumEffect.players:MarketMaker"
+  config:
+    identity: "market_maker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: market_maker
+      record_path: "EXPERIMENT/MomentumEffect/records"
+  persona: !include persona.yml
+
+technical_trader:
+  name: "Technical Trader"
+  class: "examples.MomentumEffect.players:TechnicalTrader"
+  config:
+    identity: "technical_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: technical_trader
+      record_path: "EXPERIMENT/MomentumEffect/records"
+  persona: !include persona.yml
+
+fundamental_trader:
+  name: "Fundamental Trader"
+  class: "examples.MomentumEffect.players:FundamentalTrader"
+  config:
+    identity: "fundamental_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: fundamental_trader
+      record_path: "EXPERIMENT/MomentumEffect/records"
+  persona: !include persona.yml

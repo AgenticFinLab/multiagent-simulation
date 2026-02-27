@@ -1,0 +1,142 @@
+# =============================================================================
+# VolatilityClustering Players Configuration
+# =============================================================================
+# Heterogeneous Agent Model for GARCH-like Volatility Clustering
+#
+# Investor Types:
+#   - Market:           Rule-based coordinator with GARCH volatility dynamics
+#   - Fundamentalist:   Slow mean reversion (stabilizing, delayed)
+#   - TrendFollower:    Fast momentum, high volatility sensitivity (destabilizing)
+#   - NoiseTrader:      Random liquidity provider (neutral)
+#   - SlowAdapter:      Conservative, slow information processing (weak stabilizing)
+#   - VolatilityTrader: Trades volatility regime (weak stabilizing)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator)
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.VolatilityClustering.players:Market"
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/VolatilityClustering/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Fundamentalist - Slow Mean Reversion
+# -----------------------------------------------------------------------------
+fundamentalist:
+  name: "Fundamentalist Investor"
+  class: "examples.VolatilityClustering.players:Fundamentalist"
+  config:
+    identity: "fundamentalist"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: fundamentalist
+      record_path: "EXPERIMENT/VolatilityClustering/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Trend Followers (Multiple for stronger effect)
+# -----------------------------------------------------------------------------
+trend_follower_1:
+  name: "Trend Follower 1"
+  class: "examples.VolatilityClustering.players:TrendFollower"
+  config:
+    identity: "trend_follower_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: trend_follower
+      record_path: "EXPERIMENT/VolatilityClustering/records"
+  persona: !include persona.yml
+
+trend_follower_2:
+  name: "Trend Follower 2"
+  class: "examples.VolatilityClustering.players:TrendFollower"
+  config:
+    identity: "trend_follower_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: trend_follower
+      record_path: "EXPERIMENT/VolatilityClustering/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Noise Traders
+# -----------------------------------------------------------------------------
+noise_trader_1:
+  name: "Noise Trader 1"
+  class: "examples.VolatilityClustering.players:NoiseTrader"
+  config:
+    identity: "noise_trader_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: noise_trader
+      record_path: "EXPERIMENT/VolatilityClustering/records"
+  persona: !include persona.yml
+
+noise_trader_2:
+  name: "Noise Trader 2"
+  class: "examples.VolatilityClustering.players:NoiseTrader"
+  config:
+    identity: "noise_trader_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: noise_trader
+      record_path: "EXPERIMENT/VolatilityClustering/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Slow Adapter
+# -----------------------------------------------------------------------------
+slow_adapter:
+  name: "Slow Adapter"
+  class: "examples.VolatilityClustering.players:SlowAdapter"
+  config:
+    identity: "slow_adapter"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: slow_adapter
+      record_path: "EXPERIMENT/VolatilityClustering/records"
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Volatility Trader
+# -----------------------------------------------------------------------------
+volatility_trader:
+  name: "Volatility Trader"
+  class: "examples.VolatilityClustering.players:VolatilityTrader"
+  config:
+    identity: "volatility_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: volatility_trader
+      record_path: "EXPERIMENT/VolatilityClustering/records"
+  persona: !include persona.yml

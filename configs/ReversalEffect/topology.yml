@@ -1,0 +1,62 @@
+# =============================================================================
+# ReversalEffect Topology - Star Pattern
+# =============================================================================
+# Market as hub, all investors communicate through market.
+#
+#         contrarian_1 ──────────┐
+#         contrarian_2 ──────────┤
+#         momentum_1 ────────────┼──▶ market ──┬──▶ contrarian_1
+#         momentum_2 ────────────┤             ├──▶ contrarian_2
+#         overconfident_1 ───────┤             ├──▶ momentum_1
+#         overconfident_2 ───────┤             ├──▶ momentum_2
+#         noise_trader ──────────┤             ├──▶ overconfident_1
+#         value_investor ────────┤             ├──▶ overconfident_2
+#         index_tracker ─────────┘             ├──▶ noise_trader
+#                                              ├──▶ value_investor
+#                   (orders: P,Q)              └──▶ index_tracker
+#                                                   (market data)
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - contrarian_1
+    - contrarian_2
+    - momentum_1
+    - momentum_2
+    - overconfident_1
+    - overconfident_2
+    - noise_trader
+    - value_investor
+    - index_tracker
+
+  contrarian_1:
+    - market
+
+  contrarian_2:
+    - market
+
+  momentum_1:
+    - market
+
+  momentum_2:
+    - market
+
+  overconfident_1:
+    - market
+
+  overconfident_2:
+    - market
+
+  noise_trader:
+    - market
+
+  value_investor:
+    - market
+
+  index_tracker:
+    - market

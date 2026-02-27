@@ -1,0 +1,63 @@
+# =============================================================================
+# MarketCrash Topology - Star Pattern
+# =============================================================================
+# Market as hub, all investors communicate through market.
+#
+#         risk_parity_fund ────────┐
+#         leveraged_hedge_fund_1 ───┤
+#         leveraged_hedge_fund_2 ───┼──▶ market ──┬──▶ risk_parity_fund
+#         market_maker ───────────┤             ├──▶ leveraged_hedge_fund_1
+#         passive_investor ────────┤             ├──▶ leveraged_hedge_fund_2
+#         panic_seller_1 ──────────┤             ├──▶ market_maker
+#         panic_seller_2 ──────────┤             ├──▶ passive_investor
+#         bottom_fisher ───────────┘             ├──▶ panic_seller_1
+#                                               ├──▶ panic_seller_2
+#                    (orders: P,Q)              └──▶ bottom_fisher
+#                                                    (market: price, liquidity, vol)
+#
+# Execution flow per round:
+#   Level 0: market executes (broadcasts price + liquidity + volatility)
+#   Level 1: all investors execute in parallel (submit P,Q orders)
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  # Market → All investors (price + liquidity broadcast)
+  market:
+    - risk_parity_fund
+    - leveraged_hedge_fund_1
+    - leveraged_hedge_fund_2
+    - market_maker
+    - passive_investor
+    - panic_seller_1
+    - panic_seller_2
+    - bottom_fisher
+
+  # Each investor → Market only (order submission)
+  risk_parity_fund:
+    - market
+
+  leveraged_hedge_fund_1:
+    - market
+
+  leveraged_hedge_fund_2:
+    - market
+
+  market_maker:
+    - market
+
+  passive_investor:
+    - market
+
+  panic_seller_1:
+    - market
+
+  panic_seller_2:
+    - market
+
+  bottom_fisher:
+    - market

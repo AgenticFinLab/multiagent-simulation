@@ -1,0 +1,58 @@
+# =============================================================================
+# VolatilityClustering Topology - Star Pattern
+# =============================================================================
+# Market as hub, all investors communicate through market.
+#
+#         fundamentalist ─────────┐
+#         trend_follower_1 ───────┤
+#         trend_follower_2 ───────┼──▶ market ──┬──▶ fundamentalist
+#         noise_trader_1 ─────────┤             ├──▶ trend_follower_1
+#         noise_trader_2 ─────────┤             ├──▶ trend_follower_2
+#         slow_adapter ───────────┤             ├──▶ noise_trader_1
+#         volatility_trader ──────┘             ├──▶ noise_trader_2
+#                                               ├──▶ slow_adapter
+#                    (orders: P,Q)              └──▶ volatility_trader
+#                                                    (market data: price, volatility)
+#
+# Execution flow per round:
+#   Level 0: market executes (broadcasts price + volatility)
+#   Level 1: all investors execute in parallel (submit P,Q orders)
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  # Market → All investors (price + volatility broadcast)
+  market:
+    - fundamentalist
+    - trend_follower_1
+    - trend_follower_2
+    - noise_trader_1
+    - noise_trader_2
+    - slow_adapter
+    - volatility_trader
+
+  # Each investor → Market only (order submission)
+  fundamentalist:
+    - market
+
+  trend_follower_1:
+    - market
+
+  trend_follower_2:
+    - market
+
+  noise_trader_1:
+    - market
+
+  noise_trader_2:
+    - market
+
+  slow_adapter:
+    - market
+
+  volatility_trader:
+    - market

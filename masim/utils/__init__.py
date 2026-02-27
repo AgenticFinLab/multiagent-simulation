@@ -4,6 +4,7 @@ Provides utility modules:
 - config: YAML configuration loading with !include support
 - topology: NetworkX-based topology graph for message routing
 - history: Memory-efficient history buffer with disk persistence
+- data_loader: Generic simulation data loading from record directories
 """
 
 from masim.utils.config import (
@@ -12,6 +13,12 @@ from masim.utils.config import (
     build_connection_matrix,
     ConnectionValidator,
     IncludeLoader,
+)
+from masim.utils.data_loader import (
+    load_simulation_data,
+    get_investor_quantities,
+    get_investor_orders,
+    get_investor_bids,
 )
 from masim.utils.history import (
     HistoryBuffer,
@@ -25,6 +32,11 @@ __all__ = [
     "build_connection_matrix",
     "ConnectionValidator",
     "IncludeLoader",
+    # Data loader utilities
+    "load_simulation_data",
+    "get_investor_quantities",
+    "get_investor_orders",
+    "get_investor_bids",
     # History utilities
     "HistoryBuffer",
     "create_history_buffer",

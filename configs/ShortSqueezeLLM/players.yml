@@ -1,0 +1,117 @@
+market:
+  name: "Market with Short Interest Tracking"
+  class: "examples.ShortSqueezeLLM.players:Market"
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      price_model: "short_squeeze"
+  persona: !include persona.yml
+
+llm_short_seller:
+  name: "LLM Short Seller"
+  class: "examples.ShortSqueezeLLM.players:LLMShortSeller"
+  config:
+    identity: "llm_short_seller"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: short_seller
+      llm:
+        sys_message: "examples.ShortSqueezeLLM.prompts:LLM_SHORT_SELLER_SYS"
+        user_message: "examples.ShortSqueezeLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_retail_coord:
+  name: "LLM Retail Coordinator"
+  class: "examples.ShortSqueezeLLM.players:LLMRetailCoordinator"
+  config:
+    identity: "llm_retail_coord"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: retail_coord
+      llm:
+        sys_message: "examples.ShortSqueezeLLM.prompts:LLM_RETAIL_COORD_SYS"
+        user_message: "examples.ShortSqueezeLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_momentum:
+  name: "LLM Momentum Buyer"
+  class: "examples.ShortSqueezeLLM.players:LLMMomentumBuyer"
+  config:
+    identity: "llm_momentum"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: momentum
+      llm:
+        sys_message: "examples.ShortSqueezeLLM.prompts:LLM_MOMENTUM_SYS"
+        user_message: "examples.ShortSqueezeLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_value:
+  name: "LLM Value Investor"
+  class: "examples.ShortSqueezeLLM.players:LLMValueInvestor"
+  config:
+    identity: "llm_value"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: value
+      llm:
+        sys_message: "examples.ShortSqueezeLLM.prompts:LLM_VALUE_SYS"
+        user_message: "examples.ShortSqueezeLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_institutional:
+  name: "LLM Institutional Holder"
+  class: "examples.ShortSqueezeLLM.players:LLMInstitutionalHolder"
+  config:
+    identity: "llm_institutional"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: institutional
+      llm:
+        sys_message: "examples.ShortSqueezeLLM.prompts:LLM_INSTITUTIONAL_SYS"
+        user_message: "examples.ShortSqueezeLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml

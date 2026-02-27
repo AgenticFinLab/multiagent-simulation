@@ -1,0 +1,100 @@
+# =============================================================================
+# DispositionEffect Players Configuration
+# =============================================================================
+
+market:
+  name: "Market"
+  class: "examples.DispositionEffect.players:Market"
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/DispositionEffect/records"
+  persona: !include persona.yml
+
+disposition_investor_1:
+  name: "Disposition Investor 1"
+  class: "examples.DispositionEffect.players:DispositionInvestor"
+  config:
+    identity: "disposition_investor_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: disposition_investor
+      record_path: "EXPERIMENT/DispositionEffect/records"
+  persona: !include persona.yml
+
+disposition_investor_2:
+  name: "Disposition Investor 2"
+  class: "examples.DispositionEffect.players:DispositionInvestor"
+  config:
+    identity: "disposition_investor_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: disposition_investor
+      record_path: "EXPERIMENT/DispositionEffect/records"
+  persona: !include persona.yml
+
+rational_investor:
+  name: "Rational Investor"
+  class: "examples.DispositionEffect.players:RationalInvestor"
+  config:
+    identity: "rational_investor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: rational_investor
+      record_path: "EXPERIMENT/DispositionEffect/records"
+  persona: !include persona.yml
+
+tax_aware_investor:
+  name: "Tax Aware Investor"
+  class: "examples.DispositionEffect.players:TaxAwareInvestor"
+  config:
+    identity: "tax_aware_investor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: tax_aware_investor
+      record_path: "EXPERIMENT/DispositionEffect/records"
+  persona: !include persona.yml
+
+index_holder:
+  name: "Index Holder"
+  class: "examples.DispositionEffect.players:IndexHolder"
+  config:
+    identity: "index_holder"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: index_holder
+      record_path: "EXPERIMENT/DispositionEffect/records"
+  persona: !include persona.yml
+
+institutional_investor:
+  name: "Institutional Investor"
+  class: "examples.DispositionEffect.players:InstitutionalInvestor"
+  config:
+    identity: "institutional_investor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      strategy: institutional_investor
+      record_path: "EXPERIMENT/DispositionEffect/records"
+  persona: !include persona.yml

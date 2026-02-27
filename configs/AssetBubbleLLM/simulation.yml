@@ -1,0 +1,22 @@
+# =============================================================================
+# AssetBubbleLLM Simulation Configuration
+# =============================================================================
+# LLM-based Asset Bubble simulation
+# Tests: Greater Fool Theory, Limits to Arbitrage, Noise Trader Risk
+# =============================================================================
+
+name: "AssetBubbleLLM"
+version: "1.0.0"
+
+setting:
+  num_rounds: 50
+  record_path: "EXPERIMENT/AssetBubbleLLM/records"
+
+players: !include players.yml
+
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/AssetBubbleLLM/messages"
+  type: "message_broker"
+  flush_interval: 50

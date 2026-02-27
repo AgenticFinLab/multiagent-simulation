@@ -472,7 +472,7 @@ class GeneralSimulator(BaseSimulator):
         # ─────────────────────────────────────────────────────────────────────
         # PHASE 4: RECORD - Save topology diagram (rate-limited to reduce I/O)
         # ─────────────────────────────────────────────────────────────────────────
-        save_interval = self.config.setting.get("save_diagram_interval", 100)
+        save_interval = self.config.setting["save_diagram_interval"]
         if save_interval > 0 and round_num % save_interval == 0:
             diagrams_dir = os.path.join(self.config.setting["record_path"], "diagrams")
             self.topology.save_round_diagram(diagrams_dir, round_num=round_num)

@@ -1,0 +1,3 @@
+simulation:
+  num_rounds: 50
+  description: "LLM-based Market Crash Simulation with liquidity spiral dynamics"

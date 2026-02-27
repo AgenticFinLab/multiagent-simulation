@@ -1,0 +1,117 @@
+market:
+  name: "Market with News Shocks"
+  class: "examples.DispositionEffectLLM.players:Market"
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      price_model: "news_shock"
+  persona: !include persona.yml
+
+llm_disposition_biased:
+  name: "LLM Disposition Biased"
+  class: "examples.DispositionEffectLLM.players:LLMDispositionBiased"
+  config:
+    identity: "llm_disposition_biased"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: disposition_biased
+      llm:
+        sys_message: "examples.DispositionEffectLLM.prompts:LLM_DISPOSITION_BIASED_SYS"
+        user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_rational:
+  name: "LLM Rational Investor"
+  class: "examples.DispositionEffectLLM.players:LLMRationalInvestor"
+  config:
+    identity: "llm_rational"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: rational
+      llm:
+        sys_message: "examples.DispositionEffectLLM.prompts:LLM_RATIONAL_SYS"
+        user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_tax_aware:
+  name: "LLM Tax-Aware Investor"
+  class: "examples.DispositionEffectLLM.players:LLMTaxAwareInvestor"
+  config:
+    identity: "llm_tax_aware"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: tax_aware
+      llm:
+        sys_message: "examples.DispositionEffectLLM.prompts:LLM_TAX_AWARE_SYS"
+        user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_institutional:
+  name: "LLM Institutional Investor"
+  class: "examples.DispositionEffectLLM.players:LLMInstitutionalInvestor"
+  config:
+    identity: "llm_institutional"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: institutional
+      llm:
+        sys_message: "examples.DispositionEffectLLM.prompts:LLM_INSTITUTIONAL_SYS"
+        user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_loss_averse:
+  name: "LLM Loss-Averse Investor"
+  class: "examples.DispositionEffectLLM.players:LLMLossAverse"
+  config:
+    identity: "llm_loss_averse"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: loss_averse
+      llm:
+        sys_message: "examples.DispositionEffectLLM.prompts:LLM_LOSS_AVERSE_SYS"
+        user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 500
+  persona: !include persona.yml

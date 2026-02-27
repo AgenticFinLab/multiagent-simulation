@@ -1,0 +1,14 @@
+# =============================================================================
+# AssetBubbleLLM Persona Configuration
+# =============================================================================
+
+storage:
+  base_path: "EXPERIMENT/AssetBubbleLLM"
+  simulation_name: "AssetBubbleLLM"
+
+communication:
+  storage_path: "EXPERIMENT/AssetBubbleLLM/messages"
+  flush_interval: 50
+
+monitoring:
+  record_path: "EXPERIMENT/AssetBubbleLLM/records"

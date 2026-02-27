@@ -1,0 +1,117 @@
+market:
+  name: "Market with Liquidity Dynamics"
+  class: "examples.LiquidityDryupLLM.players:Market"
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      price_model: "liquidity_dependent"
+  persona: !include persona.yml
+
+llm_market_maker:
+  name: "LLM Market Maker"
+  class: "examples.LiquidityDryupLLM.players:LLMMarketMaker"
+  config:
+    identity: "llm_market_maker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: market_maker
+      llm:
+        sys_message: "examples.LiquidityDryupLLM.prompts:LLM_MARKET_MAKER_SYS"
+        user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_liquidity_demander:
+  name: "LLM Liquidity Demander"
+  class: "examples.LiquidityDryupLLM.players:LLMLiquidityDemander"
+  config:
+    identity: "llm_liquidity_demander"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: liquidity_demander
+      llm:
+        sys_message: "examples.LiquidityDryupLLM.prompts:LLM_LIQUIDITY_DEMANDER_SYS"
+        user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_arbitrageur:
+  name: "LLM Arbitrageur"
+  class: "examples.LiquidityDryupLLM.players:LLMArbitrageur"
+  config:
+    identity: "llm_arbitrageur"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: arbitrageur
+      llm:
+        sys_message: "examples.LiquidityDryupLLM.prompts:LLM_ARBITRAGEUR_SYS"
+        user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_value:
+  name: "LLM Value Investor"
+  class: "examples.LiquidityDryupLLM.players:LLMValueInvestor"
+  config:
+    identity: "llm_value"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: value
+      llm:
+        sys_message: "examples.LiquidityDryupLLM.prompts:LLM_VALUE_SYS"
+        user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_forced_seller:
+  name: "LLM Forced Seller"
+  class: "examples.LiquidityDryupLLM.players:LLMForcedSeller"
+  config:
+    identity: "llm_forced_seller"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      strategy: forced_seller
+      llm:
+        sys_message: "examples.LiquidityDryupLLM.prompts:LLM_FORCED_SELLER_SYS"
+        user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.2
+          max_new_tokens: 500
+  persona: !include persona.yml

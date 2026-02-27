@@ -108,7 +108,7 @@ class PlayerPersona(BasePersona):
         # Inject storage record_path into player config extras
         # So player can use HistoryBuffer with persona's storage path
         proxy_config = self.config["proxy"]
-        storage_record_path = proxy_config["storage"].get("record_path", "")
+        storage_record_path = proxy_config["storage"]["record_path"]
         if "extras" not in self.player_config.__dict__:
             self.player_config.extras = {}
         self.player_config.extras["record_path"] = storage_record_path

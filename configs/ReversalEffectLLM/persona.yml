@@ -1,0 +1,14 @@
+storage:
+  inbox: true
+  outbox: true
+  internal: true
+  message_history: true
+  history_limit: 100
+
+communication:
+  routing: coordinator
+  coordinator_id: market
+  message_limit: 50
+
+monitoring:
+  log_level: INFO

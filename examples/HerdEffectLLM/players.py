@@ -29,6 +29,7 @@ import os
 import json
 import random
 import re
+import importlib
 from typing import Any, Dict, List, Optional
 from dotenv import load_dotenv
 
@@ -39,6 +40,22 @@ from masim.utils.history import HistoryBuffer
 # lmbase for LLM inference
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
+
+
+def load_prompt(prompt_path: str) -> str:
+    """
+    Load a prompt string from module path.
+
+    Args:
+        prompt_path: Path in format "module.path:VARIABLE_NAME"
+                     e.g., "examples.HerdEffectLLM.prompts:LLM_MOMENTUM_SYS"
+
+    Returns:
+        The prompt string.
+    """
+    module_path, var_name = prompt_path.rsplit(":", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, var_name)
 
 
 # =============================================================================
@@ -221,7 +238,7 @@ class LLMInvestor(GeneralPlayer):
 
             # Initialize LLM client via lmbase
             load_dotenv()
-            llm_config = self.config.extras["llm_api"]
+            llm_config = self.config.extras["llm"]
             lm_name = llm_config["lm_name"]
             generation_config = llm_config["generation_config"]
 
@@ -275,7 +292,7 @@ class LLMInvestor(GeneralPlayer):
                 custom["llm_client"] = llm_client
 
     def _build_prompt(self, market_data: Dict[str, Any]) -> str:
-        """Build the user prompt with market data. Override in subclass."""
+        """Build the user prompt with market data using template from config."""
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         price_history = self.state.custom_state["price_history"]
@@ -285,6 +302,24 @@ class LLMInvestor(GeneralPlayer):
             list(price_history)[-5:] if len(price_history) >= 5 else list(price_history)
         )
 
+        # Load template from config or use default
+        llm_config = self.config.extras["llm"]
+        if "user_message" in llm_config:
+            template = load_prompt(llm_config["user_message"])
+            return template.format(
+                price=market_data["price"],
+                prev_price=market_data["prev_price"],
+                return_pct=market_data["return_pct"],
+                volume=market_data["volume"],
+                net_demand=market_data["net_demand"],
+                fundamental=market_data["fundamental"],
+                recent_prices=recent_prices,
+                cash=cash,
+                position=position,
+                portfolio_value=cash + position * market_data["price"],
+            )
+
+        # Default inline template
         return f"""
 Current Market Data:
 - Price: ${market_data['price']:.2f}
@@ -353,11 +388,13 @@ Make your trading decision. Respond with ONLY valid JSON:
 
         # Build prompt
         user_prompt = self._build_prompt(market_data)
-        system_prompt = (
-            self.config.extras["system_prompt"]
-            if "system_prompt" in self.config.extras
-            else self.SYSTEM_PROMPT
-        )
+
+        # Load system prompt from config or use class default
+        llm_config = self.config.extras["llm"]
+        if "sys_message" in llm_config:
+            system_prompt = load_prompt(llm_config["sys_message"])
+        else:
+            system_prompt = self.SYSTEM_PROMPT
 
         # Call LLM with retry until valid response
         max_retries = 3
@@ -366,7 +403,7 @@ Make your trading decision. Respond with ONLY valid JSON:
                 system_msg=system_prompt,
                 user_msg=user_prompt,
             )
-            infer_output = llm_client.run(infer_input)
+            infer_output = llm_client.run([infer_input])
             try:
                 decision = self._parse_llm_response(infer_output.response)
                 break
@@ -380,6 +417,7 @@ Make your trading decision. Respond with ONLY valid JSON:
         # Extract values (direct access, no defaults)
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
+
         quantity = self._apply_constraints(bid_price, quantity, market_data["price"])
 
         # Update position and cash

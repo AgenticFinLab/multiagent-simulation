@@ -47,8 +47,11 @@ llm_momentum:
       - llm_investors
     extras:
       strategy: momentum
-      llm_api:
-        lm_name: "ark/ep-20250218212539-7r2k9"
+      llm:
+        sys_message: "examples.HerdEffectLLM.prompts:LLM_MOMENTUM_SYS"
+        user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -65,8 +68,11 @@ llm_contrarian:
       - llm_investors
     extras:
       strategy: contrarian
-      llm_api:
-        lm_name: "ark/ep-20250218212539-7r2k9"
+      llm:
+        sys_message: "examples.HerdEffectLLM.prompts:LLM_CONTRARIAN_SYS"
+        user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -83,8 +89,11 @@ llm_risk_averse:
       - llm_investors
     extras:
       strategy: risk_averse
-      llm_api:
-        lm_name: "ark/ep-20250218212539-7r2k9"
+      llm:
+        sys_message: "examples.HerdEffectLLM.prompts:LLM_RISK_AVERSE_SYS"
+        user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -101,8 +110,11 @@ llm_aggressive:
       - llm_investors
     extras:
       strategy: aggressive
-      llm_api:
-        lm_name: "ark/ep-20250218212539-7r2k9"
+      llm:
+        sys_message: "examples.HerdEffectLLM.prompts:LLM_AGGRESSIVE_SYS"
+        user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -119,9 +131,12 @@ llm_noise:
       - llm_investors
     extras:
       strategy: noise
-      llm_api:
-        lm_name: "ark/ep-20250218212539-7r2k9"
+      llm:
+        sys_message: "examples.HerdEffectLLM.prompts:LLM_NOISE_SYS"
+        user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
         generation_config:
-          temperature: 0.5  # Higher temperature for more randomness
+          temperature: 0.5
           max_new_tokens: 500
   persona: !include persona.yml

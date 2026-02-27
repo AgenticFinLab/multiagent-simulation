@@ -1,0 +1,47 @@
+# =============================================================================
+# ReversalEffect Simulation Configuration
+# =============================================================================
+# Demonstrates the reversal effect (De Bondt & Thaler, 1985):
+# - Past losers outperform past winners over long horizons
+# - Market overreaction followed by mean reversion
+# =============================================================================
+
+setting:
+  name: "reversal_effect_simulation"
+  description: "Long-term mean reversion and overreaction correction"
+  total_rounds: 500
+  entry_limit: 100
+  record_path: "EXPERIMENT/ReversalEffect/records"
+  save_diagram_interval: 100
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "reversal_effect"
+  actor_prefix: null
+  num_cpus: 4
+  num_gpus: null
+  object_store_memory: null
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: true
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/ReversalEffect/communication"

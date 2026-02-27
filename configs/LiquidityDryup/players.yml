@@ -1,0 +1,53 @@
+market:
+  name: "Market"
+  class: "examples.LiquidityDryup.players:Market"
+  config: {identity: "market", role: coordinator, steps_per_turn: 1, group_tags: [market], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  persona: !include persona.yml
+
+mm_1:
+  name: "Market Maker 1"
+  class: "examples.LiquidityDryup.players:MarketMaker"
+  config: {identity: "mm_1", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  persona: !include persona.yml
+
+mm_2:
+  name: "Market Maker 2"
+  class: "examples.LiquidityDryup.players:MarketMaker"
+  config: {identity: "mm_2", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  persona: !include persona.yml
+
+liq_seeker_1:
+  name: "Liquidity Seeker 1"
+  class: "examples.LiquidityDryup.players:LiquiditySeeker"
+  config: {identity: "liq_seeker_1", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  persona: !include persona.yml
+
+liq_seeker_2:
+  name: "Liquidity Seeker 2"
+  class: "examples.LiquidityDryup.players:LiquiditySeeker"
+  config: {identity: "liq_seeker_2", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  persona: !include persona.yml
+
+value_trader:
+  name: "Value Trader"
+  class: "examples.LiquidityDryup.players:ValueTrader"
+  config: {identity: "value_trader", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  persona: !include persona.yml
+
+momentum_trader:
+  name: "Momentum Trader"
+  class: "examples.LiquidityDryup.players:MomentumTrader"
+  config: {identity: "momentum_trader", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  persona: !include persona.yml
+
+noise_1:
+  name: "Noise Trader 1"
+  class: "examples.LiquidityDryup.players:NoiseTrader"
+  config: {identity: "noise_1", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  persona: !include persona.yml
+
+noise_2:
+  name: "Noise Trader 2"
+  class: "examples.LiquidityDryup.players:NoiseTrader"
+  config: {identity: "noise_2", role: player, steps_per_turn: 1, group_tags: [investors], extras: {record_path: "EXPERIMENT/LiquidityDryup/records"}}
+  persona: !include persona.yml

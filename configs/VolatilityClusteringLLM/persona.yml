@@ -1,0 +1,24 @@
+# =============================================================================
+# VolatilityClusteringLLM Persona Configuration
+# =============================================================================
+
+auto_checkpoint: false
+debug_mode: true
+
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/VolatilityClusteringLLM/checkpoints"
+    record_path: "EXPERIMENT/VolatilityClusteringLLM/records"
+    record_rounds: true
+
+  monitoring:
+    record_path: "EXPERIMENT/VolatilityClusteringLLM/monitoring"
+    entry_limit: 100
+
+  communication:
+    message_timeout_ms: 30000  # Longer timeout for LLM calls
+    enable_compression: true
+
+  resource:
+    mcp_servers: []
+    enable_caching: false

@@ -213,9 +213,41 @@ Bubble_t = Σ_{s=1}^{t} (P_s - F)
 ```bash
 # Run simulation
 python examples/HerdEffect/run_herd.py -c configs/HerdEffect/simulation.yml
+```
 
-# Run analysis
-python examples/HerdEffect/analysis.py -c configs/HerdEffect/simulation.yml
+### Using Centralized Evaluation Module
+
+All analysis functions are available in `masim.evaluation.finance`:
+
+```python
+from masim.evaluation.finance import (
+    # Herding Metrics
+    calculate_bid_convergence_cv,
+    calculate_directional_agreement,
+    calculate_cascade_measure,
+    calculate_cross_sectional_std,
+    
+    # Core Metrics
+    calculate_price_deviation,
+    calculate_rolling_volatility,
+    calculate_autocorrelation,
+    calculate_returns,
+    
+    # Visualization
+    plot_price_dynamics,
+    plot_herding_metrics,
+    plot_multi_panel_summary,
+)
+
+# Example: Analyze herding behavior
+prices = {...}  # Load from simulation output
+investor_bids = {...}
+
+cv_series = calculate_bid_convergence_cv(investor_bids)
+agreement = calculate_directional_agreement(investor_bids)
+
+plot_herding_metrics(cv_series, agreement, output_path="herding.png")
+plot_price_dynamics(prices, investor_bids=investor_bids, output_path="price.png")
 ```
 
 ## Output Files
@@ -285,6 +317,61 @@ Phase 5: CORRECTION (Round 46-50)
   - DA: decreases
   - Volatility: spike
   - PD: falling
+```
+
+---
+
+## Round Scaling Effects
+
+### What Happens as Total Rounds Increase
+
+| Total Rounds   | Expected Behavior                                      | Rationale                    |
+|----------------|--------------------------------------------------------|------------------------------|
+| **50 rounds**  | One herding cycle; may see peak but limited correction | Standard observation window  |
+| **100 rounds** | Full herding cycle with correction                     | Complete cascade + bust      |
+| **200 rounds** | Multiple herding episodes possible                     | New cascade after correction |
+| **500 rounds** | 3-5 herding cycles; statistical properties stabilize   | Long-term herding dynamics   |
+
+### Observable Metrics by Round Count
+
+```
+Round 50:  CV drops to ~0.08; DA peaks at ~0.85; single cycle
+Round 100: Full CV recovery; 2 DA peaks possible
+Round 200: Clear multi-cycle pattern; herding strength varies
+Round 500: Statistical distribution of herding episodes
+```
+
+---
+
+## Agent Scaling Effects
+
+### What Happens as Number of Agents Increases
+
+| Agent Count               | Market Behavior                                 | Economic Interpretation         |
+|---------------------------|-------------------------------------------------|---------------------------------|
+| **3-5 agents**            | Extreme herding; single agent can drive cascade | Individual behavior dominates   |
+| **8-10 agents** (default) | Clear herding patterns                          | Sufficient for cascade dynamics |
+| **20-30 agents**          | Stronger herding; more robust patterns          | More followers available        |
+| **50+ agents**            | Very smooth herding; CV drops faster            | Law of large numbers effect     |
+
+### Agent Type Effects
+
+| More of This Agent       | Effect on Herding                           |
+|--------------------------|---------------------------------------------|
+| **Momentum Investors**   | Stronger herding; deeper cascades           |
+| **Noise Traders**        | Delays herding formation; random disruption |
+| **Fundamental Traders**  | Limits herding; earlier correction          |
+| **Aggressive Investors** | Amplifies cascade; extreme CV drops         |
+
+### Critical Ratios
+
+```
+Trend-following agents / Contrarian agents:
+
+Ratio > 4:1 → Extreme herding; CV < 0.03
+Ratio 2:1   → Pronounced herding (default)
+Ratio 1:1   → Weak herding; CV stays > 0.15
+Ratio < 1:2 → No herding; dispersed opinions
 ```
 
 ---

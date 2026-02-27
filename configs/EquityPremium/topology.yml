@@ -1,0 +1,12 @@
+type: "star"
+sources: [market]
+connections:
+  market: [mla_1, mla_2, mla_3, long_horizon_1, risk_neutral, conservative_1, conservative_2, noise_1]
+  mla_1: [market]
+  mla_2: [market]
+  mla_3: [market]
+  long_horizon_1: [market]
+  risk_neutral: [market]
+  conservative_1: [market]
+  conservative_2: [market]
+  noise_1: [market]
