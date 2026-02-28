@@ -80,9 +80,9 @@ def calculate_rolling_volatility(
         prices = np.array(market_prices)
         result = np.zeros(len(prices))
         for i in range(window - 1, len(prices)):
-            result[i] = np.std(prices[i - window + 1:i + 1])
+            result[i] = np.std(prices[i - window + 1 : i + 1])
         return result
-    
+
     # Handle dict input
     rounds = sorted(market_prices.keys())
     prices = [market_prices[r] for r in rounds]
@@ -141,7 +141,7 @@ def calculate_returns(
             return np.log(prices[1:] / prices[:-1])
         else:
             return np.diff(prices) / prices[:-1]
-    
+
     # Handle dict input
     rounds = sorted(market_prices.keys())
     returns = {}

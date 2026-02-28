@@ -65,7 +65,7 @@ def load_simulation_data(record_dir: str) -> Dict[str, Any]:
                                 price_data[round_num] = market_data["price"]
                 except (json.JSONDecodeError, KeyError):
                     continue
-    
+
     # Sort by round and extract prices
     for round_num in sorted(price_data.keys()):
         data["prices"].append(price_data[round_num])

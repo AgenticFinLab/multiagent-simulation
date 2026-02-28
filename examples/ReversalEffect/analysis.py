@@ -130,7 +130,16 @@ def analyze_reversal(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     }
 
     with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=2, default=lambda x: int(x) if isinstance(x, (np.bool_, np.integer)) else float(x) if isinstance(x, np.floating) else str(x))
+        json.dump(
+            summary,
+            f,
+            indent=2,
+            default=lambda x: (
+                int(x)
+                if isinstance(x, (np.bool_, np.integer))
+                else float(x) if isinstance(x, np.floating) else str(x)
+            ),
+        )
 
     print("\n" + "=" * 50)
     print("REVERSAL EFFECT ANALYSIS")
