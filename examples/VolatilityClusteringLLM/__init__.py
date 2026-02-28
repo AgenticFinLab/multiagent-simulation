@@ -1,11 +1,8 @@
-"""VolatilityClusteringLLM - LLM-based Volatility Clustering Simulation
-
-This module implements LLM-powered investors for studying GARCH-like
-volatility clustering through heterogeneous agent interactions.
-"""
+"""VolatilityClusteringLLM - LLM-based Multi-Agent Market Simulation"""
 
 from examples.VolatilityClusteringLLM.players import (
     Market,
+    LLMInvestor,
     LLMFundamentalist,
     LLMTrendFollower,
     LLMNoiseTrader,
@@ -15,6 +12,7 @@ from examples.VolatilityClusteringLLM.players import (
 
 __all__ = [
     "Market",
+    "LLMInvestor",
     "LLMFundamentalist",
     "LLMTrendFollower",
     "LLMNoiseTrader",

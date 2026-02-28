@@ -13,7 +13,7 @@ proxy:
 
   monitoring:
     record_path: "EXPERIMENT/VolatilityClusteringLLM/monitoring"
-    entry_limit: 100
+    entry_limit: 10
 
   communication:
     message_timeout_ms: 30000  # Longer timeout for LLM calls

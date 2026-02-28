@@ -1,0 +1,43 @@
+# =============================================================================
+# Persona Configuration Template
+# =============================================================================
+# Shared persona settings for all players in the scenario.
+# Includes proxy configurations for storage, monitoring, communication, resources.
+# =============================================================================
+
+# Checkpoint settings
+auto_checkpoint: false                        # Auto-save player state
+debug_mode: true                              # Enable debug logging
+
+# -----------------------------------------------------------------------------
+# Proxy Configurations
+# -----------------------------------------------------------------------------
+proxy:
+  # =================================
+  # Storage Proxy
+  # =================================
+  storage:
+    checkpoint_dir: "EXPERIMENT/[SCENARIO_NAME]/checkpoints"
+    record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
+    record_rounds: true                       # Record data each round
+  
+  # =================================
+  # Monitoring Proxy
+  # =================================
+  monitoring:
+    record_path: "EXPERIMENT/[SCENARIO_NAME]/monitoring"
+    entry_limit: 10                           # Max monitoring entries
+  
+  # =================================
+  # Communication Proxy
+  # =================================
+  communication:
+    message_timeout_ms: 5000                  # Message timeout in milliseconds
+    enable_compression: true                  # Compress messages
+  
+  # =================================
+  # Resource Proxy (for MCP servers, external APIs)
+  # =================================
+  resource:
+    mcp_servers: []                           # MCP server configurations
+    enable_caching: false                     # Cache resource responses

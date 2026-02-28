@@ -43,18 +43,38 @@ from masim.utils import load_config
 def load_simulation_data(record_dir: str) -> Dict[str, Any]:
     """Load simulation data from record directory."""
     data = {"prices": [], "trades": defaultdict(list), "rounds": []}
+    price_data = {}  # round -> price mapping
 
-    # Load price history
-    price_dir = os.path.join(record_dir, "market", "price")
-    if os.path.exists(price_dir):
-        for f in sorted(glob.glob(os.path.join(price_dir, "*.json"))):
+    # Load price history from market turns data
+    market_turns_dir = os.path.join(record_dir, "market", "turns")
+    if os.path.exists(market_turns_dir):
+        for f in sorted(glob.glob(os.path.join(market_turns_dir, "*.json"))):
+            if "store-information" in f:
+                continue
             with open(f, encoding="utf-8") as fp:
-                batch = json.load(fp)
-                data["prices"].extend(batch)
+                try:
+                    turn_block = json.load(fp)
+                    for turn_key, turn_data in turn_block.items():
+                        round_num = turn_data.get("round_num", 0)
+                        turn_result = turn_data.get("turn_result", {})
+                        step_results = turn_result.get("step_results", [])
+                        for step in step_results:
+                            payload = step.get("decision_payload", {})
+                            market_data = payload.get("market_data", {})
+                            if "price" in market_data:
+                                price_data[round_num] = market_data["price"]
+                except (json.JSONDecodeError, KeyError):
+                    continue
+    
+    # Sort by round and extract prices
+    for round_num in sorted(price_data.keys()):
+        data["prices"].append(price_data[round_num])
 
     # Load turn data from all players
     turns_pattern = os.path.join(record_dir, "*", "turns", "*.json")
     for f in sorted(glob.glob(turns_pattern)):
+        if "store-information" in f:
+            continue
         with open(f, encoding="utf-8") as fp:
             try:
                 turn_data = json.load(fp)
@@ -184,7 +204,8 @@ def plot_disposition_analysis(
     if len(prices) == 0:
         return
 
-    returns = calculate_returns(prices)
+    # Calculate returns directly from prices array
+    returns = np.diff(prices) / prices[:-1] if len(prices) > 1 else np.array([])
 
     # Figure 1: Price dynamics with news events
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
@@ -282,7 +303,8 @@ def generate_summary(
 ) -> Dict[str, Any]:
     """Generate summary statistics with validation."""
     prices = np.array(data["prices"])
-    returns = calculate_returns(prices) if len(prices) > 1 else np.array([])
+    # Calculate returns directly from prices array
+    returns = np.diff(prices) / prices[:-1] if len(prices) > 1 else np.array([])
     prices_list = list(prices)
     max_dd, peak_idx, trough_idx = (
         calculate_max_drawdown(prices_list) if len(prices_list) > 1 else (0, 0, 0)

@@ -1,17 +1,11 @@
-"""FlashCrashLLM - LLM-based Market Microstructure Simulation
-
-Phenomenon: Flash Crash
-    - Extreme rapid price decline (5-10% in minutes)
-    - Algorithmic trading feedback loops
-    - Liquidity withdrawal amplifies crash
-    - Quick recovery as fundamental traders step in
+"""FlashCrashLLM - LLM-based Multi-Agent Market Simulation
 
 LLM Investor Types:
-    - HFT Trader: Rapid momentum, can trigger cascades
-    - Market Maker: Provides liquidity, withdraws in stress
-    - Stop-Loss Trader: Triggered selling at thresholds
-    - Fundamental Trader: Stabilizing, buys during crash
-    - Algorithmic Trader: Trend-following algorithm
+    - High-Frequency Trader: Fast momentum trading
+    - Market Maker: Provides liquidity, manages risk
+    - Stop-Loss Trader: Rule-based position management
+    - Fundamental Trader: Value-focused
+    - Algorithmic Trader: Systematic trading
 
 Market Parameters (from config.extras):
     - record_path: Path for output records
@@ -130,17 +124,17 @@ class Market(GeneralPlayer):
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
         price_return = (new_price - current_price) / current_price
 
-        # Detect flash crash
-        in_crash = price_return < -0.03 or (
+        # Detect high volatility mode
+        in_high_vol = price_return < -0.03 or (
             self.state.custom_state["in_crash"] and current_price < 95
         )
 
         self.state.custom_state["price"] = new_price
         self.state.custom_state["liquidity"] = liquidity
-        self.state.custom_state["in_crash"] = in_crash
+        self.state.custom_state["in_crash"] = in_high_vol
         self.state.custom_state["price_history"].append(new_price)
 
-        status = "FLASH CRASH!" if in_crash else "Normal"
+        status = "HIGH VOLATILITY" if in_high_vol else "Normal"
         print(f"\n{'='*60}")
         print(
             f"[Market] Round {round_num}: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%) [{status}]"
@@ -152,7 +146,7 @@ class Market(GeneralPlayer):
             "prev_price": current_price,
             "return_pct": price_return * 100,
             "liquidity": liquidity,
-            "in_crash": in_crash,
+            "in_crash": in_high_vol,  # high volatility mode flag
             "fundamental": fundamental_value,
             "round": round_num,
         }
@@ -171,8 +165,8 @@ class Market(GeneralPlayer):
         )
 
 
-class LLMFlashCrashInvestor(GeneralPlayer):
-    """Base class for flash crash investors.
+class LLMInvestor(GeneralPlayer):
+    """Base class for LLM-powered investors.
 
     All parameters read from config.extras (no class constants).
     """
@@ -240,13 +234,26 @@ class LLMFlashCrashInvestor(GeneralPlayer):
         )
 
     def _parse_response(self, text: str) -> Dict[str, Any]:
+        """Parse LLM response and validate required fields are present and non-null."""
+        parsed = None
         try:
-            return json.loads(text)
+            parsed = json.loads(text)
         except:
             match = re.search(r"\{.*\}", text, re.DOTALL)
             if match:
-                return json.loads(match.group(0))
+                parsed = json.loads(match.group(0))
+        if parsed is None:
             raise ValueError(f"Parse failed: {text[:100]}")
+
+        # Validate required fields are present and non-null (fail-fast)
+        required_fields = ["bid_price", "quantity", "reasoning"]
+        for field in required_fields:
+            if field not in parsed:
+                raise ValueError(f"Missing required field '{field}' in LLM response")
+            if parsed[field] is None:
+                raise ValueError(f"Field '{field}' is null in LLM response")
+
+        return parsed
 
     async def decide(self) -> Dict[str, Any]:
         market_data = self.state.custom_state["market_data"]
@@ -313,31 +320,31 @@ class LLMFlashCrashInvestor(GeneralPlayer):
         )
 
 
-class LLMHighFrequencyTrader(LLMFlashCrashInvestor):
-    """HFT - rapid momentum trading, can trigger cascades."""
+class LLMHighFrequencyTrader(LLMInvestor):
+    """High-Frequency Trader - fast momentum trading."""
 
     pass
 
 
-class LLMFlashMarketMaker(LLMFlashCrashInvestor):
-    """Market Maker - provides liquidity, withdraws in stress."""
+class LLMFlashMarketMaker(LLMInvestor):
+    """Market Maker - provides liquidity, manages risk."""
 
     pass
 
 
-class LLMStopLossTrader(LLMFlashCrashInvestor):
-    """Stop-Loss Trader - mechanical selling at thresholds."""
+class LLMStopLossTrader(LLMInvestor):
+    """Stop-Loss Trader - rule-based position management."""
 
     pass
 
 
-class LLMFundamentalTrader(LLMFlashCrashInvestor):
-    """Fundamental Trader - stabilizing force during crashes."""
+class LLMFundamentalTrader(LLMInvestor):
+    """Fundamental Trader - value-focused."""
 
     pass
 
 
-class LLMAlgorithmicTrader(LLMFlashCrashInvestor):
-    """Algorithmic Trader - systematic trend following."""
+class LLMAlgorithmicTrader(LLMInvestor):
+    """Algorithmic Trader - systematic trading."""
 
     pass

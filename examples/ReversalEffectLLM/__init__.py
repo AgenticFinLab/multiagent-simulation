@@ -1,8 +1,8 @@
-"""ReversalEffectLLM - LLM-based Long-term Mean Reversion"""
+"""ReversalEffectLLM - LLM-based Multi-Agent Market Simulation"""
 
 from .players import (
     Market,
-    LLMReversalInvestor,
+    LLMInvestor,
     LLMContrarianInvestor,
     LLMOverconfidentTrader,
     LLMValueInvestor,
@@ -12,7 +12,7 @@ from .players import (
 
 __all__ = [
     "Market",
-    "LLMReversalInvestor",
+    "LLMInvestor",
     "LLMContrarianInvestor",
     "LLMOverconfidentTrader",
     "LLMValueInvestor",

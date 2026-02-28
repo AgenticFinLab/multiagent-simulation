@@ -1,8 +1,8 @@
-"""ShortSqueezeLLM - LLM-based Short Squeeze Simulation"""
+"""ShortSqueezeLLM - LLM-based Multi-Agent Market Simulation"""
 
 from .players import (
     Market,
-    LLMShortSqueezeInvestor,
+    LLMInvestor,
     LLMShortSeller,
     LLMRetailCoordinator,
     LLMMomentumBuyer,
@@ -12,7 +12,7 @@ from .players import (
 
 __all__ = [
     "Market",
-    "LLMShortSqueezeInvestor",
+    "LLMInvestor",
     "LLMShortSeller",
     "LLMRetailCoordinator",
     "LLMMomentumBuyer",

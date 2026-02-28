@@ -2,13 +2,23 @@
 # AssetBubbleLLM Persona Configuration
 # =============================================================================
 
-storage:
-  base_path: "EXPERIMENT/AssetBubbleLLM"
-  simulation_name: "AssetBubbleLLM"
+auto_checkpoint: false
+debug_mode: true
 
-communication:
-  storage_path: "EXPERIMENT/AssetBubbleLLM/messages"
-  flush_interval: 50
-
-monitoring:
-  record_path: "EXPERIMENT/AssetBubbleLLM/records"
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/AssetBubbleLLM/checkpoints"
+    record_path: "EXPERIMENT/AssetBubbleLLM/records"
+    record_rounds: true
+  
+  monitoring:
+    record_path: "EXPERIMENT/AssetBubbleLLM/monitoring"
+    entry_limit: 10
+  
+  communication:
+    message_timeout_ms: 30000
+    enable_compression: true
+  
+  resource:
+    mcp_servers: []
+    enable_caching: false

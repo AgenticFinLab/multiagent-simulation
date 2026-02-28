@@ -1,3 +1,49 @@
-simulation:
-  num_rounds: 50
-  description: "LLM-based Flash Crash Simulation - Market Microstructure"
+# =============================================================================
+# FlashCrashLLM Simulation Configuration
+# =============================================================================
+# LLM-based Flash Crash simulation - Market Microstructure
+# Tests: HFT dynamics, liquidity withdrawal, algorithmic cascades
+#
+# Usage:
+#   python examples/FlashCrashLLM/run_flash_llm.py -c configs/FlashCrashLLM/simulation.yml
+# =============================================================================
+
+setting:
+  name: "flash_crash_llm_simulation"
+  description: "LLM-based flash crash with HFT and liquidity dynamics"
+  total_rounds: 50
+  entry_limit: 10
+  record_path: "EXPERIMENT/FlashCrashLLM/records"
+  save_diagram_interval: 25
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "flash_crash_llm"
+  actor_prefix: null
+  num_cpus: 4
+  num_gpus: null
+  object_store_memory: null
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: true
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/FlashCrashLLM/communication"

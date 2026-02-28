@@ -1,8 +1,8 @@
-"""FlashCrashLLM - LLM-based Market Microstructure Simulation"""
+"""FlashCrashLLM - LLM-based Multi-Agent Market Simulation"""
 
 from .players import (
     Market,
-    LLMFlashCrashInvestor,
+    LLMInvestor,
     LLMHighFrequencyTrader,
     LLMFlashMarketMaker,
     LLMStopLossTrader,
@@ -12,7 +12,7 @@ from .players import (
 
 __all__ = [
     "Market",
-    "LLMFlashCrashInvestor",
+    "LLMInvestor",
     "LLMHighFrequencyTrader",
     "LLMFlashMarketMaker",
     "LLMStopLossTrader",

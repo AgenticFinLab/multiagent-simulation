@@ -1,8 +1,6 @@
-"""DispositionEffectLLM - LLM-based Prospect Theory Trading Simulation
+"""DispositionEffectLLM - LLM-based Multi-Agent Market Simulation
 
-Phenomenon: Disposition Effect (Shefrin & Statman 1985)
-    - Investors sell winners too early (realize gains prematurely)
-    - Investors hold losers too long (reluctant to realize losses)
+LLM investors with different loss aversion and trading personalities.
 
 All parameters are configured via players.yml config file.
 """
@@ -145,9 +143,9 @@ class Market(GeneralPlayer):
         )
 
 
-class LLMDispositionInvestor(GeneralPlayer):
+class LLMInvestor(GeneralPlayer):
     """
-    Base class for LLM-powered disposition effect investors.
+    Base class for LLM-powered investors.
 
     Parameters from config extras:
         - initial_cash, initial_position, history_limit, record_path, llm config
@@ -262,17 +260,33 @@ Respond with JSON: {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantit
 """
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
+        """Parse LLM response and validate required fields are present and non-null."""
+        parsed = None
+
         try:
-            return json.loads(response_text)
+            parsed = json.loads(response_text)
         except json.JSONDecodeError:
             pass
-        match = re.search(r"```(?:json)?\s*(.*?)\s*```", response_text, re.DOTALL)
-        if match:
-            return json.loads(match.group(1))
-        match = re.search(r"\{.*\}", response_text, re.DOTALL)
-        if match:
-            return json.loads(match.group(0))
-        raise ValueError(f"Failed to parse: {response_text[:100]}")
+        if parsed is None:
+            match = re.search(r"```(?:json)?\s*(.*?)\s*```", response_text, re.DOTALL)
+            if match:
+                parsed = json.loads(match.group(1))
+        if parsed is None:
+            match = re.search(r"\{.*\}", response_text, re.DOTALL)
+            if match:
+                parsed = json.loads(match.group(0))
+        if parsed is None:
+            raise ValueError(f"Failed to parse: {response_text[:100]}")
+
+        # Validate required fields are present and non-null (fail-fast)
+        required_fields = ["bid_price", "quantity", "reasoning"]
+        for field in required_fields:
+            if field not in parsed:
+                raise ValueError(f"Missing required field '{field}' in LLM response")
+            if parsed[field] is None:
+                raise ValueError(f"Field '{field}' is null in LLM response")
+
+        return parsed
 
     def _apply_constraints(self, bid_price: float, quantity: float) -> float:
         cash = self.state.custom_state["cash"]
@@ -350,31 +364,31 @@ Respond with JSON: {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantit
         )
 
 
-class LLMDispositionBiased(LLMDispositionInvestor):
-    """Classic disposition effect - sells winners, holds losers."""
+class LLMDispositionBiased(LLMInvestor):
+    """Loss-averse investor."""
 
     pass
 
 
-class LLMRationalInvestor(LLMDispositionInvestor):
-    """Expected utility maximizer - no disposition bias."""
+class LLMRationalInvestor(LLMInvestor):
+    """Rational utility maximizer."""
 
     pass
 
 
-class LLMTaxAwareInvestor(LLMDispositionInvestor):
-    """Tax-loss harvesting - opposite of disposition effect."""
+class LLMTaxAwareInvestor(LLMInvestor):
+    """Tax-aware investor."""
 
     pass
 
 
-class LLMInstitutionalInvestor(LLMDispositionInvestor):
-    """Professional investor - reduced behavioral biases."""
+class LLMInstitutionalInvestor(LLMInvestor):
+    """Professional institutional investor."""
 
     pass
 
 
-class LLMLossAverse(LLMDispositionInvestor):
-    """Extreme loss aversion - paralyzed by losses."""
+class LLMLossAverse(LLMInvestor):
+    """Highly loss-averse investor."""
 
     pass

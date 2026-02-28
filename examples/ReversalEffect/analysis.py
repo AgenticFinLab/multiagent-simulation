@@ -12,6 +12,8 @@ import json
 import os
 from typing import Any, Dict
 
+import numpy as np
+
 from masim.evaluation.finance import (
     calculate_returns,
     calculate_autocorrelation,
@@ -52,8 +54,8 @@ def analyze_reversal(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
 
     # Reversal: negative long-lag autocorrelation (De Bondt & Thaler 1985)
     long_lag = 15 if len(acf) > 15 else (len(acf) - 1 if acf else 0)
-    long_lag_acf = acf[long_lag - 1] if long_lag > 0 and acf else 0
-    reversal_detected = long_lag_acf < -0.05 if acf else False
+    long_lag_acf = float(acf[long_lag - 1]) if long_lag > 0 and acf else 0.0
+    reversal_detected = bool(long_lag_acf < -0.05) if acf else False
 
     # Run validation
     validation = validate_reversal_effect(
@@ -128,7 +130,7 @@ def analyze_reversal(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     }
 
     with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=2)
+        json.dump(summary, f, indent=2, default=lambda x: int(x) if isinstance(x, (np.bool_, np.integer)) else float(x) if isinstance(x, np.floating) else str(x))
 
     print("\n" + "=" * 50)
     print("REVERSAL EFFECT ANALYSIS")

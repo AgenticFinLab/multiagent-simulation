@@ -1,3 +1,49 @@
-simulation:
-  num_rounds: 50
-  description: "LLM-based Liquidity Dry-up Simulation"
+# =============================================================================
+# LiquidityDryupLLM Simulation Configuration
+# =============================================================================
+# LLM-based Liquidity Dry-up simulation - Market Maker Inventory Model
+# Tests: Liquidity withdrawal, market maker stress, bid-ask dynamics
+#
+# Usage:
+#   python examples/LiquidityDryupLLM/run_liquidity_llm.py -c configs/LiquidityDryupLLM/simulation.yml
+# =============================================================================
+
+setting:
+  name: "liquidity_dryup_llm_simulation"
+  description: "LLM-based liquidity dry-up with market maker dynamics"
+  total_rounds: 50
+  entry_limit: 10
+  record_path: "EXPERIMENT/LiquidityDryupLLM/records"
+  save_diagram_interval: 25
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "liquidity_dryup_llm"
+  actor_prefix: null
+  num_cpus: 4
+  num_gpus: null
+  object_store_memory: null
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: true
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/LiquidityDryupLLM/communication"

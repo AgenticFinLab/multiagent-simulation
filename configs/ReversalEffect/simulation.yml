@@ -10,7 +10,7 @@ setting:
   name: "reversal_effect_simulation"
   description: "Long-term mean reversion and overreaction correction"
   total_rounds: 500
-  entry_limit: 100
+  entry_limit: 10
   record_path: "EXPERIMENT/ReversalEffect/records"
   save_diagram_interval: 100
 

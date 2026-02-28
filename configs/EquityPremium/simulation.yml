@@ -2,7 +2,7 @@ setting:
   name: "equity_premium_simulation"
   description: "Equity Premium Puzzle with myopic loss aversion"
   total_rounds: 500
-  entry_limit: 100
+  entry_limit: 10
   record_path: "EXPERIMENT/EquityPremium/records"
   save_diagram_interval: 100
 

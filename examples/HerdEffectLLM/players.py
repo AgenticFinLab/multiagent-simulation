@@ -277,20 +277,36 @@ Respond with ONLY valid JSON:
 """
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
+        """Parse LLM response and validate required fields are present and non-null."""
+        parsed = None
+
         try:
-            return json.loads(response_text)
+            parsed = json.loads(response_text)
         except json.JSONDecodeError:
             pass
 
-        match = re.search(r"```(?:json)?\s*(.*?)\s*```", response_text, re.DOTALL)
-        if match:
-            return json.loads(match.group(1))
+        if parsed is None:
+            match = re.search(r"```(?:json)?\s*(.*?)\s*```", response_text, re.DOTALL)
+            if match:
+                parsed = json.loads(match.group(1))
 
-        match = re.search(r"\{.*\}", response_text, re.DOTALL)
-        if match:
-            return json.loads(match.group(0))
+        if parsed is None:
+            match = re.search(r"\{.*\}", response_text, re.DOTALL)
+            if match:
+                parsed = json.loads(match.group(0))
 
-        raise ValueError(f"Failed to parse LLM response: {response_text[:100]}")
+        if parsed is None:
+            raise ValueError(f"Failed to parse LLM response: {response_text[:100]}")
+
+        # Validate required fields are present and non-null (fail-fast)
+        required_fields = ["bid_price", "quantity", "reasoning"]
+        for field in required_fields:
+            if field not in parsed:
+                raise ValueError(f"Missing required field '{field}' in LLM response")
+            if parsed[field] is None:
+                raise ValueError(f"Field '{field}' is null in LLM response")
+
+        return parsed
 
     def _apply_constraints(
         self, bid_price: float, quantity: float, current_price: float

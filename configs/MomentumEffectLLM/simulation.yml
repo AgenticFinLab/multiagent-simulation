@@ -1,3 +1,49 @@
-simulation:
-  num_rounds: 50
-  description: "LLM-based Momentum Effect Simulation"
+# =============================================================================
+# MomentumEffectLLM Simulation Configuration
+# =============================================================================
+# LLM-based Momentum Effect simulation - Price Continuation
+# Tests: Trend following, price drift, information diffusion
+#
+# Usage:
+#   python examples/MomentumEffectLLM/run_momentum_llm.py -c configs/MomentumEffectLLM/simulation.yml
+# =============================================================================
+
+setting:
+  name: "momentum_effect_llm_simulation"
+  description: "LLM-based momentum effect with heterogeneous traders"
+  total_rounds: 50
+  entry_limit: 10
+  record_path: "EXPERIMENT/MomentumEffectLLM/records"
+  save_diagram_interval: 25
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "momentum_effect_llm"
+  actor_prefix: null
+  num_cpus: 4
+  num_gpus: null
+  object_store_memory: null
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: true
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/MomentumEffectLLM/communication"

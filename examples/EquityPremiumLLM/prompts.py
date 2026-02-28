@@ -18,7 +18,7 @@ PSYCHOLOGY:
 - Daily volatility = noise
 - Focus on long-term returns
 - Maintain HIGH stock allocation (60-80%)
-- Buy when others panic
+- Buy when others are fearful
 
 Respond with JSON: {"stock_qty": float, "reasoning": string}
 """

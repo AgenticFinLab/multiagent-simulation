@@ -1,3 +1,49 @@
-simulation:
-  num_rounds: 50
-  description: "LLM-based Market Crash Simulation with liquidity spiral dynamics"
+# =============================================================================
+# MarketCrashLLM Simulation Configuration
+# =============================================================================
+# LLM-based Market Crash simulation with liquidity spiral dynamics
+# Tests: Panic selling, forced liquidation, liquidity withdrawal
+#
+# Usage:
+#   python examples/MarketCrashLLM/run_crash_llm.py -c configs/MarketCrashLLM/simulation.yml
+# =============================================================================
+
+setting:
+  name: "market_crash_llm_simulation"
+  description: "LLM-based market crash with liquidity spiral dynamics"
+  total_rounds: 50
+  entry_limit: 10
+  record_path: "EXPERIMENT/MarketCrashLLM/records"
+  save_diagram_interval: 25
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "market_crash_llm"
+  actor_prefix: null
+  num_cpus: 4
+  num_gpus: null
+  object_store_memory: null
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: true
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/MarketCrashLLM/communication"

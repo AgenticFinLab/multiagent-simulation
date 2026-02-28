@@ -1,8 +1,4 @@
-"""ReversalEffectLLM - LLM-based Long-term Mean Reversion Simulation
-
-Phenomenon: Reversal Effect (De Bondt & Thaler, 1985)
-    - Past losers outperform past winners over 3-5 year periods
-    - Market overreacts to information, then corrects
+"""ReversalEffectLLM - LLM-based Multi-Agent Market Simulation
 
 Market Parameters (from config.extras):
     - record_path: Path for output records
@@ -148,8 +144,8 @@ class Market(GeneralPlayer):
         )
 
 
-class LLMReversalInvestor(GeneralPlayer):
-    """Base class for LLM reversal investors.
+class LLMInvestor(GeneralPlayer):
+    """Base class for LLM-powered investors.
 
     All parameters read from config.extras (no class constants).
     """
@@ -217,13 +213,26 @@ class LLMReversalInvestor(GeneralPlayer):
         )
 
     def _parse_response(self, text: str) -> Dict[str, Any]:
+        """Parse LLM response and validate required fields are present and non-null."""
+        parsed = None
         try:
-            return json.loads(text)
+            parsed = json.loads(text)
         except:
             match = re.search(r"\{.*\}", text, re.DOTALL)
             if match:
-                return json.loads(match.group(0))
+                parsed = json.loads(match.group(0))
+        if parsed is None:
             raise ValueError(f"Parse failed: {text[:100]}")
+
+        # Validate required fields are present and non-null (fail-fast)
+        required_fields = ["bid_price", "quantity", "reasoning"]
+        for field in required_fields:
+            if field not in parsed:
+                raise ValueError(f"Missing required field '{field}' in LLM response")
+            if parsed[field] is None:
+                raise ValueError(f"Field '{field}' is null in LLM response")
+
+        return parsed
 
     async def decide(self) -> Dict[str, Any]:
         market_data = self.state.custom_state["market_data"]
@@ -290,31 +299,31 @@ class LLMReversalInvestor(GeneralPlayer):
         )
 
 
-class LLMContrarianInvestor(LLMReversalInvestor):
-    """Contrarian - buys losers, sells winners."""
+class LLMContrarianInvestor(LLMInvestor):
+    """Contrarian investor."""
 
     pass
 
 
-class LLMOverconfidentTrader(LLMReversalInvestor):
-    """Overconfident - overreacts to recent news/returns."""
+class LLMOverconfidentTrader(LLMInvestor):
+    """Overconfident trader."""
 
     pass
 
 
-class LLMValueInvestor(LLMReversalInvestor):
-    """Value investor - focuses on fundamental value."""
+class LLMValueInvestor(LLMInvestor):
+    """Value investor."""
 
     pass
 
 
-class LLMMomentumChaser(LLMReversalInvestor):
-    """Short-term momentum chaser."""
+class LLMMomentumChaser(LLMInvestor):
+    """Momentum chaser."""
 
     pass
 
 
-class LLMNoiseTrader(LLMReversalInvestor):
-    """Noise trader - provides liquidity with random behavior."""
+class LLMNoiseTrader(LLMInvestor):
+    """Noise trader."""
 
     pass

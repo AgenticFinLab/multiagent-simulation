@@ -234,9 +234,9 @@ def analyze_herding(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     print("=" * 50)
     print(f"Total Rounds: {summary['total_rounds']}")
     print(
-        f"Price Range: {summary['price_range']['min']:.2f} - {summary['price_range']['max']:.2f}"
+        f"Price Range: {summary['price']['min']:.2f} - {summary['price']['max']:.2f}"
     )
-    print(f"Final Price: {summary['price_range']['final']:.2f}")
+    print(f"Final Price: {summary['price']['final']:.2f}")
     print(f"Max Drawdown: {max_dd:.2f}%")
     print(f"Avg Bid CV: {summary['herding']['avg_cv']:.4f}")
     print(f"Avg Directional Agreement: {summary['herding']['avg_agreement']:.4f}")

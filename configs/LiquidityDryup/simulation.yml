@@ -2,7 +2,7 @@ setting:
   name: "liquidity_dryup_simulation"
   description: "Liquidity dry-up and market maker inventory model"
   total_rounds: 200
-  entry_limit: 100
+  entry_limit: 10
   record_path: "EXPERIMENT/LiquidityDryup/records"
   save_diagram_interval: 50
 

@@ -15,7 +15,7 @@ proxy:
 
   monitoring:
     record_path: "EXPERIMENT/LiquidityDryup/monitoring"
-    entry_limit: 100
+    entry_limit: 10
 
   communication:
     message_timeout_ms: 5000

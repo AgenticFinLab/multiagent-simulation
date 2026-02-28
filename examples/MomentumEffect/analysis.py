@@ -12,6 +12,8 @@ import json
 import os
 from typing import Any, Dict
 
+import numpy as np
+
 from masim.evaluation.finance import (
     calculate_returns,
     calculate_autocorrelation,
@@ -24,6 +26,18 @@ from masim.evaluation.finance import (
     validate_momentum_effect,
 )
 from masim.utils import load_config, load_simulation_data, get_investor_quantities
+
+
+class NumpyEncoder(json.JSONEncoder):
+    """JSON encoder for numpy types."""
+    def default(self, obj):
+        if isinstance(obj, (np.bool_, np.integer)):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super().default(obj)
 
 
 def analyze_momentum(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
@@ -47,7 +61,7 @@ def analyze_momentum(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     rolling_ac = calculate_rolling_autocorrelation(market_prices, lag=1, window=20)
 
     # Momentum detection: positive short-lag autocorrelation
-    momentum_detected = acf[0] > 0.1 if acf else False
+    momentum_detected = bool(acf[0] > 0.1) if acf else False
 
     # Calculate trend duration (average same-sign return streak)
     trend_durations = []
@@ -138,7 +152,7 @@ def analyze_momentum(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     }
 
     with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=2)
+        json.dump(summary, f, indent=2, cls=NumpyEncoder)
 
     print("\n" + "=" * 50)
     print("MOMENTUM ANALYSIS")

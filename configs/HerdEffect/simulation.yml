@@ -11,7 +11,7 @@ setting:
   name: "herd_effect_simulation"
   description: "Multi-strategy investors interacting with market"
   total_rounds: 1000
-  entry_limit: 100
+  entry_limit: 10
   record_path: "EXPERIMENT/HerdEffect/records"
   save_diagram_interval: 100  # Save diagram every N rounds (0 = disabled)
 

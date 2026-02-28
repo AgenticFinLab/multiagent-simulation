@@ -1,18 +1,10 @@
-"""EquityPremiumLLM - LLM-based Equity Premium Puzzle Simulation
-
-Phenomenon: Equity Premium Puzzle (Mehra & Prescott, 1985)
-    - Stocks historically return ~6% more than bonds
-    - Standard theory cannot explain this with reasonable risk aversion
-    - Myopic Loss Aversion (Benartzi & Thaler, 1995) provides explanation:
-      * Investors evaluate portfolios frequently
-      * Losses hurt more than gains (λ ≈ 2.25)
-      * Short evaluation → stocks look risky → high premium demanded
+"""EquityPremiumLLM - LLM-based Multi-Agent Asset Allocation Simulation
 
 LLM Investor Types:
-    - Myopic Loss Averse: Evaluates frequently, demands high premium
-    - Long-Term Investor: Evaluates infrequently, more stocks
+    - Loss-Averse Investor: Evaluates frequently, sensitive to losses
+    - Long-Term Investor: Evaluates infrequently, more risk-tolerant
     - Institutional Investor: Balanced allocation
-    - Risk-Averse Saver: Prefers bonds
+    - Risk-Averse Saver: Prefers low-risk assets
     - Rational Optimizer: Expected utility maximizer
 
 Market Parameters (from config.extras):
@@ -142,7 +134,7 @@ class Market(GeneralPlayer):
         )
 
 
-class LLMEquityInvestor(GeneralPlayer):
+class LLMInvestor(GeneralPlayer):
     """Base class for equity premium investors.
 
     All parameters read from config.extras (no class constants).
@@ -222,13 +214,26 @@ class LLMEquityInvestor(GeneralPlayer):
         )
 
     def _parse_response(self, text: str) -> Dict[str, Any]:
+        """Parse LLM response and validate required fields are present and non-null."""
+        parsed = None
         try:
-            return json.loads(text)
+            parsed = json.loads(text)
         except:
             match = re.search(r"\{.*\}", text, re.DOTALL)
             if match:
-                return json.loads(match.group(0))
+                parsed = json.loads(match.group(0))
+        if parsed is None:
             raise ValueError(f"Parse failed: {text[:100]}")
+
+        # Validate required fields are present and non-null (fail-fast)
+        required_fields = ["bid_price", "quantity", "reasoning"]
+        for field in required_fields:
+            if field not in parsed:
+                raise ValueError(f"Missing required field '{field}' in LLM response")
+            if parsed[field] is None:
+                raise ValueError(f"Field '{field}' is null in LLM response")
+
+        return parsed
 
     async def decide(self) -> Dict[str, Any]:
         market_data = self.state.custom_state["market_data"]
@@ -290,31 +295,31 @@ class LLMEquityInvestor(GeneralPlayer):
         )
 
 
-class LLMMyopicLossAverse(LLMEquityInvestor):
+class LLMMyopicLossAverse(LLMInvestor):
     """Myopic loss averse - evaluates frequently, demands high premium."""
 
     pass
 
 
-class LLMLongTermInvestor(LLMEquityInvestor):
+class LLMLongTermInvestor(LLMInvestor):
     """Long-term investor - evaluates infrequently, more stocks."""
 
     pass
 
 
-class LLMInstitutionalInvestor(LLMEquityInvestor):
+class LLMInstitutionalInvestor(LLMInvestor):
     """Institutional investor - balanced allocation."""
 
     pass
 
 
-class LLMRiskAverseSaver(LLMEquityInvestor):
+class LLMRiskAverseSaver(LLMInvestor):
     """Risk-averse saver - prefers bonds."""
 
     pass
 
 
-class LLMRationalOptimizer(LLMEquityInvestor):
+class LLMRationalOptimizer(LLMInvestor):
     """Rational optimizer - expected utility maximizer."""
 
     pass

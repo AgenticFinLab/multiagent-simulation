@@ -1,14 +1,24 @@
-storage:
-  inbox: true
-  outbox: true
-  internal: true
-  message_history: true
-  history_limit: 100
+# =============================================================================
+# MarketCrashLLM Persona Configuration
+# =============================================================================
 
-communication:
-  routing: coordinator
-  coordinator_id: market
-  message_limit: 50
+auto_checkpoint: false
+debug_mode: true
 
-monitoring:
-  log_level: INFO
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/MarketCrashLLM/checkpoints"
+    record_path: "EXPERIMENT/MarketCrashLLM/records"
+    record_rounds: true
+  
+  monitoring:
+    record_path: "EXPERIMENT/MarketCrashLLM/monitoring"
+    entry_limit: 10
+  
+  communication:
+    message_timeout_ms: 30000
+    enable_compression: true
+  
+  resource:
+    mcp_servers: []
+    enable_caching: false

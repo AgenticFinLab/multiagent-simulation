@@ -1,8 +1,8 @@
-"""LiquidityDryupLLM - LLM-based Liquidity Dry-up Simulation"""
+"""LiquidityDryupLLM - LLM-based Multi-Agent Market Simulation"""
 
 from .players import (
     Market,
-    LLMLiquidityInvestor,
+    LLMInvestor,
     LLMMarketMaker,
     LLMLiquidityDemander,
     LLMArbitrageur,
@@ -12,7 +12,7 @@ from .players import (
 
 __all__ = [
     "Market",
-    "LLMLiquidityInvestor",
+    "LLMInvestor",
     "LLMMarketMaker",
     "LLMLiquidityDemander",
     "LLMArbitrageur",

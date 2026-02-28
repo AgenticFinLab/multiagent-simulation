@@ -58,8 +58,8 @@ def calculate_autocorrelation(
 
 
 def calculate_rolling_volatility(
-    market_prices: Dict[int, float], window: int = 10
-) -> Dict[int, float]:
+    market_prices: Dict[int, float] | np.ndarray | list, window: int = 10
+) -> Dict[int, float] | np.ndarray:
     """
     Calculate rolling price volatility (standard deviation).
 
@@ -69,12 +69,21 @@ def calculate_rolling_volatility(
     Formula: σ_t = std(P_{t-window+1}, ..., P_t)
 
     Args:
-        market_prices: {round: price}
+        market_prices: {round: price} or array/list of prices
         window: Rolling window size
 
     Returns:
-        {round: volatility}
+        {round: volatility} or array of volatility values
     """
+    # Handle array/list input
+    if isinstance(market_prices, (np.ndarray, list)):
+        prices = np.array(market_prices)
+        result = np.zeros(len(prices))
+        for i in range(window - 1, len(prices)):
+            result[i] = np.std(prices[i - window + 1:i + 1])
+        return result
+    
+    # Handle dict input
     rounds = sorted(market_prices.keys())
     prices = [market_prices[r] for r in rounds]
 
@@ -111,18 +120,29 @@ def calculate_price_deviation(
 
 
 def calculate_returns(
-    market_prices: Dict[int, float], log_returns: bool = False
-) -> Dict[int, float]:
+    market_prices: Dict[int, float] | np.ndarray | list, log_returns: bool = False
+) -> Dict[int, float] | np.ndarray:
     """
     Calculate price returns (simple or log returns).
 
     Args:
-        market_prices: {round: price}
+        market_prices: {round: price} or array/list of prices
         log_returns: If True, compute log returns
 
     Returns:
-        {round: return} (starting from round 2)
+        {round: return} (starting from round 2) or array of returns
     """
+    # Handle array/list input
+    if isinstance(market_prices, (np.ndarray, list)):
+        prices = np.array(market_prices)
+        if len(prices) < 2:
+            return np.array([])
+        if log_returns:
+            return np.log(prices[1:] / prices[:-1])
+        else:
+            return np.diff(prices) / prices[:-1]
+    
+    # Handle dict input
     rounds = sorted(market_prices.keys())
     returns = {}
 

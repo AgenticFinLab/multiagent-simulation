@@ -14,6 +14,8 @@ import json
 import os
 import sys
 
+import numpy as np
+
 from masim.utils import load_config
 
 # Import from rule-based version
@@ -83,7 +85,7 @@ def main():
 
     summary_path = os.path.join(output_dir, "summary.json")
     with open(summary_path, "w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=2)
+        json.dump(summary, f, indent=2, default=lambda x: int(x) if isinstance(x, (np.bool_, np.integer)) else float(x) if isinstance(x, np.floating) else str(x))
     print(f"    Saved to {summary_path}")
 
     return summary

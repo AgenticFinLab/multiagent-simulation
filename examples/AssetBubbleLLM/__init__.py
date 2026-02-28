@@ -1,8 +1,8 @@
-"""AssetBubbleLLM - LLM-based Asset Bubble Simulation"""
+"""AssetBubbleLLM - LLM-based Multi-Agent Market Simulation"""
 
 from .players import (
     Market,
-    LLMBubbleInvestor,
+    LLMInvestor,
     LLMGreaterFoolSpeculator,
     LLMRationalArbitrageur,
     LLMSentimentTrader,
@@ -12,7 +12,7 @@ from .players import (
 
 __all__ = [
     "Market",
-    "LLMBubbleInvestor",
+    "LLMInvestor",
     "LLMGreaterFoolSpeculator",
     "LLMRationalArbitrageur",
     "LLMSentimentTrader",

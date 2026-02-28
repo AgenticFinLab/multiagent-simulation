@@ -1,16 +1,11 @@
-"""LiquidityDryupLLM - LLM-based Market Maker Inventory Model Simulation
-
-Phenomenon: Liquidity Dry-up
-    - Market makers withdraw liquidity during stress
-    - Creates self-reinforcing cycles of illiquidity
-    - Reference: Grossman & Miller (1988), Amihud & Mendelson (1986)
+"""LiquidityDryupLLM - LLM-based Multi-Agent Market Simulation
 
 LLM Investor Types:
-    - Market Maker: Provides liquidity for spread, withdraws in stress
-    - Liquidity Demander: Takes liquidity, suffers from dry-up
-    - Arbitrageur: Profits from mispricings during illiquidity
-    - Value Investor: Patient buyer waiting for extreme mispricings
-    - Forced Seller: Must sell regardless of liquidity conditions
+    - Market Maker: Provides liquidity for spread
+    - Liquidity Demander: Takes liquidity
+    - Arbitrageur: Seeks opportunities
+    - Value Investor: Patient buyer
+    - Forced Seller: Must sell
 
 Market Parameters (from config.extras):
     - record_path: Path for output records
@@ -122,7 +117,7 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
 
         status = (
-            "DRYUP!"
+            "LOW"
             if total_liquidity < 30
             else "Stressed" if total_liquidity < 60 else "Normal"
         )
@@ -158,8 +153,8 @@ class Market(GeneralPlayer):
         )
 
 
-class LLMLiquidityInvestor(GeneralPlayer):
-    """Base class for liquidity dry-up investors.
+class LLMInvestor(GeneralPlayer):
+    """Base class for LLM-powered investors.
 
     All parameters read from config.extras (no class constants).
     """
@@ -225,13 +220,26 @@ class LLMLiquidityInvestor(GeneralPlayer):
         )
 
     def _parse_response(self, text: str) -> Dict[str, Any]:
+        """Parse LLM response and validate required fields are present and non-null."""
+        parsed = None
         try:
-            return json.loads(text)
+            parsed = json.loads(text)
         except:
             match = re.search(r"\{.*\}", text, re.DOTALL)
             if match:
-                return json.loads(match.group(0))
+                parsed = json.loads(match.group(0))
+        if parsed is None:
             raise ValueError(f"Parse failed: {text[:100]}")
+
+        # Validate required fields are present and non-null (fail-fast)
+        required_fields = ["bid_price", "quantity", "reasoning"]
+        for field in required_fields:
+            if field not in parsed:
+                raise ValueError(f"Missing required field '{field}' in LLM response")
+            if parsed[field] is None:
+                raise ValueError(f"Field '{field}' is null in LLM response")
+
+        return parsed
 
     async def decide(self) -> Dict[str, Any]:
         market_data = self.state.custom_state["market_data"]
@@ -260,9 +268,9 @@ class LLMLiquidityInvestor(GeneralPlayer):
                     "reasoning": "error",
                 }
 
-        bid_price = float(decision["bid_price"])
-        quantity = float(decision["quantity"])
-        provides_liquidity = float(decision["provides_liquidity"])
+        bid_price = float(decision.get("bid_price", market_data["price"]))
+        quantity = float(decision.get("quantity", 0))
+        provides_liquidity = float(decision.get("provides_liquidity", 0))
 
         cash, position = (
             self.state.custom_state["cash"],
@@ -287,7 +295,7 @@ class LLMLiquidityInvestor(GeneralPlayer):
             "strategy": strategy_name,
             "investor": self.identity,
             "provides_liquidity": provides_liquidity,
-            "reasoning": decision["reasoning"][:100],
+            "reasoning": decision.get("reasoning", "N/A")[:100],
         }
         return {
             **order,
@@ -302,31 +310,31 @@ class LLMLiquidityInvestor(GeneralPlayer):
         )
 
 
-class LLMMarketMaker(LLMLiquidityInvestor):
-    """Market maker - provides liquidity, withdraws in stress."""
+class LLMMarketMaker(LLMInvestor):
+    """Market maker - provides liquidity."""
 
     pass
 
 
-class LLMLiquidityDemander(LLMLiquidityInvestor):
-    """Liquidity demander - takes liquidity, suffers from dry-up."""
+class LLMLiquidityDemander(LLMInvestor):
+    """Liquidity demander - takes liquidity."""
 
     pass
 
 
-class LLMArbitrageur(LLMLiquidityInvestor):
-    """Arbitrageur - profits from mispricings during illiquidity."""
+class LLMArbitrageur(LLMInvestor):
+    """Arbitrageur - seeks opportunities."""
 
     pass
 
 
-class LLMValueInvestor(LLMLiquidityInvestor):
-    """Value investor - patient buyer during extreme mispricings."""
+class LLMValueInvestor(LLMInvestor):
+    """Value investor - patient buyer."""
 
     pass
 
 
-class LLMForcedSeller(LLMLiquidityInvestor):
-    """Forced seller - must sell regardless of conditions."""
+class LLMForcedSeller(LLMInvestor):
+    """Forced seller - must sell."""
 
     pass

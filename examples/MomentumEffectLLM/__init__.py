@@ -1,8 +1,8 @@
-"""MomentumEffectLLM - LLM-based Momentum Trading Simulation"""
+"""MomentumEffectLLM - LLM-based Multi-Agent Market Simulation"""
 
 from .players import (
     Market,
-    LLMMomentumInvestor,
+    LLMInvestor,
     LLMMomentumTrader,
     LLMContrarianTrader,
     LLMTechnicalTrader,
@@ -12,7 +12,7 @@ from .players import (
 
 __all__ = [
     "Market",
-    "LLMMomentumInvestor",
+    "LLMInvestor",
     "LLMMomentumTrader",
     "LLMContrarianTrader",
     "LLMTechnicalTrader",

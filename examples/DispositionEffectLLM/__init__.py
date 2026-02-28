@@ -1,8 +1,8 @@
-"""DispositionEffectLLM - LLM-based Prospect Theory Simulation"""
+"""DispositionEffectLLM - LLM-based Multi-Agent Market Simulation"""
 
 from .players import (
     Market,
-    LLMDispositionInvestor,
+    LLMInvestor,
     LLMDispositionBiased,
     LLMRationalInvestor,
     LLMTaxAwareInvestor,
@@ -12,7 +12,7 @@ from .players import (
 
 __all__ = [
     "Market",
-    "LLMDispositionInvestor",
+    "LLMInvestor",
     "LLMDispositionBiased",
     "LLMRationalInvestor",
     "LLMTaxAwareInvestor",

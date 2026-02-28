@@ -1,14 +1,10 @@
-"""MomentumEffectLLM - LLM-based Momentum Trading Simulation
+"""MomentumEffectLLM - LLM-based Multi-Agent Market Simulation
 
-Phenomenon: Momentum Effect with LLM Decision-Making
-    - Past winners continue to outperform (positive momentum)
-    - Past losers continue to underperform (negative momentum)
-    - LLM investors interpret price trends through their strategies
-
-Theoretical Foundation:
-    - Jegadeesh & Titman (1993): Original momentum documentation
-    - Conservatism Bias: Underreaction to new information
-    - Information Diffusion: Gradual incorporation of information
+LLM investors with different trading strategies:
+    - Trend followers
+    - Contrarian traders
+    - Technical analysts
+    - Value investors
 
 Market Parameters (from config.extras):
     - record_path: Path for output records
@@ -181,7 +177,7 @@ class Market(GeneralPlayer):
         )
 
 
-class LLMMomentumInvestor(GeneralPlayer):
+class LLMInvestor(GeneralPlayer):
     """Base class for LLM-powered momentum investors.
 
     All parameters read from config.extras (no class constants).
@@ -277,17 +273,33 @@ class LLMMomentumInvestor(GeneralPlayer):
         )
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
+        """Parse LLM response and validate required fields are present and non-null."""
+        parsed = None
+
         try:
-            return json.loads(response_text)
+            parsed = json.loads(response_text)
         except json.JSONDecodeError:
             pass
-        match = re.search(r"```(?:json)?\s*(.*?)\s*```", response_text, re.DOTALL)
-        if match:
-            return json.loads(match.group(1))
-        match = re.search(r"\{.*\}", response_text, re.DOTALL)
-        if match:
-            return json.loads(match.group(0))
-        raise ValueError(f"Failed to parse LLM response: {response_text[:100]}")
+        if parsed is None:
+            match = re.search(r"```(?:json)?\s*(.*?)\s*```", response_text, re.DOTALL)
+            if match:
+                parsed = json.loads(match.group(1))
+        if parsed is None:
+            match = re.search(r"\{.*\}", response_text, re.DOTALL)
+            if match:
+                parsed = json.loads(match.group(0))
+        if parsed is None:
+            raise ValueError(f"Failed to parse LLM response: {response_text[:100]}")
+
+        # Validate required fields are present and non-null (fail-fast)
+        required_fields = ["bid_price", "quantity", "reasoning"]
+        for field in required_fields:
+            if field not in parsed:
+                raise ValueError(f"Missing required field '{field}' in LLM response")
+            if parsed[field] is None:
+                raise ValueError(f"Field '{field}' is null in LLM response")
+
+        return parsed
 
     def _apply_constraints(self, bid_price: float, quantity: float) -> float:
         cash = self.state.custom_state["cash"]
@@ -356,31 +368,31 @@ class LLMMomentumInvestor(GeneralPlayer):
         )
 
 
-class LLMMomentumTrader(LLMMomentumInvestor):
+class LLMMomentumTrader(LLMInvestor):
     """Buys past winners, sells past losers."""
 
     pass
 
 
-class LLMContrarianTrader(LLMMomentumInvestor):
+class LLMContrarianTrader(LLMInvestor):
     """Mean reversion strategy - opposing momentum."""
 
     pass
 
 
-class LLMTechnicalTrader(LLMMomentumInvestor):
+class LLMTechnicalTrader(LLMInvestor):
     """Moving average crossover strategy."""
 
     pass
 
 
-class LLMTrendFollower(LLMMomentumInvestor):
+class LLMTrendFollower(LLMInvestor):
     """Aggressive trend following."""
 
     pass
 
 
-class LLMFundamentalAnchor(LLMMomentumInvestor):
+class LLMFundamentalAnchor(LLMInvestor):
     """Value-based anchor providing fundamental gravity."""
 
     pass

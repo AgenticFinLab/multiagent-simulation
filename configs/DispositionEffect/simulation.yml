@@ -6,7 +6,7 @@ setting:
   name: "disposition_effect_simulation"
   description: "Prospect theory disposition effect demonstration"
   total_rounds: 200
-  entry_limit: 100
+  entry_limit: 10
   record_path: "EXPERIMENT/DispositionEffect/records"
   save_diagram_interval: 50
 

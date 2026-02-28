@@ -191,6 +191,8 @@ def plot_price_dynamics(
     Returns:
         Figure if output_path is None, else None
     """
+    # Deviation subplot only makes sense when fundamental is provided
+    show_deviation = show_deviation and (fundamental is not None)
     n_rows = 2 if show_deviation else 1
     fig, axes = create_figure(nrows=n_rows, figsize=(14, 4 * n_rows))
 
@@ -210,13 +212,14 @@ def plot_price_dynamics(
         label="Market Price",
         zorder=10,
     )
-    ax.axhline(
-        y=fundamental,
-        color=COLORS["fundamental"],
-        linestyle="--",
-        label=f"Fundamental ({fundamental})",
-        alpha=0.7,
-    )
+    if fundamental is not None:
+        ax.axhline(
+            y=fundamental,
+            color=COLORS["fundamental"],
+            linestyle="--",
+            label=f"Fundamental ({fundamental})",
+            alpha=0.7,
+        )
 
     # Plot investor bids
     if investor_bids:
@@ -246,7 +249,7 @@ def plot_price_dynamics(
     ax.grid(True, alpha=0.3)
 
     # Deviation subplot
-    if show_deviation:
+    if show_deviation and fundamental is not None:
         ax2 = axes[1]
         deviation = [(p - fundamental) / fundamental * 100 for p in price_values]
         ax2.fill_between(
@@ -827,9 +830,10 @@ def plot_multi_panel_summary(
 
     # Panel 1: Price
     axes[0, 0].plot(rounds, price_values, color=COLORS["price"], linewidth=1)
-    axes[0, 0].axhline(
-        y=fundamental, color=COLORS["fundamental"], linestyle="--", alpha=0.5
-    )
+    if fundamental is not None:
+        axes[0, 0].axhline(
+            y=fundamental, color=COLORS["fundamental"], linestyle="--", alpha=0.5
+        )
     axes[0, 0].set_title("Price", fontsize=12)
     axes[0, 0].set_xlabel("Round")
     axes[0, 0].grid(True, alpha=0.3)
@@ -862,7 +866,12 @@ def plot_multi_panel_summary(
     axes[0, 2].grid(True, alpha=0.3)
 
     # Panel 4: Price deviation from fundamental
-    deviation = [(p - fundamental) / fundamental * 100 for p in price_values]
+    if fundamental is not None and fundamental > 0:
+        deviation = [(p - fundamental) / fundamental * 100 for p in price_values]
+    else:
+        # Use initial price as reference if fundamental not available
+        ref_price = price_values[0] if price_values else 100.0
+        deviation = [(p - ref_price) / ref_price * 100 for p in price_values]
     axes[1, 0].fill_between(
         rounds,
         deviation,
@@ -902,12 +911,13 @@ def plot_multi_panel_summary(
     axes[1, 2].hist(
         price_values, bins=20, color=COLORS["price"], alpha=0.7, edgecolor="black"
     )
-    axes[1, 2].axvline(
-        x=fundamental,
-        color=COLORS["negative"],
-        linestyle="--",
-        label=f"Fundamental: {fundamental}",
-    )
+    if fundamental is not None:
+        axes[1, 2].axvline(
+            x=fundamental,
+            color=COLORS["negative"],
+            linestyle="--",
+            label=f"Fundamental: {fundamental}",
+        )
     axes[1, 2].axvline(
         x=np.mean(price_values),
         color=COLORS["positive"],

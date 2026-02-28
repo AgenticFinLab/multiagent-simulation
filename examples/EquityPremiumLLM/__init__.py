@@ -1,8 +1,8 @@
-"""EquityPremiumLLM - LLM-based Equity Premium Puzzle Simulation"""
+"""EquityPremiumLLM - LLM-based Multi-Agent Asset Allocation Simulation"""
 
 from .players import (
     Market,
-    LLMEquityInvestor,
+    LLMInvestor,
     LLMMyopicLossAverse,
     LLMLongTermInvestor,
     LLMInstitutionalInvestor,
@@ -12,7 +12,7 @@ from .players import (
 
 __all__ = [
     "Market",
-    "LLMEquityInvestor",
+    "LLMInvestor",
     "LLMMyopicLossAverse",
     "LLMLongTermInvestor",
     "LLMInstitutionalInvestor",

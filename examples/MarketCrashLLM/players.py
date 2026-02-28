@@ -1,17 +1,11 @@
-"""MarketCrashLLM - LLM-based Market Crash Simulation
+"""MarketCrashLLM - LLM-based Multi-Agent Market Simulation
 
-Phenomenon: Market Crash with LLM Decision-Making
-    LLM investors simulate different crash-related trading personalities:
-    - Panic Seller (accelerates crash)
-    - Risk Parity Fund (volatility-sensitive, forced selling)
-    - Leveraged Fund (margin-triggered liquidation)
-    - Market Maker (liquidity withdrawal)
-    - Bottom Fisher (provides eventual floor)
-
-Theoretical Foundation:
-    - Minsky Moment: Sudden shift from stability to instability
-    - Liquidity Spiral (Brunnermeier & Pedersen, 2009)
-    - Fire Sales: Forced selling creates additional price pressure
+LLM investors with different trading personalities:
+    - Loss-Averse Retail Investor
+    - Risk Parity Fund (volatility-sensitive)
+    - Leveraged Fund (margin-constrained)
+    - Market Maker (liquidity provider)
+    - Value Buyer (patient buyer)
 
 Market Parameters (from config.extras):
     - record_path: Path for output records
@@ -202,8 +196,8 @@ class Market(GeneralPlayer):
         )
 
 
-class LLMCrashInvestor(GeneralPlayer):
-    """Base class for LLM-powered crash investors.
+class LLMInvestor(GeneralPlayer):
+    """Base class for LLM-powered investors.
 
     All parameters read from config.extras (no class constants).
     """
@@ -271,7 +265,7 @@ class LLMCrashInvestor(GeneralPlayer):
                 custom["llm_client"] = llm_client
 
     def _build_prompt(self, market_data: Dict[str, Any]) -> str:
-        """Build user prompt with crash-specific market data."""
+        """Build user prompt with current market data."""
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         price_history = self.state.custom_state["price_history"]
@@ -298,20 +292,36 @@ class LLMCrashInvestor(GeneralPlayer):
         )
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
+        """Parse LLM response and validate required fields are present and non-null."""
+        parsed = None
+
         try:
-            return json.loads(response_text)
+            parsed = json.loads(response_text)
         except json.JSONDecodeError:
             pass
 
-        match = re.search(r"```(?:json)?\s*(.*?)\s*```", response_text, re.DOTALL)
-        if match:
-            return json.loads(match.group(1))
+        if parsed is None:
+            match = re.search(r"```(?:json)?\s*(.*?)\s*```", response_text, re.DOTALL)
+            if match:
+                parsed = json.loads(match.group(1))
 
-        match = re.search(r"\{.*\}", response_text, re.DOTALL)
-        if match:
-            return json.loads(match.group(0))
+        if parsed is None:
+            match = re.search(r"\{.*\}", response_text, re.DOTALL)
+            if match:
+                parsed = json.loads(match.group(0))
 
-        raise ValueError(f"Failed to parse LLM response: {response_text[:100]}")
+        if parsed is None:
+            raise ValueError(f"Failed to parse LLM response: {response_text[:100]}")
+
+        # Validate required fields are present and non-null (fail-fast)
+        required_fields = ["bid_price", "quantity", "reasoning"]
+        for field in required_fields:
+            if field not in parsed:
+                raise ValueError(f"Missing required field '{field}' in LLM response")
+            if parsed[field] is None:
+                raise ValueError(f"Field '{field}' is null in LLM response")
+
+        return parsed
 
     def _apply_constraints(self, bid_price: float, quantity: float) -> float:
         cash = self.state.custom_state["cash"]
@@ -390,31 +400,31 @@ class LLMCrashInvestor(GeneralPlayer):
         )
 
 
-class LLMPanicSeller(LLMCrashInvestor):
-    """LLM Panic Seller - Accelerates crash through fear-driven selling."""
+class LLMPanicSeller(LLMInvestor):
+    """LLM Loss-Averse Retail Investor."""
 
     pass
 
 
-class LLMRiskParityFund(LLMCrashInvestor):
-    """LLM Risk Parity Fund - Volatility-sensitive forced selling."""
+class LLMRiskParityFund(LLMInvestor):
+    """LLM Risk Parity Fund - volatility-targeting institutional."""
 
     pass
 
 
-class LLMLeveragedFund(LLMCrashInvestor):
-    """LLM Leveraged Fund - Margin-triggered forced liquidation."""
+class LLMLeveragedFund(LLMInvestor):
+    """LLM Leveraged Fund - margin-constrained."""
 
     pass
 
 
-class LLMMarketMaker(LLMCrashInvestor):
-    """LLM Market Maker - Liquidity provider who withdraws in stress."""
+class LLMMarketMaker(LLMInvestor):
+    """LLM Market Maker - liquidity provider."""
 
     pass
 
 
-class LLMBottomFisher(LLMCrashInvestor):
-    """LLM Bottom Fisher - Value buyer who provides eventual floor."""
+class LLMBottomFisher(LLMInvestor):
+    """LLM Value Buyer - patient buyer."""
 
     pass

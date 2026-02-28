@@ -1,0 +1,94 @@
+# =============================================================================
+# [SCENARIO_NAME] Players Configuration Template
+# =============================================================================
+# Define all players in the simulation with their configurations.
+#
+# Structure:
+#   - Each player has: name, class, config, persona
+#   - config includes: identity, role, steps_per_turn, group_tags, extras
+#   - extras contains: all domain-specific parameters (NO hardcoded defaults!)
+#
+# Rules:
+#   - NO class constants in players.py - all parameters in extras
+#   - NO .get() with default values - direct access only
+#   - Players.py must fail fast if config is missing
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market / Coordinator (Level 0 - executes first)
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.[SCENARIO_NAME].players:Market"
+  config:
+    identity: "market"
+    role: coordinator                         # coordinator = Level 0, player = Level 1+
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
+      # =================================
+      # Market-specific parameters
+      # =================================
+      initial_price: 100.0                    # Starting price
+      fundamental_value: 100.0                # True fundamental value
+      price_impact: 0.05                      # Price impact coefficient
+      mean_reversion: 0.02                    # Mean reversion strength
+      noise_std: 0.5                          # Random noise std dev
+      history_limit: 200                      # Max history buffer size
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Investor / Player Template (Level 1 - executes after coordinator)
+# -----------------------------------------------------------------------------
+investor_template:
+  name: "Template Investor"
+  class: "examples.[SCENARIO_NAME].players:TemplateInvestor"
+  config:
+    identity: "investor_template"
+    role: player                              # player = Level 1+ execution
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
+      # =================================
+      # Base investor parameters
+      # =================================
+      initial_cash: 10000.0                   # Starting cash balance
+      initial_position: 0.0                   # Starting share position
+      history_limit: 100                      # Max history buffer size
+      # =================================
+      # Strategy-specific parameters
+      # =================================
+      # Add strategy-specific parameters here
+      # Example: lambda_price: 0.5
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Investor Template (for LLM-based scenarios)
+# -----------------------------------------------------------------------------
+# llm_investor:
+#   name: "LLM Investor"
+#   class: "examples.[SCENARIO_NAME].players:LLMInvestor"
+#   config:
+#     identity: "llm_investor"
+#     role: player
+#     steps_per_turn: 1
+#     group_tags:
+#       - llm_investors
+#     extras:
+#       record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
+#       initial_cash: 10000.0
+#       initial_position: 0.0
+#       history_limit: 100
+#       llm:
+#         sys_message: "examples.[SCENARIO_NAME].prompts:LLM_SYS"
+#         user_message: "examples.[SCENARIO_NAME].prompts:LLM_USER_TEMPLATE"
+#         lm_type: "api"
+#         lm_name: "ark/doubao-seed-1-6-lite-251015"
+#         generation_config:
+#           temperature: 0.3
+#           max_new_tokens: 500
+#   persona: !include persona.yml

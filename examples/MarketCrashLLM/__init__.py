@@ -1,8 +1,8 @@
-"""MarketCrashLLM - LLM-based Market Crash Simulation"""
+"""MarketCrashLLM - LLM-based Multi-Agent Market Simulation"""
 
 from .players import (
     Market,
-    LLMCrashInvestor,
+    LLMInvestor,
     LLMPanicSeller,
     LLMRiskParityFund,
     LLMLeveragedFund,
@@ -12,7 +12,7 @@ from .players import (
 
 __all__ = [
     "Market",
-    "LLMCrashInvestor",
+    "LLMInvestor",
     "LLMPanicSeller",
     "LLMRiskParityFund",
     "LLMLeveragedFund",

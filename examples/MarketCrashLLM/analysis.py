@@ -46,7 +46,7 @@ def main():
     print("MarketCrashLLM Analysis - Panic Selling Cascade (LLM Agents)")
     print("=" * 70)
 
-    data = load_simulation_data(record_dir)
+    data = load_simulation_data(config)
     summary = analyze_crash(data, output_dir)
     return summary
 

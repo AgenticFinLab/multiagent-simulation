@@ -1,18 +1,11 @@
-"""AssetBubbleLLM - LLM-based Asset Bubble Simulation
+"""AssetBubbleLLM - LLM-based Multi-Agent Market Simulation
 
-Phenomenon: Asset Bubbles with LLM Decision-Making
-    LLM investors simulate different bubble-related trading personalities:
-    - Greater Fool speculator (extremely destabilizing)
-    - Rational arbitrageur (weakly stabilizing due to limits)
-    - Noise trader (destabilizing through herding)
-    - Fundamental investor (weakly stabilizing)
-    - Leveraged buyer (amplifies both bubbles and crashes)
-
-Theoretical Foundation:
-    - Greater Fool Theory: Buy expensive expecting to sell higher
-    - Limits to Arbitrage (Shleifer & Vishny, 1997)
-    - Noise Trader Risk (De Long et al., 1990)
-    - Synchronization Risk (Abreu & Brunnermeier, 2003)
+LLM investors with different trading personalities:
+    - Aggressive Momentum Trader
+    - Fundamental Analyst
+    - Sentiment Trader
+    - Value Investor
+    - Leveraged Trader
 
 All parameters are configured via players.yml config file.
 """
@@ -42,7 +35,7 @@ def load_prompt(prompt_path: str) -> str:
 
 class Market(GeneralPlayer):
     """
-    Central market with bubble-prone price dynamics.
+    Central market coordinating price discovery.
 
     Parameters from config extras:
         - fundamental_value, initial_price, price_impact, mean_reversion
@@ -70,8 +63,8 @@ class Market(GeneralPlayer):
                 folder=os.path.join(base_path, "price"),
                 entry_limit=history_limit,
             )
-            self.state.custom_state["bubble_metric_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "bubble_metric"),
+            self.state.custom_state["valuation_ratio_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "valuation_ratio"),
                 entry_limit=history_limit,
             )
 
@@ -125,14 +118,14 @@ class Market(GeneralPlayer):
         )
         price_return = (new_price - current_price) / current_price
 
-        # Bubble metric
-        bubble_ratio = new_price / new_fundamental
+        # Price/Fundamental ratio
+        valuation_ratio = new_price / new_fundamental
 
         # Update state
         self.state.custom_state["price"] = new_price
         self.state.custom_state["fundamental"] = new_fundamental
         self.state.custom_state["price_history"].append(new_price)
-        self.state.custom_state["bubble_metric_history"].append(bubble_ratio)
+        self.state.custom_state["valuation_ratio_history"].append(valuation_ratio)
 
         # Log
         print(f"\n{'='*70}")
@@ -141,7 +134,7 @@ class Market(GeneralPlayer):
             f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
         print(
-            f"  Fundamental: {new_fundamental:.2f}, Bubble Ratio: {bubble_ratio:.2f}x"
+            f"  Fundamental: {new_fundamental:.2f}, P/F Ratio: {valuation_ratio:.2f}x"
         )
         print(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
         if orders:
@@ -159,7 +152,7 @@ class Market(GeneralPlayer):
             "return": price_return,
             "return_pct": price_return * 100,
             "fundamental": new_fundamental,
-            "bubble_ratio": bubble_ratio,
+            "bubble_ratio": valuation_ratio,  # P/F ratio
             "volume": total_volume,
             "net_demand": net_demand,
             "round": round_num,
@@ -181,9 +174,9 @@ class Market(GeneralPlayer):
         )
 
 
-class LLMBubbleInvestor(GeneralPlayer):
+class LLMInvestor(GeneralPlayer):
     """
-    Base class for LLM-powered bubble investors.
+    Base class for LLM-powered investors.
 
     Parameters from config extras:
         - initial_cash, initial_position, history_limit, record_path, llm config
@@ -254,7 +247,7 @@ class LLMBubbleInvestor(GeneralPlayer):
                 custom["llm_client"] = llm_client
 
     def _build_prompt(self, market_data: Dict[str, Any]) -> str:
-        """Build user prompt with bubble-specific market data."""
+        """Build user prompt with current market data."""
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         short_pos = self.state.custom_state["short_position"]
@@ -289,7 +282,7 @@ Current Market Data:
 - Previous Price: ${market_data['prev_price']:.2f}
 - Return: {market_data['return_pct']:+.2f}%
 - Fundamental Value: ${market_data['fundamental']:.2f}
-- Bubble Ratio (Price/Fundamental): {market_data['bubble_ratio']:.2f}x
+- Price/Fundamental Ratio: {market_data['bubble_ratio']:.2f}x
 - Volume: {market_data['volume']:.2f}
 - Net Demand: {market_data['net_demand']:+.2f}
 - Short-Selling Cost Rate: {market_data['short_cost_rate']:.1%}
@@ -306,20 +299,36 @@ Respond with ONLY valid JSON:
 """
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
+        """Parse LLM response and validate required fields are present and non-null."""
+        parsed = None
+
         try:
-            return json.loads(response_text)
+            parsed = json.loads(response_text)
         except json.JSONDecodeError:
             pass
 
-        match = re.search(r"```(?:json)?\s*(.*?)\s*```", response_text, re.DOTALL)
-        if match:
-            return json.loads(match.group(1))
+        if parsed is None:
+            match = re.search(r"```(?:json)?\s*(.*?)\s*```", response_text, re.DOTALL)
+            if match:
+                parsed = json.loads(match.group(1))
 
-        match = re.search(r"\{.*\}", response_text, re.DOTALL)
-        if match:
-            return json.loads(match.group(0))
+        if parsed is None:
+            match = re.search(r"\{.*\}", response_text, re.DOTALL)
+            if match:
+                parsed = json.loads(match.group(0))
 
-        raise ValueError(f"Failed to parse LLM response: {response_text[:100]}")
+        if parsed is None:
+            raise ValueError(f"Failed to parse LLM response: {response_text[:100]}")
+
+        # Validate required fields are present and non-null (fail-fast)
+        required_fields = ["bid_price", "quantity", "reasoning"]
+        for field in required_fields:
+            if field not in parsed:
+                raise ValueError(f"Missing required field '{field}' in LLM response")
+            if parsed[field] is None:
+                raise ValueError(f"Field '{field}' is null in LLM response")
+
+        return parsed
 
     def _apply_constraints(
         self, bid_price: float, quantity: float, current_price: float
@@ -409,31 +418,31 @@ Respond with ONLY valid JSON:
         )
 
 
-class LLMGreaterFoolSpeculator(LLMBubbleInvestor):
-    """LLM Greater Fool Speculator - Primary bubble driver."""
+class LLMGreaterFoolSpeculator(LLMInvestor):
+    """LLM Aggressive Momentum Trader."""
 
     pass
 
 
-class LLMRationalArbitrageur(LLMBubbleInvestor):
-    """LLM Rational Arbitrageur - Limited corrective force."""
+class LLMRationalArbitrageur(LLMInvestor):
+    """LLM Fundamental Analyst."""
 
     pass
 
 
-class LLMSentimentTrader(LLMBubbleInvestor):
-    """LLM Sentiment Trader - Herding noise trader."""
+class LLMSentimentTrader(LLMInvestor):
+    """LLM Sentiment Trader."""
 
     pass
 
 
-class LLMValueInvestor(LLMBubbleInvestor):
-    """LLM Value Investor - Weak stabilizing force."""
+class LLMValueInvestor(LLMInvestor):
+    """LLM Value Investor."""
 
     pass
 
 
-class LLMLeveragedSpeculator(LLMBubbleInvestor):
-    """LLM Leveraged Speculator - Amplifies both directions."""
+class LLMLeveragedSpeculator(LLMInvestor):
+    """LLM Leveraged Trader."""
 
     pass
