@@ -324,7 +324,7 @@ class MomentumTrader(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -345,7 +345,7 @@ class MomentumTrader(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -432,7 +432,7 @@ class ContrarianTrader(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -453,7 +453,7 @@ class ContrarianTrader(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -539,7 +539,7 @@ class IndexFund(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -556,7 +556,7 @@ class IndexFund(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -633,7 +633,7 @@ class MarketMaker(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -650,7 +650,7 @@ class MarketMaker(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -748,7 +748,7 @@ class TechnicalTrader(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -765,7 +765,7 @@ class TechnicalTrader(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -848,7 +848,7 @@ class FundamentalTrader(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -865,7 +865,7 @@ class FundamentalTrader(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
