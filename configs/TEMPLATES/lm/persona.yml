@@ -1,8 +1,8 @@
 # =============================================================================
-# Persona Configuration Template
+# Persona Configuration (LLM-Based)
 # =============================================================================
-# Shared persona settings for all players in the scenario.
-# Includes proxy configurations for storage, monitoring, communication, resources.
+# Shared persona settings for all players in LLM scenarios.
+# Reference: AssetBubbleLLM/, HerdEffectLLM/
 # =============================================================================
 
 # Checkpoint settings
@@ -17,22 +17,22 @@ proxy:
   # Storage Proxy
   # =================================
   storage:
-    checkpoint_dir: "EXPERIMENT/[SCENARIO_NAME]/checkpoints"
-    record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
+    checkpoint_dir: "EXPERIMENT/[SCENARIO_NAME]LLM/checkpoints"
+    record_path: "EXPERIMENT/[SCENARIO_NAME]LLM/records"
     record_rounds: true                       # Record data each round
   
   # =================================
   # Monitoring Proxy
   # =================================
   monitoring:
-    record_path: "EXPERIMENT/[SCENARIO_NAME]/monitoring"
+    record_path: "EXPERIMENT/[SCENARIO_NAME]LLM/monitoring"
     entry_limit: 10                           # Max monitoring entries
   
   # =================================
   # Communication Proxy
   # =================================
   communication:
-    message_timeout_ms: 5000                  # Message timeout in milliseconds
+    message_timeout_ms: 10000                 # Longer timeout for LLM responses
     enable_compression: true                  # Compress messages
   
   # =================================

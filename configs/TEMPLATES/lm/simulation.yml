@@ -1,28 +1,32 @@
 # =============================================================================
-# [SCENARIO_NAME] Simulation Configuration
+# [SCENARIO_NAME]LLM Simulation Configuration (LLM-Based)
 # =============================================================================
-# [Brief description of the financial phenomenon being simulated]
+# Template for LLM-driven financial simulations.
+# Reference: AssetBubbleLLM/, HerdEffectLLM/
+#
+# LLM Provider: ByteDance Doubao (via lmbase)
+# Environment Variable: ARK_API_KEY
 #
 # Usage:
-#   python examples/[SCENARIO_NAME]/run_[scenario].py -c configs/[SCENARIO_NAME]/simulation.yml
+#   python examples/[SCENARIO_NAME]LLM/run_[scenario]_llm.py -c configs/[SCENARIO_NAME]LLM/simulation.yml
 # =============================================================================
 
 # -----------------------------------------------------------------------------
 # Simulation Settings
 # -----------------------------------------------------------------------------
 setting:
-  name: "[scenario_name]_simulation"
-  description: "[Description of the simulation]"
-  total_rounds: 300                           # Total number of simulation rounds
+  name: "[scenario_name]_llm_simulation"
+  description: "[Description of the LLM-based simulation]"
+  total_rounds: 100                           # LLM simulations typically use fewer rounds
   entry_limit: 10                             # HistoryBuffer entry limit
-  record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
-  save_diagram_interval: 50                   # Save diagram every N rounds (0 = disabled)
+  record_path: "EXPERIMENT/[SCENARIO_NAME]LLM/records"
+  save_diagram_interval: 20                   # Save diagram every N rounds (0 = disabled)
 
 # -----------------------------------------------------------------------------
 # Environment Configuration
 # -----------------------------------------------------------------------------
 environment:
-  dotenv_path: .env                           # Path to .env file for API keys
+  dotenv_path: .env                           # Path to .env file for API keys (ARK_API_KEY)
   workspace: "."                              # Working directory
 
 # -----------------------------------------------------------------------------
@@ -30,7 +34,7 @@ environment:
 # -----------------------------------------------------------------------------
 ray:
   address: null                               # Ray cluster address (null = local)
-  namespace: "[scenario_name]"                # Ray namespace for isolation
+  namespace: "[scenario_name]_llm"            # Ray namespace for isolation
   actor_prefix: null                          # Actor name prefix
   num_cpus: 4                                 # CPU cores to use
   num_gpus: null                              # GPU count (null = none)
@@ -64,4 +68,4 @@ topology: !include topology.yml
 # Communication Configuration
 # -----------------------------------------------------------------------------
 communication:
-  storage_path: "EXPERIMENT/[SCENARIO_NAME]/communication"
+  storage_path: "EXPERIMENT/[SCENARIO_NAME]LLM/communication"

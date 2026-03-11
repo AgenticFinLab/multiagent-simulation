@@ -1,7 +1,8 @@
 # =============================================================================
-# [SCENARIO_NAME] Topology Configuration Template
+# [SCENARIO_NAME] Topology Configuration (Rule-Based)
 # =============================================================================
 # Defines the communication structure between players.
+# Reference: AssetBubble/, Demo/, HerdEffect/
 #
 # Pattern Types:
 #   - star: Market as hub, all investors communicate through market

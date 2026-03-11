@@ -1,0 +1,68 @@
+# =============================================================================
+# [SCENARIO_NAME] Simulation Configuration (Rule-Based)
+# =============================================================================
+# Template for rule-based financial simulations.
+# Reference: AssetBubble/, Demo/, HerdEffect/
+#
+# Usage:
+#   python examples/[SCENARIO_NAME]/run_[scenario].py -c configs/[SCENARIO_NAME]/simulation.yml
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Simulation Settings
+# -----------------------------------------------------------------------------
+setting:
+  name: "[scenario_name]_simulation"
+  description: "[Description of the simulation]"
+  total_rounds: 300                           # Total number of simulation rounds
+  entry_limit: 10                             # HistoryBuffer entry limit
+  record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
+  save_diagram_interval: 50                   # Save diagram every N rounds (0 = disabled)
+
+# -----------------------------------------------------------------------------
+# Environment Configuration
+# -----------------------------------------------------------------------------
+environment:
+  dotenv_path: .env                           # Path to .env file for API keys
+  workspace: "."                              # Working directory
+
+# -----------------------------------------------------------------------------
+# Ray Configuration (Distributed Computing)
+# -----------------------------------------------------------------------------
+ray:
+  address: null                               # Ray cluster address (null = local)
+  namespace: "[scenario_name]"                # Ray namespace for isolation
+  actor_prefix: null                          # Actor name prefix
+  num_cpus: 4                                 # CPU cores to use
+  num_gpus: null                              # GPU count (null = none)
+  object_store_memory: null                   # Object store memory limit
+  include_dashboard: false                    # Enable Ray dashboard
+  logging_level: "warning"                    # Ray logging level
+  log_to_driver: true                         # Log to driver process
+  actor_options:
+    max_restarts: 3                           # Max actor restart attempts
+    max_task_retries: 1                       # Max task retry attempts
+    max_concurrency: 10                       # Max concurrent tasks per actor
+  runtime_env:
+    working_dir: null                         # Runtime working directory
+    pip: []                                   # Additional pip packages
+    env_vars: {}                              # Environment variables
+  serialization:
+    use_arrow: true                           # Use Arrow for serialization
+    register_custom_serializers: true         # Register custom serializers
+
+# -----------------------------------------------------------------------------
+# Players Configuration (imported from players.yml)
+# -----------------------------------------------------------------------------
+players: !include players.yml
+
+# -----------------------------------------------------------------------------
+# Topology Configuration (imported from topology.yml)
+# -----------------------------------------------------------------------------
+topology: !include topology.yml
+
+# -----------------------------------------------------------------------------
+# Communication Configuration
+# -----------------------------------------------------------------------------
+communication:
+  storage_path: "EXPERIMENT/[SCENARIO_NAME]/communication"

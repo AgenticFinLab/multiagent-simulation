@@ -1,7 +1,8 @@
 # =============================================================================
-# [SCENARIO_NAME] Players Configuration Template
+# [SCENARIO_NAME] Players Configuration (Rule-Based)
 # =============================================================================
-# Define all players in the simulation with their configurations.
+# Template for rule-based financial simulations.
+# Reference: AssetBubble/, Demo/, HerdEffect/
 #
 # Structure:
 #   - Each player has: name, class, config, persona
@@ -40,13 +41,13 @@ market:
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# Investor / Player Template (Level 1 - executes after coordinator)
+# Investor Type 1 (example: Trend Follower)
 # -----------------------------------------------------------------------------
-investor_template:
-  name: "Template Investor"
-  class: "examples.[SCENARIO_NAME].players:TemplateInvestor"
+investor_1:
+  name: "Investor Type 1"
+  class: "examples.[SCENARIO_NAME].players:InvestorType1"
   config:
-    identity: "investor_template"
+    identity: "investor_1"
     role: player                              # player = Level 1+ execution
     steps_per_turn: 1
     group_tags:
@@ -63,32 +64,45 @@ investor_template:
       # Strategy-specific parameters
       # =================================
       # Add strategy-specific parameters here
-      # Example: lambda_price: 0.5
+      # Example: momentum_window: 5
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# LLM Investor Template (for LLM-based scenarios)
+# Investor Type 2 (example: Contrarian)
 # -----------------------------------------------------------------------------
-# llm_investor:
-#   name: "LLM Investor"
-#   class: "examples.[SCENARIO_NAME].players:LLMInvestor"
-#   config:
-#     identity: "llm_investor"
-#     role: player
-#     steps_per_turn: 1
-#     group_tags:
-#       - llm_investors
-#     extras:
-#       record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
-#       initial_cash: 10000.0
-#       initial_position: 0.0
-#       history_limit: 100
-#       llm:
-#         sys_message: "examples.[SCENARIO_NAME].prompts:LLM_SYS"
-#         user_message: "examples.[SCENARIO_NAME].prompts:LLM_USER_TEMPLATE"
-#         lm_type: "api"
-#         lm_name: "ark/doubao-seed-1-6-lite-251015"
-#         generation_config:
-#           temperature: 0.3
-#           max_new_tokens: 500
-#   persona: !include persona.yml
+investor_2:
+  name: "Investor Type 2"
+  class: "examples.[SCENARIO_NAME].players:InvestorType2"
+  config:
+    identity: "investor_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      # Strategy-specific parameters
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Investor Type 3 (example: Noise Trader)
+# -----------------------------------------------------------------------------
+investor_3:
+  name: "Investor Type 3"
+  class: "examples.[SCENARIO_NAME].players:InvestorType3"
+  config:
+    identity: "investor_3"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      history_limit: 100
+      # Strategy-specific parameters
+  persona: !include persona.yml

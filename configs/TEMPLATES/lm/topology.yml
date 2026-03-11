@@ -1,0 +1,56 @@
+# =============================================================================
+# [SCENARIO_NAME]LLM Topology Configuration (LLM-Based)
+# =============================================================================
+# Defines the communication structure for LLM-driven simulations.
+# Reference: AssetBubbleLLM/, HerdEffectLLM/
+#
+# Pattern: Star topology
+#   - Market as central hub
+#   - All LLM investors communicate through market
+#
+# Execution Levels:
+#   - Level 0: Market (rule-based coordinator)
+#   - Level 1: LLM Investors (execute in parallel)
+# =============================================================================
+
+# Topology type
+type: "star"
+
+# -----------------------------------------------------------------------------
+# Sources (Level 0 - execute first)
+# -----------------------------------------------------------------------------
+sources:
+  - market
+
+# -----------------------------------------------------------------------------
+# Connections (defines message flow)
+# -----------------------------------------------------------------------------
+connections:
+  # =================================
+  # Market → LLM Investors (broadcasts market data)
+  # =================================
+  market:
+    - llm_investor_1
+    - llm_investor_2
+    - llm_investor_3
+    - llm_investor_4
+    - llm_investor_5
+    # Add more LLM investors as needed
+
+  # =================================
+  # LLM Investors → Market (submit orders)
+  # =================================
+  llm_investor_1:
+    - market
+
+  llm_investor_2:
+    - market
+
+  llm_investor_3:
+    - market
+
+  llm_investor_4:
+    - market
+
+  llm_investor_5:
+    - market
