@@ -56,21 +56,32 @@ class GeneralPlayer(BasePlayer):
     # =========================================================================
 
     def save_state(self) -> Dict[str, Any]:
-        """Return state that should be persisted by StorageProxy."""
+        """
+        Return state that should be persisted by StorageProxy.
+
+        NOTE: Returns direct reference to custom_state (no copy).
+        StorageProxy serializes immediately, so copy is unnecessary.
+        Avoiding .copy() prevents memory waste for large custom_state dicts.
+        """
         return {
             "turn_count": self.state.turn_count,
-            "custom_state": self.state.custom_state.copy(),
+            "custom_state": self.state.custom_state,
         }
 
     def load_state(self, state: Dict[str, Any]) -> None:
-        """Restore state from persisted data."""
+        """
+        Restore state from persisted data.
+
+        NOTE: Directly assigns custom_state (no copy).
+        State comes from storage deserialization, already a new object.
+        """
         if "turn_count" in state:
             self.state.turn_count = state["turn_count"]
         elif "step_count" in state:
             self.state.turn_count = state["step_count"]
         else:
             raise KeyError("State must contain 'turn_count' or 'step_count'")
-        self.state.custom_state = state["custom_state"].copy()
+        self.state.custom_state = state["custom_state"]
 
     # =========================================================================
     #                           LIFECYCLE
