@@ -43,7 +43,7 @@ class Market(GeneralPlayer):
         - initial_price, fundamental_value
         - price_impact, mean_reversion, noise_std
         - news_probability, news_impact_range
-        - history_limit, record_path
+        - custom_state_hot_limit, record_path
     """
 
     async def perceive(
@@ -60,10 +60,10 @@ class Market(GeneralPlayer):
             base_path = os.path.join(record_path, self.config.identity)
 
             self.state.custom_state["price"] = extras["initial_price"]
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         orders = []
@@ -169,7 +169,7 @@ class BaseInvestor(GeneralPlayer):
     Base class with purchase price (reference point) tracking.
 
     Parameters from config extras:
-        - initial_cash, initial_position, initial_purchase_price, history_limit
+        - initial_cash, initial_position, initial_purchase_price, custom_state_hot_limit
     """
 
     async def perceive(
@@ -200,22 +200,33 @@ class BaseInvestor(GeneralPlayer):
                 break
         self.state.custom_state["market_data"] = market_data
 
-    def update_reference_point(self, quantity: float, price: float):
-        """Update average purchase price (reference point) after trade."""
+    def update_reference_point(
+        self, quantity: float, price: float, move_reference: bool = True
+    ):
+        """Update position and cost basis after trade.
+
+        Args:
+            quantity: positive=buy, negative=sell
+            price: execution price
+            move_reference: if True, recalculate purchase_price (average cost).
+                            Set False for DispositionInvestor buys to preserve
+                            the original purchase price as behavioral anchor.
+        """
         position = self.state.custom_state["position"]
         total_cost = self.state.custom_state["total_cost"]
 
-        if quantity > 0:  # Buy - adjust average cost
+        if quantity > 0:  # Buy
             new_cost = quantity * price
             total_cost += new_cost
             position += quantity
-            if position > 0:
+            if move_reference and position > 0:
                 self.state.custom_state["purchase_price"] = total_cost / position
         elif quantity < 0:  # Sell - remove at average cost
             if position > 0:
                 cost_per_share = total_cost / position
                 total_cost -= abs(quantity) * cost_per_share
             position += quantity
+            # After selling, reference point stays at original anchor
 
         self.state.custom_state["position"] = position
         self.state.custom_state["total_cost"] = max(0, total_cost)
@@ -272,30 +283,40 @@ class DispositionInvestor(BaseInvestor):
         sell_fraction_gain = extras["sell_fraction_gain"]
         sell_fraction_loss = extras["sell_fraction_loss"]
 
+        max_position = extras["max_position"]
+        buy_fraction = extras["buy_fraction"]
+
         quantity = 0.0
         action = "HOLD"
 
         # Disposition effect logic
         if gain_loss >= gain_threshold and position > 0:
-            # SELL WINNERS quickly (realize gains)
+            # SELL WINNERS quickly (realize gains) — concave value function in gain domain
             quantity = -position * sell_fraction_gain
             action = "SELL_WINNER"
         elif gain_loss <= loss_threshold and position > 0:
-            # Reluctantly sell losers
+            # Reluctantly sell losers — only at extreme loss (convex value function)
             quantity = -position * sell_fraction_loss
             action = "SELL_LOSER"
-        elif gain_loss > 0.02 and position < 50:
-            # Small buy when slightly positive
-            buy_capacity = (cash / price) * 0.1
-            quantity = min(buy_capacity, 5)
-            action = "BUY"
+        elif -0.01 <= gain_loss < 0.01 and position < max_position:
+            # Buy ONLY when price is nearly exactly at reference point (±1%)
+            # Odean: investors add to positions at perceived "fair value"
+            # gain_threshold excluded — any rise toward threshold is sell territory
+            target_qty = (max_position - position) * buy_fraction
+            affordable = (cash * 0.15) / price if price > 0 else 0
+            quantity = min(target_qty, affordable)
+            if quantity >= 0.5:
+                action = "BUY"
+            else:
+                quantity = 0.0
 
         # Execute trade
         if quantity > 0:
             cost = quantity * price
             if cost <= cash:
                 self.state.custom_state["cash"] -= cost
-                self.update_reference_point(quantity, price)
+                # move_reference=False: preserve original purchase price as behavioral anchor
+                self.update_reference_point(quantity, price, move_reference=False)
             else:
                 quantity = 0
         elif quantity < 0:
@@ -324,7 +345,7 @@ class DispositionInvestor(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -345,7 +366,7 @@ class DispositionInvestor(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -432,7 +453,7 @@ class RationalInvestor(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -449,7 +470,7 @@ class RationalInvestor(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -541,7 +562,7 @@ class TaxAwareInvestor(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -558,7 +579,7 @@ class TaxAwareInvestor(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -603,7 +624,7 @@ class IndexHolder(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -694,7 +715,7 @@ class InstitutionalInvestor(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -711,7 +732,7 @@ class InstitutionalInvestor(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }

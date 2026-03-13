@@ -29,7 +29,7 @@ market:
       price_impact: 0.08
       mean_reversion: 0.01         # Slow reversion to fundamental
       noise_std: 0.5
-      history_limit: 200
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 contrarian_1:
@@ -46,7 +46,7 @@ contrarian_1:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       # Contrarian specific (long-term reversal)
       lookback_window: 30          # Long-term horizon
       reversal_threshold: 0.15     # 15% deviation triggers trade
@@ -67,7 +67,7 @@ contrarian_2:
       record_path: "EXPERIMENT/ReversalEffect/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       lookback_window: 30
       reversal_threshold: 0.15
       base_position_size: 25.0
@@ -87,7 +87,7 @@ momentum_1:
       record_path: "EXPERIMENT/ReversalEffect/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       # Momentum specific (short-term)
       lookback_window: 5
       momentum_threshold: 0.02
@@ -108,7 +108,7 @@ momentum_2:
       record_path: "EXPERIMENT/ReversalEffect/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       lookback_window: 5
       momentum_threshold: 0.02
       base_position_size: 20.0
@@ -128,7 +128,7 @@ overconfident_1:
       record_path: "EXPERIMENT/ReversalEffect/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       # Overconfident specific
       overconfidence_factor: 2.5   # Overweights signals by 2.5x
       reaction_threshold: 0.01
@@ -149,7 +149,7 @@ overconfident_2:
       record_path: "EXPERIMENT/ReversalEffect/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       overconfidence_factor: 2.5
       reaction_threshold: 0.01
       base_position_size: 30.0
@@ -169,7 +169,7 @@ noise_trader:
       record_path: "EXPERIMENT/ReversalEffect/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       # Noise specific
       position_volatility: 10.0
       mean_reversion: 0.1
@@ -188,7 +188,7 @@ value_investor:
       record_path: "EXPERIMENT/ReversalEffect/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       # Value specific
       value_sensitivity: 0.4
       base_position_size: 15.0
@@ -209,7 +209,7 @@ index_tracker:
       record_path: "EXPERIMENT/ReversalEffect/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       # Index specific
       target_position: 50.0
       rebalance_threshold: 0.1

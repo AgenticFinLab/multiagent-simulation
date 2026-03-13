@@ -12,7 +12,7 @@ setting:
   name: "flash_crash_llm_simulation"
   description: "LLM-based flash crash with HFT and liquidity dynamics"
   total_rounds: 50
-  entry_limit: 10
+  round_history_limit: 3
   record_path: "EXPERIMENT/FlashCrashLLM/records"
   save_diagram_interval: 25
 

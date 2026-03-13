@@ -30,7 +30,8 @@ market:
   class: "examples.[SCENARIO_NAME]LLM.players:Market"
   config:
     identity: "market"
-    role: coordinator                         # coordinator = Level 0
+    # coordinator = Level 0 (executes before all LLM investors)
+    role: coordinator
     steps_per_turn: 1
     group_tags:
       - market
@@ -44,7 +45,10 @@ market:
       price_impact: 0.1
       mean_reversion: 0.02
       noise_std: 0.5
-      history_limit: 200
+      # Max entries kept in RAM for HistoryBuffers stored in custom_state
+      # (e.g. price_history, volume_history, return_history).
+      # Entries exceeding this limit are flushed to disk automatically.
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -66,7 +70,10 @@ llm_investor_1:
       # =================================
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      # Max entries kept in RAM for HistoryBuffers stored in custom_state
+      # (e.g. price_history, volume_history, return_history).
+      # Entries exceeding this limit are flushed to disk automatically.
+      custom_state_hot_limit: 3
       # =================================
       # LLM Configuration (INLINE, no YAML anchors!)
       # =================================
@@ -96,7 +103,7 @@ llm_investor_2:
       record_path: "EXPERIMENT/[SCENARIO_NAME]LLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_TYPE2_SYS"
         user_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_USER_TEMPLATE"
@@ -123,7 +130,7 @@ llm_investor_3:
       record_path: "EXPERIMENT/[SCENARIO_NAME]LLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_TYPE3_SYS"
         user_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_USER_TEMPLATE"
@@ -150,7 +157,7 @@ llm_investor_4:
       record_path: "EXPERIMENT/[SCENARIO_NAME]LLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_TYPE4_SYS"
         user_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_USER_TEMPLATE"
@@ -177,13 +184,14 @@ llm_investor_5:
       record_path: "EXPERIMENT/[SCENARIO_NAME]LLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_TYPE5_SYS"
         user_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-251015"
         generation_config:
-          temperature: 0.5                    # Higher temp for noise trader
+          # Higher temperature for noise trader: more unpredictable LLM decisions
+          temperature: 0.5
           max_new_tokens: 500
   persona: !include persona.yml

@@ -47,7 +47,7 @@ class Market(GeneralPlayer):
     Parameters from config extras:
         - fundamental_value, initial_price, price_impact, mean_reversion
         - garch_omega, garch_alpha, garch_beta
-        - min_volatility, max_volatility, history_limit, record_path
+        - min_volatility, max_volatility, custom_state_hot_limit, record_path
     """
 
     async def perceive(
@@ -63,7 +63,7 @@ class Market(GeneralPlayer):
             extras = self.config.extras
             record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["volatility"] = 1.0  # Initial volatility
@@ -71,15 +71,15 @@ class Market(GeneralPlayer):
 
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["volatility_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volatility"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["volume_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volume"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         # Collect orders from investors
@@ -197,7 +197,7 @@ class BaseInvestor(GeneralPlayer):
     Base class for volatility clustering investors.
 
     Parameters from config extras:
-        - initial_cash, initial_position, history_limit, record_path
+        - initial_cash, initial_position, custom_state_hot_limit, record_path
     """
 
     async def perceive(
@@ -213,17 +213,17 @@ class BaseInvestor(GeneralPlayer):
             extras = self.config.extras
             record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["volatility_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volatility"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         # Get market data

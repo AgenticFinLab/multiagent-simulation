@@ -17,42 +17,64 @@
 setting:
   name: "[scenario_name]_llm_simulation"
   description: "[Description of the LLM-based simulation]"
-  total_rounds: 100                           # LLM simulations typically use fewer rounds
-  entry_limit: 10                             # HistoryBuffer entry limit
+  # Total number of simulation rounds (LLM simulations typically use fewer rounds)
+  total_rounds: 100
+  # Max round results kept in hot RAM; older results spill to disk (round history HistoryBuffer)
+  round_history_limit: 3
   record_path: "EXPERIMENT/[SCENARIO_NAME]LLM/records"
-  save_diagram_interval: 20                   # Save diagram every N rounds (0 = disabled)
+  # Save diagram every N rounds (0 = disabled)
+  save_diagram_interval: 20
 
 # -----------------------------------------------------------------------------
 # Environment Configuration
 # -----------------------------------------------------------------------------
 environment:
-  dotenv_path: .env                           # Path to .env file for API keys (ARK_API_KEY)
-  workspace: "."                              # Working directory
+  # Path to .env file for API keys (must contain ARK_API_KEY)
+  dotenv_path: .env
+  # Working directory
+  workspace: "."
 
 # -----------------------------------------------------------------------------
 # Ray Configuration (Distributed Computing)
 # -----------------------------------------------------------------------------
 ray:
-  address: null                               # Ray cluster address (null = local)
-  namespace: "[scenario_name]_llm"            # Ray namespace for isolation
-  actor_prefix: null                          # Actor name prefix
-  num_cpus: 4                                 # CPU cores to use
-  num_gpus: null                              # GPU count (null = none)
-  object_store_memory: null                   # Object store memory limit
-  include_dashboard: false                    # Enable Ray dashboard
-  logging_level: "warning"                    # Ray logging level
-  log_to_driver: true                         # Log to driver process
+  # Ray cluster address (null = start local cluster)
+  address: null
+  # Ray namespace for actor isolation between experiments
+  namespace: "[scenario_name]_llm"
+  # Actor name prefix (null = auto)
+  actor_prefix: null
+  # CPU cores to allocate
+  num_cpus: 4
+  # GPU count (null = none)
+  num_gpus: null
+  # Object store (Plasma) memory cap in bytes (null = 30% of RAM default)
+  object_store_memory: null
+  # Enable Ray dashboard UI
+  include_dashboard: false
+  # Ray internal logging level
+  logging_level: "warning"
+  # Forward Ray logs to driver process stdout
+  log_to_driver: true
   actor_options:
-    max_restarts: 3                           # Max actor restart attempts
-    max_task_retries: 1                       # Max task retry attempts
-    max_concurrency: 10                       # Max concurrent tasks per actor
+    # Max actor restart attempts on failure
+    max_restarts: 3
+    # Max task retry attempts on failure
+    max_task_retries: 1
+    # Max concurrent tasks per actor
+    max_concurrency: 10
   runtime_env:
-    working_dir: null                         # Runtime working directory
-    pip: []                                   # Additional pip packages
-    env_vars: {}                              # Environment variables
+    # Runtime working directory override (null = workspace)
+    working_dir: null
+    # Additional pip packages to install in runtime env
+    pip: []
+    # Extra environment variables for actors
+    env_vars: {}
   serialization:
-    use_arrow: true                           # Use Arrow for serialization
-    register_custom_serializers: true         # Register custom serializers
+    # Use Apache Arrow for object serialization
+    use_arrow: true
+    # Register custom serializers for domain objects
+    register_custom_serializers: true
 
 # -----------------------------------------------------------------------------
 # Players Configuration (imported from players.yml)

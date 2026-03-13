@@ -6,8 +6,10 @@
 # =============================================================================
 
 # Checkpoint settings
-auto_checkpoint: false                        # Auto-save player state
-debug_mode: true                              # Enable debug logging
+# Auto-save player state each round
+auto_checkpoint: false
+# Enable debug logging
+debug_mode: true
 
 # -----------------------------------------------------------------------------
 # Proxy Configurations
@@ -19,25 +21,34 @@ proxy:
   storage:
     checkpoint_dir: "EXPERIMENT/[SCENARIO_NAME]/checkpoints"
     record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
-    record_rounds: true                       # Record data each round
+    # Record turn data to disk each round
+    record_rounds: true
+    # Entries per block file written to disk (turns/ and messages/).
+    # Older blocks are kept on disk; only the latest block stays in memory.
+    turn_block_size: 3
   
   # =================================
   # Monitoring Proxy
   # =================================
   monitoring:
     record_path: "EXPERIMENT/[SCENARIO_NAME]/monitoring"
-    entry_limit: 10                           # Max monitoring entries
+    # Max monitoring entries (metrics/events) kept in hot RAM before spilling to disk
+    monitor_hot_limit: 3
   
   # =================================
   # Communication Proxy
   # =================================
   communication:
-    message_timeout_ms: 5000                  # Message timeout in milliseconds
-    enable_compression: true                  # Compress messages
+    # Message send/receive timeout in milliseconds
+    message_timeout_ms: 5000
+    # Compress messages in transit
+    enable_compression: true
   
   # =================================
   # Resource Proxy (for MCP servers, external APIs)
   # =================================
   resource:
-    mcp_servers: []                           # MCP server configurations
-    enable_caching: false                     # Cache resource responses
+    # MCP server configurations (list of {name, endpoint, capabilities})
+    mcp_servers: []
+    # Cache resource responses to reduce repeated API calls
+    enable_caching: false

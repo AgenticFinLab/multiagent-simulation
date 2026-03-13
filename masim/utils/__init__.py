@@ -11,7 +11,6 @@ from masim.utils.config import (
     load_config,
     validate_config,
     build_connection_matrix,
-    ConnectionValidator,
     IncludeLoader,
 )
 from masim.utils.data_loader import (
@@ -30,7 +29,6 @@ __all__ = [
     "load_config",
     "validate_config",
     "build_connection_matrix",
-    "ConnectionValidator",
     "IncludeLoader",
     # Data loader utilities
     "load_simulation_data",

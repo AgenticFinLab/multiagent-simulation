@@ -11,7 +11,7 @@ setting:
   name: "momentum_effect_simulation"
   description: "Momentum trading vs contrarian strategies"
   total_rounds: 200
-  entry_limit: 10
+  round_history_limit: 3
   record_path: "EXPERIMENT/MomentumEffect/records"
   save_diagram_interval: 50
 

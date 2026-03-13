@@ -13,6 +13,8 @@ Usage:
 import argparse
 import asyncio
 import logging
+import os
+import shutil
 
 from masim.simulator.general import GeneralSimulator
 from masim.simulator.base import SimulationConfig
@@ -29,6 +31,11 @@ async def run_simulation(config_path: str):
     yaml_config = load_config(config_path)
     config = SimulationConfig(**yaml_config)
 
+    # Clear stale records from any previous run
+    record_path = yaml_config.get("setting", {}).get("record_path", "")
+    if record_path and os.path.exists(record_path):
+        shutil.rmtree(record_path)
+        logger.info(f"Cleared old records: {record_path}")
     logger.info("=" * 70)
     logger.info("DISPOSITION EFFECT SIMULATION")
     logger.info("=" * 70)

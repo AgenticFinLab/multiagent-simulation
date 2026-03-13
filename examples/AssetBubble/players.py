@@ -55,7 +55,7 @@ class Market(GeneralPlayer):
     All parameters configured via extras in players.yml:
         - fundamental_value, initial_price
         - price_impact, mean_reversion, fundamental_growth, noise_std
-        - short_cost_rate, history_limit
+        - short_cost_rate, custom_state_hot_limit
     """
 
     async def perceive(
@@ -74,22 +74,22 @@ class Market(GeneralPlayer):
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras["fundamental_value"]
 
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["fundamental_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "fundamental"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["volume_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volume"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["bubble_metric_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "bubble_metric"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         orders = []
@@ -199,7 +199,7 @@ class BaseInvestor(GeneralPlayer):
     Base class for bubble simulation investors.
 
     All parameters configured via extras in players.yml:
-        - initial_cash, initial_position, history_limit
+        - initial_cash, initial_position, custom_state_hot_limit
     """
 
     async def perceive(
@@ -220,7 +220,7 @@ class BaseInvestor(GeneralPlayer):
             self.state.custom_state["short_position"] = 0.0  # Shares borrowed & sold
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=extras["history_limit"],
+                entry_limit=extras["custom_state_hot_limit"],
             )
 
         if observation.inbounds:

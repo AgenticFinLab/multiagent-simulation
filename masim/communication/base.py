@@ -1,32 +1,34 @@
 """Base Communication module for the Multi-Agent Simulation (MASim) framework.
 
-This module provides message formats and the CommunicationChannel base class.
+This module provides the channel wire type and the CommunicationChannel base class.
 For concrete implementations, see `general.py`.
 
 ================================================================================
                           MODULE CONTENTS
 ================================================================================
 
-Type Aliases:
-    PayloadType          - Union[Dict, np.ndarray, bytes, List]
-
-Enums:
-    MessageType          - OBSERVATION, ACTION, COORDINATION, PEER, SYSTEM, BROADCAST
-    MessagePriority      - LOW, NORMAL, HIGH, CRITICAL
-
 Dataclasses:
-    Message              - Standard message format: type, sender_id, payload, recipient_id
+    SimPacket            - Channel wire envelope: encoded Message + transmission metadata
 
 Abstract Classes:
-    CommunicationChannel - Channel base class: dispatch, shutdown
+    CommunicationChannel - Channel base class: encode, decode, dispatch
 
 ================================================================================
                          DESIGN PHILOSOPHY
 ================================================================================
 
-- All cross-component communication uses standard Message format
-- CommunicationChannel is the central abstraction for message transmission
-- Concrete implementations (JsonProtocol, etc.) belong in general.py
+Three-layer message model (types defined close to their layer):
+    Info      (player/base.py)  - Player-layer content: pure payload, no routing
+    Message   (proxy/base.py)   - Proxy-layer: adds sender_id, recipient_id, routing
+    SimPacket (here)            - Channel wire envelope: encoded Message for transmission
+
+CommunicationChannel responsibility: SimPacket ONLY.
+    encode_message(Message) → SimPacket   [bridges proxy → wire]
+    decode_message(SimPacket) → Message   [bridges wire → proxy]
+
+Building a Message from an Info unit is NOT a Channel concern —
+it is handled by build_message_from_info() in proxy/general.py,
+called by the Simulator in phase_dispatch.
 
 ================================================================================
                     COMMUNICATION CHANNEL FLOW
@@ -35,157 +37,57 @@ Abstract Classes:
     Simulator
         │
         │  1. collect_outbound_messages() from all Personas
+        │  2. build_message_from_info(Info) → Message  [proxy helper]
         │
         ▼
     CommunicationChannel.encode_and_deliver(messages, handles)
         │
-        ├── 2. encode(message) via Protocol
+        ├── 3. encode(Message) → SimPacket  [wire format]
         │
-        ├── 3. record(message) for persistence
+        ├── 4. record(SimPacket) for persistence
         │
-        └── 4. send to target via actor_handle.receive_message.remote()
+        └── 5. decode(SimPacket) → Message, send via actor_handle.receive_message.remote()
         │
         ▼
-    Target Persona receives message
-
-================================================================================
-                          MESSAGE TYPES
-================================================================================
-
-    OBSERVATION  - Environment → Players (round state notification)
-    ACTION       - Player → Environment (behavioral output)
-    COORDINATION - Player → Players (coordination decision broadcast)
-    PEER         - Player ↔ Player (direct peer communication)
-    SYSTEM       - Framework internal control messages
-    BROADCAST    - One-to-many messages
+    Target Persona receives Message
 """
 
 import os
 from abc import ABC, abstractmethod
-from enum import Enum, auto
 from datetime import datetime
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union
-
-import numpy as np
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from lmbase.utils.tools import BlockBasedStoreManager
 
-
-# =============================================================================
-# Type Aliases
-# =============================================================================
-
-PayloadType = Union[Dict[str, Any], np.ndarray, bytes, List[Any]]
+if TYPE_CHECKING:
+    from masim.proxy.base import Message
 
 
 # =============================================================================
-# Message Types
-# =============================================================================
-
-
-class MessageType(Enum):
-    """Types of messages in the framework."""
-
-    # Environment -> Players
-    OBSERVATION = auto()
-    # Player -> Environment
-    ACTION = auto()
-    # Player -> Players (coordination)
-    COORDINATION = auto()
-    # Player <-> Player
-    PEER = auto()
-    # Framework internal
-    SYSTEM = auto()
-    # One-to-many
-    BROADCAST = auto()
-
-
-class MessagePriority(Enum):
-    """Priority levels for message delivery."""
-
-    LOW = 0
-    NORMAL = 1
-    HIGH = 2
-    CRITICAL = 3
-
-
-# =============================================================================
-# Core Message Dataclass
+# SimPacket: Channel Wire Envelope
 # =============================================================================
 
 
 @dataclass
-class Message:
+class SimPacket:
     """
-    Standard message format for all cross-component communication.
+    Channel-layer wire envelope — the encoded form of a Message for transmission.
 
-    All messages transmitted between framework components must use this format
-    to ensure serialization compatibility and consistent routing.
+    CommunicationChannel encodes Message → SimPacket before sending,
+    and decodes SimPacket → Message on receipt.
 
     Attributes:
-        message_type: Category of message
-        sender_id: ID of the sending component
-        payload: Message content (must be serializable)
-        recipient_id: Target recipient (None for broadcast)
-        timestamp: ISO format timestamp
-        priority: Message delivery priority
-        extras: Additional context
+        encoded:    Serialized message content (JSON string)
+        sender_id:  Sender ID (for routing without full decode)
+        recipient_id: Recipient ID (for routing without full decode)
+        timestamp:  Encoding timestamp (ISO format)
     """
 
-    message_type: MessageType
+    encoded: str
     sender_id: str
-    payload: PayloadType
-    recipient_id: Optional[str] = None
+    recipient_id: Optional[str]
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    priority: MessagePriority = MessagePriority.NORMAL
-    extras: Dict[str, Any] = field(default_factory=dict)
-
-    def __post_init__(self):
-        self._validate_payload()
-
-    def _validate_payload(self) -> None:
-        """Ensure payload is serialization-friendly."""
-        if self.payload is None:
-            return
-        if isinstance(self.payload, (dict, list, np.ndarray, bytes)):
-            return
-        raise TypeError(
-            f"Message payload must be dict, list, numpy.ndarray, or bytes. "
-            f"Got: {type(self.payload).__name__}"
-        )
-
-    def is_broadcast(self) -> bool:
-        """Check if this message is a broadcast."""
-        return self.recipient_id is None
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for serialization."""
-        payload_data = self.payload
-        if isinstance(self.payload, np.ndarray):
-            payload_data = self.payload.tolist()
-        return {
-            "message_type": self.message_type.name,
-            "sender_id": self.sender_id,
-            "recipient_id": self.recipient_id,
-            "payload": payload_data,
-            "timestamp": self.timestamp,
-            "priority": self.priority.value,
-            "extras": self.extras,
-        }
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Message":
-        """Create Message from dictionary."""
-        return cls(
-            message_type=MessageType[data["message_type"]],
-            sender_id=data["sender_id"],
-            recipient_id=data["recipient_id"],
-            payload=data["payload"],
-            timestamp=data["timestamp"],
-            priority=MessagePriority(data["priority"]),
-            extras=data["extras"],
-        )
 
 
 # =============================================================================
@@ -197,22 +99,26 @@ class CommunicationChannel(ABC):
     """
     Abstract base class for communication channels.
 
-    A CommunicationChannel is the central message bus that the Simulator
+    A CommunicationChannel is the wire transport layer that the Simulator
     uses to transmit messages between Personas. It is responsible for:
 
-    1. **Building**: Create Message objects from various sources
-    2. **Encoding**: Convert Message objects to wire format
-    3. **Recording**: Persist sent messages for debugging/replay
-    4. **Dispatching**: Send messages to target actors via Ray
+    1. **Encoding**: Convert proxy-layer Message → SimPacket (wire format)
+    2. **Recording**: Persist SimPackets for debugging/replay
+    3. **Decoding**: Convert SimPacket → proxy-layer Message
+    4. **Dispatching**: Send Messages to target actors via Ray
+
+    NOTE: Building a Message from an Info unit is NOT this class's concern.
+    That is done by build_message_from_info() in proxy/general.py.
 
     Lifecycle:
         1. Simulator creates CommunicationChannel with config
-        2. During each round, Simulator collects outbound messages from Personas
-        3. Simulator calls channel.encode_and_deliver(messages, handles)
+        2. During each round, Simulator calls channel.encode_and_deliver(messages, handles)
         4. On simulation end, Simulator calls channel.shutdown()
 
     Subclasses must implement:
-        - dispatch(): Send messages to target actors
+        - encode_message(): Message → SimPacket
+        - decode_message(): SimPacket → Message
+        - encode_and_deliver(): Full send pipeline
         - shutdown(): Release resources and flush pending data
 
     Config keys (passed to __init__):
@@ -236,66 +142,29 @@ class CommunicationChannel(ABC):
         )
 
     # =========================================================================
-    #                    MESSAGE BUILDING
-    # =========================================================================
-
-    def build_message_from_outbound(
-        self,
-        outbound: Any,
-        sender_id: str,
-        target_id: str,
-        round_num: int = 0,
-    ) -> Message:
-        """
-        Convert Player's Outbound to wire-ready Message.
-
-        Args:
-            outbound: The Outbound object containing payload, content_type, extras
-            sender_id: The sender's identity
-            target_id: The target's identity
-            round_num: Current simulation round
-
-        Returns:
-            A fully-configured Message ready for transmission
-        """
-        payload = {
-            "content": outbound.payload,
-            "content_type": getattr(outbound, "content_type", None),
-            "extras": getattr(outbound, "extras", {}),
-        }
-        return Message(
-            message_type=MessageType.PEER,
-            sender_id=sender_id,
-            recipient_id=target_id,
-            payload=payload,
-            timestamp=datetime.now().isoformat(),
-            extras={"round_num": round_num},
-        )
-
-    # =========================================================================
     #                    ABSTRACT METHODS (Must implement)
     # =========================================================================
 
     @abstractmethod
-    def encode_message(self, message: Message) -> str:
+    def encode_message(self, message: "Message") -> "SimPacket":
         """
-        Encode Message to wire format (JSON string).
+        Encode proxy-layer Message to SimPacket (wire envelope).
 
         Args:
-            message: Message object to encode
+            message: Proxy-layer Message to encode
 
         Returns:
-            JSON string representation for transmission
+            SimPacket containing serialized content + routing metadata
         """
         raise NotImplementedError
 
     @abstractmethod
-    def decode_message(self, data: str) -> Message:
+    def decode_message(self, packet: "SimPacket") -> "Message":
         """
-        Decode wire format (JSON string) back to Message.
+        Decode SimPacket back to proxy-layer Message.
 
         Args:
-            data: JSON string from transmission
+            packet: SimPacket from transmission
 
         Returns:
             Reconstructed Message object
@@ -305,21 +174,21 @@ class CommunicationChannel(ABC):
     @abstractmethod
     def encode_and_deliver(
         self,
-        messages: List[Message],
+        messages: List["Message"],
         handles: Dict[str, Any],
     ) -> List[Any]:
         """
-        Encode, record, decode, and deliver messages to target actors.
+        Encode, record, and deliver messages to target actors.
 
         This is the main entry point called by Simulator. Implementations
         should:
-        1. encode_message() → JSON string (wire format)
-        2. Record the encoded message to storage
-        3. decode_message() → reconstruct Message from wire format
+        1. encode_message(Message) → SimPacket  [wire format]
+        2. record_encoded_message(SimPacket) → persist to storage
+        3. decode_message(SimPacket) → Message  [proxy layer restored]
         4. Send decoded Message to target actor via Ray remote call
 
         Args:
-            messages: List of Message objects to send
+            messages: List of proxy-layer Message objects to send
             handles: Dict mapping recipient_id -> Ray actor handle
 
         Returns:

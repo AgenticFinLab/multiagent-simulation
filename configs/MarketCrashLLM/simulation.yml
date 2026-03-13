@@ -12,7 +12,7 @@ setting:
   name: "market_crash_llm_simulation"
   description: "LLM-based market crash with liquidity spiral dynamics"
   total_rounds: 50
-  entry_limit: 10
+  round_history_limit: 3
   record_path: "EXPERIMENT/MarketCrashLLM/records"
   save_diagram_interval: 25
 

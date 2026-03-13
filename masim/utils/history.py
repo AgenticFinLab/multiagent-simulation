@@ -282,21 +282,17 @@ class HistoryBuffer:
 
         return result
 
-    def to_list(self) -> List[Any]:
-        """Alias for get_all()."""
-        return self.get_all()
-
-    @property
-    def recent(self) -> List[Any]:
-        """Get hot deque contents as list (for backward compatibility)."""
-        return list(self.hot)
-
     def __repr__(self) -> str:
         return (
             f"HistoryBuffer(total={self.total_count}, "
             f"hot={len(self.hot)}, cold={self.cold_count}, "
             f"pending={len(self._pending_cold)})"
         )
+
+    @property
+    def recent(self) -> List[Any]:
+        """Get hot deque contents as list (most recent items in memory)."""
+        return list(self.hot)
 
 
 # =============================================================================

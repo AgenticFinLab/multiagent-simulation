@@ -1,13 +1,32 @@
-"""
-General Proxy Implementations for MASim Framework.
+"""General Proxy Implementations for MASim Framework.
 
 This module provides concrete proxy implementations:
-    - SendReceiveProxy: Message routing (send, broadcast, receive)
+    - SendReceiveProxy: Info send/receive queue management for Persona
     - StorageProxy: State checkpoint/restore using BlockBasedStoreManager
     - ResourceProxy: MCP resource access
     - MonitoringProxy: Metrics and logging
 
 Base classes and configs are in base.py; implementations are here.
+
+Architecture (SendReceiveProxy):
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │  Proxy strictly owned by Persona - manages Info send/receive queues   │
+    │  Proxy CANNOT access Channel (owned by Simulator)                      │
+    ├─────────────────────────────────────────────────────────────────────────┤
+    │                                                                         │
+    │  SEND FLOW (Player → Simulator):                                        │
+    │    Player.decide() → outbound_messages                                 │
+    │    Persona extracts → proxy.enqueue_info(info)                         │
+    │    Simulator → persona.message_proxy.dequeue_infos()                   │
+    │    Simulator → channel.encode() → dispatch via ray.remote              │
+    │                                                                         │
+    │  RECEIVE FLOW (Simulator → Player):                                     │
+    │    Simulator → persona.message_proxy.handle_incoming(message)          │
+    │    Proxy converts Message → Info and queues in receive_queue           │
+    │    Persona → proxy.get_received_senders() → player.is_received_ready() │
+    │    Persona → proxy.get_received_infos() → player.receive_info()        │
+    │                                                                         │
+    └─────────────────────────────────────────────────────────────────────────┘
 """
 
 import os
@@ -22,18 +41,73 @@ from masim.proxy.base import (
     OwnerType,
     BaseProxy,
     ProxyResult,
+    # Message types
+    Message,
+    MessageType,
     # Configs
     SendReceiveConfig,
     StorageConfig,
     ResourceConfig,
     MonitoringConfig,
 )
-from masim.communication.base import Message
+from masim.player.base import Info
 from masim.utils.history import HistoryBuffer
 from lmbase.utils.tools import BlockBasedStoreManager
 
 if TYPE_CHECKING:
     pass
+
+
+# =============================================================================
+#                     BUILD MESSAGE HELPER
+# =============================================================================
+
+
+def build_message_from_info(
+    info: "Info",
+    sender_id: str,
+    target_id: str,
+    round_num: int = 0,
+) -> Message:
+    """
+    Convert a player-layer Info unit to a proxy-layer Message.
+
+    This is the ONLY place where Info → Message conversion happens.
+    Called by Simulator in phase_dispatch after collecting outbounds.
+
+    The Info payload is wrapped in a content envelope so the proxy-layer
+    Message carries structured metadata alongside the raw content:
+        payload = {"content": info.payload,
+                   "content_type": info.content_type,
+                   "extras": info.extras}
+
+    On the receive side, SendReceiveProxy.handle_incoming() unpacks this
+    envelope back into an Info unit for the target player.
+
+    Args:
+        info:       The Info unit produced by the sending Player
+        sender_id:  Identity of the sending Persona
+        target_id:  Identity of the receiving Persona
+        round_num:  Current simulation round (stored in extras)
+
+    Returns:
+        Message ready for CommunicationChannel.encode_and_deliver()
+    """
+    from datetime import datetime
+
+    payload = {
+        "content": info.payload,
+        "content_type": getattr(info, "content_type", None),
+        "extras": getattr(info, "extras", {}),
+    }
+    return Message(
+        message_type=MessageType.PEER,
+        sender_id=sender_id,
+        recipient_id=target_id,
+        payload=payload,
+        timestamp=datetime.now().isoformat(),
+        extras={"round_num": round_num},
+    )
 
 
 # =============================================================================
@@ -43,14 +117,23 @@ if TYPE_CHECKING:
 
 class SendReceiveProxy(BaseProxy):
     """
-    Proxy for message routing and reliable transmission.
+    Proxy for Info send/receive queue management - strictly owned by Persona.
+
+    Architecture:
+        Proxy owns Info queues but CANNOT access Channel (Simulator-owned).
+        Simulator accesses proxy via persona.message_proxy.xxx().
 
     Core Methods:
-        1. send()       - Send to specific recipient
-        2. broadcast()  - Send to multiple recipients
-        3. receive()    - Retrieve pending messages
-        4. subscribe()  - Register for real-time delivery
-        5. unsubscribe()- Remove subscription
+        1. enqueue_info(info)        - Called by Persona to queue Info for dispatch
+        2. dequeue_infos()           - Called by Simulator to collect all queued Info units
+        3. handle_incoming(message)  - Called by Simulator to deliver incoming Message
+        4. get_received_senders()    - Called by Persona to pass data to Player.is_received_ready()
+        5. get_received_infos()      - Called by Persona to deliver Info units to Player
+
+    Flow:
+        SEND:    Player.decide() → Persona.enqueue_info() → Simulator.dequeue_infos()
+        RECEIVE: Simulator.handle_incoming() → Persona checks player.is_received_ready()
+                 → Persona.get_received_infos() → Player.receive_info()
     """
 
     def __init__(
@@ -60,74 +143,113 @@ class SendReceiveProxy(BaseProxy):
     ):
         super().__init__(config or SendReceiveConfig(), owner)
         self.config: SendReceiveConfig = config or SendReceiveConfig()
-        self.subscriptions: Dict[str, Callable[[Message], Awaitable[None]]] = {}
-        self.pending_messages: Dict[str, List[Message]] = {}
+        # Send queue: Info units waiting to be dispatched by Simulator
+        self.send_queue: List[Info] = []
+        # Receive queue: Info units waiting to be delivered to Player
+        self.receive_queue: List[Info] = []
 
     async def initialize(self) -> None:
         self.is_initialized = True
 
     async def shutdown(self) -> None:
-        self.subscriptions.clear()
-        self.pending_messages.clear()
+        self.send_queue.clear()
+        self.receive_queue.clear()
         self.is_initialized = False
 
-    async def send(self, message: Message) -> ProxyResult:
-        """Send a message to a specific recipient."""
-        if not message.recipient_id:
-            return ProxyResult.fail(
-                "INVALID_RECIPIENT", "Message must have recipient_id"
-            )
+    # =========================================================================
+    #                    SEND METHODS (Persona → Simulator)
+    # =========================================================================
 
-        if message.recipient_id not in self.pending_messages:
-            self.pending_messages[message.recipient_id] = []
-        self.pending_messages[message.recipient_id].append(message)
+    def enqueue_info(self, info: "Info") -> None:
+        """
+        Queue an Info unit for later dispatch by Simulator.
 
-        if message.recipient_id in self.subscriptions:
-            await self.subscriptions[message.recipient_id](message)
+        Called by Persona after extracting Info units from Player.
 
-        return ProxyResult.ok()
+        Args:
+            info: The Info unit (player-layer content) to queue for sending
+        """
+        self.send_queue.append(info)
 
-    async def broadcast(
-        self, message: Message, scope: Optional[str] = None
-    ) -> ProxyResult:
-        """Broadcast a message to multiple recipients."""
-        message.extras["broadcast_scope"] = scope or "all"
+    def dequeue_infos(self) -> List["Info"]:
+        """
+        Dequeue all Info units queued for dispatch.
 
-        for recipient_id in list(self.pending_messages.keys()):
-            self.pending_messages[recipient_id].append(message)
-            if recipient_id in self.subscriptions:
-                await self.subscriptions[recipient_id](message)
+        Called by Simulator via persona.message_proxy.dequeue_infos().
+        Returns all queued Info units and clears the send queue.
 
-        return ProxyResult.ok()
+        Returns:
+            List of all queued Info units ready for channel encoding
+        """
+        result = self.send_queue.copy()
+        self.send_queue.clear()
+        return result
 
-    async def receive(self, entity_id: str) -> List[Message]:
-        """Receive pending messages for an entity."""
-        if entity_id in self.pending_messages:
-            messages = self.pending_messages[entity_id].copy()
-        else:
-            messages = []
-        self.pending_messages[entity_id] = []
+    # =========================================================================
+    #                    RECEIVE METHODS (Simulator → Player)
+    # =========================================================================
 
-        owner = self.get_owner()
-        if owner and hasattr(owner, "on_message"):
-            for msg in messages:
-                owner.on_message(msg)
+    def handle_incoming(self, message: Message) -> None:
+        """
+        Handle an incoming Message from Simulator.
 
-        return messages
+        Called by Simulator via persona.message_proxy.handle_incoming().
+        Converts Message → Info (populates sender_id + time_received) and queues.
 
-    async def subscribe(
-        self, entity_id: str, callback: Callable[[Message], Awaitable[None]]
-    ) -> bool:
-        """Subscribe to messages with a callback for real-time delivery."""
-        self.subscriptions[entity_id] = callback
-        if entity_id not in self.pending_messages:
-            self.pending_messages[entity_id] = []
-        return True
+        Args:
+            message: The proxy-layer Message received from another player
+        """
+        info = Info(
+            payload=message.payload.get("content", message.payload),
+            content_type=(
+                message.payload.get("content_type")
+                if isinstance(message.payload, dict)
+                else None
+            ),
+            extras=(
+                message.payload.get("extras", {})
+                if isinstance(message.payload, dict)
+                else {}
+            ),
+            sender_id=message.sender_id,
+            time_received=datetime.now().isoformat(),
+        )
+        self.receive_queue.append(info)
 
-    async def unsubscribe(self, entity_id: str) -> bool:
-        """Unsubscribe from real-time message delivery."""
-        self.subscriptions.pop(entity_id, None)
-        return True
+    def get_received_infos(self) -> List["Info"]:
+        """
+        Get all received Info units for Player.
+
+        Called by Persona to retrieve Info units and deliver to Player.
+        Returns all queued Info units and clears the receive queue.
+
+        Returns:
+            List of all received Info units (sender_id populated)
+        """
+        result = self.receive_queue.copy()
+        self.receive_queue.clear()
+        return result
+
+    def has_received_infos(self) -> bool:
+        """
+        Check if there are Info units waiting to be delivered to Player.
+
+        Returns:
+            True if receive_queue is not empty
+        """
+        return len(self.receive_queue) > 0
+
+    def get_received_senders(self) -> set:
+        """
+        Get the set of sender IDs currently in the inbound queue.
+
+        Called by Persona to pass inbound state to Player.is_received_ready().
+        Proxy owns the DATA; Player owns the DECISION of whether that's enough.
+
+        Returns:
+            Set of sender_id strings for all queued inbound messages
+        """
+        return {info.sender_id for info in self.receive_queue}
 
 
 # =============================================================================
@@ -158,7 +280,9 @@ class StorageProxy(BaseProxy):
             msg_dir = os.path.join(self._get_base_path(player_id), "messages")
             os.makedirs(msg_dir, exist_ok=True)
             self._message_stores[player_id] = BlockBasedStoreManager(
-                folder=msg_dir, file_format="json", block_size=self.config.entry_limit
+                folder=msg_dir,
+                file_format="json",
+                block_size=self.config.turn_block_size,
             )
         return self._message_stores[player_id]
 
@@ -168,7 +292,9 @@ class StorageProxy(BaseProxy):
             turn_dir = os.path.join(self._get_base_path(player_id), "turns")
             os.makedirs(turn_dir, exist_ok=True)
             self._turn_stores[player_id] = BlockBasedStoreManager(
-                folder=turn_dir, file_format="json", block_size=self.config.entry_limit
+                folder=turn_dir,
+                file_format="json",
+                block_size=self.config.turn_block_size,
             )
         return self._turn_stores[player_id]
 
@@ -381,7 +507,7 @@ class MonitoringProxy(BaseProxy):
         self.config: MonitoringConfig = config or MonitoringConfig()
 
         # Initialize HistoryBuffer storage (record_path must be set in config)
-        entry_limit = self.config.entry_limit
+        entry_limit = self.config.monitor_hot_limit
         record_path = self.config.record_path
 
         metrics_dir = os.path.join(record_path, "metrics")
@@ -448,7 +574,7 @@ class MonitoringProxy(BaseProxy):
         self, name_filter: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """Get recorded metrics (recent, from hot storage)."""
-        result = self._metrics.recent
+        result = list(self._metrics.hot)
         if name_filter:
             result = [m for m in result if m["name"].startswith(name_filter)]
         return result
@@ -457,7 +583,7 @@ class MonitoringProxy(BaseProxy):
         self, event_type: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """Get recorded events (recent, from hot storage)."""
-        result = self._events.recent
+        result = list(self._events.hot)
         if event_type:
             result = [e for e in result if e["event_type"] == event_type]
         return result
@@ -550,7 +676,7 @@ class SimpleMonitoringProxy(MonitoringProxy):
     ):
         config = MonitoringConfig(
             record_path=record_path,
-            entry_limit=100,
+            monitor_hot_limit=3,
         )
         super().__init__(config, owner)
 

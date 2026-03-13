@@ -28,7 +28,7 @@ market:
       bond_return: 0.0000397               # ~1% annual / 252
       stock_volatility: 0.00945            # ~15% annual / sqrt(252)
       initial_stock_price: 100.0
-      history_limit: 200
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 mla_1:
@@ -44,7 +44,7 @@ mla_1:
       record_path: "EXPERIMENT/EquityPremium/records"
       initial_cash: 10000.0
       initial_stock: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # MLA specific
       loss_aversion: 2.25
       evaluation_window: 5
@@ -64,7 +64,7 @@ mla_2:
       record_path: "EXPERIMENT/EquityPremium/records"
       initial_cash: 10000.0
       initial_stock: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       loss_aversion: 2.25
       evaluation_window: 5
       risk_aversion: 2.0
@@ -83,7 +83,7 @@ mla_3:
       record_path: "EXPERIMENT/EquityPremium/records"
       initial_cash: 10000.0
       initial_stock: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       loss_aversion: 2.25
       evaluation_window: 5
       risk_aversion: 2.0
@@ -102,7 +102,7 @@ long_horizon_1:
       record_path: "EXPERIMENT/EquityPremium/records"
       initial_cash: 10000.0
       initial_stock: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # Long horizon specific
       evaluation_window: 50
       target_stock_pct: 0.6
@@ -121,7 +121,7 @@ risk_neutral:
       record_path: "EXPERIMENT/EquityPremium/records"
       initial_cash: 10000.0
       initial_stock: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # Risk neutral specific
       excess_return_multiplier: 500
   persona: !include persona.yml
@@ -139,7 +139,7 @@ conservative_1:
       record_path: "EXPERIMENT/EquityPremium/records"
       initial_cash: 10000.0
       initial_stock: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # Conservative specific
       target_stock_pct: 0.2
   persona: !include persona.yml
@@ -157,7 +157,7 @@ conservative_2:
       record_path: "EXPERIMENT/EquityPremium/records"
       initial_cash: 10000.0
       initial_stock: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       target_stock_pct: 0.2
   persona: !include persona.yml
 
@@ -174,7 +174,7 @@ noise_1:
       record_path: "EXPERIMENT/EquityPremium/records"
       initial_cash: 10000.0
       initial_stock: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # Noise specific
       noise_std: 8.0
   persona: !include persona.yml

@@ -19,13 +19,13 @@ import ray
 from masim.utils.topology import TopologyGraph
 
 if TYPE_CHECKING:
-    from masim.proxy.base import (
+    from masim.proxy.general import (
         SendReceiveProxy,
         StorageProxy,
         ResourceProxy,
         MonitoringProxy,
     )
-    from masim.communication.base import Message
+    from masim.proxy.base import Message
     from masim.player.base import BasePlayer, PlayerConfig, TurnResult
 
 
@@ -70,7 +70,7 @@ class BasePersona(ABC):
         self.player: Optional["BasePlayer"] = None
 
         # Proxy references
-        self.communication: Optional["SendReceiveProxy"] = None
+        self.message_proxy: Optional["SendReceiveProxy"] = None
         self.storage: Optional["StorageProxy"] = None
         self.resource: Optional["ResourceProxy"] = None
         self.monitoring: Optional["MonitoringProxy"] = None
@@ -170,15 +170,15 @@ class BasePersona(ABC):
     # =========================================================================
 
     @abstractmethod
-    def collect_outbounds(self) -> List[Dict[str, Any]]:
+    def collect_pending_infos(self) -> List[Dict[str, Any]]:
         """
-        Collect all raw outbounds declared by Player.
+        Collect all queued Info units declared by Player.
 
-        Called by Simulator to gather outbound messages for dispatch
+        Called by Simulator to gather Info units for dispatch
         via CommunicationChannel.
 
         Returns:
-            List of dicts with keys: outbound, sender_id, target_ids, round_num
+            List of dicts with keys: info, sender_id, target_ids, round_num
         """
         ...
 

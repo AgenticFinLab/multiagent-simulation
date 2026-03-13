@@ -12,10 +12,11 @@ proxy:
     checkpoint_dir: "EXPERIMENT/ShortSqueeze/checkpoints"
     record_path: "EXPERIMENT/ShortSqueeze/records"
     record_rounds: true
+    turn_block_size: 3
 
   monitoring:
     record_path: "EXPERIMENT/ShortSqueeze/monitoring"
-    entry_limit: 10
+    monitor_hot_limit: 3
 
   communication:
     message_timeout_ms: 5000

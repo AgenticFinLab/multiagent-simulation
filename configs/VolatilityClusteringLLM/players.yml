@@ -35,7 +35,7 @@ market:
       garch_beta: 0.80
       min_volatility: 0.5
       max_volatility: 10.0
-      history_limit: 200
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ llm_fundamentalist:
       record_path: "EXPERIMENT/VolatilityClusteringLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.VolatilityClusteringLLM.prompts:LLM_FUNDAMENTALIST_SYS"
         user_message: "examples.VolatilityClusteringLLM.prompts:LLM_USER_TEMPLATE"
@@ -81,7 +81,7 @@ llm_trend_follower_1:
       record_path: "EXPERIMENT/VolatilityClusteringLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.VolatilityClusteringLLM.prompts:LLM_TREND_FOLLOWER_SYS"
         user_message: "examples.VolatilityClusteringLLM.prompts:LLM_USER_TEMPLATE"
@@ -105,7 +105,7 @@ llm_trend_follower_2:
       record_path: "EXPERIMENT/VolatilityClusteringLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.VolatilityClusteringLLM.prompts:LLM_TREND_FOLLOWER_SYS"
         user_message: "examples.VolatilityClusteringLLM.prompts:LLM_USER_TEMPLATE"
@@ -132,7 +132,7 @@ llm_noise_trader_1:
       record_path: "EXPERIMENT/VolatilityClusteringLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.VolatilityClusteringLLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.VolatilityClusteringLLM.prompts:LLM_USER_TEMPLATE"
@@ -159,7 +159,7 @@ llm_slow_adapter:
       record_path: "EXPERIMENT/VolatilityClusteringLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.VolatilityClusteringLLM.prompts:LLM_SLOW_ADAPTER_SYS"
         user_message: "examples.VolatilityClusteringLLM.prompts:LLM_USER_TEMPLATE"
@@ -186,7 +186,7 @@ llm_volatility_trader:
       record_path: "EXPERIMENT/VolatilityClusteringLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.VolatilityClusteringLLM.prompts:LLM_VOLATILITY_TRADER_SYS"
         user_message: "examples.VolatilityClusteringLLM.prompts:LLM_USER_TEMPLATE"

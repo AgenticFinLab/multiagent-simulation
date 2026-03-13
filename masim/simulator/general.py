@@ -53,6 +53,7 @@ from masim.simulator.base import (
 from masim.player.base import PlayerConfig
 from masim.persona.general import PlayerPersona
 from masim.communication.general import GeneralCommunicationChannel
+from masim.proxy.general import build_message_from_info
 from masim.utils.topology import TopologyGraph
 
 # Module logger
@@ -363,37 +364,58 @@ class GeneralSimulator(BaseSimulator):
         level_handles: Dict[str, ray.actor.ActorHandle],
     ) -> None:
         """
-        PHASE 3: DISPATCH - Send outbound messages via CommunicationChannel.
+        PHASE 3: DISPATCH - Encode Info→Message→SimPacket via CommunicationChannel.
 
-        Collects raw outbounds from each player's Persona, builds Messages
-        via CommunicationChannel, then dispatches them.
+        Architecture (Proxy-Centric Design):
+
+        SEND (collect from proxy):
+            Simulator → persona.collect_pending_infos()
+                       → persona.message_proxy.dequeue_infos()  [proxy dequeues]
+                       → returns [{info, sender_id, target_ids, round_num}]
+            Simulator → build_message_from_info(info)  [proxy helper, builds Message]
+
+        RECEIVE (dispatch via channel → proxy):
+            Simulator → channel.encode_and_deliver(messages, handles)
+                       → target_persona.receive_message(decoded_message)
+                       → persona.message_proxy.handle_incoming(message)  [proxy→Info]
+
+        When target persona.operate() is called:
+            proxy.get_received_senders()                   [proxy provides data]
+            player.is_received_ready(received_senders)     [player decides]
+            proxy.get_received_infos()                     [proxy dequeues]
+            player.receive_info(info)                      [single delivery]
+
+        Ownership boundaries:
+            Simulator owns Channel (encoding, routing, logging)
+            Persona owns Proxy (queuing, readiness tracking)
 
         This ensures Level N messages arrive before Level N+1 starts.
 
         Args:
             level_handles: Dict of player_id -> actor handle for this level
         """
-        # Step 1: Collect raw outbounds from all players in this level
+        # Step 1: Collect Info units from all players in this level
         collect_refs = []
         for handle in level_handles.values():
-            ref = handle.collect_outbounds.remote()
+            ref = handle.collect_pending_infos.remote()
             collect_refs.append(ref)
 
-        # Get all collected outbounds
-        all_outbound_lists = ray.get(collect_refs) if collect_refs else []
+        # Get all collected Info unit lists
+        all_info_lists = ray.get(collect_refs) if collect_refs else []
 
-        # Step 2: Build Messages via CommunicationChannel
+        # Step 2: Build Messages from Info units via build_message_from_info()
+        # (proxy-layer helper — NOT a Channel method)
         all_messages = []
-        for outbound_list in all_outbound_lists:
-            for outbound_data in outbound_list:
-                outbound = outbound_data["outbound"]
-                sender_id = outbound_data["sender_id"]
-                target_ids = outbound_data["target_ids"]
-                round_num = outbound_data["round_num"]
+        for info_list in all_info_lists:
+            for info_data in info_list:
+                info = info_data["info"]
+                sender_id = info_data["sender_id"]
+                target_ids = info_data["target_ids"]
+                round_num = info_data["round_num"]
 
                 for target_id in target_ids:
-                    message = self.communication.build_message_from_outbound(
-                        outbound=outbound,
+                    message = build_message_from_info(
+                        info=info,
                         sender_id=sender_id,
                         target_id=target_id,
                         round_num=round_num,
@@ -422,16 +444,16 @@ class GeneralSimulator(BaseSimulator):
         │  1. EXECUTE: Players run operate() in parallel                     │
         │              └─► Waits for is_received_ready() before turn()        │
         │              └─► perceive() → decide() → act()                     │
-        │              └─► Inbounds included in Observation                   │
-        │              └─► Outbound messages declared in decide()            │
+        │              └─► Received Info units delivered via proxy.get_received_infos() │
+        │              └─► Info units declared in decide() via outbound_messages │
         │                                                                     │
         │  2. COLLECT: Wait for all operate() to complete                    │
         │              └─► Gather TurnResults from all players               │
         │                                                                     │
-        │  3. DISPATCH: Send outbound messages to next level                 │
-        │              └─► Build Messages from Outbounds via Channel         │
-        │              └─► Messages arrive at targets via receive_message()  │
-        │              └─► Persona decodes to Inbounds for next level        │
+        │  3. DISPATCH: Encode Info→Message→SimPacket, deliver to targets│
+        │              └─► build_message_from_info(info) → Message               │
+        │              └─► channel.encode(Message) → SimPacket → ray.remote    │
+        │              └─► handle_incoming(Message) queues Info in receive_queue│
         │                                                                     │
         │  Then proceed to next level...                                     │
         └─────────────────────────────────────────────────────────────────────┘
@@ -465,7 +487,7 @@ class GeneralSimulator(BaseSimulator):
             self.phase_collect(execute_result)
 
             # ─────────────────────────────────────────────────────────────────
-            # PHASE 3: DISPATCH - Send outbound messages to next level
+            # PHASE 3: DISPATCH - Encode Info→Message→SimPacket, deliver to targets
             # ─────────────────────────────────────────────────────────────────
             self.phase_dispatch(level_handles)
 

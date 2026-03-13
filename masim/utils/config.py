@@ -277,90 +277,6 @@ def build_connection_matrix(
     return connections
 
 
-class ConnectionValidator:
-    """
-    Validates and enforces connection topology.
-
-    Only allows messages between explicitly connected entities.
-
-    Usage:
-        validator = ConnectionValidator(config)
-        if validator.can_send("investor_1", "market"):
-            # Allow message
-        else:
-            raise ConnectionError("Not connected")
-    """
-
-    def __init__(self, config: Dict[str, Any]):
-        """Initialize with configuration."""
-        self._connections = build_connection_matrix(config)
-        if "topology" in config and "broadcast" in config["topology"]:
-            broadcast_config = config["topology"]["broadcast"]
-            if "allowed_sources" not in broadcast_config:
-                raise KeyError("Broadcast config must have 'allowed_sources' field")
-            self._broadcast_sources = set(broadcast_config["allowed_sources"])
-        else:
-            self._broadcast_sources = set()
-
-    def can_send(self, source_id: str, target_id: str) -> bool:
-        """
-        Check if source can send to target.
-
-        Args:
-            source_id: Sender entity ID
-            target_id: Receiver entity ID
-
-        Returns:
-            True if connection is allowed
-        """
-        if source_id not in self._connections:
-            return False
-        return target_id in self._connections[source_id]
-
-    def can_broadcast(self, source_id: str) -> bool:
-        """
-        Check if source can broadcast to all.
-
-        Args:
-            source_id: Sender entity ID
-
-        Returns:
-            True if broadcast is allowed
-        """
-        return source_id in self._broadcast_sources
-
-    def get_targets(self, source_id: str) -> set:
-        """
-        Get all allowed targets for a source.
-
-        Args:
-            source_id: Sender entity ID
-
-        Returns:
-            Set of allowed target IDs
-        """
-        if source_id not in self._connections:
-            return set()
-        return self._connections[source_id].copy()
-
-    def validate_send(self, source_id: str, target_id: str) -> None:
-        """
-        Validate send operation, raise if not allowed.
-
-        Args:
-            source_id: Sender entity ID
-            target_id: Receiver entity ID
-
-        Raises:
-            ConnectionError: If connection not allowed
-        """
-        if not self.can_send(source_id, target_id):
-            raise ConnectionError(
-                f"Connection not allowed: {source_id} -> {target_id}. "
-                f"Allowed targets: {self.get_targets(source_id)}"
-            )
-
-
 # =============================================================================
 # Logging Configuration
 # =============================================================================
@@ -400,7 +316,6 @@ __all__ = [
     "load_config",
     "validate_config",
     "build_connection_matrix",
-    "ConnectionValidator",
     "IncludeLoader",
     "setup_logging",
 ]

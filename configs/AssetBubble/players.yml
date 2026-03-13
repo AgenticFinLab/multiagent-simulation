@@ -35,7 +35,7 @@ market:
       fundamental_growth: 0.001 # Slow fundamental appreciation
       noise_std: 0.3
       short_cost_rate: 0.02     # Cost of borrowing shares to short
-      history_limit: 10
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -55,7 +55,7 @@ momentum_speculator_1:
       # Investor base parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 10
+      custom_state_hot_limit: 3
       # MomentumSpeculator specific parameters
       lookback_short: 3
       aggressiveness: 2.0       # High: amplifies momentum signals
@@ -77,7 +77,7 @@ momentum_speculator_2:
       # Investor base parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 10
+      custom_state_hot_limit: 3
       # MomentumSpeculator specific parameters
       lookback_short: 3
       aggressiveness: 2.0
@@ -102,7 +102,7 @@ rational_arbitrageur:
       # Investor base parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 10
+      custom_state_hot_limit: 3
       # RationalArbitrageur specific parameters
       deviation_threshold: 0.10     # Only act on >10% deviation
       base_position_size: 25.0      # Moderate size (limited capital)
@@ -127,7 +127,7 @@ noise_trader_1:
       # Investor base parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 10
+      custom_state_hot_limit: 3
       # NoiseTrader specific parameters
       sentiment_volatility: 0.3
       herding_weight: 0.6       # How much to follow recent returns
@@ -148,7 +148,7 @@ noise_trader_2:
       # Investor base parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 10
+      custom_state_hot_limit: 3
       # NoiseTrader specific parameters
       sentiment_volatility: 0.3
       herding_weight: 0.6
@@ -172,7 +172,7 @@ fundamental_investor:
       # Investor base parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 10
+      custom_state_hot_limit: 3
       # FundamentalInvestor specific parameters
       trade_frequency: 5        # Trade every N rounds
       value_sensitivity: 0.3
@@ -196,7 +196,7 @@ leveraged_buyer:
       # Investor base parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 10
+      custom_state_hot_limit: 3
       # LeveragedBuyer specific parameters
       leverage_ratio: 2.0           # 2x leverage
       margin_call_threshold: 0.3    # Forced sell if equity drops 30%
@@ -221,7 +221,7 @@ conservative_holder:
       # Investor base parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 10
+      custom_state_hot_limit: 3
       # ConservativeHolder specific parameters
       target_position: 20.0         # Target holding
       rebalance_frequency: 10       # Rebalance every N rounds

@@ -7,7 +7,7 @@ setting:
   name: "flash_crash_simulation"
   description: "Market microstructure with HFT and liquidity dynamics"
   total_rounds: 300
-  entry_limit: 10
+  round_history_limit: 3
   record_path: "EXPERIMENT/FlashCrash/records"
   save_diagram_interval: 50
 

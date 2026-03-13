@@ -12,7 +12,7 @@ setting:
   name: "market_crash_simulation"
   description: "Market crash through liquidity spiral and forced deleveraging"
   total_rounds: 200
-  entry_limit: 10
+  round_history_limit: 3
   record_path: "EXPERIMENT/MarketCrash/records"
   save_diagram_interval: 25
 

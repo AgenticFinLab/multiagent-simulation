@@ -18,7 +18,7 @@ market:
       price_impact: 0.08
       mean_reversion: 0.015
       noise_std: 0.4
-      history_limit: 200
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 llm_market_maker:
@@ -34,7 +34,7 @@ llm_market_maker:
       record_path: "EXPERIMENT/LiquidityDryupLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.LiquidityDryupLLM.prompts:LLM_MARKET_MAKER_SYS"
         user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"
@@ -58,7 +58,7 @@ llm_liquidity_demander:
       record_path: "EXPERIMENT/LiquidityDryupLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.LiquidityDryupLLM.prompts:LLM_LIQUIDITY_DEMANDER_SYS"
         user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"
@@ -82,7 +82,7 @@ llm_arbitrageur:
       record_path: "EXPERIMENT/LiquidityDryupLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.LiquidityDryupLLM.prompts:LLM_ARBITRAGEUR_SYS"
         user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"
@@ -106,7 +106,7 @@ llm_value:
       record_path: "EXPERIMENT/LiquidityDryupLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.LiquidityDryupLLM.prompts:LLM_VALUE_SYS"
         user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"
@@ -130,7 +130,7 @@ llm_forced_seller:
       record_path: "EXPERIMENT/LiquidityDryupLLM/records"
       initial_cash: 10000.0
       initial_position: 100.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.LiquidityDryupLLM.prompts:LLM_FORCED_SELLER_SYS"
         user_message: "examples.LiquidityDryupLLM.prompts:LLM_USER_TEMPLATE"

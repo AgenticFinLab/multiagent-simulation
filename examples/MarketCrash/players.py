@@ -40,7 +40,7 @@ class Market(GeneralPlayer):
         - fundamental_value, initial_price
         - base_price_impact, mean_reversion, noise_std
         - liquidity_decay, liquidity_recovery, min_liquidity
-        - history_limit, record_path
+        - custom_state_hot_limit, record_path
     """
 
     async def perceive(
@@ -55,7 +55,7 @@ class Market(GeneralPlayer):
             extras = self.config.extras
             record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["liquidity"] = 1.0  # Normalized liquidity
@@ -64,15 +64,15 @@ class Market(GeneralPlayer):
 
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["liquidity_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "liquidity"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["volatility_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volatility"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         orders = []
@@ -213,7 +213,7 @@ class BaseInvestor(GeneralPlayer):
     Base class for crash simulation investors.
 
     Parameters from config extras:
-        - initial_cash, initial_position, history_limit, record_path
+        - initial_cash, initial_position, custom_state_hot_limit, record_path
     """
 
     async def perceive(
@@ -228,18 +228,18 @@ class BaseInvestor(GeneralPlayer):
             extras = self.config.extras
             record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["entry_price"] = 0.0
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["volatility_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volatility"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         if observation.inbounds:

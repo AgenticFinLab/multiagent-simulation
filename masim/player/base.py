@@ -7,6 +7,7 @@ Base Player module for the Multi-Agent Simulation (MASim) framework.
 
 This module contains:
 - Dataclasses: Type definitions for Actions, Observations, Results
+- `Info`: Player-layer data unit (direction-agnostic: send as Info, receive as Info)
 - PlayerState: Private state container for Player entities
 - Abstract BasePlayer: Interface contract for all Player implementations
 
@@ -51,7 +52,7 @@ entity in the MASim framework. A Player represents any agent that can:
        │
        └── Persona (When: Infrastructure Coordination)
                 │
-                ├── communication_proxy
+                ├── message_proxy  (SendReceiveProxy)
                 ├── storage_proxy
                 ├── resource_proxy
                 └── observability_proxy
@@ -201,35 +202,39 @@ class LocalObservation:
 
 
 @dataclass
-class Inbound:
+class Info:
     """
-    Inbound wrapper for received messages.
+    Player-layer data unit — direction-agnostic content carrier.
 
-    Persona converts channel Message to Inbound for Player consumption.
-    Wraps the original Message with reception metadata.
+    Used in both directions at the Player/Persona boundary:
+      - Outgoing: Player produces Info(payload, content_type, extras)
+      - Incoming: Proxy unwraps Message → Info, populates sender_id + time_received
+
+    Flow:
+        SEND:    Player.decide() → Info(payload) → Persona → Message → SimPacket
+        RECEIVE: SimPacket → Message → Proxy → Info(payload, sender_id) → Player
 
     Attributes:
-        message: The original Message object from channel
-        time_received: ISO timestamp when message was received
+        payload:       The actual content (sent or received)
+        content_type:  Optional categorization of the content
+        extras:        Flexible additional fields
+        sender_id:     Populated on receive — ID of the sender (None if outgoing)
+        time_received: Populated on receive — ISO timestamp (None if outgoing)
     """
 
-    message: "Message"
-    time_received: str = field(default_factory=lambda: datetime.now().isoformat())
-
-    @property
-    def sender_id(self) -> str:
-        """Shortcut to message sender_id."""
-        return self.message.sender_id
-
-    @property
-    def payload(self) -> PayloadType:
-        """Extract actual content from message payload."""
-        return self.message.payload["content"]
+    payload: PayloadType
+    content_type: Optional[str] = None
+    extras: Dict[str, Any] = field(default_factory=dict)
+    sender_id: Optional[str] = None
+    time_received: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialize to dictionary."""
         return {
-            "message": self.message.to_dict(),
+            "payload": self.payload,
+            "content_type": self.content_type,
+            "extras": self.extras,
+            "sender_id": self.sender_id,
             "time_received": self.time_received,
         }
 
@@ -241,15 +246,15 @@ class Observation:
 
     Observation Structure:
     - local: LocalObservation (player's own perception)
-    - inbounds: List[Inbound] (decoded messages from other players)
+    - inbounds: List[Info] (Info units received from other players, populated by Persona)
     - round: int (simulation round number)
 
     Data Flow:
-        Channel → Message → Persona (decode) → Inbound → Observation
+        SimPacket → Message → Proxy → Info(sender_id populated) → Observation
     """
 
     local: LocalObservation
-    inbounds: List["Inbound"]
+    inbounds: List["Info"]
     round: int = 0
 
     @property
@@ -263,33 +268,6 @@ class Observation:
             "local": self.local.to_dict(),
             "inbounds": [inb.to_dict() for inb in self.inbounds],
             "round": self.round,
-        }
-
-
-@dataclass
-class Outbound:
-    """
-    Content-focused outbound data that Player wants to send.
-
-    Player returns these in decide() result under 'outbound_messages' key.
-    Persona converts them to Message objects and handles routing via topology.
-
-    Attributes:
-        payload: The actual content to send
-        content_type: Optional categorization of the content
-        extras: Flexible additional fields
-    """
-
-    payload: PayloadType
-    content_type: Optional[str] = None
-    extras: Dict[str, Any] = field(default_factory=dict)
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Serialize to dictionary."""
-        return {
-            "payload": self.payload,
-            "content_type": self.content_type,
-            "extras": self.extras,
         }
 
 
@@ -372,10 +350,6 @@ class PlayerConfig:
     group_tags: List[str] = field(default_factory=list)
     extras: Dict[str, Any] = field(default_factory=dict)
 
-    def is_coordinator(self) -> bool:
-        """Check if this player has coordinator role."""
-        return self.role == "coordinator"
-
 
 # =============================================================================
 #                          PLAYER STATE
@@ -407,7 +381,7 @@ class PlayerState:
     - custom_state: Domain-specific key-value store
     - Timing metrics: turn/step durations
 
-    Does NOT contain functional members like inbounds, pending_outbounds, or expected_senders
+    Does NOT contain functional members like received_infos, pending_info, or expected_senders
     - those belong to the Player class directly.
     """
 
@@ -481,11 +455,6 @@ class PlayerState:
             ),
         }
 
-    def update_turn(self, observation: "Observation", action: "Action") -> None:
-        """Update state after completing a turn."""
-        self.last_observation = observation
-        self.last_action = action
-
     def update_step(self, observation: "Observation", action: "Action") -> None:
         """Update state after completing a step."""
         self.last_observation = observation
@@ -553,11 +522,11 @@ class BasePlayer(ABC):
         # Private State Container (status/metrics only)
         self.state: PlayerState = PlayerState()
 
-        # Inbound Queue (decoded messages from Persona)
-        self.inbounds: List["Inbound"] = []
+        # Received Info queue (Info units delivered by Persona, waiting for perceive)
+        self.received_infos: List["Info"] = []
 
-        # Outbound Queue (pending messages to send)
-        self.pending_outbounds: List["Outbound"] = []
+        # Pending Info queue (Info units after decide(), waiting for Simulator dispatch)
+        self.pending_info: List["Info"] = []
 
         # Expected Senders (set by Persona from topology sources)
         self.expected_senders: Set[str] = set()
@@ -657,22 +626,35 @@ class BasePlayer(ABC):
         ...
 
     # =========================================================================
-    #                      INBOUND HANDLING (Override in subclass)
+    #                      RECEIVED INFO HANDLING (Override in subclass)
     # =========================================================================
 
     @abstractmethod
-    def on_inbound(self, inbound: "Inbound") -> None:
-        """Receive a decoded inbound from Persona."""
+    def receive_info(self, info: "Info") -> None:
+        """Receive an Info unit from Persona (incoming content from another player)."""
         ...
 
     @abstractmethod
-    def get_pending_inbounds(self) -> List["Inbound"]:
-        """Get and clear pending inbounds."""
+    def get_received_infos(self) -> List["Info"]:
+        """Get and clear all received Info units (consumed once, in operate())."""
         ...
 
     @abstractmethod
-    def is_received_ready(self, round_num: int, **kwargs) -> bool:
-        """Check if player has received enough inbounds to proceed."""
+    def is_received_ready(
+        self, round_num: int, received_senders: set, **kwargs
+    ) -> bool:
+        """
+        Check if player has received enough inbounds to proceed.
+
+        Called by Persona in operate() waiting loop.
+        Player owns this decision - override in subclass for custom readiness logic.
+
+        Args:
+            round_num: Current round number
+            received_senders: Set of sender IDs currently in proxy receive_queue
+                              (provided by Persona from proxy.get_received_senders())
+            **kwargs: Additional parameters (e.g., level)
+        """
         ...
 
     # =========================================================================

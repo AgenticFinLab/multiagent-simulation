@@ -20,7 +20,7 @@ market:
       noise_std: 0.3
       low_liquidity_threshold: 50.0
       high_impact_multiplier: 3.0
-      history_limit: 200
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 llm_hft:
@@ -36,7 +36,7 @@ llm_hft:
       record_path: "EXPERIMENT/FlashCrashLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.FlashCrashLLM.prompts:LLM_HFT_SYS"
         user_message: "examples.FlashCrashLLM.prompts:LLM_USER_TEMPLATE"
@@ -60,7 +60,7 @@ llm_market_maker:
       record_path: "EXPERIMENT/FlashCrashLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.FlashCrashLLM.prompts:LLM_MARKET_MAKER_SYS"
         user_message: "examples.FlashCrashLLM.prompts:LLM_USER_TEMPLATE"
@@ -84,7 +84,7 @@ llm_stop_loss:
       record_path: "EXPERIMENT/FlashCrashLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.FlashCrashLLM.prompts:LLM_STOP_LOSS_SYS"
         user_message: "examples.FlashCrashLLM.prompts:LLM_USER_TEMPLATE"
@@ -108,7 +108,7 @@ llm_fundamental:
       record_path: "EXPERIMENT/FlashCrashLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.FlashCrashLLM.prompts:LLM_FUNDAMENTAL_SYS"
         user_message: "examples.FlashCrashLLM.prompts:LLM_USER_TEMPLATE"
@@ -132,7 +132,7 @@ llm_algo:
       record_path: "EXPERIMENT/FlashCrashLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.FlashCrashLLM.prompts:LLM_ALGO_SYS"
         user_message: "examples.FlashCrashLLM.prompts:LLM_USER_TEMPLATE"

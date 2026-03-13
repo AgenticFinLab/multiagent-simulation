@@ -23,7 +23,7 @@ market:
       noise_std: 0.4
       news_probability: 0.15
       news_impact_range: 5.0
-      history_limit: 200
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 llm_disposition_biased:
@@ -39,7 +39,7 @@ llm_disposition_biased:
       record_path: "EXPERIMENT/DispositionEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffectLLM.prompts:LLM_DISPOSITION_BIASED_SYS"
         user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -63,7 +63,7 @@ llm_rational:
       record_path: "EXPERIMENT/DispositionEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffectLLM.prompts:LLM_RATIONAL_SYS"
         user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -87,7 +87,7 @@ llm_tax_aware:
       record_path: "EXPERIMENT/DispositionEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffectLLM.prompts:LLM_TAX_AWARE_SYS"
         user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -111,7 +111,7 @@ llm_institutional:
       record_path: "EXPERIMENT/DispositionEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffectLLM.prompts:LLM_INSTITUTIONAL_SYS"
         user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -135,7 +135,7 @@ llm_loss_averse:
       record_path: "EXPERIMENT/DispositionEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffectLLM.prompts:LLM_LOSS_AVERSE_SYS"
         user_message: "examples.DispositionEffectLLM.prompts:LLM_USER_TEMPLATE"

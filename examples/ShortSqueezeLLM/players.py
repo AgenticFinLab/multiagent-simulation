@@ -8,13 +8,13 @@ Market Parameters (from config.extras):
     - mean_reversion: Mean reversion strength
     - noise_std: Random noise standard deviation
     - initial_short_interest: Starting short interest percentage
-    - history_limit: Maximum history buffer size
+    - custom_state_hot_limit: Maximum history buffer size
 
 Investor Parameters (from config.extras):
     - record_path: Path for output records
     - initial_cash: Starting cash balance
     - initial_position: Starting share position (negative for shorts)
-    - history_limit: Maximum history buffer size
+    - custom_state_hot_limit: Maximum history buffer size
     - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
@@ -56,13 +56,13 @@ class Market(GeneralPlayer):
             extras = self.config.extras
             record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["short_interest"] = extras["initial_short_interest"]
             self.state.custom_state["buying_pressure"] = 0.0
             self.state.custom_state["price_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "price"), entry_limit=history_limit
+                folder=os.path.join(base_path, "price"), entry_limit=custom_state_hot_limit
             )
 
         orders = []

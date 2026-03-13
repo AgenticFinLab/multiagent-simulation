@@ -17,13 +17,13 @@ Market Parameters (from config.extras):
     - liquidity_decay: Liquidity decay rate during selling
     - liquidity_recovery: Liquidity recovery rate
     - min_liquidity: Minimum liquidity floor
-    - history_limit: Maximum history buffer size
+    - custom_state_hot_limit: Maximum history buffer size
 
 Investor Parameters (from config.extras):
     - record_path: Path for output records
     - initial_cash: Starting cash balance
     - initial_position: Starting share position
-    - history_limit: Maximum history buffer size
+    - custom_state_hot_limit: Maximum history buffer size
     - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
@@ -68,7 +68,7 @@ class Market(GeneralPlayer):
             extras = self.config.extras
             record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["liquidity"] = 1.0
@@ -77,11 +77,11 @@ class Market(GeneralPlayer):
 
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["liquidity_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "liquidity"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         orders = []
@@ -214,7 +214,7 @@ class LLMInvestor(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             load_dotenv()
             llm_config = extras["llm"]
@@ -234,7 +234,7 @@ class LLMInvestor(GeneralPlayer):
             base_path = os.path.join(record_path, self.config.identity)
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         if observation.inbounds:

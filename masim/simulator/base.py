@@ -277,7 +277,7 @@ class BaseSimulator(ABC):
         history_folder = os.path.join(config.setting["record_path"], "history")
         self.history: HistoryBuffer = HistoryBuffer(
             folder=history_folder,
-            entry_limit=config.setting["entry_limit"],
+            entry_limit=config.setting["round_history_limit"],
         )
 
         # Communication topology (initialized by subclass setup)
@@ -339,7 +339,7 @@ class BaseSimulator(ABC):
 
     @abstractmethod
     def phase_dispatch(self, level_handles: Dict[str, "ActorHandle"]) -> None:
-        """Dispatch outbound messages for a level."""
+        """Encode queued Info units → Message → SimPacket and deliver to targets."""
         ...
 
     # =========================================================================

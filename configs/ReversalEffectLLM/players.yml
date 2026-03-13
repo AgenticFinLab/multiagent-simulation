@@ -18,7 +18,7 @@ market:
       price_impact: 0.08
       mean_reversion: 0.01
       noise_std: 0.5
-      history_limit: 200
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 llm_contrarian:
@@ -34,7 +34,7 @@ llm_contrarian:
       record_path: "EXPERIMENT/ReversalEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.ReversalEffectLLM.prompts:LLM_CONTRARIAN_SYS"
         user_message: "examples.ReversalEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -58,7 +58,7 @@ llm_overconfident:
       record_path: "EXPERIMENT/ReversalEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.ReversalEffectLLM.prompts:LLM_OVERCONFIDENT_SYS"
         user_message: "examples.ReversalEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -82,7 +82,7 @@ llm_value:
       record_path: "EXPERIMENT/ReversalEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.ReversalEffectLLM.prompts:LLM_VALUE_SYS"
         user_message: "examples.ReversalEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -106,7 +106,7 @@ llm_momentum_chaser:
       record_path: "EXPERIMENT/ReversalEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.ReversalEffectLLM.prompts:LLM_MOMENTUM_CHASER_SYS"
         user_message: "examples.ReversalEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -130,7 +130,7 @@ llm_noise:
       record_path: "EXPERIMENT/ReversalEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.ReversalEffectLLM.prompts:LLM_NOISE_SYS"
         user_message: "examples.ReversalEffectLLM.prompts:LLM_USER_TEMPLATE"

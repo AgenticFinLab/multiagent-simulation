@@ -19,7 +19,7 @@ market:
       mean_reversion: 0.005
       noise_std: 0.5
       initial_short_interest: 80.0
-      history_limit: 200
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 llm_short_seller:
@@ -35,7 +35,7 @@ llm_short_seller:
       record_path: "EXPERIMENT/ShortSqueezeLLM/records"
       initial_cash: 10000.0
       initial_position: -50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.ShortSqueezeLLM.prompts:LLM_SHORT_SELLER_SYS"
         user_message: "examples.ShortSqueezeLLM.prompts:LLM_USER_TEMPLATE"
@@ -59,7 +59,7 @@ llm_retail_coord:
       record_path: "EXPERIMENT/ShortSqueezeLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.ShortSqueezeLLM.prompts:LLM_RETAIL_COORD_SYS"
         user_message: "examples.ShortSqueezeLLM.prompts:LLM_USER_TEMPLATE"
@@ -83,7 +83,7 @@ llm_momentum:
       record_path: "EXPERIMENT/ShortSqueezeLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.ShortSqueezeLLM.prompts:LLM_MOMENTUM_SYS"
         user_message: "examples.ShortSqueezeLLM.prompts:LLM_USER_TEMPLATE"
@@ -107,7 +107,7 @@ llm_value:
       record_path: "EXPERIMENT/ShortSqueezeLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.ShortSqueezeLLM.prompts:LLM_VALUE_SYS"
         user_message: "examples.ShortSqueezeLLM.prompts:LLM_USER_TEMPLATE"
@@ -131,7 +131,7 @@ llm_institutional:
       record_path: "EXPERIMENT/ShortSqueezeLLM/records"
       initial_cash: 10000.0
       initial_position: 100.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.ShortSqueezeLLM.prompts:LLM_INSTITUTIONAL_SYS"
         user_message: "examples.ShortSqueezeLLM.prompts:LLM_USER_TEMPLATE"

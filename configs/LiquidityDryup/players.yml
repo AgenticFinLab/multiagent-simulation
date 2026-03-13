@@ -33,7 +33,7 @@ market:
       price_impact: 0.08
       mean_reversion: 0.015
       noise_std: 0.4
-      history_limit: 200
+      custom_state_hot_limit: 3
       base_liquidity: 50.0
   persona: !include persona.yml
 
@@ -50,7 +50,7 @@ market_maker_1:
       record_path: "EXPERIMENT/LiquidityDryup/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # MarketMaker specific
       volatility_threshold: 0.02
       base_liquidity: 30.0
@@ -71,7 +71,7 @@ market_maker_2:
       record_path: "EXPERIMENT/LiquidityDryup/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       volatility_threshold: 0.02
       base_liquidity: 30.0
       withdraw_rebalance: 0.3
@@ -91,7 +91,7 @@ liquidity_seeker_1:
       record_path: "EXPERIMENT/LiquidityDryup/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # LiquiditySeeker specific
       target_volatility: 15.0
       liquidity_base: 100.0
@@ -110,7 +110,7 @@ liquidity_seeker_2:
       record_path: "EXPERIMENT/LiquidityDryup/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       target_volatility: 15.0
       liquidity_base: 100.0
   persona: !include persona.yml
@@ -128,7 +128,7 @@ value_trader:
       record_path: "EXPERIMENT/LiquidityDryup/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # ValueTrader specific
       liquidity_threshold: 0.05
       trade_threshold: 0.03
@@ -149,7 +149,7 @@ momentum_trader:
       record_path: "EXPERIMENT/LiquidityDryup/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # MomentumTrader specific
       momentum_threshold: 0.01
       momentum_multiplier: 200
@@ -168,7 +168,7 @@ noise_trader:
       record_path: "EXPERIMENT/LiquidityDryup/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # NoiseTrader specific
       noise_volatility: 10.0
   persona: !include persona.yml

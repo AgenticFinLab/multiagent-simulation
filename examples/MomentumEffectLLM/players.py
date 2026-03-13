@@ -15,13 +15,13 @@ Market Parameters (from config.extras):
     - noise_std: Random noise standard deviation
     - drift_persistence: Drift autocorrelation
     - drift_volatility: Drift innovation volatility
-    - history_limit: Maximum history buffer size
+    - custom_state_hot_limit: Maximum history buffer size
 
 Investor Parameters (from config.extras):
     - record_path: Path for output records
     - initial_cash: Starting cash balance
     - initial_position: Starting share position
-    - history_limit: Maximum history buffer size
+    - custom_state_hot_limit: Maximum history buffer size
     - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
@@ -30,6 +30,7 @@ import json
 import random
 import re
 import importlib
+from collections import deque
 from typing import Any, Dict, List, Optional
 from dotenv import load_dotenv
 
@@ -65,16 +66,16 @@ class Market(GeneralPlayer):
             extras = self.config.extras
             record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras["initial_fundamental"]
             self.state.custom_state["drift"] = 0.0
-            self.state.custom_state["returns"] = []
+            self.state.custom_state["returns"] = deque(maxlen=20)  # bounded ring buffer
 
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         orders = []
@@ -127,8 +128,6 @@ class Market(GeneralPlayer):
         price_return = (new_price - current_price) / current_price
 
         returns.append(price_return)
-        if len(returns) > 20:
-            returns.pop(0)
 
         # Calculate momentum indicators
         momentum_5 = sum(returns[-5:]) if len(returns) >= 5 else 0
@@ -195,7 +194,7 @@ class LLMInvestor(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             load_dotenv()
             llm_config = extras["llm"]
@@ -215,7 +214,7 @@ class LLMInvestor(GeneralPlayer):
             base_path = os.path.join(record_path, self.config.identity)
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         if observation.inbounds:

@@ -32,7 +32,7 @@ market:
       # Fundamental drift (creates momentum opportunities)
       drift_persistence: 0.95      # Autocorrelated drift
       drift_volatility: 0.5
-      history_limit: 200
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 momentum_trader_1:
@@ -49,7 +49,7 @@ momentum_trader_1:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # MomentumTrader specific
       lookback_window: 5
       momentum_threshold: 0.02     # 2% threshold
@@ -71,7 +71,7 @@ momentum_trader_2:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # MomentumTrader specific
       lookback_window: 5
       momentum_threshold: 0.02
@@ -93,7 +93,7 @@ contrarian_trader:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # ContrarianTrader specific
       reversion_threshold: 0.03    # 3% deviation
       scale: 2.0
@@ -114,7 +114,7 @@ index_fund:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # IndexFund specific
       target_allocation: 0.6       # 60% equity
       rebalance_threshold: 0.05    # 5% deviation triggers rebalance
@@ -134,7 +134,7 @@ market_maker:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # MarketMaker specific
       inventory_target: 0.0
       reversion_speed: 0.2
@@ -154,7 +154,7 @@ technical_trader:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 20.0       # Start with some position
-      history_limit: 50
+      custom_state_hot_limit: 3
       # TechnicalTrader specific (MA crossover)
       short_window: 3
       long_window: 10
@@ -176,7 +176,7 @@ fundamental_trader:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # FundamentalTrader specific
       value_threshold: 0.05        # 5% mispricing
       scale: 1.5

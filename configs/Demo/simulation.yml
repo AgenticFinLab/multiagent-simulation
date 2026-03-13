@@ -14,7 +14,8 @@ setting:
   name: "demo_simulation"
   description: "Demo topology-driven message passing"
   total_rounds: 3
-  entry_limit: 10
+  round_history_limit: 3
+  save_diagram_interval: 1
   # Simulation-level records (diagrams, etc.)
   record_path: "EXPERIMENT/Demo/records"
 

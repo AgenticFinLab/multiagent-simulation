@@ -11,7 +11,7 @@ setting:
   name: "volatility_clustering_simulation"
   description: "GARCH-like volatility dynamics through heterogeneous agents"
   total_rounds: 200
-  entry_limit: 10
+  round_history_limit: 3
   record_path: "EXPERIMENT/VolatilityClustering/records"
   save_diagram_interval: 50
 

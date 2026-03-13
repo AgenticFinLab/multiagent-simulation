@@ -33,7 +33,7 @@ class Market(GeneralPlayer):
     Parameters from config extras:
         - fundamental_value, initial_price
         - price_impact, mean_reversion, noise_std
-        - history_limit, record_path
+        - custom_state_hot_limit, record_path
     """
 
     async def perceive(
@@ -50,12 +50,12 @@ class Market(GeneralPlayer):
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["short_interest"] = 0.0
 
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
             self.state.custom_state["price_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "price"), entry_limit=history_limit
+                folder=os.path.join(base_path, "price"), entry_limit=custom_state_hot_limit
             )
             self.state.custom_state["volume_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "volume"), entry_limit=history_limit
+                folder=os.path.join(base_path, "volume"), entry_limit=custom_state_hot_limit
             )
 
         orders = []
@@ -143,7 +143,7 @@ class BaseInvestor(GeneralPlayer):
     Base investor class.
 
     Parameters from config extras:
-        - initial_cash, initial_position, history_limit, record_path
+        - initial_cash, initial_position, custom_state_hot_limit, record_path
     """
 
     async def perceive(
@@ -156,9 +156,9 @@ class BaseInvestor(GeneralPlayer):
             base_path = os.path.join(record_path, self.config.identity)
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
             self.state.custom_state["price_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "price"), entry_limit=history_limit
+                folder=os.path.join(base_path, "price"), entry_limit=custom_state_hot_limit
             )
         if observation.inbounds:
             for inb in observation.inbounds:

@@ -29,13 +29,13 @@ market:
       # Market parameters
       initial_price: 100.0
       fundamental_value: 100.0
-      price_impact: 0.06
-      mean_reversion: 0.015
-      noise_std: 0.4
+      price_impact: 0.08
+      mean_reversion: 0.05
+      noise_std: 0.6
       # News shock parameters
       news_probability: 0.15
-      news_impact_range: 5.0
-      history_limit: 200
+      news_impact_range: 4.0
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 disposition_investor_1:
@@ -53,13 +53,15 @@ disposition_investor_1:
       initial_cash: 10000.0
       initial_position: 30.0
       initial_purchase_price: 100.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # DispositionInvestor specific (Prospect Theory)
-      gain_threshold: 0.10        # Sell at 10% gain
-      loss_threshold: -0.30       # Only sell at 30% loss
-      loss_aversion: 2.25         # λ parameter
-      sell_fraction_gain: 0.6     # Sell 60% when gain threshold hit
-      sell_fraction_loss: 0.2     # Reluctantly sell only 20% at loss
+      gain_threshold: 0.03        # Sell at 3% gain (quicker realization of winners)
+      loss_threshold: -0.10       # Sell at 10% loss (strong but not extreme threshold)
+      loss_aversion: 2.25         # λ parameter (Kahneman-Tversky 1979)
+      sell_fraction_gain: 0.5     # Sell 50% of position on gain realization
+      sell_fraction_loss: 0.15    # Very reluctantly sell only 15% at loss
+      max_position: 30.0          # Ceiling = initial_position
+      buy_fraction: 0.15          # Buy 15% of deficit only when ±1% of reference point
   persona: !include persona.yml
 
 disposition_investor_2:
@@ -77,13 +79,15 @@ disposition_investor_2:
       initial_cash: 10000.0
       initial_position: 30.0
       initial_purchase_price: 100.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # DispositionInvestor specific
-      gain_threshold: 0.10
-      loss_threshold: -0.30
+      gain_threshold: 0.03        # Sell at 3% gain
+      loss_threshold: -0.10       # Sell at 10% loss
       loss_aversion: 2.25
-      sell_fraction_gain: 0.6
-      sell_fraction_loss: 0.2
+      sell_fraction_gain: 0.5     # Sell 50% on gain
+      sell_fraction_loss: 0.15
+      max_position: 30.0          # Ceiling = initial_position
+      buy_fraction: 0.15          # Buy 15% of deficit only when ±1% of reference point
   persona: !include persona.yml
 
 rational_investor:
@@ -101,7 +105,7 @@ rational_investor:
       initial_cash: 10000.0
       initial_position: 30.0
       initial_purchase_price: 100.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # RationalInvestor specific
       target_allocation: 0.5
       rebalance_threshold: 0.1
@@ -122,7 +126,7 @@ tax_aware_investor:
       initial_cash: 10000.0
       initial_position: 30.0
       initial_purchase_price: 100.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # TaxAwareInvestor specific
       tax_loss_threshold: -0.05     # Sell at 5% loss for tax benefit
       capital_gains_hold: 0.20      # Hold until 20% gain (deferral benefit)
@@ -144,7 +148,7 @@ index_holder:
       initial_cash: 10000.0
       initial_position: 50.0        # Larger position for passive holder
       initial_purchase_price: 100.0
-      history_limit: 50
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 institutional_investor:
@@ -162,7 +166,7 @@ institutional_investor:
       initial_cash: 10000.0
       initial_position: 30.0
       initial_purchase_price: 100.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # InstitutionalInvestor specific (weaker disposition)
       gain_threshold: 0.25          # Hold longer than retail
       loss_threshold: -0.15         # Cut losses earlier than retail

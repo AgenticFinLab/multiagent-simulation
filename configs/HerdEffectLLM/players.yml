@@ -34,7 +34,7 @@ market:
       supply_elasticity: 0.1
       mean_reversion: 0.02
       noise_std: 0.5
-      history_limit: 200
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -55,7 +55,7 @@ llm_momentum:
       record_path: "EXPERIMENT/HerdEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.HerdEffectLLM.prompts:LLM_MOMENTUM_SYS"
         user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -79,7 +79,7 @@ llm_contrarian:
       record_path: "EXPERIMENT/HerdEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.HerdEffectLLM.prompts:LLM_CONTRARIAN_SYS"
         user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -103,7 +103,7 @@ llm_risk_averse:
       record_path: "EXPERIMENT/HerdEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.HerdEffectLLM.prompts:LLM_RISK_AVERSE_SYS"
         user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -127,7 +127,7 @@ llm_aggressive:
       record_path: "EXPERIMENT/HerdEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.HerdEffectLLM.prompts:LLM_AGGRESSIVE_SYS"
         user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -151,7 +151,7 @@ llm_noise:
       record_path: "EXPERIMENT/HerdEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.HerdEffectLLM.prompts:LLM_NOISE_SYS"
         user_message: "examples.HerdEffectLLM.prompts:LLM_USER_TEMPLATE"

@@ -12,7 +12,7 @@ setting:
   name: "momentum_effect_llm_simulation"
   description: "LLM-based momentum effect with heterogeneous traders"
   total_rounds: 50
-  entry_limit: 10
+  round_history_limit: 3
   record_path: "EXPERIMENT/MomentumEffectLLM/records"
   save_diagram_interval: 25
 

@@ -12,7 +12,7 @@ setting:
   name: "disposition_effect_llm_simulation"
   description: "LLM-based disposition effect with prospect theory investors"
   total_rounds: 50
-  entry_limit: 10
+  round_history_limit: 3
   record_path: "EXPERIMENT/DispositionEffectLLM/records"
   save_diagram_interval: 25
 

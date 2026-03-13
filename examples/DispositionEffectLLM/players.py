@@ -33,7 +33,7 @@ class Market(GeneralPlayer):
 
     Parameters from config extras:
         - initial_price, fundamental_value, price_impact, mean_reversion
-        - noise_std, news_probability, news_impact_range, history_limit, record_path
+        - noise_std, news_probability, news_impact_range, custom_state_hot_limit, record_path
     """
 
     async def perceive(
@@ -48,12 +48,12 @@ class Market(GeneralPlayer):
             extras = self.config.extras
             record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         orders = []
@@ -148,7 +148,7 @@ class LLMInvestor(GeneralPlayer):
     Base class for LLM-powered investors.
 
     Parameters from config extras:
-        - initial_cash, initial_position, history_limit, record_path, llm config
+        - initial_cash, initial_position, custom_state_hot_limit, record_path, llm config
     """
 
     async def perceive(
@@ -163,7 +163,7 @@ class LLMInvestor(GeneralPlayer):
             extras = self.config.extras
             record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
@@ -185,7 +185,7 @@ class LLMInvestor(GeneralPlayer):
 
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         if observation.inbounds:

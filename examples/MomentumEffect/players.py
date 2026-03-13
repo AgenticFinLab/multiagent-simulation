@@ -24,6 +24,7 @@ All parameters are configured via players.yml config file.
 import os
 import random
 import math
+from collections import deque
 from typing import Any, Dict, List, Optional
 
 from masim.player.general import GeneralPlayer
@@ -49,7 +50,7 @@ class Market(GeneralPlayer):
         - initial_price, initial_fundamental
         - price_impact, mean_reversion, noise_std
         - drift_persistence, drift_volatility
-        - history_limit, record_path
+        - custom_state_hot_limit, record_path
     """
 
     async def perceive(
@@ -69,14 +70,14 @@ class Market(GeneralPlayer):
             self.state.custom_state["fundamental"] = extras["initial_fundamental"]
             self.state.custom_state["drift"] = 0.0
 
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["return_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "return"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         orders = []
@@ -197,7 +198,7 @@ class BaseInvestor(GeneralPlayer):
     Base class for all investors.
 
     Parameters from config extras:
-        - initial_cash, initial_position, history_limit, record_path
+        - initial_cash, initial_position, custom_state_hot_limit, record_path
     """
 
     async def perceive(
@@ -215,10 +216,10 @@ class BaseInvestor(GeneralPlayer):
 
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
             self.state.custom_state["return_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "returns"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         market_data = None
@@ -324,7 +325,7 @@ class MomentumTrader(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -345,7 +346,7 @@ class MomentumTrader(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -432,7 +433,7 @@ class ContrarianTrader(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -453,7 +454,7 @@ class ContrarianTrader(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -539,7 +540,7 @@ class IndexFund(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -556,7 +557,7 @@ class IndexFund(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -633,7 +634,7 @@ class MarketMaker(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -650,7 +651,7 @@ class MarketMaker(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -690,18 +691,12 @@ class TechnicalTrader(BaseInvestor):
         scale = extras["scale"]
         max_position = extras["max_position"]
 
-        # Store price for MA calculation
+        # Store price for MA calculation (deque auto-caps at long_window)
         if "ma_prices" not in self.state.custom_state:
-            self.state.custom_state["ma_prices"] = []
+            self.state.custom_state["ma_prices"] = deque(maxlen=long_window)
         self.state.custom_state["ma_prices"].append(price)
 
-        # Keep limited history
-        if len(self.state.custom_state["ma_prices"]) > long_window:
-            self.state.custom_state["ma_prices"] = self.state.custom_state["ma_prices"][
-                -long_window:
-            ]
-
-        prices = self.state.custom_state["ma_prices"]
+        prices = list(self.state.custom_state["ma_prices"])
         quantity = 0.0
 
         if len(prices) >= long_window:
@@ -748,7 +743,7 @@ class TechnicalTrader(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -765,7 +760,7 @@ class TechnicalTrader(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -848,7 +843,7 @@ class FundamentalTrader(BaseInvestor):
                         "quantity": quantity,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }
@@ -865,7 +860,7 @@ class FundamentalTrader(BaseInvestor):
                         "quantity": 0,
                         "strategy": strategy_name,
                     },
-                    "target": "market",
+                    "content_type": "investor_bid",
                 }
             ],
         }

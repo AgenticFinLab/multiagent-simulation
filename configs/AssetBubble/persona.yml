@@ -10,11 +10,12 @@ proxy:
     checkpoint_dir: "EXPERIMENT/AssetBubble/checkpoints"
     record_path: "EXPERIMENT/AssetBubble/records"
     record_rounds: true
-    entry_limit: 10
+    turn_block_size: 3
+    monitor_hot_limit: 3
 
   monitoring:
     record_path: "EXPERIMENT/AssetBubble/monitoring"
-    entry_limit: 10
+    monitor_hot_limit: 3
 
   communication:
     message_timeout_ms: 5000

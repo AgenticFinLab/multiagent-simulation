@@ -23,7 +23,8 @@ market:
   class: "examples.[SCENARIO_NAME].players:Market"
   config:
     identity: "market"
-    role: coordinator                         # coordinator = Level 0, player = Level 1+
+    # coordinator = Level 0 (executes before all players); player = Level 1+
+    role: coordinator
     steps_per_turn: 1
     group_tags:
       - market
@@ -32,12 +33,20 @@ market:
       # =================================
       # Market-specific parameters
       # =================================
-      initial_price: 100.0                    # Starting price
-      fundamental_value: 100.0                # True fundamental value
-      price_impact: 0.05                      # Price impact coefficient
-      mean_reversion: 0.02                    # Mean reversion strength
-      noise_std: 0.5                          # Random noise std dev
-      history_limit: 200                      # Max history buffer size
+      # Starting price
+      initial_price: 100.0
+      # True fundamental value
+      fundamental_value: 100.0
+      # Price impact coefficient
+      price_impact: 0.05
+      # Mean reversion strength
+      mean_reversion: 0.02
+      # Random noise std dev
+      noise_std: 0.5
+      # Max entries kept in RAM for HistoryBuffers stored in custom_state
+      # (e.g. price_history, volume_history, return_history).
+      # Entries exceeding this limit are flushed to disk automatically.
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -48,7 +57,8 @@ investor_1:
   class: "examples.[SCENARIO_NAME].players:InvestorType1"
   config:
     identity: "investor_1"
-    role: player                              # player = Level 1+ execution
+    # player = Level 1+ execution (after coordinator)
+    role: player
     steps_per_turn: 1
     group_tags:
       - investors
@@ -57,9 +67,14 @@ investor_1:
       # =================================
       # Base investor parameters
       # =================================
-      initial_cash: 10000.0                   # Starting cash balance
-      initial_position: 0.0                   # Starting share position
-      history_limit: 100                      # Max history buffer size
+      # Starting cash balance
+      initial_cash: 10000.0
+      # Starting share position
+      initial_position: 0.0
+      # Max entries kept in RAM for HistoryBuffers stored in custom_state
+      # (e.g. price_history, volume_history, return_history).
+      # Entries exceeding this limit are flushed to disk automatically.
+      custom_state_hot_limit: 3
       # =================================
       # Strategy-specific parameters
       # =================================
@@ -83,7 +98,7 @@ investor_2:
       record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       # Strategy-specific parameters
   persona: !include persona.yml
 
@@ -103,6 +118,6 @@ investor_3:
       record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       # Strategy-specific parameters
   persona: !include persona.yml

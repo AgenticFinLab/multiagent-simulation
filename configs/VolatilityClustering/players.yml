@@ -37,7 +37,7 @@ market:
       garch_beta: 0.80
       min_volatility: 0.5
       max_volatility: 10.0
-      history_limit: 200
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -56,7 +56,7 @@ fundamentalist:
       record_path: "EXPERIMENT/VolatilityClustering/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # Fundamentalist specific
       trade_frequency: 3
       value_sensitivity: 0.5
@@ -80,7 +80,7 @@ trend_follower_1:
       record_path: "EXPERIMENT/VolatilityClustering/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # Trend follower specific
       lookback_window: 3
       base_position_size: 30.0
@@ -102,7 +102,7 @@ trend_follower_2:
       record_path: "EXPERIMENT/VolatilityClustering/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       lookback_window: 3
       base_position_size: 30.0
       volatility_sensitivity: 0.8
@@ -126,7 +126,7 @@ noise_trader_1:
       record_path: "EXPERIMENT/VolatilityClustering/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # Noise trader specific
       position_volatility: 15.0
       mean_reversion_speed: 0.1
@@ -145,7 +145,7 @@ noise_trader_2:
       record_path: "EXPERIMENT/VolatilityClustering/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       position_volatility: 15.0
       mean_reversion_speed: 0.1
   persona: !include persona.yml
@@ -166,7 +166,7 @@ slow_adapter:
       record_path: "EXPERIMENT/VolatilityClustering/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # Slow adapter specific
       lookback_window: 10
       update_weight: 0.1
@@ -189,7 +189,7 @@ volatility_trader:
       record_path: "EXPERIMENT/VolatilityClustering/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # Volatility trader specific
       vol_lookback: 5
       high_vol_threshold: 1.5

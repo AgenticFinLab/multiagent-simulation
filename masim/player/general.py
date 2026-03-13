@@ -20,8 +20,7 @@ from masim.player.base import (
     PayloadType,
     StepResult,
     TurnResult,
-    Outbound,
-    Inbound,
+    Info,
 )
 
 if TYPE_CHECKING:
@@ -152,11 +151,11 @@ class GeneralPlayer(BasePlayer):
         )
 
     def prepare_observation(self, round_num: int) -> Observation:
-        """Prepare the Observation for this turn with local data + inbounds."""
-        inbounds = self.get_pending_inbounds()
+        """Prepare the Observation for this turn with local data + received Info units."""
+        infos = self.get_received_infos()
         return Observation(
             local=self.get_local_observation(),
-            inbounds=inbounds,
+            inbounds=infos,
             round=round_num,
         )
 
@@ -172,6 +171,7 @@ class GeneralPlayer(BasePlayer):
         """Execute a turn consisting of multiple steps."""
         observation = self.prepare_observation(round_num)
         self.state.turn_tick_start()
+        self.state.step_reset()  # Reset step metrics for new turn
 
         step_results: List[StepResult] = []
         current_observation = observation
@@ -189,8 +189,8 @@ class GeneralPlayer(BasePlayer):
         self.state.turn_count += 1
         self.state.turn_tick_end()
 
-        # Prepare outbounds from step results (after turn completes)
-        self.prepare_outbounds(step_results)
+        # Prepare pending Info from step results (after turn completes)
+        self.prepare_pending_info(step_results)
 
         return TurnResult(
             step_results=step_results,
@@ -209,9 +209,9 @@ class GeneralPlayer(BasePlayer):
         """Update observation for the next step."""
         return current_observation
 
-    def prepare_outbounds(self, step_results: List["StepResult"]) -> None:
+    def prepare_pending_info(self, step_results: List["StepResult"]) -> None:
         """
-        Extract outbound messages from step results.
+        Extract Info units from step results and queue them for Simulator dispatch.
 
         Called after turn() completes to separate message preparation
         from the core perceive → decide → act flow.
@@ -224,10 +224,10 @@ class GeneralPlayer(BasePlayer):
             if isinstance(payload, dict) and "outbound_messages" in payload:
                 raw_messages = payload.pop("outbound_messages", [])
                 for msg in raw_messages:
-                    if isinstance(msg, Outbound):
-                        self.pending_outbounds.append(msg)
+                    if isinstance(msg, Info):
+                        self.pending_info.append(msg)
                     elif isinstance(msg, dict):
-                        self.pending_outbounds.append(Outbound(**msg))
+                        self.pending_info.append(Info(**msg))
 
     # =========================================================================
     #                      TOPOLOGY ACCESS
@@ -238,20 +238,22 @@ class GeneralPlayer(BasePlayer):
         return target_id in self.topology_targets
 
     # =========================================================================
-    #                      INBOUND HANDLING
+    #                      RECEIVED INFO HANDLING
     # =========================================================================
 
-    def on_inbound(self, inbound: Inbound) -> None:
-        """Receive a decoded inbound from Persona."""
-        self.inbounds.append(inbound)
+    def receive_info(self, info: Info) -> None:
+        """Receive an Info unit from Persona (incoming content from another player)."""
+        self.received_infos.append(info)
 
-    def get_pending_inbounds(self) -> List[Inbound]:
-        """Get and clear pending inbounds."""
-        inbounds = self.inbounds.copy()
-        self.inbounds.clear()
-        return inbounds
+    def get_received_infos(self) -> List[Info]:
+        """Get and clear all received Info units (consumed once, in operate())."""
+        infos = self.received_infos.copy()
+        self.received_infos.clear()
+        return infos
 
-    def is_received_ready(self, round_num: int, **kwargs) -> bool:
+    def is_received_ready(
+        self, round_num: int, received_senders: set, **kwargs
+    ) -> bool:
         """
         Check if player has received enough inbounds to proceed.
 
@@ -262,12 +264,14 @@ class GeneralPlayer(BasePlayer):
 
         Args:
             round_num: Current round number
+            received_senders: Set of sender IDs in proxy inbound queue
+                              (injected by Persona from proxy.get_received_senders())
             **kwargs: Additional parameters (level, etc.)
 
         Returns:
             True if ready to proceed with decision
         """
-        level = kwargs["level"]
+        level = kwargs.get("level", 0)
 
         # Level 0 nodes in Round 1 are initiators - they don't wait for messages
         if round_num == 1 and level == 0:
@@ -276,7 +280,7 @@ class GeneralPlayer(BasePlayer):
         if not self.expected_senders:
             return True
 
-        received_senders = {inb.sender_id for inb in self.inbounds}
+        # Player owns the readiness decision; proxy provides received_senders data
         return self.expected_senders.issubset(received_senders)
 
     # =========================================================================

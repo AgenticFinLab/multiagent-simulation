@@ -68,7 +68,7 @@ class Market(GeneralPlayer):
 
     All parameters configured via extras in players.yml:
         - initial_price, fundamental_value, supply_elasticity
-        - mean_reversion, noise_std, history_limit, record_path
+        - mean_reversion, noise_std, custom_state_hot_limit, record_path
     """
 
     async def perceive(
@@ -86,21 +86,21 @@ class Market(GeneralPlayer):
 
             record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
                 initial_values=[extras["initial_price"]],
             )
             self.state.custom_state["volume_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volume"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
                 initial_values=[0],
             )
             self.state.custom_state["return_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "return"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
                 initial_values=[0.0],
             )
 
@@ -226,7 +226,7 @@ class BaseInvestor(GeneralPlayer):
     - price_history: Track recent prices for volatility calculation (HistoryBuffer)
 
     All parameters configured via extras in players.yml:
-        - initial_cash, initial_position, history_limit, record_path
+        - initial_cash, initial_position, custom_state_hot_limit, record_path
     """
 
     async def perceive(
@@ -245,15 +245,15 @@ class BaseInvestor(GeneralPlayer):
 
             record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
-            history_limit = extras["history_limit"]
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["volume_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volume"),
-                entry_limit=history_limit,
+                entry_limit=custom_state_hot_limit,
             )
 
         # Get market data

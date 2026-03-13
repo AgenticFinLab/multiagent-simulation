@@ -28,7 +28,7 @@ market:
       price_impact: 0.1
       mean_reversion: 0.005        # Weak - allows squeeze to develop
       noise_std: 0.5
-      history_limit: 200
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 short_seller_1:
@@ -45,7 +45,7 @@ short_seller_1:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0        # Will be overridden to -50
-      history_limit: 50
+      custom_state_hot_limit: 3
       # ShortSeller specific
       short_initial_position: -50.0
       short_entry_price: 30.0      # Shorted at initial price
@@ -66,7 +66,7 @@ short_seller_2:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # ShortSeller specific
       short_initial_position: -50.0
       short_entry_price: 30.0
@@ -87,7 +87,7 @@ momentum_buyer_1:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # MomentumBuyer specific
       lookback: 3
       base_size: 25.0
@@ -110,7 +110,7 @@ momentum_buyer_2:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # MomentumBuyer specific
       lookback: 3
       base_size: 25.0
@@ -133,7 +133,7 @@ retail_1:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # RetailTrader specific
       noise_std: 12.0
       bullish_bias: 5.0
@@ -155,7 +155,7 @@ retail_2:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # RetailTrader specific
       noise_std: 12.0
       bullish_bias: 5.0
@@ -177,7 +177,7 @@ value_investor:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 50
+      custom_state_hot_limit: 3
       # ValueInvestor specific
       value_threshold: 0.15
       base_size: 20.0
@@ -199,5 +199,5 @@ institutional:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 100.0      # Large passive holder
-      history_limit: 50
+      custom_state_hot_limit: 3
   persona: !include persona.yml

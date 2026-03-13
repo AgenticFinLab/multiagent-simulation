@@ -20,7 +20,7 @@ market:
       noise_std: 0.3
       drift_persistence: 0.95
       drift_volatility: 0.5
-      history_limit: 200
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 llm_momentum_trader:
@@ -36,7 +36,7 @@ llm_momentum_trader:
       record_path: "EXPERIMENT/MomentumEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.MomentumEffectLLM.prompts:LLM_MOMENTUM_TRADER_SYS"
         user_message: "examples.MomentumEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -60,7 +60,7 @@ llm_contrarian:
       record_path: "EXPERIMENT/MomentumEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.MomentumEffectLLM.prompts:LLM_CONTRARIAN_SYS"
         user_message: "examples.MomentumEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -84,7 +84,7 @@ llm_technical:
       record_path: "EXPERIMENT/MomentumEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.MomentumEffectLLM.prompts:LLM_TECHNICAL_SYS"
         user_message: "examples.MomentumEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -108,7 +108,7 @@ llm_trend_follower:
       record_path: "EXPERIMENT/MomentumEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.MomentumEffectLLM.prompts:LLM_TREND_FOLLOWER_SYS"
         user_message: "examples.MomentumEffectLLM.prompts:LLM_USER_TEMPLATE"
@@ -132,7 +132,7 @@ llm_fundamental:
       record_path: "EXPERIMENT/MomentumEffectLLM/records"
       initial_cash: 10000.0
       initial_position: 50.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.MomentumEffectLLM.prompts:LLM_FUNDAMENTAL_SYS"
         user_message: "examples.MomentumEffectLLM.prompts:LLM_USER_TEMPLATE"

@@ -24,7 +24,7 @@ market:
       fundamental_growth: 0.001
       noise_std: 0.3
       short_cost_rate: 0.02
-      history_limit: 300
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 # LLM Greater Fool Speculator
@@ -41,7 +41,7 @@ llm_greater_fool:
       record_path: "EXPERIMENT/AssetBubbleLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.AssetBubbleLLM.prompts:LLM_GREATER_FOOL_SYS"
         user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"
@@ -66,7 +66,7 @@ llm_arbitrageur:
       record_path: "EXPERIMENT/AssetBubbleLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.AssetBubbleLLM.prompts:LLM_ARBITRAGEUR_SYS"
         user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"
@@ -91,7 +91,7 @@ llm_sentiment:
       record_path: "EXPERIMENT/AssetBubbleLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.AssetBubbleLLM.prompts:LLM_SENTIMENT_SYS"
         user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"
@@ -116,7 +116,7 @@ llm_value:
       record_path: "EXPERIMENT/AssetBubbleLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.AssetBubbleLLM.prompts:LLM_VALUE_SYS"
         user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"
@@ -141,7 +141,7 @@ llm_leveraged:
       record_path: "EXPERIMENT/AssetBubbleLLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       llm:
         sys_message: "examples.AssetBubbleLLM.prompts:LLM_LEVERAGED_SYS"
         user_message: "examples.AssetBubbleLLM.prompts:LLM_USER_TEMPLATE"

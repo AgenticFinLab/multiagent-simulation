@@ -11,7 +11,7 @@ setting:
   name: "volatility_clustering_llm_simulation"
   description: "LLM-based GARCH volatility dynamics through heterogeneous agents"
   total_rounds: 50
-  entry_limit: 10
+  round_history_limit: 3
   record_path: "EXPERIMENT/VolatilityClusteringLLM/records"
   save_diagram_interval: 25
 

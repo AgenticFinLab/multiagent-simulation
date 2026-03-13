@@ -38,7 +38,7 @@ market:
       supply_elasticity: 0.1
       mean_reversion: 0.02
       noise_std: 0.5
-      history_limit: 200
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -59,7 +59,7 @@ investor_momentum:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       # Momentum specific parameters
       lambda_price: 0.5         # Price aggressiveness
       beta: 0.3                 # Capital allocation ratio
@@ -79,7 +79,7 @@ investor_contrarian:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       # Contrarian specific parameters
       fundamental: 100.0
       beta: 0.5                 # Value deviation sensitivity
@@ -103,7 +103,7 @@ investor_risk_averse:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       # RiskAverse specific parameters
       k: 0.5                    # Risk tolerance coefficient
       lookback: 5               # Periods for volatility calculation
@@ -123,7 +123,7 @@ investor_aggressive:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       # Aggressive specific parameters
       kappa: 1.0                # Aggressive price factor
       beta: 0.5                 # Aggressive capital allocation
@@ -144,7 +144,7 @@ investor_noise:
       # Base investor parameters
       initial_cash: 10000.0
       initial_position: 0.0
-      history_limit: 100
+      custom_state_hot_limit: 3
       # Noise specific parameters
       price_noise_std: 2.0
       qty_noise_std: 5.0

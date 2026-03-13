@@ -379,21 +379,5 @@ class TopologyGraph:
 
         return save_path
 
-    def to_ascii(self) -> str:
-        """
-        Generate ASCII representation of topology.
-
-        Returns:
-            ASCII string showing connections
-        """
-        lines = ["Topology Connections:", "=" * 40]
-        for node in sorted(self.graph.nodes()):
-            targets = self.get_targets(node)
-            if targets:
-                lines.append(f"  {node} -> {', '.join(sorted(targets))}")
-            else:
-                lines.append(f"  {node} -> (no targets)")
-        return "\n".join(lines)
-
     def __repr__(self) -> str:
         return f"TopologyGraph(nodes={len(self.graph.nodes())}, edges={len(self.graph.edges())})"
