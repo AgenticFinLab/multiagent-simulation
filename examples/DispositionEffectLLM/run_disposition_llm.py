@@ -58,7 +58,7 @@ async def main():
         await simulator.setup()
         results = await simulator.run()
         print("\n" + "=" * 60)
-        print("Simulation Complete! Rounds: %d" % len(results))
+        print("Simulation Complete! Rounds: %d" % config.setting["total_rounds"])
         print("=" * 60)
     finally:
         await simulator.shutdown()

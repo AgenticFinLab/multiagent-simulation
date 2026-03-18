@@ -6,15 +6,19 @@ Provides YAML configuration loading with:
 - Environment variable interpolation
 - Validation helpers
 - Logging configuration
+- load_class(): Dynamic class loading from module path string
 
 Usage:
-    from masim.utils.config import load_config, setup_logging
+    from masim.utils.config import load_config, setup_logging, load_class
 
     setup_logging()  # Configure logging with sensible defaults
     cfg = load_config("configs/Demo/simulation.yml")
     logger.info(cfg["players"])  # Loaded from players.yml via !include
+
+    PlayerClass = load_class("mypackage.players:MyPlayer")
 """
 
+import importlib
 import logging
 import os
 import re
@@ -312,10 +316,38 @@ def setup_logging(
     )
 
 
+def load_class(path: str) -> type:
+    """
+    Load a class from a module path string.
+
+    Args:
+        path: Class path in format "module.submodule:ClassName" or
+              "module.submodule.ClassName"
+
+    Returns:
+        The loaded class
+
+    Raises:
+        ImportError: If module cannot be imported
+        AttributeError: If class not found in module
+
+    Example:
+        PlayerClass = load_class("mypackage.players:MyPlayer")
+        PlayerClass = load_class("mypackage.players.MyPlayer")
+    """
+    if ":" in path:
+        module_path, cls_name = path.split(":", 1)
+    else:
+        module_path, cls_name = path.rsplit(".", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, cls_name)
+
+
 __all__ = [
     "load_config",
     "validate_config",
     "build_connection_matrix",
     "IncludeLoader",
     "setup_logging",
+    "load_class",
 ]

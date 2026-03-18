@@ -88,7 +88,7 @@ async def main():
         results = await simulator.run()
         print("\n" + "=" * 60)
         print("Simulation Complete!")
-        print("Total rounds executed: %d" % len(results))
+        print("Total rounds executed: %d" % config.setting["total_rounds"])
         print("Results saved to: %s" % config.setting["record_path"])
         print("=" * 60)
     finally:

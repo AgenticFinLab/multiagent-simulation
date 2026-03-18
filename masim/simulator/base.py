@@ -27,6 +27,14 @@ Abstract Classes:
                           Lifecycle:   setup(), run_round(), run(), shutdown()
                           Utilities:   get_status(), get_round_history(), get_player_handle()
 
+                          Extension hooks (override in subclass for customization):
+                          update_topology(round_num) — called at the start of every round.
+                              Default: no-op (static topology).
+                              Override to: add/remove edges, rewire agents, switch between
+                              feedforward and feedback configurations.
+                              After mutation: call topology.invalidate_levels_cache() +
+                              _update_actor_topology_slices() to propagate to actors.
+
 ================================================================================
                             ARCHITECTURE
 ================================================================================
@@ -320,6 +328,40 @@ class BaseSimulator(ABC):
         ...
 
     # =========================================================================
+    #                    TOPOLOGY UPDATE HOOK
+    # =========================================================================
+
+    def update_topology(self, round_num: int) -> None:
+        """
+        Extension point: update the topology graph before each round executes.
+
+        Default implementation is a no-op (static topology).
+
+        Override this in a subclass to implement dynamic topologies, e.g.:
+        - Rewire edges based on simulation state (agent relationships evolve)
+        - Add/remove players mid-simulation
+        - Switch between feedback and feedforward configurations
+
+        After mutating self.topology (add_edge / remove_edge), you MUST:
+          1. Call self.topology.invalidate_levels_cache() to force BFS recompute.
+          2. Call self._update_actor_topology_slices() to push new topology slices
+             AND updated peer handles to all affected actors.
+
+        Args:
+            round_num: The round number about to be executed (1-indexed)
+
+        Example override::
+
+            def update_topology(self, round_num: int) -> None:
+                if round_num == 10:
+                    self.topology.graph.add_edge("player_1", "player_2")
+                    self.topology.invalidate_levels_cache()
+                    self._update_actor_topology_slices()
+        """
+        # Default: static topology — no mutation, no actor updates needed.
+        pass
+
+    # =========================================================================
     #                    ROUND PHASES
     # =========================================================================
 
@@ -338,8 +380,14 @@ class BaseSimulator(ABC):
         ...
 
     @abstractmethod
-    def phase_dispatch(self, level_handles: Dict[str, "ActorHandle"]) -> None:
-        """Encode queued Info units → Message → SimPacket and deliver to targets."""
+    def phase_dispatch(self, all_info_lists: List[List[Dict[str, Any]]]) -> None:
+        """Encode pending Info units → Message → SimPacket and deliver to targets.
+
+        Args:
+            all_info_lists: List of per-actor Info lists from phase_collect().
+                            Each inner list contains dicts with keys:
+                            info, sender_id, target_ids, round_num.
+        """
         ...
 
     # =========================================================================

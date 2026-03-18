@@ -24,16 +24,21 @@ ray:
   address: null
   namespace: "market_crash"
   actor_prefix: null
-  num_cpus: 4
+  # Derived: 8 investors run parallel at level 1; +1 for OS/driver = 9
+  num_cpus: 9
   num_gpus: null
-  object_store_memory: null
+  # Derived: 9 players, star topology -> 16 msgs/round
+  #   9 TurnResult + 9 pending_info + 16 Message = 34 Ray objects
+  #   34 obj x 64 KB min-alloc = 2176 KB (2.12 MB)
+  #   10x headroom = 21.2 MB; 128 MB minimum floor -> 134217728 bytes
+  object_store_memory: 134217728
   include_dashboard: false
   logging_level: "warning"
-  log_to_driver: true
+  log_to_driver: false
   actor_options:
     max_restarts: 3
     max_task_retries: 1
-    max_concurrency: 10
+    max_concurrency: 4
   runtime_env:
     working_dir: null
     pip: []
@@ -47,3 +52,5 @@ topology: !include topology.yml
 
 communication:
   storage_path: "EXPERIMENT/MarketCrash/communication"
+  record_messages: true
+  message_block_size: 500

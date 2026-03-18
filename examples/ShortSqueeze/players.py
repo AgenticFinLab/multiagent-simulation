@@ -16,6 +16,7 @@ Architecture:
 All parameters are configured via players.yml config file.
 """
 
+import logging
 import os
 import random
 import math
@@ -24,6 +25,8 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+
+logger = logging.getLogger("ShortSqueeze")
 
 
 class Market(GeneralPlayer):
@@ -106,12 +109,12 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["volume_history"].append(total_volume)
 
-        print(f"\n{'='*70}")
-        print(f"[Market] Round {round_num} - ShortSqueeze")
-        print(
+        logger.debug(f"\n{'='*70}")
+        logger.debug(f"[Market] Round {round_num} - ShortSqueeze")
+        logger.debug(
             f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        print(f"  Net Demand: {net_demand:+.2f}, Cover Buying: {cover_buying:.1f}")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}, Cover Buying: {cover_buying:.1f}")
 
         market_data = {
             "price": new_price,
@@ -230,7 +233,7 @@ class ShortSeller(BaseInvestor):
                 # COVER - buy to close short
                 quantity = abs(position) * 0.5  # Cover half
                 is_short_cover = True
-                print(f"  [SHORT COVER] Loss {loss_pct*100:.1f}% > threshold")
+                logger.debug(f"  [SHORT COVER] Loss {loss_pct*100:.1f}% > threshold")
             else:
                 quantity = 0.0
         else:
@@ -241,7 +244,7 @@ class ShortSeller(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:12s}): Q={quantity:+8.2f}"
         )
         return {
@@ -307,7 +310,7 @@ class MomentumBuyer(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:12s}): Q={quantity:+8.2f} mom={momentum*100:+.1f}%"
         )
         return {
@@ -360,7 +363,7 @@ class RetailTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:12s}): Q={quantity:+8.2f}"
         )
         return {
@@ -419,7 +422,7 @@ class ValueInvestor(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:12s}): Q={quantity:+8.2f}"
         )
         return {
@@ -457,7 +460,7 @@ class InstitutionalHolder(BaseInvestor):
         # Passive - rarely trades
         quantity = 0.0
         bid_price = 0.0
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:12s}): Q={quantity:+8.2f} (passive)"
         )
         return {

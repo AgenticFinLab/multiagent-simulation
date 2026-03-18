@@ -21,8 +21,9 @@ Architecture:
     ├─────────────────────────────────────────────────────────────────────────┤
     │  OUTBOUND FLOW:                                                        │
     │    Player.turn() → Info(payload) [player layer]                       │
-    │    Persona → proxy.enqueue_info(info)                                │
-    │    Simulator → persona.collect_pending_infos()                        │
+    │    Persona → player.pending_info → proxy.enqueue_info(info)          │
+    │    Persona.operate() → _collect_pending_infos_local()                │
+    │    operate() return tuple → phase_collect → phase_dispatch            │
     │    Simulator → build_message_from_info(info) → Message                │
     │    Simulator → channel.encode(Message) → SimPacket → ray.remote       │
     │                                                                        │
@@ -53,15 +54,16 @@ Key Design Principles:
     6. THREE-LAYER MODEL: Info (player) → Message (proxy) → SimPacket (channel)
 """
 
-import asyncio
+import logging
 import time
 
 import ray
-from typing import Any, Dict, List, Optional, Set, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
+
+logger = logging.getLogger("masim.persona")
 
 from masim.persona.base import BasePersona
 from masim.proxy.base import Message
-from masim.utils.topology import TopologyGraph
 from masim.proxy.base import (
     StorageConfig,
     SendReceiveConfig,
@@ -179,24 +181,30 @@ class PlayerPersona(BasePersona):
         self,
         round_num: int,
         **kwargs,
-    ) -> "TurnResult":
+    ) -> Tuple["TurnResult", List[Dict[str, Any]]]:
         """
         Execute the Player's turn operation.
 
+        Returns a tuple of (TurnResult, pending_infos) so the Simulator can
+        collect both the result AND the pending Info units in a single ray.get()
+        call — eliminating a separate IPC round-trip for collect_pending_infos().
+
         Flow:
-            1. Wait until Player.is_received_ready() returns True
-               (Player owns readiness decision; proxy provides received_senders data)
+            1. Check Player.is_received_ready() — should always be True when called
+               (Simulator's level-ordered dispatch guarantees messages arrive before
+               operate() starts). Logs a warning if unexpectedly False.
             2. Deliver all pending Info units from proxy to Player
             3. Execute Player.turn() (perceive → decide → act)
-            4. Extract pending Info units from Player and queue to proxy
-            5. Return TurnResult
+            4. Extract pending Info units from Player → queue to proxy → collect for return
+            5. Return (TurnResult, pending_infos)
 
         Args:
             round_num: Current simulation round number
             **kwargs: Additional parameters (e.g., level) passed to Player
 
         Returns:
-            TurnResult from internal Player
+            Tuple of (TurnResult, List[Dict]) where each dict has keys:
+            info, sender_id, target_ids, round_num — ready for phase_dispatch.
         """
         if not self.player:
             raise RuntimeError("PlayerPersona not initialized")
@@ -209,14 +217,26 @@ class PlayerPersona(BasePersona):
 
         level = kwargs.get("level", 0)
 
-        # Wait until Player decides it has received enough Info units
-        # Proxy provides DATA (which senders arrived), Player owns the DECISION
-        while not self.player.is_received_ready(
+        # Readiness check — no busy-wait.
+        # The Simulator's level-ordered execution model guarantees that
+        # phase_dispatch for level N-1 completes (all receive_message.remote()
+        # futures resolved) before phase_execute for level N is called.
+        # Therefore is_received_ready() should always return True on first check.
+        # A False result indicates an unexpected topology/timing issue — log and proceed.
+        if not self.player.is_received_ready(
             round_num,
             self.message_proxy.get_received_senders(),
             level=level,
         ):
-            await asyncio.sleep(0.01)
+            logger.warning(
+                "Actor %s: is_received_ready=False at operate() start "
+                "(round=%d, level=%d, received=%s, expected=%s) — proceeding anyway",
+                self.identity,
+                round_num,
+                level,
+                self.message_proxy.get_received_senders(),
+                self.player.expected_senders,
+            )
 
         # Deliver from proxy to Player (single delivery point)
         pending_infos = self.message_proxy.get_received_infos()
@@ -252,7 +272,39 @@ class PlayerPersona(BasePersona):
                 },
             )
 
-        return turn_result
+        # Collect pending Info units from proxy — returned together with
+        # TurnResult so the Simulator avoids a separate collect_pending_infos() IPC wave.
+        pending_infos_for_dispatch = self._collect_pending_infos_local()
+
+        return turn_result, pending_infos_for_dispatch
+
+    def _collect_pending_infos_local(self) -> List[Dict[str, Any]]:
+        """
+        Collect pending Info units from proxy — called locally within operate().
+
+        This is the internal equivalent of collect_pending_infos(), used to bundle
+        pending Info data into operate()'s return value and avoid a separate IPC call.
+
+        Returns:
+            List of dicts with keys: info, sender_id, target_ids, round_num
+        """
+        if not self._topology_initialized:
+            return []
+
+        infos = self.message_proxy.dequeue_infos()
+        targets = self.player.topology_targets  # already set at setup, no graph query
+
+        result = []
+        for info in infos:
+            result.append(
+                {
+                    "info": info,
+                    "sender_id": self.identity,
+                    "target_ids": targets,
+                    "round_num": self.current_round,
+                }
+            )
+        return result
 
     # =========================================================================
     #                    STATE ACCESS
@@ -303,14 +355,11 @@ class PlayerPersona(BasePersona):
         Returns:
             List of dicts with keys: info, sender_id, target_ids, round_num
         """
-        if not self.topology:
+        if not self._topology_initialized:
             return []
 
         # Dequeue Info units from proxy (owned by Persona)
         infos = self.message_proxy.dequeue_infos()
-
-        # Get targets from topology
-        targets = self.topology.get_targets(self.identity)
 
         result = []
         for info in infos:
@@ -318,7 +367,7 @@ class PlayerPersona(BasePersona):
                 {
                     "info": info,
                     "sender_id": self.identity,
-                    "target_ids": targets,
+                    "target_ids": self._topology_targets,
                     "round_num": self.current_round,
                 }
             )
@@ -329,24 +378,33 @@ class PlayerPersona(BasePersona):
     #                    TOPOLOGY & MESSAGE PASSING
     # =========================================================================
 
-    def set_topology(self, topology_config: Optional[Dict[str, Any]]) -> None:
+    def set_topology(self, local_slice: Optional[Dict[str, Any]]) -> None:
         """
-        Set the topology configuration using NetworkX graph.
+        Set this actor's local topology slice.
 
-        Creates a TopologyGraph from config, extracts targets and senders
-        for this player.
+        Accepts a pre-computed slice dict {targets: [...], senders: [...]}
+        sent by the Simulator — NOT the full topology config. This avoids
+        constructing an N-node nx.DiGraph inside every actor and reduces
+        IPC payload from O(N) per actor to O(targets+senders) per actor.
 
         Args:
-            topology_config: Full topology config dict from topology.yml
+            local_slice: Dict with keys:
+                "targets" → List[str]: player IDs this actor can send to
+                "senders" → List[str]: player IDs that can send to this actor
         """
-        self.topology = TopologyGraph(topology_config)
+        if not local_slice:
+            self._topology_targets = []
+            self._topology_senders = []
+        else:
+            self._topology_targets = list(local_slice["targets"])
+            self._topology_senders = list(local_slice["senders"])
+
+        self._topology_initialized = True
 
         if self.player:
-            # Set targets (who this player can send to)
-            targets = self.topology.get_targets(self.identity)
-            self.player.topology_targets = targets
+            self.player.topology_targets = self._topology_targets
 
-        # Set expected senders from topology sources
+        # Set expected senders on Player
         self.setup_expected_senders()
 
     def set_peer_handles(
@@ -356,21 +414,23 @@ class PlayerPersona(BasePersona):
         """
         Set Ray actor handles for peer communication.
 
-        Only stores handles for targets defined in topology connections.
         Called by Simulator after all actors are created.
+        The Simulator pre-computes and passes only this actor's topology target
+        handles (not the full player dict), so no filtering is needed here.
 
         Args:
-            handles: Dict mapping player_id -> Ray actor handle (all players)
+            handles: Dict mapping target_player_id -> Ray actor handle
+                     (already filtered to this actor's topology targets)
         """
-        if not self.topology:
+        if not self._topology_initialized:
             self.peer_handles = {}
             return
 
-        # Only keep handles for targets in our topology
-        targets = self.topology.get_targets(self.identity)
+        # Simulator already pre-filters to topology targets; store directly.
+        # Retain a guard to drop any stale handles not in current targets.
         self.peer_handles = {
             target_id: handles[target_id]
-            for target_id in targets
+            for target_id in self._topology_targets
             if target_id in handles
         }
 
@@ -413,8 +473,7 @@ class PlayerPersona(BasePersona):
         if not self.player:
             return
 
-        if self.topology:
-            senders = self.topology.get_senders(self.identity)
-            self.player.expected_senders = set(senders)
+        if self._topology_initialized:
+            self.player.expected_senders = set(self._topology_senders)
         else:
             self.player.expected_senders = set()

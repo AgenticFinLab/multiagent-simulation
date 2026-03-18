@@ -18,16 +18,21 @@ ray:
   address: null
   namespace: "disposition_effect"
   actor_prefix: null
-  num_cpus: 4
+  # Derived: 6 investors run parallel at level 1; +1 for OS/driver = 7
+  num_cpus: 7
   num_gpus: null
-  object_store_memory: null
+  # Derived: 7 players, star topology -> 12 msgs/round
+  #   7 TurnResult + 7 pending_info + 12 Message = 26 Ray objects
+  #   26 obj x 64 KB min-alloc = 1664 KB (1.62 MB)
+  #   10x headroom = 16.2 MB; 128 MB minimum floor -> 134217728 bytes
+  object_store_memory: 134217728
   include_dashboard: false
   logging_level: "warning"
-  log_to_driver: true
+  log_to_driver: false
   actor_options:
     max_restarts: 3
     max_task_retries: 1
-    max_concurrency: 10
+    max_concurrency: 4
   runtime_env:
     working_dir: null
     pip: []
@@ -41,3 +46,5 @@ topology: !include topology.yml
 
 communication:
   storage_path: "EXPERIMENT/DispositionEffect/communication"
+  record_messages: true
+  message_block_size: 500

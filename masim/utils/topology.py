@@ -51,6 +51,11 @@ class TopologyGraph:
         self.graph: nx.DiGraph = nx.DiGraph()
         self.sources: List[str] = []
         self.levels: List[List[str]] = []  # Cached execution levels
+        # True once levels have been computed. Invalidated by topology mutations.
+        self._levels_valid: bool = False
+        # Hash of the last saved edge set — used to skip redundant diagram renders.
+        # None means no diagram has been saved yet (forces first render).
+        self._last_saved_edge_hash: Optional[frozenset] = None
         if topology_config:
             self._build_from_config(topology_config)
 
@@ -131,6 +136,11 @@ class TopologyGraph:
         """
         Compute execution levels via BFS from source nodes.
 
+        Result is cached after the first call. The cache is valid as long as
+        the topology graph is not mutated (no add_edge / remove_edge calls).
+        If the topology changes mid-simulation, call invalidate_levels_cache()
+        before calling this method.
+
         Sources execute first (Level 0), then their successors (Level 1), etc.
         Players in the same level execute in parallel.
 
@@ -151,10 +161,14 @@ class TopologyGraph:
                 ['player_1', 'player_2']  # Level 1
             ]
         """
+        if self._levels_valid:
+            return self.levels
+
         if not self.sources:
             # No sources: all players in single level (parallel)
             all_players = self.get_all_players()
             self.levels = [all_players] if all_players else []
+            self._levels_valid = True
             return self.levels
 
         # BFS from sources
@@ -165,6 +179,7 @@ class TopologyGraph:
         current_level = [s for s in self.sources if s in self.graph]
         if not current_level:
             self.levels = []
+            self._levels_valid = True
             return self.levels
 
         levels.append(current_level)
@@ -186,7 +201,18 @@ class TopologyGraph:
             current_level = next_level
 
         self.levels = levels
+        self._levels_valid = True
         return self.levels
+
+    def invalidate_levels_cache(self) -> None:
+        """
+        Invalidate the cached execution levels.
+
+        Call this after any topology mutation (add_edge, remove_edge, etc.)
+        so that the next get_execution_levels() call recomputes from scratch.
+        """
+        self._levels_valid = False
+        self.levels = []
 
     # Edge style configurations
     FORWARD_EDGE_CONFIG = {
@@ -359,9 +385,14 @@ class TopologyGraph:
 
     def save_round_diagram(
         self, output_dir: str, round_num: int, format: str = "png"
-    ) -> str:
+    ) -> Optional[str]:
         """
-        Save topology diagram for a specific round.
+        Save topology diagram for a specific round — only when topology changes.
+
+        Compares the current edge set hash against the last saved hash.
+        If unchanged (static topology), skips the expensive spring_layout render
+        entirely. For a typical static simulation, only 1 diagram is ever written
+        regardless of save_diagram_interval.
 
         Args:
             output_dir: Directory to save the diagram
@@ -369,8 +400,13 @@ class TopologyGraph:
             format: Output format ("png" or "pdf")
 
         Returns:
-            Path to saved diagram file
+            Path to saved diagram file, or None if topology was unchanged.
         """
+        current_hash = frozenset(self.graph.edges())
+        if current_hash == self._last_saved_edge_hash:
+            return None  # topology unchanged — skip render
+
+        self._last_saved_edge_hash = current_hash
         os.makedirs(output_dir, exist_ok=True)
 
         filename = f"topology_r{round_num:06d}.{format}"

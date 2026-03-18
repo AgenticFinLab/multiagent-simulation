@@ -1,9 +1,10 @@
 """MASim Utilities Package
 
 Provides utility modules:
-- config: YAML configuration loading with !include support
-- topology: NetworkX-based topology graph for message routing
-- history: Memory-efficient history buffer with disk persistence
+- config:     YAML configuration loading with !include support; load_class()
+- ray_utils:  Ray cluster initialization and actor naming helpers
+- topology:   NetworkX-based topology graph for message routing
+- history:    Memory-efficient history buffer with disk persistence
 - data_loader: Generic simulation data loading from record directories
 """
 
@@ -12,6 +13,11 @@ from masim.utils.config import (
     validate_config,
     build_connection_matrix,
     IncludeLoader,
+    load_class,
+)
+from masim.utils.ray_utils import (
+    ensure_ray,
+    get_actor_name,
 )
 from masim.utils.data_loader import (
     load_simulation_data,
@@ -30,6 +36,10 @@ __all__ = [
     "validate_config",
     "build_connection_matrix",
     "IncludeLoader",
+    "load_class",
+    # Ray utilities
+    "ensure_ray",
+    "get_actor_name",
     # Data loader utilities
     "load_simulation_data",
     "get_investor_quantities",

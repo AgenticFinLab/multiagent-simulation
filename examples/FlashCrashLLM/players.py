@@ -26,6 +26,7 @@ Investor Parameters (from config.extras):
     - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
+import logging
 import os
 import json
 import random
@@ -40,6 +41,8 @@ from masim.utils.history import HistoryBuffer
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
+
+logger = logging.getLogger("FlashCrashLLM")
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -135,11 +138,11 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
 
         status = "HIGH VOLATILITY" if in_high_vol else "Normal"
-        print(f"\n{'='*60}")
-        print(
+        logger.debug(f"\n{'='*60}")
+        logger.debug(
             f"[Market] Round {round_num}: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%) [{status}]"
         )
-        print(f"  Liquidity: {liquidity:.1f}, Impact Mult: {impact_multiplier:.1f}x")
+        logger.debug(f"  Liquidity: {liquidity:.1f}, Impact Mult: {impact_multiplier:.1f}x")
 
         market_data = {
             "price": new_price,

@@ -32,8 +32,8 @@ async def run_simulation(config_path: str):
     config = SimulationConfig(**yaml_config)
 
     # Clear stale records from any previous run
-    record_path = yaml_config.get("setting", {}).get("record_path", "")
-    if record_path and os.path.exists(record_path):
+    record_path = yaml_config["setting"]["record_path"]
+    if os.path.exists(record_path):
         shutil.rmtree(record_path)
         logger.info(f"Cleared old records: {record_path}")
     logger.info("=" * 70)

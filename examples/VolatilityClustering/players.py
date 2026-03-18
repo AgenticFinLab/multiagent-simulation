@@ -24,6 +24,7 @@ Architecture:
 All parameters are configured via players.yml config file.
 """
 
+import logging
 import os
 import random
 import math
@@ -32,6 +33,8 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+
+logger = logging.getLogger("VolatilityClustering")
 
 
 class Market(GeneralPlayer):
@@ -152,15 +155,15 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
 
         # Log
-        print(f"\n{'='*70}")
-        print(f"[Market] Round {round_num}")
-        print(f"  Price: {current_price:.2f} → {new_price:.2f} ({return_pct:+.2f}%)")
-        print(f"  Volatility: {current_vol:.3f} → {new_vol:.3f}")
-        print(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug(f"\n{'='*70}")
+        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(f"  Price: {current_price:.2f} → {new_price:.2f} ({return_pct:+.2f}%)")
+        logger.debug(f"  Volatility: {current_vol:.3f} → {new_vol:.3f}")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
         if orders:
-            print(f"  Orders ({len(orders)}):")
+            logger.debug(f"  Orders ({len(orders)}):")
             for o in orders:
-                print(
+                logger.debug(
                     f"    {o['investor']:25s} [{o['strategy']:15s}]: Q={o['quantity']:+8.2f}"
                 )
 
@@ -317,7 +320,7 @@ class Fundamentalist(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -391,7 +394,7 @@ class TrendFollower(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} vol_mult={vol_multiplier:.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -447,7 +450,7 @@ class NoiseTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -517,7 +520,7 @@ class SlowAdapter(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -591,7 +594,7 @@ class VolatilityTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} vol_ratio={vol_ratio:.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "

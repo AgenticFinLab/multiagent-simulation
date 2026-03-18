@@ -23,11 +23,14 @@ All parameters are configured via players.yml config file.
 import os
 import random
 import math
+import logging
 from typing import Any, Dict, List, Optional
 
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+
+logger = logging.getLogger("DispositionEffect")
 
 
 # =============================================================================
@@ -118,20 +121,26 @@ class Market(GeneralPlayer):
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
 
-        print(f"\n{'='*70}")
-        print(f"[Market] Round {round_num}")
-        print(
-            f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
-        )
-        if news_shock != 0:
-            print(f"  NEWS SHOCK: {news_shock:+.2f}")
-        print(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
-        if orders:
-            print(f"  Orders ({len(orders)}):")
-            for o in orders:
-                print(
+        logger.debug(
+            "\n%s\n[Market] Round %d\n  Price: %.2f → %.2f (%+.2f%%)%s\n  Net Demand: %+.2f, Volume: %.2f%s",
+            "=" * 70,
+            round_num,
+            current_price,
+            new_price,
+            price_return * 100,
+            f"\n  NEWS SHOCK: {news_shock:+.2f}" if news_shock != 0 else "",
+            net_demand,
+            total_volume,
+            (
+                ("\n  Orders (%d):\n" % len(orders))
+                + "\n".join(
                     f"    {o['investor']:24s} [{o['strategy']:20s}]: Q={o['quantity']:+8.2f}"
+                    for o in orders
                 )
+                if orders
+                else ""
+            ),
+        )
 
         market_data = {
             "price": new_price,
@@ -327,13 +336,17 @@ class DispositionInvestor(BaseInvestor):
             else:
                 quantity = 0
 
-        print(
-            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:20s}): "
-            f"Q={quantity:+8.2f} [{action:12s}] g/l={gain_loss*100:+.1f}% | "
-            f"Cash={self.state.custom_state['cash']:10.2f}, "
-            f"Pos={self.state.custom_state['position']:+8.2f}"
+        logger.debug(
+            "[%s] R%d (%s): Q=%+8.2f [%s] g/l=%+.1f%% | Cash=%10.2f, Pos=%+8.2f",
+            self.config.identity,
+            round_num,
+            strategy_name,
+            quantity,
+            action,
+            gain_loss * 100,
+            self.state.custom_state["cash"],
+            self.state.custom_state["position"],
         )
-
         return {
             "bid_price": price,
             "quantity": quantity,
@@ -351,9 +364,11 @@ class DispositionInvestor(BaseInvestor):
         }
 
     def _hold_order(self, round_num, strategy_name):
-        print(
-            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:20s}): "
-            f"Q=   +0.00 [NO DATA]"
+        logger.debug(
+            "[%s] R%d (%s): Q=   +0.00 [NO DATA]",
+            self.config.identity,
+            round_num,
+            strategy_name,
         )
         return {
             "bid_price": 0,
@@ -435,11 +450,15 @@ class RationalInvestor(BaseInvestor):
             else:
                 quantity = 0
 
-        print(
-            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:20s}): "
-            f"Q={quantity:+8.2f} alloc={current_alloc*100:.1f}% | "
-            f"Cash={self.state.custom_state['cash']:10.2f}, "
-            f"Pos={self.state.custom_state['position']:+8.2f}"
+        logger.debug(
+            "[%s] R%d (%s): Q=%+8.2f alloc=%.1f%% | Cash=%10.2f, Pos=%+8.2f",
+            self.config.identity,
+            round_num,
+            strategy_name,
+            quantity,
+            current_alloc * 100,
+            self.state.custom_state["cash"],
+            self.state.custom_state["position"],
         )
 
         return {
@@ -544,11 +563,16 @@ class TaxAwareInvestor(BaseInvestor):
             else:
                 quantity = 0
 
-        print(
-            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:20s}): "
-            f"Q={quantity:+8.2f} [{action:12s}] g/l={gain_loss*100:+.1f}% | "
-            f"Cash={self.state.custom_state['cash']:10.2f}, "
-            f"Pos={self.state.custom_state['position']:+8.2f}"
+        logger.debug(
+            "[%s] R%d (%s): Q=%+8.2f [%s] g/l=%+.1f%% | Cash=%10.2f, Pos=%+8.2f",
+            self.config.identity,
+            round_num,
+            strategy_name,
+            quantity,
+            action,
+            gain_loss * 100,
+            self.state.custom_state["cash"],
+            self.state.custom_state["position"],
         )
 
         return {
@@ -606,11 +630,14 @@ class IndexHolder(BaseInvestor):
         # Pure hold - no trading
         quantity = 0.0
 
-        print(
-            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:20s}): "
-            f"Q={quantity:+8.2f} [HOLD] | "
-            f"Cash={self.state.custom_state['cash']:10.2f}, "
-            f"Pos={self.state.custom_state['position']:+8.2f}"
+        logger.debug(
+            "[%s] R%d (%s): Q=%+8.2f [HOLD] | Cash=%10.2f, Pos=%+8.2f",
+            self.config.identity,
+            round_num,
+            strategy_name,
+            quantity,
+            self.state.custom_state["cash"],
+            self.state.custom_state["position"],
         )
 
         return {
@@ -697,11 +724,16 @@ class InstitutionalInvestor(BaseInvestor):
             else:
                 quantity = 0
 
-        print(
-            f"[{self.config.identity:24s}] R{round_num} ({strategy_name:20s}): "
-            f"Q={quantity:+8.2f} [{action:12s}] g/l={gain_loss*100:+.1f}% | "
-            f"Cash={self.state.custom_state['cash']:10.2f}, "
-            f"Pos={self.state.custom_state['position']:+8.2f}"
+        logger.debug(
+            "[%s] R%d (%s): Q=%+8.2f [%s] g/l=%+.1f%% | Cash=%10.2f, Pos=%+8.2f",
+            self.config.identity,
+            round_num,
+            strategy_name,
+            quantity,
+            action,
+            gain_loss * 100,
+            self.state.custom_state["cash"],
+            self.state.custom_state["position"],
         )
 
         return {

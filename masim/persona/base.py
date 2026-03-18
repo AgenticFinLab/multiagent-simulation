@@ -12,7 +12,7 @@ For concrete implementations, see general.py.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Type, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Tuple, Type, TYPE_CHECKING
 
 import ray
 
@@ -81,8 +81,15 @@ class BasePersona(ABC):
         # Operate timing
         self.operate_start_time: Optional[float] = None
 
-        # Topology graph for message routing
-        self.topology: Optional[TopologyGraph] = None
+        # Topology — stored as pre-computed local slice (targets/senders lists),
+        # not as a full TopologyGraph. Populated by set_topology() from the Simulator.
+        # The full graph lives only in the Simulator; actors hold only their local slice.
+        self.topology: Optional[TopologyGraph] = (
+            None  # retained for type-checking compat
+        )
+        self._topology_initialized: bool = False
+        self._topology_targets: List[str] = []  # player IDs this actor can send to
+        self._topology_senders: List[str] = []  # player IDs that can send to this actor
 
         # Peer actor handles for direct message passing
         self.peer_handles: Dict[str, ray.actor.ActorHandle] = {}
@@ -114,7 +121,7 @@ class BasePersona(ABC):
         self,
         round_num: int,
         **kwargs,
-    ) -> "TurnResult":
+    ) -> Tuple["TurnResult", List[Dict[str, Any]]]:
         """
         Execute the Player's turn operation.
 
@@ -123,7 +130,10 @@ class BasePersona(ABC):
             **kwargs: Additional parameters (e.g., level)
 
         Returns:
-            TurnResult from internal Player
+            Tuple of (TurnResult, pending_infos) where pending_infos is a list
+            of dicts with keys: info, sender_id, target_ids, round_num.
+            Both values are returned together to avoid a separate IPC round-trip
+            for collect_pending_infos().
         """
         ...
 
@@ -151,8 +161,8 @@ class BasePersona(ABC):
     # =========================================================================
 
     @abstractmethod
-    def set_topology(self, topology_config: Optional[Dict[str, Any]]) -> None:
-        """Set the topology configuration for message routing."""
+    def set_topology(self, local_slice: Optional[Dict[str, Any]]) -> None:
+        """Set the local topology slice for message routing."""
         ...
 
     @abstractmethod

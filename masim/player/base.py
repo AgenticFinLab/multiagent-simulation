@@ -646,8 +646,24 @@ class BasePlayer(ABC):
         """
         Check if player has received enough inbounds to proceed.
 
-        Called by Persona in operate() waiting loop.
-        Player owns this decision - override in subclass for custom readiness logic.
+        Called by Persona in operate() before delivering Info to the Player.
+        Player owns this decision — override in subclass for custom readiness logic.
+
+        Extension point for non-standard topology scenarios:
+        - Default: True when all expected_senders have sent (or no senders expected).
+        - Same-level peers: by design, same-level senders are round-lagged.
+          Override to relax the readiness condition for optional peers.
+        - Feedback edges: back-edges carry the previous round's message.
+          Override to track which round's message arrived (info.extras["round_num"]).
+        - Partial readiness: override to proceed with a subset of expected senders
+          (e.g., quorum-based, timeout-based, or priority-based readiness).
+
+        Note:
+            The Simulator's level-ordered execution model guarantees that
+            all lower-level senders' messages have been delivered before
+            operate() is called. If is_received_ready returns False, the
+            Persona logs a warning and proceeds anyway — it does NOT block.
+            Use this hook to express readiness semantics, not as a blocking gate.
 
         Args:
             round_num: Current round number

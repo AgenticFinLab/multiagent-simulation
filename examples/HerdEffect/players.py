@@ -37,6 +37,7 @@ References:
 All parameters are configured via players.yml config file.
 """
 
+import logging
 import os
 import random
 import math
@@ -46,6 +47,8 @@ from typing import Any, Dict, List, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+
+logger = logging.getLogger("HerdEffect")
 
 
 # =============================================================================
@@ -170,17 +173,17 @@ class Market(GeneralPlayer):
         self.state.custom_state["return_history"].append(price_return)
 
         # Log
-        print(f"\n{'='*60}")
-        print(f"[Market] Round {round_num}")
-        print(f"  Price: {prev_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)")
-        print(f"  Net Demand: {net_demand:+.2f}")
-        print(f"  Total Volume: {total_volume:.2f}")
-        print(f"  Price Impact: {price_impact:+.4f}")
-        print(f"  Mean Reversion: {mean_reversion:+.4f}")
+        logger.debug(f"\n{'='*60}")
+        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(f"  Price: {prev_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}")
+        logger.debug(f"  Total Volume: {total_volume:.2f}")
+        logger.debug(f"  Price Impact: {price_impact:+.4f}")
+        logger.debug(f"  Mean Reversion: {mean_reversion:+.4f}")
         if orders:
-            print(f"  Orders ({len(orders)}):")
+            logger.debug(f"  Orders ({len(orders)}):")
             for o in orders:
-                print(
+                logger.debug(
                     f"    {o['investor']:20s} [{o['strategy']:12s}]: "
                     f"P={o['price']:7.2f}, Q={o['quantity']:+7.2f}"
                 )
@@ -298,7 +301,7 @@ class BaseInvestor(GeneralPlayer):
             self.state.custom_state["position"] += quantity  # negative
 
         strategy_name = self.__class__.__name__
-        print(
+        logger.debug(
             f"[{self.identity:20s}] R{round_num} ({strategy_name:20s}): "
             f"P={bid_price:7.2f}, Q={quantity:+7.2f} | "
             f"Cash={self.state.custom_state['cash']:8.2f}, "

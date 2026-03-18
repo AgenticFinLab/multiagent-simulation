@@ -74,7 +74,7 @@ async def run_simulation(config_path: str):
     logger.info("")
     logger.info("[3] Simulation Summary")
     logger.info("-" * 70)
-    logger.info("Total rounds completed: %d", len(results))
+    logger.info("Total rounds completed: %d", config.setting["total_rounds"])
 
     logger.info("")
     logger.info("[4] Shutting down...")

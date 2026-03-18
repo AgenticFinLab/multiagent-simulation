@@ -24,6 +24,7 @@ Investor Parameters (from config.extras):
     - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
+import logging
 import os
 import json
 import random
@@ -39,6 +40,8 @@ from masim.utils.history import HistoryBuffer
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
+
+logger = logging.getLogger("VolatilityClusteringLLM")
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -151,19 +154,19 @@ class Market(GeneralPlayer):
         self.state.custom_state["volatility_history"].append(new_vol)
         self.state.custom_state["volume_history"].append(total_volume)
 
-        print(f"\n{'='*70}")
-        print(f"[Market] Round {round_num}")
-        print(f"  Price: {current_price:.2f} → {new_price:.2f} ({return_pct:+.2f}%)")
-        print(f"  Volatility: {current_vol:.3f} → {new_vol:.3f}")
-        print(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug(f"\n{'='*70}")
+        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(f"  Price: {current_price:.2f} → {new_price:.2f} ({return_pct:+.2f}%)")
+        logger.debug(f"  Volatility: {current_vol:.3f} → {new_vol:.3f}")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
         if orders:
-            print(f"  LLM Orders ({len(orders)}):")
+            logger.debug(f"  LLM Orders ({len(orders)}):")
             for o in orders:
-                print(
+                logger.debug(
                     f"    {o['investor']:25s} [{o['strategy']:15s}]: Q={o['quantity']:+8.2f}"
                 )
                 if o["reasoning"]:
-                    print(f"      → {o['reasoning'][:80]}...")
+                    logger.debug(f"      → {o['reasoning'][:80]}...")
 
         market_data = {
             "price": new_price,
@@ -370,7 +373,7 @@ class LLMInvestor(GeneralPlayer):
             except ValueError as e:
                 if attempt == max_retries - 1:
                     raise RuntimeError(f"LLM failed after {max_retries} attempts: {e}")
-                print(
+                logger.debug(
                     f"[{self.identity}] LLM parse failed, retrying ({attempt + 1}/{max_retries})..."
                 )
 
@@ -389,7 +392,7 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["position"] += quantity
 
         strategy_name = self.__class__.__name__
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"P={bid_price:7.2f}, Q={quantity:+7.2f} | "
             f"Cash={self.state.custom_state['cash']:8.2f}, "

@@ -12,6 +12,7 @@ Architecture:
 All parameters are configured via players.yml config file.
 """
 
+import logging
 import os
 import json
 import random
@@ -26,6 +27,8 @@ from masim.utils.history import HistoryBuffer
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
+
+logger = logging.getLogger("HerdEffectLLM")
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -121,19 +124,19 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
 
         # Log
-        print(f"\n{'='*60}")
-        print(f"[Market] Round {round_num}")
-        print(f"  Price: {prev_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)")
-        print(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug(f"\n{'='*60}")
+        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(f"  Price: {prev_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
         if orders:
-            print(f"  LLM Orders ({len(orders)}):")
+            logger.debug(f"  LLM Orders ({len(orders)}):")
             for o in orders:
-                print(
+                logger.debug(
                     f"    {o['investor']:20s} [{o['strategy']:12s}]: "
                     f"P={o['price']:7.2f}, Q={o['quantity']:+7.2f}"
                 )
                 if o["reasoning"]:
-                    print(f"      → {o['reasoning'][:80]}...")
+                    logger.debug(f"      → {o['reasoning'][:80]}...")
 
         market_data = {
             "price": new_price,
@@ -344,7 +347,7 @@ Respond with ONLY valid JSON:
             except ValueError as e:
                 if attempt == max_retries - 1:
                     raise RuntimeError(f"LLM failed after {max_retries} attempts: {e}")
-                print(f"[{self.identity}] LLM parse failed, retrying...")
+                logger.debug(f"[{self.identity}] LLM parse failed, retrying...")
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
@@ -359,7 +362,7 @@ Respond with ONLY valid JSON:
             self.state.custom_state["cash"] += proceeds
             self.state.custom_state["position"] += quantity
 
-        print(
+        logger.debug(
             f"[{self.identity:20s}] R{round_num} ({strategy_name:12s}): "
             f"P={bid_price:7.2f}, Q={quantity:+7.2f} | "
             f"Cash={self.state.custom_state['cash']:8.2f}, "

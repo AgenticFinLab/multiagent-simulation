@@ -20,6 +20,7 @@ Key Dynamics:
 All parameters are configured via players.yml config file.
 """
 
+import logging
 import os
 import random
 import math
@@ -28,6 +29,8 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+
+logger = logging.getLogger("AssetBubble")
 
 
 # =============================================================================
@@ -148,16 +151,16 @@ class Market(GeneralPlayer):
         self.state.custom_state["bubble_metric_history"].append(bubble_ratio)
 
         # Log
-        print(f"\n{'='*70}")
-        print(f"[Market] Round {round_num}")
-        print(f"  Price: {current_price:.2f} → {new_price:.2f} ({return_pct:+.2f}%)")
-        print(f"  Fundamental: {new_fundamental:.2f}")
-        print(f"  Bubble Ratio: {bubble_ratio:.2f}x")
-        print(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug(f"\n{'='*70}")
+        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(f"  Price: {current_price:.2f} → {new_price:.2f} ({return_pct:+.2f}%)")
+        logger.debug(f"  Fundamental: {new_fundamental:.2f}")
+        logger.debug(f"  Bubble Ratio: {bubble_ratio:.2f}x")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
         if orders:
-            print(f"  Orders ({len(orders)}):")
+            logger.debug(f"  Orders ({len(orders)}):")
             for o in orders:
-                print(
+                logger.debug(
                     f"    {o['investor']:25s} [{o['strategy']:20s}]: Q={o['quantity']:+8.2f}"
                 )
 
@@ -339,7 +342,7 @@ class MomentumSpeculator(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         strategy_name = "momentum_speculator"
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} mom={momentum:+.3f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -434,7 +437,7 @@ class RationalArbitrageur(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         strategy_name = "rational_arbitrageur"
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} dev={deviation:+.2%} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -513,7 +516,7 @@ class NoiseTrader(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         strategy_name = "noise_trader"
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} sent={total_sentiment:+.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -585,7 +588,7 @@ class FundamentalInvestor(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         strategy_name = "fundamental_investor"
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -651,7 +654,7 @@ class LeveragedBuyer(BaseInvestor):
         if equity_ratio < margin_call_threshold and position > 0:
             # Forced to deleverage - sell everything
             quantity = -position * 0.5  # Sell half
-            print(f"    [MARGIN CALL] Forced deleveraging!")
+            logger.debug(f"    [MARGIN CALL] Forced deleveraging!")
         else:
             # Normal leveraged buying on positive momentum
             if price_return > 0.005:
@@ -670,7 +673,7 @@ class LeveragedBuyer(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         strategy_name = "leveraged_buyer"
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} eq_ratio={equity_ratio:.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -739,7 +742,7 @@ class ConservativeHolder(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         strategy_name = "conservative_holder"
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "

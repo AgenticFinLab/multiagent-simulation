@@ -18,6 +18,7 @@ Key Mechanism:
 All parameters are configured via players.yml config file.
 """
 
+import logging
 import os
 import random
 import math
@@ -26,6 +27,8 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+
+logger = logging.getLogger("FlashCrash")
 
 
 class Market(GeneralPlayer):
@@ -127,15 +130,15 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
         self.state.custom_state["liquidity_history"].append(total_liquidity)
 
-        print(f"\n{'='*70}")
-        print(f"[Market] Round {round_num}")
-        print(
+        logger.debug(f"\n{'='*70}")
+        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(
             f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        print(
+        logger.debug(
             f"  Liquidity: {total_liquidity:.1f}, Impact Factor: {liquidity_factor:.2f}"
         )
-        print(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
 
         market_data = {
             "price": new_price,
@@ -270,7 +273,7 @@ class HighFrequencyTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:10s}): "
             f"Q={quantity:+8.2f} mom={short_momentum*100:+.2f}%"
         )
@@ -314,7 +317,7 @@ class MarketMaker(BaseInvestor):
             quantity = -position * 0.3 if position > 0 else 0
             quantity = max(-20, min(20, quantity))
             bid_price = price if quantity != 0 else 0.0
-            print(f"  [MM] WITHDRAWING - volatility too high ({price_return*100:.1f}%)")
+            logger.debug(f"  [MM] WITHDRAWING - volatility too high ({price_return*100:.1f}%)")
         else:
             provides_liquidity = True
             quantity = -position * 0.2
@@ -326,7 +329,7 @@ class MarketMaker(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:10s}): "
             f"Q={quantity:+8.2f} liq={'YES' if provides_liquidity else 'NO'}"
         )
@@ -381,7 +384,7 @@ class AlgorithmicTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:10s}): "
             f"Q={quantity:+8.2f} trend={trend*100:+.2f}%"
         )
@@ -444,7 +447,7 @@ class StopLossTrader(BaseInvestor):
         if price < stop_price and position > 0:
             quantity = -position
             bid_price = price
-            print(f"  [STOP-LOSS TRIGGERED] Price {price:.2f} < Stop {stop_price:.2f}")
+            logger.debug(f"  [STOP-LOSS TRIGGERED] Price {price:.2f} < Stop {stop_price:.2f}")
         else:
             quantity = 0.0
             bid_price = 0.0
@@ -454,7 +457,7 @@ class StopLossTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:10s}): "
             f"Q={quantity:+8.2f} pos={self.state.custom_state['position']:.1f}"
         )
@@ -502,7 +505,7 @@ class FundamentalTrader(BaseInvestor):
             )
             quantity = max(0, min(50, quantity))
             bid_price = price
-            print(f"  [FUNDAMENTAL BUY] Price {deviation*100:.1f}% below fundamental")
+            logger.debug(f"  [FUNDAMENTAL BUY] Price {deviation*100:.1f}% below fundamental")
         elif deviation < -value_threshold:
             quantity = (
                 deviation * base_position_size * value_sensitivity * value_multiplier
@@ -518,7 +521,7 @@ class FundamentalTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:10s}): "
             f"Q={quantity:+8.2f} dev={deviation*100:+.1f}%"
         )
@@ -572,7 +575,7 @@ class RetailTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:10s}): "
             f"Q={quantity:+8.2f}"
         )

@@ -10,6 +10,7 @@ LLM investors with different trading personalities:
 All parameters are configured via players.yml config file.
 """
 
+import logging
 import os
 import json
 import random
@@ -24,6 +25,8 @@ from masim.utils.history import HistoryBuffer
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
+
+logger = logging.getLogger("AssetBubbleLLM")
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -128,23 +131,23 @@ class Market(GeneralPlayer):
         self.state.custom_state["valuation_ratio_history"].append(valuation_ratio)
 
         # Log
-        print(f"\n{'='*70}")
-        print(f"[Market] Round {round_num}")
-        print(
+        logger.debug(f"\n{'='*70}")
+        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(
             f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        print(
+        logger.debug(
             f"  Fundamental: {new_fundamental:.2f}, P/F Ratio: {valuation_ratio:.2f}x"
         )
-        print(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
         if orders:
-            print(f"  LLM Orders ({len(orders)}):")
+            logger.debug(f"  LLM Orders ({len(orders)}):")
             for o in orders:
-                print(
+                logger.debug(
                     f"    {o['investor']:20s} [{o['strategy']:15s}]: Q={o['quantity']:+8.2f}"
                 )
                 if o["reasoning"]:
-                    print(f"      → {o['reasoning'][:80]}...")
+                    logger.debug(f"      → {o['reasoning'][:80]}...")
 
         market_data = {
             "price": new_price,
@@ -366,7 +369,7 @@ Respond with ONLY valid JSON:
             except ValueError as e:
                 if attempt == max_retries - 1:
                     raise RuntimeError(f"LLM failed after {max_retries} attempts: {e}")
-                print(f"[{self.identity}] LLM parse failed, retrying...")
+                logger.debug(f"[{self.identity}] LLM parse failed, retrying...")
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
@@ -388,7 +391,7 @@ Respond with ONLY valid JSON:
                 self.state.custom_state["position"] = 0
                 self.state.custom_state["short_position"] += short_qty
 
-        print(
+        logger.debug(
             f"[{self.identity:20s}] R{round_num} ({strategy_name:15s}): "
             f"P={bid_price:7.2f}, Q={quantity:+7.2f} | "
             f"Cash={self.state.custom_state['cash']:8.2f}, "

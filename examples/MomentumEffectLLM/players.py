@@ -25,6 +25,7 @@ Investor Parameters (from config.extras):
     - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
+import logging
 import os
 import json
 import random
@@ -40,6 +41,8 @@ from masim.utils.history import HistoryBuffer
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
+
+logger = logging.getLogger("MomentumEffectLLM")
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -140,12 +143,12 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
 
         # Log
-        print(f"\n{'='*70}")
-        print(f"[Market] Round {round_num}")
-        print(
+        logger.debug(f"\n{'='*70}")
+        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(
             f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        print(
+        logger.debug(
             f"  Momentum5: {momentum_5*100:+.2f}%, Momentum10: {momentum_10*100:+.2f}%"
         )
 
@@ -342,7 +345,7 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["position"] += quantity
 
         strategy_name = self.__class__.__name__
-        print(
+        logger.debug(
             f"[{self.identity:20s}] R{round_num} ({strategy_name:15s}): Q={quantity:+7.2f}"
         )
 

@@ -20,6 +20,7 @@ Key Crash Dynamics:
 All parameters are configured via players.yml config file.
 """
 
+import logging
 import os
 import random
 from typing import Any, Dict, Optional
@@ -27,6 +28,8 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+
+logger = logging.getLogger("MarketCrash")
 
 
 class Market(GeneralPlayer):
@@ -163,19 +166,19 @@ class Market(GeneralPlayer):
         self.state.custom_state["volatility_history"].append(new_volatility)
 
         # Log
-        print(f"\n{'='*70}")
-        print(f"[Market] Round {round_num}")
-        print(f"  Price: {current_price:.2f} → {new_price:.2f} ({return_pct:+.2f}%)")
-        print(f"  Liquidity: {current_liquidity:.2f} → {new_liquidity:.2f}")
-        print(f"  Volatility: {new_volatility:.2f}")
+        logger.debug(f"\n{'='*70}")
+        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(f"  Price: {current_price:.2f} → {new_price:.2f} ({return_pct:+.2f}%)")
+        logger.debug(f"  Liquidity: {current_liquidity:.2f} → {new_liquidity:.2f}")
+        logger.debug(f"  Volatility: {new_volatility:.2f}")
         if is_crash:
-            print(f"  *** CRASH CONDITIONS DETECTED ***")
-        print(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+            logger.debug(f"  *** CRASH CONDITIONS DETECTED ***")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
         if orders:
-            print(f"  Orders ({len(orders)}):")
+            logger.debug(f"  Orders ({len(orders)}):")
             for o in orders:
                 mm_flag = " [MM]" if o["is_market_maker"] else ""
-                print(
+                logger.debug(
                     f"    {o['investor']:25s} [{o['strategy']:20s}]: Q={o['quantity']:+8.2f}{mm_flag}"
                 )
 
@@ -322,7 +325,7 @@ class RiskParityFund(BaseInvestor):
         if current_vol > target_volatility * 2:
             if position > target_position:
                 quantity = min(quantity, -position * 0.3)  # Force sell at least 30%
-                print(f"    [FORCED DELEVERAGE] Vol={current_vol:.1f}, selling!")
+                logger.debug(f"    [FORCED DELEVERAGE] Vol={current_vol:.1f}, selling!")
 
         quantity = max(-50, min(30, quantity))
         bid_price = price if quantity != 0 else 0.0
@@ -331,7 +334,7 @@ class RiskParityFund(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} target={target_position:.1f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -392,11 +395,11 @@ class LeveragedHedgeFund(BaseInvestor):
         if margin_ratio < liquidation_level and position > 0:
             # FORCED FULL LIQUIDATION
             quantity = -position
-            print(f"    [FORCED LIQUIDATION] Margin={margin_ratio:.2%}!")
+            logger.debug(f"    [FORCED LIQUIDATION] Margin={margin_ratio:.2%}!")
         elif margin_ratio < margin_call_level and position > 0:
             # Partial deleverage
             quantity = -position * 0.5
-            print(f"    [MARGIN CALL] Margin={margin_ratio:.2%}, reducing!")
+            logger.debug(f"    [MARGIN CALL] Margin={margin_ratio:.2%}, reducing!")
         else:
             # Normal trading - momentum based
             if price_return > 0.01:
@@ -414,7 +417,7 @@ class LeveragedHedgeFund(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} margin={margin_ratio:.2%} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -462,7 +465,7 @@ class MarketMaker(BaseInvestor):
         if is_withdrawn:
             # Market maker withdraws - no quotes
             quantity = 0.0
-            print(f"    [MM WITHDRAWN] Vol={volatility:.1f} too high!")
+            logger.debug(f"    [MM WITHDRAWN] Vol={volatility:.1f} too high!")
         else:
             # Provide liquidity - mean revert inventory
             inventory_signal = -position / inventory_limit
@@ -476,7 +479,7 @@ class MarketMaker(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         status = "WITHDRAWN" if is_withdrawn else "ACTIVE"
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} [{status}] | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -530,7 +533,7 @@ class PassiveInvestor(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -583,11 +586,11 @@ class PanicSeller(BaseInvestor):
         if pnl_pct < -loss_threshold and position > 0:
             # Full panic - sell everything
             quantity = -position
-            print(f"    [FULL PANIC] Loss={pnl_pct:.1%}!")
+            logger.debug(f"    [FULL PANIC] Loss={pnl_pct:.1%}!")
         elif price_return < crash_trigger and position > 0:
             # Partial panic - sell some
             quantity = -position * panic_sell_fraction
-            print(f"    [PANIC SELLING] Daily drop={price_return:.1%}")
+            logger.debug(f"    [PANIC SELLING] Daily drop={price_return:.1%}")
         else:
             quantity = 0.0
 
@@ -597,7 +600,7 @@ class PanicSeller(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} pnl={pnl_pct:.1%} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -652,7 +655,7 @@ class BottomFisher(BaseInvestor):
             # Crash detected - buy the dip
             quantity = buy_size * abs(price_return) * 10
             quantity = min(quantity, 25)
-            print(f"    [BOTTOM FISHING] Discount={discount:.1%}")
+            logger.debug(f"    [BOTTOM FISHING] Discount={discount:.1%}")
         elif discount < -discount_threshold * 1.5:
             # Deep value buy
             quantity = buy_size * 0.5
@@ -665,7 +668,7 @@ class BottomFisher(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
             f"Q={quantity:+8.2f} discount={discount:.1%} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "

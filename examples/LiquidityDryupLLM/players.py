@@ -24,6 +24,7 @@ Investor Parameters (from config.extras):
     - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
+import logging
 import os
 import json
 import random
@@ -38,6 +39,8 @@ from masim.utils.history import HistoryBuffer
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
+
+logger = logging.getLogger("LiquidityDryupLLM")
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -121,11 +124,11 @@ class Market(GeneralPlayer):
             if total_liquidity < 30
             else "Stressed" if total_liquidity < 60 else "Normal"
         )
-        print(f"\n{'='*60}")
-        print(
+        logger.debug(f"\n{'='*60}")
+        logger.debug(
             f"[Market] Round {round_num}: ${current_price:.2f} → ${new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        print(
+        logger.debug(
             f"  Liquidity: {total_liquidity:.1f}, Impact Factor: {liquidity_factor:.2f}x [{status}]"
         )
 

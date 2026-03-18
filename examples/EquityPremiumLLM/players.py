@@ -25,6 +25,7 @@ Investor Parameters (from config.extras):
     - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
+import logging
 import os
 import json
 import random
@@ -39,6 +40,8 @@ from masim.utils.history import HistoryBuffer
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
+
+logger = logging.getLogger("EquityPremiumLLM")
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -104,11 +107,11 @@ class Market(GeneralPlayer):
         self.state.custom_state["stock_price"] = new_price
         self.state.custom_state["stock_history"].append(new_price)
 
-        print(f"\n{'='*60}")
-        print(
+        logger.debug(f"\n{'='*60}")
+        logger.debug(
             f"[Market] Round {round_num}: Stock ${current_price:.2f} → ${new_price:.2f} ({stock_return*100:+.2f}%)"
         )
-        print(f"  Bond Return: {bond_return*100*252:.2f}% annual")
+        logger.debug(f"  Bond Return: {bond_return*100*252:.2f}% annual")
 
         market_data = {
             "stock_price": new_price,

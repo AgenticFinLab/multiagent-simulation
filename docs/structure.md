@@ -7,10 +7,13 @@ masim/
 ├── __init__.py              # Public API exports
 ├── simulator/               # Simulation orchestration
 │   ├── base.py              # SimulationConfig, BaseSimulator, ExecutionClock, RoundPhase
+│   │                        # update_topology() extension hook (default no-op; override for dynamic topology)
 │   └── general.py           # GeneralSimulator: setup, run_round, phase_execute/collect/dispatch
+│                            # _setup_topology(), _update_actor_topology_slices()
 ├── persona/                 # Ray actor wrapper layer
 │   ├── base.py              # BasePersona interface (abstract)
 │   └── general.py           # PlayerPersona (Ray actor: owns Player + proxies)
+│                            # operate() returns (TurnResult, pending_infos) tuple
 ├── player/                  # Agent logic (USER IMPLEMENTS)
 │   ├── base.py              # Data types: Info, Action, Observation, BasePlayer, PlayerState
 │   └── general.py           # GeneralPlayer: turn(), prepare_pending_info(), is_received_ready()
@@ -20,11 +23,14 @@ masim/
 ├── proxy/                   # Infrastructure services
 │   ├── base.py              # Message, MessageType, MessagePriority, ProxyConfigs, BaseProxy
 │   └── general.py           # SendReceiveProxy, StorageProxy, ResourceProxy, MonitoringProxy
-│                            # build_message_from_info() — Info→Message conversion
+│                            # build_message_from_info() — Info→Message conversion (proxy layer helper)
 └── utils/                   # Utilities
-    ├── config.py            # load_config (!include YAML), setup_logging, validate_config
+    ├── config.py            # load_config (!include YAML), setup_logging, validate_config,
+    │                        # load_class() — dynamic class loading from module path string
+    ├── ray_utils.py         # ensure_ray(), get_actor_name() — Ray cluster init and actor naming
     ├── history.py           # HistoryBuffer: hot deque + cold BlockBasedStoreManager
-    └── topology.py          # TopologyGraph: BFS execution levels, visualize
+    ├── topology.py          # TopologyGraph: BFS execution levels, invalidate_levels_cache(), visualize
+    └── data_loader.py       # load_simulation_data(), get_investor_* — record directory loading
 ```
 
 ### Module Summary
@@ -36,7 +42,7 @@ masim/
 | `player`        | Agent decision logic                                                  | `GeneralPlayer`, `Info`, `Action`, `Observation`                 | ✅ **Yes**        |
 | `communication` | Message encoding/decoding, wire protocol                              | `SimPacket`, `GeneralCommunicationChannel`                       | ❌ No             |
 | `proxy`         | Message queue management, routing types                               | `Message`, `SendReceiveProxy`, `StorageProxy`, `MonitoringProxy` | ❌ No             |
-| `utils`         | Config loading, topology graph, memory-safe history                   | `TopologyGraph`, `load_config`, `HistoryBuffer`                  | ❌ No             |
+| `utils`         | Config loading, class loading, Ray init, topology graph, history      | `TopologyGraph`, `load_config`, `load_class`, `ensure_ray`, `HistoryBuffer` | ❌ No |
 
 ## Design Architecture
 
@@ -106,8 +112,9 @@ Simulator.run()
                     │       │       └── ray.get(operate_refs) → TurnResults
                     │       │
                     │       └── phase_dispatch(level)
-                    │               ├── persona.collect_pending_infos() → [{info, sender_id, targets}]
-                    │               ├── build_message_from_info(info) → Message  [from proxy.general]
+                    │               ├── [pending_infos bundled into phase_collect result]
+                    │               │   (no separate collect_pending_infos() IPC wave)
+                    │               ├── build_message_from_info(info) → Message  [proxy.general helper]
                     │               ├── channel.encode_message(Message) → SimPacket
                     │               ├── channel.record_encoded_message(SimPacket)
                     │               ├── channel.decode_message(SimPacket) → Message
@@ -125,7 +132,7 @@ PlayerPersona (Ray Actor)
     ├── Owns: SendReceiveProxy (self.message_proxy)
     │       │
     │       ├── enqueue_info(info)             # Persona queues Info after Player.turn()
-    │       ├── dequeue_infos() → List[Info]   # Simulator collects for channel encoding
+    │       ├── dequeue_infos() → List[Info]   # Collect Info units for dispatch
     │       ├── handle_incoming(Message)        # Proxy converts Message→Info, queues in receive_queue
     │       ├── get_received_senders() → set    # Data for player.is_received_ready()
     │       └── get_received_infos() → List[Info]  # Deliver to Player in operate()
@@ -134,17 +141,20 @@ PlayerPersona (Ray Actor)
     │       └── Delegates to proxy.handle_incoming(message)
     │           [proxy converts Message → Info, queues in receive_queue]
     │
-    ├── operate(round_num)                  # Called by Simulator each round
-    │       ├── proxy.get_received_senders()         [data]
-    │       ├── player.is_received_ready()           [player owns this decision]
+    ├── operate(round_num) → (TurnResult, List[Dict])   # Called by Simulator each round
+    │       ├── proxy.get_received_senders()              [data]
+    │       ├── player.is_received_ready()                [player owns this decision]
+    │       │       └── if False: log warning, proceed (no busy-wait)
     │       ├── proxy.get_received_infos() → Info
-    │       ├── player.receive_info(info)             [single delivery]
+    │       ├── player.receive_info(info)                 [single delivery]
     │       ├── player.turn(round_num) → TurnResult
-    │       └── proxy.enqueue_info(info) for each pending Info
+    │       └── _collect_pending_infos_local() → pending_infos  [bundled into return tuple]
+    │               (avoids a separate collect_pending_infos() IPC wave)
     │
-    └── collect_pending_infos()            # Called by Simulator after operate()
+    └── collect_pending_infos()   # Legacy public API — still callable externally
             └── proxy.dequeue_infos() → List[Info]
             └── returns [{info, sender_id, target_ids, round_num}]
+            (Note: Simulator currently uses operate() return tuple, not this method)
 ```
 
 ### Three-Layer Message Model
@@ -225,6 +235,7 @@ PlayerPersona (Ray Actor)
 3. **Player owns readiness decision** — `player.is_received_ready()` decides when to proceed; proxy only provides data
 4. **Single delivery** — Info units delivered to Player ONCE, inside `operate()` after readiness confirmed
 5. **Topology targets come from edges** — `topology.get_targets(sender_id)` returns successors; `topology.get_senders(receiver_id)` returns predecessors used for `expected_senders`
+6. **operate() returns bundled tuple** — `(TurnResult, pending_infos)` in a single `ray.get()`, eliminating a separate `collect_pending_infos()` IPC round-trip
 
 ## Execution Model
 
@@ -243,12 +254,15 @@ Each round iterates over topology levels (Level 0 → Level 1 → ... → Level 
 │  │   in parallel via Ray .remote()                                       │  │
 │  │                                                                       │  │
 │  │ Inside operate():                                                     │  │
-│  │   ① Poll: while not player.is_received_ready(): asyncio.sleep(0.01)  │  │
+│  │   ① Readiness check: player.is_received_ready() — if False, log      │  │
+│  │       warning and proceed (no busy-wait; level-ordered dispatch       │  │
+│  │       guarantees messages arrive before operate() is called)          │  │
 │  │   ② Drain: proxy.get_received_infos() → player.receive_info()        │  │
 │  │   ③ Execute: player.turn(round_num) → TurnResult                     │  │
 │  │      turn() = for step in N: perceive→decide→act                     │  │
 │  │      prepare_pending_info() extracts outbound_messages into pending  │  │
-│  │   ④ Queue: proxy.enqueue_info(info) for each pending Info            │  │
+│  │   ④ Collect: _collect_pending_infos_local() bundles pending Info     │  │
+│  │   ⑤ Return: (TurnResult, pending_infos) tuple — no extra IPC wave   │  │
 │  └───────────────────────────────────────────────────────────────────────┘  │
 │                                      │                                      │
 │                                      ▼                                      │
@@ -261,8 +275,8 @@ Each round iterates over topology levels (Level 0 → Level 1 → ... → Level 
 │                                      ▼                                      │
 │  Phase 3: DISPATCH                                                          │
 │  ┌───────────────────────────────────────────────────────────────────────┐  │
-│  │ ① ray.get(persona.collect_pending_infos()) for all level players      │  │
-│  │   → returns [{info, sender_id, target_ids, round_num}]               │  │
+│  │ ① pending_infos already collected from operate() return value         │  │
+│  │   (no separate ray.get call — bundled in phase_collect result)        │  │
 │  │ ② build_message_from_info(info) → Message                            │  │
 │  │   (wraps payload in {"content":…,"content_type":…,"extras":…})      │  │
 │  │ ③ channel.encode_and_deliver(messages, handles)                      │  │
@@ -328,6 +342,48 @@ return self.expected_senders.issubset(received_senders)
 ```
 This means in a star topology with `coordinator` at Level 0: coordinator fires first in Round 1 without waiting; from Round 2 onward, coordinator waits for player responses before running.
 
+## Extension Points
+
+### Dynamic Topology (`update_topology`)
+
+Override `update_topology(round_num)` in a `GeneralSimulator` subclass to rewire the topology before each round:
+
+```python
+class MySimulator(GeneralSimulator):
+    def update_topology(self, round_num: int) -> None:
+        if round_num == 10:
+            self.topology.graph.add_edge("player_1", "player_2")
+            self.topology.invalidate_levels_cache()   # Force BFS recompute
+            self._update_actor_topology_slices(["player_1", "player_2"])
+            # Pass both affected players: player_1's targets grew,
+            # player_2's senders grew — and player_1 needs player_2's handle.
+```
+
+`_update_actor_topology_slices(player_ids)` does two things atomically:
+1. Pushes new `{targets, senders}` slices via `set_topology.remote()`
+2. Pushes updated peer handle subsets via `set_peer_handles.remote()`
+
+Both steps must complete before the next round's phase_execute starts.
+
+### Custom Readiness Logic (`is_received_ready`)
+
+Override `is_received_ready(round_num, received_senders, **kwargs)` in your `Player` subclass for non-standard scenarios:
+- **Same-level peers**: relax readiness condition for optional/lagged senders
+- **Feedback edges**: check `info.extras["round_num"]` to distinguish which round's message arrived
+- **Quorum-based**: proceed when a minimum subset of expected senders have sent
+- **Timeout-based**: proceed after N rounds regardless of readiness
+
+Default implementation (in `GeneralPlayer`):
+```python
+def is_received_ready(self, round_num, received_senders, **kwargs) -> bool:
+    level = kwargs.get("level", 0)
+    if round_num == 1 and level == 0:   # Initiators fire unconditionally
+        return True
+    if not self.expected_senders:        # Isolated node — always ready
+        return True
+    return self.expected_senders.issubset(received_senders)
+```
+
 ## Memory Management
 
 The framework is designed to avoid unbounded memory growth over long simulations:
@@ -356,9 +412,6 @@ class Info:
     extras: Dict                 # Flexible additional fields
     sender_id: Optional[str]     # Populated on RECEIVE — who sent this (None if sending)
     time_received: Optional[str] # Populated on RECEIVE — ISO timestamp (None if sending)
-
-# Backwards-compatible alias:
-D = Info  # original single-letter alias
 ```
 ```
 
@@ -617,7 +670,6 @@ EXPERIMENT/MySimulation/
 | Dataclass          | Layer   | Purpose                        | Key Fields                                                          |
 |--------------------|---------|--------------------------------|---------------------------------------------------------------------|
 | `Info`             | Player  | Send/receive content           | `payload`, `content_type`, `extras`, `sender_id*`, `time_received*` |
-| `D`                | Player  | Alias for Info (legacy)        | same as Info                                                        |
 | `Observation`      | Player  | Input to perceive()            | `local`, `inbounds: List[Info]`, `round`                            |
 | `LocalObservation` | Player  | Player's own perception        | `data`, `timestamp`, `extras`                                       |
 | `Action`           | Player  | Output of act()                | `action_type`, `payload`, `source_id`                               |

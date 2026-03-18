@@ -8,6 +8,7 @@ Phenomenon: Reversal Effect (De Bondt & Thaler, 1985)
 All parameters are configured via players.yml config file.
 """
 
+import logging
 import os
 import random
 import math
@@ -16,6 +17,8 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+
+logger = logging.getLogger("ReversalEffect")
 
 
 class Market(GeneralPlayer):
@@ -103,12 +106,12 @@ class Market(GeneralPlayer):
         self.state.custom_state["return_history"].append(price_return)
 
         # Log
-        print(f"\n{'='*70}")
-        print(f"[Market] Round {round_num}")
-        print(
+        logger.debug(f"\n{'='*70}")
+        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(
             f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        print(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
 
         market_data = {
             "price": new_price,
@@ -254,7 +257,7 @@ class ContrarianInvestor(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} cum_ret={cumulative_return*100:+.1f}% | "
             f"Cash={self.state.custom_state['cash']:10.2f}"
@@ -314,7 +317,7 @@ class MomentumInvestor(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} mom={momentum*100:+.1f}%"
         )
@@ -368,7 +371,7 @@ class OverconfidentTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} ret={price_return*100:+.1f}%"
         )
@@ -417,7 +420,7 @@ class NoiseTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f}"
         )
@@ -475,7 +478,7 @@ class ValueInvestor(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} dev={deviation*100:+.1f}%"
         )
@@ -528,7 +531,7 @@ class IndexTracker(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:25s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+8.2f} pos={position:.1f}"
         )

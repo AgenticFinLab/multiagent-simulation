@@ -134,11 +134,16 @@ class CommunicationChannel(ABC):
         """
         self.config = config
         self.storage_path = config["storage_path"]
+        # Whether to persist encoded messages to disk.
+        # Set false for large-scale runs (N > ~100 players) to avoid high write volume.
+        self.record_messages: bool = config["record_messages"]
 
         # Initialize message store
         os.makedirs(self.storage_path, exist_ok=True)
         self.message_store = BlockBasedStoreManager(
-            folder=self.storage_path, file_format="json", block_size=500
+            folder=self.storage_path,
+            file_format="json",
+            block_size=config["message_block_size"],
         )
 
     # =========================================================================

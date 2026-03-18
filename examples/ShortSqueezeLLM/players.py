@@ -18,6 +18,7 @@ Investor Parameters (from config.extras):
     - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
+import logging
 import os
 import json
 import random
@@ -32,6 +33,8 @@ from masim.utils.history import HistoryBuffer
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
+
+logger = logging.getLogger("ShortSqueezeLLM")
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -127,11 +130,11 @@ class Market(GeneralPlayer):
             if buying_pressure > 50
             else "Building" if buying_pressure > 20 else "Normal"
         )
-        print(f"\n{'='*60}")
-        print(
+        logger.debug(f"\n{'='*60}")
+        logger.debug(
             f"[Market] Round {round_num}: ${current_price:.2f} → ${new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        print(
+        logger.debug(
             f"  Short Interest: {short_interest:.1f}%, Buying Pressure: {buying_pressure:.1f}% [{status}]"
         )
 

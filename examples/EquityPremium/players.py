@@ -11,12 +11,15 @@ Phenomenon: Equity Premium Puzzle (Mehra & Prescott, 1985)
 All parameters are configured via players.yml config file.
 """
 
+import logging
 import os
 import random
 from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+
+logger = logging.getLogger("EquityPremium")
 
 
 class Market(GeneralPlayer):
@@ -83,7 +86,7 @@ class Market(GeneralPlayer):
         self.state.custom_state["stock_history"].append(new_price)
         self.state.custom_state["volume_history"].append(total_volume)
 
-        print(
+        logger.debug(
             f"\n[Market] R{round_num} Stock: {current_price:.2f}→{new_price:.2f} ({stock_return*100:+.3f}%) Bond: {bond_return*100:.4f}%"
         )
 
@@ -211,7 +214,7 @@ class MyopicLossAverseInvestor(BaseInvestor):
 
         self._execute_trade(stock_qty, stock_price)
 
-        print(
+        logger.debug(
             f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f} target_pct={target_stock_pct:.1%}"
         )
         return {
@@ -253,7 +256,7 @@ class LongHorizonInvestor(BaseInvestor):
 
         self._execute_trade(stock_qty, stock_price)
 
-        print(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
+        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
         return {
             "stock_qty": stock_qty,
             "strategy": strategy_name,
@@ -289,7 +292,7 @@ class RiskNeutralInvestor(BaseInvestor):
 
         self._execute_trade(stock_qty, stock_price)
 
-        print(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
+        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
         return {
             "stock_qty": stock_qty,
             "strategy": strategy_name,
@@ -329,7 +332,7 @@ class ConservativeInvestor(BaseInvestor):
 
         self._execute_trade(stock_qty, stock_price)
 
-        print(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
+        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
         return {
             "stock_qty": stock_qty,
             "strategy": strategy_name,
@@ -363,7 +366,7 @@ class NoiseTrader(BaseInvestor):
 
         self._execute_trade(stock_qty, stock_price)
 
-        print(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
+        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
         return {
             "stock_qty": stock_qty,
             "strategy": strategy_name,

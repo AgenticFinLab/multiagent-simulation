@@ -27,6 +27,7 @@ Investor Parameters (from config.extras):
     - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
 """
 
+import logging
 import os
 import json
 import random
@@ -41,6 +42,8 @@ from masim.utils.history import HistoryBuffer
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
+
+logger = logging.getLogger("MarketCrashLLM")
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -154,17 +157,17 @@ class Market(GeneralPlayer):
         self.state.custom_state["liquidity_history"].append(new_liquidity)
 
         # Log
-        print(f"\n{'='*70}")
-        print(f"[Market] Round {round_num}")
-        print(
+        logger.debug(f"\n{'='*70}")
+        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(
             f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        print(f"  Liquidity: {new_liquidity:.2f}, Volatility: {new_volatility:.2f}")
-        print(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug(f"  Liquidity: {new_liquidity:.2f}, Volatility: {new_volatility:.2f}")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
         if orders:
-            print(f"  LLM Orders ({len(orders)}):")
+            logger.debug(f"  LLM Orders ({len(orders)}):")
             for o in orders:
-                print(
+                logger.debug(
                     f"    {o['investor']:20s} [{o['strategy']:15s}]: Q={o['quantity']:+8.2f}"
                 )
 
@@ -372,7 +375,7 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["position"] += quantity
 
         strategy_name = self.__class__.__name__
-        print(
+        logger.debug(
             f"[{self.identity:20s}] R{round_num} ({strategy_name:15s}): "
             f"Q={quantity:+7.2f} | "
             f"Cash={self.state.custom_state['cash']:8.2f}, "

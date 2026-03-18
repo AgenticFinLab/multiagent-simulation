@@ -27,12 +27,18 @@ ray:
   address: null
   namespace: "herd_effect_llm"
   actor_prefix: null
-  num_cpus: 4
+  # Derived: 5 investors run parallel at level 1; +1 for OS/driver = 6
+  num_cpus: 6
   num_gpus: null
-  object_store_memory: null
+  # Derived: 6 players, star topology -> 10 msgs/round
+  #   6 TurnResult + 6 pending_info + 10 Message = 22 Ray objects
+  #   22 obj x 64 KB min-alloc = 1408 KB (1.38 MB) base peak
+  #   LLM TurnResult also carries prompt+response strings (~4-8 KB each) -> extra overhead
+  #   Minimum 512 MB floor for LLM simulations -> 536870912 bytes
+  object_store_memory: 536870912
   include_dashboard: false
   logging_level: "warning"
-  log_to_driver: true
+  log_to_driver: false
   actor_options:
     max_restarts: 3
     max_task_retries: 1
@@ -50,3 +56,5 @@ topology: !include topology.yml
 
 communication:
   storage_path: "EXPERIMENT/HerdEffectLLM/communication"
+  record_messages: true
+  message_block_size: 500

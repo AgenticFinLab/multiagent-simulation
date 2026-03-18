@@ -2,6 +2,7 @@
 numpy
 pandas
 ray
+psutil
 torch
 transformers
 selenium

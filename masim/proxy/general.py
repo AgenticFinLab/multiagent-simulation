@@ -31,9 +31,8 @@ Architecture (SendReceiveProxy):
 
 import os
 import time
-from collections import deque
 from datetime import datetime
-from typing import Any, Awaitable, Callable, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from masim.proxy.base import (
     # Types
@@ -93,12 +92,10 @@ def build_message_from_info(
     Returns:
         Message ready for CommunicationChannel.encode_and_deliver()
     """
-    from datetime import datetime
-
     payload = {
         "content": info.payload,
-        "content_type": getattr(info, "content_type", None),
-        "extras": getattr(info, "extras", {}),
+        "content_type": info.content_type,
+        "extras": info.extras,
     }
     return Message(
         message_type=MessageType.PEER,
@@ -200,17 +197,9 @@ class SendReceiveProxy(BaseProxy):
             message: The proxy-layer Message received from another player
         """
         info = Info(
-            payload=message.payload.get("content", message.payload),
-            content_type=(
-                message.payload.get("content_type")
-                if isinstance(message.payload, dict)
-                else None
-            ),
-            extras=(
-                message.payload.get("extras", {})
-                if isinstance(message.payload, dict)
-                else {}
-            ),
+            payload=message.payload["content"],
+            content_type=message.payload["content_type"],
+            extras=message.payload["extras"],
             sender_id=message.sender_id,
             time_received=datetime.now().isoformat(),
         )

@@ -8,6 +8,7 @@ Phenomenon: Liquidity Dry-up
 All parameters are configured via players.yml config file.
 """
 
+import logging
 import os
 import random
 import math
@@ -15,6 +16,8 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+
+logger = logging.getLogger("LiquidityDryup")
 
 
 class Market(GeneralPlayer):
@@ -97,7 +100,7 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["liquidity_history"].append(total_liquidity)
 
-        print(
+        logger.debug(
             f"\n[Market] R{round_num} Price: {current_price:.2f}→{new_price:.2f} ({price_return*100:+.2f}%) Liq: {total_liquidity:.0f}"
         )
 
@@ -212,7 +215,7 @@ class MarketMaker(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(
+        logger.debug(
             f"[{self.identity:20s}] Q={quantity:+6.1f} liq={'YES' if provides_liquidity else 'WITHDRAW'}"
         )
         return {
@@ -265,7 +268,7 @@ class LiquiditySeeker(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(f"[{self.identity:20s}] Q={quantity:+6.1f}")
+        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")
         return {
             "bid_price": bid_price,
             "quantity": quantity,
@@ -319,7 +322,7 @@ class ValueTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(f"[{self.identity:20s}] Q={quantity:+6.1f}")
+        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")
         return {
             "bid_price": bid_price,
             "quantity": quantity,
@@ -365,7 +368,7 @@ class MomentumTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        print(f"[{self.identity:20s}] Q={quantity:+6.1f}")
+        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")
         return {
             "bid_price": bid_price,
             "quantity": quantity,
@@ -407,7 +410,7 @@ class NoiseTrader(BaseInvestor):
         quantity = self._apply_constraints(bid_price, quantity)
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
-        print(f"[{self.identity:20s}] Q={quantity:+6.1f}")
+        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")
         return {
             "bid_price": bid_price,
             "quantity": quantity,

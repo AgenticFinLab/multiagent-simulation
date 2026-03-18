@@ -83,7 +83,7 @@ class GeneralCommunicationChannel(CommunicationChannel):
 
         Flow:
         1. encode_message() → JSON string (wire format)
-        2. record_encoded_message() → persist to storage
+        2. record_encoded_message() → persist to storage (skipped if record_messages=False)
         3. decode_message() → reconstruct Message from wire format
         4. Send decoded Message to target actor via Ray remote call
 
@@ -104,8 +104,9 @@ class GeneralCommunicationChannel(CommunicationChannel):
                 # 1. Encode Message → SimPacket (wire envelope)
                 packet = self.encode_message(message)
 
-                # 2. Record the SimPacket
-                self.record_encoded_message(packet)
+                # 2. Record the SimPacket (skipped at scale when record_messages=False)
+                if self.record_messages:
+                    self.record_encoded_message(packet)
 
                 # 3. Decode SimPacket → Message (proxy layer restored)
                 decoded_message = self.decode_message(packet)

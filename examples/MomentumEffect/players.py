@@ -21,6 +21,7 @@ Investor Types:
 All parameters are configured via players.yml config file.
 """
 
+import logging
 import os
 import random
 import math
@@ -30,6 +31,8 @@ from typing import Any, Dict, List, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+
+logger = logging.getLogger("MomentumEffect")
 
 
 # =============================================================================
@@ -146,18 +149,18 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["return_history"].append(price_return)
 
-        print(f"\n{'='*70}")
-        print(f"[Market] Round {round_num}")
-        print(
+        logger.debug(f"\n{'='*70}")
+        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(
             f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        print(f"  Fundamental: {new_fundamental:.2f}")
-        print(f"  5-Round Momentum: {momentum_5*100:+.2f}%")
-        print(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug(f"  Fundamental: {new_fundamental:.2f}")
+        logger.debug(f"  5-Round Momentum: {momentum_5*100:+.2f}%")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
         if orders:
-            print(f"  Orders ({len(orders)}):")
+            logger.debug(f"  Orders ({len(orders)}):")
             for o in orders:
-                print(
+                logger.debug(
                     f"    {o['investor']:20s} [{o['strategy']:16s}]: Q={o['quantity']:+8.2f}"
                 )
 
@@ -307,7 +310,7 @@ class MomentumTrader(BaseInvestor):
             self.state.custom_state["cash"] += proceeds
             self.state.custom_state["position"] += quantity
 
-        print(
+        logger.debug(
             f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q={quantity:+8.2f} mom={signal*100:+.1f}% | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -331,7 +334,7 @@ class MomentumTrader(BaseInvestor):
         }
 
     def _hold_order(self, round_num, strategy_name):
-        print(
+        logger.debug(
             f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q=   +0.00 [NO DATA]"
         )
@@ -415,7 +418,7 @@ class ContrarianTrader(BaseInvestor):
             self.state.custom_state["cash"] += proceeds
             self.state.custom_state["position"] += quantity
 
-        print(
+        logger.debug(
             f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q={quantity:+8.2f} signal={signal*100:+.1f}% | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -439,7 +442,7 @@ class ContrarianTrader(BaseInvestor):
         }
 
     def _hold_order(self, round_num, strategy_name):
-        print(
+        logger.debug(
             f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q=   +0.00 [NO DATA]"
         )
@@ -522,7 +525,7 @@ class IndexFund(BaseInvestor):
             else:
                 quantity = 0
 
-        print(
+        logger.debug(
             f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q={quantity:+8.2f} alloc={current_allocation*100:.1f}% | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -616,7 +619,7 @@ class MarketMaker(BaseInvestor):
             self.state.custom_state["cash"] += proceeds
             self.state.custom_state["position"] += quantity
 
-        print(
+        logger.debug(
             f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q={quantity:+8.2f} [MM] | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -725,7 +728,7 @@ class TechnicalTrader(BaseInvestor):
             self.state.custom_state["cash"] += proceeds
             self.state.custom_state["position"] += quantity
 
-        print(
+        logger.debug(
             f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q={quantity:+8.2f} | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
@@ -825,7 +828,7 @@ class FundamentalTrader(BaseInvestor):
             self.state.custom_state["cash"] += proceeds
             self.state.custom_state["position"] += quantity
 
-        print(
+        logger.debug(
             f"[{self.config.identity:24s}] R{round_num} ({strategy_name:16s}): "
             f"Q={quantity:+8.2f} misp={mispricing*100:+.1f}% | "
             f"Cash={self.state.custom_state['cash']:10.2f}, "
