@@ -7,6 +7,7 @@
 market:
   name: "Market with News Shocks"
   class: "examples.DispositionEffectLLM.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -29,6 +30,7 @@ market:
 llm_disposition_biased:
   name: "LLM Disposition Biased"
   class: "examples.DispositionEffectLLM.players:LLMDispositionBiased"
+  num_instances: 1
   config:
     identity: "llm_disposition_biased"
     role: player
@@ -53,6 +55,7 @@ llm_disposition_biased:
 llm_rational:
   name: "LLM Rational Investor"
   class: "examples.DispositionEffectLLM.players:LLMRationalInvestor"
+  num_instances: 1
   config:
     identity: "llm_rational"
     role: player
@@ -77,6 +80,7 @@ llm_rational:
 llm_tax_aware:
   name: "LLM Tax-Aware Investor"
   class: "examples.DispositionEffectLLM.players:LLMTaxAwareInvestor"
+  num_instances: 1
   config:
     identity: "llm_tax_aware"
     role: player
@@ -101,6 +105,7 @@ llm_tax_aware:
 llm_institutional:
   name: "LLM Institutional Investor"
   class: "examples.DispositionEffectLLM.players:LLMInstitutionalInvestor"
+  num_instances: 1
   config:
     identity: "llm_institutional"
     role: player
@@ -125,6 +130,7 @@ llm_institutional:
 llm_loss_averse:
   name: "LLM Loss-Averse Investor"
   class: "examples.DispositionEffectLLM.players:LLMLossAverse"
+  num_instances: 1
   config:
     identity: "llm_loss_averse"
     role: player

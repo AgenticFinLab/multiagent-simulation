@@ -5,6 +5,7 @@
 market:
   name: "Market with Momentum Dynamics"
   class: "examples.MomentumEffectLLM.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -26,6 +27,7 @@ market:
 llm_momentum_trader:
   name: "LLM Momentum Trader"
   class: "examples.MomentumEffectLLM.players:LLMMomentumTrader"
+  num_instances: 1
   config:
     identity: "llm_momentum_trader"
     role: player
@@ -50,6 +52,7 @@ llm_momentum_trader:
 llm_contrarian:
   name: "LLM Contrarian Trader"
   class: "examples.MomentumEffectLLM.players:LLMContrarianTrader"
+  num_instances: 1
   config:
     identity: "llm_contrarian"
     role: player
@@ -74,6 +77,7 @@ llm_contrarian:
 llm_technical:
   name: "LLM Technical Trader"
   class: "examples.MomentumEffectLLM.players:LLMTechnicalTrader"
+  num_instances: 1
   config:
     identity: "llm_technical"
     role: player
@@ -98,6 +102,7 @@ llm_technical:
 llm_trend_follower:
   name: "LLM Trend Follower"
   class: "examples.MomentumEffectLLM.players:LLMTrendFollower"
+  num_instances: 1
   config:
     identity: "llm_trend_follower"
     role: player
@@ -122,6 +127,7 @@ llm_trend_follower:
 llm_fundamental:
   name: "LLM Fundamental Anchor"
   class: "examples.MomentumEffectLLM.players:LLMFundamentalAnchor"
+  num_instances: 1
   config:
     identity: "llm_fundamental"
     role: player

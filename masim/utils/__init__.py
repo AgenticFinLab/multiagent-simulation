@@ -1,7 +1,7 @@
 """MASim Utilities Package
 
 Provides utility modules:
-- config:     YAML configuration loading with !include support; load_class()
+- config:     YAML configuration loading with !include support; load_class(); expand_player_instances()
 - ray_utils:  Ray cluster initialization and actor naming helpers
 - topology:   NetworkX-based topology graph for message routing
 - history:    Memory-efficient history buffer with disk persistence
@@ -10,6 +10,7 @@ Provides utility modules:
 
 from masim.utils.config import (
     load_config,
+    expand_player_instances,
     validate_config,
     build_connection_matrix,
     IncludeLoader,
@@ -33,6 +34,7 @@ from masim.utils.history import (
 __all__ = [
     # Config utilities
     "load_config",
+    "expand_player_instances",
     "validate_config",
     "build_connection_matrix",
     "IncludeLoader",

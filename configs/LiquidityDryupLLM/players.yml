@@ -5,6 +5,7 @@
 market:
   name: "Market with Liquidity Dynamics"
   class: "examples.LiquidityDryupLLM.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -24,6 +25,7 @@ market:
 llm_market_maker:
   name: "LLM Market Maker"
   class: "examples.LiquidityDryupLLM.players:LLMMarketMaker"
+  num_instances: 1
   config:
     identity: "llm_market_maker"
     role: player
@@ -48,6 +50,7 @@ llm_market_maker:
 llm_liquidity_demander:
   name: "LLM Liquidity Demander"
   class: "examples.LiquidityDryupLLM.players:LLMLiquidityDemander"
+  num_instances: 1
   config:
     identity: "llm_liquidity_demander"
     role: player
@@ -72,6 +75,7 @@ llm_liquidity_demander:
 llm_arbitrageur:
   name: "LLM Arbitrageur"
   class: "examples.LiquidityDryupLLM.players:LLMArbitrageur"
+  num_instances: 1
   config:
     identity: "llm_arbitrageur"
     role: player
@@ -96,6 +100,7 @@ llm_arbitrageur:
 llm_value:
   name: "LLM Value Investor"
   class: "examples.LiquidityDryupLLM.players:LLMValueInvestor"
+  num_instances: 1
   config:
     identity: "llm_value"
     role: player
@@ -120,6 +125,7 @@ llm_value:
 llm_forced_seller:
   name: "LLM Forced Seller"
   class: "examples.LiquidityDryupLLM.players:LLMForcedSeller"
+  num_instances: 1
   config:
     identity: "llm_forced_seller"
     role: player

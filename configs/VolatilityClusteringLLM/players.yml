@@ -18,6 +18,7 @@
 market:
   name: "Market"
   class: "examples.VolatilityClusteringLLM.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -44,6 +45,7 @@ market:
 llm_fundamentalist:
   name: "LLM Fundamentalist"
   class: "examples.VolatilityClusteringLLM.players:LLMFundamentalist"
+  num_instances: 1
   config:
     identity: "llm_fundamentalist"
     role: player
@@ -68,35 +70,13 @@ llm_fundamentalist:
 # -----------------------------------------------------------------------------
 # LLM Trend Followers (Multiple for stronger effect)
 # -----------------------------------------------------------------------------
-llm_trend_follower_1:
-  name: "LLM Trend Follower 1"
+llm_trend_follower:
+  name: "LLM Trend Follower"
   class: "examples.VolatilityClusteringLLM.players:LLMTrendFollower"
+  # Expander → llm_trend_follower_1, llm_trend_follower_2
+  num_instances: 2
   config:
-    identity: "llm_trend_follower_1"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - investors
-    extras:
-      record_path: "EXPERIMENT/VolatilityClusteringLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      llm:
-        sys_message: "examples.VolatilityClusteringLLM.prompts:LLM_TREND_FOLLOWER_SYS"
-        user_message: "examples.VolatilityClusteringLLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
-        generation_config:
-          temperature: 0.5
-          max_new_tokens: 500
-  persona: !include persona.yml
-
-llm_trend_follower_2:
-  name: "LLM Trend Follower 2"
-  class: "examples.VolatilityClusteringLLM.players:LLMTrendFollower"
-  config:
-    identity: "llm_trend_follower_2"
+    identity: "llm_trend_follower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -117,13 +97,14 @@ llm_trend_follower_2:
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# LLM Noise Traders
+# LLM Noise Trader
 # -----------------------------------------------------------------------------
-llm_noise_trader_1:
-  name: "LLM Noise Trader 1"
+llm_noise_trader:
+  name: "LLM Noise Trader"
   class: "examples.VolatilityClusteringLLM.players:LLMNoiseTrader"
+  num_instances: 1
   config:
-    identity: "llm_noise_trader_1"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -149,6 +130,7 @@ llm_noise_trader_1:
 llm_slow_adapter:
   name: "LLM Slow Adapter"
   class: "examples.VolatilityClusteringLLM.players:LLMSlowAdapter"
+  num_instances: 1
   config:
     identity: "llm_slow_adapter"
     role: player
@@ -176,6 +158,7 @@ llm_slow_adapter:
 llm_volatility_trader:
   name: "LLM Volatility Trader"
   class: "examples.VolatilityClusteringLLM.players:LLMVolatilityTrader"
+  num_instances: 1
   config:
     identity: "llm_volatility_trader"
     role: player

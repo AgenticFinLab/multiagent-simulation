@@ -18,6 +18,7 @@
 market:
   name: "Market"
   class: "examples.VolatilityClustering.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -46,6 +47,7 @@ market:
 fundamentalist:
   name: "Fundamentalist Investor"
   class: "examples.VolatilityClustering.players:Fundamentalist"
+  num_instances: 1
   config:
     identity: "fundamentalist"
     role: player
@@ -67,11 +69,13 @@ fundamentalist:
 # -----------------------------------------------------------------------------
 # Trend Followers (Multiple for stronger effect)
 # -----------------------------------------------------------------------------
-trend_follower_1:
-  name: "Trend Follower 1"
+trend_follower:
+  name: "Trend Follower"
   class: "examples.VolatilityClustering.players:TrendFollower"
+  # Expander → trend_follower_1, trend_follower_2
+  num_instances: 2
   config:
-    identity: "trend_follower_1"
+    identity: "trend_follower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -89,35 +93,16 @@ trend_follower_1:
       trend_threshold: 0.005
   persona: !include persona.yml
 
-trend_follower_2:
-  name: "Trend Follower 2"
-  class: "examples.VolatilityClustering.players:TrendFollower"
-  config:
-    identity: "trend_follower_2"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - investors
-    extras:
-      record_path: "EXPERIMENT/VolatilityClustering/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      lookback_window: 3
-      base_position_size: 30.0
-      volatility_sensitivity: 0.8
-      baseline_volatility: 1.0
-      trend_threshold: 0.005
-  persona: !include persona.yml
-
 # -----------------------------------------------------------------------------
 # Noise Traders
 # -----------------------------------------------------------------------------
-noise_trader_1:
-  name: "Noise Trader 1"
+noise_trader:
+  name: "Noise Trader"
   class: "examples.VolatilityClustering.players:NoiseTrader"
+  # Expander → noise_trader_1, noise_trader_2
+  num_instances: 2
   config:
-    identity: "noise_trader_1"
+    identity: "noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -132,30 +117,13 @@ noise_trader_1:
       mean_reversion_speed: 0.1
   persona: !include persona.yml
 
-noise_trader_2:
-  name: "Noise Trader 2"
-  class: "examples.VolatilityClustering.players:NoiseTrader"
-  config:
-    identity: "noise_trader_2"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - investors
-    extras:
-      record_path: "EXPERIMENT/VolatilityClustering/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      position_volatility: 15.0
-      mean_reversion_speed: 0.1
-  persona: !include persona.yml
-
 # -----------------------------------------------------------------------------
 # Slow Adapter
 # -----------------------------------------------------------------------------
 slow_adapter:
   name: "Slow Adapter"
   class: "examples.VolatilityClustering.players:SlowAdapter"
+  num_instances: 1
   config:
     identity: "slow_adapter"
     role: player
@@ -179,6 +147,7 @@ slow_adapter:
 volatility_trader:
   name: "Volatility Trader"
   class: "examples.VolatilityClustering.players:VolatilityTrader"
+  num_instances: 1
   config:
     identity: "volatility_trader"
     role: player

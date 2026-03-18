@@ -50,16 +50,8 @@ environment:
 # -----------------------------------------------------------------------------
 #
 # RESOURCE SIZING PROTOCOL (mandatory for every new scenario):
-#   Before setting num_cpus and object_store_memory, read the players.py code
-#   and compute the actual resource demand. Then write a concrete value here.
-#   Do NOT leave these as null.
-#
-#   num_cpus derivation:
-#     Count the number of Ray actors (= number of players in players.yml).
-#     Each actor runs one turn at a time (max_concurrency tasks per actor).
-#     Coordinator and investors run in different levels (sequential levels,
-#     parallel within each level). Set num_cpus = N_players_in_largest_level + 1.
-#     Never set more CPUs than physical cores available.
+#   Only object_store_memory needs to be computed per-scenario.
+#   num_cpus = null always (actors declare num_cpus=0, so the value is irrelevant).
 #
 #   object_store_memory — WHAT IT IS:
 #     This is NOT per-actor memory. It is ONE cluster-wide shared memory pool
@@ -88,8 +80,11 @@ ray:
   namespace: "[scenario_name]"
   # Actor name prefix (null = auto)
   actor_prefix: null
-  # [FILL IN] Read players.yml: set = N_players_in_largest_level + 1
-  num_cpus: 4
+  # null = Ray auto-detects from machine.
+  # All actors in this framework use num_cpus=0 (async, I/O-bound via asyncio).
+  # No actor ever declares a CPU resource requirement, so this value has no
+  # scheduling effect. Set to null to avoid stale hardcoded values.
+  num_cpus: null
   # GPU count (null = none — rule-based simulations never use GPUs)
   num_gpus: null
   # [FILL IN] ONE shared Plasma pool (NOT per-actor). Holds only cross-actor objects during ray.get().

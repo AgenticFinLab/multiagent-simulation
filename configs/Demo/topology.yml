@@ -3,12 +3,15 @@
 # =============================================================================
 # Coordinator as hub, all players communicate through coordinator.
 #
-#         player_1 ──┐
-#                    │
-#         player_2 ──┼──▶ coordinator ──┬──▶ player_1
-#                    │                  └──▶ player_2
-#                    │
-#                    └──── (responses) ◀────────────┘
+# Note: player keys with num_instances > 1 use their base key here.
+# The simulator expander resolves them to foo_1, foo_2, ... before building
+# the TopologyGraph, so all edge rules apply to every instance automatically.
+#
+#         player ──┐
+#                  │
+#                  ├──▶ coordinator ──▶ player (→ player_1, player_2)
+#                  │
+#                  └──── (responses) ◀─────────┘
 #
 # Execution flow per round:
 #   Level 0: coordinator executes (sends to players)
@@ -24,13 +27,11 @@ sources:
 # Explicit connections: sender → [targets]
 connections:
   # Coordinator → All players (broadcasts)
+  # num_instances: 2 → expands to player_1, player_2
   coordinator:
-    - player_1
-    - player_2
+    - player
 
   # Each player → Coordinator only (responses)
-  player_1:
-    - coordinator
-
-  player_2:
+  # num_instances: 2 → expands to player_1 → coordinator, player_2 → coordinator
+  player:
     - coordinator

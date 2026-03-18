@@ -3,15 +3,15 @@
 # =============================================================================
 # Market as hub, all LLM investors communicate through market.
 #
-#         llm_fundamentalist ───────┐
-#         llm_trend_follower_1 ─────┤
-#         llm_trend_follower_2 ─────┼──▶ market ──┬──▶ llm_fundamentalist
-#         llm_noise_trader_1 ───────┤             ├──▶ llm_trend_follower_1
-#         llm_slow_adapter ─────────┤             ├──▶ llm_trend_follower_2
-#         llm_volatility_trader ────┘             ├──▶ llm_noise_trader_1
-#                                               ├──▶ llm_slow_adapter
-#                    (orders: P,Q)              └──▶ llm_volatility_trader
-#                                                    (market: price, volatility)
+# Note: player keys with num_instances > 1 use their base key here.
+# The simulator expander resolves them to foo_1, foo_2, ... before building
+# the TopologyGraph, so all edge rules apply to every instance automatically.
+#
+#         llm_fundamentalist ──────┐
+#         llm_trend_follower ──────┤
+#         llm_noise_trader ────────┼──▶ market ──▶ all investors
+#         llm_slow_adapter ────────┤             (market: price, volatility)
+#         llm_volatility_trader ───┘
 #
 # Execution flow per round:
 #   Level 0: market executes (broadcasts price + volatility)
@@ -25,11 +25,11 @@ sources:
 
 connections:
   # Market → All LLM investors (price + volatility broadcast)
+  # num_instances: 2 → llm_trend_follower_1/2
   market:
     - llm_fundamentalist
-    - llm_trend_follower_1
-    - llm_trend_follower_2
-    - llm_noise_trader_1
+    - llm_trend_follower
+    - llm_noise_trader
     - llm_slow_adapter
     - llm_volatility_trader
 
@@ -37,13 +37,11 @@ connections:
   llm_fundamentalist:
     - market
 
-  llm_trend_follower_1:
+  # num_instances: 2 → expands to llm_trend_follower_1/2 → market
+  llm_trend_follower:
     - market
 
-  llm_trend_follower_2:
-    - market
-
-  llm_noise_trader_1:
+  llm_noise_trader:
     - market
 
   llm_slow_adapter:

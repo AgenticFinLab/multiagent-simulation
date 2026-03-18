@@ -5,6 +5,7 @@
 market:
   name: "Market with Mean Reversion"
   class: "examples.ReversalEffectLLM.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -24,6 +25,7 @@ market:
 llm_contrarian:
   name: "LLM Contrarian Investor"
   class: "examples.ReversalEffectLLM.players:LLMContrarianInvestor"
+  num_instances: 1
   config:
     identity: "llm_contrarian"
     role: player
@@ -48,6 +50,7 @@ llm_contrarian:
 llm_overconfident:
   name: "LLM Overconfident Trader"
   class: "examples.ReversalEffectLLM.players:LLMOverconfidentTrader"
+  num_instances: 1
   config:
     identity: "llm_overconfident"
     role: player
@@ -72,6 +75,7 @@ llm_overconfident:
 llm_value:
   name: "LLM Value Investor"
   class: "examples.ReversalEffectLLM.players:LLMValueInvestor"
+  num_instances: 1
   config:
     identity: "llm_value"
     role: player
@@ -96,6 +100,7 @@ llm_value:
 llm_momentum_chaser:
   name: "LLM Momentum Chaser"
   class: "examples.ReversalEffectLLM.players:LLMMomentumChaser"
+  num_instances: 1
   config:
     identity: "llm_momentum_chaser"
     role: player
@@ -120,6 +125,7 @@ llm_momentum_chaser:
 llm_noise:
   name: "LLM Noise Trader"
   class: "examples.ReversalEffectLLM.players:LLMNoiseTrader"
+  num_instances: 1
   config:
     identity: "llm_noise"
     role: player

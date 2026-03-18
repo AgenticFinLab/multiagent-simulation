@@ -28,6 +28,7 @@
 market:
   name: "Market"
   class: "examples.[SCENARIO_NAME]LLM.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     # coordinator = Level 0 (executes before all LLM investors)
@@ -57,6 +58,14 @@ market:
 llm_investor_1:
   name: "LLM Investor Type 1"
   class: "examples.[SCENARIO_NAME]LLM.players:LLMInvestorType1"
+  # REQUIRED: num_instances — number of identical copies to spawn.
+  # The expander deep-copies this block N times, assigning:
+  #   identity = "llm_investor_1_1" … "llm_investor_1_N"
+  #   name     = "LLM Investor Type 1 1" … "LLM Investor Type 1 N"
+  # topology.yml uses the BASE key ("llm_investor_1") — expander resolves instances.
+  # Use num_instances: 1 for a single instance (identity = key unchanged, no suffix).
+  # Omitting num_instances entirely is a config error and will raise KeyError.
+  num_instances: 1
   config:
     identity: "llm_investor_1"
     role: player
@@ -93,6 +102,7 @@ llm_investor_1:
 llm_investor_2:
   name: "LLM Investor Type 2"
   class: "examples.[SCENARIO_NAME]LLM.players:LLMInvestorType2"
+  num_instances: 1
   config:
     identity: "llm_investor_2"
     role: player
@@ -120,6 +130,7 @@ llm_investor_2:
 llm_investor_3:
   name: "LLM Investor Type 3"
   class: "examples.[SCENARIO_NAME]LLM.players:LLMInvestorType3"
+  num_instances: 1
   config:
     identity: "llm_investor_3"
     role: player
@@ -147,6 +158,7 @@ llm_investor_3:
 llm_investor_4:
   name: "LLM Investor Type 4"
   class: "examples.[SCENARIO_NAME]LLM.players:LLMInvestorType4"
+  num_instances: 1
   config:
     identity: "llm_investor_4"
     role: player
@@ -174,6 +186,7 @@ llm_investor_4:
 llm_investor_5:
   name: "LLM Investor Type 5"
   class: "examples.[SCENARIO_NAME]LLM.players:LLMInvestorType5"
+  num_instances: 1
   config:
     identity: "llm_investor_5"
     role: player

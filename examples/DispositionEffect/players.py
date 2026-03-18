@@ -224,13 +224,15 @@ class BaseInvestor(GeneralPlayer):
         position = self.state.custom_state["position"]
         total_cost = self.state.custom_state["total_cost"]
 
-        if quantity > 0:  # Buy
+        # Buy: add to position and optionally update reference price
+        if quantity > 0:
             new_cost = quantity * price
             total_cost += new_cost
             position += quantity
             if move_reference and position > 0:
                 self.state.custom_state["purchase_price"] = total_cost / position
-        elif quantity < 0:  # Sell - remove at average cost
+        # Sell: remove shares at average cost; reference point stays at original anchor
+        elif quantity < 0:
             if position > 0:
                 cost_per_share = total_cost / position
                 total_cost -= abs(quantity) * cost_per_share

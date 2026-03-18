@@ -12,8 +12,8 @@ ray:
   address: null
   namespace: "liquidity_dryup"
   actor_prefix: null
-  # Derived: 7 investors run parallel at level 1; +1 for OS/driver = 8
-  num_cpus: 8
+  # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
+  num_cpus: null
   num_gpus: null
   # Derived: 8 players, star topology -> 14 msgs/round
   #   8 TurnResult + 8 pending_info + 14 Message = 30 Ray objects

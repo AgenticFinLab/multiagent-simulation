@@ -300,14 +300,14 @@ class PlayerPersona:
 
 ### 3.2 Bounded O(k) - Configurable upper bound
 
-| Component                                   | Bound       | Configuration                  |
-|---------------------------------------------|-------------|--------------------------------|
-| `Simulator.history.hot`                     | entry_limit | `setting.entry_limit`          |
-| `MonitoringProxy._metrics.hot`              | entry_limit | `MonitoringConfig.entry_limit` |
-| `MonitoringProxy._events.hot`               | entry_limit | `MonitoringConfig.entry_limit` |
-| `StorageProxy._*_stores` buffer             | block_size  | `StorageConfig.entry_limit`    |
-| `CommunicationChannel.message_store` buffer | 500         | Hardcoded                      |
-| `HistoryBuffer._pending_cold`               | block_size  | Constructor param              |
+| Component                                   | Bound       | Configuration                        |
+|---------------------------------------------|-------------|--------------------------------------|
+| `Simulator.history.hot`                     | entry_limit | `setting.round_history_limit`        |
+| `MonitoringProxy._metrics.hot`              | entry_limit | `MonitoringConfig.monitor_hot_limit` |
+| `MonitoringProxy._events.hot`               | entry_limit | `MonitoringConfig.monitor_hot_limit` |
+| `StorageProxy._*_stores` buffer             | block_size  | `StorageConfig.turn_block_size`      |
+| `CommunicationChannel.message_store` buffer | 500         | Hardcoded                            |
+| `HistoryBuffer._pending_cold`               | block_size  | Constructor param                    |
 
 ### 3.3 Transient - Cleared each round
 

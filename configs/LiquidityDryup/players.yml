@@ -19,6 +19,7 @@
 market:
   name: "Market"
   class: "examples.LiquidityDryup.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -37,11 +38,13 @@ market:
       base_liquidity: 50.0
   persona: !include persona.yml
 
-market_maker_1:
-  name: "Market Maker 1"
+market_maker:
+  name: "Market Maker"
   class: "examples.LiquidityDryup.players:MarketMaker"
+  # Expander → market_maker_1, market_maker_2
+  num_instances: 2
   config:
-    identity: "market_maker_1"
+    identity: "market_maker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -58,31 +61,13 @@ market_maker_1:
       normal_rebalance: 0.2
   persona: !include persona.yml
 
-market_maker_2:
-  name: "Market Maker 2"
-  class: "examples.LiquidityDryup.players:MarketMaker"
-  config:
-    identity: "market_maker_2"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - investors
-    extras:
-      record_path: "EXPERIMENT/LiquidityDryup/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      volatility_threshold: 0.02
-      base_liquidity: 30.0
-      withdraw_rebalance: 0.3
-      normal_rebalance: 0.2
-  persona: !include persona.yml
-
-liquidity_seeker_1:
-  name: "Liquidity Seeker 1"
+liquidity_seeker:
+  name: "Liquidity Seeker"
   class: "examples.LiquidityDryup.players:LiquiditySeeker"
+  # Expander → liquidity_seeker_1, liquidity_seeker_2
+  num_instances: 2
   config:
-    identity: "liquidity_seeker_1"
+    identity: "liquidity_seeker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -97,27 +82,10 @@ liquidity_seeker_1:
       liquidity_base: 100.0
   persona: !include persona.yml
 
-liquidity_seeker_2:
-  name: "Liquidity Seeker 2"
-  class: "examples.LiquidityDryup.players:LiquiditySeeker"
-  config:
-    identity: "liquidity_seeker_2"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - investors
-    extras:
-      record_path: "EXPERIMENT/LiquidityDryup/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      target_volatility: 15.0
-      liquidity_base: 100.0
-  persona: !include persona.yml
-
 value_trader:
   name: "Value Trader"
   class: "examples.LiquidityDryup.players:ValueTrader"
+  num_instances: 1
   config:
     identity: "value_trader"
     role: player
@@ -139,6 +107,7 @@ value_trader:
 momentum_trader:
   name: "Momentum Trader"
   class: "examples.LiquidityDryup.players:MomentumTrader"
+  num_instances: 1
   config:
     identity: "momentum_trader"
     role: player
@@ -158,6 +127,7 @@ momentum_trader:
 noise_trader:
   name: "Noise Trader"
   class: "examples.LiquidityDryup.players:NoiseTrader"
+  num_instances: 1
   config:
     identity: "noise_trader"
     role: player

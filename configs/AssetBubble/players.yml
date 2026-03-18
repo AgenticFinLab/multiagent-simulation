@@ -19,6 +19,7 @@
 market:
   name: "Market"
   class: "examples.AssetBubble.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -41,11 +42,13 @@ market:
 # -----------------------------------------------------------------------------
 # Momentum Speculators (Primary Bubble Drivers)
 # -----------------------------------------------------------------------------
-momentum_speculator_1:
-  name: "Momentum Speculator 1"
+momentum_speculator:
+  name: "Momentum Speculator"
   class: "examples.AssetBubble.players:MomentumSpeculator"
+  # Expander → momentum_speculator_1, momentum_speculator_2
+  num_instances: 2
   config:
-    identity: "momentum_speculator_1"
+    identity: "momentum_speculator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -58,30 +61,11 @@ momentum_speculator_1:
       custom_state_hot_limit: 3
       # MomentumSpeculator specific parameters
       lookback_short: 3
-      aggressiveness: 2.0       # High: amplifies momentum signals
-      base_position_size: 50.0  # Large positions
-      leverage_multiplier: 1.5  # Uses leverage
-  persona: !include persona.yml
-
-momentum_speculator_2:
-  name: "Momentum Speculator 2"
-  class: "examples.AssetBubble.players:MomentumSpeculator"
-  config:
-    identity: "momentum_speculator_2"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - investors
-    extras:
-      record_path: "EXPERIMENT/AssetBubble/records"
-      # Investor base parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # MomentumSpeculator specific parameters
-      lookback_short: 3
+      # High: amplifies momentum signals
       aggressiveness: 2.0
+      # Large positions
       base_position_size: 50.0
+      # Uses leverage
       leverage_multiplier: 1.5
   persona: !include persona.yml
 
@@ -91,6 +75,7 @@ momentum_speculator_2:
 rational_arbitrageur:
   name: "Rational Arbitrageur"
   class: "examples.AssetBubble.players:RationalArbitrageur"
+  num_instances: 1
   config:
     identity: "rational_arbitrageur"
     role: player
@@ -113,11 +98,13 @@ rational_arbitrageur:
 # -----------------------------------------------------------------------------
 # Noise Traders (Herd Followers)
 # -----------------------------------------------------------------------------
-noise_trader_1:
-  name: "Noise Trader 1"
+noise_trader:
+  name: "Noise Trader"
   class: "examples.AssetBubble.players:NoiseTrader"
+  # Expander → noise_trader_1, noise_trader_2
+  num_instances: 2
   config:
-    identity: "noise_trader_1"
+    identity: "noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -130,27 +117,7 @@ noise_trader_1:
       custom_state_hot_limit: 3
       # NoiseTrader specific parameters
       sentiment_volatility: 0.3
-      herding_weight: 0.6       # How much to follow recent returns
-      base_position_size: 20.0
-  persona: !include persona.yml
-
-noise_trader_2:
-  name: "Noise Trader 2"
-  class: "examples.AssetBubble.players:NoiseTrader"
-  config:
-    identity: "noise_trader_2"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - investors
-    extras:
-      record_path: "EXPERIMENT/AssetBubble/records"
-      # Investor base parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # NoiseTrader specific parameters
-      sentiment_volatility: 0.3
+      # How much to follow recent returns
       herding_weight: 0.6
       base_position_size: 20.0
   persona: !include persona.yml
@@ -161,6 +128,7 @@ noise_trader_2:
 fundamental_investor:
   name: "Fundamental Investor"
   class: "examples.AssetBubble.players:FundamentalInvestor"
+  num_instances: 1
   config:
     identity: "fundamental_investor"
     role: player
@@ -185,6 +153,7 @@ fundamental_investor:
 leveraged_buyer:
   name: "Leveraged Buyer"
   class: "examples.AssetBubble.players:LeveragedBuyer"
+  num_instances: 1
   config:
     identity: "leveraged_buyer"
     role: player
@@ -210,6 +179,7 @@ leveraged_buyer:
 conservative_holder:
   name: "Conservative Holder"
   class: "examples.AssetBubble.players:ConservativeHolder"
+  num_instances: 1
   config:
     identity: "conservative_holder"
     role: player

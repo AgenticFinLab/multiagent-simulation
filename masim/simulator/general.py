@@ -1,26 +1,29 @@
 """General Simulator implementation for the MASim framework.
 
-This module provides the concrete GeneralSimulator implementation.
-Utility functions (Ray init, class loading) have been moved to utils/:
-- masim.utils.ray_utils: ensure_ray(), get_actor_name()
-- masim.utils.config:    load_class()
+This module provides the concrete GeneralSimulator with full Ray integration.
 
-For abstract base classes, see `base.py`.
+Utility functions are in utils/:
+    masim.utils.ray_utils  → ensure_ray(), get_actor_name()
+    masim.utils.config     → load_class()
 
-Architectural Note:
-    The Simulator is a system-level orchestrator. All agents are Players,
-    with some having role='coordinator' for multi-agent coordination.
+For abstract base classes, see `simulator/base.py`.
 
-    The framework supports three modes:
-    1. Zero coordinators: Pure peer-to-peer simulation
-    2. One coordinator: Traditional hierarchical coordination
-    3. Multiple coordinators: Multi-level coordination hierarchy
+Extension hooks (override in subclass for customization):
+    update_topology(round_num)
+        Called at the start of every round. Default: no-op (static topology).
+        Override to rewire agents, add/remove edges, or switch between
+        feedforward and feedback configurations.
+        After any mutation: call topology.invalidate_levels_cache() +
+        _update_actor_topology_slices() to push new topology slices AND
+        updated peer handles to all affected actors.
 
-    Execution flow with coordinator(s):
-    1. COORDINATOR_NOTIFY: Coordinator sends initial messages to players
-    2. PLAYER_DECISION: All regular players execute in parallel
-    3. COORDINATOR_COLLECT: Coordinators collect player responses
-    4. COORDINATOR_BROADCAST: Coordinators broadcast results
+Round execution (for each topology level):
+    Phase 1 EXECUTE: Submit persona.operate(round_num, level=N) in parallel
+                     → returns (TurnResult, pending_infos) tuple
+    Phase 2 COLLECT: ray.get all operate futures → gather TurnResults + pending_infos
+    Phase 3 DISPATCH: build_message_from_info → channel.encode_and_deliver
+                      → target.receive_message [Ray remote, blocks until complete]
+    Phase 4 RECORD:  save_round_diagram (rate-limited by save_diagram_interval)
 
 Usage:
     from masim.simulator.general import GeneralSimulator
@@ -69,27 +72,16 @@ class GeneralSimulator(BaseSimulator):
     """
     Concrete implementation of BaseSimulator with full Ray integration.
 
-    This class provides:
-    - Ray cluster initialization and management
-    - Direct Persona creation as Ray actors from config (no intermediate instances)
-    - Simulation lifecycle orchestration (setup, run_round, run, shutdown)
-    - History management and status tracking
-    - Flexible coordinator support (zero, one, or multiple)
+    Provides:
+    - Ray cluster initialization and management via utils/ray_utils.py
+    - Persona creation as Ray actors from YAML config (dynamic class loading via utils/config.py)
+    - Level-ordered simulation execution (setup, run_round, run, shutdown)
+    - History management (HistoryBuffer) and status tracking
+    - Topology update hook: override update_topology() for dynamic rewiring
 
-    The Simulator is a system-level orchestrator:
-    - All agents are Players with perceive/decide/act pattern
-    - Players with role='coordinator' execute first and orchestrate others
-    - Regular players respond to coordinator notifications
-
-    Coordinator Flow (per round):
-        1. COORDINATOR_NOTIFY: Coordinator(s) run perceive/decide/act to send init messages
-        2. PLAYER_DECISION: Regular players run in parallel, respond to notifications
-        3. COORDINATOR_PROCESS: Coordinator(s) collect and process responses
-        4. COORDINATOR_BROADCAST: Coordinator(s) broadcast final results
-
-    No Coordinator Mode:
-        When no coordinator is configured, the Simulator sends default notifications
-        and all players run in parallel without centralized coordination.
+    All agents are Players (including coordinators). Topology levels determine
+    execution order — Level 0 nodes run first; each level waits for the previous
+    level's phase_dispatch to complete before starting phase_execute.
 
     Example:
         yaml_config = load_config("configs/Demo/simulation.yml")
@@ -194,14 +186,14 @@ class GeneralSimulator(BaseSimulator):
 
         Step 1: set_topology — sends each actor only its LOCAL topology slice
                 {targets: [...], senders: [...]} instead of the full connections
-                dict. This reduces IPC payload from O(N) per actor to O(targets+senders)
+                dict. Reduces IPC payload from O(N) per actor to O(targets+senders)
                 per actor, eliminating O(N²) total transfer at large N.
 
-        Step 2: set_peer_handles — sends each actor only its target handles
-                (already pre-filtered in the previous session's fix).
+        Step 2: set_peer_handles — sends each actor only the Ray handles for its
+                topology targets (pre-filtered subset, not the full player dict).
 
         Both steps submit all remote calls concurrently and wait with a single ray.get().
-        set_topology must complete on all actors before set_peer_handles is submitted,
+        Step 1 must complete on all actors before Step 2 is submitted,
         because set_peer_handles may reference topology-derived state inside the actor.
 
         Also saves the initial topology diagram as round 0 (before simulation starts).

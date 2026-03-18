@@ -15,6 +15,7 @@
 market:
   name: "Market"
   class: "examples.EquityPremium.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -24,18 +25,23 @@ market:
     extras:
       record_path: "EXPERIMENT/EquityPremium/records"
       # Market parameters (daily basis)
-      stock_expected_return: 0.000238      # ~6% annual / 252
-      bond_return: 0.0000397               # ~1% annual / 252
-      stock_volatility: 0.00945            # ~15% annual / sqrt(252)
+      # ~6% annual / 252
+      stock_expected_return: 0.000238
+      # ~1% annual / 252
+      bond_return: 0.0000397
+      # ~15% annual / sqrt(252)
+      stock_volatility: 0.00945
       initial_stock_price: 100.0
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-mla_1:
-  name: "Myopic Loss Averse 1"
+mla:
+  name: "Myopic Loss Averse"
   class: "examples.EquityPremium.players:MyopicLossAverseInvestor"
+  # Expander → mla_1, mla_2, mla_3
+  num_instances: 3
   config:
-    identity: "mla_1"
+    identity: "mla"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -51,49 +57,12 @@ mla_1:
       risk_aversion: 2.0
   persona: !include persona.yml
 
-mla_2:
-  name: "Myopic Loss Averse 2"
-  class: "examples.EquityPremium.players:MyopicLossAverseInvestor"
-  config:
-    identity: "mla_2"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - investors
-    extras:
-      record_path: "EXPERIMENT/EquityPremium/records"
-      initial_cash: 10000.0
-      initial_stock: 0.0
-      custom_state_hot_limit: 3
-      loss_aversion: 2.25
-      evaluation_window: 5
-      risk_aversion: 2.0
-  persona: !include persona.yml
-
-mla_3:
-  name: "Myopic Loss Averse 3"
-  class: "examples.EquityPremium.players:MyopicLossAverseInvestor"
-  config:
-    identity: "mla_3"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - investors
-    extras:
-      record_path: "EXPERIMENT/EquityPremium/records"
-      initial_cash: 10000.0
-      initial_stock: 0.0
-      custom_state_hot_limit: 3
-      loss_aversion: 2.25
-      evaluation_window: 5
-      risk_aversion: 2.0
-  persona: !include persona.yml
-
-long_horizon_1:
+long_horizon:
   name: "Long Horizon Investor"
   class: "examples.EquityPremium.players:LongHorizonInvestor"
+  num_instances: 1
   config:
-    identity: "long_horizon_1"
+    identity: "long_horizon"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -111,6 +80,7 @@ long_horizon_1:
 risk_neutral:
   name: "Risk Neutral Investor"
   class: "examples.EquityPremium.players:RiskNeutralInvestor"
+  num_instances: 1
   config:
     identity: "risk_neutral"
     role: player
@@ -126,11 +96,13 @@ risk_neutral:
       excess_return_multiplier: 500
   persona: !include persona.yml
 
-conservative_1:
-  name: "Conservative Investor 1"
+conservative:
+  name: "Conservative Investor"
   class: "examples.EquityPremium.players:ConservativeInvestor"
+  # Expander → conservative_1, conservative_2
+  num_instances: 2
   config:
-    identity: "conservative_1"
+    identity: "conservative"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -144,28 +116,12 @@ conservative_1:
       target_stock_pct: 0.2
   persona: !include persona.yml
 
-conservative_2:
-  name: "Conservative Investor 2"
-  class: "examples.EquityPremium.players:ConservativeInvestor"
-  config:
-    identity: "conservative_2"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - investors
-    extras:
-      record_path: "EXPERIMENT/EquityPremium/records"
-      initial_cash: 10000.0
-      initial_stock: 0.0
-      custom_state_hot_limit: 3
-      target_stock_pct: 0.2
-  persona: !include persona.yml
-
-noise_1:
+noise_trader:
   name: "Noise Trader"
   class: "examples.EquityPremium.players:NoiseTrader"
+  num_instances: 1
   config:
-    identity: "noise_1"
+    identity: "noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

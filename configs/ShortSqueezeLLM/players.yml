@@ -5,6 +5,7 @@
 market:
   name: "Market with Short Interest Tracking"
   class: "examples.ShortSqueezeLLM.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -25,6 +26,7 @@ market:
 llm_short_seller:
   name: "LLM Short Seller"
   class: "examples.ShortSqueezeLLM.players:LLMShortSeller"
+  num_instances: 1
   config:
     identity: "llm_short_seller"
     role: player
@@ -49,6 +51,7 @@ llm_short_seller:
 llm_retail_coord:
   name: "LLM Retail Coordinator"
   class: "examples.ShortSqueezeLLM.players:LLMRetailCoordinator"
+  num_instances: 1
   config:
     identity: "llm_retail_coord"
     role: player
@@ -73,6 +76,7 @@ llm_retail_coord:
 llm_momentum:
   name: "LLM Momentum Buyer"
   class: "examples.ShortSqueezeLLM.players:LLMMomentumBuyer"
+  num_instances: 1
   config:
     identity: "llm_momentum"
     role: player
@@ -97,6 +101,7 @@ llm_momentum:
 llm_value:
   name: "LLM Value Investor"
   class: "examples.ShortSqueezeLLM.players:LLMValueInvestor"
+  num_instances: 1
   config:
     identity: "llm_value"
     role: player
@@ -121,6 +126,7 @@ llm_value:
 llm_institutional:
   name: "LLM Institutional Holder"
   class: "examples.ShortSqueezeLLM.players:LLMInstitutionalHolder"
+  num_instances: 1
   config:
     identity: "llm_institutional"
     role: player

@@ -18,12 +18,13 @@ Usage:
     PlayerClass = load_class("mypackage.players:MyPlayer")
 """
 
+import copy
 import importlib
 import logging
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import yaml
 
@@ -92,6 +93,92 @@ class IncludeLoader(yaml.SafeLoader):
 IncludeLoader.add_constructor("!include", IncludeLoader.include)
 
 
+def expand_player_instances(config: Dict[str, Any]) -> None:
+    """
+    Expand player templates into individual named instances.
+
+    Reads the top-level `num_instances` field from each player block
+    (between 'class' and 'config').  This field is REQUIRED for every player —
+    omitting it raises KeyError so misconfigured files fail fast.
+    For num_instances == 1 the original key is kept unchanged.
+    For num_instances > 1 the base key is replaced by base_key_1 … base_key_N,
+    each with its own identity and display name.
+    topology['sources'] and topology['connections'] are rewritten in-place to
+    use the expanded instance keys.
+
+    Mutates config['players'] and config['topology'] in-place.
+    Called automatically by load_config() after env-var interpolation.
+    Raises KeyError if config is missing required 'players', 'topology', or
+    any player block is missing 'num_instances'.
+
+    Naming: base key "foo" with num_instances: 3  →  "foo_1", "foo_2", "foo_3"
+
+    Args:
+        config: Full loaded configuration dict (with 'players' and 'topology' keys).
+    """
+    players = config["players"]
+
+    new_players: Dict[str, Any] = {}
+    # Maps each base key to its list of expanded instance keys.
+    # For num_instances == 1: identity mapping {base_key: [base_key]}.
+    base_to_instances: Dict[str, List[str]] = {}
+
+    for base_key, cfg in players.items():
+        # num_instances is REQUIRED — no default, no .get(). Missing key = config error.
+        if "num_instances" not in cfg:
+            raise KeyError(
+                f"Player '{base_key}' is missing required field 'num_instances'. "
+                f"Set num_instances: 1 for a single instance."
+            )
+        n = int(cfg["num_instances"])
+        if n <= 0:
+            raise ValueError(
+                f"Player '{base_key}' has invalid num_instances: {n}. Must be >= 1."
+            )
+
+        if n == 1:
+            # No expansion — keep original key unchanged
+            new_players[base_key] = cfg
+            base_to_instances[base_key] = [base_key]
+        else:
+            instances = []
+            for i in range(1, n + 1):
+                inst_key = f"{base_key}_{i}"
+                inst_cfg = copy.deepcopy(cfg)
+                inst_cfg["config"]["identity"] = inst_key
+                # top-level display name: "Disposition Investor 1", "Disposition Investor 2", …
+                inst_cfg["name"] = f"{cfg['name']} {i}"
+                new_players[inst_key] = inst_cfg
+                instances.append(inst_key)
+            base_to_instances[base_key] = instances
+
+    config["players"] = new_players
+
+    # Rewrite topology sources and connections to use fully-expanded instance keys
+    topo = config["topology"]
+
+    # Expand sources: each base key → its instance keys (identity if n == 1)
+    new_sources: List[str] = []
+    for s in topo["sources"]:
+        new_sources.extend(base_to_instances[s] if s in base_to_instances else [s])
+    topo["sources"] = new_sources
+
+    # Expand connections: sender keys and all target lists
+    new_conns: Dict[str, List[str]] = {}
+    for sender, targets in topo["connections"].items():
+        sender_instances = (
+            base_to_instances[sender] if sender in base_to_instances else [sender]
+        )
+        expanded_targets: List[str] = []
+        for t in targets:
+            expanded_targets.extend(
+                base_to_instances[t] if t in base_to_instances else [t]
+            )
+        for si in sender_instances:
+            new_conns[si] = expanded_targets
+    topo["connections"] = new_conns
+
+
 def load_config(
     config_path: Union[str, Path],
     env_interpolate: bool = True,
@@ -123,6 +210,8 @@ def load_config(
 
     if env_interpolate:
         config = _interpolate_env_vars(config)
+
+    expand_player_instances(config)
 
     return config
 
@@ -196,7 +285,7 @@ def validate_config(config: Dict[str, Any]) -> None:
         ValueError: If configuration is invalid
     """
     # Check required sections
-    required_sections = ["simulation", "players"]
+    required_sections = ["setting", "players"]
     for section in required_sections:
         if section not in config:
             raise ValueError(f"Missing required configuration section: {section}")
@@ -345,6 +434,7 @@ def load_class(path: str) -> type:
 
 __all__ = [
     "load_config",
+    "expand_player_instances",
     "validate_config",
     "build_connection_matrix",
     "IncludeLoader",

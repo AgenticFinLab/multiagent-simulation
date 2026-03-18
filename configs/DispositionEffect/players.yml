@@ -18,6 +18,7 @@
 market:
   name: "Market"
   class: "examples.DispositionEffect.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -38,11 +39,13 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-disposition_investor_1:
-  name: "Disposition Investor 1"
+disposition_investor:
+  name: "Disposition Investor"
   class: "examples.DispositionEffect.players:DispositionInvestor"
+  # Expander → disposition_investor_1, disposition_investor_2
+  num_instances: 50
   config:
-    identity: "disposition_investor_1"
+    identity: "disposition_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -55,44 +58,26 @@ disposition_investor_1:
       initial_purchase_price: 100.0
       custom_state_hot_limit: 3
       # DispositionInvestor specific (Prospect Theory)
-      gain_threshold: 0.03        # Sell at 3% gain (quicker realization of winners)
-      loss_threshold: -0.10       # Sell at 10% loss (strong but not extreme threshold)
-      loss_aversion: 2.25         # λ parameter (Kahneman-Tversky 1979)
-      sell_fraction_gain: 0.5     # Sell 50% of position on gain realization
-      sell_fraction_loss: 0.15    # Very reluctantly sell only 15% at loss
-      max_position: 30.0          # Ceiling = initial_position
-      buy_fraction: 0.15          # Buy 15% of deficit only when ±1% of reference point
-  persona: !include persona.yml
-
-disposition_investor_2:
-  name: "Disposition Investor 2"
-  class: "examples.DispositionEffect.players:DispositionInvestor"
-  config:
-    identity: "disposition_investor_2"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - investors
-    extras:
-      record_path: "EXPERIMENT/DispositionEffect/records"
-      # Base investor parameters
-      initial_cash: 10000.0
-      initial_position: 30.0
-      initial_purchase_price: 100.0
-      custom_state_hot_limit: 3
-      # DispositionInvestor specific
-      gain_threshold: 0.03        # Sell at 3% gain
-      loss_threshold: -0.10       # Sell at 10% loss
+      # Sell at 3% gain (quicker realization of winners)
+      gain_threshold: 0.03
+      # Sell at 10% loss (strong but not extreme threshold)
+      loss_threshold: -0.10
+      # λ parameter (Kahneman-Tversky 1979)
       loss_aversion: 2.25
-      sell_fraction_gain: 0.5     # Sell 50% on gain
+      # Sell 50% of position on gain realization
+      sell_fraction_gain: 0.5
+      # Very reluctantly sell only 15% at loss
       sell_fraction_loss: 0.15
-      max_position: 30.0          # Ceiling = initial_position
-      buy_fraction: 0.15          # Buy 15% of deficit only when ±1% of reference point
+      # Ceiling = initial_position
+      max_position: 30.0
+      # Buy 15% of deficit only when ±1% of reference point
+      buy_fraction: 0.15
   persona: !include persona.yml
 
 rational_investor:
   name: "Rational Investor"
   class: "examples.DispositionEffect.players:RationalInvestor"
+  num_instances: 1
   config:
     identity: "rational_investor"
     role: player
@@ -114,6 +99,7 @@ rational_investor:
 tax_aware_investor:
   name: "Tax Aware Investor"
   class: "examples.DispositionEffect.players:TaxAwareInvestor"
+  num_instances: 1
   config:
     identity: "tax_aware_investor"
     role: player
@@ -128,14 +114,18 @@ tax_aware_investor:
       initial_purchase_price: 100.0
       custom_state_hot_limit: 3
       # TaxAwareInvestor specific
-      tax_loss_threshold: -0.05     # Sell at 5% loss for tax benefit
-      capital_gains_hold: 0.20      # Hold until 20% gain (deferral benefit)
-      tax_harvest_fraction: 0.5     # Sell 50% when harvesting
+      # Sell at 5% loss for tax benefit
+      tax_loss_threshold: -0.05
+      # Hold until 20% gain (deferral benefit)
+      capital_gains_hold: 0.20
+      # Sell 50% when harvesting
+      tax_harvest_fraction: 0.5
   persona: !include persona.yml
 
 index_holder:
   name: "Index Holder"
   class: "examples.DispositionEffect.players:IndexHolder"
+  num_instances: 1
   config:
     identity: "index_holder"
     role: player
@@ -146,7 +136,8 @@ index_holder:
       record_path: "EXPERIMENT/DispositionEffect/records"
       # Base investor parameters
       initial_cash: 10000.0
-      initial_position: 50.0        # Larger position for passive holder
+      # Larger position for passive holder
+      initial_position: 50.0
       initial_purchase_price: 100.0
       custom_state_hot_limit: 3
   persona: !include persona.yml
@@ -154,6 +145,7 @@ index_holder:
 institutional_investor:
   name: "Institutional Investor"
   class: "examples.DispositionEffect.players:InstitutionalInvestor"
+  num_instances: 1
   config:
     identity: "institutional_investor"
     role: player
@@ -168,7 +160,9 @@ institutional_investor:
       initial_purchase_price: 100.0
       custom_state_hot_limit: 3
       # InstitutionalInvestor specific (weaker disposition)
-      gain_threshold: 0.25          # Hold longer than retail
-      loss_threshold: -0.15         # Cut losses earlier than retail
+      # Hold longer than retail
+      gain_threshold: 0.25
+      # Cut losses earlier than retail
+      loss_threshold: -0.15
       sell_fraction: 0.4
   persona: !include persona.yml

@@ -3,17 +3,16 @@
 # =============================================================================
 # Market as hub, all investors communicate through market.
 #
-#         momentum_speculator_1 ───┐
-#         momentum_speculator_2 ───┤
-#         rational_arbitrageur ────┼──▶ market ──┬──▶ momentum_speculator_1
-#         noise_trader_1 ─────────┤             ├──▶ momentum_speculator_2
-#         noise_trader_2 ─────────┤             ├──▶ rational_arbitrageur
-#         fundamental_investor ────┤             ├──▶ noise_trader_1
-#         leveraged_buyer ────────┤             ├──▶ noise_trader_2
-#         conservative_holder ────┘             ├──▶ fundamental_investor
-#                                               ├──▶ leveraged_buyer
-#                    (orders: P,Q)              └──▶ conservative_holder
-#                                                    (market data: price, bubble_ratio)
+# Note: player keys with num_instances > 1 use their base key here.
+# The simulator expander resolves them to foo_1, foo_2, ... before building
+# the TopologyGraph, so all edge rules apply to every instance automatically.
+#
+#         momentum_speculator ─────────┐
+#         rational_arbitrageur ────────┤
+#         noise_trader ────────────────┼──▶ market ──▶ all investors
+#         fundamental_investor ────────┤             (market data: price, bubble_ratio)
+#         leveraged_buyer ─────────────┤
+#         conservative_holder ─────────┘
 #
 # Execution flow per round:
 #   Level 0: market executes (broadcasts price + bubble metrics)
@@ -27,30 +26,25 @@ sources:
 
 connections:
   # Market → All investors (price + bubble data broadcast)
+  # num_instances: 2 → momentum_speculator_1/2, noise_trader_1/2
   market:
-    - momentum_speculator_1
-    - momentum_speculator_2
+    - momentum_speculator
     - rational_arbitrageur
-    - noise_trader_1
-    - noise_trader_2
+    - noise_trader
     - fundamental_investor
     - leveraged_buyer
     - conservative_holder
 
   # Each investor → Market only (order submission)
-  momentum_speculator_1:
-    - market
-
-  momentum_speculator_2:
+  # num_instances: 2 → expands to momentum_speculator_1/2 → market
+  momentum_speculator:
     - market
 
   rational_arbitrageur:
     - market
 
-  noise_trader_1:
-    - market
-
-  noise_trader_2:
+  # num_instances: 2 → expands to noise_trader_1/2 → market
+  noise_trader:
     - market
 
   fundamental_investor:

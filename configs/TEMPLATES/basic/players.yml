@@ -21,6 +21,7 @@
 market:
   name: "Market"
   class: "examples.[SCENARIO_NAME].players:Market"
+  num_instances: 1
   config:
     identity: "market"
     # coordinator = Level 0 (executes before all players); player = Level 1+
@@ -55,6 +56,14 @@ market:
 investor_1:
   name: "Investor Type 1"
   class: "examples.[SCENARIO_NAME].players:InvestorType1"
+  # REQUIRED: num_instances — number of identical copies to spawn.
+  # The expander deep-copies this block N times, assigning:
+  #   identity = "investor_1_1" … "investor_1_N"
+  #   name     = "Investor Type 1 1" … "Investor Type 1 N"
+  # topology.yml uses the BASE key ("investor_1") — expander resolves instances.
+  # Use num_instances: 1 for a single instance (identity = key unchanged, no suffix).
+  # Omitting num_instances entirely is a config error and will raise KeyError.
+  num_instances: 1
   config:
     identity: "investor_1"
     # player = Level 1+ execution (after coordinator)
@@ -88,6 +97,7 @@ investor_1:
 investor_2:
   name: "Investor Type 2"
   class: "examples.[SCENARIO_NAME].players:InvestorType2"
+  num_instances: 1
   config:
     identity: "investor_2"
     role: player
@@ -108,6 +118,7 @@ investor_2:
 investor_3:
   name: "Investor Type 3"
   class: "examples.[SCENARIO_NAME].players:InvestorType3"
+  num_instances: 1
   config:
     identity: "investor_3"
     role: player

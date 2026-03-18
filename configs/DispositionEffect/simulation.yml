@@ -18,14 +18,14 @@ ray:
   address: null
   namespace: "disposition_effect"
   actor_prefix: null
-  # Derived: 6 investors run parallel at level 1; +1 for OS/driver = 7
-  num_cpus: 7
+  # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
+  num_cpus: null
   num_gpus: null
-  # Derived: 7 players, star topology -> 12 msgs/round
-  #   7 TurnResult + 7 pending_info + 12 Message = 26 Ray objects
-  #   26 obj x 64 KB min-alloc = 1664 KB (1.62 MB)
-  #   10x headroom = 16.2 MB; 128 MB minimum floor -> 134217728 bytes
-  object_store_memory: 134217728
+  # Derived: 55 players, star topology -> 108 msgs/round
+  #   55 TurnResult + 55 pending_info + 108 Message = 218 Ray objects
+  #   218 obj x 64 KB min-alloc = 13952 KB (13.6 MB)
+  #   10x headroom = 136 MB; 256 MB floor -> 268435456 bytes
+  object_store_memory: 268435456
   include_dashboard: false
   logging_level: "warning"
   log_to_driver: false

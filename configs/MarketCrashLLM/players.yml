@@ -5,6 +5,7 @@
 market:
   name: "Market with Liquidity Dynamics"
   class: "examples.MarketCrashLLM.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -27,6 +28,7 @@ market:
 llm_panic_seller:
   name: "LLM Panic Seller"
   class: "examples.MarketCrashLLM.players:LLMPanicSeller"
+  num_instances: 1
   config:
     identity: "llm_panic_seller"
     role: player
@@ -51,6 +53,7 @@ llm_panic_seller:
 llm_risk_parity:
   name: "LLM Risk Parity Fund"
   class: "examples.MarketCrashLLM.players:LLMRiskParityFund"
+  num_instances: 1
   config:
     identity: "llm_risk_parity"
     role: player
@@ -75,6 +78,7 @@ llm_risk_parity:
 llm_leveraged_fund:
   name: "LLM Leveraged Fund"
   class: "examples.MarketCrashLLM.players:LLMLeveragedFund"
+  num_instances: 1
   config:
     identity: "llm_leveraged_fund"
     role: player
@@ -99,6 +103,7 @@ llm_leveraged_fund:
 llm_market_maker:
   name: "LLM Market Maker"
   class: "examples.MarketCrashLLM.players:LLMMarketMaker"
+  num_instances: 1
   config:
     identity: "llm_market_maker"
     role: player
@@ -123,6 +128,7 @@ llm_market_maker:
 llm_bottom_fisher:
   name: "LLM Bottom Fisher"
   class: "examples.MarketCrashLLM.players:LLMBottomFisher"
+  num_instances: 1
   config:
     identity: "llm_bottom_fisher"
     role: player

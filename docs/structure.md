@@ -35,14 +35,14 @@ masim/
 
 ### Module Summary
 
-| Module          | What It Does                                                          | Key Classes                                                      | User Implements? |
-|-----------------|-----------------------------------------------------------------------|------------------------------------------------------------------|------------------|
-| `simulator`     | Orchestrates simulation rounds, manages topology, dispatches messages | `GeneralSimulator`, `SimulationConfig`                           | ❌ No             |
-| `persona`       | Ray actor wrapper, bridges Player ↔ Simulator, owns proxy             | `PlayerPersona`                                                  | ❌ No             |
-| `player`        | Agent decision logic                                                  | `GeneralPlayer`, `Info`, `Action`, `Observation`                 | ✅ **Yes**        |
-| `communication` | Message encoding/decoding, wire protocol                              | `SimPacket`, `GeneralCommunicationChannel`                       | ❌ No             |
-| `proxy`         | Message queue management, routing types                               | `Message`, `SendReceiveProxy`, `StorageProxy`, `MonitoringProxy` | ❌ No             |
-| `utils`         | Config loading, class loading, Ray init, topology graph, history      | `TopologyGraph`, `load_config`, `load_class`, `ensure_ray`, `HistoryBuffer` | ❌ No |
+| Module          | What It Does                                                          | Key Classes                                                                 | User Implements? |
+|-----------------|-----------------------------------------------------------------------|-----------------------------------------------------------------------------|------------------|
+| `simulator`     | Orchestrates simulation rounds, manages topology, dispatches messages | `GeneralSimulator`, `SimulationConfig`                                      | ❌ No             |
+| `persona`       | Ray actor wrapper, bridges Player ↔ Simulator, owns proxy             | `PlayerPersona`                                                             | ❌ No             |
+| `player`        | Agent decision logic                                                  | `GeneralPlayer`, `Info`, `Action`, `Observation`                            | ✅ **Yes**        |
+| `communication` | Message encoding/decoding, wire protocol                              | `SimPacket`, `GeneralCommunicationChannel`                                  | ❌ No             |
+| `proxy`         | Message queue management, routing types                               | `Message`, `SendReceiveProxy`, `StorageProxy`, `MonitoringProxy`            | ❌ No             |
+| `utils`         | Config loading, class loading, Ray init, topology graph, history      | `TopologyGraph`, `load_config`, `load_class`, `ensure_ray`, `HistoryBuffer` | ❌ No             |
 
 ## Design Architecture
 
@@ -167,7 +167,7 @@ PlayerPersona (Ray Actor)
 │  Layer         Type          Where Defined       Description                 │
 │  ─────────     ──────────    ───────────────     ──────────────────────────  │
 │  Player        Info          player/base.py      Pure payload, no routing    │
-│                (alias: D)                        payload, content_type,      │
+│                                                  payload, content_type,      │
 │                                                  extras, sender_id*,         │
 │                                                  time_received*              │
 │                                                  (* populated on receive)    │
@@ -388,15 +388,15 @@ def is_received_ready(self, round_num, received_senders, **kwargs) -> bool:
 
 The framework is designed to avoid unbounded memory growth over long simulations:
 
-| Component                        | What it stores                     | Bound                                              |
-|----------------------------------|------------------------------------|----------------------------------------------------|
-| `HistoryBuffer` (simulator)      | Round results                      | `setting.entry_limit` hot; rest on disk            |
-| `MonitoringProxy`                | Metrics + events                   | `MonitoringConfig.entry_limit` hot; rest on disk   |
-| `StorageProxy`                   | Turn results + messages per player | BlockBasedStoreManager (disk, flushed on shutdown) |
-| `SendReceiveProxy.send_queue`    | Pending Info to dispatch           | Cleared every round in `collect_pending_infos()`   |
-| `SendReceiveProxy.receive_queue` | Received Info to deliver           | Cleared every round in `get_received_infos()`      |
-| `Player.received_infos`          | Infos before delivery              | Cleared in `get_received_infos()`                  |
-| `Player.pending_info`            | Infos after decide()               | Cleared in `operate()` after enqueue               |
+| Component                        | What it stores                     | Bound                                                  |
+|----------------------------------|------------------------------------|--------------------------------------------------------|
+| `HistoryBuffer` (simulator)      | Round results                      | `setting.round_history_limit` hot; rest on disk        |
+| `MonitoringProxy`                | Metrics + events                   | `MonitoringConfig.monitor_hot_limit` hot; rest on disk |
+| `StorageProxy`                   | Turn results + messages per player | BlockBasedStoreManager (disk, flushed on shutdown)     |
+| `SendReceiveProxy.send_queue`    | Pending Info to dispatch           | Cleared every round in `collect_pending_infos()`       |
+| `SendReceiveProxy.receive_queue` | Received Info to deliver           | Cleared every round in `get_received_infos()`          |
+| `Player.received_infos`          | Infos before delivery              | Cleared in `get_received_infos()`                      |
+| `Player.pending_info`            | Infos after decide()               | Cleared in `operate()` after enqueue                   |
 
 **In example players:** Use `HistoryBuffer` or `deque(maxlen=N)` for any list that grows each round (e.g., price history, returns). Never use a plain `list.append()` without a bound.
 
@@ -567,6 +567,7 @@ communication:
 player_id:                                    # Unique identifier
   name: "Display Name"
   class: "module.path:ClassName"              # Import path
+  num_instances: 1                            # REQUIRED — no default; omitting raises KeyError
   config:
     identity: "player_id"                     # Must match key
     role: coordinator | player                # Role hint
@@ -661,7 +662,7 @@ EXPERIMENT/MySimulation/
 **Key config fields controlling artifacts:**
 - `setting.record_path`: base for diagrams, history, player storage
 - `setting.save_diagram_interval`: how often topology diagrams are saved (0 = never)
-- `setting.entry_limit`: HistoryBuffer hot deque size
+- `setting.round_history_limit`: HistoryBuffer hot deque size for round results
 - `communication.storage_path`: where channel SimPacket records go
 - `proxy.storage.record_path` in persona.yml: per-player turn/message storage root
 

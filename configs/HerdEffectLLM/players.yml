@@ -20,6 +20,7 @@
 market:
   name: "Market"
   class: "examples.HerdEffectLLM.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -45,6 +46,7 @@ market:
 llm_momentum:
   name: "LLM Momentum Investor"
   class: "examples.HerdEffectLLM.players:LLMMomentumInvestor"
+  num_instances: 1
   config:
     identity: "llm_momentum"
     role: player
@@ -69,6 +71,7 @@ llm_momentum:
 llm_contrarian:
   name: "LLM Contrarian Investor"
   class: "examples.HerdEffectLLM.players:LLMContrarianInvestor"
+  num_instances: 1
   config:
     identity: "llm_contrarian"
     role: player
@@ -93,6 +96,7 @@ llm_contrarian:
 llm_risk_averse:
   name: "LLM Risk Averse Investor"
   class: "examples.HerdEffectLLM.players:LLMRiskAverseInvestor"
+  num_instances: 1
   config:
     identity: "llm_risk_averse"
     role: player
@@ -117,6 +121,7 @@ llm_risk_averse:
 llm_aggressive:
   name: "LLM Aggressive Investor"
   class: "examples.HerdEffectLLM.players:LLMAggressiveInvestor"
+  num_instances: 1
   config:
     identity: "llm_aggressive"
     role: player
@@ -141,6 +146,7 @@ llm_aggressive:
 llm_noise:
   name: "LLM Noise Trader"
   class: "examples.HerdEffectLLM.players:LLMNoiseTrader"
+  num_instances: 1
   config:
     identity: "llm_noise"
     role: player

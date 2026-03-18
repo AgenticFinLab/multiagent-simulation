@@ -5,6 +5,7 @@
 market:
   name: "Market with Liquidity-Sensitive Pricing"
   class: "examples.FlashCrashLLM.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -26,6 +27,7 @@ market:
 llm_hft:
   name: "LLM High-Frequency Trader"
   class: "examples.FlashCrashLLM.players:LLMHighFrequencyTrader"
+  num_instances: 1
   config:
     identity: "llm_hft"
     role: player
@@ -50,6 +52,7 @@ llm_hft:
 llm_market_maker:
   name: "LLM Market Maker"
   class: "examples.FlashCrashLLM.players:LLMFlashMarketMaker"
+  num_instances: 1
   config:
     identity: "llm_market_maker"
     role: player
@@ -74,6 +77,7 @@ llm_market_maker:
 llm_stop_loss:
   name: "LLM Stop-Loss Trader"
   class: "examples.FlashCrashLLM.players:LLMStopLossTrader"
+  num_instances: 1
   config:
     identity: "llm_stop_loss"
     role: player
@@ -98,6 +102,7 @@ llm_stop_loss:
 llm_fundamental:
   name: "LLM Fundamental Trader"
   class: "examples.FlashCrashLLM.players:LLMFundamentalTrader"
+  num_instances: 1
   config:
     identity: "llm_fundamental"
     role: player
@@ -122,6 +127,7 @@ llm_fundamental:
 llm_algo:
   name: "LLM Algorithmic Trader"
   class: "examples.FlashCrashLLM.players:LLMAlgorithmicTrader"
+  num_instances: 1
   config:
     identity: "llm_algo"
     role: player

@@ -347,10 +347,15 @@ class PlayerPersona(BasePersona):
 
     def collect_pending_infos(self) -> List[Dict[str, Any]]:
         """
-        Collect all queued Info units from proxy for Simulator dispatch.
+        Collect all queued Info units from proxy for external dispatch.
 
-        Called by Simulator via persona.collect_pending_infos().
-        Returns Info units with sender/target info for channel processing.
+        Note: The GeneralSimulator does NOT call this method — it uses the
+        pending_infos bundled into the operate() return tuple instead
+        (via _collect_pending_infos_local), avoiding a separate IPC round-trip.
+
+        This method remains available as a public API for:
+        - Custom simulator subclasses that prefer explicit collection
+        - Testing and introspection outside of normal round execution
 
         Returns:
             List of dicts with keys: info, sender_id, target_ids, round_num

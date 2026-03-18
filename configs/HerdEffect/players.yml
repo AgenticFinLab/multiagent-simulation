@@ -24,6 +24,7 @@
 market:
   name: "Market"
   class: "examples.HerdEffect.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -48,6 +49,7 @@ market:
 investor_momentum:
   name: "Momentum Investor"
   class: "examples.HerdEffect.players:MomentumInvestor"
+  num_instances: 1
   config:
     identity: "investor_momentum"
     role: player
@@ -61,13 +63,16 @@ investor_momentum:
       initial_position: 0.0
       custom_state_hot_limit: 3
       # Momentum specific parameters
-      lambda_price: 0.5         # Price aggressiveness
-      beta: 0.3                 # Capital allocation ratio
+      # Price aggressiveness
+      lambda_price: 0.5
+      # Capital allocation ratio
+      beta: 0.3
   persona: !include persona.yml
 
 investor_contrarian:
   name: "Contrarian Investor"
   class: "examples.HerdEffect.players:ContrarianInvestor"
+  num_instances: 1
   config:
     identity: "investor_contrarian"
     role: player
@@ -82,8 +87,10 @@ investor_contrarian:
       custom_state_hot_limit: 3
       # Contrarian specific parameters
       fundamental: 100.0
-      beta: 0.5                 # Value deviation sensitivity
-      noise_std: 0.5            # Bid noise
+      # Value deviation sensitivity
+      beta: 0.5
+      # Bid noise
+      noise_std: 0.5
   persona: !include persona.yml
 
 # NOTE: HerdingInvestor REMOVED for Emergent Herding Model
@@ -92,6 +99,7 @@ investor_contrarian:
 investor_risk_averse:
   name: "Risk Averse Investor"
   class: "examples.HerdEffect.players:RiskAverseInvestor"
+  num_instances: 1
   config:
     identity: "investor_risk_averse"
     role: player
@@ -105,13 +113,16 @@ investor_risk_averse:
       initial_position: 0.0
       custom_state_hot_limit: 3
       # RiskAverse specific parameters
-      k: 0.5                    # Risk tolerance coefficient
-      lookback: 5               # Periods for volatility calculation
+      # Risk tolerance coefficient
+      k: 0.5
+      # Periods for volatility calculation
+      lookback: 5
   persona: !include persona.yml
 
 investor_aggressive:
   name: "Aggressive Investor"
   class: "examples.HerdEffect.players:AggressiveInvestor"
+  num_instances: 1
   config:
     identity: "investor_aggressive"
     role: player
@@ -125,14 +136,18 @@ investor_aggressive:
       initial_position: 0.0
       custom_state_hot_limit: 3
       # Aggressive specific parameters
-      kappa: 1.0                # Aggressive price factor
-      beta: 0.5                 # Aggressive capital allocation
-      accel_bonus: 0.3          # Acceleration trading bonus
+      # Aggressive price factor
+      kappa: 1.0
+      # Aggressive capital allocation
+      beta: 0.5
+      # Acceleration trading bonus
+      accel_bonus: 0.3
   persona: !include persona.yml
 
 investor_noise:
   name: "Noise Trader"
   class: "examples.HerdEffect.players:NoiseTrader"
+  num_instances: 1
   config:
     identity: "investor_noise"
     role: player

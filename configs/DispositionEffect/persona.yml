@@ -9,8 +9,8 @@ proxy:
   storage:
     checkpoint_dir: "EXPERIMENT/DispositionEffect/checkpoints"
     record_path: "EXPERIMENT/DispositionEffect/records"
-    record_rounds: false
-    turn_block_size: 3
+    record_rounds: true
+    turn_block_size: 50
 
   monitoring:
     record_path: "EXPERIMENT/DispositionEffect/monitoring"

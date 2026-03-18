@@ -3,16 +3,15 @@
 # =============================================================================
 # Market as hub, all investors communicate through market.
 #
-#         fundamentalist ─────────┐
-#         trend_follower_1 ───────┤
-#         trend_follower_2 ───────┼──▶ market ──┬──▶ fundamentalist
-#         noise_trader_1 ─────────┤             ├──▶ trend_follower_1
-#         noise_trader_2 ─────────┤             ├──▶ trend_follower_2
-#         slow_adapter ───────────┤             ├──▶ noise_trader_1
-#         volatility_trader ──────┘             ├──▶ noise_trader_2
-#                                               ├──▶ slow_adapter
-#                    (orders: P,Q)              └──▶ volatility_trader
-#                                                    (market data: price, volatility)
+# Note: player keys with num_instances > 1 use their base key here.
+# The simulator expander resolves them to foo_1, foo_2, ... before building
+# the TopologyGraph, so all edge rules apply to every instance automatically.
+#
+#         fundamentalist ──────────┐
+#         trend_follower ──────────┤
+#         noise_trader ────────────┼──▶ market ──▶ all investors
+#         slow_adapter ────────────┤             (market: price, volatility)
+#         volatility_trader ───────┘
 #
 # Execution flow per round:
 #   Level 0: market executes (broadcasts price + volatility)
@@ -26,12 +25,11 @@ sources:
 
 connections:
   # Market → All investors (price + volatility broadcast)
+  # num_instances: 2 → trend_follower_1/2, noise_trader_1/2
   market:
     - fundamentalist
-    - trend_follower_1
-    - trend_follower_2
-    - noise_trader_1
-    - noise_trader_2
+    - trend_follower
+    - noise_trader
     - slow_adapter
     - volatility_trader
 
@@ -39,16 +37,12 @@ connections:
   fundamentalist:
     - market
 
-  trend_follower_1:
+  # num_instances: 2 → expands to trend_follower_1/2 → market
+  trend_follower:
     - market
 
-  trend_follower_2:
-    - market
-
-  noise_trader_1:
-    - market
-
-  noise_trader_2:
+  # num_instances: 2 → expands to noise_trader_1/2 → market
+  noise_trader:
     - market
 
   slow_adapter:

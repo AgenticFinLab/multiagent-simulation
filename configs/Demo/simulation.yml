@@ -33,8 +33,8 @@ ray:
   address: null
   namespace: "demo_simulation"
   actor_prefix: null
-  # Derived: 2 investors run parallel at level 1; +1 for OS/driver = 3
-  num_cpus: 3
+  # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
+  num_cpus: null
   num_gpus: null
   # Derived: 3 players, star topology -> 4 msgs/round
   #   3 TurnResult + 3 pending_info + 4 Message = 10 Ray objects

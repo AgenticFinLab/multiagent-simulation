@@ -1,12 +1,39 @@
+# =============================================================================
+# LiquidityDryup Topology - Star Pattern
+# =============================================================================
+# Note: player keys with num_instances > 1 use their base key here.
+# The simulator expander resolves them to foo_1, foo_2, ... before building
+# the TopologyGraph, so all edge rules apply to every instance automatically.
+# =============================================================================
+
 type: "star"
-sources: [market]
+
+sources:
+  - market
+
 connections:
-  market: [mm_1, mm_2, liq_seeker_1, liq_seeker_2, value_trader, momentum_trader, noise_1, noise_2]
-  mm_1: [market]
-  mm_2: [market]
-  liq_seeker_1: [market]
-  liq_seeker_2: [market]
-  value_trader: [market]
-  momentum_trader: [market]
-  noise_1: [market]
-  noise_2: [market]
+  # Market → All investors
+  # num_instances: 2 → market_maker_1/2, liquidity_seeker_1/2
+  market:
+    - market_maker
+    - liquidity_seeker
+    - value_trader
+    - momentum_trader
+    - noise_trader
+
+  # num_instances: 2 → expands to market_maker_1/2 → market
+  market_maker:
+    - market
+
+  # num_instances: 2 → expands to liquidity_seeker_1/2 → market
+  liquidity_seeker:
+    - market
+
+  value_trader:
+    - market
+
+  momentum_trader:
+    - market
+
+  noise_trader:
+    - market

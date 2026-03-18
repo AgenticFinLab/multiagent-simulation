@@ -15,6 +15,7 @@
 market:
   name: "Market"
   class: "examples.ReversalEffect.players:Market"
+  num_instances: 1
   config:
     identity: "market"
     role: coordinator
@@ -27,16 +28,19 @@ market:
       fundamental_value: 100.0
       initial_price: 100.0
       price_impact: 0.08
-      mean_reversion: 0.01         # Slow reversion to fundamental
+      # Slow reversion to fundamental
+      mean_reversion: 0.01
       noise_std: 0.5
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-contrarian_1:
-  name: "Contrarian Investor 1"
+contrarian:
+  name: "Contrarian Investor"
   class: "examples.ReversalEffect.players:ContrarianInvestor"
+  # Expander → contrarian_1, contrarian_2
+  num_instances: 2
   config:
-    identity: "contrarian_1"
+    identity: "contrarian"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -48,37 +52,21 @@ contrarian_1:
       initial_position: 0.0
       custom_state_hot_limit: 3
       # Contrarian specific (long-term reversal)
-      lookback_window: 30          # Long-term horizon
-      reversal_threshold: 0.15     # 15% deviation triggers trade
-      base_position_size: 25.0
-      value_sensitivity: 0.6
-  persona: !include persona.yml
-
-contrarian_2:
-  name: "Contrarian Investor 2"
-  class: "examples.ReversalEffect.players:ContrarianInvestor"
-  config:
-    identity: "contrarian_2"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - investors
-    extras:
-      record_path: "EXPERIMENT/ReversalEffect/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      # Long-term horizon
       lookback_window: 30
+      # 15% deviation triggers trade
       reversal_threshold: 0.15
       base_position_size: 25.0
       value_sensitivity: 0.6
   persona: !include persona.yml
 
-momentum_1:
-  name: "Momentum Investor 1"
+momentum:
+  name: "Momentum Investor"
   class: "examples.ReversalEffect.players:MomentumInvestor"
+  # Expander → momentum_1, momentum_2
+  num_instances: 2
   config:
-    identity: "momentum_1"
+    identity: "momentum"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -95,31 +83,13 @@ momentum_1:
       momentum_multiplier: 10
   persona: !include persona.yml
 
-momentum_2:
-  name: "Momentum Investor 2"
-  class: "examples.ReversalEffect.players:MomentumInvestor"
-  config:
-    identity: "momentum_2"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - investors
-    extras:
-      record_path: "EXPERIMENT/ReversalEffect/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      lookback_window: 5
-      momentum_threshold: 0.02
-      base_position_size: 20.0
-      momentum_multiplier: 10
-  persona: !include persona.yml
-
-overconfident_1:
-  name: "Overconfident Trader 1"
+overconfident:
+  name: "Overconfident Trader"
   class: "examples.ReversalEffect.players:OverconfidentTrader"
+  # Expander → overconfident_1, overconfident_2
+  num_instances: 2
   config:
-    identity: "overconfident_1"
+    identity: "overconfident"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -130,26 +100,7 @@ overconfident_1:
       initial_position: 0.0
       custom_state_hot_limit: 3
       # Overconfident specific
-      overconfidence_factor: 2.5   # Overweights signals by 2.5x
-      reaction_threshold: 0.01
-      base_position_size: 30.0
-      overconfidence_multiplier: 10
-  persona: !include persona.yml
-
-overconfident_2:
-  name: "Overconfident Trader 2"
-  class: "examples.ReversalEffect.players:OverconfidentTrader"
-  config:
-    identity: "overconfident_2"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - investors
-    extras:
-      record_path: "EXPERIMENT/ReversalEffect/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      # Overweights signals by 2.5x
       overconfidence_factor: 2.5
       reaction_threshold: 0.01
       base_position_size: 30.0
@@ -159,6 +110,7 @@ overconfident_2:
 noise_trader:
   name: "Noise Trader"
   class: "examples.ReversalEffect.players:NoiseTrader"
+  num_instances: 1
   config:
     identity: "noise_trader"
     role: player
@@ -178,6 +130,7 @@ noise_trader:
 value_investor:
   name: "Value Investor"
   class: "examples.ReversalEffect.players:ValueInvestor"
+  num_instances: 1
   config:
     identity: "value_investor"
     role: player
@@ -199,6 +152,7 @@ value_investor:
 index_tracker:
   name: "Index Tracker"
   class: "examples.ReversalEffect.players:IndexTracker"
+  num_instances: 1
   config:
     identity: "index_tracker"
     role: player
