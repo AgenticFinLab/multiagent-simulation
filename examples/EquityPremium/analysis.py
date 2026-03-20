@@ -388,7 +388,7 @@ def main():
     results = load_results(config)
     # Coordinator batch store 'price' holds the market price time-series
     coordinators = list(results.players_by_role("coordinator").values())
-    prices = list(coordinators[0].batch("price").all()) if coordinators else []
+    prices = list(coordinators[0].batch("stock").all()) if coordinators else []
     # Each non-coordinator player contributes a list of per-round decision payloads
     # payload fields: bid_price, quantity, strategy, investor
     trades = {}

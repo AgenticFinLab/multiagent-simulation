@@ -101,8 +101,13 @@ def analyze_herding(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
         print("No market price data found")
         return {}
 
-    # Fundamental value from simulation data
-    fundamental_value = sum(fundamentals.values()) / len(fundamentals)
+    # Fundamental value: use per-round batch data if available, else fall back
+    # to the initial_price of the coordinator (market stabilises around it)
+    if fundamentals:
+        fundamental_value = sum(fundamentals.values()) / len(fundamentals)
+    else:
+        prices_list = [market_prices[r] for r in sorted(market_prices.keys())]
+        fundamental_value = prices_list[0]  # Use initial price as proxy
 
     # ===========================================
     # 1. Calculate Core Metrics

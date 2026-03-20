@@ -148,7 +148,16 @@ class HistoryBuffer:
         self._pending_cold = []
 
     def flush(self) -> None:
-        """Force flush any pending cold items to disk."""
+        """Force flush ALL pending items (pending_cold + hot) to disk.
+
+        This must be called at simulation shutdown to ensure the final
+        incomplete batch — items still in the hot deque that were never
+        evicted — is written to disk.
+        """
+        # Move all hot items into pending_cold in order
+        # (hot deque is ordered oldest-first)
+        self._pending_cold.extend(list(self.hot))
+        self.hot.clear()
         self._flush_pending()
 
     def __len__(self) -> int:

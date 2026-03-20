@@ -63,7 +63,8 @@ class Market(GeneralPlayer):
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["cumulative_return"] = 0.0
             self.state.custom_state["price_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "price"), entry_limit=custom_state_hot_limit
+                folder=os.path.join(base_path, "price"),
+                entry_limit=custom_state_hot_limit,
             )
 
         orders = []
@@ -227,13 +228,14 @@ class LLMInvestor(GeneralPlayer):
         if parsed is None:
             raise ValueError(f"Parse failed: {text[:100]}")
 
-        # Validate required fields are present and non-null (fail-fast)
+        # Validate required fields with fallback to trigger retry
         required_fields = ["bid_price", "quantity", "reasoning"]
+        missing_or_null = []
         for field in required_fields:
-            if field not in parsed:
-                raise ValueError(f"Missing required field '{field}' in LLM response")
-            if parsed[field] is None:
-                raise ValueError(f"Field '{field}' is null in LLM response")
+            if field not in parsed or parsed[field] is None:
+                missing_or_null.append(field)
+        if missing_or_null:
+            raise ValueError(f"Fields missing or null: {missing_or_null}")
 
         return parsed
 

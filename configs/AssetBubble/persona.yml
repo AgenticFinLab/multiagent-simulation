@@ -11,7 +11,6 @@ proxy:
     record_path: "EXPERIMENT/AssetBubble/records"
     record_rounds: true
     turn_block_size: 3
-    monitor_hot_limit: 3
 
   monitoring:
     record_path: "EXPERIMENT/AssetBubble/monitoring"

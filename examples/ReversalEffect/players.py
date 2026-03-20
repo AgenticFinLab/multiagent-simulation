@@ -231,14 +231,14 @@ class ContrarianInvestor(BaseInvestor):
         # Calculate long-term average
         if len(price_history) >= lookback_window:
             long_term_avg = (
-                sum(list(price_history)[-lookback_window:]) / lookback_window
+                sum(list(price_history[-lookback_window:])) / lookback_window
             )
         else:
             long_term_avg = price
 
         # Long-term cumulative return
         if len(price_history) >= lookback_window:
-            old_price = list(price_history)[-lookback_window]
+            old_price = price_history[-lookback_window]
             cumulative_return = (price - old_price) / old_price
         else:
             cumulative_return = 0.0
@@ -299,7 +299,7 @@ class MomentumInvestor(BaseInvestor):
 
         # Short-term momentum
         if len(price_history) >= lookback_window:
-            old_price = list(price_history)[-lookback_window]
+            old_price = price_history[-lookback_window]
             momentum = (price - old_price) / old_price
         else:
             momentum = 0.0

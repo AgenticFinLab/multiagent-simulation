@@ -87,7 +87,11 @@ def analyze_reversal(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
         return {}
 
     # Fundamental value from simulation data
-    fundamental_value = sum(fundamentals.values()) / len(fundamentals)
+    prices_list_tmp = [market_prices[r] for r in sorted(market_prices.keys())]
+    if fundamentals:
+        fundamental_value = sum(fundamentals.values()) / len(fundamentals)
+    else:
+        fundamental_value = prices_list_tmp[0]  # Use initial price as proxy
 
     # Calculate metrics
     returns = calculate_returns(market_prices)

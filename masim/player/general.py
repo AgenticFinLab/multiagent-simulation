@@ -22,6 +22,7 @@ from masim.player.base import (
     TurnResult,
     Info,
 )
+from masim.utils.history import HistoryBuffer
 
 if TYPE_CHECKING:
     pass
@@ -91,8 +92,16 @@ class GeneralPlayer(BasePlayer):
         self.is_initialized = True
 
     async def shutdown(self) -> None:
-        """Shutdown the Player after simulation."""
+        """Shutdown the Player after simulation.
+
+        Flushes all HistoryBuffer instances in custom_state to ensure
+        the final incomplete batch is written to disk before teardown.
+        """
         self.is_running = False
+        # Flush any pending cold items in all HistoryBuffer instances
+        for value in self.state.custom_state.values():
+            if isinstance(value, HistoryBuffer):
+                value.flush()
 
     # =========================================================================
     #              CORE BEHAVIORAL CONTRACT (Override these)

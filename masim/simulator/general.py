@@ -40,7 +40,9 @@ Usage:
 """
 
 import logging
+import json
 import os
+import re
 from typing import Any, Dict, List, Optional
 
 import ray
@@ -522,7 +524,19 @@ class GeneralSimulator(BaseSimulator):
 
     async def run(self) -> List[Dict[str, Any]]:
         """
-        Run the complete simulation.
+        Run the complete simulation, resuming from the last completed round
+        if on-disk data already exists (Option A: skip-round resume).
+
+        Resume behaviour:
+        - Scans record_path for existing batch data to find the highest
+          completed round N.
+        - Starts the loop from round N+1, skipping rounds 1..N entirely.
+        - WARNING: actor custom_state (cash, position, etc.) is re-initialised
+          from config defaults, not restored from disk. This is correct for
+          coordinators (their state is rebuilt from inbound orders each round)
+          but means LLM investor portfolios restart from initial values.
+          Use this only when the remaining rounds are independent of the
+          exact portfolio state at round N (e.g. price-driven strategies).
 
         Returns:
             List of recent round results (from bounded history deque)
@@ -530,12 +544,28 @@ class GeneralSimulator(BaseSimulator):
         logger.info("Starting simulation: %s", self.simulation_id)
         self.status = SimulatorStatus.RUNNING
 
+        total_rounds = self.config.setting["total_rounds"]
+        record_path = self.config.setting["record_path"]
+
+        # Detect already-completed rounds from on-disk data
+        start_round = self._detect_resume_round(record_path) + 1
+        if start_round > 1:
+            logger.info(
+                "    Resume detected: %d round(s) already on disk, starting from round %d",
+                start_round - 1,
+                start_round,
+            )
+        if start_round > total_rounds:
+            logger.info(
+                "    All %d rounds already completed. Nothing to run.", total_rounds
+            )
+            self.status = SimulatorStatus.TERMINATED
+            return self.history.recent
+
         # NOTE: Don't accumulate all_results in memory - use self.history (HistoryBuffer)
         # Full history is already persisted via HistoryBuffer cold storage
-        for round_num in range(1, self.config.setting["total_rounds"] + 1):
-            logger.info(
-                "    Round %d/%d", round_num, self.config.setting["total_rounds"]
-            )
+        for round_num in range(start_round, total_rounds + 1):
+            logger.info("    Round %d/%d", round_num, total_rounds)
 
             await self.run_round(round_num)
 
@@ -546,6 +576,73 @@ class GeneralSimulator(BaseSimulator):
 
         # Return recent history (from hot storage)
         return self.history.recent
+
+    @staticmethod
+    def _detect_resume_round(record_path: str) -> int:
+        """
+        Scan record_path for the highest completed round number.
+
+        Uses the market coordinator's turns/ directory (turn_block_N.json),
+        where each entry contains a round_num field — one entry per round.
+        Falls back to scanning HistoryBuffer cold files (batch_XXXXXXXX_XXXXXXXX.json)
+        under record_path/market/ if turns data is absent.
+        Returns 0 if no data is found.
+        """
+        market_path = os.path.join(record_path, "market")
+        if not os.path.isdir(market_path):
+            return 0
+
+        # Primary: read turn_block_*.json files in market/turns/
+        turns_path = os.path.join(market_path, "turns")
+        if os.path.isdir(turns_path):
+            max_round = 0
+            for fname in os.listdir(turns_path):
+                if not (fname.startswith("turn_block_") and fname.endswith(".json")):
+                    continue
+                try:
+                    with open(os.path.join(turns_path, fname)) as f:
+                        block = json.load(f)
+                    for record in block.values():
+                        rn = (
+                            record.get("round_num")
+                            if isinstance(record, dict)
+                            else None
+                        )
+                        if rn is not None:
+                            max_round = max(max_round, int(rn))
+                except Exception:
+                    pass
+            if max_round > 0:
+                return max_round
+
+        # Fallback: count entries in HistoryBuffer cold files under market/*/
+        # File naming: batch_{start:08d}_{end:08d}.json  (HistoryBuffer cold storage)
+        # File naming: batch_block_N.json                (BlockBasedStoreManager)
+        max_round = 0
+        for store_name in os.listdir(market_path):
+            store_path = os.path.join(market_path, store_name)
+            if not os.path.isdir(store_path) or store_name in ("turns", "messages"):
+                continue
+            total = 0
+            for fname in os.listdir(store_path):
+                # HistoryBuffer: batch_00000000_00000049.json
+                m = re.match(r"batch_(\d{8})_(\d{8})\.json", fname)
+                if m:
+                    batch_end = int(m.group(2))  # 0-based end index
+                    total = max(total, batch_end + 1)
+                # BlockBasedStoreManager: batch_block_N.json
+                m2 = re.match(r"batch_block_(\d+)\.json", fname)
+                if m2:
+                    try:
+                        with open(os.path.join(store_path, fname)) as f:
+                            entries = json.load(f)
+                        block_idx = int(m2.group(1))
+                        block_size = 50
+                        total = max(total, block_idx * block_size + len(entries))
+                    except Exception:
+                        pass
+            max_round = max(max_round, total)
+        return max_round
 
     async def shutdown(self) -> None:
         """Shutdown simulation and release resources."""
