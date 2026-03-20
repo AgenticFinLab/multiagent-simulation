@@ -29,12 +29,54 @@ from masim.evaluation.finance import (
     plot_multi_panel_summary,
     validate_herd_effect,
 )
-from masim.utils import (
-    load_config,
-    load_simulation_data,
-    get_investor_quantities,
-    get_investor_bids,
-)
+from masim.utils import load_config, load_results
+
+
+def _batch_to_rounds(values: list) -> Dict[int, float]:
+    """Convert a batch store list to {round_num: value} (round_num starts at 1)."""
+    return {i + 1: v for i, v in enumerate(values)}
+
+
+def _load_data(results) -> Dict[str, Any]:
+    """Extract analysis-ready data dicts from a SimulationResults object.
+
+    Data sources
+    ------------
+    Coordinator  → batch stores price / fundamental  (flat time-series)
+    Player turns → decision_payload fields bid_price / quantity
+
+    Returns
+    -------
+    dict with keys:
+        market_prices       : {round_num: float}
+        fundamentals        : {round_num: float}
+        investor_bids       : {player_id: {round_num: float}}
+        investor_quantities : {player_id: {round_num: float}}
+    """
+    market_prices: Dict[int, float] = {}
+    fundamentals: Dict[int, float] = {}
+    for player in results.players_by_role("coordinator").values():
+        if "price" in player.batch_store_names:
+            market_prices.update(_batch_to_rounds(player.batch("price").all()))
+        if "fundamental" in player.batch_store_names:
+            fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
+
+    investor_bids: Dict[str, Dict[int, float]] = {}
+    investor_quantities: Dict[str, Dict[int, float]] = {}
+    for pid, player in results.players_by_role("player").items():
+        bid = player.turns.field("bid_price")
+        if bid:
+            investor_bids[pid] = bid
+        qty = player.turns.field("quantity")
+        if qty:
+            investor_quantities[pid] = qty
+
+    return {
+        "market_prices": market_prices,
+        "fundamentals": fundamentals,
+        "investor_bids": investor_bids,
+        "investor_quantities": investor_quantities,
+    }
 
 
 def analyze_herding(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
@@ -52,8 +94,8 @@ def analyze_herding(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
 
     market_prices = data["market_prices"]
     fundamentals = data["fundamentals"]
-    investor_bids = get_investor_bids(data)
-    investor_quantities = get_investor_quantities(data)
+    investor_bids = data.get("investor_bids", {})
+    investor_quantities = data.get("investor_quantities", {})
 
     if not market_prices:
         print("No market price data found")
@@ -233,9 +275,7 @@ def analyze_herding(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     print("SUMMARY STATISTICS")
     print("=" * 50)
     print(f"Total Rounds: {summary['total_rounds']}")
-    print(
-        f"Price Range: {summary['price']['min']:.2f} - {summary['price']['max']:.2f}"
-    )
+    print(f"Price Range: {summary['price']['min']:.2f} - {summary['price']['max']:.2f}")
     print(f"Final Price: {summary['price']['final']:.2f}")
     print(f"Max Drawdown: {max_dd:.2f}%")
     print(f"Avg Bid CV: {summary['herding']['avg_cv']:.4f}")
@@ -265,7 +305,8 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
 
     print(f"Loading simulation data...")
-    data = load_simulation_data(config)
+    results = load_results(config)
+    data = _load_data(results)
     summary = analyze_herding(data, output_dir)
     return summary
 

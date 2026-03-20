@@ -27,7 +27,8 @@ market:
 llm_momentum_trader:
   name: "LLM Momentum Trader"
   class: "examples.MomentumEffectLLM.players:LLMMomentumTrader"
-  num_instances: 1
+  # Expander → llm_momentum_trader_1 .. llm_momentum_trader_3
+  num_instances: 3
   config:
     identity: "llm_momentum_trader"
     role: player
@@ -52,7 +53,8 @@ llm_momentum_trader:
 llm_contrarian:
   name: "LLM Contrarian Trader"
   class: "examples.MomentumEffectLLM.players:LLMContrarianTrader"
-  num_instances: 1
+  # Expander → llm_contrarian_1, llm_contrarian_2
+  num_instances: 2
   config:
     identity: "llm_contrarian"
     role: player
@@ -77,7 +79,8 @@ llm_contrarian:
 llm_technical:
   name: "LLM Technical Trader"
   class: "examples.MomentumEffectLLM.players:LLMTechnicalTrader"
-  num_instances: 1
+  # Expander → llm_technical_1, llm_technical_2
+  num_instances: 2
   config:
     identity: "llm_technical"
     role: player
@@ -102,7 +105,8 @@ llm_technical:
 llm_trend_follower:
   name: "LLM Trend Follower"
   class: "examples.MomentumEffectLLM.players:LLMTrendFollower"
-  num_instances: 1
+  # Expander → llm_trend_follower_1, llm_trend_follower_2
+  num_instances: 2
   config:
     identity: "llm_trend_follower"
     role: player
@@ -127,7 +131,8 @@ llm_trend_follower:
 llm_fundamental:
   name: "LLM Fundamental Anchor"
   class: "examples.MomentumEffectLLM.players:LLMFundamentalAnchor"
-  num_instances: 1
+  # Expander → llm_fundamental_1, llm_fundamental_2
+  num_instances: 2
   config:
     identity: "llm_fundamental"
     role: player

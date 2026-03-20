@@ -24,7 +24,62 @@ from masim.evaluation.finance import (
     plot_multi_panel_summary,
     validate_asset_bubble,
 )
-from masim.utils import load_config, load_simulation_data, get_investor_quantities
+from masim.utils import load_config, load_results
+
+
+def _batch_to_rounds(values: list) -> Dict[int, float]:
+    """Convert a batch store list to {round_num: value} (round_num starts at 1)."""
+    return {i + 1: v for i, v in enumerate(values)}
+
+
+def _load_data(results) -> Dict[str, Any]:
+    """Extract analysis-ready data dicts from a SimulationResults object.
+
+    Data sources
+    ------------
+    Coordinator  → batch stores price / fundamental / volume  (flat time-series)
+    Player turns → decision_payload fields bid_price / quantity
+
+    Returns
+    -------
+    dict with keys:
+        market_prices       : {round_num: float}
+        fundamentals        : {round_num: float}
+        volumes             : {round_num: float}
+        investor_quantities : {player_id: {round_num: float}}
+        investor_bids       : {player_id: {round_num: float}}
+    """
+    # --- market (coordinator) player: read from batch stores ---
+    market_prices: Dict[int, float] = {}
+    fundamentals: Dict[int, float] = {}
+    volumes: Dict[int, float] = {}
+    for player in results.players_by_role("coordinator").values():
+        if "price" in player.batch_store_names:
+            market_prices.update(_batch_to_rounds(player.batch("price").all()))
+        if "fundamental" in player.batch_store_names:
+            fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
+        if "volume" in player.batch_store_names:
+            volumes.update(_batch_to_rounds(player.batch("volume").all()))
+
+    # --- non-coordinator (investor) players: read from turn decision_payloads ---
+    # payload fields: bid_price (submitted order price), quantity (signed order size)
+    investor_quantities: Dict[str, Dict[int, float]] = {}
+    investor_bids: Dict[str, Dict[int, float]] = {}
+    for pid, player in results.players_by_role("player").items():
+        qty = player.turns.field("quantity")
+        if qty:
+            investor_quantities[pid] = qty
+        bid = player.turns.field("bid_price")
+        if bid:
+            investor_bids[pid] = bid
+
+    return {
+        "market_prices": market_prices,
+        "fundamentals": fundamentals,
+        "volumes": volumes,
+        "investor_quantities": investor_quantities,
+        "investor_bids": investor_bids,
+    }
 
 
 def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
@@ -34,7 +89,7 @@ def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     market_prices = data["market_prices"]
     fundamentals = data["fundamentals"]
     volumes = data["volumes"]
-    investor_quantities = get_investor_quantities(data)
+    investor_quantities = data.get("investor_quantities", {})
 
     if not market_prices:
         print("No market price data found")
@@ -175,8 +230,9 @@ def main():
     output_dir = os.path.join(base_dir, "analysis")
     os.makedirs(output_dir, exist_ok=True)
 
-    # Load data using generic loader
-    data = load_simulation_data(config)
+    # Load results lazily, then extract analysis dicts
+    results = load_results(config)
+    data = _load_data(results)
     summary = analyze_bubble(data, output_dir)
     return summary
 

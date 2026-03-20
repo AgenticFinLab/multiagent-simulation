@@ -15,10 +15,10 @@ ray:
   # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
   num_cpus: null
   num_gpus: null
-  # Derived: 9 players, star topology -> 16 msgs/round
-  #   9 TurnResult + 9 pending_info + 16 Message = 34 Ray objects
-  #   34 obj x 64 KB min-alloc = 2176 KB (2.12 MB)
-  #   10x headroom = 21.2 MB; 128 MB minimum floor -> 134217728 bytes
+  # Derived: 14 players, star topology -> 26 msgs/round
+  #   14 TurnResult + 14 pending_info + 26 Message = 54 Ray objects
+  #   54 obj x 64 KB min-alloc = 3456 KB (3.38 MB)
+  #   10x headroom = 33.8 MB; 128 MB minimum floor -> 134217728 bytes
   object_store_memory: 134217728
   include_dashboard: false
   logging_level: "warning"

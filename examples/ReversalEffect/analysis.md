@@ -102,6 +102,150 @@ Ratio < 1:3 → Momentum dominates; no reversal
 
 ---
 
+## Mathematical Detail of Each Metric
+
+### 1. Return Autocorrelation at Long Lags — Reversal Signature
+
+Let r(t) = [P(t) − P(t−1)] / P(t−1).
+
+```
+AC(τ) = Corr(r(t), r(t−τ))
+
+Short lags (τ = 1−5):   AC > 0  (initial momentum phase)
+Long lags  (τ = 15−30): AC < 0  (mean reversion / reversal signature)
+```
+
+**De Bondt-Thaler (1985) empirical finding (3–5 year horizon):**
+```
+E[R_losers, 3−5yr] − E[R_winners, 3−5yr] ≈ +25%  (losers outperform)
+
+In simulation (100-round horizon, lag τ = 20):
+  Target: AC(20) < −0.10  (negative autocorrelation confirmed)
+```
+
+**Variance Ratio test** for overreaction (Lo & MacKinlay 1988 in reversal context):
+```
+VR(q) = Var(r_q) / [q · Var(r_1)]
+
+For random walk: VR(q) = 1
+With reversal:   VR(q) < 1 for large q (long-horizon returns less variable = mean reversion)
+
+VR(20) < 0.8 indicates statistically significant reversal
+```
+
+---
+
+### 2. Winner-Loser Spread (WL) — De Bondt-Thaler Measure
+
+Implemented with rolling formation-holding windows:
+
+```
+Formation period (L rounds):
+  R_past(t) = [P(t) − P(t−L)] / P(t−L)
+
+Classification:
+  Winner: R_past(t) > percentile_70(R_past)
+  Loser:  R_past(t) < percentile_30(R_past)
+
+Holding period return (H rounds):
+  R_future(t) = [P(t+H) − P(t)] / P(t)
+
+Winner-Loser Spread:
+  WL = Avg[R_future | Loser] − Avg[R_future | Winner]
+
+  WL > 0: Reversal (losers outperform winners) = De Bondt-Thaler effect
+  WL < 0: Momentum (winners continue outperforming)
+```
+
+Expected in reversal simulation with L = 20, H = 20:
+```
+WL ≥ 0.05  (5% outperformance of losers vs winners)
+```
+
+---
+
+### 3. Overreaction Index (ORI) — Shiller Excess Volatility
+
+Shiller (1981) showed that stock prices are "too volatile" relative to fundamentals:
+
+```
+ORI = σ(P) / σ(F)
+
+Where:
+  σ(P) = standard deviation of market price across simulation
+  σ(F) = standard deviation of fundamental value (= 0 in our model since F = 100)
+
+Since F is constant, ORI simplifies to:
+  ORI = σ(P) / noise_baseline
+  where noise_baseline = pure-noise σ from ε(t) alone
+
+ORI > 2: Excess volatility due to overreaction (beyond noise-driven fluctuations)
+```
+
+Alternative formulation using fundamental deviation:
+```
+ORI = E[(P − F)²]^{0.5} / F
+
+ORI > 0.15 (15% RMS deviation from fundamental) = significant overreaction
+```
+
+---
+
+### 4. Price Deviation from Fundamental — Overreaction Trajectory
+
+```
+PD(t) = (P(t) − F) / F
+
+Overreaction profile (idealized):
+  Phase 1 (t = 0–30):  PD rises from 0 to peak (overreaction)
+  Phase 2 (t = 30–50): PD stabilizes at peak (maximum deviation)
+  Phase 3 (t = 50−100): PD declines back toward 0 (mean reversion)
+
+Mean-reversion speed (γ_eff):
+  PD(t) ≈ PD_peak · exp(−γ_eff · (t − t_peak))
+  where γ_eff > 0 captures contrarian + fundamental restoring forces
+```
+
+Expected peak deviation: PD_peak ≈ 0.20–0.40 (20–40% overvaluation at maximum).
+Reversion half-life: t_½ = log(2) / γ_eff ≈ 15–25 rounds.
+
+---
+
+### 5. Contrarian Profit — Strategy Return Validation
+
+The ContrarianInvestor is profitable if and only if the reversal effect is present:
+
+```
+ContrarianInvestor strategy:
+  Sell when P > F (overvalued):  quantity = −β·(P−F)/P · cash/P
+  Buy  when P < F (undervalued): quantity = +β·(F−P)/P · cash/P
+
+Expected P&L per round (during reversal phase):
+  E[π_contrarian] = quantity_t · E[P(t+1) − P(t)]
+                   = −β·(P−F)/P · cash/P · [−γ_eff · (P−F)]
+                   = +β·γ_eff · (P−F)² · cash / P²  > 0
+```
+
+This shows: contrarian profit is proportional to (P−F)² — larger deviations yield
+higher profit, validating the reversal mechanism mathematically.
+
+---
+
+### 6. Validation Score Formula
+
+```
+score_ac    = 1.0 if AC(20) < −0.10 else 0.5 if AC(20) < 0 else 0.0
+score_wl    = 1.0 if WL > 0.05      else 0.5 if WL > 0    else 0.0
+score_pd    = 1.0 if max(PD) > 0.20 else 0.5 if max(PD) > 0.10 else 0.2
+score_prof  = 1.0 if PnL_contrarian > 0 else 0.0
+
+overall_score = 0.35 · score_ac + 0.30 · score_wl + 0.20 · score_pd + 0.15 · score_prof
+```
+
+Target: `overall_score > 0.5` (negative long-lag AC with positive WL spread).
+
+---
+
 ## Key Metrics
 
 | Metric                     | Formula                                   | Source                   | Purpose                             |

@@ -103,6 +103,158 @@ Ratio < 1:2 → Very stable; almost no dry-ups
 
 ---
 
+## Mathematical Detail of Each Metric
+
+### 1. Bid-Ask Spread — Inventory Risk Model (Grossman-Miller 1988)
+
+The market maker sets bid and ask to cover inventory holding costs:
+
+```
+Spread(t) = ask(t) − bid(t)
+
+Grossman-Miller (1988) equilibrium spread:
+  S* = 2 · ρ · σ(t) · |Inventory(t)|
+
+Where:
+  ρ = inventory risk premium coefficient
+  σ(t) = rolling price volatility (market maker's risk estimate)
+  Inventory(t) = cumulative net position = Σ_τ Q_MM(τ)
+
+Spread dynamics during stress:
+  S(t+1) = S(t) + δ_S · [σ(t) − σ(t−1)] + η_S · Δ|Inv(t)|
+```
+
+**Spread widening ratio (key metric):**
+```
+SWR = max(S) / S_baseline
+  S_baseline = average spread during normal phase (t = 1–20)
+
+Expected:
+  Normal period:   SWR = 1.0
+  Stress onset:    SWR = 1.5–2.5
+  Active dry-up:   SWR = 3–10
+  Full withdrawal: SWR → ∞ (no quotes)
+```
+
+---
+
+### 2. Market Depth — Available Liquidity Measure
+
+```
+Depth(t) = Σ_i bid_size_i(t) + Σ_j ask_size_j(t)
+          ≈ 2 · max_quote_size(t) · N_active_MMs
+
+Liquidity Withdrawal Ratio:
+  LWR(t) = Depth(t) / Depth_0
+  where Depth_0 = initial (normal market) depth
+
+Expected trajectory:
+  Phase 1: LWR ≈ 1.0 (full liquidity)
+  Phase 2: LWR = 0.5–0.8 (partial withdrawal)
+  Phase 3: LWR < 0.2 (severe dry-up)
+  Phase 4: LWR ≈ 0 (complete withdrawal)
+```
+
+The **illiquidity spiral** (Brunnermeier-Pedersen 2009 fixed-point):
+```
+Let L(t) = depth at time t, σ(L) = volatility as function of depth
+
+Illiquidity spiral equilibrium condition:
+  L* = f(σ(L*))   where f() is decreasing
+
+If σ is sharply increasing as L → 0:
+  Two equilibria: L_high (normal) and L_low ≈ 0 (dry-up)
+  Market can switch from L_high to L_low discontinuously
+```
+
+---
+
+### 3. Price Impact (Kyle λ) — Illiquidity Coefficient
+
+Kyle (1985) model of price impact:
+
+```
+Kyle λ = ΔP / ΔVolume = (P(t) − P(t−1)) / Q_net(t)
+
+Normal market:    λ ≈ 0.1–0.3 per unit
+Stress period:    λ ≈ 1–3 per unit
+Full withdrawal:  λ → ∞ (any order moves price drastically)
+
+Amihud (2002) ILLIQ measure:
+  ILLIQ(t) = |r(t)| / Volume(t)
+           = |P(t)−P(t−1)| / [P(t−1) · Volume(t)]
+
+ILLIQ during dry-up vs. normal:
+  ILLIQratio = ILLIQ_dryup / ILLIQ_normal  (expected: 10–50×)
+```
+
+**Inventory Imbalance (MM risk exposure):**
+```
+Inv(t) = Σ_{τ=1}^{t} Q_MM(τ)   (signed net position)
+
+Inventory threshold for withdrawal:
+  |Inv(t)| > Inv_max → MM stops quoting
+
+Inventory variance under random walk order flow:
+  Var(Inv(T)) = T · σ_Q²   (grows as √T)
+  → Probability of hitting Inv_max grows with time
+```
+
+---
+
+### 4. Liquidity-Price Feedback (Spiral Strength)
+
+The illiquidity spiral intensity is measured by the feedback coefficient:
+
+```
+Feedback loop:
+  Step 1: One-sided flow → MM inventory imbalance ΔInv
+  Step 2: Imbalance → spread widens by δ_S · ΔInv
+  Step 3: Wide spread → higher price impact → more volatility
+  Step 4: Higher σ → MM tightens quotes further (Step 2 amplifies)
+
+Spiral amplification:
+  A = d(Spread) / d(Inv) · d(Inv) / d(Spread)
+
+  A > 1: self-reinforcing spiral (dry-up)
+  A < 1: dampened (recovers naturally)
+  A = 1: critical point (bifurcation)
+```
+
+Expected simulation signature: A > 1.5 during active dry-up phase.
+
+---
+
+### 5. Recovery Score — Market Structure Integrity
+
+```
+Recovery = (Depth(t_end) − Depth(t_trough)) / Depth_0
+
+Score interpretation:
+  > 0.7: Full recovery (resilient market structure)
+  0.3–0.7: Partial recovery
+  < 0.3: Permanent impairment (market failure)
+```
+
+---
+
+### 6. Validation Score Formula
+
+```
+score_spr  = 1.0 if max(SWR) > 3.0   else 0.5 if max(SWR) > 1.5  else 0.0
+score_dep  = 1.0 if min(LWR) < 0.20  else 0.5 if min(LWR) < 0.50 else 0.0
+score_imp  = 1.0 if ILLIQratio > 10  else 0.5 if ILLIQratio > 3   else 0.0
+score_spi  = 1.0 if spiral_detected  else 0.0   (A > 1.5 for ≥5 rounds)
+score_rec  = 1.0 if Recovery > 0.5   else 0.5 if Recovery > 0.2   else 0.0
+
+overall_score = 0.25·score_spr + 0.25·score_dep + 0.20·score_imp
+              + 0.20·score_spi + 0.10·score_rec
+```
+
+Target: `overall_score > 0.6` (spread widening + depth withdrawal + spiral confirmed).
+
+---
+
 ## Key Metrics
 
 | Metric               | Formula                        | Source          | Purpose             |

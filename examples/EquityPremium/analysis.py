@@ -15,13 +15,11 @@ Academic References:
 """
 
 import argparse
-import glob
 import json
 import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
 from masim.evaluation.finance import (
@@ -36,39 +34,12 @@ from masim.evaluation.finance import (
     # Validation
     validate_equity_premium,
 )
-from masim.utils import load_config
+from masim.utils import load_config, load_results
 
 
 # Constants for equity premium analysis
 ANNUAL_TRADING_DAYS = 252
 RISK_FREE_RATE_ANNUAL = 0.01  # 1% annual bond return
-
-
-def load_simulation_data(record_dir: str) -> Dict[str, Any]:
-    """Load simulation data from record directory."""
-    data = {"prices": [], "trades": defaultdict(list), "allocations": defaultdict(list)}
-
-    # Load price history
-    price_dir = os.path.join(record_dir, "market", "price")
-    if os.path.exists(price_dir):
-        for f in sorted(glob.glob(os.path.join(price_dir, "*.json"))):
-            with open(f, encoding="utf-8") as fp:
-                batch = json.load(fp)
-                data["prices"].extend(batch)
-
-    # Load turn data from all players
-    turns_pattern = os.path.join(record_dir, "*", "turns", "*.json")
-    for f in sorted(glob.glob(turns_pattern)):
-        with open(f, encoding="utf-8") as fp:
-            try:
-                turn_data = json.load(fp)
-                player_id = f.split(os.sep)[-3]
-                if "strategy" in turn_data:
-                    data["trades"][player_id].append(turn_data)
-            except (json.JSONDecodeError, KeyError):
-                continue
-
-    return data
 
 
 def calculate_equity_premium(prices: List[float], periods: int) -> Dict[str, float]:
@@ -153,10 +124,13 @@ def analyze_investor_allocations(trades: Dict[str, List]) -> Dict[str, Dict]:
         if strategy == "market":
             continue
 
+        # decision_payload uses "stock_qty" for the order quantity
         # Track implied allocation (simplified)
-        buy_volume = sum(t["quantity"] for t in player_trades if t["quantity"] > 0)
+        buy_volume = sum(
+            t["stock_qty"] for t in player_trades if t.get("stock_qty", 0) > 0
+        )
         sell_volume = abs(
-            sum(t["quantity"] for t in player_trades if t["quantity"] < 0)
+            sum(t["stock_qty"] for t in player_trades if t.get("stock_qty", 0) < 0)
         )
         net_position = buy_volume - sell_volume
 
@@ -409,15 +383,28 @@ def main():
     print("EquityPremium Analysis - Myopic Loss Aversion")
     print("=" * 70)
 
-    # Load data
+    # Load data via lazy result loader
     print("\n[1] Loading simulation data...")
-    data = load_simulation_data(record_dir)
-    print(f"    Loaded {len(data['prices'])} price points")
-    print(f"    Loaded trades from {len(data['trades'])} players")
+    results = load_results(config)
+    # Coordinator batch store 'price' holds the market price time-series
+    coordinators = list(results.players_by_role("coordinator").values())
+    prices = list(coordinators[0].batch("price").all()) if coordinators else []
+    # Each non-coordinator player contributes a list of per-round decision payloads
+    # payload fields: bid_price, quantity, strategy, investor
+    trades = {}
+    for pid, player in results.players_by_role("player").items():
+        payloads_by_round = player.turns.payloads()
+        if payloads_by_round:
+            # Inject round number into each payload for downstream analysis
+            trades[pid] = [
+                {**p, "round": rn} for rn, p in sorted(payloads_by_round.items())
+            ]
+    print(f"    Loaded {len(prices)} price points")
+    print(f"    Loaded trades from {len(trades)} players")
 
     # Calculate equity premium
     print("\n[2] Calculating equity premium metrics...")
-    premium_metrics = calculate_equity_premium(data["prices"], len(data["prices"]))
+    premium_metrics = calculate_equity_premium(prices, len(prices))
     print(f"    Annual Stock Return: {premium_metrics['annual_return']:.2f}%")
     print(f"    Risk-Free Rate:      {premium_metrics['risk_free_rate']:.2f}%")
     print(f"    Equity Premium:      {premium_metrics['equity_premium']:.2f}%")
@@ -426,29 +413,35 @@ def main():
     # Calculate loss probability by horizon
     print("\n[3] Calculating loss probability by horizon...")
     horizons = [1, 5, 10, 20, 50, 100]
-    horizons = [h for h in horizons if h < len(data["prices"])]
-    loss_probs = calculate_loss_probability(data["prices"], horizons)
+    horizons = [h for h in horizons if h < len(prices)]
+    loss_probs = calculate_loss_probability(prices, horizons)
     for h, prob in sorted(loss_probs.items()):
         print(f"    Horizon {h:3d} rounds: P(Loss) = {prob:.1f}%")
 
     # Analyze investor allocations
     print("\n[4] Analyzing investor allocations...")
-    allocations = analyze_investor_allocations(data["trades"])
+    allocations = analyze_investor_allocations(trades)
     for pid, alloc in allocations.items():
         print(
             f"    {alloc['strategy']:24s}: Stock allocation ~{alloc['implied_stock_allocation']*100:.0f}%"
         )
 
-    # Generate plots
+    # Generate plots (pass prices/trades directly to avoid re-extracting)
     print("\n[5] Generating plots...")
     plot_equity_premium_analysis(
-        data, premium_metrics, loss_probs, allocations, output_dir
+        {"prices": prices, "trades": trades},
+        premium_metrics,
+        loss_probs,
+        allocations,
+        output_dir,
     )
     print(f"    Saved to {output_dir}/equity_premium_analysis.png")
 
     # Generate summary
     print("\n[6] Generating summary...")
-    summary = generate_summary(data, premium_metrics, loss_probs, allocations)
+    summary = generate_summary(
+        {"prices": prices, "trades": trades}, premium_metrics, loss_probs, allocations
+    )
 
     summary_path = os.path.join(output_dir, "summary.json")
     with open(summary_path, "w", encoding="utf-8") as f:

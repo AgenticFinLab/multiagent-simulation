@@ -13,13 +13,13 @@ import argparse
 import os
 import sys
 
-from masim.utils import load_config
+from masim.utils import load_config, load_results
 
-# Import from rule-based version
+# Import analysis functions from rule-based version
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from VolatilityClustering.analysis import (
-    load_simulation_data,
     analyze_volatility_clustering,
+    _load_data,
 )
 
 
@@ -48,7 +48,8 @@ def main():
     print("VolatilityClusteringLLM Analysis - GARCH Dynamics (LLM Agents)")
     print("=" * 70)
 
-    data = load_simulation_data(record_dir)
+    results = load_results(config)
+    data = _load_data(results)
     summary = analyze_volatility_clustering(data, output_dir)
     return summary
 

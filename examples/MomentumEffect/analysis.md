@@ -103,6 +103,131 @@ Ratio < 1:1 → Reversal dominates; no momentum
 
 ---
 
+## Mathematical Detail of Each Metric
+
+### 1. Return Autocorrelation (AC) — Core Momentum Statistic
+
+Let r(t) = [P(t) − P(t−1)] / P(t−1) be the log-approximation return.
+
+```
+AC(τ) = Cov(r(t), r(t−τ)) / Var(r(t))
+
+       = [Σ_t (r(t) − r̄)(r(t−τ) − r̄)] / [Σ_t (r(t) − r̄)²]
+```
+
+**Theoretical AC under AR(1) momentum model:**
+If P(t) = P(t−1) + α·[P(t−1) − P(t−2)] + ε(t) (AR(1) in changes), then:
+```
+AC(1) = α / (1 + α²)
+
+For our model (α ≈ 0.15–0.25):  AC(1) ≈ 0.14–0.22
+```
+
+The **ACF decay** determines trend duration:
+```
+AC(τ) ≈ α^τ / (1 + α²) · correction_factor
+
+Trend half-life:  t_½ = −log(2) / log(α) ≈ 6 rounds for α = 0.2
+```
+
+**Ljung-Box test for momentum significance:**
+```
+Q(m) = T(T+2) · Σ_{τ=1}^{m} AC(τ)² / (T − τ)
+
+Under null (no momentum): Q(m) ~ χ²(m)
+Momentum confirmed when: Q(m) > χ²_{0.05}(m)
+  For m=10:  Q > 18.3  at 5% significance
+```
+
+---
+
+### 2. Momentum Profit — Jegadeesh-Titman (1993) Strategy Return
+
+The J&T (J, K) strategy: form portfolio on J-period past return, hold K periods.
+
+```
+Formation return (past J rounds):
+  R_past(t, J) = [P(t) − P(t−J)] / P(t−J)
+
+Winner portfolio: stocks with R_past > median_R_past
+Loser portfolio:  stocks with R_past < median_R_past
+
+Momentum profit:
+  π(t, K) = R_future_winners(t, K) − R_future_losers(t, K)
+
+Where:
+  R_future(t, K) = [P(t+K) − P(t)] / P(t)
+```
+
+In our single-asset simulation, momentum profit is measured as the strategy P&L
+of MomentumTrader vs ContrarianTrader:
+```
+π_momentum = PnL_MomentumTrader - PnL_ContrarianTrader
+
+Expected π_momentum > 0 when AC(1) > 0  (momentum effect present)
+```
+
+---
+
+### 3. Trend Persistence — Duration Distribution
+
+A **trend** is a consecutive run of same-sign returns:
+```
+Trend starts at t_0 when sign(r(t_0)) ≠ sign(r(t_0−1))
+Trend ends at t_0 + L when sign(r(t_0 + L + 1)) ≠ sign(r(t_0))
+
+Trend length L is geometrically distributed under momentum:
+  P(L = k) = (1 − p_flip)^{k−1} · p_flip
+  where p_flip = P(r < 0 | r_{t−1} > 0) = (1 − AC(1)) / 2
+
+Expected trend length:
+  E[L] = 1 / p_flip = 2 / (1 − AC(1))
+
+For AC(1) = 0.15:  E[L] ≈ 2.35 rounds
+For AC(1) = 0.30:  E[L] ≈ 2.86 rounds
+For full multi-agent simulation: effective L ≈ 8–15 rounds
+  (agent capital effects extend persistence beyond theoretical minimum)
+```
+
+---
+
+### 4. Cumulative Return — Trend Magnitude
+
+The cumulative return over a trend of length L:
+```
+CR(L) = ∏_{k=t_0}^{t_0+L} (1 + r(k)) − 1
+       ≈ Σ_{k=t_0}^{t_0+L} r(k)   (log approximation)
+
+Expected cumulative return during trend:
+  E[CR] = E[r] · E[L] = μ_r · 2 / (1 − AC(1))
+```
+
+The **momentum premium** (excess return over random walk):
+```
+Momentum excess = E[CR | momentum] − E[CR | random walk]
+               = μ_r · [2/(1−AC(1)) − 2] / 2
+               = μ_r · AC(1) / (1 − AC(1))
+
+For AC(1) = 0.2, μ_r = 0.5%:  momentum premium ≈ 0.125% per round
+```
+
+---
+
+### 5. Validation Score Formula
+
+```
+score_ac    = 1.0 if AC(1) > 0.10 else  0.5 if AC(1) > 0.05 else 0.0
+score_dur   = 1.0 if E[L] > 5    else  0.5 if E[L] > 3    else 0.2
+score_prof  = 1.0 if π_momentum > 0 else 0.0
+score_rev   = 0.5 if AC(20) < 0  else 0.0   (eventual reversal bonus)
+
+overall_score = 0.40 · score_ac + 0.30 · score_dur + 0.20 · score_prof + 0.10 · score_rev
+```
+
+Target: `overall_score > 0.5` (AC(1) > 0.05 with positive momentum profit).
+
+---
+
 ## Key Metrics
 
 | Metric                     | Formula                        | Source                    | Purpose           |

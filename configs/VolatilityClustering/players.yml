@@ -47,7 +47,8 @@ market:
 fundamentalist:
   name: "Fundamentalist Investor"
   class: "examples.VolatilityClustering.players:Fundamentalist"
-  num_instances: 1
+  # Expander → fundamentalist_1, fundamentalist_2
+  num_instances: 2
   config:
     identity: "fundamentalist"
     role: player
@@ -72,8 +73,8 @@ fundamentalist:
 trend_follower:
   name: "Trend Follower"
   class: "examples.VolatilityClustering.players:TrendFollower"
-  # Expander → trend_follower_1, trend_follower_2
-  num_instances: 2
+  # Expander → trend_follower_1, trend_follower_2, trend_follower_3
+  num_instances: 3
   config:
     identity: "trend_follower"
     role: player
@@ -99,8 +100,8 @@ trend_follower:
 noise_trader:
   name: "Noise Trader"
   class: "examples.VolatilityClustering.players:NoiseTrader"
-  # Expander → noise_trader_1, noise_trader_2
-  num_instances: 2
+  # Expander → noise_trader_1, noise_trader_2, noise_trader_3
+  num_instances: 3
   config:
     identity: "noise_trader"
     role: player

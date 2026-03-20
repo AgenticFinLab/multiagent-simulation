@@ -103,6 +103,163 @@ Ratio < 1:3 → No clustering; constant low volatility
 
 ---
 
+## Mathematical Detail of Each Metric
+
+### 1. Return ACF — Market Efficiency Test
+
+Let r(t) = [P(t) − P(t−1)] / P(t−1).
+
+```
+AC_r(τ) = Corr(r(t), r(t−τ))
+
+Null hypothesis (efficient market): AC_r(τ) = 0 for all τ ≥ 1
+```
+
+**Ljung-Box Q-test for return autocorrelation:**
+```
+Q_r(m) = T(T+2) · Σ_{τ=1}^{m} AC_r(τ)² / (T − τ)
+
+Under H0: Q_r(m) ~ χ²(m)
+
+For volatility clustering: Q_r(10) < 18.3 (not significant at 5%)
+⇒ returns are approximately unpredictable even when volatility clusters
+```
+
+Targets:
+```
+|AC_r(1)| < 0.15  (market approximately efficient)
+|AC_r(5)| < 0.10  (no multi-round predictability)
+```
+
+---
+
+### 2. Squared Return ACF — ARCH/GARCH Volatility Clustering Test
+
+The **key diagnostic** for volatility clustering: squared returns must be autocorrelated
+even when returns themselves are not.
+
+```
+AC_r2(τ) = Corr(r(t)², r(t−τ)²)
+
+GARCH(1,1) theoretical ACF of squared returns:
+  AC_r2(τ) = [α(α+β)]^{τ-1} · α² / [1 − (α+β)² − 2α²ρ]
+  where ρ = Corr(r²(t), σ²(t))
+
+Simplified at lag 1:
+  AC_r2(1) ≈ α² + αβ = α(α+β)
+```
+
+For the GARCH(1,1) with typical parameters (α = 0.2, β = 0.7):
+```
+AC_r2(1) ≈ 0.2 · (0.2 + 0.7) = 0.18
+```
+
+**Engle (1982) ARCH-LM test:**
+```
+Regress: r(t)² = a_0 + a_1·r(t−1)² + ... + a_m·r(t−m)² + ε(t)
+
+LM statistic: T · R² ~ χ²(m)
+
+Reject no-ARCH when: T·R² > χ²_{0.05}(m)
+  For m=5, T=100: critical value = 11.07
+```
+
+Target: AC_r2(1) > 0.10 (GARCH signature present).
+
+---
+
+### 3. Clustering Ratio — GARCH vs Random Walk Discrimination
+
+```
+Clustering Ratio (CR) = AC_r2(1) / |AC_r(1)|
+
+Interpretation:
+  CR >> 1: volatility clusters but prices don’t trend (GARCH-like, realistic)
+  CR ≈ 1:  both cluster equally (momentum dominates)
+  CR < 1:  returns autocorrelated more than squared (unusual / unstable)
+```
+
+**Theoretical baseline values:**
+```
+For pure GARCH(1,1) with α+β = 0.9, α = 0.2:
+  AC_r(1) ≈ 0 (by market efficiency)
+  AC_r2(1) ≈ 0.18
+  CR → ∞ (theoretically infinite)
+
+For our multi-agent simulation:
+  Expected CR ≈ 2–10 (strong GARCH signature)
+  CR < 2:  volatility clustering marginal
+  CR > 5:  clean GARCH regime switching
+```
+
+---
+
+### 4. Volatility Persistence — GARCH Half-Life
+
+The GARCH(1,1) formal specification:
+
+```
+σ²(t) = ω + α · r²(t−1) + β · σ²(t−1)
+
+Persistence parameter:  p = α + β
+  p < 1:  covariance-stationary (volatility reverts to unconditional mean)
+  p = 1:  IGARCH (volatility is permanent)
+  p > 1:  explosive (unrealistic)
+
+Unconditional variance:
+  σ²_∞ = ω / (1 − α − β)  for p < 1
+
+Half-life of volatility shock:
+  t_½ = log(0.5) / log(α + β)
+
+Typical values:
+  p = 0.90 → t_½ ≈ 6.6 rounds
+  p = 0.95 → t_½ ≈ 13.5 rounds
+  p = 0.99 → t_½ ≈ 69 rounds
+```
+
+Expected in simulation: p ≈ 0.85–0.95, t_½ ≈ 5–15 rounds.
+
+---
+
+### 5. Regime Detection — High-Low Volatility Episodes
+
+```
+Rolling volatility:
+  σ(t) = std(r[t−w+1:t])  where w = 10 rounds
+
+Threshold classification:
+  High-vol regime: σ(t) > μ_σ + 1.5 · std_σ
+  Low-vol regime:  σ(t) < μ_σ + 0.5 · std_σ
+
+Episode length distribution:
+  If volatility follows a 2-state Markov chain with transition probabilities
+  p_HH (persist in high vol), p_LL (persist in low vol):
+
+  E[high-vol episode length] = 1 / (1 − p_HH)
+  E[low-vol episode length]  = 1 / (1 − p_LL)
+```
+
+Expected: high-vol episodes last 5–20 rounds, low-vol episodes last 10–40 rounds.
+
+---
+
+### 6. Validation Score Formula
+
+```
+score_eff   = 1.0 if |AC_r(1)| < 0.10 else 0.5 if |AC_r(1)| < 0.20 else 0.0
+score_garch = 1.0 if AC_r2(1) > 0.10  else 0.5 if AC_r2(1) > 0.05 else 0.0
+score_cr    = 1.0 if CR > 2.0          else 0.5 if CR > 1.5         else 0.0
+score_reg   = 1.0 if N_regimes ≥ 2     else 0.5 if N_regimes == 1  else 0.0
+  where N_regimes = number of distinct high-vol episodes
+
+overall_score = 0.30 · score_eff + 0.35 · score_garch + 0.25 · score_cr + 0.10 · score_reg
+```
+
+Target: `overall_score > 0.6` (GARCH signature with efficient returns).
+
+---
+
 ## Key Metrics
 
 | Metric                     | Formula               | Source            | Purpose                   |

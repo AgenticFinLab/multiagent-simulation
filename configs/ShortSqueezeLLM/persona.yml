@@ -19,7 +19,8 @@ proxy:
     monitor_hot_limit: 3
 
   communication:
-    message_timeout_ms: 5000
+    # Longer timeout for LLM API calls (2–8 s inference latency)
+    message_timeout_ms: 30000
     enable_compression: true
 
   resource:

@@ -19,18 +19,19 @@ market:
       # Market parameters
       initial_price: 100.0
       fundamental_value: 100.0
-      price_impact: 0.06
-      mean_reversion: 0.015
-      noise_std: 0.4
+      price_impact: 0.08
+      mean_reversion: 0.05
+      noise_std: 0.6
       news_probability: 0.15
-      news_impact_range: 5.0
+      news_impact_range: 4.0
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
 llm_disposition_biased:
   name: "LLM Disposition Biased"
   class: "examples.DispositionEffectLLM.players:LLMDispositionBiased"
-  num_instances: 1
+  # Expander → llm_disposition_biased_1, llm_disposition_biased_2, llm_disposition_biased_3
+  num_instances: 3
   config:
     identity: "llm_disposition_biased"
     role: player
@@ -55,7 +56,8 @@ llm_disposition_biased:
 llm_rational:
   name: "LLM Rational Investor"
   class: "examples.DispositionEffectLLM.players:LLMRationalInvestor"
-  num_instances: 1
+  # Expander → llm_rational_1, llm_rational_2
+  num_instances: 2
   config:
     identity: "llm_rational"
     role: player
@@ -80,7 +82,8 @@ llm_rational:
 llm_tax_aware:
   name: "LLM Tax-Aware Investor"
   class: "examples.DispositionEffectLLM.players:LLMTaxAwareInvestor"
-  num_instances: 1
+  # Expander → llm_tax_aware_1, llm_tax_aware_2
+  num_instances: 2
   config:
     identity: "llm_tax_aware"
     role: player
@@ -105,7 +108,8 @@ llm_tax_aware:
 llm_institutional:
   name: "LLM Institutional Investor"
   class: "examples.DispositionEffectLLM.players:LLMInstitutionalInvestor"
-  num_instances: 1
+  # Expander → llm_institutional_1, llm_institutional_2
+  num_instances: 2
   config:
     identity: "llm_institutional"
     role: player
@@ -130,7 +134,8 @@ llm_institutional:
 llm_loss_averse:
   name: "LLM Loss-Averse Investor"
   class: "examples.DispositionEffectLLM.players:LLMLossAverse"
-  num_instances: 1
+  # Expander → llm_loss_averse_1, llm_loss_averse_2
+  num_instances: 2
   config:
     identity: "llm_loss_averse"
     role: player

@@ -10,10 +10,10 @@
 setting:
   name: "volatility_clustering_llm_simulation"
   description: "LLM-based GARCH volatility dynamics through heterogeneous agents"
-  total_rounds: 50
+  total_rounds: 100
   round_history_limit: 3
   record_path: "EXPERIMENT/VolatilityClusteringLLM/records"
-  save_diagram_interval: 25
+  save_diagram_interval: 50
 
 environment:
   dotenv_path: .env
@@ -26,9 +26,9 @@ ray:
   # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
   num_cpus: null
   num_gpus: null
-  # Derived: 7 players, star topology -> 12 msgs/round
-  #   7 TurnResult + 7 pending_info + 12 Message = 26 Ray objects
-  #   26 obj x 64 KB min-alloc = 1664 KB (1.62 MB) base peak
+  # Derived: 11 players, star topology -> 20 msgs/round
+  #   11 TurnResult + 11 pending_info + 20 Message = 42 Ray objects
+  #   42 obj x 64 KB min-alloc = 2688 KB (2.63 MB) base peak
   #   LLM TurnResult also carries prompt+response strings (~4-8 KB each) -> extra overhead
   #   Minimum 512 MB floor for LLM simulations -> 536870912 bytes
   object_store_memory: 536870912

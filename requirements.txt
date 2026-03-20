@@ -19,3 +19,7 @@ h5py
 wandb
 einops
 litellm
+
+# Web Interface
+streamlit>=1.28
+pyyaml

@@ -25,7 +25,8 @@ market:
 llm_contrarian:
   name: "LLM Contrarian Investor"
   class: "examples.ReversalEffectLLM.players:LLMContrarianInvestor"
-  num_instances: 1
+  # Expander → llm_contrarian_1, llm_contrarian_2, llm_contrarian_3
+  num_instances: 3
   config:
     identity: "llm_contrarian"
     role: player
@@ -50,7 +51,8 @@ llm_contrarian:
 llm_overconfident:
   name: "LLM Overconfident Trader"
   class: "examples.ReversalEffectLLM.players:LLMOverconfidentTrader"
-  num_instances: 1
+  # Expander → llm_overconfident_1, llm_overconfident_2, llm_overconfident_3
+  num_instances: 3
   config:
     identity: "llm_overconfident"
     role: player
@@ -75,7 +77,8 @@ llm_overconfident:
 llm_value:
   name: "LLM Value Investor"
   class: "examples.ReversalEffectLLM.players:LLMValueInvestor"
-  num_instances: 1
+  # Expander → llm_value_1, llm_value_2
+  num_instances: 2
   config:
     identity: "llm_value"
     role: player
@@ -100,7 +103,8 @@ llm_value:
 llm_momentum_chaser:
   name: "LLM Momentum Chaser"
   class: "examples.ReversalEffectLLM.players:LLMMomentumChaser"
-  num_instances: 1
+  # Expander → llm_momentum_chaser_1, llm_momentum_chaser_2, llm_momentum_chaser_3
+  num_instances: 3
   config:
     identity: "llm_momentum_chaser"
     role: player
@@ -125,7 +129,8 @@ llm_momentum_chaser:
 llm_noise:
   name: "LLM Noise Trader"
   class: "examples.ReversalEffectLLM.players:LLMNoiseTrader"
-  num_instances: 1
+  # Expander → llm_noise_1, llm_noise_2
+  num_instances: 2
   config:
     identity: "llm_noise"
     role: player

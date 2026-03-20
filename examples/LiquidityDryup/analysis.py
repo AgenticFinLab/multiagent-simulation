@@ -15,7 +15,6 @@ Academic References:
 """
 
 import argparse
-import glob
 import json
 import os
 
@@ -36,50 +35,7 @@ from masim.evaluation.finance import (
     # Validation
     validate_liquidity_dryup,
 )
-from masim.utils import load_config
-
-
-def load_simulation_data(record_dir: str) -> Dict[str, Any]:
-    """Load simulation data from record directory."""
-    data = {"prices": [], "trades": defaultdict(list), "volumes": []}
-    price_data = {}  # round -> price mapping
-
-    # Load price history from market turns data
-    market_turns_dir = os.path.join(record_dir, "market", "turns")
-    if os.path.exists(market_turns_dir):
-        for f in sorted(glob.glob(os.path.join(market_turns_dir, "*.json"))):
-            with open(f, encoding="utf-8") as fp:
-                try:
-                    turn_block = json.load(fp)
-                    for turn_key, turn_data in turn_block.items():
-                        round_num = turn_data.get("round_num", 0)
-                        turn_result = turn_data.get("turn_result", {})
-                        step_results = turn_result.get("step_results", [])
-                        for step in step_results:
-                            payload = step.get("decision_payload", {})
-                            market_data = payload.get("market_data", {})
-                            if "price" in market_data:
-                                price_data[round_num] = market_data["price"]
-                except (json.JSONDecodeError, KeyError):
-                    continue
-
-    # Sort by round and extract prices
-    for round_num in sorted(price_data.keys()):
-        data["prices"].append(price_data[round_num])
-
-    # Load turn data from all players
-    turns_pattern = os.path.join(record_dir, "*", "turns", "*.json")
-    for f in sorted(glob.glob(turns_pattern)):
-        with open(f, encoding="utf-8") as fp:
-            try:
-                turn_data = json.load(fp)
-                player_id = f.split(os.sep)[-3]
-                if "strategy" in turn_data:
-                    data["trades"][player_id].append(turn_data)
-            except (json.JSONDecodeError, KeyError):
-                continue
-
-    return data
+from masim.utils import load_config, load_results
 
 
 def calculate_liquidity_states(
@@ -430,11 +386,25 @@ def main():
     print("LiquidityDryup Analysis - Market Maker Inventory Model")
     print("=" * 70)
 
-    # Load data
+    # Load data via lazy result loader
     print("\n[1] Loading simulation data...")
-    data = load_simulation_data(record_dir)
-    print(f"    Loaded {len(data['prices'])} price points")
-    print(f"    Loaded trades from {len(data['trades'])} players")
+    results = load_results(config)
+    # Coordinator batch store 'price' holds the market price time-series
+    coordinators = list(results.players_by_role("coordinator").values())
+    prices = list(coordinators[0].batch("price").all()) if coordinators else []
+    # Each non-coordinator player contributes per-round decision payloads
+    # payload fields: bid_price, quantity, strategy, investor
+    trades = {}
+    for pid, player in results.players_by_role("player").items():
+        payloads_by_round = player.turns.payloads()
+        if payloads_by_round:
+            # Inject round number into each payload for downstream analysis
+            trades[pid] = [
+                {**p, "round": rn} for rn, p in sorted(payloads_by_round.items())
+            ]
+    data = {"prices": prices, "trades": trades}
+    print(f"    Loaded {len(prices)} price points")
+    print(f"    Loaded trades from {len(trades)} players")
 
     # Calculate liquidity states
     print("\n[2] Calculating liquidity states...")

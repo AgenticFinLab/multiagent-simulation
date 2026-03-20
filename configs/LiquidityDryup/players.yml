@@ -41,8 +41,8 @@ market:
 market_maker:
   name: "Market Maker"
   class: "examples.LiquidityDryup.players:MarketMaker"
-  # Expander → market_maker_1, market_maker_2
-  num_instances: 2
+  # Expander → market_maker_1, market_maker_2, market_maker_3
+  num_instances: 3
   config:
     identity: "market_maker"
     role: player
@@ -64,8 +64,8 @@ market_maker:
 liquidity_seeker:
   name: "Liquidity Seeker"
   class: "examples.LiquidityDryup.players:LiquiditySeeker"
-  # Expander → liquidity_seeker_1, liquidity_seeker_2
-  num_instances: 2
+  # Expander → liquidity_seeker_1, liquidity_seeker_2, liquidity_seeker_3
+  num_instances: 3
   config:
     identity: "liquidity_seeker"
     role: player
@@ -85,7 +85,8 @@ liquidity_seeker:
 value_trader:
   name: "Value Trader"
   class: "examples.LiquidityDryup.players:ValueTrader"
-  num_instances: 1
+  # Expander → value_trader_1, value_trader_2
+  num_instances: 2
   config:
     identity: "value_trader"
     role: player
@@ -107,7 +108,8 @@ value_trader:
 momentum_trader:
   name: "Momentum Trader"
   class: "examples.LiquidityDryup.players:MomentumTrader"
-  num_instances: 1
+  # Expander → momentum_trader_1, momentum_trader_2
+  num_instances: 2
   config:
     identity: "momentum_trader"
     role: player
@@ -127,7 +129,8 @@ momentum_trader:
 noise_trader:
   name: "Noise Trader"
   class: "examples.LiquidityDryup.players:NoiseTrader"
-  num_instances: 1
+  # Expander → noise_trader_1, noise_trader_2
+  num_instances: 2
   config:
     identity: "noise_trader"
     role: player

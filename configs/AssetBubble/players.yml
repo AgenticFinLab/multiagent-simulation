@@ -46,7 +46,7 @@ momentum_speculator:
   name: "Momentum Speculator"
   class: "examples.AssetBubble.players:MomentumSpeculator"
   # Expander → momentum_speculator_1, momentum_speculator_2
-  num_instances: 2
+  num_instances: 5
   config:
     identity: "momentum_speculator"
     role: player
@@ -75,7 +75,7 @@ momentum_speculator:
 rational_arbitrageur:
   name: "Rational Arbitrageur"
   class: "examples.AssetBubble.players:RationalArbitrageur"
-  num_instances: 1
+  num_instances: 3
   config:
     identity: "rational_arbitrageur"
     role: player
@@ -128,7 +128,7 @@ noise_trader:
 fundamental_investor:
   name: "Fundamental Investor"
   class: "examples.AssetBubble.players:FundamentalInvestor"
-  num_instances: 1
+  num_instances: 4
   config:
     identity: "fundamental_investor"
     role: player
@@ -153,7 +153,7 @@ fundamental_investor:
 leveraged_buyer:
   name: "Leveraged Buyer"
   class: "examples.AssetBubble.players:LeveragedBuyer"
-  num_instances: 1
+  num_instances: 3
   config:
     identity: "leveraged_buyer"
     role: player
@@ -179,7 +179,7 @@ leveraged_buyer:
 conservative_holder:
   name: "Conservative Holder"
   class: "examples.AssetBubble.players:ConservativeHolder"
-  num_instances: 1
+  num_instances: 2
   config:
     identity: "conservative_holder"
     role: player

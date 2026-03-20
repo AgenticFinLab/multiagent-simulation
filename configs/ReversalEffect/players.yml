@@ -37,8 +37,8 @@ market:
 contrarian:
   name: "Contrarian Investor"
   class: "examples.ReversalEffect.players:ContrarianInvestor"
-  # Expander → contrarian_1, contrarian_2
-  num_instances: 2
+  # Expander → contrarian_1, contrarian_2, contrarian_3
+  num_instances: 3
   config:
     identity: "contrarian"
     role: player
@@ -63,8 +63,8 @@ contrarian:
 momentum:
   name: "Momentum Investor"
   class: "examples.ReversalEffect.players:MomentumInvestor"
-  # Expander → momentum_1, momentum_2
-  num_instances: 2
+  # Expander → momentum_1, momentum_2, momentum_3
+  num_instances: 3
   config:
     identity: "momentum"
     role: player
@@ -86,8 +86,8 @@ momentum:
 overconfident:
   name: "Overconfident Trader"
   class: "examples.ReversalEffect.players:OverconfidentTrader"
-  # Expander → overconfident_1, overconfident_2
-  num_instances: 2
+  # Expander → overconfident_1, overconfident_2, overconfident_3
+  num_instances: 3
   config:
     identity: "overconfident"
     role: player
@@ -110,7 +110,8 @@ overconfident:
 noise_trader:
   name: "Noise Trader"
   class: "examples.ReversalEffect.players:NoiseTrader"
-  num_instances: 1
+  # Expander → noise_trader_1, noise_trader_2
+  num_instances: 2
   config:
     identity: "noise_trader"
     role: player
@@ -130,7 +131,8 @@ noise_trader:
 value_investor:
   name: "Value Investor"
   class: "examples.ReversalEffect.players:ValueInvestor"
-  num_instances: 1
+  # Expander → value_investor_1, value_investor_2
+  num_instances: 2
   config:
     identity: "value_investor"
     role: player

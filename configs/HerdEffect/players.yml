@@ -49,7 +49,8 @@ market:
 investor_momentum:
   name: "Momentum Investor"
   class: "examples.HerdEffect.players:MomentumInvestor"
-  num_instances: 1
+  # Expander → investor_momentum_1, investor_momentum_2
+  num_instances: 2
   config:
     identity: "investor_momentum"
     role: player
@@ -72,7 +73,8 @@ investor_momentum:
 investor_contrarian:
   name: "Contrarian Investor"
   class: "examples.HerdEffect.players:ContrarianInvestor"
-  num_instances: 1
+  # Expander → investor_contrarian_1, investor_contrarian_2
+  num_instances: 2
   config:
     identity: "investor_contrarian"
     role: player
@@ -99,7 +101,8 @@ investor_contrarian:
 investor_risk_averse:
   name: "Risk Averse Investor"
   class: "examples.HerdEffect.players:RiskAverseInvestor"
-  num_instances: 1
+  # Expander → investor_risk_averse_1, investor_risk_averse_2
+  num_instances: 2
   config:
     identity: "investor_risk_averse"
     role: player
@@ -122,7 +125,8 @@ investor_risk_averse:
 investor_aggressive:
   name: "Aggressive Investor"
   class: "examples.HerdEffect.players:AggressiveInvestor"
-  num_instances: 1
+  # Expander → investor_aggressive_1, investor_aggressive_2
+  num_instances: 2
   config:
     identity: "investor_aggressive"
     role: player
@@ -147,7 +151,8 @@ investor_aggressive:
 investor_noise:
   name: "Noise Trader"
   class: "examples.HerdEffect.players:NoiseTrader"
-  num_instances: 1
+  # Expander → investor_noise_1, investor_noise_2
+  num_instances: 2
   config:
     identity: "investor_noise"
     role: player

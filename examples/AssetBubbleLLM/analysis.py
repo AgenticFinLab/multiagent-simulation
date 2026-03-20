@@ -13,11 +13,11 @@ import argparse
 import os
 import sys
 
-from masim.utils import load_config, load_simulation_data
+from masim.utils import load_config, load_results
 
 # Import analysis functions from rule-based version
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from AssetBubble.analysis import analyze_bubble
+from AssetBubble.analysis import analyze_bubble, _load_data
 
 
 def main():
@@ -41,7 +41,8 @@ def main():
     print("AssetBubbleLLM Analysis - Positive Feedback Dynamics (LLM Agents)")
     print("=" * 70)
 
-    data = load_simulation_data(config)
+    results = load_results(config)
+    data = _load_data(results)
     summary = analyze_bubble(data, output_dir)
     return summary
 

@@ -26,7 +26,29 @@ from masim.evaluation.finance import (
     plot_multi_panel_summary,
     validate_volatility_clustering,
 )
-from masim.utils import load_config, load_simulation_data, get_investor_quantities
+from masim.utils import load_config, load_results
+
+
+def _batch_to_rounds(values: list) -> Dict[int, float]:
+    """Convert a batch store list to {round_num: value} (round_num starts at 1)."""
+    return {i + 1: v for i, v in enumerate(values)}
+
+
+def _load_data(results) -> Dict[str, Any]:
+    """Extract market prices from a SimulationResults object.
+
+    Data source: coordinator batch store 'price'.
+
+    Returns
+    -------
+    dict with keys:
+        market_prices : {round_num: float}
+    """
+    market_prices: Dict[int, float] = {}
+    for player in results.players_by_role("coordinator").values():
+        if "price" in player.batch_store_names:
+            market_prices.update(_batch_to_rounds(player.batch("price").all()))
+    return {"market_prices": market_prices}
 
 
 def analyze_volatility_clustering(
@@ -184,7 +206,8 @@ def main():
     output_dir = os.path.join(base_dir, "analysis")
     os.makedirs(output_dir, exist_ok=True)
 
-    data = load_simulation_data(config)
+    results = load_results(config)
+    data = _load_data(results)
     summary = analyze_volatility_clustering(data, output_dir)
     return summary
 

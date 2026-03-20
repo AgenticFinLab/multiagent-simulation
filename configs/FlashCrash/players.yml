@@ -40,8 +40,8 @@ market:
 hft:
   name: "HFT"
   class: "examples.FlashCrash.players:HighFrequencyTrader"
-  # Expander → hft_1, hft_2
-  num_instances: 2
+  # Expander → hft_1, hft_2, hft_3
+  num_instances: 3
   config:
     identity: "hft"
     role: player
@@ -63,8 +63,8 @@ hft:
 market_maker:
   name: "Market Maker"
   class: "examples.FlashCrash.players:MarketMaker"
-  # Expander → market_maker_1, market_maker_2
-  num_instances: 2
+  # Expander → market_maker_1, market_maker_2, market_maker_3
+  num_instances: 3
   config:
     identity: "market_maker"
     role: player
@@ -85,7 +85,8 @@ market_maker:
 algo_trader:
   name: "Algorithmic Trader"
   class: "examples.FlashCrash.players:AlgorithmicTrader"
-  num_instances: 1
+  # Expander → algo_trader_1, algo_trader_2
+  num_instances: 2
   config:
     identity: "algo_trader"
     role: player
@@ -107,8 +108,8 @@ algo_trader:
 stop_loss:
   name: "Stop Loss Trader"
   class: "examples.FlashCrash.players:StopLossTrader"
-  # Expander → stop_loss_1, stop_loss_2
-  num_instances: 2
+  # Expander → stop_loss_1, stop_loss_2, stop_loss_3
+  num_instances: 3
   config:
     identity: "stop_loss"
     role: player
@@ -130,7 +131,8 @@ stop_loss:
 fundamental_trader:
   name: "Fundamental Trader"
   class: "examples.FlashCrash.players:FundamentalTrader"
-  num_instances: 1
+  # Expander → fundamental_trader_1, fundamental_trader_2
+  num_instances: 2
   config:
     identity: "fundamental_trader"
     role: player
@@ -152,7 +154,8 @@ fundamental_trader:
 retail_trader:
   name: "Retail Trader"
   class: "examples.FlashCrash.players:RetailTrader"
-  num_instances: 1
+  # Expander → retail_trader_1, retail_trader_2
+  num_instances: 2
   config:
     identity: "retail_trader"
     role: player

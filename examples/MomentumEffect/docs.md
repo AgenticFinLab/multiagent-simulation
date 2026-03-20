@@ -87,17 +87,17 @@
 
 ## Market Clearing Model
 
-```
-Price Model with Autocorrelated Drift:
-    P(t+1) = P(t) + λ × NetDemand + γ × [F(t) - P(t)] + ε
+Price model with autocorrelated fundamental drift:
 
-Fundamental Drift (creates momentum opportunity):
-    drift(t) = ρ × drift(t-1) + η
-    F(t+1) = F(t) + drift(t)
+$$P(t+1) = P(t) + \lambda\cdot D(t) + \gamma\cdot[F(t)-P(t)] + \varepsilon(t)$$
 
-Where:
-    ρ = 0.95 (high persistence → momentum)
-```
+Fundamental drift (AR(1) process creating the momentum opportunity):
+
+$$\text{drift}(t) = \rho\cdot\text{drift}(t-1) + \eta(t), \qquad \eta\sim\mathcal{N}(0,\sigma_\eta^2)$$
+
+$$F(t+1) = F(t) + \text{drift}(t)$$
+
+With $\rho=0.95$ (high persistence) — this creates sustained fundamental trends that price only gradually catches up to.
 
 | Parameter         | Value | Financial Meaning                      |
 |-------------------|-------|----------------------------------------|
@@ -108,56 +108,163 @@ Where:
 
 ## Investor Strategy Formulas
 
-### MomentumTrader (⭐ Trend Follower)
-```python
-# Calculate 5-period momentum
-momentum_5 = (price[-1] - price[-6]) / price[-6]
+*See implementation*: `examples/MomentumEffect/players.py`.
 
-if momentum_5 > 0.02:  # Positive momentum
-    quantity = 0.3 * momentum_5 * cash / price  # BUY
-elif momentum_5 < -0.02:  # Negative momentum
-    quantity = 0.3 * momentum_5 * cash / price  # SELL (negative)
-```
+| Agent            | Key parameters                           | File line                   |
+|------------------|------------------------------------------|-----------------------------|
+| MomentumTrader   | $J=5$, $\beta=0.3$, threshold $2\%$      | `MomentumTrader.decide()`   |
+| TechnicalTrader  | $S=5$, $L=20$ MA windows, band $\pm1\%$  | `TechnicalTrader.decide()`  |
+| ContrarianTrader | $L=20$, threshold $\pm10\%$, $\beta=0.2$ | `ContrarianTrader.decide()` |
 
-### TechnicalTrader (⭐ Moving Average)
-```python
-short_ma = mean(price[-5:])   # 5-period MA
-long_ma = mean(price[-20:])   # 20-period MA
+## Mathematical Foundations
 
-if short_ma > long_ma * 1.02:  # Golden cross
-    quantity = 0.2 * cash / price  # BUY
-elif short_ma < long_ma * 0.98:  # Death cross
-    quantity = -position * 0.5  # SELL
-```
+### Notations
 
-### ContrarianTrader (Mean Reversion)
-```python
-momentum_20 = (price[-1] - price[-21]) / price[-21]
+| Symbol            | Meaning                                            |
+|-------------------|----------------------------------------------------|
+| $P(t)$            | Market price at round $t$                          |
+| $F(t)$            | Fundamental value at round $t$                     |
+| $D(t)$            | Net aggregate demand                               |
+| $r(t)$            | One-period return $[P(t)-P(t-1)]/P(t-1)$           |
+| $\mu_J(t)$        | $J$-period formation return $[P(t)-P(t-J)]/P(t-J)$ |
+| $\text{SMA}_S(t)$ | Simple moving average over $S$ periods             |
+| $\text{SMA}_L(t)$ | Simple moving average over $L$ periods             |
+| $\text{drift}(t)$ | AR(1) fundamental drift process                    |
+| $\rho$            | Drift persistence (0.95)                           |
+| $\lambda$         | Price-impact coefficient (0.08)                    |
+| $\gamma$          | Mean-reversion speed (0.01)                        |
+| $\varepsilon(t)$  | i.i.d. noise $\sim\mathcal{N}(0,0.5^2)$            |
+| $W(t)$            | Investor cash                                      |
 
-if momentum_20 > 0.10:  # +10% = overextended
-    quantity = -0.2 * momentum_20 * cash / price  # SELL
-elif momentum_20 < -0.10:  # -10% = oversold
-    quantity = -0.2 * momentum_20 * cash / price  # BUY
-```
+---
+
+### 1. Autocorrelated Fundamental Drift — Underreaction Model
+
+> **Source**: Hong & Stein (1999) \[2\] — *A Unified Theory of Underreaction, Momentum Trading, and Overreaction*. *Implementation*: `examples/MomentumEffect/players.py`, class `Market`.
+
+Fundamental follows an AR(1) drift:
+
+$$\text{drift}(t) = \rho\cdot\text{drift}(t-1) + \eta(t), \quad \eta\sim\mathcal{N}(0,\sigma_\eta^2)$$
+
+$$F(t+1) = F(t) + \text{drift}(t)$$
+
+> **What it does**: The fundamental value $F(t)$ does not jump randomly each period — it drifts in one direction persistently (AR(1) with $\rho=0.95$). Think of a company whose earnings are growing quarter after quarter: each quarter's earnings reflect the previous quarter plus a small random shock. **Simulates**: the gradual information diffusion mechanism of Hong & Stein (1999) — news about improving fundamentals doesn't arrive all at once but seeps in over many periods, creating a sustained drift that rational prices should quickly fully reflect, but underreacting traders don't.
+
+With $\rho=0.95$, $\sigma_\eta=0.5$, the impulse response to a one-unit shock decays as:
+
+$$\text{drift}(t+k) = 0.95^k \quad\text{(slow decay — persistent drift)}$$
+
+> **What it does**: Shows the half-life of a fundamental shock: after 13.5 periods the drift has halved ($0.95^{13.5}\approx0.5$). This creates a "window" of sustained trend that momentum traders can profitably exploit before fundamentals fully manifest in price.
+
+---
+
+### 2. Price Dynamics — Underreaction Condition
+
+> **Source**: Hong & Stein (1999) \[2\]. *Implementation*: `examples/MomentumEffect/players.py`, `Market.update_price()`.
+
+$$P(t+1) = P(t) + \lambda\,D(t) + \gamma\,[F(t)-P(t)] + \varepsilon(t)$$
+
+> **What it does**: The price update has three components: (1) $\lambda D(t)$ — demand-driven price impact from all investors' orders; (2) $\gamma[F(t)-P(t)]$ — the fundamental pull (mean reversion toward intrinsic value); (3) $\varepsilon(t)$ — noise. **Simulates underreaction**: with $\gamma=0.01$ (very slow), prices only move 1% of the way toward the fundamental each round. When the fundamental drifts up by 0.5 per period but prices only correct by 1% of the gap, the gap keeps widening — creating a tradeable momentum signal.
+
+Underreaction condition: price only partially adjusts to $F(t)$ each round. Defining the price gap $G(t)=F(t)-P(t)$:
+
+$$G(t+1) = (1-\gamma)\,G(t) - \lambda\,D(t) + \text{drift}(t) - \varepsilon(t)$$
+
+> **What it does**: Shows how the gap between fundamental and price evolves. When $\gamma\ll\rho$ (price adjusts slowly, fundamental drifts fast), $G(t)$ grows over time. **Effect**: a growing gap means past returns (driven by catching up to a drifting $F$) predict future returns — this is the mathematical backbone of the momentum effect.
+
+---
+
+### 3. MomentumTrader — Jegadeesh-Titman Strategy
+
+> **Source**: Jegadeesh & Titman (1993) \[1\] — *Returns to Buying Winners and Selling Losers*. *Implementation*: `examples/MomentumEffect/players.py`, class `MomentumTrader.decide()`.
+
+Formation-period return ($J=5$):
+
+$$\mu_J(t) = \frac{P(t) - P(t-J)}{P(t-J)}$$
+
+> **What it does**: Computes the "momentum signal" — the asset's cumulative return over the last $J=5$ periods. A positive $\mu_J$ means the asset has been a recent winner. **Simulates**: Jegadeesh & Titman's empirical formation-period methodology — rank stocks by their past J-month return, buy the top decile (winners) and short the bottom decile (losers).
+
+Order quantity:
+
+$$q_m(t) = \beta_m\cdot\mu_J(t)\cdot\frac{W(t)}{P(t)}, \quad \beta_m = 0.3$$
+
+> **What it does**: Scales the trade size by both the momentum signal and the investor's available wealth (capital deployment). Larger past returns $\Rightarrow$ larger position. **Effect**: creates trend-following demand that further pushes winners higher and losers lower — the self-reinforcing mechanism producing momentum. Jegadeesh & Titman (1993) \[1\] find a 12-month formation, 3-month holding strategy generates $\approx12\%$ annual alpha.
+
+---
+
+### 4. TechnicalTrader — Moving Average Crossover
+
+> **Source**: Barberis, Shleifer & Vishny (1998) \[3\] — conservatism and representativeness biases. *Implementation*: `examples/MomentumEffect/players.py`, class `TechnicalTrader.decide()`.
+
+$$\text{SMA}_S(t) = \frac{1}{S}\sum_{k=0}^{S-1} P(t-k), \quad S=5$$
+
+$$\text{SMA}_L(t) = \frac{1}{L}\sum_{k=0}^{L-1} P(t-k), \quad L=20$$
+
+> **What it does**: Computes two moving averages at different timescales — a "fast" 5-period MA that responds quickly to recent price changes, and a "slow" 20-period MA that reflects the medium-term trend. **Simulates**: the widely-used technical analysis crossover rule, which embodies the Barberis et al. (1998) conservatism bias — investors anchor to past prices and only slowly update their beliefs, so the slow MA lags the fast one during a trend.
+
+Trading signal:
+- Golden Cross: $\text{SMA}_S > \text{SMA}_L\cdot(1+0.01) \Rightarrow$ BUY
+- Death Cross: $\text{SMA}_S < \text{SMA}_L\cdot(1-0.01) \Rightarrow$ SELL
+
+> **What it does**: The crossover fires when the short MA has diverged at least 1% from the long MA — filtering noise and confirming only sustained trends. **Effect**: TechnicalTraders add a second wave of momentum buying after the initial MomentumTrader signal, amplifying and prolonging the trend. Mathematically, $\text{SMA}_S - \text{SMA}_L$ acts as a bandpass filter: detecting low-frequency trend components while suppressing high-frequency noise.
+
+---
+
+### 5. ContrarianTrader — De Bondt-Thaler Long-Horizon Reversal
+
+> **Source**: De Bondt & Thaler (1985) \[4\] — *Does the Stock Market Overreact?* *Implementation*: `examples/MomentumEffect/players.py`, class `ContrarianTrader.decide()`.
+
+Long-horizon formation return ($L=20$):
+
+$$\mu_L(t) = \frac{P(t) - P(t-L)}{P(t-L)}$$
+
+> **What it does**: Measures the cumulative return over a much longer window ($L=20$) than the MomentumTrader's signal ($J=5$). A stock that has risen 15% over 20 periods is flagged as a "past winner" candidate for contrarian selling.
+
+Contrarian order (active when $|\mu_L|>0.10$):
+
+$$q_c(t) = -0.2\cdot\mu_L(t)\cdot\frac{W(t)}{P(t)}$$
+
+> **What it does**: When $\mu_L < -10\%$ (past loser), $q_c > 0$ — the contrarian **buys** the past loser, betting on a correction. When $\mu_L > +10\%$, $q_c < 0$ — they **sell** the past winner. **Simulates**: De Bondt & Thaler (1985) \[4\] empirical finding that past extreme losers outperform by $\approx25\%$ over the next 3 years. **Effect**: ContrarianTrader provides a long-run corrective force that eventually terminates the momentum rally — the source of the long-term reversal shown in the simulation.
+
+---
+
+### 6. Momentum Persistence Metrics
+
+> **Source**: Jegadeesh & Titman (1993) \[1\]. *Implementation*: `examples/MomentumEffect/analysis.py`.
+
+Return autocorrelation at lag $k$:
+
+$$\rho_k = \text{Corr}\!\bigl(r(t),\, r(t-k)\bigr)$$
+
+> **What it does**: Measures the statistical persistence of returns — whether today's return predicts tomorrow's. $\rho_1>0$ means positive serial correlation (trending); $\rho_{20}<0$ means long-run mean-reversion. **Simulates**: the hallmark test of the momentum effect — Jegadeesh & Titman show that winner portfolios have significantly positive autocorrelations at 1–12 month lags.
+
+$\rho_1 > 0$: trending market (momentum active) \\
+$\rho_{20} < 0$: long-run reversal effect present
+
+Winner-Loser spread over holding period $H$:
+
+$$\text{WL} = \overline{R}_{\text{winners}}^H - \overline{R}_{\text{losers}}^H \quad (\text{positive} \Rightarrow \text{momentum profitable})$$
+
+> **What it does**: Computes the average return differential between past winners and past losers over the holding period. **Simulates**: the Jegadeesh-Titman strategy's profitability — if WL $>0$ and statistically significant, momentum is present. WL $\approx 1\%$/month was the empirical finding in US stocks 1965–1989.
 
 ## Strategy Comparison
 
-| Strategy            | Lookback   | Signal            | Market Effect     |
-|---------------------|------------|-------------------|-------------------|
-| **MomentumTrader**  | 5 periods  | Past return > 2%  | ⭐ Trend Amplifier |
-| **TechnicalTrader** | 5 vs 20    | MA crossover      | ⭐ Trend Follower  |
-| ContrarianTrader    | 20 periods | Extreme moves     | Mean Reversion    |
-| FundamentalTrader   | N/A        | Price vs F        | Slow Stabilizer   |
-| IndexFund           | N/A        | Target allocation | Passive           |
-| MarketMaker         | N/A        | Inventory balance | Liquidity         |
+| Strategy            | Lookback   | Signal                | Market Effect     |
+|---------------------|------------|-----------------------|-------------------|
+| **MomentumTrader**  | 5 periods  | Past return > 2%      | ⭐ Trend Amplifier |
+| **TechnicalTrader** | 5 vs 20    | MA crossover $\pm1\%$ | ⭐ Trend Follower  |
+| ContrarianTrader    | 20 periods | Extreme moves         | Mean Reversion    |
+| FundamentalTrader   | N/A        | Price vs F            | Slow Stabilizer   |
+| IndexFund           | N/A        | Target allocation     | Passive           |
+| MarketMaker         | N/A        | Inventory balance     | Liquidity         |
 
 ## Momentum Detection Metrics
 
-| Metric                     | Formula                          | Interpretation                  |
-|----------------------------|----------------------------------|---------------------------------|
-| **Return Autocorrelation** | corr(r_t, r_{t-1})               | > 0 = momentum, < 0 = reversal  |
-| **Momentum Signal**        | Σ(r_{t-k}) for k=1..12           | Cumulative past returns         |
-| **Winner-Loser Spread**    | Return(winners) - Return(losers) | Momentum strategy profitability |
+| Metric                     | Formula                                                  | Interpretation                      |
+|----------------------------|----------------------------------------------------------|-------------------------------------|
+| **Return Autocorrelation** | $\mathrm{Corr}(r(t),\,r(t-1))$                           | $>0$ = momentum, $<0$ = reversal    |
+| **Momentum Signal**        | $\sum_{k=1}^{12}r(t-k)$ (cumulative past returns)        | Positive = recent winner            |
+| **Winner-Loser Spread**    | $\bar{R}_{\text{winners}}^H - \bar{R}_{\text{losers}}^H$ | $>0\Rightarrow$ momentum profitable |
 
 ## Topology
 
@@ -208,6 +315,10 @@ python examples/MomentumEffect/run_momentum.py -c configs/MomentumEffect/simulat
 
 ## References
 
-1. Jegadeesh, N. & Titman, S. (1993). *Returns to Buying Winners and Selling Losers*. Journal of Finance.
-2. Hong, H. & Stein, J. (1999). *A Unified Theory of Underreaction, Momentum Trading, and Overreaction*. Journal of Finance.
-3. Barberis, N., Shleifer, A. & Vishny, R. (1998). *A Model of Investor Sentiment*. JFE.
+\[1\] Jegadeesh, N. & Titman, S. (1993). *Returns to Buying Winners and Selling Losers: Implications for Stock Market Efficiency*. Journal of Finance, 48(1), 65–91.
+
+\[2\] Hong, H. & Stein, J. (1999). *A Unified Theory of Underreaction, Momentum Trading, and Overreaction in Asset Markets*. Journal of Finance, 54(6), 2143–2184.
+
+\[3\] Barberis, N., Shleifer, A. & Vishny, R. (1998). *A Model of Investor Sentiment*. Journal of Financial Economics, 49(3), 307–343.
+
+\[4\] De Bondt, W.F.M. & Thaler, R. (1985). *Does the Stock Market Overreact?* Journal of Finance, 40(3), 793–805.

@@ -14,12 +14,11 @@ import json
 import os
 import sys
 
-from masim.utils import load_config
+from masim.utils import load_config, load_results
 
-# Import from rule-based version
+# Import analysis functions from rule-based version
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from ShortSqueeze.analysis import (
-    load_simulation_data,
     calculate_squeeze_metrics,
     identify_squeeze_phases,
     plot_squeeze_analysis,
@@ -50,23 +49,46 @@ def main():
     print("ShortSqueezeLLM Analysis - Supply-Demand Imbalance (LLM Agents)")
     print("=" * 70)
 
-    # Load data
+    # Load data via lazy result loader
     print("\n[1] Loading simulation data...")
-    data = load_simulation_data(record_dir)
-    print(f"    Loaded {len(data['prices'])} price points")
+    results = load_results(config)
+    # Coordinator batch store 'price' holds the market price time-series
+    coordinators = list(results.players_by_role("coordinator").values())
+    prices = list(coordinators[0].batch("price").all()) if coordinators else []
+    # payload fields: bid_price, quantity, strategy, investor
+    trades = {}
+    for pid, player in results.players_by_role("player").items():
+        payloads_by_round = player.turns.payloads()
+        if payloads_by_round:
+            # Inject round number into each payload for downstream analysis
+            trades[pid] = [
+                {**p, "round": rn} for rn, p in sorted(payloads_by_round.items())
+            ]
+    data = {"prices": prices, "trades": trades}
+    print(f"    Loaded {len(prices)} price points")
+    print(f"    Loaded trades from {len(trades)} players")
 
     # Calculate squeeze metrics
     print("\n[2] Calculating squeeze metrics...")
     squeeze_metrics = calculate_squeeze_metrics(data["prices"], data["trades"])
+    print(f"    Entry Price: ${squeeze_metrics['entry_price']:.2f}")
+    print(
+        f"    Peak Price:  ${squeeze_metrics['peak_price']:.2f} (Round {squeeze_metrics['peak_round']})"
+    )
+    print(f"    Squeeze:     +{squeeze_metrics['squeeze_percentage']:.1f}%")
 
     # Identify phases
     print("\n[3] Identifying squeeze phases...")
     phases = identify_squeeze_phases(data["prices"])
+    for phase_name, phase_data in phases.items():
+        print(
+            f"    {phase_name.title():12s}: Rounds {phase_data['start']}-{phase_data['end']}"
+        )
 
     # Generate plots
     print("\n[4] Generating plots...")
     plot_squeeze_analysis(data, squeeze_metrics, phases, output_dir)
-    print(f"    Saved to {output_dir}/")
+    print(f"    Saved to {output_dir}/squeeze_analysis.png")
 
     # Generate summary
     print("\n[5] Generating summary...")
@@ -76,6 +98,18 @@ def main():
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
     print(f"    Saved to {summary_path}")
+
+    # Print key findings
+    print("\n" + "=" * 70)
+    print("KEY FINDINGS")
+    print("=" * 70)
+    print(f"Squeeze Detected: {summary['squeeze_detected']}")
+    print(f"Squeeze Intensity: {summary['squeeze_intensity']}")
+    print(f"Max Squeeze: +{squeeze_metrics['squeeze_percentage']:.1f}%")
+    print(f"Short Covering: {'Yes' if summary['short_covering_detected'] else 'No'}")
+    print(f"Feedback Loop: {'Yes' if summary['feedback_loop_detected'] else 'No'}")
+    print(f"\nVALIDATION: {summary['validation']['interpretation']}")
+    print(f"Fit Score: {summary['validation']['score']:.1%}")
 
     return summary
 

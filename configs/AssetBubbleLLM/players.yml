@@ -32,7 +32,8 @@ market:
 llm_greater_fool:
   name: "LLM Greater Fool Speculator"
   class: "examples.AssetBubbleLLM.players:LLMGreaterFoolSpeculator"
-  num_instances: 1
+  # Expander → llm_greater_fool_1 .. llm_greater_fool_5
+  num_instances: 5
   config:
     identity: "llm_greater_fool"
     role: player
@@ -58,7 +59,8 @@ llm_greater_fool:
 llm_arbitrageur:
   name: "LLM Rational Arbitrageur"
   class: "examples.AssetBubbleLLM.players:LLMRationalArbitrageur"
-  num_instances: 1
+  # Expander → llm_arbitrageur_1, llm_arbitrageur_2, llm_arbitrageur_3
+  num_instances: 3
   config:
     identity: "llm_arbitrageur"
     role: player
@@ -84,7 +86,8 @@ llm_arbitrageur:
 llm_sentiment:
   name: "LLM Sentiment Trader"
   class: "examples.AssetBubbleLLM.players:LLMSentimentTrader"
-  num_instances: 1
+  # Expander → llm_sentiment_1, llm_sentiment_2
+  num_instances: 2
   config:
     identity: "llm_sentiment"
     role: player
@@ -110,7 +113,8 @@ llm_sentiment:
 llm_value:
   name: "LLM Value Investor"
   class: "examples.AssetBubbleLLM.players:LLMValueInvestor"
-  num_instances: 1
+  # Expander → llm_value_1, llm_value_2, llm_value_3, llm_value_4
+  num_instances: 4
   config:
     identity: "llm_value"
     role: player
@@ -136,7 +140,8 @@ llm_value:
 llm_leveraged:
   name: "LLM Leveraged Speculator"
   class: "examples.AssetBubbleLLM.players:LLMLeveragedSpeculator"
-  num_instances: 1
+  # Expander → llm_leveraged_1, llm_leveraged_2, llm_leveraged_3
+  num_instances: 3
   config:
     identity: "llm_leveraged"
     role: player

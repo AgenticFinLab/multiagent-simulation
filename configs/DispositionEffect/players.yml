@@ -77,7 +77,8 @@ disposition_investor:
 rational_investor:
   name: "Rational Investor"
   class: "examples.DispositionEffect.players:RationalInvestor"
-  num_instances: 1
+  # Expander → rational_investor_1, rational_investor_2
+  num_instances: 2
   config:
     identity: "rational_investor"
     role: player
@@ -99,7 +100,8 @@ rational_investor:
 tax_aware_investor:
   name: "Tax Aware Investor"
   class: "examples.DispositionEffect.players:TaxAwareInvestor"
-  num_instances: 1
+  # Expander → tax_aware_investor_1, tax_aware_investor_2
+  num_instances: 2
   config:
     identity: "tax_aware_investor"
     role: player

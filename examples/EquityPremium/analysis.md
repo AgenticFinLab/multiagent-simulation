@@ -106,11 +106,114 @@ Ratio < 1:2 → Low premium; efficient market
 
 | Metric               | Formula                          | Source                 | Purpose                    |
 |----------------------|----------------------------------|------------------------|----------------------------|
-| Equity Premium       | EP = E[R_stock] - R_f            | Mehra-Prescott (1985)  | Risk premium magnitude     |
+| Equity Premium       | EP = E[R_stock] − R_f            | Mehra-Prescott (1985)  | Risk premium magnitude     |
 | Loss Frequency       | LF = P(R < 0) at horizon H       | Benartzi-Thaler (1995) | Probability of seeing loss |
 | Certainty Equivalent | CE = U^{-1}(E[U(W)])             | Prospect theory        | Risk-adjusted value        |
 | Evaluation Horizon   | H = frequency of portfolio check | Thaler (1985)          | Myopia measure             |
 | Stock Allocation     | α = W_stock / W_total            | Standard               | Risk tolerance indicator   |
+
+---
+
+## Mathematical Detail of Each Metric
+
+### 1. Equity Premium Calculation
+
+```
+Per-round excess return:
+  ER(t) = r_stock(t) − r_bond   (both per round)
+
+Sample mean equity premium:
+  EP = (1/T) Σ_{t=1}^{T} ER(t)
+
+Annualised EP:
+  EP_annual = EP × 252    (if rounds are daily)
+  EP_annual = EP × 52     (if rounds are weekly)
+  EP_annual = EP × 12     (if rounds are monthly)
+
+Target: EP_annual ≈ 5–7%  (historical US equity premium)
+
+Associated Sharpe Ratio:
+  SR = EP / σ_stock
+  Historical US: SR ≈ 0.33 (0.05 / 0.15)
+```
+
+### 2. Loss Frequency at Each Horizon
+
+```
+For myopic investor checking every T_eval rounds:
+
+  T_eval-period return:
+    R_H(t) = [P(t) − P(t−T_eval)] / P(t−T_eval)
+
+  Empirical loss frequency:
+    LF = |{t : R_H(t) < 0}| / (T / T_eval)
+
+  Theoretical (under GBM):
+    LF = Φ(−μ⋅√T_eval / σ)
+
+  T_eval = 1:   LF ≈ 45%    (monthly evaluation)
+  T_eval = 12:  LF ≈ 34%    (annual evaluation)
+  T_eval = 120: LF ≈ 9%     (10-year evaluation)
+
+Loss frequency drives the demand for equity premium:
+  Higher LF ⇒ more frequent pain from losses ⇒ higher premium demanded.
+```
+
+### 3. Prospect Theory Certainty Equivalent
+
+```
+For an investment with return distribution P_H(r):
+
+  Expected prospect value:
+    E[V_H] = Σ_r V(r) · P_H(r)
+
+  Where V(r) = r^0.88        if r ≥ 0
+               −2.25|r|^0.88  if r < 0
+
+Certainty equivalent return (CE):
+  Solve: V(CE) = E[V_H]
+
+For CE > 0: investor willing to hold stocks without extra premium
+For CE < 0: investor demands premium (positive EP) to hold stocks
+
+Benartzi & Thaler calibration:
+  CE = 0 when H = 1 year  AND  EP = 6%
+  ⇒ Annual evaluation + 6% premium = indifference between stocks and bonds.
+```
+
+### 4. Stock Allocation Gap (Δα)
+
+```
+Myopic allocation:
+  α_myopic = W_stock_myopic / W_total_myopic
+
+Long-horizon allocation:
+  α_long = W_stock_long / W_total_long
+
+Allocation gap:
+  Δα = α_long − α_myopic
+
+Expected from Benartzi & Thaler (1995):
+  α_myopic ≈ 0.20 (20% equities)
+  α_long   ≈ 0.70 (70% equities)
+  Δα ≈ 0.50 (50 percentage points)
+
+A well-functioning simulation should show Δα ≥ 0.30.
+```
+
+### 5. Validation Score
+
+```
+Fit score components:
+  s1 = min(EP_annual / 0.06, 1.0)       → rewards EP near 6%
+  s2 = 1.0 if Δα > 0.30 else Δα / 0.30  → rewards allocation divergence
+  s3 = min(LF_ratio / 2.0, 1.0)         → LF_myopic / LF_long ≥ 2
+  s4 = 1.0 if premium_positive else 0.0 → stocks must outperform bonds
+
+  overall_score = 0.40×s1 + 0.30×s2 + 0.20×s3 + 0.10×s4
+
+Target: overall_score ≥ 0.60.
+```
 
 ---
 

@@ -38,8 +38,8 @@ market:
 mla:
   name: "Myopic Loss Averse"
   class: "examples.EquityPremium.players:MyopicLossAverseInvestor"
-  # Expander → mla_1, mla_2, mla_3
-  num_instances: 3
+  # Expander → mla_1, mla_2, mla_3, mla_4, mla_5
+  num_instances: 5
   config:
     identity: "mla"
     role: player
@@ -60,7 +60,8 @@ mla:
 long_horizon:
   name: "Long Horizon Investor"
   class: "examples.EquityPremium.players:LongHorizonInvestor"
-  num_instances: 1
+  # Expander → long_horizon_1, long_horizon_2
+  num_instances: 2
   config:
     identity: "long_horizon"
     role: player
@@ -99,8 +100,8 @@ risk_neutral:
 conservative:
   name: "Conservative Investor"
   class: "examples.EquityPremium.players:ConservativeInvestor"
-  # Expander → conservative_1, conservative_2
-  num_instances: 2
+  # Expander → conservative_1, conservative_2, conservative_3
+  num_instances: 3
   config:
     identity: "conservative"
     role: player
@@ -119,7 +120,8 @@ conservative:
 noise_trader:
   name: "Noise Trader"
   class: "examples.EquityPremium.players:NoiseTrader"
-  num_instances: 1
+  # Expander → noise_trader_1, noise_trader_2
+  num_instances: 2
   config:
     identity: "noise_trader"
     role: player

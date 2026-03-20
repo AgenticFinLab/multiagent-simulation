@@ -103,6 +103,164 @@ Ratio < 1:1 → Market too stable, no flash crash
 
 ---
 
+## Mathematical Detail of Each Metric
+
+### 1. Price Drop (Maximum Drawdown from Pre-Crash) — Crash Depth
+
+```
+Let P_0 = price at round t_trigger (just before crash begins)
+    P_min = minimum price during crash window
+
+Max Drawdown (crash depth):
+  MDD_crash = (P_0 − P_min) / P_0
+
+Expected range:
+  Mild flash crash:  MDD ≈ 0.05–0.08  (5–8%)
+  Realistic crash:   MDD ≈ 0.09–0.15  (9–15%  — cf. May 2010: 9%)
+  Severe cascade:    MDD > 0.20        (>20%)
+```
+
+**HFT cascade amplification formula:**
+The cascade speed satisfies (linearized model):
+```
+dP(t)/dt ≈ −μ · |P(t) − P_0|  during cascade
+
+Solution:  P(t) = P_0 − (P_0 − P_min) · (1 − e^{-μt})
+
+Crash speed μ increases with HFT/StopLoss agent density:
+  μ = λ · (N_HFT · β_HFT + N_stop · k_stop)
+```
+
+---
+
+### 2. Recovery Time — V-Shape Metric
+
+```
+t_min = argmin_t P(t)   (crash trough)
+t_rec = min{t > t_min : P(t) ≥ P_0 · (1 − recovery_threshold)}
+
+Recovery time:  T_rec = t_rec − t_min
+
+Expected values:
+  Flash crash (V-shape): T_rec ≈ 5–10 rounds
+  Slow recovery:         T_rec > 20 rounds
+  No recovery:           T_rec = ∞ (simulation failure)
+```
+
+**Recovery mechanism** (FundamentalTrader buying floor):
+```
+Recovery rate ≈ λ · Q_fundamental(t)
+  where Q_fundamental ∝ max(0, F − P(t)) · cash / P(t)
+
+As P(t) falls below F = 100:
+  Q_fundamental ↑ → buying pressure ↑ → P(t) recovers
+
+Floor price estimate:  P_floor = F − (λ · Q_panic) / (λ · Q_fund + γ)
+```
+
+---
+
+### 3. Volatility Spike Ratio — Abnormal Market Stress
+
+```
+σ_normal = std(r[t_pre-crash])    (baseline, rounds 1–15)
+σ_crash  = std(r[t_cascade])      (crash window, rounds 16–35)
+
+Volatility Spike Ratio:
+  VSR = σ_crash / σ_normal
+
+Benchmark from real flash crashes:
+  May 2010 Flash Crash:  VSR ≈ 8–12×
+  2015 Treasury crash:   VSR ≈ 5–8×
+
+Expected in simulation:
+  VSR > 3:  flash crash signature confirmed
+  VSR > 5:  realistic calibration
+```
+
+Rolling volatility during crash:
+```
+σ(t) = std(r[t−5:t])   (5-round rolling window)
+
+Expected shape: near-zero → spike at t_trigger → decay during recovery
+Decay half-life ≈ 3–5 rounds after P recovers
+```
+
+---
+
+### 4. Order Flow Toxicity (OFT) — Sell Pressure Measure
+
+Easley-López de Prado-O'Hara (2011) VPIN-inspired measure:
+
+```
+OFT(t) = sell_volume(t) / total_volume(t)
+        = Σ_i max(0, −Q_i(t)) / Σ_i |Q_i(t)|
+
+OFT interpretation:
+  OFT < 0.50:  balanced two-way flow (normal)
+  OFT ≈ 0.80:  strongly one-sided (early crash warning)
+  OFT > 0.90:  extreme sell pressure (cascade in progress)
+```
+
+**Stop-loss cascade trigger condition:**
+```
+StopLossTrader activates when:
+  P(t) < trigger_price_i = purchase_price_i · (1 − stop_threshold)
+
+Cascade: each stop triggers more selling → P falls further → new stops trigger
+
+Formal cascade condition:
+  N_triggered(t+1) > N_triggered(t)
+  ⇔ λ · Q_stop(t) > recovery_force(t)
+  ⇔ λ · N_stop · k_stop > γ + λ · Q_fundamental(t)
+```
+
+---
+
+### 5. Liquidity Measure (Bid-Ask Spread Proxy) — O'Hara (1995)
+
+In our simulation, the MarketMaker's quote width proxies the bid-ask spread:
+
+```
+Spread(t) = ask(t) − bid(t)
+           ≈ 2 · inventory_risk(t)
+           ≈ 2 · ρ · σ(t) · |inventory(t)|
+
+Grossman-Miller (1988) spread decomposition:
+  S = adverse_selection_component + inventory_component
+    = I_adv + ρ · Inv² · σ²
+
+At withdrawal threshold:
+  If σ(t) > σ_max or |Inv| > Inv_max → MM withdraws
+```
+
+**Amihud (2002) ILLIQ price impact:**
+```
+ILLIQ(t) = |r(t)| / Volume(t)
+
+During normal trading:  ILLIQ ≈ 0.001–0.005
+During liquidity vacuum: ILLIQ ≈ 0.05–0.20  (10–40× normal)
+```
+
+---
+
+### 6. Validation Score Formula
+
+```
+score_depth   = 1.0 if MDD > 0.09 else 0.5 if MDD > 0.05 else 0.0
+score_recov   = 1.0 if T_rec < 15  else 0.5 if T_rec < 30  else 0.0
+score_vsr     = 1.0 if VSR > 3.0   else 0.5 if VSR > 1.5   else 0.0
+score_cascade = 1.0 if max(OFT) > 0.8 else 0.5 if max(OFT) > 0.65 else 0.0
+score_liq     = 1.0 if MM_withdraws else 0.5   (binary)
+
+overall_score = 0.25 · score_depth + 0.20 · score_recov + 0.20 · score_vsr
+              + 0.20 · score_cascade + 0.15 · score_liq
+```
+
+Target: `overall_score > 0.6` (clear V-shape crash with cascade and recovery).
+
+---
+
 ## Key Metrics
 
 | Metric              | Formula                          | Source               | Purpose                          |

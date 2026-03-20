@@ -14,14 +14,11 @@ import json
 import os
 import sys
 
-import numpy as np
+from masim.utils import load_config, load_results
 
-from masim.utils import load_config
-
-# Import from rule-based version
+# Import analysis functions from rule-based version
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from EquityPremium.analysis import (
-    load_simulation_data,
     calculate_equity_premium,
     calculate_loss_probability,
     analyze_investor_allocations,
@@ -53,49 +50,87 @@ def main():
     print("EquityPremiumLLM Analysis - Myopic Loss Aversion (LLM Agents)")
     print("=" * 70)
 
-    # Load data
+    # Load data via lazy result loader
     print("\n[1] Loading simulation data...")
-    data = load_simulation_data(record_dir)
-    print(f"    Loaded {len(data['prices'])} price points")
+    results = load_results(config)
+    # Coordinator batch store 'price' holds the market price time-series
+    coordinators = list(results.players_by_role("coordinator").values())
+    prices = list(coordinators[0].batch("price").all()) if coordinators else []
+    # payload fields: bid_price, quantity, strategy, investor
+    trades = {}
+    for pid, player in results.players_by_role("player").items():
+        payloads_by_round = player.turns.payloads()
+        if payloads_by_round:
+            # Inject round number into each payload for downstream analysis
+            trades[pid] = [
+                {**p, "round": rn} for rn, p in sorted(payloads_by_round.items())
+            ]
+    data = {"prices": prices, "trades": trades}
+    print(f"    Loaded {len(prices)} price points")
+    print(f"    Loaded trades from {len(trades)} players")
 
     # Calculate equity premium
-    print("\n[2] Calculating equity premium...")
-    premium_metrics = calculate_equity_premium(data["prices"], len(data["prices"]))
+    print("\n[2] Calculating equity premium metrics...")
+    premium_metrics = calculate_equity_premium(prices, len(prices))
+    print(f"    Annual Stock Return: {premium_metrics['annual_return']:.2f}%")
+    print(f"    Risk-Free Rate:      {premium_metrics['risk_free_rate']:.2f}%")
+    print(f"    Equity Premium:      {premium_metrics['equity_premium']:.2f}%")
+    print(f"    Sharpe Ratio:        {premium_metrics['sharpe_ratio']:.2f}")
 
     # Calculate loss probability by horizon
     print("\n[3] Calculating loss probability by horizon...")
     horizons = [1, 5, 10, 20, 50, 100]
-    horizons = [h for h in horizons if h < len(data["prices"])]
-    loss_probs = calculate_loss_probability(data["prices"], horizons)
+    horizons = [h for h in horizons if h < len(prices)]
+    loss_probs = calculate_loss_probability(prices, horizons)
+    for h, prob in sorted(loss_probs.items()):
+        print(f"    Horizon {h:3d} rounds: P(Loss) = {prob:.1f}%")
 
     # Analyze investor allocations
     print("\n[4] Analyzing investor allocations...")
-    allocations = analyze_investor_allocations(data["trades"])
+    allocations = analyze_investor_allocations(trades)
+    for pid, alloc in allocations.items():
+        print(
+            f"    {alloc['strategy']:24s}: Stock allocation ~{alloc['implied_stock_allocation']*100:.0f}%"
+        )
 
-    # Generate plots
+    # Generate plots (pass prices/trades directly to avoid re-extracting)
     print("\n[5] Generating plots...")
     plot_equity_premium_analysis(
-        data, premium_metrics, loss_probs, allocations, output_dir
+        {"prices": prices, "trades": trades},
+        premium_metrics,
+        loss_probs,
+        allocations,
+        output_dir,
     )
-    print(f"    Saved to {output_dir}/")
+    print(f"    Saved to {output_dir}/equity_premium_analysis.png")
 
     # Generate summary
     print("\n[6] Generating summary...")
-    summary = generate_summary(data, premium_metrics, loss_probs, allocations)
+    summary = generate_summary(
+        {"prices": prices, "trades": trades}, premium_metrics, loss_probs, allocations
+    )
 
     summary_path = os.path.join(output_dir, "summary.json")
     with open(summary_path, "w", encoding="utf-8") as f:
-        json.dump(
-            summary,
-            f,
-            indent=2,
-            default=lambda x: (
-                int(x)
-                if isinstance(x, (np.bool_, np.integer))
-                else float(x) if isinstance(x, np.floating) else str(x)
-            ),
-        )
+        json.dump(summary, f, indent=2)
     print(f"    Saved to {summary_path}")
+
+    # Print key findings
+    print("\n" + "=" * 70)
+    print("KEY FINDINGS")
+    print("=" * 70)
+    print(f"Equity Premium: {premium_metrics['equity_premium']:.2f}% annual")
+    print(
+        f"Puzzle Explanation: {'Supported' if summary['puzzle_explained'] else 'Not clear'}"
+    )
+    if loss_probs:
+        short_h = min(loss_probs.keys())
+        long_h = max(loss_probs.keys())
+        print(f"Short-horizon P(Loss): {loss_probs[short_h]:.1f}%")
+        print(f"Long-horizon P(Loss):  {loss_probs[long_h]:.1f}%")
+        print("→ Myopic investors see more losses, demand higher premium")
+    print(f"\nVALIDATION: {summary['validation']['interpretation']}")
+    print(f"Fit Score: {summary['validation']['score']:.1%}")
 
     return summary
 

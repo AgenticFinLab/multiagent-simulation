@@ -13,12 +13,12 @@ import argparse
 import os
 import sys
 
-from masim.utils import load_config
+from masim.utils import load_config, load_results
 
 # Import from rule-based version
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from MarketCrash.analysis import (
-    load_simulation_data,
+    _load_data,
     analyze_crash,
 )
 
@@ -46,7 +46,8 @@ def main():
     print("MarketCrashLLM Analysis - Panic Selling Cascade (LLM Agents)")
     print("=" * 70)
 
-    data = load_simulation_data(config)
+    results = load_results(config)
+    data = _load_data(results)
     summary = analyze_crash(data, output_dir)
     return summary
 

@@ -47,7 +47,8 @@ market:
 risk_parity_fund:
   name: "Risk Parity Fund"
   class: "examples.MarketCrash.players:RiskParityFund"
-  num_instances: 1
+  # Expander → risk_parity_fund_1, risk_parity_fund_2
+  num_instances: 2
   config:
     identity: "risk_parity_fund"
     role: player
@@ -73,8 +74,8 @@ risk_parity_fund:
 leveraged_hedge_fund:
   name: "Leveraged Hedge Fund"
   class: "examples.MarketCrash.players:LeveragedHedgeFund"
-  # Expander → leveraged_hedge_fund_1, leveraged_hedge_fund_2
-  num_instances: 2
+  # Expander → leveraged_hedge_fund_1, leveraged_hedge_fund_2, leveraged_hedge_fund_3
+  num_instances: 3
   config:
     identity: "leveraged_hedge_fund"
     role: player
@@ -100,7 +101,8 @@ leveraged_hedge_fund:
 market_maker:
   name: "Market Maker"
   class: "examples.MarketCrash.players:MarketMaker"
-  num_instances: 1
+  # Expander → market_maker_1, market_maker_2
+  num_instances: 2
   config:
     identity: "market_maker"
     role: player
@@ -148,8 +150,8 @@ passive_investor:
 panic_seller:
   name: "Panic Seller"
   class: "examples.MarketCrash.players:PanicSeller"
-  # Expander → panic_seller_1, panic_seller_2
-  num_instances: 2
+  # Expander → panic_seller_1, panic_seller_2, panic_seller_3
+  num_instances: 3
   config:
     identity: "panic_seller"
     role: player

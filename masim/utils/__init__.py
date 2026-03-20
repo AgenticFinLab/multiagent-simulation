@@ -1,11 +1,11 @@
 """MASim Utilities Package
 
 Provides utility modules:
-- config:     YAML configuration loading with !include support; load_class(); expand_player_instances()
-- ray_utils:  Ray cluster initialization and actor naming helpers
-- topology:   NetworkX-based topology graph for message routing
-- history:    Memory-efficient history buffer with disk persistence
-- data_loader: Generic simulation data loading from record directories
+- config:        YAML configuration loading with !include support; load_class(); expand_player_instances()
+- ray_utils:     Ray cluster initialization and actor naming helpers
+- topology:      NetworkX-based topology graph for message routing
+- history:       Memory-efficient history buffer with disk persistence
+- result_loader: Generic simulation result loading from record directories
 """
 
 from masim.utils.config import (
@@ -20,11 +20,15 @@ from masim.utils.ray_utils import (
     ensure_ray,
     get_actor_name,
 )
-from masim.utils.data_loader import (
-    load_simulation_data,
-    get_investor_quantities,
-    get_investor_orders,
-    get_investor_bids,
+from masim.utils.result_loader import (
+    SimulationResults,
+    PlayerResults,
+    TurnStore,
+    MessageStore,
+    BatchStore,
+    TopologyView,
+    load_results,
+    load_simulation_data,  # deprecated alias
 )
 from masim.utils.history import (
     HistoryBuffer,
@@ -42,11 +46,15 @@ __all__ = [
     # Ray utilities
     "ensure_ray",
     "get_actor_name",
-    # Data loader utilities
+    # Result loader utilities
+    "SimulationResults",
+    "PlayerResults",
+    "TurnStore",
+    "MessageStore",
+    "BatchStore",
+    "TopologyView",
+    "load_results",
     "load_simulation_data",
-    "get_investor_quantities",
-    "get_investor_orders",
-    "get_investor_bids",
     # History utilities
     "HistoryBuffer",
     "create_history_buffer",

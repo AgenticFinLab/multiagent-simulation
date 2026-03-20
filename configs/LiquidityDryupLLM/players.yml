@@ -20,12 +20,14 @@ market:
       mean_reversion: 0.015
       noise_std: 0.4
       custom_state_hot_limit: 3
+      base_liquidity: 50.0
   persona: !include persona.yml
 
 llm_market_maker:
   name: "LLM Market Maker"
   class: "examples.LiquidityDryupLLM.players:LLMMarketMaker"
-  num_instances: 1
+  # Expander → llm_market_maker_1, llm_market_maker_2, llm_market_maker_3
+  num_instances: 3
   config:
     identity: "llm_market_maker"
     role: player
@@ -50,7 +52,8 @@ llm_market_maker:
 llm_liquidity_demander:
   name: "LLM Liquidity Demander"
   class: "examples.LiquidityDryupLLM.players:LLMLiquidityDemander"
-  num_instances: 1
+  # Expander → llm_liquidity_demander_1, llm_liquidity_demander_2, llm_liquidity_demander_3
+  num_instances: 3
   config:
     identity: "llm_liquidity_demander"
     role: player
@@ -75,7 +78,8 @@ llm_liquidity_demander:
 llm_arbitrageur:
   name: "LLM Arbitrageur"
   class: "examples.LiquidityDryupLLM.players:LLMArbitrageur"
-  num_instances: 1
+  # Expander → llm_arbitrageur_1, llm_arbitrageur_2
+  num_instances: 2
   config:
     identity: "llm_arbitrageur"
     role: player
@@ -100,7 +104,8 @@ llm_arbitrageur:
 llm_value:
   name: "LLM Value Investor"
   class: "examples.LiquidityDryupLLM.players:LLMValueInvestor"
-  num_instances: 1
+  # Expander → llm_value_1, llm_value_2
+  num_instances: 2
   config:
     identity: "llm_value"
     role: player
@@ -125,7 +130,8 @@ llm_value:
 llm_forced_seller:
   name: "LLM Forced Seller"
   class: "examples.LiquidityDryupLLM.players:LLMForcedSeller"
-  num_instances: 1
+  # Expander → llm_forced_seller_1, llm_forced_seller_2
+  num_instances: 2
   config:
     identity: "llm_forced_seller"
     role: player

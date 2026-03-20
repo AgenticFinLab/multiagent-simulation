@@ -11,10 +11,10 @@
 setting:
   name: "asset_bubble_llm_simulation"
   description: "LLM-based asset bubble formation with heterogeneous investors"
-  total_rounds: 50
+  total_rounds: 100
   round_history_limit: 3
   record_path: "EXPERIMENT/AssetBubbleLLM/records"
-  save_diagram_interval: 25
+  save_diagram_interval: 50
 
 environment:
   dotenv_path: .env
@@ -27,9 +27,9 @@ ray:
   # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
   num_cpus: null
   num_gpus: null
-  # Derived: 6 players, star topology -> 10 msgs/round
-  #   6 TurnResult + 6 pending_info + 10 Message = 22 Ray objects
-  #   22 obj x 64 KB min-alloc = 1408 KB (1.38 MB) base peak
+  # Derived: 18 players, star topology -> 34 msgs/round
+  #   18 TurnResult + 18 pending_info + 34 Message = 70 Ray objects
+  #   70 obj x 64 KB min-alloc = 4480 KB (4.38 MB) base peak
   #   LLM TurnResult also carries prompt+response strings (~4-8 KB each) -> extra overhead
   #   Minimum 512 MB floor for LLM simulations -> 536870912 bytes
   object_store_memory: 536870912

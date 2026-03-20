@@ -26,7 +26,8 @@ market:
 llm_short_seller:
   name: "LLM Short Seller"
   class: "examples.ShortSqueezeLLM.players:LLMShortSeller"
-  num_instances: 1
+  # Expander → llm_short_seller_1, llm_short_seller_2, llm_short_seller_3
+  num_instances: 3
   config:
     identity: "llm_short_seller"
     role: player
@@ -51,7 +52,8 @@ llm_short_seller:
 llm_retail_coord:
   name: "LLM Retail Coordinator"
   class: "examples.ShortSqueezeLLM.players:LLMRetailCoordinator"
-  num_instances: 1
+  # Expander → llm_retail_coord_1, llm_retail_coord_2, llm_retail_coord_3
+  num_instances: 3
   config:
     identity: "llm_retail_coord"
     role: player
@@ -76,7 +78,8 @@ llm_retail_coord:
 llm_momentum:
   name: "LLM Momentum Buyer"
   class: "examples.ShortSqueezeLLM.players:LLMMomentumBuyer"
-  num_instances: 1
+  # Expander → llm_momentum_1, llm_momentum_2, llm_momentum_3
+  num_instances: 3
   config:
     identity: "llm_momentum"
     role: player
@@ -101,7 +104,8 @@ llm_momentum:
 llm_value:
   name: "LLM Value Investor"
   class: "examples.ShortSqueezeLLM.players:LLMValueInvestor"
-  num_instances: 1
+  # Expander → llm_value_1, llm_value_2
+  num_instances: 2
   config:
     identity: "llm_value"
     role: player

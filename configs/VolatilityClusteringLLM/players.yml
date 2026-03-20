@@ -45,7 +45,8 @@ market:
 llm_fundamentalist:
   name: "LLM Fundamentalist"
   class: "examples.VolatilityClusteringLLM.players:LLMFundamentalist"
-  num_instances: 1
+  # Expander → llm_fundamentalist_1, llm_fundamentalist_2
+  num_instances: 2
   config:
     identity: "llm_fundamentalist"
     role: player
@@ -73,8 +74,8 @@ llm_fundamentalist:
 llm_trend_follower:
   name: "LLM Trend Follower"
   class: "examples.VolatilityClusteringLLM.players:LLMTrendFollower"
-  # Expander → llm_trend_follower_1, llm_trend_follower_2
-  num_instances: 2
+  # Expander → llm_trend_follower_1, llm_trend_follower_2, llm_trend_follower_3
+  num_instances: 3
   config:
     identity: "llm_trend_follower"
     role: player
@@ -102,7 +103,8 @@ llm_trend_follower:
 llm_noise_trader:
   name: "LLM Noise Trader"
   class: "examples.VolatilityClusteringLLM.players:LLMNoiseTrader"
-  num_instances: 1
+  # Expander → llm_noise_trader_1, llm_noise_trader_2, llm_noise_trader_3
+  num_instances: 3
   config:
     identity: "llm_noise_trader"
     role: player

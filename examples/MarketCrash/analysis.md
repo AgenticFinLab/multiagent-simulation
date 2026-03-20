@@ -107,10 +107,122 @@ Ratio < 1:1 → No crash develops
 
 | Metric            | Formula                | Source                | Purpose          |
 |-------------------|------------------------|-----------------------|------------------|
-| **Max Drawdown**  | (peak - trough) / peak | Standard              | Crash severity   |
+| **Max Drawdown**  | (peak − trough) / peak | Standard              | Crash severity   |
 | **Sell Pressure** | sell_vol / total_vol   | Kyle (1985)           | Panic intensity  |
 | **Liquidity**     | bid_depth              | Market microstructure | Available buyers |
 | **Cascade Speed** | Δprice / Δtime         | Brunnermeier (2009)   | Crash velocity   |
+
+---
+
+## Mathematical Detail of Each Metric
+
+### 1. Maximum Drawdown (MDD)
+
+```
+Running maximum price:
+  P_max(t) = max_{s ≤ t} P(s)
+
+Drawdown at round t:
+  DD(t) = [P_max(t) − P(t)] / P_max(t)  ∈ [0, 1]
+
+Maximum drawdown over horizon T:
+  MDD = max_{t ≤ T} DD(t)
+
+Calmar Ratio (return per unit of drawdown risk):
+  Calmar = Total Return / MDD
+
+Crash classification:
+  MDD < 0.10  → minor dip
+  MDD 0.10–0.20 → correction
+  MDD 0.20–0.40 → crash (2008: 57%, 2020: 34%)
+  MDD > 0.40  → depression-level crash
+```
+
+### 2. Sell Pressure Ratio
+
+```
+Sell Volume(t) = Σ_{i: q_i(t) < 0} |q_i(t)|
+Buy  Volume(t) = Σ_{i: q_i(t) > 0}  q_i(t)
+
+Sell Ratio(t) = Sell Volume(t) / [Sell Volume(t) + Buy Volume(t)]
+
+Panic threshold: Sell Ratio > 0.75 (3:1 sellers dominate)
+
+Cumulative Sell Pressure over crash window [t1, t2]:
+  CSP = Σ_{t=t1}^{t2} Sell Volume(t) / Σ_{t} Total Volume(t)
+```
+
+### 3. Liquidity Drop & Recovery
+
+```
+Liquidity at time t:
+  L(t) = BaseLiquidity + MM_Provision(t)
+
+Liquidity ratio (normalised by pre-crash level):
+  LR(t) = L(t) / L(0)
+
+Crash onset: LR < 0.5 (more than 50% liquidity lost)
+
+Price impact multiplier:
+  λ(t) = BASE_IMPACT / L(t)
+
+  L drops from 1.0 to 0.1:  λ increases 10×
+  A 100-unit sell at L=1.0 moves price by λ·100 = 0.08·100 = 8
+  A 100-unit sell at L=0.1 moves price by 0.08/0.1·100 = 80  (⇒ catastrophic)
+```
+
+### 4. Cascade Speed (Velocity)
+
+```
+Crash velocity (price decline rate):
+  v(t) = [P(t) − P(t−1)] / P(t−1)   (negative during crash)
+
+Peak crash velocity:
+  v_peak = min_{t} v(t)    (most negative round-over-round return)
+
+Crash duration:
+  τ = t_bottom − t_peak   (rounds from peak to trough)
+
+Classification:
+  τ < 5 rounds   → flash crash
+  τ = 5–20 rounds → acute crash (1987, 2020)
+  τ > 20 rounds  → bear market (2007–2009)
+```
+
+### 5. Volatility Clustering During Crash
+
+```
+Rolling volatility (w = 10):
+  σ(t) = Std({r(t−w+1), ..., r(t)})
+
+Volatility ratio (crash vs pre-crash):
+  VR = σ_crash / σ_pre
+  VR > 3 indicates panic regime
+
+GARCH(1,1) representation of crash dynamics:
+  σ²(t) = ω + α⋅r²(t−1) + β⋅σ²(t−1)
+  During crashes: high r²(t−1) → σ² spikes → volatility clustering.
+```
+
+### 6. Liquidity Spiral Score & Validation
+
+```
+Liquidity Spiral Index (LSI):
+  LSI = Corr(DD(t), 1/L(t))   over crash window
+
+  LSI > 0.6  → strong spiral: drawdown and illiquidity co-move
+  LSI < 0.3  → crash driven by fundamentals, not spiral
+
+Overall fit score:
+  s1 = min(MDD / 0.20, 1.0)          → rewards MDD ≥ 20%
+  s2 = min(CSP / 0.70, 1.0)          → rewards sustained sell ratio ≥ 70%
+  s3 = min((1 − LR_min) / 0.50, 1.0) → rewards ≥50% liquidity drop
+  s4 = 1.0 if recovery_detected else 0.5
+
+  overall_score = 0.40×s1 + 0.30×s2 + 0.20×s3 + 0.10×s4
+
+Target: overall_score ≥ 0.60.
+```
 
 ---
 

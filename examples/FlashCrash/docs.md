@@ -88,18 +88,36 @@
 
 ## Market Clearing Model
 
-```
-Liquidity-Adjusted Price Impact:
-    P(t+1) = P(t) + λ × NetDemand × LiquidityFactor + γ × [F - P(t)] + ε
+### Notations
 
-LiquidityFactor:
-    if Liquidity < 50:
-        factor = 3.0  # HIGH impact when liquidity low
-    else:
-        factor = 1.0 + (50/Liquidity - 1) × 0.5
+| Symbol                | Meaning                                                          |
+|-----------------------|------------------------------------------------------------------|
+| $P(t)$                | Market price at round $t$                                        |
+| $D(t)$                | Net aggregate demand (buy minus sell)                            |
+| $\lambda$             | Base price-impact coefficient (0.05)                             |
+| $\mathrm{LF}(t)$      | Liquidity factor — amplifies impact when $L(t)$ is low           |
+| $L(t)$                | Total available liquidity depth                                  |
+| $L_{\mathrm{base}}$   | Baseline liquidity (50 units)                                    |
+| $L_{\mathrm{MM}}(t)$  | Market-maker–provided liquidity                                  |
+| $\gamma$              | Mean-reversion speed toward fundamental (0.02)                   |
+| $F$                   | Fundamental (intrinsic) value                                    |
+| $\varepsilon(t)$      | Microstructure noise $\sim\mathcal{N}(0,\,\sigma_\varepsilon^2)$ |
+| $r_{\text{short}}(t)$ | Lookback short-term momentum: $[P(t)-P(t-k)]/P(t-k)$             |
+| $q_{\text{HFT}}$      | HFT order quantity                                               |
+| $q_{\text{cover}}$    | Stop-loss triggered sell quantity                                |
+| $\sigma(t)$           | Rolling return volatility                                        |
+| $P_{\text{high}}$     | 10-round recent high price for stop-loss reference               |
+| $s$                   | Stop-loss threshold (fraction, from config)                      |
 
-This creates "air pockets" - price can drop rapidly when liquidity disappears.
-```
+Liquidity-adjusted price impact (O'Hara 1995 [1]; Kirilenko et al. 2017 [2]):
+
+$$P(t+1) = P(t) + \lambda\cdot D(t)\cdot\mathrm{LF}(t) + \gamma\cdot[F - P(t)] + \varepsilon(t)$$
+
+Liquidity factor (piecewise):
+
+$$\mathrm{LF}(t) = 1 + \max\!\Bigl(0,\;\frac{50 - L(t)}{50}\Bigr)\times 2.0$$
+
+When $L(t)<50$, $\mathrm{LF}$ rises from 1 toward 3 — tripling price impact. At $L(t)\to 0$ (air pocket), any small order causes a huge price move.
 
 | Parameter               | Value | Financial Meaning                         |
 |-------------------------|-------|-------------------------------------------|
@@ -110,45 +128,128 @@ This creates "air pockets" - price can drop rapidly when liquidity disappears.
 
 ## Investor Strategy Formulas
 
-### HighFrequencyTrader (⭐ Millisecond Reaction)
-```python
-# Reacts to instantaneous price change
-instant_return = (price - prev_price) / prev_price
+*See implementation*: `examples/FlashCrash/players.py`.
 
-if instant_return < -0.005:  # -0.5% = sell signal
-    quantity = -0.8 * position  # Aggressive exit
-elif instant_return > 0.005:
-    quantity = 0.5 * cash / price  # Buy momentum
-```
+| Agent               | Key parameters                                                                                                                                                 | File reference                 |
+|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|
+| HighFrequencyTrader | lookback-based momentum $r_{\text{short}}$; threshold $\lvert r_{\text{short}}\rvert\cdot\text{sensitivity}$; signed position via `signal * base_size * speed` | `HighFrequencyTrader.decide()` |
+| AlgorithmicTrader   | lookback trend signal; trend-following orders                                                                                                                  | `AlgorithmicTrader.decide()`   |
+| StopLossTrader      | stop at $s$ below 10-round recent high; full liquidation                                                                                                       | `StopLossTrader.decide()`      |
+| MarketMaker         | withdraw when $\sigma>0.02$; spread widens                                                                                                                     | `MarketMaker.decide()`         |
+| FundamentalTrader   | buy if discount $>10\%$                                                                                                                                        | `FundamentalTrader.decide()`   |
+| RetailTrader        | delayed / slow reaction                                                                                                                                        | `RetailTrader.decide()`        |
 
-### StopLossTrader (⭐ Cascade Trigger)
-```python
-stop_loss_level = entry_price * 0.95  # -5% stop
+## Mathematical Foundations
 
-if price < stop_loss_level:
-    quantity = -position  # FULL liquidation (automatic!)
-    # This triggers cascade when many have same stop level
-```
+### Liquidity-Adjusted Price Impact Model
 
-### MarketMaker (Liquidity Provider/Withdrawer)
-```python
-volatility = std(recent_returns)
+> **Source**: O'Hara (1995) [1] — *Market Microstructure Theory*; Kirilenko et al. (2017) [2] — *The Flash Crash: High-Frequency Trading in an Electronic Market*. *Implementation*: `examples/FlashCrash/players.py`, `Market.update_price()`.
 
-if volatility > 0.02:  # High vol
-    provides_liquidity = False  # WITHDRAW
-    quantity = 0  # No quotes
-else:
-    provides_liquidity = True
-    # Provide liquidity at bid/ask spread
-```
+Total liquidity:
 
-### FundamentalTrader (Crash Floor)
-```python
-discount = (fundamental - price) / fundamental
+$$L(t) = L_{\mathrm{base}} + L_{\mathrm{MM}}(t)$$
 
-if discount > 0.10:  # Price 10%+ below fundamental
-    quantity = 0.5 * discount * cash / price  # BUY the dip
-```
+> **What it does**: Total market depth is the sum of always-present baseline liquidity $L_{\mathrm{base}}=50$ (representing passive limit orders) plus the market-maker contribution $L_{\mathrm{MM}}(t)$, which collapses to 0 when the MarketMaker withdraws. **Simulates**: the 2010 Flash Crash observation (Kirilenko et al. 2017) that the liquidity vacuum was caused by HFTs withdrawing from the book, not the initial large sell order itself.
+
+Price update (already stated in Market Clearing Model above; repeated for completeness):
+
+$$P(t+1) = P(t) + \lambda\cdot D(t)\cdot\mathrm{LF}(t) + \gamma\cdot[F - P(t)] + \varepsilon(t)$$
+
+> **What it does**: The standard price-impact equation, but with demand multiplied by the liquidity factor $\mathrm{LF}(t)$. When $\mathrm{LF}>1$ (low liquidity), the same order $D(t)$ causes a disproportionately larger price move. **Effect**: transforms the Flash Crash from a simple supply shock into an **amplification cascade** where each price drop reduces liquidity, which amplifies the next price drop.
+
+### HighFrequencyTrader — Lookback Momentum
+
+> **Source**: Kirilenko, Kyle, Samadi & Tuzun (2017) [2] — *The Flash Crash: High-Frequency Trading in an Electronic Market*: HFTs' rapid position cycling transformed a large sell order into the 2010 Flash Crash. *Implementation*: `examples/FlashCrash/players.py`, `HighFrequencyTrader.decide()`.
+
+$$r_{\text{short}}(t) = \frac{P(t) - P(t-k)}{P(t-k)}, \quad k = \text{lookback (config)}$$
+
+> **What it does**: Measures the short-term price momentum over the last $k$ rounds. **Simulates**: how HFTs continuously scan for directional price signals at sub-second frequency. When $r_{\text{short}}<0$ (price falling), HFTs immediately sell; when $r_{\text{short}}>0$ they buy. This reflexive momentum-following is the core HFT behavior identified in Kirilenko et al.'s analysis of the 2010 event.
+
+HFT order rule:
+
+$$q_{\text{HFT}}(t) = r_{\text{short}}(t)\times\text{momentum\_sensitivity}\times\text{base\_position\_size}\times\text{speed\_advantage}$$
+
+> **What it does**: Scales the momentum signal by both `momentum_sensitivity` and `speed_advantage` to reflect HFTs' ability to act faster and larger than ordinary participants. Signed order: sells when $r_{\text{short}}<0$, buys when $r_{\text{short}}>0$, capped at $\pm60$ shares. **Effect**: during a crash, the HFT's sell orders further depress price, increasing $|r_{\text{short}}|$, triggering even larger sell orders in the next round.
+
+Cascade equation — price after $k$ HFT sell rounds:
+
+$$P(t+k) \approx P(t)\cdot\bigl(1 + \lambda\cdot\mathrm{LF}\cdot q_{\text{HFT}}\bigr)^k$$
+
+> **What it does**: Shows how the crash accelerates geometrically. With high `speed_advantage`, each round of HFT selling multiplies the price by $(1+\text{negative number})$, compounding the decline. **Simulates**: why in May 2010 the Dow dropped ~1000 points in minutes — the geometric compounding of HFT momentum feedback with a liquidity vacuum.
+
+### StopLossTrader — Cascade Trigger
+
+> **Source**: SEC/CFTC Flash Crash Report (2010) [5] — identifies stop-loss triggered orders as a key cascade amplifier in the May 6, 2010 event; Easley, López de Prado & O'Hara (2011) [6] on order toxicity. *Implementation*: `StopLossTrader.decide()`.
+
+$$P_{\text{stop}}(t) = \max\bigl(P(t-1),\ldots,P(t-10)\bigr)\times(1-s), \qquad s = \text{stop\_loss\_percent (config)}$$
+
+> **What it does**: Defines a **trailing stop** anchored to the 10-round recent high. Unlike a fixed stop, the threshold rises as prices rise, then stays elevated when prices fall. **Simulates**: the real-world practice of traders using trailing stops to protect gains — making them especially susceptible to a sharp reversal from recent highs.
+
+$$\text{Trigger: }P(t) < P_{\text{stop}}(t) \Rightarrow q_{\text{cover}} = -\text{Position (full liquidation)}$$
+
+> **What it does**: Once triggered, the StopLossTrader dumps its entire position immediately at market price, regardless of the current liquidity. **Effect**: creates a discontinuous, one-way sell waterfall. Each new stop trigger adds selling pressure that depresses price further, triggering the next set of stops.
+
+Fraction of $N$ agents triggered by a price drop $\Delta P$ from a recent high:
+
+$$f(\Delta P) \approx \frac{\Delta P / P_{\text{high}}}{s}$$
+
+> **What it does**: Shows how quickly the stop-loss cascade spreads. A drop of $s\%$ (one stop-loss threshold) triggers approximately $1/N$ of agents on the first round. Each round of new stops creates more selling, which triggers the next fraction — the cascade self-amplifies until either all stops are triggered or fundamental buyers step in.
+
+### MarketMaker Withdrawal — Inventory Risk
+
+> **Source**: Grossman & Miller (1988) [3] — *Liquidity and Market Structure*: market makers provide immediacy services but withdraw when inventory risk becomes too costly. *Implementation*: `MarketMaker.decide()`.
+
+$$\text{Risk}(t) = \bigl|\text{Inventory}(t)\bigr|\cdot\sigma(t)^2$$
+
+> **What it does**: Quantifies the market maker's inventory risk as the product of position size and price variance. When the MM accumulates a large inventory (from buying falling shares that no one else wants) and volatility is high, this risk term grows rapidly, making liquidity provision unprofitable.
+
+Liquidity provision rule:
+
+$$L_{\mathrm{MM}}(t) = \begin{cases} L_{\mathrm{base}} & \sigma(t) < 0.02 \\ 0 & \sigma(t) \ge 0.02 \end{cases}$$
+
+> **What it does**: A binary withdrawal rule — when volatility exceeds 2%, the MM immediately stops providing any liquidity. **Simulates**: the documented Flash Crash behavior where HFTs, acting as de-facto market makers, simultaneously stepped back from the book when the market became too volatile (Kirilenko et al. 2017). **Effect**: this withdrawal removes $L_{\mathrm{base}}$ units of depth instantly, causing $\mathrm{LF}$ to spike, which amplifies the next order's price impact dramatically.
+
+Price-impact jump on withdrawal:
+
+$$\Delta\lambda = \lambda_{\mathrm{base}}\left(\frac{1}{L_{\mathrm{after}}} - \frac{1}{L_{\mathrm{before}}}\right) = 0.05\times\left(\tfrac{1}{10}-\tfrac{1}{100}\right) = 0.0045$$
+
+> **What it does**: Quantifies the immediate jump in effective price-impact coefficient when the MM withdraws. A $0.0045$ unit increase per order means each trade causes $0.45\%$ more price movement — the "air pocket" that caused the Dow to drop 600 points in minutes during the 2010 Flash Crash.
+
+### Recovery Mechanism — FundamentalTrader
+
+> **Source**: Graham & Dodd (1934) deep-value principle — buy when price is significantly below intrinsic value. *Implementation*: `FundamentalTrader.decide()`.
+
+Fundamental discount:
+
+$$\text{discount}(t) = \frac{F - P(t)}{F}$$
+
+> **What it does**: Measures how far below fundamental value the crashed price has fallen. A positive discount means the stock is undervalued — the FundamentalTrader sees opportunity.
+
+Buy order when $\text{discount}>0.10$:
+
+$$q_{\mathrm{fund}}(t) = 0.5\cdot\text{discount}(t)\cdot\frac{\text{Cash}}{P(t)}$$
+
+> **What it does**: The FundamentalTrader only activates when the discount exceeds 10% (price at least 10% below fundamental). Order size scales with the discount — deeper crashes attract larger buys. **Effect**: this is the V-shaped recovery mechanism. After the HFT cascade bottoms out, the crash-floor created by FundamentalTraders buying at steep discounts causes rapid price recovery. **Simulates**: the documented behavior in most flash crashes where prices recover within minutes — the 2010 Flash Crash recovered in about 20 minutes as value buyers stepped in.
+
+### Flash Crash Signature Metrics
+
+> **Source**: Kirilenko et al. (2017) [2] for crash characterization; Brunnermeier & Pedersen (2009) [4] for liquidity metrics.
+
+Crash magnitude:
+
+$$\mathrm{CM} = \frac{P_{\mathrm{peak}} - P_{\mathrm{trough}}}{P_{\mathrm{peak}}} \qquad (\text{expected: }\mathrm{CM}>0.05)$$
+
+> **What it does**: Measures the fraction of value lost from the pre-crash peak to the crash trough. **Threshold**: $\mathrm{CM}>5\%$ qualifies as a flash crash (vs normal intraday volatility of $\sim0.5\%$). **Simulates**: the 2010 event where $\mathrm{CM}\approx9\%$ (Dow dropped ~1000 points from ~10,900).
+
+V-shape ratio (crash velocity $\mathrm{CV}$ vs recovery velocity $\mathrm{RV}$):
+
+$$\mathrm{VSR} = \frac{\mathrm{RV}}{\mathrm{CV}}, \qquad \mathrm{CV}=t_{\mathrm{trough}}-t_{\mathrm{start}}, \quad \mathrm{RV}=t_{\mathrm{recovery}}-t_{\mathrm{trough}}$$
+
+> **What it does**: Quantifies the V-shape symmetry. $\mathrm{VSR}<5$ means recovery was nearly as fast as the crash — the flash crash signature. $\mathrm{VSR}>10$ means a slow, grinding recovery more like a bear market. **Simulates**: the defining characteristic of flash crashes vs structural crashes — the 2010 event recovered in ~20 minutes, giving $\mathrm{VSR}\approx2\text{-}3$.
+
+Liquidity trough: $L_{\min}=\min_t L(t)$, expected $L_{\min}<0.3\,L_{\mathrm{normal}}$.
+
+> **What it does**: The minimum liquidity observed during the crash. $L_{\min}<30\%$ of normal confirms that the crash was a **liquidity-driven** event (not just a price reaction), consistent with the air-pocket theory of flash crashes.
 
 ## Strategy Comparison
 
@@ -223,6 +324,14 @@ python examples/FlashCrash/run_flash_crash.py -c configs/FlashCrash/simulation.y
 
 ## References
 
-1. Kirilenko, A. et al. (2017). *The Flash Crash: High Frequency Trading in an Electronic Market*. Journal of Finance.
-2. SEC/CFTC (2010). *Findings Regarding the Market Events of May 6, 2010*.
-3. Easley, D., López de Prado, M. & O'Hara, M. (2011). *The Microstructure of the Flash Crash*. Journal of Portfolio Management.
+\[1\] O'Hara, M. (1995). *Market Microstructure Theory*. Blackwell Publishers.
+
+\[2\] Kirilenko, A., Kyle, A.S., Samadi, M. & Tuzun, T. (2017). *The Flash Crash: High-Frequency Trading in an Electronic Market*. Journal of Finance, 72(3), 967–1013.
+
+\[3\] Grossman, S.J. & Miller, M.H. (1988). *Liquidity and Market Structure*. Journal of Finance, 43(3), 617–637.
+
+\[4\] Brunnermeier, M.K. & Pedersen, L.H. (2009). *Market Liquidity and Funding Liquidity*. Review of Financial Studies, 22(6), 2201–2238.
+
+\[5\] SEC/CFTC (2010). *Findings Regarding the Market Events of May 6, 2010*. Joint Report.
+
+\[6\] Easley, D., López de Prado, M. & O'Hara, M. (2011). *The Microstructure of the ‘Flash Crash\u2019: Flow Toxicity, Liquidity Crashes, and the Probability of Informed Trading*. Journal of Portfolio Management, 37(2), 118–128.

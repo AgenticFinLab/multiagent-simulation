@@ -41,8 +41,8 @@ market:
 momentum_trader:
   name: "Momentum Trader"
   class: "examples.MomentumEffect.players:MomentumTrader"
-  # Expander → momentum_trader_1, momentum_trader_2
-  num_instances: 2
+  # Expander → momentum_trader_1, momentum_trader_2, momentum_trader_3
+  num_instances: 3
   config:
     identity: "momentum_trader"
     role: player
@@ -67,7 +67,8 @@ momentum_trader:
 contrarian_trader:
   name: "Contrarian Trader"
   class: "examples.MomentumEffect.players:ContrarianTrader"
-  num_instances: 1
+  # Expander → contrarian_trader_1, contrarian_trader_2
+  num_instances: 2
   config:
     identity: "contrarian_trader"
     role: player
@@ -134,7 +135,8 @@ market_maker:
 technical_trader:
   name: "Technical Trader"
   class: "examples.MomentumEffect.players:TechnicalTrader"
-  num_instances: 1
+  # Expander → technical_trader_1, technical_trader_2
+  num_instances: 2
   config:
     identity: "technical_trader"
     role: player
@@ -158,7 +160,8 @@ technical_trader:
 fundamental_trader:
   name: "Fundamental Trader"
   class: "examples.MomentumEffect.players:FundamentalTrader"
-  num_instances: 1
+  # Expander → fundamental_trader_1, fundamental_trader_2
+  num_instances: 2
   config:
     identity: "fundamental_trader"
     role: player

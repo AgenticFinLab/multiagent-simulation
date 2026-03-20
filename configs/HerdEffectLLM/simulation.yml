@@ -14,10 +14,10 @@
 setting:
   name: "herd_effect_llm_simulation"
   description: "LLM-based investors with ByteDance Doubao"
-  total_rounds: 10
+  total_rounds: 100
   round_history_limit: 3
   record_path: "EXPERIMENT/HerdEffectLLM/records"
-  save_diagram_interval: 10
+  save_diagram_interval: 100
 
 environment:
   dotenv_path: .env
@@ -30,9 +30,9 @@ ray:
   # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
   num_cpus: null
   num_gpus: null
-  # Derived: 6 players, star topology -> 10 msgs/round
-  #   6 TurnResult + 6 pending_info + 10 Message = 22 Ray objects
-  #   22 obj x 64 KB min-alloc = 1408 KB (1.38 MB) base peak
+  # Derived: 11 players, star topology -> 20 msgs/round
+  #   11 TurnResult + 11 pending_info + 20 Message = 42 Ray objects
+  #   42 obj x 64 KB min-alloc = 2688 KB (2.63 MB) base peak
   #   LLM TurnResult also carries prompt+response strings (~4-8 KB each) -> extra overhead
   #   Minimum 512 MB floor for LLM simulations -> 536870912 bytes
   object_store_memory: 536870912

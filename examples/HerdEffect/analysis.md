@@ -208,6 +208,207 @@ Bubble_t = Σ_{s=1}^{t} (P_s - F)
 
 ---
 
+## Mathematical Detail of Each Metric
+
+### 1. Bid Convergence Index (CV) — Formal Derivation
+
+Let B_i(t) be the bid price submitted by investor i at round t, with N investors.
+
+```
+μ_bids(t) = (1/N) · Σ_i B_i(t)
+σ_bids(t) = sqrt[(1/N) · Σ_i (B_i(t) − μ_bids(t))²]
+
+CV(t) = σ_bids(t) / μ_bids(t)
+```
+
+**Why CV captures herding:** In a heterogeneous market with no herding, each agent
+bids according to its own strategy. Strategy dispersion implies:
+```
+CV_baseline = sqrt[Σ w_i · (μ_i − μ)²] / μ ≈ 0.15–0.20
+```
+During a cascade, all bids converge toward the current market price P(t), since
+momentum traders bid P·(1+λr) and aggressive traders also anchor to P(t). Thus:
+```
+CV(t)|_{cascade} → ε_small / P(t) ≈ 0.01–0.03
+```
+The **CV collapse** is the quantitative signature of emergent herding.
+
+---
+
+### 2. Directional Agreement (DA) — Signed Order Flow Correlation
+
+Let s_i(t) = sign(B_i(t) − B_i(t−1)) be the direction of bid change for investor i.
+
+```
+DA(t) = |Σ_i s_i(t)| / N
+
+  DA = 1.0  : all N investors moved bids in the same direction
+  DA = 0.0  : exactly half up, half down (random / no herding)
+  DA > 0.8  : strong behavioral convergence threshold
+```
+
+**Statistical baseline under no herding (null hypothesis):**
+If each s_i is independently Bernoulli(½), then Σ s_i ~ Binomial(N, ½) − N/2.
+E[DA] = E[|X|]/N where X ~ Binomial(N, 1/2) shifted. For large N:
+```
+E[DA_null] ≈ sqrt(2/(πN))   (half-normal approximation)
+For N = 10: E[DA_null] ≈ 0.25
+```
+Herding signal when DA significantly exceeds sqrt(2/πN), especially DA > 0.8.
+
+---
+
+### 3. Information Cascade Measure (ICM) — Signal Abandonment Rate
+
+Bikhchandani-Hirshleifer-Welch (1992) cascade condition formalized:
+
+```
+Private signal for rational investor: SELL if P > F (overvalued)
+
+Cascade event: investor bids ABOVE market price when P > F
+  (i.e., buys despite private signal saying sell)
+
+ICM(t) = |{i : B_i(t) > P(t) AND P(t) > F}| / N
+        + |{i : B_i(t) < P(t) AND P(t) < F}| / N
+        (both overreaction cases)
+```
+
+**Bayesian interpretation:** In a rational Bayesian model, an agent ignores her
+private signal if the public history (= price trend) is sufficiently strong:
+```
+Ignore signal when: P(public history) / P(private signal) > likelihood_ratio_threshold
+
+In our emergent model: ICM rises as price trend overpowers fundamental anchor,
+corresponding to agents weighting recent price history over F = 100.
+```
+
+---
+
+### 4. Cross-Sectional Std (CSSD) — LSV Institutional Herding Measure
+
+Lakonishok-Shleifer-Vishny (1992) measure of correlated institutional trading:
+
+```
+CSSD(t) = std(B_1(t), B_2(t), ..., B_N(t))
+         = sqrt[(1/(N−1)) · Σ_i (B_i(t) − μ_bids(t))²]
+```
+
+Note: CSSD and CV convey related information but differ in scale. CSSD is in dollar
+units (absolute dispersion); CV is dimensionless (relative dispersion). During herding:
+```
+CSSD → 0 as all bids converge
+```
+
+Relationship: CSSD(t) = CV(t) · μ_bids(t). For μ_bids ≈ P(t) ≈ 100–130 during bubble:
+```
+CSSD threshold: CSSD < $2 ≡ CV < 0.015–0.02 (strong herding)
+```
+
+---
+
+### 5. Price Deviation from Fundamental — Bubble Gauge
+
+```
+PD(t) = (P(t) − F) / F = (P(t) − 100) / 100
+
+Cumulative bubble area (total mispricing over simulation):
+  BA = Σ_t max(0, P(t) − F) · Δt
+```
+
+The **decomposition** of price into fundamentals + bubble:
+```
+P(t) = F + B(t) + η(t)
+  B(t) = endogenous bubble component driven by positive feedback
+  η(t) = residual noise (mean-reverting)
+```
+
+Bubble formation speed (Phase 2–3 average):
+```
+dP/dt|_{bubble} = λ · [D_m + D_a − D_c − D_r]
+               ≈ 0.1 · [0.8 · r · W / P − 0.5 · (P−F) · W_c / P²]
+```
+Peak deviation occurs when the net force equals zero (dP/dt = 0), defining the bubble top.
+
+---
+
+### 6. Rolling Volatility — Regime Indicator
+
+```
+σ(t) = std(P[t−w+1 : t])  where w = 10 (default window)
+
+VZ-score (volatility z-score relative to baseline):
+  VZ(t) = (σ(t) − μ_σ) / std_σ
+
+  VZ > 2: elevated volatility (bubble formation or crash)
+  VZ > 5: extreme volatility (crash/correction phase)
+```
+
+In the RiskAverseInvestor position rule:
+```
+Q_r ∝ 1/σ²(t) ⇒ as σ doubles, Q_r falls to 1/4
+```
+This creates a **positive feedback in volatility**: rising σ reduces stabilizing
+capital, which allows more extreme moves, further raising σ. The volatility-position
+feedback amplifies the crash once σ exceeds a critical threshold.
+
+---
+
+### 7. Return Autocorrelation — Momentum Persistence Score
+
+Let r(t) = [P(t) − P(t−1)] / P(t−1) be the round-t return.
+
+```
+AC(τ) = Corr(r(t), r(t−τ)) = Cov(r,r_{−τ}) / Var(r)
+
+For momentum effect:  AC(τ) > 0  for τ = 1, 2, ..., 10
+For reversal/crash:   AC(τ) < 0  for τ = 10, ..., 20
+```
+
+**ARMA representation of cascade dynamics:**
+During herding, prices approximately follow AR(1):
+```
+P(t) = (1 + α) · P(t−1) − γ · F + ε(t)
+  α = 0.1 · (0.3 + 0.5) · W / P² (positive feedback coefficient)
+```
+AC(1) ≈ α during bubble formation. Typical AC(1) ≈ 0.2–0.4 during herding.
+
+---
+
+### 8. Cumulative Bubble Magnitude — Integral Measure
+
+```
+BM(T) = Σ_{t=1}^{T} (P(t) − F)   [sum over all rounds]
+
+Normalized version:
+  BM_norm = BM(T) / (F · T) = average % deviation per round
+```
+
+For a pure AR(1) bubble with coefficient α:
+```
+E[BM(T)] = P_0 · [(1+α)^T − 1] / α − F · T   (growing faster than linearly)
+```
+The peak of BM and its subsequent decline traces the full bubble lifecycle.
+
+---
+
+### 9. Validation Score Formula
+
+The simulation passes if the following composite score exceeds 0.6:
+
+```
+score_cv  = 1.0 if min(CV)  < 0.05 else  0.5 if min(CV)  < 0.10 else 0.2
+score_da  = 1.0 if max(DA)  > 0.80 else  0.5 if max(DA)  > 0.60 else 0.2
+score_icm = 1.0 if max(ICM) > 0.50 else  0.5 if max(ICM) > 0.30 else 0.2
+score_pd  = 1.0 if max(PD)  > 0.15 else  0.5 if max(PD)  > 0.08 else 0.2
+
+overall_score = 0.30 · score_cv + 0.30 · score_da + 0.20 · score_icm + 0.20 · score_pd
+```
+
+The equal weight on CV and DA reflects that both bid convergence and directional
+alignment are necessary (but individually insufficient) conditions for herding.
+
+---
+
 ## Running Analysis
 
 ```bash

@@ -108,10 +108,108 @@ Ratio < 1:1 → Price anchored to fundamental
 
 | Metric                   | Formula             | Source             | Purpose              |
 |--------------------------|---------------------|--------------------|----------------------|
-| **Price Deviation**      | (P - F) / F × 100%  | Standard           | Bubble magnitude     |
-| **Cumulative Bubble**    | Σ(P - F)            | Shiller (2000)     | Total deviation      |
+| **Price Deviation**      | (P − F) / F × 100%  | Standard           | Bubble magnitude     |
+| **Cumulative Bubble**    | Σ(P − F)            | Shiller (2000)     | Total deviation      |
 | **Buy Ratio**            | buy_vol / total_vol | Kyle (1985)        | Directional pressure |
 | **Momentum Persistence** | corr(r_t, r_{t-1})  | Jegadeesh & Titman | Trend strength       |
+
+---
+
+## Mathematical Detail of Each Metric
+
+### 1. Price Deviation
+
+```
+Relative deviation (used in all bubble ratio computations):
+
+  dev(t) = [P(t) − F(t)] / F(t)
+
+Bubble Ratio:
+  BR(t) = P(t) / F(t) = 1 + dev(t)
+
+Max deviation (bubble peak):
+  dev_max = max_{t ∈ [1,T]} dev(t)
+
+Bubble duration (rounds where BR > 1.1):
+  D_bubble = |{t : BR(t) > 1.1}|
+
+Interpretation:
+  dev > 0.20  → 20% overvalued; bubble territory
+  dev > 0.50  → 50% overvalued; extreme bubble
+  dev < 0     → undervalued (rare in bubble scenario)
+```
+
+### 2. Cumulative Bubble Area (Shiller 2000)
+
+```
+Cumulative Bubble = Σ_{t} max(P(t) − F(t), 0)
+
+This is the area between the price curve and the fundamental,
+integrated over time. Larger area = more total mispricing.
+
+Normalised version:
+  CB_norm = CB / (F_0 × T)    (as fraction of fundamental times horizon)
+```
+
+### 3. Momentum Persistence (Serial Return Autocorrelation)
+
+```
+Return series: r(t) = [P(t) − P(t−1)] / P(t−1)
+
+Lag-1 autocorrelation:
+  ρ_1 = Corr(r_t, r_{t−1})
+       = Cov(r_t, r_{t−1}) / [Std(r_t) · Std(r_{t−1})]
+
+Interpretation:
+  ρ_1 > 0.2  → strong positive feedback (trending market; bubble regime)
+  ρ_1 ≈ 0    → efficient market (random walk)
+  ρ_1 < −0.2 → mean reversion dominating (no bubble)
+
+Jegadeesh & Titman (1993): momentum strategy profitability tied to ρ > 0.
+```
+
+### 4. Buy Pressure Ratio (Kyle 1985)
+
+```
+Buy Ratio = Buy Volume / Total Volume
+
+Where:
+  Buy Volume  = Σ_{t} Σ_{i: q_i(t)>0} q_i(t)
+  Total Volume = Σ_{t} Σ_{i} |q_i(t)|
+
+Interpretation:
+  Ratio > 0.6  → buying dominance → bubble building
+  Ratio ≈ 0.5  → balanced market
+  Ratio < 0.4  → selling dominance → correction or crash
+```
+
+### 5. Volatility & Volatility Ratio
+
+```
+Rolling volatility (window w = 20 rounds):
+  σ(t) = Std({r(t−w+1), ..., r(t)})
+
+Crash volatility ratio:
+  VR = σ_crash / σ_pre
+  where σ_crash is vol during crash phase and σ_pre is pre-bubble vol
+
+Expected: VR > 3 indicates panic-like dynamics.
+```
+
+### 6. Validation Score Formula
+
+```
+The overall simulation fit score combines:
+
+  s1 = min(dev_max / 0.30, 1.0)         → rewards peak deviation ≥ 30%
+  s2 = min(D_bubble / 10, 1.0)          → rewards bubble lasting ≥ 10 rounds
+  s3 = 1.0 if ρ_1 > 0.1 else 0.0        → requires positive momentum
+  s4 = 1.0 if crash_detected else 0.0   → requires eventual price collapse
+
+  overall_score = 0.40 × s1 + 0.20 × s2 + 0.20 × s3 + 0.20 × s4
+
+Target: overall_score ≥ 0.60 for a well-functioning bubble simulation.
+```
 
 ---
 

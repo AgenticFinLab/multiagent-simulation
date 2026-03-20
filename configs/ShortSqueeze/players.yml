@@ -38,8 +38,8 @@ market:
 short_seller:
   name: "Short Seller"
   class: "examples.ShortSqueeze.players:ShortSeller"
-  # Expander → short_seller_1, short_seller_2
-  num_instances: 2
+  # Expander → short_seller_1, short_seller_2, short_seller_3
+  num_instances: 3
   config:
     identity: "short_seller"
     role: player
@@ -64,8 +64,8 @@ short_seller:
 momentum_buyer:
   name: "Momentum Buyer"
   class: "examples.ShortSqueeze.players:MomentumBuyer"
-  # Expander → momentum_buyer_1, momentum_buyer_2
-  num_instances: 2
+  # Expander → momentum_buyer_1, momentum_buyer_2, momentum_buyer_3
+  num_instances: 3
   config:
     identity: "momentum_buyer"
     role: player
@@ -89,8 +89,8 @@ momentum_buyer:
 retail:
   name: "Retail Trader"
   class: "examples.ShortSqueeze.players:RetailTrader"
-  # Expander → retail_1, retail_2
-  num_instances: 2
+  # Expander → retail_1, retail_2, retail_3
+  num_instances: 3
   config:
     identity: "retail"
     role: player
@@ -113,7 +113,8 @@ retail:
 value_investor:
   name: "Value Investor"
   class: "examples.ShortSqueeze.players:ValueInvestor"
-  num_instances: 1
+  # Expander → value_investor_1, value_investor_2
+  num_instances: 2
   config:
     identity: "value_investor"
     role: player
