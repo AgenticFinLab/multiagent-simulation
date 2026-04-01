@@ -1,0 +1,182 @@
+{
+  "turn_r000088_0330120456": {
+    "round_num": 88,
+    "timestamp": "2026-03-30T12:04:56.703954",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 110.85,
+            "quantity": 1.73,
+            "strategy": "RuleLLMNoiseTrader",
+            "investor": "rulellm_noise_1",
+            "reasoning": "Positive net demand and price return signal bullish crowd; herding sentiment + positive random mood trigger buy, quantit",
+            "analysis": "1. Market Signals: Net demand (+4.69) and price return (+0.50%) are both positive → crowd is bullish, align with persona's herding behavior.\n2. Herding Sentiment Calculation: 0.7 × 0.005 (0.5% return) ×10 = 0.035. Adding a small positive random sentiment (consistent with bullish signals) gives total_sentiment ~0.115 (>0.1 threshold for buy).\n3. Quantity: 0.115 ×15 (base size) ≈1.725, capped at 40 (well under). Portfolio check: 1.725 shares ×$110.85 ≈$191 < available cash ($6389.28), valid.",
+            "cash": 6197.508600000007,
+            "position": 35.940000000000005
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 110.85,
+              "quantity": 1.73,
+              "strategy": "RuleLLMNoiseTrader",
+              "investor": "rulellm_noise_1",
+              "reasoning": "Positive net demand and price return signal bullish crowd; herding sentiment + positive random mood trigger buy, quantit",
+              "analysis": "1. Market Signals: Net demand (+4.69) and price return (+0.50%) are both positive → crowd is bullish, align with persona's herding behavior.\n2. Herding Sentiment Calculation: 0.7 × 0.005 (0.5% return) ×10 = 0.035. Adding a small positive random sentiment (consistent with bullish signals) gives total_sentiment ~0.115 (>0.1 threshold for buy).\n3. Quantity: 0.115 ×15 (base size) ≈1.725, capped at 40 (well under). Portfolio check: 1.725 shares ×$110.85 ≈$191 < available cash ($6389.28), valid.",
+              "cash": 6197.508600000007,
+              "position": 35.940000000000005
+            },
+            "source_id": "rulellm_noise_1",
+            "timestamp": "2026-03-30T12:04:56.703831",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 16125.411
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 110.85,
+          "quantity": 1.73,
+          "strategy": "RuleLLMNoiseTrader",
+          "investor": "rulellm_noise_1",
+          "reasoning": "Positive net demand and price return signal bullish crowd; herding sentiment + positive random mood trigger buy, quantit",
+          "analysis": "1. Market Signals: Net demand (+4.69) and price return (+0.50%) are both positive → crowd is bullish, align with persona's herding behavior.\n2. Herding Sentiment Calculation: 0.7 × 0.005 (0.5% return) ×10 = 0.035. Adding a small positive random sentiment (consistent with bullish signals) gives total_sentiment ~0.115 (>0.1 threshold for buy).\n3. Quantity: 0.115 ×15 (base size) ≈1.725, capped at 40 (well under). Portfolio check: 1.725 shares ×$110.85 ≈$191 < available cash ($6389.28), valid.",
+          "cash": 6197.508600000007,
+          "position": 35.940000000000005
+        },
+        "source_id": "rulellm_noise_1",
+        "timestamp": "2026-03-30T12:04:56.703831",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 88,
+      "tick_turn_duration_ms": 16125.432,
+      "tick_turn_total_duration_ms": 1360140.78,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000089_0330120511": {
+    "round_num": 89,
+    "timestamp": "2026-03-30T12:05:11.939536",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 111.31,
+            "quantity": 1.64,
+            "strategy": "RuleLLMNoiseTrader",
+            "investor": "rulellm_noise_1",
+            "reasoning": "Positive net demand and price return signal bullish crowd; total sentiment >0.1 triggers buy.",
+            "analysis": "1. Market Signals: Net demand (+3.98) is positive, price return (+0.42%) is positive → bullish crowd sentiment.\n2. Total Sentiment Calculation: Herding sentiment = 0.7 * 0.0042 *10 = 0.0294. Adding a small positive random sentiment (0.08, within Gaussian range) gives total_sentiment ≈ 0.1094 > 0.1 → trigger buy.\n3. Quantity: 0.1094 *15 ≈ 1.64 (capped at 40, valid).\n4. Portfolio Check: Available cash ($6197.51) can cover 1.64 shares at $111.31 (1.64*111.31≈$182.55 ≤ $6197.51).",
+            "cash": 6014.960200000008,
+            "position": 37.580000000000005
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 111.31,
+              "quantity": 1.64,
+              "strategy": "RuleLLMNoiseTrader",
+              "investor": "rulellm_noise_1",
+              "reasoning": "Positive net demand and price return signal bullish crowd; total sentiment >0.1 triggers buy.",
+              "analysis": "1. Market Signals: Net demand (+3.98) is positive, price return (+0.42%) is positive → bullish crowd sentiment.\n2. Total Sentiment Calculation: Herding sentiment = 0.7 * 0.0042 *10 = 0.0294. Adding a small positive random sentiment (0.08, within Gaussian range) gives total_sentiment ≈ 0.1094 > 0.1 → trigger buy.\n3. Quantity: 0.1094 *15 ≈ 1.64 (capped at 40, valid).\n4. Portfolio Check: Available cash ($6197.51) can cover 1.64 shares at $111.31 (1.64*111.31≈$182.55 ≤ $6197.51).",
+              "cash": 6014.960200000008,
+              "position": 37.580000000000005
+            },
+            "source_id": "rulellm_noise_1",
+            "timestamp": "2026-03-30T12:05:11.939383",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 12901.688
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 111.31,
+          "quantity": 1.64,
+          "strategy": "RuleLLMNoiseTrader",
+          "investor": "rulellm_noise_1",
+          "reasoning": "Positive net demand and price return signal bullish crowd; total sentiment >0.1 triggers buy.",
+          "analysis": "1. Market Signals: Net demand (+3.98) is positive, price return (+0.42%) is positive → bullish crowd sentiment.\n2. Total Sentiment Calculation: Herding sentiment = 0.7 * 0.0042 *10 = 0.0294. Adding a small positive random sentiment (0.08, within Gaussian range) gives total_sentiment ≈ 0.1094 > 0.1 → trigger buy.\n3. Quantity: 0.1094 *15 ≈ 1.64 (capped at 40, valid).\n4. Portfolio Check: Available cash ($6197.51) can cover 1.64 shares at $111.31 (1.64*111.31≈$182.55 ≤ $6197.51).",
+          "cash": 6014.960200000008,
+          "position": 37.580000000000005
+        },
+        "source_id": "rulellm_noise_1",
+        "timestamp": "2026-03-30T12:05:11.939383",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 89,
+      "tick_turn_duration_ms": 12901.706,
+      "tick_turn_total_duration_ms": 1373042.486,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000090_0330120542": {
+    "round_num": 90,
+    "timestamp": "2026-03-30T12:05:42.737869",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 111.53,
+            "quantity": 1.4,
+            "strategy": "RuleLLMNoiseTrader",
+            "investor": "rulellm_noise_1",
+            "reasoning": "Positive net demand and price return signal bullish crowd; follow with small buy.",
+            "analysis": "1. Market Signals: Net demand (+3.28) is positive, price return (+0.19%) is positive → bullish crowd sentiment.\n2. Composite Sentiment Estimate: Herding_sentiment = 0.7 * 0.0019 *10 = 0.0133. Assuming random_sentiment (Gaussian 0 mean, 0.3 std) is 0.08 (plausible positive value), total_sentiment = 0.0133 + 0.08 = 0.0933 (close to 0.1, lean buy).\n3. Portfolio Constraints: Buying ~1.4 shares is feasible (1.4 * 111.53 ≈ $156 < $6014.96 cash available, no short position to worry about).",
+            "cash": 5858.818200000008,
+            "position": 38.980000000000004
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 111.53,
+              "quantity": 1.4,
+              "strategy": "RuleLLMNoiseTrader",
+              "investor": "rulellm_noise_1",
+              "reasoning": "Positive net demand and price return signal bullish crowd; follow with small buy.",
+              "analysis": "1. Market Signals: Net demand (+3.28) is positive, price return (+0.19%) is positive → bullish crowd sentiment.\n2. Composite Sentiment Estimate: Herding_sentiment = 0.7 * 0.0019 *10 = 0.0133. Assuming random_sentiment (Gaussian 0 mean, 0.3 std) is 0.08 (plausible positive value), total_sentiment = 0.0133 + 0.08 = 0.0933 (close to 0.1, lean buy).\n3. Portfolio Constraints: Buying ~1.4 shares is feasible (1.4 * 111.53 ≈ $156 < $6014.96 cash available, no short position to worry about).",
+              "cash": 5858.818200000008,
+              "position": 38.980000000000004
+            },
+            "source_id": "rulellm_noise_1",
+            "timestamp": "2026-03-30T12:05:42.737783",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 28676.831
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 111.53,
+          "quantity": 1.4,
+          "strategy": "RuleLLMNoiseTrader",
+          "investor": "rulellm_noise_1",
+          "reasoning": "Positive net demand and price return signal bullish crowd; follow with small buy.",
+          "analysis": "1. Market Signals: Net demand (+3.28) is positive, price return (+0.19%) is positive → bullish crowd sentiment.\n2. Composite Sentiment Estimate: Herding_sentiment = 0.7 * 0.0019 *10 = 0.0133. Assuming random_sentiment (Gaussian 0 mean, 0.3 std) is 0.08 (plausible positive value), total_sentiment = 0.0133 + 0.08 = 0.0933 (close to 0.1, lean buy).\n3. Portfolio Constraints: Buying ~1.4 shares is feasible (1.4 * 111.53 ≈ $156 < $6014.96 cash available, no short position to worry about).",
+          "cash": 5858.818200000008,
+          "position": 38.980000000000004
+        },
+        "source_id": "rulellm_noise_1",
+        "timestamp": "2026-03-30T12:05:42.737783",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 90,
+      "tick_turn_duration_ms": 28676.842,
+      "tick_turn_total_duration_ms": 1401719.327,
+      "tick_step_count": 1
+    }
+  }
+}

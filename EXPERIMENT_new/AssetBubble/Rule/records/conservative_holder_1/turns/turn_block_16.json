@@ -1,0 +1,146 @@
+{
+  "turn_r000049_0331151638": {
+    "round_num": 49,
+    "timestamp": "2026-03-31T15:16:38.287534",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "conservative_holder",
+            "investor": "conservative_holder_1"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "conservative_holder",
+              "investor": "conservative_holder_1"
+            },
+            "source_id": "conservative_holder_1",
+            "timestamp": "2026-03-31T15:16:38.287515",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.017
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_1"
+        },
+        "source_id": "conservative_holder_1",
+        "timestamp": "2026-03-31T15:16:38.287515",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 49,
+      "tick_turn_duration_ms": 0.021,
+      "tick_turn_total_duration_ms": 2.581,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000050_0331151638": {
+    "round_num": 50,
+    "timestamp": "2026-03-31T15:16:38.461723",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 160.8558403159093,
+            "quantity": 1.6383999999999999,
+            "strategy": "conservative_holder",
+            "investor": "conservative_holder_1"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 160.8558403159093,
+              "quantity": 1.6383999999999999,
+              "strategy": "conservative_holder",
+              "investor": "conservative_holder_1"
+            },
+            "source_id": "conservative_holder_1",
+            "timestamp": "2026-03-31T15:16:38.461703",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.021
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 160.8558403159093,
+          "quantity": 1.6383999999999999,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_1"
+        },
+        "source_id": "conservative_holder_1",
+        "timestamp": "2026-03-31T15:16:38.461703",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 50,
+      "tick_turn_duration_ms": 0.025,
+      "tick_turn_total_duration_ms": 2.606,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000051_0331151638": {
+    "round_num": 51,
+    "timestamp": "2026-03-31T15:16:38.633098",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "conservative_holder",
+            "investor": "conservative_holder_1"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "conservative_holder",
+              "investor": "conservative_holder_1"
+            },
+            "source_id": "conservative_holder_1",
+            "timestamp": "2026-03-31T15:16:38.633078",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.019
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_1"
+        },
+        "source_id": "conservative_holder_1",
+        "timestamp": "2026-03-31T15:16:38.633078",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 51,
+      "tick_turn_duration_ms": 0.024,
+      "tick_turn_total_duration_ms": 2.63,
+      "tick_step_count": 1
+    }
+  }
+}

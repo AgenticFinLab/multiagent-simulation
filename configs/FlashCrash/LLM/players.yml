@@ -1,0 +1,156 @@
+# =============================================================================
+# FlashCrashLLM Players Configuration
+# =============================================================================
+
+market:
+  name: "Market with Liquidity-Sensitive Pricing"
+  class: "examples.FlashCrash.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/FlashCrash/LLM/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      base_price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.3
+      low_liquidity_threshold: 50.0
+      high_impact_multiplier: 3.0
+      base_liquidity: 50.0
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+llm_hft:
+  name: "LLM High-Frequency Trader"
+  class: "examples.FlashCrash.LLM.players:LLMHighFrequencyTrader"
+  # Expander → llm_hft_1, llm_hft_2, llm_hft_3
+  num_instances: 3
+  config:
+    identity: "llm_hft"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "EXPERIMENT/FlashCrash/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FlashCrash.LLM.prompts:LLM_HFT_SYS"
+        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_market_maker:
+  name: "LLM Market Maker"
+  class: "examples.FlashCrash.LLM.players:LLMFlashMarketMaker"
+  # Expander → llm_market_maker_1, llm_market_maker_2, llm_market_maker_3
+  num_instances: 3
+  config:
+    identity: "llm_market_maker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "EXPERIMENT/FlashCrash/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FlashCrash.LLM.prompts:LLM_MARKET_MAKER_SYS"
+        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_stop_loss:
+  name: "LLM Stop-Loss Trader"
+  class: "examples.FlashCrash.LLM.players:LLMStopLossTrader"
+  # Expander → llm_stop_loss_1, llm_stop_loss_2, llm_stop_loss_3
+  num_instances: 3
+  config:
+    identity: "llm_stop_loss"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "EXPERIMENT/FlashCrash/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FlashCrash.LLM.prompts:LLM_STOP_LOSS_SYS"
+        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.2
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_fundamental:
+  name: "LLM Fundamental Trader"
+  class: "examples.FlashCrash.LLM.players:LLMFundamentalTrader"
+  # Expander → llm_fundamental_1, llm_fundamental_2
+  num_instances: 2
+  config:
+    identity: "llm_fundamental"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "EXPERIMENT/FlashCrash/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FlashCrash.LLM.prompts:LLM_FUNDAMENTAL_SYS"
+        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_algo:
+  name: "LLM Algorithmic Trader"
+  class: "examples.FlashCrash.LLM.players:LLMAlgorithmicTrader"
+  # Expander → llm_algo_1, llm_algo_2
+  num_instances: 2
+  config:
+    identity: "llm_algo"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "EXPERIMENT/FlashCrash/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FlashCrash.LLM.prompts:LLM_ALGO_SYS"
+        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.2
+          max_new_tokens: 500
+  persona: !include persona.yml

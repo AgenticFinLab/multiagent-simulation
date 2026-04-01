@@ -1,0 +1,146 @@
+{
+  "turn_r000007_0331151631": {
+    "round_num": 7,
+    "timestamp": "2026-03-31T15:16:31.938563",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 108.2060968267404,
+            "quantity": 5.7341657028608,
+            "strategy": "momentum_speculator",
+            "investor": "momentum_speculator_2"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 108.2060968267404,
+              "quantity": 5.7341657028608,
+              "strategy": "momentum_speculator",
+              "investor": "momentum_speculator_2"
+            },
+            "source_id": "momentum_speculator_2",
+            "timestamp": "2026-03-31T15:16:31.938540",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.025
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 108.2060968267404,
+          "quantity": 5.7341657028608,
+          "strategy": "momentum_speculator",
+          "investor": "momentum_speculator_2"
+        },
+        "source_id": "momentum_speculator_2",
+        "timestamp": "2026-03-31T15:16:31.938540",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 7,
+      "tick_turn_duration_ms": 0.03,
+      "tick_turn_total_duration_ms": 0.369,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000008_0331151632": {
+    "round_num": 8,
+    "timestamp": "2026-03-31T15:16:32.084048",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 116.39357373658157,
+            "quantity": 9.737738087114948,
+            "strategy": "momentum_speculator",
+            "investor": "momentum_speculator_2"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 116.39357373658157,
+              "quantity": 9.737738087114948,
+              "strategy": "momentum_speculator",
+              "investor": "momentum_speculator_2"
+            },
+            "source_id": "momentum_speculator_2",
+            "timestamp": "2026-03-31T15:16:32.084014",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.026
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 116.39357373658157,
+          "quantity": 9.737738087114948,
+          "strategy": "momentum_speculator",
+          "investor": "momentum_speculator_2"
+        },
+        "source_id": "momentum_speculator_2",
+        "timestamp": "2026-03-31T15:16:32.084014",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 8,
+      "tick_turn_duration_ms": 0.03,
+      "tick_turn_total_duration_ms": 0.4,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000009_0331151632": {
+    "round_num": 9,
+    "timestamp": "2026-03-31T15:16:32.237652",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 128.51372340035158,
+            "quantity": 13.775083354973436,
+            "strategy": "momentum_speculator",
+            "investor": "momentum_speculator_2"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 128.51372340035158,
+              "quantity": 13.775083354973436,
+              "strategy": "momentum_speculator",
+              "investor": "momentum_speculator_2"
+            },
+            "source_id": "momentum_speculator_2",
+            "timestamp": "2026-03-31T15:16:32.237628",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.029
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 128.51372340035158,
+          "quantity": 13.775083354973436,
+          "strategy": "momentum_speculator",
+          "investor": "momentum_speculator_2"
+        },
+        "source_id": "momentum_speculator_2",
+        "timestamp": "2026-03-31T15:16:32.237628",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 9,
+      "tick_turn_duration_ms": 0.034,
+      "tick_turn_total_duration_ms": 0.433,
+      "tick_step_count": 1
+    }
+  }
+}

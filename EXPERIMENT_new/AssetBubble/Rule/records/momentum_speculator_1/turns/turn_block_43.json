@@ -1,0 +1,146 @@
+{
+  "turn_r000130_0331151651": {
+    "round_num": 130,
+    "timestamp": "2026-03-31T15:16:51.987741",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "momentum_speculator",
+            "investor": "momentum_speculator_1"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "momentum_speculator",
+              "investor": "momentum_speculator_1"
+            },
+            "source_id": "momentum_speculator_1",
+            "timestamp": "2026-03-31T15:16:51.987718",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.027
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "momentum_speculator",
+          "investor": "momentum_speculator_1"
+        },
+        "source_id": "momentum_speculator_1",
+        "timestamp": "2026-03-31T15:16:51.987718",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 130,
+      "tick_turn_duration_ms": 0.031,
+      "tick_turn_total_duration_ms": 6.588,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000131_0331151652": {
+    "round_num": 131,
+    "timestamp": "2026-03-31T15:16:52.188002",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "momentum_speculator",
+            "investor": "momentum_speculator_1"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "momentum_speculator",
+              "investor": "momentum_speculator_1"
+            },
+            "source_id": "momentum_speculator_1",
+            "timestamp": "2026-03-31T15:16:52.187980",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.025
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "momentum_speculator",
+          "investor": "momentum_speculator_1"
+        },
+        "source_id": "momentum_speculator_1",
+        "timestamp": "2026-03-31T15:16:52.187980",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 131,
+      "tick_turn_duration_ms": 0.03,
+      "tick_turn_total_duration_ms": 6.618,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000132_0331151652": {
+    "round_num": 132,
+    "timestamp": "2026-03-31T15:16:52.398772",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "momentum_speculator",
+            "investor": "momentum_speculator_1"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "momentum_speculator",
+              "investor": "momentum_speculator_1"
+            },
+            "source_id": "momentum_speculator_1",
+            "timestamp": "2026-03-31T15:16:52.398744",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.051
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "momentum_speculator",
+          "investor": "momentum_speculator_1"
+        },
+        "source_id": "momentum_speculator_1",
+        "timestamp": "2026-03-31T15:16:52.398744",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 132,
+      "tick_turn_duration_ms": 0.057,
+      "tick_turn_total_duration_ms": 6.675,
+      "tick_step_count": 1
+    }
+  }
+}

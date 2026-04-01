@@ -1,0 +1,182 @@
+{
+  "turn_r000094_0330120659": {
+    "round_num": 94,
+    "timestamp": "2026-03-30T12:06:59.082634",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 111.11,
+            "quantity": 0.0,
+            "strategy": "RuleLLMMomentumSpeculator",
+            "investor": "rulellm_momentum_1",
+            "reasoning": "Neutral momentum (fewer than 5 recent prices, no trend up/ sharp drop)",
+            "analysis": "First, compute momentum: Recent prices have only 3 entries (fewer than 5), so momentum = 0. \n\nNext, apply decision rules: Momentum is 0, which is not >0.01 (no uptrend) nor < -0.02 (no sharp drop). So quantity = 0 (hold). \n\nQualitative check: Volume is zero, net demand is zero, no clear momentum signal. No need to adjust quantity (already 0). \n\nPortfolio constraints: No action needed, so no constraints violated.",
+            "cash": 10000.0,
+            "position": 0.0
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 111.11,
+              "quantity": 0.0,
+              "strategy": "RuleLLMMomentumSpeculator",
+              "investor": "rulellm_momentum_1",
+              "reasoning": "Neutral momentum (fewer than 5 recent prices, no trend up/ sharp drop)",
+              "analysis": "First, compute momentum: Recent prices have only 3 entries (fewer than 5), so momentum = 0. \n\nNext, apply decision rules: Momentum is 0, which is not >0.01 (no uptrend) nor < -0.02 (no sharp drop). So quantity = 0 (hold). \n\nQualitative check: Volume is zero, net demand is zero, no clear momentum signal. No need to adjust quantity (already 0). \n\nPortfolio constraints: No action needed, so no constraints violated.",
+              "cash": 10000.0,
+              "position": 0.0
+            },
+            "source_id": "rulellm_momentum_1",
+            "timestamp": "2026-03-30T12:06:59.082218",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 7961.022
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 111.11,
+          "quantity": 0.0,
+          "strategy": "RuleLLMMomentumSpeculator",
+          "investor": "rulellm_momentum_1",
+          "reasoning": "Neutral momentum (fewer than 5 recent prices, no trend up/ sharp drop)",
+          "analysis": "First, compute momentum: Recent prices have only 3 entries (fewer than 5), so momentum = 0. \n\nNext, apply decision rules: Momentum is 0, which is not >0.01 (no uptrend) nor < -0.02 (no sharp drop). So quantity = 0 (hold). \n\nQualitative check: Volume is zero, net demand is zero, no clear momentum signal. No need to adjust quantity (already 0). \n\nPortfolio constraints: No action needed, so no constraints violated.",
+          "cash": 10000.0,
+          "position": 0.0
+        },
+        "source_id": "rulellm_momentum_1",
+        "timestamp": "2026-03-30T12:06:59.082218",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 94,
+      "tick_turn_duration_ms": 7961.045,
+      "tick_turn_total_duration_ms": 700252.604,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000095_0330120709": {
+    "round_num": 95,
+    "timestamp": "2026-03-30T12:07:09.161205",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 111.22,
+            "quantity": 0.0,
+            "strategy": "RuleLLMMomentumSpeculator",
+            "investor": "rulellm_momentum_1",
+            "reasoning": "Insufficient recent prices (<5) → momentum = 0, no clear trend",
+            "analysis": "First, compute short-term momentum: Recent prices have only 3 entries (fewer than 5), so momentum = 0. \n\nNext, check action rules: Momentum is 0, which is not >0.01 (no buy) nor < -0.02 (no sell). So the action is hold with quantity 0.",
+            "cash": 10000.0,
+            "position": 0.0
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 111.22,
+              "quantity": 0.0,
+              "strategy": "RuleLLMMomentumSpeculator",
+              "investor": "rulellm_momentum_1",
+              "reasoning": "Insufficient recent prices (<5) → momentum = 0, no clear trend",
+              "analysis": "First, compute short-term momentum: Recent prices have only 3 entries (fewer than 5), so momentum = 0. \n\nNext, check action rules: Momentum is 0, which is not >0.01 (no buy) nor < -0.02 (no sell). So the action is hold with quantity 0.",
+              "cash": 10000.0,
+              "position": 0.0
+            },
+            "source_id": "rulellm_momentum_1",
+            "timestamp": "2026-03-30T12:07:09.161080",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 6900.703
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 111.22,
+          "quantity": 0.0,
+          "strategy": "RuleLLMMomentumSpeculator",
+          "investor": "rulellm_momentum_1",
+          "reasoning": "Insufficient recent prices (<5) → momentum = 0, no clear trend",
+          "analysis": "First, compute short-term momentum: Recent prices have only 3 entries (fewer than 5), so momentum = 0. \n\nNext, check action rules: Momentum is 0, which is not >0.01 (no buy) nor < -0.02 (no sell). So the action is hold with quantity 0.",
+          "cash": 10000.0,
+          "position": 0.0
+        },
+        "source_id": "rulellm_momentum_1",
+        "timestamp": "2026-03-30T12:07:09.161080",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 95,
+      "tick_turn_duration_ms": 6900.721,
+      "tick_turn_total_duration_ms": 707153.325,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000096_0330120725": {
+    "round_num": 96,
+    "timestamp": "2026-03-30T12:07:25.234368",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 111.29,
+            "quantity": 0.0,
+            "strategy": "RuleLLMMomentumSpeculator",
+            "investor": "rulellm_momentum_1",
+            "reasoning": "Insufficient recent prices for 5MA; momentum is 0 (neutral)",
+            "analysis": "First, compute momentum: Recent Prices only have 3 entries (fewer than 5), so momentum = 0.  \nSince momentum is not >0.01 (no uptrend) or < -0.02 (no sharp drop), the action is hold with quantity 0.  \nNo adjustments needed as momentum is neutral.",
+            "cash": 10000.0,
+            "position": 0.0
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 111.29,
+              "quantity": 0.0,
+              "strategy": "RuleLLMMomentumSpeculator",
+              "investor": "rulellm_momentum_1",
+              "reasoning": "Insufficient recent prices for 5MA; momentum is 0 (neutral)",
+              "analysis": "First, compute momentum: Recent Prices only have 3 entries (fewer than 5), so momentum = 0.  \nSince momentum is not >0.01 (no uptrend) or < -0.02 (no sharp drop), the action is hold with quantity 0.  \nNo adjustments needed as momentum is neutral.",
+              "cash": 10000.0,
+              "position": 0.0
+            },
+            "source_id": "rulellm_momentum_1",
+            "timestamp": "2026-03-30T12:07:25.234307",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 6327.68
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 111.29,
+          "quantity": 0.0,
+          "strategy": "RuleLLMMomentumSpeculator",
+          "investor": "rulellm_momentum_1",
+          "reasoning": "Insufficient recent prices for 5MA; momentum is 0 (neutral)",
+          "analysis": "First, compute momentum: Recent Prices only have 3 entries (fewer than 5), so momentum = 0.  \nSince momentum is not >0.01 (no uptrend) or < -0.02 (no sharp drop), the action is hold with quantity 0.  \nNo adjustments needed as momentum is neutral.",
+          "cash": 10000.0,
+          "position": 0.0
+        },
+        "source_id": "rulellm_momentum_1",
+        "timestamp": "2026-03-30T12:07:25.234307",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 96,
+      "tick_turn_duration_ms": 6327.688,
+      "tick_turn_total_duration_ms": 713481.014,
+      "tick_step_count": 1
+    }
+  }
+}

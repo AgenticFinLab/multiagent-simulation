@@ -1,0 +1,182 @@
+{
+  "turn_r000187_0330124239": {
+    "round_num": 187,
+    "timestamp": "2026-03-30T12:42:39.776805",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 129.54,
+            "quantity": 1.56,
+            "strategy": "RuleLLMNoiseTrader",
+            "investor": "rulellm_noise_2",
+            "reasoning": "Positive net demand and price return signal crowd bullishness; small buy to follow trend",
+            "analysis": "Market signals: Net demand (+0.81) and price return (+0.06%) are both positive (lean bullish). Herding sentiment = 0.7 * 0.0006 *10 = 0.0042. Estimated random sentiment (positive, ~0.1) makes total sentiment ~0.104 > 0.1 → buy. Quantity = 0.104 *15 ≈1.56, which is ≤ available cash / current price (4358.83/129.54≈33.65). No short position, so no sell constraints apply.",
+            "cash": 4156.748,
+            "position": 50.989999999999995
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 129.54,
+              "quantity": 1.56,
+              "strategy": "RuleLLMNoiseTrader",
+              "investor": "rulellm_noise_2",
+              "reasoning": "Positive net demand and price return signal crowd bullishness; small buy to follow trend",
+              "analysis": "Market signals: Net demand (+0.81) and price return (+0.06%) are both positive (lean bullish). Herding sentiment = 0.7 * 0.0006 *10 = 0.0042. Estimated random sentiment (positive, ~0.1) makes total sentiment ~0.104 > 0.1 → buy. Quantity = 0.104 *15 ≈1.56, which is ≤ available cash / current price (4358.83/129.54≈33.65). No short position, so no sell constraints apply.",
+              "cash": 4156.748,
+              "position": 50.989999999999995
+            },
+            "source_id": "rulellm_noise_2",
+            "timestamp": "2026-03-30T12:42:39.776671",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 10798.69
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 129.54,
+          "quantity": 1.56,
+          "strategy": "RuleLLMNoiseTrader",
+          "investor": "rulellm_noise_2",
+          "reasoning": "Positive net demand and price return signal crowd bullishness; small buy to follow trend",
+          "analysis": "Market signals: Net demand (+0.81) and price return (+0.06%) are both positive (lean bullish). Herding sentiment = 0.7 * 0.0006 *10 = 0.0042. Estimated random sentiment (positive, ~0.1) makes total sentiment ~0.104 > 0.1 → buy. Quantity = 0.104 *15 ≈1.56, which is ≤ available cash / current price (4358.83/129.54≈33.65). No short position, so no sell constraints apply.",
+          "cash": 4156.748,
+          "position": 50.989999999999995
+        },
+        "source_id": "rulellm_noise_2",
+        "timestamp": "2026-03-30T12:42:39.776671",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 187,
+      "tick_turn_duration_ms": 10798.708,
+      "tick_turn_total_duration_ms": 2810373.559,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000188_0330124315": {
+    "round_num": 188,
+    "timestamp": "2026-03-30T12:43:15.236761",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 129.73,
+            "quantity": 1.65,
+            "strategy": "RuleLLMNoiseTrader",
+            "investor": "rulellm_noise_2",
+            "reasoning": "Positive price return and net demand signal bullish crowd; combined sentiment just above 0.1 triggers small buy.",
+            "analysis": "1. Market Signals: This round return is +0.14% (positive), net demand is +0.84 (positive) → bullish crowd cues. Recent prices show a small uptrend (129.46 → 129.54 → 129.72).\n2. Sentiment Calculation: Herding_sentiment = 0.7 * 0.0014 *10 = 0.0098. Estimating random_sentiment as 0.1 (consistent with positive crowd signals), total_sentiment = 0.0098 + 0.1 = 0.1098 (>0.1 → buy).\n3. Quantity: 0.1098 *15 (base_size) ≈1.65 shares. Cap at 40 (not exceeded). Cash available ($4156.75) covers 1.65*129.73 ≈$214.05.\n4. Portfolio Constraints: No short position, long position (50.99) + 1.65 is allowed.",
+            "cash": 3942.6934999999994,
+            "position": 52.63999999999999
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 129.73,
+              "quantity": 1.65,
+              "strategy": "RuleLLMNoiseTrader",
+              "investor": "rulellm_noise_2",
+              "reasoning": "Positive price return and net demand signal bullish crowd; combined sentiment just above 0.1 triggers small buy.",
+              "analysis": "1. Market Signals: This round return is +0.14% (positive), net demand is +0.84 (positive) → bullish crowd cues. Recent prices show a small uptrend (129.46 → 129.54 → 129.72).\n2. Sentiment Calculation: Herding_sentiment = 0.7 * 0.0014 *10 = 0.0098. Estimating random_sentiment as 0.1 (consistent with positive crowd signals), total_sentiment = 0.0098 + 0.1 = 0.1098 (>0.1 → buy).\n3. Quantity: 0.1098 *15 (base_size) ≈1.65 shares. Cap at 40 (not exceeded). Cash available ($4156.75) covers 1.65*129.73 ≈$214.05.\n4. Portfolio Constraints: No short position, long position (50.99) + 1.65 is allowed.",
+              "cash": 3942.6934999999994,
+              "position": 52.63999999999999
+            },
+            "source_id": "rulellm_noise_2",
+            "timestamp": "2026-03-30T12:43:15.236639",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 22930.868
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 129.73,
+          "quantity": 1.65,
+          "strategy": "RuleLLMNoiseTrader",
+          "investor": "rulellm_noise_2",
+          "reasoning": "Positive price return and net demand signal bullish crowd; combined sentiment just above 0.1 triggers small buy.",
+          "analysis": "1. Market Signals: This round return is +0.14% (positive), net demand is +0.84 (positive) → bullish crowd cues. Recent prices show a small uptrend (129.46 → 129.54 → 129.72).\n2. Sentiment Calculation: Herding_sentiment = 0.7 * 0.0014 *10 = 0.0098. Estimating random_sentiment as 0.1 (consistent with positive crowd signals), total_sentiment = 0.0098 + 0.1 = 0.1098 (>0.1 → buy).\n3. Quantity: 0.1098 *15 (base_size) ≈1.65 shares. Cap at 40 (not exceeded). Cash available ($4156.75) covers 1.65*129.73 ≈$214.05.\n4. Portfolio Constraints: No short position, long position (50.99) + 1.65 is allowed.",
+          "cash": 3942.6934999999994,
+          "position": 52.63999999999999
+        },
+        "source_id": "rulellm_noise_2",
+        "timestamp": "2026-03-30T12:43:15.236639",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 188,
+      "tick_turn_duration_ms": 22930.885,
+      "tick_turn_total_duration_ms": 2833304.445,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000189_0330124326": {
+    "round_num": 189,
+    "timestamp": "2026-03-30T12:43:26.996779",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 130.01,
+            "quantity": 1.73,
+            "strategy": "RuleLLMNoiseTrader",
+            "investor": "rulellm_noise_2",
+            "reasoning": "Bullish crowd (positive net demand/return) → follow with small buy.",
+            "analysis": "1. Market Signals: Net demand (+0.99) is positive, price return (+0.22%) is positive → bullish crowd sentiment.  \n2. Herding Sentiment Calculation: 0.7 * 0.0022 (return) *10 = 0.0154.  \n3. Random Sentiment Estimate: Gaussian(0,0.3) → assume positive (0.1) to align with bullish signals.  \n4. Total Sentiment: 0.1 + 0.0154 = 0.1154 > 0.1 → BUY.  \n5. Quantity: 0.1154 *15 ≈1.731 (≤40 cap, ≤3942.69/130.01≈30.32 cash limit).",
+            "cash": 3717.7761999999993,
+            "position": 54.36999999999999
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 130.01,
+              "quantity": 1.73,
+              "strategy": "RuleLLMNoiseTrader",
+              "investor": "rulellm_noise_2",
+              "reasoning": "Bullish crowd (positive net demand/return) → follow with small buy.",
+              "analysis": "1. Market Signals: Net demand (+0.99) is positive, price return (+0.22%) is positive → bullish crowd sentiment.  \n2. Herding Sentiment Calculation: 0.7 * 0.0022 (return) *10 = 0.0154.  \n3. Random Sentiment Estimate: Gaussian(0,0.3) → assume positive (0.1) to align with bullish signals.  \n4. Total Sentiment: 0.1 + 0.0154 = 0.1154 > 0.1 → BUY.  \n5. Quantity: 0.1154 *15 ≈1.731 (≤40 cap, ≤3942.69/130.01≈30.32 cash limit).",
+              "cash": 3717.7761999999993,
+              "position": 54.36999999999999
+            },
+            "source_id": "rulellm_noise_2",
+            "timestamp": "2026-03-30T12:43:26.996703",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 11505.351
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 130.01,
+          "quantity": 1.73,
+          "strategy": "RuleLLMNoiseTrader",
+          "investor": "rulellm_noise_2",
+          "reasoning": "Bullish crowd (positive net demand/return) → follow with small buy.",
+          "analysis": "1. Market Signals: Net demand (+0.99) is positive, price return (+0.22%) is positive → bullish crowd sentiment.  \n2. Herding Sentiment Calculation: 0.7 * 0.0022 (return) *10 = 0.0154.  \n3. Random Sentiment Estimate: Gaussian(0,0.3) → assume positive (0.1) to align with bullish signals.  \n4. Total Sentiment: 0.1 + 0.0154 = 0.1154 > 0.1 → BUY.  \n5. Quantity: 0.1154 *15 ≈1.731 (≤40 cap, ≤3942.69/130.01≈30.32 cash limit).",
+          "cash": 3717.7761999999993,
+          "position": 54.36999999999999
+        },
+        "source_id": "rulellm_noise_2",
+        "timestamp": "2026-03-30T12:43:26.996703",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 189,
+      "tick_turn_duration_ms": 11505.363,
+      "tick_turn_total_duration_ms": 2844809.808,
+      "tick_step_count": 1
+    }
+  }
+}

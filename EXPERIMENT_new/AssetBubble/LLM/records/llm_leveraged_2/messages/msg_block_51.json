@@ -1,0 +1,95 @@
+{
+  "msg_r000153_0330125517": {
+    "round_num": 153,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:55:17.217003",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "llm_leveraged_2",
+      "payload": {
+        "content": {
+          "price": 409.94757737041704,
+          "prev_price": 412.8005784786474,
+          "return": -0.006911330208753479,
+          "return_pct": -0.6911330208753479,
+          "fundamental": 116.64011302684976,
+          "bubble_ratio": 3.5146363179196327,
+          "volume": 90.0,
+          "net_demand": -10.0,
+          "round": 154,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:55:17.108755",
+      "priority": 1,
+      "extras": {
+        "round_num": 154
+      }
+    }
+  },
+  "msg_r000154_0330125547": {
+    "round_num": 154,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:55:47.602660",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "llm_leveraged_2",
+      "payload": {
+        "content": {
+          "price": 369.5108927652721,
+          "prev_price": 409.94757737041704,
+          "return": -0.09863867196026259,
+          "return_pct": -9.86386719602626,
+          "fundamental": 116.7567531398766,
+          "bubble_ratio": 3.1647924666301033,
+          "volume": 300.0,
+          "net_demand": -260.0,
+          "round": 155,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:55:47.529245",
+      "priority": 1,
+      "extras": {
+        "round_num": 155
+      }
+    }
+  },
+  "msg_r000155_0330125612": {
+    "round_num": 155,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:56:12.099111",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "llm_leveraged_2",
+      "payload": {
+        "content": {
+          "price": 157.84016263867636,
+          "prev_price": 369.5108927652721,
+          "return": -0.5728402985431267,
+          "return_pct": -57.28402985431267,
+          "fundamental": 116.87350989301646,
+          "bubble_ratio": 1.350521283934742,
+          "volume": 1734.4965340586182,
+          "net_demand": -1401.363465941382,
+          "round": 156,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:56:11.973072",
+      "priority": 1,
+      "extras": {
+        "round_num": 156
+      }
+    }
+  }
+}

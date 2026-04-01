@@ -1,0 +1,56 @@
+{
+  "scenario": "AssetBubble",
+  "total_rounds": 200,
+  "fundamental_value": 99.84189647553548,
+  "bubble_detected": true,
+  "metrics": {
+    "max_deviation_pct": 341.4275,
+    "max_bubble_magnitude": 23987.3025,
+    "max_drawdown": -97.6539,
+    "peak_round": 125,
+    "trough_round": 132,
+    "crash_duration": 7,
+    "return_autocorr_lag1": 0.1163
+  },
+  "price": {
+    "initial": 99.8419,
+    "final": 173.9866,
+    "min": 9.5923,
+    "max": 440.7296,
+    "mean": 219.7784
+  },
+  "returns": {
+    "mean": 0.100713,
+    "std": 0.905975
+  },
+  "volume": {
+    "total": 0,
+    "avg": 0
+  },
+  "validation": {
+    "scenario": "AssetBubble",
+    "is_valid": true,
+    "score": 0.72,
+    "criteria": {
+      "bubble_magnitude": {
+        "value": 341.42748202681605,
+        "target": "20-50%",
+        "score": 0.3,
+        "passed": false
+      },
+      "crash_occurrence": {
+        "value": -97.65386285680704,
+        "target": "< -15%",
+        "score": 1.0,
+        "passed": true
+      },
+      "gradual_formation": {
+        "value": 168,
+        "target": "peak > round 60",
+        "score": 1.0,
+        "passed": true
+      }
+    },
+    "interpretation": "=== ASSET BUBBLE SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 72.0% (threshold: 50%)\n\n[1] BUBBLE MAGNITUDE ANALYSIS\n    Observed: Price deviated 341.4% from fundamental value\n    Expected: 20-50% deviation (Kindleberger-Minsky bubble dynamics)\n    Score: 30.0%\n    Assessment: EXTREME - Unrealistically large bubble.\n    Such extreme deviations (>80%) are rare even in historical manias.\n    This may indicate model instability or unrealistic agent parameters.\n\n[2] CRASH DYNAMICS ANALYSIS\n    Observed: Maximum drawdown of -97.7%\n    Expected: >15% drawdown following bubble peak (Minsky Moment)\n    Score: 100.0%\n    Assessment: SEVERE CRASH - Strong crash dynamics observed.\n    This matches major historical crashes (e.g., 1929: -89%, 2008: -57%).\n    The fire-sale feedback mechanism is strongly present.\n\n[3] BUBBLE FORMATION TIMING\n    Observed: Price peaked at round 168 of 200\n    Expected: Peak after round 60 (gradual formation)\n    Score: 100.0%\n    Assessment: LATE PEAK - Bubble peaked late in simulation.\n    The crash phase may be truncated. Consider longer simulation.\n\n[SUMMARY]\nThe simulation successfully reproduces key features of asset bubble dynamics:\npositive feedback driving prices above fundamentals, followed by a crash.\nThe results are consistent with Kindleberger-Minsky theory and empirical stylized facts."
+  }
+}

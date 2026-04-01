@@ -1,0 +1,146 @@
+{
+  "turn_r000166_0331151658": {
+    "round_num": 166,
+    "timestamp": "2026-03-31T15:16:58.442911",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "fundamental_investor",
+            "investor": "fundamental_investor_3"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "fundamental_investor",
+              "investor": "fundamental_investor_3"
+            },
+            "source_id": "fundamental_investor_3",
+            "timestamp": "2026-03-31T15:16:58.442878",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.035
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "fundamental_investor",
+          "investor": "fundamental_investor_3"
+        },
+        "source_id": "fundamental_investor_3",
+        "timestamp": "2026-03-31T15:16:58.442878",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 166,
+      "tick_turn_duration_ms": 0.041,
+      "tick_turn_total_duration_ms": 10.39,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000167_0331151658": {
+    "round_num": 167,
+    "timestamp": "2026-03-31T15:16:58.637824",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "fundamental_investor",
+            "investor": "fundamental_investor_3"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "fundamental_investor",
+              "investor": "fundamental_investor_3"
+            },
+            "source_id": "fundamental_investor_3",
+            "timestamp": "2026-03-31T15:16:58.637801",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.022
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "fundamental_investor",
+          "investor": "fundamental_investor_3"
+        },
+        "source_id": "fundamental_investor_3",
+        "timestamp": "2026-03-31T15:16:58.637801",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 167,
+      "tick_turn_duration_ms": 0.028,
+      "tick_turn_total_duration_ms": 10.418,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000168_0331151658": {
+    "round_num": 168,
+    "timestamp": "2026-03-31T15:16:58.837136",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "fundamental_investor",
+            "investor": "fundamental_investor_3"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "fundamental_investor",
+              "investor": "fundamental_investor_3"
+            },
+            "source_id": "fundamental_investor_3",
+            "timestamp": "2026-03-31T15:16:58.837114",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.019
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "fundamental_investor",
+          "investor": "fundamental_investor_3"
+        },
+        "source_id": "fundamental_investor_3",
+        "timestamp": "2026-03-31T15:16:58.837114",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 168,
+      "tick_turn_duration_ms": 0.024,
+      "tick_turn_total_duration_ms": 10.442,
+      "tick_step_count": 1
+    }
+  }
+}

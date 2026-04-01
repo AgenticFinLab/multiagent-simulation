@@ -1,0 +1,95 @@
+{
+  "msg_r000147_0331151655": {
+    "round_num": 147,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:55.127776",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "leveraged_buyer_1",
+      "payload": {
+        "content": {
+          "price": 182.36605235632945,
+          "prev_price": 183.1515869733109,
+          "return": -0.004288986134179303,
+          "return_pct": -0.4288986134179303,
+          "fundamental": 115.94271527388328,
+          "bubble_ratio": 1.572897891217564,
+          "volume": 3.79594418417537,
+          "net_demand": -3.79594418417537,
+          "round": 148,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:55.085423",
+      "priority": 1,
+      "extras": {
+        "round_num": 148
+      }
+    }
+  },
+  "msg_r000148_0331151655": {
+    "round_num": 148,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:55.293179",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "leveraged_buyer_1",
+      "payload": {
+        "content": {
+          "price": 181.3716977659103,
+          "prev_price": 182.36605235632945,
+          "return": -0.005452520233734302,
+          "return_pct": -0.5452520233734302,
+          "fundamental": 116.05865798915715,
+          "bubble_ratio": 1.562758874765337,
+          "volume": 8.270407312096816,
+          "net_demand": -3.35576433070848,
+          "round": 149,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:55.248878",
+      "priority": 1,
+      "extras": {
+        "round_num": 149
+      }
+    }
+  },
+  "msg_r000149_0331151655": {
+    "round_num": 149,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:55.464301",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "leveraged_buyer_1",
+      "payload": {
+        "content": {
+          "price": 180.35137492750928,
+          "prev_price": 181.3716977659103,
+          "return": -0.005625590160808449,
+          "return_pct": -0.5625590160808449,
+          "fundamental": 116.1747166471463,
+          "bubble_ratio": 1.552415018796944,
+          "volume": 7.785462267439881,
+          "net_demand": -7.785462267439881,
+          "round": 150,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:55.418875",
+      "priority": 1,
+      "extras": {
+        "round_num": 150
+      }
+    }
+  }
+}

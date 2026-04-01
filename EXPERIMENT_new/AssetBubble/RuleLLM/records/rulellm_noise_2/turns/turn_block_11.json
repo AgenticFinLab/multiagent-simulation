@@ -1,0 +1,182 @@
+{
+  "turn_r000034_0330114728": {
+    "round_num": 34,
+    "timestamp": "2026-03-30T11:47:28.949399",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 103.21,
+            "quantity": 0.0,
+            "strategy": "RuleLLMNoiseTrader",
+            "investor": "rulellm_noise_2",
+            "reasoning": "Neutral sentiment (zero return, net demand, volume) leads to holding position.",
+            "analysis": "Market signals: Price return is -0.00% (negligible), net demand is 0, volume is 0. Mixed/neutral signals. Composite sentiment (random_sentiment ~0 + herding_sentiment=0.7*0*10=0) is ~0, which is between -0.1 and 0.1. Thus, no action needed.",
+            "cash": 9011.525700000002,
+            "position": 9.650000000000002
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 103.21,
+              "quantity": 0.0,
+              "strategy": "RuleLLMNoiseTrader",
+              "investor": "rulellm_noise_2",
+              "reasoning": "Neutral sentiment (zero return, net demand, volume) leads to holding position.",
+              "analysis": "Market signals: Price return is -0.00% (negligible), net demand is 0, volume is 0. Mixed/neutral signals. Composite sentiment (random_sentiment ~0 + herding_sentiment=0.7*0*10=0) is ~0, which is between -0.1 and 0.1. Thus, no action needed.",
+              "cash": 9011.525700000002,
+              "position": 9.650000000000002
+            },
+            "source_id": "rulellm_noise_2",
+            "timestamp": "2026-03-30T11:47:28.949273",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 6292.124
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 103.21,
+          "quantity": 0.0,
+          "strategy": "RuleLLMNoiseTrader",
+          "investor": "rulellm_noise_2",
+          "reasoning": "Neutral sentiment (zero return, net demand, volume) leads to holding position.",
+          "analysis": "Market signals: Price return is -0.00% (negligible), net demand is 0, volume is 0. Mixed/neutral signals. Composite sentiment (random_sentiment ~0 + herding_sentiment=0.7*0*10=0) is ~0, which is between -0.1 and 0.1. Thus, no action needed.",
+          "cash": 9011.525700000002,
+          "position": 9.650000000000002
+        },
+        "source_id": "rulellm_noise_2",
+        "timestamp": "2026-03-30T11:47:28.949273",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 34,
+      "tick_turn_duration_ms": 6292.141,
+      "tick_turn_total_duration_ms": 495602.772,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000035_0330114740": {
+    "round_num": 35,
+    "timestamp": "2026-03-30T11:47:40.677609",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 103.49,
+            "quantity": 0.0,
+            "strategy": "RuleLLMNoiseTrader",
+            "investor": "rulellm_noise_2",
+            "reasoning": "Mixed signals (zero net demand, small positive return) lead to neutral sentiment; hold position.",
+            "analysis": "1. **Market Signals**: Price return is +0.27% (positive), but net demand and volume are 0.00 (mixed signals).  \n2. **Composite Sentiment Calculation**:  \n   - Herding sentiment = 0.7 * 0.0027 * 10 ≈ 0.0189  \n   - Random sentiment (estimated ~0, no strong mood shift)  \n   - Total sentiment ≈ 0.0189 (between -0.1 and 0.1 → neutral)  \n3. **Decision**: Neutral sentiment triggers hold (no buy/sell).",
+            "cash": 9011.525700000002,
+            "position": 9.650000000000002
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 103.49,
+              "quantity": 0.0,
+              "strategy": "RuleLLMNoiseTrader",
+              "investor": "rulellm_noise_2",
+              "reasoning": "Mixed signals (zero net demand, small positive return) lead to neutral sentiment; hold position.",
+              "analysis": "1. **Market Signals**: Price return is +0.27% (positive), but net demand and volume are 0.00 (mixed signals).  \n2. **Composite Sentiment Calculation**:  \n   - Herding sentiment = 0.7 * 0.0027 * 10 ≈ 0.0189  \n   - Random sentiment (estimated ~0, no strong mood shift)  \n   - Total sentiment ≈ 0.0189 (between -0.1 and 0.1 → neutral)  \n3. **Decision**: Neutral sentiment triggers hold (no buy/sell).",
+              "cash": 9011.525700000002,
+              "position": 9.650000000000002
+            },
+            "source_id": "rulellm_noise_2",
+            "timestamp": "2026-03-30T11:47:40.677541",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 9311.58
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 103.49,
+          "quantity": 0.0,
+          "strategy": "RuleLLMNoiseTrader",
+          "investor": "rulellm_noise_2",
+          "reasoning": "Mixed signals (zero net demand, small positive return) lead to neutral sentiment; hold position.",
+          "analysis": "1. **Market Signals**: Price return is +0.27% (positive), but net demand and volume are 0.00 (mixed signals).  \n2. **Composite Sentiment Calculation**:  \n   - Herding sentiment = 0.7 * 0.0027 * 10 ≈ 0.0189  \n   - Random sentiment (estimated ~0, no strong mood shift)  \n   - Total sentiment ≈ 0.0189 (between -0.1 and 0.1 → neutral)  \n3. **Decision**: Neutral sentiment triggers hold (no buy/sell).",
+          "cash": 9011.525700000002,
+          "position": 9.650000000000002
+        },
+        "source_id": "rulellm_noise_2",
+        "timestamp": "2026-03-30T11:47:40.677541",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 35,
+      "tick_turn_duration_ms": 9311.59,
+      "tick_turn_total_duration_ms": 504914.362,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000036_0330114756": {
+    "round_num": 36,
+    "timestamp": "2026-03-30T11:47:56.327251",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 102.68,
+            "quantity": 0.0,
+            "strategy": "RuleLLMNoiseTrader",
+            "investor": "rulellm_noise_2",
+            "reasoning": "Neutral sentiment (net demand zero, small negative price return, total sentiment between -0.1 and 0.1) → hold position.",
+            "analysis": "1. **Market Signals**: \n   - Price return: -0.79% (negative, bearish short-term trend)\n   - Net demand: 0.00 (no net buying/selling crowd activity)\n   - Volume: 0.00 (no trading activity)\n   \n2. **Sentiment Calculation**:\n   - Herding sentiment = 0.7 * (-0.0079) * 10 ≈ -0.0553 (negative but small)\n   - Random sentiment proxy: Since net demand is 0, assume a small neutral value (≈0.0)\n   - Total sentiment ≈ -0.0553 (between -0.1 and 0.1 → neutral)\n\n3. **Portfolio Constraints**: No action needed as sentiment is neutral, no forced buy/sell.",
+            "cash": 9011.525700000002,
+            "position": 9.650000000000002
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 102.68,
+              "quantity": 0.0,
+              "strategy": "RuleLLMNoiseTrader",
+              "investor": "rulellm_noise_2",
+              "reasoning": "Neutral sentiment (net demand zero, small negative price return, total sentiment between -0.1 and 0.1) → hold position.",
+              "analysis": "1. **Market Signals**: \n   - Price return: -0.79% (negative, bearish short-term trend)\n   - Net demand: 0.00 (no net buying/selling crowd activity)\n   - Volume: 0.00 (no trading activity)\n   \n2. **Sentiment Calculation**:\n   - Herding sentiment = 0.7 * (-0.0079) * 10 ≈ -0.0553 (negative but small)\n   - Random sentiment proxy: Since net demand is 0, assume a small neutral value (≈0.0)\n   - Total sentiment ≈ -0.0553 (between -0.1 and 0.1 → neutral)\n\n3. **Portfolio Constraints**: No action needed as sentiment is neutral, no forced buy/sell.",
+              "cash": 9011.525700000002,
+              "position": 9.650000000000002
+            },
+            "source_id": "rulellm_noise_2",
+            "timestamp": "2026-03-30T11:47:56.327098",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 13936.963
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 102.68,
+          "quantity": 0.0,
+          "strategy": "RuleLLMNoiseTrader",
+          "investor": "rulellm_noise_2",
+          "reasoning": "Neutral sentiment (net demand zero, small negative price return, total sentiment between -0.1 and 0.1) → hold position.",
+          "analysis": "1. **Market Signals**: \n   - Price return: -0.79% (negative, bearish short-term trend)\n   - Net demand: 0.00 (no net buying/selling crowd activity)\n   - Volume: 0.00 (no trading activity)\n   \n2. **Sentiment Calculation**:\n   - Herding sentiment = 0.7 * (-0.0079) * 10 ≈ -0.0553 (negative but small)\n   - Random sentiment proxy: Since net demand is 0, assume a small neutral value (≈0.0)\n   - Total sentiment ≈ -0.0553 (between -0.1 and 0.1 → neutral)\n\n3. **Portfolio Constraints**: No action needed as sentiment is neutral, no forced buy/sell.",
+          "cash": 9011.525700000002,
+          "position": 9.650000000000002
+        },
+        "source_id": "rulellm_noise_2",
+        "timestamp": "2026-03-30T11:47:56.327098",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 36,
+      "tick_turn_duration_ms": 13936.983,
+      "tick_turn_total_duration_ms": 518851.345,
+      "tick_step_count": 1
+    }
+  }
+}

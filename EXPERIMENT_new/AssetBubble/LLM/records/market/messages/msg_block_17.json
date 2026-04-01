@@ -1,0 +1,89 @@
+{
+  "msg_r000050_0330120011": {
+    "round_num": 50,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:00:11.481581",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "llm_leveraged_3",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 90.64,
+          "quantity": 0.0,
+          "strategy": "LLMLeveragedSpeculator",
+          "investor": "llm_leveraged_3",
+          "reasoning": "Negative momentum (prices falling) means no favorable conditions to increase positions; portfolio va",
+          "analysis": "1. **Momentum Check**: Recent prices show a clear downward trend (100.86 → 97.59 → 90.64), indicating negative momentum. Rule 1 (larger positions only with positive momentum) does not apply here.  \n2. **Portfolio Value**: Current value ($40354.70) is far above the starting $10000, so Rule 2 (reduce exposure if portfolio drops significantly) is not triggered.  \n3. **Warning Signs**:  \n   - No significant portfolio drop from starting value.  \n   - No sharp reversal after extended gains (trend is downward, not a reversal).  \n   - Price is 0.86x below fundamental value (not overvalued).  \n   - Momentum is accelerating downward (not weakening).  \n4. **Position Context**: Net position is short 10 shares (50 short - 40 long). No immediate favorable conditions to adjust positions (negative momentum, no warning signs to reduce exposure).",
+          "cash": 36729.3,
+          "position": 40.0
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:00:11.418709",
+      "priority": 1,
+      "extras": {
+        "round_num": 50
+      }
+    }
+  },
+  "msg_r000051_0330120044": {
+    "round_num": 51,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:00:44.999891",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "llm_greater_fool_5",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 108.93,
+          "quantity": 30.0,
+          "strategy": "LLMGreaterFoolSpeculator",
+          "investor": "llm_greater_fool_5",
+          "reasoning": "Strong upward momentum (20%+ jump) with price acceleration; aggressively add to long position to rid",
+          "analysis": "1. **Momentum Check**: Recent prices show a sharp acceleration: 90.64 → 108.93 (+20.19% jump), confirming strong upward momentum.  \n2. **Strategy Alignment**: Rising prices mean BUY MORE; aggressive position sizing applies here.  \n3. **Fundamental vs Price**: Current price ($108.93) is a 3.5% premium to fundamental value ($105.23), but momentum overrides this (willing to pay premiums for trending assets).  \n4. **Portfolio Position**: Current long is 60 shares; short is 140 (net short -80). Momentum dictates shifting to net long by adding aggressively to longs.  \n5. **Execution**: Pay current market price to ensure entry (no need to lowball; momentum is strong).",
+          "cash": 19676.053999999996,
+          "position": 90.0
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:00:44.978935",
+      "priority": 1,
+      "extras": {
+        "round_num": 51
+      }
+    }
+  },
+  "msg_r000051_0330120045": {
+    "round_num": 51,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:00:45.047725",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "llm_leveraged_3",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 108.93,
+          "quantity": 40.0,
+          "strategy": "LLMLeveragedSpeculator",
+          "investor": "llm_leveraged_3",
+          "reasoning": "Positive momentum (sharp price increase, upward acceleration), strong portfolio value, positive net ",
+          "analysis": "1. **Momentum Check**: Recent price jumped from $90.64 to $108.93 (+20.19%), with upward acceleration in recent prices → positive momentum.\n2. **Portfolio Value**: $41086.69 is far above the starting $10k → no need to reduce exposure.\n3. **Fundamental Ratio**: 1.04x (only 4% above fundamental) → no significant overvaluation warning.\n4. **Net Demand**: +120 → buying pressure supports positive momentum.\n5. **Position Sizing**: Current long position (40 shares) is below the 80-share max allowed for positive momentum → should increase to max to maximize returns.",
+          "cash": 32372.100000000002,
+          "position": 80.0
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:00:44.978960",
+      "priority": 1,
+      "extras": {
+        "round_num": 51
+      }
+    }
+  }
+}

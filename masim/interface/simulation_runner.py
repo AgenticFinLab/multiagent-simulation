@@ -1,4 +1,93 @@
-"""Async simulation runner with progress streaming for Streamlit."""
+"""Async simulation runner with progress streaming for Streamlit.
+
+This module provides async simulation execution with real-time progress updates,
+designed for integration with the Streamlit web UI (masim/interface/app.py).
+
+Usage
+-----
+
+1. **Via Streamlit Web UI (Recommended):**
+
+   Launch the web interface and select a scenario:
+
+   ```bash
+   cd /path/to/multiagent-simulation
+   streamlit run masim/interface/app.py
+   ```
+
+   Then:
+   - Select a scenario from the sidebar (e.g., AssetBubble, HerdEffect)
+   - Click "Start Simulation" to run
+   - View real-time progress and results
+
+2. **Programmatic Usage:**
+
+   ```python
+   import asyncio
+   from masim.interface.simulation_runner import SimulationRunner
+
+   async def main():
+       # Initialize with config path
+       runner = SimulationRunner("configs/AssetBubble/simulation.yml")
+
+       # Setup
+       if not await runner.setup():
+           print(f"Setup failed: {runner.status.error}")
+           return
+
+       # Run with progress callback
+       def on_progress(status):
+           print(f"Progress: {status.progress_pct:.1f}% - {status.message}")
+
+       async for update in runner.run(progress_callback=on_progress):
+           # Process round updates here
+           print(f"Round {update.round_num} completed")
+
+       # Cleanup
+       await runner.shutdown()
+
+   asyncio.run(main())
+   ```
+
+3. **Using Convenience Function:**
+
+   ```python
+   from masim.interface.simulation_runner import run_simulation_with_progress
+
+   async def main():
+       async for status in run_simulation_with_progress(
+           "configs/AssetBubble/simulation.yml",
+           use_mock=False  # Set True for testing without real simulation
+       ):
+           print(f"{status.state}: {status.progress_pct:.1f}%")
+
+   asyncio.run(main())
+   ```
+
+4. **Mock Mode for Testing:**
+
+   Use mock mode to test the UI without running actual simulations:
+
+   ```python
+   runner = SimulationRunner(config_path)  # Real simulation
+   # vs
+   from masim.interface.simulation_runner import MockSimulationRunner
+   runner = MockSimulationRunner(config_path)  # Mock for testing
+   ```
+
+Classes
+-------
+- SimulationRunner: Main async runner with progress streaming
+- MockSimulationRunner: Mock runner for UI testing
+- RoundUpdate: Dataclass for per-round updates
+- SimulationStatus: Dataclass for simulation state
+
+Integration Notes
+-----------------
+- Used by: masim/interface/app.py (Streamlit web UI)
+- Depends on: masim/simulator/general.py (GeneralSimulator)
+- Progress callbacks enable real-time UI updates in Streamlit
+"""
 
 import asyncio
 import logging

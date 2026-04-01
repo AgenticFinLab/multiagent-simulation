@@ -1,0 +1,182 @@
+{
+  "turn_r000118_0330121414": {
+    "round_num": 118,
+    "timestamp": "2026-03-30T12:14:14.995923",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 109.19,
+            "quantity": 0.312,
+            "strategy": "RuleLLMLeveragedBuyer",
+            "investor": "rulellm_leveraged_1",
+            "reasoning": "Positive momentum (>0.5% gain), no margin call, undervalued (P/F <1.5), so leveraged buy.",
+            "analysis": "1. **Margin Call Check**: Portfolio equity ratio = 10035.18 / 10000 = 1.0035 > 0.7 → No margin call.\n2. **Normal Trading**: Price return (+0.52%) > 0.005 → Buy with leverage.\n3. **Quantity Calculation**: 0.0052 * 20 * 3 = 0.312 (capped at 60, which is satisfied).\n4. **Constraints**: 0.312 ≤ 8568.08 / 109.19 ≈ 78.47 → Valid.\n5. **P/F Ratio**: 0.97 < 1.5 → No reduction needed.",
+            "cash": 8534.017180000003,
+            "position": 13.748000000000003
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 109.19,
+              "quantity": 0.312,
+              "strategy": "RuleLLMLeveragedBuyer",
+              "investor": "rulellm_leveraged_1",
+              "reasoning": "Positive momentum (>0.5% gain), no margin call, undervalued (P/F <1.5), so leveraged buy.",
+              "analysis": "1. **Margin Call Check**: Portfolio equity ratio = 10035.18 / 10000 = 1.0035 > 0.7 → No margin call.\n2. **Normal Trading**: Price return (+0.52%) > 0.005 → Buy with leverage.\n3. **Quantity Calculation**: 0.0052 * 20 * 3 = 0.312 (capped at 60, which is satisfied).\n4. **Constraints**: 0.312 ≤ 8568.08 / 109.19 ≈ 78.47 → Valid.\n5. **P/F Ratio**: 0.97 < 1.5 → No reduction needed.",
+              "cash": 8534.017180000003,
+              "position": 13.748000000000003
+            },
+            "source_id": "rulellm_leveraged_1",
+            "timestamp": "2026-03-30T12:14:14.995864",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 9388.922
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 109.19,
+          "quantity": 0.312,
+          "strategy": "RuleLLMLeveragedBuyer",
+          "investor": "rulellm_leveraged_1",
+          "reasoning": "Positive momentum (>0.5% gain), no margin call, undervalued (P/F <1.5), so leveraged buy.",
+          "analysis": "1. **Margin Call Check**: Portfolio equity ratio = 10035.18 / 10000 = 1.0035 > 0.7 → No margin call.\n2. **Normal Trading**: Price return (+0.52%) > 0.005 → Buy with leverage.\n3. **Quantity Calculation**: 0.0052 * 20 * 3 = 0.312 (capped at 60, which is satisfied).\n4. **Constraints**: 0.312 ≤ 8568.08 / 109.19 ≈ 78.47 → Valid.\n5. **P/F Ratio**: 0.97 < 1.5 → No reduction needed.",
+          "cash": 8534.017180000003,
+          "position": 13.748000000000003
+        },
+        "source_id": "rulellm_leveraged_1",
+        "timestamp": "2026-03-30T12:14:14.995864",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 118,
+      "tick_turn_duration_ms": 9388.932,
+      "tick_turn_total_duration_ms": 1187981.489,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000119_0330121433": {
+    "round_num": 119,
+    "timestamp": "2026-03-30T12:14:33.991264",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 110.32,
+            "quantity": 0.62,
+            "strategy": "RuleLLMLeveragedBuyer",
+            "investor": "rulellm_leveraged_1",
+            "reasoning": "Positive momentum (>0.5% gain), no margin call, undervalued (P/F <1.5), so buy with leverage.",
+            "analysis": "1. **Margin Call Check**: Portfolio equity ratio = 10050.68 / 10000 = 1.005 > 0.7 → No margin call.\n2. **Normal Trading Rule**: Price return (+1.03%) > 0.5% → Buy with leverage.\n3. **Quantity Calculation**: 0.0103 * 20 * 3 = 0.618 (capped at 60, well below limit).\n4. **Constraints Check**: Available cash / bid price ≈ 77.36 > 0.618 → Valid. Price/fundamental ratio (0.98) <1.5 → No reduction needed.",
+            "cash": 8465.618780000003,
+            "position": 14.368000000000002
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 110.32,
+              "quantity": 0.62,
+              "strategy": "RuleLLMLeveragedBuyer",
+              "investor": "rulellm_leveraged_1",
+              "reasoning": "Positive momentum (>0.5% gain), no margin call, undervalued (P/F <1.5), so buy with leverage.",
+              "analysis": "1. **Margin Call Check**: Portfolio equity ratio = 10050.68 / 10000 = 1.005 > 0.7 → No margin call.\n2. **Normal Trading Rule**: Price return (+1.03%) > 0.5% → Buy with leverage.\n3. **Quantity Calculation**: 0.0103 * 20 * 3 = 0.618 (capped at 60, well below limit).\n4. **Constraints Check**: Available cash / bid price ≈ 77.36 > 0.618 → Valid. Price/fundamental ratio (0.98) <1.5 → No reduction needed.",
+              "cash": 8465.618780000003,
+              "position": 14.368000000000002
+            },
+            "source_id": "rulellm_leveraged_1",
+            "timestamp": "2026-03-30T12:14:33.991201",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 12321.519
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 110.32,
+          "quantity": 0.62,
+          "strategy": "RuleLLMLeveragedBuyer",
+          "investor": "rulellm_leveraged_1",
+          "reasoning": "Positive momentum (>0.5% gain), no margin call, undervalued (P/F <1.5), so buy with leverage.",
+          "analysis": "1. **Margin Call Check**: Portfolio equity ratio = 10050.68 / 10000 = 1.005 > 0.7 → No margin call.\n2. **Normal Trading Rule**: Price return (+1.03%) > 0.5% → Buy with leverage.\n3. **Quantity Calculation**: 0.0103 * 20 * 3 = 0.618 (capped at 60, well below limit).\n4. **Constraints Check**: Available cash / bid price ≈ 77.36 > 0.618 → Valid. Price/fundamental ratio (0.98) <1.5 → No reduction needed.",
+          "cash": 8465.618780000003,
+          "position": 14.368000000000002
+        },
+        "source_id": "rulellm_leveraged_1",
+        "timestamp": "2026-03-30T12:14:33.991201",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 119,
+      "tick_turn_duration_ms": 12321.529,
+      "tick_turn_total_duration_ms": 1200303.018,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000120_0330121454": {
+    "round_num": 120,
+    "timestamp": "2026-03-30T12:14:54.982826",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 111.51,
+            "quantity": 0.648,
+            "strategy": "RuleLLMLeveragedBuyer",
+            "investor": "rulellm_leveraged_1",
+            "reasoning": "Positive momentum (>0.5% gain), no margin call, undervalued (P/F <1.5), so leveraged buy.",
+            "analysis": "1. **Margin Call Check**: Portfolio value ($10067.73) / Initial equity ($10000) = 1.0067 > 0.7 → No margin call.\n2. **Normal Trading Rule**: This round return (+1.08%) > 0.5% → Buy with leverage.\n3. **Quantity Calculation**: 0.0108 * 20 (base_size) * 3 (leverage_ratio) = 0.648 (capped at +60, valid).\n4. **Constraints**: Cost of 0.648 shares (0.648*111.51 ≈ $72.26) ≤ available cash ($8465.62); P/F ratio (0.99x) <1.5 → no reduction needed.",
+            "cash": 8393.360300000002,
+            "position": 15.016000000000002
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 111.51,
+              "quantity": 0.648,
+              "strategy": "RuleLLMLeveragedBuyer",
+              "investor": "rulellm_leveraged_1",
+              "reasoning": "Positive momentum (>0.5% gain), no margin call, undervalued (P/F <1.5), so leveraged buy.",
+              "analysis": "1. **Margin Call Check**: Portfolio value ($10067.73) / Initial equity ($10000) = 1.0067 > 0.7 → No margin call.\n2. **Normal Trading Rule**: This round return (+1.08%) > 0.5% → Buy with leverage.\n3. **Quantity Calculation**: 0.0108 * 20 (base_size) * 3 (leverage_ratio) = 0.648 (capped at +60, valid).\n4. **Constraints**: Cost of 0.648 shares (0.648*111.51 ≈ $72.26) ≤ available cash ($8465.62); P/F ratio (0.99x) <1.5 → no reduction needed.",
+              "cash": 8393.360300000002,
+              "position": 15.016000000000002
+            },
+            "source_id": "rulellm_leveraged_1",
+            "timestamp": "2026-03-30T12:14:54.982715",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 14694.276
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 111.51,
+          "quantity": 0.648,
+          "strategy": "RuleLLMLeveragedBuyer",
+          "investor": "rulellm_leveraged_1",
+          "reasoning": "Positive momentum (>0.5% gain), no margin call, undervalued (P/F <1.5), so leveraged buy.",
+          "analysis": "1. **Margin Call Check**: Portfolio value ($10067.73) / Initial equity ($10000) = 1.0067 > 0.7 → No margin call.\n2. **Normal Trading Rule**: This round return (+1.08%) > 0.5% → Buy with leverage.\n3. **Quantity Calculation**: 0.0108 * 20 (base_size) * 3 (leverage_ratio) = 0.648 (capped at +60, valid).\n4. **Constraints**: Cost of 0.648 shares (0.648*111.51 ≈ $72.26) ≤ available cash ($8465.62); P/F ratio (0.99x) <1.5 → no reduction needed.",
+          "cash": 8393.360300000002,
+          "position": 15.016000000000002
+        },
+        "source_id": "rulellm_leveraged_1",
+        "timestamp": "2026-03-30T12:14:54.982715",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 120,
+      "tick_turn_duration_ms": 14694.291,
+      "tick_turn_total_duration_ms": 1214997.309,
+      "tick_step_count": 1
+    }
+  }
+}

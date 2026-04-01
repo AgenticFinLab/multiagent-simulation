@@ -1,0 +1,95 @@
+{
+  "msg_r000048_0330115903": {
+    "round_num": 48,
+    "direction": "received",
+    "timestamp": "2026-03-30T11:59:03.878864",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "llm_greater_fool_2",
+      "payload": {
+        "content": {
+          "price": 97.59413507708105,
+          "prev_price": 100.86105911625883,
+          "return": -0.03239034041286556,
+          "return_pct": -3.2390340412865557,
+          "fundamental": 105.0194637796949,
+          "bubble_ratio": 0.9292956901951969,
+          "volume": 259.57713662502476,
+          "net_demand": -20.422863374975208,
+          "round": 49,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T11:59:03.870679",
+      "priority": 1,
+      "extras": {
+        "round_num": 49
+      }
+    }
+  },
+  "msg_r000049_0330115939": {
+    "round_num": 49,
+    "direction": "received",
+    "timestamp": "2026-03-30T11:59:39.740177",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "llm_greater_fool_2",
+      "payload": {
+        "content": {
+          "price": 90.6350219376166,
+          "prev_price": 97.59413507708105,
+          "return": -0.07130667364353459,
+          "return_pct": -7.130667364353458,
+          "fundamental": 105.12448324347459,
+          "bubble_ratio": 0.8621685371589458,
+          "volume": 315.0,
+          "net_demand": -45.0,
+          "round": 50,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T11:59:39.733382",
+      "priority": 1,
+      "extras": {
+        "round_num": 50
+      }
+    }
+  },
+  "msg_r000050_0330120011": {
+    "round_num": 50,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:00:11.497799",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "llm_greater_fool_2",
+      "payload": {
+        "content": {
+          "price": 108.93471617687588,
+          "prev_price": 90.6350219376166,
+          "return": 0.20190533248676018,
+          "return_pct": 20.19053324867602,
+          "fundamental": 105.22960772671804,
+          "bubble_ratio": 1.0352097525610855,
+          "volume": 360.0,
+          "net_demand": 120.0,
+          "round": 51,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:00:11.490929",
+      "priority": 1,
+      "extras": {
+        "round_num": 51
+      }
+    }
+  }
+}

@@ -18,7 +18,7 @@ setting:
   description: "[Description of the simulation]"
   # Total number of rounds to execute. The loop in GeneralSimulator.run() iterates
   # range(1, total_rounds+1). Simulation stops exactly at this count.
-  total_rounds: 300
+  total_rounds: 200
   # Max round results kept in hot RAM (HistoryBuffer hot deque).
   # Round results beyond this limit are spilled to disk under record_path/history/.
   # simulator.run() returns only these hot entries — NOT all round results.

@@ -1,0 +1,89 @@
+{
+  "msg_r000146_0330125158": {
+    "round_num": 146,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:51:58.661478",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "llm_leveraged_3",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 346.69,
+          "quantity": -40.0,
+          "strategy": "LLMLeveragedSpeculator",
+          "investor": "llm_leveraged_3",
+          "reasoning": "Price is 3x above fundamental value; despite positive momentum, reduce leveraged long exposure to ma",
+          "analysis": "1. **Momentum Check**: Recent prices show acceleration (295.27 → 306.61 → 346.69, with the last jump being larger than the prior), so momentum is positive.  \n2. **Fundamental Risk**: Price is 3.00x above fundamental value ($115.71), a significant deviation that signals potential reversal risk.  \n3. **Risk Management**: As a leveraged trader with very high risk profile, even positive momentum warrants caution against overexposure to an overvalued asset.  \n4. **Position Size**: Current long position (244 shares) is large; reducing it moderately aligns with risk management without abandoning positive momentum entirely.",
+          "cash": 85511.31000000003,
+          "position": 204.0
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:51:58.548713",
+      "priority": 1,
+      "extras": {
+        "round_num": 146
+      }
+    }
+  },
+  "msg_r000147_0330125225": {
+    "round_num": 147,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:52:25.144294",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "llm_leveraged_3",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 372.86,
+          "quantity": -50.0,
+          "strategy": "LLMLeveragedSpeculator",
+          "investor": "llm_leveraged_3",
+          "reasoning": "Price 3.22x above fundamental value with weakening momentum; reduce long exposure to manage leverage",
+          "analysis": "1. **Momentum Check**: Recent prices show upward trend (306.61 → 346.69 → 372.86) but **weakening acceleration**: return from 306.61→346.69 (~13.07%) > 346.69→372.86 (~7.55%).  \n2. **Fundamental Valuation**: Price ($372.86) is 3.22x fundamental value ($115.83) → **significantly overvalued**.  \n3. **Warning Sign Trigger**: Weakening momentum + price far above fundamentals = must reduce exposure (per rules).  \n4. **Portfolio Exposure**: Current long position (204 shares) is large; reducing this aligns with risk management for leveraged trading.",
+          "cash": 104154.31000000003,
+          "position": 154.0
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:52:25.024973",
+      "priority": 1,
+      "extras": {
+        "round_num": 147
+      }
+    }
+  },
+  "msg_r000148_0330125249": {
+    "round_num": 148,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:52:49.944349",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "llm_leveraged_3",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 373.62,
+          "quantity": -30.0,
+          "strategy": "LLMLeveragedSpeculator",
+          "investor": "llm_leveraged_3",
+          "reasoning": "Price is 3.22x fundamental value with weakening momentum; reduce long exposure to manage risk from o",
+          "analysis": "1. Portfolio Value Check: Current value ($161,691.13) is far above starting ($10,000) → no rule 2 trigger yet, but warning signs exist.\n2. Momentum: Recent prices show upward trend (346.69 → 372.86 → 373.62) but latest gain is small (+0.20%) → weakening momentum.\n3. Fundamental Check: Price ($373.62) is 3.22x fundamental value ($115.94) → significantly overvalued.\n4. Warning Sign Triggered: Price above fundamental + weakening momentum → must reduce exposure.\n5. Position Adjustment: Reduce long position to lower risk from overvaluation and weakening momentum.",
+          "cash": 115362.91000000003,
+          "position": 124.0
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:52:49.877871",
+      "priority": 1,
+      "extras": {
+        "round_num": 148
+      }
+    }
+  }
+}

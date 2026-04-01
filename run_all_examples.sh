@@ -5,11 +5,11 @@ PROJ="/Users/sjia/Documents/AgenticFinLab/Projects/multiagent-simulation"
 cd "$PROJ"
 
 declare -A RUNNERS=(
-    ["LiquidityDryup"]="examples/LiquidityDryup/run_liquidity.py -c configs/LiquidityDryup/simulation.yml"
-    ["MarketCrash"]="examples/MarketCrash/run_crash.py -c configs/MarketCrash/simulation.yml"
-    ["ReversalEffect"]="examples/ReversalEffect/run_reversal.py -c configs/ReversalEffect/simulation.yml"
-    ["ShortSqueeze"]="examples/ShortSqueeze/run_short_squeeze.py -c configs/ShortSqueeze/simulation.yml"
-    ["VolatilityClustering"]="examples/VolatilityClustering/run_volatility.py -c configs/VolatilityClustering/simulation.yml"
+    ["LiquidityDryup"]="examples/LiquidityDryup/Rule/run_liquidity.py -c configs/LiquidityDryup/Rule/simulation.yml"
+    ["MarketCrash"]="examples/MarketCrash/Rule/run_crash.py -c configs/MarketCrash/Rule/simulation.yml"
+    ["ReversalEffect"]="examples/ReversalEffect/Rule/run_reversal.py -c configs/ReversalEffect/Rule/simulation.yml"
+    ["ShortSqueeze"]="examples/ShortSqueeze/Rule/run_short_squeeze.py -c configs/ShortSqueeze/Rule/simulation.yml"
+    ["VolatilityClustering"]="examples/VolatilityClustering/Rule/run_volatility.py -c configs/VolatilityClustering/Rule/simulation.yml"
 )
 
 PASS=0

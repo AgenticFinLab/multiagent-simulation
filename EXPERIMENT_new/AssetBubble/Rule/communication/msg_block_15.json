@@ -1,0 +1,502 @@
+{
+  "msg_0331151704625728": {
+    "timestamp": "2026-03-31T15:17:04.625728",
+    "size_bytes": 545,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"leveraged_buyer_1\", \"payload\": {\"content\": {\"price\": 153.05246392642005, \"prev_price\": 151.2898652634586, \"return\": 0.011650474140432472, \"return_pct\": 1.1650474140432472, \"fundamental\": 121.8841802901228, \"bubble_ratio\": 1.2557205009059165, \"volume\": 12.721945387358424, \"net_demand\": 12.721945387358424, \"round\": 198, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.559886\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704627924": {
+    "timestamp": "2026-03-31T15:17:04.627924",
+    "size_bytes": 545,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"leveraged_buyer_2\", \"payload\": {\"content\": {\"price\": 153.05246392642005, \"prev_price\": 151.2898652634586, \"return\": 0.011650474140432472, \"return_pct\": 1.1650474140432472, \"fundamental\": 121.8841802901228, \"bubble_ratio\": 1.2557205009059165, \"volume\": 12.721945387358424, \"net_demand\": 12.721945387358424, \"round\": 198, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.559888\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704630079": {
+    "timestamp": "2026-03-31T15:17:04.630079",
+    "size_bytes": 545,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"leveraged_buyer_3\", \"payload\": {\"content\": {\"price\": 153.05246392642005, \"prev_price\": 151.2898652634586, \"return\": 0.011650474140432472, \"return_pct\": 1.1650474140432472, \"fundamental\": 121.8841802901228, \"bubble_ratio\": 1.2557205009059165, \"volume\": 12.721945387358424, \"net_demand\": 12.721945387358424, \"round\": 198, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.559889\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704632154": {
+    "timestamp": "2026-03-31T15:17:04.632154",
+    "size_bytes": 549,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"conservative_holder_1\", \"payload\": {\"content\": {\"price\": 153.05246392642005, \"prev_price\": 151.2898652634586, \"return\": 0.011650474140432472, \"return_pct\": 1.1650474140432472, \"fundamental\": 121.8841802901228, \"bubble_ratio\": 1.2557205009059165, \"volume\": 12.721945387358424, \"net_demand\": 12.721945387358424, \"round\": 198, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.559890\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704634237": {
+    "timestamp": "2026-03-31T15:17:04.634237",
+    "size_bytes": 549,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"conservative_holder_2\", \"payload\": {\"content\": {\"price\": 153.05246392642005, \"prev_price\": 151.2898652634586, \"return\": 0.011650474140432472, \"return_pct\": 1.1650474140432472, \"fundamental\": 121.8841802901228, \"bubble_ratio\": 1.2557205009059165, \"volume\": 12.721945387358424, \"net_demand\": 12.721945387358424, \"round\": 198, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.559892\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704661808": {
+    "timestamp": "2026-03-31T15:17:04.661808",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661749\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704664387": {
+    "timestamp": "2026-03-31T15:17:04.664387",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661758\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704666602": {
+    "timestamp": "2026-03-31T15:17:04.666602",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_3\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_3\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661760\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704668736": {
+    "timestamp": "2026-03-31T15:17:04.668736",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_4\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_4\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661762\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704670904": {
+    "timestamp": "2026-03-31T15:17:04.670904",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_5\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_5\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661764\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704673343": {
+    "timestamp": "2026-03-31T15:17:04.673343",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"rational_arbitrageur_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"rational_arbitrageur\", \"investor\": \"rational_arbitrageur_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661765\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704675491": {
+    "timestamp": "2026-03-31T15:17:04.675491",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"rational_arbitrageur_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"rational_arbitrageur\", \"investor\": \"rational_arbitrageur_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661767\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704677829": {
+    "timestamp": "2026-03-31T15:17:04.677829",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"rational_arbitrageur_3\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"rational_arbitrageur\", \"investor\": \"rational_arbitrageur_3\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661768\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704679941": {
+    "timestamp": "2026-03-31T15:17:04.679941",
+    "size_bytes": 334,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"noise_trader_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"noise_trader\", \"investor\": \"noise_trader_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661770\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704682462": {
+    "timestamp": "2026-03-31T15:17:04.682462",
+    "size_bytes": 334,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"noise_trader_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"noise_trader\", \"investor\": \"noise_trader_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661771\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704684955": {
+    "timestamp": "2026-03-31T15:17:04.684955",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"fundamental_investor_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"fundamental_investor\", \"investor\": \"fundamental_investor_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661773\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704687561": {
+    "timestamp": "2026-03-31T15:17:04.687561",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"fundamental_investor_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"fundamental_investor\", \"investor\": \"fundamental_investor_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661774\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704689957": {
+    "timestamp": "2026-03-31T15:17:04.689957",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"fundamental_investor_3\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"fundamental_investor\", \"investor\": \"fundamental_investor_3\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661776\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704692088": {
+    "timestamp": "2026-03-31T15:17:04.692088",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"fundamental_investor_4\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"fundamental_investor\", \"investor\": \"fundamental_investor_4\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661778\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704694262": {
+    "timestamp": "2026-03-31T15:17:04.694262",
+    "size_bytes": 373,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"leveraged_buyer_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 153.05246392642005, \"quantity\": 0.9320379312345978, \"strategy\": \"leveraged_buyer\", \"investor\": \"leveraged_buyer_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661779\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704696363": {
+    "timestamp": "2026-03-31T15:17:04.696363",
+    "size_bytes": 373,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"leveraged_buyer_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 153.05246392642005, \"quantity\": 0.9320379312345978, \"strategy\": \"leveraged_buyer\", \"investor\": \"leveraged_buyer_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661781\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704698871": {
+    "timestamp": "2026-03-31T15:17:04.698871",
+    "size_bytes": 373,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"leveraged_buyer_3\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 153.05246392642005, \"quantity\": 0.9320379312345978, \"strategy\": \"leveraged_buyer\", \"investor\": \"leveraged_buyer_3\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661782\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704701195": {
+    "timestamp": "2026-03-31T15:17:04.701195",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"conservative_holder_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"conservative_holder\", \"investor\": \"conservative_holder_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661783\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704703385": {
+    "timestamp": "2026-03-31T15:17:04.703385",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"conservative_holder_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"conservative_holder\", \"investor\": \"conservative_holder_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.661785\", \"priority\": 1, \"extras\": {\"round_num\": 198}}"
+  },
+  "msg_0331151704760561": {
+    "timestamp": "2026-03-31T15:17:04.760561",
+    "size_bytes": 556,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"momentum_speculator_1\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760510\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704762903": {
+    "timestamp": "2026-03-31T15:17:04.762903",
+    "size_bytes": 556,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"momentum_speculator_2\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760516\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704765106": {
+    "timestamp": "2026-03-31T15:17:04.765106",
+    "size_bytes": 556,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"momentum_speculator_3\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760518\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704767722": {
+    "timestamp": "2026-03-31T15:17:04.767722",
+    "size_bytes": 556,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"momentum_speculator_4\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760520\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704770074": {
+    "timestamp": "2026-03-31T15:17:04.770074",
+    "size_bytes": 556,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"momentum_speculator_5\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760521\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704772304": {
+    "timestamp": "2026-03-31T15:17:04.772304",
+    "size_bytes": 557,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"rational_arbitrageur_1\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760522\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704774588": {
+    "timestamp": "2026-03-31T15:17:04.774588",
+    "size_bytes": 557,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"rational_arbitrageur_2\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760524\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704777288": {
+    "timestamp": "2026-03-31T15:17:04.777288",
+    "size_bytes": 557,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"rational_arbitrageur_3\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760525\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704779694": {
+    "timestamp": "2026-03-31T15:17:04.779694",
+    "size_bytes": 549,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"noise_trader_1\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760526\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704781957": {
+    "timestamp": "2026-03-31T15:17:04.781957",
+    "size_bytes": 549,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"noise_trader_2\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760527\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704784289": {
+    "timestamp": "2026-03-31T15:17:04.784289",
+    "size_bytes": 557,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"fundamental_investor_1\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760529\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704786968": {
+    "timestamp": "2026-03-31T15:17:04.786968",
+    "size_bytes": 557,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"fundamental_investor_2\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760530\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704789603": {
+    "timestamp": "2026-03-31T15:17:04.789603",
+    "size_bytes": 557,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"fundamental_investor_3\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760531\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704792003": {
+    "timestamp": "2026-03-31T15:17:04.792003",
+    "size_bytes": 557,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"fundamental_investor_4\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760533\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704794281": {
+    "timestamp": "2026-03-31T15:17:04.794281",
+    "size_bytes": 552,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"leveraged_buyer_1\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760534\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704796630": {
+    "timestamp": "2026-03-31T15:17:04.796630",
+    "size_bytes": 552,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"leveraged_buyer_2\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760535\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704799126": {
+    "timestamp": "2026-03-31T15:17:04.799126",
+    "size_bytes": 552,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"leveraged_buyer_3\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760536\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704801731": {
+    "timestamp": "2026-03-31T15:17:04.801731",
+    "size_bytes": 556,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"conservative_holder_1\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760538\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704804434": {
+    "timestamp": "2026-03-31T15:17:04.804434",
+    "size_bytes": 556,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"conservative_holder_2\", \"payload\": {\"content\": {\"price\": 153.03954821463154, \"prev_price\": 153.05246392642005, \"return\": -8.438748032647037e-05, \"return_pct\": -0.008438748032647037, \"fundamental\": 122.00606447041291, \"bubble_ratio\": 1.2543601736432077, \"volume\": 2.7961137937037934, \"net_demand\": 2.7961137937037934, \"round\": 199, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.760539\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704831679": {
+    "timestamp": "2026-03-31T15:17:04.831679",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831620\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704834585": {
+    "timestamp": "2026-03-31T15:17:04.834585",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831629\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704837314": {
+    "timestamp": "2026-03-31T15:17:04.837314",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_3\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_3\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831631\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704839713": {
+    "timestamp": "2026-03-31T15:17:04.839713",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_4\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_4\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831633\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704842107": {
+    "timestamp": "2026-03-31T15:17:04.842107",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_5\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_5\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831635\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704844422": {
+    "timestamp": "2026-03-31T15:17:04.844422",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"rational_arbitrageur_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"rational_arbitrageur\", \"investor\": \"rational_arbitrageur_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831636\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704846670": {
+    "timestamp": "2026-03-31T15:17:04.846670",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"rational_arbitrageur_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"rational_arbitrageur\", \"investor\": \"rational_arbitrageur_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831638\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704848899": {
+    "timestamp": "2026-03-31T15:17:04.848899",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"rational_arbitrageur_3\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"rational_arbitrageur\", \"investor\": \"rational_arbitrageur_3\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831639\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704851190": {
+    "timestamp": "2026-03-31T15:17:04.851190",
+    "size_bytes": 363,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"noise_trader_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 153.03954821463154, \"quantity\": 8.039105467878764, \"strategy\": \"noise_trader\", \"investor\": \"noise_trader_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831641\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704853629": {
+    "timestamp": "2026-03-31T15:17:04.853629",
+    "size_bytes": 334,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"noise_trader_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"noise_trader\", \"investor\": \"noise_trader_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831642\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704855973": {
+    "timestamp": "2026-03-31T15:17:04.855973",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"fundamental_investor_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"fundamental_investor\", \"investor\": \"fundamental_investor_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831644\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704858232": {
+    "timestamp": "2026-03-31T15:17:04.858232",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"fundamental_investor_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"fundamental_investor\", \"investor\": \"fundamental_investor_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831645\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704860858": {
+    "timestamp": "2026-03-31T15:17:04.860858",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"fundamental_investor_3\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"fundamental_investor\", \"investor\": \"fundamental_investor_3\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831646\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704863172": {
+    "timestamp": "2026-03-31T15:17:04.863172",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"fundamental_investor_4\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"fundamental_investor\", \"investor\": \"fundamental_investor_4\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831648\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704865496": {
+    "timestamp": "2026-03-31T15:17:04.865496",
+    "size_bytes": 343,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"leveraged_buyer_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"leveraged_buyer\", \"investor\": \"leveraged_buyer_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831649\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704867761": {
+    "timestamp": "2026-03-31T15:17:04.867761",
+    "size_bytes": 343,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"leveraged_buyer_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"leveraged_buyer\", \"investor\": \"leveraged_buyer_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831651\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704870295": {
+    "timestamp": "2026-03-31T15:17:04.870295",
+    "size_bytes": 343,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"leveraged_buyer_3\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"leveraged_buyer\", \"investor\": \"leveraged_buyer_3\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831652\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704872941": {
+    "timestamp": "2026-03-31T15:17:04.872941",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"conservative_holder_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"conservative_holder\", \"investor\": \"conservative_holder_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831654\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704875326": {
+    "timestamp": "2026-03-31T15:17:04.875326",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"conservative_holder_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"conservative_holder\", \"investor\": \"conservative_holder_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.831655\", \"priority\": 1, \"extras\": {\"round_num\": 199}}"
+  },
+  "msg_0331151704921938": {
+    "timestamp": "2026-03-31T15:17:04.921938",
+    "size_bytes": 547,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"momentum_speculator_1\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921849\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704924474": {
+    "timestamp": "2026-03-31T15:17:04.924474",
+    "size_bytes": 547,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"momentum_speculator_2\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921856\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704926990": {
+    "timestamp": "2026-03-31T15:17:04.926990",
+    "size_bytes": 547,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"momentum_speculator_3\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921858\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704929466": {
+    "timestamp": "2026-03-31T15:17:04.929466",
+    "size_bytes": 547,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"momentum_speculator_4\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921860\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704932044": {
+    "timestamp": "2026-03-31T15:17:04.932044",
+    "size_bytes": 547,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"momentum_speculator_5\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921861\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704934535": {
+    "timestamp": "2026-03-31T15:17:04.934535",
+    "size_bytes": 548,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"rational_arbitrageur_1\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921862\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704936952": {
+    "timestamp": "2026-03-31T15:17:04.936952",
+    "size_bytes": 548,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"rational_arbitrageur_2\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921864\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704939409": {
+    "timestamp": "2026-03-31T15:17:04.939409",
+    "size_bytes": 548,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"rational_arbitrageur_3\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921865\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704942195": {
+    "timestamp": "2026-03-31T15:17:04.942195",
+    "size_bytes": 540,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"noise_trader_1\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921866\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704944793": {
+    "timestamp": "2026-03-31T15:17:04.944793",
+    "size_bytes": 540,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"noise_trader_2\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921867\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704947297": {
+    "timestamp": "2026-03-31T15:17:04.947297",
+    "size_bytes": 548,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"fundamental_investor_1\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921869\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704950052": {
+    "timestamp": "2026-03-31T15:17:04.950052",
+    "size_bytes": 548,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"fundamental_investor_2\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921870\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704952894": {
+    "timestamp": "2026-03-31T15:17:04.952894",
+    "size_bytes": 548,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"fundamental_investor_3\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921871\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704955492": {
+    "timestamp": "2026-03-31T15:17:04.955492",
+    "size_bytes": 548,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"fundamental_investor_4\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921872\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704959389": {
+    "timestamp": "2026-03-31T15:17:04.959389",
+    "size_bytes": 543,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"leveraged_buyer_1\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921874\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704962281": {
+    "timestamp": "2026-03-31T15:17:04.962281",
+    "size_bytes": 543,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"leveraged_buyer_2\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921875\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704964739": {
+    "timestamp": "2026-03-31T15:17:04.964739",
+    "size_bytes": 543,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"leveraged_buyer_3\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921876\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704967243": {
+    "timestamp": "2026-03-31T15:17:04.967243",
+    "size_bytes": 547,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"conservative_holder_1\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921877\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704969816": {
+    "timestamp": "2026-03-31T15:17:04.969816",
+    "size_bytes": 547,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"market\", \"recipient_id\": \"conservative_holder_2\", \"payload\": {\"content\": {\"price\": 154.2607008467156, \"prev_price\": 153.03954821463154, \"return\": 0.007979327215285822, \"return_pct\": 0.7979327215285822, \"fundamental\": 122.1280705348833, \"bubble_ratio\": 1.2631060178966331, \"volume\": 8.039105467878764, \"net_demand\": 8.039105467878764, \"round\": 200, \"short_cost_rate\": 0.02}, \"content_type\": \"market_price\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.921879\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704995688": {
+    "timestamp": "2026-03-31T15:17:04.995688",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995628\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151704998835": {
+    "timestamp": "2026-03-31T15:17:04.998835",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995637\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705001488": {
+    "timestamp": "2026-03-31T15:17:05.001488",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_3\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_3\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995640\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705004020": {
+    "timestamp": "2026-03-31T15:17:05.004020",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_4\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_4\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995642\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705006553": {
+    "timestamp": "2026-03-31T15:17:05.006553",
+    "size_bytes": 355,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"momentum_speculator_5\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"momentum_speculator\", \"investor\": \"momentum_speculator_5\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995644\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705009197": {
+    "timestamp": "2026-03-31T15:17:05.009197",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"rational_arbitrageur_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"rational_arbitrageur\", \"investor\": \"rational_arbitrageur_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995646\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705011714": {
+    "timestamp": "2026-03-31T15:17:05.011714",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"rational_arbitrageur_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"rational_arbitrageur\", \"investor\": \"rational_arbitrageur_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995648\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705014134": {
+    "timestamp": "2026-03-31T15:17:05.014134",
+    "size_bytes": 358,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"rational_arbitrageur_3\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 0.0, \"quantity\": 0.0, \"strategy\": \"rational_arbitrageur\", \"investor\": \"rational_arbitrageur_3\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995649\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705016637": {
+    "timestamp": "2026-03-31T15:17:05.016637",
+    "size_bytes": 363,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"noise_trader_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 154.2607008467156, \"quantity\": 11.000177301885703, \"strategy\": \"noise_trader\", \"investor\": \"noise_trader_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995650\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705019552": {
+    "timestamp": "2026-03-31T15:17:05.019552",
+    "size_bytes": 363,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"noise_trader_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 154.2607008467156, \"quantity\": -4.922597712322856, \"strategy\": \"noise_trader\", \"investor\": \"noise_trader_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995652\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705022156": {
+    "timestamp": "2026-03-31T15:17:05.022156",
+    "size_bytes": 387,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"fundamental_investor_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 154.2607008467156, \"quantity\": -0.937353685090067, \"strategy\": \"fundamental_investor\", \"investor\": \"fundamental_investor_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995653\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705024694": {
+    "timestamp": "2026-03-31T15:17:05.024694",
+    "size_bytes": 387,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"fundamental_investor_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 154.2607008467156, \"quantity\": -0.937353685090067, \"strategy\": \"fundamental_investor\", \"investor\": \"fundamental_investor_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995655\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705027179": {
+    "timestamp": "2026-03-31T15:17:05.027179",
+    "size_bytes": 387,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"fundamental_investor_3\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 154.2607008467156, \"quantity\": -0.937353685090067, \"strategy\": \"fundamental_investor\", \"investor\": \"fundamental_investor_3\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995656\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705030447": {
+    "timestamp": "2026-03-31T15:17:05.030447",
+    "size_bytes": 387,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"fundamental_investor_4\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 154.2607008467156, \"quantity\": -0.937353685090067, \"strategy\": \"fundamental_investor\", \"investor\": \"fundamental_investor_4\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995658\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705033285": {
+    "timestamp": "2026-03-31T15:17:05.033285",
+    "size_bytes": 372,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"leveraged_buyer_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 154.2607008467156, \"quantity\": 0.6383461772228658, \"strategy\": \"leveraged_buyer\", \"investor\": \"leveraged_buyer_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995659\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705035784": {
+    "timestamp": "2026-03-31T15:17:05.035784",
+    "size_bytes": 372,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"leveraged_buyer_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 154.2607008467156, \"quantity\": 0.6383461772228658, \"strategy\": \"leveraged_buyer\", \"investor\": \"leveraged_buyer_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995661\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705038266": {
+    "timestamp": "2026-03-31T15:17:05.038266",
+    "size_bytes": 372,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"leveraged_buyer_3\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 154.2607008467156, \"quantity\": 0.6383461772228658, \"strategy\": \"leveraged_buyer\", \"investor\": \"leveraged_buyer_3\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995662\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705040735": {
+    "timestamp": "2026-03-31T15:17:05.040735",
+    "size_bytes": 385,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"conservative_holder_1\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 154.2607008467156, \"quantity\": 0.05764607523034187, \"strategy\": \"conservative_holder\", \"investor\": \"conservative_holder_1\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995663\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  },
+  "msg_0331151705043629": {
+    "timestamp": "2026-03-31T15:17:05.043629",
+    "size_bytes": 385,
+    "encoded": "{\"message_type\": \"PEER\", \"sender_id\": \"conservative_holder_2\", \"recipient_id\": \"market\", \"payload\": {\"content\": {\"bid_price\": 154.2607008467156, \"quantity\": 0.05764607523034187, \"strategy\": \"conservative_holder\", \"investor\": \"conservative_holder_2\"}, \"content_type\": \"investor_bid\", \"extras\": {}}, \"timestamp\": \"2026-03-31T15:17:04.995665\", \"priority\": 1, \"extras\": {\"round_num\": 200}}"
+  }
+}

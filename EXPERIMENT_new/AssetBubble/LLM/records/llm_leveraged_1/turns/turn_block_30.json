@@ -1,0 +1,182 @@
+{
+  "turn_r000091_0330122220": {
+    "round_num": 91,
+    "timestamp": "2026-03-30T12:22:20.807364",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 249.93,
+            "quantity": -40.0,
+            "strategy": "LLMLeveragedSpeculator",
+            "investor": "llm_leveraged_1",
+            "reasoning": "Price 2.28x above fundamental value with weakening momentum; reduce long exposure from 120 to 80 sha",
+            "analysis": "1. **Warning Signs Triggered**: \n   - Price ($249.93) is 2.28x above fundamental value ($109.52) → significantly overvalued.\n   - Momentum weakening: Recent returns dropped from ~44.7% (137.26→198.62) to 25.83% (198.62→249.93).\n2. **Risk Management**: Current long position (120 shares) exceeds the 80-share max for favorable conditions; overvaluation + weakening momentum require reducing exposure.\n3. **Action Rationale**: Sell long shares to lower net exposure, aligning with risk rules for warning signs.",
+            "cash": 73685.2,
+            "position": 80.0
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 249.93,
+              "quantity": -40.0,
+              "strategy": "LLMLeveragedSpeculator",
+              "investor": "llm_leveraged_1",
+              "reasoning": "Price 2.28x above fundamental value with weakening momentum; reduce long exposure from 120 to 80 sha",
+              "analysis": "1. **Warning Signs Triggered**: \n   - Price ($249.93) is 2.28x above fundamental value ($109.52) → significantly overvalued.\n   - Momentum weakening: Recent returns dropped from ~44.7% (137.26→198.62) to 25.83% (198.62→249.93).\n2. **Risk Management**: Current long position (120 shares) exceeds the 80-share max for favorable conditions; overvaluation + weakening momentum require reducing exposure.\n3. **Action Rationale**: Sell long shares to lower net exposure, aligning with risk rules for warning signs.",
+              "cash": 73685.2,
+              "position": 80.0
+            },
+            "source_id": "llm_leveraged_1",
+            "timestamp": "2026-03-30T12:22:20.807254",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 19422.735
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 249.93,
+          "quantity": -40.0,
+          "strategy": "LLMLeveragedSpeculator",
+          "investor": "llm_leveraged_1",
+          "reasoning": "Price 2.28x above fundamental value with weakening momentum; reduce long exposure from 120 to 80 sha",
+          "analysis": "1. **Warning Signs Triggered**: \n   - Price ($249.93) is 2.28x above fundamental value ($109.52) → significantly overvalued.\n   - Momentum weakening: Recent returns dropped from ~44.7% (137.26→198.62) to 25.83% (198.62→249.93).\n2. **Risk Management**: Current long position (120 shares) exceeds the 80-share max for favorable conditions; overvaluation + weakening momentum require reducing exposure.\n3. **Action Rationale**: Sell long shares to lower net exposure, aligning with risk rules for warning signs.",
+          "cash": 73685.2,
+          "position": 80.0
+        },
+        "source_id": "llm_leveraged_1",
+        "timestamp": "2026-03-30T12:22:20.807254",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 91,
+      "tick_turn_duration_ms": 19422.75,
+      "tick_turn_total_duration_ms": 2085890.024,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000092_0330122301": {
+    "round_num": 92,
+    "timestamp": "2026-03-30T12:23:01.250040",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 267.93,
+            "quantity": 40.0,
+            "strategy": "LLMLeveragedSpeculator",
+            "investor": "llm_leveraged_1",
+            "reasoning": "Price is 2.44x fundamental value with decelerating momentum (warning sign). Reduce long exposure fro",
+            "analysis": "1. **Momentum Check**: Recent prices show upward trend (198.62 → 249.93 → 267.93) but **decelerating acceleration** (jump of ~51 then ~18), indicating weakening momentum.\n2. **Fundamental Valuation**: Price ($267.93) is 2.44x fundamental value ($109.63) → **significantly overvalued** (warning sign).\n3. **Portfolio Exposure**: Current long position (80 shares) is at max allowed, but warning signs require reducing exposure.\n4. **Risk Management**: Leveraged position needs strict risk control; overvaluation + weakening momentum justifies cutting long exposure.",
+            "cash": 62968.0,
+            "position": 120.0
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 267.93,
+              "quantity": 40.0,
+              "strategy": "LLMLeveragedSpeculator",
+              "investor": "llm_leveraged_1",
+              "reasoning": "Price is 2.44x fundamental value with decelerating momentum (warning sign). Reduce long exposure fro",
+              "analysis": "1. **Momentum Check**: Recent prices show upward trend (198.62 → 249.93 → 267.93) but **decelerating acceleration** (jump of ~51 then ~18), indicating weakening momentum.\n2. **Fundamental Valuation**: Price ($267.93) is 2.44x fundamental value ($109.63) → **significantly overvalued** (warning sign).\n3. **Portfolio Exposure**: Current long position (80 shares) is at max allowed, but warning signs require reducing exposure.\n4. **Risk Management**: Leveraged position needs strict risk control; overvaluation + weakening momentum justifies cutting long exposure.",
+              "cash": 62968.0,
+              "position": 120.0
+            },
+            "source_id": "llm_leveraged_1",
+            "timestamp": "2026-03-30T12:23:01.249913",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 20835.506
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 267.93,
+          "quantity": 40.0,
+          "strategy": "LLMLeveragedSpeculator",
+          "investor": "llm_leveraged_1",
+          "reasoning": "Price is 2.44x fundamental value with decelerating momentum (warning sign). Reduce long exposure fro",
+          "analysis": "1. **Momentum Check**: Recent prices show upward trend (198.62 → 249.93 → 267.93) but **decelerating acceleration** (jump of ~51 then ~18), indicating weakening momentum.\n2. **Fundamental Valuation**: Price ($267.93) is 2.44x fundamental value ($109.63) → **significantly overvalued** (warning sign).\n3. **Portfolio Exposure**: Current long position (80 shares) is at max allowed, but warning signs require reducing exposure.\n4. **Risk Management**: Leveraged position needs strict risk control; overvaluation + weakening momentum justifies cutting long exposure.",
+          "cash": 62968.0,
+          "position": 120.0
+        },
+        "source_id": "llm_leveraged_1",
+        "timestamp": "2026-03-30T12:23:01.249913",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 92,
+      "tick_turn_duration_ms": 20835.522,
+      "tick_turn_total_duration_ms": 2106725.547,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000093_0330122333": {
+    "round_num": 93,
+    "timestamp": "2026-03-30T12:23:33.104045",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 272.87,
+            "quantity": -20.0,
+            "strategy": "LLMLeveragedSpeculator",
+            "investor": "llm_leveraged_1",
+            "reasoning": "Price is 2.49x above fundamental value with weakening momentum (slowing price increase), so reduce e",
+            "analysis": "1. **Momentum Check**: Recent prices show upward trend (249.93 → 267.93 → 272.87) but **weakening acceleration**: prior return ~7.2% vs current ~1.84%.  \n2. **Fundamental Valuation**: Price ($272.87) is 2.49x above fundamental value ($109.74) → significant overvaluation.  \n3. **Warning Sign Trigger**: Price above fundamental + weakening momentum → **must reduce exposure**.  \n4. **Current Exposure**: Net long 40 shares (120 long - 80 short). Need to lower this to manage risk.",
+            "cash": 68425.4,
+            "position": 100.0
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 272.87,
+              "quantity": -20.0,
+              "strategy": "LLMLeveragedSpeculator",
+              "investor": "llm_leveraged_1",
+              "reasoning": "Price is 2.49x above fundamental value with weakening momentum (slowing price increase), so reduce e",
+              "analysis": "1. **Momentum Check**: Recent prices show upward trend (249.93 → 267.93 → 272.87) but **weakening acceleration**: prior return ~7.2% vs current ~1.84%.  \n2. **Fundamental Valuation**: Price ($272.87) is 2.49x above fundamental value ($109.74) → significant overvaluation.  \n3. **Warning Sign Trigger**: Price above fundamental + weakening momentum → **must reduce exposure**.  \n4. **Current Exposure**: Net long 40 shares (120 long - 80 short). Need to lower this to manage risk.",
+              "cash": 68425.4,
+              "position": 100.0
+            },
+            "source_id": "llm_leveraged_1",
+            "timestamp": "2026-03-30T12:23:33.103924",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 21751.279
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 272.87,
+          "quantity": -20.0,
+          "strategy": "LLMLeveragedSpeculator",
+          "investor": "llm_leveraged_1",
+          "reasoning": "Price is 2.49x above fundamental value with weakening momentum (slowing price increase), so reduce e",
+          "analysis": "1. **Momentum Check**: Recent prices show upward trend (249.93 → 267.93 → 272.87) but **weakening acceleration**: prior return ~7.2% vs current ~1.84%.  \n2. **Fundamental Valuation**: Price ($272.87) is 2.49x above fundamental value ($109.74) → significant overvaluation.  \n3. **Warning Sign Trigger**: Price above fundamental + weakening momentum → **must reduce exposure**.  \n4. **Current Exposure**: Net long 40 shares (120 long - 80 short). Need to lower this to manage risk.",
+          "cash": 68425.4,
+          "position": 100.0
+        },
+        "source_id": "llm_leveraged_1",
+        "timestamp": "2026-03-30T12:23:33.103924",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 93,
+      "tick_turn_duration_ms": 21751.296,
+      "tick_turn_total_duration_ms": 2128476.843,
+      "tick_step_count": 1
+    }
+  }
+}

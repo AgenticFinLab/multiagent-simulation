@@ -1,0 +1,77 @@
+{
+  "msg_r000060_0331151640": {
+    "round_num": 60,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:40.080896",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 157.84163946612944,
+          "quantity": 1.3107199999999999,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:40.006542",
+      "priority": 1,
+      "extras": {
+        "round_num": 60
+      }
+    }
+  },
+  "msg_r000061_0331151640": {
+    "round_num": 61,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:40.246604",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:40.167880",
+      "priority": 1,
+      "extras": {
+        "round_num": 61
+      }
+    }
+  },
+  "msg_r000062_0331151640": {
+    "round_num": 62,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:40.412152",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:40.337284",
+      "priority": 1,
+      "extras": {
+        "round_num": 62
+      }
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "msg_r000003_0330113809": {
+    "round_num": 3,
+    "direction": "received",
+    "timestamp": "2026-03-30T11:38:09.832835",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "rulellm_momentum_5",
+      "payload": {
+        "content": {
+          "price": 99.36792149992208,
+          "prev_price": 99.68631998054099,
+          "return": -0.0031940037577980846,
+          "return_pct": -0.31940037577980845,
+          "fundamental": 100.40060040009996,
+          "bubble_ratio": 0.9897144150925131,
+          "volume": 0,
+          "net_demand": 0,
+          "round": 4,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T11:38:09.820465",
+      "priority": 1,
+      "extras": {
+        "round_num": 4
+      }
+    }
+  },
+  "msg_r000004_0330113822": {
+    "round_num": 4,
+    "direction": "received",
+    "timestamp": "2026-03-30T11:38:22.446459",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "rulellm_momentum_5",
+      "payload": {
+        "content": {
+          "price": 99.30093329895637,
+          "prev_price": 99.36792149992208,
+          "return": -0.0006741431233998655,
+          "return_pct": -0.06741431233998656,
+          "fundamental": 100.50100100050005,
+          "bubble_ratio": 0.9880591467786702,
+          "volume": 0,
+          "net_demand": 0,
+          "round": 5,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T11:38:22.187249",
+      "priority": 1,
+      "extras": {
+        "round_num": 5
+      }
+    }
+  },
+  "msg_r000005_0330113838": {
+    "round_num": 5,
+    "direction": "received",
+    "timestamp": "2026-03-30T11:38:38.088123",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "rulellm_momentum_5",
+      "payload": {
+        "content": {
+          "price": 99.82477756566642,
+          "prev_price": 99.30093329895637,
+          "return": 0.005275320677329048,
+          "return_pct": 0.5275320677329048,
+          "fundamental": 100.60150200150055,
+          "bubble_ratio": 0.9922791964296662,
+          "volume": 0.18,
+          "net_demand": 0.18,
+          "round": 6,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T11:38:38.068668",
+      "priority": 1,
+      "extras": {
+        "round_num": 6
+      }
+    }
+  }
+}

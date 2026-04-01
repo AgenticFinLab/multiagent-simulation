@@ -1,0 +1,182 @@
+{
+  "turn_r000196_0330124557": {
+    "round_num": 196,
+    "timestamp": "2026-03-30T12:45:57.380869",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 125.6,
+            "quantity": 0.0,
+            "strategy": "RuleLLMValueInvestor",
+            "investor": "rulellm_value_4",
+            "reasoning": "Round 196 is not a multiple of 5; per rules, hold this round.",
+            "analysis": "1. Check trading round: Round 196 mod 5 = 1 (not a multiple of 5). Per Step 1 of decision rules, we hold this round (quantity = 0) regardless of other metrics.\n2. No further steps needed as trading only occurs every 5 rounds.",
+            "cash": 9976.925099999999,
+            "position": 0.7500000000000004
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 125.6,
+              "quantity": 0.0,
+              "strategy": "RuleLLMValueInvestor",
+              "investor": "rulellm_value_4",
+              "reasoning": "Round 196 is not a multiple of 5; per rules, hold this round.",
+              "analysis": "1. Check trading round: Round 196 mod 5 = 1 (not a multiple of 5). Per Step 1 of decision rules, we hold this round (quantity = 0) regardless of other metrics.\n2. No further steps needed as trading only occurs every 5 rounds.",
+              "cash": 9976.925099999999,
+              "position": 0.7500000000000004
+            },
+            "source_id": "rulellm_value_4",
+            "timestamp": "2026-03-30T12:45:57.380699",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 6275.254
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 125.6,
+          "quantity": 0.0,
+          "strategy": "RuleLLMValueInvestor",
+          "investor": "rulellm_value_4",
+          "reasoning": "Round 196 is not a multiple of 5; per rules, hold this round.",
+          "analysis": "1. Check trading round: Round 196 mod 5 = 1 (not a multiple of 5). Per Step 1 of decision rules, we hold this round (quantity = 0) regardless of other metrics.\n2. No further steps needed as trading only occurs every 5 rounds.",
+          "cash": 9976.925099999999,
+          "position": 0.7500000000000004
+        },
+        "source_id": "rulellm_value_4",
+        "timestamp": "2026-03-30T12:45:57.380699",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 196,
+      "tick_turn_duration_ms": 6275.272,
+      "tick_turn_total_duration_ms": 1543999.826,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000197_0330124620": {
+    "round_num": 197,
+    "timestamp": "2026-03-30T12:46:20.006776",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "RuleLLMValueInvestor",
+            "investor": "rulellm_value_4",
+            "reasoning": "Round 197 is not a multiple of 5; per value investor rules, no trade this round.",
+            "analysis": "1. **Trading Round Check**: Round 197 mod 5 = 2 (not divisible by 5). Per Step 1, no trade is allowed this round (patience rule: trade only every 5 rounds).\n2. **No Need for Further Steps**: Since it's not a trading round, quantity is 0, and no action is taken.",
+            "cash": 9976.925099999999,
+            "position": 0.7500000000000004
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "RuleLLMValueInvestor",
+              "investor": "rulellm_value_4",
+              "reasoning": "Round 197 is not a multiple of 5; per value investor rules, no trade this round.",
+              "analysis": "1. **Trading Round Check**: Round 197 mod 5 = 2 (not divisible by 5). Per Step 1, no trade is allowed this round (patience rule: trade only every 5 rounds).\n2. **No Need for Further Steps**: Since it's not a trading round, quantity is 0, and no action is taken.",
+              "cash": 9976.925099999999,
+              "position": 0.7500000000000004
+            },
+            "source_id": "rulellm_value_4",
+            "timestamp": "2026-03-30T12:46:20.006637",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 7539.55
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "RuleLLMValueInvestor",
+          "investor": "rulellm_value_4",
+          "reasoning": "Round 197 is not a multiple of 5; per value investor rules, no trade this round.",
+          "analysis": "1. **Trading Round Check**: Round 197 mod 5 = 2 (not divisible by 5). Per Step 1, no trade is allowed this round (patience rule: trade only every 5 rounds).\n2. **No Need for Further Steps**: Since it's not a trading round, quantity is 0, and no action is taken.",
+          "cash": 9976.925099999999,
+          "position": 0.7500000000000004
+        },
+        "source_id": "rulellm_value_4",
+        "timestamp": "2026-03-30T12:46:20.006637",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 197,
+      "tick_turn_duration_ms": 7539.568,
+      "tick_turn_total_duration_ms": 1551539.394,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000198_0330124638": {
+    "round_num": 198,
+    "timestamp": "2026-03-30T12:46:38.363846",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "RuleLLMValueInvestor",
+            "investor": "rulellm_value_4",
+            "reasoning": "Round 198 is not a trading round (198 mod 5 ≠ 0); hold as per value investor discipline.",
+            "analysis": "1. **Trading Round Check**: Round 198. 198 mod 5 = 3 (not divisible by 5). Per Step 1, no trade this round.\n2. **No Further Steps Needed**: Since it's not a trading round, we hold regardless of deviation or other factors.",
+            "cash": 9976.925099999999,
+            "position": 0.7500000000000004
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "RuleLLMValueInvestor",
+              "investor": "rulellm_value_4",
+              "reasoning": "Round 198 is not a trading round (198 mod 5 ≠ 0); hold as per value investor discipline.",
+              "analysis": "1. **Trading Round Check**: Round 198. 198 mod 5 = 3 (not divisible by 5). Per Step 1, no trade this round.\n2. **No Further Steps Needed**: Since it's not a trading round, we hold regardless of deviation or other factors.",
+              "cash": 9976.925099999999,
+              "position": 0.7500000000000004
+            },
+            "source_id": "rulellm_value_4",
+            "timestamp": "2026-03-30T12:46:38.363761",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 5755.493
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "RuleLLMValueInvestor",
+          "investor": "rulellm_value_4",
+          "reasoning": "Round 198 is not a trading round (198 mod 5 ≠ 0); hold as per value investor discipline.",
+          "analysis": "1. **Trading Round Check**: Round 198. 198 mod 5 = 3 (not divisible by 5). Per Step 1, no trade this round.\n2. **No Further Steps Needed**: Since it's not a trading round, we hold regardless of deviation or other factors.",
+          "cash": 9976.925099999999,
+          "position": 0.7500000000000004
+        },
+        "source_id": "rulellm_value_4",
+        "timestamp": "2026-03-30T12:46:38.363761",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 198,
+      "tick_turn_duration_ms": 5755.505,
+      "tick_turn_total_duration_ms": 1557294.899,
+      "tick_step_count": 1
+    }
+  }
+}

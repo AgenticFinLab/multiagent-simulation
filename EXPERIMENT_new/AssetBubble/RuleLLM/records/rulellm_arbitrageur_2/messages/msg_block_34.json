@@ -1,0 +1,95 @@
+{
+  "msg_r000102_0330120919": {
+    "round_num": 102,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:09:19.207109",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "rulellm_arbitrageur_2",
+      "payload": {
+        "content": {
+          "price": 111.17712014529995,
+          "prev_price": 111.25907268568176,
+          "return": -0.0007365919776567841,
+          "return_pct": -0.0736591977656784,
+          "fundamental": 110.84343612661272,
+          "bubble_ratio": 1.0030104084675442,
+          "volume": 3.66,
+          "net_demand": -3.66,
+          "round": 103,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:09:19.170089",
+      "priority": 1,
+      "extras": {
+        "round_num": 103
+      }
+    }
+  },
+  "msg_r000103_0330120947": {
+    "round_num": 103,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:09:47.726564",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "rulellm_arbitrageur_2",
+      "payload": {
+        "content": {
+          "price": 109.63939446182182,
+          "prev_price": 111.17712014529995,
+          "return": -0.013831314226060541,
+          "return_pct": -1.383131422606054,
+          "fundamental": 110.95427956273932,
+          "bubble_ratio": 0.9881493070289913,
+          "volume": 9.67,
+          "net_demand": -9.67,
+          "round": 104,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:09:47.713759",
+      "priority": 1,
+      "extras": {
+        "round_num": 104
+      }
+    }
+  },
+  "msg_r000104_0330121005": {
+    "round_num": 104,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:10:05.162728",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "rulellm_arbitrageur_2",
+      "payload": {
+        "content": {
+          "price": 108.9406712025492,
+          "prev_price": 109.63939446182182,
+          "return": -0.006372921546150388,
+          "return_pct": -0.6372921546150389,
+          "fundamental": 111.06523384230205,
+          "bubble_ratio": 0.9808710379814313,
+          "volume": 5.228000000000001,
+          "net_demand": -5.228000000000001,
+          "round": 105,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:10:05.146701",
+      "priority": 1,
+      "extras": {
+        "round_num": 105
+      }
+    }
+  }
+}

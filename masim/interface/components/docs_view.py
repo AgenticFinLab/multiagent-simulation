@@ -1,4 +1,4 @@
-"""Documentation page — renders a scenario's docs.md with a Back button."""
+"""Documentation page — renders a scenario's explain.md with a Back button."""
 
 import streamlit as st
 
@@ -9,7 +9,7 @@ def render_docs_page(scenario_name: str):
     Layout:
       - Back button (returns to Simulation page)
       - Scenario name + short principle header
-      - Full docs.md content rendered as markdown
+      - Full explain.md content rendered as markdown
 
     Args:
         scenario_name: Name of the selected scenario
@@ -52,7 +52,7 @@ def render_docs_page(scenario_name: str):
 
     if docs_content is None:
         st.warning(f"No documentation file found for **{display_name}**.")
-        st.info(f"Expected at: `examples/{scenario_name}/docs.md`")
+        st.info(f"Expected at: `examples/{scenario_name}/explain.md`")
         return
 
     # Strip the H1 title from the docs (we already show it above)

@@ -1,0 +1,504 @@
+{
+  "batch_00000000_00000049": [
+    {
+      "name": "timer_operate_duration",
+      "value": 11268.388271331787,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:11:46.970206"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 171,
+        "duration_ms": 11268.388271331787
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:11:46.970284"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11544.586896896362,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:12:02.091563"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 172,
+        "duration_ms": 11544.586896896362
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:12:02.091610"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 9168.736934661865,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:12:17.288119"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 173,
+        "duration_ms": 9168.736934661865
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:12:17.288197"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13127.839088439941,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:12:36.773200"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 174,
+        "duration_ms": 13127.839088439941
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:12:36.773213"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 16569.17119026184,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:13:06.902531"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 175,
+        "duration_ms": 16569.17119026184
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:13:06.902547"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13180.998802185059,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:13:22.607931"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 176,
+        "duration_ms": 13180.998802185059
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:13:22.607962"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11837.950944900513,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:13:45.242128"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 177,
+        "duration_ms": 11837.950944900513
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:13:45.242156"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11191.936016082764,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:14:02.364322"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 178,
+        "duration_ms": 11191.936016082764
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:14:02.364343"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 21604.496240615845,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:14:37.804180"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 179,
+        "duration_ms": 21604.496240615845
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:14:37.804208"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 19279.698133468628,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:15:02.625443"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 180,
+        "duration_ms": 19279.698133468628
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:15:02.625479"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11610.090017318726,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:15:21.317917"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 181,
+        "duration_ms": 11610.090017318726
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:15:21.317927"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 19870.89776992798,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:16:06.314982"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 182,
+        "duration_ms": 19870.89776992798
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:16:06.314995"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 19961.716890335083,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:16:29.767944"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 183,
+        "duration_ms": 19961.716890335083
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:16:29.767974"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 22219.149112701416,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:16:57.963797"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 184,
+        "duration_ms": 22219.149112701416
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:16:57.963827"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 18988.67917060852,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:17:17.193466"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 185,
+        "duration_ms": 18988.67917060852
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:17:17.193487"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15377.186059951782,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:17:35.182934"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 186,
+        "duration_ms": 15377.186059951782
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:17:35.182989"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 18942.85273551941,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:18:03.365551"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 187,
+        "duration_ms": 18942.85273551941
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:18:03.365610"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 20134.30666923523,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:18:29.155757"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 188,
+        "duration_ms": 20134.30666923523
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:18:29.155770"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 22429.89420890808,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:18:54.266859"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 189,
+        "duration_ms": 22429.89420890808
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:18:54.266869"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 18514.564037322998,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:19:16.423929"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 190,
+        "duration_ms": 18514.564037322998
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:19:16.423988"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 17998.291015625,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:19:47.430598"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 191,
+        "duration_ms": 17998.291015625
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:19:47.430641"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 18002.150058746338,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:20:08.261156"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 192,
+        "duration_ms": 18002.150058746338
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:20:08.261174"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 21558.831930160522,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:20:31.915650"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 193,
+        "duration_ms": 21558.831930160522
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:20:31.915664"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 14541.248083114624,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:20:48.999844"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 194,
+        "duration_ms": 14541.248083114624
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:20:48.999859"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 18750.43797492981,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:21:19.430373"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "llm_greater_fool_3",
+        "round_num": 195,
+        "duration_ms": 18750.43797492981
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T13:21:19.430401"
+    }
+  ]
+}

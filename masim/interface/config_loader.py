@@ -12,14 +12,76 @@ EXAMPLES_DIR = Path("examples")
 CONFIGS_DIR = Path("configs")
 EXPERIMENT_DIR = Path("EXPERIMENT")
 
+# Maps flat config-dir name → (parent_dir, sub_dir) in examples/ and EXPERIMENT/
+# Scenarios not in this map (e.g. "Demo") remain flat.
+SCENARIO_PATH_MAP: Dict[str, Tuple[str, str]] = {
+    "AssetBubble": ("AssetBubble", "Rule"),
+    "AssetBubbleLLM": ("AssetBubble", "LLM"),
+    "AssetBubbleRuleLLM": ("AssetBubble", "RuleLLM"),
+    "AssetBubbleRag": ("AssetBubble", "Rag"),
+    "DispositionEffect": ("DispositionEffect", "Rule"),
+    "DispositionEffectLLM": ("DispositionEffect", "LLM"),
+    "DispositionEffectRuleLLM": ("DispositionEffect", "RuleLLM"),
+    "HerdEffect": ("HerdEffect", "Rule"),
+    "HerdEffectLLM": ("HerdEffect", "LLM"),
+    "HerdEffectRuleLLM": ("HerdEffect", "RuleLLM"),
+    "EquityPremium": ("EquityPremium", "Rule"),
+    "EquityPremiumLLM": ("EquityPremium", "LLM"),
+    "FlashCrash": ("FlashCrash", "Rule"),
+    "FlashCrashLLM": ("FlashCrash", "LLM"),
+    "LiquidityDryup": ("LiquidityDryup", "Rule"),
+    "LiquidityDryupLLM": ("LiquidityDryup", "LLM"),
+    "MarketCrash": ("MarketCrash", "Rule"),
+    "MarketCrashLLM": ("MarketCrash", "LLM"),
+    "MomentumEffect": ("MomentumEffect", "Rule"),
+    "MomentumEffectLLM": ("MomentumEffect", "LLM"),
+    "ReversalEffect": ("ReversalEffect", "Rule"),
+    "ReversalEffectLLM": ("ReversalEffect", "LLM"),
+    "ShortSqueeze": ("ShortSqueeze", "Rule"),
+    "ShortSqueezeLLM": ("ShortSqueeze", "LLM"),
+    "VolatilityClustering": ("VolatilityClustering", "Rule"),
+    "VolatilityClusteringLLM": ("VolatilityClustering", "LLM"),
+}
+
+
+def _examples_path(scenario_name: str) -> Path:
+    """Return the examples/ subdirectory for a scenario (nested or flat)."""
+    mapping = SCENARIO_PATH_MAP.get(scenario_name)
+    if mapping:
+        parent, sub = mapping
+        return EXAMPLES_DIR / parent / sub
+    return EXAMPLES_DIR / scenario_name
+
+
+def _experiment_path(scenario_name: str) -> Path:
+    """Return the EXPERIMENT/ subdirectory for a scenario (nested or flat)."""
+    mapping = SCENARIO_PATH_MAP.get(scenario_name)
+    if mapping:
+        parent, sub = mapping
+        return EXPERIMENT_DIR / parent / sub
+    return EXPERIMENT_DIR / scenario_name
+
+
+def _configs_path(scenario_name: str) -> Path:
+    """Return the configs/ subdirectory for a scenario (nested or flat)."""
+    mapping = SCENARIO_PATH_MAP.get(scenario_name)
+    if mapping:
+        parent, sub = mapping
+        return CONFIGS_DIR / parent / sub
+    return CONFIGS_DIR / scenario_name
+
+
 # Scenario name mapping for display
 SCENARIO_DISPLAY_NAMES = {
     "AssetBubble": "Asset Bubble",
     "AssetBubbleLLM": "Asset Bubble (LLM)",
+    "AssetBubbleRuleLLM": "Asset Bubble (RuleLLM)",
+    "AssetBubbleRag": "Asset Bubble (RAG)",
     "MarketCrash": "Market Crash",
     "MarketCrashLLM": "Market Crash (LLM)",
     "HerdEffect": "Herd Effect",
     "HerdEffectLLM": "Herd Effect (LLM)",
+    "HerdEffectRuleLLM": "Herd Effect (RuleLLM)",
     "MomentumEffect": "Momentum Effect",
     "MomentumEffectLLM": "Momentum Effect (LLM)",
     "ReversalEffect": "Reversal Effect",
@@ -32,6 +94,7 @@ SCENARIO_DISPLAY_NAMES = {
     "EquityPremiumLLM": "Equity Premium (LLM)",
     "DispositionEffect": "Disposition Effect",
     "DispositionEffectLLM": "Disposition Effect (LLM)",
+    "DispositionEffectRuleLLM": "Disposition Effect (RuleLLM)",
     "LiquidityDryup": "Liquidity Dry-up",
     "LiquidityDryupLLM": "Liquidity Dry-up (LLM)",
     "ShortSqueeze": "Short Squeeze",
@@ -43,20 +106,40 @@ SCENARIO_DISPLAY_NAMES = {
 def discover_scenarios() -> List[str]:
     """Discover all available simulation scenarios from configs directory.
 
+    Supports both flat layout (configs/Demo/) and nested layout
+    (configs/AssetBubble/Rule/, configs/AssetBubble/LLM/, ...).
+
     Returns:
-        List of scenario directory names (e.g., ["AssetBubble", "AssetBubbleLLM", ...])
+        List of logical scenario names keyed by SCENARIO_PATH_MAP
+        (e.g., ["AssetBubble", "AssetBubbleLLM", "Demo", ...])
     """
     if not CONFIGS_DIR.exists():
         return []
 
-    scenarios = []
-    for item in sorted(CONFIGS_DIR.iterdir()):
-        if item.is_dir() and not item.name.startswith("_") and item.name != "TEMPLATES":
-            # Check if it has a simulation.yml file
-            if (item / "simulation.yml").exists():
-                scenarios.append(item.name)
+    found = set()
 
-    return scenarios
+    # Walk up to depth-2 looking for simulation.yml
+    for item in sorted(CONFIGS_DIR.iterdir()):
+        if not item.is_dir() or item.name.startswith("_") or item.name == "TEMPLATES":
+            continue
+        # Depth-1: flat scenario (e.g. configs/Demo/simulation.yml)
+        if (item / "simulation.yml").exists():
+            found.add(item.name)
+        else:
+            # Depth-2: nested scenario (e.g. configs/AssetBubble/Rule/simulation.yml)
+            for sub in sorted(item.iterdir()):
+                if sub.is_dir() and (sub / "simulation.yml").exists():
+                    # Reverse-lookup logical name from (parent, subdir)
+                    key = (item.name, sub.name)
+                    logical = next(
+                        (k for k, v in SCENARIO_PATH_MAP.items() if v == key), None
+                    )
+                    if logical:
+                        found.add(logical)
+
+    # Return in a stable display order matching SCENARIO_DISPLAY_NAMES
+    order = list(SCENARIO_DISPLAY_NAMES.keys())
+    return [s for s in order if s in found] + sorted(found - set(order))
 
 
 def get_scenario_info(scenario_name: str) -> Dict[str, Any]:
@@ -68,13 +151,13 @@ def get_scenario_info(scenario_name: str) -> Dict[str, Any]:
     Returns:
         Dict with name, display_name, description, is_llm, config_path
     """
-    config_path = CONFIGS_DIR / scenario_name / "simulation.yml"
+    config_path = _configs_path(scenario_name) / "simulation.yml"
 
     info = {
         "name": scenario_name,
         "display_name": SCENARIO_DISPLAY_NAMES.get(scenario_name, scenario_name),
         "description": "",
-        "is_llm": scenario_name.endswith("LLM"),
+        "is_llm": scenario_name.endswith("LLM") or scenario_name.endswith("Rag"),
         "config_path": str(config_path),
         "exists": config_path.exists(),
     }
@@ -111,7 +194,7 @@ def load_players_config(scenario_name: str) -> Dict[str, Any]:
     Returns:
         Dict mapping player type to configuration
     """
-    players_path = CONFIGS_DIR / scenario_name / "players.yml"
+    players_path = _configs_path(scenario_name) / "players.yml"
 
     if not players_path.exists():
         return {}
@@ -151,6 +234,18 @@ _AGENT_THEORIES: Dict[str, str] = {
     "LLMSentimentTrader": "Noise Trader Risk",
     "LLMValueInvestor": "Fundamental Valuation",
     "LLMLeveragedSpeculator": "Margin Amplification",
+    # AssetBubbleRuleLLM (Hybrid Rule + LLM)
+    "RuleLLMMomentumSpeculator": "Greater Fool Theory",
+    "RuleLLMRationalArbitrageur": "Limits to Arbitrage",
+    "RuleLLMNoiseTrader": "Noise Trader Risk",
+    "RuleLLMValueInvestor": "Fundamental Valuation",
+    "RuleLLMLeveragedBuyer": "Margin Amplification",
+    # AssetBubbleRag (RAG + LLM)
+    "RagLLMMomentumSpeculator": "Greater Fool Theory",
+    "RagLLMRationalArbitrageur": "Limits to Arbitrage",
+    "RagLLMNoiseTrader": "Noise Trader Risk",
+    "RagLLMValueInvestor": "Fundamental Valuation",
+    "RagLLMLeveragedBuyer": "Margin Amplification",
     # MarketCrash
     "RiskParityFund": "Risk Parity / Deleveraging",
     "LeveragedHedgeFund": "Leverage Cycle Theory",
@@ -211,6 +306,18 @@ _AGENT_THEORIES: Dict[str, str] = {
     "LLMTaxAwareInvestor": "Tax-Loss Harvesting",
     "LLMInstitutionalInvestor": "Professional Discipline",
     "LLMLossAverse": "Loss Aversion (Kahneman-Tversky)",
+    # DispositionEffectRuleLLM
+    "RuleLLMDispositionBiased": "Prospect Theory (Kahneman-Tversky)",
+    "RuleLLMRationalInvestor": "Expected Utility Theory",
+    "RuleLLMTaxAwareInvestor": "Tax-Loss Harvesting",
+    "RuleLLMInstitutionalInvestor": "Professional Discipline",
+    "RuleLLMLossAverse": "Loss Aversion (Kahneman-Tversky)",
+    # HerdEffectRuleLLM
+    "RuleLLMMomentumInvestor": "Momentum Premium (Jegadeesh & Titman)",
+    "RuleLLMContrarianInvestor": "Mean Reversion / DeBondt-Thaler",
+    "RuleLLMRiskAverseInvestor": "Mean-Variance Optimisation",
+    "RuleLLMAggressiveInvestor": "Overconfidence Bias",
+    "RuleLLMNoiseTrader": "Noise Trader Risk",
     # EquityPremium
     "MyopicLossAverseInvestor": "Myopic Loss Aversion (Benartzi-Thaler)",
     "LongHorizonInvestor": "Long-Horizon Risk Diversification",
@@ -242,7 +349,7 @@ def get_agent_theory(class_name: str) -> str:
 
 
 def get_docs_content(scenario_name: str) -> Optional[str]:
-    """Read the docs.md file for a scenario.
+    """Read the explain.md file for a scenario.
 
     Args:
         scenario_name: Name of the scenario directory
@@ -250,7 +357,7 @@ def get_docs_content(scenario_name: str) -> Optional[str]:
     Returns:
         Full markdown string, or None if file not found
     """
-    docs_path = EXAMPLES_DIR / scenario_name / "docs.md"
+    docs_path = _examples_path(scenario_name) / "explain.md"
     if not docs_path.exists():
         return None
     try:
@@ -278,6 +385,18 @@ _AGENT_PRINCIPLES: Dict[str, str] = {
     "LLMSentimentTrader": "LLM-driven trader reacting to market sentiment and narrative signals",
     "LLMValueInvestor": "LLM-driven value investor anchoring on fundamental worth",
     "LLMLeveragedSpeculator": "LLM-driven speculator using leverage to amplify returns (and losses)",
+    # AssetBubbleRuleLLM (Hybrid Rule + LLM)
+    "RuleLLMMomentumSpeculator": "Hybrid rule+LLM speculator following momentum formulas with qualitative adjustments",
+    "RuleLLMRationalArbitrageur": "Hybrid rule+LLM arbitrageur exploiting mispricings with cost-aware reasoning",
+    "RuleLLMNoiseTrader": "Hybrid rule+LLM trader following sentiment signals with herding adjustments",
+    "RuleLLMValueInvestor": "Hybrid rule+LLM value investor trading infrequently on fundamental deviation",
+    "RuleLLMLeveragedBuyer": "Hybrid rule+LLM leveraged buyer with margin-call awareness in reasoning",
+    # AssetBubbleRag (RAG + LLM)
+    "RagLLMMomentumSpeculator": "RAG-augmented momentum speculator retrieving relevant trading knowledge",
+    "RagLLMRationalArbitrageur": "RAG-augmented arbitrageur with knowledge-grounded mispricing analysis",
+    "RagLLMNoiseTrader": "RAG-augmented noise trader informed by retrieved sentiment research",
+    "RagLLMValueInvestor": "RAG-augmented value investor using fundamental analysis literature",
+    "RagLLMLeveragedBuyer": "RAG-augmented leveraged buyer with risk management knowledge retrieval",
     # MarketCrash / MarketCrashLLM
     "RiskParityFund": "Balances risk across asset classes; forced deleveraging triggers cascade",
     "LeveragedHedgeFund": "High-leverage positions; margin calls accelerate crash dynamics",
@@ -338,6 +457,18 @@ _AGENT_PRINCIPLES: Dict[str, str] = {
     "LLMTaxAwareInvestor": "LLM investor optimising after-tax portfolio returns",
     "LLMInstitutionalInvestor": "LLM-driven institutional investor with mandate constraints",
     "LLMLossAverse": "LLM investor with strong loss aversion; holds losers, books gains",
+    # DispositionEffectRuleLLM
+    "RuleLLMDispositionBiased": "Hybrid rule+LLM investor following embedded disposition effect formulas",
+    "RuleLLMRationalInvestor": "Hybrid rule+LLM investor with systematic rebalancing rules",
+    "RuleLLMTaxAwareInvestor": "Hybrid rule+LLM investor applying tax-loss harvesting formulas",
+    "RuleLLMInstitutionalInvestor": "Hybrid rule+LLM institutional investor with symmetric thresholds",
+    "RuleLLMLossAverse": "Hybrid rule+LLM investor with extreme loss aversion embedded rules",
+    # HerdEffectRuleLLM
+    "RuleLLMMomentumInvestor": "Hybrid rule+LLM momentum investor following trend formulas",
+    "RuleLLMContrarianInvestor": "Hybrid rule+LLM contrarian applying mean-reversion rules",
+    "RuleLLMRiskAverseInvestor": "Hybrid rule+LLM investor with variance-adjusted position sizing",
+    "RuleLLMAggressiveInvestor": "Hybrid rule+LLM aggressive investor with acceleration bonus",
+    "RuleLLMNoiseTrader": "Hybrid rule+LLM noise trader with random trading rules",
     # EquityPremium / EquityPremiumLLM
     "MyopicLossAverseInvestor": "Evaluates P&L at short horizons; demands high equity premium",
     "LongHorizonInvestor": "Patient investor; sees lower loss probability over long run",
@@ -426,19 +557,54 @@ def get_scenario_pairs() -> List[Tuple[str, str]]:
 
     Returns:
         List of tuples (base_name, llm_name) for scenarios that have both variants
+        Special variants (RuleLLM, Rag) are paired with their base scenario.
     """
     scenarios = discover_scenarios()
     pairs = []
+    seen = set()
 
     for name in scenarios:
-        if not name.endswith("LLM"):
-            llm_variant = name + "LLM"
-            if llm_variant in scenarios:
-                pairs.append((name, llm_variant))
+        if name in seen:
+            continue
+
+        # Handle RuleLLM variants - pair with their base scenario
+        if name.endswith("RuleLLM"):
+            base = name[:-8]  # Remove "RuleLLM"
+            if base in scenarios and base not in seen:
+                pairs.append((base, name))
+                seen.add(base)
             else:
+                pairs.append((None, name))
+            seen.add(name)
+        # Handle Rag variants
+        elif name.endswith("Rag"):
+            base = name[:-3]  # Remove "Rag"
+            if base in scenarios and base not in seen:
+                pairs.append((base, name))
+                seen.add(base)
+            else:
+                pairs.append((None, name))
+            seen.add(name)
+        # Standard LLM variant (not RuleLLM)
+        elif name.endswith("LLM"):
+            base = name[:-3]
+            if base in scenarios:
+                pairs.append((base, name))
+                seen.add(base)
+                seen.add(name)
+            else:
+                pairs.append((None, name))
+                seen.add(name)
+        # Base scenario (not LLM variant)
+        else:
+            llm_variant = name + "LLM"
+            if llm_variant in scenarios and llm_variant not in seen:
+                pairs.append((name, llm_variant))
+                seen.add(name)
+                seen.add(llm_variant)
+            elif name not in seen:
                 pairs.append((name, None))
-        elif name[:-3] not in scenarios:  # LLM variant without base
-            pairs.append((None, name))
+                seen.add(name)
 
     return pairs
 
@@ -472,7 +638,7 @@ def get_diagram_path(scenario_name: str) -> Optional[Path]:
     Returns:
         Path to the latest topology PNG, or None if not found
     """
-    diagram_dir = EXPERIMENT_DIR / scenario_name / "records" / "diagrams"
+    diagram_dir = _experiment_path(scenario_name) / "records" / "diagrams"
     if not diagram_dir.exists():
         return None
     # Take the first available topology PNG (typically only one)
@@ -489,7 +655,7 @@ def get_topology_info(scenario_name: str) -> Dict[str, Any]:
     Returns:
         Dict with topology_type, sources, connections (node -> [targets])
     """
-    topology_path = CONFIGS_DIR / scenario_name / "topology.yml"
+    topology_path = _configs_path(scenario_name) / "topology.yml"
 
     result: Dict[str, Any] = {
         "topology_type": "star",
@@ -538,6 +704,18 @@ _SCENARIO_MARKET_DESCRIPTIONS: Dict[str, str] = {
         "LLM-driven investors trade a single risky equity. Greater-fool speculators "
         "ride the bubble narrative, leveraged players amplify it, and value-anchored "
         "agents try to resist — testing whether LLM reasoning reproduces bubble dynamics."
+    ),
+    "AssetBubbleRuleLLM": (
+        "Hybrid rule+LLM investors trade with embedded quantitative rules. Each agent "
+        "follows explicit financial formulas (momentum, deviation, sentiment) while "
+        "using LLM reasoning for qualitative context — combining rule precision with "
+        "language understanding."
+    ),
+    "AssetBubbleRag": (
+        "RAG-augmented LLM investors retrieve relevant financial knowledge before "
+        "deciding. Each agent queries a knowledge base of trading literature, grounding "
+        "decisions in retrieved context — testing whether external knowledge improves "
+        "trading behavior and bubble dynamics."
     ),
     "MarketCrash": (
         "Investors hold a diversified portfolio. Risk-parity funds and leveraged hedge "
@@ -618,6 +796,18 @@ _SCENARIO_MARKET_DESCRIPTIONS: Dict[str, str] = {
         "LLM investors track personal cost bases and make sell decisions in natural "
         "language. The simulation tests whether LLM reasoning reproduces the "
         "prospect-theory disposition effect seen in real retail investors."
+    ),
+    "DispositionEffectRuleLLM": (
+        "Hybrid rule+LLM investors follow embedded quantitative disposition rules "
+        "while using LLM reasoning for qualitative adjustments. Each agent computes "
+        "gain/loss relative to reference point and applies prospect-theory formulas "
+        "with natural language context — combining rule precision with LLM flexibility."
+    ),
+    "HerdEffectRuleLLM": (
+        "Hybrid rule+LLM investors follow embedded momentum, contrarian, and volatility "
+        "formulas while using LLM reasoning for market context. The simulation tests "
+        "whether herding behavior emerges from agents following explicit trend-following "
+        "and mean-reversion rules enhanced by qualitative judgment."
     ),
     "LiquidityDryup": (
         "Market makers provide bid-ask liquidity while informed traders and liquidity "

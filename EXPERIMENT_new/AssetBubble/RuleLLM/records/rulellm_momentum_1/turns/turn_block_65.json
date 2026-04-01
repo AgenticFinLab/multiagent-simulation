@@ -1,0 +1,182 @@
+{
+  "turn_r000196_0330124557": {
+    "round_num": 196,
+    "timestamp": "2026-03-30T12:45:57.045799",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 125.6,
+            "quantity": 0.0,
+            "strategy": "RuleLLMMomentumSpeculator",
+            "investor": "rulellm_momentum_1",
+            "reasoning": "Insufficient recent prices (<5) → neutral momentum, no action",
+            "analysis": "First, compute momentum: Recent prices have only 3 entries (fewer than 5), so momentum = 0. This falls into the \"flat/neutral momentum\" category, so quantity = 0. No buy or sell action is needed.",
+            "cash": 10000.0,
+            "position": 0.0
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 125.6,
+              "quantity": 0.0,
+              "strategy": "RuleLLMMomentumSpeculator",
+              "investor": "rulellm_momentum_1",
+              "reasoning": "Insufficient recent prices (<5) → neutral momentum, no action",
+              "analysis": "First, compute momentum: Recent prices have only 3 entries (fewer than 5), so momentum = 0. This falls into the \"flat/neutral momentum\" category, so quantity = 0. No buy or sell action is needed.",
+              "cash": 10000.0,
+              "position": 0.0
+            },
+            "source_id": "rulellm_momentum_1",
+            "timestamp": "2026-03-30T12:45:57.045221",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 5944.861
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 125.6,
+          "quantity": 0.0,
+          "strategy": "RuleLLMMomentumSpeculator",
+          "investor": "rulellm_momentum_1",
+          "reasoning": "Insufficient recent prices (<5) → neutral momentum, no action",
+          "analysis": "First, compute momentum: Recent prices have only 3 entries (fewer than 5), so momentum = 0. This falls into the \"flat/neutral momentum\" category, so quantity = 0. No buy or sell action is needed.",
+          "cash": 10000.0,
+          "position": 0.0
+        },
+        "source_id": "rulellm_momentum_1",
+        "timestamp": "2026-03-30T12:45:57.045221",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 196,
+      "tick_turn_duration_ms": 5945.057,
+      "tick_turn_total_duration_ms": 1458913.062,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000197_0330124620": {
+    "round_num": 197,
+    "timestamp": "2026-03-30T12:46:20.274893",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 125.22,
+            "quantity": 0.0,
+            "strategy": "RuleLLMMomentumSpeculator",
+            "investor": "rulellm_momentum_1",
+            "reasoning": "Insufficient recent prices (3 < 5) to calculate momentum; neutral trend",
+            "analysis": "First, compute short-term momentum: Recent prices provided are only 3 (fewer than 5), so momentum = 0. \n\nNext, check action rules: Momentum is 0, which is between -0.02 and 0.01 → neutral/flat momentum. So quantity = 0 (hold). \n\nNo adjustments needed as momentum is clearly neutral, and portfolio constraints don't apply (no buy/sell).",
+            "cash": 10000.0,
+            "position": 0.0
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 125.22,
+              "quantity": 0.0,
+              "strategy": "RuleLLMMomentumSpeculator",
+              "investor": "rulellm_momentum_1",
+              "reasoning": "Insufficient recent prices (3 < 5) to calculate momentum; neutral trend",
+              "analysis": "First, compute short-term momentum: Recent prices provided are only 3 (fewer than 5), so momentum = 0. \n\nNext, check action rules: Momentum is 0, which is between -0.02 and 0.01 → neutral/flat momentum. So quantity = 0 (hold). \n\nNo adjustments needed as momentum is clearly neutral, and portfolio constraints don't apply (no buy/sell).",
+              "cash": 10000.0,
+              "position": 0.0
+            },
+            "source_id": "rulellm_momentum_1",
+            "timestamp": "2026-03-30T12:46:20.274800",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 7820.415
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 125.22,
+          "quantity": 0.0,
+          "strategy": "RuleLLMMomentumSpeculator",
+          "investor": "rulellm_momentum_1",
+          "reasoning": "Insufficient recent prices (3 < 5) to calculate momentum; neutral trend",
+          "analysis": "First, compute short-term momentum: Recent prices provided are only 3 (fewer than 5), so momentum = 0. \n\nNext, check action rules: Momentum is 0, which is between -0.02 and 0.01 → neutral/flat momentum. So quantity = 0 (hold). \n\nNo adjustments needed as momentum is clearly neutral, and portfolio constraints don't apply (no buy/sell).",
+          "cash": 10000.0,
+          "position": 0.0
+        },
+        "source_id": "rulellm_momentum_1",
+        "timestamp": "2026-03-30T12:46:20.274800",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 197,
+      "tick_turn_duration_ms": 7820.425,
+      "tick_turn_total_duration_ms": 1466733.487,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000198_0330124639": {
+    "round_num": 198,
+    "timestamp": "2026-03-30T12:46:39.366107",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 124.99,
+            "quantity": 0.0,
+            "strategy": "RuleLLMMomentumSpeculator",
+            "investor": "rulellm_momentum_1",
+            "reasoning": "Insufficient recent prices (<5) → momentum = 0, neutral trend",
+            "analysis": "First, compute momentum: Recent Prices has only 3 entries (fewer than 5), so momentum = 0.  \nStep 2: Momentum is not >0.01 (no buy) nor < -0.02 (no sell), so action is hold.  \nNo constraints apply since quantity is 0.",
+            "cash": 10000.0,
+            "position": 0.0
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 124.99,
+              "quantity": 0.0,
+              "strategy": "RuleLLMMomentumSpeculator",
+              "investor": "rulellm_momentum_1",
+              "reasoning": "Insufficient recent prices (<5) → momentum = 0, neutral trend",
+              "analysis": "First, compute momentum: Recent Prices has only 3 entries (fewer than 5), so momentum = 0.  \nStep 2: Momentum is not >0.01 (no buy) nor < -0.02 (no sell), so action is hold.  \nNo constraints apply since quantity is 0.",
+              "cash": 10000.0,
+              "position": 0.0
+            },
+            "source_id": "rulellm_momentum_1",
+            "timestamp": "2026-03-30T12:46:39.365970",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 6762.621
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 124.99,
+          "quantity": 0.0,
+          "strategy": "RuleLLMMomentumSpeculator",
+          "investor": "rulellm_momentum_1",
+          "reasoning": "Insufficient recent prices (<5) → momentum = 0, neutral trend",
+          "analysis": "First, compute momentum: Recent Prices has only 3 entries (fewer than 5), so momentum = 0.  \nStep 2: Momentum is not >0.01 (no buy) nor < -0.02 (no sell), so action is hold.  \nNo constraints apply since quantity is 0.",
+          "cash": 10000.0,
+          "position": 0.0
+        },
+        "source_id": "rulellm_momentum_1",
+        "timestamp": "2026-03-30T12:46:39.365970",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 198,
+      "tick_turn_duration_ms": 6762.639,
+      "tick_turn_total_duration_ms": 1473496.126,
+      "tick_step_count": 1
+    }
+  }
+}

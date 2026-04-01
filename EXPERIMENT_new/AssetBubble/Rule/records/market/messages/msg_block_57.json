@@ -1,0 +1,77 @@
+{
+  "msg_r000167_0331151658": {
+    "round_num": 167,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:58.739765",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:58.647934",
+      "priority": 1,
+      "extras": {
+        "round_num": 167
+      }
+    }
+  },
+  "msg_r000168_0331151658": {
+    "round_num": 168,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:58.936939",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:58.847384",
+      "priority": 1,
+      "extras": {
+        "round_num": 168
+      }
+    }
+  },
+  "msg_r000169_0331151659": {
+    "round_num": 169,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:59.140688",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:59.048331",
+      "priority": 1,
+      "extras": {
+        "round_num": 169
+      }
+    }
+  }
+}

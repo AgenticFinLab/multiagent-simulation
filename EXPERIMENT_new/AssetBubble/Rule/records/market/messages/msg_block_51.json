@@ -1,0 +1,77 @@
+{
+  "msg_r000149_0331151655": {
+    "round_num": 149,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:55.396673",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:55.326075",
+      "priority": 1,
+      "extras": {
+        "round_num": 149
+      }
+    }
+  },
+  "msg_r000150_0331151655": {
+    "round_num": 150,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:55.576279",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 180.35137492750928,
+          "quantity": 0.17592186044415997,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:55.499510",
+      "priority": 1,
+      "extras": {
+        "round_num": 150
+      }
+    }
+  },
+  "msg_r000151_0331151655": {
+    "round_num": 151,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:55.753122",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:55.672419",
+      "priority": 1,
+      "extras": {
+        "round_num": 151
+      }
+    }
+  }
+}

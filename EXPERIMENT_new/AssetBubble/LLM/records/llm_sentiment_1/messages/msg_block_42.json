@@ -1,0 +1,95 @@
+{
+  "msg_r000126_0330124141": {
+    "round_num": 126,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:41:41.648380",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "llm_sentiment_1",
+      "payload": {
+        "content": {
+          "price": 396.876002195745,
+          "prev_price": 408.8548179273283,
+          "return": -0.029298458049997818,
+          "return_pct": -2.9298458049997818,
+          "fundamental": 113.53449691168537,
+          "bubble_ratio": 3.4956424081789113,
+          "volume": 130.0,
+          "net_demand": -70.0,
+          "round": 127,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:41:41.609088",
+      "priority": 1,
+      "extras": {
+        "round_num": 127
+      }
+    }
+  },
+  "msg_r000127_0330124210": {
+    "round_num": 127,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:42:10.728767",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "llm_sentiment_1",
+      "payload": {
+        "content": {
+          "price": 341.61183977788085,
+          "prev_price": 396.876002195745,
+          "return": -0.13924793162627927,
+          "return_pct": -13.924793162627926,
+          "fundamental": 113.64803140859703,
+          "bubble_ratio": 3.005875557577315,
+          "volume": 480.00152240223747,
+          "net_demand": -359.99847759776253,
+          "round": 128,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:42:10.669995",
+      "priority": 1,
+      "extras": {
+        "round_num": 128
+      }
+    }
+  },
+  "msg_r000128_0330124241": {
+    "round_num": 128,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:42:41.675025",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "llm_sentiment_1",
+      "payload": {
+        "content": {
+          "price": 203.42519087458365,
+          "prev_price": 341.61183977788085,
+          "return": -0.4045136403736692,
+          "return_pct": -40.45136403736692,
+          "fundamental": 113.76167944000562,
+          "bubble_ratio": 1.788169723547935,
+          "volume": 1231.6975612540616,
+          "net_demand": -912.2824387459384,
+          "round": 129,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:42:41.626534",
+      "priority": 1,
+      "extras": {
+        "round_num": 129
+      }
+    }
+  }
+}

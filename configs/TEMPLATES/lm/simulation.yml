@@ -22,7 +22,7 @@ setting:
   # Total number of rounds to execute. The loop in GeneralSimulator.run() iterates
   # range(1, total_rounds+1). Simulation stops exactly at this count.
   # LLM simulations typically use fewer rounds (50-100) due to API latency.
-  total_rounds: 100
+  total_rounds: 200
   # Max round results kept in hot RAM (HistoryBuffer hot deque).
   # Round results beyond this limit are spilled to disk under record_path/history/.
   # simulator.run() returns only these hot entries — NOT all round results.

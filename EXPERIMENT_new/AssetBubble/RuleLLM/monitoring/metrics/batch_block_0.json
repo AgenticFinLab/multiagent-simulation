@@ -1,0 +1,3014 @@
+{
+  "batch_00000050_00000099": [
+    {
+      "name": "timer_operate_duration",
+      "value": 20902.020931243896,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:45:41.352098"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 26,
+        "duration_ms": 20902.020931243896
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:45:41.352117"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13543.832063674927,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:45:55.078207"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 27,
+        "duration_ms": 13543.832063674927
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:45:55.086493"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 17896.336793899536,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:46:13.156278"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 28,
+        "duration_ms": 17896.336793899536
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:46:13.156306"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13532.023906707764,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:46:27.011256"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 29,
+        "duration_ms": 13532.023906707764
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:46:27.011278"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13439.388990402222,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:46:40.639900"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 30,
+        "duration_ms": 13439.388990402222
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:46:40.639920"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12278.746843338013,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:47:00.543446"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 31,
+        "duration_ms": 12278.746843338013
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:47:00.543461"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 9794.68584060669,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:47:10.450502"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 32,
+        "duration_ms": 9794.68584060669
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:47:10.450510"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11175.260782241821,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:47:22.527366"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 33,
+        "duration_ms": 11175.260782241821
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:47:22.527377"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 5963.374137878418,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:47:28.620331"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 34,
+        "duration_ms": 5963.374137878418
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:47:28.620351"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 10883.811235427856,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:47:42.251343"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 35,
+        "duration_ms": 10883.811235427856
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:47:42.251348"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 9743.421792984009,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:47:52.133285"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 36,
+        "duration_ms": 9743.421792984009
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:47:52.133301"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11782.88197517395,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:48:08.258180"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 37,
+        "duration_ms": 11782.88197517395
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:48:08.258187"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 10514.049053192139,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:48:18.979367"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 38,
+        "duration_ms": 10514.049053192139
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:48:18.979399"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12422.948122024536,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:48:32.039943"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 39,
+        "duration_ms": 12422.948122024536
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:48:32.039975"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 9214.410066604614,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:48:41.440228"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 40,
+        "duration_ms": 9214.410066604614
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:48:41.440268"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15008.385181427002,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:49:03.454362"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 41,
+        "duration_ms": 15008.385181427002
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:49:03.454386"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 19213.207721710205,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:49:22.864831"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 42,
+        "duration_ms": 19213.207721710205
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:49:22.864859"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13416.931867599487,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:49:36.478947"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 43,
+        "duration_ms": 13416.931867599487
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:49:36.478959"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 14850.337982177734,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:49:55.203860"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 44,
+        "duration_ms": 14850.337982177734
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:49:55.203871"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 19205.524921417236,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:50:17.489310"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 45,
+        "duration_ms": 19205.524921417236
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:50:17.489323"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 17585.915088653564,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:50:35.183897"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 46,
+        "duration_ms": 17585.915088653564
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:50:35.183909"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 23298.312187194824,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:50:58.611411"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 47,
+        "duration_ms": 23298.312187194824
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:50:58.611422"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 17737.349271774292,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:51:16.506071"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 48,
+        "duration_ms": 17737.349271774292
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:51:16.506089"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15389.031887054443,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:51:32.045392"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 49,
+        "duration_ms": 15389.031887054443
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:51:32.045412"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11024.96314048767,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:51:47.758048"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 50,
+        "duration_ms": 11024.96314048767
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:51:47.758084"
+    }
+  ],
+  "batch_00000100_00000149": [
+    {
+      "name": "timer_operate_duration",
+      "value": 12386.488199234009,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:52:15.197067"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 51,
+        "duration_ms": 12386.488199234009
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:52:15.197087"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 19918.989896774292,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:52:51.506461"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 52,
+        "duration_ms": 19918.989896774292
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:52:51.509791"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12714.290142059326,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:53:04.404695"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 53,
+        "duration_ms": 12714.290142059326
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:53:04.404707"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15471.748113632202,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:53:25.755907"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 54,
+        "duration_ms": 15471.748113632202
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:53:25.755937"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 26315.28091430664,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:53:54.475556"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 55,
+        "duration_ms": 26315.28091430664
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:53:54.475570"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 18319.382905960083,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:54:13.007843"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 56,
+        "duration_ms": 18319.382905960083
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:54:13.007874"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 21181.129932403564,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:54:37.831200"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 57,
+        "duration_ms": 21181.129932403564
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:54:37.831215"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12378.675937652588,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:55:01.002947"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 58,
+        "duration_ms": 12378.675937652588
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:55:01.002972"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 18560.723066329956,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:55:31.324819"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 59,
+        "duration_ms": 18560.723066329956
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:55:31.324857"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 23486.1478805542,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:55:59.320376"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 60,
+        "duration_ms": 23486.1478805542
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:55:59.320412"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 18829.27918434143,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:56:21.762560"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 61,
+        "duration_ms": 18829.27918434143
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:56:21.762580"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 14660.989761352539,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:56:44.175330"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 62,
+        "duration_ms": 14660.989761352539
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:56:44.175373"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15402.334928512573,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:57:00.677968"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 63,
+        "duration_ms": 15402.334928512573
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:57:00.677983"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 18764.64796066284,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:57:19.617683"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 64,
+        "duration_ms": 18764.64796066284
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:57:19.617712"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 31699.147939682007,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:57:51.484457"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 65,
+        "duration_ms": 31699.147939682007
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:57:51.484470"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 22898.90193939209,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:58:14.575146"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 66,
+        "duration_ms": 22898.90193939209
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:58:14.575152"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 19659.942865371704,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:58:34.392043"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 67,
+        "duration_ms": 19659.942865371704
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:58:34.392072"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13199.459791183472,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:58:47.789306"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 68,
+        "duration_ms": 13199.459791183472
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:58:47.789324"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15571.484088897705,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:59:03.530200"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 69,
+        "duration_ms": 15571.484088897705
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:59:03.530223"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15636.262893676758,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:59:20.281041"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 70,
+        "duration_ms": 15636.262893676758
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:59:20.281062"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 25728.12008857727,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:59:46.220749"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 71,
+        "duration_ms": 25728.12008857727
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T11:59:46.220783"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 21324.007987976074,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:00:07.798065"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 72,
+        "duration_ms": 21324.007987976074
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:00:07.798098"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 16038.168668746948,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:00:24.071248"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 73,
+        "duration_ms": 16038.168668746948
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:00:24.071284"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 20561.882257461548,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:00:45.590228"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 74,
+        "duration_ms": 20561.882257461548
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:00:45.590250"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 14934.680938720703,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:01:00.670148"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 75,
+        "duration_ms": 14934.680938720703
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:01:00.670164"
+    }
+  ],
+  "batch_00000150_00000199": [
+    {
+      "name": "timer_operate_duration",
+      "value": 18174.98278617859,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:01:29.652242"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 76,
+        "duration_ms": 18174.98278617859
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:01:29.652274"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 10815.721988677979,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:01:40.626170"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 77,
+        "duration_ms": 10815.721988677979
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:01:40.631719"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 14353.652954101562,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:02:01.345815"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 78,
+        "duration_ms": 14353.652954101562
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:02:01.345841"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 14092.563152313232,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:02:22.059206"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 79,
+        "duration_ms": 14092.563152313232
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:02:22.059229"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 10257.704734802246,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:02:32.493994"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 80,
+        "duration_ms": 10257.704734802246
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:02:32.494019"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12740.716934204102,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:02:50.068526"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 81,
+        "duration_ms": 12740.716934204102
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:02:50.068532"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12763.05103302002,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:03:10.538015"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 82,
+        "duration_ms": 12763.05103302002
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:03:10.538041"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 18858.695030212402,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:03:29.593240"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 83,
+        "duration_ms": 18858.695030212402
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:03:29.593265"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12243.427276611328,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:03:42.030031"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 84,
+        "duration_ms": 12243.427276611328
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:03:42.030064"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 10559.466123580933,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:04:01.558164"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 85,
+        "duration_ms": 10559.466123580933
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:04:01.558189"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15431.496143341064,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:04:22.004515"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 86,
+        "duration_ms": 15431.496143341064
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:04:22.004546"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11427.89888381958,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:04:34.727754"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 87,
+        "duration_ms": 11427.89888381958
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:04:34.727791"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15381.085872650146,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:04:55.959332"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 88,
+        "duration_ms": 15381.085872650146
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:04:55.959360"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12309.554815292358,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:05:11.349213"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 89,
+        "duration_ms": 12309.554815292358
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:05:11.349228"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 14521.586894989014,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:05:28.583612"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 90,
+        "duration_ms": 14521.586894989014
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:05:28.583625"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13684.230089187622,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:05:56.575756"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 91,
+        "duration_ms": 13684.230089187622
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:05:56.575780"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 17773.155212402344,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:06:34.982875"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 92,
+        "duration_ms": 17773.155212402344
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:06:34.982923"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12165.130138397217,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:06:50.934959"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 93,
+        "duration_ms": 12165.130138397217
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:06:50.934975"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 9270.9219455719,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:07:00.396401"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 94,
+        "duration_ms": 9270.9219455719
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:07:00.396430"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11357.465028762817,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:07:13.621332"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 95,
+        "duration_ms": 11357.465028762817
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:07:13.621362"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 10463.898181915283,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:07:29.375628"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 96,
+        "duration_ms": 10463.898181915283
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:07:29.375661"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 24869.11416053772,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:07:55.172693"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 97,
+        "duration_ms": 24869.11416053772
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:07:55.172746"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 9814.152002334595,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:08:05.179053"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 98,
+        "duration_ms": 9814.152002334595
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:08:05.179073"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11764.95099067688,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:08:18.355457"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 99,
+        "duration_ms": 11764.95099067688
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:08:18.355480"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13009.89317893982,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:08:31.563223"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 100,
+        "duration_ms": 13009.89317893982
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:08:31.563264"
+    }
+  ],
+  "batch_00000200_00000249": [
+    {
+      "name": "timer_operate_duration",
+      "value": 16261.18803024292,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:08:55.369092"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 101,
+        "duration_ms": 16261.18803024292
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:08:55.369125"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 20319.626092910767,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:09:19.038851"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 102,
+        "duration_ms": 20319.626092910767
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:09:19.044376"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 28313.64893913269,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:09:47.582671"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 103,
+        "duration_ms": 28313.64893913269
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:09:47.582682"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 17308.916807174683,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:10:05.060346"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 104,
+        "duration_ms": 17308.916807174683
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:10:05.060357"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 19900.997161865234,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:10:25.093810"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 105,
+        "duration_ms": 19900.997161865234
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:10:25.093822"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12742.76614189148,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:10:37.970312"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 106,
+        "duration_ms": 12742.76614189148
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:10:37.970322"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15595.737218856812,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:10:59.179280"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 107,
+        "duration_ms": 15595.737218856812
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:10:59.179290"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 9869.694232940674,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:11:14.365545"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 108,
+        "duration_ms": 9869.694232940674
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:11:14.365556"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15001.203060150146,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:11:35.134409"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 109,
+        "duration_ms": 15001.203060150146
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:11:35.134421"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 17117.857694625854,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:11:57.924034"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 110,
+        "duration_ms": 17117.857694625854
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:11:57.924046"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12026.77297592163,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:12:11.470656"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 111,
+        "duration_ms": 12026.77297592163
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:12:11.470669"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13683.53009223938,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:12:34.062890"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 112,
+        "duration_ms": 13683.53009223938
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:12:34.062901"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11772.727012634277,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:12:48.580949"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 113,
+        "duration_ms": 11772.727012634277
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:12:48.580962"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12206.41016960144,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:13:07.522749"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 114,
+        "duration_ms": 12206.41016960144
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:13:07.522766"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11639.579057693481,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:13:23.215638"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 115,
+        "duration_ms": 11639.579057693481
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:13:23.215651"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13091.381072998047,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:13:46.656487"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 116,
+        "duration_ms": 13091.381072998047
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:13:46.656499"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 10417.663097381592,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:14:00.531683"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 117,
+        "duration_ms": 10417.663097381592
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:14:00.531695"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15909.732818603516,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:14:21.515479"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 118,
+        "duration_ms": 15909.732818603516
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:14:21.515490"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 18263.076066970825,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:14:39.932176"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 119,
+        "duration_ms": 18263.076066970825
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:14:39.932185"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12958.130359649658,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:14:53.243503"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 120,
+        "duration_ms": 12958.130359649658
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:14:53.243550"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 17459.831714630127,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:15:18.447143"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 121,
+        "duration_ms": 17459.831714630127
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:15:18.447177"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 17200.239181518555,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:15:35.800658"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 122,
+        "duration_ms": 17200.239181518555
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:15:35.800664"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15525.538921356201,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:15:51.465194"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 123,
+        "duration_ms": 15525.538921356201
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:15:51.465210"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 14150.704860687256,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:16:07.463755"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 124,
+        "duration_ms": 14150.704860687256
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:16:07.463779"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12940.412998199463,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:16:21.914306"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 125,
+        "duration_ms": 12940.412998199463
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:16:21.914322"
+    }
+  ],
+  "batch_00000250_00000299": [
+    {
+      "name": "timer_operate_duration",
+      "value": 19752.400875091553,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:16:54.167273"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 126,
+        "duration_ms": 19752.400875091553
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:16:54.167304"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 9667.104005813599,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:17:04.040629"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 127,
+        "duration_ms": 9667.104005813599
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:17:04.052405"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 10928.611040115356,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:17:17.229650"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 128,
+        "duration_ms": 10928.611040115356
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:17:17.229666"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15090.856313705444,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:17:34.915790"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 129,
+        "duration_ms": 15090.856313705444
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:17:34.915820"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 26012.36128807068,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:18:01.155602"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 130,
+        "duration_ms": 26012.36128807068
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:18:01.155633"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 10839.25986289978,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:18:12.219307"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 131,
+        "duration_ms": 10839.25986289978
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:18:12.219322"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 10932.03592300415,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:18:23.707887"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 132,
+        "duration_ms": 10932.03592300415
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:18:23.707903"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13942.846775054932,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:18:37.865944"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 133,
+        "duration_ms": 13942.846775054932
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:18:37.865953"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 9799.759864807129,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:18:47.826788"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 134,
+        "duration_ms": 9799.759864807129
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:18:47.826806"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13611.814022064209,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:19:05.988880"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 135,
+        "duration_ms": 13611.814022064209
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:19:05.988903"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13464.885950088501,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:19:19.618467"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 136,
+        "duration_ms": 13464.885950088501
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:19:19.618493"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13277.80032157898,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:19:33.267598"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 137,
+        "duration_ms": 13277.80032157898
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:19:33.267625"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13185.864925384521,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:19:46.638623"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 138,
+        "duration_ms": 13185.864925384521
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:19:46.638641"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11802.369117736816,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:19:58.620592"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 139,
+        "duration_ms": 11802.369117736816
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:19:58.620607"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12893.541812896729,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:20:13.680234"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 140,
+        "duration_ms": 12893.541812896729
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:20:13.680249"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 19493.66521835327,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:20:37.081048"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 141,
+        "duration_ms": 19493.66521835327
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:20:37.081071"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11174.196004867554,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:20:58.155083"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 142,
+        "duration_ms": 11174.196004867554
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:20:58.155104"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 10273.090124130249,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:21:11.304860"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 143,
+        "duration_ms": 10273.090124130249
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:21:11.304892"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 14203.501224517822,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:21:33.293592"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 144,
+        "duration_ms": 14203.501224517822
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:21:33.293617"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12392.075061798096,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:21:46.948604"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 145,
+        "duration_ms": 12392.075061798096
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:21:46.948632"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 21365.59510231018,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:22:13.657508"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 146,
+        "duration_ms": 21365.59510231018
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:22:13.657534"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 18853.384017944336,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:22:38.511974"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 147,
+        "duration_ms": 18853.384017944336
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:22:38.511988"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11607.038974761963,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:22:56.669170"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 148,
+        "duration_ms": 11607.038974761963
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:22:56.669188"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 14955.487966537476,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:23:20.941288"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 149,
+        "duration_ms": 14955.487966537476
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:23:20.941325"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13008.986234664917,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:23:35.860978"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_1",
+        "round_num": 150,
+        "duration_ms": 13008.986234664917
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:23:35.860989"
+    }
+  ],
+  "batch_00000300_00000349": [
+    {
+      "name": "timer_operate_duration",
+      "value": 13259.389877319336,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:23:49.280663"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 151,
+        "duration_ms": 13259.389877319336
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:23:49.280681"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 20074.20015335083,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:24:12.480664"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 152,
+        "duration_ms": 20074.20015335083
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:24:12.486791"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13536.762237548828,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:24:28.076897"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 153,
+        "duration_ms": 13536.762237548828
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:24:28.076914"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13322.35598564148,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:24:41.593780"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 154,
+        "duration_ms": 13322.35598564148
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:24:41.593796"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 10619.477987289429,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:24:52.935495"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 155,
+        "duration_ms": 10619.477987289429
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:24:52.935516"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 21953.624963760376,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:25:34.791987"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 156,
+        "duration_ms": 21953.624963760376
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:25:34.792010"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11904.25181388855,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:25:46.908088"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 157,
+        "duration_ms": 11904.25181388855
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:25:46.908124"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 13529.671907424927,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:26:05.957886"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 158,
+        "duration_ms": 13529.671907424927
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:26:05.957947"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 14454.13589477539,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:26:24.261391"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 159,
+        "duration_ms": 14454.13589477539
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:26:24.261414"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 12724.766969680786,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:26:44.746217"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 160,
+        "duration_ms": 12724.766969680786
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:26:44.746262"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 20732.59997367859,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:27:19.867423"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 161,
+        "duration_ms": 20732.59997367859
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:27:19.867446"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 19572.52287864685,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:27:45.427349"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 162,
+        "duration_ms": 19572.52287864685
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:27:45.427376"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11349.198818206787,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:28:02.372022"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 163,
+        "duration_ms": 11349.198818206787
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:28:02.372059"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 16719.349145889282,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:28:31.256114"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 164,
+        "duration_ms": 16719.349145889282
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:28:31.256133"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 14333.754301071167,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:28:47.069603"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 165,
+        "duration_ms": 14333.754301071167
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:28:47.069632"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 14356.888055801392,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:29:06.445862"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 166,
+        "duration_ms": 14356.888055801392
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:29:06.445890"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 16039.695024490356,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:29:27.995733"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 167,
+        "duration_ms": 16039.695024490356
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:29:27.995751"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15812.922954559326,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:29:44.551163"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 168,
+        "duration_ms": 15812.922954559326
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:29:44.551190"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 16336.795091629028,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:30:01.083009"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 169,
+        "duration_ms": 16336.795091629028
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:30:01.083044"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 11694.427251815796,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:30:13.924515"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 170,
+        "duration_ms": 11694.427251815796
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:30:13.924564"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 20379.17995452881,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:30:36.285805"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 171,
+        "duration_ms": 20379.17995452881
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:30:36.285884"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 38172.4419593811,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:31:14.723740"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 172,
+        "duration_ms": 38172.4419593811
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:31:14.723773"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15858.880996704102,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:31:30.846433"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 173,
+        "duration_ms": 15858.880996704102
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:31:30.846460"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 16789.78991508484,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:31:47.890048"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 174,
+        "duration_ms": 16789.78991508484
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:31:47.890074"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 15339.44296836853,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:32:03.488073"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "rulellm_noise_2",
+        "round_num": 175,
+        "duration_ms": 15339.44296836853
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-30T12:32:03.488105"
+    }
+  ]
+}

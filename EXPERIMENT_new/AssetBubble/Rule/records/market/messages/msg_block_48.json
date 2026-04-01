@@ -1,0 +1,77 @@
+{
+  "msg_r000140_0331151653": {
+    "round_num": 140,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:53.794654",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 182.72980418809232,
+          "quantity": 0.21990232555519995,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:53.715630",
+      "priority": 1,
+      "extras": {
+        "round_num": 140
+      }
+    }
+  },
+  "msg_r000141_0331151653": {
+    "round_num": 141,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:53.982253",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:53.900403",
+      "priority": 1,
+      "extras": {
+        "round_num": 141
+      }
+    }
+  },
+  "msg_r000142_0331151654": {
+    "round_num": 142,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:54.170975",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:54.085611",
+      "priority": 1,
+      "extras": {
+        "round_num": 142
+      }
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "msg_r000015_0331151633": {
+    "round_num": 15,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:33.270535",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "noise_trader_2",
+      "payload": {
+        "content": {
+          "price": 179.0541989914489,
+          "prev_price": 178.47363267773062,
+          "return": 0.0032529528592417927,
+          "return_pct": 0.3252952859241793,
+          "fundamental": 101.61205618243747,
+          "bubble_ratio": 1.7621353776167012,
+          "volume": 22.241889842380807,
+          "net_demand": 6.717629525023616,
+          "round": 16,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:33.256943",
+      "priority": 1,
+      "extras": {
+        "round_num": 16
+      }
+    }
+  },
+  "msg_r000016_0331151633": {
+    "round_num": 16,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:33.400232",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "noise_trader_2",
+      "payload": {
+        "content": {
+          "price": 178.56821833633498,
+          "prev_price": 179.0541989914489,
+          "return": -0.002714153914576129,
+          "return_pct": -0.2714153914576129,
+          "fundamental": 101.7136682386199,
+          "bubble_ratio": 1.7555970739096203,
+          "volume": 0.7216863034943695,
+          "net_demand": 0.7216863034943695,
+          "round": 17,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:33.384072",
+      "priority": 1,
+      "extras": {
+        "round_num": 17
+      }
+    }
+  },
+  "msg_r000017_0331151633": {
+    "round_num": 17,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:33.541640",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "noise_trader_2",
+      "payload": {
+        "content": {
+          "price": 178.2711505759888,
+          "prev_price": 178.56821833633498,
+          "return": -0.001663609365170743,
+          "return_pct": -0.1663609365170743,
+          "fundamental": 101.8153819068585,
+          "bubble_ratio": 1.750925520655343,
+          "volume": 0,
+          "net_demand": 0,
+          "round": 18,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:33.523645",
+      "priority": 1,
+      "extras": {
+        "round_num": 18
+      }
+    }
+  }
+}

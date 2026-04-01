@@ -1,0 +1,604 @@
+{
+  "turn_block_0.json": {
+    "ids": [
+      "turn_r000001_0330113731",
+      "turn_r000002_0330113744",
+      "turn_r000003_0330113758"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_0.json"
+  },
+  "turn_block_1.json": {
+    "ids": [
+      "turn_r000004_0330113809",
+      "turn_r000005_0330113822",
+      "turn_r000006_0330113838"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_1.json"
+  },
+  "turn_block_2.json": {
+    "ids": [
+      "turn_r000007_0330113855",
+      "turn_r000008_0330113910",
+      "turn_r000009_0330113924"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_2.json"
+  },
+  "turn_block_3.json": {
+    "ids": [
+      "turn_r000010_0330113943",
+      "turn_r000011_0330113958",
+      "turn_r000012_0330114019"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_3.json"
+  },
+  "turn_block_4.json": {
+    "ids": [
+      "turn_r000013_0330114039",
+      "turn_r000014_0330114113",
+      "turn_r000015_0330114132"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_4.json"
+  },
+  "turn_block_5.json": {
+    "ids": [
+      "turn_r000016_0330114156",
+      "turn_r000017_0330114212",
+      "turn_r000018_0330114231"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_5.json"
+  },
+  "turn_block_6.json": {
+    "ids": [
+      "turn_r000019_0330114252",
+      "turn_r000020_0330114312",
+      "turn_r000021_0330114336"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_6.json"
+  },
+  "turn_block_7.json": {
+    "ids": [
+      "turn_r000022_0330114401",
+      "turn_r000023_0330114426",
+      "turn_r000024_0330114442"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_7.json"
+  },
+  "turn_block_8.json": {
+    "ids": [
+      "turn_r000025_0330114504",
+      "turn_r000026_0330114520",
+      "turn_r000027_0330114541"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_8.json"
+  },
+  "turn_block_9.json": {
+    "ids": [
+      "turn_r000028_0330114555",
+      "turn_r000029_0330114613",
+      "turn_r000030_0330114627"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_9.json"
+  },
+  "turn_block_10.json": {
+    "ids": [
+      "turn_r000031_0330114648",
+      "turn_r000032_0330114700",
+      "turn_r000033_0330114711"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_10.json"
+  },
+  "turn_block_11.json": {
+    "ids": [
+      "turn_r000034_0330114722",
+      "turn_r000035_0330114731",
+      "turn_r000036_0330114742"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_11.json"
+  },
+  "turn_block_12.json": {
+    "ids": [
+      "turn_r000037_0330114756",
+      "turn_r000038_0330114808",
+      "turn_r000039_0330114819"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_12.json"
+  },
+  "turn_block_13.json": {
+    "ids": [
+      "turn_r000040_0330114832",
+      "turn_r000041_0330114848",
+      "turn_r000042_0330114903"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_13.json"
+  },
+  "turn_block_14.json": {
+    "ids": [
+      "turn_r000043_0330114922",
+      "turn_r000044_0330114940",
+      "turn_r000045_0330114958"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_14.json"
+  },
+  "turn_block_15.json": {
+    "ids": [
+      "turn_r000046_0330115017",
+      "turn_r000047_0330115035",
+      "turn_r000048_0330115058"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_15.json"
+  },
+  "turn_block_16.json": {
+    "ids": [
+      "turn_r000049_0330115116",
+      "turn_r000050_0330115136",
+      "turn_r000051_0330115202"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_16.json"
+  },
+  "turn_block_17.json": {
+    "ids": [
+      "turn_r000052_0330115231",
+      "turn_r000053_0330115251",
+      "turn_r000054_0330115310"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_17.json"
+  },
+  "turn_block_18.json": {
+    "ids": [
+      "turn_r000055_0330115328",
+      "turn_r000056_0330115354",
+      "turn_r000057_0330115416"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_18.json"
+  },
+  "turn_block_19.json": {
+    "ids": [
+      "turn_r000058_0330115448",
+      "turn_r000059_0330115512",
+      "turn_r000060_0330115535"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_19.json"
+  },
+  "turn_block_20.json": {
+    "ids": [
+      "turn_r000061_0330115602",
+      "turn_r000062_0330115629",
+      "turn_r000063_0330115645"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_20.json"
+  },
+  "turn_block_21.json": {
+    "ids": [
+      "turn_r000064_0330115700",
+      "turn_r000065_0330115719",
+      "turn_r000066_0330115751"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_21.json"
+  },
+  "turn_block_22.json": {
+    "ids": [
+      "turn_r000067_0330115814",
+      "turn_r000068_0330115834",
+      "turn_r000069_0330115847"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_22.json"
+  },
+  "turn_block_23.json": {
+    "ids": [
+      "turn_r000070_0330115904",
+      "turn_r000071_0330115920",
+      "turn_r000072_0330115946"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_23.json"
+  },
+  "turn_block_24.json": {
+    "ids": [
+      "turn_r000073_0330120007",
+      "turn_r000074_0330120024",
+      "turn_r000075_0330120045"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_24.json"
+  },
+  "turn_block_25.json": {
+    "ids": [
+      "turn_r000076_0330120111",
+      "turn_r000077_0330120129",
+      "turn_r000078_0330120146"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_25.json"
+  },
+  "turn_block_26.json": {
+    "ids": [
+      "turn_r000079_0330120207",
+      "turn_r000080_0330120222",
+      "turn_r000081_0330120237"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_26.json"
+  },
+  "turn_block_27.json": {
+    "ids": [
+      "turn_r000082_0330120257",
+      "turn_r000083_0330120310",
+      "turn_r000084_0330120329"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_27.json"
+  },
+  "turn_block_28.json": {
+    "ids": [
+      "turn_r000085_0330120350",
+      "turn_r000086_0330120406",
+      "turn_r000087_0330120423"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_28.json"
+  },
+  "turn_block_29.json": {
+    "ids": [
+      "turn_r000088_0330120440",
+      "turn_r000089_0330120458",
+      "turn_r000090_0330120514"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_29.json"
+  },
+  "turn_block_30.json": {
+    "ids": [
+      "turn_r000091_0330120542",
+      "turn_r000092_0330120617",
+      "turn_r000093_0330120638"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_30.json"
+  },
+  "turn_block_31.json": {
+    "ids": [
+      "turn_r000094_0330120651",
+      "turn_r000095_0330120702",
+      "turn_r000096_0330120718"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_31.json"
+  },
+  "turn_block_32.json": {
+    "ids": [
+      "turn_r000097_0330120730",
+      "turn_r000098_0330120755",
+      "turn_r000099_0330120806"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_32.json"
+  },
+  "turn_block_33.json": {
+    "ids": [
+      "turn_r000100_0330120818",
+      "turn_r000101_0330120839",
+      "turn_r000102_0330120858"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_33.json"
+  },
+  "turn_block_34.json": {
+    "ids": [
+      "turn_r000103_0330120919",
+      "turn_r000104_0330120947",
+      "turn_r000105_0330121005"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_34.json"
+  },
+  "turn_block_35.json": {
+    "ids": [
+      "turn_r000106_0330121025",
+      "turn_r000107_0330121043",
+      "turn_r000108_0330121104"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_35.json"
+  },
+  "turn_block_36.json": {
+    "ids": [
+      "turn_r000109_0330121120",
+      "turn_r000110_0330121140",
+      "turn_r000111_0330121159"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_36.json"
+  },
+  "turn_block_37.json": {
+    "ids": [
+      "turn_r000112_0330121220",
+      "turn_r000113_0330121236",
+      "turn_r000114_0330121255"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_37.json"
+  },
+  "turn_block_38.json": {
+    "ids": [
+      "turn_r000115_0330121311",
+      "turn_r000116_0330121333",
+      "turn_r000117_0330121350"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_38.json"
+  },
+  "turn_block_39.json": {
+    "ids": [
+      "turn_r000118_0330121405",
+      "turn_r000119_0330121421",
+      "turn_r000120_0330121440"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_39.json"
+  },
+  "turn_block_40.json": {
+    "ids": [
+      "turn_r000121_0330121500",
+      "turn_r000122_0330121518",
+      "turn_r000123_0330121535"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_40.json"
+  },
+  "turn_block_41.json": {
+    "ids": [
+      "turn_r000124_0330121553",
+      "turn_r000125_0330121608",
+      "turn_r000126_0330121634"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_41.json"
+  },
+  "turn_block_42.json": {
+    "ids": [
+      "turn_r000127_0330121654",
+      "turn_r000128_0330121706",
+      "turn_r000129_0330121719"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_42.json"
+  },
+  "turn_block_43.json": {
+    "ids": [
+      "turn_r000130_0330121735",
+      "turn_r000131_0330121801",
+      "turn_r000132_0330121812"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_43.json"
+  },
+  "turn_block_44.json": {
+    "ids": [
+      "turn_r000133_0330121823",
+      "turn_r000134_0330121837",
+      "turn_r000135_0330121852"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_44.json"
+  },
+  "turn_block_45.json": {
+    "ids": [
+      "turn_r000136_0330121906",
+      "turn_r000137_0330121919",
+      "turn_r000138_0330121933"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_45.json"
+  },
+  "turn_block_46.json": {
+    "ids": [
+      "turn_r000139_0330121946",
+      "turn_r000140_0330122000",
+      "turn_r000141_0330122017"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_46.json"
+  },
+  "turn_block_47.json": {
+    "ids": [
+      "turn_r000142_0330122046",
+      "turn_r000143_0330122100",
+      "turn_r000144_0330122118"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_47.json"
+  },
+  "turn_block_48.json": {
+    "ids": [
+      "turn_r000145_0330122134",
+      "turn_r000146_0330122152",
+      "turn_r000147_0330122219"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_48.json"
+  },
+  "turn_block_49.json": {
+    "ids": [
+      "turn_r000148_0330122245",
+      "turn_r000149_0330122305",
+      "turn_r000150_0330122322"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_49.json"
+  },
+  "turn_block_50.json": {
+    "ids": [
+      "turn_r000151_0330122335",
+      "turn_r000152_0330122352",
+      "turn_r000153_0330122414"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_50.json"
+  },
+  "turn_block_51.json": {
+    "ids": [
+      "turn_r000154_0330122428",
+      "turn_r000155_0330122442",
+      "turn_r000156_0330122512"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_51.json"
+  },
+  "turn_block_52.json": {
+    "ids": [
+      "turn_r000157_0330122534",
+      "turn_r000158_0330122552",
+      "turn_r000159_0330122609"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_52.json"
+  },
+  "turn_block_53.json": {
+    "ids": [
+      "turn_r000160_0330122631",
+      "turn_r000161_0330122659",
+      "turn_r000162_0330122725"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_53.json"
+  },
+  "turn_block_54.json": {
+    "ids": [
+      "turn_r000163_0330122750",
+      "turn_r000164_0330122814",
+      "turn_r000165_0330122832"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_54.json"
+  },
+  "turn_block_55.json": {
+    "ids": [
+      "turn_r000166_0330122852",
+      "turn_r000167_0330122911",
+      "turn_r000168_0330122928"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_55.json"
+  },
+  "turn_block_56.json": {
+    "ids": [
+      "turn_r000169_0330122944",
+      "turn_r000170_0330123002",
+      "turn_r000171_0330123015"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_56.json"
+  },
+  "turn_block_57.json": {
+    "ids": [
+      "turn_r000172_0330123036",
+      "turn_r000173_0330123114",
+      "turn_r000174_0330123130"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_57.json"
+  },
+  "turn_block_58.json": {
+    "ids": [
+      "turn_r000175_0330123148",
+      "turn_r000176_0330123203",
+      "turn_r000177_0330123220"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_58.json"
+  },
+  "turn_block_59.json": {
+    "ids": [
+      "turn_r000178_0330123241",
+      "turn_r000179_0330123300",
+      "turn_r000180_0330123317"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_59.json"
+  },
+  "turn_block_60.json": {
+    "ids": [
+      "turn_r000181_0330123331",
+      "turn_r000182_0330123345",
+      "turn_r000183_0330123404"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_60.json"
+  },
+  "turn_block_61.json": {
+    "ids": [
+      "turn_r000184_0330124118",
+      "turn_r000185_0330124133",
+      "turn_r000186_0330124201"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_61.json"
+  },
+  "turn_block_62.json": {
+    "ids": [
+      "turn_r000187_0330124228",
+      "turn_r000188_0330124252",
+      "turn_r000189_0330124315"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_62.json"
+  },
+  "turn_block_63.json": {
+    "ids": [
+      "turn_r000190_0330124339",
+      "turn_r000191_0330124404",
+      "turn_r000192_0330124424"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_63.json"
+  },
+  "turn_block_64.json": {
+    "ids": [
+      "turn_r000193_0330124447",
+      "turn_r000194_0330124511",
+      "turn_r000195_0330124526"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_64.json"
+  },
+  "turn_block_65.json": {
+    "ids": [
+      "turn_r000196_0330124551",
+      "turn_r000197_0330124612",
+      "turn_r000198_0330124632"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_65.json"
+  },
+  "turn_block_66.json": {
+    "ids": [
+      "turn_r000199_0330124648",
+      "turn_r000200_0330124705"
+    ],
+    "count": 2,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/records/market/turns/turn_block_66.json"
+  }
+}

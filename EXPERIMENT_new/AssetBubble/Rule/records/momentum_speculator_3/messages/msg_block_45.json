@@ -1,0 +1,95 @@
+{
+  "msg_r000135_0331151652": {
+    "round_num": 135,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:52.972298",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "momentum_speculator_3",
+      "payload": {
+        "content": {
+          "price": 183.95537556528146,
+          "prev_price": 184.7705393818268,
+          "return": -0.004411762931864485,
+          "return_pct": -0.4411762931864485,
+          "fundamental": 114.56040417699663,
+          "bubble_ratio": 1.6057500572455132,
+          "volume": 16.190858138166647,
+          "net_demand": -3.40229755775327,
+          "round": 136,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:52.962452",
+      "priority": 1,
+      "extras": {
+        "round_num": 136
+      }
+    }
+  },
+  "msg_r000136_0331151653": {
+    "round_num": 136,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:53.134553",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "momentum_speculator_3",
+      "payload": {
+        "content": {
+          "price": 182.42810843503182,
+          "prev_price": 183.95537556528146,
+          "return": -0.00830237836516851,
+          "return_pct": -0.8302378365168509,
+          "fundamental": 114.67496458117361,
+          "bubble_ratio": 1.5908276850253447,
+          "volume": 5.423297208291951,
+          "net_demand": -5.423297208291951,
+          "round": 137,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:53.123272",
+      "priority": 1,
+      "extras": {
+        "round_num": 137
+      }
+    }
+  },
+  "msg_r000137_0331151653": {
+    "round_num": 137,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:53.299452",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "momentum_speculator_3",
+      "payload": {
+        "content": {
+          "price": 181.07116192551888,
+          "prev_price": 182.42810843503182,
+          "return": -0.0074382534640827416,
+          "return_pct": -0.7438253464082741,
+          "fundamental": 114.78963954575477,
+          "bubble_ratio": 1.5774172881982482,
+          "volume": 8.93393205581626,
+          "net_demand": -8.93393205581626,
+          "round": 138,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:53.289302",
+      "priority": 1,
+      "extras": {
+        "round_num": 138
+      }
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "msg_r000036_0331151636": {
+    "round_num": 36,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:36.421608",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "rational_arbitrageur_2",
+      "payload": {
+        "content": {
+          "price": 163.80044536296927,
+          "prev_price": 163.88239824160038,
+          "return": -0.0005000712676311735,
+          "return_pct": -0.050007126763117346,
+          "fundamental": 103.76738364832285,
+          "bubble_ratio": 1.5785349847318495,
+          "volume": 19.20054851096843,
+          "net_demand": 0.19284915512095857,
+          "round": 37,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:36.399669",
+      "priority": 1,
+      "extras": {
+        "round_num": 37
+      }
+    }
+  },
+  "msg_r000037_0331151636": {
+    "round_num": 37,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:36.584224",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "rational_arbitrageur_2",
+      "payload": {
+        "content": {
+          "price": 162.51264136929694,
+          "prev_price": 163.80044536296927,
+          "return": -0.007862029867004645,
+          "return_pct": -0.7862029867004645,
+          "fundamental": 103.87115103197117,
+          "bubble_ratio": 1.5645599356001758,
+          "volume": 5.514037480055326,
+          "net_demand": -5.514037480055326,
+          "round": 38,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:36.562433",
+      "priority": 1,
+      "extras": {
+        "round_num": 38
+      }
+    }
+  },
+  "msg_r000038_0331151636": {
+    "round_num": 38,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:36.754387",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "rational_arbitrageur_2",
+      "payload": {
+        "content": {
+          "price": 163.57326346471413,
+          "prev_price": 162.51264136929694,
+          "return": 0.006526397494254055,
+          "return_pct": 0.6526397494254055,
+          "fundamental": 103.97502218300312,
+          "bubble_ratio": 1.573197677965522,
+          "volume": 9.957554095110957,
+          "net_demand": 9.957554095110957,
+          "round": 39,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:36.728787",
+      "priority": 1,
+      "extras": {
+        "round_num": 39
+      }
+    }
+  }
+}

@@ -172,7 +172,7 @@ def render_simulation_page(scenario_name: str):
         if idx < n_rounds:
             st.session_state.replay_index = idx + 1
             st.session_state.viewed_round_idx = idx
-            time.sleep(0.10)
+            time.sleep(0.05)
             st.rerun()
         else:
             st.session_state.replay_active = False
@@ -243,6 +243,8 @@ def _render_action_card(act):
     price = act.price
     strategy = act.strategy
     agent_id = act.agent_id
+    analysis = act.analysis
+    reasoning = act.reasoning
 
     color_map = {"BUY": "#28a745", "SELL": "#dc3545", "HOLD": "#6c757d"}
     color = color_map.get(action_str, "#6c757d")
@@ -254,14 +256,70 @@ def _render_action_card(act):
         else ""
     )
 
+    # Build tooltip content with analysis and reasoning
+    tooltip_content = ""
+    if analysis:
+        # Escape HTML and format analysis
+        analysis_escaped = (
+            analysis.replace('"', "&quot;").replace("'", "&#39;").replace("\n", "<br/>")
+        )
+        tooltip_content += f"<b>🔍 Analysis:</b><br/>{analysis_escaped}"
+    if reasoning:
+        reasoning_escaped = reasoning.replace('"', "&quot;").replace("'", "&#39;")
+        if tooltip_content:
+            tooltip_content += f"<br/><br/><b>📋 Reasoning:</b> {reasoning_escaped}"
+        else:
+            tooltip_content += f"<b>📋 Reasoning:</b> {reasoning_escaped}"
+
+    # Add hover tooltip using CSS
+    tooltip_html = ""
+    if tooltip_content:
+        tooltip_html = f"""
+    <div class="tooltip" style="position:relative;display:inline-block;width:100%;">
+      <style>
+        .tooltip .tooltiptext {{
+          visibility: hidden;
+          width: 320px;
+          background-color: #2d3748;
+          color: #e2e8f0;
+          text-align: left;
+          border-radius: 8px;
+          padding: 12px;
+          position: absolute;
+          z-index: 1000;
+          bottom: 125%;
+          left: 50%;
+          margin-left: -160px;
+          opacity: 0;
+          transition: opacity 0.3s;
+          font-size: 12px;
+          line-height: 1.5;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+          max-height: 300px;
+          overflow-y: auto;
+        }}
+        .tooltip:hover .tooltiptext {{
+          visibility: visible;
+          opacity: 1;
+        }}
+      </style>
+      <span class="tooltiptext">{tooltip_content}</span>
+    """
+        close_div = "</div>"
+    else:
+        tooltip_html = ""
+        close_div = ""
+
     st.markdown(
         f"""
+{tooltip_html}
 <div style="
     background:#1e2533;
     border-left:4px solid {color};
     border-radius:6px;
     padding:10px 14px;
     margin-bottom:8px;
+    cursor: {'pointer' if tooltip_content else 'default'};
 ">
   <div style="display:flex;justify-content:space-between;align-items:center;">
     <span style="font-weight:700;font-size:13px;color:#e0e6f0;">{agent_id}</span>
@@ -276,7 +334,8 @@ def _render_action_card(act):
     &nbsp;&nbsp;Price: <b style='color:#e0e6f0;'>{price_str}</b>
   </div>
   {strategy_html}
-</div>""",
+</div>
+{close_div}""",
         unsafe_allow_html=True,
     )
 
@@ -348,8 +407,28 @@ def _render_action_buttons(scenario_name: str):
     data_exists = has_experiment_data(scenario_name)
 
     if st.session_state.simulation_running:
-        if st.button("⏹ Stop", type="secondary", use_container_width=True):
-            _stop_simulation()
+        # When simulation is running, show Stop and View Analysis (if data exists)
+        if data_exists:
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                if st.button("⏹ Stop", type="secondary", use_container_width=True):
+                    _stop_simulation()
+            with c2:
+                if st.button(
+                    "📊 View Analysis",
+                    type="primary",
+                    use_container_width=True,
+                    help="Jump to analysis page while simulation continues",
+                ):
+                    st.session_state.current_page = "Analysis"
+                    st.rerun()
+            with c3:
+                if st.button("🔄 Reset", use_container_width=True):
+                    _stop_simulation()
+                    _reset_simulation()
+        else:
+            if st.button("⏹ Stop", type="secondary", use_container_width=True):
+                _stop_simulation()
 
     elif st.session_state.simulation_completed:
         c1, c2 = st.columns(2)
@@ -362,7 +441,8 @@ def _render_action_buttons(scenario_name: str):
                 _reset_simulation()
 
     elif data_exists:
-        c1, c2 = st.columns(2)
+        # When data exists but no simulation running, show Load, View Analysis, and Re-run
+        c1, c2, c3 = st.columns(3)
         with c1:
             if st.button(
                 "📂 Load Results",
@@ -372,6 +452,15 @@ def _render_action_buttons(scenario_name: str):
             ):
                 _start_replay(scenario_name, info)
         with c2:
+            if st.button(
+                "📊 View Analysis",
+                type="secondary",
+                use_container_width=True,
+                help="Jump directly to analysis page without replay",
+            ):
+                st.session_state.current_page = "Analysis"
+                st.rerun()
+        with c3:
             if st.button(
                 "▶ Re-run",
                 use_container_width=True,

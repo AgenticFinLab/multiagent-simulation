@@ -1,0 +1,182 @@
+{
+  "turn_r000103_0330120947": {
+    "round_num": 103,
+    "timestamp": "2026-03-30T12:09:47.580662",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 111.18,
+            "quantity": -8.1,
+            "strategy": "RuleLLMNoiseTrader",
+            "investor": "rulellm_noise_2",
+            "reasoning": "Crowd is bearish (net demand negative, price down), so follow by selling small quantity.",
+            "analysis": "1. Market Signals: Net demand (-3.66) is negative, price return (-0.07%) is negative → crowd is bearish.\n2. Herding Sentiment Calculation: 0.7 * (-0.07% as percentage points) *10 = -0.49. Adding a negative random sentiment (aligned with bearish trend) gives total_sentiment ~-0.54.\n3. Quantity: -0.54 *15 (base size) ≈ -8.1 (within -40 floor).\n4. Portfolio Check: Selling 8.1 shares is ≥ -(30.70 +50) = -80.70 (valid).",
+            "cash": 7648.779700000003,
+            "position": 22.599999999999994
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 111.18,
+              "quantity": -8.1,
+              "strategy": "RuleLLMNoiseTrader",
+              "investor": "rulellm_noise_2",
+              "reasoning": "Crowd is bearish (net demand negative, price down), so follow by selling small quantity.",
+              "analysis": "1. Market Signals: Net demand (-3.66) is negative, price return (-0.07%) is negative → crowd is bearish.\n2. Herding Sentiment Calculation: 0.7 * (-0.07% as percentage points) *10 = -0.49. Adding a negative random sentiment (aligned with bearish trend) gives total_sentiment ~-0.54.\n3. Quantity: -0.54 *15 (base size) ≈ -8.1 (within -40 floor).\n4. Portfolio Check: Selling 8.1 shares is ≥ -(30.70 +50) = -80.70 (valid).",
+              "cash": 7648.779700000003,
+              "position": 22.599999999999994
+            },
+            "source_id": "rulellm_noise_2",
+            "timestamp": "2026-03-30T12:09:47.580605",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 28311.454
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 111.18,
+          "quantity": -8.1,
+          "strategy": "RuleLLMNoiseTrader",
+          "investor": "rulellm_noise_2",
+          "reasoning": "Crowd is bearish (net demand negative, price down), so follow by selling small quantity.",
+          "analysis": "1. Market Signals: Net demand (-3.66) is negative, price return (-0.07%) is negative → crowd is bearish.\n2. Herding Sentiment Calculation: 0.7 * (-0.07% as percentage points) *10 = -0.49. Adding a negative random sentiment (aligned with bearish trend) gives total_sentiment ~-0.54.\n3. Quantity: -0.54 *15 (base size) ≈ -8.1 (within -40 floor).\n4. Portfolio Check: Selling 8.1 shares is ≥ -(30.70 +50) = -80.70 (valid).",
+          "cash": 7648.779700000003,
+          "position": 22.599999999999994
+        },
+        "source_id": "rulellm_noise_2",
+        "timestamp": "2026-03-30T12:09:47.580605",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 103,
+      "tick_turn_duration_ms": 28311.464,
+      "tick_turn_total_duration_ms": 1535095.441,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000104_0330121005": {
+    "round_num": 104,
+    "timestamp": "2026-03-30T12:10:05.058437",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 109.64,
+            "quantity": -2.2,
+            "strategy": "RuleLLMNoiseTrader",
+            "investor": "rulellm_noise_2",
+            "reasoning": "Crowd bearish (negative net demand/price return), total sentiment < -0.1 → sell ~2.2 shares",
+            "analysis": "1. Market Signals: Net demand (-9.67) and price return (-1.38%) are both negative → crowd is bearish.\n2. Herding Sentiment Calculation: 0.7 * (-0.0138) * 10 = -0.0966 (negative, aligns with bearish crowd).\n3. Random Sentiment Proxy: Given bearish signals, assume slight negative random sentiment (-0.05) → total_sentiment = -0.0966 - 0.05 = -0.1466 < -0.1.\n4. Quantity Calculation: -0.1466 * 15 ≈ -2.20 (within sell constraints: ≥ -(22.60 + 50) = -72.6).\n5. Bid Price: Current price ($109.64) as per rules.",
+            "cash": 7889.987700000002,
+            "position": 20.399999999999995
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 109.64,
+              "quantity": -2.2,
+              "strategy": "RuleLLMNoiseTrader",
+              "investor": "rulellm_noise_2",
+              "reasoning": "Crowd bearish (negative net demand/price return), total sentiment < -0.1 → sell ~2.2 shares",
+              "analysis": "1. Market Signals: Net demand (-9.67) and price return (-1.38%) are both negative → crowd is bearish.\n2. Herding Sentiment Calculation: 0.7 * (-0.0138) * 10 = -0.0966 (negative, aligns with bearish crowd).\n3. Random Sentiment Proxy: Given bearish signals, assume slight negative random sentiment (-0.05) → total_sentiment = -0.0966 - 0.05 = -0.1466 < -0.1.\n4. Quantity Calculation: -0.1466 * 15 ≈ -2.20 (within sell constraints: ≥ -(22.60 + 50) = -72.6).\n5. Bid Price: Current price ($109.64) as per rules.",
+              "cash": 7889.987700000002,
+              "position": 20.399999999999995
+            },
+            "source_id": "rulellm_noise_2",
+            "timestamp": "2026-03-30T12:10:05.058379",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 17306.884
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 109.64,
+          "quantity": -2.2,
+          "strategy": "RuleLLMNoiseTrader",
+          "investor": "rulellm_noise_2",
+          "reasoning": "Crowd bearish (negative net demand/price return), total sentiment < -0.1 → sell ~2.2 shares",
+          "analysis": "1. Market Signals: Net demand (-9.67) and price return (-1.38%) are both negative → crowd is bearish.\n2. Herding Sentiment Calculation: 0.7 * (-0.0138) * 10 = -0.0966 (negative, aligns with bearish crowd).\n3. Random Sentiment Proxy: Given bearish signals, assume slight negative random sentiment (-0.05) → total_sentiment = -0.0966 - 0.05 = -0.1466 < -0.1.\n4. Quantity Calculation: -0.1466 * 15 ≈ -2.20 (within sell constraints: ≥ -(22.60 + 50) = -72.6).\n5. Bid Price: Current price ($109.64) as per rules.",
+          "cash": 7889.987700000002,
+          "position": 20.399999999999995
+        },
+        "source_id": "rulellm_noise_2",
+        "timestamp": "2026-03-30T12:10:05.058379",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 104,
+      "tick_turn_duration_ms": 17306.893,
+      "tick_turn_total_duration_ms": 1552402.334,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000105_0330121025": {
+    "round_num": 105,
+    "timestamp": "2026-03-30T12:10:25.091432",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 108.94,
+            "quantity": -1.57,
+            "strategy": "RuleLLMNoiseTrader",
+            "investor": "rulellm_noise_2",
+            "reasoning": "Crowd is bearish (negative return + net demand), so follow by selling small quantity.",
+            "analysis": "1. **Price Return**: -0.64% (negative, bearish signal)\n2. **Net Demand**: -5.23 (negative, more selling than buying)\n3. **Herding Sentiment**: 0.7 * (-0.0064) * 10 = -0.0448 (amplifies bearishness)\n4. **Random Sentiment**: Estimated negative (aligned with bearish market signals) → Total Sentiment ≈ -0.0448 + (-0.06) = -0.1048 < -0.1 (trigger sell)\n5. **Portfolio Constraints**: Selling quantity (-1.57) ≥ -(20.40 + 50) = -70.40 (valid)",
+            "cash": 8061.023500000002,
+            "position": 18.829999999999995
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 108.94,
+              "quantity": -1.57,
+              "strategy": "RuleLLMNoiseTrader",
+              "investor": "rulellm_noise_2",
+              "reasoning": "Crowd is bearish (negative return + net demand), so follow by selling small quantity.",
+              "analysis": "1. **Price Return**: -0.64% (negative, bearish signal)\n2. **Net Demand**: -5.23 (negative, more selling than buying)\n3. **Herding Sentiment**: 0.7 * (-0.0064) * 10 = -0.0448 (amplifies bearishness)\n4. **Random Sentiment**: Estimated negative (aligned with bearish market signals) → Total Sentiment ≈ -0.0448 + (-0.06) = -0.1048 < -0.1 (trigger sell)\n5. **Portfolio Constraints**: Selling quantity (-1.57) ≥ -(20.40 + 50) = -70.40 (valid)",
+              "cash": 8061.023500000002,
+              "position": 18.829999999999995
+            },
+            "source_id": "rulellm_noise_2",
+            "timestamp": "2026-03-30T12:10:25.091372",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 19898.48
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 108.94,
+          "quantity": -1.57,
+          "strategy": "RuleLLMNoiseTrader",
+          "investor": "rulellm_noise_2",
+          "reasoning": "Crowd is bearish (negative return + net demand), so follow by selling small quantity.",
+          "analysis": "1. **Price Return**: -0.64% (negative, bearish signal)\n2. **Net Demand**: -5.23 (negative, more selling than buying)\n3. **Herding Sentiment**: 0.7 * (-0.0064) * 10 = -0.0448 (amplifies bearishness)\n4. **Random Sentiment**: Estimated negative (aligned with bearish market signals) → Total Sentiment ≈ -0.0448 + (-0.06) = -0.1048 < -0.1 (trigger sell)\n5. **Portfolio Constraints**: Selling quantity (-1.57) ≥ -(20.40 + 50) = -70.40 (valid)",
+          "cash": 8061.023500000002,
+          "position": 18.829999999999995
+        },
+        "source_id": "rulellm_noise_2",
+        "timestamp": "2026-03-30T12:10:25.091372",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 105,
+      "tick_turn_duration_ms": 19898.49,
+      "tick_turn_total_duration_ms": 1572300.824,
+      "tick_step_count": 1
+    }
+  }
+}

@@ -1,0 +1,182 @@
+{
+  "turn_r000112_0330123351": {
+    "round_num": 112,
+    "timestamp": "2026-03-30T12:33:51.545844",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 303.44,
+            "quantity": 0.0,
+            "strategy": "LLMSentimentTrader",
+            "investor": "llm_sentiment_2",
+            "reasoning": "Bullish trend (rising recent prices, +50.68% return) and positive net demand (+682.75) drive buying ",
+            "analysis": "1. Trend Analysis: Recent prices show a clear upward trend (103.20 → 201.38 → 303.44), with a +50.68% return from previous price → bullish.\n2. Sentiment Indicators: Net demand is +682.75 (positive, indicating strong buying pressure), volume is 812.75 (active trading) → confirms bullish mood.\n3. Trading Rule Alignment: Rule 1 applies (bullish market → follow trend with BUY).\n4. Position Size: Within allowed 15-40 shares range, choose 30 shares.\n5. Bid Price: Align with current market price ($303.44) to ensure execution.",
+            "cash": 0.0,
+            "position": 252.61716211024026
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 303.44,
+              "quantity": 0.0,
+              "strategy": "LLMSentimentTrader",
+              "investor": "llm_sentiment_2",
+              "reasoning": "Bullish trend (rising recent prices, +50.68% return) and positive net demand (+682.75) drive buying ",
+              "analysis": "1. Trend Analysis: Recent prices show a clear upward trend (103.20 → 201.38 → 303.44), with a +50.68% return from previous price → bullish.\n2. Sentiment Indicators: Net demand is +682.75 (positive, indicating strong buying pressure), volume is 812.75 (active trading) → confirms bullish mood.\n3. Trading Rule Alignment: Rule 1 applies (bullish market → follow trend with BUY).\n4. Position Size: Within allowed 15-40 shares range, choose 30 shares.\n5. Bid Price: Align with current market price ($303.44) to ensure execution.",
+              "cash": 0.0,
+              "position": 252.61716211024026
+            },
+            "source_id": "llm_sentiment_2",
+            "timestamp": "2026-03-30T12:33:51.545742",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 12778.056
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 303.44,
+          "quantity": 0.0,
+          "strategy": "LLMSentimentTrader",
+          "investor": "llm_sentiment_2",
+          "reasoning": "Bullish trend (rising recent prices, +50.68% return) and positive net demand (+682.75) drive buying ",
+          "analysis": "1. Trend Analysis: Recent prices show a clear upward trend (103.20 → 201.38 → 303.44), with a +50.68% return from previous price → bullish.\n2. Sentiment Indicators: Net demand is +682.75 (positive, indicating strong buying pressure), volume is 812.75 (active trading) → confirms bullish mood.\n3. Trading Rule Alignment: Rule 1 applies (bullish market → follow trend with BUY).\n4. Position Size: Within allowed 15-40 shares range, choose 30 shares.\n5. Bid Price: Align with current market price ($303.44) to ensure execution.",
+          "cash": 0.0,
+          "position": 252.61716211024026
+        },
+        "source_id": "llm_sentiment_2",
+        "timestamp": "2026-03-30T12:33:51.545742",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 112,
+      "tick_turn_duration_ms": 12778.07,
+      "tick_turn_total_duration_ms": 1524111.648,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000113_0330123416": {
+    "round_num": 113,
+    "timestamp": "2026-03-30T12:34:16.971907",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 321.06,
+            "quantity": 0.0,
+            "strategy": "LLMSentimentTrader",
+            "investor": "llm_sentiment_2",
+            "reasoning": "Bullish sentiment (rising prices, positive net demand, uptrend) → follow trend to buy 30 shares.",
+            "analysis": "- Bullish indicators: Price is up +5.81% from previous, recent prices show a clear uptrend (201.38 → 303.44 → 321.06), net demand is positive (+124.76 indicating more buyers than sellers).\n- Per rule 1, follow bullish trend → BUY.\n- Position size within 15-40 shares range: choose 30 shares.\n- Bid price aligns with current market price ($321.06) to execute quickly.",
+            "cash": 0.0,
+            "position": 252.61716211024026
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 321.06,
+              "quantity": 0.0,
+              "strategy": "LLMSentimentTrader",
+              "investor": "llm_sentiment_2",
+              "reasoning": "Bullish sentiment (rising prices, positive net demand, uptrend) → follow trend to buy 30 shares.",
+              "analysis": "- Bullish indicators: Price is up +5.81% from previous, recent prices show a clear uptrend (201.38 → 303.44 → 321.06), net demand is positive (+124.76 indicating more buyers than sellers).\n- Per rule 1, follow bullish trend → BUY.\n- Position size within 15-40 shares range: choose 30 shares.\n- Bid price aligns with current market price ($321.06) to execute quickly.",
+              "cash": 0.0,
+              "position": 252.61716211024026
+            },
+            "source_id": "llm_sentiment_2",
+            "timestamp": "2026-03-30T12:34:16.971775",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 14060.542
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 321.06,
+          "quantity": 0.0,
+          "strategy": "LLMSentimentTrader",
+          "investor": "llm_sentiment_2",
+          "reasoning": "Bullish sentiment (rising prices, positive net demand, uptrend) → follow trend to buy 30 shares.",
+          "analysis": "- Bullish indicators: Price is up +5.81% from previous, recent prices show a clear uptrend (201.38 → 303.44 → 321.06), net demand is positive (+124.76 indicating more buyers than sellers).\n- Per rule 1, follow bullish trend → BUY.\n- Position size within 15-40 shares range: choose 30 shares.\n- Bid price aligns with current market price ($321.06) to execute quickly.",
+          "cash": 0.0,
+          "position": 252.61716211024026
+        },
+        "source_id": "llm_sentiment_2",
+        "timestamp": "2026-03-30T12:34:16.971775",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 113,
+      "tick_turn_duration_ms": 14063.148,
+      "tick_turn_total_duration_ms": 1538174.796,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000114_0330123446": {
+    "round_num": 114,
+    "timestamp": "2026-03-30T12:34:46.382149",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 332.25,
+            "quantity": 0.0,
+            "strategy": "LLMSentimentTrader",
+            "investor": "llm_sentiment_2",
+            "reasoning": "Bullish sentiment (rising prices, positive net demand, upward momentum) → follow trend to buy 30 sha",
+            "analysis": "1. **Market Sentiment Check**: \n   - Recent prices show an uptrend: 303.44 → 321.06 → 332.25 (consistent increase).\n   - Return is +3.49% (positive momentum).\n   - Net demand is +84 (more buyers than sellers, positive demand).\n   - All indicators point to bullish sentiment.\n\n2. **Trading Rule Application**: Rule 1 says follow bullish trend with BUY.\n\n3. **Position Size**: Within 15-40 shares range, choose 30 shares.\n\n4. **Bid Price**: Use current market price ($332.25) as it aligns with trend following.",
+            "cash": 0.0,
+            "position": 252.61716211024026
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 332.25,
+              "quantity": 0.0,
+              "strategy": "LLMSentimentTrader",
+              "investor": "llm_sentiment_2",
+              "reasoning": "Bullish sentiment (rising prices, positive net demand, upward momentum) → follow trend to buy 30 sha",
+              "analysis": "1. **Market Sentiment Check**: \n   - Recent prices show an uptrend: 303.44 → 321.06 → 332.25 (consistent increase).\n   - Return is +3.49% (positive momentum).\n   - Net demand is +84 (more buyers than sellers, positive demand).\n   - All indicators point to bullish sentiment.\n\n2. **Trading Rule Application**: Rule 1 says follow bullish trend with BUY.\n\n3. **Position Size**: Within 15-40 shares range, choose 30 shares.\n\n4. **Bid Price**: Use current market price ($332.25) as it aligns with trend following.",
+              "cash": 0.0,
+              "position": 252.61716211024026
+            },
+            "source_id": "llm_sentiment_2",
+            "timestamp": "2026-03-30T12:34:46.382016",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 13384.943
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 332.25,
+          "quantity": 0.0,
+          "strategy": "LLMSentimentTrader",
+          "investor": "llm_sentiment_2",
+          "reasoning": "Bullish sentiment (rising prices, positive net demand, upward momentum) → follow trend to buy 30 sha",
+          "analysis": "1. **Market Sentiment Check**: \n   - Recent prices show an uptrend: 303.44 → 321.06 → 332.25 (consistent increase).\n   - Return is +3.49% (positive momentum).\n   - Net demand is +84 (more buyers than sellers, positive demand).\n   - All indicators point to bullish sentiment.\n\n2. **Trading Rule Application**: Rule 1 says follow bullish trend with BUY.\n\n3. **Position Size**: Within 15-40 shares range, choose 30 shares.\n\n4. **Bid Price**: Use current market price ($332.25) as it aligns with trend following.",
+          "cash": 0.0,
+          "position": 252.61716211024026
+        },
+        "source_id": "llm_sentiment_2",
+        "timestamp": "2026-03-30T12:34:46.382016",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 114,
+      "tick_turn_duration_ms": 13384.964,
+      "tick_turn_total_duration_ms": 1551559.76,
+      "tick_step_count": 1
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "msg_r000128_0331151651": {
+    "round_num": 128,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:51.708633",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:51.615161",
+      "priority": 1,
+      "extras": {
+        "round_num": 128
+      }
+    }
+  },
+  "msg_r000129_0331151651": {
+    "round_num": 129,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:51.894858",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_1",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_1"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:51.807006",
+      "priority": 1,
+      "extras": {
+        "round_num": 129
+      }
+    }
+  },
+  "msg_r000130_0331151652": {
+    "round_num": 130,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:52.091948",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 185.37303334829608,
+          "quantity": 0.2748779069439998,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:52.003583",
+      "priority": 1,
+      "extras": {
+        "round_num": 130
+      }
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "msg_r000152_0330125441": {
+    "round_num": 152,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:54:41.590265",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "llm_leveraged_3",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 408.97,
+          "quantity": -40.0,
+          "strategy": "LLMLeveragedSpeculator",
+          "investor": "llm_leveraged_3",
+          "reasoning": "Price is 3.51x above fundamental with weakening momentum (recent drop), reduce long exposure to mana",
+          "analysis": "1. Momentum Check: Recent prices show a decline (417.72 → 408.97), indicating negative momentum (not favorable for large positions).\n2. Fundamental Valuation: Price is 3.51x above its fundamental value ($116.41), triggering the \"price significantly above fundamental\" warning sign.\n3. Risk Management: Leveraged position requires strict risk control; weakening momentum + overvaluation demands reduced exposure.\n4. Current Position: Long 80 shares (max allowed under positive momentum, but momentum is now negative).",
+          "cash": 151112.95,
+          "position": 40.0
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:54:41.516559",
+      "priority": 1,
+      "extras": {
+        "round_num": 152
+      }
+    }
+  },
+  "msg_r000153_0330125517": {
+    "round_num": 153,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:55:17.094702",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "llm_leveraged_3",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 412.8,
+          "quantity": 20.0,
+          "strategy": "LLMLeveragedSpeculator",
+          "investor": "llm_leveraged_3",
+          "reasoning": "Price is 3.54x above fundamental value with weakening momentum (below recent high), so reduce exposu",
+          "analysis": "1. **Momentum Check**: Current price ($412.80) is up +0.94% from previous ($408.97), but recent prices show a pullback from $417.72 (weakening momentum).  \n2. **Fundamental Valuation**: Price is 3.54x above fundamental value ($116.52) – a significant overvaluation.  \n3. **Warning Sign Trigger**: Price significantly above fundamental + weakening momentum → **must reduce exposure**.  \n4. **Portfolio Exposure**: Current net short position (80 short - 40 long = 40 net short) needs reduction.  \n5. **Risk Management**: Leveraged short positions require caution; covering part of the short reduces risk while aligning with the warning sign.",
+          "cash": 142856.95,
+          "position": 60.0
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:55:17.004490",
+      "priority": 1,
+      "extras": {
+        "round_num": 153
+      }
+    }
+  },
+  "msg_r000154_0330125547": {
+    "round_num": 154,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:55:47.505477",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "llm_leveraged_3",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 409.95,
+          "quantity": 20.0,
+          "strategy": "LLMLeveragedSpeculator",
+          "investor": "llm_leveraged_3",
+          "reasoning": "Price significantly above fundamental (3.51x) with weakening momentum; reduce exposure by covering s",
+          "analysis": "1. **Portfolio Check**: Current value ($167k) is far above starting $10k, no warning from portfolio drop.  \n2. **Price vs Fundamental**: $409.95 is 3.51x the $116.64 fundamental value (significantly overvalued).  \n3. **Momentum**: Recent prices show a small gain followed by a drop (408.97 → 412.80 → 409.95), indicating weakening momentum.  \n4. **Warning Sign Triggered**: Price above fundamental with weak momentum → must reduce exposure.  \n5. **Position Adjustment**: Current net position is short 20 shares (80 short - 60 long). To reduce exposure, cover 20 short shares (buy back) to lower net exposure to 0.",
+          "cash": 134657.95,
+          "position": 80.0
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:55:47.417986",
+      "priority": 1,
+      "extras": {
+        "round_num": 154
+      }
+    }
+  }
+}

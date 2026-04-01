@@ -1,0 +1,146 @@
+{
+  "turn_r000070_0331151641": {
+    "round_num": 70,
+    "timestamp": "2026-03-31T15:16:41.757448",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "leveraged_buyer",
+            "investor": "leveraged_buyer_3"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "leveraged_buyer",
+              "investor": "leveraged_buyer_3"
+            },
+            "source_id": "leveraged_buyer_3",
+            "timestamp": "2026-03-31T15:16:41.757425",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.023
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "leveraged_buyer",
+          "investor": "leveraged_buyer_3"
+        },
+        "source_id": "leveraged_buyer_3",
+        "timestamp": "2026-03-31T15:16:41.757425",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 70,
+      "tick_turn_duration_ms": 0.028,
+      "tick_turn_total_duration_ms": 5.439,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000071_0331151641": {
+    "round_num": 71,
+    "timestamp": "2026-03-31T15:16:41.906959",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "leveraged_buyer",
+            "investor": "leveraged_buyer_3"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "leveraged_buyer",
+              "investor": "leveraged_buyer_3"
+            },
+            "source_id": "leveraged_buyer_3",
+            "timestamp": "2026-03-31T15:16:41.906935",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.024
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "leveraged_buyer",
+          "investor": "leveraged_buyer_3"
+        },
+        "source_id": "leveraged_buyer_3",
+        "timestamp": "2026-03-31T15:16:41.906935",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 71,
+      "tick_turn_duration_ms": 0.029,
+      "tick_turn_total_duration_ms": 5.468,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000072_0331151642": {
+    "round_num": 72,
+    "timestamp": "2026-03-31T15:16:42.062227",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 152.30775081654963,
+            "quantity": 0.9448066915367577,
+            "strategy": "leveraged_buyer",
+            "investor": "leveraged_buyer_3"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 152.30775081654963,
+              "quantity": 0.9448066915367577,
+              "strategy": "leveraged_buyer",
+              "investor": "leveraged_buyer_3"
+            },
+            "source_id": "leveraged_buyer_3",
+            "timestamp": "2026-03-31T15:16:42.062206",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.022
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 152.30775081654963,
+          "quantity": 0.9448066915367577,
+          "strategy": "leveraged_buyer",
+          "investor": "leveraged_buyer_3"
+        },
+        "source_id": "leveraged_buyer_3",
+        "timestamp": "2026-03-31T15:16:42.062206",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 72,
+      "tick_turn_duration_ms": 0.027,
+      "tick_turn_total_duration_ms": 5.495,
+      "tick_step_count": 1
+    }
+  }
+}

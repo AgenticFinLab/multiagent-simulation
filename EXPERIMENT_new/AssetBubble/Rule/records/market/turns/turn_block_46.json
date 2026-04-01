@@ -1,0 +1,218 @@
+{
+  "turn_r000139_0331151653": {
+    "round_num": 139,
+    "timestamp": "2026-03-31T15:16:53.453784",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "market_data": {
+              "price": 182.70466592738063,
+              "prev_price": 181.07116192551888,
+              "return": 0.009021337160986857,
+              "return_pct": 0.9021337160986856,
+              "fundamental": 114.90442918530051,
+              "bubble_ratio": 1.5900576437548994,
+              "volume": 9.979145080729896,
+              "net_demand": 9.979145080729896,
+              "round": 139,
+              "short_cost_rate": 0.02
+            }
+          },
+          "action": {
+            "action_type": "market_broadcast",
+            "payload": {
+              "market_data": {
+                "price": 182.70466592738063,
+                "prev_price": 181.07116192551888,
+                "return": 0.009021337160986857,
+                "return_pct": 0.9021337160986856,
+                "fundamental": 114.90442918530051,
+                "bubble_ratio": 1.5900576437548994,
+                "volume": 9.979145080729896,
+                "net_demand": 9.979145080729896,
+                "round": 139,
+                "short_cost_rate": 0.02
+              }
+            },
+            "source_id": "market",
+            "timestamp": "2026-03-31T15:16:53.453758",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.055
+        }
+      ],
+      "final_action": {
+        "action_type": "market_broadcast",
+        "payload": {
+          "market_data": {
+            "price": 182.70466592738063,
+            "prev_price": 181.07116192551888,
+            "return": 0.009021337160986857,
+            "return_pct": 0.9021337160986856,
+            "fundamental": 114.90442918530051,
+            "bubble_ratio": 1.5900576437548994,
+            "volume": 9.979145080729896,
+            "net_demand": 9.979145080729896,
+            "round": 139,
+            "short_cost_rate": 0.02
+          }
+        },
+        "source_id": "market",
+        "timestamp": "2026-03-31T15:16:53.453758",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 139,
+      "tick_turn_duration_ms": 0.068,
+      "tick_turn_total_duration_ms": 13.807,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000140_0331151653": {
+    "round_num": 140,
+    "timestamp": "2026-03-31T15:16:53.628045",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "market_data": {
+              "price": 182.72980418809232,
+              "prev_price": 182.70466592738063,
+              "return": 0.00013758959347911183,
+              "return_pct": 0.013758959347911184,
+              "fundamental": 115.0193336144858,
+              "bubble_ratio": 1.5886877314083039,
+              "volume": 4.274405971509085,
+              "net_demand": 4.274405971509085,
+              "round": 140,
+              "short_cost_rate": 0.02
+            }
+          },
+          "action": {
+            "action_type": "market_broadcast",
+            "payload": {
+              "market_data": {
+                "price": 182.72980418809232,
+                "prev_price": 182.70466592738063,
+                "return": 0.00013758959347911183,
+                "return_pct": 0.013758959347911184,
+                "fundamental": 115.0193336144858,
+                "bubble_ratio": 1.5886877314083039,
+                "volume": 4.274405971509085,
+                "net_demand": 4.274405971509085,
+                "round": 140,
+                "short_cost_rate": 0.02
+              }
+            },
+            "source_id": "market",
+            "timestamp": "2026-03-31T15:16:53.628020",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.048
+        }
+      ],
+      "final_action": {
+        "action_type": "market_broadcast",
+        "payload": {
+          "market_data": {
+            "price": 182.72980418809232,
+            "prev_price": 182.70466592738063,
+            "return": 0.00013758959347911183,
+            "return_pct": 0.013758959347911184,
+            "fundamental": 115.0193336144858,
+            "bubble_ratio": 1.5886877314083039,
+            "volume": 4.274405971509085,
+            "net_demand": 4.274405971509085,
+            "round": 140,
+            "short_cost_rate": 0.02
+          }
+        },
+        "source_id": "market",
+        "timestamp": "2026-03-31T15:16:53.628020",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 140,
+      "tick_turn_duration_ms": 0.052,
+      "tick_turn_total_duration_ms": 13.859,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000141_0331151653": {
+    "round_num": 141,
+    "timestamp": "2026-03-31T15:16:53.805943",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "market_data": {
+              "price": 183.66505158792782,
+              "prev_price": 182.72980418809232,
+              "return": 0.005118198446011631,
+              "return_pct": 0.5118198446011631,
+              "fundamental": 115.13435294810027,
+              "bubble_ratio": 1.595223726759636,
+              "volume": 23.834266628754026,
+              "net_demand": 10.494478128019235,
+              "round": 141,
+              "short_cost_rate": 0.02
+            }
+          },
+          "action": {
+            "action_type": "market_broadcast",
+            "payload": {
+              "market_data": {
+                "price": 183.66505158792782,
+                "prev_price": 182.72980418809232,
+                "return": 0.005118198446011631,
+                "return_pct": 0.5118198446011631,
+                "fundamental": 115.13435294810027,
+                "bubble_ratio": 1.595223726759636,
+                "volume": 23.834266628754026,
+                "net_demand": 10.494478128019235,
+                "round": 141,
+                "short_cost_rate": 0.02
+              }
+            },
+            "source_id": "market",
+            "timestamp": "2026-03-31T15:16:53.805911",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.073
+        }
+      ],
+      "final_action": {
+        "action_type": "market_broadcast",
+        "payload": {
+          "market_data": {
+            "price": 183.66505158792782,
+            "prev_price": 182.72980418809232,
+            "return": 0.005118198446011631,
+            "return_pct": 0.5118198446011631,
+            "fundamental": 115.13435294810027,
+            "bubble_ratio": 1.595223726759636,
+            "volume": 23.834266628754026,
+            "net_demand": 10.494478128019235,
+            "round": 141,
+            "short_cost_rate": 0.02
+          }
+        },
+        "source_id": "market",
+        "timestamp": "2026-03-31T15:16:53.805911",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 141,
+      "tick_turn_duration_ms": 0.079,
+      "tick_turn_total_duration_ms": 13.938,
+      "tick_step_count": 1
+    }
+  }
+}

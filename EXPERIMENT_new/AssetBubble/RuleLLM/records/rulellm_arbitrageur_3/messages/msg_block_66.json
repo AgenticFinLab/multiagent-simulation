@@ -1,0 +1,64 @@
+{
+  "msg_r000198_0330124648": {
+    "round_num": 198,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:46:48.386795",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "rulellm_arbitrageur_3",
+      "payload": {
+        "content": {
+          "price": 124.24034443891017,
+          "prev_price": 124.98968807388341,
+          "return": -0.005995243659863318,
+          "return_pct": -0.5995243659863319,
+          "fundamental": 122.00606447041291,
+          "bubble_ratio": 1.0183128599237712,
+          "volume": 3.4,
+          "net_demand": -3.4,
+          "round": 199,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:46:48.352331",
+      "priority": 1,
+      "extras": {
+        "round_num": 199
+      }
+    }
+  },
+  "msg_r000199_0330124705": {
+    "round_num": 199,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:47:05.537223",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "rulellm_arbitrageur_3",
+      "payload": {
+        "content": {
+          "price": 123.96678090638032,
+          "prev_price": 124.24034443891017,
+          "return": -0.002201889682174553,
+          "return_pct": -0.2201889682174553,
+          "fundamental": 122.1280705348833,
+          "bubble_ratio": 1.015055591752527,
+          "volume": 3.51,
+          "net_demand": -3.51,
+          "round": 200,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:47:05.501486",
+      "priority": 1,
+      "extras": {
+        "round_num": 200
+      }
+    }
+  }
+}

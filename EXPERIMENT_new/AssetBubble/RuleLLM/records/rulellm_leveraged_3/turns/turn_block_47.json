@@ -1,0 +1,182 @@
+{
+  "turn_r000142_0330122056": {
+    "round_num": 142,
+    "timestamp": "2026-03-30T12:20:56.996731",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 114.64,
+            "quantity": 0.0,
+            "strategy": "RuleLLMLeveragedBuyer",
+            "investor": "rulellm_leveraged_3",
+            "reasoning": "No margin call; price return (+0.45%) below buy threshold, no significant drop to trigger sell.",
+            "analysis": "1. **Margin Call Check**: Portfolio Value = $10115.59, Initial Equity = $10000 → Equity Ratio = 10115.59/10000 = 1.0116 > 0.7 → No margin call.\n2. **Normal Trading Rule**: \n   - Price Return = +0.45% (0.0045) < 0.5% (0.005) → No buy trigger.\n   - Price Return is not < -1% → No sell trigger.\n3. **Other Constraints**: Price/Fundamental Ratio = 0.99x (undervalued, but no momentum trigger).\n→ **Hold** position.",
+            "cash": 8270.101920000001,
+            "position": 16.098000000000003
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 114.64,
+              "quantity": 0.0,
+              "strategy": "RuleLLMLeveragedBuyer",
+              "investor": "rulellm_leveraged_3",
+              "reasoning": "No margin call; price return (+0.45%) below buy threshold, no significant drop to trigger sell.",
+              "analysis": "1. **Margin Call Check**: Portfolio Value = $10115.59, Initial Equity = $10000 → Equity Ratio = 10115.59/10000 = 1.0116 > 0.7 → No margin call.\n2. **Normal Trading Rule**: \n   - Price Return = +0.45% (0.0045) < 0.5% (0.005) → No buy trigger.\n   - Price Return is not < -1% → No sell trigger.\n3. **Other Constraints**: Price/Fundamental Ratio = 0.99x (undervalued, but no momentum trigger).\n→ **Hold** position.",
+              "cash": 8270.101920000001,
+              "position": 16.098000000000003
+            },
+            "source_id": "rulellm_leveraged_3",
+            "timestamp": "2026-03-30T12:20:56.996623",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 10014.257
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 114.64,
+          "quantity": 0.0,
+          "strategy": "RuleLLMLeveragedBuyer",
+          "investor": "rulellm_leveraged_3",
+          "reasoning": "No margin call; price return (+0.45%) below buy threshold, no significant drop to trigger sell.",
+          "analysis": "1. **Margin Call Check**: Portfolio Value = $10115.59, Initial Equity = $10000 → Equity Ratio = 10115.59/10000 = 1.0116 > 0.7 → No margin call.\n2. **Normal Trading Rule**: \n   - Price Return = +0.45% (0.0045) < 0.5% (0.005) → No buy trigger.\n   - Price Return is not < -1% → No sell trigger.\n3. **Other Constraints**: Price/Fundamental Ratio = 0.99x (undervalued, but no momentum trigger).\n→ **Hold** position.",
+          "cash": 8270.101920000001,
+          "position": 16.098000000000003
+        },
+        "source_id": "rulellm_leveraged_3",
+        "timestamp": "2026-03-30T12:20:56.996623",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 142,
+      "tick_turn_duration_ms": 10014.269,
+      "tick_turn_total_duration_ms": 1462275.088,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000143_0330122110": {
+    "round_num": 143,
+    "timestamp": "2026-03-30T12:21:10.356459",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 115.1,
+            "quantity": 0.0,
+            "strategy": "RuleLLMLeveragedBuyer",
+            "investor": "rulellm_leveraged_3",
+            "reasoning": "Price return (0.4%) is between -1% and 0.5%, so no leveraged action required.",
+            "analysis": "1. **Margin Call Check**: Portfolio value ($10123.01) / Initial Equity ($10000) = 1.0123 > 0.7 → No margin call.\n2. **Normal Trading Rule**: \n   - Price return this round = +0.40% (0.004) → Not >0.5% (0.005) and not < -1% (-0.01). \n   - Price/Fundamental ratio = 1.00x < 1.5 → No adjustment needed.\n3. **Portfolio Constraints**: Quantity = 0, so no constraints violated.",
+            "cash": 8270.101920000001,
+            "position": 16.098000000000003
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 115.1,
+              "quantity": 0.0,
+              "strategy": "RuleLLMLeveragedBuyer",
+              "investor": "rulellm_leveraged_3",
+              "reasoning": "Price return (0.4%) is between -1% and 0.5%, so no leveraged action required.",
+              "analysis": "1. **Margin Call Check**: Portfolio value ($10123.01) / Initial Equity ($10000) = 1.0123 > 0.7 → No margin call.\n2. **Normal Trading Rule**: \n   - Price return this round = +0.40% (0.004) → Not >0.5% (0.005) and not < -1% (-0.01). \n   - Price/Fundamental ratio = 1.00x < 1.5 → No adjustment needed.\n3. **Portfolio Constraints**: Quantity = 0, so no constraints violated.",
+              "cash": 8270.101920000001,
+              "position": 16.098000000000003
+            },
+            "source_id": "rulellm_leveraged_3",
+            "timestamp": "2026-03-30T12:21:10.354868",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 9320.934
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 115.1,
+          "quantity": 0.0,
+          "strategy": "RuleLLMLeveragedBuyer",
+          "investor": "rulellm_leveraged_3",
+          "reasoning": "Price return (0.4%) is between -1% and 0.5%, so no leveraged action required.",
+          "analysis": "1. **Margin Call Check**: Portfolio value ($10123.01) / Initial Equity ($10000) = 1.0123 > 0.7 → No margin call.\n2. **Normal Trading Rule**: \n   - Price return this round = +0.40% (0.004) → Not >0.5% (0.005) and not < -1% (-0.01). \n   - Price/Fundamental ratio = 1.00x < 1.5 → No adjustment needed.\n3. **Portfolio Constraints**: Quantity = 0, so no constraints violated.",
+          "cash": 8270.101920000001,
+          "position": 16.098000000000003
+        },
+        "source_id": "rulellm_leveraged_3",
+        "timestamp": "2026-03-30T12:21:10.354868",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 143,
+      "tick_turn_duration_ms": 9321.333,
+      "tick_turn_total_duration_ms": 1471596.421,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000144_0330122134": {
+    "round_num": 144,
+    "timestamp": "2026-03-30T12:21:34.324325",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 115.71,
+            "quantity": 0.312,
+            "strategy": "RuleLLMLeveragedBuyer",
+            "investor": "rulellm_leveraged_3",
+            "reasoning": "Positive momentum (>0.5% gain) triggers leveraged buy; no margin call, cash sufficient, ratio not in bubble territory.",
+            "analysis": "1. **Margin Call Check**: Portfolio value = $10132.73, initial equity = $10000. Equity ratio = 10132.73/10000 = 1.013 > 0.7 → NO margin call.\n2. **Normal Trading Rule**: This round return = +0.52% > 0.5% → BUY with leverage.\n3. **Quantity Calculation**: price_return (0.0052) × base_size (20) × leverage_ratio (3) = 0.0052×20×3 = 0.312. Cap at +60 (no issue).\n4. **Portfolio Constraints**: Available cash ($8270.10) / bid_price ($115.71) ≈ 71.47 ≥ 0.312 → valid.\n5. **Price/Fundamental Ratio**: 1.00x ≤ 1.5 → no quantity reduction needed.",
+            "cash": 8234.0004,
+            "position": 16.410000000000004
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 115.71,
+              "quantity": 0.312,
+              "strategy": "RuleLLMLeveragedBuyer",
+              "investor": "rulellm_leveraged_3",
+              "reasoning": "Positive momentum (>0.5% gain) triggers leveraged buy; no margin call, cash sufficient, ratio not in bubble territory.",
+              "analysis": "1. **Margin Call Check**: Portfolio value = $10132.73, initial equity = $10000. Equity ratio = 10132.73/10000 = 1.013 > 0.7 → NO margin call.\n2. **Normal Trading Rule**: This round return = +0.52% > 0.5% → BUY with leverage.\n3. **Quantity Calculation**: price_return (0.0052) × base_size (20) × leverage_ratio (3) = 0.0052×20×3 = 0.312. Cap at +60 (no issue).\n4. **Portfolio Constraints**: Available cash ($8270.10) / bid_price ($115.71) ≈ 71.47 ≥ 0.312 → valid.\n5. **Price/Fundamental Ratio**: 1.00x ≤ 1.5 → no quantity reduction needed.",
+              "cash": 8234.0004,
+              "position": 16.410000000000004
+            },
+            "source_id": "rulellm_leveraged_3",
+            "timestamp": "2026-03-30T12:21:34.324212",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 15229.923
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 115.71,
+          "quantity": 0.312,
+          "strategy": "RuleLLMLeveragedBuyer",
+          "investor": "rulellm_leveraged_3",
+          "reasoning": "Positive momentum (>0.5% gain) triggers leveraged buy; no margin call, cash sufficient, ratio not in bubble territory.",
+          "analysis": "1. **Margin Call Check**: Portfolio value = $10132.73, initial equity = $10000. Equity ratio = 10132.73/10000 = 1.013 > 0.7 → NO margin call.\n2. **Normal Trading Rule**: This round return = +0.52% > 0.5% → BUY with leverage.\n3. **Quantity Calculation**: price_return (0.0052) × base_size (20) × leverage_ratio (3) = 0.0052×20×3 = 0.312. Cap at +60 (no issue).\n4. **Portfolio Constraints**: Available cash ($8270.10) / bid_price ($115.71) ≈ 71.47 ≥ 0.312 → valid.\n5. **Price/Fundamental Ratio**: 1.00x ≤ 1.5 → no quantity reduction needed.",
+          "cash": 8234.0004,
+          "position": 16.410000000000004
+        },
+        "source_id": "rulellm_leveraged_3",
+        "timestamp": "2026-03-30T12:21:34.324212",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 144,
+      "tick_turn_duration_ms": 15229.95,
+      "tick_turn_total_duration_ms": 1486826.371,
+      "tick_step_count": 1
+    }
+  }
+}

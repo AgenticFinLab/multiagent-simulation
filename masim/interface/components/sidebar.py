@@ -203,7 +203,7 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
             for agent in agents:
                 _render_agent_card(agent)
 
-        # Documentation button — opens full docs.md page
+        # Documentation button — opens full explain.md page
         st.markdown("")
         if st.button(
             "📖 Full Documentation",

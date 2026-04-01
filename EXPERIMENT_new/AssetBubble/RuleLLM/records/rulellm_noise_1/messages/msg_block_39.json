@@ -1,0 +1,95 @@
+{
+  "msg_r000117_0330121405": {
+    "round_num": 117,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:14:05.555569",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "rulellm_noise_1",
+      "payload": {
+        "content": {
+          "price": 109.19137406300197,
+          "prev_price": 108.6274743507803,
+          "return": 0.005191133418058879,
+          "return_pct": 0.5191133418058879,
+          "fundamental": 112.51777681470317,
+          "bubble_ratio": 0.970436647027081,
+          "volume": 4.542,
+          "net_demand": 4.542,
+          "round": 118,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:14:05.509805",
+      "priority": 1,
+      "extras": {
+        "round_num": 118
+      }
+    }
+  },
+  "msg_r000118_0330121421": {
+    "round_num": 118,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:14:21.633113",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "rulellm_noise_1",
+      "payload": {
+        "content": {
+          "price": 110.31858582169973,
+          "prev_price": 109.19137406300197,
+          "return": 0.01032326745927172,
+          "return_pct": 1.032326745927172,
+          "fundamental": 112.63029459151785,
+          "bubble_ratio": 0.9794752488377828,
+          "volume": 4.586,
+          "net_demand": 4.586,
+          "round": 119,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:14:21.613006",
+      "priority": 1,
+      "extras": {
+        "round_num": 119
+      }
+    }
+  },
+  "msg_r000119_0330121440": {
+    "round_num": 119,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:14:40.251770",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "rulellm_noise_1",
+      "payload": {
+        "content": {
+          "price": 111.50573345720393,
+          "prev_price": 110.31858582169973,
+          "return": 0.010761084604754704,
+          "return_pct": 1.0761084604754703,
+          "fundamental": 112.74292488610936,
+          "bubble_ratio": 0.989026438420369,
+          "volume": 5.686,
+          "net_demand": 5.686,
+          "round": 120,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:14:40.182371",
+      "priority": 1,
+      "extras": {
+        "round_num": 120
+      }
+    }
+  }
+}

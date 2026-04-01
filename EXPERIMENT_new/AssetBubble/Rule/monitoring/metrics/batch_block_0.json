@@ -1,0 +1,504 @@
+{
+  "batch_00000300_00000349": [
+    {
+      "name": "timer_operate_duration",
+      "value": 2.012968063354492,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:55.666756"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 151,
+        "duration_ms": 2.012968063354492
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:55.666761"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.8460750579833984,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:55.848112"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 152,
+        "duration_ms": 1.8460750579833984
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:55.849292"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 4.080772399902344,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:56.037022"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 153,
+        "duration_ms": 4.080772399902344
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:56.037027"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.3661384582519531,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:56.225712"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 154,
+        "duration_ms": 1.3661384582519531
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:56.225729"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.6779899597167969,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:56.424270"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 155,
+        "duration_ms": 1.6779899597167969
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:56.424276"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.6100406646728516,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:56.620267"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 156,
+        "duration_ms": 1.6100406646728516
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:56.620272"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.3301372528076172,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:56.820530"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 157,
+        "duration_ms": 1.3301372528076172
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:56.820535"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.5070438385009766,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:57.030184"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 158,
+        "duration_ms": 1.5070438385009766
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:57.030191"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 2.1500587463378906,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:57.198151"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 159,
+        "duration_ms": 2.1500587463378906
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:57.198156"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 2.295970916748047,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:57.366281"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 160,
+        "duration_ms": 2.295970916748047
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:57.366287"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.5590190887451172,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:57.530352"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 161,
+        "duration_ms": 1.5590190887451172
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:57.530357"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 2.329111099243164,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:57.699619"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 162,
+        "duration_ms": 2.329111099243164
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:57.699625"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.7268657684326172,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:57.878509"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 163,
+        "duration_ms": 1.7268657684326172
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:57.878515"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.497030258178711,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:58.054296"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 164,
+        "duration_ms": 1.497030258178711
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:58.054302"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.6698837280273438,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:58.234404"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 165,
+        "duration_ms": 1.6698837280273438
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:58.234410"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.7671585083007812,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:58.447112"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 166,
+        "duration_ms": 1.7671585083007812
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:58.447119"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.1181831359863281,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:58.640840"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 167,
+        "duration_ms": 1.1181831359863281
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:58.640845"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.3842582702636719,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:58.840401"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 168,
+        "duration_ms": 1.3842582702636719
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:58.840408"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.7480850219726562,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:59.042727"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 169,
+        "duration_ms": 1.7480850219726562
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:59.042731"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 0.7288455963134766,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:59.246718"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 170,
+        "duration_ms": 0.7288455963134766
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:59.246722"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.4171600341796875,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:59.458014"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 171,
+        "duration_ms": 1.4171600341796875
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:59.458021"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.291036605834961,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:59.626952"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 172,
+        "duration_ms": 1.291036605834961
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:59.626957"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 1.722097396850586,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:59.786125"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 173,
+        "duration_ms": 1.722097396850586
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:59.786132"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 0.8692741394042969,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:59.950685"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 174,
+        "duration_ms": 0.8692741394042969
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:16:59.950691"
+    },
+    {
+      "name": "timer_operate_duration",
+      "value": 0.9641647338867188,
+      "tags": {
+        "unit": "ms"
+      },
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:17:00.123576"
+    },
+    {
+      "name": "operate_completed",
+      "value": {
+        "player_id": "conservative_holder_1",
+        "round_num": 175,
+        "duration_ms": 0.9641647338867188
+      },
+      "tags": {},
+      "entity_id": null,
+      "timestamp": "2026-03-31T15:17:00.123581"
+    }
+  ]
+}

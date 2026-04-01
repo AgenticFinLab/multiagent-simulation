@@ -1,0 +1,9 @@
+{
+  "batch_block_0.json": {
+    "ids": [
+      "batch_00000000_00000049"
+    ],
+    "count": 1,
+    "path": "EXPERIMENT/AssetBubbleRuleLLM/monitoring/metrics/batch_block_0.json"
+  }
+}

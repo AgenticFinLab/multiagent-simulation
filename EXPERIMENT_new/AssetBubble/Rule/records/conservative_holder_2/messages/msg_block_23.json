@@ -1,0 +1,95 @@
+{
+  "msg_r000069_0331151641": {
+    "round_num": 69,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:41.745155",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "conservative_holder_2",
+      "payload": {
+        "content": {
+          "price": 151.76247647198622,
+          "prev_price": 151.8193813609301,
+          "return": -0.0003748196602684899,
+          "return_pct": -0.037481966026848994,
+          "fundamental": 107.24706691303307,
+          "bubble_ratio": 1.4150734452724083,
+          "volume": 7.816822085564822,
+          "net_demand": -0.3197953230880861,
+          "round": 70,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:41.707142",
+      "priority": 1,
+      "extras": {
+        "round_num": 70
+      }
+    }
+  },
+  "msg_r000070_0331151641": {
+    "round_num": 70,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:41.894921",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "conservative_holder_2",
+      "payload": {
+        "content": {
+          "price": 150.52997917157225,
+          "prev_price": 151.76247647198622,
+          "return": -0.00812122554313664,
+          "return_pct": -0.8121225543136641,
+          "fundamental": 107.35431397994608,
+          "bubble_ratio": 1.4021791355277202,
+          "volume": 11.382936407773562,
+          "net_demand": -7.188632407773563,
+          "round": 71,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:41.852265",
+      "priority": 1,
+      "extras": {
+        "round_num": 71
+      }
+    }
+  },
+  "msg_r000071_0331151642": {
+    "round_num": 71,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:16:42.050594",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "conservative_holder_2",
+      "payload": {
+        "content": {
+          "price": 152.30775081654963,
+          "prev_price": 150.52997917157225,
+          "return": 0.011810083644209471,
+          "return_pct": 1.181008364420947,
+          "fundamental": 107.46166829392602,
+          "bubble_ratio": 1.4173216667357322,
+          "volume": 12.05123246262957,
+          "net_demand": 12.05123246262957,
+          "round": 72,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:16:42.004443",
+      "priority": 1,
+      "extras": {
+        "round_num": 72
+      }
+    }
+  }
+}

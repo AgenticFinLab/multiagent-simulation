@@ -1,0 +1,54 @@
+# =============================================================================
+# DispositionEffectRuleLLM Simulation Configuration
+# =============================================================================
+# Hybrid Rule+LLM investors simulating disposition effect with embedded rules.
+# Market is rule-based, investors use LLM for decision making with rules.
+#
+# LLM Provider: ByteDance Doubao (via lmbase)
+# Environment Variable: ARK_API_KEY
+#
+# Usage:
+#   python examples/DispositionEffect/RuleLLM/run_disposition_rulellm.py -c configs/DispositionEffect/RuleLLM/simulation.yml
+# =============================================================================
+
+setting:
+  name: "disposition_effect_rulellm_simulation"
+  description: "Hybrid Rule+LLM investors with ByteDance Doubao"
+  total_rounds: 100
+  round_history_limit: 3
+  record_path: "EXPERIMENT/DispositionEffect/RuleLLM/records"
+  save_diagram_interval: 100
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "disposition_effect_rulellm"
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 536870912
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/DispositionEffect/RuleLLM/communication"
+  record_messages: true
+  message_block_size: 500

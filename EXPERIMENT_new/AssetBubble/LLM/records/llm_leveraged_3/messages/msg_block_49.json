@@ -1,0 +1,95 @@
+{
+  "msg_r000147_0330125225": {
+    "round_num": 147,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:52:25.207458",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "llm_leveraged_3",
+      "payload": {
+        "content": {
+          "price": 373.61572475960645,
+          "prev_price": 372.85790364831445,
+          "return": 0.0020324662663093016,
+          "return_pct": 0.20324662663093016,
+          "fundamental": 115.94271527388328,
+          "bubble_ratio": 3.222416551803539,
+          "volume": 231.34100921525504,
+          "net_demand": 11.341009215255056,
+          "round": 148,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:52:25.154303",
+      "priority": 1,
+      "extras": {
+        "round_num": 148
+      }
+    }
+  },
+  "msg_r000148_0330125250": {
+    "round_num": 148,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:52:50.011591",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "llm_leveraged_3",
+      "payload": {
+        "content": {
+          "price": 396.5270648920259,
+          "prev_price": 373.61572475960645,
+          "return": 0.06132327579938234,
+          "return_pct": 6.132327579938234,
+          "fundamental": 116.05865798915715,
+          "bubble_ratio": 3.4166090816686134,
+          "volume": 220.00019780525665,
+          "net_demand": 160.00019780525665,
+          "round": 149,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:52:49.953872",
+      "priority": 1,
+      "extras": {
+        "round_num": 149
+      }
+    }
+  },
+  "msg_r000149_0330125319": {
+    "round_num": 149,
+    "direction": "received",
+    "timestamp": "2026-03-30T12:53:19.335776",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "market",
+      "recipient_id": "llm_leveraged_3",
+      "payload": {
+        "content": {
+          "price": 415.74040281733846,
+          "prev_price": 396.5270648920259,
+          "return": 0.04845403914747742,
+          "return_pct": 4.845403914747743,
+          "fundamental": 116.1747166471463,
+          "bubble_ratio": 3.5785790128505615,
+          "volume": 156.0,
+          "net_demand": 136.0,
+          "round": 150,
+          "short_cost_rate": 0.02
+        },
+        "content_type": "market_price",
+        "extras": {}
+      },
+      "timestamp": "2026-03-30T12:53:19.286783",
+      "priority": 1,
+      "extras": {
+        "round_num": 150
+      }
+    }
+  }
+}

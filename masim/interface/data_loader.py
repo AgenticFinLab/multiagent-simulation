@@ -66,6 +66,15 @@ class AgentAction:
     def strategy(self) -> str:
         return self.content.get("strategy", "")
 
+    @property
+    def reasoning(self) -> str:
+        return self.content.get("reasoning", "")
+
+    @property
+    def analysis(self) -> str:
+        """LLM's analysis/reasoning before the decision."""
+        return self.content.get("analysis", "")
+
 
 @dataclass
 class MarketBroadcast:

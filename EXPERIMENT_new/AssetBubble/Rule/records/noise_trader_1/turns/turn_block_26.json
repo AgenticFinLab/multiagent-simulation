@@ -1,0 +1,146 @@
+{
+  "turn_r000079_0331151643": {
+    "round_num": 79,
+    "timestamp": "2026-03-31T15:16:43.281801",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 140.4050031775581,
+            "quantity": -18.353975518933577,
+            "strategy": "noise_trader",
+            "investor": "noise_trader_1"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 140.4050031775581,
+              "quantity": -18.353975518933577,
+              "strategy": "noise_trader",
+              "investor": "noise_trader_1"
+            },
+            "source_id": "noise_trader_1",
+            "timestamp": "2026-03-31T15:16:43.281778",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.028
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 140.4050031775581,
+          "quantity": -18.353975518933577,
+          "strategy": "noise_trader",
+          "investor": "noise_trader_1"
+        },
+        "source_id": "noise_trader_1",
+        "timestamp": "2026-03-31T15:16:43.281778",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 79,
+      "tick_turn_duration_ms": 0.033,
+      "tick_turn_total_duration_ms": 3.979,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000080_0331151643": {
+    "round_num": 80,
+    "timestamp": "2026-03-31T15:16:43.472325",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 135.54152283140186,
+            "quantity": -4.993699918957836,
+            "strategy": "noise_trader",
+            "investor": "noise_trader_1"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 135.54152283140186,
+              "quantity": -4.993699918957836,
+              "strategy": "noise_trader",
+              "investor": "noise_trader_1"
+            },
+            "source_id": "noise_trader_1",
+            "timestamp": "2026-03-31T15:16:43.472303",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.026
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 135.54152283140186,
+          "quantity": -4.993699918957836,
+          "strategy": "noise_trader",
+          "investor": "noise_trader_1"
+        },
+        "source_id": "noise_trader_1",
+        "timestamp": "2026-03-31T15:16:43.472303",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 80,
+      "tick_turn_duration_ms": 0.03,
+      "tick_turn_total_duration_ms": 4.01,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000081_0331151643": {
+    "round_num": 81,
+    "timestamp": "2026-03-31T15:16:43.609176",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 129.95507857698664,
+            "quantity": -7.850674907147123,
+            "strategy": "noise_trader",
+            "investor": "noise_trader_1"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 129.95507857698664,
+              "quantity": -7.850674907147123,
+              "strategy": "noise_trader",
+              "investor": "noise_trader_1"
+            },
+            "source_id": "noise_trader_1",
+            "timestamp": "2026-03-31T15:16:43.609154",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.029
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 129.95507857698664,
+          "quantity": -7.850674907147123,
+          "strategy": "noise_trader",
+          "investor": "noise_trader_1"
+        },
+        "source_id": "noise_trader_1",
+        "timestamp": "2026-03-31T15:16:43.609154",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 81,
+      "tick_turn_duration_ms": 0.034,
+      "tick_turn_total_duration_ms": 4.044,
+      "tick_step_count": 1
+    }
+  }
+}

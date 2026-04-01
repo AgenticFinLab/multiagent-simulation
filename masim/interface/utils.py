@@ -137,8 +137,10 @@ def get_scenario_color(scenario_name: str) -> str:
         "ShortSqueeze": "#F8C471",
     }
 
-    # Remove LLM suffix for color lookup
-    base_name = scenario_name.replace("LLM", "")
+    # Remove LLM/Rag/RuleLLM suffix for color lookup
+    base_name = (
+        scenario_name.replace("RuleLLM", "").replace("Rag", "").replace("LLM", "")
+    )
     return colors.get(base_name, "#95A5A6")
 
 

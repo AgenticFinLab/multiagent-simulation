@@ -1,0 +1,182 @@
+{
+  "turn_r000127_0330124154": {
+    "round_num": 127,
+    "timestamp": "2026-03-30T12:41:54.632058",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 396.88,
+            "quantity": -30.0,
+            "strategy": "LLMSentimentTrader",
+            "investor": "llm_sentiment_2",
+            "reasoning": "Bearish market (falling price, negative net demand, downward momentum) → sell 30 shares at current p",
+            "analysis": "1. **Price Trend**: Current price ($396.88) is lower than previous price ($408.85) with a -2.93% return → falling prices (bearish signal).  \n2. **Demand Indicator**: Net demand is -70 → negative demand (bearish signal).  \n3. **Momentum**: Recent prices show a downward trend (408.85 → 396.88) → negative momentum.  \n4. **Rule Alignment**: Bearish market → follow trend with SELL action.  \n5. **Position Size**: Choose 30 shares (within 15-40 range).  \n6. **Price**: Use current market price ($396.88) for execution.",
+            "cash": 11906.4,
+            "position": 237.4010186124824
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 396.88,
+              "quantity": -30.0,
+              "strategy": "LLMSentimentTrader",
+              "investor": "llm_sentiment_2",
+              "reasoning": "Bearish market (falling price, negative net demand, downward momentum) → sell 30 shares at current p",
+              "analysis": "1. **Price Trend**: Current price ($396.88) is lower than previous price ($408.85) with a -2.93% return → falling prices (bearish signal).  \n2. **Demand Indicator**: Net demand is -70 → negative demand (bearish signal).  \n3. **Momentum**: Recent prices show a downward trend (408.85 → 396.88) → negative momentum.  \n4. **Rule Alignment**: Bearish market → follow trend with SELL action.  \n5. **Position Size**: Choose 30 shares (within 15-40 range).  \n6. **Price**: Use current market price ($396.88) for execution.",
+              "cash": 11906.4,
+              "position": 237.4010186124824
+            },
+            "source_id": "llm_sentiment_2",
+            "timestamp": "2026-03-30T12:41:54.631492",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 12934.999
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 396.88,
+          "quantity": -30.0,
+          "strategy": "LLMSentimentTrader",
+          "investor": "llm_sentiment_2",
+          "reasoning": "Bearish market (falling price, negative net demand, downward momentum) → sell 30 shares at current p",
+          "analysis": "1. **Price Trend**: Current price ($396.88) is lower than previous price ($408.85) with a -2.93% return → falling prices (bearish signal).  \n2. **Demand Indicator**: Net demand is -70 → negative demand (bearish signal).  \n3. **Momentum**: Recent prices show a downward trend (408.85 → 396.88) → negative momentum.  \n4. **Rule Alignment**: Bearish market → follow trend with SELL action.  \n5. **Position Size**: Choose 30 shares (within 15-40 range).  \n6. **Price**: Use current market price ($396.88) for execution.",
+          "cash": 11906.4,
+          "position": 237.4010186124824
+        },
+        "source_id": "llm_sentiment_2",
+        "timestamp": "2026-03-30T12:41:54.631492",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 127,
+      "tick_turn_duration_ms": 12935.053,
+      "tick_turn_total_duration_ms": 1715658.378,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000128_0330124220": {
+    "round_num": 128,
+    "timestamp": "2026-03-30T12:42:20.013451",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 341.61,
+            "quantity": 30.0,
+            "strategy": "LLMSentimentTrader",
+            "investor": "llm_sentiment_2",
+            "reasoning": "Bearish trend (falling prices, negative net demand) → follow trend by selling 30 shares at current p",
+            "analysis": "1. **Trend Identification**: Recent prices show a clear downward trend (408.85 → 396.88 → 341.61), with a -13.92% return.  \n2. **Sentiment Indicators**: Net demand is negative (-360), confirming weak demand.  \n3. **Rule Alignment**: Bearish market (falling prices, negative demand) → follow trend with SELL.  \n4. **Position Size**: Choose 30 shares (within 15-40 range).  \n5. **Price**: Use current market price ($341.61) for execution.",
+            "cash": 1658.0999999999985,
+            "position": 267.4010186124824
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 341.61,
+              "quantity": 30.0,
+              "strategy": "LLMSentimentTrader",
+              "investor": "llm_sentiment_2",
+              "reasoning": "Bearish trend (falling prices, negative net demand) → follow trend by selling 30 shares at current p",
+              "analysis": "1. **Trend Identification**: Recent prices show a clear downward trend (408.85 → 396.88 → 341.61), with a -13.92% return.  \n2. **Sentiment Indicators**: Net demand is negative (-360), confirming weak demand.  \n3. **Rule Alignment**: Bearish market (falling prices, negative demand) → follow trend with SELL.  \n4. **Position Size**: Choose 30 shares (within 15-40 range).  \n5. **Price**: Use current market price ($341.61) for execution.",
+              "cash": 1658.0999999999985,
+              "position": 267.4010186124824
+            },
+            "source_id": "llm_sentiment_2",
+            "timestamp": "2026-03-30T12:42:20.013357",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 9232.749
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 341.61,
+          "quantity": 30.0,
+          "strategy": "LLMSentimentTrader",
+          "investor": "llm_sentiment_2",
+          "reasoning": "Bearish trend (falling prices, negative net demand) → follow trend by selling 30 shares at current p",
+          "analysis": "1. **Trend Identification**: Recent prices show a clear downward trend (408.85 → 396.88 → 341.61), with a -13.92% return.  \n2. **Sentiment Indicators**: Net demand is negative (-360), confirming weak demand.  \n3. **Rule Alignment**: Bearish market (falling prices, negative demand) → follow trend with SELL.  \n4. **Position Size**: Choose 30 shares (within 15-40 range).  \n5. **Price**: Use current market price ($341.61) for execution.",
+          "cash": 1658.0999999999985,
+          "position": 267.4010186124824
+        },
+        "source_id": "llm_sentiment_2",
+        "timestamp": "2026-03-30T12:42:20.013357",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 128,
+      "tick_turn_duration_ms": 9232.772,
+      "tick_turn_total_duration_ms": 1724891.15,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000129_0330124252": {
+    "round_num": 129,
+    "timestamp": "2026-03-30T12:42:52.054382",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 203.43,
+            "quantity": -30.0,
+            "strategy": "LLMSentimentTrader",
+            "investor": "llm_sentiment_2",
+            "reasoning": "Bearish sentiment (downward price trend, negative net demand) → follow trend to sell 30 shares at cu",
+            "analysis": "1. **Trend Identification**: Recent prices show a clear downward trend: 396.88 → 341.61 → 203.43 (consistent decline).\n2. **Sentiment Indicators**: \n   - Net demand is negative (-912.28) → weak buying pressure.\n   - Return is -40.45% → significant price drop.\n3. **Rule Alignment**: Bearish market (falling prices, negative demand) → follow trend with SELL.\n4. **Position Size**: Choose 30 shares (within 15-40 range).",
+            "cash": 7760.999999999999,
+            "position": 237.4010186124824
+          },
+          "action": {
+            "action_type": "investor_bid",
+            "payload": {
+              "bid_price": 203.43,
+              "quantity": -30.0,
+              "strategy": "LLMSentimentTrader",
+              "investor": "llm_sentiment_2",
+              "reasoning": "Bearish sentiment (downward price trend, negative net demand) → follow trend to sell 30 shares at cu",
+              "analysis": "1. **Trend Identification**: Recent prices show a clear downward trend: 396.88 → 341.61 → 203.43 (consistent decline).\n2. **Sentiment Indicators**: \n   - Net demand is negative (-912.28) → weak buying pressure.\n   - Return is -40.45% → significant price drop.\n3. **Rule Alignment**: Bearish market (falling prices, negative demand) → follow trend with SELL.\n4. **Position Size**: Choose 30 shares (within 15-40 range).",
+              "cash": 7760.999999999999,
+              "position": 237.4010186124824
+            },
+            "source_id": "llm_sentiment_2",
+            "timestamp": "2026-03-30T12:42:52.054305",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 10332.871
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_bid",
+        "payload": {
+          "bid_price": 203.43,
+          "quantity": -30.0,
+          "strategy": "LLMSentimentTrader",
+          "investor": "llm_sentiment_2",
+          "reasoning": "Bearish sentiment (downward price trend, negative net demand) → follow trend to sell 30 shares at cu",
+          "analysis": "1. **Trend Identification**: Recent prices show a clear downward trend: 396.88 → 341.61 → 203.43 (consistent decline).\n2. **Sentiment Indicators**: \n   - Net demand is negative (-912.28) → weak buying pressure.\n   - Return is -40.45% → significant price drop.\n3. **Rule Alignment**: Bearish market (falling prices, negative demand) → follow trend with SELL.\n4. **Position Size**: Choose 30 shares (within 15-40 range).",
+          "cash": 7760.999999999999,
+          "position": 237.4010186124824
+        },
+        "source_id": "llm_sentiment_2",
+        "timestamp": "2026-03-30T12:42:52.054305",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 129,
+      "tick_turn_duration_ms": 10332.881,
+      "tick_turn_total_duration_ms": 1735224.031,
+      "tick_step_count": 1
+    }
+  }
+}

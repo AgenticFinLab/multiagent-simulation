@@ -1,0 +1,146 @@
+{
+  "turn_r000157_0331151656": {
+    "round_num": 157,
+    "timestamp": "2026-03-31T15:16:56.818469",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 172.92695466182477,
+            "quantity": 0.6190990313419747,
+            "strategy": "leveraged_buyer",
+            "investor": "leveraged_buyer_2"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 172.92695466182477,
+              "quantity": 0.6190990313419747,
+              "strategy": "leveraged_buyer",
+              "investor": "leveraged_buyer_2"
+            },
+            "source_id": "leveraged_buyer_2",
+            "timestamp": "2026-03-31T15:16:56.818444",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.027
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 172.92695466182477,
+          "quantity": 0.6190990313419747,
+          "strategy": "leveraged_buyer",
+          "investor": "leveraged_buyer_2"
+        },
+        "source_id": "leveraged_buyer_2",
+        "timestamp": "2026-03-31T15:16:56.818444",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 157,
+      "tick_turn_duration_ms": 0.033,
+      "tick_turn_total_duration_ms": 10.996,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000158_0331151657": {
+    "round_num": 158,
+    "timestamp": "2026-03-31T15:16:57.028083",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 170.22696532914293,
+            "quantity": -0.6245386875543899,
+            "strategy": "leveraged_buyer",
+            "investor": "leveraged_buyer_2"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 170.22696532914293,
+              "quantity": -0.6245386875543899,
+              "strategy": "leveraged_buyer",
+              "investor": "leveraged_buyer_2"
+            },
+            "source_id": "leveraged_buyer_2",
+            "timestamp": "2026-03-31T15:16:57.028049",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.063
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 170.22696532914293,
+          "quantity": -0.6245386875543899,
+          "strategy": "leveraged_buyer",
+          "investor": "leveraged_buyer_2"
+        },
+        "source_id": "leveraged_buyer_2",
+        "timestamp": "2026-03-31T15:16:57.028049",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 158,
+      "tick_turn_duration_ms": 0.07,
+      "tick_turn_total_duration_ms": 11.066,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000159_0331151657": {
+    "round_num": 159,
+    "timestamp": "2026-03-31T15:16:57.195937",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 171.11880831284802,
+            "quantity": 0.4191312378650061,
+            "strategy": "leveraged_buyer",
+            "investor": "leveraged_buyer_2"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 171.11880831284802,
+              "quantity": 0.4191312378650061,
+              "strategy": "leveraged_buyer",
+              "investor": "leveraged_buyer_2"
+            },
+            "source_id": "leveraged_buyer_2",
+            "timestamp": "2026-03-31T15:16:57.195913",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.035
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 171.11880831284802,
+          "quantity": 0.4191312378650061,
+          "strategy": "leveraged_buyer",
+          "investor": "leveraged_buyer_2"
+        },
+        "source_id": "leveraged_buyer_2",
+        "timestamp": "2026-03-31T15:16:57.195913",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 159,
+      "tick_turn_duration_ms": 0.04,
+      "tick_turn_total_duration_ms": 11.106,
+      "tick_step_count": 1
+    }
+  }
+}

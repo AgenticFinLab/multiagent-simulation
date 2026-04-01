@@ -1,0 +1,128 @@
+# MASIM Web UI Chinese Locale (Simplified Chinese)
+# Usage: Set MASIM_LOCALE=zh_CN environment variable or use language selector
+
+# Page titles
+app:
+  title: "MASIM - 多智能体仿真平台"
+  page_icon: "📊"
+
+# Sidebar
+sidebar:
+  title: "MASIM 仿真器"
+  select_scenario: "选择场景"
+  scenario_info: "场景信息"
+  finance_market: "金融市场"
+  description: "描述"
+  agent_type: "智能体类型"
+  rounds: "回合数"
+  simulation: "仿真"
+  network_topology: "网络拓扑"
+  agents: "智能体"
+  full_documentation: "📖 完整文档"
+  version: "MASIM v0.1.0 | 多智能体仿真平台"
+
+  # Status badges
+  data_saved: "✔ 数据已保存"
+  analysis_ready: "✔ 分析就绪"
+
+  # Agent card
+  principle: "原理"
+  instances: "实例"
+  instance: "实例"
+  key_parameters: "关键参数"
+
+  # Agent type
+  rule_based: "规则型"
+  llm_based: "LLM驱动"
+
+# Simulation page
+simulation:
+  title: "仿真平台"
+  round: "回合"
+
+  # Action buttons
+  start: "▶ 开始仿真"
+  stop: "⏹ 停止"
+  reset: "🔄 重置"
+  load_results: "📂 加载结果"
+  view_analysis: "📊 查看分析"
+  rerun: "▶ 重新运行"
+
+  # Button help text
+  load_results_help: "重放已保存的实验数据，无需重新运行仿真"
+  view_analysis_help: "直接跳转到分析页面，无需重放"
+  rerun_help: "开始新的仿真（将覆盖现有数据）"
+  view_analysis_running_help: "仿真运行时跳转到分析页面"
+
+  # Metrics
+  stock_price: "股票价格"
+  return: "收益率"
+  prev_price: "前一期价格"
+
+  # Investor activity
+  investor_activity: "📈 投资者活动"
+  no_actions: "本回合没有记录到智能体操作。"
+
+  # Action types
+  buy: "买入"
+  sell: "卖出"
+  hold: "持有"
+
+  # Action card
+  qty: "数量"
+  price: "价格"
+  analysis: "分析"
+  reasoning: "推理"
+
+  # Progress
+  loading_experiment: "加载实验数据中…"
+
+  # Notices
+  all_rounds_loaded: "已从已保存的实验中加载所有回合。"
+  starting_simulation: "开始仿真："
+  total_rounds: "总回合数："
+  setup_failed: "设置失败："
+  simulation_completed: "仿真成功完成！"
+  simulation_error: "仿真错误："
+  replay_stopped: "回放已由用户停止。"
+  simulation_stopped: "仿真已由用户停止。"
+  loading_rounds: "正在加载 {count} 个已保存回合，场景：{scenario}…"
+  no_round_data: "已保存的实验中未找到回合数据。"
+  scenario_not_found: "未找到场景配置："
+
+# Analysis page
+analysis:
+  title: "分析 — {name}"
+  back: "← 返回"
+  rerun_analysis: "🔄 重新分析"
+  rerun_help: "重新执行分析脚本并刷新图表"
+  running_analysis: "运行分析脚本中…"
+  analysis_failed: "分析失败："
+  analysis_completed: "分析成功完成"
+  analysis_timeout: "分析超时（> 3分钟）"
+  no_results: "此场景未找到仿真结果。"
+  run_first: "请先运行仿真，然后点击**查看分析**。"
+  no_charts: "未找到分析图表。"
+  charts_title: "分析图表"
+  results_title: "仿真结果"
+  validation_passed: "✅ 验证通过 — "
+  validation_failed: "❌ 验证失败 — "
+  validation_result: "验证结果可用"
+  fit_score: "拟合分数"
+  price_metrics: "价格指标"
+  price_statistics: "价格统计"
+  view_full_json: "查看完整 JSON 摘要"
+  output_dir_not_found: "运行分析后未找到输出目录。"
+  script_not_found: "未找到分析脚本："
+  config_not_found: "未找到配置文件："
+  error_running: "运行分析时出错："
+
+# Documentation page
+docs:
+  back: "← 返回"
+  no_docs: "未找到 **{name}** 的文档文件。"
+  expected_path: "预期位置：`examples/{scenario}/explain.md`"
+
+# Error messages
+errors:
+  no_agent_config: "未找到智能体配置"

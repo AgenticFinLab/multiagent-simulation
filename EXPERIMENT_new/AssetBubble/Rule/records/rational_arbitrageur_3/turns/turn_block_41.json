@@ -1,0 +1,146 @@
+{
+  "turn_r000124_0331151650": {
+    "round_num": 124,
+    "timestamp": "2026-03-31T15:16:50.848082",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "rational_arbitrageur",
+            "investor": "rational_arbitrageur_3"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "rational_arbitrageur",
+              "investor": "rational_arbitrageur_3"
+            },
+            "source_id": "rational_arbitrageur_3",
+            "timestamp": "2026-03-31T15:16:50.848051",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.031
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "rational_arbitrageur",
+          "investor": "rational_arbitrageur_3"
+        },
+        "source_id": "rational_arbitrageur_3",
+        "timestamp": "2026-03-31T15:16:50.848051",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 124,
+      "tick_turn_duration_ms": 0.036,
+      "tick_turn_total_duration_ms": 8.731,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000125_0331151651": {
+    "round_num": 125,
+    "timestamp": "2026-03-31T15:16:51.058802",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "rational_arbitrageur",
+            "investor": "rational_arbitrageur_3"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "rational_arbitrageur",
+              "investor": "rational_arbitrageur_3"
+            },
+            "source_id": "rational_arbitrageur_3",
+            "timestamp": "2026-03-31T15:16:51.058780",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.023
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "rational_arbitrageur",
+          "investor": "rational_arbitrageur_3"
+        },
+        "source_id": "rational_arbitrageur_3",
+        "timestamp": "2026-03-31T15:16:51.058780",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 125,
+      "tick_turn_duration_ms": 0.027,
+      "tick_turn_total_duration_ms": 8.758,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000126_0331151651": {
+    "round_num": 126,
+    "timestamp": "2026-03-31T15:16:51.230237",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": "rational_arbitrageur",
+            "investor": "rational_arbitrageur_3"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 0.0,
+              "quantity": 0.0,
+              "strategy": "rational_arbitrageur",
+              "investor": "rational_arbitrageur_3"
+            },
+            "source_id": "rational_arbitrageur_3",
+            "timestamp": "2026-03-31T15:16:51.230144",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.028
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 0.0,
+          "quantity": 0.0,
+          "strategy": "rational_arbitrageur",
+          "investor": "rational_arbitrageur_3"
+        },
+        "source_id": "rational_arbitrageur_3",
+        "timestamp": "2026-03-31T15:16:51.230144",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 126,
+      "tick_turn_duration_ms": 0.055,
+      "tick_turn_total_duration_ms": 8.814,
+      "tick_step_count": 1
+    }
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "turn_r000085_0331151644": {
+    "round_num": 85,
+    "timestamp": "2026-03-31T15:16:44.202334",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 94.65300541370658,
+            "quantity": 3.2640898018076916,
+            "strategy": "rational_arbitrageur",
+            "investor": "rational_arbitrageur_2"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 94.65300541370658,
+              "quantity": 3.2640898018076916,
+              "strategy": "rational_arbitrageur",
+              "investor": "rational_arbitrageur_2"
+            },
+            "source_id": "rational_arbitrageur_2",
+            "timestamp": "2026-03-31T15:16:44.202308",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.042
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 94.65300541370658,
+          "quantity": 3.2640898018076916,
+          "strategy": "rational_arbitrageur",
+          "investor": "rational_arbitrageur_2"
+        },
+        "source_id": "rational_arbitrageur_2",
+        "timestamp": "2026-03-31T15:16:44.202308",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 85,
+      "tick_turn_duration_ms": 0.047,
+      "tick_turn_total_duration_ms": 5.256,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000086_0331151644": {
+    "round_num": 86,
+    "timestamp": "2026-03-31T15:16:44.362965",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 83.55493460011557,
+            "quantity": 5.8317948391910654,
+            "strategy": "rational_arbitrageur",
+            "investor": "rational_arbitrageur_2"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 83.55493460011557,
+              "quantity": 5.8317948391910654,
+              "strategy": "rational_arbitrageur",
+              "investor": "rational_arbitrageur_2"
+            },
+            "source_id": "rational_arbitrageur_2",
+            "timestamp": "2026-03-31T15:16:44.362943",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.025
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 83.55493460011557,
+          "quantity": 5.8317948391910654,
+          "strategy": "rational_arbitrageur",
+          "investor": "rational_arbitrageur_2"
+        },
+        "source_id": "rational_arbitrageur_2",
+        "timestamp": "2026-03-31T15:16:44.362943",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 86,
+      "tick_turn_duration_ms": 0.03,
+      "tick_turn_total_duration_ms": 5.286,
+      "tick_step_count": 1
+    }
+  },
+  "turn_r000087_0331151644": {
+    "round_num": 87,
+    "timestamp": "2026-03-31T15:16:44.526732",
+    "turn_result": {
+      "step_results": [
+        {
+          "decision_payload": {
+            "bid_price": 70.82198656688563,
+            "quantity": 8.769071202001436,
+            "strategy": "rational_arbitrageur",
+            "investor": "rational_arbitrageur_2"
+          },
+          "action": {
+            "action_type": "investor_order",
+            "payload": {
+              "bid_price": 70.82198656688563,
+              "quantity": 8.769071202001436,
+              "strategy": "rational_arbitrageur",
+              "investor": "rational_arbitrageur_2"
+            },
+            "source_id": "rational_arbitrageur_2",
+            "timestamp": "2026-03-31T15:16:44.526707",
+            "extras": {},
+            "status": "CREATED"
+          },
+          "tick_step_count": 1,
+          "tick_step_duration_ms": 0.027
+        }
+      ],
+      "final_action": {
+        "action_type": "investor_order",
+        "payload": {
+          "bid_price": 70.82198656688563,
+          "quantity": 8.769071202001436,
+          "strategy": "rational_arbitrageur",
+          "investor": "rational_arbitrageur_2"
+        },
+        "source_id": "rational_arbitrageur_2",
+        "timestamp": "2026-03-31T15:16:44.526707",
+        "extras": {},
+        "status": "CREATED"
+      },
+      "tick_turn_count": 87,
+      "tick_turn_duration_ms": 0.032,
+      "tick_turn_total_duration_ms": 5.319,
+      "tick_step_count": 1
+    }
+  }
+}

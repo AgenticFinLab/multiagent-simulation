@@ -1,0 +1,27 @@
+{
+  "msg_r000200_0331151705": {
+    "round_num": 200,
+    "direction": "received",
+    "timestamp": "2026-03-31T15:17:05.072407",
+    "message": {
+      "message_type": "PEER",
+      "sender_id": "conservative_holder_2",
+      "recipient_id": "market",
+      "payload": {
+        "content": {
+          "bid_price": 154.2607008467156,
+          "quantity": 0.05764607523034187,
+          "strategy": "conservative_holder",
+          "investor": "conservative_holder_2"
+        },
+        "content_type": "investor_bid",
+        "extras": {}
+      },
+      "timestamp": "2026-03-31T15:17:04.995665",
+      "priority": 1,
+      "extras": {
+        "round_num": 200
+      }
+    }
+  }
+}

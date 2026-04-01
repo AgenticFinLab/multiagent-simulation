@@ -1,0 +1,604 @@
+{
+  "turn_block_0.json": {
+    "ids": [
+      "turn_r000001_0330113549",
+      "turn_r000002_0330113604",
+      "turn_r000003_0330113628"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_0.json"
+  },
+  "turn_block_1.json": {
+    "ids": [
+      "turn_r000004_0330113656",
+      "turn_r000005_0330113721",
+      "turn_r000006_0330113743"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_1.json"
+  },
+  "turn_block_2.json": {
+    "ids": [
+      "turn_r000007_0330113758",
+      "turn_r000008_0330113817",
+      "turn_r000009_0330113859"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_2.json"
+  },
+  "turn_block_3.json": {
+    "ids": [
+      "turn_r000010_0330113922",
+      "turn_r000011_0330113948",
+      "turn_r000012_0330114035"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_3.json"
+  },
+  "turn_block_4.json": {
+    "ids": [
+      "turn_r000013_0330114055",
+      "turn_r000014_0330114112",
+      "turn_r000015_0330114152"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_4.json"
+  },
+  "turn_block_5.json": {
+    "ids": [
+      "turn_r000016_0330114228",
+      "turn_r000017_0330114306",
+      "turn_r000018_0330114316"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_5.json"
+  },
+  "turn_block_6.json": {
+    "ids": [
+      "turn_r000019_0330114345",
+      "turn_r000020_0330114408",
+      "turn_r000021_0330114434"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_6.json"
+  },
+  "turn_block_7.json": {
+    "ids": [
+      "turn_r000022_0330114505",
+      "turn_r000023_0330114531",
+      "turn_r000024_0330114553"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_7.json"
+  },
+  "turn_block_8.json": {
+    "ids": [
+      "turn_r000025_0330114617",
+      "turn_r000026_0330114643",
+      "turn_r000027_0330114704"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_8.json"
+  },
+  "turn_block_9.json": {
+    "ids": [
+      "turn_r000028_0330114730",
+      "turn_r000029_0330114756",
+      "turn_r000030_0330114826"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_9.json"
+  },
+  "turn_block_10.json": {
+    "ids": [
+      "turn_r000031_0330114901",
+      "turn_r000032_0330114930",
+      "turn_r000033_0330115004"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_10.json"
+  },
+  "turn_block_11.json": {
+    "ids": [
+      "turn_r000034_0330115030",
+      "turn_r000035_0330115108",
+      "turn_r000036_0330115139"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_11.json"
+  },
+  "turn_block_12.json": {
+    "ids": [
+      "turn_r000037_0330115213",
+      "turn_r000038_0330115234",
+      "turn_r000039_0330115317"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_12.json"
+  },
+  "turn_block_13.json": {
+    "ids": [
+      "turn_r000040_0330115345",
+      "turn_r000041_0330115410",
+      "turn_r000042_0330115453"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_13.json"
+  },
+  "turn_block_14.json": {
+    "ids": [
+      "turn_r000043_0330115519",
+      "turn_r000044_0330115547",
+      "turn_r000045_0330115639"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_14.json"
+  },
+  "turn_block_15.json": {
+    "ids": [
+      "turn_r000046_0330115715",
+      "turn_r000047_0330115800",
+      "turn_r000048_0330115829"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_15.json"
+  },
+  "turn_block_16.json": {
+    "ids": [
+      "turn_r000049_0330115921",
+      "turn_r000050_0330115952",
+      "turn_r000051_0330120021"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_16.json"
+  },
+  "turn_block_17.json": {
+    "ids": [
+      "turn_r000052_0330120057",
+      "turn_r000053_0330120136",
+      "turn_r000054_0330120200"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_17.json"
+  },
+  "turn_block_18.json": {
+    "ids": [
+      "turn_r000055_0330120230",
+      "turn_r000056_0330120302",
+      "turn_r000057_0330120329"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_18.json"
+  },
+  "turn_block_19.json": {
+    "ids": [
+      "turn_r000058_0330120355",
+      "turn_r000059_0330120444",
+      "turn_r000060_0330120533"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_19.json"
+  },
+  "turn_block_20.json": {
+    "ids": [
+      "turn_r000061_0330120609",
+      "turn_r000062_0330120653",
+      "turn_r000063_0330120715"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_20.json"
+  },
+  "turn_block_21.json": {
+    "ids": [
+      "turn_r000064_0330120757",
+      "turn_r000065_0330120824",
+      "turn_r000066_0330120857"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_21.json"
+  },
+  "turn_block_22.json": {
+    "ids": [
+      "turn_r000067_0330120923",
+      "turn_r000068_0330120947",
+      "turn_r000069_0330121025"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_22.json"
+  },
+  "turn_block_23.json": {
+    "ids": [
+      "turn_r000070_0330121053",
+      "turn_r000071_0330121123",
+      "turn_r000072_0330121148"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_23.json"
+  },
+  "turn_block_24.json": {
+    "ids": [
+      "turn_r000073_0330121225",
+      "turn_r000074_0330121259",
+      "turn_r000075_0330121326"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_24.json"
+  },
+  "turn_block_25.json": {
+    "ids": [
+      "turn_r000076_0330121402",
+      "turn_r000077_0330121442",
+      "turn_r000078_0330121513"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_25.json"
+  },
+  "turn_block_26.json": {
+    "ids": [
+      "turn_r000079_0330121542",
+      "turn_r000080_0330121630",
+      "turn_r000081_0330121658"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_26.json"
+  },
+  "turn_block_27.json": {
+    "ids": [
+      "turn_r000082_0330121725",
+      "turn_r000083_0330121759",
+      "turn_r000084_0330121828"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_27.json"
+  },
+  "turn_block_28.json": {
+    "ids": [
+      "turn_r000085_0330121852",
+      "turn_r000086_0330121931",
+      "turn_r000087_0330122009"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_28.json"
+  },
+  "turn_block_29.json": {
+    "ids": [
+      "turn_r000088_0330122043",
+      "turn_r000089_0330122111",
+      "turn_r000090_0330122146"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_29.json"
+  },
+  "turn_block_30.json": {
+    "ids": [
+      "turn_r000091_0330122224",
+      "turn_r000092_0330122257",
+      "turn_r000093_0330122322"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_30.json"
+  },
+  "turn_block_31.json": {
+    "ids": [
+      "turn_r000094_0330122349",
+      "turn_r000095_0330122419",
+      "turn_r000096_0330122444"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_31.json"
+  },
+  "turn_block_32.json": {
+    "ids": [
+      "turn_r000097_0330122516",
+      "turn_r000098_0330122556",
+      "turn_r000099_0330122639"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_32.json"
+  },
+  "turn_block_33.json": {
+    "ids": [
+      "turn_r000100_0330122715",
+      "turn_r000101_0330122750",
+      "turn_r000102_0330122831"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_33.json"
+  },
+  "turn_block_34.json": {
+    "ids": [
+      "turn_r000103_0330122902",
+      "turn_r000104_0330122938",
+      "turn_r000105_0330123005"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_34.json"
+  },
+  "turn_block_35.json": {
+    "ids": [
+      "turn_r000106_0330123034",
+      "turn_r000107_0330123112",
+      "turn_r000108_0330123141"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_35.json"
+  },
+  "turn_block_36.json": {
+    "ids": [
+      "turn_r000109_0330123202",
+      "turn_r000110_0330123239",
+      "turn_r000111_0330123320"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_36.json"
+  },
+  "turn_block_37.json": {
+    "ids": [
+      "turn_r000112_0330123351",
+      "turn_r000113_0330123418",
+      "turn_r000114_0330123448"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_37.json"
+  },
+  "turn_block_38.json": {
+    "ids": [
+      "turn_r000115_0330123517",
+      "turn_r000116_0330123540",
+      "turn_r000117_0330123608"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_38.json"
+  },
+  "turn_block_39.json": {
+    "ids": [
+      "turn_r000118_0330123655",
+      "turn_r000119_0330123720",
+      "turn_r000120_0330123758"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_39.json"
+  },
+  "turn_block_40.json": {
+    "ids": [
+      "turn_r000121_0330123826",
+      "turn_r000122_0330123910",
+      "turn_r000123_0330123938"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_40.json"
+  },
+  "turn_block_41.json": {
+    "ids": [
+      "turn_r000124_0330124003",
+      "turn_r000125_0330124039",
+      "turn_r000126_0330124127"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_41.json"
+  },
+  "turn_block_42.json": {
+    "ids": [
+      "turn_r000127_0330124157",
+      "turn_r000128_0330124226",
+      "turn_r000129_0330124257"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_42.json"
+  },
+  "turn_block_43.json": {
+    "ids": [
+      "turn_r000130_0330124329",
+      "turn_r000131_0330124356",
+      "turn_r000132_0330124452"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_43.json"
+  },
+  "turn_block_44.json": {
+    "ids": [
+      "turn_r000133_0330124527",
+      "turn_r000134_0330124606",
+      "turn_r000135_0330124644"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_44.json"
+  },
+  "turn_block_45.json": {
+    "ids": [
+      "turn_r000136_0330124701",
+      "turn_r000137_0330124731",
+      "turn_r000138_0330124759"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_45.json"
+  },
+  "turn_block_46.json": {
+    "ids": [
+      "turn_r000139_0330124821",
+      "turn_r000140_0330124848",
+      "turn_r000141_0330124916"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_46.json"
+  },
+  "turn_block_47.json": {
+    "ids": [
+      "turn_r000142_0330124947",
+      "turn_r000143_0330125023",
+      "turn_r000144_0330125049"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_47.json"
+  },
+  "turn_block_48.json": {
+    "ids": [
+      "turn_r000145_0330125113",
+      "turn_r000146_0330125143",
+      "turn_r000147_0330125208"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_48.json"
+  },
+  "turn_block_49.json": {
+    "ids": [
+      "turn_r000148_0330125236",
+      "turn_r000149_0330125302",
+      "turn_r000150_0330125337"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_49.json"
+  },
+  "turn_block_50.json": {
+    "ids": [
+      "turn_r000151_0330125400",
+      "turn_r000152_0330125424",
+      "turn_r000153_0330125453"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_50.json"
+  },
+  "turn_block_51.json": {
+    "ids": [
+      "turn_r000154_0330125530",
+      "turn_r000155_0330125603",
+      "turn_r000156_0330125623"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_51.json"
+  },
+  "turn_block_52.json": {
+    "ids": [
+      "turn_r000157_0330125705",
+      "turn_r000158_0330125756",
+      "turn_r000159_0330125828"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_52.json"
+  },
+  "turn_block_53.json": {
+    "ids": [
+      "turn_r000160_0330125902",
+      "turn_r000161_0330125933",
+      "turn_r000162_0330125959"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_53.json"
+  },
+  "turn_block_54.json": {
+    "ids": [
+      "turn_r000163_0330130036",
+      "turn_r000164_0330130107",
+      "turn_r000165_0330130132"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_54.json"
+  },
+  "turn_block_55.json": {
+    "ids": [
+      "turn_r000166_0330130157",
+      "turn_r000167_0330130235",
+      "turn_r000168_0330130252"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_55.json"
+  },
+  "turn_block_56.json": {
+    "ids": [
+      "turn_r000169_0330130330",
+      "turn_r000170_0330130350",
+      "turn_r000171_0330131148"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_56.json"
+  },
+  "turn_block_57.json": {
+    "ids": [
+      "turn_r000172_0330131158",
+      "turn_r000173_0330131215",
+      "turn_r000174_0330131237"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_57.json"
+  },
+  "turn_block_58.json": {
+    "ids": [
+      "turn_r000175_0330131306",
+      "turn_r000176_0330131329",
+      "turn_r000177_0330131346"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_58.json"
+  },
+  "turn_block_59.json": {
+    "ids": [
+      "turn_r000178_0330131402",
+      "turn_r000179_0330131432",
+      "turn_r000180_0330131454"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_59.json"
+  },
+  "turn_block_60.json": {
+    "ids": [
+      "turn_r000181_0330131523",
+      "turn_r000182_0330131601",
+      "turn_r000183_0330131628"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_60.json"
+  },
+  "turn_block_61.json": {
+    "ids": [
+      "turn_r000184_0330131649",
+      "turn_r000185_0330131707",
+      "turn_r000186_0330131734"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_61.json"
+  },
+  "turn_block_62.json": {
+    "ids": [
+      "turn_r000187_0330131756",
+      "turn_r000188_0330131820",
+      "turn_r000189_0330131846"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_62.json"
+  },
+  "turn_block_63.json": {
+    "ids": [
+      "turn_r000190_0330131908",
+      "turn_r000191_0330131943",
+      "turn_r000192_0330132004"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_63.json"
+  },
+  "turn_block_64.json": {
+    "ids": [
+      "turn_r000193_0330132021",
+      "turn_r000194_0330132041",
+      "turn_r000195_0330132114"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_64.json"
+  },
+  "turn_block_65.json": {
+    "ids": [
+      "turn_r000196_0330132135",
+      "turn_r000197_0330132205",
+      "turn_r000198_0330132222"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_65.json"
+  },
+  "turn_block_66.json": {
+    "ids": [
+      "turn_r000199_0330132250",
+      "turn_r000200_0330132307"
+    ],
+    "count": 2,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_arbitrageur_3/turns/turn_block_66.json"
+  }
+}

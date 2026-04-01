@@ -1,0 +1,604 @@
+{
+  "turn_block_0.json": {
+    "ids": [
+      "turn_r000001_0330113549",
+      "turn_r000002_0330113607",
+      "turn_r000003_0330113625"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_0.json"
+  },
+  "turn_block_1.json": {
+    "ids": [
+      "turn_r000004_0330113658",
+      "turn_r000005_0330113719",
+      "turn_r000006_0330113736"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_1.json"
+  },
+  "turn_block_2.json": {
+    "ids": [
+      "turn_r000007_0330113803",
+      "turn_r000008_0330113828",
+      "turn_r000009_0330113904"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_2.json"
+  },
+  "turn_block_3.json": {
+    "ids": [
+      "turn_r000010_0330113914",
+      "turn_r000011_0330113951",
+      "turn_r000012_0330114023"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_3.json"
+  },
+  "turn_block_4.json": {
+    "ids": [
+      "turn_r000013_0330114052",
+      "turn_r000014_0330114110",
+      "turn_r000015_0330114152"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_4.json"
+  },
+  "turn_block_5.json": {
+    "ids": [
+      "turn_r000016_0330114228",
+      "turn_r000017_0330114302",
+      "turn_r000018_0330114316"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_5.json"
+  },
+  "turn_block_6.json": {
+    "ids": [
+      "turn_r000019_0330114351",
+      "turn_r000020_0330114413",
+      "turn_r000021_0330114449"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_6.json"
+  },
+  "turn_block_7.json": {
+    "ids": [
+      "turn_r000022_0330114500",
+      "turn_r000023_0330114535",
+      "turn_r000024_0330114554"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_7.json"
+  },
+  "turn_block_8.json": {
+    "ids": [
+      "turn_r000025_0330114618",
+      "turn_r000026_0330114647",
+      "turn_r000027_0330114705"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_8.json"
+  },
+  "turn_block_9.json": {
+    "ids": [
+      "turn_r000028_0330114736",
+      "turn_r000029_0330114758",
+      "turn_r000030_0330114852"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_9.json"
+  },
+  "turn_block_10.json": {
+    "ids": [
+      "turn_r000031_0330114906",
+      "turn_r000032_0330114949",
+      "turn_r000033_0330115015"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_10.json"
+  },
+  "turn_block_11.json": {
+    "ids": [
+      "turn_r000034_0330115038",
+      "turn_r000035_0330115111",
+      "turn_r000036_0330115151"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_11.json"
+  },
+  "turn_block_12.json": {
+    "ids": [
+      "turn_r000037_0330115212",
+      "turn_r000038_0330115259",
+      "turn_r000039_0330115308"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_12.json"
+  },
+  "turn_block_13.json": {
+    "ids": [
+      "turn_r000040_0330115340",
+      "turn_r000041_0330115409",
+      "turn_r000042_0330115501"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_13.json"
+  },
+  "turn_block_14.json": {
+    "ids": [
+      "turn_r000043_0330115512",
+      "turn_r000044_0330115549",
+      "turn_r000045_0330115639"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_14.json"
+  },
+  "turn_block_15.json": {
+    "ids": [
+      "turn_r000046_0330115728",
+      "turn_r000047_0330115805",
+      "turn_r000048_0330115852"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_15.json"
+  },
+  "turn_block_16.json": {
+    "ids": [
+      "turn_r000049_0330115923",
+      "turn_r000050_0330120000",
+      "turn_r000051_0330120044"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_16.json"
+  },
+  "turn_block_17.json": {
+    "ids": [
+      "turn_r000052_0330120118",
+      "turn_r000053_0330120134",
+      "turn_r000054_0330120205"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_17.json"
+  },
+  "turn_block_18.json": {
+    "ids": [
+      "turn_r000055_0330120239",
+      "turn_r000056_0330120307",
+      "turn_r000057_0330120339"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_18.json"
+  },
+  "turn_block_19.json": {
+    "ids": [
+      "turn_r000058_0330120406",
+      "turn_r000059_0330120456",
+      "turn_r000060_0330120545"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_19.json"
+  },
+  "turn_block_20.json": {
+    "ids": [
+      "turn_r000061_0330120627",
+      "turn_r000062_0330120647",
+      "turn_r000063_0330120712"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_20.json"
+  },
+  "turn_block_21.json": {
+    "ids": [
+      "turn_r000064_0330120750",
+      "turn_r000065_0330120815",
+      "turn_r000066_0330120853"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_21.json"
+  },
+  "turn_block_22.json": {
+    "ids": [
+      "turn_r000067_0330120936",
+      "turn_r000068_0330121000",
+      "turn_r000069_0330121031"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_22.json"
+  },
+  "turn_block_23.json": {
+    "ids": [
+      "turn_r000070_0330121057",
+      "turn_r000071_0330121138",
+      "turn_r000072_0330121205"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_23.json"
+  },
+  "turn_block_24.json": {
+    "ids": [
+      "turn_r000073_0330121235",
+      "turn_r000074_0330121255",
+      "turn_r000075_0330121324"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_24.json"
+  },
+  "turn_block_25.json": {
+    "ids": [
+      "turn_r000076_0330121402",
+      "turn_r000077_0330121439",
+      "turn_r000078_0330121523"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_25.json"
+  },
+  "turn_block_26.json": {
+    "ids": [
+      "turn_r000079_0330121549",
+      "turn_r000080_0330121637",
+      "turn_r000081_0330121703"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_26.json"
+  },
+  "turn_block_27.json": {
+    "ids": [
+      "turn_r000082_0330121730",
+      "turn_r000083_0330121757",
+      "turn_r000084_0330121832"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_27.json"
+  },
+  "turn_block_28.json": {
+    "ids": [
+      "turn_r000085_0330121859",
+      "turn_r000086_0330121930",
+      "turn_r000087_0330122002"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_28.json"
+  },
+  "turn_block_29.json": {
+    "ids": [
+      "turn_r000088_0330122051",
+      "turn_r000089_0330122115",
+      "turn_r000090_0330122150"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_29.json"
+  },
+  "turn_block_30.json": {
+    "ids": [
+      "turn_r000091_0330122215",
+      "turn_r000092_0330122255",
+      "turn_r000093_0330122326"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_30.json"
+  },
+  "turn_block_31.json": {
+    "ids": [
+      "turn_r000094_0330122401",
+      "turn_r000095_0330122419",
+      "turn_r000096_0330122441"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_31.json"
+  },
+  "turn_block_32.json": {
+    "ids": [
+      "turn_r000097_0330122513",
+      "turn_r000098_0330122601",
+      "turn_r000099_0330122639"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_32.json"
+  },
+  "turn_block_33.json": {
+    "ids": [
+      "turn_r000100_0330122723",
+      "turn_r000101_0330122815",
+      "turn_r000102_0330122847"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_33.json"
+  },
+  "turn_block_34.json": {
+    "ids": [
+      "turn_r000103_0330122904",
+      "turn_r000104_0330122942",
+      "turn_r000105_0330123006"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_34.json"
+  },
+  "turn_block_35.json": {
+    "ids": [
+      "turn_r000106_0330123045",
+      "turn_r000107_0330123114",
+      "turn_r000108_0330123146"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_35.json"
+  },
+  "turn_block_36.json": {
+    "ids": [
+      "turn_r000109_0330123209",
+      "turn_r000110_0330123234",
+      "turn_r000111_0330123331"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_36.json"
+  },
+  "turn_block_37.json": {
+    "ids": [
+      "turn_r000112_0330123348",
+      "turn_r000113_0330123418",
+      "turn_r000114_0330123453"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_37.json"
+  },
+  "turn_block_38.json": {
+    "ids": [
+      "turn_r000115_0330123520",
+      "turn_r000116_0330123545",
+      "turn_r000117_0330123625"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_38.json"
+  },
+  "turn_block_39.json": {
+    "ids": [
+      "turn_r000118_0330123646",
+      "turn_r000119_0330123722",
+      "turn_r000120_0330123747"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_39.json"
+  },
+  "turn_block_40.json": {
+    "ids": [
+      "turn_r000121_0330123831",
+      "turn_r000122_0330123902",
+      "turn_r000123_0330123941"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_40.json"
+  },
+  "turn_block_41.json": {
+    "ids": [
+      "turn_r000124_0330124012",
+      "turn_r000125_0330124042",
+      "turn_r000126_0330124141"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_41.json"
+  },
+  "turn_block_42.json": {
+    "ids": [
+      "turn_r000127_0330124205",
+      "turn_r000128_0330124234",
+      "turn_r000129_0330124305"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_42.json"
+  },
+  "turn_block_43.json": {
+    "ids": [
+      "turn_r000130_0330124338",
+      "turn_r000131_0330124401",
+      "turn_r000132_0330124455"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_43.json"
+  },
+  "turn_block_44.json": {
+    "ids": [
+      "turn_r000133_0330124535",
+      "turn_r000134_0330124619",
+      "turn_r000135_0330124637"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_44.json"
+  },
+  "turn_block_45.json": {
+    "ids": [
+      "turn_r000136_0330124719",
+      "turn_r000137_0330124732",
+      "turn_r000138_0330124802"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_45.json"
+  },
+  "turn_block_46.json": {
+    "ids": [
+      "turn_r000139_0330124826",
+      "turn_r000140_0330124857",
+      "turn_r000141_0330124927"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_46.json"
+  },
+  "turn_block_47.json": {
+    "ids": [
+      "turn_r000142_0330124947",
+      "turn_r000143_0330125024",
+      "turn_r000144_0330125048"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_47.json"
+  },
+  "turn_block_48.json": {
+    "ids": [
+      "turn_r000145_0330125114",
+      "turn_r000146_0330125142",
+      "turn_r000147_0330125212"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_48.json"
+  },
+  "turn_block_49.json": {
+    "ids": [
+      "turn_r000148_0330125244",
+      "turn_r000149_0330125304",
+      "turn_r000150_0330125341"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_49.json"
+  },
+  "turn_block_50.json": {
+    "ids": [
+      "turn_r000151_0330125412",
+      "turn_r000152_0330125423",
+      "turn_r000153_0330125503"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_50.json"
+  },
+  "turn_block_51.json": {
+    "ids": [
+      "turn_r000154_0330125531",
+      "turn_r000155_0330125601",
+      "turn_r000156_0330125650"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_51.json"
+  },
+  "turn_block_52.json": {
+    "ids": [
+      "turn_r000157_0330125702",
+      "turn_r000158_0330125754",
+      "turn_r000159_0330125825"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_52.json"
+  },
+  "turn_block_53.json": {
+    "ids": [
+      "turn_r000160_0330125904",
+      "turn_r000161_0330125933",
+      "turn_r000162_0330130001"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_53.json"
+  },
+  "turn_block_54.json": {
+    "ids": [
+      "turn_r000163_0330130040",
+      "turn_r000164_0330130110",
+      "turn_r000165_0330130135"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_54.json"
+  },
+  "turn_block_55.json": {
+    "ids": [
+      "turn_r000166_0330130152",
+      "turn_r000167_0330130220",
+      "turn_r000168_0330130248"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_55.json"
+  },
+  "turn_block_56.json": {
+    "ids": [
+      "turn_r000169_0330130324",
+      "turn_r000170_0330130354",
+      "turn_r000171_0330131146"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_56.json"
+  },
+  "turn_block_57.json": {
+    "ids": [
+      "turn_r000172_0330131202",
+      "turn_r000173_0330131217",
+      "turn_r000174_0330131236"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_57.json"
+  },
+  "turn_block_58.json": {
+    "ids": [
+      "turn_r000175_0330131306",
+      "turn_r000176_0330131322",
+      "turn_r000177_0330131345"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_58.json"
+  },
+  "turn_block_59.json": {
+    "ids": [
+      "turn_r000178_0330131402",
+      "turn_r000179_0330131437",
+      "turn_r000180_0330131502"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_59.json"
+  },
+  "turn_block_60.json": {
+    "ids": [
+      "turn_r000181_0330131521",
+      "turn_r000182_0330131606",
+      "turn_r000183_0330131629"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_60.json"
+  },
+  "turn_block_61.json": {
+    "ids": [
+      "turn_r000184_0330131657",
+      "turn_r000185_0330131717",
+      "turn_r000186_0330131735"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_61.json"
+  },
+  "turn_block_62.json": {
+    "ids": [
+      "turn_r000187_0330131803",
+      "turn_r000188_0330131829",
+      "turn_r000189_0330131854"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_62.json"
+  },
+  "turn_block_63.json": {
+    "ids": [
+      "turn_r000190_0330131916",
+      "turn_r000191_0330131947",
+      "turn_r000192_0330132008"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_63.json"
+  },
+  "turn_block_64.json": {
+    "ids": [
+      "turn_r000193_0330132031",
+      "turn_r000194_0330132048",
+      "turn_r000195_0330132119"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_64.json"
+  },
+  "turn_block_65.json": {
+    "ids": [
+      "turn_r000196_0330132136",
+      "turn_r000197_0330132212",
+      "turn_r000198_0330132221"
+    ],
+    "count": 3,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_65.json"
+  },
+  "turn_block_66.json": {
+    "ids": [
+      "turn_r000199_0330132243",
+      "turn_r000200_0330132315"
+    ],
+    "count": 2,
+    "path": "EXPERIMENT/AssetBubbleLLM/records/llm_greater_fool_3/turns/turn_block_66.json"
+  }
+}
