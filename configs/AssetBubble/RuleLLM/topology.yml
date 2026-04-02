@@ -1,0 +1,33 @@
+# =============================================================================
+# AssetBubbleRuleLLM - Topology Configuration
+# =============================================================================
+# Star topology: Market broadcasts to all hybrid rule+LLM investors
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - rulellm_momentum
+    - rulellm_arbitrageur
+    - rulellm_noise
+    - rulellm_value
+    - rulellm_leveraged
+
+  rulellm_momentum:
+    - market
+
+  rulellm_arbitrageur:
+    - market
+
+  rulellm_noise:
+    - market
+
+  rulellm_value:
+    - market
+
+  rulellm_leveraged:
+    - market

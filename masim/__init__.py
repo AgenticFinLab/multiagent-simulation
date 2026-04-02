@@ -40,9 +40,9 @@ from masim.player import (
     PayloadType,
     ActionStatus,
     Action,
+    LocalObservation,
     Observation,
-    Outbound,
-    Inbound,
+    Info,
     StepResult,
     TurnResult,
     PlayerConfig,
@@ -51,17 +51,19 @@ from masim.player import (
     GeneralPlayer,
 )
 
-# Communication module
+# Communication module (channel wire layer only)
 from masim.communication import (
-    MessageType,
-    MessagePriority,
-    Message,
+    SimPacket,
     CommunicationChannel,
     GeneralCommunicationChannel,
 )
 
-# Proxy module
+# Proxy module (message routing + proxy layer)
 from masim.proxy import (
+    MessageType,
+    MessagePriority,
+    Message,
+    build_message_from_info,
     ProxyType,
     ProxyConfig,
     BaseProxy,
@@ -95,7 +97,6 @@ from masim.utils import (
     load_config,
     validate_config,
     build_connection_matrix,
-    ConnectionValidator,
 )
 
 __all__ = [
@@ -104,22 +105,24 @@ __all__ = [
     "PayloadType",
     "ActionStatus",
     "Action",
+    "LocalObservation",
     "Observation",
-    "Outbound",
-    "Inbound",
+    "Info",
     "StepResult",
     "TurnResult",
     "PlayerConfig",
     "PlayerState",
     "BasePlayer",
     "GeneralPlayer",
-    # Communication types
+    # Communication types (channel wire layer)
+    "SimPacket",
+    "CommunicationChannel",
+    "GeneralCommunicationChannel",
+    # Proxy types (message routing + proxy layer)
     "MessageType",
     "MessagePriority",
     "Message",
-    "CommunicationChannel",
-    "GeneralCommunicationChannel",
-    # Proxy types
+    "build_message_from_info",
     "ProxyType",
     "ProxyConfig",
     "BaseProxy",
@@ -144,5 +147,4 @@ __all__ = [
     "load_config",
     "validate_config",
     "build_connection_matrix",
-    "ConnectionValidator",
 ]

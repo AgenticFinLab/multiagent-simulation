@@ -1,0 +1,53 @@
+# =============================================================================
+# [SCENARIO_NAME] Topology Configuration (Rule-Based)
+# =============================================================================
+# Defines the communication structure between players.
+# Reference: AssetBubble/, Demo/, HerdEffect/
+#
+# Pattern Types:
+#   - star: Market as hub, all investors communicate through market
+#   - mesh: Direct peer-to-peer communication
+#   - ring: Sequential communication chain
+#
+# Execution Levels:
+#   - Level 0: sources (typically coordinator/market)
+#   - Level 1+: determined by topology distance from sources
+#
+# Flow per round:
+#   1. Level 0 (market) executes → broadcasts market data
+#   2. Level 1 (investors) execute in parallel → submit orders to market
+# =============================================================================
+
+# Topology type
+type: "star"
+
+# -----------------------------------------------------------------------------
+# Sources (Level 0 - execute first)
+# -----------------------------------------------------------------------------
+sources:
+  - market
+
+# -----------------------------------------------------------------------------
+# Connections (defines message flow)
+# -----------------------------------------------------------------------------
+connections:
+  # =================================
+  # Market → Investors (broadcasts price, volume, etc.)
+  # =================================
+  market:
+    - investor_1
+    - investor_2
+    - investor_3
+    # Add more investors as needed
+
+  # =================================
+  # Investor → Market (submits orders)
+  # =================================
+  investor_1:
+    - market
+
+  investor_2:
+    - market
+
+  investor_3:
+    - market

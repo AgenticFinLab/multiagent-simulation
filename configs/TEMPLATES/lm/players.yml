@@ -1,0 +1,210 @@
+# =============================================================================
+# [SCENARIO_NAME]LLM Players Configuration (LLM-Based)
+# =============================================================================
+# Template for LLM-driven financial simulations.
+# Reference: AssetBubbleLLM/, HerdEffectLLM/
+#
+# LLM Provider: ByteDance Doubao (via lmbase)
+# Environment Variable: ARK_API_KEY
+#
+# Structure:
+#   - 1 Market (rule-based coordinator)
+#   - N LLM Investors (with different personalities/strategies)
+#
+# LLM Config (inline in extras):
+#   llm:
+#     sys_message: "examples.[SCENARIO]LLM.prompts:LLM_[ROLE]_SYS"
+#     user_message: "examples.[SCENARIO]LLM.prompts:LLM_USER_TEMPLATE"
+#     lm_type: "api"
+#     lm_name: "ark/doubao-seed-1-6-lite-251015"
+#     generation_config:
+#       temperature: 0.3
+#       max_new_tokens: 500
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market / Coordinator (Rule-based, NOT LLM)
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.[SCENARIO_NAME]LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    # coordinator = Level 0 (executes before all LLM investors)
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]LLM/records"
+      # =================================
+      # Market-specific parameters
+      # =================================
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.1
+      mean_reversion: 0.02
+      noise_std: 0.5
+      # Max entries kept in RAM for HistoryBuffers stored in custom_state
+      # (e.g. price_history, volume_history, return_history).
+      # Entries exceeding this limit are flushed to disk automatically.
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Investor Type 1 (example: Momentum Trader)
+# -----------------------------------------------------------------------------
+llm_investor_1:
+  name: "LLM Investor Type 1"
+  class: "examples.[SCENARIO_NAME]LLM.players:LLMInvestorType1"
+  # REQUIRED: num_instances — number of identical copies to spawn.
+  # The expander deep-copies this block N times, assigning:
+  #   identity = "llm_investor_1_1" … "llm_investor_1_N"
+  #   name     = "LLM Investor Type 1 1" … "LLM Investor Type 1 N"
+  # topology.yml uses the BASE key ("llm_investor_1") — expander resolves instances.
+  # Use num_instances: 1 for a single instance (identity = key unchanged, no suffix).
+  # Omitting num_instances entirely is a config error and will raise KeyError.
+  num_instances: 1
+  config:
+    identity: "llm_investor_1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]LLM/records"
+      # =================================
+      # Base investor parameters
+      # =================================
+      initial_cash: 10000.0
+      initial_position: 0.0
+      # Max entries kept in RAM for HistoryBuffers stored in custom_state
+      # (e.g. price_history, volume_history, return_history).
+      # Entries exceeding this limit are flushed to disk automatically.
+      custom_state_hot_limit: 3
+      # =================================
+      # LLM Configuration (INLINE, no YAML anchors!)
+      # =================================
+      llm:
+        sys_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_TYPE1_SYS"
+        user_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Investor Type 2 (example: Contrarian)
+# -----------------------------------------------------------------------------
+llm_investor_2:
+  name: "LLM Investor Type 2"
+  class: "examples.[SCENARIO_NAME]LLM.players:LLMInvestorType2"
+  num_instances: 1
+  config:
+    identity: "llm_investor_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_TYPE2_SYS"
+        user_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Investor Type 3 (example: Risk Averse)
+# -----------------------------------------------------------------------------
+llm_investor_3:
+  name: "LLM Investor Type 3"
+  class: "examples.[SCENARIO_NAME]LLM.players:LLMInvestorType3"
+  num_instances: 1
+  config:
+    identity: "llm_investor_3"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_TYPE3_SYS"
+        user_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Investor Type 4 (example: Aggressive)
+# -----------------------------------------------------------------------------
+llm_investor_4:
+  name: "LLM Investor Type 4"
+  class: "examples.[SCENARIO_NAME]LLM.players:LLMInvestorType4"
+  num_instances: 1
+  config:
+    identity: "llm_investor_4"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_TYPE4_SYS"
+        user_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Investor Type 5 (example: Noise Trader)
+# -----------------------------------------------------------------------------
+llm_investor_5:
+  name: "LLM Investor Type 5"
+  class: "examples.[SCENARIO_NAME]LLM.players:LLMInvestorType5"
+  num_instances: 1
+  config:
+    identity: "llm_investor_5"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_TYPE5_SYS"
+        user_message: "examples.[SCENARIO_NAME]LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          # Higher temperature for noise trader: more unpredictable LLM decisions
+          temperature: 0.5
+          max_new_tokens: 500
+  persona: !include persona.yml

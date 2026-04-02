@@ -1,0 +1,134 @@
+# =============================================================================
+# [SCENARIO_NAME] Players Configuration (Rule-Based)
+# =============================================================================
+# Template for rule-based financial simulations.
+# Reference: AssetBubble/, Demo/, HerdEffect/
+#
+# Structure:
+#   - Each player has: name, class, config, persona
+#   - config includes: identity, role, steps_per_turn, group_tags, extras
+#   - extras contains: all domain-specific parameters (NO hardcoded defaults!)
+#
+# Rules:
+#   - NO class constants in players.py - all parameters in extras
+#   - NO .get() with default values - direct access only
+#   - Players.py must fail fast if config is missing
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market / Coordinator (Level 0 - executes first)
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.[SCENARIO_NAME].players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    # coordinator = Level 0 (executes before all players); player = Level 1+
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
+      # =================================
+      # Market-specific parameters
+      # =================================
+      # Starting price
+      initial_price: 100.0
+      # True fundamental value
+      fundamental_value: 100.0
+      # Price impact coefficient
+      price_impact: 0.05
+      # Mean reversion strength
+      mean_reversion: 0.02
+      # Random noise std dev
+      noise_std: 0.5
+      # Max entries kept in RAM for HistoryBuffers stored in custom_state
+      # (e.g. price_history, volume_history, return_history).
+      # Entries exceeding this limit are flushed to disk automatically.
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Investor Type 1 (example: Trend Follower)
+# -----------------------------------------------------------------------------
+investor_1:
+  name: "Investor Type 1"
+  class: "examples.[SCENARIO_NAME].players:InvestorType1"
+  # REQUIRED: num_instances — number of identical copies to spawn.
+  # The expander deep-copies this block N times, assigning:
+  #   identity = "investor_1_1" … "investor_1_N"
+  #   name     = "Investor Type 1 1" … "Investor Type 1 N"
+  # topology.yml uses the BASE key ("investor_1") — expander resolves instances.
+  # Use num_instances: 1 for a single instance (identity = key unchanged, no suffix).
+  # Omitting num_instances entirely is a config error and will raise KeyError.
+  num_instances: 1
+  config:
+    identity: "investor_1"
+    # player = Level 1+ execution (after coordinator)
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
+      # =================================
+      # Base investor parameters
+      # =================================
+      # Starting cash balance
+      initial_cash: 10000.0
+      # Starting share position
+      initial_position: 0.0
+      # Max entries kept in RAM for HistoryBuffers stored in custom_state
+      # (e.g. price_history, volume_history, return_history).
+      # Entries exceeding this limit are flushed to disk automatically.
+      custom_state_hot_limit: 3
+      # =================================
+      # Strategy-specific parameters
+      # =================================
+      # Add strategy-specific parameters here
+      # Example: momentum_window: 5
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Investor Type 2 (example: Contrarian)
+# -----------------------------------------------------------------------------
+investor_2:
+  name: "Investor Type 2"
+  class: "examples.[SCENARIO_NAME].players:InvestorType2"
+  num_instances: 1
+  config:
+    identity: "investor_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Strategy-specific parameters
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Investor Type 3 (example: Noise Trader)
+# -----------------------------------------------------------------------------
+investor_3:
+  name: "Investor Type 3"
+  class: "examples.[SCENARIO_NAME].players:InvestorType3"
+  num_instances: 1
+  config:
+    identity: "investor_3"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Strategy-specific parameters
+  persona: !include persona.yml

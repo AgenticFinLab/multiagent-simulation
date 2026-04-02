@@ -148,7 +148,16 @@ class HistoryBuffer:
         self._pending_cold = []
 
     def flush(self) -> None:
-        """Force flush any pending cold items to disk."""
+        """Force flush ALL pending items (pending_cold + hot) to disk.
+
+        This must be called at simulation shutdown to ensure the final
+        incomplete batch — items still in the hot deque that were never
+        evicted — is written to disk.
+        """
+        # Move all hot items into pending_cold in order
+        # (hot deque is ordered oldest-first)
+        self._pending_cold.extend(list(self.hot))
+        self.hot.clear()
         self._flush_pending()
 
     def __len__(self) -> int:
@@ -282,21 +291,17 @@ class HistoryBuffer:
 
         return result
 
-    def to_list(self) -> List[Any]:
-        """Alias for get_all()."""
-        return self.get_all()
-
-    @property
-    def recent(self) -> List[Any]:
-        """Get hot deque contents as list (for backward compatibility)."""
-        return list(self.hot)
-
     def __repr__(self) -> str:
         return (
             f"HistoryBuffer(total={self.total_count}, "
             f"hot={len(self.hot)}, cold={self.cold_count}, "
             f"pending={len(self._pending_cold)})"
         )
+
+    @property
+    def recent(self) -> List[Any]:
+        """Get hot deque contents as list (most recent items in memory)."""
+        return list(self.hot)
 
 
 # =============================================================================

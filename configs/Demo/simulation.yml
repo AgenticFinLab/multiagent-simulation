@@ -14,7 +14,8 @@ setting:
   name: "demo_simulation"
   description: "Demo topology-driven message passing"
   total_rounds: 3
-  entry_limit: 10
+  round_history_limit: 3
+  save_diagram_interval: 1
   # Simulation-level records (diagrams, etc.)
   record_path: "EXPERIMENT/Demo/records"
 
@@ -32,16 +33,21 @@ ray:
   address: null
   namespace: "demo_simulation"
   actor_prefix: null
-  num_cpus: 2
+  # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
+  num_cpus: null
   num_gpus: null
-  object_store_memory: null
+  # Derived: 3 players, star topology -> 4 msgs/round
+  #   3 TurnResult + 3 pending_info + 4 Message = 10 Ray objects
+  #   10 obj x 64 KB min-alloc = 640 KB (0.62 MB)
+  #   10x headroom = 6.2 MB; 128 MB minimum floor -> 134217728 bytes
+  object_store_memory: 134217728
   include_dashboard: false
   logging_level: "warning"
-  log_to_driver: true
+  log_to_driver: false
   actor_options:
     max_restarts: 3
     max_task_retries: 1
-    max_concurrency: 10
+    max_concurrency: 4
   runtime_env:
     working_dir: null
     pip: []
@@ -67,3 +73,5 @@ topology: !include topology.yml
 communication:
   # Storage path for message records (required)
   storage_path: "EXPERIMENT/Demo/communication"
+  record_messages: true
+  message_block_size: 500

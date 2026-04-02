@@ -43,17 +43,17 @@ class SimpleCoordinator(GeneralPlayer):
     ) -> None:
         """Process received values from players."""
         round_num = observation.round
-        print(f"\n[Coordinator] === Round {round_num} ===")
+        logger.debug(f"\n[Coordinator] === Round {round_num} ===")
         self.state.custom_state["round"] = round_num
 
         # Process inbounds from players
         received_values = []
         if observation.inbounds:
-            print(f"[Coordinator] Received {len(observation.inbounds)} responses:")
+            logger.debug(f"[Coordinator] Received {len(observation.inbounds)} responses:")
             for inb in observation.inbounds:
                 value = inb.payload["average_value"]
                 received_values.append(value)
-                print(f"  - From {inb.sender_id}: average = {value:.2f}")
+                logger.debug(f"  - From {inb.sender_id}: average = {value:.2f}")
 
         self.state.custom_state["received_values"] = received_values
 
@@ -66,11 +66,11 @@ class SimpleCoordinator(GeneralPlayer):
         if round_num == 1:
             # Round 1: Generate initial random value
             value = random.randint(0, 1000)
-            print(f"[Coordinator] Generated initial value: {value}")
+            logger.debug(f"[Coordinator] Generated initial value: {value}")
         else:
             # Round 2+: Compute average of received values
             value = int(sum(received_values) / len(received_values))
-            print(f"[Coordinator] Computed average of {received_values}: {value}")
+            logger.debug(f"[Coordinator] Computed average of {received_values}: {value}")
 
         self.state.custom_state["current_value"] = value
 
@@ -80,7 +80,7 @@ class SimpleCoordinator(GeneralPlayer):
             "round": round_num,
         }
 
-        print(f"[Coordinator] Broadcasting value: {value}")
+        logger.debug(f"[Coordinator] Broadcasting value: {value}")
 
         return {
             "outbound_messages": [
@@ -116,7 +116,7 @@ class SimplePlayer(GeneralPlayer):
     ) -> None:
         """Receive value from coordinator."""
         round_num = observation.round
-        print(f"\n[{self.identity}] Round {round_num}")
+        logger.debug(f"\n[{self.identity}] Round {round_num}")
         self.state.custom_state["round"] = round_num
 
         # Get value from coordinator's inbound
@@ -124,7 +124,7 @@ class SimplePlayer(GeneralPlayer):
             for inb in observation.inbounds:
                 received_value = inb.payload["value"]
                 self.state.custom_state["received_value"] = received_value
-                print(
+                logger.debug(
                     f"[{self.identity}] Received value from {inb.sender_id}: {received_value}"
                 )
 
@@ -135,11 +135,11 @@ class SimplePlayer(GeneralPlayer):
 
         # Generate local random value
         local_value = random.randint(0, 1000)
-        print(f"[{self.identity}] Generated local value: {local_value}")
+        logger.debug(f"[{self.identity}] Generated local value: {local_value}")
 
         # Compute average
         average_value = (received_value + local_value) / 2
-        print(
+        logger.debug(
             f"[{self.identity}] Average of ({received_value} + {local_value}) / 2 = {average_value:.2f}"
         )
 
@@ -156,7 +156,7 @@ class SimplePlayer(GeneralPlayer):
             "average_value": average_value,
         }
 
-        print(f"[{self.identity}] Sending average {average_value:.2f} to coordinator")
+        logger.debug(f"[{self.identity}] Sending average {average_value:.2f} to coordinator")
 
         return {
             **response,

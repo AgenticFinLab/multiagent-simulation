@@ -1,0 +1,43 @@
+# =============================================================================
+# MomentumEffect Topology - Star Pattern
+# =============================================================================
+# Market as hub, all investors communicate through market.
+#
+# Note: player keys with num_instances > 1 use their base key here.
+# The simulator expander resolves them to foo_1, foo_2, ... before building
+# the TopologyGraph, so all edge rules apply to every instance automatically.
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  # num_instances: 2 → momentum_trader_1/2
+  market:
+    - momentum_trader
+    - contrarian_trader
+    - index_fund
+    - market_maker
+    - technical_trader
+    - fundamental_trader
+
+  # num_instances: 2 → expands to momentum_trader_1/2 → market
+  momentum_trader:
+    - market
+
+  contrarian_trader:
+    - market
+
+  index_fund:
+    - market
+
+  market_maker:
+    - market
+
+  technical_trader:
+    - market
+
+  fundamental_trader:
+    - market

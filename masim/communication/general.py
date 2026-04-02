@@ -1,16 +1,18 @@
 """General Communication implementation for the MASim framework.
 
 This module provides a simple, intuitive implementation of CommunicationChannel:
-- GeneralCommunicationChannel: JSON-based message dispatch and recording
+- GeneralCommunicationChannel: JSON-based SimPacket encoding, recording, and dispatch
 
-For abstract base class and message formats, see `base.py`.
+For abstract base class and SimPacket type, see `base.py`.
+For Message and proxy-layer types, see `masim.proxy.base`.
 """
 
 import json
 from datetime import datetime
 from typing import Any, Dict, List
 
-from masim.communication.base import CommunicationChannel, Message
+from masim.communication.base import CommunicationChannel, SimPacket
+from masim.proxy.base import Message
 
 
 class GeneralCommunicationChannel(CommunicationChannel):
@@ -26,43 +28,47 @@ class GeneralCommunicationChannel(CommunicationChannel):
         storage_path: Directory for message storage (required)
     """
 
-    def encode_message(self, message: Message) -> str:
+    def encode_message(self, message: Message) -> SimPacket:
         """
-        Encode Message to wire format (JSON string).
+        Encode Message to SimPacket (wire envelope).
 
         Args:
-            message: Message object to encode
+            message: Proxy-layer Message to encode
 
         Returns:
-            JSON string representation for transmission
+            SimPacket with JSON-encoded content and routing metadata
         """
-        return json.dumps(message.to_dict(), default=str)
+        return SimPacket(
+            encoded=json.dumps(message.to_dict(), default=str),
+            sender_id=message.sender_id,
+            recipient_id=message.recipient_id,
+        )
 
-    def decode_message(self, data: str) -> Message:
+    def decode_message(self, packet: SimPacket) -> Message:
         """
-        Decode wire format (JSON string) back to Message.
+        Decode SimPacket back to proxy-layer Message.
 
         Args:
-            data: JSON string from transmission
+            packet: SimPacket from transmission
 
         Returns:
             Reconstructed Message object
         """
-        message_dict = json.loads(data)
+        message_dict = json.loads(packet.encoded)
         return Message.from_dict(message_dict)
 
-    def record_encoded_message(self, encoded_message: str) -> None:
+    def record_encoded_message(self, packet: SimPacket) -> None:
         """
-        Record an encoded message with size and timestamp.
+        Record a SimPacket with size and timestamp.
 
         Args:
-            encoded_message: JSON string from encode_message()
+            packet: SimPacket from encode_message()
         """
         timestamp = datetime.now()
         record = {
             "timestamp": timestamp.isoformat(),
-            "size_bytes": len(encoded_message.encode("utf-8")),
-            "encoded": encoded_message,
+            "size_bytes": len(packet.encoded.encode("utf-8")),
+            "encoded": packet.encoded,
         }
         savename = f"msg_{timestamp.strftime('%m%d%H%M%S%f')}"
         self.message_store.save(savename=savename, data=record)
@@ -77,7 +83,7 @@ class GeneralCommunicationChannel(CommunicationChannel):
 
         Flow:
         1. encode_message() → JSON string (wire format)
-        2. record_encoded_message() → persist to storage
+        2. record_encoded_message() → persist to storage (skipped if record_messages=False)
         3. decode_message() → reconstruct Message from wire format
         4. Send decoded Message to target actor via Ray remote call
 
@@ -95,16 +101,17 @@ class GeneralCommunicationChannel(CommunicationChannel):
         for message in messages:
             recipient_id = message.recipient_id
             if recipient_id and recipient_id in handles:
-                # 1. Encode to wire format
-                encoded = self.encode_message(message)
+                # 1. Encode Message → SimPacket (wire envelope)
+                packet = self.encode_message(message)
 
-                # 2. Record the encoded message
-                self.record_encoded_message(encoded)
+                # 2. Record the SimPacket (skipped at scale when record_messages=False)
+                if self.record_messages:
+                    self.record_encoded_message(packet)
 
-                # 3. Decode from wire format (simulates receiving end)
-                decoded_message = self.decode_message(encoded)
+                # 3. Decode SimPacket → Message (proxy layer restored)
+                decoded_message = self.decode_message(packet)
 
-                # 4. Deliver to target
+                # 4. Deliver to target Persona
                 target_handle = handles[recipient_id]
                 ref = target_handle.receive_message.remote(decoded_message)
                 refs.append(ref)

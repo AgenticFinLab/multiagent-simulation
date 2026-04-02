@@ -1,0 +1,128 @@
+# MASIM Web UI English Locale (Fallback)
+# This is the default locale when no translation is needed
+
+# Page titles
+app:
+  title: "MASIM - Multi-Agent Simulation"
+  page_icon: "📊"
+
+# Sidebar
+sidebar:
+  title: "MASIM Simulator"
+  select_scenario: "Select Scenario"
+  scenario_info: "Scenario Info"
+  finance_market: "Finance market"
+  description: "Description"
+  agent_type: "Agent type"
+  rounds: "Rounds"
+  simulation: "Simulation"
+  network_topology: "Network Topology"
+  agents: "Agents"
+  full_documentation: "📖 Full Documentation"
+  version: "MASIM v0.1.0 | Multi-Agent Simulation Platform"
+
+  # Status badges
+  data_saved: "✔ Data saved"
+  analysis_ready: "✔ Analysis ready"
+
+  # Agent card
+  principle: "Principle"
+  instances: "instances"
+  instance: "instance"
+  key_parameters: "Key Parameters"
+
+  # Agent type
+  rule_based: "Rule-based"
+  llm_based: "LLM-based"
+
+# Simulation page
+simulation:
+  title: "Simulation Platform"
+  round: "Round"
+
+  # Action buttons
+  start: "▶ Start Simulation"
+  stop: "⏹ Stop"
+  reset: "🔄 Reset"
+  load_results: "📂 Load Results"
+  view_analysis: "📊 View Analysis"
+  rerun: "▶ Re-run"
+
+  # Button help text
+  load_results_help: "Replay saved experiment data without re-running the simulation"
+  view_analysis_help: "Jump directly to analysis page without replay"
+  rerun_help: "Start a fresh simulation (overwrites existing data)"
+  view_analysis_running_help: "Jump to analysis page while simulation continues"
+
+  # Metrics
+  stock_price: "Stock Price"
+  return: "Return"
+  prev_price: "Prev Price"
+
+  # Investor activity
+  investor_activity: "📈 Investor Activity"
+  no_actions: "No agent actions recorded for this round."
+
+  # Action types
+  buy: "BUY"
+  sell: "SELL"
+  hold: "HOLD"
+
+  # Action card
+  qty: "Qty"
+  price: "Price"
+  analysis: "Analysis"
+  reasoning: "Reasoning"
+
+  # Progress
+  loading_experiment: "Loading experiment data…"
+
+  # Notices
+  all_rounds_loaded: "All rounds loaded from saved experiment."
+  starting_simulation: "Starting simulation: "
+  total_rounds: "Total rounds: "
+  setup_failed: "Setup failed: "
+  simulation_completed: "Simulation completed successfully!"
+  simulation_error: "Simulation error: "
+  replay_stopped: "Replay stopped by user."
+  simulation_stopped: "Simulation stopped by user."
+  loading_rounds: "Loading {count} saved rounds for {scenario}…"
+  no_round_data: "No round data found in saved experiment."
+  scenario_not_found: "Scenario configuration not found: "
+
+# Analysis page
+analysis:
+  title: "Analysis — {name}"
+  back: "← Back"
+  rerun_analysis: "🔄 Re-run Analysis"
+  rerun_help: "Re-execute the analysis script and refresh the charts"
+  running_analysis: "Running analysis script…"
+  analysis_failed: "Analysis failed: "
+  analysis_completed: "Analysis completed successfully"
+  analysis_timeout: "Analysis timed out (> 3 minutes)"
+  no_results: "No simulation results found for this scenario."
+  run_first: "Please run the simulation first, then click **View Analysis**."
+  no_charts: "No analysis charts found."
+  charts_title: "Analysis Charts"
+  results_title: "Simulation Results"
+  validation_passed: "✅  Validation PASSED — "
+  validation_failed: "❌  Validation FAILED — "
+  validation_result: "Validation result available"
+  fit_score: "Fit Score"
+  price_metrics: "Price Metrics"
+  price_statistics: "Price Statistics"
+  view_full_json: "View full summary JSON"
+  output_dir_not_found: "Analysis output directory not found after running analysis."
+  script_not_found: "Analysis script not found: "
+  config_not_found: "Config not found: "
+  error_running: "Error running analysis: "
+
+# Documentation page
+docs:
+  back: "← Back"
+  no_docs: "No documentation file found for **{name}**."
+  expected_path: "Expected at: `examples/{scenario}/explain.md`"
+
+# Error messages
+errors:
+  no_agent_config: "No agent configuration found"

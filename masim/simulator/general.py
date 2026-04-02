@@ -1,27 +1,29 @@
 """General Simulator implementation for the MASim framework.
 
-This module provides ready-to-use concrete implementations:
-- ensure_ray(): Initialize Ray cluster
-- get_actor_name(): Construct deterministic actor names
-- load_class(): Dynamic class loading from module path
-- GeneralSimulator: Full-featured simulator with Ray integration
+This module provides the concrete GeneralSimulator with full Ray integration.
 
-For abstract base classes, see `base.py`.
+Utility functions are in utils/:
+    masim.utils.ray_utils  → ensure_ray(), get_actor_name()
+    masim.utils.config     → load_class()
 
-Architectural Note:
-    The Simulator is a system-level orchestrator. All agents are Players,
-    with some having role='coordinator' for multi-agent coordination.
+For abstract base classes, see `simulator/base.py`.
 
-    The framework supports three modes:
-    1. Zero coordinators: Pure peer-to-peer simulation
-    2. One coordinator: Traditional hierarchical coordination
-    3. Multiple coordinators: Multi-level coordination hierarchy
+Extension hooks (override in subclass for customization):
+    update_topology(round_num)
+        Called at the start of every round. Default: no-op (static topology).
+        Override to rewire agents, add/remove edges, or switch between
+        feedforward and feedback configurations.
+        After any mutation: call topology.invalidate_levels_cache() +
+        _update_actor_topology_slices() to push new topology slices AND
+        updated peer handles to all affected actors.
 
-    Execution flow with coordinator(s):
-    1. COORDINATOR_NOTIFY: Coordinator sends initial messages to players
-    2. PLAYER_DECISION: All regular players execute in parallel
-    3. COORDINATOR_COLLECT: Coordinators collect player responses
-    4. COORDINATOR_BROADCAST: Coordinators broadcast results
+Round execution (for each topology level):
+    Phase 1 EXECUTE: Submit persona.operate(round_num, level=N) in parallel
+                     → returns (TurnResult, pending_infos) tuple
+    Phase 2 COLLECT: ray.get all operate futures → gather TurnResults + pending_infos
+    Phase 3 DISPATCH: build_message_from_info → channel.encode_and_deliver
+                      → target.receive_message [Ray remote, blocks until complete]
+    Phase 4 RECORD:  save_round_diagram (rate-limited by save_diagram_interval)
 
 Usage:
     from masim.simulator.general import GeneralSimulator
@@ -38,8 +40,9 @@ Usage:
 """
 
 import logging
-import importlib
+import json
 import os
+import re
 from typing import Any, Dict, List, Optional
 
 import ray
@@ -53,96 +56,13 @@ from masim.simulator.base import (
 from masim.player.base import PlayerConfig
 from masim.persona.general import PlayerPersona
 from masim.communication.general import GeneralCommunicationChannel
+from masim.proxy.general import build_message_from_info
 from masim.utils.topology import TopologyGraph
+from masim.utils.ray_utils import ensure_ray, get_actor_name
+from masim.utils.config import load_class
 
 # Module logger
 logger = logging.getLogger("masim.simulator")
-
-
-# =============================================================================
-# Ray Utilities
-# =============================================================================
-
-
-def ensure_ray(ray_config: Dict[str, Any]) -> None:
-    """
-    Initialize Ray cluster; reconnect if namespace differs.
-
-    Args:
-        ray_config: Ray configuration dict from YAML (ray.*)
-
-    This function handles three scenarios:
-    1. Ray not initialized → Initialize with config
-    2. Ray initialized with same namespace → Do nothing
-    3. Ray initialized with different namespace → Shutdown and reinitialize
-    """
-    init_kwargs = {
-        "namespace": ray_config["namespace"],
-    }
-
-    if "logging_level" in ray_config:
-        level_str = ray_config["logging_level"]
-        level_map = {
-            "debug": logging.DEBUG,
-            "info": logging.INFO,
-            "warning": logging.WARNING,
-            "error": logging.ERROR,
-        }
-        init_kwargs["logging_level"] = level_map[level_str]
-
-    if "address" in ray_config and ray_config["address"]:
-        init_kwargs["address"] = ray_config["address"]
-    if "num_cpus" in ray_config and ray_config["num_cpus"] is not None:
-        init_kwargs["num_cpus"] = ray_config["num_cpus"]
-    if "num_gpus" in ray_config and ray_config["num_gpus"] is not None:
-        init_kwargs["num_gpus"] = ray_config["num_gpus"]
-    if "runtime_env" in ray_config and ray_config["runtime_env"]:
-        init_kwargs["runtime_env"] = ray_config["runtime_env"]
-
-    if ray.is_initialized():
-        current_ns = ray.get_runtime_context().namespace
-        if current_ns == ray_config["namespace"]:
-            return
-        ray.shutdown()
-
-    ray.init(**init_kwargs)
-
-
-def get_actor_name(prefix: str, entity_id: str) -> str:
-    """
-    Construct a deterministic Ray actor name.
-
-    Args:
-        prefix: Actor name prefix (usually simulation_id)
-        entity_id: Entity identifier (player_id)
-
-    Returns:
-        Actor name in format "{prefix}::{entity_id}"
-    """
-    return f"{prefix}::{entity_id}"
-
-
-def load_class(path: str) -> type:
-    """
-    Load a class from module path string.
-
-    Args:
-        path: Class path in format "module.submodule:ClassName" or
-              "module.submodule.ClassName"
-
-    Returns:
-        The loaded class
-
-    Raises:
-        ImportError: If module cannot be imported
-        AttributeError: If class not found in module
-    """
-    if ":" in path:
-        module_path, cls_name = path.split(":", 1)
-    else:
-        module_path, cls_name = path.rsplit(".", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, cls_name)
 
 
 # =============================================================================
@@ -154,27 +74,16 @@ class GeneralSimulator(BaseSimulator):
     """
     Concrete implementation of BaseSimulator with full Ray integration.
 
-    This class provides:
-    - Ray cluster initialization and management
-    - Direct Persona creation as Ray actors from config (no intermediate instances)
-    - Simulation lifecycle orchestration (setup, run_round, run, shutdown)
-    - History management and status tracking
-    - Flexible coordinator support (zero, one, or multiple)
+    Provides:
+    - Ray cluster initialization and management via utils/ray_utils.py
+    - Persona creation as Ray actors from YAML config (dynamic class loading via utils/config.py)
+    - Level-ordered simulation execution (setup, run_round, run, shutdown)
+    - History management (HistoryBuffer) and status tracking
+    - Topology update hook: override update_topology() for dynamic rewiring
 
-    The Simulator is a system-level orchestrator:
-    - All agents are Players with perceive/decide/act pattern
-    - Players with role='coordinator' execute first and orchestrate others
-    - Regular players respond to coordinator notifications
-
-    Coordinator Flow (per round):
-        1. COORDINATOR_NOTIFY: Coordinator(s) run perceive/decide/act to send init messages
-        2. PLAYER_DECISION: Regular players run in parallel, respond to notifications
-        3. COORDINATOR_PROCESS: Coordinator(s) collect and process responses
-        4. COORDINATOR_BROADCAST: Coordinator(s) broadcast final results
-
-    No Coordinator Mode:
-        When no coordinator is configured, the Simulator sends default notifications
-        and all players run in parallel without centralized coordination.
+    All agents are Players (including coordinators). Topology levels determine
+    execution order — Level 0 nodes run first; each level waits for the previous
+    level's phase_dispatch to complete before starting phase_execute.
 
     Example:
         yaml_config = load_config("configs/Demo/simulation.yml")
@@ -234,8 +143,9 @@ class GeneralSimulator(BaseSimulator):
             )
 
             handles[player_id] = handle
-            logger.info("    Launched: %s", actor_name)
+            logger.debug("    Launched: %s", actor_name)
 
+        logger.info("    Launched %d actor(s)", len(handles))
         return handles
 
     # =========================================================================
@@ -276,21 +186,116 @@ class GeneralSimulator(BaseSimulator):
         """
         Configure topology for all players.
 
-        Passes full topology config and peer handles to each Persona.
-        Each Persona extracts its own targets from the topology.
+        Step 1: set_topology — sends each actor only its LOCAL topology slice
+                {targets: [...], senders: [...]} instead of the full connections
+                dict. Reduces IPC payload from O(N) per actor to O(targets+senders)
+                per actor, eliminating O(N²) total transfer at large N.
+
+        Step 2: set_peer_handles — sends each actor only the Ray handles for its
+                topology targets (pre-filtered subset, not the full player dict).
+
+        Both steps submit all remote calls concurrently and wait with a single ray.get().
+        Step 1 must complete on all actors before Step 2 is submitted,
+        because set_peer_handles may reference topology-derived state inside the actor.
 
         Also saves the initial topology diagram as round 0 (before simulation starts).
         """
         logger.info("    Setting up topology...")
 
-        # Pass topology config and peer handles to each persona
-        for _, handle in self.player_persona_handles.items():
-            ray.get(handle.set_topology.remote(self.config.topology))
-            ray.get(handle.set_peer_handles.remote(self.player_persona_handles))
+        # Step 1: send each actor only its own local topology slice
+        # (targets = who it sends to, senders = who sends to it)
+        topology_futures = []
+        for player_id, h in self.player_persona_handles.items():
+            local_slice = {
+                "targets": self.topology.get_targets(player_id),
+                "senders": self.topology.get_senders(player_id),
+            }
+            topology_futures.append(h.set_topology.remote(local_slice))
+        ray.get(topology_futures)
+
+        # Step 2: send each actor only its target handles (pre-filtered subset)
+        peer_futures = []
+        for player_id, h in self.player_persona_handles.items():
+            targets = self.topology.get_targets(player_id)
+            target_handles = {
+                t: self.player_persona_handles[t]
+                for t in targets
+                if t in self.player_persona_handles
+            }
+            peer_futures.append(h.set_peer_handles.remote(target_handles))
+        ray.get(peer_futures)
 
         # Save initial topology diagram as round 0 (before simulation starts)
         diagrams_dir = os.path.join(self.config.setting["record_path"], "diagrams")
         self.topology.save_round_diagram(diagrams_dir, round_num=0)
+
+    def _update_actor_topology_slices(
+        self,
+        player_ids: Optional[List[str]] = None,
+    ) -> None:
+        """
+        Push updated topology slices AND peer handles to actor(s) after a topology mutation.
+
+        Called by subclasses that override update_topology() to push new
+        {targets, senders} slices to affected actors via set_topology.remote(),
+        then push updated peer handle subsets via set_peer_handles.remote().
+
+        Both steps must complete before the next round's level execution starts,
+        so that actors' _topology_targets, _topology_senders, expected_senders,
+        AND peer_handles all reflect the new topology.
+
+        Args:
+            player_ids: List of player IDs whose slices need updating.
+                        If None, all actors are updated (full refresh).
+                        For a targeted edge addition A→B, pass ["player_a", "player_b"]
+                        since both actors' sender/target lists change.
+
+        Example (from a subclass update_topology override)::
+
+            def update_topology(self, round_num: int) -> None:
+                if round_num == 10:
+                    self.topology.graph.add_edge("player_1", "player_2")
+                    self.topology.invalidate_levels_cache()
+                    # Pass both affected players: player_1's targets grew,
+                    # player_2's senders grew — and player_1 needs player_2's handle.
+                    self._update_actor_topology_slices(["player_1", "player_2"])
+        """
+        if player_ids is None:
+            player_ids = list(self.player_persona_handles.keys())
+
+        # Step 1: push new {targets, senders} slices to all affected actors
+        topology_futures = []
+        for pid in player_ids:
+            if pid not in self.player_persona_handles:
+                continue
+            h = self.player_persona_handles[pid]
+            local_slice = {
+                "targets": self.topology.get_targets(pid),
+                "senders": self.topology.get_senders(pid),
+            }
+            topology_futures.append(h.set_topology.remote(local_slice))
+
+        if topology_futures:
+            ray.get(topology_futures)
+
+        # Step 2: push updated peer handle subsets (needed for new target edges)
+        # Only actors whose targets changed need new handles, but we update all
+        # affected actors for safety (set_peer_handles is idempotent).
+        peer_futures = []
+        for pid in player_ids:
+            if pid not in self.player_persona_handles:
+                continue
+            h = self.player_persona_handles[pid]
+            targets = self.topology.get_targets(pid)
+            target_handles = {
+                t: self.player_persona_handles[t]
+                for t in targets
+                if t in self.player_persona_handles
+            }
+            peer_futures.append(h.set_peer_handles.remote(target_handles))
+
+        if peer_futures:
+            ray.get(peer_futures)
 
     def phase_execute(
         self,
@@ -330,83 +335,102 @@ class GeneralSimulator(BaseSimulator):
         """
         PHASE 2: COLLECT - Wait for all operate() to complete.
 
-        Gathers TurnResults from all players in this level.
+        Gathers TurnResults AND pending Info lists from all players in this level.
+
+        operate() returns a (TurnResult, pending_infos) tuple, so a single ray.get()
+        retrieves both the result and the pending Info units — eliminating the
+        separate collect_pending_infos() IPC wave that previously followed.
 
         Args:
             execute_result: Output from phase_execute() containing futures
 
         Returns:
-            Dict with turn_results mapping player_id -> TurnResult
+            Dict with:
+              turn_results: player_id -> TurnResult
+              all_info_lists: flat list-of-lists, one inner list per actor,
+                              each element is a dict {info, sender_id, target_ids, round_num}
         """
         futures = execute_result["futures"]
         ref_to_player = execute_result["ref_to_player"]
 
-        turn_results = {}
-        pending_refs = list(futures.values())
+        # Single ray.get(): each result is (TurnResult, List[Dict])
+        refs = list(futures.values())
+        all_results = ray.get(refs)
 
-        while pending_refs:
-            ready_refs, pending_refs = ray.wait(
-                pending_refs, num_returns=1, timeout=0.1
-            )
-            for ref in ready_refs:
-                turn_result = ray.get(ref)
-                player_id = ref_to_player[ref]
-                turn_results[player_id] = turn_result
+        turn_results = {}
+        all_info_lists = []
+        for ref, (turn_result, info_list) in zip(refs, all_results):
+            player_id = ref_to_player[ref]
+            turn_results[player_id] = turn_result
+            all_info_lists.append(info_list)
 
         return {
             "turn_results": turn_results,
+            "all_info_lists": all_info_lists,
             "pending_count": 0,
         }
 
     def phase_dispatch(
         self,
-        level_handles: Dict[str, ray.actor.ActorHandle],
+        all_info_lists: List[List[Dict[str, Any]]],
     ) -> None:
         """
-        PHASE 3: DISPATCH - Send outbound messages via CommunicationChannel.
+        PHASE 3: DISPATCH - Encode Info→Message→SimPacket via CommunicationChannel.
 
-        Collects raw outbounds from each player's Persona, builds Messages
-        via CommunicationChannel, then dispatches them.
+        Architecture (Proxy-Centric Design):
+
+        SEND (from bundled operate() return value — no separate IPC wave):
+            phase_collect() unpacks (TurnResult, pending_infos) from each operate() call.
+            pending_infos is passed here directly as all_info_lists.
+
+        RECEIVE (dispatch via channel → proxy):
+            Simulator → channel.encode_and_deliver(messages, handles)
+                       → target_persona.receive_message(decoded_message)
+                       → persona.message_proxy.handle_incoming(message)  [proxy→Info]
+
+        When target persona.operate() is called:
+            proxy.get_received_senders()                   [proxy provides data]
+            player.is_received_ready(received_senders)     [player decides]
+            proxy.get_received_infos()                     [proxy dequeues]
+            player.receive_info(info)                      [single delivery]
+
+        Ownership boundaries:
+            Simulator owns Channel (encoding, routing, logging)
+            Persona owns Proxy (queuing, readiness tracking)
 
         This ensures Level N messages arrive before Level N+1 starts.
 
         Args:
-            level_handles: Dict of player_id -> actor handle for this level
+            all_info_lists: Output from phase_collect()["all_info_lists"].
+                            Each element is a list of Info dicts from one actor:
+                            [{info, sender_id, target_ids, round_num}, ...]
         """
-        # Step 1: Collect raw outbounds from all players in this level
-        collect_refs = []
-        for handle in level_handles.values():
-            ref = handle.collect_outbounds.remote()
-            collect_refs.append(ref)
-
-        # Get all collected outbounds
-        all_outbound_lists = ray.get(collect_refs) if collect_refs else []
-
-        # Step 2: Build Messages via CommunicationChannel
+        # Build Messages from Info units via build_message_from_info()
+        # (proxy-layer helper — NOT a Channel method)
         all_messages = []
-        for outbound_list in all_outbound_lists:
-            for outbound_data in outbound_list:
-                outbound = outbound_data["outbound"]
-                sender_id = outbound_data["sender_id"]
-                target_ids = outbound_data["target_ids"]
-                round_num = outbound_data["round_num"]
+        for info_list in all_info_lists:
+            for info_data in info_list:
+                info = info_data["info"]
+                sender_id = info_data["sender_id"]
+                target_ids = info_data["target_ids"]
+                round_num = info_data["round_num"]
 
                 for target_id in target_ids:
-                    message = self.communication.build_message_from_outbound(
-                        outbound=outbound,
+                    message = build_message_from_info(
+                        info=info,
                         sender_id=sender_id,
                         target_id=target_id,
                         round_num=round_num,
                     )
                     all_messages.append(message)
 
-        # Step 3: Dispatch via CommunicationChannel
+        # Dispatch via CommunicationChannel
         if all_messages:
             dispatch_refs = self.communication.encode_and_deliver(
                 messages=all_messages,
                 handles=self.player_persona_handles,
             )
-            # Wait for all messages to be delivered
+            # Wait for all messages to be delivered before next level starts
             if dispatch_refs:
                 ray.get(dispatch_refs)
 
@@ -420,18 +444,18 @@ class GeneralSimulator(BaseSimulator):
         │  For each level (Level 0 → Level 1 → ... → Level N):               │
         │                                                                     │
         │  1. EXECUTE: Players run operate() in parallel                     │
-        │              └─► Waits for is_received_ready() before turn()        │
+        │              └─► Checks is_received_ready() — logs warning if False │
         │              └─► perceive() → decide() → act()                     │
-        │              └─► Inbounds included in Observation                   │
-        │              └─► Outbound messages declared in decide()            │
+        │              └─► Received Info units delivered via proxy.get_received_infos() │
+        │              └─► Info units declared in decide() via pending_info   │
         │                                                                     │
         │  2. COLLECT: Wait for all operate() to complete                    │
         │              └─► Gather TurnResults from all players               │
         │                                                                     │
-        │  3. DISPATCH: Send outbound messages to next level                 │
-        │              └─► Build Messages from Outbounds via Channel         │
-        │              └─► Messages arrive at targets via receive_message()  │
-        │              └─► Persona decodes to Inbounds for next level        │
+        │  3. DISPATCH: Encode Info→Message→SimPacket, deliver to targets│
+        │              └─► build_message_from_info(info) → Message               │
+        │              └─► channel.encode(Message) → SimPacket → ray.remote    │
+        │              └─► handle_incoming(Message) queues Info in receive_queue│
         │                                                                     │
         │  Then proceed to next level...                                     │
         └─────────────────────────────────────────────────────────────────────┘
@@ -444,6 +468,12 @@ class GeneralSimulator(BaseSimulator):
         """
         self.round_clock.tick_start()
         self.current_round = round_num
+
+        # Extension hook: subclasses may mutate self.topology here for dynamic topologies.
+        # Default implementation is a no-op (static topology).
+        # After any mutation, the subclass must also call self.topology.invalidate_levels_cache()
+        # and self._update_actor_topology_slices() to propagate changes to actors.
+        self.update_topology(round_num)
 
         execution_levels = self.topology.get_execution_levels()
 
@@ -461,13 +491,15 @@ class GeneralSimulator(BaseSimulator):
 
             # ─────────────────────────────────────────────────────────────────
             # PHASE 2: COLLECT - Wait for all operate() to complete
+            # operate() returns (TurnResult, pending_infos) — both collected here
             # ─────────────────────────────────────────────────────────────────
-            self.phase_collect(execute_result)
+            collect_result = self.phase_collect(execute_result)
 
             # ─────────────────────────────────────────────────────────────────
-            # PHASE 3: DISPATCH - Send outbound messages to next level
+            # PHASE 3: DISPATCH - Encode Info→Message→SimPacket, deliver to targets
+            # Uses pending_infos bundled into phase_collect result (no extra IPC wave)
             # ─────────────────────────────────────────────────────────────────
-            self.phase_dispatch(level_handles)
+            self.phase_dispatch(collect_result["all_info_lists"])
 
         # ─────────────────────────────────────────────────────────────────────
         # PHASE 4: RECORD - Save topology diagram (rate-limited to reduce I/O)
@@ -492,7 +524,19 @@ class GeneralSimulator(BaseSimulator):
 
     async def run(self) -> List[Dict[str, Any]]:
         """
-        Run the complete simulation.
+        Run the complete simulation, resuming from the last completed round
+        if on-disk data already exists (Option A: skip-round resume).
+
+        Resume behaviour:
+        - Scans record_path for existing batch data to find the highest
+          completed round N.
+        - Starts the loop from round N+1, skipping rounds 1..N entirely.
+        - WARNING: actor custom_state (cash, position, etc.) is re-initialised
+          from config defaults, not restored from disk. This is correct for
+          coordinators (their state is rebuilt from inbound orders each round)
+          but means LLM investor portfolios restart from initial values.
+          Use this only when the remaining rounds are independent of the
+          exact portfolio state at round N (e.g. price-driven strategies).
 
         Returns:
             List of recent round results (from bounded history deque)
@@ -500,12 +544,28 @@ class GeneralSimulator(BaseSimulator):
         logger.info("Starting simulation: %s", self.simulation_id)
         self.status = SimulatorStatus.RUNNING
 
+        total_rounds = self.config.setting["total_rounds"]
+        record_path = self.config.setting["record_path"]
+
+        # Detect already-completed rounds from on-disk data
+        start_round = self._detect_resume_round(record_path) + 1
+        if start_round > 1:
+            logger.info(
+                "    Resume detected: %d round(s) already on disk, starting from round %d",
+                start_round - 1,
+                start_round,
+            )
+        if start_round > total_rounds:
+            logger.info(
+                "    All %d rounds already completed. Nothing to run.", total_rounds
+            )
+            self.status = SimulatorStatus.TERMINATED
+            return self.history.recent
+
         # NOTE: Don't accumulate all_results in memory - use self.history (HistoryBuffer)
         # Full history is already persisted via HistoryBuffer cold storage
-        for round_num in range(1, self.config.setting["total_rounds"] + 1):
-            logger.info(
-                "    Round %d/%d", round_num, self.config.setting["total_rounds"]
-            )
+        for round_num in range(start_round, total_rounds + 1):
+            logger.info("    Round %d/%d", round_num, total_rounds)
 
             await self.run_round(round_num)
 
@@ -516,6 +576,73 @@ class GeneralSimulator(BaseSimulator):
 
         # Return recent history (from hot storage)
         return self.history.recent
+
+    @staticmethod
+    def _detect_resume_round(record_path: str) -> int:
+        """
+        Scan record_path for the highest completed round number.
+
+        Uses the market coordinator's turns/ directory (turn_block_N.json),
+        where each entry contains a round_num field — one entry per round.
+        Falls back to scanning HistoryBuffer cold files (batch_XXXXXXXX_XXXXXXXX.json)
+        under record_path/market/ if turns data is absent.
+        Returns 0 if no data is found.
+        """
+        market_path = os.path.join(record_path, "market")
+        if not os.path.isdir(market_path):
+            return 0
+
+        # Primary: read turn_block_*.json files in market/turns/
+        turns_path = os.path.join(market_path, "turns")
+        if os.path.isdir(turns_path):
+            max_round = 0
+            for fname in os.listdir(turns_path):
+                if not (fname.startswith("turn_block_") and fname.endswith(".json")):
+                    continue
+                try:
+                    with open(os.path.join(turns_path, fname)) as f:
+                        block = json.load(f)
+                    for record in block.values():
+                        rn = (
+                            record.get("round_num")
+                            if isinstance(record, dict)
+                            else None
+                        )
+                        if rn is not None:
+                            max_round = max(max_round, int(rn))
+                except Exception:
+                    pass
+            if max_round > 0:
+                return max_round
+
+        # Fallback: count entries in HistoryBuffer cold files under market/*/
+        # File naming: batch_{start:08d}_{end:08d}.json  (HistoryBuffer cold storage)
+        # File naming: batch_block_N.json                (BlockBasedStoreManager)
+        max_round = 0
+        for store_name in os.listdir(market_path):
+            store_path = os.path.join(market_path, store_name)
+            if not os.path.isdir(store_path) or store_name in ("turns", "messages"):
+                continue
+            total = 0
+            for fname in os.listdir(store_path):
+                # HistoryBuffer: batch_00000000_00000049.json
+                m = re.match(r"batch_(\d{8})_(\d{8})\.json", fname)
+                if m:
+                    batch_end = int(m.group(2))  # 0-based end index
+                    total = max(total, batch_end + 1)
+                # BlockBasedStoreManager: batch_block_N.json
+                m2 = re.match(r"batch_block_(\d+)\.json", fname)
+                if m2:
+                    try:
+                        with open(os.path.join(store_path, fname)) as f:
+                            entries = json.load(f)
+                        block_idx = int(m2.group(1))
+                        block_size = 50
+                        total = max(total, block_idx * block_size + len(entries))
+                    except Exception:
+                        pass
+            max_round = max(max_round, total)
+        return max_round
 
     async def shutdown(self) -> None:
         """Shutdown simulation and release resources."""

@@ -11,6 +11,7 @@
 coordinator:
   name: "Coordinator"
   class: "examples.Demo.players:SimpleCoordinator"
+  num_instances: 1
   config:
     identity: "coordinator"
     role: coordinator
@@ -23,23 +24,13 @@ coordinator:
 # -----------------------------------------------------------------------------
 # Regular Players
 # -----------------------------------------------------------------------------
-player_1:
-  name: "Player 1"
+player:
+  name: "Player"
   class: "examples.Demo.players:SimplePlayer"
+  # Expander → player_1, player_2
+  num_instances: 2
   config:
-    identity: "player_1"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - players
-    extras: {}
-  persona: !include persona.yml
-
-player_2:
-  name: "Player 2"
-  class: "examples.Demo.players:SimplePlayer"
-  config:
-    identity: "player_2"
+    identity: "player"
     role: player
     steps_per_turn: 1
     group_tags:

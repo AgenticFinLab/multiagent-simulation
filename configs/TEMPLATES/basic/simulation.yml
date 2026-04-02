@@ -1,0 +1,157 @@
+# =============================================================================
+# [SCENARIO_NAME] Simulation Configuration (Rule-Based)
+# =============================================================================
+# Template for rule-based financial simulations.
+# Reference: AssetBubble/, Demo/, HerdEffect/
+#
+# Usage:
+#   python examples/[SCENARIO_NAME]/run_[scenario].py -c configs/[SCENARIO_NAME]/simulation.yml
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Simulation Settings
+# -----------------------------------------------------------------------------
+setting:
+  # Unique identifier for this simulation run (used in actor names and log messages)
+  name: "[scenario_name]_simulation"
+  # Human-readable description (informational only, not used by framework)
+  description: "[Description of the simulation]"
+  # Total number of rounds to execute. The loop in GeneralSimulator.run() iterates
+  # range(1, total_rounds+1). Simulation stops exactly at this count.
+  total_rounds: 200
+  # Max round results kept in hot RAM (HistoryBuffer hot deque).
+  # Round results beyond this limit are spilled to disk under record_path/history/.
+  # simulator.run() returns only these hot entries — NOT all round results.
+  # Rule of thumb: keep at 3 (enough for last-N-round analysis without RAM pressure).
+  round_history_limit: 3
+  # Root directory for all output artifacts (records, diagrams, history, checkpoints).
+  # Must be consistent with extras.record_path in players.yml and proxy paths in persona.yml.
+  record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
+  # Save topology diagram every N rounds (0 = disabled).
+  # Diagrams written to record_path/diagrams/. High frequency increases I/O overhead.
+  # NOTE: Rendering is automatically skipped when topology structure is unchanged —
+  # for static topologies only 1 diagram is ever written regardless of this value.
+  # For large-scale runs (N > 100 players), set to 0 to disable entirely.
+  save_diagram_interval: 50
+
+# -----------------------------------------------------------------------------
+# Environment Configuration
+# -----------------------------------------------------------------------------
+environment:
+  # Path to .env file containing API keys (loaded via python-dotenv).
+  # Rule-based simulations typically do not need API keys; set to .env anyway for consistency.
+  dotenv_path: .env
+  # Working directory for all relative paths in this config.
+  # "." means the project root (where you run the python command from).
+  workspace: "."
+
+# -----------------------------------------------------------------------------
+# Ray Configuration (Distributed Computing)
+# -----------------------------------------------------------------------------
+#
+# RESOURCE SIZING PROTOCOL (mandatory for every new scenario):
+#   Only object_store_memory needs to be computed per-scenario.
+#   num_cpus = null always (actors declare num_cpus=0, so the value is irrelevant).
+#
+#   object_store_memory — WHAT IT IS:
+#     This is NOT per-actor memory. It is ONE cluster-wide shared memory pool
+#     (Ray Plasma store, mmap'd shared memory) that holds only the objects
+#     crossing actor boundaries via ray.get() / ray.put(). Each actor's private
+#     heap (custom_state, HistoryBuffer hot deque, all Python variables) lives
+#     entirely outside this pool and is NOT counted or limited here.
+#     Objects are freed from the store as soon as ray.get() returns — they only
+#     live here transiently while being transferred between actors.
+#
+#   object_store_memory derivation (read masim/simulator/general.py phases 2-3):
+#     Per round, the following objects enter the store and are freed after each phase:
+#       Phase 2 (COLLECT):   N_players TurnResult objects  (~600 B actual each)
+#       Phase 3 (DISPATCH):  N_players pending_info lists  (~300 B actual each)
+#                            N_messages Message objects    (~400 B actual each)
+#     Ray minimum allocation = 64 KB per object regardless of actual size.
+#     Peak simultaneous bytes in store = (N_players*2 + N_messages) * 64 KB.
+#     Set object_store_memory = peak_bytes * 10 (10x headroom), minimum 128 MB.
+#     Write the concrete integer (bytes) directly — do NOT use null.
+#
+# -----------------------------------------------------------------------------
+ray:
+  # Ray cluster address (null = start local cluster)
+  address: null
+  # Ray namespace for actor isolation between experiments
+  namespace: "[scenario_name]"
+  # Actor name prefix (null = auto)
+  actor_prefix: null
+  # null = Ray auto-detects from machine.
+  # All actors in this framework use num_cpus=0 (async, I/O-bound via asyncio).
+  # No actor ever declares a CPU resource requirement, so this value has no
+  # scheduling effect. Set to null to avoid stale hardcoded values.
+  num_cpus: null
+  # GPU count (null = none — rule-based simulations never use GPUs)
+  num_gpus: null
+  # [FILL IN] ONE shared Plasma pool (NOT per-actor). Holds only cross-actor objects during ray.get().
+  # Actor heap (custom_state, HistoryBuffer, etc.) is separate and NOT counted here.
+  # Formula: (N_players*2 + N_messages) * 64KB * 10; minimum 128 MB (134217728).
+  # Example: 9 players, 16 messages -> (18+16)*64KB*10 = ~2.2 MB peak -> floor to 128 MB.
+  object_store_memory: 134217728
+  # Enable Ray dashboard UI
+  include_dashboard: false
+  # Ray internal logging level
+  logging_level: "warning"
+  # Forward Ray logs to driver process stdout
+  log_to_driver: false
+  actor_options:
+    # How many times Ray will automatically restart a crashed actor before giving up.
+    # Covers unexpected actor death (OOM, segfault, node failure).
+    # 3 = tolerate up to 3 crashes per actor; set 0 to disable auto-restart.
+    max_restarts: 3
+    # How many times Ray will automatically retry a failed remote task call.
+    # Covers transient errors (timeout, network blip). Does NOT cover actor crashes.
+    # 1 = retry once before propagating the exception to the caller.
+    max_task_retries: 1
+    # Max number of tasks queued + executing concurrently inside one actor.
+    # Each PlayerPersona actor is single-threaded (asyncio). Ray queues excess tasks.
+    # Rule-based simulations: keep at 4 — one active operate() + 3 queued admin calls
+    # (initialize, set_topology, set_peer_handles). CPU-bound logic does not benefit
+    # from higher concurrency inside one actor thread.
+    # NOTE: This field is currently reserved in config but not yet wired into
+    # RemotePlayerPersona.options() in masim/simulator/general.py line 298.
+    max_concurrency: 4
+  runtime_env:
+    # Override working directory for all actor subprocesses (null = inherit workspace).
+    # Use when running actors on remote nodes with different filesystem layouts.
+    working_dir: null
+    # Extra pip packages to install in actor runtime environment.
+    # Useful when running on remote Ray clusters that lack certain dependencies.
+    pip: []
+    # Extra environment variables injected into each actor process.
+    # Example: {MY_KEY: "value"} makes os.environ["MY_KEY"] available inside actors.
+    env_vars: {}
+  serialization:
+    # Use Apache Arrow IPC format for Ray object serialization (faster than pickle).
+    # Keep true unless you have objects that Arrow cannot serialize.
+    use_arrow: true
+    # Register custom pickle serializers for framework domain objects
+    # (TurnResult, Message, Info, etc.) via masim.utils.serialization.
+    # Keep true to ensure correct deserialization across Ray actor boundaries.
+    register_custom_serializers: true
+
+# -----------------------------------------------------------------------------
+# Players Configuration (imported from players.yml)
+# -----------------------------------------------------------------------------
+players: !include players.yml
+
+# -----------------------------------------------------------------------------
+# Topology Configuration (imported from topology.yml)
+# -----------------------------------------------------------------------------
+topology: !include topology.yml
+
+# -----------------------------------------------------------------------------
+# Communication Configuration
+# -----------------------------------------------------------------------------
+communication:
+  storage_path: "EXPERIMENT/[SCENARIO_NAME]/communication"
+  # Whether to persist encoded messages to disk for debugging/replay.
+  # Set to false for large-scale runs (N > ~100 players) to avoid high write volume.
+  record_messages: true
+  # Number of messages batched per block file by BlockBasedStoreManager.
+  # Higher value = fewer files on disk. 500 is sufficient for most scenarios.
+  message_block_size: 500

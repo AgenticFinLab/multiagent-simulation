@@ -1,0 +1,253 @@
+# =============================================================================
+# AssetBubbleRag Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 RAG-augmented LLM Investors
+#
+# Each LLM agent's system prompt encodes:
+#   - Personal profile: identity, style, risk attitude
+#   - Quantitative rules: exact financial/mathematical principles
+#
+# Additionally each agent has a knowledge pipeline (masim.knowledge):
+#   - Document source priority: docs_dir > url_csv > LLM-suggested download
+#   - KnowledgeStore index is built at agent initialization (round 1) and persisted
+#   - Every decision injects the top-k most relevant retrieved chunks
+# =============================================================================
+
+# Market (rule-based, identical to AssetBubble)
+market:
+  name: "Market"
+  class: "examples.AssetBubbleRag.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/AssetBubbleRag/records"
+      # Market parameters (aligned with AssetBubble rule-based)
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.15
+      mean_reversion: 0.005
+      fundamental_growth: 0.001
+      noise_std: 0.3
+      short_cost_rate: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# RAG Momentum Speculator (Greater Fool Theory + LLM + RAG)
+ragllm_momentum:
+  name: "RAG Momentum Speculator"
+  class: "examples.AssetBubbleRag.players:RagLLMMomentumSpeculator"
+  # Expander → ragllm_momentum_1 .. ragllm_momentum_5
+  num_instances: 5
+  config:
+    identity: "ragllm_momentum"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "EXPERIMENT/AssetBubbleRag/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AssetBubble MomentumSpeculator)
+      lookback_short: 5
+      aggressiveness: 2.0
+      base_position_size: 20.0
+      leverage_multiplier: 2.0
+      # RAG configuration
+      rag:
+        # Document source (priority: docs_dir > url_csv > autonomous selection)
+        # If docs_dir and url_csv are null, documents are selected automatically
+        # based on the agent's identity (e.g., "ragllm_momentum_1" → momentum books)
+        docs_dir: null
+        url_csv: null
+        docs_save_dir: "EXPERIMENT/AssetBubbleRag/rag_docs/momentum"
+        rag_persist_dir: "EXPERIMENT/AssetBubbleRag/rag_index/momentum"
+        top_k: 3
+        # Embedding (HuggingFace local, no API key required)
+        embed_type: "huggingface"
+        embed_model: "BAAI/bge-small-en-v1.5"
+      llm:
+        sys_message: "examples.AssetBubbleRag.prompts:RAGLLM_MOMENTUM_SYS"
+        user_message: "examples.AssetBubbleRag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# RAG Rational Arbitrageur (Limits to Arbitrage + LLM + RAG)
+ragllm_arbitrageur:
+  name: "RAG Rational Arbitrageur"
+  class: "examples.AssetBubbleRag.players:RagLLMRationalArbitrageur"
+  # Expander → ragllm_arbitrageur_1, ragllm_arbitrageur_2, ragllm_arbitrageur_3
+  num_instances: 3
+  config:
+    identity: "ragllm_arbitrageur"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "EXPERIMENT/AssetBubbleRag/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AssetBubble RationalArbitrageur)
+      deviation_threshold: 0.05
+      base_position_size: 20.0
+      max_short_position: 30.0
+      short_cost_sensitivity: 2.0
+      # RAG configuration
+      rag:
+        # Document source (priority: docs_dir > url_csv > autonomous selection)
+        docs_dir: null
+        url_csv: null
+        docs_save_dir: "EXPERIMENT/AssetBubbleRag/rag_docs/arbitrageur"
+        rag_persist_dir: "EXPERIMENT/AssetBubbleRag/rag_index/arbitrageur"
+        top_k: 3
+        # Embedding (HuggingFace local, no API key required)
+        embed_type: "huggingface"
+        embed_model: "BAAI/bge-small-en-v1.5"
+      llm:
+        sys_message: "examples.AssetBubbleRag.prompts:RAGLLM_ARBITRAGEUR_SYS"
+        user_message: "examples.AssetBubbleRag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# RAG Noise Trader (Sentiment herding + LLM + RAG)
+ragllm_noise:
+  name: "RAG Noise Trader"
+  class: "examples.AssetBubbleRag.players:RagLLMNoiseTrader"
+  # Expander → ragllm_noise_1, ragllm_noise_2
+  num_instances: 2
+  config:
+    identity: "ragllm_noise"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "EXPERIMENT/AssetBubbleRag/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AssetBubble NoiseTrader)
+      sentiment_volatility: 0.3
+      herding_weight: 0.7
+      base_position_size: 15.0
+      # RAG configuration
+      rag:
+        # Document source (priority: docs_dir > url_csv > autonomous selection)
+        docs_dir: null
+        url_csv: null
+        docs_save_dir: "EXPERIMENT/AssetBubbleRag/rag_docs/noise"
+        rag_persist_dir: "EXPERIMENT/AssetBubbleRag/rag_index/noise"
+        top_k: 3
+        # Embedding (HuggingFace local, no API key required)
+        embed_type: "huggingface"
+        embed_model: "BAAI/bge-small-en-v1.5"
+      llm:
+        sys_message: "examples.AssetBubbleRag.prompts:RAGLLM_NOISE_SYS"
+        user_message: "examples.AssetBubbleRag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# RAG Value Investor (Fundamental value + LLM + RAG)
+ragllm_value:
+  name: "RAG Value Investor"
+  class: "examples.AssetBubbleRag.players:RagLLMValueInvestor"
+  # Expander → ragllm_value_1, ragllm_value_2, ragllm_value_3, ragllm_value_4
+  num_instances: 4
+  config:
+    identity: "ragllm_value"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "EXPERIMENT/AssetBubbleRag/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AssetBubble FundamentalInvestor)
+      trade_frequency: 5
+      value_sensitivity: 1.5
+      base_position_size: 10.0
+      # RAG configuration
+      rag:
+        # Document source (priority: docs_dir > url_csv > autonomous selection)
+        docs_dir: null
+        url_csv: null
+        docs_save_dir: "EXPERIMENT/AssetBubbleRag/rag_docs/value"
+        rag_persist_dir: "EXPERIMENT/AssetBubbleRag/rag_index/value"
+        top_k: 3
+        # Embedding (HuggingFace local, no API key required)
+        embed_type: "huggingface"
+        embed_model: "BAAI/bge-small-en-v1.5"
+      llm:
+        sys_message: "examples.AssetBubbleRag.prompts:RAGLLM_VALUE_SYS"
+        user_message: "examples.AssetBubbleRag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# RAG Leveraged Buyer (Margin amplification + LLM + RAG)
+ragllm_leveraged:
+  name: "RAG Leveraged Buyer"
+  class: "examples.AssetBubbleRag.players:RagLLMLeveragedBuyer"
+  # Expander → ragllm_leveraged_1, ragllm_leveraged_2, ragllm_leveraged_3
+  num_instances: 3
+  config:
+    identity: "ragllm_leveraged"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "EXPERIMENT/AssetBubbleRag/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AssetBubble LeveragedBuyer)
+      leverage_ratio: 3.0
+      margin_call_threshold: 0.7
+      base_position_size: 20.0
+      initial_equity: 10000.0
+      # RAG configuration
+      rag:
+        # Document source (priority: docs_dir > url_csv > autonomous selection)
+        docs_dir: null
+        url_csv: null
+        docs_save_dir: "EXPERIMENT/AssetBubbleRag/rag_docs/leveraged"
+        rag_persist_dir: "EXPERIMENT/AssetBubbleRag/rag_index/leveraged"
+        top_k: 3
+        # Embedding (HuggingFace local, no API key required)
+        embed_type: "huggingface"
+        embed_model: "BAAI/bge-small-en-v1.5"
+      llm:
+        sys_message: "examples.AssetBubbleRag.prompts:RAGLLM_LEVERAGED_SYS"
+        user_message: "examples.AssetBubbleRag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml

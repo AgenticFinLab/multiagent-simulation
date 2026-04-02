@@ -1,0 +1,154 @@
+# =============================================================================
+# ShortSqueeze Players Configuration
+# =============================================================================
+# Supply-Demand Imbalance Simulation - GameStop 2021 style
+#
+# Investor Types:
+#   - ShortSeller: Borrows and sells, must cover when losses mount
+#   - MomentumBuyer: Buys on upward momentum
+#   - RetailTrader: Can trigger initial squeeze (bullish bias + noise)
+#   - ValueInvestor: Buys when undervalued relative to fundamental
+#   - InstitutionalHolder: Large passive holder
+# =============================================================================
+
+market:
+  name: "Market"
+  class: "examples.ShortSqueeze.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/ShortSqueeze/Rule/records"
+      # Market parameters
+      # Low fundamental - typical for shorted stocks
+      fundamental_value: 50.0
+      # Trading below fundamental
+      initial_price: 30.0
+      price_impact: 0.1
+      # Weak mean reversion - allows squeeze to develop
+      mean_reversion: 0.005
+      noise_std: 0.5
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+short_seller:
+  name: "Short Seller"
+  class: "examples.ShortSqueeze.Rule.players:ShortSeller"
+  # Expander → short_seller_1, short_seller_2, short_seller_3
+  num_instances: 3
+  config:
+    identity: "short_seller"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ShortSqueeze/Rule/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      # Will be overridden to -50
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # ShortSeller specific
+      short_initial_position: -50.0
+      # Shorted at initial price
+      short_entry_price: 30.0
+      # Cover at 20% loss
+      cover_threshold: 0.20
+  persona: !include persona.yml
+
+momentum_buyer:
+  name: "Momentum Buyer"
+  class: "examples.ShortSqueeze.Rule.players:MomentumBuyer"
+  # Expander → momentum_buyer_1, momentum_buyer_2, momentum_buyer_3
+  num_instances: 3
+  config:
+    identity: "momentum_buyer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ShortSqueeze/Rule/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # MomentumBuyer specific
+      lookback: 3
+      base_size: 25.0
+      momentum_threshold: 0.02
+      momentum_multiplier: 15
+      max_quantity: 40.0
+  persona: !include persona.yml
+
+retail:
+  name: "Retail Trader"
+  class: "examples.ShortSqueeze.Rule.players:RetailTrader"
+  # Expander → retail_1, retail_2, retail_3
+  num_instances: 3
+  config:
+    identity: "retail"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ShortSqueeze/Rule/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # RetailTrader specific
+      noise_std: 12.0
+      bullish_bias: 5.0
+      min_quantity: -15.0
+      max_quantity: 25.0
+  persona: !include persona.yml
+
+value_investor:
+  name: "Value Investor"
+  class: "examples.ShortSqueeze.Rule.players:ValueInvestor"
+  # Expander → value_investor_1, value_investor_2
+  num_instances: 2
+  config:
+    identity: "value_investor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ShortSqueeze/Rule/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # ValueInvestor specific
+      value_threshold: 0.15
+      base_size: 20.0
+      value_multiplier: 5
+      max_quantity: 30.0
+  persona: !include persona.yml
+
+institutional:
+  name: "Institutional Holder"
+  class: "examples.ShortSqueeze.Rule.players:InstitutionalHolder"
+  num_instances: 1
+  config:
+    identity: "institutional"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ShortSqueeze/Rule/records"
+      # Base investor parameters
+      initial_cash: 10000.0
+      # Large passive holder
+      initial_position: 100.0
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

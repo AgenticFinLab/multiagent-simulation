@@ -1,5 +1,4 @@
-"""
-Base Proxy module for the Multi-Agent Simulation (MASim) framework.
+"""Base Proxy module for the Multi-Agent Simulation (MASim) framework.
 
 This module provides abstract base classes and type definitions ONLY.
 For concrete implementations, see `general.py`.
@@ -11,16 +10,21 @@ For concrete implementations, see `general.py`.
 Protocols:
     ObservableEntity     - Minimal interface for proxy owners (identity, save_state, etc.)
 
+Enums:
+    MessageType          - OBSERVATION, ACTION, COORDINATION, PEER, SYSTEM, BROADCAST
+    MessagePriority      - LOW, NORMAL, HIGH, CRITICAL
+
 Dataclasses:
+    Message              - Proxy-layer routed message: sender_id, recipient_id, payload
     ProxyResult          - Result wrapper for graceful degradation (success, data, error)
-    SendReceiveConfig  - Config for SendReceiveProxy
+    SendReceiveConfig    - Config for SendReceiveProxy
     StorageConfig        - Config for StorageProxy
     ResourceConfig       - Config for ResourceProxy
-    ObservabilityConfig  - Config for MonitoringProxy
+    MonitoringConfig     - Config for MonitoringProxy
 
 Abstract Classes:
     BaseProxy            - Abstract base with owner weak reference pattern
-    SendReceiveProxy   - Message routing: send, broadcast, subscribe
+    SendReceiveProxy       - Message queue management for Persona
     StorageProxy         - State persistence: checkpoint, restore
     ResourceProxy        - MCP integration: fetch_resource, invoke_tool
     ObservabilityProxy   - Metrics/logging: log_event, record_metric
@@ -32,7 +36,7 @@ Abstract Classes:
 This module defines the four micro-proxy types that provide infrastructure
 abstraction for Player entities (including coordinators):
 
-    1. SendReceiveProxy - Message routing and reliable transmission
+    1. SendReceiveProxy - Info send/receive queue management
     2. StorageProxy       - State checkpoint and rollback
     3. ResourceProxy      - MCP (Model Context Protocol) connection management
     4. ObservabilityProxy - Metrics collection and structured logging
@@ -60,7 +64,7 @@ Key Components:
    ┌─────────────────────────────────────────────────────────────────────┐
    │                    MICRO-PROXY INTERFACES                           │
    │                                                                     │
-   │  SendReceiveProxy: send, broadcast, receive, subscribe, unsubscribe
+   │  SendReceiveProxy: enqueue_info, dequeue_infos, handle_incoming, get_received_infos
    │  StorageProxy:       checkpoint, restore, list, delete, get_latest  │
    │  ResourceProxy:      fetch, invoke, list, connect, disconnect       │
    │  ObservabilityProxy: record_metric, log_event, start/stop_timer    │
@@ -74,7 +78,7 @@ Key Components:
    │  Owner (Player - may have role='coordinator' or 'player')        │
    │      │                                                            │
    │      │  ┌─────────────────────┐                                  │
-   │      ├──│ SendReceiveProxy  │──┐                               │
+   │      ├──│ SendReceiveProxy        │──┐                               │
    │      │  └─────────────────────┘  │                               │
    │      │  ┌─────────────────────┐  │                               │
    │      ├──│ StorageProxy        │──│ Each proxy holds             │
@@ -159,7 +163,7 @@ arbitrary owner methods.
 │                                                                              │
 │  Proxy Type          │ Allowed Owner Access        │ Purpose                │
 │  ────────────────────┼─────────────────────────────┼───────────────────────│
-│  SendReceiveProxy  │ identity, on_message()      │ Message routing       │
+│  SendReceiveProxy      │ send/receive Info queues    │ Message queue mgmt    │
 │  StorageProxy        │ identity, save_state(),     │ State persistence     │
 │                      │ load_state()                │                        │
 │  ResourceProxy       │ identity, capabilities    │ Access control        │
@@ -255,6 +259,7 @@ Proxy lifecycle is tied to owner lifecycle through three phases:
 import weakref
 from abc import ABC, abstractmethod
 from enum import Enum, auto
+from datetime import datetime
 from dataclasses import dataclass, field
 from typing import (
     Any,
@@ -267,7 +272,12 @@ from typing import (
     TYPE_CHECKING,
 )
 
-from masim.communication.base import Message
+import numpy as np
+
+# ---------------------------------------------------------------------------
+# No longer importing Message from communication.base — Message is defined
+# HERE in proxy/base.py since it is a proxy-layer concept.
+# ---------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
 # TYPE_CHECKING Block
@@ -283,6 +293,127 @@ from masim.communication.base import Message
 # ---------------------------------------------------------------------------
 if TYPE_CHECKING:
     from masim.player.base import BasePlayer
+
+
+# =============================================================================
+#                    PROXY-LAYER MESSAGE TYPES
+# =============================================================================
+#
+# Message and its supporting enums live here (proximity principle):
+# - MessageType / MessagePriority: enums used by Message
+# - Message: proxy-layer routed object, built from Info (player layer)
+#            and consumed by CommunicationChannel (which encodes it to SimPacket)
+#
+# Dependency direction:
+#   proxy/base.py  defines Message
+#   communication/base.py  imports Message from proxy.base (for encode/decode)
+# =============================================================================
+
+
+PayloadType = Union[Dict[str, Any], np.ndarray, bytes, List[Any]]
+
+
+class MessageType(Enum):
+    """Types of messages in the framework."""
+
+    # Environment -> Players
+    OBSERVATION = auto()
+    # Player -> Environment
+    ACTION = auto()
+    # Player -> Players (coordination)
+    COORDINATION = auto()
+    # Player <-> Player
+    PEER = auto()
+    # Framework internal
+    SYSTEM = auto()
+    # One-to-many
+    BROADCAST = auto()
+
+
+class MessagePriority(Enum):
+    """Priority levels for message delivery."""
+
+    LOW = 0
+    NORMAL = 1
+    HIGH = 2
+    CRITICAL = 3
+
+
+@dataclass
+class Message:
+    """
+    Proxy-layer routed message.
+
+    Built by the Simulator from an Info unit; adds routing metadata
+    (sender_id, recipient_id, timestamp, priority) so the Channel can
+    encode it to a SimPacket for wire transmission.
+
+    Flow:
+        Info (player layer)
+          → Message (proxy layer, routing added by Simulator)
+          → SimPacket (channel wire layer, encoded by CommunicationChannel)
+          → decode → Message (proxy layer restored)
+          → handle_incoming() → Info (player layer, routing stripped)
+
+    Attributes:
+        message_type: Category of message
+        sender_id:    ID of the sending component
+        payload:      Message content (must be serializable)
+        recipient_id: Target recipient (None for broadcast)
+        timestamp:    ISO format timestamp
+        priority:     Message delivery priority
+        extras:       Additional context
+    """
+
+    message_type: MessageType
+    sender_id: str
+    payload: PayloadType
+    recipient_id: Optional[str] = None
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+    priority: MessagePriority = MessagePriority.NORMAL
+    extras: Dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self):
+        self._validate_payload()
+
+    def _validate_payload(self) -> None:
+        """Ensure payload is serialization-friendly."""
+        if self.payload is None:
+            return
+        if isinstance(self.payload, (dict, list, np.ndarray, bytes)):
+            return
+        raise TypeError(
+            f"Message payload must be dict, list, numpy.ndarray, or bytes. "
+            f"Got: {type(self.payload).__name__}"
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        payload_data = self.payload
+        if isinstance(self.payload, np.ndarray):
+            payload_data = self.payload.tolist()
+        return {
+            "message_type": self.message_type.name,
+            "sender_id": self.sender_id,
+            "recipient_id": self.recipient_id,
+            "payload": payload_data,
+            "timestamp": self.timestamp,
+            "priority": self.priority.value,
+            "extras": self.extras,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "Message":
+        """Create Message from dictionary."""
+        return cls(
+            message_type=MessageType[data["message_type"]],
+            sender_id=data["sender_id"],
+            recipient_id=data["recipient_id"],
+            payload=data["payload"],
+            timestamp=data["timestamp"],
+            priority=MessagePriority(data["priority"]),
+            extras=data["extras"],
+        )
 
 
 # =============================================================================
@@ -780,7 +911,7 @@ class BaseProxy(ABC):
 #                         COMMUNICATION PROXY
 # =============================================================================
 #
-# SendReceiveProxy handles message routing and reliable transmission.
+# SendReceiveProxy handles Info send/receive queue management for Persona.
 # It provides a unified interface for point-to-point and broadcast messaging.
 #
 # Key Design:
@@ -849,7 +980,8 @@ class StorageConfig(ProxyConfig):
     checkpoint_dir: Optional[str] = None
     record_path: Optional[str] = None
     record_rounds: bool = True
-    entry_limit: int = 50  # Block size for BlockBasedStoreManager
+    # Entries per block file written to disk (turns/ and messages/)
+    turn_block_size: int = 3
 
 
 # =============================================================================
@@ -932,18 +1064,19 @@ class MonitoringConfig(ProxyConfig):
     Attributes:
         proxy_type: Fixed to OBSERVABILITY
         record_path: Directory for HistoryBuffer persistence (REQUIRED)
-        entry_limit: Max entries in hot storage (memory)
+        monitor_hot_limit: Max entries kept in hot memory before spilling to disk
 
     Example:
         config = MonitoringConfig(
             record_path="EXPERIMENT/Demo/monitoring",
-            entry_limit=100
+            monitor_hot_limit=50
         )
     """
 
     proxy_type: ProxyType = field(default=ProxyType.OBSERVABILITY, init=False)
     record_path: str = ""  # REQUIRED: Directory for HistoryBuffer persistence
-    entry_limit: int = 100  # Max entries in hot storage (memory)
+    # Max entries kept in hot memory before spilling to disk
+    monitor_hot_limit: int = 3
 
 
 # MonitoringProxy implementation is in general.py

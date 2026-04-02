@@ -1,1 +1,1 @@
-"""HerdEffect example module."""
+"""Simulation scenario group package."""

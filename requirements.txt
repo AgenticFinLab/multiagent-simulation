@@ -2,6 +2,7 @@
 numpy
 pandas
 ray
+psutil
 torch
 transformers
 selenium
@@ -18,3 +19,15 @@ h5py
 wandb
 einops
 litellm
+
+# RAG (masim.rag module — used by AssetBubbleRag and future scenarios)
+llama-index-core
+llama-index-embeddings-openai
+llama-index-readers-file
+PyMuPDF
+duckduckgo-search
+llama-index-embeddings-huggingface
+
+# Web Interface
+streamlit>=1.28
+pyyaml
