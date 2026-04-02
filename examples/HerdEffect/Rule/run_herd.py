@@ -5,7 +5,7 @@ Demonstrates herd behavior in financial markets:
 - 5 Investors with different strategies
 
 Usage:
-    python examples/HerdEffect/Rule/run_herd.py -c configs/HerdEffect/simulation.yml
+    python examples/HerdEffect/Rule/run_herd.py -c configs/HerdEffect/Rule/simulation.yml
 """
 
 import argparse
@@ -82,7 +82,7 @@ Investor Strategies:
   - NoiseTrader: Random behavior, adds market noise
 
 Example:
-    python examples/HerdEffect/Rule/run_herd.py -c configs/HerdEffect/simulation.yml
+    python examples/HerdEffect/Rule/run_herd.py -c configs/HerdEffect/Rule/simulation.yml
 """,
     )
     parser.add_argument(

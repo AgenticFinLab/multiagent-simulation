@@ -3,7 +3,7 @@
 Analyzes flash crash dynamics - rapid crash with quick recovery.
 
 Usage:
-    python examples/FlashCrash/Rule/analysis.py -c configs/FlashCrash/simulation.yml
+    python examples/FlashCrash/Rule/analysis.py -c configs/FlashCrash/Rule/simulation.yml
 """
 
 import argparse

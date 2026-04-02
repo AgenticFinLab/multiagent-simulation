@@ -4,7 +4,7 @@ Analyzes simulation results for bubble formation and crash dynamics.
 Detects positive feedback loops and price deviation from fundamental.
 
 Usage:
-    python examples/AssetBubble/Rule/analysis.py -c configs/AssetBubble/simulation.yml
+    python examples/AssetBubble/Rule/analysis.py -c configs/AssetBubble/Rule/simulation.yml
 """
 
 import argparse

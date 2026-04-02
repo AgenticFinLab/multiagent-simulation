@@ -4,7 +4,7 @@ Analyzes simulation results for momentum patterns.
 Tests whether past winners continue to outperform (positive autocorrelation).
 
 Usage:
-    python examples/MomentumEffect/Rule/analysis.py -c configs/MomentumEffect/simulation.yml
+    python examples/MomentumEffect/Rule/analysis.py -c configs/MomentumEffect/Rule/simulation.yml
 """
 
 import argparse

@@ -3,7 +3,7 @@
 Analyzes simulation results using the centralized evaluation module.
 
 Usage:
-    python examples/HerdEffect/Rule/analysis.py -c configs/HerdEffect/simulation.yml
+    python examples/HerdEffect/Rule/analysis.py -c configs/HerdEffect/Rule/simulation.yml
 """
 
 import argparse

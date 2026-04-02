@@ -5,7 +5,7 @@ Run LiquidityDryup Simulation
 Demonstrates liquidity dry-up dynamics with market maker inventory model.
 
 Usage:
-    python examples/LiquidityDryup/Rule/run_liquidity.py -c configs/LiquidityDryup/simulation.yml
+    python examples/LiquidityDryup/Rule/run_liquidity.py -c configs/LiquidityDryup/Rule/simulation.yml
 """
 
 import argparse

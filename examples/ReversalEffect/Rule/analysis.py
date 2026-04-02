@@ -4,7 +4,7 @@ Analyzes long-term reversal patterns (mean reversion).
 Tests whether past losers outperform past winners.
 
 Usage:
-    python examples/ReversalEffect/Rule/analysis.py -c configs/ReversalEffect/simulation.yml
+    python examples/ReversalEffect/Rule/analysis.py -c configs/ReversalEffect/Rule/simulation.yml
 """
 
 import argparse

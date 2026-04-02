@@ -5,7 +5,7 @@ Run ShortSqueeze Simulation
 Demonstrates short squeeze dynamics with supply-demand imbalance.
 
 Usage:
-    python examples/ShortSqueeze/Rule/run_short_squeeze.py -c configs/ShortSqueeze/simulation.yml
+    python examples/ShortSqueeze/Rule/run_short_squeeze.py -c configs/ShortSqueeze/Rule/simulation.yml
 """
 
 import argparse

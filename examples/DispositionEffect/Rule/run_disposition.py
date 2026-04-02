@@ -7,7 +7,7 @@ Demonstrates the disposition effect (Shefrin & Statman 1985):
 - Investors hold losers too long (reluctant to realize losses)
 
 Usage:
-    python examples/DispositionEffect/Rule/run_disposition.py -c configs/DispositionEffect/simulation.yml
+    python examples/DispositionEffect/Rule/run_disposition.py -c configs/DispositionEffect/Rule/simulation.yml
 """
 
 import argparse

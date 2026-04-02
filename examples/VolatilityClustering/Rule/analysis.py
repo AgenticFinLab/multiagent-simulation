@@ -4,7 +4,7 @@ Analyzes simulation results for GARCH-style volatility clustering patterns.
 Tests whether volatility exhibits persistence (high vol → high vol).
 
 Usage:
-    python examples/VolatilityClustering/Rule/analysis.py -c configs/VolatilityClustering/simulation.yml
+    python examples/VolatilityClustering/Rule/analysis.py -c configs/VolatilityClustering/Rule/simulation.yml
 """
 
 import argparse

@@ -6,7 +6,7 @@ Demonstrates momentum trading anomaly (Jegadeesh & Titman 1993):
 Past winners continue to outperform, past losers continue to underperform.
 
 Usage:
-    python examples/MomentumEffect/Rule/run_momentum.py -c configs/MomentumEffect/simulation.yml
+    python examples/MomentumEffect/Rule/run_momentum.py -c configs/MomentumEffect/Rule/simulation.yml
 """
 
 import argparse

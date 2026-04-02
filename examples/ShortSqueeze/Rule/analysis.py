@@ -6,7 +6,7 @@ Analyzes short squeeze dynamics:
 - Key metrics: squeeze ratio, short cover volume, days to cover
 
 Usage:
-    python examples/ShortSqueeze/Rule/analysis.py -c configs/ShortSqueeze/simulation.yml
+    python examples/ShortSqueeze/Rule/analysis.py -c configs/ShortSqueeze/Rule/simulation.yml
 
 Academic References:
     - GameStop Congressional Hearing Testimony (2021)

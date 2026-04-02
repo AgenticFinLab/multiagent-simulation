@@ -5,7 +5,7 @@ Run ReversalEffect Simulation
 Demonstrates long-term mean reversion dynamics.
 
 Usage:
-    python examples/ReversalEffect/Rule/run_reversal.py -c configs/ReversalEffect/simulation.yml
+    python examples/ReversalEffect/Rule/run_reversal.py -c configs/ReversalEffect/Rule/simulation.yml
 """
 
 import argparse

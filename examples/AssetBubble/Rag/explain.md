@@ -260,7 +260,7 @@ docs = loader.suggest_and_download(
     persona_desc="Momentum investor following Greater Fool Theory...",
     llm_client=llm_client,
     n_urls=5,
-    save_dir="EXPERIMENT/AssetBubble Rag/rag_docs/momentum"
+    save_dir="EXPERIMENT/AssetBubble/Rag/rag_docs/momentum"
 )
 ```
 
@@ -294,7 +294,7 @@ store = KnowledgeStore(
     embed_model_name="doubao-embedding-large-text-240915",
     embed_api_key=os.getenv("ARK_API_KEY"),
     embed_api_base="https://ark.cn-beijing.volces.com/api/v3",
-    persist_dir="EXPERIMENT/AssetBubble Rag/rag_index/momentum",
+    persist_dir="EXPERIMENT/AssetBubble/Rag/rag_index/momentum",
     chunk_size=512,
     chunk_overlap=64,
 )
@@ -727,7 +727,7 @@ python examples/AssetBubble/Rag/analysis.py \
 ### Output File Structure
 
 ```
-EXPERIMENT/AssetBubble Rag/
+EXPERIMENT/AssetBubble/Rag/
 ├── rag_docs/                       # Cached downloaded documents
 │   ├── momentum/
 │   │   ├── greater_fool_theory.txt

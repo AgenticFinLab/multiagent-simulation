@@ -5,7 +5,7 @@ Run AssetBubble Simulation
 Demonstrates asset bubble formation through heterogeneous agent interactions.
 
 Usage:
-    python examples/AssetBubble/Rule/run_bubble.py -c configs/AssetBubble/simulation.yml
+    python examples/AssetBubble/Rule/run_bubble.py -c configs/AssetBubble/Rule/simulation.yml
 """
 
 import argparse
@@ -98,7 +98,7 @@ Investor Types:
   - ConservativeHolder:  Long-term stability
 
 Example:
-    python examples/AssetBubble/Rule/run_bubble.py -c configs/AssetBubble/simulation.yml
+    python examples/AssetBubble/Rule/run_bubble.py -c configs/AssetBubble/Rule/simulation.yml
 """,
     )
     parser.add_argument(

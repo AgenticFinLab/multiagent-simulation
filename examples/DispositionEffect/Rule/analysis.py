@@ -6,7 +6,7 @@ Analyzes disposition effect (Shefrin & Statman 1985):
 - Disposition effect present when PGR > PLR
 
 Usage:
-    python examples/DispositionEffect/Rule/analysis.py -c configs/DispositionEffect/simulation.yml
+    python examples/DispositionEffect/Rule/analysis.py -c configs/DispositionEffect/Rule/simulation.yml
 
 Academic References:
     - Shefrin & Statman (1985): Original disposition effect paper

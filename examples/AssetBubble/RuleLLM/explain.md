@@ -571,7 +571,7 @@ python examples/AssetBubble/RuleLLM/analysis.py \
 ### Output File Structure
 
 ```
-EXPERIMENT/AssetBubble RuleLLM/
+EXPERIMENT/AssetBubble/RuleLLM/
 ├── records/
 │   ├── market/
 │   │   ├── price/            # Price time series (one entry per round)

@@ -6,7 +6,7 @@ Analyzes liquidity dry-up dynamics:
 - Key metrics: bid-ask spread, price impact, liquidity provision
 
 Usage:
-    python examples/LiquidityDryup/Rule/analysis.py -c configs/LiquidityDryup/simulation.yml
+    python examples/LiquidityDryup/Rule/analysis.py -c configs/LiquidityDryup/Rule/simulation.yml
 
 Academic References:
     - Grossman & Miller (1988): Market Maker Model

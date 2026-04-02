@@ -4,7 +4,7 @@ Analyzes simulation results for crash dynamics.
 Detects panic selling cascades and crash depth/recovery patterns.
 
 Usage:
-    python examples/MarketCrash/Rule/analysis.py -c configs/MarketCrash/simulation.yml
+    python examples/MarketCrash/Rule/analysis.py -c configs/MarketCrash/Rule/simulation.yml
 """
 
 import argparse

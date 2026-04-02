@@ -422,7 +422,7 @@ setting:
   description: "LLM-based investors simulating emergent herding behavior"
   total_rounds: 10
   entry_limit: 100
-  record_path: "EXPERIMENT/HerdEffect LLM/records"
+  record_path: "EXPERIMENT/HerdEffect/LLM/records"
 ```
 
 ### players.yml (LLM Config)

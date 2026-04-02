@@ -13,8 +13,8 @@ This report compares three variants of the AssetBubble simulation to evaluate th
 | Variant                | Agent Type | Fit Score | Bubble Detected | Max Deviation | Max Drawdown |
 |------------------------|------------|-----------|-----------------|---------------|--------------|
 | **AssetBubble**        | Rule-based | 71.2%     | ✅ Yes           | 103.5%        | -99.4%       |
-| **AssetBubbleLLM**     | Pure LLM   | 72.0%     | ✅ Yes           | 341.4%        | -97.7%       |
 | **AssetBubbleRuleLLM** | Hybrid     | 67.1%     | ❌ No            | 17.5%         | -8.7%        |
+| **AssetBubbleLLM**     | Pure LLM   | 72.0%     | ✅ Yes           | 341.4%        | -97.7%       |
 
 **Key Finding:** The pure LLM variant produces the most extreme bubble dynamics, while the hybrid (RuleLLM) variant shows the most conservative behavior, failing to trigger a true bubble detection.
 

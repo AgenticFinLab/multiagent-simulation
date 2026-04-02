@@ -6,7 +6,7 @@ Demonstrates GARCH-like volatility clustering through heterogeneous agent
 interactions. Large price swings are followed by large swings, small by small.
 
 Usage:
-    python examples/VolatilityClustering/Rule/run_volatility.py -c configs/VolatilityClustering/simulation.yml
+    python examples/VolatilityClustering/Rule/run_volatility.py -c configs/VolatilityClustering/Rule/simulation.yml
 """
 
 import argparse
@@ -95,7 +95,7 @@ Investor Types:
   - VolatilityTrader: Trades vol regime (weak stabilizing)
 
 Example:
-    python examples/VolatilityClustering/Rule/run_volatility.py -c configs/VolatilityClustering/simulation.yml
+    python examples/VolatilityClustering/Rule/run_volatility.py -c configs/VolatilityClustering/Rule/simulation.yml
 """,
     )
     parser.add_argument(

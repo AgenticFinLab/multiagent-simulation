@@ -6,7 +6,7 @@ Analyzes equity premium puzzle through behavioral lens:
 - Key metrics: realized premium, allocation by investor type
 
 Usage:
-    python examples/EquityPremium/Rule/analysis.py -c configs/EquityPremium/simulation.yml
+    python examples/EquityPremium/Rule/analysis.py -c configs/EquityPremium/Rule/simulation.yml
 
 Academic References:
     - Mehra & Prescott (1985): Equity Premium Puzzle

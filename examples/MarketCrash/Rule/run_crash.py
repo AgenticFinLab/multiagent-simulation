@@ -6,7 +6,7 @@ Demonstrates market crash dynamics through forced deleveraging
 and liquidity spiral mechanisms.
 
 Usage:
-    python examples/MarketCrash/Rule/run_crash.py -c configs/MarketCrash/simulation.yml
+    python examples/MarketCrash/Rule/run_crash.py -c configs/MarketCrash/Rule/simulation.yml
 """
 
 import argparse
@@ -103,7 +103,7 @@ Investor Types:
   - BottomFisher:       Contrarian crash buyer
 
 Example:
-    python examples/MarketCrash/Rule/run_crash.py -c configs/MarketCrash/simulation.yml
+    python examples/MarketCrash/Rule/run_crash.py -c configs/MarketCrash/Rule/simulation.yml
 """,
     )
     parser.add_argument(

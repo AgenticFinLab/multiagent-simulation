@@ -5,7 +5,7 @@ Run EquityPremium Simulation
 Demonstrates equity premium puzzle with myopic loss aversion.
 
 Usage:
-    python examples/EquityPremium/Rule/run_equity_premium.py -c configs/EquityPremium/simulation.yml
+    python examples/EquityPremium/Rule/run_equity_premium.py -c configs/EquityPremium/Rule/simulation.yml
 """
 
 import argparse

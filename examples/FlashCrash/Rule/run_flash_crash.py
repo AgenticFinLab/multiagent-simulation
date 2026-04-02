@@ -5,7 +5,7 @@ Run FlashCrash Simulation
 Demonstrates flash crash dynamics with liquidity-sensitive pricing.
 
 Usage:
-    python examples/FlashCrash/Rule/run_flash_crash.py -c configs/FlashCrash/simulation.yml
+    python examples/FlashCrash/Rule/run_flash_crash.py -c configs/FlashCrash/Rule/simulation.yml
 """
 
 import argparse
