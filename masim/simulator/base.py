@@ -9,7 +9,7 @@ For concrete implementations, see `general.py`.
 
 Enums:
     SimulatorStatus     - Lifecycle states: INITIALIZING → READY → RUNNING → TERMINATED
-    RoundPhase          - Phase within a round: NOTIFICATION → PLAYER_DECISION → COORDINATION → COMPLETE
+    RoundPhase          - Phase within a round: PENDING → EXECUTING → COMPLETE
 
 Dataclasses:
     ExecutionClock      - Hierarchical time tracking for rounds/cycles
@@ -17,9 +17,8 @@ Dataclasses:
 
 Abstract Classes:
     BaseSimulator       - Abstract orchestrator with fundamental infrastructure:
-                          - Ray actor handles (_player_persona_handles)
+                          - Ray actor handles (player_persona_handles)
                           - History management (HistoryBuffer for round results)
-                          - Storage directories (from config.proxy)
                           - Status/phase tracking
 
                           Abstract methods (must be implemented by subclasses):
@@ -27,63 +26,63 @@ Abstract Classes:
                           Lifecycle:   setup(), run_round(), run(), shutdown()
                           Utilities:   get_status(), get_round_history(), get_player_handle()
 
+                          Extension hooks (override in subclass for customization):
+                          update_topology(round_num) — called at the start of every round.
+                              Default: no-op (static topology).
+                              Override to: add/remove edges, rewire agents, switch between
+                              feedforward and feedback configurations.
+                              After mutation: call topology.invalidate_levels_cache() +
+                              _update_actor_topology_slices() to push new slices
+                              AND updated peer handles to all affected actors.
+
 ================================================================================
                             ARCHITECTURE
 ================================================================================
 
-The Simulator interacts ONLY with Personas - Player implementation is hidden.
-All agents (including coordinators) use PlayerPersona with role-based execution.
+The Simulator interacts ONLY with Personas — Player implementation is hidden.
+All agents (including coordinators) are Players wrapped in PlayerPersona actors.
+Role distinctions (coordinator vs regular player) map to topology level 0 vs 1+.
 
     Simulator
         │
-        ├── Coordinator Personas (role='coordinator', execute first)
-        │       │
+        ├── Level 0 Personas (topology sources — execute first, e.g. coordinators)
         │       └── PlayerPersona (Ray Actor) ──► BasePlayer
         │
-        └── Regular Player Personas (role='player', execute second)
-                │
+        └── Level 1+ Personas (execute after Level 0, in parallel within a level)
                 └── PlayerPersona (Ray Actor) ──► BasePlayer
 
 Key Design Principles:
 - Simulator has ZERO knowledge of Player implementation
 - All interaction goes through Persona's public interface
 - Personas are Ray actors (distributed computing)
-- Role-based execution: coordinators first, then regular players
+- Level-ordered execution: Level N fully completes before Level N+1 starts
 
 ================================================================================
-                        HIERARCHICAL EXECUTION MODEL
-================================================================================
-
-┌─────────────────────────────────────────────────────────────────────────┐
-│  Level    │  Entity           │  Term     │  Description               │
-├───────────┼───────────────────┼───────────┼────────────────────────────┤
-│  L1       │  Simulator        │  round    │  One complete simulation   │
-│           │                   │           │  cycle (all personas)      │
-├───────────┼───────────────────┼───────────┼────────────────────────────┤
-│  L2       │  PlayerPersona    │  operate  │  Simulator-facing interface│
-│           │  (role=coordinator)│          │  Coordinators run first    │
-└───────────┴───────────────────┴───────────┴────────────────────────────┘
-
-Each level has an ExecutionClock for temporal tracking.
-
-================================================================================
-                          ROUND EXECUTION FLOW
+                        ROUND EXECUTION FLOW
 ================================================================================
 
 Simulator.run():
 │
 └── for round_num in 1..total_rounds:
     │
-    ├── Phase 1: COORDINATION (if coordinators exist)
-    │   └── coordinator_persona.operate()  # Coordinators run first
-    │       └── Returns: TurnResult with coordinator's action
+    ├── update_topology(round_num)      # Extension hook (no-op for static topology)
     │
-    ├── Phase 2: PLAYER_DECISION
-    │   └── player_persona.operate(round_num)  [parallel]
-    │       └── Returns: TurnResult with final_action
+    ├── for level in topology_levels:
+    │   │
+    │   ├── Phase 1: EXECUTE
+    │   │   └── persona.operate(round_num, level=N)  [parallel for all actors in level]
+    │   │       └── Returns: (TurnResult, pending_infos) tuple
+    │   │
+    │   ├── Phase 2: COLLECT
+    │   │   └── ray.get(operate futures) → {player_id: TurnResult} + all pending_infos
+    │   │
+    │   └── Phase 3: DISPATCH
+    │       └── build_message_from_info() → channel.encode_and_deliver()
+    │           → target_persona.receive_message()  [Ray remote]
+    │           [all deliveries complete before next level's phase_execute starts]
     │
-    └── Phase 3: COMPLETE
-        └── Collect all results, record history
+    └── Phase 4: RECORD (rate-limited)
+        └── topology.save_round_diagram()  [only if save_diagram_interval matches]
 
 ================================================================================
                               USAGE
@@ -277,7 +276,7 @@ class BaseSimulator(ABC):
         history_folder = os.path.join(config.setting["record_path"], "history")
         self.history: HistoryBuffer = HistoryBuffer(
             folder=history_folder,
-            entry_limit=config.setting["entry_limit"],
+            entry_limit=config.setting["round_history_limit"],
         )
 
         # Communication topology (initialized by subclass setup)
@@ -320,6 +319,40 @@ class BaseSimulator(ABC):
         ...
 
     # =========================================================================
+    #                    TOPOLOGY UPDATE HOOK
+    # =========================================================================
+
+    def update_topology(self, round_num: int) -> None:
+        """
+        Extension point: update the topology graph before each round executes.
+
+        Default implementation is a no-op (static topology).
+
+        Override this in a subclass to implement dynamic topologies, e.g.:
+        - Rewire edges based on simulation state (agent relationships evolve)
+        - Add/remove players mid-simulation
+        - Switch between feedback and feedforward configurations
+
+        After mutating self.topology (add_edge / remove_edge), you MUST:
+          1. Call self.topology.invalidate_levels_cache() to force BFS recompute.
+          2. Call self._update_actor_topology_slices() to push new topology slices
+             AND updated peer handles to all affected actors.
+
+        Args:
+            round_num: The round number about to be executed (1-indexed)
+
+        Example override::
+
+            def update_topology(self, round_num: int) -> None:
+                if round_num == 10:
+                    self.topology.graph.add_edge("player_1", "player_2")
+                    self.topology.invalidate_levels_cache()
+                    self._update_actor_topology_slices()
+        """
+        # Default: static topology — no mutation, no actor updates needed.
+        pass
+
+    # =========================================================================
     #                    ROUND PHASES
     # =========================================================================
 
@@ -338,8 +371,14 @@ class BaseSimulator(ABC):
         ...
 
     @abstractmethod
-    def phase_dispatch(self, level_handles: Dict[str, "ActorHandle"]) -> None:
-        """Dispatch outbound messages for a level."""
+    def phase_dispatch(self, all_info_lists: List[List[Dict[str, Any]]]) -> None:
+        """Encode pending Info units → Message → SimPacket and deliver to targets.
+
+        Args:
+            all_info_lists: List of per-actor Info lists from phase_collect().
+                            Each inner list contains dicts with keys:
+                            info, sender_id, target_ids, round_num.
+        """
         ...
 
     # =========================================================================

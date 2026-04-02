@@ -1,1 +1,1 @@
-# VolatilityClustering - Heterogeneous Agent Model for GARCH-like dynamics
+"""Simulation scenario group package."""

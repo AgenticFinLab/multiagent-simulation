@@ -6,20 +6,25 @@ Provides YAML configuration loading with:
 - Environment variable interpolation
 - Validation helpers
 - Logging configuration
+- load_class(): Dynamic class loading from module path string
 
 Usage:
-    from masim.utils.config import load_config, setup_logging
+    from masim.utils.config import load_config, setup_logging, load_class
 
     setup_logging()  # Configure logging with sensible defaults
     cfg = load_config("configs/Demo/simulation.yml")
     logger.info(cfg["players"])  # Loaded from players.yml via !include
+
+    PlayerClass = load_class("mypackage.players:MyPlayer")
 """
 
+import copy
+import importlib
 import logging
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import yaml
 
@@ -88,6 +93,92 @@ class IncludeLoader(yaml.SafeLoader):
 IncludeLoader.add_constructor("!include", IncludeLoader.include)
 
 
+def expand_player_instances(config: Dict[str, Any]) -> None:
+    """
+    Expand player templates into individual named instances.
+
+    Reads the top-level `num_instances` field from each player block
+    (between 'class' and 'config').  This field is REQUIRED for every player —
+    omitting it raises KeyError so misconfigured files fail fast.
+    For num_instances == 1 the original key is kept unchanged.
+    For num_instances > 1 the base key is replaced by base_key_1 … base_key_N,
+    each with its own identity and display name.
+    topology['sources'] and topology['connections'] are rewritten in-place to
+    use the expanded instance keys.
+
+    Mutates config['players'] and config['topology'] in-place.
+    Called automatically by load_config() after env-var interpolation.
+    Raises KeyError if config is missing required 'players', 'topology', or
+    any player block is missing 'num_instances'.
+
+    Naming: base key "foo" with num_instances: 3  →  "foo_1", "foo_2", "foo_3"
+
+    Args:
+        config: Full loaded configuration dict (with 'players' and 'topology' keys).
+    """
+    players = config["players"]
+
+    new_players: Dict[str, Any] = {}
+    # Maps each base key to its list of expanded instance keys.
+    # For num_instances == 1: identity mapping {base_key: [base_key]}.
+    base_to_instances: Dict[str, List[str]] = {}
+
+    for base_key, cfg in players.items():
+        # num_instances is REQUIRED — no default, no .get(). Missing key = config error.
+        if "num_instances" not in cfg:
+            raise KeyError(
+                f"Player '{base_key}' is missing required field 'num_instances'. "
+                f"Set num_instances: 1 for a single instance."
+            )
+        n = int(cfg["num_instances"])
+        if n <= 0:
+            raise ValueError(
+                f"Player '{base_key}' has invalid num_instances: {n}. Must be >= 1."
+            )
+
+        if n == 1:
+            # No expansion — keep original key unchanged
+            new_players[base_key] = cfg
+            base_to_instances[base_key] = [base_key]
+        else:
+            instances = []
+            for i in range(1, n + 1):
+                inst_key = f"{base_key}_{i}"
+                inst_cfg = copy.deepcopy(cfg)
+                inst_cfg["config"]["identity"] = inst_key
+                # top-level display name: "Disposition Investor 1", "Disposition Investor 2", …
+                inst_cfg["name"] = f"{cfg['name']} {i}"
+                new_players[inst_key] = inst_cfg
+                instances.append(inst_key)
+            base_to_instances[base_key] = instances
+
+    config["players"] = new_players
+
+    # Rewrite topology sources and connections to use fully-expanded instance keys
+    topo = config["topology"]
+
+    # Expand sources: each base key → its instance keys (identity if n == 1)
+    new_sources: List[str] = []
+    for s in topo["sources"]:
+        new_sources.extend(base_to_instances[s] if s in base_to_instances else [s])
+    topo["sources"] = new_sources
+
+    # Expand connections: sender keys and all target lists
+    new_conns: Dict[str, List[str]] = {}
+    for sender, targets in topo["connections"].items():
+        sender_instances = (
+            base_to_instances[sender] if sender in base_to_instances else [sender]
+        )
+        expanded_targets: List[str] = []
+        for t in targets:
+            expanded_targets.extend(
+                base_to_instances[t] if t in base_to_instances else [t]
+            )
+        for si in sender_instances:
+            new_conns[si] = expanded_targets
+    topo["connections"] = new_conns
+
+
 def load_config(
     config_path: Union[str, Path],
     env_interpolate: bool = True,
@@ -119,6 +210,8 @@ def load_config(
 
     if env_interpolate:
         config = _interpolate_env_vars(config)
+
+    expand_player_instances(config)
 
     return config
 
@@ -192,7 +285,7 @@ def validate_config(config: Dict[str, Any]) -> None:
         ValueError: If configuration is invalid
     """
     # Check required sections
-    required_sections = ["simulation", "players"]
+    required_sections = ["setting", "players"]
     for section in required_sections:
         if section not in config:
             raise ValueError(f"Missing required configuration section: {section}")
@@ -277,90 +370,6 @@ def build_connection_matrix(
     return connections
 
 
-class ConnectionValidator:
-    """
-    Validates and enforces connection topology.
-
-    Only allows messages between explicitly connected entities.
-
-    Usage:
-        validator = ConnectionValidator(config)
-        if validator.can_send("investor_1", "market"):
-            # Allow message
-        else:
-            raise ConnectionError("Not connected")
-    """
-
-    def __init__(self, config: Dict[str, Any]):
-        """Initialize with configuration."""
-        self._connections = build_connection_matrix(config)
-        if "topology" in config and "broadcast" in config["topology"]:
-            broadcast_config = config["topology"]["broadcast"]
-            if "allowed_sources" not in broadcast_config:
-                raise KeyError("Broadcast config must have 'allowed_sources' field")
-            self._broadcast_sources = set(broadcast_config["allowed_sources"])
-        else:
-            self._broadcast_sources = set()
-
-    def can_send(self, source_id: str, target_id: str) -> bool:
-        """
-        Check if source can send to target.
-
-        Args:
-            source_id: Sender entity ID
-            target_id: Receiver entity ID
-
-        Returns:
-            True if connection is allowed
-        """
-        if source_id not in self._connections:
-            return False
-        return target_id in self._connections[source_id]
-
-    def can_broadcast(self, source_id: str) -> bool:
-        """
-        Check if source can broadcast to all.
-
-        Args:
-            source_id: Sender entity ID
-
-        Returns:
-            True if broadcast is allowed
-        """
-        return source_id in self._broadcast_sources
-
-    def get_targets(self, source_id: str) -> set:
-        """
-        Get all allowed targets for a source.
-
-        Args:
-            source_id: Sender entity ID
-
-        Returns:
-            Set of allowed target IDs
-        """
-        if source_id not in self._connections:
-            return set()
-        return self._connections[source_id].copy()
-
-    def validate_send(self, source_id: str, target_id: str) -> None:
-        """
-        Validate send operation, raise if not allowed.
-
-        Args:
-            source_id: Sender entity ID
-            target_id: Receiver entity ID
-
-        Raises:
-            ConnectionError: If connection not allowed
-        """
-        if not self.can_send(source_id, target_id):
-            raise ConnectionError(
-                f"Connection not allowed: {source_id} -> {target_id}. "
-                f"Allowed targets: {self.get_targets(source_id)}"
-            )
-
-
 # =============================================================================
 # Logging Configuration
 # =============================================================================
@@ -396,11 +405,39 @@ def setup_logging(
     )
 
 
+def load_class(path: str) -> type:
+    """
+    Load a class from a module path string.
+
+    Args:
+        path: Class path in format "module.submodule:ClassName" or
+              "module.submodule.ClassName"
+
+    Returns:
+        The loaded class
+
+    Raises:
+        ImportError: If module cannot be imported
+        AttributeError: If class not found in module
+
+    Example:
+        PlayerClass = load_class("mypackage.players:MyPlayer")
+        PlayerClass = load_class("mypackage.players.MyPlayer")
+    """
+    if ":" in path:
+        module_path, cls_name = path.split(":", 1)
+    else:
+        module_path, cls_name = path.rsplit(".", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, cls_name)
+
+
 __all__ = [
     "load_config",
+    "expand_player_instances",
     "validate_config",
     "build_connection_matrix",
-    "ConnectionValidator",
     "IncludeLoader",
     "setup_logging",
+    "load_class",
 ]

@@ -11,6 +11,8 @@ Base Classes and Types (base.py):
     - ProxyResult: Result wrapper for graceful degradation
     - Config dataclasses: SendReceiveConfig, StorageConfig, ResourceConfig, MonitoringConfig
     - Error types: ProxyError, ProxyNotInitializedError, ProxyOperationError
+    - MessageType, MessagePriority: Enums for proxy-layer message routing
+    - Message: Proxy-layer routed message (sender_id, recipient_id, payload, etc.)
 
 Proxy Implementations (general.py):
     - SendReceiveProxy: Message routing and transmission
@@ -18,7 +20,8 @@ Proxy Implementations (general.py):
     - ResourceProxy: MCP resource access
     - MonitoringProxy: Metrics and structured logging
 
-Convenience Functions (general.py):
+Helper Functions (general.py):
+    - build_message_from_info(): Convert player-layer Info → proxy-layer Message
     - create_default_proxies(): Create all proxies with defaults
     - create_minimal_proxies(): Create just storage and monitoring
     - create_proxies_for_owner(): Create customized proxy set
@@ -39,6 +42,10 @@ from masim.proxy.base import (
     ProxyConfig,
     BaseProxy,
     OwnerType,
+    # Message types (proxy-layer)
+    MessageType,
+    MessagePriority,
+    Message,
     # Config dataclasses
     SendReceiveConfig,
     StorageConfig,
@@ -52,6 +59,8 @@ from masim.proxy.general import (
     StorageProxy,
     ResourceProxy,
     MonitoringProxy,
+    # Message helper
+    build_message_from_info,
     # Convenience functions
     create_default_proxies,
     create_minimal_proxies,
@@ -74,6 +83,10 @@ __all__ = [
     "ProxyConfig",
     "BaseProxy",
     "OwnerType",
+    # Message types (proxy-layer)
+    "MessageType",
+    "MessagePriority",
+    "Message",
     # Communication
     "SendReceiveConfig",
     "SendReceiveProxy",
@@ -86,6 +99,8 @@ __all__ = [
     # Monitoring
     "MonitoringConfig",
     "MonitoringProxy",
+    # Message helper
+    "build_message_from_info",
     # Convenience functions
     "create_default_proxies",
     "create_minimal_proxies",

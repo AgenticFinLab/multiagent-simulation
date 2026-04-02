@@ -1,0 +1,28 @@
+# =============================================================================
+# LiquidityDryupLLM Persona Configuration
+# =============================================================================
+# Shared persona configuration for all players in the simulation.
+# =============================================================================
+
+auto_checkpoint: false
+debug_mode: true
+
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/LiquidityDryup/LLM/checkpoints"
+    record_path: "EXPERIMENT/LiquidityDryup/LLM/records"
+    record_rounds: true
+    turn_block_size: 3
+
+  monitoring:
+    record_path: "EXPERIMENT/LiquidityDryup/LLM/monitoring"
+    monitor_hot_limit: 3
+
+  communication:
+    # Longer timeout for LLM API calls (2–8 s inference latency)
+    message_timeout_ms: 30000
+    enable_compression: true
+
+  resource:
+    mcp_servers: []
+    enable_caching: false

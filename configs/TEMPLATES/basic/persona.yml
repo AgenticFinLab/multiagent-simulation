@@ -1,0 +1,71 @@
+# =============================================================================
+# Persona Configuration (Rule-Based)
+# =============================================================================
+# Shared persona settings applied to ALL players in this scenario.
+# Included via "persona: !include persona.yml" in each player entry of players.yml.
+# Reference: AssetBubble/, Demo/, HerdEffect/
+# =============================================================================
+
+# Auto-save full player state to checkpoint_dir after each round.
+# Enables resuming interrupted simulations. Keep false in normal runs (I/O overhead).
+auto_checkpoint: false
+# Enable verbose per-turn logging inside each actor (writes to Ray actor stdout).
+# Keep true during development; set false in long production runs to reduce log volume.
+debug_mode: true
+
+# -----------------------------------------------------------------------------
+# Proxy Configurations
+# -----------------------------------------------------------------------------
+# Proxies are subsystems within each PlayerPersona actor that handle specific
+# responsibilities: storage, monitoring, communication, and external resources.
+proxy:
+  # =================================
+  # Storage Proxy
+  # =================================
+  storage:
+    # Directory for full actor state snapshots (used when auto_checkpoint: true).
+    checkpoint_dir: "EXPERIMENT/[SCENARIO_NAME]/checkpoints"
+    # Root path for per-turn JSON records written by each player each round.
+    # Must match setting.record_path in simulation.yml and extras.record_path in players.yml.
+    record_path: "EXPERIMENT/[SCENARIO_NAME]/records"
+    # Write each player's TurnResult to disk after every round.
+    # Produces N_players JSON files per round under record_path/turns/.
+    # Set false to disable disk writes and reduce I/O (analysis will lose per-round detail).
+    record_rounds: true
+    # Number of turns grouped into one block file on disk (turns/ and messages/).
+    # Controls write granularity: smaller = more frequent flushes, larger = fewer files.
+    # Only the latest block is kept in hot RAM; older blocks remain on disk.
+    turn_block_size: 3
+  
+  # =================================
+  # Monitoring Proxy
+  # =================================
+  monitoring:
+    # Directory for monitoring output (metrics, events, performance counters).
+    record_path: "EXPERIMENT/[SCENARIO_NAME]/monitoring"
+    # Max monitoring entries (metrics/events) kept in hot RAM (monitoring HistoryBuffer hot deque).
+    # Entries exceeding this limit spill to disk under record_path/monitoring/.
+    # Scope: monitoring proxy hot deque; not related to custom_state or round_history_limit.
+    monitor_hot_limit: 3
+  
+  # =================================
+  # Communication Proxy
+  # =================================
+  communication:
+    # Max milliseconds to wait for a message send/receive to complete before timing out.
+    # Rule-based simulations: 5000 ms (local Ray calls are fast; ample buffer).
+    message_timeout_ms: 5000
+    # Compress message payloads before putting into Ray object store.
+    # Reduces object store usage at the cost of CPU for compress/decompress.
+    enable_compression: true
+  
+  # =================================
+  # Resource Proxy (for MCP servers, external APIs)
+  # =================================
+  resource:
+    # List of MCP server configs each in format {name, endpoint, capabilities}.
+    # Leave empty for rule-based simulations that do not call external tools.
+    mcp_servers: []
+    # Cache responses from external resource calls to avoid redundant API requests.
+    # Useful when multiple players query the same external data source per round.
+    enable_caching: false

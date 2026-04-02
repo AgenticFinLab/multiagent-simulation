@@ -1,24 +1,21 @@
 """MASim Communication Module.
 
-Provides message types and channel for cross-component communication.
+Provides the channel wire type and channel for cross-component communication.
 
 base.py exports:
-    - PayloadType, MessageType, MessagePriority (types/enums)
-    - Message (core dataclass)
-    - CommunicationChannel (abstract base class with message building methods)
+    - SimPacket (channel wire envelope dataclass)
+    - CommunicationChannel (abstract base class)
 
 general.py exports:
     - GeneralCommunicationChannel (concrete implementation)
+
+Note: Message, MessageType, MessagePriority are now in masim.proxy
+      (proximity principle — they are proxy-layer types).
 """
 
 from masim.communication.base import (
-    # Type aliases
-    PayloadType,
-    # Enums
-    MessageType,
-    MessagePriority,
-    # Core dataclass
-    Message,
+    # Channel wire type
+    SimPacket,
     # Abstract base class
     CommunicationChannel,
 )
@@ -29,11 +26,8 @@ from masim.communication.general import (
 )
 
 __all__ = [
-    # base.py - Types
-    "PayloadType",
-    "MessageType",
-    "MessagePriority",
-    "Message",
+    # base.py - Wire type
+    "SimPacket",
     "CommunicationChannel",
     # general.py - Channel
     "GeneralCommunicationChannel",

@@ -1,0 +1,1 @@
+"""HerdEffect example module."""
