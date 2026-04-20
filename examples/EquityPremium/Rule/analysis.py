@@ -468,5 +468,68 @@ def main():
     return summary
 
 
+def _load_data(results) -> Dict[str, Any]:
+    """Extract prices and trades from a SimulationResults object.
+
+    Data sources
+    ------------
+    Coordinator  → batch store 'stock' (flat time-series)
+    Player turns → decision_payload fields bid_price / stock_qty / strategy / investor
+
+    Returns
+    -------
+    dict with keys:
+        prices : list[float]
+        trades : dict[str, list]
+    """
+    coordinators = list(results.players_by_role("coordinator").values())
+    prices = list(coordinators[0].batch("stock").all()) if coordinators else []
+    trades = {}
+    for pid, player in results.players_by_role("player").items():
+        payloads_by_round = player.turns.payloads()
+        if payloads_by_round:
+            trades[pid] = [
+                {**p, "round": rn} for rn, p in sorted(payloads_by_round.items())
+            ]
+    return {"prices": prices, "trades": trades}
+
+
+def analyze_equity_premium(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
+    """Perform equity premium analysis using extracted data."""
+    os.makedirs(output_dir, exist_ok=True)
+    prices = data["prices"]
+    trades = data["trades"]
+
+    premium_metrics = calculate_equity_premium(prices, len(prices))
+    if not premium_metrics:
+        print("Insufficient data for equity premium analysis")
+        return {}
+
+    horizons = [1, 5, 10, 20, 50, 100]
+    horizons = [h for h in horizons if h < len(prices)]
+    loss_probs = calculate_loss_probability(prices, horizons)
+    allocations = analyze_investor_allocations(trades)
+
+    plot_equity_premium_analysis(
+        {"prices": prices, "trades": trades},
+        premium_metrics,
+        loss_probs,
+        allocations,
+        output_dir,
+    )
+    summary = generate_summary(
+        {"prices": prices, "trades": trades},
+        premium_metrics,
+        loss_probs,
+        allocations,
+    )
+
+    summary_path = os.path.join(output_dir, "summary.json")
+    with open(summary_path, "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2)
+
+    return summary
+
+
 if __name__ == "__main__":
     main()

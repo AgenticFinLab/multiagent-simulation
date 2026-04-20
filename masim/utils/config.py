@@ -93,6 +93,11 @@ class IncludeLoader(yaml.SafeLoader):
 IncludeLoader.add_constructor("!include", IncludeLoader.include)
 
 
+# Keys that are NOT player definitions when found inside the `players` dict.
+# These are metadata sections that get promoted to config top-level.
+_NON_PLAYER_KEYS = {"knowledge"}
+
+
 def expand_player_instances(config: Dict[str, Any]) -> None:
     """
     Expand player templates into individual named instances.
@@ -117,6 +122,27 @@ def expand_player_instances(config: Dict[str, Any]) -> None:
         config: Full loaded configuration dict (with 'players' and 'topology' keys).
     """
     players = config["players"]
+
+    # ------------------------------------------------------------------
+    # Step 0: Extract non-player metadata keys from players dict
+    # ------------------------------------------------------------------
+    # Keys like 'knowledge' are NOT player definitions.  They are metadata
+    # that belongs in the config top-level.  Extract them before iterating
+    # over player definitions, then promote them to config top-level.
+    # ------------------------------------------------------------------
+    for key in _NON_PLAYER_KEYS:
+        if key in players and key not in config:
+            config[key] = players.pop(key)
+        elif key in players and key in config:
+            # Both exist: players.yml version wins (more specific)
+            import logging
+
+            logging.getLogger("masim.config").warning(
+                "Key '%s' found in both players.yml and simulation.yml; "
+                "using players.yml value",
+                key,
+            )
+            config[key] = players.pop(key)
 
     new_players: Dict[str, Any] = {}
     # Maps each base key to its list of expanded instance keys.

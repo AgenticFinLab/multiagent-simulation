@@ -1,0 +1,451 @@
+# =============================================================================
+# [SCENARIO_NAME] Full Players Configuration Template
+# =============================================================================
+# This template covers ALL variant types: Rule, LLM, RuleLLM, Rag.
+# Remove blocks/fields that do not apply to your variant (see rules below).
+#
+# =============================================================================
+# VARIANT-SPECIFIC FIELD RULES
+# =============================================================================
+#   ┌──────────┬─────────┬──────────┬─────────────────┬──────────────────┐
+#   │ Field    │ Rule    │ LLM      │ RuleLLM         │ Rag              │
+#   ├──────────┼─────────┼──────────┼─────────────────┼──────────────────┤
+#   │ llm:     │ OMIT   │ REQUIRED │ REQUIRED        │ REQUIRED         │
+#   │ knowledge:│ OMIT  │ OMIT     │ OMIT            │ REQUIRED (top)   │
+#   │ private_  │        │          │                 │                  │
+#   │ knowledge:│ OMIT   │ OMIT     │ OMIT            │ REQUIRED (agent) │
+#   └──────────┴─────────┴──────────┴─────────────────┴──────────────────┘
+#
+# =============================================================================
+# FILE STRUCTURE
+# =============================================================================
+#   players.yml
+#   ├── knowledge:                    ← Rag ONLY (shared config, promoted to top-level by loader)
+#   ├── market:                       ← ALWAYS (rule-based coordinator)
+#   │   ├── name, class, num_instances, config, persona
+#   │   └── config.extras: scenario-specific market parameters
+#   ├── [agent_type]:                 ← 1..N agent types
+#   │   ├── name, class, num_instances, config, persona
+#   │   ├── config.extras.llm:       ← LLM / RuleLLM / Rag ONLY
+#   │   └── config.extras.private_knowledge:  ← Rag ONLY
+#   └── ...
+#
+# =============================================================================
+# CRITICAL RULES
+# =============================================================================
+#   - NO class constants in players.py — all parameters go into extras
+#   - NO .get() with default values — direct access only, fail fast
+#   - num_instances is REQUIRED for every player (even market)
+#   - rag: MUST be nested inside private_knowledge: (NOT at top level of extras)
+#   - knowledge: at file top is extracted by config loader, NOT treated as a player
+#
+# =============================================================================
+# ABOUT extras: SCENARIO-SPECIFIC, NOT FRAMEWORK-MANDATED
+# =============================================================================
+# The extras dict is a FREE-FORM key-value store. The framework does NOT
+# prescribe what goes inside extras — every field is defined by YOUR scenario's
+# players.py code. The examples below (initial_cash, price_impact, etc.) are
+# ONLY illustrative for a typical financial market simulation.
+#
+# YOUR scenario may use completely different parameter names and values.
+# What matters is: players.py accesses extras["field_name"] directly,
+# and the same field_name must exist in this YAML. They must match exactly.
+#
+# To create a new scenario:
+#   1. Define what parameters each agent type needs in players.py
+#   2. Add those parameters here under extras with their default values
+#   3. There is no step 3 — the framework just passes extras through
+# =============================================================================
+
+# =============================================================================
+# KNOWLEDGE BLOCK (Rag variant ONLY — OMIT for Rule / LLM / RuleLLM)
+# =============================================================================
+# This block is co-located with players for discoverability but is NOT a player
+# definition. The config loader (expand_player_instances in masim/utils/config.py)
+# automatically detects "knowledge" inside players and promotes it to config
+# top-level, making it accessible as config["knowledge"] / SimulationConfig.knowledge.
+#
+# ARCHITECTURE:
+#   global_uri/                        # Shared document root directory
+#   ├── source/                        # Original PDF files
+#   ├── MinerU_processed/              # MinerU-parsed Markdown output
+#   │   ├── <pdf_name>/<pdf_name>.md   # One subdir per PDF
+#   │   └── ...
+#   └── rag_index/                     # Shared LlamaIndex vector store
+#       ├── default__vector_store.json # Embedding vectors (the core index)
+#       ├── docstore.json              # Document text + metadata
+#       └── index_store.json           # Index structure metadata
+#
+# PROCESSING FLOW:
+#   1. ResourceManager discovers PDFs from resource_csv entries
+#   2. Unprocessed PDFs → MinerU API → Markdown in MinerU_processed/
+#   3. KnowledgeManager builds shared RAG index from processed Markdown
+#   4. Runner injects knowledge_config into each RAG agent's extras
+#   5. Each agent: loads shared index → copies to local → queries per decision
+#
+# Per-agent knowledge overrides are in each agent's private_knowledge.rag block.
+# The knowledge: block here provides SHARED defaults for all agents.
+# If this block is also present in simulation.yml, the players.yml version wins.
+# =============================================================================
+# knowledge:
+#   # Backend storage type. Determines how documents are accessed.
+#   # "local"   = local filesystem (single machine, default)
+#   # "shared"  = network mount / NFS (multi-server)
+#   # "remote"  = cloud object storage S3/OSS (distributed)
+#   backend: "local"
+#   # Base directory for ALL shared documents (PDFs, MinerU output, RAG index).
+#   # All other paths in knowledge are resolved relative to this directory.
+#   global_uri: "examples/document-sources"
+#   # List of resource descriptors for discovering shared documents.
+#   # Each entry can be:
+#   #   - A CSV file path: rows with source_type=file and .pdf URLs are collected.
+#   #     CSV columns: agent_type, book_title, author, year, topic, source_type, url, notes
+#   #     Code filters rows by agent_type matching the agent's identity at runtime.
+#   #   - A directory path: code auto-discovers all .pdf files inside (recursive).
+#   resource_csv:
+#     - "examples/document-sources/books.csv"
+#     - "examples/document-sources/source"
+#   preprocessing:
+#     # PDF parser engine. Currently only "mineru" is supported.
+#     # MinerU converts PDF → Markdown via cloud API (requires MINERU_API_KEY).
+#     parser: "mineru"
+#     # Seconds allowed per page for MinerU API call.
+#     # Adjusts dynamically for large PDFs (longer timeout = more reliable).
+#     timeout_per_page: 30
+#     # Maximum page count per PDF. PDFs exceeding this are split into chunks
+#     # before parsing. Each chunk is processed independently by MinerU.
+#     max_pages: 250
+#     # Subdirectory name for MinerU output, relative to global_uri/.
+#     # Already-processed PDFs are detected by checking for cached .md files here.
+#     output_position: "MinerU_processed"
+#   # -----------------------------------------------------------------
+#   # RAG Configuration (shared defaults for all agents)
+#   # -----------------------------------------------------------------
+#   # These values serve as defaults for ALL agents. Each agent can override
+#   # specific fields in its private_knowledge.rag block below.
+#   # The merge rule: start with these defaults, then apply per-agent overrides.
+#   # output_position paths are relative to global_uri.
+#   # -----------------------------------------------------------------
+#   rag:
+#     # Subdirectory for shared RAG index storage, relative to global_uri/.
+#     # All agents share this index at init time; each agent copies it to
+#     # its own local workspace for read/write isolation during simulation.
+#     output_position: "rag_index"
+#     # Embedding provider type.
+#     # "litellm"     = LiteLLM unified API (supports Hunyuan via OpenAI-compatible endpoint)
+#     # "huggingface" = Local HuggingFace embeddings (no API key required, offline)
+#     # "openai"      = OpenAI embeddings API
+#     embed_type: "litellm"
+#     # Embedding model name. Depends on embed_type:
+#     #   litellm:     "openai/hunyuan-embedding" (Hunyuan via OpenAI-compatible API)
+#     #   huggingface: "BAAI/bge-small-en-v1.5"   (local, 384-dim, fast)
+#     #   openai:      "text-embedding-3-small"     (OpenAI API)
+#     embed_model: "openai/hunyuan-embedding"
+#     # API key for embedding service. Uses {{ ENV_VAR }} template syntax.
+#     # Resolved at runtime by ResourceManager.resolve_template_var().
+#     # For litellm/Hunyuan: HUNYUAN_API_KEY | For openai: OPENAI_API_KEY
+#     # For huggingface: omit this field entirely.
+#     embed_api_key: "{{ HUNYUAN_API_KEY }}"
+#     # API base URL for embedding service. Only needed for litellm/openai.
+#     # Hunyuan: "https://api.hunyuan.cloud.tencent.com/v1"
+#     # For huggingface: omit this field entirely.
+#     embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+#     # Chunk size in tokens for document splitting (SentenceSplitter).
+#     # Larger chunks = more context per retrieval, but less precise matching.
+#     chunk_size: 512
+#     # Overlap in tokens between consecutive chunks.
+#     # Ensures context continuity across chunk boundaries.
+#     chunk_overlap: 64
+
+# =============================================================================
+# MARKET / COORDINATOR (REQUIRED — always present, rule-based)
+# =============================================================================
+# The market is always a rule-based coordinator (Level 0).
+# It executes before all investors and maintains market state (price, order book).
+# NEVER add llm: or private_knowledge: to the market.
+#
+# MANDATORY FIELDS (framework-enforced):
+#   name, class, num_instances, config.identity, config.role, config.steps_per_turn
+#
+# SCENARIO-SPECIFIC FIELDS (extras — define whatever your Market class needs):
+#   The example values below are for a typical price-impact market model.
+#   Replace with whatever parameters YOUR Market class reads from extras.
+# =============================================================================
+market:
+  name: "Market"
+  class: "examples.[SCENARIO_NAME].[Variant].players:Market"
+  # REQUIRED: num_instances — always 1 for market (single coordinator)
+  num_instances: 1
+  config:
+    identity: "market"
+    # coordinator = Level 0 (executes first, before all players)
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      # [FRAMEWORK] Output directory for experiment records
+      record_path: "EXPERIMENT/[SCENARIO_NAME]/[Variant]/records"
+      # -----------------------------------------------------------------
+      # [EXAMPLE] Market-specific parameters for a typical price-impact model
+      # -----------------------------------------------------------------
+      # These are EXAMPLES only. Replace with whatever YOUR Market class needs.
+      # Your players.py Market class accesses these via self.config.extras["field"].
+      # -----------------------------------------------------------------
+      # Starting price of the asset at round 0
+      # initial_price: 100.0
+      # True fundamental value of the asset (used by rational agents for reference)
+      # fundamental_value: 100.0
+      # Price impact coefficient: how much net order flow moves the price.
+      # Higher = more responsive to supply/demand imbalance.
+      # Typical: 0.05 (gentle) to 0.2 (aggressive)
+      # price_impact: 0.05
+      # Mean reversion strength: how strongly price pulls toward fundamental_value.
+      # 0.0 = no reversion (pure random walk with drift), 0.05 = moderate reversion.
+      # mean_reversion: 0.02
+      # Random noise standard deviation added to price each round.
+      # Higher = more volatile price movements even without trading.
+      # noise_std: 0.5
+      # Max entries kept in RAM for HistoryBuffers stored in custom_state.
+      # Entries exceeding this limit are flushed to disk automatically.
+      # custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# =============================================================================
+# INVESTOR TYPE 1 (full annotated template — replicate for each agent type)
+# =============================================================================
+# This block shows ALL possible blocks across all variants with detailed notes.
+# Only investor_1 has full annotations; types 2-5 are minimal stubs.
+#
+# MANDATORY FIELDS (framework-enforced):
+#   name, class, num_instances, config.identity, config.role, config.steps_per_turn
+#
+# CONDITIONAL BLOCKS (include based on variant type):
+#   llm:             — LLM / RuleLLM / Rag ONLY. OMIT for Rule.
+#   private_knowledge: — Rag ONLY. OMIT for Rule / LLM / RuleLLM.
+#
+# SCENARIO-SPECIFIC FIELDS (extras — define whatever your Player class needs):
+#   The example values below are for a typical investor in a financial sim.
+#   Replace with whatever parameters YOUR Player class reads from extras.
+# =============================================================================
+investor_1:
+  name: "Investor Type 1"
+  class: "examples.[SCENARIO_NAME].[Variant].players:InvestorType1"
+  # REQUIRED: num_instances — number of identical copies to spawn.
+  # The expander deep-copies this block N times, assigning:
+  #   identity = "investor_1_1" … "investor_1_N"
+  #   name     = "Investor Type 1 1" … "Investor Type 1 N"
+  # topology.yml uses the BASE key ("investor_1") — expander resolves instances.
+  # Use num_instances: 1 for a single instance (identity = key unchanged, no suffix).
+  # Omitting num_instances entirely is a config error and will raise KeyError.
+  num_instances: 1
+  config:
+    identity: "investor_1"
+    # player = Level 1+ execution (after coordinator)
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      # [FRAMEWORK] Output directory for experiment records
+      record_path: "EXPERIMENT/[SCENARIO_NAME]/[Variant]/records"
+
+      # -----------------------------------------------------------------
+      # [EXAMPLE] Scenario-specific investor parameters
+      # -----------------------------------------------------------------
+      # These are EXAMPLES for a typical financial market simulation.
+      # YOUR scenario may use completely different parameter names.
+      # The only requirement: field names here must match what players.py
+      # accesses via self.config.extras["field_name"].
+      # -----------------------------------------------------------------
+      # Starting cash balance
+      # initial_cash: 10000.0
+      # Starting share position (positive = long, negative = short)
+      # initial_position: 0.0
+      # Max entries kept in RAM for HistoryBuffers stored in custom_state.
+      # Entries exceeding this limit are flushed to disk automatically.
+      # custom_state_hot_limit: 3
+
+      # -----------------------------------------------------------------
+      # [EXAMPLE] Strategy-specific parameters
+      # -----------------------------------------------------------------
+      # Add any parameters your strategy implementation needs.
+      # These are accessed directly in players.py via extras["param_name"].
+      # Example for momentum strategy:
+      #   momentum_window: 5
+      #   momentum_threshold: 0.02
+      # Example for fundamental analysis:
+      #   fundamental_weight: 0.8
+      #   valuation_gap_threshold: 0.1
+      # -----------------------------------------------------------------
+
+      # =================================
+      # LLM Configuration (LLM / RuleLLM / Rag ONLY — OMIT for Rule)
+      # =================================
+      # This block configures the LLM inference call for each agent turn.
+      # The framework uses this to construct InferInput for the LLM proxy.
+      #
+      # sys_message: Python import path for the system prompt template.
+      #   Format: "examples.[SCENARIO].[Variant].prompts:PROMPT_CONSTANT"
+      #   The constant is a string with {variable} placeholders filled at runtime.
+      #   For RuleLLM/Rag: contains both behavioral rules AND the role description.
+      #   For LLM: contains only the role description (no explicit rules).
+      #
+      # user_message: Python import path for the user prompt template.
+      #   Contains the per-round market data + decision request.
+      #   Usually shared across all agent types in the same scenario.
+      #
+      # lm_type: "api" = remote API call (vs. "local" for on-device models).
+      #
+      # lm_name: LLM model identifier in LiteLLM format.
+      #   "ark/doubao-seed-1-6-lite-251015" = ByteDance Doubao (via ARK API)
+      #   Requires ARK_API_KEY in .env
+      #
+      # generation_config: LLM generation parameters.
+      #   temperature: 0.0-1.0. Lower = more deterministic. Higher = more creative.
+      #     Rule/LLM: 0.3 (moderate consistency)
+      #     Noise traders: 0.5+ (more randomness)
+      #   max_new_tokens: Maximum tokens in LLM response.
+      #     500 is sufficient for structured trading decisions.
+      # =================================
+      # llm:
+      #   sys_message: "examples.[SCENARIO_NAME].[Variant].prompts:LLM_TYPE1_SYS"
+      #   user_message: "examples.[SCENARIO_NAME].[Variant].prompts:LLM_USER_TEMPLATE"
+      #   lm_type: "api"
+      #   lm_name: "ark/doubao-seed-1-6-lite-251015"
+      #   generation_config:
+      #     temperature: 0.3
+      #     max_new_tokens: 500
+
+      # =================================
+      # Private Knowledge / RAG (Rag variant ONLY — OMIT for Rule / LLM / RuleLLM)
+      # =================================
+      # Per-agent RAG configuration. Each agent has its own isolated RAG index
+      # for read/write safety during simulation (no cross-agent interference).
+      #
+      # INITIALIZATION FLOW (in players.py RagLLMInvestor._initialize_rag):
+      #   1. ResourceManager.resolve_agent_knowledge() merges global defaults
+      #      (from knowledge: block) with per-agent private_knowledge overrides.
+      #   2. Try loading local existing index at <local_uri>/rag_index/
+      #   3. If not found, try copying from shared index at <global_uri>/rag_index/
+      #   4. If not found, build from scratch from processed documents
+      #
+      # from_global_resources: Whether to include resources from the shared
+      #   knowledge: block (resource_csv, preprocessing). Always true for Rag.
+      #
+      # local_resources: Per-agent local file configuration.
+      #   local_uri: Agent's private workspace directory (auto-generated if empty).
+      #     Path convention: EXPERIMENT/[SCENARIO]/[Variant]/records/[agent_type]/
+      #     Must NOT include agent_type as a subdirectory name.
+      #     Each agent gets its own isolated directory.
+      #   local_resources: List of agent-specific files (beyond global ones).
+      #     Typically empty — all resources come from global_uri.
+      #
+      # rag: Per-agent RAG index configuration (nested inside private_knowledge!).
+      #   from_global_index_dir: List of shared index directories to copy from.
+      #     Each entry is a subdirectory name under global_uri/.
+      #     Typical: ["rag_index"] (the shared index built by KnowledgeManager).
+      #   local_index_dir: Per-agent local index directory.
+      #     "" = auto-generated as <local_uri>/rag_index/
+      #     Set explicitly only if you need a non-standard path.
+      #   embed_type, embed_model, embed_api_key, embed_api_base:
+      #     These default to the shared knowledge.rag values if not specified.
+      #     Override here ONLY if this agent type needs a different embedding model.
+      #   chunk_size, chunk_overlap:
+      #     Override shared defaults if this agent type needs different chunking.
+      #   top_k: Number of top-k chunks to retrieve per query.
+      #     Higher = more context in each decision prompt, but slower retrieval.
+      #     Typical: 3-5 for focused retrieval, 10 for broad exploration.
+      # =================================
+      # private_knowledge:
+      #   from_global_resources: true
+      #   local_resources:
+      #     local_uri: ""
+      #     local_resources: []
+      #   rag:
+      #     from_global_index_dir:
+      #       - "rag_index"
+      #     local_index_dir: ""
+      #     embed_type: "litellm"
+      #     embed_model: "openai/hunyuan-embedding"
+      #     embed_api_key: "{{ HUNYUAN_API_KEY }}"
+      #     embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+      #     chunk_size: 512
+      #     chunk_overlap: 64
+      #     top_k: 5
+
+  persona: !include persona.yml
+
+# =============================================================================
+# INVESTOR TYPE 2 (stub — fill in scenario-specific extras)
+# =============================================================================
+investor_2:
+  name: "Investor Type 2"
+  class: "examples.[SCENARIO_NAME].[Variant].players:InvestorType2"
+  num_instances: 1
+  config:
+    identity: "investor_2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]/[Variant]/records"
+      # [SCENARIO-SPECIFIC] Add your investor parameters here
+      # llm: ... (LLM/RuleLLM/Rag only)
+      # private_knowledge: ... (Rag only)
+  persona: !include persona.yml
+
+# =============================================================================
+# INVESTOR TYPE 3 (stub — fill in scenario-specific extras)
+# =============================================================================
+investor_3:
+  name: "Investor Type 3"
+  class: "examples.[SCENARIO_NAME].[Variant].players:InvestorType3"
+  num_instances: 1
+  config:
+    identity: "investor_3"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]/[Variant]/records"
+      # [SCENARIO-SPECIFIC] Add your investor parameters here
+  persona: !include persona.yml
+
+# =============================================================================
+# INVESTOR TYPE 4 (stub — fill in scenario-specific extras)
+# =============================================================================
+investor_4:
+  name: "Investor Type 4"
+  class: "examples.[SCENARIO_NAME].[Variant].players:InvestorType4"
+  num_instances: 1
+  config:
+    identity: "investor_4"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]/[Variant]/records"
+      # [SCENARIO-SPECIFIC] Add your investor parameters here
+  persona: !include persona.yml
+
+# =============================================================================
+# INVESTOR TYPE 5 (stub — fill in scenario-specific extras)
+# =============================================================================
+investor_5:
+  name: "Investor Type 5"
+  class: "examples.[SCENARIO_NAME].[Variant].players:InvestorType5"
+  num_instances: 1
+  config:
+    identity: "investor_5"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/[SCENARIO_NAME]/[Variant]/records"
+      # [SCENARIO-SPECIFIC] Add your investor parameters here
+  persona: !include persona.yml

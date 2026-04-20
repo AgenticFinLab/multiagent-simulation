@@ -26,6 +26,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+# Import path helper for nested scenario support
+from masim.interface.config_loader import _experiment_path
+
 EXPERIMENT_DIR = Path("EXPERIMENT")
 
 
@@ -119,7 +122,7 @@ def has_experiment_data(scenario_name: str) -> bool:
     Returns:
         True when at least one msg_block_*.json or batch_block_*.json exists.
     """
-    base = EXPERIMENT_DIR / scenario_name
+    base = _experiment_path(scenario_name)
     comm_dir = base / "communication"
     hist_dir = base / "records" / "history"
 
@@ -140,7 +143,7 @@ def load_rounds(scenario_name: str) -> List[RoundData]:
     Returns:
         List of RoundData sorted by round_num (1-indexed).
     """
-    base = EXPERIMENT_DIR / scenario_name
+    base = _experiment_path(scenario_name)
 
     # ── 1. Load execution_levels from history blocks ──────────────────────
     exec_levels: Dict[int, List[List[str]]] = {}

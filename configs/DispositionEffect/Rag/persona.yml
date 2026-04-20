@@ -1,0 +1,33 @@
+# -----------------------------------------------------------------------------
+# MARKET
+# -----------------------------------------------------------------------------
+market:
+  type: proxy
+  checkpoint_dir: "EXPERIMENT/DispositionEffect/Rag/checkpoints"
+  record_path: "EXPERIMENT/DispositionEffect/Rag/records"
+  monitoring:
+    record_path: "EXPERIMENT/DispositionEffect/Rag/monitoring"
+
+# -----------------------------------------------------------------------------
+# RAG INVESTORS
+# -----------------------------------------------------------------------------
+rag_disposition:
+  type: player
+  checkpoint_dir: "EXPERIMENT/DispositionEffect/Rag/checkpoints"
+  record_path: "EXPERIMENT/DispositionEffect/Rag/records"
+  monitoring:
+    record_path: "EXPERIMENT/DispositionEffect/Rag/monitoring"
+
+rag_rational:
+  type: player
+  checkpoint_dir: "EXPERIMENT/DispositionEffect/Rag/checkpoints"
+  record_path: "EXPERIMENT/DispositionEffect/Rag/records"
+  monitoring:
+    record_path: "EXPERIMENT/DispositionEffect/Rag/monitoring"
+
+rag_tax_aware:
+  type: player
+  checkpoint_dir: "EXPERIMENT/DispositionEffect/Rag/checkpoints"
+  record_path: "EXPERIMENT/DispositionEffect/Rag/records"
+  monitoring:
+    record_path: "EXPERIMENT/DispositionEffect/Rag/monitoring"

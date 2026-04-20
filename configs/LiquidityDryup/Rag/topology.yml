@@ -1,0 +1,27 @@
+# =============================================================================
+# LiquidityDryupRag - Topology Configuration
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - ragllm_market_maker
+    - ragllm_liquidity_demander
+    - ragllm_arbitrageur
+    - ragllm_value
+    - ragllm_forced_seller
+
+  ragllm_market_maker:
+    - market
+  ragllm_liquidity_demander:
+    - market
+  ragllm_arbitrageur:
+    - market
+  ragllm_value:
+    - market
+  ragllm_forced_seller:
+    - market

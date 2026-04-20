@@ -14,6 +14,7 @@ sys.path.insert(0, str(project_root))
 from masim.interface.config_loader import (
     discover_scenarios,
     get_scenario_info,
+    _configs_path,
 )
 from masim.interface.data_loader import has_experiment_data, load_rounds
 from masim.interface.simulation_runner import (
@@ -519,7 +520,9 @@ def _start_simulation(scenario_name: str, info: dict):
     st.session_state.viewed_round_idx = 0
     st.session_state.replay_active = False
 
-    config_path = info.get("config_path", f"configs/{scenario_name}/simulation.yml")
+    config_path = info.get("config_path") or str(
+        _configs_path(scenario_name) / "simulation.yml"
+    )
 
     if st.session_state.use_mock:
         st.session_state.runner = MockSimulationRunner(config_path)

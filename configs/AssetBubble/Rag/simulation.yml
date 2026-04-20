@@ -6,6 +6,10 @@
 # Each agent downloads/caches reference documents and queries its RAG index
 # to inject relevant context into every trading decision prompt.
 #
+# NOTE: The shared knowledge: block is defined in players.yml (at the top,
+# before the market definition). The config loader (expand_player_instances)
+# automatically detects and promotes it to config top-level.
+#
 # Usage:
 #   python examples/AssetBubble/Rag/run_bubble_ragllm.py -c configs/AssetBubble/Rag/simulation.yml
 # =============================================================================

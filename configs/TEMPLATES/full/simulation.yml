@@ -1,0 +1,202 @@
+# =============================================================================
+# [SCENARIO_NAME] Full Simulation Configuration Template
+# =============================================================================
+# This template covers ALL variant types:
+#   Rule     — Pure rule-based (no LLM, no RAG)
+#   LLM      — LLM-driven decisions (no explicit rules in prompt, no RAG)
+#   RuleLLM  — LLM + explicit quantitative rules in system prompt
+#   Rag      — RuleLLM + RAG knowledge retrieval per decision
+#
+# FIELD PRESENCE RULES:
+#   - REQUIRED blocks: setting, environment, ray, players, topology, communication
+#     These are always present regardless of variant type.
+#   - OPTIONAL blocks: knowledge
+#     Only present for Rag variants. If your simulation does not use RAG,
+#     do NOT include the knowledge block at all — omit it entirely.
+#   - Within players.yml:
+#     llm: block       — REQUIRED for LLM / RuleLLM / Rag variants
+#                        OMIT for Rule variant
+#     private_knowledge: — REQUIRED for Rag variant only
+#                         OMIT for Rule / LLM / RuleLLM variants
+#
+# VARIANT-SPECIFIC NOTES:
+#   Rule:     No llm: block, no private_knowledge:, no knowledge: block
+#   LLM:      Has llm: block, no private_knowledge:, no knowledge: block
+#   RuleLLM:  Has llm: block (with rules in prompts), no private_knowledge:, no knowledge: block
+#   Rag:      Has llm: block (with rules in prompts), private_knowledge:, AND knowledge: block
+#
+# Environment Variables (variant-dependent):
+#   Rule:     None required
+#   LLM:      ARK_API_KEY (ByteDance Doubao LLM API)
+#   RuleLLM:  ARK_API_KEY
+#   Rag:      ARK_API_KEY + HUNYUAN_API_KEY (embedding) + MINERU_API_KEY (PDF parsing)
+#
+# Reference Implementations:
+#   Rule:     configs/AssetBubble/Rule/
+#   LLM:      configs/AssetBubble/LLM/
+#   RuleLLM:  configs/AssetBubble/RuleLLM/
+#   Rag:      configs/AssetBubble/Rag/
+#
+# Usage:
+#   python examples/[SCENARIO_NAME]/[Variant]/run_[scenario]_[variant].py \
+#       -c configs/[SCENARIO_NAME]/[Variant]/simulation.yml
+# =============================================================================
+
+# =============================================================================
+# SIMULATION SETTINGS (REQUIRED — always present)
+# =============================================================================
+setting:
+  # Unique identifier for this simulation run.
+  # Used in Ray actor names, log messages, and experiment output paths.
+  # Convention: [scenario_name]_[variant]_simulation (e.g. asset_bubble_rag_simulation)
+  name: "[scenario_name]_[variant]_simulation"
+  # Human-readable description (informational only, not parsed by framework).
+  description: "[Description of the simulation and its variant type]"
+  # Total number of rounds to execute.
+  # The loop in GeneralSimulator.run() iterates range(1, total_rounds+1).
+  # Typical values: 200 for rule-based, 50-200 for LLM/RAG (API latency is the bottleneck).
+  total_rounds: 200
+  # Max round results kept in hot RAM (HistoryBuffer hot deque).
+  # Results beyond this limit spill to disk under record_path/history/.
+  # simulator.run() returns only hot entries — NOT all round results.
+  # Rule of thumb: 3 (enough for last-N-round analysis without RAM pressure).
+  round_history_limit: 3
+  # Root directory for ALL output artifacts:
+  #   records/    — per-round turn results (BlockBasedStoreManager JSON files)
+  #   diagrams/   — topology visualization PNGs (rate-limited by save_diagram_interval)
+  #   history/    — HistoryBuffer cold storage (spilled from hot deque)
+  #   checkpoints/— actor state snapshots (if auto_checkpoint: true in persona.yml)
+  # MUST be consistent with extras.record_path in players.yml and proxy paths in persona.yml.
+  record_path: "EXPERIMENT/[SCENARIO_NAME]/[Variant]/records"
+  # Save topology diagram every N rounds (0 = disabled).
+  # Rendering is auto-skipped when topology structure is unchanged —
+  # for static topologies only 1 diagram is written regardless of this value.
+  # For large-scale runs (N > 100 players), set to 0 to disable entirely.
+  save_diagram_interval: 50
+
+# =============================================================================
+# KNOWLEDGE CONFIGURATION (OPTIONAL — Rag variant ONLY)
+# =============================================================================
+# For Rag variants, the knowledge: block is defined in players.yml (at the top,
+# before the market definition). The config loader (expand_player_instances in
+# masim/utils/config.py) automatically detects "knowledge" inside the players
+# dict and promotes it to config top-level, making it accessible as
+# config["knowledge"] / SimulationConfig.knowledge.
+#
+# Do NOT duplicate the knowledge: block here in simulation.yml.
+# See players.yml for the full annotated knowledge configuration template.
+# =============================================================================
+
+# =============================================================================
+# ENVIRONMENT CONFIGURATION (REQUIRED — always present)
+# =============================================================================
+environment:
+  # Path to .env file containing API keys (loaded via python-dotenv).
+  # Rule:     May be empty (no API keys needed)
+  # LLM+:     Must contain ARK_API_KEY (and HUNYUAN_API_KEY / MINERU_API_KEY for Rag)
+  dotenv_path: .env
+  # Working directory for all relative paths in this config.
+  # "." means the project root (where you run the python command from).
+  workspace: "."
+
+# =============================================================================
+# RAY CONFIGURATION (REQUIRED — always present)
+# =============================================================================
+#
+# RESOURCE SIZING PROTOCOL (mandatory for every new scenario):
+#   Only object_store_memory needs to be computed per-scenario.
+#   num_cpus = null always (actors declare num_cpus=0, so the value is irrelevant).
+#
+#   object_store_memory — WHAT IT IS:
+#     This is NOT per-actor memory. It is ONE cluster-wide shared memory pool
+#     (Ray Plasma store, mmap'd shared memory) that holds only the objects
+#     crossing actor boundaries via ray.get() / ray.put(). Each actor's private
+#     heap (custom_state, HistoryBuffer hot deque, all Python variables) lives
+#     entirely outside this pool and is NOT counted or limited here.
+#     Objects are freed from the store as soon as ray.get() returns — they only
+#     live here transiently while being transferred between actors.
+#
+#   object_store_memory derivation (read masim/simulator/general.py phases 2-3):
+#     Per round, the following objects enter the store and are freed after each phase:
+#       Phase 2 (COLLECT):   N_players TurnResult objects  (~600 B actual each)
+#       Phase 3 (DISPATCH):  N_players pending_info lists  (~300 B actual each)
+#                            N_messages Message objects    (~400 B actual each)
+#     Ray minimum allocation = 64 KB per object regardless of actual size.
+#     Peak simultaneous bytes in store = (N_players*2 + N_messages) * 64 KB.
+#     Set object_store_memory = peak_bytes * 10 (10x headroom).
+#     Variant-specific floors:
+#       Rule:     minimum 128 MB (134217728)
+#       LLM:      minimum 512 MB (536870912) — LLM prompt/response strings (~4-8 KB each)
+#       RuleLLM:  minimum 512 MB (536870912) — same as LLM
+#       Rag:      minimum 1 GB  (1073741824) — RAG context strings add ~8-16 KB per TurnResult
+#     Write the concrete integer (bytes) directly — do NOT use null.
+#
+# =============================================================================
+ray:
+  # Ray cluster address (null = start local cluster on this machine)
+  address: null
+  # Ray namespace for actor isolation between experiments.
+  # Prevents name collisions when running multiple simulations concurrently.
+  namespace: "[scenario_name]_[variant]"
+  # Actor name prefix (null = auto-generated)
+  actor_prefix: null
+  # null = Ray auto-detects from machine.
+  # All actors use num_cpus=0 (async, I/O-bound). This value has no scheduling effect.
+  num_cpus: null
+  # GPU count (null = none — all computation is either rule-based or server-side API)
+  num_gpus: null
+  # [FILL IN] ONE shared Plasma pool (NOT per-actor). See sizing protocol above.
+  # Rule: 134217728 | LLM/RuleLLM: 536870912 | Rag: 1073741824
+  object_store_memory: 134217728
+  # Enable Ray dashboard UI (useful for debugging, keep false in production)
+  include_dashboard: false
+  # Ray internal logging level
+  logging_level: "warning"
+  # Forward Ray logs to driver process stdout
+  log_to_driver: false
+  actor_options:
+    # How many times Ray auto-restarts a crashed actor before giving up.
+    # 3 = tolerate up to 3 crashes per actor; 0 = disable auto-restart.
+    max_restarts: 3
+    # How many times Ray retries a failed remote task call.
+    # 1 = retry once before propagating the exception.
+    max_task_retries: 1
+    # Max concurrent tasks inside one actor.
+    # Rule: 4 (CPU-bound, low concurrency needed)
+    # LLM/RAG: 10 (I/O-bound, high concurrency while awaiting API responses)
+    max_concurrency: 4
+  runtime_env:
+    # Override working directory for actor subprocesses (null = inherit workspace)
+    working_dir: null
+    # Extra pip packages for remote Ray clusters
+    pip: []
+    # Extra env vars injected into each actor process
+    env_vars: {}
+  serialization:
+    # Use Apache Arrow for Ray object serialization (faster than pickle)
+    use_arrow: true
+    # Register custom serializers for framework domain objects
+    register_custom_serializers: true
+
+# =============================================================================
+# PLAYERS CONFIGURATION (REQUIRED — imported from players.yml)
+# =============================================================================
+players: !include players.yml
+
+# =============================================================================
+# TOPOLOGY CONFIGURATION (REQUIRED — imported from topology.yml)
+# =============================================================================
+topology: !include topology.yml
+
+# =============================================================================
+# COMMUNICATION CONFIGURATION (REQUIRED — always present)
+# =============================================================================
+communication:
+  # Directory for persisted message logs (JSON block files).
+  storage_path: "EXPERIMENT/[SCENARIO_NAME]/[Variant]/communication"
+  # Whether to persist encoded messages to disk for debugging/replay.
+  # Set false for large-scale runs (N > ~100 players) to reduce write volume.
+  record_messages: true
+  # Number of messages batched per block file by BlockBasedStoreManager.
+  # Higher = fewer files. 500 is sufficient for most scenarios.
+  message_block_size: 500

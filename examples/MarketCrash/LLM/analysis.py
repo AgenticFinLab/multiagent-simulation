@@ -11,13 +11,10 @@ See examples/MarketCrash/Rule/analysis.py for detailed documentation.
 
 import argparse
 import os
-import sys
 
 from masim.utils import load_config, load_results
 
-# Import from rule-based version
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from MarketCrash.analysis import (
+from examples.MarketCrash.Rule.analysis import (
     _load_data,
     analyze_crash,
 )

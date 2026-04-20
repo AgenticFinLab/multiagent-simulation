@@ -1,0 +1,32 @@
+# =============================================================================
+# DispositionEffect Rag Topology Configuration
+# =============================================================================
+# Star topology: Market as central hub, all investors communicate through market
+
+type: "star"
+
+# -----------------------------------------------------------------------------
+# Sources (Level 0 — execute first)
+# -----------------------------------------------------------------------------
+sources:
+  - market
+
+# -----------------------------------------------------------------------------
+# Connections (defines message flow)
+# -----------------------------------------------------------------------------
+connections:
+  # Market → All RAG investors (broadcasts market data)
+  market:
+    - rag_disposition
+    - rag_rational
+    - rag_tax_aware
+
+  # RAG investors → Market (submit orders)
+  rag_disposition:
+    - market
+
+  rag_rational:
+    - market
+
+  rag_tax_aware:
+    - market

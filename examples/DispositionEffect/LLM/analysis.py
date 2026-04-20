@@ -12,13 +12,10 @@ See examples/DispositionEffect/Rule/analysis.py for detailed documentation.
 import argparse
 import json
 import os
-import sys
 
 from masim.utils import load_config, load_results
 
-# Import analysis functions from rule-based version
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from DispositionEffect.analysis import (
+from examples.DispositionEffect.Rule.analysis import (
     analyze_by_strategy,
     plot_disposition_analysis,
     generate_summary,

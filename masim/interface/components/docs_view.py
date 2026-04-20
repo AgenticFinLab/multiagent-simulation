@@ -52,7 +52,7 @@ def render_docs_page(scenario_name: str):
 
     if docs_content is None:
         st.warning(f"No documentation file found for **{display_name}**.")
-        st.info(f"Expected at: `examples/{scenario_name}/explain.md`")
+        st.info(f"Expected at: `examples/<Scenario>/<Variant>/explain.md`")
         return
 
     # Strip the H1 title from the docs (we already show it above)

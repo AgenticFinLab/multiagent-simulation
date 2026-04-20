@@ -1,0 +1,52 @@
+# =============================================================================
+# MarketCrashRuleLLM Simulation Configuration
+# =============================================================================
+# Hybrid: LLM agents guided by explicit rule-based mathematical principles
+# Each agent's system prompt encodes both persona profile AND quantitative rules
+# derived from the rule-based MarketCrash counterpart.
+#
+# Usage:
+#   python examples/MarketCrash/RuleLLM/run_market_crash_rulellm.py -c configs/MarketCrash/RuleLLM/simulation.yml
+# =============================================================================
+
+setting:
+  name: "market_crash_rulellm_simulation"
+  description: "Hybrid rule+LLM market crash: agents follow explicit financial rules encoded in prompts"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "EXPERIMENT/MarketCrash/RuleLLM/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "market_crash_rulellm"
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 536870912
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/MarketCrash/RuleLLM/communication"
+  record_messages: true
+  message_block_size: 500

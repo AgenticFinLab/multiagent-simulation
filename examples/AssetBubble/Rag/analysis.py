@@ -12,13 +12,10 @@ See examples/AssetBubble/Rule/analysis.py for detailed documentation.
 
 import argparse
 import os
-import sys
 
 from masim.utils import load_config, load_results
 
-# Import analysis functions from rule-based version
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from AssetBubble.analysis import analyze_bubble, _load_data
+from examples.AssetBubble.Rule.analysis import analyze_bubble, _load_data
 
 
 def main():

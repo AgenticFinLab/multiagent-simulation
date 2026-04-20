@@ -1,0 +1,27 @@
+# =============================================================================
+# VolatilityClusteringRag - Topology Configuration
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - ragllm_fundamentalist
+    - ragllm_trend_follower
+    - ragllm_noise_trader
+    - ragllm_slow_adapter
+    - ragllm_volatility_trader
+
+  ragllm_fundamentalist:
+    - market
+  ragllm_trend_follower:
+    - market
+  ragllm_noise_trader:
+    - market
+  ragllm_slow_adapter:
+    - market
+  ragllm_volatility_trader:
+    - market

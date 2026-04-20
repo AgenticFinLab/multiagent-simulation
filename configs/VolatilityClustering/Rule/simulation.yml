@@ -4,7 +4,7 @@
 # Demonstrates GARCH-like volatility clustering through heterogeneous agents.
 #
 # Usage:
-#   python examples/VolatilityClustering/run_volatility.py -c configs/VolatilityClustering/simulation.yml
+#   python examples/VolatilityClustering/run_volatility.py -c configs/VolatilityClustering/Rule/simulation.yml
 # =============================================================================
 
 setting:

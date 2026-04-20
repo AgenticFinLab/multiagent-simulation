@@ -31,3 +31,4 @@ llama-index-embeddings-huggingface
 # Web Interface
 streamlit>=1.28
 pyyaml
+llama-index-embeddings-litellm

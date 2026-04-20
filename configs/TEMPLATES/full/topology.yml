@@ -1,0 +1,193 @@
+# =============================================================================
+# [SCENARIO_NAME] Topology Configuration (Full Template — All Variants)
+# =============================================================================
+# Defines the communication structure (message flow) between players.
+#
+# topology.yml is the same structure regardless of variant type (Rule/LLM/RuleLLM/Rag).
+# The only difference between variants is which player keys appear in connections.
+#
+# =============================================================================
+# CORE CONCEPT: Execution Levels
+# =============================================================================
+# The topology determines the ORDER in which players execute each round:
+#
+#   Level 0: "sources" — execute FIRST (typically the market/coordinator)
+#   Level 1+: All other players — determined by shortest path from sources
+#             Players at the same level execute IN PARALLEL within that level.
+#
+# Example (star topology):
+#   Round N:
+#     1. Level 0: market executes → sends market data to all connected investors
+#     2. Level 1: ALL investors execute in parallel → each sends order back to market
+#     3. Round N complete → proceed to Round N+1
+#
+# =============================================================================
+# PATTERN TYPES
+# =============================================================================
+#
+# 1. STAR (most common — recommended for most scenarios)
+#    Market as central hub; all investors ONLY communicate with market.
+#    Investors never talk to each other directly.
+#
+#    Market ←→ Investor_1
+#    Market ←→ Investor_2
+#    Market ←→ Investor_3
+#
+#    Use when: investors only need market data (price, volume) to make decisions.
+#    This is the default pattern for ALL current scenarios.
+#
+# 2. MESH (peer-to-peer)
+#    All players can communicate with all other players.
+#    Useful for: herding scenarios, information cascade simulations.
+#
+#    Investor_1 ←→ Investor_2 ←→ Investor_3
+#         ↕              ↕              ↕
+#       Market         Market         Market
+#
+#    WARNING: mesh generates O(N²) messages per round — expensive for large N.
+#
+# 3. RING (sequential chain)
+#    Each player passes information to the next in a chain.
+#    Useful for: sequential decision-making, rumor propagation.
+#
+#    Market → Investor_1 → Investor_2 → Investor_3 → Market
+#
+# 4. CUSTOM (arbitrary)
+#    Any combination of the above. Define connections as needed.
+#    Some investors talk to market only; others also talk to peers.
+#
+# =============================================================================
+# INSTANCE EXPANSION RULE
+# =============================================================================
+# Player keys in connections must match the BASE keys in players.yml
+# (BEFORE instance expansion). The config loader automatically expands:
+#
+#   players.yml:                 topology.yml:              After expansion:
+#   investor_1:                  connections:               connections:
+#     num_instances: 3             investor_1: [market]       investor_1_1: [market]
+#                                                            investor_1_2: [market]
+#                                                            investor_1_3: [market]
+#
+# You NEVER write "investor_1_1" in topology.yml — always use the base key.
+# The expander handles the rest.
+#
+# =============================================================================
+# HOW TO ADD A NEW AGENT TYPE
+# =============================================================================
+# 1. Add the agent definition in players.yml (e.g., "new_investor:")
+# 2. Add "new_investor" to the market's connection list below
+# 3. Add a "new_investor: [market]" entry in connections below
+# 4. Done — the expander will handle instance expansion automatically
+#
+# =============================================================================
+# HOW TO REMOVE AN AGENT TYPE
+# =============================================================================
+# 1. Remove the agent definition from players.yml
+# 2. Remove the agent key from market's connection list below
+# 3. Remove the agent's own connection entry below
+# 4. Done — topology must be consistent with players.yml
+#
+# IMPORTANT: Every player key in players.yml MUST appear in connections
+# (either as sender or recipient). Orphaned players will not receive messages.
+# =============================================================================
+
+# Topology pattern name (informational — not parsed by framework, for human reference)
+type: "star"
+
+# -----------------------------------------------------------------------------
+# Sources (Level 0 — ALWAYS execute first each round)
+# -----------------------------------------------------------------------------
+# CRITICAL RULES:
+#   - MUST contain at least one entry (empty sources = config error)
+#   - "market" is ALWAYS a source — it must execute first to produce
+#     market data (price, volume, etc.) that investors need for decisions
+#   - You can add other coordinators here if your scenario has multiple
+#   - Sources execute sequentially in list order (if multiple)
+#   - All non-source players execute AFTER all sources complete
+# -----------------------------------------------------------------------------
+sources:
+  - market
+
+# -----------------------------------------------------------------------------
+# Connections (defines message flow between players)
+# -----------------------------------------------------------------------------
+# Format:
+#   sender_key:
+#     - recipient_key_1
+#     - recipient_key_2
+#
+# SEMANTICS:
+#   After sender executes, it sends its output (TurnResult) to each recipient.
+#   Recipients receive these messages as input for THEIR execution.
+#
+# DIRECTION:
+#   Connections are DIRECTED. "A: [B]" means A sends to B, but B does NOT
+#   send to A unless you also add "B: [A]".
+#
+#   For bidirectional communication (typical in star topology):
+#     market: [investor_1]        # market → investor_1 (market data)
+#     investor_1: [market]        # investor_1 → market (submit order)
+#   Both directions must be listed explicitly.
+#
+# KEY MATCHING:
+#   Keys must match player keys in players.yml (BEFORE instance expansion).
+#   The expander automatically resolves base keys to expanded instance keys.
+#   e.g., "investor_1" with num_instances: 3 → connections for
+#         investor_1_1, investor_1_2, investor_1_3
+#
+# SELF-CONNECTIONS:
+#   Do NOT list a player as its own recipient — it's meaningless and wastes resources.
+#
+# COMPLETENESS:
+#   Every player defined in players.yml MUST appear in connections
+#   (either as sender or as a recipient of another sender).
+#   Players not reachable from any source will never execute.
+# -----------------------------------------------------------------------------
+connections:
+  # =================================
+  # Market → Investors
+  # =================================
+  # After the market executes each round, it broadcasts market data
+  # (current price, volume, returns, etc.) to all connected investors.
+  # Every investor that needs market data must be listed here.
+  #
+  # ADD a new investor type: append its base key to this list
+  # REMOVE an investor type: delete its entry from this list
+  # =================================
+  market:
+    - investor_1
+    - investor_2
+    - investor_3
+    - investor_4
+    - investor_5
+    # Add more investor types as needed
+
+  # =================================
+  # Investor → Market
+  # =================================
+  # After each investor executes, it sends its trading decision (order)
+  # back to the market for order matching and price update.
+  #
+  # Each investor type needs its own entry pointing to market.
+  # This creates the bidirectional flow: market → investor → market.
+  #
+  # For peer-to-peer communication (mesh/custom), add other investors
+  # to the recipient list, e.g.:
+  #   investor_1:
+  #     - market
+  #     - investor_2    # also sends to investor_2
+  # =================================
+  investor_1:
+    - market
+
+  investor_2:
+    - market
+
+  investor_3:
+    - market
+
+  investor_4:
+    - market
+
+  investor_5:
+    - market

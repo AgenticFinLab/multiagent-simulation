@@ -1,0 +1,46 @@
+# =============================================================================
+# DispositionEffect Rag Simulation Configuration
+# =============================================================================
+# RAG variant: LLM agents guided by explicit rules (in system prompt) AND
+# real-time knowledge retrieval from a personal RAG library built at init.
+# Each agent queries its RAG index to inject relevant context into decisions.
+#
+# Usage:
+#   python examples/DispositionEffect/Rag/run_disposition_rag.py -c configs/DispositionEffect/Rag/simulation.yml
+# =============================================================================
+
+setting:
+  name: "disposition_effect_rag_simulation"
+  description: "RAG-augmented disposition effect: agents retrieve behavioral finance knowledge per decision"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "EXPERIMENT/DispositionEffect/Rag/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "disposition_effect_rag"
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  # RAG simulations need more memory for knowledge stores
+  object_store_memory: 1073741824
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/DispositionEffect/Rag/communication"
+  record_messages: true
+  message_block_size: 500
