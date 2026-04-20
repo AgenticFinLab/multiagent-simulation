@@ -48,9 +48,11 @@ import logging
 import os
 import random
 import re
+import shutil
 import sys
+import time
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
 
@@ -61,7 +63,13 @@ from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
 from examples.llm_utils import parse_llm_response_with_thinking
-from masim.knowledge import KnowledgeLoader, KnowledgeQuery, KnowledgeStore
+from masim.knowledge import (
+    KnowledgeLoader,
+    KnowledgeQuery,
+    KnowledgeStore,
+    ResourceManager,
+)
+from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
@@ -327,91 +335,265 @@ class RagLLMInvestor(GeneralPlayer):
         )
         self.state.custom_state["llm_client"] = llm_client
 
-        # RAG index
-        rag_cfg = extras["rag"]
+        # RAG index — get rag config from private_knowledge.rag (YAML structure)
+        private_knowledge = extras.get("private_knowledge", {})
+        rag_cfg = private_knowledge.get("rag", extras.get("rag", {}))
         await self._initialize_rag(rag_cfg, llm_client, extras["llm"])
 
     async def _initialize_rag(
         self, rag_cfg: Dict[str, Any], llm_client: Any, llm_config: Dict[str, Any]
     ) -> None:
-        """Build or load the agent's personal RAG index."""
-        persist_dir = rag_cfg.get("rag_persist_dir")
-        embed_type = rag_cfg.get("embed_type", "huggingface")
-        embed_model = rag_cfg.get("embed_model", "BAAI/bge-small-en-v1.5")
-        embed_api_base = rag_cfg.get("embed_api_base", "")
-        # Only needed for openai embed_type
-        embed_api_key = os.getenv("ARK_API_KEY", "") if embed_type == "openai" else ""
+        """Build or load the agent's RAG index using the unified knowledge architecture.
+
+        Architecture (from players.yml):
+            knowledge (shared/global):
+                global_uri/                    # Shared document root
+                ├── source/                    # Original PDFs
+                ├── MinerU_processed/           # Parsed Markdown
+                └── rag_index/                  # Shared RAG index
+
+            private_knowledge (per-agent):
+                local_uri/                      # Agent-local workspace
+                ├── MinerU_processed/           # Local copy of processed docs
+                └── rag_index/                  # Local RAG index (copy from shared)
+
+        Resolution Flow:
+            1. ResourceManager.resolve_agent_knowledge() merges global + private config
+            2. Try loading local RAG index (resume support)
+            3. Try copying shared RAG index to local
+            4. Fallback: load processed docs and build local index from scratch
+        """
+        extras = self.config.extras
+        record_path = extras.get("record_path", "EXPERIMENT")
+
+        # ------------------------------------------------------------------
+        # STEP 1: Resolve knowledge config via ResourceManager
+        # ------------------------------------------------------------------
+        # Obtain the knowledge_config from the top-level YAML (or from rag_cfg
+        # for backward compat with older runners)
+        knowledge_config = extras.get("knowledge", {})
+        if not knowledge_config:
+            # Fallback: construct from legacy rag_cfg fields
+            knowledge_config = {
+                "backend": "local",
+                "global_uri": rag_cfg.get("docs_dir", "examples/document-sources"),
+                "preprocessing": {
+                    "parser": "mineru",
+                    "output_position": rag_cfg.get(
+                        "mineru_output_dir", "MinerU_processed"
+                    ),
+                },
+                "rag": {
+                    "output_position": rag_cfg.get("shared_rag_index_dir", "rag_index"),
+                },
+            }
+
+        resource_manager = ResourceManager(knowledge_config)
+
+        # Resolve per-agent knowledge config (merges global + private)
+        private_knowledge = extras.get("private_knowledge", {})
+        if not private_knowledge:
+            # Fallback: construct from legacy rag_cfg fields
+            private_knowledge = {
+                "from_global_resources": ["MinerU_processed"],
+                "local_resources": {
+                    "local_uri": "",
+                    "local_resources": [],
+                },
+                "rag": rag_cfg,
+            }
+
+        agent_knowledge = resource_manager.resolve_agent_knowledge(
+            agent_id=self.identity,
+            private_knowledge=private_knowledge,
+            record_path=record_path,
+        )
+
+        # Extract resolved paths
+        processed_dir = agent_knowledge["processed_dir"]
+        shared_rag_dir = agent_knowledge["shared_rag_dir"]
+        local_uri = agent_knowledge["local_uri"]
+        local_rag_dir = agent_knowledge["local_rag_dir"]
+        resolved_rag = agent_knowledge["rag"]
+
+        # Create directories
+        os.makedirs(local_uri, exist_ok=True)
+        os.makedirs(local_rag_dir, exist_ok=True)
+
+        logger.info(
+            "[%s] Knowledge architecture:\n"
+            "  global_uri=%s\n  processed_dir=%s\n  shared_rag_dir=%s\n"
+            "  local_uri=%s\n  local_rag_dir=%s",
+            self.identity,
+            agent_knowledge["global_uri"],
+            processed_dir,
+            shared_rag_dir,
+            local_uri,
+            local_rag_dir,
+        )
+
+        # ------------------------------------------------------------------
+        # STEP 2: Build KnowledgeStore with resolved RAG config
+        # ------------------------------------------------------------------
+        embed_type = resolved_rag.get("embed_type", "litellm")
+        embed_model = resolved_rag.get("embed_model", "openai/hunyuan-embedding")
+        embed_api_base = resolved_rag.get("embed_api_base", "")
+        embed_api_key = resolved_rag.get("embed_api_key", "")
+        chunk_size = int(resolved_rag.get("chunk_size", 512))
+        chunk_overlap = int(resolved_rag.get("chunk_overlap", 64))
+
+        # Resolve API key from env if not already resolved
+        if not embed_api_key:
+            if embed_type == "litellm":
+                embed_api_key = os.getenv("HUNYUAN_API_KEY", "")
+            elif embed_type == "openai":
+                embed_api_key = os.getenv("ARK_API_KEY", "")
 
         rag_store = KnowledgeStore(
             embed_model_name=embed_model,
             embed_api_key=embed_api_key,
             embed_api_base=embed_api_base,
             embed_type=embed_type,
-            persist_dir=persist_dir,
+            persist_dir=local_rag_dir,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
         )
 
-        # Reuse persisted index if available (resume support)
-        if persist_dir and os.path.isdir(persist_dir):
-            index_files = [f for f in os.listdir(persist_dir) if not f.startswith(".")]
+        # ------------------------------------------------------------------
+        # STEP 3: Try loading existing local RAG index (resume support)
+        # ------------------------------------------------------------------
+        if os.path.isdir(local_rag_dir):
+            index_files = [
+                f for f in os.listdir(local_rag_dir) if not f.startswith(".")
+            ]
             if index_files:
                 logger.info(
-                    "[%s] Loading persisted RAG index from %s",
+                    "[%s] Loading agent-local RAG index from %s (%d files)",
                     self.identity,
-                    persist_dir,
+                    local_rag_dir,
+                    len(index_files),
                 )
                 try:
-                    rag_store.load(persist_dir)
+                    rag_store.load(local_rag_dir)
                     self.state.custom_state["rag_store"] = rag_store
-                    self.state.custom_state["rag_cfg"] = rag_cfg
+                    self.state.custom_state["rag_cfg"] = resolved_rag
+                    logger.info(
+                        "[%s] Successfully loaded agent-local RAG index",
+                        self.identity,
+                    )
                     return
                 except Exception as exc:
                     logger.warning(
-                        "[%s] Failed to load persisted index (%s); rebuilding",
+                        "[%s] Failed to load local index (%s); will try shared",
                         self.identity,
                         exc,
                     )
 
-        # Load documents from the configured source
-        # Priority: docs_dir > url_csv > autonomous selection via load_for_agent
+        # ------------------------------------------------------------------
+        # STEP 4: Try copying shared RAG index to local
+        # ------------------------------------------------------------------
+        shared_rag_dirs = resolved_rag.get("shared_rag_index_dirs", [])
+        if not shared_rag_dirs and os.path.isdir(shared_rag_dir):
+            shared_rag_dirs = [shared_rag_dir]
+
+        for s_dir in shared_rag_dirs:
+            if os.path.isdir(s_dir):
+                shared_index_files = [
+                    f for f in os.listdir(s_dir) if not f.startswith(".")
+                ]
+                if shared_index_files:
+                    logger.info(
+                        "[%s] Found shared RAG index at %s (%d files). Copying to local...",
+                        self.identity,
+                        s_dir,
+                        len(shared_index_files),
+                    )
+                    try:
+                        for item in shared_index_files:
+                            src = os.path.join(s_dir, item)
+                            dst = os.path.join(local_rag_dir, item)
+                            if os.path.isdir(src):
+                                shutil.copytree(src, dst, dirs_exist_ok=True)
+                            else:
+                                shutil.copy2(src, dst)
+                        rag_store.load(local_rag_dir)
+                        self.state.custom_state["rag_store"] = rag_store
+                        self.state.custom_state["rag_cfg"] = resolved_rag
+                        logger.info(
+                            "[%s] Successfully copied shared RAG index to local",
+                            self.identity,
+                        )
+                        return
+                    except Exception as exc:
+                        logger.warning(
+                            "[%s] Failed to copy shared index (%s); will build",
+                            self.identity,
+                            exc,
+                        )
+
+        # ------------------------------------------------------------------
+        # STEP 5: Load processed documents and build index from scratch
+        # ------------------------------------------------------------------
         loader = KnowledgeLoader()
+        docs: List[Any] = []
 
-        if rag_cfg.get("docs_dir") and os.path.isdir(rag_cfg["docs_dir"]):
+        if os.path.isdir(processed_dir) and os.listdir(processed_dir):
             logger.info(
-                "[%s] Loading documents from local dir: %s",
+                "[%s] Loading processed documents from: %s",
                 self.identity,
-                rag_cfg["docs_dir"],
+                processed_dir,
             )
-            docs = loader.load_from_dir(rag_cfg["docs_dir"])
-
-        elif rag_cfg.get("url_csv") and os.path.isfile(rag_cfg["url_csv"]):
-            logger.info(
-                "[%s] Loading documents from URL CSV: %s",
-                self.identity,
-                rag_cfg["url_csv"],
-            )
-            docs = loader.load_from_url_csv(rag_cfg["url_csv"])
-
+            docs = loader.load_from_dir(processed_dir)
         else:
-            # Autonomous document selection based on agent identity
-            save_dir = rag_cfg.get("docs_save_dir")
-            logger.info(
-                "[%s] Autonomous document selection for identity (save_dir=%s)",
+            logger.error(
+                "[%s] No processed documents found in %s. "
+                "Ensure ResourceManager pre-processed documents during simulation setup.",
                 self.identity,
-                save_dir,
+                processed_dir,
             )
-            docs = loader.load_for_agent(
-                identity=self.identity,
-                save_dir=save_dir,
+            raise RuntimeError(
+                f"[{self.identity}] No processed documents available for RAG. "
+                f"Ensure documents are available in {processed_dir} "
+                f"or check ResourceManager preprocessing logs."
             )
 
-        # Build and persist the index
         logger.info(
-            "[%s] Building RAG index over %d document(s)…", self.identity, len(docs)
+            "[%s] Building RAG index over %d document(s)...",
+            self.identity,
+            len(docs),
         )
         rag_store.build(docs)
+        logger.info(
+            "[%s] Built and persisted RAG index to local: %s",
+            self.identity,
+            local_rag_dir,
+        )
+
+        # Copy to shared location for other agents to reuse
+        try:
+            for item in os.listdir(local_rag_dir):
+                if item.startswith("."):
+                    continue
+                src = os.path.join(local_rag_dir, item)
+                dst = os.path.join(shared_rag_dir, item)
+                if os.path.isdir(src):
+                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(src, dst)
+            logger.info(
+                "[%s] Copied RAG index to shared location: %s",
+                self.identity,
+                shared_rag_dir,
+            )
+        except Exception as exc:
+            logger.warning(
+                "[%s] Failed to copy to shared location: %s",
+                self.identity,
+                exc,
+            )
 
         self.state.custom_state["rag_store"] = rag_store
-        self.state.custom_state["rag_cfg"] = rag_cfg
+        self.state.custom_state["rag_cfg"] = resolved_rag
 
     # ------------------------------------------------------------------
     # Serialization (exclude non-picklable objects for Ray)
@@ -440,23 +622,41 @@ class RagLLMInvestor(GeneralPlayer):
             # Reconstruct RAG store (load persisted index if available)
             if "rag_cfg" in custom and "rag_store" not in custom:
                 rag_cfg = custom["rag_cfg"]
-                persist_dir = rag_cfg.get("rag_persist_dir")
-                embed_type = rag_cfg.get("embed_type", "huggingface")
-                embed_api_key = (
-                    os.getenv("ARK_API_KEY", "") if embed_type == "openai" else ""
-                )
+                # New resolved config uses local_index_dir; legacy uses local_workspace_dir
+                local_rag_dir = rag_cfg.get("local_index_dir", "")
+                if not local_rag_dir:
+                    local_workspace_dir = rag_cfg.get("local_workspace_dir", "")
+                    if local_workspace_dir:
+                        local_rag_dir = os.path.join(local_workspace_dir, "rag_index")
+
+                if not local_rag_dir:
+                    logger.warning(
+                        "Cannot reconstruct RAG store: no local_index_dir or local_workspace_dir"
+                    )
+                    return
+
+                embed_type = rag_cfg.get("embed_type", "litellm")
+                embed_api_key = rag_cfg.get("embed_api_key", "")
+                if not embed_api_key:
+                    if embed_type == "litellm":
+                        embed_api_key = os.getenv("HUNYUAN_API_KEY", "")
+                    elif embed_type == "openai":
+                        embed_api_key = os.getenv("ARK_API_KEY", "")
+
                 rag_store = KnowledgeStore(
                     embed_model_name=rag_cfg.get(
-                        "embed_model", "BAAI/bge-small-en-v1.5"
+                        "embed_model", "openai/hunyuan-embedding"
                     ),
                     embed_api_key=embed_api_key,
                     embed_api_base=rag_cfg.get("embed_api_base", ""),
                     embed_type=embed_type,
-                    persist_dir=persist_dir,
+                    persist_dir=local_rag_dir,
+                    chunk_size=int(rag_cfg.get("chunk_size", 512)),
+                    chunk_overlap=int(rag_cfg.get("chunk_overlap", 64)),
                 )
-                if persist_dir and os.path.isdir(persist_dir):
+                if os.path.isdir(local_rag_dir):
                     try:
-                        rag_store.load(persist_dir)
+                        rag_store.load(local_rag_dir)
                     except Exception as exc:
                         logger.warning(
                             "RAG store reload failed (%s); index unavailable until reinit",

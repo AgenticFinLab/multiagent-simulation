@@ -24,6 +24,8 @@ from ..config_loader import (
     SCENARIO_DISPLAY_NAMES,
     CONFIGS_DIR,
     EXPERIMENT_DIR,
+    _configs_path,
+    _experiment_path,
 )
 
 
@@ -284,8 +286,8 @@ def _get_or_create_topology_preview(scenario_name: str) -> Optional[Path]:
     """
     import yaml
 
-    topology_path = CONFIGS_DIR / scenario_name / "topology.yml"
-    players_path = CONFIGS_DIR / scenario_name / "players.yml"
+    topology_path = _configs_path(scenario_name) / "topology.yml"
+    players_path = _configs_path(scenario_name) / "players.yml"
 
     if not topology_path.exists():
         return None
@@ -296,7 +298,7 @@ def _get_or_create_topology_preview(scenario_name: str) -> Optional[Path]:
         hash_src += _file_content_hash(players_path)
     config_fingerprint = hashlib.md5(hash_src.encode()).hexdigest()[:8]
 
-    preview_dir = EXPERIMENT_DIR / scenario_name / "records" / "diagrams"
+    preview_dir = _experiment_path(scenario_name) / "records" / "diagrams"
     preview_path = preview_dir / "topology_preview.png"
     fingerprint_path = preview_dir / ".topology_preview_hash"
 

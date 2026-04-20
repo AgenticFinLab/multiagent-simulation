@@ -12,14 +12,11 @@ See examples/LiquidityDryup/Rule/analysis.py for detailed documentation.
 import argparse
 import json
 import os
-import sys
 from collections import defaultdict
 
 from masim.utils import load_config, load_results
 
-# Import analysis functions from rule-based version
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from LiquidityDryup.analysis import (
+from examples.LiquidityDryup.Rule.analysis import (
     calculate_liquidity_states,
     identify_dryup_episodes,
     plot_liquidity_analysis,

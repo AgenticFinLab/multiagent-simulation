@@ -1,0 +1,16 @@
+agent_type,book_title,author,year,topic,source_type,url,notes
+ragllm_momentum,Trend Following Strategy,Wikipedia,2024,Momentum Investing,web,https://en.wikipedia.org/wiki/Trend_following,Overview of trend following and momentum strategies
+ragllm_momentum,Market Trend Analysis,Wikipedia,2024,Momentum & Trend Following,web,https://en.wikipedia.org/wiki/Market_trend,Comprehensive guide to market trends and momentum
+ragllm_momentum,Returns to Buying Winners and Selling Losers Summary,Narasimhan Jegadeesh and Sheridan Titman,1993,Momentum Strategy,web,https://en.wikipedia.org/wiki/Momentum_investing,Wikipedia summary of seminal momentum research
+ragllm_arbitrageur,Inefficient Markets: An Introduction to Behavioral Finance,Andrei Shleifer,2000,Limits to Arbitrage,file,source/shleifer_inefficient_markets.pdf,PDF - covers behavioral finance and limits to arbitrage
+ragllm_arbitrageur,The Limits of Arbitrage Summary,Andrei Shleifer and Robert W. Vishny,1997,Arbitrage Constraints,web,https://en.wikipedia.org/wiki/Limits_to_arbitrage,Wikipedia summary of limits to arbitrage theory
+ragllm_arbitrageur,Irrational Exuberance,Robert J. Shiller,2000,Market Inefficiencies,web,https://en.wikipedia.org/wiki/Irrational_Exuberance_(book),Wikipedia summary of bubbles and market inefficiencies
+ragllm_noise,Noise Trader Risk in Financial Markets Summary,J. Bradford De Long et al.,1990,Noise Trader Theory,web,https://en.wikipedia.org/wiki/Noise_trader,Wikipedia summary of DSSW noise trader model
+ragllm_noise,Inefficient Markets: An Introduction to Behavioral Finance,Andrei Shleifer,2000,Behavioral Finance,file,source/shleifer_inefficient_markets.pdf,PDF - behavioral finance foundations including noise trader research
+ragllm_noise,Behavioral Finance Overview,Richard H. Thaler,2005,Behavioral Finance,web,https://en.wikipedia.org/wiki/Behavioral_finance,Wikipedia overview of behavioral finance including noise trader research
+ragllm_value,Security Analysis: Principles and Techniques,Graham and Dodd,1934,Value Investing,web,https://glenbradford.com/files/Stocks/security-analysis-benjamin-graham-6th-edition-pdf-february-24-2010-12-08-am-3-0-meg-3-0-meg.pdf,PDF - foundational text on value investing and security analysis
+ragllm_value,The Intelligent Investor Summary,Benjamin Graham,1949,Value Investing Principles,web,https://en.wikipedia.org/wiki/The_Intelligent_Investor,Wikipedia summary of Graham's classic value investing text
+ragllm_value,Value Investing Overview,Bruce Greenwald,2001,Value Investing,web,https://en.wikipedia.org/wiki/Value_investing,Wikipedia overview of value investing principles
+ragllm_leveraged,Manias Panics and Crashes: A History of Financial Crises,Charles P. Kindleberger,1978,Financial Crises & Leverage,file,source/kindleberger_manias_panics_crashes.pdf,PDF - covers leverage cycles and crashes
+ragllm_leveraged,Irrational Exuberance,Robert J. Shiller,2000,Asset Bubbles & Leverage,web,https://en.wikipedia.org/wiki/Irrational_Exuberance_(book),Wikipedia summary of leverage in bubble formation
+ragllm_leveraged,Solving the Present Crisis and Managing the Leverage Cycle,John Geanakoplos,2010,Leverage Cycles,file,source/geanakoplos_leverage_cycle.pdf,PDF - Federal Reserve paper on leverage cycles and margin requirements

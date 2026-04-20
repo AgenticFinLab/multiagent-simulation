@@ -457,5 +457,49 @@ def main():
     return summary
 
 
+def _load_data(results) -> Dict[str, Any]:
+    """Extract prices and trades from a SimulationResults object.
+
+    Data sources
+    ------------
+    Coordinator  → batch store 'price' (flat time-series)
+    Player turns → decision_payload fields bid_price / quantity / strategy / investor
+
+    Returns
+    -------
+    dict with keys:
+        prices : list[float]
+        trades : dict[str, list]
+    """
+    coordinators = list(results.players_by_role("coordinator").values())
+    prices = list(coordinators[0].batch("price").all()) if coordinators else []
+    trades = {}
+    for pid, player in results.players_by_role("player").items():
+        payloads_by_round = player.turns.payloads()
+        if payloads_by_round:
+            trades[pid] = [
+                {**p, "round": rn} for rn, p in sorted(payloads_by_round.items())
+            ]
+    return {"prices": prices, "trades": trades}
+
+
+def analyze_liquidity_dryup(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
+    """Perform liquidity dry-up analysis using extracted data."""
+    os.makedirs(output_dir, exist_ok=True)
+    prices = data["prices"]
+    trades = data["trades"]
+
+    liquidity_states = calculate_liquidity_states(prices, trades)
+    episodes = identify_dryup_episodes(liquidity_states)
+    plot_liquidity_analysis(data, liquidity_states, episodes, output_dir)
+    summary = generate_summary(data, liquidity_states, episodes)
+
+    summary_path = os.path.join(output_dir, "summary.json")
+    with open(summary_path, "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2)
+
+    return summary
+
+
 if __name__ == "__main__":
     main()

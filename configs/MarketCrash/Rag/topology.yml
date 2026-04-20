@@ -1,0 +1,27 @@
+# =============================================================================
+# MarketCrashRag - Topology Configuration
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - ragllm_panic_seller
+    - ragllm_risk_parity
+    - ragllm_leveraged_fund
+    - ragllm_market_maker
+    - ragllm_bottom_fisher
+
+  ragllm_panic_seller:
+    - market
+  ragllm_risk_parity:
+    - market
+  ragllm_leveraged_fund:
+    - market
+  ragllm_market_maker:
+    - market
+  ragllm_bottom_fisher:
+    - market

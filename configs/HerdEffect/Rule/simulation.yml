@@ -4,7 +4,7 @@
 # Demonstrates herd behavior in financial markets with multi-strategy investors.
 #
 # Usage:
-#   python examples/HerdEffect/run_herd.py -c configs/HerdEffect/simulation.yml
+#   python examples/HerdEffect/run_herd.py -c configs/HerdEffect/Rule/simulation.yml
 # =============================================================================
 
 setting:

@@ -12,13 +12,10 @@ See examples/EquityPremium/Rule/analysis.py for detailed documentation.
 import argparse
 import json
 import os
-import sys
 
 from masim.utils import load_config, load_results
 
-# Import analysis functions from rule-based version
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from EquityPremium.analysis import (
+from examples.EquityPremium.Rule.analysis import (
     calculate_equity_premium,
     calculate_loss_probability,
     analyze_investor_allocations,

@@ -230,6 +230,7 @@ class SimulationConfig:
     topology: Dict[str, Any] = field(default_factory=dict)
     environment: Dict[str, Any] = field(default_factory=dict)
     communication: Dict[str, Any] = field(default_factory=dict)
+    knowledge: Dict[str, Any] = field(default_factory=dict)
 
     simulation_id: Optional[str] = None
 

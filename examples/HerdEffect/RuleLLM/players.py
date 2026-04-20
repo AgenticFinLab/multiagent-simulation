@@ -41,11 +41,7 @@ from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("HerdEffectRuleLLM")
 
-# Import LLM utilities
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from llm_utils import (
+from examples.llm_utils import (
     parse_llm_response_with_thinking,
     build_messages,
     call_llm,

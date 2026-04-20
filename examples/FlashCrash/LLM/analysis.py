@@ -11,13 +11,10 @@ See examples/FlashCrash/Rule/analysis.py for detailed documentation.
 
 import argparse
 import os
-import sys
 
 from masim.utils import load_config, load_results
 
-# Import analysis functions from rule-based version
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from FlashCrash.analysis import analyze_flash_crash, _load_data
+from examples.FlashCrash.Rule.analysis import analyze_flash_crash, _load_data
 
 
 def main():

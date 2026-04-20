@@ -1,0 +1,27 @@
+# =============================================================================
+# MarketCrashRuleLLM - Topology Configuration
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - rulellm_panic_seller
+    - rulellm_risk_parity
+    - rulellm_leveraged_fund
+    - rulellm_market_maker
+    - rulellm_bottom_fisher
+
+  rulellm_panic_seller:
+    - market
+  rulellm_risk_parity:
+    - market
+  rulellm_leveraged_fund:
+    - market
+  rulellm_market_maker:
+    - market
+  rulellm_bottom_fisher:
+    - market

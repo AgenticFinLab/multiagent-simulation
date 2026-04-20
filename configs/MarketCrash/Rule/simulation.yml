@@ -5,7 +5,7 @@
 # and liquidity spiral mechanisms.
 #
 # Usage:
-#   python examples/MarketCrash/run_crash.py -c configs/MarketCrash/simulation.yml
+#   python examples/MarketCrash/run_crash.py -c configs/MarketCrash/Rule/simulation.yml
 # =============================================================================
 
 setting:

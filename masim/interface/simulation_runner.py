@@ -28,7 +28,7 @@ Usage
 
    async def main():
        # Initialize with config path
-       runner = SimulationRunner("configs/AssetBubble/simulation.yml")
+       runner = SimulationRunner("configs/AssetBubble/Rule/simulation.yml")
 
        # Setup
        if not await runner.setup():
@@ -56,7 +56,7 @@ Usage
 
    async def main():
        async for status in run_simulation_with_progress(
-           "configs/AssetBubble/simulation.yml",
+           "configs/AssetBubble/Rule/simulation.yml",
            use_mock=False  # Set True for testing without real simulation
        ):
            print(f"{status.state}: {status.progress_pct:.1f}%")
