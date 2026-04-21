@@ -1,0 +1,38 @@
+# EuropeanDebtCrisis LLM Simulation Configuration
+#
+# EuropeanDebtCrisis simulation
+#
+# Usage:
+#   python examples/EuropeanDebtCrisis/LLM/run_europeandebtcrisis_llm.py \
+#       -c configs/EuropeanDebtCrisis/LLM/simulation.yml
+
+setting:
+  name: "EuropeanDebtCrisis-LLM"
+  description: "EuropeanDebtCrisis simulation - LLM agents"
+  total_rounds: 200
+
+  record_path: "EXPERIMENT/EuropeanDebtCrisis/LLM/records"
+  storage_path: "EXPERIMENT/EuropeanDebtCrisis/LLM/communication"
+
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/EuropeanDebtCrisis/LLM/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "europeandebtcrisis_llm"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/EuropeanDebtCrisis/LLM/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

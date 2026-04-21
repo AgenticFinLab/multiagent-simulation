@@ -1,0 +1,71 @@
+# MentalAccounting Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.MentalAccounting.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.04
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+mental_accountant_1:
+  name: "MentalAccountant 1"
+  class: "examples.MentalAccounting.Rule.players:MentalAccountant"
+  num_instances: 2
+  config:
+    identity: "mental_accountant_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+house_money_trader_2:
+  name: "HouseMoneyTrader 2"
+  class: "examples.MentalAccounting.Rule.players:HouseMoneyTrader"
+  num_instances: 2
+  config:
+    identity: "house_money_trader_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+rational_portfolio_manager_3:
+  name: "RationalPortfolioManager 3"
+  class: "examples.MentalAccounting.Rule.players:RationalPortfolioManager"
+  num_instances: 1
+  config:
+    identity: "rational_portfolio_manager_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+sunk_cost_holder_4:
+  name: "SunkCostHolder 4"
+  class: "examples.MentalAccounting.Rule.players:SunkCostHolder"
+  num_instances: 2
+  config:
+    identity: "sunk_cost_holder_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+noise_trader_5:
+  name: "NoiseTrader 5"
+  class: "examples.MentalAccounting.Rule.players:NoiseTrader"
+  num_instances: 2
+  config:
+    identity: "noise_trader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+

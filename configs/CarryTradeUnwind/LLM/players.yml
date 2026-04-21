@@ -1,0 +1,85 @@
+# CarryTradeUnwind LLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.CarryTradeUnwind.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+carrytrader_1:
+  name: "CarryTrader 1"
+  class: "examples.CarryTradeUnwind.LLM.players:CarryTrader"
+  num_instances: 2
+  config:
+    identity: "carrytrader_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: carrytrader
+
+
+leveragedcarryfund_2:
+  name: "LeveragedCarryFund 2"
+  class: "examples.CarryTradeUnwind.LLM.players:LeveragedCarryFund"
+  num_instances: 2
+  config:
+    identity: "leveragedcarryfund_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: leveragedcarryfund
+
+
+fundingcurrencybuyer_3:
+  name: "FundingCurrencyBuyer 3"
+  class: "examples.CarryTradeUnwind.LLM.players:FundingCurrencyBuyer"
+  num_instances: 1
+  config:
+    identity: "fundingcurrencybuyer_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: fundingcurrencybuyer
+
+
+hedgedcarrytrader_4:
+  name: "HedgedCarryTrader 4"
+  class: "examples.CarryTradeUnwind.LLM.players:HedgedCarryTrader"
+  num_instances: 1
+  config:
+    identity: "hedgedcarrytrader_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: hedgedcarrytrader
+
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.CarryTradeUnwind.LLM.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: noisetrader
+

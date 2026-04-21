@@ -1,0 +1,38 @@
+# AvailabilityBias RuleLLM Simulation Configuration
+#
+# AvailabilityBias simulation
+#
+# Usage:
+#   python examples/AvailabilityBias/RuleLLM/run_availabilitybias_rulellm.py \
+#       -c configs/AvailabilityBias/RuleLLM/simulation.yml
+
+setting:
+  name: "AvailabilityBias-RuleLLM"
+  description: "AvailabilityBias simulation - RuleLLM agents"
+  total_rounds: 200
+
+  record_path: "EXPERIMENT/AvailabilityBias/RuleLLM/records"
+  storage_path: "EXPERIMENT/AvailabilityBias/RuleLLM/communication"
+
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/AvailabilityBias/RuleLLM/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "availabilitybias_rulellm"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/AvailabilityBias/RuleLLM/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

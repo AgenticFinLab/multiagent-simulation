@@ -1,0 +1,65 @@
+# HerdingInformation Rule Persona Configuration
+
+market:
+  type: proxy
+  checkpoint_dir: "EXPERIMENT/HerdingInformation/Rule/records/market/checkpoints"
+  record_path: "EXPERIMENT/HerdingInformation/Rule/records/market"
+  monitoring:
+    record_path: "EXPERIMENT/HerdingInformation/Rule/monitoring/market"
+
+cascade_follower_1_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/HerdingInformation/Rule/records/cascade_follower_1_1/checkpoints"
+  record_path: "EXPERIMENT/HerdingInformation/Rule/records/cascade_follower_1_1"
+  monitoring:
+    record_path: "EXPERIMENT/HerdingInformation/Rule/monitoring/cascade_follower_1_1"
+
+cascade_follower_1_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/HerdingInformation/Rule/records/cascade_follower_1_2/checkpoints"
+  record_path: "EXPERIMENT/HerdingInformation/Rule/records/cascade_follower_1_2"
+  monitoring:
+    record_path: "EXPERIMENT/HerdingInformation/Rule/monitoring/cascade_follower_1_2"
+
+reputation_herder_2_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/HerdingInformation/Rule/records/reputation_herder_2_1/checkpoints"
+  record_path: "EXPERIMENT/HerdingInformation/Rule/records/reputation_herder_2_1"
+  monitoring:
+    record_path: "EXPERIMENT/HerdingInformation/Rule/monitoring/reputation_herder_2_1"
+
+reputation_herder_2_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/HerdingInformation/Rule/records/reputation_herder_2_2/checkpoints"
+  record_path: "EXPERIMENT/HerdingInformation/Rule/records/reputation_herder_2_2"
+  monitoring:
+    record_path: "EXPERIMENT/HerdingInformation/Rule/monitoring/reputation_herder_2_2"
+
+independent_thinker_3_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/HerdingInformation/Rule/records/independent_thinker_3_1/checkpoints"
+  record_path: "EXPERIMENT/HerdingInformation/Rule/records/independent_thinker_3_1"
+  monitoring:
+    record_path: "EXPERIMENT/HerdingInformation/Rule/monitoring/independent_thinker_3_1"
+
+contrarian_4_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/HerdingInformation/Rule/records/contrarian_4_1/checkpoints"
+  record_path: "EXPERIMENT/HerdingInformation/Rule/records/contrarian_4_1"
+  monitoring:
+    record_path: "EXPERIMENT/HerdingInformation/Rule/monitoring/contrarian_4_1"
+
+noise_trader_5_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/HerdingInformation/Rule/records/noise_trader_5_1/checkpoints"
+  record_path: "EXPERIMENT/HerdingInformation/Rule/records/noise_trader_5_1"
+  monitoring:
+    record_path: "EXPERIMENT/HerdingInformation/Rule/monitoring/noise_trader_5_1"
+
+noise_trader_5_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/HerdingInformation/Rule/records/noise_trader_5_2/checkpoints"
+  record_path: "EXPERIMENT/HerdingInformation/Rule/records/noise_trader_5_2"
+  monitoring:
+    record_path: "EXPERIMENT/HerdingInformation/Rule/monitoring/noise_trader_5_2"
+

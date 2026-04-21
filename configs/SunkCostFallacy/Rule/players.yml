@@ -1,0 +1,70 @@
+# SunkCostFallacy Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.SunkCostFallacy.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+sunkcostholder_1:
+  name: "SunkCostHolder 1"
+  class: "examples.SunkCostFallacy.Rule.players:SunkCostHolder"
+  num_instances: 2
+  config:
+    identity: "sunkcostholder_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+commitmentescalator_2:
+  name: "CommitmentEscalator 2"
+  class: "examples.SunkCostFallacy.Rule.players:CommitmentEscalator"
+  num_instances: 2
+  config:
+    identity: "commitmentescalator_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+rationalcutter_3:
+  name: "RationalCutter 3"
+  class: "examples.SunkCostFallacy.Rule.players:RationalCutter"
+  num_instances: 1
+  config:
+    identity: "rationalcutter_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+opportunitycosttrader_4:
+  name: "OpportunityCostTrader 4"
+  class: "examples.SunkCostFallacy.Rule.players:OpportunityCostTrader"
+  num_instances: 1
+  config:
+    identity: "opportunitycosttrader_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.SunkCostFallacy.Rule.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0

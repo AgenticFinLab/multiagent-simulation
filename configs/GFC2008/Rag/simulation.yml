@@ -1,0 +1,44 @@
+# GFC2008 Rag Simulation Configuration
+#
+# 2007-2009 financial crisis - Housing bubble burst triggered global recession
+#
+# Usage:
+#   python examples/GFC2008/Rag/run_gfc2008_rag.py \
+#       -c configs/GFC2008/Rag/simulation.yml
+
+setting:
+  name: "GFC2008-Rag"
+  description: "2008 Global Financial Crisis simulation with mortgage-backed securities, rating agency failures, and systemic contagion"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/GFC2008/Rag/records"
+  storage_path: "EXPERIMENT/GFC2008/Rag/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/GFC2008/Rag/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+llm:
+  model: "doubao-pro-32k"
+  temperature: 0.3
+  max_tokens: 500
+  timeout: 30
+
+ray:
+  namespace: "gfc2008_rag"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/GFC2008/Rag/communication"
+  record_messages: true
+  message_timeout_ms: 30000
+  max_retries: 3

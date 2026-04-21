@@ -1,0 +1,65 @@
+# GFC2008 RuleLLM Persona Configuration
+
+market:
+  type: proxy
+  checkpoint_dir: "EXPERIMENT/GFC2008/RuleLLM/records/market/checkpoints"
+  record_path: "EXPERIMENT/GFC2008/RuleLLM/records/market"
+  monitoring:
+    record_path: "EXPERIMENT/GFC2008/RuleLLM/monitoring/market"
+
+m_b_s_originator_1_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GFC2008/RuleLLM/records/m_b_s_originator_1_1/checkpoints"
+  record_path: "EXPERIMENT/GFC2008/RuleLLM/records/m_b_s_originator_1_1"
+  monitoring:
+    record_path: "EXPERIMENT/GFC2008/RuleLLM/monitoring/m_b_s_originator_1_1"
+
+m_b_s_originator_1_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GFC2008/RuleLLM/records/m_b_s_originator_1_2/checkpoints"
+  record_path: "EXPERIMENT/GFC2008/RuleLLM/records/m_b_s_originator_1_2"
+  monitoring:
+    record_path: "EXPERIMENT/GFC2008/RuleLLM/monitoring/m_b_s_originator_1_2"
+
+rating_agency_2_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GFC2008/RuleLLM/records/rating_agency_2_1/checkpoints"
+  record_path: "EXPERIMENT/GFC2008/RuleLLM/records/rating_agency_2_1"
+  monitoring:
+    record_path: "EXPERIMENT/GFC2008/RuleLLM/monitoring/rating_agency_2_1"
+
+rating_agency_2_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GFC2008/RuleLLM/records/rating_agency_2_2/checkpoints"
+  record_path: "EXPERIMENT/GFC2008/RuleLLM/records/rating_agency_2_2"
+  monitoring:
+    record_path: "EXPERIMENT/GFC2008/RuleLLM/monitoring/rating_agency_2_2"
+
+leveraged_investor_3_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GFC2008/RuleLLM/records/leveraged_investor_3_1/checkpoints"
+  record_path: "EXPERIMENT/GFC2008/RuleLLM/records/leveraged_investor_3_1"
+  monitoring:
+    record_path: "EXPERIMENT/GFC2008/RuleLLM/monitoring/leveraged_investor_3_1"
+
+leveraged_investor_3_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GFC2008/RuleLLM/records/leveraged_investor_3_2/checkpoints"
+  record_path: "EXPERIMENT/GFC2008/RuleLLM/records/leveraged_investor_3_2"
+  monitoring:
+    record_path: "EXPERIMENT/GFC2008/RuleLLM/monitoring/leveraged_investor_3_2"
+
+distressed_buyer_4_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GFC2008/RuleLLM/records/distressed_buyer_4_1/checkpoints"
+  record_path: "EXPERIMENT/GFC2008/RuleLLM/records/distressed_buyer_4_1"
+  monitoring:
+    record_path: "EXPERIMENT/GFC2008/RuleLLM/monitoring/distressed_buyer_4_1"
+
+regulator_5_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GFC2008/RuleLLM/records/regulator_5_1/checkpoints"
+  record_path: "EXPERIMENT/GFC2008/RuleLLM/records/regulator_5_1"
+  monitoring:
+    record_path: "EXPERIMENT/GFC2008/RuleLLM/monitoring/regulator_5_1"
+

@@ -1,0 +1,38 @@
+# OverconfidenceBias Rule Simulation Configuration
+#
+# Overconfidence bias causes traders to overestimate their precision, trade too much, and increase volatility
+#
+# Usage:
+#   python examples/OverconfidenceBias/Rule/run_overconfidencebias.py \
+#       -c configs/OverconfidenceBias/Rule/simulation.yml
+
+setting:
+  name: "OverconfidenceBias-Rule"
+  description: "Overconfidence bias simulation showing how excessive self-confidence leads to excessive trading and market instability"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/OverconfidenceBias/Rule/records"
+  storage_path: "EXPERIMENT/OverconfidenceBias/Rule/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/OverconfidenceBias/Rule/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "overconfidencebias_rule"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/OverconfidenceBias/Rule/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

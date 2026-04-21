@@ -1,0 +1,39 @@
+# =============================================================================
+# RumorSpreadLLM - Topology Configuration
+# =============================================================================
+# Star topology: InformationEnvironment broadcasts to all LLM agents
+#
+#         llm_gullible_spreader ────────┐
+#         llm_distorting_relayer ───────┤
+#         llm_skeptical_evaluator ──────┼──▶ environment ──▶ all agents
+#         llm_fact_checker ─────────────┤             (belief, distortion, truth)
+#         llm_uninformed_bystander ─────┘
+# =============================================================================
+
+type: "star"
+
+sources:
+  - environment
+
+connections:
+  environment:
+    - llm_gullible_spreader
+    - llm_distorting_relayer
+    - llm_skeptical_evaluator
+    - llm_fact_checker
+    - llm_uninformed_bystander
+
+  llm_gullible_spreader:
+    - environment
+
+  llm_distorting_relayer:
+    - environment
+
+  llm_skeptical_evaluator:
+    - environment
+
+  llm_fact_checker:
+    - environment
+
+  llm_uninformed_bystander:
+    - environment

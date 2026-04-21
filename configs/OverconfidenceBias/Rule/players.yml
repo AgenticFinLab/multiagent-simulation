@@ -1,0 +1,71 @@
+# OverconfidenceBias Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.OverconfidenceBias.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+overconfident_trader_1:
+  name: "OverconfidentTrader 1"
+  class: "examples.OverconfidenceBias.Rule.players:OverconfidentTrader"
+  num_instances: 2
+  config:
+    identity: "overconfident_trader_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+self_attributor_2:
+  name: "SelfAttributor 2"
+  class: "examples.OverconfidenceBias.Rule.players:SelfAttributor"
+  num_instances: 2
+  config:
+    identity: "self_attributor_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+calibrated_trader_3:
+  name: "CalibratedTrader 3"
+  class: "examples.OverconfidenceBias.Rule.players:CalibratedTrader"
+  num_instances: 1
+  config:
+    identity: "calibrated_trader_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+contrarian_investor_4:
+  name: "ContrarianInvestor 4"
+  class: "examples.OverconfidenceBias.Rule.players:ContrarianInvestor"
+  num_instances: 1
+  config:
+    identity: "contrarian_investor_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+noise_trader_5:
+  name: "NoiseTrader 5"
+  class: "examples.OverconfidenceBias.Rule.players:NoiseTrader"
+  num_instances: 2
+  config:
+    identity: "noise_trader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+

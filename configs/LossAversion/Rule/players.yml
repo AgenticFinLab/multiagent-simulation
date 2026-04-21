@@ -1,0 +1,71 @@
+# LossAversion Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.LossAversion.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.04
+      mean_reversion: 0.02
+      noise_std: 0.015
+
+loss_averse_investor_1:
+  name: "LossAverseInvestor 1"
+  class: "examples.LossAversion.Rule.players:LossAverseInvestor"
+  num_instances: 2
+  config:
+    identity: "loss_averse_investor_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+break_even_trader_2:
+  name: "BreakEvenTrader 2"
+  class: "examples.LossAversion.Rule.players:BreakEvenTrader"
+  num_instances: 2
+  config:
+    identity: "break_even_trader_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+rational_trader_3:
+  name: "RationalTrader 3"
+  class: "examples.LossAversion.Rule.players:RationalTrader"
+  num_instances: 1
+  config:
+    identity: "rational_trader_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+momentum_trader_4:
+  name: "MomentumTrader 4"
+  class: "examples.LossAversion.Rule.players:MomentumTrader"
+  num_instances: 2
+  config:
+    identity: "momentum_trader_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+market_maker_5:
+  name: "MarketMaker 5"
+  class: "examples.LossAversion.Rule.players:MarketMaker"
+  num_instances: 1
+  config:
+    identity: "market_maker_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+

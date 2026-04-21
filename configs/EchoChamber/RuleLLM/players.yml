@@ -1,0 +1,203 @@
+# =============================================================================
+# EchoChamberRuleLLM Players Configuration
+# =============================================================================
+# 1 OpinionEnvironment (rule-based) + 5 Hybrid Rule+LLM Social Agent Types
+# Each LLM agent's system prompt embeds:
+#   - Personal profile: identity, style, behavioral traits (from LLM variant)
+#   - Quantitative rules: exact social-psychological/mathematical principles (from rule-based)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# OpinionEnvironment (Coordinator) — identical to Rule variant
+# -----------------------------------------------------------------------------
+environment:
+  name: "OpinionEnvironment"
+  class: "examples.EchoChamber.RuleLLM.players:OpinionEnvironment"
+  num_instances: 1
+  config:
+    identity: "environment"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - environment
+    extras:
+      record_path: "EXPERIMENT/EchoChamber/RuleLLM/records"
+      # Polarization dynamics parameters (aligned with EchoChamber.Rule)
+      initial_polarization: 0.15   # Low starting polarization (moderate population)
+      polarization_impact: 0.12    # How strongly agent actions shift polarization
+      centripetal_force: 0.01      # Weak center-pull (Sunstein: centripetal forces are weak)
+      noise_std: 0.02              # Opinion perturbation noise
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Hybrid Ideologue (Sunstein Echo Chamber + LLM reasoning)
+# Split: 3 left-leaning, 3 right-leaning (initial_opinion sign determines lean)
+# -----------------------------------------------------------------------------
+rulellm_ideologue:
+  name: "RuleLLM Ideologue"
+  class: "examples.EchoChamber.RuleLLM.players:RuleLLMIdeologue"
+  # Expander → rulellm_ideologue_1 .. rulellm_ideologue_6
+  num_instances: 6
+  config:
+    identity: "rulellm_ideologue"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_agents
+    extras:
+      record_path: "EXPERIMENT/EchoChamber/RuleLLM/records"
+      # Agent base parameters
+      initial_opinion: 0.4         # Will be ±0.4 per instance (set at startup)
+      custom_state_hot_limit: 3
+      # Rule parameters (from EchoChamber.Rule.Ideologue)
+      in_group_weight: 0.6         # Strong: amplifies in-group consensus
+      extremity_boost: 1.3         # Pushes toward more extreme version
+      out_group_discount: 0.05     # Almost ignores opposing views
+      spread_eagerness: 0.9        # High: actively polarizes
+      # LLM configuration
+      llm:
+        sys_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_IDEOLOGUE_SYS"
+        user_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Hybrid Conformist (Asch Conformity + LLM reasoning)
+# -----------------------------------------------------------------------------
+rulellm_conformist:
+  name: "RuleLLM Conformist"
+  class: "examples.EchoChamber.RuleLLM.players:RuleLLMConformist"
+  # Expander → rulellm_conformist_1 .. rulellm_conformist_5
+  num_instances: 5
+  config:
+    identity: "rulellm_conformist"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_agents
+    extras:
+      record_path: "EXPERIMENT/EchoChamber/RuleLLM/records"
+      # Agent base parameters
+      initial_opinion: 0.0         # Starts neutral, will drift
+      custom_state_hot_limit: 3
+      # Rule parameters (from EchoChamber.Rule.Conformist)
+      conformity: 0.7              # High: adopts group opinion readily
+      conformity_eagerness: 0.6    # Moderate-high: follows group
+      group_proximity_threshold: 0.3  # Polarize when opinion exceeds this
+      # LLM configuration
+      llm:
+        sys_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_CONFORMIST_SYS"
+        user_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Hybrid Critical Thinker (Isenberg Critical Evaluation + LLM reasoning)
+# -----------------------------------------------------------------------------
+rulellm_critical_thinker:
+  name: "RuleLLM Critical Thinker"
+  class: "examples.EchoChamber.RuleLLM.players:RuleLLMCriticalThinker"
+  # Expander → rulellm_critical_thinker_1 .. rulellm_critical_thinker_3
+  num_instances: 3
+  config:
+    identity: "rulellm_critical_thinker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_agents
+    extras:
+      record_path: "EXPERIMENT/EchoChamber/RuleLLM/records"
+      # Agent base parameters
+      initial_opinion: 0.0         # Starts neutral
+      custom_state_hot_limit: 3
+      # Rule parameters (from EchoChamber.Rule.CriticalThinker)
+      critical_weight: 0.5         # Moderate: evaluates independently
+      critical_eagerness: 0.7      # High: actively depolarizes when needed
+      evidence_sensitivity: 0.6    # Responds to polarization as evidence of groupthink
+      # LLM configuration
+      llm:
+        sys_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_CRITICAL_SYS"
+        user_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Hybrid Bridge Builder (Pariser Bridge-Building + LLM reasoning)
+# -----------------------------------------------------------------------------
+rulellm_bridge_builder:
+  name: "RuleLLM Bridge Builder"
+  class: "examples.EchoChamber.RuleLLM.players:RuleLLMBridgeBuilder"
+  # Expander → rulellm_bridge_builder_1 .. rulellm_bridge_builder_2
+  num_instances: 2
+  config:
+    identity: "rulellm_bridge_builder"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_agents
+    extras:
+      record_path: "EXPERIMENT/EchoChamber/RuleLLM/records"
+      # Agent base parameters
+      initial_opinion: 0.0         # Starts at center
+      custom_state_hot_limit: 3
+      # Rule parameters (from EchoChamber.Rule.BridgeBuilder)
+      bridge_weight: 0.4           # Moderate: pulls toward center
+      bridge_strength: 0.8         # Strong: effective depolarizer
+      centering_tendency: 0.5      # Tends toward moderate center
+      # LLM configuration
+      llm:
+        sys_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_BRIDGE_SYS"
+        user_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Hybrid Passive Follower (Lazarsfeld Mass Communication + LLM reasoning)
+# -----------------------------------------------------------------------------
+rulellm_passive_follower:
+  name: "RuleLLM Passive Follower"
+  class: "examples.EchoChamber.RuleLLM.players:RuleLLMPassiveFollower"
+  # Expander → rulellm_passive_follower_1 .. rulellm_passive_follower_4
+  num_instances: 4
+  config:
+    identity: "rulellm_passive_follower"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_agents
+    extras:
+      record_path: "EXPERIMENT/EchoChamber/RuleLLM/records"
+      # Agent base parameters
+      initial_opinion: 0.0         # Starts neutral
+      custom_state_hot_limit: 3
+      # Rule parameters (from EchoChamber.Rule.PassiveFollower)
+      engagement_probability: 0.3  # Low: rarely engages
+      drift_rate: 0.1              # Small drift toward mean
+      alignment_strength: 0.4      # When engaged, moderately aligns
+      # LLM configuration
+      llm:
+        sys_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_PASSIVE_SYS"
+        user_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 500
+  persona: !include persona.yml

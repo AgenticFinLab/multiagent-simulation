@@ -1,0 +1,72 @@
+# AnchoringEffect LLM Persona Configuration
+
+market:
+  type: proxy
+  checkpoint_dir: "EXPERIMENT/AnchoringEffect/LLM/records/market/checkpoints"
+  record_path: "EXPERIMENT/AnchoringEffect/LLM/records/market"
+  monitoring:
+    record_path: "EXPERIMENT/AnchoringEffect/LLM/monitoring/market"
+
+anchored_trader_1_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/AnchoringEffect/LLM/records/anchored_trader_1_1/checkpoints"
+  record_path: "EXPERIMENT/AnchoringEffect/LLM/records/anchored_trader_1_1"
+  monitoring:
+    record_path: "EXPERIMENT/AnchoringEffect/LLM/monitoring/anchored_trader_1_1"
+
+anchored_trader_1_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/AnchoringEffect/LLM/records/anchored_trader_1_2/checkpoints"
+  record_path: "EXPERIMENT/AnchoringEffect/LLM/records/anchored_trader_1_2"
+  monitoring:
+    record_path: "EXPERIMENT/AnchoringEffect/LLM/monitoring/anchored_trader_1_2"
+
+historical_anchor_2_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/AnchoringEffect/LLM/records/historical_anchor_2_1/checkpoints"
+  record_path: "EXPERIMENT/AnchoringEffect/LLM/records/historical_anchor_2_1"
+  monitoring:
+    record_path: "EXPERIMENT/AnchoringEffect/LLM/monitoring/historical_anchor_2_1"
+
+historical_anchor_2_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/AnchoringEffect/LLM/records/historical_anchor_2_2/checkpoints"
+  record_path: "EXPERIMENT/AnchoringEffect/LLM/records/historical_anchor_2_2"
+  monitoring:
+    record_path: "EXPERIMENT/AnchoringEffect/LLM/monitoring/historical_anchor_2_2"
+
+rational_updater_3_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/AnchoringEffect/LLM/records/rational_updater_3_1/checkpoints"
+  record_path: "EXPERIMENT/AnchoringEffect/LLM/records/rational_updater_3_1"
+  monitoring:
+    record_path: "EXPERIMENT/AnchoringEffect/LLM/monitoring/rational_updater_3_1"
+
+momentum_trader_4_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/AnchoringEffect/LLM/records/momentum_trader_4_1/checkpoints"
+  record_path: "EXPERIMENT/AnchoringEffect/LLM/records/momentum_trader_4_1"
+  monitoring:
+    record_path: "EXPERIMENT/AnchoringEffect/LLM/monitoring/momentum_trader_4_1"
+
+momentum_trader_4_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/AnchoringEffect/LLM/records/momentum_trader_4_2/checkpoints"
+  record_path: "EXPERIMENT/AnchoringEffect/LLM/records/momentum_trader_4_2"
+  monitoring:
+    record_path: "EXPERIMENT/AnchoringEffect/LLM/monitoring/momentum_trader_4_2"
+
+noise_trader_5_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/AnchoringEffect/LLM/records/noise_trader_5_1/checkpoints"
+  record_path: "EXPERIMENT/AnchoringEffect/LLM/records/noise_trader_5_1"
+  monitoring:
+    record_path: "EXPERIMENT/AnchoringEffect/LLM/monitoring/noise_trader_5_1"
+
+noise_trader_5_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/AnchoringEffect/LLM/records/noise_trader_5_2/checkpoints"
+  record_path: "EXPERIMENT/AnchoringEffect/LLM/records/noise_trader_5_2"
+  monitoring:
+    record_path: "EXPERIMENT/AnchoringEffect/LLM/monitoring/noise_trader_5_2"
+

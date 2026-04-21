@@ -1,0 +1,91 @@
+# BlackMonday1987 LLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.BlackMonday1987.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 250.0
+      fundamental_value: 250.0
+      price_impact: 0.03
+      mean_reversion: 0.01
+      noise_std: 0.015
+
+portfolio_insurer_1:
+  name: "PortfolioInsurer 1"
+  class: "examples.BlackMonday1987.LLM.players:LLMPortfolioInsurer"
+  num_instances: 2
+  config:
+    identity: "portfolio_insurer_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "portfolio_insurer"
+      llm:
+        model: "doubao-pro-32k"
+
+
+index_arbitrageur_2:
+  name: "IndexArbitrageur 2"
+  class: "examples.BlackMonday1987.LLM.players:LLMIndexArbitrageur"
+  num_instances: 2
+  config:
+    identity: "index_arbitrageur_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "index_arbitrageur"
+      llm:
+        model: "doubao-pro-32k"
+
+
+program_trader_3:
+  name: "ProgramTrader 3"
+  class: "examples.BlackMonday1987.LLM.players:LLMProgramTrader"
+  num_instances: 2
+  config:
+    identity: "program_trader_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "program_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+
+value_investor_4:
+  name: "ValueInvestor 4"
+  class: "examples.BlackMonday1987.LLM.players:LLMValueInvestor"
+  num_instances: 1
+  config:
+    identity: "value_investor_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "value_investor"
+      llm:
+        model: "doubao-pro-32k"
+
+
+noise_trader_5:
+  name: "NoiseTrader 5"
+  class: "examples.BlackMonday1987.LLM.players:LLMNoiseTrader"
+  num_instances: 2
+  config:
+    identity: "noise_trader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "noise_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+

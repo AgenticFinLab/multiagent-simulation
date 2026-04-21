@@ -1,0 +1,80 @@
+# TulipMania Rag Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.TulipMania.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+trendchaser_1:
+  name: "TrendChaser 1"
+  class: "examples.TulipMania.Rag.players:TrendChaser"
+  num_instances: 2
+  config:
+    identity: "trendchaser_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: trendchaser
+
+socialprooffollower_2:
+  name: "SocialProofFollower 2"
+  class: "examples.TulipMania.Rag.players:SocialProofFollower"
+  num_instances: 2
+  config:
+    identity: "socialprooffollower_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: socialprooffollower
+
+intrinsicvaluetrader_3:
+  name: "IntrinsicValueTrader 3"
+  class: "examples.TulipMania.Rag.players:IntrinsicValueTrader"
+  num_instances: 1
+  config:
+    identity: "intrinsicvaluetrader_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: intrinsicvaluetrader
+
+earlyexittrader_4:
+  name: "EarlyExitTrader 4"
+  class: "examples.TulipMania.Rag.players:EarlyExitTrader"
+  num_instances: 1
+  config:
+    identity: "earlyexittrader_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: earlyexittrader
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.TulipMania.Rag.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: noisetrader

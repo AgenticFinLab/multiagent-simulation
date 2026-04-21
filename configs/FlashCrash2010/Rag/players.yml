@@ -1,0 +1,191 @@
+# FlashCrash2010 LLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.FlashCrash2010.Rag.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 40.00
+      fundamental_value: 40.00
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+      base_depth: 10000
+      stress_threshold: 0.02
+
+hft_market_maker_1:
+  name: "HFT Market Maker 1"
+  class: "examples.FlashCrash2010.Rag.players:LLMHFTMarketMaker"
+  num_instances: 1
+  config:
+    identity: "hft_mm_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "hft_market_maker"
+      llm:
+        model: "doubao-pro-32k"
+
+hft_market_maker_2:
+  name: "HFT Market Maker 2"
+  class: "examples.FlashCrash2010.Rag.players:LLMHFTMarketMaker"
+  num_instances: 1
+  config:
+    identity: "hft_mm_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "hft_market_maker"
+      llm:
+        model: "doubao-pro-32k"
+
+hft_market_maker_3:
+  name: "HFT Market Maker 3"
+  class: "examples.FlashCrash2010.Rag.players:LLMHFTMarketMaker"
+  num_instances: 1
+  config:
+    identity: "hft_mm_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "hft_market_maker"
+      llm:
+        model: "doubao-pro-32k"
+
+momentum_chaser_1:
+  name: "Momentum Chaser 1"
+  class: "examples.FlashCrash2010.Rag.players:LLMMomentumChaser"
+  num_instances: 1
+  config:
+    identity: "mom_chaser_1"
+    role: player
+    extras:
+      initial_cash: 500000.00
+      initial_position: 0
+      agent_type: "momentum_chaser"
+      llm:
+        model: "doubao-pro-32k"
+
+momentum_chaser_2:
+  name: "Momentum Chaser 2"
+  class: "examples.FlashCrash2010.Rag.players:LLMMomentumChaser"
+  num_instances: 1
+  config:
+    identity: "mom_chaser_2"
+    role: player
+    extras:
+      initial_cash: 500000.00
+      initial_position: 0
+      agent_type: "momentum_chaser"
+      llm:
+        model: "doubao-pro-32k"
+
+fundamental_trader_1:
+  name: "Fundamental Trader 1"
+  class: "examples.FlashCrash2010.Rag.players:LLMFundamentalTrader"
+  num_instances: 1
+  config:
+    identity: "fund_1"
+    role: player
+    extras:
+      initial_cash: 2000000.00
+      initial_position: 0
+      agent_type: "fundamental_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+fundamental_trader_2:
+  name: "Fundamental Trader 2"
+  class: "examples.FlashCrash2010.Rag.players:LLMFundamentalTrader"
+  num_instances: 1
+  config:
+    identity: "fund_2"
+    role: player
+    extras:
+      initial_cash: 2000000.00
+      initial_position: 0
+      agent_type: "fundamental_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+stop_loss_trader_1:
+  name: "Stop-Loss Trader 1"
+  class: "examples.FlashCrash2010.Rag.players:LLMStopLossTrader"
+  num_instances: 1
+  config:
+    identity: "stop_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 1000
+      entry_price: 40.00
+      stop_percentage: 0.03
+      agent_type: "stop_loss_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+stop_loss_trader_2:
+  name: "Stop-Loss Trader 2"
+  class: "examples.FlashCrash2010.Rag.players:LLMStopLossTrader"
+  num_instances: 1
+  config:
+    identity: "stop_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 1000
+      entry_price: 40.00
+      stop_percentage: 0.03
+      agent_type: "stop_loss_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+stop_loss_trader_3:
+  name: "Stop-Loss Trader 3"
+  class: "examples.FlashCrash2010.Rag.players:LLMStopLossTrader"
+  num_instances: 1
+  config:
+    identity: "stop_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 1000
+      entry_price: 40.00
+      stop_percentage: 0.03
+      agent_type: "stop_loss_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+noise_trader_1:
+  name: "Noise Trader 1"
+  class: "examples.FlashCrash2010.Rag.players:LLMNoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noise_1"
+    role: player
+    extras:
+      initial_cash: 500000.00
+      initial_position: 0
+      agent_type: "noise_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+noise_trader_2:
+  name: "Noise Trader 2"
+  class: "examples.FlashCrash2010.Rag.players:LLMNoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noise_2"
+    role: player
+    extras:
+      initial_cash: 500000.00
+      initial_position: 0
+      agent_type: "noise_trader"
+      llm:
+        model: "doubao-pro-32k"

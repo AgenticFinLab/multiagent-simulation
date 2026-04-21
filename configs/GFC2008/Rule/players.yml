@@ -1,0 +1,71 @@
+# GFC2008 Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.GFC2008.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.03
+      mean_reversion: 0.005
+      noise_std: 0.02
+
+m_b_s_originator_1:
+  name: "MBSOriginator 1"
+  class: "examples.GFC2008.Rule.players:MBSOriginator"
+  num_instances: 2
+  config:
+    identity: "m_b_s_originator_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+rating_agency_2:
+  name: "RatingAgency 2"
+  class: "examples.GFC2008.Rule.players:RatingAgency"
+  num_instances: 2
+  config:
+    identity: "rating_agency_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+leveraged_investor_3:
+  name: "LeveragedInvestor 3"
+  class: "examples.GFC2008.Rule.players:LeveragedInvestor"
+  num_instances: 2
+  config:
+    identity: "leveraged_investor_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+distressed_buyer_4:
+  name: "DistressedBuyer 4"
+  class: "examples.GFC2008.Rule.players:DistressedBuyer"
+  num_instances: 1
+  config:
+    identity: "distressed_buyer_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+regulator_5:
+  name: "Regulator 5"
+  class: "examples.GFC2008.Rule.players:Regulator"
+  num_instances: 1
+  config:
+    identity: "regulator_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+

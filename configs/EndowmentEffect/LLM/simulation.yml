@@ -1,0 +1,38 @@
+# EndowmentEffect LLM Simulation Configuration
+#
+# EndowmentEffect simulation
+#
+# Usage:
+#   python examples/EndowmentEffect/LLM/run_endowmenteffect_llm.py \
+#       -c configs/EndowmentEffect/LLM/simulation.yml
+
+setting:
+  name: "EndowmentEffect-LLM"
+  description: "EndowmentEffect simulation - LLM agents"
+  total_rounds: 200
+
+  record_path: "EXPERIMENT/EndowmentEffect/LLM/records"
+  storage_path: "EXPERIMENT/EndowmentEffect/LLM/communication"
+
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/EndowmentEffect/LLM/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "endowmenteffect_llm"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/EndowmentEffect/LLM/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

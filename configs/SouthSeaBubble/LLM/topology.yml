@@ -1,0 +1,22 @@
+# Topology configuration
+connections:
+  - source: market
+    target: insideradvantaged
+  - source: insideradvantaged
+    target: market
+  - source: market
+    target: narrativebeliever
+  - source: narrativebeliever
+    target: market
+  - source: market
+    target: skepticalanalyst
+  - source: skepticalanalyst
+    target: market
+  - source: market
+    target: arbitrageur
+  - source: arbitrageur
+    target: market
+  - source: market
+    target: noisetrader
+  - source: noisetrader
+    target: market

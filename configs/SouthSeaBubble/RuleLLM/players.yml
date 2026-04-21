@@ -1,0 +1,80 @@
+# SouthSeaBubble RuleLLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.SouthSeaBubble.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+insideradvantaged_1:
+  name: "InsiderAdvantaged 1"
+  class: "examples.SouthSeaBubble.RuleLLM.players:InsiderAdvantaged"
+  num_instances: 2
+  config:
+    identity: "insideradvantaged_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: insideradvantaged
+
+narrativebeliever_2:
+  name: "NarrativeBeliever 2"
+  class: "examples.SouthSeaBubble.RuleLLM.players:NarrativeBeliever"
+  num_instances: 2
+  config:
+    identity: "narrativebeliever_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: narrativebeliever
+
+skepticalanalyst_3:
+  name: "SkepticalAnalyst 3"
+  class: "examples.SouthSeaBubble.RuleLLM.players:SkepticalAnalyst"
+  num_instances: 1
+  config:
+    identity: "skepticalanalyst_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: skepticalanalyst
+
+arbitrageur_4:
+  name: "Arbitrageur 4"
+  class: "examples.SouthSeaBubble.RuleLLM.players:Arbitrageur"
+  num_instances: 1
+  config:
+    identity: "arbitrageur_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: arbitrageur
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.SouthSeaBubble.RuleLLM.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: noisetrader

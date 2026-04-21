@@ -1,0 +1,75 @@
+# ConfirmationBias Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.ConfirmationBias.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+beliefanchor_1:
+  name: "BeliefAnchor 1"
+  class: "examples.ConfirmationBias.Rule.players:BeliefAnchor"
+  num_instances: 2
+  config:
+    identity: "beliefanchor_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+
+selectivescanner_2:
+  name: "SelectiveScanner 2"
+  class: "examples.ConfirmationBias.Rule.players:SelectiveScanner"
+  num_instances: 2
+  config:
+    identity: "selectivescanner_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+
+balancedanalyst_3:
+  name: "BalancedAnalyst 3"
+  class: "examples.ConfirmationBias.Rule.players:BalancedAnalyst"
+  num_instances: 1
+  config:
+    identity: "balancedanalyst_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+
+contrariantrader_4:
+  name: "ContrarianTrader 4"
+  class: "examples.ConfirmationBias.Rule.players:ContrarianTrader"
+  num_instances: 1
+  config:
+    identity: "contrariantrader_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.ConfirmationBias.Rule.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+

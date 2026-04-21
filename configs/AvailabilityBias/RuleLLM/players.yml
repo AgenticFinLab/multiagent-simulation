@@ -1,0 +1,85 @@
+# AvailabilityBias RuleLLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.AvailabilityBias.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+recenteventoverweighter_1:
+  name: "RecentEventOverweighter 1"
+  class: "examples.AvailabilityBias.RuleLLM.players:RecentEventOverweighter"
+  num_instances: 2
+  config:
+    identity: "recenteventoverweighter_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: recenteventoverweighter
+
+
+mediainfluencedtrader_2:
+  name: "MediaInfluencedTrader 2"
+  class: "examples.AvailabilityBias.RuleLLM.players:MediaInfluencedTrader"
+  num_instances: 2
+  config:
+    identity: "mediainfluencedtrader_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: mediainfluencedtrader
+
+
+systematicanalyst_3:
+  name: "SystematicAnalyst 3"
+  class: "examples.AvailabilityBias.RuleLLM.players:SystematicAnalyst"
+  num_instances: 1
+  config:
+    identity: "systematicanalyst_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: systematicanalyst
+
+
+valuetrader_4:
+  name: "ValueTrader 4"
+  class: "examples.AvailabilityBias.RuleLLM.players:ValueTrader"
+  num_instances: 1
+  config:
+    identity: "valuetrader_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: valuetrader
+
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.AvailabilityBias.RuleLLM.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: noisetrader
+

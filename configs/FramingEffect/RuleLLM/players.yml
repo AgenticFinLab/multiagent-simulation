@@ -1,0 +1,80 @@
+# FramingEffect RuleLLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.FramingEffect.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+gainframefollower_1:
+  name: "GainFrameFollower 1"
+  class: "examples.FramingEffect.RuleLLM.players:GainFrameFollower"
+  num_instances: 2
+  config:
+    identity: "gainframefollower_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: gainframefollower
+
+lossframereactor_2:
+  name: "LossFrameReactor 2"
+  class: "examples.FramingEffect.RuleLLM.players:LossFrameReactor"
+  num_instances: 2
+  config:
+    identity: "lossframereactor_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: lossframereactor
+
+frameinvarianttrader_3:
+  name: "FrameInvariantTrader 3"
+  class: "examples.FramingEffect.RuleLLM.players:FrameInvariantTrader"
+  num_instances: 1
+  config:
+    identity: "frameinvarianttrader_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: frameinvarianttrader
+
+arbitrageframer_4:
+  name: "ArbitrageFramer 4"
+  class: "examples.FramingEffect.RuleLLM.players:ArbitrageFramer"
+  num_instances: 1
+  config:
+    identity: "arbitrageframer_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: arbitrageframer
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.FramingEffect.RuleLLM.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: noisetrader

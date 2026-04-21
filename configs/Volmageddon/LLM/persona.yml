@@ -1,0 +1,72 @@
+# Volmageddon LLM Persona Configuration
+
+market:
+  type: proxy
+  checkpoint_dir: "EXPERIMENT/Volmageddon/LLM/records/market/checkpoints"
+  record_path: "EXPERIMENT/Volmageddon/LLM/records/market"
+  monitoring:
+    record_path: "EXPERIMENT/Volmageddon/LLM/monitoring/market"
+
+short_vol_trader_1_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/Volmageddon/LLM/records/short_vol_trader_1_1/checkpoints"
+  record_path: "EXPERIMENT/Volmageddon/LLM/records/short_vol_trader_1_1"
+  monitoring:
+    record_path: "EXPERIMENT/Volmageddon/LLM/monitoring/short_vol_trader_1_1"
+
+short_vol_trader_1_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/Volmageddon/LLM/records/short_vol_trader_1_2/checkpoints"
+  record_path: "EXPERIMENT/Volmageddon/LLM/records/short_vol_trader_1_2"
+  monitoring:
+    record_path: "EXPERIMENT/Volmageddon/LLM/monitoring/short_vol_trader_1_2"
+
+vol_e_t_n_manager_2_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/Volmageddon/LLM/records/vol_e_t_n_manager_2_1/checkpoints"
+  record_path: "EXPERIMENT/Volmageddon/LLM/records/vol_e_t_n_manager_2_1"
+  monitoring:
+    record_path: "EXPERIMENT/Volmageddon/LLM/monitoring/vol_e_t_n_manager_2_1"
+
+vol_e_t_n_manager_2_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/Volmageddon/LLM/records/vol_e_t_n_manager_2_2/checkpoints"
+  record_path: "EXPERIMENT/Volmageddon/LLM/records/vol_e_t_n_manager_2_2"
+  monitoring:
+    record_path: "EXPERIMENT/Volmageddon/LLM/monitoring/vol_e_t_n_manager_2_2"
+
+long_vol_hedger_3_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/Volmageddon/LLM/records/long_vol_hedger_3_1/checkpoints"
+  record_path: "EXPERIMENT/Volmageddon/LLM/records/long_vol_hedger_3_1"
+  monitoring:
+    record_path: "EXPERIMENT/Volmageddon/LLM/monitoring/long_vol_hedger_3_1"
+
+vol_arbitrageur_4_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/Volmageddon/LLM/records/vol_arbitrageur_4_1/checkpoints"
+  record_path: "EXPERIMENT/Volmageddon/LLM/records/vol_arbitrageur_4_1"
+  monitoring:
+    record_path: "EXPERIMENT/Volmageddon/LLM/monitoring/vol_arbitrageur_4_1"
+
+vol_arbitrageur_4_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/Volmageddon/LLM/records/vol_arbitrageur_4_2/checkpoints"
+  record_path: "EXPERIMENT/Volmageddon/LLM/records/vol_arbitrageur_4_2"
+  monitoring:
+    record_path: "EXPERIMENT/Volmageddon/LLM/monitoring/vol_arbitrageur_4_2"
+
+equity_trader_5_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/Volmageddon/LLM/records/equity_trader_5_1/checkpoints"
+  record_path: "EXPERIMENT/Volmageddon/LLM/records/equity_trader_5_1"
+  monitoring:
+    record_path: "EXPERIMENT/Volmageddon/LLM/monitoring/equity_trader_5_1"
+
+equity_trader_5_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/Volmageddon/LLM/records/equity_trader_5_2/checkpoints"
+  record_path: "EXPERIMENT/Volmageddon/LLM/records/equity_trader_5_2"
+  monitoring:
+    record_path: "EXPERIMENT/Volmageddon/LLM/monitoring/equity_trader_5_2"
+

@@ -1,0 +1,22 @@
+# Topology configuration
+connections:
+  - source: market
+    target: macrohedgefund
+  - source: macrohedgefund
+    target: market
+  - source: market
+    target: pegdefender
+  - source: pegdefender
+    target: market
+  - source: market
+    target: convergencetrader
+  - source: convergencetrader
+    target: market
+  - source: market
+    target: opportunistictrader
+  - source: opportunistictrader
+    target: market
+  - source: market
+    target: noisetrader
+  - source: noisetrader
+    target: market

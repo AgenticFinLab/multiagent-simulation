@@ -1,0 +1,44 @@
+# AnchoringEffect LLM Simulation Configuration
+#
+# Anchoring causes traders to insufficiently adjust from reference prices, creating slow price discovery
+#
+# Usage:
+#   python examples/AnchoringEffect/LLM/run_anchoringeffect_llm.py \
+#       -c configs/AnchoringEffect/LLM/simulation.yml
+
+setting:
+  name: "AnchoringEffect-LLM"
+  description: "Anchoring effect simulation demonstrating how initial reference points bias subsequent judgments"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
+  storage_path: "EXPERIMENT/AnchoringEffect/LLM/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/AnchoringEffect/LLM/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+llm:
+  model: "doubao-pro-32k"
+  temperature: 0.3
+  max_tokens: 500
+  timeout: 30
+
+ray:
+  namespace: "anchoringeffect_llm"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/AnchoringEffect/LLM/communication"
+  record_messages: true
+  message_timeout_ms: 30000
+  max_retries: 3

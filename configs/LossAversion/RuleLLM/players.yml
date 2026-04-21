@@ -1,0 +1,91 @@
+# LossAversion RuleLLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.LossAversion.RuleLLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.04
+      mean_reversion: 0.02
+      noise_std: 0.015
+
+loss_averse_investor_1:
+  name: "LossAverseInvestor 1"
+  class: "examples.LossAversion.RuleLLM.players:LLMLossAverseInvestor"
+  num_instances: 2
+  config:
+    identity: "loss_averse_investor_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "loss_averse_investor"
+      llm:
+        model: "doubao-pro-32k"
+
+
+break_even_trader_2:
+  name: "BreakEvenTrader 2"
+  class: "examples.LossAversion.RuleLLM.players:LLMBreakEvenTrader"
+  num_instances: 2
+  config:
+    identity: "break_even_trader_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "break_even_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+
+rational_trader_3:
+  name: "RationalTrader 3"
+  class: "examples.LossAversion.RuleLLM.players:LLMRationalTrader"
+  num_instances: 1
+  config:
+    identity: "rational_trader_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "rational_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+
+momentum_trader_4:
+  name: "MomentumTrader 4"
+  class: "examples.LossAversion.RuleLLM.players:LLMMomentumTrader"
+  num_instances: 2
+  config:
+    identity: "momentum_trader_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "momentum_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+
+market_maker_5:
+  name: "MarketMaker 5"
+  class: "examples.LossAversion.RuleLLM.players:LLMMarketMaker"
+  num_instances: 1
+  config:
+    identity: "market_maker_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "market_maker"
+      llm:
+        model: "doubao-pro-32k"
+
+

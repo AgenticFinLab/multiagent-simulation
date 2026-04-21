@@ -1,0 +1,91 @@
+# LTCMCollapse RuleLLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.LTCMCollapse.RuleLLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.04
+      mean_reversion: 0.005
+      noise_std: 0.02
+
+convergence_arbitrageur_1:
+  name: "ConvergenceArbitrageur 1"
+  class: "examples.LTCMCollapse.RuleLLM.players:LLMConvergenceArbitrageur"
+  num_instances: 2
+  config:
+    identity: "convergence_arbitrageur_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "convergence_arbitrageur"
+      llm:
+        model: "doubao-pro-32k"
+
+
+leverage_trader_2:
+  name: "LeverageTrader 2"
+  class: "examples.LTCMCollapse.RuleLLM.players:LLMLeverageTrader"
+  num_instances: 2
+  config:
+    identity: "leverage_trader_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "leverage_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+
+risk_manager_3:
+  name: "RiskManager 3"
+  class: "examples.LTCMCollapse.RuleLLM.players:LLMRiskManager"
+  num_instances: 2
+  config:
+    identity: "risk_manager_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "risk_manager"
+      llm:
+        model: "doubao-pro-32k"
+
+
+liquidity_provider_4:
+  name: "LiquidityProvider 4"
+  class: "examples.LTCMCollapse.RuleLLM.players:LLMLiquidityProvider"
+  num_instances: 1
+  config:
+    identity: "liquidity_provider_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "liquidity_provider"
+      llm:
+        model: "doubao-pro-32k"
+
+
+central_bank_5:
+  name: "CentralBank 5"
+  class: "examples.LTCMCollapse.RuleLLM.players:LLMCentralBank"
+  num_instances: 1
+  config:
+    identity: "central_bank_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "central_bank"
+      llm:
+        model: "doubao-pro-32k"
+
+

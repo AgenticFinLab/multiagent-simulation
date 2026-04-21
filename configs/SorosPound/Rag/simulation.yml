@@ -1,0 +1,30 @@
+# SorosPound Rag Simulation Configuration
+
+setting:
+  name: "SorosPound-Rag"
+  description: "SorosPound simulation - Rag agents"
+  total_rounds: 200
+  record_path: "EXPERIMENT/SorosPound/Rag/records"
+  storage_path: "EXPERIMENT/SorosPound/Rag/communication"
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/SorosPound/Rag/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "sorospound_rag"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/SorosPound/Rag/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

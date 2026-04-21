@@ -1,0 +1,44 @@
+# MentalAccounting Rag Simulation Configuration
+#
+# Mental accounting causes investors to treat money differently based on its source or intended use
+#
+# Usage:
+#   python examples/MentalAccounting/Rag/run_mentalaccounting_rag.py \
+#       -c configs/MentalAccounting/Rag/simulation.yml
+
+setting:
+  name: "MentalAccounting-Rag"
+  description: "Mental accounting simulation showing how portfolio segregation leads to suboptimal decisions"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/MentalAccounting/Rag/records"
+  storage_path: "EXPERIMENT/MentalAccounting/Rag/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/MentalAccounting/Rag/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+llm:
+  model: "doubao-pro-32k"
+  temperature: 0.3
+  max_tokens: 500
+  timeout: 30
+
+ray:
+  namespace: "mentalaccounting_rag"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/MentalAccounting/Rag/communication"
+  record_messages: true
+  message_timeout_ms: 30000
+  max_retries: 3

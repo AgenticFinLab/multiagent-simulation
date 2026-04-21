@@ -1,0 +1,72 @@
+# MentalAccounting Rag Persona Configuration
+
+market:
+  type: proxy
+  checkpoint_dir: "EXPERIMENT/MentalAccounting/Rag/records/market/checkpoints"
+  record_path: "EXPERIMENT/MentalAccounting/Rag/records/market"
+  monitoring:
+    record_path: "EXPERIMENT/MentalAccounting/Rag/monitoring/market"
+
+mental_accountant_1_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/MentalAccounting/Rag/records/mental_accountant_1_1/checkpoints"
+  record_path: "EXPERIMENT/MentalAccounting/Rag/records/mental_accountant_1_1"
+  monitoring:
+    record_path: "EXPERIMENT/MentalAccounting/Rag/monitoring/mental_accountant_1_1"
+
+mental_accountant_1_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/MentalAccounting/Rag/records/mental_accountant_1_2/checkpoints"
+  record_path: "EXPERIMENT/MentalAccounting/Rag/records/mental_accountant_1_2"
+  monitoring:
+    record_path: "EXPERIMENT/MentalAccounting/Rag/monitoring/mental_accountant_1_2"
+
+house_money_trader_2_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/MentalAccounting/Rag/records/house_money_trader_2_1/checkpoints"
+  record_path: "EXPERIMENT/MentalAccounting/Rag/records/house_money_trader_2_1"
+  monitoring:
+    record_path: "EXPERIMENT/MentalAccounting/Rag/monitoring/house_money_trader_2_1"
+
+house_money_trader_2_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/MentalAccounting/Rag/records/house_money_trader_2_2/checkpoints"
+  record_path: "EXPERIMENT/MentalAccounting/Rag/records/house_money_trader_2_2"
+  monitoring:
+    record_path: "EXPERIMENT/MentalAccounting/Rag/monitoring/house_money_trader_2_2"
+
+rational_portfolio_manager_3_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/MentalAccounting/Rag/records/rational_portfolio_manager_3_1/checkpoints"
+  record_path: "EXPERIMENT/MentalAccounting/Rag/records/rational_portfolio_manager_3_1"
+  monitoring:
+    record_path: "EXPERIMENT/MentalAccounting/Rag/monitoring/rational_portfolio_manager_3_1"
+
+sunk_cost_holder_4_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/MentalAccounting/Rag/records/sunk_cost_holder_4_1/checkpoints"
+  record_path: "EXPERIMENT/MentalAccounting/Rag/records/sunk_cost_holder_4_1"
+  monitoring:
+    record_path: "EXPERIMENT/MentalAccounting/Rag/monitoring/sunk_cost_holder_4_1"
+
+sunk_cost_holder_4_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/MentalAccounting/Rag/records/sunk_cost_holder_4_2/checkpoints"
+  record_path: "EXPERIMENT/MentalAccounting/Rag/records/sunk_cost_holder_4_2"
+  monitoring:
+    record_path: "EXPERIMENT/MentalAccounting/Rag/monitoring/sunk_cost_holder_4_2"
+
+noise_trader_5_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/MentalAccounting/Rag/records/noise_trader_5_1/checkpoints"
+  record_path: "EXPERIMENT/MentalAccounting/Rag/records/noise_trader_5_1"
+  monitoring:
+    record_path: "EXPERIMENT/MentalAccounting/Rag/monitoring/noise_trader_5_1"
+
+noise_trader_5_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/MentalAccounting/Rag/records/noise_trader_5_2/checkpoints"
+  record_path: "EXPERIMENT/MentalAccounting/Rag/records/noise_trader_5_2"
+  monitoring:
+    record_path: "EXPERIMENT/MentalAccounting/Rag/monitoring/noise_trader_5_2"
+

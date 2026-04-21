@@ -1,0 +1,76 @@
+# AnchoringEffect Rule Communication Topology
+
+graph:
+  type: star
+  center: market
+
+connections:
+  - from: market
+    to:
+      - anchored_trader_1_1
+      - anchored_trader_1_2
+      - historical_anchor_2_1
+      - historical_anchor_2_2
+      - rational_updater_3_1
+      - momentum_trader_4_1
+      - momentum_trader_4_2
+      - noise_trader_5_1
+      - noise_trader_5_2
+    bidirectional: false
+    message_type: market_update
+
+  - from: anchored_trader_1_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: anchored_trader_1_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: historical_anchor_2_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: historical_anchor_2_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: rational_updater_3_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: momentum_trader_4_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: momentum_trader_4_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: noise_trader_5_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: noise_trader_5_2
+    to: market
+    bidirectional: false
+    message_type: order
+
+broadcast:
+  enabled: true
+  from: market
+  to: all_players
+  message_type: market_update
+
+execution:
+  order:
+    - market
+    - anchored_trader_1_1
+    - anchored_trader_1_2
+    - historical_anchor_2_1
+    - historical_anchor_2_2
+    - rational_updater_3_1
+    - momentum_trader_4_1
+    - momentum_trader_4_2
+    - noise_trader_5_1
+    - noise_trader_5_2

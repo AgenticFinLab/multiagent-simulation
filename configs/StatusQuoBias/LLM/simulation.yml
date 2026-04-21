@@ -1,0 +1,38 @@
+# StatusQuoBias LLM Simulation Configuration
+#
+# StatusQuoBias simulation
+#
+# Usage:
+#   python examples/StatusQuoBias/LLM/run_statusquobias_llm.py \
+#       -c configs/StatusQuoBias/LLM/simulation.yml
+
+setting:
+  name: "StatusQuoBias-LLM"
+  description: "StatusQuoBias simulation - LLM agents"
+  total_rounds: 200
+
+  record_path: "EXPERIMENT/StatusQuoBias/LLM/records"
+  storage_path: "EXPERIMENT/StatusQuoBias/LLM/communication"
+
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/StatusQuoBias/LLM/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "statusquobias_llm"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/StatusQuoBias/LLM/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

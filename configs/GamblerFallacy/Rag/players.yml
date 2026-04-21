@@ -1,0 +1,85 @@
+# GamblerFallacy Rag Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.GamblerFallacy.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+streakreversaltrader_1:
+  name: "StreakReversalTrader 1"
+  class: "examples.GamblerFallacy.Rag.players:StreakReversalTrader"
+  num_instances: 2
+  config:
+    identity: "streakreversaltrader_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: streakreversaltrader
+
+
+hothandtrader_2:
+  name: "HotHandTrader 2"
+  class: "examples.GamblerFallacy.Rag.players:HotHandTrader"
+  num_instances: 2
+  config:
+    identity: "hothandtrader_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: hothandtrader
+
+
+independentassessor_3:
+  name: "IndependentAssessor 3"
+  class: "examples.GamblerFallacy.Rag.players:IndependentAssessor"
+  num_instances: 1
+  config:
+    identity: "independentassessor_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: independentassessor
+
+
+arbitrageur_4:
+  name: "Arbitrageur 4"
+  class: "examples.GamblerFallacy.Rag.players:Arbitrageur"
+  num_instances: 1
+  config:
+    identity: "arbitrageur_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: arbitrageur
+
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.GamblerFallacy.Rag.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: noisetrader
+

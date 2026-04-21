@@ -1,0 +1,178 @@
+# =============================================================================
+# RumorSpreadLLM Players Configuration
+# =============================================================================
+# 1 InformationEnvironment (rule-based) + 5 LLM Social Agent Types
+#
+# Agent Types:
+#   - InformationEnvironment: Rule-based coordinator (belief dynamics)
+#   - LLMGullibleSpreader: Uncritical transmitter (DESTABILIZING)
+#   - LLMDistortingRelayer: Serial distortion (DESTABILIZING)
+#   - LLMSkepticalEvaluator: Critical assessor (STABILIZING)
+#   - LLMFactChecker: Active debunker (STRONGLY STABILIZING)
+#   - LLMUninformedBystander: Random participant (NEUTRAL)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# InformationEnvironment (Coordinator) — identical to Rule variant
+# -----------------------------------------------------------------------------
+environment:
+  name: "InformationEnvironment"
+  class: "examples.RumorSpread.LLM.players:InformationEnvironment"
+  num_instances: 1
+  config:
+    identity: "environment"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - environment
+    extras:
+      record_path: "EXPERIMENT/RumorSpread/LLM/records"
+      rumor_truth_value: 0.1     # 0.0 = completely false, 1.0 = fully true
+      initial_belief: 0.3        # Starting belief level (rumor seed)
+      spread_impact: 0.15        # How strongly agent actions shift belief
+      truth_correction: 0.02     # Rate of truth-based correction
+      leveling_rate: 0.01        # Allport & Postman: detail loss rate
+      sharpening_rate: 0.02      # Allport & Postman: exaggeration rate
+      noise_std: 0.02            # Transmission noise
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Gullible Spreaders
+# -----------------------------------------------------------------------------
+llm_gullible_spreader:
+  name: "LLM Gullible Spreader"
+  class: "examples.RumorSpread.LLM.players:LLMGullibleSpreader"
+  num_instances: 5
+  config:
+    identity: "llm_gullible_spreader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_agents
+    extras:
+      record_path: "EXPERIMENT/RumorSpread/LLM/records"
+      initial_belief: 0.3
+      initial_credibility: 0.5
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.RumorSpread.LLM.prompts:LLM_GULLIBLE_SYS"
+        user_message: "examples.RumorSpread.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Distorting Relayers
+# -----------------------------------------------------------------------------
+llm_distorting_relayer:
+  name: "LLM Distorting Relayer"
+  class: "examples.RumorSpread.LLM.players:LLMDistortingRelayer"
+  num_instances: 3
+  config:
+    identity: "llm_distorting_relayer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_agents
+    extras:
+      record_path: "EXPERIMENT/RumorSpread/LLM/records"
+      initial_belief: 0.2
+      initial_credibility: 0.4
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.RumorSpread.LLM.prompts:LLM_DISTORTING_SYS"
+        user_message: "examples.RumorSpread.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Skeptical Evaluators
+# -----------------------------------------------------------------------------
+llm_skeptical_evaluator:
+  name: "LLM Skeptical Evaluator"
+  class: "examples.RumorSpread.LLM.players:LLMSkepticalEvaluator"
+  num_instances: 3
+  config:
+    identity: "llm_skeptical_evaluator"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_agents
+    extras:
+      record_path: "EXPERIMENT/RumorSpread/LLM/records"
+      initial_belief: 0.1
+      initial_credibility: 0.7
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.RumorSpread.LLM.prompts:LLM_SKEPTICAL_SYS"
+        user_message: "examples.RumorSpread.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Fact Checkers
+# -----------------------------------------------------------------------------
+llm_fact_checker:
+  name: "LLM Fact Checker"
+  class: "examples.RumorSpread.LLM.players:LLMFactChecker"
+  num_instances: 2
+  config:
+    identity: "llm_fact_checker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_agents
+    extras:
+      record_path: "EXPERIMENT/RumorSpread/LLM/records"
+      initial_belief: 0.05
+      initial_credibility: 0.9
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.RumorSpread.LLM.prompts:LLM_FACTCHECKER_SYS"
+        user_message: "examples.RumorSpread.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Uninformed Bystanders
+# -----------------------------------------------------------------------------
+llm_uninformed_bystander:
+  name: "LLM Uninformed Bystander"
+  class: "examples.RumorSpread.LLM.players:LLMUninformedBystander"
+  num_instances: 4
+  config:
+    identity: "llm_uninformed_bystander"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_agents
+    extras:
+      record_path: "EXPERIMENT/RumorSpread/LLM/records"
+      initial_belief: 0.2
+      initial_credibility: 0.3
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.RumorSpread.LLM.prompts:LLM_BYSTANDER_SYS"
+        user_message: "examples.RumorSpread.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 500
+  persona: !include persona.yml

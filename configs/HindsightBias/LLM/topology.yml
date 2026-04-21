@@ -1,0 +1,22 @@
+# Topology configuration
+connections:
+  - source: market
+    target: hindsightoverconfident
+  - source: hindsightoverconfident
+    target: market
+  - source: market
+    target: outcomelearner
+  - source: outcomelearner
+    target: market
+  - source: market
+    target: processevaluator
+  - source: processevaluator
+    target: market
+  - source: market
+    target: contrarianskeptic
+  - source: contrarianskeptic
+    target: market
+  - source: market
+    target: noisetrader
+  - source: noisetrader
+    target: market

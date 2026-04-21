@@ -1,0 +1,91 @@
+# AnchoringEffect LLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.AnchoringEffect.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.04
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+anchored_trader_1:
+  name: "AnchoredTrader 1"
+  class: "examples.AnchoringEffect.LLM.players:LLMAnchoredTrader"
+  num_instances: 2
+  config:
+    identity: "anchored_trader_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "anchored_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+
+historical_anchor_2:
+  name: "HistoricalAnchor 2"
+  class: "examples.AnchoringEffect.LLM.players:LLMHistoricalAnchor"
+  num_instances: 2
+  config:
+    identity: "historical_anchor_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "historical_anchor"
+      llm:
+        model: "doubao-pro-32k"
+
+
+rational_updater_3:
+  name: "RationalUpdater 3"
+  class: "examples.AnchoringEffect.LLM.players:LLMRationalUpdater"
+  num_instances: 1
+  config:
+    identity: "rational_updater_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "rational_updater"
+      llm:
+        model: "doubao-pro-32k"
+
+
+momentum_trader_4:
+  name: "MomentumTrader 4"
+  class: "examples.AnchoringEffect.LLM.players:LLMMomentumTrader"
+  num_instances: 2
+  config:
+    identity: "momentum_trader_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "momentum_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+
+noise_trader_5:
+  name: "NoiseTrader 5"
+  class: "examples.AnchoringEffect.LLM.players:LLMNoiseTrader"
+  num_instances: 2
+  config:
+    identity: "noise_trader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "noise_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+

@@ -1,0 +1,72 @@
+# BlackMonday1987 LLM Persona Configuration
+
+market:
+  type: proxy
+  checkpoint_dir: "EXPERIMENT/BlackMonday1987/LLM/records/market/checkpoints"
+  record_path: "EXPERIMENT/BlackMonday1987/LLM/records/market"
+  monitoring:
+    record_path: "EXPERIMENT/BlackMonday1987/LLM/monitoring/market"
+
+portfolio_insurer_1_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/BlackMonday1987/LLM/records/portfolio_insurer_1_1/checkpoints"
+  record_path: "EXPERIMENT/BlackMonday1987/LLM/records/portfolio_insurer_1_1"
+  monitoring:
+    record_path: "EXPERIMENT/BlackMonday1987/LLM/monitoring/portfolio_insurer_1_1"
+
+portfolio_insurer_1_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/BlackMonday1987/LLM/records/portfolio_insurer_1_2/checkpoints"
+  record_path: "EXPERIMENT/BlackMonday1987/LLM/records/portfolio_insurer_1_2"
+  monitoring:
+    record_path: "EXPERIMENT/BlackMonday1987/LLM/monitoring/portfolio_insurer_1_2"
+
+index_arbitrageur_2_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/BlackMonday1987/LLM/records/index_arbitrageur_2_1/checkpoints"
+  record_path: "EXPERIMENT/BlackMonday1987/LLM/records/index_arbitrageur_2_1"
+  monitoring:
+    record_path: "EXPERIMENT/BlackMonday1987/LLM/monitoring/index_arbitrageur_2_1"
+
+index_arbitrageur_2_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/BlackMonday1987/LLM/records/index_arbitrageur_2_2/checkpoints"
+  record_path: "EXPERIMENT/BlackMonday1987/LLM/records/index_arbitrageur_2_2"
+  monitoring:
+    record_path: "EXPERIMENT/BlackMonday1987/LLM/monitoring/index_arbitrageur_2_2"
+
+program_trader_3_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/BlackMonday1987/LLM/records/program_trader_3_1/checkpoints"
+  record_path: "EXPERIMENT/BlackMonday1987/LLM/records/program_trader_3_1"
+  monitoring:
+    record_path: "EXPERIMENT/BlackMonday1987/LLM/monitoring/program_trader_3_1"
+
+program_trader_3_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/BlackMonday1987/LLM/records/program_trader_3_2/checkpoints"
+  record_path: "EXPERIMENT/BlackMonday1987/LLM/records/program_trader_3_2"
+  monitoring:
+    record_path: "EXPERIMENT/BlackMonday1987/LLM/monitoring/program_trader_3_2"
+
+value_investor_4_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/BlackMonday1987/LLM/records/value_investor_4_1/checkpoints"
+  record_path: "EXPERIMENT/BlackMonday1987/LLM/records/value_investor_4_1"
+  monitoring:
+    record_path: "EXPERIMENT/BlackMonday1987/LLM/monitoring/value_investor_4_1"
+
+noise_trader_5_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/BlackMonday1987/LLM/records/noise_trader_5_1/checkpoints"
+  record_path: "EXPERIMENT/BlackMonday1987/LLM/records/noise_trader_5_1"
+  monitoring:
+    record_path: "EXPERIMENT/BlackMonday1987/LLM/monitoring/noise_trader_5_1"
+
+noise_trader_5_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/BlackMonday1987/LLM/records/noise_trader_5_2/checkpoints"
+  record_path: "EXPERIMENT/BlackMonday1987/LLM/records/noise_trader_5_2"
+  monitoring:
+    record_path: "EXPERIMENT/BlackMonday1987/LLM/monitoring/noise_trader_5_2"
+

@@ -1,0 +1,22 @@
+# Topology configuration
+connections:
+  - source: market
+    target: peripherybondseller
+  - source: peripherybondseller
+    target: market
+  - source: market
+    target: creditorpanicker
+  - source: creditorpanicker
+    target: market
+  - source: market
+    target: corebondbuyer
+  - source: corebondbuyer
+    target: market
+  - source: market
+    target: ecbintervenor
+  - source: ecbintervenor
+    target: market
+  - source: market
+    target: hedgedfund
+  - source: hedgedfund
+    target: market

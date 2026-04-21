@@ -1,0 +1,289 @@
+# =============================================================================
+# RumorSpreadRag Players Configuration
+# =============================================================================
+# 1 InformationEnvironment (rule-based) + 5 RAG-augmented LLM Social Agents
+#
+# Knowledge Architecture:
+#   The shared knowledge: block is defined at the TOP of this file.
+#   The config loader automatically promotes it to config top-level.
+#
+#   Each agent has private_knowledge for agent-specific resources:
+#     - from_global_resources: List of global resource sub-dirs to inherit
+#     - local_resources:
+#         local_uri:       Per-agent local directory
+#         local_resources: Agent-specific local resource paths
+#     - rag: Per-agent RAG configuration (MUST be nested inside private_knowledge)
+# =============================================================================
+
+# =============================================================================
+# Shared Knowledge Configuration
+# =============================================================================
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    timeout_per_page: 30
+    max_pages: 250
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+
+# -----------------------------------------------------------------------------
+# InformationEnvironment (Coordinator) — identical to Rule variant
+# -----------------------------------------------------------------------------
+environment:
+  name: "InformationEnvironment"
+  class: "examples.RumorSpread.Rag.players:InformationEnvironment"
+  num_instances: 1
+  config:
+    identity: "environment"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - environment
+    extras:
+      record_path: "EXPERIMENT/RumorSpread/Rag/records"
+      rumor_truth_value: 0.1
+      initial_belief: 0.3
+      spread_impact: 0.15
+      truth_correction: 0.02
+      leveling_rate: 0.01
+      sharpening_rate: 0.02
+      noise_std: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Gullible Spreader
+# -----------------------------------------------------------------------------
+ragllm_gullible_spreader:
+  name: "RAG Gullible Spreader"
+  class: "examples.RumorSpread.Rag.players:RagLLMGullibleSpreader"
+  num_instances: 5
+  config:
+    identity: "ragllm_gullible_spreader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_agents
+    extras:
+      record_path: "EXPERIMENT/RumorSpread/Rag/records"
+      initial_belief: 0.3
+      initial_credibility: 0.5
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.RumorSpread.Rag.prompts:RAG_GULLIBLE_SYS"
+        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Distorting Relayer
+# -----------------------------------------------------------------------------
+ragllm_distorting_relayer:
+  name: "RAG Distorting Relayer"
+  class: "examples.RumorSpread.Rag.players:RagLLMDistortingRelayer"
+  num_instances: 3
+  config:
+    identity: "ragllm_distorting_relayer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_agents
+    extras:
+      record_path: "EXPERIMENT/RumorSpread/Rag/records"
+      initial_belief: 0.2
+      initial_credibility: 0.4
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.RumorSpread.Rag.prompts:RAG_DISTORTING_SYS"
+        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Skeptical Evaluator
+# -----------------------------------------------------------------------------
+ragllm_skeptical_evaluator:
+  name: "RAG Skeptical Evaluator"
+  class: "examples.RumorSpread.Rag.players:RagLLMSkepticalEvaluator"
+  num_instances: 3
+  config:
+    identity: "ragllm_skeptical_evaluator"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_agents
+    extras:
+      record_path: "EXPERIMENT/RumorSpread/Rag/records"
+      initial_belief: 0.1
+      initial_credibility: 0.7
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.RumorSpread.Rag.prompts:RAG_SKEPTICAL_SYS"
+        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Fact Checker
+# -----------------------------------------------------------------------------
+ragllm_fact_checker:
+  name: "RAG Fact Checker"
+  class: "examples.RumorSpread.Rag.players:RagLLMFactChecker"
+  num_instances: 2
+  config:
+    identity: "ragllm_fact_checker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_agents
+    extras:
+      record_path: "EXPERIMENT/RumorSpread/Rag/records"
+      initial_belief: 0.05
+      initial_credibility: 0.9
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.RumorSpread.Rag.prompts:RAG_FACTCHECKER_SYS"
+        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Uninformed Bystander
+# -----------------------------------------------------------------------------
+ragllm_uninformed_bystander:
+  name: "RAG Uninformed Bystander"
+  class: "examples.RumorSpread.Rag.players:RagLLMUninformedBystander"
+  num_instances: 4
+  config:
+    identity: "ragllm_uninformed_bystander"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_agents
+    extras:
+      record_path: "EXPERIMENT/RumorSpread/Rag/records"
+      initial_belief: 0.2
+      initial_credibility: 0.3
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 3
+      llm:
+        sys_message: "examples.RumorSpread.Rag.prompts:RAG_BYSTANDER_SYS"
+        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 600
+  persona: !include persona.yml

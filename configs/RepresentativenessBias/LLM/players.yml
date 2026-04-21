@@ -1,0 +1,80 @@
+# RepresentativenessBias LLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.RepresentativenessBias.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+patternmatcher_1:
+  name: "PatternMatcher 1"
+  class: "examples.RepresentativenessBias.LLM.players:PatternMatcher"
+  num_instances: 2
+  config:
+    identity: "patternmatcher_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: patternmatcher
+
+categoryovergeneralizer_2:
+  name: "CategoryOvergeneralizer 2"
+  class: "examples.RepresentativenessBias.LLM.players:CategoryOvergeneralizer"
+  num_instances: 2
+  config:
+    identity: "categoryovergeneralizer_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: categoryovergeneralizer
+
+bayesianupdater_3:
+  name: "BayesianUpdater 3"
+  class: "examples.RepresentativenessBias.LLM.players:BayesianUpdater"
+  num_instances: 1
+  config:
+    identity: "bayesianupdater_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: bayesianupdater
+
+contrarianstatistical_4:
+  name: "ContrarianStatistical 4"
+  class: "examples.RepresentativenessBias.LLM.players:ContrarianStatistical"
+  num_instances: 1
+  config:
+    identity: "contrarianstatistical_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: contrarianstatistical
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.RepresentativenessBias.LLM.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: noisetrader

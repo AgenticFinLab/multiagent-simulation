@@ -1,0 +1,70 @@
+# LossAversion Rag Communication Topology
+
+graph:
+  type: star
+  center: market
+
+connections:
+  - from: market
+    to:
+      - loss_averse_investor_1_1
+      - loss_averse_investor_1_2
+      - break_even_trader_2_1
+      - break_even_trader_2_2
+      - rational_trader_3_1
+      - momentum_trader_4_1
+      - momentum_trader_4_2
+      - market_maker_5_1
+    bidirectional: false
+    message_type: market_update
+
+  - from: loss_averse_investor_1_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: loss_averse_investor_1_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: break_even_trader_2_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: break_even_trader_2_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: rational_trader_3_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: momentum_trader_4_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: momentum_trader_4_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: market_maker_5_1
+    to: market
+    bidirectional: false
+    message_type: order
+
+broadcast:
+  enabled: true
+  from: market
+  to: all_players
+  message_type: market_update
+
+execution:
+  order:
+    - market
+    - loss_averse_investor_1_1
+    - loss_averse_investor_1_2
+    - break_even_trader_2_1
+    - break_even_trader_2_2
+    - rational_trader_3_1
+    - momentum_trader_4_1
+    - momentum_trader_4_2
+    - market_maker_5_1

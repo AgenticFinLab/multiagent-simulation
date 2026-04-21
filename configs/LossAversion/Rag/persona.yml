@@ -1,0 +1,65 @@
+# LossAversion Rag Persona Configuration
+
+market:
+  type: proxy
+  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/market/checkpoints"
+  record_path: "EXPERIMENT/LossAversion/Rag/records/market"
+  monitoring:
+    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/market"
+
+loss_averse_investor_1_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/loss_averse_investor_1_1/checkpoints"
+  record_path: "EXPERIMENT/LossAversion/Rag/records/loss_averse_investor_1_1"
+  monitoring:
+    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/loss_averse_investor_1_1"
+
+loss_averse_investor_1_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/loss_averse_investor_1_2/checkpoints"
+  record_path: "EXPERIMENT/LossAversion/Rag/records/loss_averse_investor_1_2"
+  monitoring:
+    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/loss_averse_investor_1_2"
+
+break_even_trader_2_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/break_even_trader_2_1/checkpoints"
+  record_path: "EXPERIMENT/LossAversion/Rag/records/break_even_trader_2_1"
+  monitoring:
+    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/break_even_trader_2_1"
+
+break_even_trader_2_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/break_even_trader_2_2/checkpoints"
+  record_path: "EXPERIMENT/LossAversion/Rag/records/break_even_trader_2_2"
+  monitoring:
+    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/break_even_trader_2_2"
+
+rational_trader_3_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/rational_trader_3_1/checkpoints"
+  record_path: "EXPERIMENT/LossAversion/Rag/records/rational_trader_3_1"
+  monitoring:
+    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/rational_trader_3_1"
+
+momentum_trader_4_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/momentum_trader_4_1/checkpoints"
+  record_path: "EXPERIMENT/LossAversion/Rag/records/momentum_trader_4_1"
+  monitoring:
+    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/momentum_trader_4_1"
+
+momentum_trader_4_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/momentum_trader_4_2/checkpoints"
+  record_path: "EXPERIMENT/LossAversion/Rag/records/momentum_trader_4_2"
+  monitoring:
+    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/momentum_trader_4_2"
+
+market_maker_5_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/market_maker_5_1/checkpoints"
+  record_path: "EXPERIMENT/LossAversion/Rag/records/market_maker_5_1"
+  monitoring:
+    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/market_maker_5_1"
+

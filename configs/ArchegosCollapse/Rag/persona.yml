@@ -1,0 +1,72 @@
+# ArchegosCollapse Rag Persona Configuration
+
+market:
+  type: proxy
+  checkpoint_dir: "EXPERIMENT/ArchegosCollapse/Rag/records/market/checkpoints"
+  record_path: "EXPERIMENT/ArchegosCollapse/Rag/records/market"
+  monitoring:
+    record_path: "EXPERIMENT/ArchegosCollapse/Rag/monitoring/market"
+
+concentrated_fund_1_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/ArchegosCollapse/Rag/records/concentrated_fund_1_1/checkpoints"
+  record_path: "EXPERIMENT/ArchegosCollapse/Rag/records/concentrated_fund_1_1"
+  monitoring:
+    record_path: "EXPERIMENT/ArchegosCollapse/Rag/monitoring/concentrated_fund_1_1"
+
+concentrated_fund_1_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/ArchegosCollapse/Rag/records/concentrated_fund_1_2/checkpoints"
+  record_path: "EXPERIMENT/ArchegosCollapse/Rag/records/concentrated_fund_1_2"
+  monitoring:
+    record_path: "EXPERIMENT/ArchegosCollapse/Rag/monitoring/concentrated_fund_1_2"
+
+prime_broker1_2_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/ArchegosCollapse/Rag/records/prime_broker1_2_1/checkpoints"
+  record_path: "EXPERIMENT/ArchegosCollapse/Rag/records/prime_broker1_2_1"
+  monitoring:
+    record_path: "EXPERIMENT/ArchegosCollapse/Rag/monitoring/prime_broker1_2_1"
+
+prime_broker1_2_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/ArchegosCollapse/Rag/records/prime_broker1_2_2/checkpoints"
+  record_path: "EXPERIMENT/ArchegosCollapse/Rag/records/prime_broker1_2_2"
+  monitoring:
+    record_path: "EXPERIMENT/ArchegosCollapse/Rag/monitoring/prime_broker1_2_2"
+
+prime_broker2_3_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/ArchegosCollapse/Rag/records/prime_broker2_3_1/checkpoints"
+  record_path: "EXPERIMENT/ArchegosCollapse/Rag/records/prime_broker2_3_1"
+  monitoring:
+    record_path: "EXPERIMENT/ArchegosCollapse/Rag/monitoring/prime_broker2_3_1"
+
+prime_broker2_3_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/ArchegosCollapse/Rag/records/prime_broker2_3_2/checkpoints"
+  record_path: "EXPERIMENT/ArchegosCollapse/Rag/records/prime_broker2_3_2"
+  monitoring:
+    record_path: "EXPERIMENT/ArchegosCollapse/Rag/monitoring/prime_broker2_3_2"
+
+block_trade_buyer_4_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/ArchegosCollapse/Rag/records/block_trade_buyer_4_1/checkpoints"
+  record_path: "EXPERIMENT/ArchegosCollapse/Rag/records/block_trade_buyer_4_1"
+  monitoring:
+    record_path: "EXPERIMENT/ArchegosCollapse/Rag/monitoring/block_trade_buyer_4_1"
+
+information_trader_5_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/ArchegosCollapse/Rag/records/information_trader_5_1/checkpoints"
+  record_path: "EXPERIMENT/ArchegosCollapse/Rag/records/information_trader_5_1"
+  monitoring:
+    record_path: "EXPERIMENT/ArchegosCollapse/Rag/monitoring/information_trader_5_1"
+
+information_trader_5_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/ArchegosCollapse/Rag/records/information_trader_5_2/checkpoints"
+  record_path: "EXPERIMENT/ArchegosCollapse/Rag/records/information_trader_5_2"
+  monitoring:
+    record_path: "EXPERIMENT/ArchegosCollapse/Rag/monitoring/information_trader_5_2"
+

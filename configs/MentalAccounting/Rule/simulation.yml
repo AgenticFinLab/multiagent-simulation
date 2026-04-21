@@ -1,0 +1,38 @@
+# MentalAccounting Rule Simulation Configuration
+#
+# Mental accounting causes investors to treat money differently based on its source or intended use
+#
+# Usage:
+#   python examples/MentalAccounting/Rule/run_mentalaccounting.py \
+#       -c configs/MentalAccounting/Rule/simulation.yml
+
+setting:
+  name: "MentalAccounting-Rule"
+  description: "Mental accounting simulation showing how portfolio segregation leads to suboptimal decisions"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/MentalAccounting/Rule/records"
+  storage_path: "EXPERIMENT/MentalAccounting/Rule/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/MentalAccounting/Rule/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "mentalaccounting_rule"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/MentalAccounting/Rule/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

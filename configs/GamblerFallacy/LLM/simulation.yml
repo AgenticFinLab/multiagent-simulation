@@ -1,0 +1,38 @@
+# GamblerFallacy LLM Simulation Configuration
+#
+# GamblerFallacy simulation
+#
+# Usage:
+#   python examples/GamblerFallacy/LLM/run_gamblerfallacy_llm.py \
+#       -c configs/GamblerFallacy/LLM/simulation.yml
+
+setting:
+  name: "GamblerFallacy-LLM"
+  description: "GamblerFallacy simulation - LLM agents"
+  total_rounds: 200
+
+  record_path: "EXPERIMENT/GamblerFallacy/LLM/records"
+  storage_path: "EXPERIMENT/GamblerFallacy/LLM/communication"
+
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/GamblerFallacy/LLM/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "gamblerfallacy_llm"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/GamblerFallacy/LLM/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

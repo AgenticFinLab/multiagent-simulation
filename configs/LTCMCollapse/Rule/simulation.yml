@@ -1,0 +1,38 @@
+# LTCMCollapse Rule Simulation Configuration
+#
+# August-September 1998 LTCM crisis - Russian default triggered liquidity crisis
+#
+# Usage:
+#   python examples/LTCMCollapse/Rule/run_ltcmcollapse.py \
+#       -c configs/LTCMCollapse/Rule/simulation.yml
+
+setting:
+  name: "LTCMCollapse-Rule"
+  description: "Long-Term Capital Management collapse simulation with convergence arbitrage, leverage cycles, and liquidity crisis"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/LTCMCollapse/Rule/records"
+  storage_path: "EXPERIMENT/LTCMCollapse/Rule/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/LTCMCollapse/Rule/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "ltcmcollapse_rule"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/LTCMCollapse/Rule/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

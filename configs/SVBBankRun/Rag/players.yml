@@ -1,0 +1,91 @@
+# SVBBankRun Rag Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.SVBBankRun.Rag.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.04
+      mean_reversion: 0.01
+      noise_std: 0.02
+
+depositor_1:
+  name: "Depositor 1"
+  class: "examples.SVBBankRun.Rag.players:LLMDepositor"
+  num_instances: 2
+  config:
+    identity: "depositor_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "depositor"
+      llm:
+        model: "doubao-pro-32k"
+
+
+social_media_influencer_2:
+  name: "SocialMediaInfluencer 2"
+  class: "examples.SVBBankRun.Rag.players:LLMSocialMediaInfluencer"
+  num_instances: 2
+  config:
+    identity: "social_media_influencer_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "social_media_influencer"
+      llm:
+        model: "doubao-pro-32k"
+
+
+bank_manager_3:
+  name: "BankManager 3"
+  class: "examples.SVBBankRun.Rag.players:LLMBankManager"
+  num_instances: 2
+  config:
+    identity: "bank_manager_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "bank_manager"
+      llm:
+        model: "doubao-pro-32k"
+
+
+regulator_4:
+  name: "Regulator 4"
+  class: "examples.SVBBankRun.Rag.players:LLMRegulator"
+  num_instances: 1
+  config:
+    identity: "regulator_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "regulator"
+      llm:
+        model: "doubao-pro-32k"
+
+
+bond_trader_5:
+  name: "BondTrader 5"
+  class: "examples.SVBBankRun.Rag.players:LLMBondTrader"
+  num_instances: 2
+  config:
+    identity: "bond_trader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "bond_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+

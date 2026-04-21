@@ -1,0 +1,38 @@
+# EuropeanDebtCrisis Rule Simulation Configuration
+#
+# EuropeanDebtCrisis simulation
+#
+# Usage:
+#   python examples/EuropeanDebtCrisis/Rule/run_europeandebtcrisis_rule.py \
+#       -c configs/EuropeanDebtCrisis/Rule/simulation.yml
+
+setting:
+  name: "EuropeanDebtCrisis-Rule"
+  description: "EuropeanDebtCrisis simulation - Rule agents"
+  total_rounds: 200
+
+  record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"
+  storage_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/communication"
+
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "europeandebtcrisis_rule"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

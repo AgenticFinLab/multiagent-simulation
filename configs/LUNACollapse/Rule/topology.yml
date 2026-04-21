@@ -1,0 +1,76 @@
+# LUNACollapse Rule Communication Topology
+
+graph:
+  type: star
+  center: market
+
+connections:
+  - from: market
+    to:
+      - stablecoin_holder_1_1
+      - stablecoin_holder_1_2
+      - arbitrageur_2_1
+      - arbitrageur_2_2
+      - de_fi_lender_3_1
+      - de_fi_lender_3_2
+      - anchor_depositor_4_1
+      - anchor_depositor_4_2
+      - value_buyer_5_1
+    bidirectional: false
+    message_type: market_update
+
+  - from: stablecoin_holder_1_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: stablecoin_holder_1_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: arbitrageur_2_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: arbitrageur_2_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: de_fi_lender_3_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: de_fi_lender_3_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: anchor_depositor_4_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: anchor_depositor_4_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: value_buyer_5_1
+    to: market
+    bidirectional: false
+    message_type: order
+
+broadcast:
+  enabled: true
+  from: market
+  to: all_players
+  message_type: market_update
+
+execution:
+  order:
+    - market
+    - stablecoin_holder_1_1
+    - stablecoin_holder_1_2
+    - arbitrageur_2_1
+    - arbitrageur_2_2
+    - de_fi_lender_3_1
+    - de_fi_lender_3_2
+    - anchor_depositor_4_1
+    - anchor_depositor_4_2
+    - value_buyer_5_1

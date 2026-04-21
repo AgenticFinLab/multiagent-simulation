@@ -1,0 +1,94 @@
+# FlashCrash2010 Persona Configuration
+#
+# Persistence and checkpoint settings for all agents
+
+market:
+  type: proxy
+  checkpoint_dir: "EXPERIMENT/FlashCrash2010/LLM/records/market/checkpoints"
+  record_path: "EXPERIMENT/FlashCrash2010/LLM/records/market"
+  monitoring:
+    record_path: "EXPERIMENT/FlashCrash2010/LLM/monitoring/market"
+
+hft_mm_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/FlashCrash2010/LLM/records/hft_mm_1/checkpoints"
+  record_path: "EXPERIMENT/FlashCrash2010/LLM/records/hft_mm_1"
+  monitoring:
+    record_path: "EXPERIMENT/FlashCrash2010/LLM/monitoring/hft_mm_1"
+
+hft_mm_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/FlashCrash2010/LLM/records/hft_mm_2/checkpoints"
+  record_path: "EXPERIMENT/FlashCrash2010/LLM/records/hft_mm_2"
+  monitoring:
+    record_path: "EXPERIMENT/FlashCrash2010/LLM/monitoring/hft_mm_2"
+
+hft_mm_3:
+  type: player
+  checkpoint_dir: "EXPERIMENT/FlashCrash2010/LLM/records/hft_mm_3/checkpoints"
+  record_path: "EXPERIMENT/FlashCrash2010/LLM/records/hft_mm_3"
+  monitoring:
+    record_path: "EXPERIMENT/FlashCrash2010/LLM/monitoring/hft_mm_3"
+
+mom_chaser_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/FlashCrash2010/LLM/records/mom_chaser_1/checkpoints"
+  record_path: "EXPERIMENT/FlashCrash2010/LLM/records/mom_chaser_1"
+  monitoring:
+    record_path: "EXPERIMENT/FlashCrash2010/LLM/monitoring/mom_chaser_1"
+
+mom_chaser_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/FlashCrash2010/LLM/records/mom_chaser_2/checkpoints"
+  record_path: "EXPERIMENT/FlashCrash2010/LLM/records/mom_chaser_2"
+  monitoring:
+    record_path: "EXPERIMENT/FlashCrash2010/LLM/monitoring/mom_chaser_2"
+
+fund_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/FlashCrash2010/LLM/records/fund_1/checkpoints"
+  record_path: "EXPERIMENT/FlashCrash2010/LLM/records/fund_1"
+  monitoring:
+    record_path: "EXPERIMENT/FlashCrash2010/LLM/monitoring/fund_1"
+
+fund_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/FlashCrash2010/LLM/records/fund_2/checkpoints"
+  record_path: "EXPERIMENT/FlashCrash2010/LLM/records/fund_2"
+  monitoring:
+    record_path: "EXPERIMENT/FlashCrash2010/LLM/monitoring/fund_2"
+
+stop_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/FlashCrash2010/LLM/records/stop_1/checkpoints"
+  record_path: "EXPERIMENT/FlashCrash2010/LLM/records/stop_1"
+  monitoring:
+    record_path: "EXPERIMENT/FlashCrash2010/LLM/monitoring/stop_1"
+
+stop_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/FlashCrash2010/LLM/records/stop_2/checkpoints"
+  record_path: "EXPERIMENT/FlashCrash2010/LLM/records/stop_2"
+  monitoring:
+    record_path: "EXPERIMENT/FlashCrash2010/LLM/monitoring/stop_2"
+
+stop_3:
+  type: player
+  checkpoint_dir: "EXPERIMENT/FlashCrash2010/LLM/records/stop_3/checkpoints"
+  record_path: "EXPERIMENT/FlashCrash2010/LLM/records/stop_3"
+  monitoring:
+    record_path: "EXPERIMENT/FlashCrash2010/LLM/monitoring/stop_3"
+
+noise_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/FlashCrash2010/LLM/records/noise_1/checkpoints"
+  record_path: "EXPERIMENT/FlashCrash2010/LLM/records/noise_1"
+  monitoring:
+    record_path: "EXPERIMENT/FlashCrash2010/LLM/monitoring/noise_1"
+
+noise_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/FlashCrash2010/LLM/records/noise_2/checkpoints"
+  record_path: "EXPERIMENT/FlashCrash2010/LLM/records/noise_2"
+  monitoring:
+    record_path: "EXPERIMENT/FlashCrash2010/LLM/monitoring/noise_2"

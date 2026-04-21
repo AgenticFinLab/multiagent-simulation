@@ -1,0 +1,44 @@
+# LUNACollapse RuleLLM Simulation Configuration
+#
+# May 2022 Terra/LUNA crash - $40B wiped out in algorithmic stablecoin death spiral
+#
+# Usage:
+#   python examples/LUNACollapse/RuleLLM/run_lunacollapse_rulellm.py \
+#       -c configs/LUNACollapse/RuleLLM/simulation.yml
+
+setting:
+  name: "LUNACollapse-RuleLLM"
+  description: "Terra/LUNA collapse simulation with algorithmic stablecoin death spiral and DeFi contagion"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/LUNACollapse/RuleLLM/records"
+  storage_path: "EXPERIMENT/LUNACollapse/RuleLLM/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/LUNACollapse/RuleLLM/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+llm:
+  model: "doubao-pro-32k"
+  temperature: 0.3
+  max_tokens: 500
+  timeout: 30
+
+ray:
+  namespace: "lunacollapse_rulellm"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/LUNACollapse/RuleLLM/communication"
+  record_messages: true
+  message_timeout_ms: 30000
+  max_retries: 3

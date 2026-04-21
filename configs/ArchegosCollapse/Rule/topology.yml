@@ -1,0 +1,76 @@
+# ArchegosCollapse Rule Communication Topology
+
+graph:
+  type: star
+  center: market
+
+connections:
+  - from: market
+    to:
+      - concentrated_fund_1_1
+      - concentrated_fund_1_2
+      - prime_broker1_2_1
+      - prime_broker1_2_2
+      - prime_broker2_3_1
+      - prime_broker2_3_2
+      - block_trade_buyer_4_1
+      - information_trader_5_1
+      - information_trader_5_2
+    bidirectional: false
+    message_type: market_update
+
+  - from: concentrated_fund_1_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: concentrated_fund_1_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: prime_broker1_2_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: prime_broker1_2_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: prime_broker2_3_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: prime_broker2_3_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: block_trade_buyer_4_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: information_trader_5_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: information_trader_5_2
+    to: market
+    bidirectional: false
+    message_type: order
+
+broadcast:
+  enabled: true
+  from: market
+  to: all_players
+  message_type: market_update
+
+execution:
+  order:
+    - market
+    - concentrated_fund_1_1
+    - concentrated_fund_1_2
+    - prime_broker1_2_1
+    - prime_broker1_2_2
+    - prime_broker2_3_1
+    - prime_broker2_3_2
+    - block_trade_buyer_4_1
+    - information_trader_5_1
+    - information_trader_5_2

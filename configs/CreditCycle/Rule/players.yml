@@ -1,0 +1,70 @@
+# CreditCycle Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.CreditCycle.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+procyclicallender_1:
+  name: "ProCyclicalLender 1"
+  class: "examples.CreditCycle.Rule.players:ProCyclicalLender"
+  num_instances: 2
+  config:
+    identity: "procyclicallender_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+minskyborrower_2:
+  name: "MinskyBorrower 2"
+  class: "examples.CreditCycle.Rule.players:MinskyBorrower"
+  num_instances: 2
+  config:
+    identity: "minskyborrower_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+countercyclicallender_3:
+  name: "CounterCyclicalLender 3"
+  class: "examples.CreditCycle.Rule.players:CounterCyclicalLender"
+  num_instances: 1
+  config:
+    identity: "countercyclicallender_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+valueinvestor_4:
+  name: "ValueInvestor 4"
+  class: "examples.CreditCycle.Rule.players:ValueInvestor"
+  num_instances: 1
+  config:
+    identity: "valueinvestor_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.CreditCycle.Rule.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0

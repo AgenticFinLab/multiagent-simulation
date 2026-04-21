@@ -1,0 +1,38 @@
+# BlackMonday1987 Rule Simulation Configuration
+#
+# October 19, 1987 stock market crash - Dow fell 22.6% in one day
+#
+# Usage:
+#   python examples/BlackMonday1987/Rule/run_blackmonday1987.py \
+#       -c configs/BlackMonday1987/Rule/simulation.yml
+
+setting:
+  name: "BlackMonday1987-Rule"
+  description: "Black Monday 1987 crash simulation with portfolio insurance, index arbitrage, and program trading feedback loops"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/BlackMonday1987/Rule/records"
+  storage_path: "EXPERIMENT/BlackMonday1987/Rule/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/BlackMonday1987/Rule/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "blackmonday1987_rule"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/BlackMonday1987/Rule/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

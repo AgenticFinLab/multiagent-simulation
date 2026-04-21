@@ -1,0 +1,76 @@
+# GameStopShortSqueeze RuleLLM Communication Topology
+
+graph:
+  type: star
+  center: market
+
+connections:
+  - from: market
+    to:
+      - retail_coordinated_1_1
+      - retail_coordinated_1_2
+      - short_seller_h_f_2_1
+      - short_seller_h_f_2_2
+      - market_maker_gamma_3_1
+      - market_maker_gamma_3_2
+      - institutional_value_4_1
+      - momentum_retail_5_1
+      - momentum_retail_5_2
+    bidirectional: false
+    message_type: market_update
+
+  - from: retail_coordinated_1_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: retail_coordinated_1_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: short_seller_h_f_2_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: short_seller_h_f_2_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: market_maker_gamma_3_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: market_maker_gamma_3_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: institutional_value_4_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: momentum_retail_5_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: momentum_retail_5_2
+    to: market
+    bidirectional: false
+    message_type: order
+
+broadcast:
+  enabled: true
+  from: market
+  to: all_players
+  message_type: market_update
+
+execution:
+  order:
+    - market
+    - retail_coordinated_1_1
+    - retail_coordinated_1_2
+    - short_seller_h_f_2_1
+    - short_seller_h_f_2_2
+    - market_maker_gamma_3_1
+    - market_maker_gamma_3_2
+    - institutional_value_4_1
+    - momentum_retail_5_1
+    - momentum_retail_5_2

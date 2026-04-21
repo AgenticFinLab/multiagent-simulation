@@ -1,0 +1,412 @@
+"""RumorSpreadLLM - LLM-based Rumor Propagation Simulation
+
+LLM agents with different information processing personalities:
+    - Gullible Spreader
+    - Distorting Relayer
+    - Skeptical Evaluator
+    - Fact Checker
+    - Uninformed Bystander
+
+All parameters are configured via players.yml config file.
+
+Usage
+-----
+1. **Via Streamlit Web UI (Recommended):**
+
+   ```bash
+   cd /path/to/multiagent-simulation
+   streamlit run masim/interface/app.py
+   ```
+   Then select "RumorSpreadLLM" from the scenario dropdown.
+
+2. **Command Line:**
+
+   ```bash
+   python examples/RumorSpread/LLM/run_rumor_llm.py \
+       -c configs/RumorSpread/LLM/simulation.yml
+   ```
+
+Environment Variables:
+    ARK_API_KEY: ByteDance Doubao API key (required for LLM calls)
+"""
+
+import logging
+import os
+import json
+import random
+import re
+import sys
+import importlib
+from typing import Any, Dict, Optional
+from dotenv import load_dotenv
+
+from masim.player.general import GeneralPlayer
+from masim.player.base import Action, Observation, StepResult
+from masim.utils.history import HistoryBuffer
+
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
+
+# Add examples directory to path for shared utilities
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from examples.llm_utils import parse_llm_response_with_thinking
+
+logger = logging.getLogger("RumorSpreadLLM")
+
+
+def load_prompt(prompt_path: str) -> str:
+    """Load a prompt string from module path."""
+    module_path, var_name = prompt_path.rsplit(":", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, var_name)
+
+
+class InformationEnvironment(GeneralPlayer):
+    """
+    Central information environment with rumor belief dynamics.
+
+    Identical to Rule variant InformationEnvironment.
+
+    Parameters from config extras:
+        - rumor_truth_value, initial_belief, spread_impact, truth_correction
+        - leveling_rate, sharpening_rate, noise_std, custom_state_hot_limit
+    """
+
+    async def perceive(
+        self,
+        observation: Observation,
+        prev_result: Optional[StepResult] = None,
+    ) -> None:
+        round_num = observation.round
+        self.state.custom_state["round"] = round_num
+
+        if "belief" not in self.state.custom_state:
+            extras = self.config.extras
+            record_path = extras["record_path"]
+            base_path = os.path.join(record_path, self.config.identity)
+
+            self.state.custom_state["belief"] = extras["initial_belief"]
+            self.state.custom_state["distortion"] = 0.0
+            self.state.custom_state["truth_value"] = extras["rumor_truth_value"]
+
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
+            self.state.custom_state["belief_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "belief"),
+                entry_limit=custom_state_hot_limit,
+            )
+            self.state.custom_state["distortion_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "distortion"),
+                entry_limit=custom_state_hot_limit,
+            )
+            self.state.custom_state["spread_count_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "spread_count"),
+                entry_limit=custom_state_hot_limit,
+            )
+            self.state.custom_state["correction_count_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "correction_count"),
+                entry_limit=custom_state_hot_limit,
+            )
+
+        actions = []
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                action = inb.payload
+                actions.append(
+                    {
+                        "agent_id": inb.sender_id,
+                        "action_type": action["action_type"],
+                        "intensity": action["intensity"],
+                        "agent_role": action["agent_role"],
+                    }
+                )
+        self.state.custom_state["actions"] = actions
+
+    async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
+        round_num = self.state.custom_state["round"]
+        current_belief = self.state.custom_state["belief"]
+        current_distortion = self.state.custom_state["distortion"]
+        truth_value = self.state.custom_state["truth_value"]
+        actions = self.state.custom_state["actions"]
+
+        spread_actions = [a for a in actions if a["action_type"] == "spread"]
+        correct_actions = [a for a in actions if a["action_type"] == "correct"]
+
+        total_spread = sum(a["intensity"] for a in spread_actions)
+        total_correction = sum(a["intensity"] for a in correct_actions)
+        net_spread = total_spread - total_correction
+
+        spread_impact = extras["spread_impact"]
+        truth_correction = extras["truth_correction"]
+        leveling_rate = extras["leveling_rate"]
+        sharpening_rate = extras["sharpening_rate"]
+        noise_std = extras["noise_std"]
+
+        spread_effect = spread_impact * net_spread
+        truth_effect = truth_correction * (truth_value - current_belief)
+        noise = random.gauss(0, noise_std)
+
+        new_belief = max(
+            0.0, min(1.0, current_belief + spread_effect + truth_effect + noise)
+        )
+
+        leveling = leveling_rate * current_distortion
+        sharpening = sharpening_rate * len(spread_actions) * (1.0 - truth_value)
+        new_distortion = max(0.0, min(1.0, current_distortion - leveling + sharpening))
+
+        self.state.custom_state["belief"] = new_belief
+        self.state.custom_state["distortion"] = new_distortion
+        self.state.custom_state["belief_history"].append(new_belief)
+        self.state.custom_state["distortion_history"].append(new_distortion)
+        self.state.custom_state["spread_count_history"].append(len(spread_actions))
+        self.state.custom_state["correction_count_history"].append(len(correct_actions))
+
+        env_data = {
+            "belief": new_belief,
+            "prev_belief": current_belief,
+            "belief_change": new_belief - current_belief,
+            "distortion": new_distortion,
+            "truth_value": truth_value,
+            "num_spreaders": len(spread_actions),
+            "num_correctors": len(correct_actions),
+            "net_spread_intensity": net_spread,
+            "round": round_num,
+        }
+
+        return {
+            "env_data": env_data,
+            "outbound_messages": [
+                {"payload": env_data, "content_type": "environment_update"}
+            ],
+        }
+
+    async def act(self, decision_payload: Dict[str, Any]) -> Action:
+        return Action(
+            action_type="environment_broadcast",
+            payload=decision_payload,
+            source_id=self.identity,
+        )
+
+
+class LLMSocialAgent(GeneralPlayer):
+    """
+    Base class for LLM-powered social agents.
+
+    Parameters from config extras:
+        - initial_belief, initial_credibility, custom_state_hot_limit, record_path, llm config
+    """
+
+    async def perceive(
+        self,
+        observation: Observation,
+        prev_result: Optional[StepResult] = None,
+    ) -> None:
+        round_num = observation.round
+        self.state.custom_state["round"] = round_num
+
+        if "my_belief" not in self.state.custom_state:
+            extras = self.config.extras
+            record_path = extras["record_path"]
+            base_path = os.path.join(record_path, self.config.identity)
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
+
+            self.state.custom_state["my_belief"] = extras["initial_belief"]
+            self.state.custom_state["credibility"] = extras["initial_credibility"]
+            self.state.custom_state["belief_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "belief"),
+                entry_limit=custom_state_hot_limit,
+            )
+
+            load_dotenv()
+            llm_config = extras["llm"]
+            lm_name = llm_config["lm_name"]
+            generation_config = llm_config["generation_config"]
+
+            self.state.custom_state["lm_name"] = lm_name
+            self.state.custom_state["generation_config"] = generation_config
+
+            llm_client = LangChainAPIInference(
+                lm_name=lm_name,
+                generation_config=generation_config,
+            )
+            self.state.custom_state["llm_client"] = llm_client
+
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                env_data = inb.payload
+                self.state.custom_state["env_data"] = env_data
+                self.state.custom_state["belief_history"].append(env_data["belief"])
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        if "state" in state and hasattr(state["state"], "custom_state"):
+            custom = state["state"].custom_state
+            if "llm_client" in custom:
+                custom = dict(custom)
+                del custom["llm_client"]
+                state["state"].custom_state = custom
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        if hasattr(self, "state") and hasattr(self.state, "custom_state"):
+            custom = self.state.custom_state
+            if "lm_name" in custom and "llm_client" not in custom:
+                llm_client = LangChainAPIInference(
+                    lm_name=custom["lm_name"],
+                    generation_config=custom["generation_config"],
+                )
+                custom["llm_client"] = llm_client
+
+    def _build_prompt(self, env_data: Dict[str, Any]) -> str:
+        """Build user prompt with current environment data."""
+        my_belief = self.state.custom_state["my_belief"]
+
+        llm_config = self.config.extras["llm"]
+        if "user_message" in llm_config:
+            template = load_prompt(llm_config["user_message"])
+            return template.format(
+                round=env_data["round"],
+                belief=env_data["belief"],
+                prev_belief=env_data["prev_belief"],
+                belief_change=env_data["belief_change"],
+                distortion=env_data["distortion"],
+                truth_value=env_data["truth_value"],
+                num_spreaders=env_data["num_spreaders"],
+                num_correctors=env_data["num_correctors"],
+                net_spread_intensity=env_data["net_spread_intensity"],
+                my_belief=my_belief,
+            )
+
+        return f"""
+Current Information Environment (Round {env_data['round']}):
+- Population Belief Level: {env_data['belief']:.3f}
+- Information Distortion: {env_data['distortion']:.3f}
+- Ground Truth Value: {env_data['truth_value']:.3f}
+- Active Spreaders: {env_data['num_spreaders']}
+- Active Correctors: {env_data['num_correctors']}
+
+Your Personal Belief: {my_belief:.3f}
+
+Respond with ONLY valid JSON:
+{{"action_type": "spread"|"ignore"|"correct", "intensity": <0-1>, "reasoning": "<brief>"}}
+"""
+
+    def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
+        """Parse LLM response with thinking and decision sections."""
+        return parse_llm_response_with_thinking(response_text)
+
+    async def decide(self) -> Dict[str, Any]:
+        round_num = self.state.custom_state["round"]
+        env_data = self.state.custom_state["env_data"]
+        llm_client = self.state.custom_state["llm_client"]
+        strategy_name = self.__class__.__name__
+
+        user_prompt = self._build_prompt(env_data)
+
+        llm_config = self.config.extras["llm"]
+        system_prompt = load_prompt(llm_config["sys_message"])
+
+        max_retries = 3
+        decision = None
+        last_error = None
+        for attempt in range(max_retries):
+            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
+            infer_output = llm_client.run([infer_input])
+            try:
+                decision = self._parse_llm_response(infer_output.outputs[0].response)
+                break
+            except ValueError as e:
+                last_error = e
+                if attempt < max_retries - 1:
+                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")
+
+        if decision is None:
+            logger.warning(
+                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}. "
+                f"Skipping action this round."
+            )
+            action = {
+                "action_type": "ignore",
+                "intensity": 0.0,
+                "agent_role": strategy_name,
+                "agent_id": self.identity,
+                "reasoning": "LLM parse failed: held position",
+                "analysis": "",
+            }
+            return {
+                **action,
+                "outbound_messages": [
+                    {"payload": action, "content_type": "social_action"}
+                ],
+            }
+
+        action_type = decision.get("action_type", "ignore")
+        intensity = float(decision.get("intensity", 0.0))
+        intensity = max(0.0, min(1.0, intensity))
+
+        # Update personal belief based on action
+        my_belief = self.state.custom_state["my_belief"]
+        if action_type == "spread":
+            my_belief = max(my_belief, env_data["belief"] * 0.5 + my_belief * 0.5)
+        elif action_type == "correct":
+            my_belief = min(my_belief, env_data["truth_value"] * 0.5 + my_belief * 0.5)
+        my_belief = max(0.0, min(1.0, my_belief))
+        self.state.custom_state["my_belief"] = my_belief
+
+        logger.debug(
+            f"[{self.identity:20s}] R{round_num} ({strategy_name:15s}): "
+            f"A={action_type:7s} I={intensity:.3f} belief={my_belief:.3f}"
+        )
+
+        action = {
+            "action_type": action_type,
+            "intensity": intensity,
+            "agent_role": strategy_name,
+            "agent_id": self.identity,
+            "reasoning": decision.get("reasoning", "")[:100],
+            "analysis": decision.get("analysis", ""),
+        }
+
+        return {
+            **action,
+            "outbound_messages": [{"payload": action, "content_type": "social_action"}],
+        }
+
+    async def act(self, decision_payload: Dict[str, Any]) -> Action:
+        return Action(
+            action_type="social_action",
+            payload=decision_payload,
+            source_id=self.identity,
+        )
+
+
+class LLMGullibleSpreader(LLMSocialAgent):
+    """LLM Gullible Spreader."""
+
+    pass
+
+
+class LLMDistortingRelayer(LLMSocialAgent):
+    """LLM Distorting Relayer."""
+
+    pass
+
+
+class LLMSkepticalEvaluator(LLMSocialAgent):
+    """LLM Skeptical Evaluator."""
+
+    pass
+
+
+class LLMFactChecker(LLMSocialAgent):
+    """LLM Fact Checker."""
+
+    pass
+
+
+class LLMUninformedBystander(LLMSocialAgent):
+    """LLM Uninformed Bystander."""
+
+    pass

@@ -1,0 +1,30 @@
+# SouthSeaBubble RuleLLM Simulation Configuration
+
+setting:
+  name: "SouthSeaBubble-RuleLLM"
+  description: "SouthSeaBubble simulation - RuleLLM agents"
+  total_rounds: 200
+  record_path: "EXPERIMENT/SouthSeaBubble/RuleLLM/records"
+  storage_path: "EXPERIMENT/SouthSeaBubble/RuleLLM/communication"
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/SouthSeaBubble/RuleLLM/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "southseabubble_rulellm"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/SouthSeaBubble/RuleLLM/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

@@ -1,0 +1,80 @@
+# CurrencyCrisis RuleLLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.CurrencyCrisis.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+speculativeattacker_1:
+  name: "SpeculativeAttacker 1"
+  class: "examples.CurrencyCrisis.RuleLLM.players:SpeculativeAttacker"
+  num_instances: 2
+  config:
+    identity: "speculativeattacker_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: speculativeattacker
+
+selffulfillingtrader_2:
+  name: "SelfFulfillingTrader 2"
+  class: "examples.CurrencyCrisis.RuleLLM.players:SelfFulfillingTrader"
+  num_instances: 2
+  config:
+    identity: "selffulfillingtrader_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: selffulfillingtrader
+
+centralbankdefender_3:
+  name: "CentralBankDefender 3"
+  class: "examples.CurrencyCrisis.RuleLLM.players:CentralBankDefender"
+  num_instances: 1
+  config:
+    identity: "centralbankdefender_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: centralbankdefender
+
+fundamentalhedger_4:
+  name: "FundamentalHedger 4"
+  class: "examples.CurrencyCrisis.RuleLLM.players:FundamentalHedger"
+  num_instances: 1
+  config:
+    identity: "fundamentalhedger_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: fundamentalhedger
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.CurrencyCrisis.RuleLLM.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: noisetrader

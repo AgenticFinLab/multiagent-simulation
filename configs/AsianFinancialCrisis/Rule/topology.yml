@@ -1,0 +1,22 @@
+# Topology configuration
+connections:
+  - source: market
+    target: hotmoneyfunder
+  - source: hotmoneyfunder
+    target: market
+  - source: market
+    target: contagiontrader
+  - source: contagiontrader
+    target: market
+  - source: market
+    target: imfrescuer
+  - source: imfrescuer
+    target: market
+  - source: market
+    target: valuecontrarian
+  - source: valuecontrarian
+    target: market
+  - source: market
+    target: noisetrader
+  - source: noisetrader
+    target: market

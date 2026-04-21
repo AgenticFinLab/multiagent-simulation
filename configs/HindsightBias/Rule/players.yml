@@ -1,0 +1,70 @@
+# HindsightBias Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.HindsightBias.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+hindsightoverconfident_1:
+  name: "HindsightOverconfident 1"
+  class: "examples.HindsightBias.Rule.players:HindsightOverconfident"
+  num_instances: 2
+  config:
+    identity: "hindsightoverconfident_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+outcomelearner_2:
+  name: "OutcomeLearner 2"
+  class: "examples.HindsightBias.Rule.players:OutcomeLearner"
+  num_instances: 2
+  config:
+    identity: "outcomelearner_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+processevaluator_3:
+  name: "ProcessEvaluator 3"
+  class: "examples.HindsightBias.Rule.players:ProcessEvaluator"
+  num_instances: 1
+  config:
+    identity: "processevaluator_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+contrarianskeptic_4:
+  name: "ContrarianSkeptic 4"
+  class: "examples.HindsightBias.Rule.players:ContrarianSkeptic"
+  num_instances: 1
+  config:
+    identity: "contrarianskeptic_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.HindsightBias.Rule.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0

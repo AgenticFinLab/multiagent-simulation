@@ -1,0 +1,22 @@
+# Topology configuration
+connections:
+  - source: market
+    target: procyclicallender
+  - source: procyclicallender
+    target: market
+  - source: market
+    target: minskyborrower
+  - source: minskyborrower
+    target: market
+  - source: market
+    target: countercyclicallender
+  - source: countercyclicallender
+    target: market
+  - source: market
+    target: valueinvestor
+  - source: valueinvestor
+    target: market
+  - source: market
+    target: noisetrader
+  - source: noisetrader
+    target: market

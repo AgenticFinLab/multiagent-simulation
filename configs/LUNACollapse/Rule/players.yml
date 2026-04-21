@@ -1,0 +1,71 @@
+# LUNACollapse Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.LUNACollapse.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.005
+      noise_std: 0.02
+
+stablecoin_holder_1:
+  name: "StablecoinHolder 1"
+  class: "examples.LUNACollapse.Rule.players:StablecoinHolder"
+  num_instances: 2
+  config:
+    identity: "stablecoin_holder_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+arbitrageur_2:
+  name: "Arbitrageur 2"
+  class: "examples.LUNACollapse.Rule.players:Arbitrageur"
+  num_instances: 2
+  config:
+    identity: "arbitrageur_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+de_fi_lender_3:
+  name: "DeFiLender 3"
+  class: "examples.LUNACollapse.Rule.players:DeFiLender"
+  num_instances: 2
+  config:
+    identity: "de_fi_lender_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+anchor_depositor_4:
+  name: "AnchorDepositor 4"
+  class: "examples.LUNACollapse.Rule.players:AnchorDepositor"
+  num_instances: 2
+  config:
+    identity: "anchor_depositor_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+value_buyer_5:
+  name: "ValueBuyer 5"
+  class: "examples.LUNACollapse.Rule.players:ValueBuyer"
+  num_instances: 1
+  config:
+    identity: "value_buyer_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+

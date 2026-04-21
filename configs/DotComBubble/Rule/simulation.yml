@@ -1,0 +1,38 @@
+# DotComBubble Rule Simulation Configuration
+#
+# 1995-2001 Internet bubble - NASDAQ rose 400% then fell 78%
+#
+# Usage:
+#   python examples/DotComBubble/Rule/run_dotcombubble.py \
+#       -c configs/DotComBubble/Rule/simulation.yml
+
+setting:
+  name: "DotComBubble-Rule"
+  description: "Dot-com bubble simulation with new economy narrative, IPO frenzy, and valuation disconnect"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/DotComBubble/Rule/records"
+  storage_path: "EXPERIMENT/DotComBubble/Rule/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/DotComBubble/Rule/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "dotcombubble_rule"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/DotComBubble/Rule/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

@@ -1,0 +1,70 @@
+# DotComBubble Rule Communication Topology
+
+graph:
+  type: star
+  center: market
+
+connections:
+  - from: market
+    to:
+      - new_economy_evangelist_1_1
+      - new_economy_evangelist_1_2
+      - i_p_o_flipper_2_1
+      - i_p_o_flipper_2_2
+      - momentum_follower_3_1
+      - momentum_follower_3_2
+      - skeptical_value_investor_4_1
+      - short_seller_5_1
+    bidirectional: false
+    message_type: market_update
+
+  - from: new_economy_evangelist_1_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: new_economy_evangelist_1_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: i_p_o_flipper_2_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: i_p_o_flipper_2_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: momentum_follower_3_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: momentum_follower_3_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: skeptical_value_investor_4_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: short_seller_5_1
+    to: market
+    bidirectional: false
+    message_type: order
+
+broadcast:
+  enabled: true
+  from: market
+  to: all_players
+  message_type: market_update
+
+execution:
+  order:
+    - market
+    - new_economy_evangelist_1_1
+    - new_economy_evangelist_1_2
+    - i_p_o_flipper_2_1
+    - i_p_o_flipper_2_2
+    - momentum_follower_3_1
+    - momentum_follower_3_2
+    - skeptical_value_investor_4_1
+    - short_seller_5_1

@@ -1,0 +1,76 @@
+# SVBBankRun Rag Communication Topology
+
+graph:
+  type: star
+  center: market
+
+connections:
+  - from: market
+    to:
+      - depositor_1_1
+      - depositor_1_2
+      - social_media_influencer_2_1
+      - social_media_influencer_2_2
+      - bank_manager_3_1
+      - bank_manager_3_2
+      - regulator_4_1
+      - bond_trader_5_1
+      - bond_trader_5_2
+    bidirectional: false
+    message_type: market_update
+
+  - from: depositor_1_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: depositor_1_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: social_media_influencer_2_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: social_media_influencer_2_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: bank_manager_3_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: bank_manager_3_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: regulator_4_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: bond_trader_5_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: bond_trader_5_2
+    to: market
+    bidirectional: false
+    message_type: order
+
+broadcast:
+  enabled: true
+  from: market
+  to: all_players
+  message_type: market_update
+
+execution:
+  order:
+    - market
+    - depositor_1_1
+    - depositor_1_2
+    - social_media_influencer_2_1
+    - social_media_influencer_2_2
+    - bank_manager_3_1
+    - bank_manager_3_2
+    - regulator_4_1
+    - bond_trader_5_1
+    - bond_trader_5_2

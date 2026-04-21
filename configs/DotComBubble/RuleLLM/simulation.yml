@@ -1,0 +1,44 @@
+# DotComBubble RuleLLM Simulation Configuration
+#
+# 1995-2001 Internet bubble - NASDAQ rose 400% then fell 78%
+#
+# Usage:
+#   python examples/DotComBubble/RuleLLM/run_dotcombubble_rulellm.py \
+#       -c configs/DotComBubble/RuleLLM/simulation.yml
+
+setting:
+  name: "DotComBubble-RuleLLM"
+  description: "Dot-com bubble simulation with new economy narrative, IPO frenzy, and valuation disconnect"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/DotComBubble/RuleLLM/records"
+  storage_path: "EXPERIMENT/DotComBubble/RuleLLM/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/DotComBubble/RuleLLM/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+llm:
+  model: "doubao-pro-32k"
+  temperature: 0.3
+  max_tokens: 500
+  timeout: 30
+
+ray:
+  namespace: "dotcombubble_rulellm"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/DotComBubble/RuleLLM/communication"
+  record_messages: true
+  message_timeout_ms: 30000
+  max_retries: 3

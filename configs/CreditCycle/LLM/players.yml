@@ -1,0 +1,80 @@
+# CreditCycle LLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.CreditCycle.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+procyclicallender_1:
+  name: "ProCyclicalLender 1"
+  class: "examples.CreditCycle.LLM.players:ProCyclicalLender"
+  num_instances: 2
+  config:
+    identity: "procyclicallender_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: procyclicallender
+
+minskyborrower_2:
+  name: "MinskyBorrower 2"
+  class: "examples.CreditCycle.LLM.players:MinskyBorrower"
+  num_instances: 2
+  config:
+    identity: "minskyborrower_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: minskyborrower
+
+countercyclicallender_3:
+  name: "CounterCyclicalLender 3"
+  class: "examples.CreditCycle.LLM.players:CounterCyclicalLender"
+  num_instances: 1
+  config:
+    identity: "countercyclicallender_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: countercyclicallender
+
+valueinvestor_4:
+  name: "ValueInvestor 4"
+  class: "examples.CreditCycle.LLM.players:ValueInvestor"
+  num_instances: 1
+  config:
+    identity: "valueinvestor_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: valueinvestor
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.CreditCycle.LLM.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: noisetrader

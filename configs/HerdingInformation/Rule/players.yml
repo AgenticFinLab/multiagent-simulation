@@ -1,0 +1,71 @@
+# HerdingInformation Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.HerdingInformation.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+cascade_follower_1:
+  name: "CascadeFollower 1"
+  class: "examples.HerdingInformation.Rule.players:CascadeFollower"
+  num_instances: 2
+  config:
+    identity: "cascade_follower_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+reputation_herder_2:
+  name: "ReputationHerder 2"
+  class: "examples.HerdingInformation.Rule.players:ReputationHerder"
+  num_instances: 2
+  config:
+    identity: "reputation_herder_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+independent_thinker_3:
+  name: "IndependentThinker 3"
+  class: "examples.HerdingInformation.Rule.players:IndependentThinker"
+  num_instances: 1
+  config:
+    identity: "independent_thinker_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+contrarian_4:
+  name: "Contrarian 4"
+  class: "examples.HerdingInformation.Rule.players:Contrarian"
+  num_instances: 1
+  config:
+    identity: "contrarian_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+noise_trader_5:
+  name: "NoiseTrader 5"
+  class: "examples.HerdingInformation.Rule.players:NoiseTrader"
+  num_instances: 2
+  config:
+    identity: "noise_trader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+

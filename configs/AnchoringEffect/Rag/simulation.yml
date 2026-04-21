@@ -1,0 +1,44 @@
+# AnchoringEffect Rag Simulation Configuration
+#
+# Anchoring causes traders to insufficiently adjust from reference prices, creating slow price discovery
+#
+# Usage:
+#   python examples/AnchoringEffect/Rag/run_anchoringeffect_rag.py \
+#       -c configs/AnchoringEffect/Rag/simulation.yml
+
+setting:
+  name: "AnchoringEffect-Rag"
+  description: "Anchoring effect simulation demonstrating how initial reference points bias subsequent judgments"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
+  storage_path: "EXPERIMENT/AnchoringEffect/Rag/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/AnchoringEffect/Rag/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+llm:
+  model: "doubao-pro-32k"
+  temperature: 0.3
+  max_tokens: 500
+  timeout: 30
+
+ray:
+  namespace: "anchoringeffect_rag"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/AnchoringEffect/Rag/communication"
+  record_messages: true
+  message_timeout_ms: 30000
+  max_retries: 3

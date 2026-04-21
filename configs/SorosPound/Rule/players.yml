@@ -1,0 +1,70 @@
+# SorosPound Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.SorosPound.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+macrohedgefund_1:
+  name: "MacroHedgeFund 1"
+  class: "examples.SorosPound.Rule.players:MacroHedgeFund"
+  num_instances: 2
+  config:
+    identity: "macrohedgefund_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+pegdefender_2:
+  name: "PegDefender 2"
+  class: "examples.SorosPound.Rule.players:PegDefender"
+  num_instances: 1
+  config:
+    identity: "pegdefender_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+convergencetrader_3:
+  name: "ConvergenceTrader 3"
+  class: "examples.SorosPound.Rule.players:ConvergenceTrader"
+  num_instances: 1
+  config:
+    identity: "convergencetrader_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+opportunistictrader_4:
+  name: "OpportunisticTrader 4"
+  class: "examples.SorosPound.Rule.players:OpportunisticTrader"
+  num_instances: 2
+  config:
+    identity: "opportunistictrader_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.SorosPound.Rule.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0

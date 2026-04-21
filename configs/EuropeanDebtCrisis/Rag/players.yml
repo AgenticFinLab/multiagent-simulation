@@ -1,0 +1,85 @@
+# EuropeanDebtCrisis Rag Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.EuropeanDebtCrisis.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+peripherybondseller_1:
+  name: "PeripheryBondSeller 1"
+  class: "examples.EuropeanDebtCrisis.Rag.players:PeripheryBondSeller"
+  num_instances: 2
+  config:
+    identity: "peripherybondseller_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: peripherybondseller
+
+
+creditorpanicker_2:
+  name: "CreditorPanicker 2"
+  class: "examples.EuropeanDebtCrisis.Rag.players:CreditorPanicker"
+  num_instances: 2
+  config:
+    identity: "creditorpanicker_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: creditorpanicker
+
+
+corebondbuyer_3:
+  name: "CoreBondBuyer 3"
+  class: "examples.EuropeanDebtCrisis.Rag.players:CoreBondBuyer"
+  num_instances: 1
+  config:
+    identity: "corebondbuyer_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: corebondbuyer
+
+
+ecbintervenor_4:
+  name: "ECBIntervenor 4"
+  class: "examples.EuropeanDebtCrisis.Rag.players:ECBIntervenor"
+  num_instances: 1
+  config:
+    identity: "ecbintervenor_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: ecbintervenor
+
+
+hedgedfund_5:
+  name: "HedgedFund 5"
+  class: "examples.EuropeanDebtCrisis.Rag.players:HedgedFund"
+  num_instances: 1
+  config:
+    identity: "hedgedfund_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
+      agent_type: hedgedfund
+

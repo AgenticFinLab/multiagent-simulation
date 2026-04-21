@@ -1,0 +1,70 @@
+# OverconfidenceBias Rag Communication Topology
+
+graph:
+  type: star
+  center: market
+
+connections:
+  - from: market
+    to:
+      - overconfident_trader_1_1
+      - overconfident_trader_1_2
+      - self_attributor_2_1
+      - self_attributor_2_2
+      - calibrated_trader_3_1
+      - contrarian_investor_4_1
+      - noise_trader_5_1
+      - noise_trader_5_2
+    bidirectional: false
+    message_type: market_update
+
+  - from: overconfident_trader_1_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: overconfident_trader_1_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: self_attributor_2_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: self_attributor_2_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: calibrated_trader_3_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: contrarian_investor_4_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: noise_trader_5_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: noise_trader_5_2
+    to: market
+    bidirectional: false
+    message_type: order
+
+broadcast:
+  enabled: true
+  from: market
+  to: all_players
+  message_type: market_update
+
+execution:
+  order:
+    - market
+    - overconfident_trader_1_1
+    - overconfident_trader_1_2
+    - self_attributor_2_1
+    - self_attributor_2_2
+    - calibrated_trader_3_1
+    - contrarian_investor_4_1
+    - noise_trader_5_1
+    - noise_trader_5_2

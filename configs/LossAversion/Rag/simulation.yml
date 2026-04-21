@@ -1,0 +1,44 @@
+# LossAversion Rag Simulation Configuration
+#
+# Loss aversion from prospect theory causes investors to hold losers too long and sell winners too early
+#
+# Usage:
+#   python examples/LossAversion/Rag/run_lossaversion_rag.py \
+#       -c configs/LossAversion/Rag/simulation.yml
+
+setting:
+  name: "LossAversion-Rag"
+  description: "Loss aversion simulation demonstrating how asymmetric utility functions lead to disposition effect and price patterns"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/LossAversion/Rag/records"
+  storage_path: "EXPERIMENT/LossAversion/Rag/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/LossAversion/Rag/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+llm:
+  model: "doubao-pro-32k"
+  temperature: 0.3
+  max_tokens: 500
+  timeout: 30
+
+ray:
+  namespace: "lossaversion_rag"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/LossAversion/Rag/communication"
+  record_messages: true
+  message_timeout_ms: 30000
+  max_retries: 3

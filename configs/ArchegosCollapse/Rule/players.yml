@@ -1,0 +1,71 @@
+# ArchegosCollapse Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.ArchegosCollapse.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.03
+      mean_reversion: 0.01
+      noise_std: 0.02
+
+concentrated_fund_1:
+  name: "ConcentratedFund 1"
+  class: "examples.ArchegosCollapse.Rule.players:ConcentratedFund"
+  num_instances: 2
+  config:
+    identity: "concentrated_fund_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+prime_broker1_2:
+  name: "PrimeBroker1 2"
+  class: "examples.ArchegosCollapse.Rule.players:PrimeBroker1"
+  num_instances: 2
+  config:
+    identity: "prime_broker1_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+prime_broker2_3:
+  name: "PrimeBroker2 3"
+  class: "examples.ArchegosCollapse.Rule.players:PrimeBroker2"
+  num_instances: 2
+  config:
+    identity: "prime_broker2_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+block_trade_buyer_4:
+  name: "BlockTradeBuyer 4"
+  class: "examples.ArchegosCollapse.Rule.players:BlockTradeBuyer"
+  num_instances: 1
+  config:
+    identity: "block_trade_buyer_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+information_trader_5:
+  name: "InformationTrader 5"
+  class: "examples.ArchegosCollapse.Rule.players:InformationTrader"
+  num_instances: 2
+  config:
+    identity: "information_trader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+

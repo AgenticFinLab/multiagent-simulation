@@ -1,0 +1,38 @@
+# AvailabilityBias LLM Simulation Configuration
+#
+# AvailabilityBias simulation
+#
+# Usage:
+#   python examples/AvailabilityBias/LLM/run_availabilitybias_llm.py \
+#       -c configs/AvailabilityBias/LLM/simulation.yml
+
+setting:
+  name: "AvailabilityBias-LLM"
+  description: "AvailabilityBias simulation - LLM agents"
+  total_rounds: 200
+
+  record_path: "EXPERIMENT/AvailabilityBias/LLM/records"
+  storage_path: "EXPERIMENT/AvailabilityBias/LLM/communication"
+
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/AvailabilityBias/LLM/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "availabilitybias_llm"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/AvailabilityBias/LLM/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

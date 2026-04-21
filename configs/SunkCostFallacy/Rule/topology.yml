@@ -1,0 +1,22 @@
+# Topology configuration
+connections:
+  - source: market
+    target: sunkcostholder
+  - source: sunkcostholder
+    target: market
+  - source: market
+    target: commitmentescalator
+  - source: commitmentescalator
+    target: market
+  - source: market
+    target: rationalcutter
+  - source: rationalcutter
+    target: market
+  - source: market
+    target: opportunitycosttrader
+  - source: opportunitycosttrader
+    target: market
+  - source: market
+    target: noisetrader
+  - source: noisetrader
+    target: market

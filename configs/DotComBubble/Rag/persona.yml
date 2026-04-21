@@ -1,0 +1,65 @@
+# DotComBubble Rag Persona Configuration
+
+market:
+  type: proxy
+  checkpoint_dir: "EXPERIMENT/DotComBubble/Rag/records/market/checkpoints"
+  record_path: "EXPERIMENT/DotComBubble/Rag/records/market"
+  monitoring:
+    record_path: "EXPERIMENT/DotComBubble/Rag/monitoring/market"
+
+new_economy_evangelist_1_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/DotComBubble/Rag/records/new_economy_evangelist_1_1/checkpoints"
+  record_path: "EXPERIMENT/DotComBubble/Rag/records/new_economy_evangelist_1_1"
+  monitoring:
+    record_path: "EXPERIMENT/DotComBubble/Rag/monitoring/new_economy_evangelist_1_1"
+
+new_economy_evangelist_1_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/DotComBubble/Rag/records/new_economy_evangelist_1_2/checkpoints"
+  record_path: "EXPERIMENT/DotComBubble/Rag/records/new_economy_evangelist_1_2"
+  monitoring:
+    record_path: "EXPERIMENT/DotComBubble/Rag/monitoring/new_economy_evangelist_1_2"
+
+i_p_o_flipper_2_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/DotComBubble/Rag/records/i_p_o_flipper_2_1/checkpoints"
+  record_path: "EXPERIMENT/DotComBubble/Rag/records/i_p_o_flipper_2_1"
+  monitoring:
+    record_path: "EXPERIMENT/DotComBubble/Rag/monitoring/i_p_o_flipper_2_1"
+
+i_p_o_flipper_2_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/DotComBubble/Rag/records/i_p_o_flipper_2_2/checkpoints"
+  record_path: "EXPERIMENT/DotComBubble/Rag/records/i_p_o_flipper_2_2"
+  monitoring:
+    record_path: "EXPERIMENT/DotComBubble/Rag/monitoring/i_p_o_flipper_2_2"
+
+momentum_follower_3_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/DotComBubble/Rag/records/momentum_follower_3_1/checkpoints"
+  record_path: "EXPERIMENT/DotComBubble/Rag/records/momentum_follower_3_1"
+  monitoring:
+    record_path: "EXPERIMENT/DotComBubble/Rag/monitoring/momentum_follower_3_1"
+
+momentum_follower_3_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/DotComBubble/Rag/records/momentum_follower_3_2/checkpoints"
+  record_path: "EXPERIMENT/DotComBubble/Rag/records/momentum_follower_3_2"
+  monitoring:
+    record_path: "EXPERIMENT/DotComBubble/Rag/monitoring/momentum_follower_3_2"
+
+skeptical_value_investor_4_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/DotComBubble/Rag/records/skeptical_value_investor_4_1/checkpoints"
+  record_path: "EXPERIMENT/DotComBubble/Rag/records/skeptical_value_investor_4_1"
+  monitoring:
+    record_path: "EXPERIMENT/DotComBubble/Rag/monitoring/skeptical_value_investor_4_1"
+
+short_seller_5_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/DotComBubble/Rag/records/short_seller_5_1/checkpoints"
+  record_path: "EXPERIMENT/DotComBubble/Rag/records/short_seller_5_1"
+  monitoring:
+    record_path: "EXPERIMENT/DotComBubble/Rag/monitoring/short_seller_5_1"
+

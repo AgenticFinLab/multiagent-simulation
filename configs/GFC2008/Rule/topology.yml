@@ -1,0 +1,70 @@
+# GFC2008 Rule Communication Topology
+
+graph:
+  type: star
+  center: market
+
+connections:
+  - from: market
+    to:
+      - m_b_s_originator_1_1
+      - m_b_s_originator_1_2
+      - rating_agency_2_1
+      - rating_agency_2_2
+      - leveraged_investor_3_1
+      - leveraged_investor_3_2
+      - distressed_buyer_4_1
+      - regulator_5_1
+    bidirectional: false
+    message_type: market_update
+
+  - from: m_b_s_originator_1_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: m_b_s_originator_1_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: rating_agency_2_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: rating_agency_2_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: leveraged_investor_3_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: leveraged_investor_3_2
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: distressed_buyer_4_1
+    to: market
+    bidirectional: false
+    message_type: order
+  - from: regulator_5_1
+    to: market
+    bidirectional: false
+    message_type: order
+
+broadcast:
+  enabled: true
+  from: market
+  to: all_players
+  message_type: market_update
+
+execution:
+  order:
+    - market
+    - m_b_s_originator_1_1
+    - m_b_s_originator_1_2
+    - rating_agency_2_1
+    - rating_agency_2_2
+    - leveraged_investor_3_1
+    - leveraged_investor_3_2
+    - distressed_buyer_4_1
+    - regulator_5_1

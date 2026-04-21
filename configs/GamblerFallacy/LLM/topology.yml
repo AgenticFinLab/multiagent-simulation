@@ -1,0 +1,22 @@
+# Topology configuration
+connections:
+  - source: market
+    target: streakreversaltrader
+  - source: streakreversaltrader
+    target: market
+  - source: market
+    target: hothandtrader
+  - source: hothandtrader
+    target: market
+  - source: market
+    target: independentassessor
+  - source: independentassessor
+    target: market
+  - source: market
+    target: arbitrageur
+  - source: arbitrageur
+    target: market
+  - source: market
+    target: noisetrader
+  - source: noisetrader
+    target: market

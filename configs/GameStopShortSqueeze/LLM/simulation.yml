@@ -1,0 +1,44 @@
+# GameStopShortSqueeze LLM Simulation Configuration
+#
+# January 2021 GameStop short squeeze - Reddit coordination drove 1,700% price increase
+#
+# Usage:
+#   python examples/GameStopShortSqueeze/LLM/run_gamestopshortsqueeze_llm.py \
+#       -c configs/GameStopShortSqueeze/LLM/simulation.yml
+
+setting:
+  name: "GameStopShortSqueeze-LLM"
+  description: "GameStop short squeeze simulation with retail coordination, gamma exposure, and social media-driven trading"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/GameStopShortSqueeze/LLM/records"
+  storage_path: "EXPERIMENT/GameStopShortSqueeze/LLM/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/GameStopShortSqueeze/LLM/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+llm:
+  model: "doubao-pro-32k"
+  temperature: 0.3
+  max_tokens: 500
+  timeout: 30
+
+ray:
+  namespace: "gamestopshortsqueeze_llm"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/GameStopShortSqueeze/LLM/communication"
+  record_messages: true
+  message_timeout_ms: 30000
+  max_retries: 3

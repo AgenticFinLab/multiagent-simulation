@@ -1,0 +1,46 @@
+# FlashCrash2010 Simulation Configuration
+# 
+# This simulation models the May 6, 2010 flash crash event.
+# Based on Kirilenko et al. (2017) findings about HFT behavior.
+#
+# Usage:
+#   python examples/FlashCrash2010/Rule/run_flashcrash2010.py \
+#       -c configs/FlashCrash2010/Rule/simulation.yml
+#
+# Phenomenon: 2010 Flash Crash
+# Key Feature: HFT liquidity withdrawal, order book depth collapse
+# Theory: Kirilenko et al. (2017), Biais et al. (2015)
+
+setting:
+  name: "FlashCrash2010"
+  description: "2010 Flash Crash simulation with HFT market makers, momentum chasers, fundamental traders, stop-loss traders, and noise traders. Models liquidity withdrawal and order book dynamics."
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/FlashCrash2010/Rule/records"
+  storage_path: "EXPERIMENT/FlashCrash2010/Rule/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/FlashCrash2010/Rule/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "flashcrash2010_rule"
+  ignore_reinit_error: true
+  
+  # Resource configuration
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/FlashCrash2010/Rule/communication"
+  record_messages: true
+  
+  message_timeout_ms: 5000
+  max_retries: 3

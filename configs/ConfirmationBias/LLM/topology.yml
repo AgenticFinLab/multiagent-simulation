@@ -1,0 +1,22 @@
+# Topology configuration
+connections:
+  - source: market
+    target: beliefanchor
+  - source: beliefanchor
+    target: market
+  - source: market
+    target: selectivescanner
+  - source: selectivescanner
+    target: market
+  - source: market
+    target: balancedanalyst
+  - source: balancedanalyst
+    target: market
+  - source: market
+    target: contrariantrader
+  - source: contrariantrader
+    target: market
+  - source: market
+    target: noisetrader
+  - source: noisetrader
+    target: market

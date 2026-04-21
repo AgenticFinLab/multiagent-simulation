@@ -1,0 +1,44 @@
+# DotComBubble Rag Simulation Configuration
+#
+# 1995-2001 Internet bubble - NASDAQ rose 400% then fell 78%
+#
+# Usage:
+#   python examples/DotComBubble/Rag/run_dotcombubble_rag.py \
+#       -c configs/DotComBubble/Rag/simulation.yml
+
+setting:
+  name: "DotComBubble-Rag"
+  description: "Dot-com bubble simulation with new economy narrative, IPO frenzy, and valuation disconnect"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/DotComBubble/Rag/records"
+  storage_path: "EXPERIMENT/DotComBubble/Rag/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/DotComBubble/Rag/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+llm:
+  model: "doubao-pro-32k"
+  temperature: 0.3
+  max_tokens: 500
+  timeout: 30
+
+ray:
+  namespace: "dotcombubble_rag"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/DotComBubble/Rag/communication"
+  record_messages: true
+  message_timeout_ms: 30000
+  max_retries: 3

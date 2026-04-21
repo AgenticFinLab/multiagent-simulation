@@ -1,0 +1,91 @@
+# OverconfidenceBias LLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.OverconfidenceBias.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+overconfident_trader_1:
+  name: "OverconfidentTrader 1"
+  class: "examples.OverconfidenceBias.LLM.players:LLMOverconfidentTrader"
+  num_instances: 2
+  config:
+    identity: "overconfident_trader_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "overconfident_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+
+self_attributor_2:
+  name: "SelfAttributor 2"
+  class: "examples.OverconfidenceBias.LLM.players:LLMSelfAttributor"
+  num_instances: 2
+  config:
+    identity: "self_attributor_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "self_attributor"
+      llm:
+        model: "doubao-pro-32k"
+
+
+calibrated_trader_3:
+  name: "CalibratedTrader 3"
+  class: "examples.OverconfidenceBias.LLM.players:LLMCalibratedTrader"
+  num_instances: 1
+  config:
+    identity: "calibrated_trader_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "calibrated_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+
+contrarian_investor_4:
+  name: "ContrarianInvestor 4"
+  class: "examples.OverconfidenceBias.LLM.players:LLMContrarianInvestor"
+  num_instances: 1
+  config:
+    identity: "contrarian_investor_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "contrarian_investor"
+      llm:
+        model: "doubao-pro-32k"
+
+
+noise_trader_5:
+  name: "NoiseTrader 5"
+  class: "examples.OverconfidenceBias.LLM.players:LLMNoiseTrader"
+  num_instances: 2
+  config:
+    identity: "noise_trader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "noise_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+

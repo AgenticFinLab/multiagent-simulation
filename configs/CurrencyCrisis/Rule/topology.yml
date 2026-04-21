@@ -1,0 +1,22 @@
+# Topology configuration
+connections:
+  - source: market
+    target: speculativeattacker
+  - source: speculativeattacker
+    target: market
+  - source: market
+    target: selffulfillingtrader
+  - source: selffulfillingtrader
+    target: market
+  - source: market
+    target: centralbankdefender
+  - source: centralbankdefender
+    target: market
+  - source: market
+    target: fundamentalhedger
+  - source: fundamentalhedger
+    target: market
+  - source: market
+    target: noisetrader
+  - source: noisetrader
+    target: market

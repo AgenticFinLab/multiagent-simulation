@@ -1,0 +1,44 @@
+# HerdingInformation Rag Simulation Configuration
+#
+# Information cascade occurs when individuals ignore private signals and follow the crowd
+#
+# Usage:
+#   python examples/HerdingInformation/Rag/run_herdinginformation_rag.py \
+#       -c configs/HerdingInformation/Rag/simulation.yml
+
+setting:
+  name: "HerdingInformation-Rag"
+  description: "Informational herding simulation showing how sequential decision-making leads to information cascades"
+  total_rounds: 200
+  
+  record_path: "EXPERIMENT/HerdingInformation/Rag/records"
+  storage_path: "EXPERIMENT/HerdingInformation/Rag/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/HerdingInformation/Rag/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+llm:
+  model: "doubao-pro-32k"
+  temperature: 0.3
+  max_tokens: 500
+  timeout: 30
+
+ray:
+  namespace: "herdinginformation_rag"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/HerdingInformation/Rag/communication"
+  record_messages: true
+  message_timeout_ms: 30000
+  max_retries: 3

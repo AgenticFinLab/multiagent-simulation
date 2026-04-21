@@ -1,0 +1,75 @@
+# StatusQuoBias Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.StatusQuoBias.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+
+inertialholder_1:
+  name: "InertialHolder 1"
+  class: "examples.StatusQuoBias.Rule.players:InertialHolder"
+  num_instances: 2
+  config:
+    identity: "inertialholder_1"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+
+defaultfollower_2:
+  name: "DefaultFollower 2"
+  class: "examples.StatusQuoBias.Rule.players:DefaultFollower"
+  num_instances: 2
+  config:
+    identity: "defaultfollower_2"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+
+activerebalancer_3:
+  name: "ActiveRebalancer 3"
+  class: "examples.StatusQuoBias.Rule.players:ActiveRebalancer"
+  num_instances: 1
+  config:
+    identity: "activerebalancer_3"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+
+momentumtrader_4:
+  name: "MomentumTrader 4"
+  class: "examples.StatusQuoBias.Rule.players:MomentumTrader"
+  num_instances: 1
+  config:
+    identity: "momentumtrader_4"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+
+
+noisetrader_5:
+  name: "NoiseTrader 5"
+  class: "examples.StatusQuoBias.Rule.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 0
+

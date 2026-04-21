@@ -1,0 +1,10 @@
+"""HerdingInformation Simulation Package
+
+Information cascade occurs when individuals ignore private signals and follow the crowd
+
+Variants:
+    Rule:       Deterministic rule-based agents
+    LLM:        LLM-driven agent decisions
+    RuleLLM:    Hybrid rules + LLM judgment
+    Rag:        RAG-augmented with knowledge base
+"""

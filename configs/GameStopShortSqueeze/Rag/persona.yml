@@ -1,0 +1,72 @@
+# GameStopShortSqueeze Rag Persona Configuration
+
+market:
+  type: proxy
+  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rag/records/market/checkpoints"
+  record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records/market"
+  monitoring:
+    record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/monitoring/market"
+
+retail_coordinated_1_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rag/records/retail_coordinated_1_1/checkpoints"
+  record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records/retail_coordinated_1_1"
+  monitoring:
+    record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/monitoring/retail_coordinated_1_1"
+
+retail_coordinated_1_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rag/records/retail_coordinated_1_2/checkpoints"
+  record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records/retail_coordinated_1_2"
+  monitoring:
+    record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/monitoring/retail_coordinated_1_2"
+
+short_seller_h_f_2_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rag/records/short_seller_h_f_2_1/checkpoints"
+  record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records/short_seller_h_f_2_1"
+  monitoring:
+    record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/monitoring/short_seller_h_f_2_1"
+
+short_seller_h_f_2_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rag/records/short_seller_h_f_2_2/checkpoints"
+  record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records/short_seller_h_f_2_2"
+  monitoring:
+    record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/monitoring/short_seller_h_f_2_2"
+
+market_maker_gamma_3_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rag/records/market_maker_gamma_3_1/checkpoints"
+  record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records/market_maker_gamma_3_1"
+  monitoring:
+    record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/monitoring/market_maker_gamma_3_1"
+
+market_maker_gamma_3_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rag/records/market_maker_gamma_3_2/checkpoints"
+  record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records/market_maker_gamma_3_2"
+  monitoring:
+    record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/monitoring/market_maker_gamma_3_2"
+
+institutional_value_4_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rag/records/institutional_value_4_1/checkpoints"
+  record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records/institutional_value_4_1"
+  monitoring:
+    record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/monitoring/institutional_value_4_1"
+
+momentum_retail_5_1:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rag/records/momentum_retail_5_1/checkpoints"
+  record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records/momentum_retail_5_1"
+  monitoring:
+    record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/monitoring/momentum_retail_5_1"
+
+momentum_retail_5_2:
+  type: player
+  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rag/records/momentum_retail_5_2/checkpoints"
+  record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records/momentum_retail_5_2"
+  monitoring:
+    record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/monitoring/momentum_retail_5_2"
+

@@ -1,0 +1,22 @@
+# Topology configuration
+connections:
+  - source: market
+    target: carrytrader
+  - source: carrytrader
+    target: market
+  - source: market
+    target: leveragedcarryfund
+  - source: leveragedcarryfund
+    target: market
+  - source: market
+    target: fundingcurrencybuyer
+  - source: fundingcurrencybuyer
+    target: market
+  - source: market
+    target: hedgedcarrytrader
+  - source: hedgedcarrytrader
+    target: market
+  - source: market
+    target: noisetrader
+  - source: noisetrader
+    target: market

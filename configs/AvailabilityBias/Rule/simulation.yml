@@ -1,0 +1,38 @@
+# AvailabilityBias Rule Simulation Configuration
+#
+# AvailabilityBias simulation
+#
+# Usage:
+#   python examples/AvailabilityBias/Rule/run_availabilitybias_rule.py \
+#       -c configs/AvailabilityBias/Rule/simulation.yml
+
+setting:
+  name: "AvailabilityBias-Rule"
+  description: "AvailabilityBias simulation - Rule agents"
+  total_rounds: 200
+
+  record_path: "EXPERIMENT/AvailabilityBias/Rule/records"
+  storage_path: "EXPERIMENT/AvailabilityBias/Rule/communication"
+
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/AvailabilityBias/Rule/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "availabilitybias_rule"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/AvailabilityBias/Rule/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3

@@ -1,0 +1,22 @@
+# Topology configuration
+connections:
+  - source: market
+    target: inertialholder
+  - source: inertialholder
+    target: market
+  - source: market
+    target: defaultfollower
+  - source: defaultfollower
+    target: market
+  - source: market
+    target: activerebalancer
+  - source: activerebalancer
+    target: market
+  - source: market
+    target: momentumtrader
+  - source: momentumtrader
+    target: market
+  - source: market
+    target: noisetrader
+  - source: noisetrader
+    target: market

@@ -1,0 +1,71 @@
+# GameStopShortSqueeze Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.GameStopShortSqueeze.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 20.0
+      fundamental_value: 20.0
+      price_impact: 0.03
+      mean_reversion: 0.01
+      noise_std: 0.03
+
+retail_coordinated_1:
+  name: "RetailCoordinated 1"
+  class: "examples.GameStopShortSqueeze.Rule.players:RetailCoordinated"
+  num_instances: 2
+  config:
+    identity: "retail_coordinated_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+short_seller_h_f_2:
+  name: "ShortSellerHF 2"
+  class: "examples.GameStopShortSqueeze.Rule.players:ShortSellerHF"
+  num_instances: 2
+  config:
+    identity: "short_seller_h_f_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+market_maker_gamma_3:
+  name: "MarketMakerGamma 3"
+  class: "examples.GameStopShortSqueeze.Rule.players:MarketMakerGamma"
+  num_instances: 2
+  config:
+    identity: "market_maker_gamma_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+institutional_value_4:
+  name: "InstitutionalValue 4"
+  class: "examples.GameStopShortSqueeze.Rule.players:InstitutionalValue"
+  num_instances: 1
+  config:
+    identity: "institutional_value_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+momentum_retail_5:
+  name: "MomentumRetail 5"
+  class: "examples.GameStopShortSqueeze.Rule.players:MomentumRetail"
+  num_instances: 2
+  config:
+    identity: "momentum_retail_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+

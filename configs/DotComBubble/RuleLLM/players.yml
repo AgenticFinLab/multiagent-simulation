@@ -1,0 +1,91 @@
+# DotComBubble RuleLLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.DotComBubble.RuleLLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 50.0
+      fundamental_value: 50.0
+      price_impact: 0.02
+      mean_reversion: 0.01
+      noise_std: 0.03
+
+new_economy_evangelist_1:
+  name: "NewEconomyEvangelist 1"
+  class: "examples.DotComBubble.RuleLLM.players:LLMNewEconomyEvangelist"
+  num_instances: 2
+  config:
+    identity: "new_economy_evangelist_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "new_economy_evangelist"
+      llm:
+        model: "doubao-pro-32k"
+
+
+i_p_o_flipper_2:
+  name: "IPOFlipper 2"
+  class: "examples.DotComBubble.RuleLLM.players:LLMIPOFlipper"
+  num_instances: 2
+  config:
+    identity: "i_p_o_flipper_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "i_p_o_flipper"
+      llm:
+        model: "doubao-pro-32k"
+
+
+momentum_follower_3:
+  name: "MomentumFollower 3"
+  class: "examples.DotComBubble.RuleLLM.players:LLMMomentumFollower"
+  num_instances: 2
+  config:
+    identity: "momentum_follower_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "momentum_follower"
+      llm:
+        model: "doubao-pro-32k"
+
+
+skeptical_value_investor_4:
+  name: "SkepticalValueInvestor 4"
+  class: "examples.DotComBubble.RuleLLM.players:LLMSkepticalValueInvestor"
+  num_instances: 1
+  config:
+    identity: "skeptical_value_investor_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "skeptical_value_investor"
+      llm:
+        model: "doubao-pro-32k"
+
+
+short_seller_5:
+  name: "ShortSeller 5"
+  class: "examples.DotComBubble.RuleLLM.players:LLMShortSeller"
+  num_instances: 1
+  config:
+    identity: "short_seller_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "short_seller"
+      llm:
+        model: "doubao-pro-32k"
+
+

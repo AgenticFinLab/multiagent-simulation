@@ -1,0 +1,71 @@
+# SVBBankRun Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.SVBBankRun.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.04
+      mean_reversion: 0.01
+      noise_std: 0.02
+
+depositor_1:
+  name: "Depositor 1"
+  class: "examples.SVBBankRun.Rule.players:Depositor"
+  num_instances: 2
+  config:
+    identity: "depositor_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+social_media_influencer_2:
+  name: "SocialMediaInfluencer 2"
+  class: "examples.SVBBankRun.Rule.players:SocialMediaInfluencer"
+  num_instances: 2
+  config:
+    identity: "social_media_influencer_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+bank_manager_3:
+  name: "BankManager 3"
+  class: "examples.SVBBankRun.Rule.players:BankManager"
+  num_instances: 2
+  config:
+    identity: "bank_manager_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+regulator_4:
+  name: "Regulator 4"
+  class: "examples.SVBBankRun.Rule.players:Regulator"
+  num_instances: 1
+  config:
+    identity: "regulator_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+
+bond_trader_5:
+  name: "BondTrader 5"
+  class: "examples.SVBBankRun.Rule.players:BondTrader"
+  num_instances: 2
+  config:
+    identity: "bond_trader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+

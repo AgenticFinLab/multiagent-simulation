@@ -1,0 +1,38 @@
+# EndowmentEffect RuleLLM Simulation Configuration
+#
+# EndowmentEffect simulation
+#
+# Usage:
+#   python examples/EndowmentEffect/RuleLLM/run_endowmenteffect_rulellm.py \
+#       -c configs/EndowmentEffect/RuleLLM/simulation.yml
+
+setting:
+  name: "EndowmentEffect-RuleLLM"
+  description: "EndowmentEffect simulation - RuleLLM agents"
+  total_rounds: 200
+
+  record_path: "EXPERIMENT/EndowmentEffect/RuleLLM/records"
+  storage_path: "EXPERIMENT/EndowmentEffect/RuleLLM/communication"
+
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "EXPERIMENT/EndowmentEffect/RuleLLM/logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "endowmenteffect_rulellm"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/EndowmentEffect/RuleLLM/communication"
+  record_messages: true
+  message_timeout_ms: 5000
+  max_retries: 3
