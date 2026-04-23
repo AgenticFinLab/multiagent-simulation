@@ -1,17 +1,21 @@
 """AsianFinancialCrisis Rag Variant"""
 
 from examples.AsianFinancialCrisis.Rag.players import (
-    HotMoneyFunder,
-    ContagionTrader,
-    IMFRescuer,
-    ValueContrarian,
-    NoiseTrader,
+    Market,
+    RagLLMInvestor,
+    RagLLMHotMoneyFunder,
+    RagLLMContagionTrader,
+    RagLLMIMFRescuer,
+    RagLLMValueContrarian,
+    RagLLMNoiseTrader,
 )
 
 __all__ = [
-    "HotMoneyFunder",
-    "ContagionTrader",
-    "IMFRescuer",
-    "ValueContrarian",
-    "NoiseTrader",
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMHotMoneyFunder",
+    "RagLLMContagionTrader",
+    "RagLLMIMFRescuer",
+    "RagLLMValueContrarian",
+    "RagLLMNoiseTrader",
 ]

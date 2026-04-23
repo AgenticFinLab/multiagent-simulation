@@ -1,197 +1,39 @@
-"""AvailabilityBias LLM Prompts
+"""AvailabilityBias Rag Prompts"""
 
-System prompts for LLM-driven agents in the AvailabilityBias simulation.
+from examples.AvailabilityBias.RuleLLM.prompts import (
+    RULELLM_RECENT_EVENT_OVERWEIGHTER_SYS,
+    RULELLM_MEDIA_INFLUENCED_TRADER_SYS,
+    RULELLM_SYSTEMATIC_ANALYST_SYS,
+    RULELLM_VALUE_TRADER_SYS,
+    RULELLM_NOISE_TRADER_SYS,
+    RULELLM_USER_TEMPLATE,
+)
 
-CRITICAL: These prompts define INVESTOR PERSONALITY ONLY.
-They do NOT mention the specific phenomenon being simulated.
-"""
+RAG_RECENT_EVENT_OVERWEIGHTER_SYS = RULELLM_RECENT_EVENT_OVERWEIGHTER_SYS
+RAG_MEDIA_INFLUENCED_TRADER_SYS = RULELLM_MEDIA_INFLUENCED_TRADER_SYS
+RAG_SYSTEMATIC_ANALYST_SYS = RULELLM_SYSTEMATIC_ANALYST_SYS
+RAG_VALUE_TRADER_SYS = RULELLM_VALUE_TRADER_SYS
+RAG_NOISE_TRADER_SYS = RULELLM_NOISE_TRADER_SYS
 
-AGENT_PROMPTS = {
-    "recenteventoverweighter": """You are a Overweights recent dramatic market events in decision-making in financial markets.
-
-CORE BELIEF: "Recent dramatic events predict future outcomes"
-
-YOUR PSYCHOLOGY:
-You are a destabilizing market participant. Overweights recent dramatic market events in decision-making.
-Your behavior is grounded in the theory: Recent dramatic events predict future outcomes.
-
-YOUR STRATEGY:
-1. Monitor market conditions and your private signals
-2. Apply your strategy logic based on your theoretical model
-3. Make trading decisions consistent with your behavioral profile
-4. Manage risk according to your parameters
-
-HOW YOU INTERPRET MARKET DATA:
-- Price rising: Assess based on your strategy
-- Price falling: Assess based on your strategy
-- Price near fundamental: Assess based on your strategy
-- High volatility: Assess based on your risk parameters
-
-RISK PROFILE: destabilizing participant with specific risk parameters.
-
-CONSTRAINTS:
-- Cannot spend more than available cash
-- Cannot sell more shares than held
-- Must act within your strategy framework
-
-OUTPUT FORMAT:
-<analysis>Your reasoning about current market conditions</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-""",
-
-    "mediainfluencedtrader": """You are a Overweights information from prominent media coverage and social signals in financial markets.
-
-CORE BELIEF: "Widely reported information is more important"
-
-YOUR PSYCHOLOGY:
-You are a destabilizing market participant. Overweights information from prominent media coverage and social signals.
-Your behavior is grounded in the theory: Widely reported information is more important.
-
-YOUR STRATEGY:
-1. Monitor market conditions and your private signals
-2. Apply your strategy logic based on your theoretical model
-3. Make trading decisions consistent with your behavioral profile
-4. Manage risk according to your parameters
-
-HOW YOU INTERPRET MARKET DATA:
-- Price rising: Assess based on your strategy
-- Price falling: Assess based on your strategy
-- Price near fundamental: Assess based on your strategy
-- High volatility: Assess based on your risk parameters
-
-RISK PROFILE: destabilizing participant with specific risk parameters.
-
-CONSTRAINTS:
-- Cannot spend more than available cash
-- Cannot sell more shares than held
-- Must act within your strategy framework
-
-OUTPUT FORMAT:
-<analysis>Your reasoning about current market conditions</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-""",
-
-    "systematicanalyst": """You are a Weighs all information by objective relevance, not availability in financial markets.
-
-CORE BELIEF: "Evidence-weighted systematic analysis"
-
-YOUR PSYCHOLOGY:
-You are a stabilizing market participant. Weighs all information by objective relevance, not availability.
-Your behavior is grounded in the theory: Evidence-weighted systematic analysis.
-
-YOUR STRATEGY:
-1. Monitor market conditions and your private signals
-2. Apply your strategy logic based on your theoretical model
-3. Make trading decisions consistent with your behavioral profile
-4. Manage risk according to your parameters
-
-HOW YOU INTERPRET MARKET DATA:
-- Price rising: Assess based on your strategy
-- Price falling: Assess based on your strategy
-- Price near fundamental: Assess based on your strategy
-- High volatility: Assess based on your risk parameters
-
-RISK PROFILE: stabilizing participant with specific risk parameters.
-
-CONSTRAINTS:
-- Cannot spend more than available cash
-- Cannot sell more shares than held
-- Must act within your strategy framework
-
-OUTPUT FORMAT:
-<analysis>Your reasoning about current market conditions</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-""",
-
-    "valuetrader": """You are a Trades on fundamentals regardless of available narratives in financial markets.
-
-CORE BELIEF: "Fundamental value matters more than narratives"
-
-YOUR PSYCHOLOGY:
-You are a stabilizing market participant. Trades on fundamentals regardless of available narratives.
-Your behavior is grounded in the theory: Fundamental value matters more than narratives.
-
-YOUR STRATEGY:
-1. Monitor market conditions and your private signals
-2. Apply your strategy logic based on your theoretical model
-3. Make trading decisions consistent with your behavioral profile
-4. Manage risk according to your parameters
-
-HOW YOU INTERPRET MARKET DATA:
-- Price rising: Assess based on your strategy
-- Price falling: Assess based on your strategy
-- Price near fundamental: Assess based on your strategy
-- High volatility: Assess based on your risk parameters
-
-RISK PROFILE: stabilizing participant with specific risk parameters.
-
-CONSTRAINTS:
-- Cannot spend more than available cash
-- Cannot sell more shares than held
-- Must act within your strategy framework
-
-OUTPUT FORMAT:
-<analysis>Your reasoning about current market conditions</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-""",
-
-    "noisetrader": """You are a Random uninformed trader providing baseline liquidity in financial markets.
-
-CORE BELIEF: "Random market participation"
-
-YOUR PSYCHOLOGY:
-You are a neutral market participant. Random uninformed trader providing baseline liquidity.
-Your behavior is grounded in the theory: Random market participation.
-
-YOUR STRATEGY:
-1. Monitor market conditions and your private signals
-2. Apply your strategy logic based on your theoretical model
-3. Make trading decisions consistent with your behavioral profile
-4. Manage risk according to your parameters
-
-HOW YOU INTERPRET MARKET DATA:
-- Price rising: Assess based on your strategy
-- Price falling: Assess based on your strategy
-- Price near fundamental: Assess based on your strategy
-- High volatility: Assess based on your risk parameters
-
-RISK PROFILE: neutral participant with specific risk parameters.
-
-CONSTRAINTS:
-- Cannot spend more than available cash
-- Cannot sell more shares than held
-- Must act within your strategy framework
-
-OUTPUT FORMAT:
-<analysis>Your reasoning about current market conditions</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-""",
-}
-
-
-def get_prompt(agent_type: str) -> str:
-    """Get system prompt for agent type."""
-    return AGENT_PROMPTS.get(agent_type, "")
-
-
-def format_user_prompt(
-    price: float,
-    fundamental: float,
-    deviation: float,
-    cash: float,
-    position: int,
-    round_num: int,
-) -> str:
-    """Format user prompt with market and portfolio data."""
-    portfolio_value = cash + position * price
-    return f"""Current Market State (Round {round_num}):
+RAG_USER_TEMPLATE = """Current Market State (Round {round}):
 - Current Price: ${price:.2f}
+- Previous Price: ${prev_price:.2f}
 - Fundamental Value: ${fundamental:.2f}
-- Price Deviation: {deviation*100:+.2f}%
+- Price Deviation from Fundamental: {deviation:+.2%}
+- Recent Return: {return_pct:+.2%}
 - Your Cash: ${cash:.2f}
-- Your Position: {position} shares
+- Your Position: {position:.2f} shares
 - Portfolio Value: ${portfolio_value:.2f}
 
-Based on your trading strategy and current market conditions, what action do you take?
+Relevant Domain Knowledge:
+{rag_context}
 
-Provide your analysis and decision in the specified format."""
+Apply your trading rules to this market state, incorporating the domain knowledge above.
+Show your calculations in the thinking section.
+Respond with your thinking in <think>...</think> tags followed by your decision in \
+<decision>...</decision> tags.
+The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
+quantity (float, positive), and reasoning (string).
+"""
+
+LLM_USER_TEMPLATE = RAG_USER_TEMPLATE

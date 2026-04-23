@@ -1,17 +1,21 @@
 """CurrencyCrisis LLM Variant"""
 
 from examples.CurrencyCrisis.LLM.players import (
-    SpeculativeAttacker,
-    SelfFulfillingTrader,
-    CentralBankDefender,
-    FundamentalHedger,
-    NoiseTrader,
+    Market,
+    LLMInvestor,
+    LLMSpeculativeAttacker,
+    LLMSelfFulfillingTrader,
+    LLMCentralBankDefender,
+    LLMFundamentalHedger,
+    LLMNoiseTrader,
 )
 
 __all__ = [
-    "SpeculativeAttacker",
-    "SelfFulfillingTrader",
-    "CentralBankDefender",
-    "FundamentalHedger",
-    "NoiseTrader",
+    "Market",
+    "LLMInvestor",
+    "LLMSpeculativeAttacker",
+    "LLMSelfFulfillingTrader",
+    "LLMCentralBankDefender",
+    "LLMFundamentalHedger",
+    "LLMNoiseTrader",
 ]

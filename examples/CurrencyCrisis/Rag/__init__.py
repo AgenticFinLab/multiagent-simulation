@@ -1,17 +1,21 @@
 """CurrencyCrisis Rag Variant"""
 
 from examples.CurrencyCrisis.Rag.players import (
-    SpeculativeAttacker,
-    SelfFulfillingTrader,
-    CentralBankDefender,
-    FundamentalHedger,
-    NoiseTrader,
+    Market,
+    RagLLMInvestor,
+    RagLLMSpeculativeAttacker,
+    RagLLMSelfFulfillingTrader,
+    RagLLMCentralBankDefender,
+    RagLLMFundamentalHedger,
+    RagLLMNoiseTrader,
 )
 
 __all__ = [
-    "SpeculativeAttacker",
-    "SelfFulfillingTrader",
-    "CentralBankDefender",
-    "FundamentalHedger",
-    "NoiseTrader",
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMSpeculativeAttacker",
+    "RagLLMSelfFulfillingTrader",
+    "RagLLMCentralBankDefender",
+    "RagLLMFundamentalHedger",
+    "RagLLMNoiseTrader",
 ]

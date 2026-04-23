@@ -1,27 +1,18 @@
-"""FlashCrash2010 LLM Variant
-
-LLM-driven implementation of the 2010 Flash Crash simulation.
-
-Agents:
-    Market:                 Rule-based (same as Rule variant)
-    LLMHFTMarketMaker:      LLM-driven liquidity provider
-    LLMMomentumChaser:      LLM-driven trend follower
-    LLMFundamentalTrader:   LLM-driven value investor
-    LLMStopLossTrader:      LLM-driven risk manager
-    LLMNoiseTrader:         LLM-driven uninformed trader
-"""
+"""FlashCrash2010 LLM - LLM-based 2010 Flash Crash Simulation"""
 
 from examples.FlashCrash2010.LLM.players import (
-    LLMFundamentalTrader,
+    Market,
+    LLMInvestor,
     LLMHFTMarketMaker,
     LLMMomentumChaser,
-    LLMNoiseTrader,
+    LLMFundamentalTrader,
     LLMStopLossTrader,
-    Market,
+    LLMNoiseTrader,
 )
 
 __all__ = [
     "Market",
+    "LLMInvestor",
     "LLMHFTMarketMaker",
     "LLMMomentumChaser",
     "LLMFundamentalTrader",

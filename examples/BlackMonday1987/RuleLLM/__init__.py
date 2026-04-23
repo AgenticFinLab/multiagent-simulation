@@ -1,5 +1,21 @@
 """BlackMonday1987 RuleLLM Variant"""
 
-from examples.BlackMonday1987.RuleLLM.players import Market, LLMInvestor, LLMPortfolioInsurer, LLMIndexArbitrageur, LLMProgramTrader, LLMValueInvestor, LLMNoiseTrader
+from examples.BlackMonday1987.RuleLLM.players import (
+    Market,
+    RuleLLMInvestor,
+    RuleLLMPortfolioInsurer,
+    RuleLLMIndexArbitrageur,
+    RuleLLMProgramTrader,
+    RuleLLMValueInvestor,
+    RuleLLMNoiseTrader,
+)
 
-__all__ = ["Market", "LLMInvestor", "LLMPortfolioInsurer", "LLMIndexArbitrageur", "LLMProgramTrader", "LLMValueInvestor", "LLMNoiseTrader"]
+__all__ = [
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMPortfolioInsurer",
+    "RuleLLMIndexArbitrageur",
+    "RuleLLMProgramTrader",
+    "RuleLLMValueInvestor",
+    "RuleLLMNoiseTrader",
+]

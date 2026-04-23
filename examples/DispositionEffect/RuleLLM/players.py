@@ -464,3 +464,14 @@ class RuleLLMLossAverse(BaseLLMInvestor):
     """Hybrid rule+LLM investor with extreme loss aversion rules."""
 
     pass
+
+
+__all__ = [
+    "Market",
+    "BaseLLMInvestor",
+    "RuleLLMDispositionBiased",
+    "RuleLLMRationalInvestor",
+    "RuleLLMTaxAwareInvestor",
+    "RuleLLMInstitutionalInvestor",
+    "RuleLLMLossAverse",
+]

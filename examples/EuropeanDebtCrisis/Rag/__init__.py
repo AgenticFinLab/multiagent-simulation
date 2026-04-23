@@ -1,17 +1,21 @@
 """EuropeanDebtCrisis Rag Variant"""
 
 from examples.EuropeanDebtCrisis.Rag.players import (
-    PeripheryBondSeller,
-    CreditorPanicker,
-    CoreBondBuyer,
-    ECBIntervenor,
-    HedgedFund,
+    Market,
+    RagLLMInvestor,
+    RagLLMPeripheryBondSeller,
+    RagLLMCreditorPanicker,
+    RagLLMCoreBondBuyer,
+    RagLLMECBIntervenor,
+    RagLLMHedgedFund,
 )
 
 __all__ = [
-    "PeripheryBondSeller",
-    "CreditorPanicker",
-    "CoreBondBuyer",
-    "ECBIntervenor",
-    "HedgedFund",
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMPeripheryBondSeller",
+    "RagLLMCreditorPanicker",
+    "RagLLMCoreBondBuyer",
+    "RagLLMECBIntervenor",
+    "RagLLMHedgedFund",
 ]

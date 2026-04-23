@@ -1,17 +1,21 @@
 """CarryTradeUnwind RuleLLM Variant"""
 
 from examples.CarryTradeUnwind.RuleLLM.players import (
-    CarryTrader,
-    LeveragedCarryFund,
-    FundingCurrencyBuyer,
-    HedgedCarryTrader,
-    NoiseTrader,
+    Market,
+    RuleLLMInvestor,
+    RuleLLMCarryTrader,
+    RuleLLMLeveragedCarryFund,
+    RuleLLMFundingCurrencyBuyer,
+    RuleLLMHedgedCarryTrader,
+    RuleLLMNoiseTrader,
 )
 
 __all__ = [
-    "CarryTrader",
-    "LeveragedCarryFund",
-    "FundingCurrencyBuyer",
-    "HedgedCarryTrader",
-    "NoiseTrader",
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMCarryTrader",
+    "RuleLLMLeveragedCarryFund",
+    "RuleLLMFundingCurrencyBuyer",
+    "RuleLLMHedgedCarryTrader",
+    "RuleLLMNoiseTrader",
 ]

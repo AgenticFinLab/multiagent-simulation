@@ -1,17 +1,21 @@
 """GamblerFallacy LLM Variant"""
 
 from examples.GamblerFallacy.LLM.players import (
-    StreakReversalTrader,
-    HotHandTrader,
-    IndependentAssessor,
-    Arbitrageur,
-    NoiseTrader,
+    Market,
+    LLMInvestor,
+    LLMStreakReversalTrader,
+    LLMHotHandTrader,
+    LLMIndependentAssessor,
+    LLMArbitrageur,
+    LLMNoiseTrader,
 )
 
 __all__ = [
-    "StreakReversalTrader",
-    "HotHandTrader",
-    "IndependentAssessor",
-    "Arbitrageur",
-    "NoiseTrader",
+    "Market",
+    "LLMInvestor",
+    "LLMStreakReversalTrader",
+    "LLMHotHandTrader",
+    "LLMIndependentAssessor",
+    "LLMArbitrageur",
+    "LLMNoiseTrader",
 ]

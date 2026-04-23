@@ -1,17 +1,21 @@
 """EuropeanDebtCrisis RuleLLM Variant"""
 
 from examples.EuropeanDebtCrisis.RuleLLM.players import (
-    PeripheryBondSeller,
-    CreditorPanicker,
-    CoreBondBuyer,
-    ECBIntervenor,
-    HedgedFund,
+    Market,
+    RuleLLMInvestor,
+    RuleLLMPeripheryBondSeller,
+    RuleLLMCreditorPanicker,
+    RuleLLMCoreBondBuyer,
+    RuleLLMECBIntervenor,
+    RuleLLMHedgedFund,
 )
 
 __all__ = [
-    "PeripheryBondSeller",
-    "CreditorPanicker",
-    "CoreBondBuyer",
-    "ECBIntervenor",
-    "HedgedFund",
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMPeripheryBondSeller",
+    "RuleLLMCreditorPanicker",
+    "RuleLLMCoreBondBuyer",
+    "RuleLLMECBIntervenor",
+    "RuleLLMHedgedFund",
 ]

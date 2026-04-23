@@ -1,215 +1,491 @@
-import logging
-
-"""AnchoringEffect Rag Simulation
-
-Anchoring causes traders to insufficiently adjust from reference prices, creating slow price discovery
+"""AnchoringEffect Rag — RAG-augmented Rule+LLM Anchoring Effect Simulation
 
 Design:
-- Market: Rule-based (same as Rule variant)
-- Investors: RAG-augmented LLM with personas from prompts.py
+    - Market coordinator: identical rule-based price dynamics as AnchoringEffect.
+    - Investors: LLM-powered with system prompts embedding explicit quantitative rules
+      (from RuleLLM variant) + RAG knowledge retrieval at each decision round.
+
+Environment Variables:
+    ARK_API_KEY: ByteDance Doubao API key (required for LLM calls)
 """
 
-import json
-from typing import Any, Dict, Optional
+from __future__ import annotations
 
+import importlib
+import logging
+import os
+import shutil
+import sys
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from dotenv import load_dotenv
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
+
+from examples.llm_utils import parse_llm_response_with_thinking
+from masim.knowledge import (
+    KnowledgeLoader,
+    KnowledgeQuery,
+    KnowledgeStore,
+    ResourceManager,
+)
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from masim.utils.llm_client import LLMClient
+from masim.utils.history import HistoryBuffer
 
-from examples.AnchoringEffect.Rag.prompts import format_user_prompt, get_prompt
 from examples.AnchoringEffect.Rule.players import Market
 
 logger = logging.getLogger("AnchoringEffect.Rag")
 
 
-class LLMInvestor(GeneralPlayer):
-    """Base class for LLM-driven investors."""
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.llm_client = None
-        self.agent_type = ""
-    
-    async def perceive(self, observation, prev_result=None) -> None:
+def load_prompt(prompt_path: str) -> str:
+    """Load a prompt string from a module path (module:VARIABLE)."""
+    module_path, var_name = prompt_path.rsplit(":", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, var_name)
+
+
+class RagLLMInvestor(GeneralPlayer):
+    """
+    Base class for RAG-augmented Rule+LLM investors in the AnchoringEffect scenario.
+
+    Parameters from config extras:
+        - initial_cash, initial_position, custom_state_hot_limit, record_path
+        - llm: sys_message, user_message, lm_name, generation_config
+        - rag / private_knowledge.rag: RAG configuration
+    """
+
+    async def perceive(
+        self,
+        observation: Observation,
+        prev_result: Optional[StepResult] = None,
+    ) -> None:
         round_num = observation.round
         self.state.custom_state["round"] = round_num
-        
+
         if "cash" not in self.state.custom_state:
-            self._initialize_investor_state()
-        
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
-    
-    def _initialize_investor_state(self) -> None:
+            await self._initialize_agent()
+
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                market_data = inb.payload
+                self.state.custom_state["market_data"] = market_data
+                self.state.custom_state["price_history"].append(market_data["price"])
+
+    async def _initialize_agent(self) -> None:
+        """One-time initialization: portfolio state + LLM client + RAG index."""
         extras = self.config.extras
+        record_path = extras["record_path"]
+        hot_limit = extras["custom_state_hot_limit"]
+
         self.state.custom_state["cash"] = extras["initial_cash"]
         self.state.custom_state["position"] = extras["initial_position"]
-        
-        llm_config = extras["llm"]
-        self.llm_client = LLMClient(
-            model=llm_config["model"],
-            api_key=llm_config.get("api_key"),
-            base_url=llm_config.get("base_url"),
+        self.state.custom_state["price_history"] = HistoryBuffer(
+            folder=os.path.join(record_path, self.config.identity, "price"),
+            entry_limit=hot_limit,
         )
-        self.agent_type = extras["agent_type"]
-    
-    async def step(self):
-        if not self.llm_client or not self.agent_type:
-            return Action(
-                    action_type="hold",
-                    payload={},
-                    source_id=self.identity,
-                )
-        
-        system_prompt = get_prompt(self.agent_type)
-        if not system_prompt:
-            return Action(
-                    action_type="hold",
-                    payload={},
-                    source_id=self.identity,
-                )
-        
-        user_prompt = self._format_user_prompt()
-        
-        try:
-            response = await self.llm_client.generate(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                temperature=0.3,
-                max_tokens=500,
+
+        project_root = Path(__file__).parent.parent.parent
+        load_dotenv(project_root / ".env")
+        if not os.getenv("ARK_API_KEY"):
+            raise RuntimeError(
+                "ARK_API_KEY not found after loading .env. "
+                f"Ensure .env file exists at {project_root / '.env'} and contains ARK_API_KEY."
             )
-            
-            raw_decision = self._parse_decision(response)
-            decision = self._validate_decision(raw_decision)
-            self._update_portfolio(decision)
-            
-            order = {
-                "type": "order",
-                "action": decision["action"],
-                "quantity": decision["quantity"],
-                "agent_type": self.agent_type,
+
+        llm_config = extras["llm"]
+        lm_name = llm_config["lm_name"]
+        generation_config = llm_config["generation_config"]
+
+        self.state.custom_state["lm_name"] = lm_name
+        self.state.custom_state["generation_config"] = generation_config
+
+        llm_client = LangChainAPIInference(
+            lm_name=lm_name,
+            generation_config=generation_config,
+        )
+        self.state.custom_state["llm_client"] = llm_client
+
+        private_knowledge = extras.get("private_knowledge", {})
+        rag_cfg = private_knowledge.get("rag", extras.get("rag", {}))
+        await self._initialize_rag(rag_cfg, llm_client, extras["llm"])
+
+    async def _initialize_rag(
+        self,
+        rag_cfg: Dict[str, Any],
+        llm_client: Any,
+        llm_config: Dict[str, Any],
+    ) -> None:
+        """Build or load the agent's RAG index using the unified knowledge architecture."""
+        extras = self.config.extras
+        record_path = extras.get("record_path", "EXPERIMENT")
+
+        knowledge_config = extras.get("knowledge", {})
+        if not knowledge_config:
+            knowledge_config = {
+                "backend": "local",
+                "global_uri": rag_cfg.get("docs_dir", "examples/document-sources"),
+                "preprocessing": {
+                    "parser": "mineru",
+                    "output_position": rag_cfg.get(
+                        "mineru_output_dir", "MinerU_processed"
+                    ),
+                },
+                "rag": {
+                    "output_position": rag_cfg.get("shared_rag_index_dir", "rag_index"),
+                },
             }
-            return Action(
-                    action_type="order",
-                    payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-                    source_id=self.identity,
+
+        resource_manager = ResourceManager(knowledge_config)
+
+        private_knowledge = extras.get("private_knowledge", {})
+        if not private_knowledge:
+            private_knowledge = {
+                "from_global_resources": ["MinerU_processed"],
+                "local_resources": {"local_uri": "", "local_resources": []},
+                "rag": rag_cfg,
+            }
+
+        agent_knowledge = resource_manager.resolve_agent_knowledge(
+            agent_id=self.identity,
+            private_knowledge=private_knowledge,
+            record_path=record_path,
+        )
+
+        processed_dir = agent_knowledge["processed_dir"]
+        shared_rag_dir = agent_knowledge["shared_rag_dir"]
+        local_uri = agent_knowledge["local_uri"]
+        local_rag_dir = agent_knowledge["local_rag_dir"]
+        resolved_rag = agent_knowledge["rag"]
+
+        os.makedirs(local_uri, exist_ok=True)
+        os.makedirs(local_rag_dir, exist_ok=True)
+
+        embed_type = resolved_rag.get("embed_type", "litellm")
+        embed_model = resolved_rag.get("embed_model", "openai/hunyuan-embedding")
+        embed_api_base = resolved_rag.get("embed_api_base", "")
+        embed_api_key = resolved_rag.get("embed_api_key", "")
+        chunk_size = int(resolved_rag.get("chunk_size", 512))
+        chunk_overlap = int(resolved_rag.get("chunk_overlap", 64))
+
+        if not embed_api_key:
+            if embed_type == "litellm":
+                embed_api_key = os.getenv("HUNYUAN_API_KEY", "")
+            elif embed_type == "openai":
+                embed_api_key = os.getenv("ARK_API_KEY", "")
+
+        rag_store = KnowledgeStore(
+            embed_model_name=embed_model,
+            embed_api_key=embed_api_key,
+            embed_api_base=embed_api_base,
+            embed_type=embed_type,
+            persist_dir=local_rag_dir,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+        )
+
+        if os.path.isdir(local_rag_dir):
+            index_files = [
+                f for f in os.listdir(local_rag_dir) if not f.startswith(".")
+            ]
+            if index_files:
+                try:
+                    rag_store.load(local_rag_dir)
+                    self.state.custom_state["rag_store"] = rag_store
+                    self.state.custom_state["rag_cfg"] = resolved_rag
+                    logger.info(
+                        "[%s] Loaded local RAG index (%d files)",
+                        self.identity,
+                        len(index_files),
+                    )
+                    return
+                except Exception as exc:
+                    logger.warning(
+                        "[%s] Failed to load local index (%s); trying shared",
+                        self.identity,
+                        exc,
+                    )
+
+        shared_rag_dirs = resolved_rag.get("shared_rag_index_dirs", [])
+        if not shared_rag_dirs and os.path.isdir(shared_rag_dir):
+            shared_rag_dirs = [shared_rag_dir]
+
+        for s_dir in shared_rag_dirs:
+            if os.path.isdir(s_dir):
+                shared_files = [f for f in os.listdir(s_dir) if not f.startswith(".")]
+                if shared_files:
+                    try:
+                        for item in shared_files:
+                            src = os.path.join(s_dir, item)
+                            dst = os.path.join(local_rag_dir, item)
+                            if os.path.isdir(src):
+                                shutil.copytree(src, dst, dirs_exist_ok=True)
+                            else:
+                                shutil.copy2(src, dst)
+                        rag_store.load(local_rag_dir)
+                        self.state.custom_state["rag_store"] = rag_store
+                        self.state.custom_state["rag_cfg"] = resolved_rag
+                        logger.info(
+                            "[%s] Copied shared RAG index to local", self.identity
+                        )
+                        return
+                    except Exception as exc:
+                        logger.warning(
+                            "[%s] Failed to copy shared index (%s); building",
+                            self.identity,
+                            exc,
+                        )
+
+        loader = KnowledgeLoader()
+        if os.path.isdir(processed_dir) and os.listdir(processed_dir):
+            docs = loader.load_from_dir(processed_dir)
+        else:
+            raise RuntimeError(
+                f"[{self.identity}] No processed documents available for RAG in {processed_dir}."
+            )
+
+        rag_store.build(docs)
+
+        try:
+            for item in os.listdir(local_rag_dir):
+                if item.startswith("."):
+                    continue
+                src = os.path.join(local_rag_dir, item)
+                dst = os.path.join(shared_rag_dir, item)
+                if os.path.isdir(src):
+                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(src, dst)
+        except Exception as exc:
+            logger.warning(
+                "[%s] Failed to copy to shared location: %s", self.identity, exc
+            )
+
+        self.state.custom_state["rag_store"] = rag_store
+        self.state.custom_state["rag_cfg"] = resolved_rag
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        if "state" in state and hasattr(state["state"], "custom_state"):
+            custom = dict(state["state"].custom_state)
+            for key in ("llm_client", "rag_store"):
+                custom.pop(key, None)
+            state["state"].custom_state = custom
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        if hasattr(self, "state") and hasattr(self.state, "custom_state"):
+            custom = self.state.custom_state
+            if "lm_name" in custom and "llm_client" not in custom:
+                custom["llm_client"] = LangChainAPIInference(
+                    lm_name=custom["lm_name"],
+                    generation_config=custom["generation_config"],
                 )
-        except Exception as e:
-            logger.error("LLM call failed: %%s", e)
-            return Action(
-                    action_type="hold",
-                    payload={},
-                    source_id=self.identity,
+            if "rag_cfg" in custom and "rag_store" not in custom:
+                rag_cfg = custom["rag_cfg"]
+                local_rag_dir = rag_cfg.get("local_index_dir", "")
+                if not local_rag_dir:
+                    local_workspace_dir = rag_cfg.get("local_workspace_dir", "")
+                    if local_workspace_dir:
+                        local_rag_dir = os.path.join(local_workspace_dir, "rag_index")
+                if not local_rag_dir:
+                    logger.warning("Cannot reconstruct RAG store: no local_index_dir")
+                    return
+                embed_type = rag_cfg.get("embed_type", "litellm")
+                embed_api_key = rag_cfg.get("embed_api_key", "")
+                if not embed_api_key:
+                    if embed_type == "litellm":
+                        embed_api_key = os.getenv("HUNYUAN_API_KEY", "")
+                    elif embed_type == "openai":
+                        embed_api_key = os.getenv("ARK_API_KEY", "")
+                rag_store = KnowledgeStore(
+                    embed_model_name=rag_cfg.get(
+                        "embed_model", "openai/hunyuan-embedding"
+                    ),
+                    embed_api_key=embed_api_key,
+                    embed_api_base=rag_cfg.get("embed_api_base", ""),
+                    embed_type=embed_type,
+                    persist_dir=local_rag_dir,
+                    chunk_size=int(rag_cfg.get("chunk_size", 512)),
+                    chunk_overlap=int(rag_cfg.get("chunk_overlap", 64)),
                 )
-    
-    def _format_user_prompt(self) -> str:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
+                if os.path.isdir(local_rag_dir):
+                    try:
+                        rag_store.load(local_rag_dir)
+                    except Exception as exc:
+                        logger.warning("RAG store reload failed (%s)", exc)
+                custom["rag_store"] = rag_store
+
+    def _build_prompt(self, market_data: Dict[str, Any]) -> str:
+        """Build the user prompt with RAG context + market state."""
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         round_num = self.state.custom_state["round"]
-        
-        return format_user_prompt(
-            price=price,
-            fundamental=fundamental,
-            deviation=deviation,
+        rag_store: KnowledgeStore = self.state.custom_state.get("rag_store")
+        rag_cfg: Dict[str, Any] = self.state.custom_state.get("rag_cfg", {})
+
+        rag_context = ""
+        if rag_store and rag_store.is_built():
+            top_k = rag_cfg.get("top_k", 3)
+            query = KnowledgeQuery(
+                text=(
+                    f"anchoring bias trading strategy when: "
+                    f"price={market_data['price']:.2f}, "
+                    f"fundamental={market_data['fundamental']:.2f}, "
+                    f"deviation={market_data['deviation']:+.2%}"
+                ),
+                top_k=top_k,
+                round_num=round_num,
+                agent_id=self.config.identity,
+            )
+            result = rag_store.query(query)
+            rag_context = result.formatted_text
+
+        if not rag_context:
+            rag_context = "(No relevant knowledge retrieved this round.)"
+
+        template = load_prompt(self.config.extras["llm"]["user_message"])
+        return template.format(
+            round=round_num,
+            price=market_data["price"],
+            prev_price=market_data["prev_price"],
+            fundamental=market_data["fundamental"],
+            deviation=market_data["deviation"],
             cash=cash,
             position=position,
-            round_num=round_num,
+            portfolio_value=cash + position * market_data["price"],
+            rag_context=rag_context,
         )
-    
-    def _parse_decision(self, response: str) -> dict:
-        try:
-            start = response.find("<decision>")
-            end = response.find("</decision>")
-            if start != -1 and end != -1:
-                json_str = response[start + 10:end].strip()
-                return json.loads(json_str)
-            start = response.find("{")
-            end = response.rfind("}")
-            if start != -1 and end != -1:
-                return json.loads(response[start:end + 1])
-        except json.JSONDecodeError:
-            pass
-        return {"action": "hold", "quantity": 0}
-    
-    def _validate_decision(self, decision: dict) -> dict:
-        action = decision.get("action", "hold")
-        quantity = decision.get("quantity", 0)
-        
-        valid_actions = ["buy", "sell", "hold", "market_making"]
-        if action not in valid_actions:
-            action = "hold"
-        
-        try:
-            quantity = int(quantity)
-        except (ValueError, TypeError):
-            quantity = 0
-        quantity = max(0, min(quantity, 5000))
-        
-        if action == "buy":
-            price = self.state.custom_state["price"]
-            cash = self.state.custom_state["cash"]
-            max_affordable = int(cash / price) if price > 0 else 0
+
+    async def decide(self) -> Dict[str, Any]:
+        round_num = self.state.custom_state["round"]
+        market_data = self.state.custom_state["market_data"]
+        llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
+        strategy_name = self.__class__.__name__
+
+        system_prompt = load_prompt(self.config.extras["llm"]["sys_message"])
+        user_prompt = self._build_prompt(market_data)
+
+        max_retries = 3
+        decision = None
+        last_error = None
+        for attempt in range(max_retries):
+            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
+            infer_output = llm_client.run([infer_input])
+            try:
+                decision = parse_llm_response_with_thinking(
+                    infer_output.outputs[0].response
+                )
+                break
+            except ValueError as e:
+                last_error = e
+                if attempt < max_retries - 1:
+                    logger.debug("[%s] LLM parse failed, retrying...", self.identity)
+
+        if decision is None:
+            logger.warning(
+                "[%s] LLM failed after %d attempts: %s. Holding.",
+                self.identity,
+                max_retries,
+                last_error,
+            )
+            order = {
+                "bid_price": market_data["price"],
+                "quantity": 0.0,
+                "strategy": strategy_name,
+                "investor": self.identity,
+                "reasoning": "LLM parse failed: held position",
+                "analysis": "",
+            }
+            return {
+                **order,
+                "outbound_messages": [
+                    {"payload": order, "content_type": "investor_bid"}
+                ],
+            }
+
+        bid_price = float(decision["bid_price"])
+        quantity = float(decision["quantity"])
+
+        if quantity > 0:
+            max_affordable = cash / bid_price if bid_price > 0 else 0
             quantity = min(quantity, max_affordable)
-        
-        if action == "sell":
-            position = self.state.custom_state["position"]
-            quantity = min(quantity, position)
-        
-        return {"action": action, "quantity": quantity}
-    
-    def _update_portfolio(self, decision: dict) -> None:
-        action = decision.get("action", "hold")
-        quantity = decision.get("quantity", 0)
-        price = self.state.custom_state["price"]
-        
-        if action == "buy" and quantity > 0:
-            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["cash"] -= quantity * bid_price
             self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
+        elif quantity < 0:
+            quantity = max(-position, quantity)
+            self.state.custom_state["cash"] += abs(quantity) * bid_price
+            self.state.custom_state["position"] += quantity
+
+        logger.info(
+            "[%s] R%d (%s): Q=%+.2f", self.identity, round_num, strategy_name, quantity
+        )
+
+        order = {
+            "bid_price": bid_price,
+            "quantity": quantity,
+            "strategy": strategy_name,
+            "investor": self.identity,
+            "reasoning": decision["reasoning"][:100],
+            "analysis": decision["analysis"],
+        }
+
+        return {
+            **order,
+            "outbound_messages": [{"payload": order, "content_type": "investor_bid"}],
+        }
+
+    async def act(self, decision_payload: Dict[str, Any]) -> Action:
+        return Action(
+            action_type="investor_bid",
+            payload=decision_payload,
+            source_id=self.identity,
+        )
 
 
-class LLMAnchoredTrader(LLMInvestor):
-    """LLM-driven AnchoredTrader."""
-    
-    def _initialize_investor_state(self) -> None:
-        super()._initialize_investor_state()
-        self.agent_type = "anchored_trader"
+class RagLLMAnchoredTrader(RagLLMInvestor):
+    """RAG-augmented anchored trader — anchors to initial price, adjusts insufficiently."""
 
-class LLMHistoricalAnchor(LLMInvestor):
-    """LLM-driven HistoricalAnchor."""
-    
-    def _initialize_investor_state(self) -> None:
-        super()._initialize_investor_state()
-        self.agent_type = "historical_anchor"
-
-class LLMRationalUpdater(LLMInvestor):
-    """LLM-driven RationalUpdater."""
-    
-    def _initialize_investor_state(self) -> None:
-        super()._initialize_investor_state()
-        self.agent_type = "rational_updater"
-
-class LLMMomentumTrader(LLMInvestor):
-    """LLM-driven MomentumTrader."""
-    
-    def _initialize_investor_state(self) -> None:
-        super()._initialize_investor_state()
-        self.agent_type = "momentum_trader"
-
-class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven NoiseTrader."""
-    
-    def _initialize_investor_state(self) -> None:
-        super()._initialize_investor_state()
-        self.agent_type = "noise_trader"
+    pass
 
 
-__all__ = ["Market", "LLMInvestor", "LLMAnchoredTrader", "LLMHistoricalAnchor", "LLMRationalUpdater", "LLMMomentumTrader", "LLMNoiseTrader"]
+class RagLLMHistoricalAnchor(RagLLMInvestor):
+    """RAG-augmented historical anchor — anchors to historical average price."""
+
+    pass
+
+
+class RagLLMRationalUpdater(RagLLMInvestor):
+    """RAG-augmented rational updater — Bayesian, no anchoring bias (benchmark)."""
+
+    pass
+
+
+class RagLLMMomentumTrader(RagLLMInvestor):
+    """RAG-augmented momentum trader — follows price trends."""
+
+    pass
+
+
+class RagLLMNoiseTrader(RagLLMInvestor):
+    """RAG-augmented noise trader — uninformed random participant."""
+
+    pass
+
+
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMAnchoredTrader",
+    "RagLLMHistoricalAnchor",
+    "RagLLMRationalUpdater",
+    "RagLLMMomentumTrader",
+    "RagLLMNoiseTrader",
+]

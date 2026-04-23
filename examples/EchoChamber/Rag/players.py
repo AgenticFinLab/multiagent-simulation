@@ -1,4 +1,4 @@
-"""EuropeanDebtCrisis Rag — RAG-augmented LLM simulation of European sovereign debt crisis."""
+"""EchoChamber Rag — RAG-augmented LLM simulation of echo chamber polarization dynamics."""
 
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
-from examples.EuropeanDebtCrisis.Rule.players import Market  # noqa: F401
+from examples.EchoChamber.Rule.players import OpinionEnvironment  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
@@ -40,30 +40,33 @@ def load_prompt(prompt_path: str) -> str:
     return getattr(module, var_name)
 
 
-class RagLLMInvestor(GeneralPlayer):
-    """Base RAG-augmented LLM investor for EuropeanDebtCrisis."""
+class RagLLMSocialAgent(GeneralPlayer):
+    """Base RAG-augmented LLM social agent for EchoChamber."""
 
     _system_prompt_path: str = ""
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
-        if "cash" not in self.state.custom_state:
+        if "my_opinion" not in self.state.custom_state:
             await self._initialize_agent()
+
         self.state.custom_state["round"] = observation.round
         if observation.inbounds:
             for inb in observation.inbounds:
-                data = inb.payload
-                if isinstance(data, dict) and "price" in data:
-                    self.state.custom_state["market_data"] = data
-                    self.state.custom_state["price_history"].append(data["price"])
+                env_data = inb.payload
+                self.state.custom_state["env_data"] = env_data
+                self.state.custom_state["opinion_history"].append(
+                    self.state.custom_state["my_opinion"]
+                )
 
     async def _initialize_agent(self) -> None:
         extras = self.config.extras
-        self.state.custom_state["cash"] = float(extras["initial_cash"])
-        self.state.custom_state["position"] = int(extras["initial_position"])
-        self.state.custom_state["price_history"] = []
-        self.state.custom_state["market_data"] = {}
-        self.state.custom_state["history_buffer"] = HistoryBuffer(
-            folder=f"EuropeanDebtCrisis/Rag/{self.__class__.__name__}", entry_limit=200
+        record_path = extras["record_path"]
+        base_path = os.path.join(record_path, self.config.identity)
+        custom_state_hot_limit = extras["custom_state_hot_limit"]
+        self.state.custom_state["my_opinion"] = extras["initial_opinion"]
+        self.state.custom_state["opinion_history"] = HistoryBuffer(
+            folder=os.path.join(base_path, "opinion"),
+            entry_limit=custom_state_hot_limit,
         )
         project_root = Path(__file__).parent.parent.parent
         load_dotenv(project_root / ".env")
@@ -252,14 +255,26 @@ class RagLLMInvestor(GeneralPlayer):
                         logger.warning("RAG store reload failed: %s", exc)
                 custom["rag_store"] = rag_store
 
-    def _build_prompt(self, market_data: Dict[str, Any]) -> str:
-        cash = self.state.custom_state["cash"]
-        position = self.state.custom_state["position"]
+    def _clamp_opinion(self, opinion: float) -> float:
+        """Clamp opinion to valid range [-1, 1]."""
+        return max(-1.0, min(1.0, opinion))
+
+    def _apply_intensity_constraints(self, intensity: float) -> float:
+        """Clamp intensity to valid range [0, 1]."""
+        return max(0.0, min(1.0, intensity))
+
+    def _build_prompt(self, env_data: Dict[str, Any]) -> str:
+        my_opinion = self.state.custom_state["my_opinion"]
         round_num = self.state.custom_state.get("round", 0)
-        price = market_data.get("price", 100.0)
-        fundamental = market_data.get("fundamental", 100.0)
-        deviation = market_data.get("deviation", 0.0)
-        portfolio_value = cash + position * price
+        polarization = env_data.get("polarization", 0.0)
+        prev_polarization = env_data.get("prev_polarization", 0.0)
+        polarization_change = env_data.get("polarization_change", 0.0)
+        mean_opinion = env_data.get("mean_opinion", 0.0)
+        cluster_separation = env_data.get("cluster_separation", 0.0)
+        cross_cutting_exposure = env_data.get("cross_cutting_exposure", 0.5)
+        num_polarizers = env_data.get("num_polarizers", 0)
+        num_depolarizers = env_data.get("num_depolarizers", 0)
+        net_polarization_intensity = env_data.get("net_polarization_intensity", 0.0)
         rag_store: Optional[KnowledgeStore] = self.state.custom_state.get("rag_store")
         rag_cfg: Dict[str, Any] = self.state.custom_state.get("rag_cfg", {})
         rag_context = ""
@@ -267,8 +282,8 @@ class RagLLMInvestor(GeneralPlayer):
             top_k = rag_cfg.get("top_k", 3)
             query = KnowledgeQuery(
                 text=(
-                    f"European sovereign debt crisis: price={price:.2f}, "
-                    f"fundamental={fundamental:.2f}, deviation={deviation:+.2%}"
+                    f"echo chamber polarization: opinion={my_opinion:.2f}, "
+                    f"polarization={polarization:.3f}, cluster_separation={cluster_separation:.3f}"
                 ),
                 top_k=top_k,
                 round_num=round_num,
@@ -278,112 +293,138 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
-        template = load_prompt(
-            "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
-        )
+        template = load_prompt("examples.EchoChamber.Rag.prompts:RAG_USER_TEMPLATE")
         return template.format(
             round=round_num,
-            price=price,
-            fundamental=fundamental,
-            deviation=deviation,
-            cash=cash,
-            position=position,
-            portfolio_value=portfolio_value,
+            polarization=polarization,
+            prev_polarization=prev_polarization,
+            polarization_change=polarization_change,
+            mean_opinion=mean_opinion,
+            cluster_separation=cluster_separation,
+            cross_cutting_exposure=cross_cutting_exposure,
+            num_polarizers=num_polarizers,
+            num_depolarizers=num_depolarizers,
+            net_polarization_intensity=net_polarization_intensity,
+            my_opinion=my_opinion,
             rag_context=rag_context,
         )
 
-    async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        cash = self.state.custom_state["cash"]
-        position = self.state.custom_state["position"]
-        system_prompt = load_prompt(self._system_prompt_path)
-        user_prompt = self._build_prompt(market_data)
+    async def decide(self) -> Dict[str, Any]:
+        round_num = self.state.custom_state["round"]
+        env_data = self.state.custom_state.get("env_data", {})
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
-        action_str, quantity = "hold", 0
+        strategy_name = self.__class__.__name__
+        system_prompt = load_prompt(self._system_prompt_path)
+        user_prompt = self._build_prompt(env_data)
+        decision = None
         for attempt in range(3):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-                result = llm_client.run([infer_input])
-                response = result.outputs[0].response
-                parsed = parse_llm_response_with_thinking(response)
-                action_str = parsed.get("action", "hold")
-                quantity = int(parsed.get("quantity", 0))
-                if action_str not in ("buy", "sell", "hold"):
-                    action_str = "hold"
-                quantity = max(0, quantity)
-                if action_str == "buy":
-                    quantity = min(quantity, int(cash / price) if price > 0 else 0)
-                elif action_str == "sell":
-                    quantity = min(quantity, max(position, 0))
+                infer_output = llm_client.run([infer_input])
+                decision = parse_llm_response_with_thinking(
+                    infer_output.outputs[0].response
+                )
                 break
             except Exception as exc:  # pylint: disable=broad-except
-                logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
+                logger.warning(
+                    "[%s] LLM attempt %d failed: %s", self.identity, attempt + 1, exc
+                )
                 if attempt == 2:
-                    action_str, quantity = "hold", 0
-        if action_str == "buy" and quantity > 0:
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action_str == "sell" and quantity > 0:
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
-        order = {"action": action_str, "quantity": quantity}
+                    decision = None
+        if decision is None:
+            action = {
+                "action_type": "neutral",
+                "intensity": 0.0,
+                "agent_role": strategy_name,
+                "agent_id": self.identity,
+                "opinion": self.state.custom_state["my_opinion"],
+                "reasoning": "LLM failed: stayed neutral",
+                "analysis": "",
+            }
+            return {
+                **action,
+                "outbound_messages": [
+                    {"payload": action, "content_type": "social_action"}
+                ],
+            }
+        action_type = decision.get("action_type", "neutral")
+        intensity = float(decision.get("intensity", 0.0))
+        intensity = self._apply_intensity_constraints(intensity)
+        my_opinion = self.state.custom_state["my_opinion"]
+        if action_type == "polarize":
+            shift = 0.05 * (1 if my_opinion >= 0 else -1)
+            my_opinion += shift
+        elif action_type == "depolarize":
+            my_opinion *= 0.95
+        my_opinion = self._clamp_opinion(my_opinion)
+        self.state.custom_state["my_opinion"] = my_opinion
+        logger.debug(
+            "[%s] R%s (%s): A=%s I=%.3f opinion=%.3f",
+            self.identity,
+            round_num,
+            strategy_name,
+            action_type,
+            intensity,
+            my_opinion,
+        )
+        action = {
+            "action_type": action_type,
+            "intensity": intensity,
+            "agent_role": strategy_name,
+            "agent_id": self.identity,
+            "opinion": my_opinion,
+            "reasoning": str(decision.get("reasoning", ""))[:120],
+            "analysis": decision.get("analysis", ""),
+        }
         return {
-            "action": action_str,
-            "quantity": quantity,
-            "outbound_messages": [{"payload": order, "content_type": "order"}],
+            **action,
+            "outbound_messages": [{"payload": action, "content_type": "social_action"}],
         }
 
-    async def act(self, decision_payload: Dict) -> Action:
+    async def act(self, decision_payload: Dict[str, Any]) -> Action:
         return Action(
-            action_type="order", payload=decision_payload, source_id=self.identity
+            action_type="social_action",
+            payload=decision_payload,
+            source_id=self.identity,
         )
 
 
-class RagLLMPeripheryBondSeller(RagLLMInvestor):
-    """RAG-augmented periphery bond seller."""
+class RagLLMIdeologue(RagLLMSocialAgent):
+    """RAG-augmented ideologue: strong opinion holder."""
 
-    _system_prompt_path = (
-        "examples.EuropeanDebtCrisis.Rag.prompts:RAG_PERIPHERY_BOND_SELLER_SYS"
-    )
+    _system_prompt_path = "examples.EchoChamber.Rag.prompts:RAG_IDEOLOGUE_SYS"
 
 
-class RagLLMCreditorPanicker(RagLLMInvestor):
-    """RAG-augmented creditor panicker."""
+class RagLLMConformist(RagLLMSocialAgent):
+    """RAG-augmented conformist: social group aligner."""
 
-    _system_prompt_path = (
-        "examples.EuropeanDebtCrisis.Rag.prompts:RAG_CREDITOR_PANICKER_SYS"
-    )
+    _system_prompt_path = "examples.EchoChamber.Rag.prompts:RAG_CONFORMIST_SYS"
 
 
-class RagLLMCoreBondBuyer(RagLLMInvestor):
-    """RAG-augmented flight-to-quality core bond buyer."""
+class RagLLMCriticalThinker(RagLLMSocialAgent):
+    """RAG-augmented critical thinker: evidence evaluator."""
 
-    _system_prompt_path = (
-        "examples.EuropeanDebtCrisis.Rag.prompts:RAG_CORE_BOND_BUYER_SYS"
-    )
+    _system_prompt_path = "examples.EchoChamber.Rag.prompts:RAG_CRITICAL_SYS"
 
 
-class RagLLMECBIntervenor(RagLLMInvestor):
-    """RAG-augmented ECB-style intervenor."""
+class RagLLMBridgeBuilder(RagLLMSocialAgent):
+    """RAG-augmented bridge builder: cross-group engager."""
 
-    _system_prompt_path = (
-        "examples.EuropeanDebtCrisis.Rag.prompts:RAG_ECB_INTERVENOR_SYS"
-    )
+    _system_prompt_path = "examples.EchoChamber.Rag.prompts:RAG_BRIDGE_SYS"
 
 
-class RagLLMHedgedFund(RagLLMInvestor):
-    """RAG-augmented relative-value hedge fund."""
+class RagLLMPassiveFollower(RagLLMSocialAgent):
+    """RAG-augmented passive follower: low-engagement participant."""
 
-    _system_prompt_path = "examples.EuropeanDebtCrisis.Rag.prompts:RAG_HEDGED_FUND_SYS"
+    _system_prompt_path = "examples.EchoChamber.Rag.prompts:RAG_PASSIVE_SYS"
 
 
 __all__ = [
-    "Market",
-    "RagLLMInvestor",
-    "RagLLMPeripheryBondSeller",
-    "RagLLMCreditorPanicker",
-    "RagLLMCoreBondBuyer",
-    "RagLLMECBIntervenor",
-    "RagLLMHedgedFund",
+    "OpinionEnvironment",
+    "RagLLMSocialAgent",
+    "RagLLMIdeologue",
+    "RagLLMConformist",
+    "RagLLMCriticalThinker",
+    "RagLLMBridgeBuilder",
+    "RagLLMPassiveFollower",
 ]

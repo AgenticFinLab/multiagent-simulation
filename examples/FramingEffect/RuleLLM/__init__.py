@@ -1,17 +1,21 @@
 """FramingEffect RuleLLM Variant"""
 
 from examples.FramingEffect.RuleLLM.players import (
-    GainFrameFollower,
-    LossFrameReactor,
-    FrameInvariantTrader,
-    ArbitrageFramer,
-    NoiseTrader,
+    Market,
+    RuleLLMInvestor,
+    RuleLLMGainFrameFollower,
+    RuleLLMLossFrameReactor,
+    RuleLLMFrameInvariantTrader,
+    RuleLLMArbitrageFramer,
+    RuleLLMNoiseTrader,
 )
 
 __all__ = [
-    "GainFrameFollower",
-    "LossFrameReactor",
-    "FrameInvariantTrader",
-    "ArbitrageFramer",
-    "NoiseTrader",
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMGainFrameFollower",
+    "RuleLLMLossFrameReactor",
+    "RuleLLMFrameInvariantTrader",
+    "RuleLLMArbitrageFramer",
+    "RuleLLMNoiseTrader",
 ]

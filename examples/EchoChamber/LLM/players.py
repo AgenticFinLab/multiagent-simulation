@@ -462,3 +462,14 @@ class LLMPassiveBystander(LLMSocialAgent):
     """LLM Passive Bystander."""
 
     pass
+
+
+__all__ = [
+    "OpinionEnvironment",
+    "LLMSocialAgent",
+    "LLMIdeologue",
+    "LLMConformist",
+    "LLMCriticalThinker",
+    "LLMBridgeBuilder",
+    "LLMPassiveBystander",
+]

@@ -1,17 +1,19 @@
 """AsianFinancialCrisis LLM Variant"""
 
 from examples.AsianFinancialCrisis.LLM.players import (
-    HotMoneyFunder,
-    ContagionTrader,
-    IMFRescuer,
-    ValueContrarian,
-    NoiseTrader,
+    Market,
+    LLMHotMoneyFunder,
+    LLMContagionTrader,
+    LLMIMFRescuer,
+    LLMValueContrarian,
+    LLMNoiseTrader,
 )
 
 __all__ = [
-    "HotMoneyFunder",
-    "ContagionTrader",
-    "IMFRescuer",
-    "ValueContrarian",
-    "NoiseTrader",
+    "Market",
+    "LLMHotMoneyFunder",
+    "LLMContagionTrader",
+    "LLMIMFRescuer",
+    "LLMValueContrarian",
+    "LLMNoiseTrader",
 ]

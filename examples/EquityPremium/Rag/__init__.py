@@ -1,7 +1,21 @@
-"""EquityPremiumRag — RAG-augmented hybrid Rule+LLM EquityPremium simulation.
+"""EquityPremium Rag Variant"""
 
-Three-way comparison:
-    EquityPremium        — pure rule-based
-    EquityPremiumRuleLLM — rule-embedded LLM (persona + quantitative rules in prompt)
-    EquityPremiumRag     — rule-embedded LLM + personal RAG library (retrieved context per decision)
-"""
+from examples.EquityPremium.Rag.players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMMyopicLossAverse,
+    RagLLMLongTermInvestor,
+    RagLLMInstitutionalInvestor,
+    RagLLMRiskAverseSaver,
+    RagLLMRationalOptimizer,
+)
+
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMMyopicLossAverse",
+    "RagLLMLongTermInvestor",
+    "RagLLMInstitutionalInvestor",
+    "RagLLMRiskAverseSaver",
+    "RagLLMRationalOptimizer",
+]

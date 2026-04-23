@@ -1,17 +1,21 @@
 """EndowmentEffect RuleLLM Variant"""
 
 from examples.EndowmentEffect.RuleLLM.players import (
-    EndowedHolder,
-    StatusQuoSeller,
-    RationalArbitrageur,
-    NewBuyer,
-    NoiseTrader,
+    Market,
+    RuleLLMInvestor,
+    RuleLLMEndowedHolder,
+    RuleLLMStatusQuoSeller,
+    RuleLLMRationalArbitrageur,
+    RuleLLMNewBuyer,
+    RuleLLMNoiseTrader,
 )
 
 __all__ = [
-    "EndowedHolder",
-    "StatusQuoSeller",
-    "RationalArbitrageur",
-    "NewBuyer",
-    "NoiseTrader",
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMEndowedHolder",
+    "RuleLLMStatusQuoSeller",
+    "RuleLLMRationalArbitrageur",
+    "RuleLLMNewBuyer",
+    "RuleLLMNoiseTrader",
 ]

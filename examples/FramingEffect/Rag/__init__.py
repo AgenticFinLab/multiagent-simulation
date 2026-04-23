@@ -1,17 +1,21 @@
 """FramingEffect Rag Variant"""
 
 from examples.FramingEffect.Rag.players import (
-    GainFrameFollower,
-    LossFrameReactor,
-    FrameInvariantTrader,
-    ArbitrageFramer,
-    NoiseTrader,
+    Market,
+    RagLLMInvestor,
+    RagLLMGainFrameFollower,
+    RagLLMLossFrameReactor,
+    RagLLMFrameInvariantTrader,
+    RagLLMArbitrageFramer,
+    RagLLMNoiseTrader,
 )
 
 __all__ = [
-    "GainFrameFollower",
-    "LossFrameReactor",
-    "FrameInvariantTrader",
-    "ArbitrageFramer",
-    "NoiseTrader",
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMGainFrameFollower",
+    "RagLLMLossFrameReactor",
+    "RagLLMFrameInvariantTrader",
+    "RagLLMArbitrageFramer",
+    "RagLLMNoiseTrader",
 ]

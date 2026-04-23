@@ -1,17 +1,21 @@
 """GamblerFallacy Rag Variant"""
 
 from examples.GamblerFallacy.Rag.players import (
-    StreakReversalTrader,
-    HotHandTrader,
-    IndependentAssessor,
-    Arbitrageur,
-    NoiseTrader,
+    Market,
+    RagLLMInvestor,
+    RagLLMStreakReversalTrader,
+    RagLLMHotHandTrader,
+    RagLLMIndependentAssessor,
+    RagLLMArbitrageur,
+    RagLLMNoiseTrader,
 )
 
 __all__ = [
-    "StreakReversalTrader",
-    "HotHandTrader",
-    "IndependentAssessor",
-    "Arbitrageur",
-    "NoiseTrader",
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMStreakReversalTrader",
+    "RagLLMHotHandTrader",
+    "RagLLMIndependentAssessor",
+    "RagLLMArbitrageur",
+    "RagLLMNoiseTrader",
 ]

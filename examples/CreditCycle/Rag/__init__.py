@@ -1,17 +1,21 @@
 """CreditCycle Rag Variant"""
 
 from examples.CreditCycle.Rag.players import (
-    ProCyclicalLender,
-    MinskyBorrower,
-    CounterCyclicalLender,
-    ValueInvestor,
-    NoiseTrader,
+    Market,
+    RagLLMInvestor,
+    RagLLMProCyclicalLender,
+    RagLLMMinskyBorrower,
+    RagLLMCounterCyclicalLender,
+    RagLLMValueInvestor,
+    RagLLMNoiseTrader,
 )
 
 __all__ = [
-    "ProCyclicalLender",
-    "MinskyBorrower",
-    "CounterCyclicalLender",
-    "ValueInvestor",
-    "NoiseTrader",
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMProCyclicalLender",
+    "RagLLMMinskyBorrower",
+    "RagLLMCounterCyclicalLender",
+    "RagLLMValueInvestor",
+    "RagLLMNoiseTrader",
 ]

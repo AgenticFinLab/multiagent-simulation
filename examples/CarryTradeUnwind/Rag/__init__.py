@@ -1,17 +1,21 @@
 """CarryTradeUnwind Rag Variant"""
 
 from examples.CarryTradeUnwind.Rag.players import (
-    CarryTrader,
-    LeveragedCarryFund,
-    FundingCurrencyBuyer,
-    HedgedCarryTrader,
-    NoiseTrader,
+    Market,
+    RagLLMInvestor,
+    RagLLMCarryTrader,
+    RagLLMLeveragedCarryFund,
+    RagLLMFundingCurrencyBuyer,
+    RagLLMHedgedCarryTrader,
+    RagLLMNoiseTrader,
 )
 
 __all__ = [
-    "CarryTrader",
-    "LeveragedCarryFund",
-    "FundingCurrencyBuyer",
-    "HedgedCarryTrader",
-    "NoiseTrader",
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMCarryTrader",
+    "RagLLMLeveragedCarryFund",
+    "RagLLMFundingCurrencyBuyer",
+    "RagLLMHedgedCarryTrader",
+    "RagLLMNoiseTrader",
 ]

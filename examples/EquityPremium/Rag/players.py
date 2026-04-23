@@ -791,3 +791,14 @@ class RagLLMRationalOptimizer(RagLLMInvestor):
     """RAG-augmented: RationalOptimizer rules + LLM + retrieved knowledge."""
 
     pass
+
+
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMMyopicLossAverse",
+    "RagLLMLongTermInvestor",
+    "RagLLMInstitutionalInvestor",
+    "RagLLMRiskAverseSaver",
+    "RagLLMRationalOptimizer",
+]

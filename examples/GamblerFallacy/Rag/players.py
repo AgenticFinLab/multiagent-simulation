@@ -1,115 +1,154 @@
-import asyncio
-import json
-import logging
-import random
-import re
+"""GamblerFallacy Rag Variant Players
 
+RAG-augmented LLM-driven agents for the GamblerFallacy simulation.
+"""
+
+import logging
 from typing import Any, Dict, Optional
+
+from lmbase.inference import InferInput, LangChainAPIInference
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from masim.utils.llm_client import LLMClient
 
-from examples.GamblerFallacy.Rag.prompts import format_user_prompt, get_prompt
+from examples.GamblerFallacy.Rule.players import Market
+from examples.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("GamblerFallacy.Rag")
 
-from examples.GamblerFallacy.Rule.players import Market
 
+class RagLLMInvestor(GeneralPlayer):
+    """Base class for RAG-augmented LLM-driven GamblerFallacy investors."""
 
+    _system_prompt_path: str = ""
 
-class StreakReversalTrader(GeneralPlayer):
-    """
-    LLM-driven StreakReversalTrader.
-
-    Expects reversals after consecutive price moves, betting against streaks
-
-    Theoretical Basis: Law of small numbers misconception (Tversky & Kahneman, 1971)
-    Market Role: destabilizing
-    """
-    def __init__(self, config=None):
-        super().__init__(config)
-        self.llm_client = None
-        self.agent_type = ""
-
-    async def initialize(self) -> None:
-        await super().initialize()
-        extras = self.config.extras
-        llm_config = extras["llm"]
-        self.llm_client = LLMClient(
-            model=llm_config["model"],
-            api_key=llm_config["api_key"],
-            base_url=llm_config["base_url"],
-        )
-        self.agent_type = extras["agent_type"]
-
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
+    async def perceive(self, observation: Observation, prev_result: Optional[StepResult] = None) -> None:
+        """Initialize portfolio and LLM client; read market update from inbounds."""
+        self.state.custom_state["round"] = observation.round
 
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["fundamental"] = extras.get("fundamental_value", 100.0)
+            self.state.custom_state["deviation"] = 0.0
+            await self._initialize_agent()
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        for msg in observation.inbounds:
+            payload = msg.payload if hasattr(msg, "payload") else msg
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
+                self.state.custom_state["price"] = payload.get("price", self.state.custom_state["price"])
+                self.state.custom_state["fundamental"] = payload.get("fundamental", self.state.custom_state["fundamental"])
+                self.state.custom_state["deviation"] = payload.get("deviation", 0.0)
 
-    async def decide(self) -> dict:
-        return {}
+    async def _initialize_agent(self) -> None:
+        """Initialize LangChainAPIInference client and RAG retriever from config."""
+        llm_cfg = self.config.extras.get("llm", {})
+        self._llm_params = {
+            "lm_name": llm_cfg["lm_name"],
+            "generation_config": llm_cfg["generation_config"],
+        }
+        self._llm_client = LangChainAPIInference(
+            lm_name=self._llm_params["lm_name"],
+            generation_config=self._llm_params["generation_config"],
+        )
+        self._rag_retriever = None
+        rag_cfg = self.config.extras.get("rag", {})
+        if rag_cfg:
+            self._rag_retriever = self._build_rag_retriever(rag_cfg)
 
-    async def act(self, decision_payload: dict) -> Action:
-        if not self.llm_client or not self.agent_type:
-            return Action(
-                action_type="hold",
-                payload={},
-                source_id=self.identity,
+    def _build_rag_retriever(self, rag_cfg: dict):
+        """Build RAG retriever from config (override for specific retrieval logic)."""
+        return None
+
+    def _retrieve_rag_context(self, query: str) -> str:
+        """Retrieve relevant context from RAG system."""
+        if self._rag_retriever is None:
+            return "No RAG context available."
+        try:
+            results = self._rag_retriever.retrieve(query)
+            return "\n".join(str(r) for r in results)
+        except Exception:
+            return "RAG retrieval unavailable."
+
+    def __getstate__(self) -> dict:
+        state = self.__dict__.copy()
+        state.pop("_llm_client", None)
+        state.pop("_rag_retriever", None)
+        return state
+
+    def __setstate__(self, state: dict) -> None:
+        self.__dict__.update(state)
+        self._rag_retriever = None
+        if hasattr(self, "_llm_params"):
+            self._llm_client = LangChainAPIInference(
+                lm_name=self._llm_params["lm_name"],
+                generation_config=self._llm_params["generation_config"],
             )
 
-        system_prompt = get_prompt(self.agent_type)
-        user_prompt = format_user_prompt(
-            price=self.state.custom_state["price"],
-            fundamental=self.state.custom_state["fundamental"],
-            deviation=self.state.custom_state["deviation"],
-            cash=self.state.custom_state["cash"],
-            position=self.state.custom_state["position"],
-            round_num=self.state.custom_state["round"],
+    async def decide(self) -> dict:
+        """Retrieve RAG context, call LLM, parse decision."""
+        from examples.GamblerFallacy.Rag.prompts import RAG_USER_TEMPLATE
+        from masim.utils.prompt_loader import load_prompt
+
+        system_msg = load_prompt(self._system_prompt_path)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
+        portfolio_value = cash + position * price
+
+        rag_query = (
+            f"gambler fallacy streak trading price {price:.2f} "
+            f"fundamental {fundamental:.2f} deviation {deviation:+.2%}"
+        )
+        rag_context = self._retrieve_rag_context(rag_query)
+
+        user_msg = RAG_USER_TEMPLATE.format(
+            rag_context=rag_context,
+            round=self.state.custom_state["round"],
+            price=price,
+            fundamental=fundamental,
+            deviation=deviation,
+            cash=cash,
+            position=position,
+            portfolio_value=portfolio_value,
         )
 
         try:
-            response = await self.llm_client.chat(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-            )
-            decision = self._parse_decision(response)
+            infer_input = InferInput(system_msg=system_msg, user_msg=user_msg)
+            response = self._llm_client.run([infer_input]).outputs[0].response
+            decision = parse_llm_response_with_thinking(response)
         except Exception:
             decision = {"action": "hold", "quantity": 0}
 
         action = decision.get("action", "hold")
-        quantity = decision.get("quantity", 0)
+        quantity = int(decision.get("quantity", 0))
+        price_val = self.state.custom_state["price"]
 
         if action == "buy":
-            price = self.state.custom_state["price"]
-            cash = self.state.custom_state["cash"]
-            max_qty = int(cash / price) if price > 0 else 0
-            quantity = min(quantity, max_qty)
+            max_qty = int(cash / price_val) if price_val > 0 else 0
+            quantity = min(quantity, max_qty, 1000)
         elif action == "sell":
-            position = self.state.custom_state["position"]
-            quantity = min(quantity, max(position, 0))
+            quantity = min(quantity, max(position, 0), 1000)
+        else:
+            quantity = 0
 
         quantity = max(0, quantity)
-        # Max order size
-        quantity = min(quantity, 1000)
+        return {"action": action, "quantity": quantity}
+
+    async def act(self, decision_payload: dict) -> Action:
+        """Update portfolio and send order."""
+        action = decision_payload.get("action", "hold")
+        quantity = decision_payload.get("quantity", 0)
+        price = self.state.custom_state["price"]
 
         if action == "buy" and quantity > 0:
-            price = self.state.custom_state["price"]
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
         elif action == "sell" and quantity > 0:
-            price = self.state.custom_state["price"]
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
@@ -118,504 +157,51 @@ class StreakReversalTrader(GeneralPlayer):
             "from": self.identity,
             "action": action,
             "quantity": quantity,
-            "agent_type": self.agent_type,
+            "agent_type": self.__class__.__name__,
         }
-
         return Action(
             action_type="order",
             payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
             source_id=self.identity,
         )
 
-    def _parse_decision(self, response: str) -> dict:
-        """Parse LLM response into trading decision."""
-        try:
-            json_match = re.search(r'\{.*\}', response, re.DOTALL)
-            if json_match:
-                return json.loads(json_match.group())
-        except (json.JSONDecodeError, AttributeError):
-            pass
-        return {"action": "hold", "quantity": 0}
-
-
-class HotHandTrader(GeneralPlayer):
-    """
-    LLM-driven HotHandTrader.
-
-    Believes winning streaks will continue, over-betting on recent winners
-
-    Theoretical Basis: Hot hand fallacy (Gilovich et al., 1985)
-    Market Role: destabilizing
-    """
-    def __init__(self, config=None):
-        super().__init__(config)
-        self.llm_client = None
-        self.agent_type = ""
-
-    async def initialize(self) -> None:
-        await super().initialize()
-        extras = self.config.extras
-        llm_config = extras["llm"]
-        self.llm_client = LLMClient(
-            model=llm_config["model"],
-            api_key=llm_config["api_key"],
-            base_url=llm_config["base_url"],
-        )
-        self.agent_type = extras["agent_type"]
-
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
-
-        if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
-
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
-
-    async def decide(self) -> dict:
-        return {}
-
-    async def act(self, decision_payload: dict) -> Action:
-        if not self.llm_client or not self.agent_type:
-            return Action(
-                action_type="hold",
-                payload={},
-                source_id=self.identity,
-            )
-
-        system_prompt = get_prompt(self.agent_type)
-        user_prompt = format_user_prompt(
-            price=self.state.custom_state["price"],
-            fundamental=self.state.custom_state["fundamental"],
-            deviation=self.state.custom_state["deviation"],
-            cash=self.state.custom_state["cash"],
-            position=self.state.custom_state["position"],
-            round_num=self.state.custom_state["round"],
-        )
-
-        try:
-            response = await self.llm_client.chat(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-            )
-            decision = self._parse_decision(response)
-        except Exception:
-            decision = {"action": "hold", "quantity": 0}
-
-        action = decision.get("action", "hold")
-        quantity = decision.get("quantity", 0)
-
-        if action == "buy":
-            price = self.state.custom_state["price"]
-            cash = self.state.custom_state["cash"]
-            max_qty = int(cash / price) if price > 0 else 0
-            quantity = min(quantity, max_qty)
-        elif action == "sell":
-            position = self.state.custom_state["position"]
-            quantity = min(quantity, max(position, 0))
-
-        quantity = max(0, quantity)
-        # Max order size
-        quantity = min(quantity, 1000)
-
-        if action == "buy" and quantity > 0:
-            price = self.state.custom_state["price"]
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            price = self.state.custom_state["price"]
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
-
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.agent_type,
-        }
-
-        return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
-        )
-
-    def _parse_decision(self, response: str) -> dict:
-        """Parse LLM response into trading decision."""
-        try:
-            json_match = re.search(r'\{.*\}', response, re.DOTALL)
-            if json_match:
-                return json.loads(json_match.group())
-        except (json.JSONDecodeError, AttributeError):
-            pass
-        return {"action": "hold", "quantity": 0}
-
-
-class IndependentAssessor(GeneralPlayer):
-    """
-    LLM-driven IndependentAssessor.
-
-    Correctly treats each price change as independent, no streak bias
-
-    Theoretical Basis: Independence of sequential events (Rabin, 2002 baseline)
-    Market Role: stabilizing
-    """
-    def __init__(self, config=None):
-        super().__init__(config)
-        self.llm_client = None
-        self.agent_type = ""
-
-    async def initialize(self) -> None:
-        await super().initialize()
-        extras = self.config.extras
-        llm_config = extras["llm"]
-        self.llm_client = LLMClient(
-            model=llm_config["model"],
-            api_key=llm_config["api_key"],
-            base_url=llm_config["base_url"],
-        )
-        self.agent_type = extras["agent_type"]
-
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
-
-        if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
-
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
-
-    async def decide(self) -> dict:
-        return {}
-
-    async def act(self, decision_payload: dict) -> Action:
-        if not self.llm_client or not self.agent_type:
-            return Action(
-                action_type="hold",
-                payload={},
-                source_id=self.identity,
-            )
-
-        system_prompt = get_prompt(self.agent_type)
-        user_prompt = format_user_prompt(
-            price=self.state.custom_state["price"],
-            fundamental=self.state.custom_state["fundamental"],
-            deviation=self.state.custom_state["deviation"],
-            cash=self.state.custom_state["cash"],
-            position=self.state.custom_state["position"],
-            round_num=self.state.custom_state["round"],
-        )
-
-        try:
-            response = await self.llm_client.chat(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-            )
-            decision = self._parse_decision(response)
-        except Exception:
-            decision = {"action": "hold", "quantity": 0}
-
-        action = decision.get("action", "hold")
-        quantity = decision.get("quantity", 0)
-
-        if action == "buy":
-            price = self.state.custom_state["price"]
-            cash = self.state.custom_state["cash"]
-            max_qty = int(cash / price) if price > 0 else 0
-            quantity = min(quantity, max_qty)
-        elif action == "sell":
-            position = self.state.custom_state["position"]
-            quantity = min(quantity, max(position, 0))
-
-        quantity = max(0, quantity)
-        # Max order size
-        quantity = min(quantity, 1000)
-
-        if action == "buy" and quantity > 0:
-            price = self.state.custom_state["price"]
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            price = self.state.custom_state["price"]
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
-
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.agent_type,
-        }
-
-        return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
-        )
-
-    def _parse_decision(self, response: str) -> dict:
-        """Parse LLM response into trading decision."""
-        try:
-            json_match = re.search(r'\{.*\}', response, re.DOTALL)
-            if json_match:
-                return json.loads(json_match.group())
-        except (json.JSONDecodeError, AttributeError):
-            pass
-        return {"action": "hold", "quantity": 0}
-
-
-class Arbitrageur(GeneralPlayer):
-    """
-    LLM-driven Arbitrageur.
-
-    Exploits mispricing caused by streak-based traders
-
-    Theoretical Basis: Limits to arbitrage (Shleifer & Vishny, 1997)
-    Market Role: stabilizing
-    """
-    def __init__(self, config=None):
-        super().__init__(config)
-        self.llm_client = None
-        self.agent_type = ""
-
-    async def initialize(self) -> None:
-        await super().initialize()
-        extras = self.config.extras
-        llm_config = extras["llm"]
-        self.llm_client = LLMClient(
-            model=llm_config["model"],
-            api_key=llm_config["api_key"],
-            base_url=llm_config["base_url"],
-        )
-        self.agent_type = extras["agent_type"]
-
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
-
-        if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
-
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
-
-    async def decide(self) -> dict:
-        return {}
-
-    async def act(self, decision_payload: dict) -> Action:
-        if not self.llm_client or not self.agent_type:
-            return Action(
-                action_type="hold",
-                payload={},
-                source_id=self.identity,
-            )
-
-        system_prompt = get_prompt(self.agent_type)
-        user_prompt = format_user_prompt(
-            price=self.state.custom_state["price"],
-            fundamental=self.state.custom_state["fundamental"],
-            deviation=self.state.custom_state["deviation"],
-            cash=self.state.custom_state["cash"],
-            position=self.state.custom_state["position"],
-            round_num=self.state.custom_state["round"],
-        )
-
-        try:
-            response = await self.llm_client.chat(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-            )
-            decision = self._parse_decision(response)
-        except Exception:
-            decision = {"action": "hold", "quantity": 0}
-
-        action = decision.get("action", "hold")
-        quantity = decision.get("quantity", 0)
-
-        if action == "buy":
-            price = self.state.custom_state["price"]
-            cash = self.state.custom_state["cash"]
-            max_qty = int(cash / price) if price > 0 else 0
-            quantity = min(quantity, max_qty)
-        elif action == "sell":
-            position = self.state.custom_state["position"]
-            quantity = min(quantity, max(position, 0))
-
-        quantity = max(0, quantity)
-        # Max order size
-        quantity = min(quantity, 1000)
-
-        if action == "buy" and quantity > 0:
-            price = self.state.custom_state["price"]
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            price = self.state.custom_state["price"]
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
-
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.agent_type,
-        }
-
-        return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
-        )
-
-    def _parse_decision(self, response: str) -> dict:
-        """Parse LLM response into trading decision."""
-        try:
-            json_match = re.search(r'\{.*\}', response, re.DOTALL)
-            if json_match:
-                return json.loads(json_match.group())
-        except (json.JSONDecodeError, AttributeError):
-            pass
-        return {"action": "hold", "quantity": 0}
-
-
-class NoiseTrader(GeneralPlayer):
-    """
-    LLM-driven NoiseTrader.
-
-    Random uninformed trader providing baseline liquidity
-
-    Theoretical Basis: Noise trader model (Black, 1986)
-    Market Role: neutral
-    """
-    def __init__(self, config=None):
-        super().__init__(config)
-        self.llm_client = None
-        self.agent_type = ""
-
-    async def initialize(self) -> None:
-        await super().initialize()
-        extras = self.config.extras
-        llm_config = extras["llm"]
-        self.llm_client = LLMClient(
-            model=llm_config["model"],
-            api_key=llm_config["api_key"],
-            base_url=llm_config["base_url"],
-        )
-        self.agent_type = extras["agent_type"]
-
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
-
-        if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
-
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
-
-    async def decide(self) -> dict:
-        return {}
-
-    async def act(self, decision_payload: dict) -> Action:
-        if not self.llm_client or not self.agent_type:
-            return Action(
-                action_type="hold",
-                payload={},
-                source_id=self.identity,
-            )
-
-        system_prompt = get_prompt(self.agent_type)
-        user_prompt = format_user_prompt(
-            price=self.state.custom_state["price"],
-            fundamental=self.state.custom_state["fundamental"],
-            deviation=self.state.custom_state["deviation"],
-            cash=self.state.custom_state["cash"],
-            position=self.state.custom_state["position"],
-            round_num=self.state.custom_state["round"],
-        )
-
-        try:
-            response = await self.llm_client.chat(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-            )
-            decision = self._parse_decision(response)
-        except Exception:
-            decision = {"action": "hold", "quantity": 0}
-
-        action = decision.get("action", "hold")
-        quantity = decision.get("quantity", 0)
-
-        if action == "buy":
-            price = self.state.custom_state["price"]
-            cash = self.state.custom_state["cash"]
-            max_qty = int(cash / price) if price > 0 else 0
-            quantity = min(quantity, max_qty)
-        elif action == "sell":
-            position = self.state.custom_state["position"]
-            quantity = min(quantity, max(position, 0))
-
-        quantity = max(0, quantity)
-        # Max order size
-        quantity = min(quantity, 1000)
-
-        if action == "buy" and quantity > 0:
-            price = self.state.custom_state["price"]
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            price = self.state.custom_state["price"]
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
-
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.agent_type,
-        }
-
-        return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
-        )
-
-    def _parse_decision(self, response: str) -> dict:
-        """Parse LLM response into trading decision."""
-        try:
-            json_match = re.search(r'\{.*\}', response, re.DOTALL)
-            if json_match:
-                return json.loads(json_match.group())
-        except (json.JSONDecodeError, AttributeError):
-            pass
-        return {"action": "hold", "quantity": 0}
-
-
-__all__ = ["Market", "StreakReversalTrader, HotHandTrader, IndependentAssessor, Arbitrageur, NoiseTrader"]
+
+class RagLLMStreakReversalTrader(RagLLMInvestor):
+    """RAG-augmented StreakReversalTrader."""
+
+    _system_prompt_path = "examples.GamblerFallacy.Rag.prompts:RAGLLM_STREAK_REVERSAL_TRADER_SYS"
+
+
+class RagLLMHotHandTrader(RagLLMInvestor):
+    """RAG-augmented HotHandTrader."""
+
+    _system_prompt_path = "examples.GamblerFallacy.Rag.prompts:RAGLLM_HOT_HAND_TRADER_SYS"
+
+
+class RagLLMIndependentAssessor(RagLLMInvestor):
+    """RAG-augmented IndependentAssessor."""
+
+    _system_prompt_path = "examples.GamblerFallacy.Rag.prompts:RAGLLM_INDEPENDENT_ASSESSOR_SYS"
+
+
+class RagLLMArbitrageur(RagLLMInvestor):
+    """RAG-augmented Arbitrageur."""
+
+    _system_prompt_path = "examples.GamblerFallacy.Rag.prompts:RAGLLM_ARBITRAGEUR_SYS"
+
+
+class RagLLMNoiseTrader(RagLLMInvestor):
+    """RAG-augmented NoiseTrader."""
+
+    _system_prompt_path = "examples.GamblerFallacy.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
+
+
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMStreakReversalTrader",
+    "RagLLMHotHandTrader",
+    "RagLLMIndependentAssessor",
+    "RagLLMArbitrageur",
+    "RagLLMNoiseTrader",
+]

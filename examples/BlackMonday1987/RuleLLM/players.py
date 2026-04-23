@@ -1,215 +1,206 @@
+"""BlackMonday1987 RuleLLM Simulation — LLM agents with explicit numerical trading rules."""
+
+from __future__ import annotations
+
+import importlib
 import logging
+import os
+import sys
+from typing import Any, Dict, List, Optional
 
-"""BlackMonday1987 RuleLLM Simulation
+from dotenv import load_dotenv
 
-October 19, 1987 stock market crash - Dow fell 22.6% in one day
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-Design:
-- Market: Rule-based (same as Rule variant)
-- Investors: Hybrid rule+LLM with personas from prompts.py
-"""
-
-import json
-from typing import Any, Dict, Optional
-
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from masim.utils.llm_client import LLMClient
+from masim.utils.history import HistoryBuffer
 
-from examples.BlackMonday1987.RuleLLM.prompts import format_user_prompt, get_prompt
-from examples.BlackMonday1987.Rule.players import Market
+from examples.llm_utils import parse_llm_response_with_thinking
+from examples.BlackMonday1987.Rule.players import Market  # noqa: F401
 
-logger = logging.getLogger("BlackMonday1987.RuleLLM")
+logger = logging.getLogger(__name__)
 
 
-class LLMInvestor(GeneralPlayer):
-    """Base class for LLM-driven investors."""
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.llm_client = None
-        self.agent_type = ""
-    
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
-        
+def load_prompt(prompt_path: str) -> str:
+    """Load a prompt constant from 'module:VAR' path."""
+    module_path, var_name = prompt_path.rsplit(":", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, var_name)
+
+
+class RuleLLMInvestor(GeneralPlayer):
+    """Base RuleLLM investor for BlackMonday1987."""
+
+    _system_prompt_path: str = ""
+
+    async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
-            self._initialize_investor_state()
-        
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
-    
-    def _initialize_investor_state(self) -> None:
+            await self._initialize_agent()
+
+        self.state.custom_state["round"] = observation.round
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                data = inb.payload
+                if isinstance(data, dict) and "price" in data:
+                    self.state.custom_state["market_data"] = data
+                    self.state.custom_state["price_history"].append(data["price"])
+
+    async def _initialize_agent(self) -> None:
         extras = self.config.extras
-        self.state.custom_state["cash"] = extras["initial_cash"]
-        self.state.custom_state["position"] = extras["initial_position"]
-        
-        llm_config = extras["llm"]
-        self.llm_client = LLMClient(
-            model=llm_config["model"],
-            api_key=llm_config.get("api_key"),
-            base_url=llm_config.get("base_url"),
+        self.state.custom_state["cash"] = float(extras["initial_cash"])
+        self.state.custom_state["position"] = int(extras["initial_position"])
+        self.state.custom_state["price_history"] = []
+        self.state.custom_state["market_data"] = {}
+        self.state.custom_state["history_buffer"] = HistoryBuffer(
+            folder=f"BlackMonday1987/RuleLLM/{self.__class__.__name__}", entry_limit=200
         )
-        self.agent_type = extras["agent_type"]
-    
-    async def step(self):
-        if not self.llm_client or not self.agent_type:
-            return Action(
-                    action_type="hold",
-                    payload={},
-                    source_id=self.identity,
-                )
-        
-        system_prompt = get_prompt(self.agent_type)
-        if not system_prompt:
-            return Action(
-                    action_type="hold",
-                    payload={},
-                    source_id=self.identity,
-                )
-        
-        user_prompt = self._format_user_prompt()
-        
-        try:
-            response = await self.llm_client.generate(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                temperature=0.3,
-                max_tokens=500,
+        load_dotenv()
+        llm_cfg = extras["llm"]
+        self.state.custom_state["llm_params"] = llm_cfg
+        self.state.custom_state["llm_client"] = LangChainAPIInference(
+            lm_name=llm_cfg["model"],
+            generation_config={
+                "temperature": llm_cfg.get("temperature", 0.3),
+                "max_tokens": llm_cfg.get("max_tokens", 512),
+            },
+        )
+
+    def __getstate__(self) -> Dict:
+        state = self.__dict__.copy()
+        if hasattr(self, "state") and hasattr(self.state, "custom_state"):
+            state["state"].custom_state.pop("llm_client", None)
+        return state
+
+    def __setstate__(self, state: Dict) -> None:
+        self.__dict__.update(state)
+        cs = self.state.custom_state
+        if "llm_params" in cs and "llm_client" not in cs:
+            llm_cfg = cs["llm_params"]
+            cs["llm_client"] = LangChainAPIInference(
+                lm_name=llm_cfg["model"],
+                generation_config={
+                    "temperature": llm_cfg.get("temperature", 0.3),
+                    "max_tokens": llm_cfg.get("max_tokens", 512),
+                },
             )
-            
-            raw_decision = self._parse_decision(response)
-            decision = self._validate_decision(raw_decision)
-            self._update_portfolio(decision)
-            
-            order = {
-                "type": "order",
-                "action": decision["action"],
-                "quantity": decision["quantity"],
-                "agent_type": self.agent_type,
-            }
-            return Action(
-                    action_type="order",
-                    payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-                    source_id=self.identity,
-                )
-        except Exception as e:
-            logger.error("LLM call failed: %%s", e)
-            return Action(
-                    action_type="hold",
-                    payload={},
-                    source_id=self.identity,
-                )
-    
-    def _format_user_prompt(self) -> str:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
+
+    async def decide(self) -> Dict:
+        market_data = self.state.custom_state.get("market_data", {})
+        price = market_data.get("price", 100.0)
+        fundamental = market_data.get("fundamental", 100.0)
+        deviation = market_data.get("deviation", 0.0)
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        round_num = self.state.custom_state["round"]
-        
-        return format_user_prompt(
+        portfolio_value = cash + position * price
+        round_num = self.state.custom_state.get("round", 0)
+
+        system_prompt = load_prompt(self._system_prompt_path)
+        user_template = load_prompt(
+            "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        )
+        user_prompt = user_template.format(
+            round=round_num,
             price=price,
             fundamental=fundamental,
             deviation=deviation,
             cash=cash,
             position=position,
-            round_num=round_num,
+            portfolio_value=portfolio_value,
         )
-    
-    def _parse_decision(self, response: str) -> dict:
-        try:
-            start = response.find("<decision>")
-            end = response.find("</decision>")
-            if start != -1 and end != -1:
-                json_str = response[start + 10:end].strip()
-                return json.loads(json_str)
-            start = response.find("{")
-            end = response.rfind("}")
-            if start != -1 and end != -1:
-                return json.loads(response[start:end + 1])
-        except json.JSONDecodeError:
-            pass
-        return {"action": "hold", "quantity": 0}
-    
-    def _validate_decision(self, decision: dict) -> dict:
-        action = decision.get("action", "hold")
-        quantity = decision.get("quantity", 0)
-        
-        valid_actions = ["buy", "sell", "hold", "market_making"]
-        if action not in valid_actions:
-            action = "hold"
-        
-        try:
-            quantity = int(quantity)
-        except (ValueError, TypeError):
-            quantity = 0
-        quantity = max(0, min(quantity, 5000))
-        
-        if action == "buy":
-            price = self.state.custom_state["price"]
-            cash = self.state.custom_state["cash"]
-            max_affordable = int(cash / price) if price > 0 else 0
-            quantity = min(quantity, max_affordable)
-        
-        if action == "sell":
-            position = self.state.custom_state["position"]
-            quantity = min(quantity, position)
-        
-        return {"action": action, "quantity": quantity}
-    
-    def _update_portfolio(self, decision: dict) -> None:
-        action = decision.get("action", "hold")
-        quantity = decision.get("quantity", 0)
-        price = self.state.custom_state["price"]
-        
-        if action == "buy" and quantity > 0:
+
+        llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
+        action_str, quantity = "hold", 0
+        for attempt in range(3):
+            try:
+                infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
+                result = llm_client.run([infer_input])
+                response = result.outputs[0].response
+                parsed = parse_llm_response_with_thinking(response)
+                action_str = parsed.get("action", "hold")
+                quantity = int(parsed.get("quantity", 0))
+                if action_str not in ("buy", "sell", "hold"):
+                    action_str = "hold"
+                quantity = max(0, quantity)
+                if action_str == "buy":
+                    max_buy = int(cash / price) if price > 0 else 0
+                    quantity = min(quantity, max_buy)
+                elif action_str == "sell":
+                    quantity = min(quantity, max(position, 0))
+                break
+            except Exception as exc:  # pylint: disable=broad-except
+                logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
+                if attempt == 2:
+                    action_str, quantity = "hold", 0
+
+        if action_str == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
+        elif action_str == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
+        order = {"action": action_str, "quantity": quantity}
+        return {
+            "action": action_str,
+            "quantity": quantity,
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
+        }
 
-class LLMPortfolioInsurer(LLMInvestor):
-    """LLM-driven PortfolioInsurer."""
-    
-    def _initialize_investor_state(self) -> None:
-        super()._initialize_investor_state()
-        self.agent_type = "portfolio_insurer"
-
-class LLMIndexArbitrageur(LLMInvestor):
-    """LLM-driven IndexArbitrageur."""
-    
-    def _initialize_investor_state(self) -> None:
-        super()._initialize_investor_state()
-        self.agent_type = "index_arbitrageur"
-
-class LLMProgramTrader(LLMInvestor):
-    """LLM-driven ProgramTrader."""
-    
-    def _initialize_investor_state(self) -> None:
-        super()._initialize_investor_state()
-        self.agent_type = "program_trader"
-
-class LLMValueInvestor(LLMInvestor):
-    """LLM-driven ValueInvestor."""
-    
-    def _initialize_investor_state(self) -> None:
-        super()._initialize_investor_state()
-        self.agent_type = "value_investor"
-
-class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven NoiseTrader."""
-    
-    def _initialize_investor_state(self) -> None:
-        super()._initialize_investor_state()
-        self.agent_type = "noise_trader"
+    async def act(self, decision_payload: Dict) -> Action:
+        return Action(
+            action_type="order", payload=decision_payload, source_id=self.identity
+        )
 
 
-__all__ = ["Market", "LLMInvestor", "LLMPortfolioInsurer", "LLMIndexArbitrageur", "LLMProgramTrader", "LLMValueInvestor", "LLMNoiseTrader"]
+class RuleLLMPortfolioInsurer(RuleLLMInvestor):
+    """RuleLLM-driven portfolio insurer."""
+
+    _system_prompt_path = (
+        "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_PORTFOLIO_INSURER_SYS"
+    )
+
+
+class RuleLLMIndexArbitrageur(RuleLLMInvestor):
+    """RuleLLM-driven index arbitrageur."""
+
+    _system_prompt_path = (
+        "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_INDEX_ARBITRAGEUR_SYS"
+    )
+
+
+class RuleLLMProgramTrader(RuleLLMInvestor):
+    """RuleLLM-driven program trader."""
+
+    _system_prompt_path = (
+        "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_PROGRAM_TRADER_SYS"
+    )
+
+
+class RuleLLMValueInvestor(RuleLLMInvestor):
+    """RuleLLM-driven value investor."""
+
+    _system_prompt_path = (
+        "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_VALUE_INVESTOR_SYS"
+    )
+
+
+class RuleLLMNoiseTrader(RuleLLMInvestor):
+    """RuleLLM-driven noise trader."""
+
+    _system_prompt_path = (
+        "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
+    )
+
+
+__all__ = [
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMPortfolioInsurer",
+    "RuleLLMIndexArbitrageur",
+    "RuleLLMProgramTrader",
+    "RuleLLMValueInvestor",
+    "RuleLLMNoiseTrader",
+]

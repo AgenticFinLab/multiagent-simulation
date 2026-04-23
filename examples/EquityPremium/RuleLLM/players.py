@@ -486,3 +486,14 @@ class RuleLLMRationalOptimizer(RuleLLMInvestor):
     """Hybrid: NoiseTrader rules + LLM reasoning."""
 
     pass
+
+
+__all__ = [
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMMyopicLossAverse",
+    "RuleLLMLongTermInvestor",
+    "RuleLLMInstitutionalInvestor",
+    "RuleLLMRiskAverseSaver",
+    "RuleLLMRationalOptimizer",
+]

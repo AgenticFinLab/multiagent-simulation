@@ -1,17 +1,21 @@
 """ConfirmationBias RuleLLM Variant"""
 
 from examples.ConfirmationBias.RuleLLM.players import (
-    BeliefAnchor,
-    SelectiveScanner,
-    BalancedAnalyst,
-    ContrarianTrader,
-    NoiseTrader,
+    Market,
+    RuleLLMInvestor,
+    RuleLLMBeliefAnchor,
+    RuleLLMSelectiveScanner,
+    RuleLLMBalancedAnalyst,
+    RuleLLMContrarianTrader,
+    RuleLLMNoiseTrader,
 )
 
 __all__ = [
-    "BeliefAnchor",
-    "SelectiveScanner",
-    "BalancedAnalyst",
-    "ContrarianTrader",
-    "NoiseTrader",
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMBeliefAnchor",
+    "RuleLLMSelectiveScanner",
+    "RuleLLMBalancedAnalyst",
+    "RuleLLMContrarianTrader",
+    "RuleLLMNoiseTrader",
 ]

@@ -1,6 +1,6 @@
-"""FlashCrashLLM - LLM-based Multi-Agent Market Simulation"""
+"""FlashCrash LLM - LLM-based Multi-Agent Market Simulation"""
 
-from .players import (
+from examples.FlashCrash.LLM.players import (
     Market,
     LLMInvestor,
     LLMHighFrequencyTrader,

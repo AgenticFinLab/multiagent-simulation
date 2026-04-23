@@ -1,6 +1,6 @@
-"""EquityPremiumLLM - LLM-based Multi-Agent Asset Allocation Simulation"""
+"""EquityPremium LLM Variant"""
 
-from .players import (
+from examples.EquityPremium.LLM.players import (
     Market,
     LLMInvestor,
     LLMMyopicLossAverse,

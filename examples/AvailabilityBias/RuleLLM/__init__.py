@@ -1,17 +1,21 @@
 """AvailabilityBias RuleLLM Variant"""
 
 from examples.AvailabilityBias.RuleLLM.players import (
-    RecentEventOverweighter,
-    MediaInfluencedTrader,
-    SystematicAnalyst,
-    ValueTrader,
-    NoiseTrader,
+    Market,
+    RuleLLMInvestor,
+    RuleLLMRecentEventOverweighter,
+    RuleLLMMediaInfluencedTrader,
+    RuleLLMSystematicAnalyst,
+    RuleLLMValueTrader,
+    RuleLLMNoiseTrader,
 )
 
 __all__ = [
-    "RecentEventOverweighter",
-    "MediaInfluencedTrader",
-    "SystematicAnalyst",
-    "ValueTrader",
-    "NoiseTrader",
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMRecentEventOverweighter",
+    "RuleLLMMediaInfluencedTrader",
+    "RuleLLMSystematicAnalyst",
+    "RuleLLMValueTrader",
+    "RuleLLMNoiseTrader",
 ]

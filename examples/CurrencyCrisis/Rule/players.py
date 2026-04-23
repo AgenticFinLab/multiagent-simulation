@@ -1,443 +1,474 @@
-import random
-import logging
-import re
-
 """CurrencyCrisis Rule-Based Simulation
 
-Self-fulfilling speculative currency attacks where market expectations of devaluation trigger the crisis itself
+Self-fulfilling speculative currency attacks where market expectations of
+devaluation trigger the crisis itself.
 
 Theoretical Foundation:
 - Obstfeld (1996): Models of currency crises with self-fulfilling features
 - Krugman (1979): A model of balance-of-payments crises
 - Morris & Shin (1998): Unique equilibrium in a model of self-fulfilling currency attacks
 
-Key Dynamics:
-- SpeculativeAttacker: Builds short positions in vulnerable currency, profiting from forced devaluation
-- SelfFulfillingTrader: Sells currency based on expectation that others will sell, making the crisis inevitable
-- CentralBankDefender: Defends currency peg using foreign reserves and interest rate adjustments
-- FundamentalHedger: Hedges based on fundamental analysis rather than speculative attacks
-- NoiseTrader: Random uninformed trader providing baseline liquidity
-
-Parameters from config (see configs/CurrencyCrisis/Rule/players.yml):
+Agents:
+- Market: Price formation via net-demand + mean-reversion
+- SpeculativeAttacker: Builds short positions in vulnerable currency (destabilizing)
+- SelfFulfillingTrader: Sells based on expectation others will sell (destabilizing)
+- CentralBankDefender: Defends currency peg using reserves (stabilizing)
+- FundamentalHedger: Hedges based on fundamentals, not speculation (stabilizing)
+- NoiseTrader: Random uninformed trader providing baseline liquidity (neutral)
 """
 
+import logging
+import random
 from typing import Any, Dict, List, Optional
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
+from masim.utils.history import HistoryBuffer
 
-logger = logging.getLogger("CurrencyCrisis")
+logger = logging.getLogger(__name__)
 
 
 class Market(GeneralPlayer):
-    """
-    Market agent for CurrencyCrisis simulation.
+    """Currency market — clears orders and broadcasts price each round."""
 
-    Price Formation Model:
-        P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
-    """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
+    async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "price" not in self.state.custom_state:
-            self._initialize_market_state()
-        orders = self._extract_orders(observation)
-        market_result = self._clear_market(orders)
-        self._update_state(market_result)
-        self._log_market_state()
+            extras = self.config.extras
+            self.state.custom_state["price"] = float(extras["initial_price"])
+            self.state.custom_state["fundamental"] = float(extras["fundamental_value"])
+            self.state.custom_state["price_impact"] = float(extras["price_impact"])
+            self.state.custom_state["mean_reversion"] = float(extras["mean_reversion"])
+            self.state.custom_state["noise_std"] = float(extras["noise_std"])
+            self.state.custom_state["price_history"] = []
+            self.state.custom_state["history_buffer"] = HistoryBuffer(
+                folder="CurrencyCrisis/Market", entry_limit=200
+            )
 
-    def _initialize_market_state(self) -> None:
-        extras = self.config.extras
-        self.state.custom_state["price"] = extras["initial_price"]
-        self.state.custom_state["fundamental"] = extras["fundamental_value"]
-        self.state.custom_state["price_history"] = []
-        self.state.custom_state["volume_history"] = []
-        self.state.custom_state["price_impact"] = extras["price_impact"]
-        self.state.custom_state["mean_reversion"] = extras["mean_reversion"]
-        self.state.custom_state["noise_std"] = extras["noise_std"]
+        self.state.custom_state["round"] = observation.round
+        orders: List[Dict] = []
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                payload = inb.payload
+                if isinstance(payload, dict):
+                    orders.append(payload)
 
-    def _extract_orders(self, observation) -> list:
-        orders = []
-        for msg in observation.messages:
-            if msg.get("type") == "order":
-                orders.append({"agent_id": msg.get("from"), "action": msg.get("action"), "quantity": msg.get("quantity"), "agent_type": msg.get("agent_type")})
-        return orders
-
-    def _clear_market(self, orders: list) -> dict:
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        buy_orders = [o for o in orders if o["action"] == "buy"]
-        sell_orders = [o for o in orders if o["action"] == "sell"]
-        total_buy = sum(o["quantity"] for o in buy_orders)
-        total_sell = sum(o["quantity"] for o in sell_orders)
-        net_demand = total_buy - total_sell
-        price_impact = self.state.custom_state["price_impact"]
-        mean_reversion = self.state.custom_state["mean_reversion"]
-        noise_std = self.state.custom_state["noise_std"]
-        price_change = price_impact * net_demand
-        reversion = mean_reversion * (fundamental - price)
-        noise = random.gauss(0, noise_std)
-        new_price = price + price_change + reversion + noise
-        new_price = max(new_price, 0.01)
-        volume = min(total_buy, total_sell) + abs(net_demand) * 0.5
-        return {"price": new_price, "volume": volume, "net_demand": net_demand}
+        buy_vol = sum(o.get("quantity", 0) for o in orders if o.get("action") == "buy")
+        sell_vol = sum(
+            o.get("quantity", 0) for o in orders if o.get("action") == "sell"
+        )
+        net_demand = buy_vol - sell_vol
 
-    def _update_state(self, market_result: dict) -> None:
-        self.state.custom_state["price"] = market_result["price"]
-        self.state.custom_state["price_history"].append(market_result["price"])
-        self.state.custom_state["volume_history"].append(market_result["volume"])
+        price_change = self.state.custom_state["price_impact"] * net_demand
+        reversion = self.state.custom_state["mean_reversion"] * (fundamental - price)
+        noise = random.gauss(0, self.state.custom_state["noise_std"])
+        new_price = max(price + price_change + reversion + noise, 0.01)
+        self.state.custom_state["price"] = new_price
+        self.state.custom_state["price_history"].append(new_price)
 
-    def _log_market_state(self) -> None:
-        logger.debug("Round %d: price=%.2f", self.state.custom_state["round"], self.state.custom_state["price"])
+        deviation = (new_price - fundamental) / fundamental if fundamental > 0 else 0.0
+        self.state.custom_state["deviation"] = deviation
+        logger.debug(
+            "Round %d: price=%.4f deviation=%.4f",
+            observation.round,
+            new_price,
+            deviation,
+        )
 
-    async def step(self):
+    async def decide(self) -> Dict:
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        deviation = (price - fundamental) / fundamental if fundamental > 0 else 0
-        market_update = {"type": "market_update", "price": price, "fundamental": fundamental, "deviation": deviation, "round": self.state.custom_state["round"]}
+        deviation = self.state.custom_state["deviation"]
+        market_data = {
+            "price": price,
+            "fundamental": fundamental,
+            "deviation": deviation,
+            "round": self.state.custom_state["round"],
+        }
+        return {
+            "market_data": market_data,
+            "outbound_messages": [
+                {"payload": market_data, "content_type": "market_update"}
+            ],
+        }
+
+    async def act(self, decision_payload: Dict) -> Action:
         return Action(
             action_type="market_broadcast",
-            payload={"market_data": market_update, "outbound_messages": [{"payload": market_update, "content_type": "market_update"}]},
+            payload=decision_payload,
             source_id=self.identity,
         )
 
 
 class SpeculativeAttacker(GeneralPlayer):
-    """
-    Builds short positions in vulnerable currency, profiting from forced devaluation
+    """Builds short positions in vulnerable currency, profiting from forced devaluation.
 
-    Theoretical Basis: First-generation crisis model (Krugman, 1979)
-    Market Role: destabilizing
+    Theory: Krugman (1979) first-generation crisis model. Speculators attack when
+    reserves are insufficient to maintain the peg.
+    Role: destabilizing.
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
+    async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["cash"] = float(extras["initial_cash"])
+            self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["price_history"] = []
+            self.state.custom_state["history_buffer"] = HistoryBuffer(
+                folder="CurrencyCrisis/SpeculativeAttacker", entry_limit=200
+            )
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        self.state.custom_state["round"] = observation.round
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                data = inb.payload
+                if isinstance(data, dict) and "price" in data:
+                    self.state.custom_state["market_data"] = data
+                    self.state.custom_state["price_history"].append(data["price"])
 
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Builds short positions in vulnerable currency, profiting from forced devaluation
-        extras = self.config.extras
+    async def decide(self) -> Dict:
+        market_data = self.state.custom_state.get("market_data", {})
+        price = market_data.get("price", 1.0)
+        deviation = market_data.get("deviation", 0.0)
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        attack_threshold = extras["attack_threshold"]
-        position_size = extras["position_size"]
+        extras = self.config.extras
+        attack_threshold = float(extras.get("attack_threshold", 0.02))
+        order_size = int(extras.get("order_size", 600))
 
-        if abs(deviation) > 0.02:
-            qty = min(800, int(abs(deviation) * 5000))
-            if deviation > 0:
-                buy_qty = min(qty, int(cash / price) if price > 0 else 0)
-                if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
-            else:
-                sell_qty = min(qty, max(position, 0))
-                if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+        action, quantity = "hold", 0
+        if deviation < -attack_threshold:
+            # Currency weak — attack by selling
+            qty = min(order_size, max(position, 0))
+            if qty > 0:
+                action, quantity = "sell", qty
+        elif deviation > attack_threshold:
+            # Currency recovered — cover short (buy)
+            qty = min(order_size, int(cash / price) if price > 0 else 0)
+            if qty > 0:
+                action, quantity = "buy", qty
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-
-        order = {
-            "type": "order",
-            "from": self.identity,
+        return {
             "action": action,
             "quantity": quantity,
-            "agent_type": self.__class__.__name__,
+            "outbound_messages": [
+                {
+                    "payload": {"action": action, "quantity": quantity},
+                    "content_type": "order",
+                }
+            ],
         }
 
+    async def act(self, decision_payload: Dict) -> Action:
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state.get("market_data", {}).get("price", 1.0)
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
         return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
+            action_type="order", payload=decision_payload, source_id=self.identity
         )
 
 
 class SelfFulfillingTrader(GeneralPlayer):
-    """
-    Sells currency based on expectation that others will sell, making the crisis inevitable
+    """Sells currency based on expectation that others will sell — making crisis inevitable.
 
-    Theoretical Basis: Second-generation crisis model (Obstfeld, 1996)
-    Market Role: destabilizing
+    Theory: Obstfeld (1996) second-generation model. Crises arise from self-fulfilling
+    expectations even when fundamentals are sound.
+    Role: destabilizing.
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
+    async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["cash"] = float(extras["initial_cash"])
+            self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["price_history"] = []
+            self.state.custom_state["history_buffer"] = HistoryBuffer(
+                folder="CurrencyCrisis/SelfFulfillingTrader", entry_limit=200
+            )
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        self.state.custom_state["round"] = observation.round
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                data = inb.payload
+                if isinstance(data, dict) and "price" in data:
+                    self.state.custom_state["market_data"] = data
+                    self.state.custom_state["price_history"].append(data["price"])
 
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Sells currency based on expectation that others will sell, making the crisis inevitable
-        extras = self.config.extras
+    async def decide(self) -> Dict:
+        market_data = self.state.custom_state.get("market_data", {})
+        price = market_data.get("price", 1.0)
+        deviation = market_data.get("deviation", 0.0)
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        contagion_sensitivity = extras["contagion_sensitivity"]
-        exit_threshold = extras["exit_threshold"]
+        extras = self.config.extras
+        contagion_threshold = float(extras.get("contagion_sensitivity", 0.01))
+        order_size = int(extras.get("order_size", 700))
 
-        if abs(deviation) > 0.02:
-            qty = min(800, int(abs(deviation) * 5000))
-            if deviation > 0:
-                buy_qty = min(qty, int(cash / price) if price > 0 else 0)
-                if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
-            else:
-                sell_qty = min(qty, max(position, 0))
-                if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+        action, quantity = "hold", 0
+        # Self-fulfilling: any negative deviation triggers selling
+        if deviation < -contagion_threshold:
+            qty = min(order_size, max(position, 0))
+            if qty > 0:
+                action, quantity = "sell", qty
+        elif deviation > contagion_threshold * 2:
+            qty = min(order_size // 2, int(cash / price) if price > 0 else 0)
+            if qty > 0:
+                action, quantity = "buy", qty
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-
-        order = {
-            "type": "order",
-            "from": self.identity,
+        return {
             "action": action,
             "quantity": quantity,
-            "agent_type": self.__class__.__name__,
+            "outbound_messages": [
+                {
+                    "payload": {"action": action, "quantity": quantity},
+                    "content_type": "order",
+                }
+            ],
         }
 
+    async def act(self, decision_payload: Dict) -> Action:
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state.get("market_data", {}).get("price", 1.0)
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
         return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
+            action_type="order", payload=decision_payload, source_id=self.identity
         )
 
 
 class CentralBankDefender(GeneralPlayer):
-    """
-    Defends currency peg using foreign reserves and interest rate adjustments
+    """Defends currency peg using foreign reserves and interest rate adjustments.
 
-    Theoretical Basis: Central bank defense mechanisms (Obstfeld, 1996)
-    Market Role: stabilizing
+    Theory: Central bank defense mechanisms (Obstfeld 1996). Intervenes by buying
+    the currency when it weakens.
+    Role: stabilizing.
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
+    async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["cash"] = float(extras["initial_cash"])
+            self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["price_history"] = []
+            self.state.custom_state["history_buffer"] = HistoryBuffer(
+                folder="CurrencyCrisis/CentralBankDefender", entry_limit=200
+            )
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        self.state.custom_state["round"] = observation.round
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                data = inb.payload
+                if isinstance(data, dict) and "price" in data:
+                    self.state.custom_state["market_data"] = data
+                    self.state.custom_state["price_history"].append(data["price"])
 
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Defends currency peg using foreign reserves and interest rate adjustments
-        extras = self.config.extras
+    async def decide(self) -> Dict:
+        market_data = self.state.custom_state.get("market_data", {})
+        price = market_data.get("price", 1.0)
+        deviation = market_data.get("deviation", 0.0)
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        reserve_level = extras["reserve_level"]
-        defense_threshold = extras["defense_threshold"]
+        extras = self.config.extras
+        defense_threshold = float(extras.get("defense_threshold", 0.05))
+        order_size = int(extras.get("order_size", 500))
 
-        if abs(deviation) > 0.05:
-            qty = min(500, int(abs(deviation) * 3000))
-            if deviation < 0:
-                buy_qty = min(qty, int(cash / price) if price > 0 else 0)
-                if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
-            else:
-                sell_qty = min(qty, max(position, 0))
-                if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+        action, quantity = "hold", 0
+        if deviation < -defense_threshold:
+            # Currency under attack — buy to defend
+            qty = min(order_size, int(cash / price) if price > 0 else 0)
+            if qty > 0:
+                action, quantity = "buy", qty
+        elif deviation > defense_threshold:
+            # Currency overvalued — sell reserves
+            qty = min(order_size, max(position, 0))
+            if qty > 0:
+                action, quantity = "sell", qty
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-
-        order = {
-            "type": "order",
-            "from": self.identity,
+        return {
             "action": action,
             "quantity": quantity,
-            "agent_type": self.__class__.__name__,
+            "outbound_messages": [
+                {
+                    "payload": {"action": action, "quantity": quantity},
+                    "content_type": "order",
+                }
+            ],
         }
 
+    async def act(self, decision_payload: Dict) -> Action:
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state.get("market_data", {}).get("price", 1.0)
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
         return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
+            action_type="order", payload=decision_payload, source_id=self.identity
         )
 
 
 class FundamentalHedger(GeneralPlayer):
-    """
-    Hedges based on fundamental analysis rather than speculative attacks
+    """Hedges based on fundamental analysis rather than speculative expectations.
 
-    Theoretical Basis: Fundamental currency valuation (Morris & Shin, 1998 baseline)
-    Market Role: stabilizing
+    Theory: Morris & Shin (1998) — fundamental analysis provides anchor against
+    self-fulfilling crises. Trades based on fundamental value, not crowd behavior.
+    Role: stabilizing.
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
+    async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["cash"] = float(extras["initial_cash"])
+            self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["price_history"] = []
+            self.state.custom_state["history_buffer"] = HistoryBuffer(
+                folder="CurrencyCrisis/FundamentalHedger", entry_limit=200
+            )
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        self.state.custom_state["round"] = observation.round
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                data = inb.payload
+                if isinstance(data, dict) and "price" in data:
+                    self.state.custom_state["market_data"] = data
+                    self.state.custom_state["price_history"].append(data["price"])
 
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Hedges based on fundamental analysis rather than speculative attacks
-        extras = self.config.extras
+    async def decide(self) -> Dict:
+        market_data = self.state.custom_state.get("market_data", {})
+        price = market_data.get("price", 1.0)
+        deviation = market_data.get("deviation", 0.0)
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        hedge_ratio = extras["hedge_ratio"]
-        position_size = extras["position_size"]
+        extras = self.config.extras
+        hedge_threshold = float(extras.get("hedge_ratio", 0.05))
+        order_size = int(extras.get("order_size", 400))
 
-        if abs(deviation) > 0.05:
-            qty = min(500, int(abs(deviation) * 3000))
-            if deviation < 0:
-                buy_qty = min(qty, int(cash / price) if price > 0 else 0)
-                if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
-            else:
-                sell_qty = min(qty, max(position, 0))
-                if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+        action, quantity = "hold", 0
+        if deviation < -hedge_threshold:
+            qty = min(order_size, int(cash / price) if price > 0 else 0)
+            if qty > 0:
+                action, quantity = "buy", qty
+        elif deviation > hedge_threshold:
+            qty = min(order_size, max(position, 0))
+            if qty > 0:
+                action, quantity = "sell", qty
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-
-        order = {
-            "type": "order",
-            "from": self.identity,
+        return {
             "action": action,
             "quantity": quantity,
-            "agent_type": self.__class__.__name__,
+            "outbound_messages": [
+                {
+                    "payload": {"action": action, "quantity": quantity},
+                    "content_type": "order",
+                }
+            ],
         }
 
+    async def act(self, decision_payload: Dict) -> Action:
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state.get("market_data", {}).get("price", 1.0)
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
         return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
+            action_type="order", payload=decision_payload, source_id=self.identity
         )
 
 
 class NoiseTrader(GeneralPlayer):
-    """
-    Random uninformed trader providing baseline liquidity
+    """Random uninformed trader providing baseline liquidity.
 
-    Theoretical Basis: Noise trader model (Black, 1986)
-    Market Role: neutral
+    Theory: Black (1986) noise trader model.
+    Role: neutral.
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
+    async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["cash"] = float(extras["initial_cash"])
+            self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["price_history"] = []
+            self.state.custom_state["history_buffer"] = HistoryBuffer(
+                folder="CurrencyCrisis/NoiseTrader", entry_limit=200
+            )
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        self.state.custom_state["round"] = observation.round
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                data = inb.payload
+                if isinstance(data, dict) and "price" in data:
+                    self.state.custom_state["market_data"] = data
+                    self.state.custom_state["price_history"].append(data["price"])
 
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Random uninformed trader providing baseline liquidity
-        extras = self.config.extras
+    async def decide(self) -> Dict:
+        market_data = self.state.custom_state.get("market_data", {})
+        price = market_data.get("price", 1.0)
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        trade_probability = extras["trade_probability"]
+        extras = self.config.extras
+        prob = float(extras["trade_probability"])
 
-        if random.random() < 0.3:
+        action, quantity = "hold", 0
+        if random.random() < prob:
             qty = random.randint(100, 500)
-            action = "buy" if random.random() > 0.5 else "sell"
-            if action == "buy":
+            side = "buy" if random.random() > 0.5 else "sell"
+            if side == "buy":
                 qty = min(qty, int(cash / price) if price > 0 else 0)
             else:
                 qty = min(qty, max(position, 0))
             if qty > 0:
-                return {"action": action, "quantity": qty}
-        return {"action": "hold", "quantity": 0}
+                action, quantity = side, qty
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-
-        order = {
-            "type": "order",
-            "from": self.identity,
+        return {
             "action": action,
             "quantity": quantity,
-            "agent_type": self.__class__.__name__,
+            "outbound_messages": [
+                {
+                    "payload": {"action": action, "quantity": quantity},
+                    "content_type": "order",
+                }
+            ],
         }
 
+    async def act(self, decision_payload: Dict) -> Action:
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state.get("market_data", {}).get("price", 1.0)
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
         return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
+            action_type="order", payload=decision_payload, source_id=self.identity
         )
 
 
-__all__ = ["Market, SpeculativeAttacker, SelfFulfillingTrader, CentralBankDefender, FundamentalHedger, NoiseTrader"]
+__all__ = [
+    "Market",
+    "SpeculativeAttacker",
+    "SelfFulfillingTrader",
+    "CentralBankDefender",
+    "FundamentalHedger",
+    "NoiseTrader",
+]

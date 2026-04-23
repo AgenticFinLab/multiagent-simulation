@@ -1,7 +1,21 @@
-"""FlashCrashRag — RAG-augmented hybrid Rule+LLM flash crash simulation.
+"""FlashCrash Rag - RAG-augmented hybrid Rule+LLM Flash Crash Simulation"""
 
-Three-way comparison:
-    FlashCrash        — pure rule-based
-    FlashCrashRuleLLM — rule-embedded LLM (persona + quantitative rules in prompt)
-    FlashCrashRag     — rule-embedded LLM + personal RAG library (retrieved context per decision)
-"""
+from examples.FlashCrash.Rag.players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMHighFrequencyTrader,
+    RagLLMMarketMaker,
+    RagLLMAlgorithmicTrader,
+    RagLLMStopLossTrader,
+    RagLLMFundamentalTrader,
+)
+
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMHighFrequencyTrader",
+    "RagLLMMarketMaker",
+    "RagLLMAlgorithmicTrader",
+    "RagLLMStopLossTrader",
+    "RagLLMFundamentalTrader",
+]

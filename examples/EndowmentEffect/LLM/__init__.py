@@ -1,17 +1,21 @@
 """EndowmentEffect LLM Variant"""
 
 from examples.EndowmentEffect.LLM.players import (
-    EndowedHolder,
-    StatusQuoSeller,
-    RationalArbitrageur,
-    NewBuyer,
-    NoiseTrader,
+    Market,
+    LLMInvestor,
+    LLMEndowedHolder,
+    LLMStatusQuoSeller,
+    LLMRationalArbitrageur,
+    LLMNewBuyer,
+    LLMNoiseTrader,
 )
 
 __all__ = [
-    "EndowedHolder",
-    "StatusQuoSeller",
-    "RationalArbitrageur",
-    "NewBuyer",
-    "NoiseTrader",
+    "Market",
+    "LLMInvestor",
+    "LLMEndowedHolder",
+    "LLMStatusQuoSeller",
+    "LLMRationalArbitrageur",
+    "LLMNewBuyer",
+    "LLMNoiseTrader",
 ]

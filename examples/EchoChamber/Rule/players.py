@@ -707,3 +707,13 @@ class PassiveFollower(BaseSocialAgent):
             **action,
             "outbound_messages": [{"payload": action, "content_type": "social_action"}],
         }
+
+
+__all__ = [
+    "OpinionEnvironment",
+    "Ideologue",
+    "Conformist",
+    "CriticalThinker",
+    "BridgeBuilder",
+    "PassiveFollower",
+]

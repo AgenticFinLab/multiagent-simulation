@@ -1,17 +1,19 @@
 """AsianFinancialCrisis RuleLLM Variant"""
 
 from examples.AsianFinancialCrisis.RuleLLM.players import (
-    HotMoneyFunder,
-    ContagionTrader,
-    IMFRescuer,
-    ValueContrarian,
-    NoiseTrader,
+    Market,
+    RuleLLMHotMoneyFunder,
+    RuleLLMContagionTrader,
+    RuleLLMIMFRescuer,
+    RuleLLMValueContrarian,
+    RuleLLMNoiseTrader,
 )
 
 __all__ = [
-    "HotMoneyFunder",
-    "ContagionTrader",
-    "IMFRescuer",
-    "ValueContrarian",
-    "NoiseTrader",
+    "Market",
+    "RuleLLMHotMoneyFunder",
+    "RuleLLMContagionTrader",
+    "RuleLLMIMFRescuer",
+    "RuleLLMValueContrarian",
+    "RuleLLMNoiseTrader",
 ]

@@ -1,5 +1,21 @@
 """AnchoringEffect Rag Variant"""
 
-from examples.AnchoringEffect.Rag.players import Market, LLMInvestor, LLMAnchoredTrader, LLMHistoricalAnchor, LLMRationalUpdater, LLMMomentumTrader, LLMNoiseTrader
+from examples.AnchoringEffect.Rag.players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMAnchoredTrader,
+    RagLLMHistoricalAnchor,
+    RagLLMRationalUpdater,
+    RagLLMMomentumTrader,
+    RagLLMNoiseTrader,
+)
 
-__all__ = ["Market", "LLMInvestor", "LLMAnchoredTrader", "LLMHistoricalAnchor", "LLMRationalUpdater", "LLMMomentumTrader", "LLMNoiseTrader"]
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMAnchoredTrader",
+    "RagLLMHistoricalAnchor",
+    "RagLLMRationalUpdater",
+    "RagLLMMomentumTrader",
+    "RagLLMNoiseTrader",
+]

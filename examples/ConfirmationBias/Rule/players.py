@@ -1,479 +1,482 @@
-import random
-import logging
-
 """ConfirmationBias Rule-Based Simulation
 
-Confirmation bias causes traders to seek and overweight evidence confirming their existing beliefs
+Confirmation bias causes traders to seek and overweight evidence confirming their
+existing beliefs, leading to polarized positions and mispricing.
 
 Theoretical Foundation:
-- Nickerson (1998): Confirmation bias - A ubiquitous phenomenon in many guises
+- Nickerson (1998): Confirmation bias — A ubiquitous phenomenon in many guises
 - Lord, Ross & Lepper (1979): Biased assimilation and attitude polarization
-- Rabin & Schrag (1999): First impressions matter - A model of confirmatory bias
+- Rabin & Schrag (1999): First impressions matter — a model of confirmatory bias
 
-Key Dynamics:
-- BeliefAnchor: Forms strong prior beliefs and selectively filters confirming evidence
-- SelectiveScanner: Actively seeks information supporting current position while ignoring contradictions
-- BalancedAnalyst: Evaluates all evidence equally regardless of prior beliefs
-- ContrarianTrader: Specifically looks for disconfirming evidence to trade against biased consensus
-- NoiseTrader: Random uninformed trader providing baseline liquidity
-
-Parameters from config (see configs/ConfirmationBias/Rule/players.yml):
+Agents:
+- Market: Price formation via net-demand + mean-reversion
+- BeliefAnchor: Forms strong prior beliefs and selectively filters confirming evidence (destabilizing)
+- SelectiveScanner: Seeks information supporting current position, ignores contradictions (destabilizing)
+- BalancedAnalyst: Evaluates all evidence equally regardless of priors (stabilizing)
+- ContrarianTrader: Looks for disconfirming evidence, trades against biased consensus (stabilizing)
+- NoiseTrader: Random uninformed trader providing baseline liquidity (neutral)
 """
 
+import logging
+import random
 from typing import Any, Dict, List, Optional
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
+from masim.utils.history import HistoryBuffer
 
-logger = logging.getLogger("ConfirmationBias")
+logger = logging.getLogger(__name__)
 
 
 class Market(GeneralPlayer):
-    """
-    Market agent for ConfirmationBias simulation.
+    """Market agent — clears orders and broadcasts price each round."""
 
-    Price Formation Model:
-        P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
-
-    Where:
-        - lambda: Price impact coefficient
-        - gamma: Mean reversion strength
-        - F: Fundamental value
-        - epsilon: Random noise
-    """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
-
+    async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "price" not in self.state.custom_state:
-            self._initialize_market_state()
+            extras = self.config.extras
+            self.state.custom_state["price"] = float(extras["initial_price"])
+            self.state.custom_state["fundamental"] = float(extras["fundamental_value"])
+            self.state.custom_state["price_impact"] = float(extras["price_impact"])
+            self.state.custom_state["mean_reversion"] = float(extras["mean_reversion"])
+            self.state.custom_state["noise_std"] = float(extras["noise_std"])
+            self.state.custom_state["price_history"] = []
+            self.state.custom_state["history_buffer"] = HistoryBuffer(
+                folder="ConfirmationBias/Market", entry_limit=200
+            )
 
-        orders = self._extract_orders(observation)
-        market_result = self._clear_market(orders)
-        self._update_state(market_result)
-        self._log_market_state()
+        self.state.custom_state["round"] = observation.round
+        orders: List[Dict] = []
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                payload = inb.payload
+                if isinstance(payload, dict):
+                    orders.append(payload)
 
-    def _initialize_market_state(self) -> None:
-        extras = self.config.extras
-        self.state.custom_state["price"] = extras["initial_price"]
-        self.state.custom_state["fundamental"] = extras["fundamental_value"]
-        self.state.custom_state["price_history"] = []
-        self.state.custom_state["volume_history"] = []
-
-        self.state.custom_state["price_impact"] = extras["price_impact"]
-        self.state.custom_state["mean_reversion"] = extras["mean_reversion"]
-        self.state.custom_state["noise_std"] = extras["noise_std"]
-
-    def _extract_orders(self, observation) -> list:
-        orders = []
-        for msg in observation.messages:
-            if msg.get("type") == "order":
-                orders.append({
-                    "agent_id": msg.get("from"),
-                    "action": msg.get("action"),
-                    "quantity": msg.get("quantity"),
-                    "agent_type": msg.get("agent_type"),
-                })
-        return orders
-
-    def _clear_market(self, orders: list) -> dict:
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
+        buy_vol = sum(o.get("quantity", 0) for o in orders if o.get("action") == "buy")
+        sell_vol = sum(
+            o.get("quantity", 0) for o in orders if o.get("action") == "sell"
+        )
+        net_demand = buy_vol - sell_vol
 
-        buy_orders = [o for o in orders if o["action"] == "buy"]
-        sell_orders = [o for o in orders if o["action"] == "sell"]
-        total_buy = sum(o["quantity"] for o in buy_orders)
-        total_sell = sum(o["quantity"] for o in sell_orders)
-        net_demand = total_buy - total_sell
+        price_change = self.state.custom_state["price_impact"] * net_demand
+        reversion = self.state.custom_state["mean_reversion"] * (fundamental - price)
+        noise = random.gauss(0, self.state.custom_state["noise_std"])
+        new_price = max(price + price_change + reversion + noise, 0.01)
+        self.state.custom_state["price"] = new_price
+        self.state.custom_state["price_history"].append(new_price)
 
-        price_impact = self.state.custom_state["price_impact"]
-        mean_reversion = self.state.custom_state["mean_reversion"]
-        noise_std = self.state.custom_state["noise_std"]
-
-        price_change = price_impact * net_demand
-        reversion = mean_reversion * (fundamental - price)
-        noise = random.gauss(0, noise_std)
-
-        new_price = price + price_change + reversion + noise
-        new_price = max(new_price, 0.01)
-
-        volume = min(total_buy, total_sell) + abs(net_demand) * 0.5
-
-        return {
-            "price": new_price,
-            "volume": volume,
-            "net_demand": net_demand,
-        }
-
-    def _update_state(self, market_result: dict) -> None:
-        self.state.custom_state["price"] = market_result["price"]
-        self.state.custom_state["price_history"].append(market_result["price"])
-        self.state.custom_state["volume_history"].append(market_result["volume"])
-
-    def _log_market_state(self) -> None:
+        deviation = (new_price - fundamental) / fundamental if fundamental > 0 else 0.0
+        self.state.custom_state["deviation"] = deviation
         logger.debug(
-            "Round %d: price=%.2f",
-            self.state.custom_state["round"],
-            self.state.custom_state["price"],
+            "Round %d: price=%.2f deviation=%.4f",
+            observation.round,
+            new_price,
+            deviation,
         )
 
-    async def step(self):
+    async def decide(self) -> Dict:
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        deviation = (price - fundamental) / fundamental if fundamental > 0 else 0
-
-        market_update = {
-            "type": "market_update",
+        deviation = self.state.custom_state["deviation"]
+        market_data = {
             "price": price,
             "fundamental": fundamental,
             "deviation": deviation,
             "round": self.state.custom_state["round"],
         }
+        return {
+            "market_data": market_data,
+            "outbound_messages": [
+                {"payload": market_data, "content_type": "market_update"}
+            ],
+        }
 
+    async def act(self, decision_payload: Dict) -> Action:
         return Action(
             action_type="market_broadcast",
-            payload={"market_data": market_update, "outbound_messages": [{"payload": market_update, "content_type": "market_update"}]},
+            payload=decision_payload,
             source_id=self.identity,
         )
 
 
 class BeliefAnchor(GeneralPlayer):
-    """
-    Forms strong prior beliefs and selectively filters confirming evidence
+    """Forms strong prior beliefs and selectively filters confirming evidence.
 
-    Theoretical Basis: Confirmatory evidence filtering (Nickerson, 1998)
-    Market Role: destabilizing
+    Theory: Nickerson (1998) confirmation bias. Overweights information that
+    confirms existing belief direction, amplifying trend.
+    Role: destabilizing.
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
+    async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["cash"] = float(extras["initial_cash"])
+            self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["belief"] = float(extras.get("initial_belief", 1.0))
+            self.state.custom_state["price_history"] = []
+            self.state.custom_state["history_buffer"] = HistoryBuffer(
+                folder="ConfirmationBias/BeliefAnchor", entry_limit=200
+            )
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        self.state.custom_state["round"] = observation.round
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                data = inb.payload
+                if isinstance(data, dict) and "price" in data:
+                    self.state.custom_state["market_data"] = data
+                    self.state.custom_state["price_history"].append(data["price"])
 
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Forms strong prior beliefs and selectively filters confirming evidence
-        extras = self.config.extras
+    async def decide(self) -> Dict:
+        market_data = self.state.custom_state.get("market_data", {})
+        price = market_data.get("price", 100.0)
+        deviation = market_data.get("deviation", 0.0)
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        belief_strength = extras["belief_strength"]
-        confirm_weight = extras["confirm_weight"]
-        disconfirm_weight = extras["disconfirm_weight"]
+        belief = self.state.custom_state.get("belief", 1.0)
+        extras = self.config.extras
+        confirmation_strength = float(extras.get("confirmation_strength", 0.7))
+        order_size = int(extras.get("order_size", 500))
 
-        if abs(deviation) > 0.02:
-            qty = min(800, int(abs(deviation) * 5000))
-            if deviation > 0:
-                buy_qty = min(qty, int(cash / price) if price > 0 else 0)
-                if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
-            else:
-                sell_qty = min(qty, max(position, 0))
-                if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+        # Update belief: overweight confirming signals
+        if deviation > 0 and belief > 0:
+            belief = min(belief * (1 + confirmation_strength * deviation), 3.0)
+        elif deviation < 0 and belief < 0:
+            belief = max(belief * (1 + confirmation_strength * abs(deviation)), -3.0)
+        else:
+            belief = belief * 0.95 + deviation * 0.5
+        self.state.custom_state["belief"] = belief
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
+        action, quantity = "hold", 0
+        if belief > 0.5:
+            buy_qty = min(order_size, int(cash / price) if price > 0 else 0)
+            if buy_qty > 0:
+                action, quantity = "buy", buy_qty
+        elif belief < -0.5:
+            sell_qty = min(order_size, max(position, 0))
+            if sell_qty > 0:
+                action, quantity = "sell", sell_qty
 
-        order = {
-            "type": "order",
-            "from": self.identity,
+        return {
             "action": action,
             "quantity": quantity,
-            "agent_type": self.__class__.__name__,
+            "outbound_messages": [
+                {
+                    "payload": {"action": action, "quantity": quantity},
+                    "content_type": "order",
+                }
+            ],
         }
 
+    async def act(self, decision_payload: Dict) -> Action:
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
         return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
+            action_type="order", payload=decision_payload, source_id=self.identity
         )
 
 
 class SelectiveScanner(GeneralPlayer):
-    """
-    Actively seeks information supporting current position while ignoring contradictions
+    """Seeks information supporting current position, ignores contradictions.
 
-    Theoretical Basis: Selective information search (Lord et al., 1979)
-    Market Role: destabilizing
+    Theory: Lord, Ross & Lepper (1979) biased assimilation. Filters market
+    signals to amplify current position direction.
+    Role: destabilizing.
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
+    async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["cash"] = float(extras["initial_cash"])
+            self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["price_history"] = []
+            self.state.custom_state["history_buffer"] = HistoryBuffer(
+                folder="ConfirmationBias/SelectiveScanner", entry_limit=200
+            )
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        self.state.custom_state["round"] = observation.round
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                data = inb.payload
+                if isinstance(data, dict) and "price" in data:
+                    self.state.custom_state["market_data"] = data
+                    self.state.custom_state["price_history"].append(data["price"])
 
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Actively seeks information supporting current position while ignoring contradictions
-        extras = self.config.extras
+    async def decide(self) -> Dict:
+        market_data = self.state.custom_state.get("market_data", {})
+        price = market_data.get("price", 100.0)
+        deviation = market_data.get("deviation", 0.0)
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        search_bias = extras["search_bias"]
-        ignore_contradiction = extras["ignore_contradiction"]
+        extras = self.config.extras
+        scan_threshold = float(extras.get("scan_threshold", 0.02))
+        order_size = int(extras.get("order_size", 600))
 
-        if abs(deviation) > 0.02:
-            qty = min(800, int(abs(deviation) * 5000))
-            if deviation > 0:
-                buy_qty = min(qty, int(cash / price) if price > 0 else 0)
-                if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
-            else:
-                sell_qty = min(qty, max(position, 0))
-                if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+        # Only act when signal confirms current position direction
+        action, quantity = "hold", 0
+        if deviation > scan_threshold and position >= 0:
+            # Confirming bullish signal — buy more
+            buy_qty = min(order_size, int(cash / price) if price > 0 else 0)
+            if buy_qty > 0:
+                action, quantity = "buy", buy_qty
+        elif deviation < -scan_threshold and position >= 0:
+            # Disconfirming signal while bullish — partially sell
+            sell_qty = min(order_size // 2, max(position, 0))
+            if sell_qty > 0:
+                action, quantity = "sell", sell_qty
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-
-        order = {
-            "type": "order",
-            "from": self.identity,
+        return {
             "action": action,
             "quantity": quantity,
-            "agent_type": self.__class__.__name__,
+            "outbound_messages": [
+                {
+                    "payload": {"action": action, "quantity": quantity},
+                    "content_type": "order",
+                }
+            ],
         }
 
+    async def act(self, decision_payload: Dict) -> Action:
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
         return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
+            action_type="order", payload=decision_payload, source_id=self.identity
         )
 
 
 class BalancedAnalyst(GeneralPlayer):
-    """
-    Evaluates all evidence equally regardless of prior beliefs
+    """Evaluates all evidence equally regardless of prior beliefs.
 
-    Theoretical Basis: Bayesian rationality (Rabin & Schrag, 1999 baseline)
-    Market Role: stabilizing
+    Theory: Bayesian rational updating. Processes signals without cognitive bias.
+    Role: stabilizing.
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
+    async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["cash"] = float(extras["initial_cash"])
+            self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["price_history"] = []
+            self.state.custom_state["history_buffer"] = HistoryBuffer(
+                folder="ConfirmationBias/BalancedAnalyst", entry_limit=200
+            )
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        self.state.custom_state["round"] = observation.round
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                data = inb.payload
+                if isinstance(data, dict) and "price" in data:
+                    self.state.custom_state["market_data"] = data
+                    self.state.custom_state["price_history"].append(data["price"])
 
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Evaluates all evidence equally regardless of prior beliefs
-        extras = self.config.extras
+    async def decide(self) -> Dict:
+        market_data = self.state.custom_state.get("market_data", {})
+        price = market_data.get("price", 100.0)
+        deviation = market_data.get("deviation", 0.0)
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        confirm_weight = extras["confirm_weight"]
-        disconfirm_weight = extras["disconfirm_weight"]
+        extras = self.config.extras
+        analysis_threshold = float(extras.get("analysis_threshold", 0.05))
+        order_size = int(extras.get("order_size", 400))
 
-        if abs(deviation) > 0.05:
-            qty = min(500, int(abs(deviation) * 3000))
-            if deviation < 0:
-                buy_qty = min(qty, int(cash / price) if price > 0 else 0)
-                if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
-            else:
-                sell_qty = min(qty, max(position, 0))
-                if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+        action, quantity = "hold", 0
+        if deviation < -analysis_threshold:
+            buy_qty = min(order_size, int(cash / price) if price > 0 else 0)
+            if buy_qty > 0:
+                action, quantity = "buy", buy_qty
+        elif deviation > analysis_threshold:
+            sell_qty = min(order_size, max(position, 0))
+            if sell_qty > 0:
+                action, quantity = "sell", sell_qty
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-
-        order = {
-            "type": "order",
-            "from": self.identity,
+        return {
             "action": action,
             "quantity": quantity,
-            "agent_type": self.__class__.__name__,
+            "outbound_messages": [
+                {
+                    "payload": {"action": action, "quantity": quantity},
+                    "content_type": "order",
+                }
+            ],
         }
 
+    async def act(self, decision_payload: Dict) -> Action:
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
         return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
+            action_type="order", payload=decision_payload, source_id=self.identity
         )
 
 
 class ContrarianTrader(GeneralPlayer):
-    """
-    Specifically looks for disconfirming evidence to trade against biased consensus
+    """Looks for disconfirming evidence, trades against biased consensus.
 
-    Theoretical Basis: Contrarian strategy against biased markets
-    Market Role: stabilizing
+    Theory: Rabin & Schrag (1999) — rational traders exploit systematic bias errors.
+    Role: stabilizing.
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
+    async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["cash"] = float(extras["initial_cash"])
+            self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["price_history"] = []
+            self.state.custom_state["history_buffer"] = HistoryBuffer(
+                folder="ConfirmationBias/ContrarianTrader", entry_limit=200
+            )
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        self.state.custom_state["round"] = observation.round
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                data = inb.payload
+                if isinstance(data, dict) and "price" in data:
+                    self.state.custom_state["market_data"] = data
+                    self.state.custom_state["price_history"].append(data["price"])
 
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Specifically looks for disconfirming evidence to trade against biased consensus
-        extras = self.config.extras
+    async def decide(self) -> Dict:
+        market_data = self.state.custom_state.get("market_data", {})
+        price = market_data.get("price", 100.0)
+        deviation = market_data.get("deviation", 0.0)
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        contrarian_threshold = extras["contrarian_threshold"]
-        position_size = extras["position_size"]
+        extras = self.config.extras
+        contrarian_threshold = float(extras.get("contrarian_threshold", 0.05))
+        order_size = int(extras.get("order_size", 500))
 
-        if abs(deviation) > 0.05:
-            qty = min(500, int(abs(deviation) * 3000))
-            if deviation < 0:
-                buy_qty = min(qty, int(cash / price) if price > 0 else 0)
-                if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
-            else:
-                sell_qty = min(qty, max(position, 0))
-                if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+        action, quantity = "hold", 0
+        # Trade against the trend — buy when overpriced crowd will reverse, sell when unduly depressed
+        if deviation > contrarian_threshold:
+            sell_qty = min(order_size, max(position, 0))
+            if sell_qty > 0:
+                action, quantity = "sell", sell_qty
+        elif deviation < -contrarian_threshold:
+            buy_qty = min(order_size, int(cash / price) if price > 0 else 0)
+            if buy_qty > 0:
+                action, quantity = "buy", buy_qty
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-
-        order = {
-            "type": "order",
-            "from": self.identity,
+        return {
             "action": action,
             "quantity": quantity,
-            "agent_type": self.__class__.__name__,
+            "outbound_messages": [
+                {
+                    "payload": {"action": action, "quantity": quantity},
+                    "content_type": "order",
+                }
+            ],
         }
 
+    async def act(self, decision_payload: Dict) -> Action:
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
         return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
+            action_type="order", payload=decision_payload, source_id=self.identity
         )
 
 
 class NoiseTrader(GeneralPlayer):
-    """
-    Random uninformed trader providing baseline liquidity
+    """Random uninformed trader providing baseline liquidity.
 
-    Theoretical Basis: Noise trader model (Black, 1986)
-    Market Role: neutral
+    Theory: Black (1986) noise trader model.
+    Role: neutral.
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
+    async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["cash"] = float(extras["initial_cash"])
+            self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["price_history"] = []
+            self.state.custom_state["history_buffer"] = HistoryBuffer(
+                folder="ConfirmationBias/NoiseTrader", entry_limit=200
+            )
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        self.state.custom_state["round"] = observation.round
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                data = inb.payload
+                if isinstance(data, dict) and "price" in data:
+                    self.state.custom_state["market_data"] = data
+                    self.state.custom_state["price_history"].append(data["price"])
 
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Random uninformed trader providing baseline liquidity
-        extras = self.config.extras
+    async def decide(self) -> Dict:
+        market_data = self.state.custom_state.get("market_data", {})
+        price = market_data.get("price", 100.0)
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        trade_probability = extras["trade_probability"]
+        extras = self.config.extras
+        prob = float(extras["trade_probability"])
 
-        if random.random() < 0.3:
+        action, quantity = "hold", 0
+        if random.random() < prob:
             qty = random.randint(100, 500)
-            action = "buy" if random.random() > 0.5 else "sell"
-            if action == "buy":
+            side = "buy" if random.random() > 0.5 else "sell"
+            if side == "buy":
                 qty = min(qty, int(cash / price) if price > 0 else 0)
             else:
                 qty = min(qty, max(position, 0))
             if qty > 0:
-                return {"action": action, "quantity": qty}
-        return {"action": "hold", "quantity": 0}
+                action, quantity = side, qty
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-
-        order = {
-            "type": "order",
-            "from": self.identity,
+        return {
             "action": action,
             "quantity": quantity,
-            "agent_type": self.__class__.__name__,
+            "outbound_messages": [
+                {
+                    "payload": {"action": action, "quantity": quantity},
+                    "content_type": "order",
+                }
+            ],
         }
 
+    async def act(self, decision_payload: Dict) -> Action:
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
         return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
+            action_type="order", payload=decision_payload, source_id=self.identity
         )
 
 
-__all__ = ["Market, BeliefAnchor, SelectiveScanner, BalancedAnalyst, ContrarianTrader, NoiseTrader"]
+__all__ = [
+    "Market",
+    "BeliefAnchor",
+    "SelectiveScanner",
+    "BalancedAnalyst",
+    "ContrarianTrader",
+    "NoiseTrader",
+]

@@ -539,3 +539,14 @@ class RuleLLMPassiveFollower(RuleLLMSocialAgent):
     """Hybrid: Lazarsfeld mass communication + drift formula + LLM reasoning."""
 
     pass
+
+
+__all__ = [
+    "OpinionEnvironment",
+    "RuleLLMSocialAgent",
+    "RuleLLMIdeologue",
+    "RuleLLMConformist",
+    "RuleLLMCriticalThinker",
+    "RuleLLMBridgeBuilder",
+    "RuleLLMPassiveFollower",
+]

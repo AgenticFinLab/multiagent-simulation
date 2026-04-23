@@ -1,17 +1,21 @@
 """CreditCycle RuleLLM Variant"""
 
 from examples.CreditCycle.RuleLLM.players import (
-    ProCyclicalLender,
-    MinskyBorrower,
-    CounterCyclicalLender,
-    ValueInvestor,
-    NoiseTrader,
+    Market,
+    RuleLLMInvestor,
+    RuleLLMProCyclicalLender,
+    RuleLLMMinskyBorrower,
+    RuleLLMCounterCyclicalLender,
+    RuleLLMValueInvestor,
+    RuleLLMNoiseTrader,
 )
 
 __all__ = [
-    "ProCyclicalLender",
-    "MinskyBorrower",
-    "CounterCyclicalLender",
-    "ValueInvestor",
-    "NoiseTrader",
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMProCyclicalLender",
+    "RuleLLMMinskyBorrower",
+    "RuleLLMCounterCyclicalLender",
+    "RuleLLMValueInvestor",
+    "RuleLLMNoiseTrader",
 ]
