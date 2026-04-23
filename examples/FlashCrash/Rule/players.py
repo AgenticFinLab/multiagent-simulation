@@ -130,15 +130,15 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
         self.state.custom_state["liquidity_history"].append(total_liquidity)
 
-        logger.debug(f"\n{'='*70}")
-        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(f"\n{'='*70}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"[Market] Round {round_num}")  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
         logger.debug(
             f"  Liquidity: {total_liquidity:.1f}, Impact Factor: {liquidity_factor:.2f}"
         )
-        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")  # pylint: disable=logging-fstring-interpolation
 
         market_data = {
             "price": new_price,
@@ -317,7 +317,7 @@ class MarketMaker(BaseInvestor):
             quantity = -position * 0.3 if position > 0 else 0
             quantity = max(-20, min(20, quantity))
             bid_price = price if quantity != 0 else 0.0
-            logger.debug(f"  [MM] WITHDRAWING - volatility too high ({price_return*100:.1f}%)")
+            logger.debug(f"  [MM] WITHDRAWING - volatility too high ({price_return*100:.1f}%)")  # pylint: disable=logging-fstring-interpolation
         else:
             provides_liquidity = True
             quantity = -position * 0.2
@@ -447,7 +447,7 @@ class StopLossTrader(BaseInvestor):
         if price < stop_price and position > 0:
             quantity = -position
             bid_price = price
-            logger.debug(f"  [STOP-LOSS TRIGGERED] Price {price:.2f} < Stop {stop_price:.2f}")
+            logger.debug(f"  [STOP-LOSS TRIGGERED] Price {price:.2f} < Stop {stop_price:.2f}")  # pylint: disable=logging-fstring-interpolation
         else:
             quantity = 0.0
             bid_price = 0.0
@@ -505,7 +505,7 @@ class FundamentalTrader(BaseInvestor):
             )
             quantity = max(0, min(50, quantity))
             bid_price = price
-            logger.debug(f"  [FUNDAMENTAL BUY] Price {deviation*100:.1f}% below fundamental")
+            logger.debug(f"  [FUNDAMENTAL BUY] Price {deviation*100:.1f}% below fundamental")  # pylint: disable=logging-fstring-interpolation
         elif deviation < -value_threshold:
             quantity = (
                 deviation * base_position_size * value_sensitivity * value_multiplier

@@ -1,22 +1,29 @@
-# Topology configuration
+# FramingEffect Rule Topology - Star Pattern
+
+type: "star"
+
+sources:
+  - market
+
 connections:
-  - source: market
-    target: gainframefollower
-  - source: gainframefollower
-    target: market
-  - source: market
-    target: lossframereactor
-  - source: lossframereactor
-    target: market
-  - source: market
-    target: frameinvarianttrader
-  - source: frameinvarianttrader
-    target: market
-  - source: market
-    target: arbitrageframer
-  - source: arbitrageframer
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - gainframefollower
+    - lossframereactor
+    - frameinvarianttrader
+    - arbitrageframer
+    - noisetrader
+
+  gainframefollower:
+    - market
+
+  lossframereactor:
+    - market
+
+  frameinvarianttrader:
+    - market
+
+  arbitrageframer:
+    - market
+
+  noisetrader:
+    - market

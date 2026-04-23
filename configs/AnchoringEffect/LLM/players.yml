@@ -1,5 +1,13 @@
-# AnchoringEffect LLM Agent Configuration
+# =============================================================================
+# AnchoringEffectLLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 LLM Investor types with anchoring-bias personas.
+# Each LLM agent uses a system prompt persona from prompts.py.
+# =============================================================================
 
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based, identical to Rule variant
+# -----------------------------------------------------------------------------
 market:
   name: "Market"
   class: "examples.AnchoringEffect.LLM.players:Market"
@@ -7,85 +15,164 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
-      initial_price: 100.0
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
+      # Market dynamics parameters (identical to Rule variant)
       fundamental_value: 100.0
-      price_impact: 0.04
-      mean_reversion: 0.02
-      noise_std: 0.02
+      initial_price: 100.0
+      price_impact: 0.04        # Low: anchoring effect slows price discovery
+      mean_reversion: 0.02      # Moderate: reasonable reversion
+      noise_std: 0.02           # Low noise: anchoring effect is clearer
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-anchored_trader_1:
-  name: "AnchoredTrader 1"
+# -----------------------------------------------------------------------------
+# Anchored Traders — LLM with anchoring persona
+# Theory: Tversky & Kahneman (1974) — Anchoring and Insufficient Adjustment
+# -----------------------------------------------------------------------------
+anchored_trader:
+  name: "Anchored Trader"
   class: "examples.AnchoringEffect.LLM.players:LLMAnchoredTrader"
+  # Expander → anchored_trader_1, anchored_trader_2
   num_instances: 2
   config:
-    identity: "anchored_trader_1"
+    identity: "anchored_trader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "anchored_trader"
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_ANCHORED_SYS"
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-historical_anchor_2:
-  name: "HistoricalAnchor 2"
+# -----------------------------------------------------------------------------
+# Historical Anchors — LLM with historical-price fixation persona
+# Theory: Northcraft & Neale (1987) — Experts anchor to past prices
+# -----------------------------------------------------------------------------
+historical_anchor:
+  name: "Historical Anchor"
   class: "examples.AnchoringEffect.LLM.players:LLMHistoricalAnchor"
+  # Expander → historical_anchor_1, historical_anchor_2
   num_instances: 2
   config:
-    identity: "historical_anchor_2"
+    identity: "historical_anchor"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "historical_anchor"
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_HISTORICAL_SYS"
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-rational_updater_3:
-  name: "RationalUpdater 3"
+# -----------------------------------------------------------------------------
+# Rational Updater — LLM with Bayesian-updating persona (benchmark)
+# -----------------------------------------------------------------------------
+rational_updater:
+  name: "Rational Updater"
   class: "examples.AnchoringEffect.LLM.players:LLMRationalUpdater"
   num_instances: 1
   config:
-    identity: "rational_updater_3"
+    identity: "rational_updater"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "rational_updater"
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_RATIONAL_SYS"
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-momentum_trader_4:
-  name: "MomentumTrader 4"
+# -----------------------------------------------------------------------------
+# Momentum Traders — LLM with trend-following persona
+# Theory: Jegadeesh & Titman (1993) — Momentum effect
+# -----------------------------------------------------------------------------
+momentum_trader:
+  name: "Momentum Trader"
   class: "examples.AnchoringEffect.LLM.players:LLMMomentumTrader"
+  # Expander → momentum_trader_1, momentum_trader_2
   num_instances: 2
   config:
-    identity: "momentum_trader_4"
+    identity: "momentum_trader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "momentum_trader"
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_MOMENTUM_SYS"
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-noise_trader_5:
-  name: "NoiseTrader 5"
+# -----------------------------------------------------------------------------
+# Noise Traders — LLM with random-trader persona
+# Theory: Black (1986) — Noise
+# -----------------------------------------------------------------------------
+noise_trader:
+  name: "Noise Trader"
   class: "examples.AnchoringEffect.LLM.players:LLMNoiseTrader"
+  # Expander → noise_trader_1, noise_trader_2
   num_instances: 2
   config:
-    identity: "noise_trader_5"
+    identity: "noise_trader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "noise_trader"
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
-
-
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_NOISE_SYS"
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml

@@ -1,5 +1,17 @@
 """CarryTradeUnwind Rag Variant"""
 
-from examples.CarryTradeUnwind.Rag.players import C, a, r, r, y, T, r, a, d, e, r, ,,  , L, e, v, e, r, a, g, e, d, C, a, r, r, y, F, u, n, d, ,,  , F, u, n, d, i, n, g, C, u, r, r, e, n, c, y, B, u, y, e, r, ,,  , H, e, d, g, e, d, C, a, r, r, y, T, r, a, d, e, r, ,,  , N, o, i, s, e, T, r, a, d, e, r
+from examples.CarryTradeUnwind.Rag.players import (
+    CarryTrader,
+    LeveragedCarryFund,
+    FundingCurrencyBuyer,
+    HedgedCarryTrader,
+    NoiseTrader,
+)
 
-__all__ = ["C, a, r, r, y, T, r, a, d, e, r, ,,  , L, e, v, e, r, a, g, e, d, C, a, r, r, y, F, u, n, d, ,,  , F, u, n, d, i, n, g, C, u, r, r, e, n, c, y, B, u, y, e, r, ,,  , H, e, d, g, e, d, C, a, r, r, y, T, r, a, d, e, r, ,,  , N, o, i, s, e, T, r, a, d, e, r"]
+__all__ = [
+    "CarryTrader",
+    "LeveragedCarryFund",
+    "FundingCurrencyBuyer",
+    "HedgedCarryTrader",
+    "NoiseTrader",
+]

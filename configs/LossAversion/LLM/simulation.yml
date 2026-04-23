@@ -1,38 +1,38 @@
 # LossAversion LLM Simulation Configuration
-#
-# Loss aversion from prospect theory causes investors to hold losers too long and sell winners too early
-#
-# Usage:
-#   python examples/LossAversion/LLM/run_lossaversion_llm.py \
-#       -c configs/LossAversion/LLM/simulation.yml
 
 setting:
-  name: "LossAversion-LLM"
-  description: "Loss aversion simulation demonstrating how asymmetric utility functions lead to disposition effect and price patterns"
+  name: "lossaversion_llm_simulation"
+  description: "Loss aversion: LLM-driven prospect theory traders, break-even seekers, rational traders, disposition traders"
   total_rounds: 200
-  
+  round_history_limit: 3
   record_path: "EXPERIMENT/LossAversion/LLM/records"
-  storage_path: "EXPERIMENT/LossAversion/LLM/communication"
-  
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/LossAversion/LLM/logs"
+  save_diagram_interval: 50
 
 environment:
-  dotenv_path: ".env"
+  dotenv_path: .env
   workspace: "."
 
-llm:
-  model: "doubao-pro-32k"
-  temperature: 0.3
-  max_tokens: 500
-  timeout: 30
-
 ray:
+  address: null
   namespace: "lossaversion_llm"
-  ignore_reinit_error: true
-  object_store_memory: 536870912
-  num_cpus: 4
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
 
 players: !include players.yml
 topology: !include topology.yml
@@ -40,5 +40,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/LossAversion/LLM/communication"
   record_messages: true
-  message_timeout_ms: 30000
-  max_retries: 3
+  message_block_size: 500

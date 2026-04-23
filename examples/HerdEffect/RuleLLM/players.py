@@ -147,15 +147,15 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["volume_history"].append(total_volume)
 
-        logger.debug(f"\n{'='*60}")
-        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(f"\n{'='*60}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"[Market] Round {round_num}")  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"  Price: {prev_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        logger.debug(f"  Net Demand: {net_demand:+.2f}")
-        logger.debug(f"  Total Volume: {total_volume:.2f}")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"  Total Volume: {total_volume:.2f}")  # pylint: disable=logging-fstring-interpolation
         if orders:
-            logger.debug(f"  Orders ({len(orders)}):")
+            logger.debug(f"  Orders ({len(orders)}):")  # pylint: disable=logging-fstring-interpolation
             for o in orders:
                 logger.debug(
                     f"    {o['investor']:20s} [{o['strategy']:12s}]: "
@@ -304,7 +304,7 @@ class BaseLLMInvestor(GeneralPlayer):
             except (json.JSONDecodeError, ValueError, KeyError) as e:
                 last_error = e
                 if attempt < max_retries - 1:
-                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")
+                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")  # pylint: disable=logging-fstring-interpolation
 
         # If LLM failed after all retries, skip trading this round (hold)
         if decision is None:

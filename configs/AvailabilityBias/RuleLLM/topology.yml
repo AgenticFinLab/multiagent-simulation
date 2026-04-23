@@ -1,22 +1,31 @@
-# Topology configuration
+# =============================================================================
+# AvailabilityBias Topology - Star Pattern (RuleLLM variant)
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
 connections:
-  - source: market
-    target: recenteventoverweighter
-  - source: recenteventoverweighter
-    target: market
-  - source: market
-    target: mediainfluencedtrader
-  - source: mediainfluencedtrader
-    target: market
-  - source: market
-    target: systematicanalyst
-  - source: systematicanalyst
-    target: market
-  - source: market
-    target: valuetrader
-  - source: valuetrader
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - rulellm_recent_event_overweighter
+    - rulellm_media_influenced_trader
+    - rulellm_systematic_analyst
+    - rulellm_value_trader
+    - rulellm_noise_trader
+
+  rulellm_recent_event_overweighter:
+    - market
+
+  rulellm_media_influenced_trader:
+    - market
+
+  rulellm_systematic_analyst:
+    - market
+
+  rulellm_value_trader:
+    - market
+
+  rulellm_noise_trader:
+    - market

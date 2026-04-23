@@ -197,19 +197,19 @@ class OpinionEnvironment(GeneralPlayer):
         )
 
         # Log
-        logger.debug(f"\n{'='*70}")
-        logger.debug(f"[OpinionEnv] Round {round_num}")
+        logger.debug(f"\n{'='*70}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"[OpinionEnv] Round {round_num}")  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"  Polarization: {current_polarization:.3f} -> {new_polarization:.3f}"
         )
-        logger.debug(f"  Mean Opinion: {new_mean_opinion:.3f}")
-        logger.debug(f"  Cluster Separation: {new_cluster_separation:.3f}")
+        logger.debug(f"  Mean Opinion: {new_mean_opinion:.3f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"  Cluster Separation: {new_cluster_separation:.3f}")  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"  Polarizers: {len(polarize_actions)}, "
             f"Depolarizers: {len(depolarize_actions)}"
         )
-        logger.debug(f"  Net Polarization Intensity: {net_polarization:+.3f}")
-        logger.debug(f"  Cross-cutting Exposure: {new_cross_cutting:.3f}")
+        logger.debug(f"  Net Polarization Intensity: {net_polarization:+.3f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"  Cross-cutting Exposure: {new_cross_cutting:.3f}")  # pylint: disable=logging-fstring-interpolation
 
         env_data = {
             "polarization": new_polarization,

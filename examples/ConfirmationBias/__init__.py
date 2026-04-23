@@ -1,3 +1,19 @@
-"""ConfirmationBias Simulation Package"""
+"""ConfirmationBias Rule Variant"""
 
-__all__ = ["BeliefAnchor, SelectiveScanner, BalancedAnalyst, ContrarianTrader, NoiseTrader"]
+from examples.ConfirmationBias.Rule.players import (
+    Market,
+    BeliefAnchor,
+    SelectiveScanner,
+    BalancedAnalyst,
+    ContrarianTrader,
+    NoiseTrader,
+)
+
+__all__ = [
+    "Market",
+    "BeliefAnchor",
+    "SelectiveScanner",
+    "BalancedAnalyst",
+    "ContrarianTrader",
+    "NoiseTrader",
+]

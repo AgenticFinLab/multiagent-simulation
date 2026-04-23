@@ -1,22 +1,29 @@
-# Topology configuration
+# EndowmentEffect Rule Topology - Star Pattern
+
+type: "star"
+
+sources:
+  - market
+
 connections:
-  - source: market
-    target: endowedholder
-  - source: endowedholder
-    target: market
-  - source: market
-    target: statusquoseller
-  - source: statusquoseller
-    target: market
-  - source: market
-    target: rationalarbitrageur
-  - source: rationalarbitrageur
-    target: market
-  - source: market
-    target: newbuyer
-  - source: newbuyer
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - endowedholder
+    - statusquoseller
+    - rationalarbitrageur
+    - newbuyer
+    - noisetrader
+
+  endowedholder:
+    - market
+
+  statusquoseller:
+    - market
+
+  rationalarbitrageur:
+    - market
+
+  newbuyer:
+    - market
+
+  noisetrader:
+    - market

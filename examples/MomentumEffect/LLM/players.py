@@ -152,8 +152,8 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
 
         # Log
-        logger.debug(f"\n{'='*70}")
-        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(f"\n{'='*70}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"[Market] Round {round_num}")  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
@@ -321,7 +321,7 @@ class LLMInvestor(GeneralPlayer):
             except ValueError as e:
                 last_error = e
                 if attempt < max_retries - 1:
-                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")
+                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")  # pylint: disable=logging-fstring-interpolation
 
         strategy_name = self.__class__.__name__
 

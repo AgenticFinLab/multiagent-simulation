@@ -1,3 +1,19 @@
-"""StatusQuoBias Simulation Package"""
+"""StatusQuoBias Rule Variant"""
 
-__all__ = ["InertialHolder, DefaultFollower, ActiveRebalancer, MomentumTrader, NoiseTrader"]
+from examples.StatusQuoBias.Rule.players import (
+    Market,
+    InertialHolder,
+    DefaultFollower,
+    ActiveRebalancer,
+    MomentumTrader,
+    NoiseTrader,
+)
+
+__all__ = [
+    "Market",
+    "InertialHolder",
+    "DefaultFollower",
+    "ActiveRebalancer",
+    "MomentumTrader",
+    "NoiseTrader",
+]

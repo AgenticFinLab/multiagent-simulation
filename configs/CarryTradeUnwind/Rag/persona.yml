@@ -1,2 +1,25 @@
-# Persona configuration for simulation
-personas: []
+# =============================================================================
+# CarryTradeUnwind Rag Persona Configuration
+# =============================================================================
+
+auto_checkpoint: false
+debug_mode: true
+
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/CarryTradeUnwind/Rag/checkpoints"
+    record_path: "EXPERIMENT/CarryTradeUnwind/Rag/records"
+    record_rounds: true
+    turn_block_size: 3
+
+  monitoring:
+    record_path: "EXPERIMENT/CarryTradeUnwind/Rag/monitoring"
+    monitor_hot_limit: 3
+
+  communication:
+    message_timeout_ms: 30000
+    enable_compression: true
+
+  resource:
+    mcp_servers: []
+    enable_caching: false

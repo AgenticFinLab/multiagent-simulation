@@ -268,7 +268,7 @@ class LiquiditySeeker(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")
+        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")  # pylint: disable=logging-fstring-interpolation
         return {
             "bid_price": bid_price,
             "quantity": quantity,
@@ -322,7 +322,7 @@ class ValueTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")
+        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")  # pylint: disable=logging-fstring-interpolation
         return {
             "bid_price": bid_price,
             "quantity": quantity,
@@ -368,7 +368,7 @@ class MomentumTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")
+        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")  # pylint: disable=logging-fstring-interpolation
         return {
             "bid_price": bid_price,
             "quantity": quantity,
@@ -410,7 +410,7 @@ class NoiseTrader(BaseInvestor):
         quantity = self._apply_constraints(bid_price, quantity)
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
-        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")
+        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")  # pylint: disable=logging-fstring-interpolation
         return {
             "bid_price": bid_price,
             "quantity": quantity,

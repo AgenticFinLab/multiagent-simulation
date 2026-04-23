@@ -1,44 +1,12 @@
-# SVBBankRun LLM Simulation Configuration
-#
-# March 2023 SVB collapse - $42B deposit outflow in one day triggered by social media panic
-#
-# Usage:
-#   python examples/SVBBankRun/LLM/run_svbbankrun_llm.py \
-#       -c configs/SVBBankRun/LLM/simulation.yml
-
-setting:
-  name: "SVBBankRun-LLM"
-  description: "Silicon Valley Bank run simulation with social media-accelerated deposit flight and duration risk"
-  total_rounds: 200
-  
-  record_path: "EXPERIMENT/SVBBankRun/LLM/records"
-  storage_path: "EXPERIMENT/SVBBankRun/LLM/communication"
-  
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/SVBBankRun/LLM/logs"
-
-environment:
-  dotenv_path: ".env"
-  workspace: "."
-
-llm:
-  model: "doubao-pro-32k"
-  temperature: 0.3
-  max_tokens: 500
-  timeout: 30
+simulation_name: "SVBBankRun"
+num_rounds: 50
+round_history_limit: 10
+save_diagram_interval: 10
 
 ray:
-  namespace: "svbbankrun_llm"
-  ignore_reinit_error: true
-  object_store_memory: 536870912
-  num_cpus: 4
-
-players: !include players.yml
-topology: !include topology.yml
-
-communication:
-  storage_path: "EXPERIMENT/SVBBankRun/LLM/communication"
-  record_messages: true
-  message_timeout_ms: 30000
-  max_retries: 3
+  actor_options:
+    num_cpus: 0.5
+  runtime_env:
+    env_vars: {}
+  serialization:
+    method: "pickle"

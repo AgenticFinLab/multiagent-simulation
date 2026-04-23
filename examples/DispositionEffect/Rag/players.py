@@ -250,7 +250,7 @@ class BaseRagInvestor(GeneralPlayer):
                 "generation_config", {"temperature": 0.3, "max_new_tokens": 500}
             ),
         )
-        logger.info(f"Initialized LLM client for {self.config.identity}")
+        logger.info(f"Initialized LLM client for {self.config.identity}")  # pylint: disable=logging-fstring-interpolation
 
     def _init_knowledge_store(self) -> None:
         """Initialize RAG knowledge store for this investor.
@@ -600,7 +600,7 @@ class BaseRagInvestor(GeneralPlayer):
                     for i, chunk in enumerate(result.chunks)
                 )
         except Exception as e:
-            logger.warning(f"RAG query failed: {e}")
+            logger.warning(f"RAG query failed: {e}")  # pylint: disable=logging-fstring-interpolation
         return ""
 
     async def decide(self) -> Dict[str, Any]:
@@ -671,7 +671,7 @@ class BaseRagInvestor(GeneralPlayer):
             }
 
         except Exception as e:
-            logger.error(f"LLM error for {self.config.identity}: {e}")
+            logger.error(f"LLM error for {self.config.identity}: {e}")  # pylint: disable=logging-fstring-interpolation
             decision = {
                 "action": "hold",
                 "bid_price": price,

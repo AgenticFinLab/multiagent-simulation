@@ -173,15 +173,15 @@ class Market(GeneralPlayer):
         self.state.custom_state["return_history"].append(price_return)
 
         # Log
-        logger.debug(f"\n{'='*60}")
-        logger.debug(f"[Market] Round {round_num}")
-        logger.debug(f"  Price: {prev_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)")
-        logger.debug(f"  Net Demand: {net_demand:+.2f}")
-        logger.debug(f"  Total Volume: {total_volume:.2f}")
-        logger.debug(f"  Price Impact: {price_impact:+.4f}")
-        logger.debug(f"  Mean Reversion: {mean_reversion:+.4f}")
+        logger.debug(f"\n{'='*60}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"[Market] Round {round_num}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"  Price: {prev_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"  Net Demand: {net_demand:+.2f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"  Total Volume: {total_volume:.2f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"  Price Impact: {price_impact:+.4f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"  Mean Reversion: {mean_reversion:+.4f}")  # pylint: disable=logging-fstring-interpolation
         if orders:
-            logger.debug(f"  Orders ({len(orders)}):")
+            logger.debug(f"  Orders ({len(orders)}):")  # pylint: disable=logging-fstring-interpolation
             for o in orders:
                 logger.debug(
                     f"    {o['investor']:20s} [{o['strategy']:12s}]: "

@@ -37,7 +37,7 @@ async def main():
     print("GameStopShortSqueeze Simulation - Rule-Based Agents")
     print("=" * 70)
     print("Phenomenon: January 2021 GameStop short squeeze - Reddit coordination drove 1,700% price increase")
-    print("Rounds:     %%s" %% config.setting["total_rounds"])
+    print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 70 + "\n")
     
     simulator = GeneralSimulator(config)

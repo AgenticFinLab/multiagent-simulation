@@ -1,2 +1,9 @@
-# Persona configuration
-personas: []
+auto_checkpoint: false
+
+proxy:
+  record_path: "EXPERIMENT/TulipMania/Rag/records"
+  communication:
+    store_path: "EXPERIMENT/TulipMania/Rag/communication"
+  monitoring:
+    metrics_path: "EXPERIMENT/TulipMania/Rag/monitoring/metrics"
+    events_path: "EXPERIMENT/TulipMania/Rag/monitoring/events"

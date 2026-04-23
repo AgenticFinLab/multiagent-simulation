@@ -1,72 +1,23 @@
 # MentalAccounting LLM Persona Configuration
 
-market:
-  type: proxy
-  checkpoint_dir: "EXPERIMENT/MentalAccounting/LLM/records/market/checkpoints"
-  record_path: "EXPERIMENT/MentalAccounting/LLM/records/market"
-  monitoring:
-    record_path: "EXPERIMENT/MentalAccounting/LLM/monitoring/market"
+auto_checkpoint: false
+debug_mode: true
 
-mental_accountant_1_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/MentalAccounting/LLM/records/mental_accountant_1_1/checkpoints"
-  record_path: "EXPERIMENT/MentalAccounting/LLM/records/mental_accountant_1_1"
-  monitoring:
-    record_path: "EXPERIMENT/MentalAccounting/LLM/monitoring/mental_accountant_1_1"
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/MentalAccounting/LLM/checkpoints"
+    record_path: "EXPERIMENT/MentalAccounting/LLM/records"
+    record_rounds: true
+    turn_block_size: 3
 
-mental_accountant_1_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/MentalAccounting/LLM/records/mental_accountant_1_2/checkpoints"
-  record_path: "EXPERIMENT/MentalAccounting/LLM/records/mental_accountant_1_2"
   monitoring:
-    record_path: "EXPERIMENT/MentalAccounting/LLM/monitoring/mental_accountant_1_2"
+    record_path: "EXPERIMENT/MentalAccounting/LLM/monitoring"
+    monitor_hot_limit: 3
 
-house_money_trader_2_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/MentalAccounting/LLM/records/house_money_trader_2_1/checkpoints"
-  record_path: "EXPERIMENT/MentalAccounting/LLM/records/house_money_trader_2_1"
-  monitoring:
-    record_path: "EXPERIMENT/MentalAccounting/LLM/monitoring/house_money_trader_2_1"
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
 
-house_money_trader_2_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/MentalAccounting/LLM/records/house_money_trader_2_2/checkpoints"
-  record_path: "EXPERIMENT/MentalAccounting/LLM/records/house_money_trader_2_2"
-  monitoring:
-    record_path: "EXPERIMENT/MentalAccounting/LLM/monitoring/house_money_trader_2_2"
-
-rational_portfolio_manager_3_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/MentalAccounting/LLM/records/rational_portfolio_manager_3_1/checkpoints"
-  record_path: "EXPERIMENT/MentalAccounting/LLM/records/rational_portfolio_manager_3_1"
-  monitoring:
-    record_path: "EXPERIMENT/MentalAccounting/LLM/monitoring/rational_portfolio_manager_3_1"
-
-sunk_cost_holder_4_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/MentalAccounting/LLM/records/sunk_cost_holder_4_1/checkpoints"
-  record_path: "EXPERIMENT/MentalAccounting/LLM/records/sunk_cost_holder_4_1"
-  monitoring:
-    record_path: "EXPERIMENT/MentalAccounting/LLM/monitoring/sunk_cost_holder_4_1"
-
-sunk_cost_holder_4_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/MentalAccounting/LLM/records/sunk_cost_holder_4_2/checkpoints"
-  record_path: "EXPERIMENT/MentalAccounting/LLM/records/sunk_cost_holder_4_2"
-  monitoring:
-    record_path: "EXPERIMENT/MentalAccounting/LLM/monitoring/sunk_cost_holder_4_2"
-
-noise_trader_5_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/MentalAccounting/LLM/records/noise_trader_5_1/checkpoints"
-  record_path: "EXPERIMENT/MentalAccounting/LLM/records/noise_trader_5_1"
-  monitoring:
-    record_path: "EXPERIMENT/MentalAccounting/LLM/monitoring/noise_trader_5_1"
-
-noise_trader_5_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/MentalAccounting/LLM/records/noise_trader_5_2/checkpoints"
-  record_path: "EXPERIMENT/MentalAccounting/LLM/records/noise_trader_5_2"
-  monitoring:
-    record_path: "EXPERIMENT/MentalAccounting/LLM/monitoring/noise_trader_5_2"
-
+  resource:
+    mcp_servers: []
+    enable_caching: false

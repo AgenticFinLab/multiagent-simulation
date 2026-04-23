@@ -1,38 +1,38 @@
 # OverconfidenceBias LLM Simulation Configuration
-#
-# Overconfidence bias causes traders to overestimate their precision, trade too much, and increase volatility
-#
-# Usage:
-#   python examples/OverconfidenceBias/LLM/run_overconfidencebias_llm.py \
-#       -c configs/OverconfidenceBias/LLM/simulation.yml
 
 setting:
-  name: "OverconfidenceBias-LLM"
-  description: "Overconfidence bias simulation showing how excessive self-confidence leads to excessive trading and market instability"
+  name: "overconfidence_bias_llm_simulation"
+  description: "Overconfidence bias: LLM-driven agents with overconfidence index tracking"
   total_rounds: 200
-  
+  round_history_limit: 3
   record_path: "EXPERIMENT/OverconfidenceBias/LLM/records"
-  storage_path: "EXPERIMENT/OverconfidenceBias/LLM/communication"
-  
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/OverconfidenceBias/LLM/logs"
+  save_diagram_interval: 50
 
 environment:
-  dotenv_path: ".env"
+  dotenv_path: .env
   workspace: "."
 
-llm:
-  model: "doubao-pro-32k"
-  temperature: 0.3
-  max_tokens: 500
-  timeout: 30
-
 ray:
-  namespace: "overconfidencebias_llm"
-  ignore_reinit_error: true
-  object_store_memory: 536870912
-  num_cpus: 4
+  address: null
+  namespace: "overconfidence_bias_llm"
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
 
 players: !include players.yml
 topology: !include topology.yml
@@ -40,5 +40,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/OverconfidenceBias/LLM/communication"
   record_messages: true
-  message_timeout_ms: 30000
-  max_retries: 3
+  message_block_size: 500

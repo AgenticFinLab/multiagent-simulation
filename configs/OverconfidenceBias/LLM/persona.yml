@@ -1,65 +1,23 @@
 # OverconfidenceBias LLM Persona Configuration
 
-market:
-  type: proxy
-  checkpoint_dir: "EXPERIMENT/OverconfidenceBias/LLM/records/market/checkpoints"
-  record_path: "EXPERIMENT/OverconfidenceBias/LLM/records/market"
-  monitoring:
-    record_path: "EXPERIMENT/OverconfidenceBias/LLM/monitoring/market"
+auto_checkpoint: false
+debug_mode: true
 
-overconfident_trader_1_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/OverconfidenceBias/LLM/records/overconfident_trader_1_1/checkpoints"
-  record_path: "EXPERIMENT/OverconfidenceBias/LLM/records/overconfident_trader_1_1"
-  monitoring:
-    record_path: "EXPERIMENT/OverconfidenceBias/LLM/monitoring/overconfident_trader_1_1"
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/OverconfidenceBias/LLM/checkpoints"
+    record_path: "EXPERIMENT/OverconfidenceBias/LLM/records"
+    record_rounds: true
+    turn_block_size: 3
 
-overconfident_trader_1_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/OverconfidenceBias/LLM/records/overconfident_trader_1_2/checkpoints"
-  record_path: "EXPERIMENT/OverconfidenceBias/LLM/records/overconfident_trader_1_2"
   monitoring:
-    record_path: "EXPERIMENT/OverconfidenceBias/LLM/monitoring/overconfident_trader_1_2"
+    record_path: "EXPERIMENT/OverconfidenceBias/LLM/monitoring"
+    monitor_hot_limit: 3
 
-self_attributor_2_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/OverconfidenceBias/LLM/records/self_attributor_2_1/checkpoints"
-  record_path: "EXPERIMENT/OverconfidenceBias/LLM/records/self_attributor_2_1"
-  monitoring:
-    record_path: "EXPERIMENT/OverconfidenceBias/LLM/monitoring/self_attributor_2_1"
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
 
-self_attributor_2_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/OverconfidenceBias/LLM/records/self_attributor_2_2/checkpoints"
-  record_path: "EXPERIMENT/OverconfidenceBias/LLM/records/self_attributor_2_2"
-  monitoring:
-    record_path: "EXPERIMENT/OverconfidenceBias/LLM/monitoring/self_attributor_2_2"
-
-calibrated_trader_3_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/OverconfidenceBias/LLM/records/calibrated_trader_3_1/checkpoints"
-  record_path: "EXPERIMENT/OverconfidenceBias/LLM/records/calibrated_trader_3_1"
-  monitoring:
-    record_path: "EXPERIMENT/OverconfidenceBias/LLM/monitoring/calibrated_trader_3_1"
-
-contrarian_investor_4_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/OverconfidenceBias/LLM/records/contrarian_investor_4_1/checkpoints"
-  record_path: "EXPERIMENT/OverconfidenceBias/LLM/records/contrarian_investor_4_1"
-  monitoring:
-    record_path: "EXPERIMENT/OverconfidenceBias/LLM/monitoring/contrarian_investor_4_1"
-
-noise_trader_5_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/OverconfidenceBias/LLM/records/noise_trader_5_1/checkpoints"
-  record_path: "EXPERIMENT/OverconfidenceBias/LLM/records/noise_trader_5_1"
-  monitoring:
-    record_path: "EXPERIMENT/OverconfidenceBias/LLM/monitoring/noise_trader_5_1"
-
-noise_trader_5_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/OverconfidenceBias/LLM/records/noise_trader_5_2/checkpoints"
-  record_path: "EXPERIMENT/OverconfidenceBias/LLM/records/noise_trader_5_2"
-  monitoring:
-    record_path: "EXPERIMENT/OverconfidenceBias/LLM/monitoring/noise_trader_5_2"
-
+  resource:
+    mcp_servers: []
+    enable_caching: false

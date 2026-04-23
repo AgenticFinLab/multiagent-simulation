@@ -1,3 +1,19 @@
-"""CarryTradeUnwind Simulation Package"""
+"""CarryTradeUnwind Rule Variant"""
 
-__all__ = ["CarryTrader, LeveragedCarryFund, FundingCurrencyBuyer, HedgedCarryTrader, NoiseTrader"]
+from examples.CarryTradeUnwind.Rule.players import (
+    Market,
+    CarryTrader,
+    LeveragedCarryFund,
+    FundingCurrencyBuyer,
+    HedgedCarryTrader,
+    NoiseTrader,
+)
+
+__all__ = [
+    "Market",
+    "CarryTrader",
+    "LeveragedCarryFund",
+    "FundingCurrencyBuyer",
+    "HedgedCarryTrader",
+    "NoiseTrader",
+]

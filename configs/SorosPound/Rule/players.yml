@@ -7,64 +7,121 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
+      record_path: "EXPERIMENT/SorosPound/Rule/records"
       initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.02
+      peg_rate: 100.0
+      fundamental_value: 95.0
+      price_impact: 0.03
+      mean_reversion: 0.015
+      noise_std: 0.012
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-macrohedgefund_1:
-  name: "MacroHedgeFund 1"
+macrohedgefund:
+  name: "MacroHedgeFund"
   class: "examples.SorosPound.Rule.players:MacroHedgeFund"
   num_instances: 2
   config:
-    identity: "macrohedgefund_1"
+    identity: "macrohedgefund"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
+      record_path: "EXPERIMENT/SorosPound/Rule/records"
+      initial_cash: 5000000.0
+      initial_position: 800
+      initial_price: 100.0
+      fundamental_value: 95.0
+      leverage: 3.0
+      position_size: 600
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-pegdefender_2:
-  name: "PegDefender 2"
+pegdefender:
+  name: "PegDefender"
   class: "examples.SorosPound.Rule.players:PegDefender"
   num_instances: 1
   config:
-    identity: "pegdefender_2"
+    identity: "pegdefender"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
+      record_path: "EXPERIMENT/SorosPound/Rule/records"
+      initial_cash: 10000000.0
       initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 95.0
+      reserve_capacity: 0.8
+      defense_size: 500
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-convergencetrader_3:
-  name: "ConvergenceTrader 3"
+convergencetrader:
+  name: "ConvergenceTrader"
   class: "examples.SorosPound.Rule.players:ConvergenceTrader"
-  num_instances: 1
+  num_instances: 2
   config:
-    identity: "convergencetrader_3"
+    identity: "convergencetrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/SorosPound/Rule/records"
       initial_cash: 1000000.0
-      initial_position: 0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 95.0
+      convergence_threshold: 0.03
+      position_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-opportunistictrader_4:
-  name: "OpportunisticTrader 4"
+opportunistictrader:
+  name: "OpportunisticTrader"
   class: "examples.SorosPound.Rule.players:OpportunisticTrader"
   num_instances: 2
   config:
-    identity: "opportunistictrader_4"
+    identity: "opportunistictrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
+      record_path: "EXPERIMENT/SorosPound/Rule/records"
+      initial_cash: 2000000.0
+      initial_position: 600
+      initial_price: 100.0
+      fundamental_value: 95.0
+      attack_join_threshold: 0.3
+      position_size: 400
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-noisetrader_5:
-  name: "NoiseTrader 5"
+noisetrader:
+  name: "NoiseTrader"
   class: "examples.SorosPound.Rule.players:NoiseTrader"
-  num_instances: 1
+  num_instances: 2
   config:
-    identity: "noisetrader_5"
+    identity: "noisetrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
+      record_path: "EXPERIMENT/SorosPound/Rule/records"
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 95.0
+      trade_probability: 0.3
+      noise_size: 150
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

@@ -1,38 +1,38 @@
 # LUNACollapse RuleLLM Simulation Configuration
-#
-# May 2022 Terra/LUNA crash - $40B wiped out in algorithmic stablecoin death spiral
-#
-# Usage:
-#   python examples/LUNACollapse/RuleLLM/run_lunacollapse_rulellm.py \
-#       -c configs/LUNACollapse/RuleLLM/simulation.yml
 
 setting:
-  name: "LUNACollapse-RuleLLM"
-  description: "Terra/LUNA collapse simulation with algorithmic stablecoin death spiral and DeFi contagion"
+  name: "lunacollapse_rulellm_simulation"
+  description: "LUNA collapse: rule-guided LLM agents with quantitative depeg/liquidation rules"
   total_rounds: 200
-  
+  round_history_limit: 3
   record_path: "EXPERIMENT/LUNACollapse/RuleLLM/records"
-  storage_path: "EXPERIMENT/LUNACollapse/RuleLLM/communication"
-  
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/LUNACollapse/RuleLLM/logs"
+  save_diagram_interval: 50
 
 environment:
-  dotenv_path: ".env"
+  dotenv_path: .env
   workspace: "."
 
-llm:
-  model: "doubao-pro-32k"
-  temperature: 0.3
-  max_tokens: 500
-  timeout: 30
-
 ray:
+  address: null
   namespace: "lunacollapse_rulellm"
-  ignore_reinit_error: true
-  object_store_memory: 536870912
-  num_cpus: 4
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
 
 players: !include players.yml
 topology: !include topology.yml
@@ -40,5 +40,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/LUNACollapse/RuleLLM/communication"
   record_messages: true
-  message_timeout_ms: 30000
-  max_retries: 3
+  message_block_size: 500

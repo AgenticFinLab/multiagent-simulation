@@ -7,85 +7,164 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
+      record_path: "EXPERIMENT/LTCMCollapse/RuleLLM/records"
       initial_price: 100.0
       fundamental_value: 100.0
-      price_impact: 0.04
-      mean_reversion: 0.005
-      noise_std: 0.02
+      price_impact: 0.03
+      mean_reversion: 0.01
+      noise_std: 0.015
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-convergence_arbitrageur_1:
-  name: "ConvergenceArbitrageur 1"
-  class: "examples.LTCMCollapse.RuleLLM.players:LLMConvergenceArbitrageur"
+convergencearbitrageur:
+  name: "ConvergenceArbitrageur"
+  class: "examples.LTCMCollapse.RuleLLM.players:RuleLLMConvergenceArbitrageur"
   num_instances: 2
   config:
-    identity: "convergence_arbitrageur_1"
+    identity: "convergencearbitrageur"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "convergence_arbitrageur"
+      record_path: "EXPERIMENT/LTCMCollapse/RuleLLM/records"
+      initial_cash: 2000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      entry_spread: 0.03
+      leverage: 15
+      max_position: 5000
+      base_size: 400
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_CONVERGENCE_ARBITRAGEUR_SYS"
+        user_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.2
+          max_tokens: 600
+  persona: !include persona.yml
 
-
-leverage_trader_2:
-  name: "LeverageTrader 2"
-  class: "examples.LTCMCollapse.RuleLLM.players:LLMLeverageTrader"
+leveragetrader:
+  name: "LeverageTrader"
+  class: "examples.LTCMCollapse.RuleLLM.players:RuleLLMLeverageTrader"
   num_instances: 2
   config:
-    identity: "leverage_trader_2"
+    identity: "leveragetrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "leverage_trader"
+      record_path: "EXPERIMENT/LTCMCollapse/RuleLLM/records"
+      initial_cash: 3000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      leverage_ratio: 25
+      margin_call_threshold: 0.04
+      base_size: 500
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_LEVERAGE_TRADER_SYS"
+        user_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 600
+  persona: !include persona.yml
 
-
-risk_manager_3:
-  name: "RiskManager 3"
-  class: "examples.LTCMCollapse.RuleLLM.players:LLMRiskManager"
+riskmanager:
+  name: "RiskManager"
+  class: "examples.LTCMCollapse.RuleLLM.players:RuleLLMRiskManager"
   num_instances: 2
   config:
-    identity: "risk_manager_3"
+    identity: "riskmanager"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "risk_manager"
+      record_path: "EXPERIMENT/LTCMCollapse/RuleLLM/records"
+      initial_cash: 1500000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      var_trigger: 0.06
+      base_size: 300
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_RISK_MANAGER_SYS"
+        user_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.2
+          max_tokens: 600
+  persona: !include persona.yml
 
-
-liquidity_provider_4:
-  name: "LiquidityProvider 4"
-  class: "examples.LTCMCollapse.RuleLLM.players:LLMLiquidityProvider"
-  num_instances: 1
+liquidityprovider:
+  name: "LiquidityProvider"
+  class: "examples.LTCMCollapse.RuleLLM.players:RuleLLMLiquidityProvider"
+  num_instances: 2
   config:
-    identity: "liquidity_provider_4"
+    identity: "liquidityprovider"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "liquidity_provider"
+      record_path: "EXPERIMENT/LTCMCollapse/RuleLLM/records"
+      initial_cash: 1000000.0
+      initial_position: 1000
+      initial_price: 100.0
+      fundamental_value: 100.0
+      inventory_limit: 2000
+      stress_exit: 0.4
+      base_size: 400
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_LIQUIDITY_PROVIDER_SYS"
+        user_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 600
+  persona: !include persona.yml
 
-
-central_bank_5:
-  name: "CentralBank 5"
-  class: "examples.LTCMCollapse.RuleLLM.players:LLMCentralBank"
-  num_instances: 1
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.LTCMCollapse.RuleLLM.players:RuleLLMNoiseTrader"
+  num_instances: 2
   config:
-    identity: "central_bank_5"
+    identity: "noisetrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "central_bank"
+      record_path: "EXPERIMENT/LTCMCollapse/RuleLLM/records"
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 150
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
-
-
+        sys_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
+        user_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.95
+          max_tokens: 600
+  persona: !include persona.yml

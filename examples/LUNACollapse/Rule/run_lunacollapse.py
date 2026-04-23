@@ -37,7 +37,7 @@ async def main():
     print("LUNACollapse Simulation - Rule-Based Agents")
     print("=" * 70)
     print("Phenomenon: May 2022 Terra/LUNA crash - $40B wiped out in algorithmic stablecoin death spiral")
-    print("Rounds:     %%s" %% config.setting["total_rounds"])
+    print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 70 + "\n")
     
     simulator = GeneralSimulator(config)

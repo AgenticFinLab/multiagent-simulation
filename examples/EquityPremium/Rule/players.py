@@ -256,7 +256,7 @@ class LongHorizonInvestor(BaseInvestor):
 
         self._execute_trade(stock_qty, stock_price)
 
-        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
+        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")  # pylint: disable=logging-fstring-interpolation
         return {
             "stock_qty": stock_qty,
             "strategy": strategy_name,
@@ -292,7 +292,7 @@ class RiskNeutralInvestor(BaseInvestor):
 
         self._execute_trade(stock_qty, stock_price)
 
-        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
+        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")  # pylint: disable=logging-fstring-interpolation
         return {
             "stock_qty": stock_qty,
             "strategy": strategy_name,
@@ -332,7 +332,7 @@ class ConservativeInvestor(BaseInvestor):
 
         self._execute_trade(stock_qty, stock_price)
 
-        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
+        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")  # pylint: disable=logging-fstring-interpolation
         return {
             "stock_qty": stock_qty,
             "strategy": strategy_name,
@@ -366,7 +366,7 @@ class NoiseTrader(BaseInvestor):
 
         self._execute_trade(stock_qty, stock_price)
 
-        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")
+        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")  # pylint: disable=logging-fstring-interpolation
         return {
             "stock_qty": stock_qty,
             "strategy": strategy_name,

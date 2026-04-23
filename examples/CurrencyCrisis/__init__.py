@@ -1,3 +1,19 @@
-"""CurrencyCrisis Simulation Package"""
+"""CurrencyCrisis Rule Variant"""
 
-__all__ = ["SpeculativeAttacker, SelfFulfillingTrader, CentralBankDefender, FundamentalHedger, NoiseTrader"]
+from examples.CurrencyCrisis.Rule.players import (
+    Market,
+    SpeculativeAttacker,
+    SelfFulfillingTrader,
+    CentralBankDefender,
+    FundamentalHedger,
+    NoiseTrader,
+)
+
+__all__ = [
+    "Market",
+    "SpeculativeAttacker",
+    "SelfFulfillingTrader",
+    "CentralBankDefender",
+    "FundamentalHedger",
+    "NoiseTrader",
+]

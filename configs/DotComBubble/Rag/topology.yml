@@ -1,70 +1,29 @@
-# DotComBubble Rag Communication Topology
+# DotComBubble Rag Topology - Star Pattern
 
-graph:
-  type: star
-  center: market
+type: "star"
+
+sources:
+  - market
 
 connections:
-  - from: market
-    to:
-      - new_economy_evangelist_1_1
-      - new_economy_evangelist_1_2
-      - i_p_o_flipper_2_1
-      - i_p_o_flipper_2_2
-      - momentum_follower_3_1
-      - momentum_follower_3_2
-      - skeptical_value_investor_4_1
-      - short_seller_5_1
-    bidirectional: false
-    message_type: market_update
+  market:
+    - neweconomyevangelist
+    - ipoflipper
+    - momentumfollower
+    - skepticalvalueinvestor
+    - shortseller
 
-  - from: new_economy_evangelist_1_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: new_economy_evangelist_1_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: i_p_o_flipper_2_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: i_p_o_flipper_2_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: momentum_follower_3_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: momentum_follower_3_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: skeptical_value_investor_4_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: short_seller_5_1
-    to: market
-    bidirectional: false
-    message_type: order
-
-broadcast:
-  enabled: true
-  from: market
-  to: all_players
-  message_type: market_update
-
-execution:
-  order:
+  neweconomyevangelist:
     - market
-    - new_economy_evangelist_1_1
-    - new_economy_evangelist_1_2
-    - i_p_o_flipper_2_1
-    - i_p_o_flipper_2_2
-    - momentum_follower_3_1
-    - momentum_follower_3_2
-    - skeptical_value_investor_4_1
-    - short_seller_5_1
+
+  ipoflipper:
+    - market
+
+  momentumfollower:
+    - market
+
+  skepticalvalueinvestor:
+    - market
+
+  shortseller:
+    - market

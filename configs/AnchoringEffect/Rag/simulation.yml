@@ -1,38 +1,58 @@
-# AnchoringEffect Rag Simulation Configuration
+# =============================================================================
+# AnchoringEffectRag Simulation Configuration
+# =============================================================================
+# RAG variant: LLM agents guided by explicit rules (in system prompt) AND
+# real-time knowledge retrieval from a personal RAG library built at init.
+# Each agent downloads/caches reference documents and queries its RAG index
+# to inject relevant context into every trading decision prompt.
 #
-# Anchoring causes traders to insufficiently adjust from reference prices, creating slow price discovery
+# NOTE: The shared knowledge: block is defined in players.yml (at the top,
+# before the market definition). The config loader (expand_player_instances)
+# automatically detects and promotes it to config top-level.
 #
 # Usage:
 #   python examples/AnchoringEffect/Rag/run_anchoringeffect_rag.py \
 #       -c configs/AnchoringEffect/Rag/simulation.yml
+# =============================================================================
 
 setting:
-  name: "AnchoringEffect-Rag"
-  description: "Anchoring effect simulation demonstrating how initial reference points bias subsequent judgments"
+  name: "anchoring_effect_rag_simulation"
+  description: "RAG-augmented anchoring bias: agents retrieve knowledge from personal RAG libraries per decision"
   total_rounds: 200
-  
+  round_history_limit: 3
   record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
-  storage_path: "EXPERIMENT/AnchoringEffect/Rag/communication"
-  
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/AnchoringEffect/Rag/logs"
+  save_diagram_interval: 50
 
 environment:
-  dotenv_path: ".env"
+  dotenv_path: .env
   workspace: "."
 
-llm:
-  model: "doubao-pro-32k"
-  temperature: 0.3
-  max_tokens: 500
-  timeout: 30
-
 ray:
-  namespace: "anchoringeffect_rag"
-  ignore_reinit_error: true
-  object_store_memory: 536870912
-  num_cpus: 4
+  address: null
+  namespace: "anchoring_effect_rag"
+  actor_prefix: null
+  # RAG simulations need more memory for prompt+response+rag_context strings
+  # Derived: 10 players, star topology -> 18 msgs/round
+  #   10 TurnResult + 10 pending_info + 18 Message = 38 Ray objects
+  #   LLM TurnResult carries prompt+response+rag_context strings (~8-16 KB each)
+  #   Minimum 1 GB floor for RAG simulations -> 1073741824 bytes
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 1073741824
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
 
 players: !include players.yml
 topology: !include topology.yml
@@ -40,5 +60,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/AnchoringEffect/Rag/communication"
   record_messages: true
-  message_timeout_ms: 30000
-  max_retries: 3
+  message_block_size: 500

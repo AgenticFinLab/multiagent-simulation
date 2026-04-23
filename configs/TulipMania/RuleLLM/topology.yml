@@ -1,22 +1,18 @@
-# Topology configuration
+type: "star"
 connections:
-  - source: market
-    target: trendchaser
-  - source: trendchaser
-    target: market
-  - source: market
-    target: socialprooffollower
-  - source: socialprooffollower
-    target: market
-  - source: market
-    target: intrinsicvaluetrader
-  - source: intrinsicvaluetrader
-    target: market
-  - source: market
-    target: earlyexittrader
-  - source: earlyexittrader
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - trendchaser
+    - socialprooffollower
+    - intrinsicvaluetrader
+    - earlyexittrader
+    - noisetrader
+  trendchaser:
+    - market
+  socialprooffollower:
+    - market
+  intrinsicvaluetrader:
+    - market
+  earlyexittrader:
+    - market
+  noisetrader:
+    - market

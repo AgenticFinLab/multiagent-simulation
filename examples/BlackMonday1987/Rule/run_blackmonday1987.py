@@ -37,7 +37,7 @@ async def main():
     print("BlackMonday1987 Simulation - Rule-Based Agents")
     print("=" * 70)
     print("Phenomenon: October 19, 1987 stock market crash - Dow fell 22.6% in one day")
-    print("Rounds:     %%s" %% config.setting["total_rounds"])
+    print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 70 + "\n")
     
     simulator = GeneralSimulator(config)

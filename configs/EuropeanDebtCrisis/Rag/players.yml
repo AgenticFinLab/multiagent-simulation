@@ -1,85 +1,277 @@
 # EuropeanDebtCrisis Rag Agent Configuration
 
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+    top_k: 5
+
 market:
   name: "Market"
-  class: "examples.EuropeanDebtCrisis.Rule.players:Market"
+  class: "examples.EuropeanDebtCrisis.Rag.players:Market"
   num_instances: 1
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
-      initial_price: 100.0
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"
+      initial_price: 95.0
       fundamental_value: 100.0
+      core_price: 100.0
       price_impact: 0.05
       mean_reversion: 0.02
-      noise_std: 0.02
+      noise_std: 0.01
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-peripherybondseller_1:
-  name: "PeripheryBondSeller 1"
-  class: "examples.EuropeanDebtCrisis.Rag.players:PeripheryBondSeller"
+peripherybondseller:
+  name: "PeripheryBondSeller"
+  class: "examples.EuropeanDebtCrisis.Rag.players:RagLLMPeripheryBondSeller"
   num_instances: 2
   config:
-    identity: "peripherybondseller_1"
+    identity: "peripherybondseller"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"
       initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: peripherybondseller
+      initial_position: 500
+      initial_price: 95.0
+      fundamental_value: 100.0
+      core_price: 100.0
+      panic_threshold: 5.0
+      base_size: 300
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_PERIPHERY_BOND_SELLER_SYS"
+        user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
 
-
-creditorpanicker_2:
-  name: "CreditorPanicker 2"
-  class: "examples.EuropeanDebtCrisis.Rag.players:CreditorPanicker"
+creditorpanicker:
+  name: "CreditorPanicker"
+  class: "examples.EuropeanDebtCrisis.Rag.players:RagLLMCreditorPanicker"
   num_instances: 2
   config:
-    identity: "creditorpanicker_2"
+    identity: "creditorpanicker"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"
       initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: creditorpanicker
+      initial_position: 400
+      initial_price: 95.0
+      fundamental_value: 100.0
+      core_price: 100.0
+      stress_threshold: 3.0
+      base_size: 350
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_CREDITOR_PANICKER_SYS"
+        user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.8
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
 
-
-corebondbuyer_3:
-  name: "CoreBondBuyer 3"
-  class: "examples.EuropeanDebtCrisis.Rag.players:CoreBondBuyer"
+corebondbuyer:
+  name: "CoreBondBuyer"
+  class: "examples.EuropeanDebtCrisis.Rag.players:RagLLMCoreBondBuyer"
   num_instances: 1
   config:
-    identity: "corebondbuyer_3"
+    identity: "corebondbuyer"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"
       initial_cash: 1000000.0
       initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: corebondbuyer
+      initial_price: 95.0
+      fundamental_value: 100.0
+      core_price: 100.0
+      value_threshold: 0.05
+      base_size: 300
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_CORE_BOND_BUYER_SYS"
+        user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
 
-
-ecbintervenor_4:
-  name: "ECBIntervenor 4"
-  class: "examples.EuropeanDebtCrisis.Rag.players:ECBIntervenor"
+ecbintervenor:
+  name: "ECBIntervenor"
+  class: "examples.EuropeanDebtCrisis.Rag.players:RagLLMECBIntervenor"
   num_instances: 1
   config:
-    identity: "ecbintervenor_4"
+    identity: "ecbintervenor"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"
+      initial_cash: 5000000.0
       initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: ecbintervenor
+      initial_price: 95.0
+      fundamental_value: 100.0
+      core_price: 100.0
+      ecb_threshold: 8.0
+      intervention_size: 600
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_ECB_INTERVENOR_SYS"
+        user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
 
-
-hedgedfund_5:
-  name: "HedgedFund 5"
-  class: "examples.EuropeanDebtCrisis.Rag.players:HedgedFund"
+hedgedfundtrader:
+  name: "HedgedFundTrader"
+  class: "examples.EuropeanDebtCrisis.Rag.players:RagLLMHedgedFundTrader"
   num_instances: 1
   config:
-    identity: "hedgedfund_5"
+    identity: "hedgedfundtrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"
       initial_cash: 1000000.0
       initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: hedgedfund
-
+      initial_price: 95.0
+      fundamental_value: 100.0
+      core_price: 100.0
+      spread_buy_threshold: 7.0
+      spread_exit_threshold: 3.0
+      base_size: 400
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_HEDGED_FUND_SYS"
+        user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.6
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml

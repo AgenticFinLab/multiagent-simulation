@@ -1,38 +1,38 @@
 # GFC2008 RuleLLM Simulation Configuration
-#
-# 2007-2009 financial crisis - Housing bubble burst triggered global recession
-#
-# Usage:
-#   python examples/GFC2008/RuleLLM/run_gfc2008_rulellm.py \
-#       -c configs/GFC2008/RuleLLM/simulation.yml
 
 setting:
-  name: "GFC2008-RuleLLM"
-  description: "2008 Global Financial Crisis simulation with mortgage-backed securities, rating agency failures, and systemic contagion"
+  name: "gfc2008_rulellm_simulation"
+  description: "2007-2009 Global Financial Crisis: leverage cycles, fire sales, originate-to-distribute vs distressed buyers (RuleLLM)"
   total_rounds: 200
-  
+  round_history_limit: 3
   record_path: "EXPERIMENT/GFC2008/RuleLLM/records"
-  storage_path: "EXPERIMENT/GFC2008/RuleLLM/communication"
-  
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/GFC2008/RuleLLM/logs"
+  save_diagram_interval: 50
 
 environment:
-  dotenv_path: ".env"
+  dotenv_path: .env
   workspace: "."
 
-llm:
-  model: "doubao-pro-32k"
-  temperature: 0.3
-  max_tokens: 500
-  timeout: 30
-
 ray:
+  address: null
   namespace: "gfc2008_rulellm"
-  ignore_reinit_error: true
-  object_store_memory: 536870912
-  num_cpus: 4
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
 
 players: !include players.yml
 topology: !include topology.yml
@@ -40,5 +40,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/GFC2008/RuleLLM/communication"
   record_messages: true
-  message_timeout_ms: 30000
-  max_retries: 3
+  message_block_size: 500

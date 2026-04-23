@@ -37,7 +37,7 @@ async def main():
     print("SVBBankRun Simulation - Rule-Based Agents")
     print("=" * 70)
     print("Phenomenon: March 2023 SVB collapse - $42B deposit outflow in one day triggered by social media panic")
-    print("Rounds:     %%s" %% config.setting["total_rounds"])
+    print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 70 + "\n")
     
     simulator = GeneralSimulator(config)

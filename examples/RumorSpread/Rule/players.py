@@ -165,15 +165,15 @@ class InformationEnvironment(GeneralPlayer):
         self.state.custom_state["correction_count_history"].append(len(correct_actions))
 
         # Log
-        logger.debug(f"\n{'='*70}")
-        logger.debug(f"[InfoEnv] Round {round_num}")
-        logger.debug(f"  Belief: {current_belief:.3f} → {new_belief:.3f}")
-        logger.debug(f"  Distortion: {current_distortion:.3f} → {new_distortion:.3f}")
-        logger.debug(f"  Truth Value: {truth_value:.3f}")
+        logger.debug(f"\n{'='*70}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"[InfoEnv] Round {round_num}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"  Belief: {current_belief:.3f} → {new_belief:.3f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"  Distortion: {current_distortion:.3f} → {new_distortion:.3f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"  Truth Value: {truth_value:.3f}")  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"  Spreaders: {len(spread_actions)}, Correctors: {len(correct_actions)}"
         )
-        logger.debug(f"  Net Spread Intensity: {net_spread:+.3f}")
+        logger.debug(f"  Net Spread Intensity: {net_spread:+.3f}")  # pylint: disable=logging-fstring-interpolation
 
         env_data = {
             "belief": new_belief,

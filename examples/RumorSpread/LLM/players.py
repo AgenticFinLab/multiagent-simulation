@@ -320,7 +320,7 @@ Respond with ONLY valid JSON:
             except ValueError as e:
                 last_error = e
                 if attempt < max_retries - 1:
-                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")
+                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")  # pylint: disable=logging-fstring-interpolation
 
         if decision is None:
             logger.warning(

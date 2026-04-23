@@ -147,7 +147,7 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
 
         status = "HIGH VOLATILITY" if in_high_vol else "Normal"
-        logger.debug(f"\n{'='*60}")
+        logger.debug(f"\n{'='*60}")  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"[Market] Round {round_num}: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%) [{status}]"
         )

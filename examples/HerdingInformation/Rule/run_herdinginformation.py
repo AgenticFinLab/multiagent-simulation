@@ -37,7 +37,7 @@ async def main():
     print("HerdingInformation Simulation - Rule-Based Agents")
     print("=" * 70)
     print("Phenomenon: Information cascade occurs when individuals ignore private signals and follow the crowd")
-    print("Rounds:     %%s" %% config.setting["total_rounds"])
+    print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 70 + "\n")
     
     simulator = GeneralSimulator(config)

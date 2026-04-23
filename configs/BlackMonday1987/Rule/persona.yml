@@ -1,72 +1,25 @@
+# =============================================================================
 # BlackMonday1987 Rule Persona Configuration
+# =============================================================================
 
-market:
-  type: proxy
-  checkpoint_dir: "EXPERIMENT/BlackMonday1987/Rule/records/market/checkpoints"
-  record_path: "EXPERIMENT/BlackMonday1987/Rule/records/market"
+auto_checkpoint: false
+debug_mode: true
+
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/BlackMonday1987/Rule/checkpoints"
+    record_path: "EXPERIMENT/BlackMonday1987/Rule/records"
+    record_rounds: true
+    turn_block_size: 3
+
   monitoring:
-    record_path: "EXPERIMENT/BlackMonday1987/Rule/monitoring/market"
+    record_path: "EXPERIMENT/BlackMonday1987/Rule/monitoring"
+    monitor_hot_limit: 3
 
-portfolio_insurer_1_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/BlackMonday1987/Rule/records/portfolio_insurer_1_1/checkpoints"
-  record_path: "EXPERIMENT/BlackMonday1987/Rule/records/portfolio_insurer_1_1"
-  monitoring:
-    record_path: "EXPERIMENT/BlackMonday1987/Rule/monitoring/portfolio_insurer_1_1"
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
 
-portfolio_insurer_1_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/BlackMonday1987/Rule/records/portfolio_insurer_1_2/checkpoints"
-  record_path: "EXPERIMENT/BlackMonday1987/Rule/records/portfolio_insurer_1_2"
-  monitoring:
-    record_path: "EXPERIMENT/BlackMonday1987/Rule/monitoring/portfolio_insurer_1_2"
-
-index_arbitrageur_2_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/BlackMonday1987/Rule/records/index_arbitrageur_2_1/checkpoints"
-  record_path: "EXPERIMENT/BlackMonday1987/Rule/records/index_arbitrageur_2_1"
-  monitoring:
-    record_path: "EXPERIMENT/BlackMonday1987/Rule/monitoring/index_arbitrageur_2_1"
-
-index_arbitrageur_2_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/BlackMonday1987/Rule/records/index_arbitrageur_2_2/checkpoints"
-  record_path: "EXPERIMENT/BlackMonday1987/Rule/records/index_arbitrageur_2_2"
-  monitoring:
-    record_path: "EXPERIMENT/BlackMonday1987/Rule/monitoring/index_arbitrageur_2_2"
-
-program_trader_3_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/BlackMonday1987/Rule/records/program_trader_3_1/checkpoints"
-  record_path: "EXPERIMENT/BlackMonday1987/Rule/records/program_trader_3_1"
-  monitoring:
-    record_path: "EXPERIMENT/BlackMonday1987/Rule/monitoring/program_trader_3_1"
-
-program_trader_3_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/BlackMonday1987/Rule/records/program_trader_3_2/checkpoints"
-  record_path: "EXPERIMENT/BlackMonday1987/Rule/records/program_trader_3_2"
-  monitoring:
-    record_path: "EXPERIMENT/BlackMonday1987/Rule/monitoring/program_trader_3_2"
-
-value_investor_4_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/BlackMonday1987/Rule/records/value_investor_4_1/checkpoints"
-  record_path: "EXPERIMENT/BlackMonday1987/Rule/records/value_investor_4_1"
-  monitoring:
-    record_path: "EXPERIMENT/BlackMonday1987/Rule/monitoring/value_investor_4_1"
-
-noise_trader_5_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/BlackMonday1987/Rule/records/noise_trader_5_1/checkpoints"
-  record_path: "EXPERIMENT/BlackMonday1987/Rule/records/noise_trader_5_1"
-  monitoring:
-    record_path: "EXPERIMENT/BlackMonday1987/Rule/monitoring/noise_trader_5_1"
-
-noise_trader_5_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/BlackMonday1987/Rule/records/noise_trader_5_2/checkpoints"
-  record_path: "EXPERIMENT/BlackMonday1987/Rule/records/noise_trader_5_2"
-  monitoring:
-    record_path: "EXPERIMENT/BlackMonday1987/Rule/monitoring/noise_trader_5_2"
-
+  resource:
+    mcp_servers: []
+    enable_caching: false

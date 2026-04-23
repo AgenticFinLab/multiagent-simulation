@@ -1,32 +1,52 @@
-# AnchoringEffect Rule Simulation Configuration
-#
-# Anchoring causes traders to insufficiently adjust from reference prices, creating slow price discovery
+# =============================================================================
+# AnchoringEffect Simulation Configuration
+# =============================================================================
+# Demonstrates how anchoring bias causes traders to insufficiently adjust
+# from reference prices, creating slow price discovery and persistent mispricing.
 #
 # Usage:
-#   python examples/AnchoringEffect/Rule/run_anchoringeffect.py \
-#       -c configs/AnchoringEffect/Rule/simulation.yml
+#   python examples/AnchoringEffect/Rule/run_anchoringeffect.py -c configs/AnchoringEffect/Rule/simulation.yml
+# =============================================================================
 
 setting:
-  name: "AnchoringEffect-Rule"
-  description: "Anchoring effect simulation demonstrating how initial reference points bias subsequent judgments"
+  name: "anchoring_effect_simulation"
+  description: "Anchoring bias causes traders to insufficiently adjust from reference prices, creating slow price discovery"
   total_rounds: 200
-  
+  round_history_limit: 3
   record_path: "EXPERIMENT/AnchoringEffect/Rule/records"
-  storage_path: "EXPERIMENT/AnchoringEffect/Rule/communication"
-  
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/AnchoringEffect/Rule/logs"
+  save_diagram_interval: 50
 
 environment:
-  dotenv_path: ".env"
+  dotenv_path: .env
   workspace: "."
 
 ray:
-  namespace: "anchoringeffect_rule"
-  ignore_reinit_error: true
-  object_store_memory: 536870912
-  num_cpus: 4
+  address: null
+  namespace: "anchoring_effect"
+  actor_prefix: null
+  # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
+  num_cpus: null
+  num_gpus: null
+  # Derived: 10 players (1 market + 2 anchored + 2 historical + 1 rational + 2 momentum + 2 noise)
+  #   Star topology -> 18 msgs/round
+  #   10 TurnResult + 10 pending_info + 18 Message = 38 Ray objects
+  #   38 obj x 64 KB min-alloc = 2432 KB (2.38 MB)
+  #   10x headroom = 23.8 MB; 128 MB minimum floor -> 134217728 bytes
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
 
 players: !include players.yml
 topology: !include topology.yml
@@ -34,5 +54,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/AnchoringEffect/Rule/communication"
   record_messages: true
-  message_timeout_ms: 5000
-  max_retries: 3
+  message_block_size: 500

@@ -1,91 +1,198 @@
-# SVBBankRun Rag Agent Configuration
+knowledge:
+  global_resources:
+    MinerU_processed:
+      path: "examples/document-sources/processed"
+  global_index_dir:
+    rag_index:
+      path: "examples/document-sources/rag_index"
 
 market:
   name: "Market"
-  class: "examples.SVBBankRun.Rag.players:Market"
+  class: "examples.SVBBankRun.Rule.players:Market"
   num_instances: 1
   config:
     identity: "market"
-    role: coordinator
+    role: market
+    steps_per_turn: 1
+    group_tags: [market]
+    record_path: "EXPERIMENT/SVBBankRun/Rag/records/market"
+    persona: !include ../Rag/persona.yml
     extras:
       initial_price: 100.0
       fundamental_value: 100.0
-      price_impact: 0.04
+      price_impact: 0.025
       mean_reversion: 0.01
-      noise_std: 0.02
+      noise_std: 0.015
 
-depositor_1:
-  name: "Depositor 1"
-  class: "examples.SVBBankRun.Rag.players:LLMDepositor"
+depositor:
+  name: "Depositor"
+  class: "examples.SVBBankRun.Rag.players:RagLLMDepositor"
+  num_instances: 4
+  config:
+    identity: "depositor"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SVBBankRun/Rag/records/depositor"
+    persona: !include ../Rag/persona.yml
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 600
+      initial_price: 100.0
+      fundamental_value: 100.0
+      withdrawal_threshold: 0.1
+      social_influence: 0.5
+      base_size: 300
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "hunyuan/hunyuan-embedding"
+          top_k: 3
+      llm:
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_DEPOSITOR_SYS"
+        user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+
+socialmediainfluencer:
+  name: "SocialMediaInfluencer"
+  class: "examples.SVBBankRun.Rag.players:RagLLMSocialMediaInfluencer"
   num_instances: 2
   config:
-    identity: "depositor_1"
+    identity: "socialmediainfluencer"
     role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SVBBankRun/Rag/records/socialmediainfluencer"
+    persona: !include ../Rag/persona.yml
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "depositor"
+      initial_cash: 800000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      amplification_factor: 2.0
+      base_size: 500
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "hunyuan/hunyuan-embedding"
+          top_k: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_SOCIAL_MEDIA_INFLUENCER_SYS"
+        user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
 
-
-social_media_influencer_2:
-  name: "SocialMediaInfluencer 2"
-  class: "examples.SVBBankRun.Rag.players:LLMSocialMediaInfluencer"
+bankmanager:
+  name: "BankManager"
+  class: "examples.SVBBankRun.Rag.players:RagLLMBankManager"
   num_instances: 2
   config:
-    identity: "social_media_influencer_2"
+    identity: "bankmanager"
     role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SVBBankRun/Rag/records/bankmanager"
+    persona: !include ../Rag/persona.yml
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "social_media_influencer"
+      initial_cash: 3000000.0
+      initial_position: 800
+      initial_price: 100.0
+      fundamental_value: 100.0
+      duration_gap: 0.5
+      stabilize_size: 400
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "hunyuan/hunyuan-embedding"
+          top_k: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_BANK_MANAGER_SYS"
+        user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
 
-
-bank_manager_3:
-  name: "BankManager 3"
-  class: "examples.SVBBankRun.Rag.players:LLMBankManager"
-  num_instances: 2
-  config:
-    identity: "bank_manager_3"
-    role: player
-    extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "bank_manager"
-      llm:
-        model: "doubao-pro-32k"
-
-
-regulator_4:
-  name: "Regulator 4"
-  class: "examples.SVBBankRun.Rag.players:LLMRegulator"
+regulator:
+  name: "Regulator"
+  class: "examples.SVBBankRun.Rag.players:RagLLMRegulator"
   num_instances: 1
   config:
-    identity: "regulator_4"
+    identity: "regulator"
     role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SVBBankRun/Rag/records/regulator"
+    persona: !include ../Rag/persona.yml
     extras:
-      initial_cash: 1000000.00
+      initial_cash: 10000000.0
       initial_position: 0
-      agent_type: "regulator"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      intervention_threshold: 0.5
+      guarantee_probability: 0.4
+      intervention_size: 2000
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "hunyuan/hunyuan-embedding"
+          top_k: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_REGULATOR_SYS"
+        user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
 
-
-bond_trader_5:
-  name: "BondTrader 5"
-  class: "examples.SVBBankRun.Rag.players:LLMBondTrader"
+bondtrader:
+  name: "BondTrader"
+  class: "examples.SVBBankRun.Rag.players:RagLLMBondTrader"
   num_instances: 2
   config:
-    identity: "bond_trader_5"
+    identity: "bondtrader"
     role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SVBBankRun/Rag/records/bondtrader"
+    persona: !include ../Rag/persona.yml
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "bond_trader"
+      initial_cash: 2000000.0
+      initial_position: 400
+      initial_price: 100.0
+      fundamental_value: 100.0
+      yield_sensitivity: 0.5
+      position_size: 350
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "hunyuan/hunyuan-embedding"
+          top_k: 3
       llm:
-        model: "doubao-pro-32k"
-
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_BOND_TRADER_SYS"
+        user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
 

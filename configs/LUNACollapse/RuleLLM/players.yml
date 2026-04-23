@@ -7,85 +7,160 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
+      record_path: "EXPERIMENT/LUNACollapse/RuleLLM/records"
       initial_price: 100.0
       fundamental_value: 100.0
-      price_impact: 0.05
+      price_impact: 0.04
       mean_reversion: 0.005
-      noise_std: 0.02
+      noise_std: 0.015
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-stablecoin_holder_1:
-  name: "StablecoinHolder 1"
-  class: "examples.LUNACollapse.RuleLLM.players:LLMStablecoinHolder"
+stablecoinholder:
+  name: "StablecoinHolder"
+  class: "examples.LUNACollapse.RuleLLM.players:RuleLLMStablecoinHolder"
+  num_instances: 3
+  config:
+    identity: "stablecoinholder"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LUNACollapse/RuleLLM/records"
+      initial_cash: 1000000.0
+      initial_position: 1000
+      initial_price: 100.0
+      fundamental_value: 100.0
+      redemption_threshold: 0.05
+      base_size: 500
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_STABLECOIN_HOLDER_SYS"
+        user_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 600
+  persona: !include persona.yml
+
+arbitrageur:
+  name: "Arbitrageur"
+  class: "examples.LUNACollapse.RuleLLM.players:RuleLLMArbitrageur"
   num_instances: 2
   config:
-    identity: "stablecoin_holder_1"
+    identity: "arbitrageur"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "stablecoin_holder"
+      record_path: "EXPERIMENT/LUNACollapse/RuleLLM/records"
+      initial_cash: 1500000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      arb_threshold: 0.02
+      base_size: 600
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_ARBITRAGEUR_SYS"
+        user_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 600
+  persona: !include persona.yml
 
-
-arbitrageur_2:
-  name: "Arbitrageur 2"
-  class: "examples.LUNACollapse.RuleLLM.players:LLMArbitrageur"
+defilender:
+  name: "DeFiLender"
+  class: "examples.LUNACollapse.RuleLLM.players:RuleLLMDeFiLender"
   num_instances: 2
   config:
-    identity: "arbitrageur_2"
+    identity: "defilender"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "arbitrageur"
+      record_path: "EXPERIMENT/LUNACollapse/RuleLLM/records"
+      initial_cash: 2000000.0
+      initial_position: 800
+      initial_price: 100.0
+      fundamental_value: 100.0
+      liquidation_threshold: 0.15
+      base_size: 400
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_DEFI_LENDER_SYS"
+        user_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.2
+          max_tokens: 600
+  persona: !include persona.yml
 
-
-de_fi_lender_3:
-  name: "DeFiLender 3"
-  class: "examples.LUNACollapse.RuleLLM.players:LLMDeFiLender"
+anchordepositor:
+  name: "AnchorDepositor"
+  class: "examples.LUNACollapse.RuleLLM.players:RuleLLMAnchorDepositor"
   num_instances: 2
   config:
-    identity: "de_fi_lender_3"
+    identity: "anchordepositor"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "de_fi_lender"
+      record_path: "EXPERIMENT/LUNACollapse/RuleLLM/records"
+      initial_cash: 800000.0
+      initial_position: 600
+      initial_price: 100.0
+      fundamental_value: 100.0
+      exit_threshold: 0.03
+      base_size: 350
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_ANCHOR_DEPOSITOR_SYS"
+        user_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 600
+  persona: !include persona.yml
 
-
-anchor_depositor_4:
-  name: "AnchorDepositor 4"
-  class: "examples.LUNACollapse.RuleLLM.players:LLMAnchorDepositor"
-  num_instances: 2
-  config:
-    identity: "anchor_depositor_4"
-    role: player
-    extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "anchor_depositor"
-      llm:
-        model: "doubao-pro-32k"
-
-
-value_buyer_5:
-  name: "ValueBuyer 5"
-  class: "examples.LUNACollapse.RuleLLM.players:LLMValueBuyer"
+valuebuyer:
+  name: "ValueBuyer"
+  class: "examples.LUNACollapse.RuleLLM.players:RuleLLMValueBuyer"
   num_instances: 1
   config:
-    identity: "value_buyer_5"
+    identity: "valuebuyer"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "value_buyer"
+      record_path: "EXPERIMENT/LUNACollapse/RuleLLM/records"
+      initial_cash: 3000000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      discount_threshold: 0.30
+      base_size: 200
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
-
-
+        sys_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_VALUE_BUYER_SYS"
+        user_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 600
+  persona: !include persona.yml

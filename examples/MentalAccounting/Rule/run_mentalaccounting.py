@@ -37,7 +37,7 @@ async def main():
     print("MentalAccounting Simulation - Rule-Based Agents")
     print("=" * 70)
     print("Phenomenon: Mental accounting causes investors to treat money differently based on its source or intended use")
-    print("Rounds:     %%s" %% config.setting["total_rounds"])
+    print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 70 + "\n")
     
     simulator = GeneralSimulator(config)

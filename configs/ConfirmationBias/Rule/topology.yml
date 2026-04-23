@@ -1,22 +1,30 @@
-# Topology configuration
+# =============================================================================
+# ConfirmationBias Rule Topology - Star Pattern
+# =============================================================================
+type: "star"
+
+sources:
+  - market
+
 connections:
-  - source: market
-    target: beliefanchor
-  - source: beliefanchor
-    target: market
-  - source: market
-    target: selectivescanner
-  - source: selectivescanner
-    target: market
-  - source: market
-    target: balancedanalyst
-  - source: balancedanalyst
-    target: market
-  - source: market
-    target: contrariantrader
-  - source: contrariantrader
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - belief_anchor
+    - selective_scanner
+    - balanced_analyst
+    - contrarian_trader
+    - noise_trader
+
+  belief_anchor:
+    - market
+
+  selective_scanner:
+    - market
+
+  balanced_analyst:
+    - market
+
+  contrarian_trader:
+    - market
+
+  noise_trader:
+    - market

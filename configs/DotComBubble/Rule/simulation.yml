@@ -1,32 +1,38 @@
 # DotComBubble Rule Simulation Configuration
-#
-# 1995-2001 Internet bubble - NASDAQ rose 400% then fell 78%
-#
-# Usage:
-#   python examples/DotComBubble/Rule/run_dotcombubble.py \
-#       -c configs/DotComBubble/Rule/simulation.yml
 
 setting:
-  name: "DotComBubble-Rule"
-  description: "Dot-com bubble simulation with new economy narrative, IPO frenzy, and valuation disconnect"
+  name: "dotcombubble_rule_simulation"
+  description: "Dot-com bubble: narrative-driven tech mania, IPO frenzy, momentum, vs. value skeptics and short sellers"
   total_rounds: 200
-  
+  round_history_limit: 3
   record_path: "EXPERIMENT/DotComBubble/Rule/records"
-  storage_path: "EXPERIMENT/DotComBubble/Rule/communication"
-  
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/DotComBubble/Rule/logs"
+  save_diagram_interval: 50
 
 environment:
-  dotenv_path: ".env"
+  dotenv_path: .env
   workspace: "."
 
 ray:
+  address: null
   namespace: "dotcombubble_rule"
-  ignore_reinit_error: true
-  object_store_memory: 536870912
-  num_cpus: 4
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
 
 players: !include players.yml
 topology: !include topology.yml
@@ -34,5 +40,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/DotComBubble/Rule/communication"
   record_messages: true
-  message_timeout_ms: 5000
-  max_retries: 3
+  message_block_size: 500

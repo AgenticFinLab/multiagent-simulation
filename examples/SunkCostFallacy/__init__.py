@@ -1,3 +1,19 @@
-"""SunkCostFallacy Simulation Package"""
+"""SunkCostFallacy Rule Variant"""
 
-__all__ = ["SunkCostHolder, CommitmentEscalator, RationalCutter, OpportunityCostTrader, NoiseTrader"]
+from examples.SunkCostFallacy.Rule.players import (
+    Market,
+    SunkCostHolder,
+    CommitmentEscalator,
+    RationalCutter,
+    OpportunityCostTrader,
+    NoiseTrader,
+)
+
+__all__ = [
+    "Market",
+    "SunkCostHolder",
+    "CommitmentEscalator",
+    "RationalCutter",
+    "OpportunityCostTrader",
+    "NoiseTrader",
+]

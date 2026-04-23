@@ -1,72 +1,9 @@
-# SVBBankRun RuleLLM Persona Configuration
+auto_checkpoint: false
 
-market:
-  type: proxy
-  checkpoint_dir: "EXPERIMENT/SVBBankRun/RuleLLM/records/market/checkpoints"
-  record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/market"
+proxy:
+  record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records"
+  communication:
+    store_path: "EXPERIMENT/SVBBankRun/RuleLLM/communication"
   monitoring:
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/monitoring/market"
-
-depositor_1_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/SVBBankRun/RuleLLM/records/depositor_1_1/checkpoints"
-  record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/depositor_1_1"
-  monitoring:
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/monitoring/depositor_1_1"
-
-depositor_1_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/SVBBankRun/RuleLLM/records/depositor_1_2/checkpoints"
-  record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/depositor_1_2"
-  monitoring:
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/monitoring/depositor_1_2"
-
-social_media_influencer_2_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/SVBBankRun/RuleLLM/records/social_media_influencer_2_1/checkpoints"
-  record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/social_media_influencer_2_1"
-  monitoring:
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/monitoring/social_media_influencer_2_1"
-
-social_media_influencer_2_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/SVBBankRun/RuleLLM/records/social_media_influencer_2_2/checkpoints"
-  record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/social_media_influencer_2_2"
-  monitoring:
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/monitoring/social_media_influencer_2_2"
-
-bank_manager_3_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/SVBBankRun/RuleLLM/records/bank_manager_3_1/checkpoints"
-  record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/bank_manager_3_1"
-  monitoring:
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/monitoring/bank_manager_3_1"
-
-bank_manager_3_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/SVBBankRun/RuleLLM/records/bank_manager_3_2/checkpoints"
-  record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/bank_manager_3_2"
-  monitoring:
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/monitoring/bank_manager_3_2"
-
-regulator_4_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/SVBBankRun/RuleLLM/records/regulator_4_1/checkpoints"
-  record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/regulator_4_1"
-  monitoring:
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/monitoring/regulator_4_1"
-
-bond_trader_5_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/SVBBankRun/RuleLLM/records/bond_trader_5_1/checkpoints"
-  record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/bond_trader_5_1"
-  monitoring:
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/monitoring/bond_trader_5_1"
-
-bond_trader_5_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/SVBBankRun/RuleLLM/records/bond_trader_5_2/checkpoints"
-  record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/bond_trader_5_2"
-  monitoring:
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/monitoring/bond_trader_5_2"
-
+    metrics_path: "EXPERIMENT/SVBBankRun/RuleLLM/monitoring/metrics"
+    events_path: "EXPERIMENT/SVBBankRun/RuleLLM/monitoring/events"

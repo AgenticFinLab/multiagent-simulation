@@ -1,39 +1,38 @@
-# FlashCrash2010 Simulation Configuration
-# 
-# This simulation models the May 6, 2010 flash crash event.
-# Based on Kirilenko et al. (2017) findings about HFT behavior.
-#
-# Usage:
-#   python examples/FlashCrash2010/Rule/run_flashcrash2010.py \
-#       -c configs/FlashCrash2010/Rule/simulation.yml
-#
-# Phenomenon: 2010 Flash Crash
-# Key Feature: HFT liquidity withdrawal, order book depth collapse
-# Theory: Kirilenko et al. (2017), Biais et al. (2015)
+# FlashCrash2010 Rule Simulation Configuration
 
 setting:
-  name: "FlashCrash2010"
-  description: "2010 Flash Crash simulation with HFT market makers, momentum chasers, fundamental traders, stop-loss traders, and noise traders. Models liquidity withdrawal and order book dynamics."
+  name: "flash_crash_2010_rule_simulation"
+  description: "2010 Flash Crash: rule-based HFT withdrawal, momentum feedback, stop-loss cascades"
   total_rounds: 200
-  
+  round_history_limit: 3
   record_path: "EXPERIMENT/FlashCrash2010/Rule/records"
-  storage_path: "EXPERIMENT/FlashCrash2010/Rule/communication"
-  
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/FlashCrash2010/Rule/logs"
+  save_diagram_interval: 50
 
 environment:
-  dotenv_path: ".env"
+  dotenv_path: .env
   workspace: "."
 
 ray:
-  namespace: "flashcrash2010_rule"
-  ignore_reinit_error: true
-  
-  # Resource configuration
-  object_store_memory: 536870912
-  num_cpus: 4
+  address: null
+  namespace: "flash_crash_2010_rule"
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
 
 players: !include players.yml
 topology: !include topology.yml
@@ -41,6 +40,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/FlashCrash2010/Rule/communication"
   record_messages: true
-  
-  message_timeout_ms: 5000
-  max_retries: 3
+  message_block_size: 500

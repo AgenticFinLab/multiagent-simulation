@@ -1,3 +1,19 @@
-"""EuropeanDebtCrisis Simulation Package"""
+"""EuropeanDebtCrisis Rule Variant"""
 
-__all__ = ["PeripheryBondSeller, CreditorPanicker, CoreBondBuyer, ECBIntervenor, HedgedFund"]
+from examples.EuropeanDebtCrisis.Rule.players import (
+    Market,
+    PeripheryBondSeller,
+    CreditorPanicker,
+    CoreBondBuyer,
+    ECBIntervenor,
+    HedgedFund,
+)
+
+__all__ = [
+    "Market",
+    "PeripheryBondSeller",
+    "CreditorPanicker",
+    "CoreBondBuyer",
+    "ECBIntervenor",
+    "HedgedFund",
+]

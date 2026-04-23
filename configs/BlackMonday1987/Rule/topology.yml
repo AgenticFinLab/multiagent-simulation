@@ -1,76 +1,49 @@
-# BlackMonday1987 Rule Communication Topology
+# =============================================================================
+# BlackMonday1987 Rule Topology - Star Pattern
+# =============================================================================
+# Market as hub, all investors communicate through market.
+#
+# Note: player keys with num_instances > 1 use their base key here.
+# The simulator expander resolves them to foo_1, foo_2, ... before building
+# the TopologyGraph, so all edge rules apply to every instance automatically.
+#
+#    portfolio_insurer ──────────┐
+#    index_arbitrageur ──────────┤
+#    program_trader    ──────────┼──▶ market ──▶ all investors
+#    value_investor    ──────────┤             (market data: price, return)
+#    noise_trader      ──────────┘
+#
+# Execution flow per round:
+#   Level 0: market executes (broadcasts price + dynamics data)
+#   Level 1: all investors execute in parallel (submit P,Q orders)
+# =============================================================================
 
-graph:
-  type: star
-  center: market
+type: "star"
+
+sources:
+  - market
 
 connections:
-  - from: market
-    to:
-      - portfolio_insurer_1_1
-      - portfolio_insurer_1_2
-      - index_arbitrageur_2_1
-      - index_arbitrageur_2_2
-      - program_trader_3_1
-      - program_trader_3_2
-      - value_investor_4_1
-      - noise_trader_5_1
-      - noise_trader_5_2
-    bidirectional: false
-    message_type: market_update
+  # Market → All investors (price + market data broadcast)
+  market:
+    - portfolio_insurer
+    - index_arbitrageur
+    - program_trader
+    - value_investor
+    - noise_trader
 
-  - from: portfolio_insurer_1_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: portfolio_insurer_1_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: index_arbitrageur_2_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: index_arbitrageur_2_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: program_trader_3_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: program_trader_3_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: value_investor_4_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: noise_trader_5_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: noise_trader_5_2
-    to: market
-    bidirectional: false
-    message_type: order
-
-broadcast:
-  enabled: true
-  from: market
-  to: all_players
-  message_type: market_update
-
-execution:
-  order:
+  # Each investor → Market only (order submission)
+  portfolio_insurer:
     - market
-    - portfolio_insurer_1_1
-    - portfolio_insurer_1_2
-    - index_arbitrageur_2_1
-    - index_arbitrageur_2_2
-    - program_trader_3_1
-    - program_trader_3_2
-    - value_investor_4_1
-    - noise_trader_5_1
-    - noise_trader_5_2
+
+  index_arbitrageur:
+    - market
+
+  program_trader:
+    - market
+
+  value_investor:
+    - market
+
+  noise_trader:
+    - market

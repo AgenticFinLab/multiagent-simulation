@@ -2,79 +2,155 @@
 
 market:
   name: "Market"
-  class: "examples.FramingEffect.Rule.players:Market"
+  class: "examples.FramingEffect.RuleLLM.players:Market"
   num_instances: 1
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
+      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"
       initial_price: 100.0
       fundamental_value: 100.0
       price_impact: 0.05
       mean_reversion: 0.02
-      noise_std: 0.02
+      noise_std: 0.01
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-gainframefollower_1:
-  name: "GainFrameFollower 1"
-  class: "examples.FramingEffect.RuleLLM.players:GainFrameFollower"
+gainframefollower:
+  name: "GainFrameFollower"
+  class: "examples.FramingEffect.RuleLLM.players:RuleLLMGainFrameFollower"
   num_instances: 2
   config:
-    identity: "gainframefollower_1"
+    identity: "gainframefollower"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"
       initial_cash: 1000000.0
       initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: gainframefollower
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_GAIN_FRAME_FOLLOWER_SYS"
+        user_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
 
-lossframereactor_2:
-  name: "LossFrameReactor 2"
-  class: "examples.FramingEffect.RuleLLM.players:LossFrameReactor"
+lossframereactor:
+  name: "LossFrameReactor"
+  class: "examples.FramingEffect.RuleLLM.players:RuleLLMLossFrameReactor"
   num_instances: 2
   config:
-    identity: "lossframereactor_2"
+    identity: "lossframereactor"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"
       initial_cash: 1000000.0
       initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: lossframereactor
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_LOSS_FRAME_REACTOR_SYS"
+        user_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
 
-frameinvarianttrader_3:
-  name: "FrameInvariantTrader 3"
-  class: "examples.FramingEffect.RuleLLM.players:FrameInvariantTrader"
+frameinvarianttrader:
+  name: "FrameInvariantTrader"
+  class: "examples.FramingEffect.RuleLLM.players:RuleLLMFrameInvariantTrader"
   num_instances: 1
   config:
-    identity: "frameinvarianttrader_3"
+    identity: "frameinvarianttrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"
       initial_cash: 1000000.0
       initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: frameinvarianttrader
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_FRAME_INVARIANT_TRADER_SYS"
+        user_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
 
-arbitrageframer_4:
-  name: "ArbitrageFramer 4"
-  class: "examples.FramingEffect.RuleLLM.players:ArbitrageFramer"
+arbitrageframer:
+  name: "ArbitrageFramer"
+  class: "examples.FramingEffect.RuleLLM.players:RuleLLMArbitrageFramer"
   num_instances: 1
   config:
-    identity: "arbitrageframer_4"
+    identity: "arbitrageframer"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"
       initial_cash: 1000000.0
       initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: arbitrageframer
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_ARBITRAGE_FRAMER_SYS"
+        user_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
 
-noisetrader_5:
-  name: "NoiseTrader 5"
-  class: "examples.FramingEffect.RuleLLM.players:NoiseTrader"
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.FramingEffect.RuleLLM.players:RuleLLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader_5"
+    identity: "noisetrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
+      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"
+      initial_cash: 500000.0
       initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: noisetrader
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
+        user_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml

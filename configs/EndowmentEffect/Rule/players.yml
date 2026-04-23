@@ -7,69 +7,110 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
+      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"
       initial_price: 100.0
       fundamental_value: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.02
+      price_impact: 0.02
+      mean_reversion: 0.05
+      noise_std: 0.01
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-endowedholder_1:
-  name: "EndowedHolder 1"
+endowedholder:
+  name: "EndowedHolder"
   class: "examples.EndowmentEffect.Rule.players:EndowedHolder"
   num_instances: 2
   config:
-    identity: "endowedholder_1"
+    identity: "endowedholder"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
+      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"
+      initial_cash: 800000.0
+      initial_position: 500
+      endowment_premium: 0.15
+      base_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-
-statusquoseller_2:
-  name: "StatusQuoSeller 2"
+statusquoseller:
+  name: "StatusQuoSeller"
   class: "examples.EndowmentEffect.Rule.players:StatusQuoSeller"
   num_instances: 2
   config:
-    identity: "statusquoseller_2"
+    identity: "statusquoseller"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
+      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"
+      initial_cash: 800000.0
+      initial_position: 500
+      status_quo_premium: 0.20
+      base_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-
-rationalarbitrageur_3:
-  name: "RationalArbitrageur 3"
+rationalarbitrageur:
+  name: "RationalArbitrageur"
   class: "examples.EndowmentEffect.Rule.players:RationalArbitrageur"
-  num_instances: 1
+  num_instances: 2
   config:
-    identity: "rationalarbitrageur_3"
+    identity: "rationalarbitrageur"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"
       initial_cash: 1000000.0
       initial_position: 0
+      arb_threshold: 0.05
+      base_size: 400
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-
-newbuyer_4:
-  name: "NewBuyer 4"
+newbuyer:
+  name: "NewBuyer"
   class: "examples.EndowmentEffect.Rule.players:NewBuyer"
-  num_instances: 1
+  num_instances: 2
   config:
-    identity: "newbuyer_4"
+    identity: "newbuyer"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"
       initial_cash: 1000000.0
       initial_position: 0
+      buy_threshold: 0.03
+      base_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-
-noisetrader_5:
-  name: "NoiseTrader 5"
+noisetrader:
+  name: "NoiseTrader"
   class: "examples.EndowmentEffect.Rule.players:NoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader_5"
+    identity: "noisetrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
+      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"
+      initial_cash: 500000.0
       initial_position: 0
-
+      trade_probability: 0.3
+      noise_size: 150
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

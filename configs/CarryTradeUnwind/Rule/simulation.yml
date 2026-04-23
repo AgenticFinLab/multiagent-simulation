@@ -1,32 +1,51 @@
+# =============================================================================
 # CarryTradeUnwind Rule Simulation Configuration
-#
-# CarryTradeUnwind simulation
+# =============================================================================
+# Carry trade unwind: sudden risk-off events trigger rapid appreciation of
+# low-yield funding currencies (JPY/CHF), forcing leveraged carry traders to
+# unwind positions, amplifying the move.
 #
 # Usage:
-#   python examples/CarryTradeUnwind/Rule/run_carrytradeunwind_rule.py \
+#   python examples/CarryTradeUnwind/Rule/run_carrytrade.py \
 #       -c configs/CarryTradeUnwind/Rule/simulation.yml
+# =============================================================================
 
 setting:
-  name: "CarryTradeUnwind-Rule"
-  description: "CarryTradeUnwind simulation - Rule agents"
+  name: "carrytrade_unwind_rule_simulation"
+  description: "Carry trade unwind: leveraged positions + safe-haven demand vs. central bank intervention"
   total_rounds: 200
-
+  round_history_limit: 3
   record_path: "EXPERIMENT/CarryTradeUnwind/Rule/records"
-  storage_path: "EXPERIMENT/CarryTradeUnwind/Rule/communication"
-
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/CarryTradeUnwind/Rule/logs"
+  save_diagram_interval: 50
 
 environment:
-  dotenv_path: ".env"
+  dotenv_path: .env
   workspace: "."
 
 ray:
-  namespace: "carrytradeunwind_rule"
-  ignore_reinit_error: true
-  object_store_memory: 536870912
-  num_cpus: 4
+  address: null
+  namespace: "carrytrade_rule"
+  actor_prefix: null
+  # Derived: 10 players (1 market + 2 carry_trader + 2 leveraged_carry + 2 funding_buyer
+  #          + 1 cb_intervener + 2 noise_trader)
+  #   Star topology -> 18 msgs/round -> 38 Ray objects -> 128 MB floor
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
 
 players: !include players.yml
 topology: !include topology.yml
@@ -34,5 +53,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/CarryTradeUnwind/Rule/communication"
   record_messages: true
-  message_timeout_ms: 5000
-  max_retries: 3
+  message_block_size: 500

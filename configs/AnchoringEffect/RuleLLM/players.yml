@@ -1,5 +1,15 @@
-# AnchoringEffect RuleLLM Agent Configuration
+# =============================================================================
+# AnchoringEffectRuleLLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 Hybrid Rule+LLM Investor types.
+# Each LLM agent's system prompt embeds:
+#   - Personal profile: identity, style, behavioral traits (from LLM variant)
+#   - Quantitative rules: exact anchoring formulas and thresholds (from rule-based)
+# =============================================================================
 
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based, identical to Rule variant
+# -----------------------------------------------------------------------------
 market:
   name: "Market"
   class: "examples.AnchoringEffect.RuleLLM.players:Market"
@@ -7,85 +17,184 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
-      initial_price: 100.0
+      record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
+      # Market dynamics parameters (identical to Rule variant)
       fundamental_value: 100.0
-      price_impact: 0.04
-      mean_reversion: 0.02
-      noise_std: 0.02
+      initial_price: 100.0
+      price_impact: 0.04        # Low: anchoring effect slows price discovery
+      mean_reversion: 0.02      # Moderate: reasonable reversion
+      noise_std: 0.02           # Low noise: anchoring effect is clearer
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-anchored_trader_1:
-  name: "AnchoredTrader 1"
-  class: "examples.AnchoringEffect.RuleLLM.players:LLMAnchoredTrader"
+# -----------------------------------------------------------------------------
+# Hybrid Anchored Traders (Anchor persona + explicit anchor formula)
+# Theory: Tversky & Kahneman (1974) — Anchoring and Insufficient Adjustment
+# Rule: perceived = anchor + (F - anchor) * 0.3
+# -----------------------------------------------------------------------------
+rulellm_anchored:
+  name: "RuleLLM Anchored Trader"
+  class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMAnchoredTrader"
+  # Expander → rulellm_anchored_1, rulellm_anchored_2
   num_instances: 2
   config:
-    identity: "anchored_trader_1"
+    identity: "rulellm_anchored"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "anchored_trader"
+      record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AnchoringEffect AnchoredTrader)
+      anchor_weight: 0.7
+      adjustment_factor: 0.3
+      base_position_size: 20.0
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_ANCHORED_SYS"
+        user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-historical_anchor_2:
-  name: "HistoricalAnchor 2"
-  class: "examples.AnchoringEffect.RuleLLM.players:LLMHistoricalAnchor"
+# -----------------------------------------------------------------------------
+# Hybrid Historical Anchors (Historical anchor persona + historical avg formula)
+# Theory: Northcraft & Neale (1987) — Experts anchor to past prices
+# Rule: perceived_dev = (price - hist_avg) / hist_avg * (1 - 0.5)
+# -----------------------------------------------------------------------------
+rulellm_historical:
+  name: "RuleLLM Historical Anchor"
+  class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMHistoricalAnchor"
+  # Expander → rulellm_historical_1, rulellm_historical_2
   num_instances: 2
   config:
-    identity: "historical_anchor_2"
+    identity: "rulellm_historical"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "historical_anchor"
+      record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AnchoringEffect HistoricalAnchor)
+      anchor_weight: 0.5
+      lookback: 60
+      base_position_size: 20.0
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_HISTORICAL_SYS"
+        user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-rational_updater_3:
-  name: "RationalUpdater 3"
-  class: "examples.AnchoringEffect.RuleLLM.players:LLMRationalUpdater"
+# -----------------------------------------------------------------------------
+# Hybrid Rational Updater (Rational persona + full Bayesian adjustment rule)
+# Rule: deviation = (price - F) / F; trade when |dev| > 2%
+# -----------------------------------------------------------------------------
+rulellm_rational:
+  name: "RuleLLM Rational Updater"
+  class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMRationalUpdater"
   num_instances: 1
   config:
-    identity: "rational_updater_3"
+    identity: "rulellm_rational"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "rational_updater"
+      record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AnchoringEffect RationalUpdater)
+      base_position_size: 25.0
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_RATIONAL_SYS"
+        user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-momentum_trader_4:
-  name: "MomentumTrader 4"
-  class: "examples.AnchoringEffect.RuleLLM.players:LLMMomentumTrader"
+# -----------------------------------------------------------------------------
+# Hybrid Momentum Traders (Momentum persona + trend rule)
+# Rule: if |return| > 2%: quantity = base_size * return * 10
+# -----------------------------------------------------------------------------
+rulellm_momentum:
+  name: "RuleLLM Momentum Trader"
+  class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMMomentumTrader"
+  # Expander → rulellm_momentum_1, rulellm_momentum_2
   num_instances: 2
   config:
-    identity: "momentum_trader_4"
+    identity: "rulellm_momentum"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "momentum_trader"
+      record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AnchoringEffect MomentumTrader)
+      entry_threshold: 0.02
+      base_position_size: 20.0
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_MOMENTUM_SYS"
+        user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-noise_trader_5:
-  name: "NoiseTrader 5"
-  class: "examples.AnchoringEffect.RuleLLM.players:LLMNoiseTrader"
+# -----------------------------------------------------------------------------
+# Hybrid Noise Traders (Random trader persona + random trade rule)
+# Rule: trade prob=5%, random buy/sell in [100, 500]
+# -----------------------------------------------------------------------------
+rulellm_noise:
+  name: "RuleLLM Noise Trader"
+  class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMNoiseTrader"
+  # Expander → rulellm_noise_1, rulellm_noise_2
   num_instances: 2
   config:
-    identity: "noise_trader_5"
+    identity: "rulellm_noise"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "noise_trader"
+      record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AnchoringEffect NoiseTrader)
+      trade_probability: 0.05
+      min_order: 100.0
+      max_order: 500.0
       llm:
-        model: "doubao-pro-32k"
-
-
+        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_NOISE_SYS"
+        user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml

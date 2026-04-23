@@ -1,65 +1,23 @@
 # DotComBubble LLM Persona Configuration
 
-market:
-  type: proxy
-  checkpoint_dir: "EXPERIMENT/DotComBubble/LLM/records/market/checkpoints"
-  record_path: "EXPERIMENT/DotComBubble/LLM/records/market"
-  monitoring:
-    record_path: "EXPERIMENT/DotComBubble/LLM/monitoring/market"
+auto_checkpoint: false
+debug_mode: true
 
-new_economy_evangelist_1_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/DotComBubble/LLM/records/new_economy_evangelist_1_1/checkpoints"
-  record_path: "EXPERIMENT/DotComBubble/LLM/records/new_economy_evangelist_1_1"
-  monitoring:
-    record_path: "EXPERIMENT/DotComBubble/LLM/monitoring/new_economy_evangelist_1_1"
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/DotComBubble/LLM/checkpoints"
+    record_path: "EXPERIMENT/DotComBubble/LLM/records"
+    record_rounds: true
+    turn_block_size: 3
 
-new_economy_evangelist_1_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/DotComBubble/LLM/records/new_economy_evangelist_1_2/checkpoints"
-  record_path: "EXPERIMENT/DotComBubble/LLM/records/new_economy_evangelist_1_2"
   monitoring:
-    record_path: "EXPERIMENT/DotComBubble/LLM/monitoring/new_economy_evangelist_1_2"
+    record_path: "EXPERIMENT/DotComBubble/LLM/monitoring"
+    monitor_hot_limit: 3
 
-i_p_o_flipper_2_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/DotComBubble/LLM/records/i_p_o_flipper_2_1/checkpoints"
-  record_path: "EXPERIMENT/DotComBubble/LLM/records/i_p_o_flipper_2_1"
-  monitoring:
-    record_path: "EXPERIMENT/DotComBubble/LLM/monitoring/i_p_o_flipper_2_1"
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
 
-i_p_o_flipper_2_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/DotComBubble/LLM/records/i_p_o_flipper_2_2/checkpoints"
-  record_path: "EXPERIMENT/DotComBubble/LLM/records/i_p_o_flipper_2_2"
-  monitoring:
-    record_path: "EXPERIMENT/DotComBubble/LLM/monitoring/i_p_o_flipper_2_2"
-
-momentum_follower_3_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/DotComBubble/LLM/records/momentum_follower_3_1/checkpoints"
-  record_path: "EXPERIMENT/DotComBubble/LLM/records/momentum_follower_3_1"
-  monitoring:
-    record_path: "EXPERIMENT/DotComBubble/LLM/monitoring/momentum_follower_3_1"
-
-momentum_follower_3_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/DotComBubble/LLM/records/momentum_follower_3_2/checkpoints"
-  record_path: "EXPERIMENT/DotComBubble/LLM/records/momentum_follower_3_2"
-  monitoring:
-    record_path: "EXPERIMENT/DotComBubble/LLM/monitoring/momentum_follower_3_2"
-
-skeptical_value_investor_4_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/DotComBubble/LLM/records/skeptical_value_investor_4_1/checkpoints"
-  record_path: "EXPERIMENT/DotComBubble/LLM/records/skeptical_value_investor_4_1"
-  monitoring:
-    record_path: "EXPERIMENT/DotComBubble/LLM/monitoring/skeptical_value_investor_4_1"
-
-short_seller_5_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/DotComBubble/LLM/records/short_seller_5_1/checkpoints"
-  record_path: "EXPERIMENT/DotComBubble/LLM/records/short_seller_5_1"
-  monitoring:
-    record_path: "EXPERIMENT/DotComBubble/LLM/monitoring/short_seller_5_1"
-
+  resource:
+    mcp_servers: []
+    enable_caching: false

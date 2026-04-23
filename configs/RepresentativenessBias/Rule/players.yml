@@ -7,64 +7,120 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
+      record_path: "EXPERIMENT/RepresentativenessBias/Rule/records"
       initial_price: 100.0
       fundamental_value: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.02
+      price_impact: 0.02
+      mean_reversion: 0.01
+      noise_std: 0.012
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-patternmatcher_1:
-  name: "PatternMatcher 1"
+patternmatcher:
+  name: "PatternMatcher"
   class: "examples.RepresentativenessBias.Rule.players:PatternMatcher"
   num_instances: 2
   config:
-    identity: "patternmatcher_1"
+    identity: "patternmatcher"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/RepresentativenessBias/Rule/records"
       initial_cash: 1000000.0
-      initial_position: 0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      streak_sensitivity: 2.0
+      base_size: 400
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-categoryovergeneralizer_2:
-  name: "CategoryOvergeneralizer 2"
+categoryovergeneralizer:
+  name: "CategoryOvergeneralizer"
   class: "examples.RepresentativenessBias.Rule.players:CategoryOvergeneralizer"
   num_instances: 2
   config:
-    identity: "categoryovergeneralizer_2"
+    identity: "categoryovergeneralizer"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/RepresentativenessBias/Rule/records"
       initial_cash: 1000000.0
-      initial_position: 0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      sample_size: 2
+      base_size: 350
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-bayesianupdater_3:
-  name: "BayesianUpdater 3"
+bayesianupdater:
+  name: "BayesianUpdater"
   class: "examples.RepresentativenessBias.Rule.players:BayesianUpdater"
   num_instances: 1
   config:
-    identity: "bayesianupdater_3"
+    identity: "bayesianupdater"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
+      record_path: "EXPERIMENT/RepresentativenessBias/Rule/records"
+      initial_cash: 1200000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      base_rate_weight: 0.7
+      base_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-contrarianstatistical_4:
-  name: "ContrarianStatistical 4"
+contrarianstatistical:
+  name: "ContrarianStatistical"
   class: "examples.RepresentativenessBias.Rule.players:ContrarianStatistical"
   num_instances: 1
   config:
-    identity: "contrarianstatistical_4"
+    identity: "contrarianstatistical"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/RepresentativenessBias/Rule/records"
       initial_cash: 1000000.0
-      initial_position: 0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      contrarian_threshold: 0.04
+      base_size: 350
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-noisetrader_5:
-  name: "NoiseTrader 5"
+noisetrader:
+  name: "NoiseTrader"
   class: "examples.RepresentativenessBias.Rule.players:NoiseTrader"
-  num_instances: 1
+  num_instances: 2
   config:
-    identity: "noisetrader_5"
+    identity: "noisetrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
+      record_path: "EXPERIMENT/RepresentativenessBias/Rule/records"
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 150
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

@@ -1,65 +1,23 @@
 # LTCMCollapse Rule Persona Configuration
 
-market:
-  type: proxy
-  checkpoint_dir: "EXPERIMENT/LTCMCollapse/Rule/records/market/checkpoints"
-  record_path: "EXPERIMENT/LTCMCollapse/Rule/records/market"
-  monitoring:
-    record_path: "EXPERIMENT/LTCMCollapse/Rule/monitoring/market"
+auto_checkpoint: false
+debug_mode: true
 
-convergence_arbitrageur_1_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LTCMCollapse/Rule/records/convergence_arbitrageur_1_1/checkpoints"
-  record_path: "EXPERIMENT/LTCMCollapse/Rule/records/convergence_arbitrageur_1_1"
-  monitoring:
-    record_path: "EXPERIMENT/LTCMCollapse/Rule/monitoring/convergence_arbitrageur_1_1"
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/LTCMCollapse/Rule/checkpoints"
+    record_path: "EXPERIMENT/LTCMCollapse/Rule/records"
+    record_rounds: true
+    turn_block_size: 3
 
-convergence_arbitrageur_1_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LTCMCollapse/Rule/records/convergence_arbitrageur_1_2/checkpoints"
-  record_path: "EXPERIMENT/LTCMCollapse/Rule/records/convergence_arbitrageur_1_2"
   monitoring:
-    record_path: "EXPERIMENT/LTCMCollapse/Rule/monitoring/convergence_arbitrageur_1_2"
+    record_path: "EXPERIMENT/LTCMCollapse/Rule/monitoring"
+    monitor_hot_limit: 3
 
-leverage_trader_2_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LTCMCollapse/Rule/records/leverage_trader_2_1/checkpoints"
-  record_path: "EXPERIMENT/LTCMCollapse/Rule/records/leverage_trader_2_1"
-  monitoring:
-    record_path: "EXPERIMENT/LTCMCollapse/Rule/monitoring/leverage_trader_2_1"
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
 
-leverage_trader_2_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LTCMCollapse/Rule/records/leverage_trader_2_2/checkpoints"
-  record_path: "EXPERIMENT/LTCMCollapse/Rule/records/leverage_trader_2_2"
-  monitoring:
-    record_path: "EXPERIMENT/LTCMCollapse/Rule/monitoring/leverage_trader_2_2"
-
-risk_manager_3_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LTCMCollapse/Rule/records/risk_manager_3_1/checkpoints"
-  record_path: "EXPERIMENT/LTCMCollapse/Rule/records/risk_manager_3_1"
-  monitoring:
-    record_path: "EXPERIMENT/LTCMCollapse/Rule/monitoring/risk_manager_3_1"
-
-risk_manager_3_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LTCMCollapse/Rule/records/risk_manager_3_2/checkpoints"
-  record_path: "EXPERIMENT/LTCMCollapse/Rule/records/risk_manager_3_2"
-  monitoring:
-    record_path: "EXPERIMENT/LTCMCollapse/Rule/monitoring/risk_manager_3_2"
-
-liquidity_provider_4_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LTCMCollapse/Rule/records/liquidity_provider_4_1/checkpoints"
-  record_path: "EXPERIMENT/LTCMCollapse/Rule/records/liquidity_provider_4_1"
-  monitoring:
-    record_path: "EXPERIMENT/LTCMCollapse/Rule/monitoring/liquidity_provider_4_1"
-
-central_bank_5_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LTCMCollapse/Rule/records/central_bank_5_1/checkpoints"
-  record_path: "EXPERIMENT/LTCMCollapse/Rule/records/central_bank_5_1"
-  monitoring:
-    record_path: "EXPERIMENT/LTCMCollapse/Rule/monitoring/central_bank_5_1"
-
+  resource:
+    mcp_servers: []
+    enable_caching: false

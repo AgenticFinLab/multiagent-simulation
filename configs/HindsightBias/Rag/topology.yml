@@ -1,22 +1,29 @@
-# Topology configuration
+# HindsightBias Rag Topology - Star Pattern
+
+type: "star"
+
+sources:
+  - market
+
 connections:
-  - source: market
-    target: hindsightoverconfident
-  - source: hindsightoverconfident
-    target: market
-  - source: market
-    target: outcomelearner
-  - source: outcomelearner
-    target: market
-  - source: market
-    target: processevaluator
-  - source: processevaluator
-    target: market
-  - source: market
-    target: contrarianskeptic
-  - source: contrarianskeptic
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - hindsightoverconfident
+    - outcomelearner
+    - processevaluator
+    - contrarianskeptic
+    - noisetrader
+
+  hindsightoverconfident:
+    - market
+
+  outcomelearner:
+    - market
+
+  processevaluator:
+    - market
+
+  contrarianskeptic:
+    - market
+
+  noisetrader:
+    - market

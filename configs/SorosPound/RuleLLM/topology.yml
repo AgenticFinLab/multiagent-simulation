@@ -1,22 +1,21 @@
-# Topology configuration
+# SorosPound RuleLLM Topology Configuration
+
+type: "star"
+
 connections:
-  - source: market
-    target: macrohedgefund
-  - source: macrohedgefund
-    target: market
-  - source: market
-    target: pegdefender
-  - source: pegdefender
-    target: market
-  - source: market
-    target: convergencetrader
-  - source: convergencetrader
-    target: market
-  - source: market
-    target: opportunistictrader
-  - source: opportunistictrader
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - macrohedgefund
+    - pegdefender
+    - convergencetrader
+    - opportunistictrader
+    - noisetrader
+  macrohedgefund:
+    - market
+  pegdefender:
+    - market
+  convergencetrader:
+    - market
+  opportunistictrader:
+    - market
+  noisetrader:
+    - market

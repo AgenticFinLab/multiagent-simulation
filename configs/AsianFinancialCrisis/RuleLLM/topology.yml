@@ -1,22 +1,30 @@
-# Topology configuration
+# =============================================================================
+# AsianFinancialCrisis RuleLLM - Topology Configuration
+# =============================================================================
+type: "star"
+
+sources:
+  - market
+
 connections:
-  - source: market
-    target: hotmoneyfunder
-  - source: hotmoneyfunder
-    target: market
-  - source: market
-    target: contagiontrader
-  - source: contagiontrader
-    target: market
-  - source: market
-    target: imfrescuer
-  - source: imfrescuer
-    target: market
-  - source: market
-    target: valuecontrarian
-  - source: valuecontrarian
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - hot_money_funder
+    - contagion_trader
+    - imf_rescuer
+    - value_contrarian
+    - noise_trader
+
+  hot_money_funder:
+    - market
+
+  contagion_trader:
+    - market
+
+  imf_rescuer:
+    - market
+
+  value_contrarian:
+    - market
+
+  noise_trader:
+    - market

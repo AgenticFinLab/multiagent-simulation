@@ -7,65 +7,124 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"
       initial_price: 20.0
       fundamental_value: 20.0
-      price_impact: 0.03
+      price_impact: 0.04
       mean_reversion: 0.01
-      noise_std: 0.03
+      noise_std: 0.02
+      initial_short_interest: 1.5
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-retail_coordinated_1:
-  name: "RetailCoordinated 1"
+retailcoordinated:
+  name: "RetailCoordinated"
   class: "examples.GameStopShortSqueeze.Rule.players:RetailCoordinated"
-  num_instances: 2
+  num_instances: 3
   config:
-    identity: "retail_coordinated_1"
+    identity: "retailcoordinated"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"
+      initial_cash: 500000.0
+      initial_position: 100
+      initial_price: 20.0
+      fundamental_value: 20.0
+      buy_pressure: 0.12
+      base_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-short_seller_h_f_2:
-  name: "ShortSellerHF 2"
+shortsellerhf:
+  name: "ShortSellerHF"
   class: "examples.GameStopShortSqueeze.Rule.players:ShortSellerHF"
   num_instances: 2
   config:
-    identity: "short_seller_h_f_2"
+    identity: "shortsellerhf"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"
+      initial_cash: 2000000.0
+      initial_position: 1000
+      initial_price: 20.0
+      fundamental_value: 20.0
+      cover_threshold: 0.05
+      cover_fraction: 0.15
+      cover_size: 200
+      short_size: 150
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-market_maker_gamma_3:
-  name: "MarketMakerGamma 3"
+marketmakergamma:
+  name: "MarketMakerGamma"
   class: "examples.GameStopShortSqueeze.Rule.players:MarketMakerGamma"
-  num_instances: 2
+  num_instances: 1
   config:
-    identity: "market_maker_gamma_3"
+    identity: "marketmakergamma"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"
+      initial_cash: 3000000.0
       initial_position: 0
+      initial_price: 20.0
+      fundamental_value: 20.0
+      gamma_exposure: 0.3
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-institutional_value_4:
-  name: "InstitutionalValue 4"
+institutionalvalue:
+  name: "InstitutionalValue"
   class: "examples.GameStopShortSqueeze.Rule.players:InstitutionalValue"
   num_instances: 1
   config:
-    identity: "institutional_value_4"
+    identity: "institutionalvalue"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"
+      initial_cash: 2000000.0
+      initial_position: 2000
+      initial_price: 20.0
+      fundamental_value: 20.0
+      sell_threshold: 0.30
+      buy_threshold: -0.10
+      base_size: 400
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-momentum_retail_5:
-  name: "MomentumRetail 5"
-  class: "examples.GameStopShortSqueeze.Rule.players:MomentumRetail"
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.GameStopShortSqueeze.Rule.players:NoiseTrader"
   num_instances: 2
   config:
-    identity: "momentum_retail_5"
+    identity: "noisetrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"
+      initial_cash: 300000.0
       initial_position: 0
-
+      initial_price: 20.0
+      fundamental_value: 20.0
+      trade_probability: 0.3
+      min_order: 50
+      max_order: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

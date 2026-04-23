@@ -1,2 +1,9 @@
-# Persona configuration
-personas: []
+auto_checkpoint: false
+
+proxy:
+  record_path: "EXPERIMENT/SunkCostFallacy/Rule/records"
+  communication:
+    store_path: "EXPERIMENT/SunkCostFallacy/Rule/communication"
+  monitoring:
+    metrics_path: "EXPERIMENT/SunkCostFallacy/Rule/monitoring/metrics"
+    events_path: "EXPERIMENT/SunkCostFallacy/Rule/monitoring/events"

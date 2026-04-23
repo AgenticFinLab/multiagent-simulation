@@ -7,85 +7,162 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
+      record_path: "EXPERIMENT/MentalAccounting/LLM/records"
       initial_price: 100.0
       fundamental_value: 100.0
-      price_impact: 0.04
-      mean_reversion: 0.02
-      noise_std: 0.02
+      price_impact: 0.02
+      mean_reversion: 0.01
+      noise_std: 0.012
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-mental_accountant_1:
-  name: "MentalAccountant 1"
+mentalaccountant:
+  name: "MentalAccountant"
   class: "examples.MentalAccounting.LLM.players:LLMMentalAccountant"
   num_instances: 2
   config:
-    identity: "mental_accountant_1"
+    identity: "mentalaccountant"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "mental_accountant"
+      record_path: "EXPERIMENT/MentalAccounting/LLM/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      loss_aversion_per_account: 2.25
+      num_accounts: 3
+      base_size: 400
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_MENTAL_ACCOUNTANT_SYS"
+        user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-house_money_trader_2:
-  name: "HouseMoneyTrader 2"
+housemoneytrader:
+  name: "HouseMoneyTrader"
   class: "examples.MentalAccounting.LLM.players:LLMHouseMoneyTrader"
   num_instances: 2
   config:
-    identity: "house_money_trader_2"
+    identity: "housemoneytrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "house_money_trader"
+      record_path: "EXPERIMENT/MentalAccounting/LLM/records"
+      initial_cash: 1200000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      gain_risk_multiplier: 2.0
+      loss_risk_multiplier: 0.5
+      base_size: 400
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_HOUSE_MONEY_TRADER_SYS"
+        user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-rational_portfolio_manager_3:
-  name: "RationalPortfolioManager 3"
+rationalportfoliomanager:
+  name: "RationalPortfolioManager"
   class: "examples.MentalAccounting.LLM.players:LLMRationalPortfolioManager"
   num_instances: 1
   config:
-    identity: "rational_portfolio_manager_3"
+    identity: "rationalportfoliomanager"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "rational_portfolio_manager"
+      record_path: "EXPERIMENT/MentalAccounting/LLM/records"
+      initial_cash: 1500000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      risk_aversion: 0.7
+      base_size: 300
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_RATIONAL_PORTFOLIO_MANAGER_SYS"
+        user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-sunk_cost_holder_4:
-  name: "SunkCostHolder 4"
+sunkcostholder:
+  name: "SunkCostHolder"
   class: "examples.MentalAccounting.LLM.players:LLMSunkCostHolder"
   num_instances: 2
   config:
-    identity: "sunk_cost_holder_4"
+    identity: "sunkcostholder"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "sunk_cost_holder"
+      record_path: "EXPERIMENT/MentalAccounting/LLM/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      sunk_cost_weight: 0.6
+      base_size: 350
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_SUNK_COST_HOLDER_SYS"
+        user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-noise_trader_5:
-  name: "NoiseTrader 5"
+noisetrader:
+  name: "NoiseTrader"
   class: "examples.MentalAccounting.LLM.players:LLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noise_trader_5"
+    identity: "noisetrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "noise_trader"
+      record_path: "EXPERIMENT/MentalAccounting/LLM/records"
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 150
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
-
-
+        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml

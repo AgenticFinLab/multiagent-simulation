@@ -1,2 +1,23 @@
-# Persona configuration for simulation
-personas: []
+# EndowmentEffect Rule Persona Configuration
+
+auto_checkpoint: false
+debug_mode: true
+
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/EndowmentEffect/Rule/checkpoints"
+    record_path: "EXPERIMENT/EndowmentEffect/Rule/records"
+    record_rounds: true
+    turn_block_size: 3
+
+  monitoring:
+    record_path: "EXPERIMENT/EndowmentEffect/Rule/monitoring"
+    monitor_hot_limit: 3
+
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
+
+  resource:
+    mcp_servers: []
+    enable_caching: false

@@ -1,4 +1,10 @@
-# TulipMania Rag Agent Configuration
+knowledge:
+  global_resources:
+    MinerU_processed:
+      path: "examples/document-sources/processed"
+  global_index_dir:
+    rag_index:
+      path: "examples/document-sources/rag_index"
 
 market:
   name: "Market"
@@ -6,75 +12,185 @@ market:
   num_instances: 1
   config:
     identity: "market"
-    role: coordinator
+    role: market
+    steps_per_turn: 1
+    group_tags: [market]
+    record_path: "EXPERIMENT/TulipMania/Rag/records/market"
+    persona: !include ../Rag/persona.yml
     extras:
       initial_price: 100.0
       fundamental_value: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.02
+      price_impact: 0.02
+      mean_reversion: 0.008
+      noise_std: 0.015
 
-trendchaser_1:
-  name: "TrendChaser 1"
-  class: "examples.TulipMania.Rag.players:TrendChaser"
+trendchaser:
+  name: "TrendChaser"
+  class: "examples.TulipMania.Rag.players:RagLLMTrendChaser"
+  num_instances: 4
+  config:
+    identity: "trendchaser"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/Rag/records/trendchaser"
+    persona: !include ../Rag/persona.yml
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 300
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trend_threshold: 0.01
+      chase_size: 400
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "hunyuan/hunyuan-embedding"
+          top_k: 3
+      llm:
+        sys_message: "examples.TulipMania.Rag.prompts:RAG_TREND_CHASER_SYS"
+        user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+
+socialprooffollower:
+  name: "SocialProofFollower"
+  class: "examples.TulipMania.Rag.players:RagLLMSocialProofFollower"
+  num_instances: 3
+  config:
+    identity: "socialprooffollower"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/Rag/records/socialprooffollower"
+    persona: !include ../Rag/persona.yml
+    extras:
+      initial_cash: 800000.0
+      initial_position: 400
+      initial_price: 100.0
+      fundamental_value: 100.0
+      crowd_threshold: 0.3
+      follow_size: 350
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "hunyuan/hunyuan-embedding"
+          top_k: 3
+      llm:
+        sys_message: "examples.TulipMania.Rag.prompts:RAG_SOCIAL_PROOF_FOLLOWER_SYS"
+        user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+
+intrinsicvaluetrader:
+  name: "IntrinsicValueTrader"
+  class: "examples.TulipMania.Rag.players:RagLLMIntrinsicValueTrader"
   num_instances: 2
   config:
-    identity: "trendchaser_1"
+    identity: "intrinsicvaluetrader"
     role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/Rag/records/intrinsicvaluetrader"
+    persona: !include ../Rag/persona.yml
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: trendchaser
+      initial_cash: 1500000.0
+      initial_position: 600
+      initial_price: 100.0
+      fundamental_value: 100.0
+      overvalue_threshold: 0.2
+      position_size: 350
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "hunyuan/hunyuan-embedding"
+          top_k: 3
+      llm:
+        sys_message: "examples.TulipMania.Rag.prompts:RAG_INTRINSIC_VALUE_TRADER_SYS"
+        user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
 
-socialprooffollower_2:
-  name: "SocialProofFollower 2"
-  class: "examples.TulipMania.Rag.players:SocialProofFollower"
+earlyexittrader:
+  name: "EarlyExitTrader"
+  class: "examples.TulipMania.Rag.players:RagLLMEarlyExitTrader"
   num_instances: 2
   config:
-    identity: "socialprooffollower_2"
+    identity: "earlyexittrader"
     role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/Rag/records/earlyexittrader"
+    persona: !include ../Rag/persona.yml
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: socialprooffollower
+      initial_cash: 1200000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      exit_threshold: 0.4
+      exit_size: 400
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "hunyuan/hunyuan-embedding"
+          top_k: 3
+      llm:
+        sys_message: "examples.TulipMania.Rag.prompts:RAG_EARLY_EXIT_TRADER_SYS"
+        user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
 
-intrinsicvaluetrader_3:
-  name: "IntrinsicValueTrader 3"
-  class: "examples.TulipMania.Rag.players:IntrinsicValueTrader"
-  num_instances: 1
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.TulipMania.Rag.players:RagLLMNoiseTrader"
+  num_instances: 2
   config:
-    identity: "intrinsicvaluetrader_3"
+    identity: "noisetrader"
     role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/Rag/records/noisetrader"
+    persona: !include ../Rag/persona.yml
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: intrinsicvaluetrader
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 100
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "hunyuan/hunyuan-embedding"
+          top_k: 3
+      llm:
+        sys_message: "examples.TulipMania.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
 
-earlyexittrader_4:
-  name: "EarlyExitTrader 4"
-  class: "examples.TulipMania.Rag.players:EarlyExitTrader"
-  num_instances: 1
-  config:
-    identity: "earlyexittrader_4"
-    role: player
-    extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: earlyexittrader
-
-noisetrader_5:
-  name: "NoiseTrader 5"
-  class: "examples.TulipMania.Rag.players:NoiseTrader"
-  num_instances: 1
-  config:
-    identity: "noisetrader_5"
-    role: player
-    extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: noisetrader

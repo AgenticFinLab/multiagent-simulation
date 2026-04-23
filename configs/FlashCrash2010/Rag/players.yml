@@ -1,4 +1,23 @@
-# FlashCrash2010 LLM Agent Configuration
+# FlashCrash2010 Rag Agent Configuration
+
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+    top_k: 5
 
 market:
   name: "Market"
@@ -7,185 +26,252 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
-      initial_price: 40.00
-      fundamental_value: 40.00
+      record_path: "EXPERIMENT/FlashCrash2010/Rag/records"
+      initial_price: 40.0
+      fundamental_value: 40.0
+      base_depth: 10000
       price_impact: 0.05
       mean_reversion: 0.02
-      noise_std: 0.02
-      base_depth: 10000
-      stress_threshold: 0.02
+      noise_std: 0.01
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-hft_market_maker_1:
-  name: "HFT Market Maker 1"
-  class: "examples.FlashCrash2010.Rag.players:LLMHFTMarketMaker"
-  num_instances: 1
+hftmarketmaker:
+  name: "HFTMarketMaker"
+  class: "examples.FlashCrash2010.Rag.players:RagLLMHFTMarketMaker"
+  num_instances: 3
   config:
-    identity: "hft_mm_1"
+    identity: "hftmarketmaker"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
+      record_path: "EXPERIMENT/FlashCrash2010/Rag/records"
+      initial_cash: 1000000.0
       initial_position: 0
-      agent_type: "hft_market_maker"
+      initial_price: 40.0
+      fundamental_value: 40.0
+      normal_spread: 0.0001
+      stress_spread: 0.005
+      inventory_limit: 1000
+      withdrawal_threshold: 0.02
+      mm_qty: 500
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.FlashCrash2010.Rag.prompts:RAG_HFT_MARKET_MAKER_SYS"
+        user_message: "examples.FlashCrash2010.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
 
-hft_market_maker_2:
-  name: "HFT Market Maker 2"
-  class: "examples.FlashCrash2010.Rag.players:LLMHFTMarketMaker"
-  num_instances: 1
+momentumchaser:
+  name: "MomentumChaser"
+  class: "examples.FlashCrash2010.Rag.players:RagLLMMomentumChaser"
+  num_instances: 2
   config:
-    identity: "hft_mm_2"
+    identity: "momentumchaser"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
+      record_path: "EXPERIMENT/FlashCrash2010/Rag/records"
+      initial_cash: 500000.0
       initial_position: 0
-      agent_type: "hft_market_maker"
+      initial_price: 40.0
+      fundamental_value: 40.0
+      entry_threshold: 0.001
+      position_multiplier: 10000
+      max_size: 1000
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.FlashCrash2010.Rag.prompts:RAG_MOMENTUM_CHASER_SYS"
+        user_message: "examples.FlashCrash2010.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.8
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
 
-hft_market_maker_3:
-  name: "HFT Market Maker 3"
-  class: "examples.FlashCrash2010.Rag.players:LLMHFTMarketMaker"
-  num_instances: 1
+fundamentaltrader:
+  name: "FundamentalTrader"
+  class: "examples.FlashCrash2010.Rag.players:RagLLMFundamentalTrader"
+  num_instances: 2
   config:
-    identity: "hft_mm_3"
+    identity: "fundamentaltrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
+      record_path: "EXPERIMENT/FlashCrash2010/Rag/records"
+      initial_cash: 2000000.0
       initial_position: 0
-      agent_type: "hft_market_maker"
+      initial_price: 40.0
+      fundamental_value: 40.0
+      value_trigger: 0.05
+      order_size: 500
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.FlashCrash2010.Rag.prompts:RAG_FUNDAMENTAL_TRADER_SYS"
+        user_message: "examples.FlashCrash2010.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
 
-momentum_chaser_1:
-  name: "Momentum Chaser 1"
-  class: "examples.FlashCrash2010.Rag.players:LLMMomentumChaser"
-  num_instances: 1
+stoplosstrader:
+  name: "StopLossTrader"
+  class: "examples.FlashCrash2010.Rag.players:RagLLMStopLossTrader"
+  num_instances: 3
   config:
-    identity: "mom_chaser_1"
+    identity: "stoplosstrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 500000.00
-      initial_position: 0
-      agent_type: "momentum_chaser"
-      llm:
-        model: "doubao-pro-32k"
-
-momentum_chaser_2:
-  name: "Momentum Chaser 2"
-  class: "examples.FlashCrash2010.Rag.players:LLMMomentumChaser"
-  num_instances: 1
-  config:
-    identity: "mom_chaser_2"
-    role: player
-    extras:
-      initial_cash: 500000.00
-      initial_position: 0
-      agent_type: "momentum_chaser"
-      llm:
-        model: "doubao-pro-32k"
-
-fundamental_trader_1:
-  name: "Fundamental Trader 1"
-  class: "examples.FlashCrash2010.Rag.players:LLMFundamentalTrader"
-  num_instances: 1
-  config:
-    identity: "fund_1"
-    role: player
-    extras:
-      initial_cash: 2000000.00
-      initial_position: 0
-      agent_type: "fundamental_trader"
-      llm:
-        model: "doubao-pro-32k"
-
-fundamental_trader_2:
-  name: "Fundamental Trader 2"
-  class: "examples.FlashCrash2010.Rag.players:LLMFundamentalTrader"
-  num_instances: 1
-  config:
-    identity: "fund_2"
-    role: player
-    extras:
-      initial_cash: 2000000.00
-      initial_position: 0
-      agent_type: "fundamental_trader"
-      llm:
-        model: "doubao-pro-32k"
-
-stop_loss_trader_1:
-  name: "Stop-Loss Trader 1"
-  class: "examples.FlashCrash2010.Rag.players:LLMStopLossTrader"
-  num_instances: 1
-  config:
-    identity: "stop_1"
-    role: player
-    extras:
-      initial_cash: 1000000.00
+      record_path: "EXPERIMENT/FlashCrash2010/Rag/records"
+      initial_cash: 1000000.0
       initial_position: 1000
-      entry_price: 40.00
+      initial_price: 40.0
+      fundamental_value: 40.0
+      entry_price: 40.0
       stop_percentage: 0.03
-      agent_type: "stop_loss_trader"
+      position_size: 1000
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.FlashCrash2010.Rag.prompts:RAG_STOP_LOSS_TRADER_SYS"
+        user_message: "examples.FlashCrash2010.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
 
-stop_loss_trader_2:
-  name: "Stop-Loss Trader 2"
-  class: "examples.FlashCrash2010.Rag.players:LLMStopLossTrader"
-  num_instances: 1
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.FlashCrash2010.Rag.players:RagLLMNoiseTrader"
+  num_instances: 2
   config:
-    identity: "stop_2"
+    identity: "noisetrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 1000
-      entry_price: 40.00
-      stop_percentage: 0.03
-      agent_type: "stop_loss_trader"
-      llm:
-        model: "doubao-pro-32k"
-
-stop_loss_trader_3:
-  name: "Stop-Loss Trader 3"
-  class: "examples.FlashCrash2010.Rag.players:LLMStopLossTrader"
-  num_instances: 1
-  config:
-    identity: "stop_3"
-    role: player
-    extras:
-      initial_cash: 1000000.00
-      initial_position: 1000
-      entry_price: 40.00
-      stop_percentage: 0.03
-      agent_type: "stop_loss_trader"
-      llm:
-        model: "doubao-pro-32k"
-
-noise_trader_1:
-  name: "Noise Trader 1"
-  class: "examples.FlashCrash2010.Rag.players:LLMNoiseTrader"
-  num_instances: 1
-  config:
-    identity: "noise_1"
-    role: player
-    extras:
-      initial_cash: 500000.00
+      record_path: "EXPERIMENT/FlashCrash2010/Rag/records"
+      initial_cash: 500000.0
       initial_position: 0
-      agent_type: "noise_trader"
+      initial_price: 40.0
+      fundamental_value: 40.0
+      trade_probability: 0.05
+      min_order: 100
+      max_order: 500
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
-
-noise_trader_2:
-  name: "Noise Trader 2"
-  class: "examples.FlashCrash2010.Rag.players:LLMNoiseTrader"
-  num_instances: 1
-  config:
-    identity: "noise_2"
-    role: player
-    extras:
-      initial_cash: 500000.00
-      initial_position: 0
-      agent_type: "noise_trader"
-      llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.FlashCrash2010.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        user_message: "examples.FlashCrash2010.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml

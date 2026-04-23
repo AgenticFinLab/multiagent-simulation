@@ -37,7 +37,7 @@ async def main():
     print("LossAversion Simulation - Rule-Based Agents")
     print("=" * 70)
     print("Phenomenon: Loss aversion from prospect theory causes investors to hold losers too long and sell winners too early")
-    print("Rounds:     %%s" %% config.setting["total_rounds"])
+    print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 70 + "\n")
     
     simulator = GeneralSimulator(config)

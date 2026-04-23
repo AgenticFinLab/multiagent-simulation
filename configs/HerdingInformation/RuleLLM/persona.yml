@@ -1,65 +1,23 @@
 # HerdingInformation RuleLLM Persona Configuration
 
-market:
-  type: proxy
-  checkpoint_dir: "EXPERIMENT/HerdingInformation/RuleLLM/records/market/checkpoints"
-  record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records/market"
-  monitoring:
-    record_path: "EXPERIMENT/HerdingInformation/RuleLLM/monitoring/market"
+auto_checkpoint: false
+debug_mode: true
 
-cascade_follower_1_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/HerdingInformation/RuleLLM/records/cascade_follower_1_1/checkpoints"
-  record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records/cascade_follower_1_1"
-  monitoring:
-    record_path: "EXPERIMENT/HerdingInformation/RuleLLM/monitoring/cascade_follower_1_1"
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/HerdingInformation/RuleLLM/checkpoints"
+    record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records"
+    record_rounds: true
+    turn_block_size: 3
 
-cascade_follower_1_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/HerdingInformation/RuleLLM/records/cascade_follower_1_2/checkpoints"
-  record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records/cascade_follower_1_2"
   monitoring:
-    record_path: "EXPERIMENT/HerdingInformation/RuleLLM/monitoring/cascade_follower_1_2"
+    record_path: "EXPERIMENT/HerdingInformation/RuleLLM/monitoring"
+    monitor_hot_limit: 3
 
-reputation_herder_2_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/HerdingInformation/RuleLLM/records/reputation_herder_2_1/checkpoints"
-  record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records/reputation_herder_2_1"
-  monitoring:
-    record_path: "EXPERIMENT/HerdingInformation/RuleLLM/monitoring/reputation_herder_2_1"
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
 
-reputation_herder_2_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/HerdingInformation/RuleLLM/records/reputation_herder_2_2/checkpoints"
-  record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records/reputation_herder_2_2"
-  monitoring:
-    record_path: "EXPERIMENT/HerdingInformation/RuleLLM/monitoring/reputation_herder_2_2"
-
-independent_thinker_3_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/HerdingInformation/RuleLLM/records/independent_thinker_3_1/checkpoints"
-  record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records/independent_thinker_3_1"
-  monitoring:
-    record_path: "EXPERIMENT/HerdingInformation/RuleLLM/monitoring/independent_thinker_3_1"
-
-contrarian_4_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/HerdingInformation/RuleLLM/records/contrarian_4_1/checkpoints"
-  record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records/contrarian_4_1"
-  monitoring:
-    record_path: "EXPERIMENT/HerdingInformation/RuleLLM/monitoring/contrarian_4_1"
-
-noise_trader_5_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/HerdingInformation/RuleLLM/records/noise_trader_5_1/checkpoints"
-  record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records/noise_trader_5_1"
-  monitoring:
-    record_path: "EXPERIMENT/HerdingInformation/RuleLLM/monitoring/noise_trader_5_1"
-
-noise_trader_5_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/HerdingInformation/RuleLLM/records/noise_trader_5_2/checkpoints"
-  record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records/noise_trader_5_2"
-  monitoring:
-    record_path: "EXPERIMENT/HerdingInformation/RuleLLM/monitoring/noise_trader_5_2"
-
+  resource:
+    mcp_servers: []
+    enable_caching: false

@@ -1,24 +1,48 @@
+# =============================================================================
 # AsianFinancialCrisis LLM Simulation Configuration
+# =============================================================================
+# LLM-driven simulation of the 1997 Asian Financial Crisis.
+# Each agent uses a rich persona prompt to embody their role.
+# Market dynamics are rule-based (same as Rule variant).
+#
+# Usage:
+#   python examples/AsianFinancialCrisis/LLM/run_asianfinancialcrisis_llm.py \
+#       -c configs/AsianFinancialCrisis/LLM/simulation.yml
+# =============================================================================
 
 setting:
-  name: "AsianFinancialCrisis-LLM"
-  description: "AsianFinancialCrisis simulation - LLM agents"
+  name: "asianfinancialcrisis_llm_simulation"
+  description: "1997 Asian Financial Crisis: LLM agents with crisis-role personas"
   total_rounds: 200
+  round_history_limit: 3
   record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"
-  storage_path: "EXPERIMENT/AsianFinancialCrisis/LLM/communication"
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/AsianFinancialCrisis/LLM/logs"
+  save_diagram_interval: 50
 
 environment:
-  dotenv_path: ".env"
+  dotenv_path: .env
   workspace: "."
 
 ray:
+  address: null
   namespace: "asianfinancialcrisis_llm"
-  ignore_reinit_error: true
-  object_store_memory: 536870912
-  num_cpus: 4
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 268435456
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
 
 players: !include players.yml
 topology: !include topology.yml
@@ -26,5 +50,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/AsianFinancialCrisis/LLM/communication"
   record_messages: true
-  message_timeout_ms: 5000
-  max_retries: 3
+  message_block_size: 500

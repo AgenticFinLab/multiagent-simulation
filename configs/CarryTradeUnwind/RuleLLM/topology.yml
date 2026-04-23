@@ -1,22 +1,30 @@
-# Topology configuration
+# =============================================================================
+# CarryTradeUnwind RuleLLM Topology - Star Pattern
+# =============================================================================
+type: "star"
+
+sources:
+  - market
+
 connections:
-  - source: market
-    target: carrytrader
-  - source: carrytrader
-    target: market
-  - source: market
-    target: leveragedcarryfund
-  - source: leveragedcarryfund
-    target: market
-  - source: market
-    target: fundingcurrencybuyer
-  - source: fundingcurrencybuyer
-    target: market
-  - source: market
-    target: hedgedcarrytrader
-  - source: hedgedcarrytrader
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - rulellm_carry_trader
+    - rulellm_leveraged_carry_fund
+    - rulellm_funding_currency_buyer
+    - rulellm_cb_intervener
+    - rulellm_noise_trader
+
+  rulellm_carry_trader:
+    - market
+
+  rulellm_leveraged_carry_fund:
+    - market
+
+  rulellm_funding_currency_buyer:
+    - market
+
+  rulellm_cb_intervener:
+    - market
+
+  rulellm_noise_trader:
+    - market

@@ -1,3 +1,19 @@
-"""TulipMania Simulation Package"""
+"""TulipMania Rule Variant"""
 
-__all__ = ["TrendChaser, SocialProofFollower, IntrinsicValueTrader, EarlyExitTrader, NoiseTrader"]
+from examples.TulipMania.Rule.players import (
+    Market,
+    TrendChaser,
+    SocialProofFollower,
+    IntrinsicValueTrader,
+    EarlyExitTrader,
+    NoiseTrader,
+)
+
+__all__ = [
+    "Market",
+    "TrendChaser",
+    "SocialProofFollower",
+    "IntrinsicValueTrader",
+    "EarlyExitTrader",
+    "NoiseTrader",
+]

@@ -1,22 +1,45 @@
-# Topology configuration
+# =============================================================================
+# AvailabilityBias Topology - Star Pattern (shared across all variants)
+# =============================================================================
+# Market as hub, all investors communicate through market.
+#
+#   llm_recent_event_overweighter ────┐
+#   llm_media_influenced_trader ──────┤
+#   llm_systematic_analyst ───────────┼──▶ market ──▶ all investors
+#   llm_value_trader ─────────────────┤
+#   llm_noise_trader ─────────────────┘
+#
+# Execution flow per round:
+#   Level 0: market executes (broadcasts price, fundamental, deviation data)
+#   Level 1: all investors execute in parallel (submit P,Q orders)
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
 connections:
-  - source: market
-    target: recenteventoverweighter
-  - source: recenteventoverweighter
-    target: market
-  - source: market
-    target: mediainfluencedtrader
-  - source: mediainfluencedtrader
-    target: market
-  - source: market
-    target: systematicanalyst
-  - source: systematicanalyst
-    target: market
-  - source: market
-    target: valuetrader
-  - source: valuetrader
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  # Market → All investors (price + market data broadcast)
+  market:
+    - llm_recent_event_overweighter
+    - llm_media_influenced_trader
+    - llm_systematic_analyst
+    - llm_value_trader
+    - llm_noise_trader
+
+  # Each investor → Market only (order submission)
+  llm_recent_event_overweighter:
+    - market
+
+  llm_media_influenced_trader:
+    - market
+
+  llm_systematic_analyst:
+    - market
+
+  llm_value_trader:
+    - market
+
+  llm_noise_trader:
+    - market

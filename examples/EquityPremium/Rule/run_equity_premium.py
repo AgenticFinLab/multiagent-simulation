@@ -30,7 +30,7 @@ async def run_simulation(config_path: str):
     logger.info("=" * 70)
     logger.info("EQUITY PREMIUM PUZZLE SIMULATION")
     logger.info("=" * 70)
-    logger.info("Phenomenon: Stocks return ~6%% more than bonds historically")
+    logger.info("Phenomenon: Stocks return ~6% more than bonds historically")
     logger.info("Theory: Mehra & Prescott (1985), Benartzi & Thaler (1995)")
     logger.info("")
     logger.info("Investor Types:")

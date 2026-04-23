@@ -1,32 +1,47 @@
+# =============================================================================
 # AvailabilityBias Rag Simulation Configuration
-#
-# AvailabilityBias simulation
+# =============================================================================
+# RAG-augmented LLM availability bias simulation.
+# Agents retrieve relevant knowledge about behavioral finance and
+# availability heuristic to inform their LLM decisions.
 #
 # Usage:
-#   python examples/AvailabilityBias/Rag/run_availabilitybias_rag.py \
-#       -c configs/AvailabilityBias/Rag/simulation.yml
+#   python -m examples.AvailabilityBias.Rag.run -c configs/AvailabilityBias/Rag/simulation.yml
+# =============================================================================
 
 setting:
-  name: "AvailabilityBias-Rag"
-  description: "AvailabilityBias simulation - Rag agents"
+  name: "availability_bias_rag_simulation"
+  description: "RAG-augmented availability bias: knowledge-informed LLM decisions"
   total_rounds: 200
-
+  round_history_limit: 3
   record_path: "EXPERIMENT/AvailabilityBias/Rag/records"
-  storage_path: "EXPERIMENT/AvailabilityBias/Rag/communication"
-
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/AvailabilityBias/Rag/logs"
+  save_diagram_interval: 50
 
 environment:
-  dotenv_path: ".env"
+  dotenv_path: .env
   workspace: "."
 
 ray:
-  namespace: "availabilitybias_rag"
-  ignore_reinit_error: true
-  object_store_memory: 536870912
-  num_cpus: 4
+  address: null
+  namespace: "availability_bias_rag"
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
 
 players: !include players.yml
 topology: !include topology.yml
@@ -34,5 +49,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/AvailabilityBias/Rag/communication"
   record_messages: true
-  message_timeout_ms: 5000
-  max_retries: 3
+  message_block_size: 500

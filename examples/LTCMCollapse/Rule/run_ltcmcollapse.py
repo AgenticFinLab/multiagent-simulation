@@ -37,7 +37,7 @@ async def main():
     print("LTCMCollapse Simulation - Rule-Based Agents")
     print("=" * 70)
     print("Phenomenon: August-September 1998 LTCM crisis - Russian default triggered liquidity crisis")
-    print("Rounds:     %%s" %% config.setting["total_rounds"])
+    print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 70 + "\n")
     
     simulator = GeneralSimulator(config)

@@ -7,65 +7,121 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
+      record_path: "EXPERIMENT/HerdingInformation/Rule/records"
       initial_price: 100.0
       fundamental_value: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.02
+      price_impact: 0.03
+      mean_reversion: 0.01
+      noise_std: 0.015
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-cascade_follower_1:
-  name: "CascadeFollower 1"
+cascadefollower:
+  name: "CascadeFollower"
   class: "examples.HerdingInformation.Rule.players:CascadeFollower"
-  num_instances: 2
+  num_instances: 3
   config:
-    identity: "cascade_follower_1"
+    identity: "cascadefollower"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
+      record_path: "EXPERIMENT/HerdingInformation/Rule/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      social_weight: 0.8
+      cascade_trigger: 0.3
+      base_size: 400
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-reputation_herder_2:
-  name: "ReputationHerder 2"
+reputationherder:
+  name: "ReputationHerder"
   class: "examples.HerdingInformation.Rule.players:ReputationHerder"
+  num_instances: 3
+  config:
+    identity: "reputationherder"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/HerdingInformation/Rule/records"
+      initial_cash: 1200000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      reputation_concern: 0.7
+      base_size: 350
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+independentthinker:
+  name: "IndependentThinker"
+  class: "examples.HerdingInformation.Rule.players:IndependentThinker"
   num_instances: 2
   config:
-    identity: "reputation_herder_2"
+    identity: "independentthinker"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
+      record_path: "EXPERIMENT/HerdingInformation/Rule/records"
+      initial_cash: 1500000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      signal_precision: 0.9
+      base_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-independent_thinker_3:
-  name: "IndependentThinker 3"
-  class: "examples.HerdingInformation.Rule.players:IndependentThinker"
-  num_instances: 1
-  config:
-    identity: "independent_thinker_3"
-    role: player
-    extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-
-contrarian_4:
-  name: "Contrarian 4"
+contrarian:
+  name: "Contrarian"
   class: "examples.HerdingInformation.Rule.players:Contrarian"
   num_instances: 1
   config:
-    identity: "contrarian_4"
+    identity: "contrarian"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
+      record_path: "EXPERIMENT/HerdingInformation/Rule/records"
+      initial_cash: 2000000.0
       initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      contrarian_threshold: 0.4
+      base_size: 250
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-noise_trader_5:
-  name: "NoiseTrader 5"
+noisetrader:
+  name: "NoiseTrader"
   class: "examples.HerdingInformation.Rule.players:NoiseTrader"
   num_instances: 2
   config:
-    identity: "noise_trader_5"
+    identity: "noisetrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-
+      record_path: "EXPERIMENT/HerdingInformation/Rule/records"
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 150
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

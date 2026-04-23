@@ -1,5 +1,24 @@
 # OverconfidenceBias Rag Agent Configuration
 
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+    top_k: 5
+
 market:
   name: "Market"
   class: "examples.OverconfidenceBias.Rag.players:Market"
@@ -7,85 +26,245 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
+      record_path: "EXPERIMENT/OverconfidenceBias/Rag/records"
       initial_price: 100.0
       fundamental_value: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.02
+      price_impact: 0.02
+      mean_reversion: 0.01
+      noise_std: 0.015
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-overconfident_trader_1:
-  name: "OverconfidentTrader 1"
-  class: "examples.OverconfidenceBias.Rag.players:LLMOverconfidentTrader"
+overconfidenttrader:
+  name: "OverconfidentTrader"
+  class: "examples.OverconfidenceBias.Rag.players:RagLLMOverconfidentTrader"
   num_instances: 2
   config:
-    identity: "overconfident_trader_1"
+    identity: "overconfidenttrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "overconfident_trader"
+      record_path: "EXPERIMENT/OverconfidenceBias/Rag/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      precision_overestimate: 2.0
+      base_size: 400
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_OVERCONFIDENT_TRADER_SYS"
+        user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.8
+          max_tokens: 600
+  persona: !include persona.yml
 
-
-self_attributor_2:
-  name: "SelfAttributor 2"
-  class: "examples.OverconfidenceBias.Rag.players:LLMSelfAttributor"
+selfattributor:
+  name: "SelfAttributor"
+  class: "examples.OverconfidenceBias.Rag.players:RagLLMSelfAttributor"
   num_instances: 2
   config:
-    identity: "self_attributor_2"
+    identity: "selfattributor"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "self_attributor"
+      record_path: "EXPERIMENT/OverconfidenceBias/Rag/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      confidence_boost: 0.5
+      base_size: 400
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_SELF_ATTRIBUTOR_SYS"
+        user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+  persona: !include persona.yml
 
-
-calibrated_trader_3:
-  name: "CalibratedTrader 3"
-  class: "examples.OverconfidenceBias.Rag.players:LLMCalibratedTrader"
+calibratedtrader:
+  name: "CalibratedTrader"
+  class: "examples.OverconfidenceBias.Rag.players:RagLLMCalibratedTrader"
   num_instances: 1
   config:
-    identity: "calibrated_trader_3"
+    identity: "calibratedtrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "calibrated_trader"
+      record_path: "EXPERIMENT/OverconfidenceBias/Rag/records"
+      initial_cash: 1200000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_threshold: 0.03
+      base_size: 300
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_CALIBRATED_TRADER_SYS"
+        user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 600
+  persona: !include persona.yml
 
-
-contrarian_investor_4:
-  name: "ContrarianInvestor 4"
-  class: "examples.OverconfidenceBias.Rag.players:LLMContrarianInvestor"
+contrarianinvestor:
+  name: "ContrarianInvestor"
+  class: "examples.OverconfidenceBias.Rag.players:RagLLMContrarianInvestor"
   num_instances: 1
   config:
-    identity: "contrarian_investor_4"
+    identity: "contrarianinvestor"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "contrarian_investor"
+      record_path: "EXPERIMENT/OverconfidenceBias/Rag/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      contrarian_threshold: 0.04
+      base_size: 350
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_CONTRARIAN_INVESTOR_SYS"
+        user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 600
+  persona: !include persona.yml
 
-
-noise_trader_5:
-  name: "NoiseTrader 5"
-  class: "examples.OverconfidenceBias.Rag.players:LLMNoiseTrader"
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.OverconfidenceBias.Rag.players:RagLLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noise_trader_5"
+    identity: "noisetrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "noise_trader"
+      record_path: "EXPERIMENT/OverconfidenceBias/Rag/records"
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 150
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
       llm:
-        model: "doubao-pro-32k"
-
-
+        sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.95
+          max_tokens: 600
+  persona: !include persona.yml

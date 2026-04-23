@@ -1,3 +1,19 @@
-"""HindsightBias Simulation Package"""
+"""HindsightBias Rule Variant"""
 
-__all__ = ["HindsightOverconfident, OutcomeLearner, ProcessEvaluator, ContrarianSkeptic, NoiseTrader"]
+from examples.HindsightBias.Rule.players import (
+    Market,
+    HindsightOverconfident,
+    OutcomeLearner,
+    ProcessEvaluator,
+    ContrarianSkeptic,
+    NoiseTrader,
+)
+
+__all__ = [
+    "Market",
+    "HindsightOverconfident",
+    "OutcomeLearner",
+    "ProcessEvaluator",
+    "ContrarianSkeptic",
+    "NoiseTrader",
+]

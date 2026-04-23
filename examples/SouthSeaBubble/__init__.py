@@ -1,3 +1,19 @@
-"""SouthSeaBubble Simulation Package"""
+"""SouthSeaBubble Rule Variant"""
 
-__all__ = ["InsiderAdvantaged, NarrativeBeliever, SkepticalAnalyst, Arbitrageur, NoiseTrader"]
+from examples.SouthSeaBubble.Rule.players import (
+    Market,
+    InsiderAdvantaged,
+    NarrativeBeliever,
+    SkepticalAnalyst,
+    Arbitrageur,
+    NoiseTrader,
+)
+
+__all__ = [
+    "Market",
+    "InsiderAdvantaged",
+    "NarrativeBeliever",
+    "SkepticalAnalyst",
+    "Arbitrageur",
+    "NoiseTrader",
+]

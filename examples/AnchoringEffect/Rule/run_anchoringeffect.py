@@ -37,7 +37,7 @@ async def main():
     print("AnchoringEffect Simulation - Rule-Based Agents")
     print("=" * 70)
     print("Phenomenon: Anchoring causes traders to insufficiently adjust from reference prices, creating slow price discovery")
-    print("Rounds:     %%s" %% config.setting["total_rounds"])
+    print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 70 + "\n")
     
     simulator = GeneralSimulator(config)

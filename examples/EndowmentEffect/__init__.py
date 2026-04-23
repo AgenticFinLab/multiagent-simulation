@@ -1,3 +1,19 @@
-"""EndowmentEffect Simulation Package"""
+"""EndowmentEffect Rule Variant"""
 
-__all__ = ["EndowedHolder, StatusQuoSeller, RationalArbitrageur, NewBuyer, NoiseTrader"]
+from examples.EndowmentEffect.Rule.players import (
+    Market,
+    EndowedHolder,
+    StatusQuoSeller,
+    RationalArbitrageur,
+    NewBuyer,
+    NoiseTrader,
+)
+
+__all__ = [
+    "Market",
+    "EndowedHolder",
+    "StatusQuoSeller",
+    "RationalArbitrageur",
+    "NewBuyer",
+    "NoiseTrader",
+]

@@ -1,30 +1,12 @@
-# TulipMania Rag Simulation Configuration
-
-setting:
-  name: "TulipMania-Rag"
-  description: "TulipMania simulation - Rag agents"
-  total_rounds: 200
-  record_path: "EXPERIMENT/TulipMania/Rag/records"
-  storage_path: "EXPERIMENT/TulipMania/Rag/communication"
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/TulipMania/Rag/logs"
-
-environment:
-  dotenv_path: ".env"
-  workspace: "."
+simulation_name: "TulipMania"
+num_rounds: 50
+round_history_limit: 10
+save_diagram_interval: 10
 
 ray:
-  namespace: "tulipmania_rag"
-  ignore_reinit_error: true
-  object_store_memory: 536870912
-  num_cpus: 4
-
-players: !include players.yml
-topology: !include topology.yml
-
-communication:
-  storage_path: "EXPERIMENT/TulipMania/Rag/communication"
-  record_messages: true
-  message_timeout_ms: 5000
-  max_retries: 3
+  actor_options:
+    num_cpus: 0.5
+  runtime_env:
+    env_vars: {}
+  serialization:
+    method: "pickle"

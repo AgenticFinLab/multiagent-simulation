@@ -1,38 +1,47 @@
+# =============================================================================
 # ArchegosCollapse RuleLLM Simulation Configuration
-#
-# March 2021 - Archegos Capital Management lost $20B, triggering block trade fire sales
+# =============================================================================
+# RuleLLM hybrid: prompts embed both persona AND explicit quantitative rules.
+# Enables comparison with pure Rule and pure LLM variants.
 #
 # Usage:
 #   python examples/ArchegosCollapse/RuleLLM/run_archegsoscollapse_rulellm.py \
 #       -c configs/ArchegosCollapse/RuleLLM/simulation.yml
+# =============================================================================
 
 setting:
-  name: "ArchegosCollapse-RuleLLM"
-  description: "Archegos collapse simulation with total return swaps, concentrated positions, and prime broker liquidation cascade"
+  name: "archegsoscollapse_rulellm_simulation"
+  description: "Archegos-style collapse: RuleLLM hybrid with explicit margin/liquidation rules in prompts"
   total_rounds: 200
-  
+  round_history_limit: 3
   record_path: "EXPERIMENT/ArchegosCollapse/RuleLLM/records"
-  storage_path: "EXPERIMENT/ArchegosCollapse/RuleLLM/communication"
-  
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/ArchegosCollapse/RuleLLM/logs"
+  save_diagram_interval: 50
 
 environment:
-  dotenv_path: ".env"
+  dotenv_path: .env
   workspace: "."
 
-llm:
-  model: "doubao-pro-32k"
-  temperature: 0.3
-  max_tokens: 500
-  timeout: 30
-
 ray:
+  address: null
   namespace: "archegsoscollapse_rulellm"
-  ignore_reinit_error: true
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
   object_store_memory: 536870912
-  num_cpus: 4
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
 
 players: !include players.yml
 topology: !include topology.yml
@@ -40,5 +49,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/ArchegosCollapse/RuleLLM/communication"
   record_messages: true
-  message_timeout_ms: 30000
-  max_retries: 3
+  message_block_size: 500

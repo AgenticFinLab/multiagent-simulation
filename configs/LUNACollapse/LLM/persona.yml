@@ -1,72 +1,23 @@
 # LUNACollapse LLM Persona Configuration
 
-market:
-  type: proxy
-  checkpoint_dir: "EXPERIMENT/LUNACollapse/LLM/records/market/checkpoints"
-  record_path: "EXPERIMENT/LUNACollapse/LLM/records/market"
-  monitoring:
-    record_path: "EXPERIMENT/LUNACollapse/LLM/monitoring/market"
+auto_checkpoint: false
+debug_mode: true
 
-stablecoin_holder_1_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LUNACollapse/LLM/records/stablecoin_holder_1_1/checkpoints"
-  record_path: "EXPERIMENT/LUNACollapse/LLM/records/stablecoin_holder_1_1"
-  monitoring:
-    record_path: "EXPERIMENT/LUNACollapse/LLM/monitoring/stablecoin_holder_1_1"
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/LUNACollapse/LLM/checkpoints"
+    record_path: "EXPERIMENT/LUNACollapse/LLM/records"
+    record_rounds: true
+    turn_block_size: 3
 
-stablecoin_holder_1_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LUNACollapse/LLM/records/stablecoin_holder_1_2/checkpoints"
-  record_path: "EXPERIMENT/LUNACollapse/LLM/records/stablecoin_holder_1_2"
   monitoring:
-    record_path: "EXPERIMENT/LUNACollapse/LLM/monitoring/stablecoin_holder_1_2"
+    record_path: "EXPERIMENT/LUNACollapse/LLM/monitoring"
+    monitor_hot_limit: 3
 
-arbitrageur_2_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LUNACollapse/LLM/records/arbitrageur_2_1/checkpoints"
-  record_path: "EXPERIMENT/LUNACollapse/LLM/records/arbitrageur_2_1"
-  monitoring:
-    record_path: "EXPERIMENT/LUNACollapse/LLM/monitoring/arbitrageur_2_1"
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
 
-arbitrageur_2_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LUNACollapse/LLM/records/arbitrageur_2_2/checkpoints"
-  record_path: "EXPERIMENT/LUNACollapse/LLM/records/arbitrageur_2_2"
-  monitoring:
-    record_path: "EXPERIMENT/LUNACollapse/LLM/monitoring/arbitrageur_2_2"
-
-de_fi_lender_3_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LUNACollapse/LLM/records/de_fi_lender_3_1/checkpoints"
-  record_path: "EXPERIMENT/LUNACollapse/LLM/records/de_fi_lender_3_1"
-  monitoring:
-    record_path: "EXPERIMENT/LUNACollapse/LLM/monitoring/de_fi_lender_3_1"
-
-de_fi_lender_3_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LUNACollapse/LLM/records/de_fi_lender_3_2/checkpoints"
-  record_path: "EXPERIMENT/LUNACollapse/LLM/records/de_fi_lender_3_2"
-  monitoring:
-    record_path: "EXPERIMENT/LUNACollapse/LLM/monitoring/de_fi_lender_3_2"
-
-anchor_depositor_4_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LUNACollapse/LLM/records/anchor_depositor_4_1/checkpoints"
-  record_path: "EXPERIMENT/LUNACollapse/LLM/records/anchor_depositor_4_1"
-  monitoring:
-    record_path: "EXPERIMENT/LUNACollapse/LLM/monitoring/anchor_depositor_4_1"
-
-anchor_depositor_4_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LUNACollapse/LLM/records/anchor_depositor_4_2/checkpoints"
-  record_path: "EXPERIMENT/LUNACollapse/LLM/records/anchor_depositor_4_2"
-  monitoring:
-    record_path: "EXPERIMENT/LUNACollapse/LLM/monitoring/anchor_depositor_4_2"
-
-value_buyer_5_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LUNACollapse/LLM/records/value_buyer_5_1/checkpoints"
-  record_path: "EXPERIMENT/LUNACollapse/LLM/records/value_buyer_5_1"
-  monitoring:
-    record_path: "EXPERIMENT/LUNACollapse/LLM/monitoring/value_buyer_5_1"
-
+  resource:
+    mcp_servers: []
+    enable_caching: false

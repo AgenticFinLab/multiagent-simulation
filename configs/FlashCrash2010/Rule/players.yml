@@ -1,7 +1,4 @@
-# FlashCrash2010 Agent Configuration
-#
-# Agent parameters based on Kirilenko et al. (2017) and market microstructure literature.
-# All values calibrated to match stylized facts from the May 6, 2010 event.
+# FlashCrash2010 Rule Agent Configuration
 
 market:
   name: "Market"
@@ -10,236 +7,127 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
-      # Price formation parameters
-      # Source: Kirilenko et al. (2017) - price impact estimates
-      initial_price: 40.00
-      fundamental_value: 40.00
-      
-      # Price impact coefficient
-      # Source: Empirical estimates from HFT literature
-      price_impact: 0.05
-      
-      # Mean reversion to fundamental
-      # Source: Standard market efficiency assumption
-      mean_reversion: 0.02
-      
-      # Noise standard deviation
-      # Source: Calibrated to match observed volatility
-      noise_std: 0.02
-      
-      # Base order book depth
-      # Source: Typical depth for S&P 500 E-mini futures
+      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"
+      initial_price: 40.0
+      fundamental_value: 40.0
       base_depth: 10000
-      
-      # Stress threshold for depth collapse
-      # Source: Observed during flash crash
-      stress_threshold: 0.02
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.01
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-hft_market_maker_1:
-  name: "HFT Market Maker 1"
+hftmarketmaker:
+  name: "HFTMarketMaker"
   class: "examples.FlashCrash2010.Rule.players:HFTMarketMaker"
-  num_instances: 1
+  num_instances: 3
   config:
-    identity: "hft_mm_1"
+    identity: "hftmarketmaker"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
+      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"
+      initial_cash: 1000000.0
       initial_position: 0
-      
-      # Normal spread: 0.01% (tight)
-      # Source: Typical HFT spreads in normal conditions
-      normal_spread: 0.0001
-      
-      # Stress spread: 0.5% (widened)
-      # Source: Observed spread expansion during flash crash
-      stress_spread: 0.005
-      
-      # Inventory limit before withdrawal
-      # Source: Kirilenko et al. (2017) - HFT risk limits
-      inventory_limit: 1000
-      
-      # Withdrawal threshold: 2% price change
-      # Source: Empirical HFT withdrawal patterns
-      withdrawal_threshold: 0.02
-
-hft_market_maker_2:
-  name: "HFT Market Maker 2"
-  class: "examples.FlashCrash2010.Rule.players:HFTMarketMaker"
-  num_instances: 1
-  config:
-    identity: "hft_mm_2"
-    role: player
-    extras:
-      initial_cash: 1000000.00
-      initial_position: 0
+      initial_price: 40.0
+      fundamental_value: 40.0
       normal_spread: 0.0001
       stress_spread: 0.005
       inventory_limit: 1000
       withdrawal_threshold: 0.02
+      mm_qty: 500
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-hft_market_maker_3:
-  name: "HFT Market Maker 3"
-  class: "examples.FlashCrash2010.Rule.players:HFTMarketMaker"
-  num_instances: 1
-  config:
-    identity: "hft_mm_3"
-    role: player
-    extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      normal_spread: 0.0001
-      stress_spread: 0.005
-      inventory_limit: 1000
-      withdrawal_threshold: 0.02
-
-momentum_chaser_1:
-  name: "Momentum Chaser 1"
+momentumchaser:
+  name: "MomentumChaser"
   class: "examples.FlashCrash2010.Rule.players:MomentumChaser"
-  num_instances: 1
+  num_instances: 2
   config:
-    identity: "mom_chaser_1"
+    identity: "momentumchaser"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 500000.00
+      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"
+      initial_cash: 500000.0
       initial_position: 0
-      
-      # Lookback window for velocity calculation
-      # Source: Typical HFT signal windows
-      lookback_window: 10
-      
-      # Entry threshold: 0.1% move
-      # Source: Calibrated to capture meaningful trends
-      entry_threshold: 0.001
-      
-      # Position size multiplier
-      # Source: Proportional to signal strength
-      position_multiplier: 10000
-
-momentum_chaser_2:
-  name: "Momentum Chaser 2"
-  class: "examples.FlashCrash2010.Rule.players:MomentumChaser"
-  num_instances: 1
-  config:
-    identity: "mom_chaser_2"
-    role: player
-    extras:
-      initial_cash: 500000.00
-      initial_position: 0
-      lookback_window: 10
+      initial_price: 40.0
+      fundamental_value: 40.0
       entry_threshold: 0.001
       position_multiplier: 10000
+      max_size: 1000
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-fundamental_trader_1:
-  name: "Fundamental Trader 1"
+fundamentaltrader:
+  name: "FundamentalTrader"
   class: "examples.FlashCrash2010.Rule.players:FundamentalTrader"
-  num_instances: 1
+  num_instances: 2
   config:
-    identity: "fund_1"
+    identity: "fundamentaltrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 2000000.00
+      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"
+      initial_cash: 2000000.0
       initial_position: 0
-      
-      # Value trigger: 5% deviation
-      # Source: Standard value investing thresholds
-      value_trigger: 0.05
-      
-      # Order size
-      # Source: Institutional trading sizes
-      order_size: 500
-
-fundamental_trader_2:
-  name: "Fundamental Trader 2"
-  class: "examples.FlashCrash2010.Rule.players:FundamentalTrader"
-  num_instances: 1
-  config:
-    identity: "fund_2"
-    role: player
-    extras:
-      initial_cash: 2000000.00
-      initial_position: 0
+      initial_price: 40.0
+      fundamental_value: 40.0
       value_trigger: 0.05
       order_size: 500
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-stop_loss_trader_1:
-  name: "Stop-Loss Trader 1"
+stoplosstrader:
+  name: "StopLossTrader"
   class: "examples.FlashCrash2010.Rule.players:StopLossTrader"
-  num_instances: 1
+  num_instances: 3
   config:
-    identity: "stop_1"
+    identity: "stoplosstrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
+      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"
+      initial_cash: 1000000.0
       initial_position: 1000
-      
-      # Entry price
-      entry_price: 40.00
-      
-      # Stop percentage: 3%
-      # Source: Common stop-loss levels
-      stop_percentage: 0.03
-      
-      # Position size
-      position_size: 1000
-
-stop_loss_trader_2:
-  name: "Stop-Loss Trader 2"
-  class: "examples.FlashCrash2010.Rule.players:StopLossTrader"
-  num_instances: 1
-  config:
-    identity: "stop_2"
-    role: player
-    extras:
-      initial_cash: 1000000.00
-      initial_position: 1000
-      entry_price: 40.00
+      initial_price: 40.0
+      fundamental_value: 40.0
+      entry_price: 40.0
       stop_percentage: 0.03
       position_size: 1000
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-stop_loss_trader_3:
-  name: "Stop-Loss Trader 3"
-  class: "examples.FlashCrash2010.Rule.players:StopLossTrader"
-  num_instances: 1
-  config:
-    identity: "stop_3"
-    role: player
-    extras:
-      initial_cash: 1000000.00
-      initial_position: 1000
-      entry_price: 40.00
-      stop_percentage: 0.03
-      position_size: 1000
-
-noise_trader_1:
-  name: "Noise Trader 1"
+noisetrader:
+  name: "NoiseTrader"
   class: "examples.FlashCrash2010.Rule.players:NoiseTrader"
-  num_instances: 1
+  num_instances: 2
   config:
-    identity: "noise_1"
+    identity: "noisetrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 500000.00
+      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"
+      initial_cash: 500000.0
       initial_position: 0
-      
-      # Trade probability per round
-      # Source: Background trading activity
-      trade_probability: 0.05
-      
-      # Order size range
-      min_order: 100
-      max_order: 500
-
-noise_trader_2:
-  name: "Noise Trader 2"
-  class: "examples.FlashCrash2010.Rule.players:NoiseTrader"
-  num_instances: 1
-  config:
-    identity: "noise_2"
-    role: player
-    extras:
-      initial_cash: 500000.00
-      initial_position: 0
+      initial_price: 40.0
+      fundamental_value: 40.0
       trade_probability: 0.05
       min_order: 100
       max_order: 500
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

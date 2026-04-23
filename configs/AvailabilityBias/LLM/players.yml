@@ -1,85 +1,168 @@
-# AvailabilityBias LLM Agent Configuration
+# =============================================================================
+# AvailabilityBias LLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 LLM Availability Bias Investors
+# =============================================================================
 
+# -----------------------------------------------------------------------------
+# Market (rule-based, identical to Rule variant)
+# -----------------------------------------------------------------------------
 market:
   name: "Market"
-  class: "examples.AvailabilityBias.Rule.players:Market"
+  class: "examples.AvailabilityBias.LLM.players:Market"
   num_instances: 1
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
-      initial_price: 100.0
+      record_path: "EXPERIMENT/AvailabilityBias/LLM/records"
       fundamental_value: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.02
+      initial_price: 100.0
+      price_impact: 0.02
+      mean_reversion: 0.03
+      noise_std: 0.5
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-recenteventoverweighter_1:
-  name: "RecentEventOverweighter 1"
-  class: "examples.AvailabilityBias.LLM.players:RecentEventOverweighter"
+# -----------------------------------------------------------------------------
+# LLM Recent Event Overweighter
+# -----------------------------------------------------------------------------
+llm_recent_event_overweighter:
+  name: "LLM Recent Event Overweighter"
+  class: "examples.AvailabilityBias.LLM.players:LLMRecentEventOverweighter"
   num_instances: 2
   config:
-    identity: "recenteventoverweighter_1"
+    identity: "llm_recent_event_overweighter"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: recenteventoverweighter
+      record_path: "EXPERIMENT/AvailabilityBias/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_RECENT_EVENT_OVERWEIGHTER_SYS"
+        user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 500
+  persona: !include persona.yml
 
-
-mediainfluencedtrader_2:
-  name: "MediaInfluencedTrader 2"
-  class: "examples.AvailabilityBias.LLM.players:MediaInfluencedTrader"
+# -----------------------------------------------------------------------------
+# LLM Media Influenced Trader
+# -----------------------------------------------------------------------------
+llm_media_influenced_trader:
+  name: "LLM Media Influenced Trader"
+  class: "examples.AvailabilityBias.LLM.players:LLMMediaInfluencedTrader"
   num_instances: 2
   config:
-    identity: "mediainfluencedtrader_2"
+    identity: "llm_media_influenced_trader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: mediainfluencedtrader
+      record_path: "EXPERIMENT/AvailabilityBias/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_MEDIA_INFLUENCED_TRADER_SYS"
+        user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 500
+  persona: !include persona.yml
 
-
-systematicanalyst_3:
-  name: "SystematicAnalyst 3"
-  class: "examples.AvailabilityBias.LLM.players:SystematicAnalyst"
+# -----------------------------------------------------------------------------
+# LLM Systematic Analyst
+# -----------------------------------------------------------------------------
+llm_systematic_analyst:
+  name: "LLM Systematic Analyst"
+  class: "examples.AvailabilityBias.LLM.players:LLMSystematicAnalyst"
   num_instances: 1
   config:
-    identity: "systematicanalyst_3"
+    identity: "llm_systematic_analyst"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: systematicanalyst
+      record_path: "EXPERIMENT/AvailabilityBias/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_SYSTEMATIC_ANALYST_SYS"
+        user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
 
-
-valuetrader_4:
-  name: "ValueTrader 4"
-  class: "examples.AvailabilityBias.LLM.players:ValueTrader"
-  num_instances: 1
+# -----------------------------------------------------------------------------
+# LLM Value Trader
+# -----------------------------------------------------------------------------
+llm_value_trader:
+  name: "LLM Value Trader"
+  class: "examples.AvailabilityBias.LLM.players:LLMValueTrader"
+  num_instances: 2
   config:
-    identity: "valuetrader_4"
+    identity: "llm_value_trader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: valuetrader
+      record_path: "EXPERIMENT/AvailabilityBias/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_VALUE_TRADER_SYS"
+        user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
 
-
-noisetrader_5:
-  name: "NoiseTrader 5"
-  class: "examples.AvailabilityBias.LLM.players:NoiseTrader"
-  num_instances: 1
+# -----------------------------------------------------------------------------
+# LLM Noise Trader
+# -----------------------------------------------------------------------------
+llm_noise_trader:
+  name: "LLM Noise Trader"
+  class: "examples.AvailabilityBias.LLM.players:LLMNoiseTrader"
+  num_instances: 3
   config:
-    identity: "noisetrader_5"
+    identity: "llm_noise_trader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: noisetrader
-
+      record_path: "EXPERIMENT/AvailabilityBias/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 500
+  persona: !include persona.yml

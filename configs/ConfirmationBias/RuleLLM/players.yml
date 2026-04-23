@@ -1,85 +1,173 @@
-# ConfirmationBias RuleLLM Agent Configuration
+# =============================================================================
+# ConfirmationBias RuleLLM Players Configuration
+# =============================================================================
 
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based, identical to Rule variant
+# -----------------------------------------------------------------------------
 market:
   name: "Market"
-  class: "examples.ConfirmationBias.Rule.players:Market"
+  class: "examples.ConfirmationBias.RuleLLM.players:Market"
   num_instances: 1
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
-      initial_price: 100.0
+      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"
       fundamental_value: 100.0
-      price_impact: 0.05
+      initial_price: 100.0
+      price_impact: 0.02
       mean_reversion: 0.02
       noise_std: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-beliefanchor_1:
-  name: "BeliefAnchor 1"
-  class: "examples.ConfirmationBias.RuleLLM.players:BeliefAnchor"
+# -----------------------------------------------------------------------------
+# RuleLLM Belief Anchors
+# Theory: Nickerson (1998)
+# -----------------------------------------------------------------------------
+rulellm_belief_anchor:
+  name: "RuleLLM Belief Anchor"
+  class: "examples.ConfirmationBias.RuleLLM.players:RuleLLMBeliefAnchor"
+  # Expander → rulellm_belief_anchor_1, rulellm_belief_anchor_2
   num_instances: 2
   config:
-    identity: "beliefanchor_1"
+    identity: "rulellm_belief_anchor"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: beliefanchor
+      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"
+      initial_cash: 50000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_BELIEF_ANCHOR_SYS"
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-selectivescanner_2:
-  name: "SelectiveScanner 2"
-  class: "examples.ConfirmationBias.RuleLLM.players:SelectiveScanner"
+# -----------------------------------------------------------------------------
+# RuleLLM Selective Scanners
+# Theory: Lord, Ross & Lepper (1979)
+# -----------------------------------------------------------------------------
+rulellm_selective_scanner:
+  name: "RuleLLM Selective Scanner"
+  class: "examples.ConfirmationBias.RuleLLM.players:RuleLLMSelectiveScanner"
+  # Expander → rulellm_selective_scanner_1, rulellm_selective_scanner_2
   num_instances: 2
   config:
-    identity: "selectivescanner_2"
+    identity: "rulellm_selective_scanner"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: selectivescanner
+      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"
+      initial_cash: 50000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_SELECTIVE_SCANNER_SYS"
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-balancedanalyst_3:
-  name: "BalancedAnalyst 3"
-  class: "examples.ConfirmationBias.RuleLLM.players:BalancedAnalyst"
+# -----------------------------------------------------------------------------
+# RuleLLM Balanced Analyst
+# Theory: Rabin & Schrag (1999)
+# -----------------------------------------------------------------------------
+rulellm_balanced_analyst:
+  name: "RuleLLM Balanced Analyst"
+  class: "examples.ConfirmationBias.RuleLLM.players:RuleLLMBalancedAnalyst"
   num_instances: 1
   config:
-    identity: "balancedanalyst_3"
+    identity: "rulellm_balanced_analyst"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: balancedanalyst
+      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"
+      initial_cash: 50000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_BALANCED_ANALYST_SYS"
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.2
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-contrariantrader_4:
-  name: "ContrarianTrader 4"
-  class: "examples.ConfirmationBias.RuleLLM.players:ContrarianTrader"
+# -----------------------------------------------------------------------------
+# RuleLLM Contrarian Trader
+# -----------------------------------------------------------------------------
+rulellm_contrarian_trader:
+  name: "RuleLLM Contrarian Trader"
+  class: "examples.ConfirmationBias.RuleLLM.players:RuleLLMContrarianTrader"
   num_instances: 1
   config:
-    identity: "contrariantrader_4"
+    identity: "rulellm_contrarian_trader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: contrariantrader
+      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"
+      initial_cash: 50000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_CONTRARIAN_SYS"
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.2
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-noisetrader_5:
-  name: "NoiseTrader 5"
-  class: "examples.ConfirmationBias.RuleLLM.players:NoiseTrader"
-  num_instances: 1
+# -----------------------------------------------------------------------------
+# RuleLLM Noise Traders
+# Theory: Black (1986)
+# -----------------------------------------------------------------------------
+rulellm_noise_trader:
+  name: "RuleLLM Noise Trader"
+  class: "examples.ConfirmationBias.RuleLLM.players:RuleLLMNoiseTrader"
+  # Expander → rulellm_noise_trader_1, rulellm_noise_trader_2
+  num_instances: 2
   config:
-    identity: "noisetrader_5"
+    identity: "rulellm_noise_trader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: noisetrader
-
+      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"
+      initial_cash: 20000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml

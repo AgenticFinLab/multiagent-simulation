@@ -1,80 +1,298 @@
-# AsianFinancialCrisis Rag Agent Configuration
+# =============================================================================
+# AsianFinancialCrisis Rag Players Configuration
+# =============================================================================
+# 1 Market (rule-based coordinator) + 5 RAG-augmented LLM agent types
+#
+# Knowledge Architecture:
+#   The shared knowledge: block is promoted to config top-level by the loader.
+#   Each agent has private_knowledge for agent-specific RAG configuration.
+# =============================================================================
 
+# =============================================================================
+# Shared Knowledge Configuration
+# =============================================================================
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+    top_k: 5
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based, identical to Rule variant
+# -----------------------------------------------------------------------------
 market:
   name: "Market"
-  class: "examples.AsianFinancialCrisis.Rule.players:Market"
+  class: "examples.AsianFinancialCrisis.Rag.players:Market"
   num_instances: 1
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
-      initial_price: 100.0
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"
       fundamental_value: 100.0
-      price_impact: 0.05
+      initial_price: 100.0
+      price_impact: 0.04
       mean_reversion: 0.02
       noise_std: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-hotmoneyfunder_1:
-  name: "HotMoneyFunder 1"
-  class: "examples.AsianFinancialCrisis.Rag.players:HotMoneyFunder"
+# -----------------------------------------------------------------------------
+# RAG HotMoneyFunder — short-term capital reversal + domain knowledge
+# Theory: Radelet & Sachs (1998): hot money reversal mechanics
+# -----------------------------------------------------------------------------
+ragllm_hot_money_funder:
+  name: "RAG Hot Money Funder"
+  class: "examples.AsianFinancialCrisis.Rag.players:RagLLMHotMoneyFunder"
+  # Expander → ragllm_hot_money_funder_1, ragllm_hot_money_funder_2
   num_instances: 2
   config:
-    identity: "hotmoneyfunder_1"
+    identity: "ragllm_hot_money_funder"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: hotmoneyfunder
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"
+      initial_cash: 800000.0
+      initial_position: 3000.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.AsianFinancialCrisis.Rag.prompts:RAG_HOT_MONEY_FUNDER_SYS"
+        user_message: "examples.AsianFinancialCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 600
+  persona: !include persona.yml
 
-contagiontrader_2:
-  name: "ContagionTrader 2"
-  class: "examples.AsianFinancialCrisis.Rag.players:ContagionTrader"
+# -----------------------------------------------------------------------------
+# RAG ContagionTrader — cross-border contagion seller + domain knowledge
+# Theory: Kaminsky & Reinhart (1999): contagion mechanics
+# -----------------------------------------------------------------------------
+ragllm_contagion_trader:
+  name: "RAG Contagion Trader"
+  class: "examples.AsianFinancialCrisis.Rag.players:RagLLMContagionTrader"
+  # Expander → ragllm_contagion_trader_1, ragllm_contagion_trader_2
   num_instances: 2
   config:
-    identity: "contagiontrader_2"
+    identity: "ragllm_contagion_trader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: contagiontrader
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"
+      initial_cash: 600000.0
+      initial_position: 4000.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.AsianFinancialCrisis.Rag.prompts:RAG_CONTAGION_TRADER_SYS"
+        user_message: "examples.AsianFinancialCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 600
+  persona: !include persona.yml
 
-imfrescuer_3:
-  name: "IMFRescuer 3"
-  class: "examples.AsianFinancialCrisis.Rag.players:IMFRescuer"
+# -----------------------------------------------------------------------------
+# RAG IMFRescuer — emergency liquidity provider + domain knowledge
+# Theory: Corsetti, Pesenti & Roubini (1999): IMF conditionality
+# -----------------------------------------------------------------------------
+ragllm_imf_rescuer:
+  name: "RAG IMF Rescuer"
+  class: "examples.AsianFinancialCrisis.Rag.players:RagLLMIMFRescuer"
   num_instances: 1
   config:
-    identity: "imfrescuer_3"
+    identity: "ragllm_imf_rescuer"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: imfrescuer
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"
+      initial_cash: 5000000.0
+      initial_position: 0.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.AsianFinancialCrisis.Rag.prompts:RAG_IMF_RESCUER_SYS"
+        user_message: "examples.AsianFinancialCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
 
-valuecontrarian_4:
-  name: "ValueContrarian 4"
-  class: "examples.AsianFinancialCrisis.Rag.players:ValueContrarian"
-  num_instances: 1
+# -----------------------------------------------------------------------------
+# RAG ValueContrarian — crisis value buyer + domain knowledge
+# Theory: Fundamental value investing; long-run mean reversion
+# -----------------------------------------------------------------------------
+ragllm_value_contrarian:
+  name: "RAG Value Contrarian"
+  class: "examples.AsianFinancialCrisis.Rag.players:RagLLMValueContrarian"
+  # Expander → ragllm_value_contrarian_1, ragllm_value_contrarian_2
+  num_instances: 2
   config:
-    identity: "valuecontrarian_4"
+    identity: "ragllm_value_contrarian"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"
       initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: valuecontrarian
+      initial_position: 500.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.AsianFinancialCrisis.Rag.prompts:RAG_VALUE_CONTRARIAN_SYS"
+        user_message: "examples.AsianFinancialCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 600
+  persona: !include persona.yml
 
-noisetrader_5:
-  name: "NoiseTrader 5"
-  class: "examples.AsianFinancialCrisis.Rag.players:NoiseTrader"
-  num_instances: 1
+# -----------------------------------------------------------------------------
+# RAG NoiseTrader — background liquidity provider + domain knowledge
+# Theory: Noise trader model (Black, 1986)
+# -----------------------------------------------------------------------------
+ragllm_noise_trader:
+  name: "RAG Noise Trader"
+  class: "examples.AsianFinancialCrisis.Rag.players:RagLLMNoiseTrader"
+  # Expander → ragllm_noise_trader_1, ragllm_noise_trader_2, ragllm_noise_trader_3
+  num_instances: 3
   config:
-    identity: "noisetrader_5"
+    identity: "ragllm_noise_trader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
-      initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: noisetrader
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"
+      initial_cash: 200000.0
+      initial_position: 1000.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.AsianFinancialCrisis.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        user_message: "examples.AsianFinancialCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.8
+          max_new_tokens: 600
+  persona: !include persona.yml

@@ -1,22 +1,29 @@
-# Topology configuration
+# GamblerFallacy LLM Topology - Star Pattern
+
+type: "star"
+
+sources:
+  - market
+
 connections:
-  - source: market
-    target: streakreversaltrader
-  - source: streakreversaltrader
-    target: market
-  - source: market
-    target: hothandtrader
-  - source: hothandtrader
-    target: market
-  - source: market
-    target: independentassessor
-  - source: independentassessor
-    target: market
-  - source: market
-    target: arbitrageur
-  - source: arbitrageur
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - streakreversaltrader
+    - hothandtrader
+    - independentassessor
+    - arbitrageur
+    - noisetrader
+
+  streakreversaltrader:
+    - market
+
+  hothandtrader:
+    - market
+
+  independentassessor:
+    - market
+
+  arbitrageur:
+    - market
+
+  noisetrader:
+    - market

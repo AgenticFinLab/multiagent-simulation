@@ -37,7 +37,7 @@ async def main():
     print("Volmageddon Simulation - Rule-Based Agents")
     print("=" * 70)
     print("Phenomenon: February 5, 2018 - VIX spiked 115%, XIV ETN lost 90%+ in after-hours trading")
-    print("Rounds:     %%s" %% config.setting["total_rounds"])
+    print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 70 + "\n")
     
     simulator = GeneralSimulator(config)

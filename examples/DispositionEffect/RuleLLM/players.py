@@ -332,7 +332,7 @@ class BaseLLMInvestor(GeneralPlayer):
             except (json.JSONDecodeError, ValueError, KeyError) as e:
                 last_error = e
                 if attempt < max_retries - 1:
-                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")
+                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")  # pylint: disable=logging-fstring-interpolation
 
         # If LLM failed after all retries, skip trading this round (hold)
         if decision is None:

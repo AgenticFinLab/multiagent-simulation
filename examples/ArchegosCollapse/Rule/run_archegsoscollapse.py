@@ -37,7 +37,7 @@ async def main():
     print("ArchegosCollapse Simulation - Rule-Based Agents")
     print("=" * 70)
     print("Phenomenon: March 2021 - Archegos Capital Management lost $20B, triggering block trade fire sales")
-    print("Rounds:     %%s" %% config.setting["total_rounds"])
+    print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 70 + "\n")
     
     simulator = GeneralSimulator(config)

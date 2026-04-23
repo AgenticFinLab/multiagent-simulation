@@ -1,22 +1,21 @@
-# Topology configuration
+# RepresentativenessBias Rag Topology Configuration
+
+type: "star"
+
 connections:
-  - source: market
-    target: patternmatcher
-  - source: patternmatcher
-    target: market
-  - source: market
-    target: categoryovergeneralizer
-  - source: categoryovergeneralizer
-    target: market
-  - source: market
-    target: bayesianupdater
-  - source: bayesianupdater
-    target: market
-  - source: market
-    target: contrarianstatistical
-  - source: contrarianstatistical
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - patternmatcher
+    - categoryovergeneralizer
+    - bayesianupdater
+    - contrarianstatistical
+    - noisetrader
+  patternmatcher:
+    - market
+  categoryovergeneralizer:
+    - market
+  bayesianupdater:
+    - market
+  contrarianstatistical:
+    - market
+  noisetrader:
+    - market

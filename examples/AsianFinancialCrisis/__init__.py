@@ -1,3 +1,19 @@
-"""AsianFinancialCrisis Simulation Package"""
+"""AsianFinancialCrisis Rule Variant"""
 
-__all__ = ["HotMoneyFunder, ContagionTrader, IMFRescuer, ValueContrarian, NoiseTrader"]
+from examples.AsianFinancialCrisis.Rule.players import (
+    Market,
+    HotMoneyFunder,
+    ContagionTrader,
+    IMFRescuer,
+    ValueContrarian,
+    NoiseTrader,
+)
+
+__all__ = [
+    "Market",
+    "HotMoneyFunder",
+    "ContagionTrader",
+    "IMFRescuer",
+    "ValueContrarian",
+    "NoiseTrader",
+]

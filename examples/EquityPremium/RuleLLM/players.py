@@ -177,15 +177,15 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
         self.state.custom_state["liquidity_history"].append(total_liquidity)
 
-        logger.debug(f"\n{'='*70}")
-        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(f"\n{'='*70}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(f"[Market] Round {round_num}")  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
         logger.debug(
             f"  Liquidity: {total_liquidity:.1f}, Impact Factor: {liquidity_factor:.2f}"
         )
-        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")  # pylint: disable=logging-fstring-interpolation
 
         market_data = {
             "price": new_price,

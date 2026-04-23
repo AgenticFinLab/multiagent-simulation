@@ -1,3 +1,19 @@
-"""AvailabilityBias Simulation Package"""
+"""AvailabilityBias Rule Variant"""
 
-__all__ = ["RecentEventOverweighter, MediaInfluencedTrader, SystematicAnalyst, ValueTrader, NoiseTrader"]
+from examples.AvailabilityBias.Rule.players import (
+    Market,
+    RecentEventOverweighter,
+    MediaInfluencedTrader,
+    SystematicAnalyst,
+    ValueTrader,
+    NoiseTrader,
+)
+
+__all__ = [
+    "Market",
+    "RecentEventOverweighter",
+    "MediaInfluencedTrader",
+    "SystematicAnalyst",
+    "ValueTrader",
+    "NoiseTrader",
+]

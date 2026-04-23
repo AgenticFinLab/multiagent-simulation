@@ -1,110 +1,29 @@
-# FlashCrash2010 Communication Topology
-#
-# Star topology with Market at center
-# All agents communicate with Market for orders and state updates
+# FlashCrash2010 LLM Topology - Star Pattern
 
-graph:
-  type: star
-  center: market
+type: "star"
+
+sources:
+  - market
 
 connections:
-  # Market broadcasts to all investors
-  - from: market
-    to:
-      - hft_mm_1
-      - hft_mm_2
-      - hft_mm_3
-      - mom_chaser_1
-      - mom_chaser_2
-      - fund_1
-      - fund_2
-      - stop_1
-      - stop_2
-      - stop_3
-      - noise_1
-      - noise_2
-    bidirectional: false
-    message_type: market_update
-  
-  # Investors send orders to Market
-  - from: hft_mm_1
-    to: market
-    bidirectional: false
-    message_type: order
-  
-  - from: hft_mm_2
-    to: market
-    bidirectional: false
-    message_type: order
-  
-  - from: hft_mm_3
-    to: market
-    bidirectional: false
-    message_type: order
-  
-  - from: mom_chaser_1
-    to: market
-    bidirectional: false
-    message_type: order
-  
-  - from: mom_chaser_2
-    to: market
-    bidirectional: false
-    message_type: order
-  
-  - from: fund_1
-    to: market
-    bidirectional: false
-    message_type: order
-  
-  - from: fund_2
-    to: market
-    bidirectional: false
-    message_type: order
-  
-  - from: stop_1
-    to: market
-    bidirectional: false
-    message_type: order
-  
-  - from: stop_2
-    to: market
-    bidirectional: false
-    message_type: order
-  
-  - from: stop_3
-    to: market
-    bidirectional: false
-    message_type: order
-  
-  - from: noise_1
-    to: market
-    bidirectional: false
-    message_type: order
-  
-  - from: noise_2
-    to: market
-    bidirectional: false
-    message_type: order
+  market:
+    - hftmarketmaker
+    - momentumchaser
+    - fundamentaltrader
+    - stoplosstrader
+    - noisetrader
 
-broadcast:
-  enabled: true
-  from: market
-  to: all_players
-  message_type: market_update
-
-execution:
-  order:
+  hftmarketmaker:
     - market
-    - hft_mm_1
-    - hft_mm_2
-    - hft_mm_3
-    - mom_chaser_1
-    - mom_chaser_2
-    - fund_1
-    - fund_2
-    - stop_1
-    - stop_2
-    - stop_3
-    - noise_1
-    - noise_2
+
+  momentumchaser:
+    - market
+
+  fundamentaltrader:
+    - market
+
+  stoplosstrader:
+    - market
+
+  noisetrader:
+    - market

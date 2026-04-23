@@ -1,76 +1,49 @@
-# AnchoringEffect RuleLLM Communication Topology
+# =============================================================================
+# AnchoringEffectRuleLLM Topology - Star Pattern
+# =============================================================================
+# Market as hub, all hybrid rule+LLM investors communicate through market.
+#
+# Note: player keys with num_instances > 1 use their base key here.
+# The simulator expander resolves them to foo_1, foo_2, ... before building
+# the TopologyGraph, so all edge rules apply to every instance automatically.
+#
+#         rulellm_anchored ─────────────┐
+#         rulellm_historical ───────────┤
+#         rulellm_rational ─────────────┼──▶ market ──▶ all investors
+#         rulellm_momentum ─────────────┤             (market data: price, deviation)
+#         rulellm_noise ────────────────┘
+#
+# Execution flow per round:
+#   Level 0: market executes (broadcasts price + deviation metrics)
+#   Level 1: all investors execute in parallel (submit P,Q orders)
+# =============================================================================
 
-graph:
-  type: star
-  center: market
+type: "star"
+
+sources:
+  - market
 
 connections:
-  - from: market
-    to:
-      - anchored_trader_1_1
-      - anchored_trader_1_2
-      - historical_anchor_2_1
-      - historical_anchor_2_2
-      - rational_updater_3_1
-      - momentum_trader_4_1
-      - momentum_trader_4_2
-      - noise_trader_5_1
-      - noise_trader_5_2
-    bidirectional: false
-    message_type: market_update
+  # Market → All investors (price + deviation data broadcast)
+  market:
+    - rulellm_anchored
+    - rulellm_historical
+    - rulellm_rational
+    - rulellm_momentum
+    - rulellm_noise
 
-  - from: anchored_trader_1_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: anchored_trader_1_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: historical_anchor_2_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: historical_anchor_2_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: rational_updater_3_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: momentum_trader_4_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: momentum_trader_4_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: noise_trader_5_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: noise_trader_5_2
-    to: market
-    bidirectional: false
-    message_type: order
-
-broadcast:
-  enabled: true
-  from: market
-  to: all_players
-  message_type: market_update
-
-execution:
-  order:
+  # Each investor → Market only (order submission)
+  rulellm_anchored:
     - market
-    - anchored_trader_1_1
-    - anchored_trader_1_2
-    - historical_anchor_2_1
-    - historical_anchor_2_2
-    - rational_updater_3_1
-    - momentum_trader_4_1
-    - momentum_trader_4_2
-    - noise_trader_5_1
-    - noise_trader_5_2
+
+  rulellm_historical:
+    - market
+
+  rulellm_rational:
+    - market
+
+  rulellm_momentum:
+    - market
+
+  rulellm_noise:
+    - market

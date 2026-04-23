@@ -37,7 +37,7 @@ async def main():
     print("OverconfidenceBias Simulation - Rule-Based Agents")
     print("=" * 70)
     print("Phenomenon: Overconfidence bias causes traders to overestimate their precision, trade too much, and increase volatility")
-    print("Rounds:     %%s" %% config.setting["total_rounds"])
+    print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 70 + "\n")
     
     simulator = GeneralSimulator(config)

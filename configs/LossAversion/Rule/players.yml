@@ -7,65 +7,121 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
+      record_path: "EXPERIMENT/LossAversion/Rule/records"
       initial_price: 100.0
       fundamental_value: 100.0
-      price_impact: 0.04
-      mean_reversion: 0.02
+      price_impact: 0.03
+      mean_reversion: 0.01
       noise_std: 0.015
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-loss_averse_investor_1:
-  name: "LossAverseInvestor 1"
+lossaverseinvestor:
+  name: "LossAverseInvestor"
   class: "examples.LossAversion.Rule.players:LossAverseInvestor"
-  num_instances: 2
+  num_instances: 3
   config:
-    identity: "loss_averse_investor_1"
+    identity: "lossaverseinvestor"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
+      record_path: "EXPERIMENT/LossAversion/Rule/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      loss_aversion_lambda: 2.25
+      sell_gain_threshold: 0.05
+      base_size: 400
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-break_even_trader_2:
-  name: "BreakEvenTrader 2"
+breakeventrader:
+  name: "BreakEvenTrader"
   class: "examples.LossAversion.Rule.players:BreakEvenTrader"
   num_instances: 2
   config:
-    identity: "break_even_trader_2"
+    identity: "breakeventrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
+      record_path: "EXPERIMENT/LossAversion/Rule/records"
+      initial_cash: 1200000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      risk_increase_factor: 2.0
+      base_size: 350
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-rational_trader_3:
-  name: "RationalTrader 3"
+rationaltrader:
+  name: "RationalTrader"
   class: "examples.LossAversion.Rule.players:RationalTrader"
-  num_instances: 1
-  config:
-    identity: "rational_trader_3"
-    role: player
-    extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-
-momentum_trader_4:
-  name: "MomentumTrader 4"
-  class: "examples.LossAversion.Rule.players:MomentumTrader"
   num_instances: 2
   config:
-    identity: "momentum_trader_4"
+    identity: "rationaltrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
+      record_path: "EXPERIMENT/LossAversion/Rule/records"
+      initial_cash: 1500000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      risk_aversion: 0.7
+      base_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-market_maker_5:
-  name: "MarketMaker 5"
-  class: "examples.LossAversion.Rule.players:MarketMaker"
-  num_instances: 1
+dispositiontrader:
+  name: "DispositionTrader"
+  class: "examples.LossAversion.Rule.players:DispositionTrader"
+  num_instances: 2
   config:
-    identity: "market_maker_5"
+    identity: "dispositiontrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
+      record_path: "EXPERIMENT/LossAversion/Rule/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      profit_trigger: 0.03
+      base_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.LossAversion.Rule.players:NoiseTrader"
+  num_instances: 2
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LossAversion/Rule/records"
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 150
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

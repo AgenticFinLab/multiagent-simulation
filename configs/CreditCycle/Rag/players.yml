@@ -1,80 +1,300 @@
+# =============================================================================
 # CreditCycle Rag Agent Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 RAG-augmented LLM investor types.
+# Knowledge Architecture: shared knowledge block + per-agent private_knowledge.
+# =============================================================================
 
+# =============================================================================
+# Shared Knowledge Configuration
+# =============================================================================
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+    top_k: 5
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based
+# -----------------------------------------------------------------------------
 market:
   name: "Market"
-  class: "examples.CreditCycle.Rule.players:Market"
+  class: "examples.CreditCycle.Rag.players:Market"
   num_instances: 1
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
+      record_path: "EXPERIMENT/CreditCycle/Rag/records"
       initial_price: 100.0
       fundamental_value: 100.0
       price_impact: 0.05
       mean_reversion: 0.02
       noise_std: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-procyclicallender_1:
-  name: "ProCyclicalLender 1"
-  class: "examples.CreditCycle.Rag.players:ProCyclicalLender"
+# -----------------------------------------------------------------------------
+# RAG Pro-Cyclical Lenders
+# Theory: Adrian & Shin (2010)
+# -----------------------------------------------------------------------------
+procyclicallender:
+  name: "ProCyclicalLender"
+  class: "examples.CreditCycle.Rag.players:RagLLMProCyclicalLender"
   num_instances: 2
   config:
-    identity: "procyclicallender_1"
+    identity: "procyclicallender"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/CreditCycle/Rag/records"
       initial_cash: 1000000.0
       initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: procyclicallender
+      leverage_expansion_rate: 0.3
+      leverage_contraction_rate: 0.4
+      expansion_threshold: 0.01
+      contraction_threshold: -0.015
+      base_size: 500
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CreditCycle.Rag.prompts:RAG_PRO_CYCLICAL_LENDER_SYS"
+        user_message: "examples.CreditCycle.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 600
+  persona: !include persona.yml
 
-minskyborrower_2:
-  name: "MinskyBorrower 2"
-  class: "examples.CreditCycle.Rag.players:MinskyBorrower"
+# -----------------------------------------------------------------------------
+# RAG Minsky Borrowers
+# Theory: Minsky (1986)
+# -----------------------------------------------------------------------------
+minskyborrower:
+  name: "MinskyBorrower"
+  class: "examples.CreditCycle.Rag.players:RagLLMMinskyBorrower"
   num_instances: 2
   config:
-    identity: "minskyborrower_2"
+    identity: "minskyborrower"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
+      record_path: "EXPERIMENT/CreditCycle/Rag/records"
+      initial_cash: 500000.0
       initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: minskyborrower
+      hedge_rounds: 20
+      speculative_rounds: 40
+      ponzi_rounds: 80
+      hedge_size: 100
+      speculative_size: 300
+      ponzi_size: 600
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CreditCycle.Rag.prompts:RAG_MINSKY_BORROWER_SYS"
+        user_message: "examples.CreditCycle.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 600
+  persona: !include persona.yml
 
-countercyclicallender_3:
-  name: "CounterCyclicalLender 3"
-  class: "examples.CreditCycle.Rag.players:CounterCyclicalLender"
+# -----------------------------------------------------------------------------
+# RAG Counter-Cyclical Lenders
+# Theory: Geanakoplos (2010)
+# -----------------------------------------------------------------------------
+countercyclicallender:
+  name: "CounterCyclicalLender"
+  class: "examples.CreditCycle.Rag.players:RagLLMCounterCyclicalLender"
   num_instances: 1
   config:
-    identity: "countercyclicallender_3"
+    identity: "countercyclicallender"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
+      record_path: "EXPERIMENT/CreditCycle/Rag/records"
+      initial_cash: 2000000.0
       initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: countercyclicallender
+      buy_threshold: -0.05
+      sell_threshold: 0.10
+      counter_cycle_size: 400
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CreditCycle.Rag.prompts:RAG_COUNTER_CYCLICAL_LENDER_SYS"
+        user_message: "examples.CreditCycle.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 600
+  persona: !include persona.yml
 
-valueinvestor_4:
-  name: "ValueInvestor 4"
-  class: "examples.CreditCycle.Rag.players:ValueInvestor"
+# -----------------------------------------------------------------------------
+# RAG Value Investors
+# Theory: Graham (1949)
+# -----------------------------------------------------------------------------
+valueinvestor:
+  name: "ValueInvestor"
+  class: "examples.CreditCycle.Rag.players:RagLLMValueInvestor"
   num_instances: 1
   config:
-    identity: "valueinvestor_4"
+    identity: "valueinvestor"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
+      record_path: "EXPERIMENT/CreditCycle/Rag/records"
       initial_cash: 1000000.0
       initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: valueinvestor
+      value_discount: 0.10
+      value_premium: 0.10
+      value_size: 300
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CreditCycle.Rag.prompts:RAG_VALUE_INVESTOR_SYS"
+        user_message: "examples.CreditCycle.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 600
+  persona: !include persona.yml
 
-noisetrader_5:
-  name: "NoiseTrader 5"
-  class: "examples.CreditCycle.Rag.players:NoiseTrader"
+# -----------------------------------------------------------------------------
+# RAG Noise Traders
+# Theory: Black (1986)
+# -----------------------------------------------------------------------------
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.CreditCycle.Rag.players:RagLLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader_5"
+    identity: "noisetrader"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.0
+      record_path: "EXPERIMENT/CreditCycle/Rag/records"
+      initial_cash: 500000.0
       initial_position: 0
-      llm: {'model': 'doubao-pro-32k', 'api_key': '${LLM_API_KEY}', 'base_url': '${LLM_BASE_URL}'}
-      agent_type: noisetrader
+      trade_probability: 0.3
+      noise_size: 100
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CreditCycle.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        user_message: "examples.CreditCycle.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 600
+  persona: !include persona.yml

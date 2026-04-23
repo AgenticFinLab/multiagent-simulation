@@ -7,85 +7,163 @@ market:
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
     extras:
+      record_path: "EXPERIMENT/GFC2008/RuleLLM/records"
       initial_price: 100.0
       fundamental_value: 100.0
-      price_impact: 0.03
+      price_impact: 0.04
       mean_reversion: 0.005
-      noise_std: 0.02
+      noise_std: 0.015
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
 
-m_b_s_originator_1:
-  name: "MBSOriginator 1"
-  class: "examples.GFC2008.RuleLLM.players:LLMMBSOriginator"
+mbsoriginator:
+  name: "MBSOriginator"
+  class: "examples.GFC2008.RuleLLM.players:RuleLLMMBSOriginator"
   num_instances: 2
   config:
-    identity: "m_b_s_originator_1"
+    identity: "mbsoriginator"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "m_b_s_originator"
+      record_path: "EXPERIMENT/GFC2008/RuleLLM/records"
+      initial_cash: 500000.0
+      initial_position: 3000
+      initial_price: 100.0
+      fundamental_value: 100.0
+      origination_rate: 0.08
+      base_size: 300
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_MBS_ORIGINATOR_SYS"
+        user_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-rating_agency_2:
-  name: "RatingAgency 2"
-  class: "examples.GFC2008.RuleLLM.players:LLMRatingAgency"
+leveragedinvestor:
+  name: "LeveragedInvestor"
+  class: "examples.GFC2008.RuleLLM.players:RuleLLMLeveragedInvestor"
   num_instances: 2
   config:
-    identity: "rating_agency_2"
+    identity: "leveragedinvestor"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "rating_agency"
+      record_path: "EXPERIMENT/GFC2008/RuleLLM/records"
+      initial_cash: 2000000.0
+      initial_position: 1500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      margin_trigger: 0.30
+      fire_sale_fraction: 0.25
+      buy_threshold: -0.03
+      base_size: 350
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_LEVERAGED_INVESTOR_SYS"
+        user_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-leveraged_investor_3:
-  name: "LeveragedInvestor 3"
-  class: "examples.GFC2008.RuleLLM.players:LLMLeveragedInvestor"
+ratingagency:
+  name: "RatingAgency"
+  class: "examples.GFC2008.RuleLLM.players:RuleLLMRatingAgency"
   num_instances: 2
   config:
-    identity: "leveraged_investor_3"
+    identity: "ratingagency"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
-      initial_position: 0
-      agent_type: "leveraged_investor"
+      record_path: "EXPERIMENT/GFC2008/RuleLLM/records"
+      initial_cash: 1500000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      overrating_bias: 0.20
+      base_size: 250
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_RATING_AGENCY_SYS"
+        user_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-distressed_buyer_4:
-  name: "DistressedBuyer 4"
-  class: "examples.GFC2008.RuleLLM.players:LLMDistressedBuyer"
+distressedbuyer:
+  name: "DistressedBuyer"
+  class: "examples.GFC2008.RuleLLM.players:RuleLLMDistressedBuyer"
   num_instances: 1
   config:
-    identity: "distressed_buyer_4"
+    identity: "distressedbuyer"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
+      record_path: "EXPERIMENT/GFC2008/RuleLLM/records"
+      initial_cash: 5000000.0
       initial_position: 0
-      agent_type: "distressed_buyer"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      discount_threshold: 0.20
+      base_size: 400
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
+        sys_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_DISTRESSED_BUYER_SYS"
+        user_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
 
-
-regulator_5:
-  name: "Regulator 5"
-  class: "examples.GFC2008.RuleLLM.players:LLMRegulator"
+regulator:
+  name: "Regulator"
+  class: "examples.GFC2008.RuleLLM.players:RuleLLMRegulator"
   num_instances: 1
   config:
-    identity: "regulator_5"
+    identity: "regulator"
     role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
     extras:
-      initial_cash: 1000000.00
+      record_path: "EXPERIMENT/GFC2008/RuleLLM/records"
+      initial_cash: 10000000.0
       initial_position: 0
-      agent_type: "regulator"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      intervention_threshold: 0.50
+      rescue_size: 500
+      rescue_probability: 0.6
+      custom_state_hot_limit: 3
       llm:
-        model: "doubao-pro-32k"
-
-
+        sys_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_REGULATOR_SYS"
+        user_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        generation_config:
+          temperature: 0.2
+          max_tokens: 512
+  persona: !include persona.yml

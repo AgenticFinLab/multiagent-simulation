@@ -1,32 +1,53 @@
+# =============================================================================
 # BlackMonday1987 Rule Simulation Configuration
-#
-# October 19, 1987 stock market crash - Dow fell 22.6% in one day
+# =============================================================================
+# October 19, 1987 — Dow Jones fell 22.6% in a single day. Portfolio insurance
+# strategies mechanically sold index futures as prices fell, creating a feedback
+# loop that overwhelmed stabilizing buyers.
 #
 # Usage:
 #   python examples/BlackMonday1987/Rule/run_blackmonday1987.py \
 #       -c configs/BlackMonday1987/Rule/simulation.yml
+# =============================================================================
 
 setting:
-  name: "BlackMonday1987-Rule"
-  description: "Black Monday 1987 crash simulation with portfolio insurance, index arbitrage, and program trading feedback loops"
+  name: "blackmonday1987_rule_simulation"
+  description: "Black Monday 1987 crash: portfolio insurance feedback loop overwhelms value investors"
   total_rounds: 200
-  
+  round_history_limit: 3
   record_path: "EXPERIMENT/BlackMonday1987/Rule/records"
-  storage_path: "EXPERIMENT/BlackMonday1987/Rule/communication"
-  
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/BlackMonday1987/Rule/logs"
+  save_diagram_interval: 50
 
 environment:
-  dotenv_path: ".env"
+  dotenv_path: .env
   workspace: "."
 
 ray:
+  address: null
   namespace: "blackmonday1987_rule"
-  ignore_reinit_error: true
-  object_store_memory: 536870912
-  num_cpus: 4
+  actor_prefix: null
+  # Derived: 10 players (1 market + 2 portfolio_insurer + 2 index_arb + 2 program_trader
+  #          + 1 value_investor + 2 noise_trader)
+  #   Star topology -> 18 msgs/round
+  #   10 TurnResult + 10 pending_info + 18 Message = 38 Ray objects
+  #   38 obj x 64 KB min-alloc = 2432 KB -> 128 MB minimum floor -> 134217728 bytes
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
 
 players: !include players.yml
 topology: !include topology.yml
@@ -34,5 +55,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/BlackMonday1987/Rule/communication"
   record_messages: true
-  message_timeout_ms: 5000
-  max_retries: 3
+  message_block_size: 500

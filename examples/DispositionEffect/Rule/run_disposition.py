@@ -35,7 +35,7 @@ async def run_simulation(config_path: str):
     record_path = yaml_config["setting"]["record_path"]
     if os.path.exists(record_path):
         shutil.rmtree(record_path)
-        logger.info(f"Cleared old records: {record_path}")
+        logger.info(f"Cleared old records: {record_path}")  # pylint: disable=logging-fstring-interpolation
     logger.info("=" * 70)
     logger.info("DISPOSITION EFFECT SIMULATION")
     logger.info("=" * 70)

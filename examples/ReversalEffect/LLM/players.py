@@ -126,11 +126,11 @@ class Market(GeneralPlayer):
             else "loser" if cumulative_return < -0.1 else "neutral"
         )
 
-        logger.debug(f"\n{'='*60}")
+        logger.debug(f"\n{'='*60}")  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"[Market] Round {round_num}: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        logger.debug(f"  Cumulative: {cumulative_return*100:+.2f}% ({performance})")
+        logger.debug(f"  Cumulative: {cumulative_return*100:+.2f}% ({performance})")  # pylint: disable=logging-fstring-interpolation
 
         market_data = {
             "price": new_price,

@@ -1,76 +1,45 @@
-# ArchegosCollapse LLM Communication Topology
+# =============================================================================
+# ArchegosCollapse LLM - Topology Configuration
+# =============================================================================
+# Star topology: Market broadcasts to all LLM agents; agents send orders to market.
+#
+#         concentrated_fund ──────────────┐
+#         prime_broker1 ──────────────────┤
+#         prime_broker2 ──────────────────┼──▶ market ──▶ all agents
+#         block_trade_buyer ──────────────┤        (price, deviation, volume)
+#         information_trader ─────────────┘
+#
+# Execution flow per round:
+#   Level 0: market broadcasts current price + market data
+#   Level 1: all LLM agents execute in parallel, submit orders
+# =============================================================================
 
-graph:
-  type: star
-  center: market
+type: "star"
+
+sources:
+  - market
 
 connections:
-  - from: market
-    to:
-      - concentrated_fund_1_1
-      - concentrated_fund_1_2
-      - prime_broker1_2_1
-      - prime_broker1_2_2
-      - prime_broker2_3_1
-      - prime_broker2_3_2
-      - block_trade_buyer_4_1
-      - information_trader_5_1
-      - information_trader_5_2
-    bidirectional: false
-    message_type: market_update
+  # Market → All agents (price + market data broadcast)
+  market:
+    - concentrated_fund
+    - prime_broker1
+    - prime_broker2
+    - block_trade_buyer
+    - information_trader
 
-  - from: concentrated_fund_1_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: concentrated_fund_1_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: prime_broker1_2_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: prime_broker1_2_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: prime_broker2_3_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: prime_broker2_3_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: block_trade_buyer_4_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: information_trader_5_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: information_trader_5_2
-    to: market
-    bidirectional: false
-    message_type: order
-
-broadcast:
-  enabled: true
-  from: market
-  to: all_players
-  message_type: market_update
-
-execution:
-  order:
+  # Each agent → Market only (order submission)
+  concentrated_fund:
     - market
-    - concentrated_fund_1_1
-    - concentrated_fund_1_2
-    - prime_broker1_2_1
-    - prime_broker1_2_2
-    - prime_broker2_3_1
-    - prime_broker2_3_2
-    - block_trade_buyer_4_1
-    - information_trader_5_1
-    - information_trader_5_2
+
+  prime_broker1:
+    - market
+
+  prime_broker2:
+    - market
+
+  block_trade_buyer:
+    - market
+
+  information_trader:
+    - market

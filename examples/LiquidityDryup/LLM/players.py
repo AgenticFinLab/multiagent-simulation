@@ -132,7 +132,7 @@ class Market(GeneralPlayer):
             if total_liquidity < 30
             else "Stressed" if total_liquidity < 60 else "Normal"
         )
-        logger.debug(f"\n{'='*60}")
+        logger.debug(f"\n{'='*60}")  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"[Market] Round {round_num}: ${current_price:.2f} → ${new_price:.2f} ({price_return*100:+.2f}%)"
         )

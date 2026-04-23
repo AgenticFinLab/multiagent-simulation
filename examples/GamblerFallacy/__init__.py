@@ -1,3 +1,19 @@
-"""GamblerFallacy Simulation Package"""
+"""GamblerFallacy Rule Variant"""
 
-__all__ = ["StreakReversalTrader, HotHandTrader, IndependentAssessor, Arbitrageur, NoiseTrader"]
+from examples.GamblerFallacy.Rule.players import (
+    Market,
+    StreakReversalTrader,
+    HotHandTrader,
+    IndependentAssessor,
+    Arbitrageur,
+    NoiseTrader,
+)
+
+__all__ = [
+    "Market",
+    "StreakReversalTrader",
+    "HotHandTrader",
+    "IndependentAssessor",
+    "Arbitrageur",
+    "NoiseTrader",
+]

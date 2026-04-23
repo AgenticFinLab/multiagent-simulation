@@ -1,70 +1,29 @@
-# GFC2008 Rule Communication Topology
+# GFC2008 Rule Topology - Star Pattern
 
-graph:
-  type: star
-  center: market
+type: "star"
+
+sources:
+  - market
 
 connections:
-  - from: market
-    to:
-      - m_b_s_originator_1_1
-      - m_b_s_originator_1_2
-      - rating_agency_2_1
-      - rating_agency_2_2
-      - leveraged_investor_3_1
-      - leveraged_investor_3_2
-      - distressed_buyer_4_1
-      - regulator_5_1
-    bidirectional: false
-    message_type: market_update
+  market:
+    - mbsoriginator
+    - leveragedinvestor
+    - ratingagency
+    - distressedbuyer
+    - regulator
 
-  - from: m_b_s_originator_1_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: m_b_s_originator_1_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: rating_agency_2_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: rating_agency_2_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: leveraged_investor_3_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: leveraged_investor_3_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: distressed_buyer_4_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: regulator_5_1
-    to: market
-    bidirectional: false
-    message_type: order
-
-broadcast:
-  enabled: true
-  from: market
-  to: all_players
-  message_type: market_update
-
-execution:
-  order:
+  mbsoriginator:
     - market
-    - m_b_s_originator_1_1
-    - m_b_s_originator_1_2
-    - rating_agency_2_1
-    - rating_agency_2_2
-    - leveraged_investor_3_1
-    - leveraged_investor_3_2
-    - distressed_buyer_4_1
-    - regulator_5_1
+
+  leveragedinvestor:
+    - market
+
+  ratingagency:
+    - market
+
+  distressedbuyer:
+    - market
+
+  regulator:
+    - market

@@ -1,22 +1,30 @@
-# Topology configuration
+# =============================================================================
+# AsianFinancialCrisis Rag - Topology Configuration
+# =============================================================================
+type: "star"
+
+sources:
+  - market
+
 connections:
-  - source: market
-    target: hotmoneyfunder
-  - source: hotmoneyfunder
-    target: market
-  - source: market
-    target: contagiontrader
-  - source: contagiontrader
-    target: market
-  - source: market
-    target: imfrescuer
-  - source: imfrescuer
-    target: market
-  - source: market
-    target: valuecontrarian
-  - source: valuecontrarian
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - ragllm_hot_money_funder
+    - ragllm_contagion_trader
+    - ragllm_imf_rescuer
+    - ragllm_value_contrarian
+    - ragllm_noise_trader
+
+  ragllm_hot_money_funder:
+    - market
+
+  ragllm_contagion_trader:
+    - market
+
+  ragllm_imf_rescuer:
+    - market
+
+  ragllm_value_contrarian:
+    - market
+
+  ragllm_noise_trader:
+    - market

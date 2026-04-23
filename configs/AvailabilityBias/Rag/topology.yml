@@ -1,22 +1,31 @@
-# Topology configuration
+# =============================================================================
+# AvailabilityBias Topology - Star Pattern (Rag variant)
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
 connections:
-  - source: market
-    target: recenteventoverweighter
-  - source: recenteventoverweighter
-    target: market
-  - source: market
-    target: mediainfluencedtrader
-  - source: mediainfluencedtrader
-    target: market
-  - source: market
-    target: systematicanalyst
-  - source: systematicanalyst
-    target: market
-  - source: market
-    target: valuetrader
-  - source: valuetrader
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - ragllm_recent_event_overweighter
+    - ragllm_media_influenced_trader
+    - ragllm_systematic_analyst
+    - ragllm_value_trader
+    - ragllm_noise_trader
+
+  ragllm_recent_event_overweighter:
+    - market
+
+  ragllm_media_influenced_trader:
+    - market
+
+  ragllm_systematic_analyst:
+    - market
+
+  ragllm_value_trader:
+    - market
+
+  ragllm_noise_trader:
+    - market

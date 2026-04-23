@@ -138,7 +138,7 @@ class Market(GeneralPlayer):
             if buying_pressure > 50
             else "Building" if buying_pressure > 20 else "Normal"
         )
-        logger.debug(f"\n{'='*60}")
+        logger.debug(f"\n{'='*60}")  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"[Market] Round {round_num}: ${current_price:.2f} → ${new_price:.2f} ({price_return*100:+.2f}%)"
         )

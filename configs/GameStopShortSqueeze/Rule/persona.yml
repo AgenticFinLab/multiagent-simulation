@@ -1,72 +1,23 @@
 # GameStopShortSqueeze Rule Persona Configuration
 
-market:
-  type: proxy
-  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rule/records/market/checkpoints"
-  record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records/market"
-  monitoring:
-    record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/monitoring/market"
+auto_checkpoint: false
+debug_mode: true
 
-retail_coordinated_1_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rule/records/retail_coordinated_1_1/checkpoints"
-  record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records/retail_coordinated_1_1"
-  monitoring:
-    record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/monitoring/retail_coordinated_1_1"
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rule/checkpoints"
+    record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"
+    record_rounds: true
+    turn_block_size: 3
 
-retail_coordinated_1_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rule/records/retail_coordinated_1_2/checkpoints"
-  record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records/retail_coordinated_1_2"
   monitoring:
-    record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/monitoring/retail_coordinated_1_2"
+    record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/monitoring"
+    monitor_hot_limit: 3
 
-short_seller_h_f_2_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rule/records/short_seller_h_f_2_1/checkpoints"
-  record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records/short_seller_h_f_2_1"
-  monitoring:
-    record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/monitoring/short_seller_h_f_2_1"
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
 
-short_seller_h_f_2_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rule/records/short_seller_h_f_2_2/checkpoints"
-  record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records/short_seller_h_f_2_2"
-  monitoring:
-    record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/monitoring/short_seller_h_f_2_2"
-
-market_maker_gamma_3_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rule/records/market_maker_gamma_3_1/checkpoints"
-  record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records/market_maker_gamma_3_1"
-  monitoring:
-    record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/monitoring/market_maker_gamma_3_1"
-
-market_maker_gamma_3_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rule/records/market_maker_gamma_3_2/checkpoints"
-  record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records/market_maker_gamma_3_2"
-  monitoring:
-    record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/monitoring/market_maker_gamma_3_2"
-
-institutional_value_4_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rule/records/institutional_value_4_1/checkpoints"
-  record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records/institutional_value_4_1"
-  monitoring:
-    record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/monitoring/institutional_value_4_1"
-
-momentum_retail_5_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rule/records/momentum_retail_5_1/checkpoints"
-  record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records/momentum_retail_5_1"
-  monitoring:
-    record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/monitoring/momentum_retail_5_1"
-
-momentum_retail_5_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/GameStopShortSqueeze/Rule/records/momentum_retail_5_2/checkpoints"
-  record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records/momentum_retail_5_2"
-  monitoring:
-    record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/monitoring/momentum_retail_5_2"
-
+  resource:
+    mcp_servers: []
+    enable_caching: false

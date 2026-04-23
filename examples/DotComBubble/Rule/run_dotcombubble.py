@@ -37,7 +37,7 @@ async def main():
     print("DotComBubble Simulation - Rule-Based Agents")
     print("=" * 70)
     print("Phenomenon: 1995-2001 Internet bubble - NASDAQ rose 400% then fell 78%")
-    print("Rounds:     %%s" %% config.setting["total_rounds"])
+    print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 70 + "\n")
     
     simulator = GeneralSimulator(config)

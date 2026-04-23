@@ -1,70 +1,29 @@
-# HerdingInformation RuleLLM Communication Topology
+# HerdingInformation RuleLLM Topology - Star Pattern
 
-graph:
-  type: star
-  center: market
+type: "star"
+
+sources:
+  - market
 
 connections:
-  - from: market
-    to:
-      - cascade_follower_1_1
-      - cascade_follower_1_2
-      - reputation_herder_2_1
-      - reputation_herder_2_2
-      - independent_thinker_3_1
-      - contrarian_4_1
-      - noise_trader_5_1
-      - noise_trader_5_2
-    bidirectional: false
-    message_type: market_update
+  market:
+    - cascadefollower
+    - reputationherder
+    - independentthinker
+    - contrarian
+    - noisetrader
 
-  - from: cascade_follower_1_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: cascade_follower_1_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: reputation_herder_2_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: reputation_herder_2_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: independent_thinker_3_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: contrarian_4_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: noise_trader_5_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: noise_trader_5_2
-    to: market
-    bidirectional: false
-    message_type: order
-
-broadcast:
-  enabled: true
-  from: market
-  to: all_players
-  message_type: market_update
-
-execution:
-  order:
+  cascadefollower:
     - market
-    - cascade_follower_1_1
-    - cascade_follower_1_2
-    - reputation_herder_2_1
-    - reputation_herder_2_2
-    - independent_thinker_3_1
-    - contrarian_4_1
-    - noise_trader_5_1
-    - noise_trader_5_2
+
+  reputationherder:
+    - market
+
+  independentthinker:
+    - market
+
+  contrarian:
+    - market
+
+  noisetrader:
+    - market

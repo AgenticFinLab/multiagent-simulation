@@ -1,38 +1,47 @@
+# =============================================================================
 # BlackMonday1987 Rag Simulation Configuration
-#
-# October 19, 1987 stock market crash - Dow fell 22.6% in one day
+# =============================================================================
+# RAG-augmented agents with rules in prompts + external document retrieval.
+# Market dynamics are rule-based (same as Rule variant).
 #
 # Usage:
 #   python examples/BlackMonday1987/Rag/run_blackmonday1987_rag.py \
 #       -c configs/BlackMonday1987/Rag/simulation.yml
+# =============================================================================
 
 setting:
-  name: "BlackMonday1987-Rag"
-  description: "Black Monday 1987 crash simulation with portfolio insurance, index arbitrage, and program trading feedback loops"
+  name: "blackmonday1987_rag_simulation"
+  description: "Black Monday 1987 with RAG-augmented agents: rules + retrieved academic knowledge"
   total_rounds: 200
-  
+  round_history_limit: 3
   record_path: "EXPERIMENT/BlackMonday1987/Rag/records"
-  storage_path: "EXPERIMENT/BlackMonday1987/Rag/communication"
-  
-  log_level: "INFO"
-  log_to_file: true
-  log_path: "EXPERIMENT/BlackMonday1987/Rag/logs"
+  save_diagram_interval: 50
 
 environment:
-  dotenv_path: ".env"
+  dotenv_path: .env
   workspace: "."
 
-llm:
-  model: "doubao-pro-32k"
-  temperature: 0.3
-  max_tokens: 500
-  timeout: 30
-
 ray:
+  address: null
   namespace: "blackmonday1987_rag"
-  ignore_reinit_error: true
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
   object_store_memory: 536870912
-  num_cpus: 4
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
 
 players: !include players.yml
 topology: !include topology.yml
@@ -40,5 +49,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/BlackMonday1987/Rag/communication"
   record_messages: true
-  message_timeout_ms: 30000
-  max_retries: 3
+  message_block_size: 500

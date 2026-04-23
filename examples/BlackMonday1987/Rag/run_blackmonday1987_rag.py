@@ -41,7 +41,7 @@ async def main():
     print("\n" + "=" * 70)
     print("BlackMonday1987 Simulation - Rag Agents")
     print("=" * 70)
-    print("Rounds:     %%s" %% config.setting["total_rounds"])
+    print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 70 + "\n")
     
     simulator = GeneralSimulator(config)

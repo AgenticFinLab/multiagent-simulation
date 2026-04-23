@@ -1,65 +1,23 @@
 # LossAversion Rag Persona Configuration
 
-market:
-  type: proxy
-  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/market/checkpoints"
-  record_path: "EXPERIMENT/LossAversion/Rag/records/market"
-  monitoring:
-    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/market"
+auto_checkpoint: false
+debug_mode: true
 
-loss_averse_investor_1_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/loss_averse_investor_1_1/checkpoints"
-  record_path: "EXPERIMENT/LossAversion/Rag/records/loss_averse_investor_1_1"
-  monitoring:
-    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/loss_averse_investor_1_1"
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/LossAversion/Rag/checkpoints"
+    record_path: "EXPERIMENT/LossAversion/Rag/records"
+    record_rounds: true
+    turn_block_size: 3
 
-loss_averse_investor_1_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/loss_averse_investor_1_2/checkpoints"
-  record_path: "EXPERIMENT/LossAversion/Rag/records/loss_averse_investor_1_2"
   monitoring:
-    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/loss_averse_investor_1_2"
+    record_path: "EXPERIMENT/LossAversion/Rag/monitoring"
+    monitor_hot_limit: 3
 
-break_even_trader_2_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/break_even_trader_2_1/checkpoints"
-  record_path: "EXPERIMENT/LossAversion/Rag/records/break_even_trader_2_1"
-  monitoring:
-    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/break_even_trader_2_1"
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
 
-break_even_trader_2_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/break_even_trader_2_2/checkpoints"
-  record_path: "EXPERIMENT/LossAversion/Rag/records/break_even_trader_2_2"
-  monitoring:
-    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/break_even_trader_2_2"
-
-rational_trader_3_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/rational_trader_3_1/checkpoints"
-  record_path: "EXPERIMENT/LossAversion/Rag/records/rational_trader_3_1"
-  monitoring:
-    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/rational_trader_3_1"
-
-momentum_trader_4_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/momentum_trader_4_1/checkpoints"
-  record_path: "EXPERIMENT/LossAversion/Rag/records/momentum_trader_4_1"
-  monitoring:
-    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/momentum_trader_4_1"
-
-momentum_trader_4_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/momentum_trader_4_2/checkpoints"
-  record_path: "EXPERIMENT/LossAversion/Rag/records/momentum_trader_4_2"
-  monitoring:
-    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/momentum_trader_4_2"
-
-market_maker_5_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/LossAversion/Rag/records/market_maker_5_1/checkpoints"
-  record_path: "EXPERIMENT/LossAversion/Rag/records/market_maker_5_1"
-  monitoring:
-    record_path: "EXPERIMENT/LossAversion/Rag/monitoring/market_maker_5_1"
-
+  resource:
+    mcp_servers: []
+    enable_caching: false

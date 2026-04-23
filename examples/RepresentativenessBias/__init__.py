@@ -1,3 +1,19 @@
-"""RepresentativenessBias Simulation Package"""
+"""RepresentativenessBias Rule Variant"""
 
-__all__ = ["PatternMatcher, CategoryOvergeneralizer, BayesianUpdater, ContrarianStatistical, NoiseTrader"]
+from examples.RepresentativenessBias.Rule.players import (
+    Market,
+    PatternMatcher,
+    CategoryOvergeneralizer,
+    BayesianUpdater,
+    ContrarianStatistical,
+    NoiseTrader,
+)
+
+__all__ = [
+    "Market",
+    "PatternMatcher",
+    "CategoryOvergeneralizer",
+    "BayesianUpdater",
+    "ContrarianStatistical",
+    "NoiseTrader",
+]

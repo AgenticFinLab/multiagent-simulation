@@ -1,22 +1,43 @@
-# Topology configuration
+# =============================================================================
+# CarryTradeUnwind Rule Topology - Star Pattern
+# =============================================================================
+# Market as hub, all investors communicate through market.
+#
+#    carry_trader         ──────────┐
+#    leveraged_carry_fund ──────────┤
+#    funding_currency_buyer ────────┼──▶ market ──▶ all investors
+#    cb_intervener        ──────────┤             (FX rate, return, deviation)
+#    noise_trader         ──────────┘
+#
+# Execution flow per round:
+#   Level 0: market executes (broadcasts FX rate + dynamics data)
+#   Level 1: all investors execute in parallel
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
 connections:
-  - source: market
-    target: carrytrader
-  - source: carrytrader
-    target: market
-  - source: market
-    target: leveragedcarryfund
-  - source: leveragedcarryfund
-    target: market
-  - source: market
-    target: fundingcurrencybuyer
-  - source: fundingcurrencybuyer
-    target: market
-  - source: market
-    target: hedgedcarrytrader
-  - source: hedgedcarrytrader
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - carry_trader
+    - leveraged_carry_fund
+    - funding_currency_buyer
+    - cb_intervener
+    - noise_trader
+
+  carry_trader:
+    - market
+
+  leveraged_carry_fund:
+    - market
+
+  funding_currency_buyer:
+    - market
+
+  cb_intervener:
+    - market
+
+  noise_trader:
+    - market

@@ -1,76 +1,29 @@
-# MentalAccounting Rag Communication Topology
+# MentalAccounting Rag Topology - Star Pattern
 
-graph:
-  type: star
-  center: market
+type: "star"
+
+sources:
+  - market
 
 connections:
-  - from: market
-    to:
-      - mental_accountant_1_1
-      - mental_accountant_1_2
-      - house_money_trader_2_1
-      - house_money_trader_2_2
-      - rational_portfolio_manager_3_1
-      - sunk_cost_holder_4_1
-      - sunk_cost_holder_4_2
-      - noise_trader_5_1
-      - noise_trader_5_2
-    bidirectional: false
-    message_type: market_update
+  market:
+    - mentalaccountant
+    - housemoneytrader
+    - rationalportfoliomanager
+    - sunkcostholder
+    - noisetrader
 
-  - from: mental_accountant_1_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: mental_accountant_1_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: house_money_trader_2_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: house_money_trader_2_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: rational_portfolio_manager_3_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: sunk_cost_holder_4_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: sunk_cost_holder_4_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: noise_trader_5_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: noise_trader_5_2
-    to: market
-    bidirectional: false
-    message_type: order
-
-broadcast:
-  enabled: true
-  from: market
-  to: all_players
-  message_type: market_update
-
-execution:
-  order:
+  mentalaccountant:
     - market
-    - mental_accountant_1_1
-    - mental_accountant_1_2
-    - house_money_trader_2_1
-    - house_money_trader_2_2
-    - rational_portfolio_manager_3_1
-    - sunk_cost_holder_4_1
-    - sunk_cost_holder_4_2
-    - noise_trader_5_1
-    - noise_trader_5_2
+
+  housemoneytrader:
+    - market
+
+  rationalportfoliomanager:
+    - market
+
+  sunkcostholder:
+    - market
+
+  noisetrader:
+    - market

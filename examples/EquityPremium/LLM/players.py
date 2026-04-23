@@ -136,11 +136,11 @@ class Market(GeneralPlayer):
         self.state.custom_state["stock_price"] = new_price
         self.state.custom_state["stock_history"].append(new_price)
 
-        logger.debug(f"\n{'='*60}")
+        logger.debug(f"\n{'='*60}")  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"[Market] Round {round_num}: Stock ${current_price:.2f} → ${new_price:.2f} ({stock_return*100:+.2f}%)"
         )
-        logger.debug(f"  Bond Return: {bond_return*100*252:.2f}% annual")
+        logger.debug(f"  Bond Return: {bond_return*100*252:.2f}% annual")  # pylint: disable=logging-fstring-interpolation
 
         market_data = {
             "stock_price": new_price,
