@@ -1,10 +1,6 @@
-import random
-import logging
-from masim.player.base import Action
-
 """GameStopShortSqueeze Rule-Based Simulation
 
-January 2021 GameStop short squeeze - Reddit coordination drove 1,700% price increase
+January 2021 GameStop short squeeze - Reddit coordination drove 1,700% price increase.
 
 Theoretical Foundation:
 - Gamma squeeze dynamics (Jarrow & Li, 2021)
@@ -18,196 +14,336 @@ Key Dynamics:
 - InstitutionalValue: Values company based on fundamentals, sees extreme overvaluation
 - MomentumRetail: Retail momentum trader driven by fear of missing out
 
-Parameters from config (see configs/GameStopShortSqueeze/Rule/players.yml):
+Parameters from config (see configs/GameStopShortSqueeze/Rule/players.yml).
 """
 
-from typing import Any, Dict, List, Optional
+import logging
+import random
 
-from masim.player.base import Action, Observation, StepResult
+from masim.player.base import Action
 from masim.player.general import GeneralPlayer
+from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("GameStopShortSqueeze")
 
 
 class Market(GeneralPlayer):
-    """
-    Market agent for GameStopShortSqueeze simulation.
-    
-    Price Formation Model:
-        P(t+1) = P(t) + λ × NetDemand + γ × (F - P(t)) + ε
-    
-    Where:
-        - λ: Price impact coefficient
-        - γ: Mean reversion strength  
-        - F: Fundamental value
-        - ε: Random noise
-    """
-    async def perceive(
-        self,
-        observation,
-        prev_result=None,
-    ) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
-        
+    """Market agent: collects orders, clears market, broadcasts new price."""
+
+    async def perceive(self, observation, prev_result=None) -> None:
+        self.state.custom_state["round"] = observation.round
         if "price" not in self.state.custom_state:
-            self._initialize_market_state()
-        
-        orders = self._extract_orders(observation)
-        market_result = self._clear_market(orders)
-        self._update_state(market_result)
-        self._log_market_state()
-    
-    def _initialize_market_state(self) -> None:
-        extras = self.config.extras
-        self.state.custom_state["price"] = extras["initial_price"]
-        self.state.custom_state["fundamental"] = extras["fundamental_value"]
-        self.state.custom_state["price_history"] = []
-        self.state.custom_state["volume_history"] = []
-        
-        self.state.custom_state["price_impact"] = extras["price_impact"]
-        self.state.custom_state["mean_reversion"] = extras["mean_reversion"]
-        self.state.custom_state["noise_std"] = extras["noise_std"]
-    
-    def _extract_orders(self, observation) -> list:
+            extras = self.config.extras
+            self.state.custom_state["price"] = extras["initial_price"]
+            self.state.custom_state["fundamental"] = extras["fundamental_value"]
+            self.state.custom_state["price_impact"] = extras["price_impact"]
+            self.state.custom_state["mean_reversion"] = extras["mean_reversion"]
+            self.state.custom_state["noise_std"] = extras["noise_std"]
+            self.state.custom_state["price_history"] = []
+            self._history = HistoryBuffer(
+                folder=f"history/GameStopShortSqueeze/Market",
+                entry_limit=200,
+            )
+
         orders = []
-        for msg in observation.messages:
-            if msg.get("type") == "order":
-                orders.append({
-                    "agent_id": msg.get("from"),
-                    "action": msg.get("action"),
-                    "quantity": msg.get("quantity"),
-                    "agent_type": msg.get("agent_type"),
-                })
-        return orders
-    
-    def _clear_market(self, orders: list) -> dict:
+        for msg in observation.inbounds:
+            payload = msg.payload if hasattr(msg, "payload") else msg
+            if isinstance(payload, dict) and payload.get("type") == "order":
+                orders.append(payload)
+
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        
-        buy_orders = [o for o in orders if o["action"] == "buy"]
-        sell_orders = [o for o in orders if o["action"] == "sell"]
-        total_buy = sum(o["quantity"] for o in buy_orders)
-        total_sell = sum(o["quantity"] for o in sell_orders)
-        net_demand = total_buy - total_sell
-        
         price_impact = self.state.custom_state["price_impact"]
         mean_reversion = self.state.custom_state["mean_reversion"]
         noise_std = self.state.custom_state["noise_std"]
-        
-        price_change = price_impact * net_demand
-        reversion = mean_reversion * (fundamental - price)
-        noise = random.gauss(0, noise_std)
-        
-        new_price = price + price_change + reversion + noise
-        new_price = max(new_price, 0.01)
-        
-        volume = min(total_buy, total_sell) + abs(net_demand) * 0.5
-        
-        return {
-            "price": new_price,
-            "volume": volume,
-            "net_demand": net_demand,
-        }
-    
-    def _update_state(self, market_result: dict) -> None:
-        self.state.custom_state["price"] = market_result["price"]
-        self.state.custom_state["price_history"].append(market_result["price"])
-        self.state.custom_state["volume_history"].append(market_result["volume"])
-    
-    def _log_market_state(self) -> None:
-        logger = logging.getLogger("{name}")
-        logger.debug(
-            "Round %%d: price=%%.2f",
-            self.state.custom_state["round"],
-            self.state.custom_state["price"],
+
+        total_buy = sum(
+            o.get("quantity", 0) for o in orders if o.get("action") == "buy"
         )
-    
-    async def step(self):
+        total_sell = sum(
+            o.get("quantity", 0) for o in orders if o.get("action") == "sell"
+        )
+        net_demand = total_buy - total_sell
+
+        new_price = (
+            price
+            + price_impact * net_demand
+            + mean_reversion * (fundamental - price)
+            + random.gauss(0, noise_std)
+        )
+        new_price = max(new_price, 0.01)
+        self.state.custom_state["price"] = new_price
+        self.state.custom_state["price_history"].append(new_price)
+        logger.debug(
+            "Round %d: price=%.2f",
+            self.state.custom_state["round"],
+            new_price,
+        )
+
+    async def decide(self):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        deviation = (price - fundamental) / fundamental if fundamental > 0 else 0
-        
-        market_update = {
-            "type": "market_update",
+        deviation = (price - fundamental) / fundamental if fundamental > 0 else 0.0
+        return {
             "price": price,
             "fundamental": fundamental,
             "deviation": deviation,
             "round": self.state.custom_state["round"],
         }
-        
+
+    async def act(self, decision_payload):
+        market_update = {
+            "type": "market_update",
+            "price": decision_payload["price"],
+            "fundamental": decision_payload["fundamental"],
+            "deviation": decision_payload["deviation"],
+            "round": decision_payload["round"],
+        }
         return Action(
             action_type="market_broadcast",
-            payload={"market_data": market_update, "outbound_messages": [{"payload": market_update, "content_type": "market_update"}]},
+            payload={
+                "market_data": market_update,
+                "outbound_messages": [
+                    {"payload": market_update, "content_type": "market_update"}
+                ],
+            },
             source_id=self.identity,
         )
 
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        """Retail coordination: buys and holds with diamond hands."""
-        extras = self.config.extras
+class RetailCoordinated(GeneralPlayer):
+    """Retail trader coordinating via social media: buys and holds aggressively."""
+
+    async def perceive(self, observation, prev_result=None) -> None:
+        self.state.custom_state["round"] = observation.round
+        if "cash" not in self.state.custom_state:
+            extras = self.config.extras
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["buy_pressure"] = extras["buy_pressure"]
+        for msg in observation.inbounds:
+            payload = msg.payload if hasattr(msg, "payload") else msg
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
+
+    async def decide(self):
+        price = self.state.custom_state.get("price", 0)
         cash = self.state.custom_state["cash"]
-        position = self.state.custom_state["position"]
-        buy_pressure = extras["buy_pressure"]
-        
-        if cash > price * 50:
-            buy_qty = min(int(cash * buy_pressure / price), 500) if price > 0 else 0
+        buy_pressure = self.state.custom_state["buy_pressure"]
+        if cash > price * 50 and price > 0:
+            buy_qty = min(int(cash * buy_pressure / price), 500)
             if buy_qty > 0:
                 return {"action": "buy", "quantity": buy_qty}
         return {"action": "hold", "quantity": 0}
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        """Short squeeze: forced to cover at higher prices."""
-        extras = self.config.extras
-        cash = self.state.custom_state["cash"]
+    async def act(self, decision_payload):
+        action = decision_payload.get("action", "hold")
+        quantity = decision_payload.get("quantity", 0)
+        price = self.state.custom_state.get("price", 0)
+        if action == "buy" and quantity > 0 and price > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        order = {"type": "order", "action": action, "quantity": quantity}
+        return Action(
+            action_type="order",
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
+            source_id=self.identity,
+        )
+
+
+class ShortSellerHF(GeneralPlayer):
+    """Heavily short hedge fund forced to cover when price rises above threshold."""
+
+    async def perceive(self, observation, prev_result=None) -> None:
+        self.state.custom_state["round"] = observation.round
+        if "cash" not in self.state.custom_state:
+            extras = self.config.extras
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras.get("initial_position", -500)
+            self.state.custom_state["cover_threshold"] = extras["cover_threshold"]
+        for msg in observation.inbounds:
+            payload = msg.payload if hasattr(msg, "payload") else msg
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
+
+    async def decide(self):
         position = self.state.custom_state["position"]
-        cover_threshold = extras["cover_threshold"]
-        
+        deviation = self.state.custom_state.get("deviation", 0.0)
+        cover_threshold = self.state.custom_state["cover_threshold"]
         if position < 0 and deviation > cover_threshold:
             cover_qty = min(abs(position), int(abs(position) * 0.5))
             if cover_qty > 0:
                 return {"action": "buy", "quantity": cover_qty}
         return {"action": "hold", "quantity": 0}
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        """Gamma hedging: delta-hedges options exposure."""
-        extras = self.config.extras
+    async def act(self, decision_payload):
+        action = decision_payload.get("action", "hold")
+        quantity = decision_payload.get("quantity", 0)
+        price = self.state.custom_state.get("price", 0)
+        if action == "buy" and quantity > 0 and price > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        order = {"type": "order", "action": action, "quantity": quantity}
+        return Action(
+            action_type="order",
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
+            source_id=self.identity,
+        )
+
+
+class MarketMakerGamma(GeneralPlayer):
+    """Market maker delta-hedging options exposure: buys more when price rises."""
+
+    async def perceive(self, observation, prev_result=None) -> None:
+        self.state.custom_state["round"] = observation.round
+        if "cash" not in self.state.custom_state:
+            extras = self.config.extras
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["gamma_exposure"] = extras["gamma_exposure"]
+        for msg in observation.inbounds:
+            payload = msg.payload if hasattr(msg, "payload") else msg
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
+
+    async def decide(self):
+        price = self.state.custom_state.get("price", 0)
         cash = self.state.custom_state["cash"]
-        position = self.state.custom_state["position"]
-        gamma = extras["gamma_exposure"]
-        
+        deviation = self.state.custom_state.get("deviation", 0.0)
+        gamma = self.state.custom_state["gamma_exposure"]
         hedge_qty = int(abs(deviation) * gamma * 5000)
-        if deviation > 0:
-            buy_qty = min(hedge_qty, int(cash / price) if price > 0 else 0)
+        if deviation > 0 and hedge_qty > 0 and price > 0:
+            buy_qty = min(hedge_qty, int(cash / price))
             if buy_qty > 0:
                 return {"action": "buy", "quantity": buy_qty}
         return {"action": "hold", "quantity": 0}
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        """Institutional value: sells when extremely overvalued."""
-        extras = self.config.extras
-        cash = self.state.custom_state["cash"]
+    async def act(self, decision_payload):
+        action = decision_payload.get("action", "hold")
+        quantity = decision_payload.get("quantity", 0)
+        price = self.state.custom_state.get("price", 0)
+        if action == "buy" and quantity > 0 and price > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        order = {"type": "order", "action": action, "quantity": quantity}
+        return Action(
+            action_type="order",
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
+            source_id=self.identity,
+        )
+
+
+class InstitutionalValue(GeneralPlayer):
+    """Fundamental value investor: sells aggressively when price is extremely overvalued."""
+
+    async def perceive(self, observation, prev_result=None) -> None:
+        self.state.custom_state["round"] = observation.round
+        if "cash" not in self.state.custom_state:
+            extras = self.config.extras
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras.get("initial_position", 1000)
+            self.state.custom_state["sell_threshold"] = extras["sell_threshold"]
+        for msg in observation.inbounds:
+            payload = msg.payload if hasattr(msg, "payload") else msg
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
+
+    async def decide(self):
         position = self.state.custom_state["position"]
-        sell_threshold = extras["sell_threshold"]
-        
+        deviation = self.state.custom_state.get("deviation", 0.0)
+        sell_threshold = self.state.custom_state["sell_threshold"]
         if deviation > sell_threshold:
             sell_qty = min(1000, max(position, 0))
             if sell_qty > 0:
                 return {"action": "sell", "quantity": sell_qty}
         return {"action": "hold", "quantity": 0}
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        """FOMO trading: buys on fear of missing out."""
-        extras = self.config.extras
+    async def act(self, decision_payload):
+        action = decision_payload.get("action", "hold")
+        quantity = decision_payload.get("quantity", 0)
+        price = self.state.custom_state.get("price", 0)
+        if action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
+        order = {"type": "order", "action": action, "quantity": quantity}
+        return Action(
+            action_type="order",
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
+            source_id=self.identity,
+        )
+
+
+class MomentumRetail(GeneralPlayer):
+    """FOMO retail trader: buys when price is rising above FOMO threshold."""
+
+    async def perceive(self, observation, prev_result=None) -> None:
+        self.state.custom_state["round"] = observation.round
+        if "cash" not in self.state.custom_state:
+            extras = self.config.extras
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["fomo_threshold"] = extras["fomo_threshold"]
+        for msg in observation.inbounds:
+            payload = msg.payload if hasattr(msg, "payload") else msg
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
+
+    async def decide(self):
+        price = self.state.custom_state.get("price", 0)
         cash = self.state.custom_state["cash"]
-        position = self.state.custom_state["position"]
-        fomo_threshold = extras["fomo_threshold"]
-        
-        if deviation > fomo_threshold:
-            buy_qty = min(50, int(cash / price) if price > 0 else 0)
+        deviation = self.state.custom_state.get("deviation", 0.0)
+        fomo_threshold = self.state.custom_state["fomo_threshold"]
+        if deviation > fomo_threshold and price > 0:
+            buy_qty = min(50, int(cash / price))
             if buy_qty > 0:
                 return {"action": "buy", "quantity": buy_qty}
         return {"action": "hold", "quantity": 0}
 
+    async def act(self, decision_payload):
+        action = decision_payload.get("action", "hold")
+        quantity = decision_payload.get("quantity", 0)
+        price = self.state.custom_state.get("price", 0)
+        if action == "buy" and quantity > 0 and price > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        order = {"type": "order", "action": action, "quantity": quantity}
+        return Action(
+            action_type="order",
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
+            source_id=self.identity,
+        )
 
-__all__ = ["Market", "RetailCoordinated", "ShortSellerHF", "MarketMakerGamma", "InstitutionalValue", "MomentumRetail"]
+
+__all__ = [
+    "Market",
+    "RetailCoordinated",
+    "ShortSellerHF",
+    "MarketMakerGamma",
+    "InstitutionalValue",
+    "MomentumRetail",
+]

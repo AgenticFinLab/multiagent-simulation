@@ -1,7 +1,8 @@
 """SorosPound Rule Variant"""
 
-from examples.SorosPound.Rule.players import (
+from .players import (
     Market,
+    BaseInvestor,
     MacroHedgeFund,
     PegDefender,
     ConvergenceTrader,
@@ -11,6 +12,7 @@ from examples.SorosPound.Rule.players import (
 
 __all__ = [
     "Market",
+    "BaseInvestor",
     "MacroHedgeFund",
     "PegDefender",
     "ConvergenceTrader",

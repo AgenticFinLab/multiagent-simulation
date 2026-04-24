@@ -1,17 +1,19 @@
 """RepresentativenessBias RuleLLM Variant"""
 
-from examples.RepresentativenessBias.RuleLLM.players import (
-    PatternMatcher,
-    CategoryOvergeneralizer,
-    BayesianUpdater,
-    ContrarianStatistical,
-    NoiseTrader,
+from .players import (
+    RuleLLMBayesianUpdater,
+    RuleLLMCategoryOvergeneralizer,
+    RuleLLMContrarianStatistical,
+    RuleLLMInvestor,
+    RuleLLMNoiseTrader,
+    RuleLLMPatternMatcher,
 )
 
 __all__ = [
-    "PatternMatcher",
-    "CategoryOvergeneralizer",
-    "BayesianUpdater",
-    "ContrarianStatistical",
-    "NoiseTrader",
+    "RuleLLMInvestor",
+    "RuleLLMPatternMatcher",
+    "RuleLLMCategoryOvergeneralizer",
+    "RuleLLMBayesianUpdater",
+    "RuleLLMContrarianStatistical",
+    "RuleLLMNoiseTrader",
 ]

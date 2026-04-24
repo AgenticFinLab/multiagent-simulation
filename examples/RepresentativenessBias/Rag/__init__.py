@@ -1,17 +1,19 @@
 """RepresentativenessBias Rag Variant"""
 
-from examples.RepresentativenessBias.Rag.players import (
-    PatternMatcher,
-    CategoryOvergeneralizer,
-    BayesianUpdater,
-    ContrarianStatistical,
-    NoiseTrader,
+from .players import (
+    RagLLMBayesianUpdater,
+    RagLLMCategoryOvergeneralizer,
+    RagLLMContrarianStatistical,
+    RagLLMInvestor,
+    RagLLMNoiseTrader,
+    RagLLMPatternMatcher,
 )
 
 __all__ = [
-    "PatternMatcher",
-    "CategoryOvergeneralizer",
-    "BayesianUpdater",
-    "ContrarianStatistical",
-    "NoiseTrader",
+    "RagLLMInvestor",
+    "RagLLMPatternMatcher",
+    "RagLLMCategoryOvergeneralizer",
+    "RagLLMBayesianUpdater",
+    "RagLLMContrarianStatistical",
+    "RagLLMNoiseTrader",
 ]

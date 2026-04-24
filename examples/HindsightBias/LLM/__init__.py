@@ -1,17 +1,19 @@
 """HindsightBias LLM Variant"""
 
 from examples.HindsightBias.LLM.players import (
-    HindsightOverconfident,
-    OutcomeLearner,
-    ProcessEvaluator,
-    ContrarianSkeptic,
-    NoiseTrader,
+    Market,
+    LLMHindsightOverconfident,
+    LLMOutcomeLearner,
+    LLMProcessEvaluator,
+    LLMContrarianSkeptic,
+    LLMNoiseTrader,
 )
 
 __all__ = [
-    "HindsightOverconfident",
-    "OutcomeLearner",
-    "ProcessEvaluator",
-    "ContrarianSkeptic",
-    "NoiseTrader",
+    "Market",
+    "LLMHindsightOverconfident",
+    "LLMOutcomeLearner",
+    "LLMProcessEvaluator",
+    "LLMContrarianSkeptic",
+    "LLMNoiseTrader",
 ]

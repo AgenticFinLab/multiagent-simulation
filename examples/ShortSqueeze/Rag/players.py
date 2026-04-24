@@ -48,20 +48,12 @@ import os
 import random
 import re
 import shutil
-import sys
 import time
-from pathlib import Path
 from typing import Any, Dict, List, Optional
-
-from dotenv import load_dotenv
-
-# Add examples directory to path for shared utilities
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -72,15 +64,17 @@ from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
+from masim.utils.llm_utils import parse_llm_response_with_thinking
+
+from .prompts import (
+    RAGLLM_SHORT_SELLER_SYS,
+    RAGLLM_MOMENTUM_BUYER_SYS,
+    RAGLLM_RETAIL_TRADER_SYS,
+    RAGLLM_VALUE_INVESTOR_SYS,
+    RAGLLM_INSTITUTIONAL_HOLDER_SYS,
+)
 
 logger = logging.getLogger("ShortSqueezeRag")
-
-
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt string from a module path (``module:VARIABLE``)."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
 
 
 # =============================================================================
@@ -240,24 +234,27 @@ class Market(GeneralPlayer):
 
 
 class RagLLMInvestor(GeneralPlayer):
-    """
-    Base class for RAG-augmented Rule+LLM short squeeze investors.
+    """Base class for RAG-augmented short-squeeze investors."""
 
-    Each subclass uses a system prompt that encodes BOTH persona and rules
-    (identical to RuleLLMInvestor). In addition, at initialization:
+    _system_prompt: str = ""
 
-        1. Documents are loaded from shared/global or agent-local sources.
-        2. A LlamaIndex VectorStoreIndex is built over those documents.
-        3. At every decision round, a query is formulated from the current
-           market state and the top-k most relevant chunks are retrieved and
-           injected into the user prompt via the {rag_context} placeholder.
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state.pop("_llm", None)
+        return state
 
-    Parameters from config extras:
-        - initial_cash, initial_position, custom_state_hot_limit, record_path
-        - rag: docs_dir, url_csv, docs_save_dir, rag_persist_dir, top_k,
-               embed_model, embed_api_base
-        - llm: sys_message, user_message, lm_name, generation_config
-    """
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._llm = None
+
+    def _get_llm(self) -> LangChainAPIInference:
+        """Lazy-initialize LLM client."""
+        llm_cfg = self.config.extras["llm"]
+        self._llm = LangChainAPIInference(
+            lm_name=llm_cfg["lm_name"],
+            generation_config=llm_cfg["generation_config"],
+        )
+        return self._llm
 
     # ------------------------------------------------------------------
     # perceive
@@ -297,26 +294,8 @@ class RagLLMInvestor(GeneralPlayer):
             entry_limit=hot_limit,
         )
 
-        # LLM client
-        project_root = Path(__file__).parent.parent.parent
-        load_dotenv(project_root / ".env")
-        if not os.getenv("ARK_API_KEY"):
-            raise RuntimeError(
-                "ARK_API_KEY not found after loading .env. "
-                f"Ensure .env file exists at {project_root / '.env'} and contains ARK_API_KEY."
-            )
-        llm_config = extras["llm"]
-        lm_name = llm_config["lm_name"]
-        generation_config = llm_config["generation_config"]
-
-        self.state.custom_state["lm_name"] = lm_name
-        self.state.custom_state["generation_config"] = generation_config
-
-        llm_client = LangChainAPIInference(
-            lm_name=lm_name,
-            generation_config=generation_config,
-        )
-        self.state.custom_state["llm_client"] = llm_client
+        # LLM client for RAG initialization
+        llm_client = self._get_llm()
 
         # RAG index
         private_knowledge = extras["private_knowledge"]
@@ -636,22 +615,19 @@ class RagLLMInvestor(GeneralPlayer):
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
 
-        llm_config = self.config.extras["llm"]
-        template = load_prompt(llm_config["user_message"])
-        return template.format(
-            round=round_num,
-            rag_context=rag_context,
-            price=market_data["price"],
-            prev_price=market_data["prev_price"],
-            return_pct=market_data["return_pct"],
-            liquidity=market_data["liquidity"],
-            fundamental=market_data["fundamental"],
-            volume=market_data["volume"],
-            net_demand=market_data["net_demand"],
-            recent_prices=recent_prices,
-            cash=cash,
-            position=position,
-            portfolio_value=cash + position * market_data["price"],
+        return (
+            f"Round {round_num}\n"
+            f"RAG Context:\n{rag_context}\n\n"
+            f"Price: ${market_data['price']:.2f}  prev=${market_data['prev_price']:.2f}"
+            f"  ret={market_data['return_pct']:+.2f}%\n"
+            f"Short interest: {market_data.get('short_interest', 0):.1f}%"
+            f"  squeeze_pressure={market_data.get('squeeze_pressure', 0):.2f}\n"
+            f"Liquidity: {market_data.get('liquidity', 1):.1f}  fundamental=${market_data['fundamental']:.2f}\n"
+            f"Recent prices: {recent_prices}\n"
+            f"Portfolio: cash={cash:.2f}  position={position:.4f}"
+            f"  value={cash + position * market_data['price']:.2f}\n"
+            "Respond with <analysis>...</analysis> then "
+            '<decision>{"bid_price":...,"quantity":...,"reasoning":"...","provides_liquidity":false}</decision>'
         )
 
     # ------------------------------------------------------------------
@@ -687,11 +663,11 @@ class RagLLMInvestor(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
-        llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
         strategy_name = self.__class__.__name__
 
         user_prompt = self._build_prompt(market_data)
-        system_prompt = load_prompt(self.config.extras["llm"]["sys_message"])
+        system_prompt = self._system_prompt
+        llm_client = self._get_llm()
 
         max_retries = 3
         decision: Dict[str, Any] = {}
@@ -741,7 +717,7 @@ class RagLLMInvestor(GeneralPlayer):
             "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
-            "analysis": decision["analysis"],
+            "analysis": decision.get("analysis", ""),
             "provides_liquidity": decision.get("provides_liquidity", False),
         }
 
@@ -764,30 +740,41 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMShortSeller(RagLLMInvestor):
-    """RAG-augmented: ShortSeller rules + LLM + retrieved knowledge."""
+    """RAG-augmented short seller."""
 
-    pass
+    _system_prompt = RAGLLM_SHORT_SELLER_SYS
 
 
 class RagLLMRetailCoordinator(RagLLMInvestor):
-    """RAG-augmented: RetailCoordinator rules + LLM + retrieved knowledge."""
+    """RAG-augmented retail coordinator."""
 
-    pass
+    _system_prompt = RAGLLM_RETAIL_TRADER_SYS
 
 
 class RagLLMMomentumBuyer(RagLLMInvestor):
-    """RAG-augmented: MomentumBuyer rules + LLM + retrieved knowledge."""
+    """RAG-augmented momentum buyer."""
 
-    pass
+    _system_prompt = RAGLLM_MOMENTUM_BUYER_SYS
 
 
 class RagLLMValueInvestor(RagLLMInvestor):
-    """RAG-augmented: ValueInvestor rules + LLM + retrieved knowledge."""
+    """RAG-augmented value investor."""
 
-    pass
+    _system_prompt = RAGLLM_VALUE_INVESTOR_SYS
 
 
 class RagLLMInstitutionalHolder(RagLLMInvestor):
-    """RAG-augmented: InstitutionalHolder rules + LLM + retrieved knowledge."""
+    """RAG-augmented institutional holder."""
 
-    pass
+    _system_prompt = RAGLLM_INSTITUTIONAL_HOLDER_SYS
+
+
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMShortSeller",
+    "RagLLMRetailCoordinator",
+    "RagLLMMomentumBuyer",
+    "RagLLMValueInvestor",
+    "RagLLMInstitutionalHolder",
+]

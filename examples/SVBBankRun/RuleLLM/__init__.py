@@ -1,5 +1,21 @@
 """SVBBankRun RuleLLM Variant"""
 
-from examples.SVBBankRun.RuleLLM.players import Market, LLMInvestor, LLMDepositor, LLMSocialMediaInfluencer, LLMBankManager, LLMRegulator, LLMBondTrader
+from .players import (
+    Market,
+    RuleLLMInvestor,
+    RuleLLMDepositor,
+    RuleLLMSocialMediaInfluencer,
+    RuleLLMBankManager,
+    RuleLLMRegulator,
+    RuleLLMBondTrader,
+)
 
-__all__ = ["Market", "LLMInvestor", "LLMDepositor", "LLMSocialMediaInfluencer", "LLMBankManager", "LLMRegulator", "LLMBondTrader"]
+__all__ = [
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMDepositor",
+    "RuleLLMSocialMediaInfluencer",
+    "RuleLLMBankManager",
+    "RuleLLMRegulator",
+    "RuleLLMBondTrader",
+]

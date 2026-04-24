@@ -95,4 +95,4 @@ LLM_USER_TEMPLATE = """Current Market State (Round {round}):
 - Portfolio Value: ${portfolio_value:.2f}
 
 Apply your personality and trading style to decide your action.
-Respond with <think>...</think> and <decision>{{"action": "buy"|"sell"|"hold", "quantity": integer}}</decision>."""
+Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "quantity": integer}}</decision>."""

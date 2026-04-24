@@ -1,6 +1,6 @@
 """RumorSpread Rule Variant"""
 
-from examples.RumorSpread.Rule.players import (
+from .players import (
     InformationEnvironment,
     GullibleSpreader,
     DistortingRelayer,

@@ -35,13 +35,16 @@ class Market(GeneralPlayer):
         P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
     """
 
-    async def perceive(self, observation: Observation, prev_result: Optional[StepResult] = None) -> None:
+    async def perceive(
+        self, observation: Observation, prev_result: Optional[StepResult] = None
+    ) -> None:
         """Collect orders from inbound messages; initialize state on first round."""
         round_num = observation.round
         self.state.custom_state["round"] = round_num
 
         if "price" not in self.state.custom_state:
             import os
+
             extras = self.config.extras
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras["fundamental_value"]
@@ -51,18 +54,22 @@ class Market(GeneralPlayer):
             self.state.custom_state["mean_reversion"] = extras["mean_reversion"]
             self.state.custom_state["noise_std"] = extras["noise_std"]
             folder = os.path.join("outputs", "FramingEffect", "Rule", "Market")
-            self.state.custom_state["history"] = HistoryBuffer(folder=folder, entry_limit=200)
+            self.state.custom_state["history"] = HistoryBuffer(
+                folder=folder, entry_limit=200
+            )
 
         orders = []
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "order":
-                orders.append({
-                    "agent_id": payload.get("from"),
-                    "action": payload.get("action"),
-                    "quantity": payload.get("quantity", 0),
-                    "agent_type": payload.get("agent_type"),
-                })
+                orders.append(
+                    {
+                        "agent_id": payload.get("from"),
+                        "action": payload.get("action"),
+                        "quantity": payload.get("quantity", 0),
+                        "agent_type": payload.get("agent_type"),
+                    }
+                )
         self.state.custom_state["pending_orders"] = orders
 
     async def decide(self) -> dict:
@@ -94,7 +101,9 @@ class Market(GeneralPlayer):
         deviation = (new_price - fundamental) / fundamental if fundamental > 0 else 0
         logger.debug(
             "Round %d: price=%.2f deviation=%.4f",
-            self.state.custom_state["round"], new_price, deviation
+            self.state.custom_state["round"],
+            new_price,
+            deviation,
         )
         return {
             "price": new_price,
@@ -116,7 +125,9 @@ class Market(GeneralPlayer):
             action_type="market_broadcast",
             payload={
                 "market_data": market_update,
-                "outbound_messages": [{"payload": market_update, "content_type": "market_update"}],
+                "outbound_messages": [
+                    {"payload": market_update, "content_type": "market_update"}
+                ],
             },
             source_id=self.identity,
         )
@@ -130,7 +141,9 @@ class GainFrameFollower(GeneralPlayer):
     Market Role: destabilizing
     """
 
-    async def perceive(self, observation: Observation, prev_result: Optional[StepResult] = None) -> None:
+    async def perceive(
+        self, observation: Observation, prev_result: Optional[StepResult] = None
+    ) -> None:
         """Initialize portfolio; read market update from inbounds."""
         self.state.custom_state["round"] = observation.round
         if "cash" not in self.state.custom_state:
@@ -138,14 +151,20 @@ class GainFrameFollower(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["price"] = extras.get("initial_price", 100.0)
-            self.state.custom_state["fundamental"] = extras.get("fundamental_value", 100.0)
+            self.state.custom_state["fundamental"] = extras.get(
+                "fundamental_value", 100.0
+            )
             self.state.custom_state["deviation"] = 0.0
 
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get("price", self.state.custom_state["price"])
-                self.state.custom_state["fundamental"] = payload.get("fundamental", self.state.custom_state["fundamental"])
+                self.state.custom_state["price"] = payload.get(
+                    "price", self.state.custom_state["price"]
+                )
+                self.state.custom_state["fundamental"] = payload.get(
+                    "fundamental", self.state.custom_state["fundamental"]
+                )
                 self.state.custom_state["deviation"] = payload.get("deviation", 0.0)
 
     async def decide(self) -> dict:
@@ -189,7 +208,10 @@ class GainFrameFollower(GeneralPlayer):
         }
         return Action(
             action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
             source_id=self.identity,
         )
 
@@ -202,7 +224,9 @@ class LossFrameReactor(GeneralPlayer):
     Market Role: destabilizing
     """
 
-    async def perceive(self, observation: Observation, prev_result: Optional[StepResult] = None) -> None:
+    async def perceive(
+        self, observation: Observation, prev_result: Optional[StepResult] = None
+    ) -> None:
         """Initialize portfolio; read market update from inbounds."""
         self.state.custom_state["round"] = observation.round
         if "cash" not in self.state.custom_state:
@@ -210,14 +234,20 @@ class LossFrameReactor(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["price"] = extras.get("initial_price", 100.0)
-            self.state.custom_state["fundamental"] = extras.get("fundamental_value", 100.0)
+            self.state.custom_state["fundamental"] = extras.get(
+                "fundamental_value", 100.0
+            )
             self.state.custom_state["deviation"] = 0.0
 
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get("price", self.state.custom_state["price"])
-                self.state.custom_state["fundamental"] = payload.get("fundamental", self.state.custom_state["fundamental"])
+                self.state.custom_state["price"] = payload.get(
+                    "price", self.state.custom_state["price"]
+                )
+                self.state.custom_state["fundamental"] = payload.get(
+                    "fundamental", self.state.custom_state["fundamental"]
+                )
                 self.state.custom_state["deviation"] = payload.get("deviation", 0.0)
 
     async def decide(self) -> dict:
@@ -261,7 +291,10 @@ class LossFrameReactor(GeneralPlayer):
         }
         return Action(
             action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
             source_id=self.identity,
         )
 
@@ -274,7 +307,9 @@ class FrameInvariantTrader(GeneralPlayer):
     Market Role: stabilizing
     """
 
-    async def perceive(self, observation: Observation, prev_result: Optional[StepResult] = None) -> None:
+    async def perceive(
+        self, observation: Observation, prev_result: Optional[StepResult] = None
+    ) -> None:
         """Initialize portfolio; read market update from inbounds."""
         self.state.custom_state["round"] = observation.round
         if "cash" not in self.state.custom_state:
@@ -282,14 +317,20 @@ class FrameInvariantTrader(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["price"] = extras.get("initial_price", 100.0)
-            self.state.custom_state["fundamental"] = extras.get("fundamental_value", 100.0)
+            self.state.custom_state["fundamental"] = extras.get(
+                "fundamental_value", 100.0
+            )
             self.state.custom_state["deviation"] = 0.0
 
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get("price", self.state.custom_state["price"])
-                self.state.custom_state["fundamental"] = payload.get("fundamental", self.state.custom_state["fundamental"])
+                self.state.custom_state["price"] = payload.get(
+                    "price", self.state.custom_state["price"]
+                )
+                self.state.custom_state["fundamental"] = payload.get(
+                    "fundamental", self.state.custom_state["fundamental"]
+                )
                 self.state.custom_state["deviation"] = payload.get("deviation", 0.0)
 
     async def decide(self) -> dict:
@@ -333,7 +374,10 @@ class FrameInvariantTrader(GeneralPlayer):
         }
         return Action(
             action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
             source_id=self.identity,
         )
 
@@ -346,7 +390,9 @@ class ArbitrageFramer(GeneralPlayer):
     Market Role: stabilizing
     """
 
-    async def perceive(self, observation: Observation, prev_result: Optional[StepResult] = None) -> None:
+    async def perceive(
+        self, observation: Observation, prev_result: Optional[StepResult] = None
+    ) -> None:
         """Initialize portfolio; read market update from inbounds."""
         self.state.custom_state["round"] = observation.round
         if "cash" not in self.state.custom_state:
@@ -354,14 +400,20 @@ class ArbitrageFramer(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["price"] = extras.get("initial_price", 100.0)
-            self.state.custom_state["fundamental"] = extras.get("fundamental_value", 100.0)
+            self.state.custom_state["fundamental"] = extras.get(
+                "fundamental_value", 100.0
+            )
             self.state.custom_state["deviation"] = 0.0
 
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get("price", self.state.custom_state["price"])
-                self.state.custom_state["fundamental"] = payload.get("fundamental", self.state.custom_state["fundamental"])
+                self.state.custom_state["price"] = payload.get(
+                    "price", self.state.custom_state["price"]
+                )
+                self.state.custom_state["fundamental"] = payload.get(
+                    "fundamental", self.state.custom_state["fundamental"]
+                )
                 self.state.custom_state["deviation"] = payload.get("deviation", 0.0)
 
     async def decide(self) -> dict:
@@ -405,7 +457,10 @@ class ArbitrageFramer(GeneralPlayer):
         }
         return Action(
             action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
             source_id=self.identity,
         )
 
@@ -418,7 +473,9 @@ class NoiseTrader(GeneralPlayer):
     Market Role: neutral
     """
 
-    async def perceive(self, observation: Observation, prev_result: Optional[StepResult] = None) -> None:
+    async def perceive(
+        self, observation: Observation, prev_result: Optional[StepResult] = None
+    ) -> None:
         """Initialize portfolio; read market update from inbounds."""
         self.state.custom_state["round"] = observation.round
         if "cash" not in self.state.custom_state:
@@ -431,7 +488,9 @@ class NoiseTrader(GeneralPlayer):
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get("price", self.state.custom_state["price"])
+                self.state.custom_state["price"] = payload.get(
+                    "price", self.state.custom_state["price"]
+                )
                 self.state.custom_state["deviation"] = payload.get("deviation", 0.0)
 
     async def decide(self) -> dict:
@@ -475,7 +534,10 @@ class NoiseTrader(GeneralPlayer):
         }
         return Action(
             action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
             source_id=self.identity,
         )
 

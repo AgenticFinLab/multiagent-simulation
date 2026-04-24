@@ -22,32 +22,25 @@ import os
 import json
 import random
 import re
-import sys
-import importlib
 from typing import Any, Dict, Optional
-from dotenv import load_dotenv
 
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-# Shared utility for parsing LLM responses with analysis/decision format
-import sys
+from .prompts import (
+    LLM_CONTRARIAN_SYS,
+    LLM_MOMENTUM_CHASER_SYS,
+    LLM_NOISE_SYS,
+    LLM_OVERCONFIDENT_SYS,
+    LLM_VALUE_SYS,
+)
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from examples.llm_utils import parse_llm_response_with_thinking
-
-
-logger = logging.getLogger("ReversalEffectLLM")
-
-
-def load_prompt(prompt_path: str) -> str:
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
+logger = logging.getLogger("ReversalEffect.LLM")
 
 
 class Market(GeneralPlayer):
@@ -130,7 +123,9 @@ class Market(GeneralPlayer):
         logger.debug(
             f"[Market] Round {round_num}: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        logger.debug(f"  Cumulative: {cumulative_return*100:+.2f}% ({performance})")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Cumulative: {cumulative_return*100:+.2f}% ({performance})"
+        )  # pylint: disable=logging-fstring-interpolation
 
         market_data = {
             "price": new_price,
@@ -162,6 +157,8 @@ class LLMInvestor(GeneralPlayer):
     All parameters read from config.extras (no class constants).
     """
 
+    _system_prompt: str = ""
+
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
     ) -> None:
@@ -173,7 +170,6 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
 
-            load_dotenv()
             llm_config = extras["llm"]
             self.state.custom_state["lm_name"] = llm_config["lm_name"]
             self.state.custom_state["generation_config"] = llm_config[
@@ -209,34 +205,33 @@ class LLMInvestor(GeneralPlayer):
                 )
 
     def _build_prompt(self, market_data: Dict[str, Any]) -> str:
-        llm_config = self.config.extras["llm"]
-        template = load_prompt(llm_config["user_message"])
-        return template.format(
-            price=market_data["price"],
-            prev_price=market_data["prev_price"],
-            return_pct=market_data["return_pct"],
-            cumulative_return=market_data["cumulative_return"],
-            performance=market_data["performance"],
-            fundamental=market_data["fundamental"],
-            cash=self.state.custom_state["cash"],
-            position=self.state.custom_state["position"],
-            portfolio_value=self.state.custom_state["cash"]
-            + self.state.custom_state["position"] * market_data["price"],
-        )
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
+        return f"""
+Price: ${market_data['price']:.2f} | Prev: ${market_data['prev_price']:.2f} | Return: {market_data['return_pct']:+.2f}%
+Cumulative Return: {market_data['cumulative_return']:+.2f}% ({market_data['performance']})
+Fundamental: ${market_data['fundamental']:.2f} | Round: {market_data['round']}
+Portfolio → Cash: ${cash:.2f} | Position: {position:.2f} | Value: ${cash + position * market_data['price']:.2f}
+
+Respond with ONLY valid JSON:
+{{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float, +buy/-sell>, "reasoning": "<brief>"}}
+"""
 
     def _parse_response(self, text: str) -> Dict[str, Any]:
         """Parse LLM response and validate required fields are present and non-null."""
         parsed = None
         try:
             parsed = json.loads(text)
-        except:
+        except Exception:
             match = re.search(r"\{.*\}", text, re.DOTALL)
             if match:
-                parsed = json.loads(match.group(0))
+                try:
+                    parsed = json.loads(match.group(0))
+                except Exception:
+                    pass
         if parsed is None:
             raise ValueError(f"Parse failed: {text[:100]}")
 
-        # Validate required fields with fallback to trigger retry
         required_fields = ["bid_price", "quantity", "reasoning"]
         missing_or_null = []
         for field in required_fields:
@@ -250,8 +245,7 @@ class LLMInvestor(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         market_data = self.state.custom_state["market_data"]
         llm_client = self.state.custom_state["llm_client"]
-        llm_config = self.config.extras["llm"]
-        system_prompt = load_prompt(llm_config["sys_message"])
+        system_prompt = self._system_prompt
 
         for _ in range(3):
             try:
@@ -298,7 +292,7 @@ class LLMInvestor(GeneralPlayer):
             "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": decision["reasoning"][:100],
-            "analysis": decision["analysis"],
+            "analysis": decision.get("analysis", ""),
         }
         return {
             **order,
@@ -316,28 +310,39 @@ class LLMInvestor(GeneralPlayer):
 class LLMContrarianInvestor(LLMInvestor):
     """Contrarian investor."""
 
-    pass
+    _system_prompt = LLM_CONTRARIAN_SYS
 
 
 class LLMOverconfidentTrader(LLMInvestor):
     """Overconfident trader."""
 
-    pass
+    _system_prompt = LLM_OVERCONFIDENT_SYS
 
 
 class LLMValueInvestor(LLMInvestor):
     """Value investor."""
 
-    pass
+    _system_prompt = LLM_VALUE_SYS
 
 
 class LLMMomentumChaser(LLMInvestor):
     """Momentum chaser."""
 
-    pass
+    _system_prompt = LLM_MOMENTUM_CHASER_SYS
 
 
 class LLMNoiseTrader(LLMInvestor):
     """Noise trader."""
 
-    pass
+    _system_prompt = LLM_NOISE_SYS
+
+
+__all__ = [
+    "Market",
+    "LLMInvestor",
+    "LLMContrarianInvestor",
+    "LLMOverconfidentTrader",
+    "LLMValueInvestor",
+    "LLMMomentumChaser",
+    "LLMNoiseTrader",
+]

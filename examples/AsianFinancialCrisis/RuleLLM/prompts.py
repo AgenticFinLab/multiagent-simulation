@@ -21,15 +21,15 @@ EXPLICIT TRADING RULES (follow these exactly):
 4. When |deviation| ≤ 0.02: HOLD — no signal
 5. Quantity constraints: you cannot sell more shares than you hold, cannot spend more than cash
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside \
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside \
 <decision>...</decision> tags.
 
 Example format:
 
-<think>
+<analysis>
 Deviation is -0.04 (below -0.02 threshold). Hot money reversal rule triggers: sell 60% of my \
 position of 3000 shares = 1800 shares.
-</think>
+</analysis>
 
 <decision>
 {"action": "sell", "bid_price": 96.00, "quantity": 1800.0, "reasoning": "Rule: deviation \
@@ -54,16 +54,16 @@ EXPLICIT TRADING RULES (follow these exactly):
 3. When signal ≥ -0.025: HOLD — no sell signal
 4. Quantity constraints: cannot sell more than held position
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside \
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside \
 <decision>...</decision> tags.
 
 Example format:
 
-<think>
+<analysis>
 Deviation = -0.06, price_return = -0.02.
 Signal = 0.60 × (-0.06) + 0.40 × (-0.02) = -0.036 + (-0.008) = -0.044.
 -0.044 < -0.025 threshold → contagion sell rule triggers. Sell 50% of 4000 = 2000 shares.
-</think>
+</analysis>
 
 <decision>
 {"action": "sell", "bid_price": 94.00, "quantity": 2000.0, "reasoning": "Rule: contagion \
@@ -86,15 +86,15 @@ EXPLICIT TRADING RULES (follow these exactly):
 3. When deviation ≥ -0.05: HOLD — not yet at intervention threshold
 4. Quantity constraints: cannot spend more than available cash
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside \
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside \
 <decision>...</decision> tags.
 
 Example format:
 
-<think>
+<analysis>
 Deviation is -0.08 (below -0.05 rescue threshold). Emergency intervention rule triggers. \
 I have $5,000,000 cash — deploy 25% = $1,250,000. At price $92 that's ~13,587 shares.
-</think>
+</analysis>
 
 <decision>
 {"action": "buy", "bid_price": 92.00, "quantity": 13587.0, "reasoning": "Rule: deviation \
@@ -118,15 +118,15 @@ EXPLICIT TRADING RULES (follow these exactly):
    - "Contrarian sell": euphoria has pushed price above fair value
 4. When -0.08 ≤ deviation ≤ +0.10: HOLD — within normal range
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside \
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside \
 <decision>...</decision> tags.
 
 Example format:
 
-<think>
+<analysis>
 Deviation is -0.10 (below -0.08 buy threshold). Contrarian buy rule triggers. \
 I have $1,000,000 cash — deploy 20% = $200,000. At price $90 that's ~2,222 shares.
-</think>
+</analysis>
 
 <decision>
 {"action": "buy", "bid_price": 90.00, "quantity": 2222.0, "reasoning": "Rule: deviation \
@@ -153,14 +153,14 @@ Since you cannot evaluate probabilities directly, use the market round number an
 movement as a pseudo-random signal: if round is odd and price is up, buy; if round is even \
 and price is down, sell; otherwise hold (or make any reasonable low-conviction trade).
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside \
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside \
 <decision>...</decision> tags.
 
 Example format:
 
-<think>
+<analysis>
 Round is 7 (odd) and price is up today. Rule suggests a small buy. I'll trade 200 shares.
-</think>
+</analysis>
 
 <decision>
 {"action": "buy", "bid_price": 101.00, "quantity": 200.0, "reasoning": "Noise trade: \
@@ -178,7 +178,7 @@ RULELLM_USER_TEMPLATE = """Current Market State (Round {round}):
 - Portfolio Value: ${portfolio_value:.2f}
 
 Apply your trading rules to this market state. Show your calculations in the thinking section.
-Respond with your thinking in <think>...</think> tags followed by your decision in \
+Respond with your thinking in <analysis>...</analysis> tags followed by your decision in \
 <decision>...</decision> tags.
 The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
 quantity (float, positive), and reasoning (string).

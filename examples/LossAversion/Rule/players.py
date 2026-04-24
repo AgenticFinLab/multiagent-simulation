@@ -1,10 +1,7 @@
-import random
-import logging
-from masim.player.base import Action
-
 """LossAversion Rule-Based Simulation
 
-Loss aversion from prospect theory causes investors to hold losers too long and sell winners too early
+Loss aversion from prospect theory causes investors to hold losers too long
+and sell winners too early.
 
 Theoretical Foundation:
 - Kahneman & Tversky (1979): Prospect Theory
@@ -18,146 +15,214 @@ Key Dynamics:
 - MomentumTrader: Follows price trends
 - MarketMaker: Provides liquidity and earns spread
 
-Parameters from config (see configs/LossAversion/Rule/players.yml):
+All parameters are configured via players.yml config file.
 """
 
-from typing import Any, Dict, List, Optional
+import logging
+import random
+from typing import Any, Dict, Optional
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
+from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("LossAversion")
 
 
 class Market(GeneralPlayer):
-    """
-    Market agent for LossAversion simulation.
-    
+    """Market agent for LossAversion simulation.
+
     Price Formation Model:
         P(t+1) = P(t) + λ × NetDemand + γ × (F - P(t)) + ε
-    
+
     Where:
         - λ: Price impact coefficient
-        - γ: Mean reversion strength  
+        - γ: Mean reversion strength
         - F: Fundamental value
         - ε: Random noise
     """
+
     async def perceive(
         self,
-        observation,
-        prev_result=None,
+        observation: Observation,
+        prev_result: Optional[StepResult] = None,
     ) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
-        
+        self.state.custom_state["round"] = observation.round
+
         if "price" not in self.state.custom_state:
-            self._initialize_market_state()
-        
-        orders = self._extract_orders(observation)
-        market_result = self._clear_market(orders)
-        self._update_state(market_result)
-        self._log_market_state()
-    
-    def _initialize_market_state(self) -> None:
-        extras = self.config.extras
-        self.state.custom_state["price"] = extras["initial_price"]
-        self.state.custom_state["fundamental"] = extras["fundamental_value"]
-        self.state.custom_state["price_history"] = []
-        self.state.custom_state["volume_history"] = []
-        
-        self.state.custom_state["price_impact"] = extras["price_impact"]
-        self.state.custom_state["mean_reversion"] = extras["mean_reversion"]
-        self.state.custom_state["noise_std"] = extras["noise_std"]
-    
-    def _extract_orders(self, observation) -> list:
+            extras = self.config.extras
+            record_path = extras["record_path"]
+            base_path = __import__("os").path.join(record_path, self.config.identity)
+            hot_limit = extras.get("custom_state_hot_limit", 100)
+
+            self.state.custom_state["price"] = extras["initial_price"]
+            self.state.custom_state["fundamental"] = extras["fundamental_value"]
+            self.state.custom_state["price_history"] = HistoryBuffer(
+                folder=__import__("os").path.join(base_path, "price"),
+                entry_limit=hot_limit,
+            )
+
         orders = []
-        for msg in observation.messages:
-            if msg.get("type") == "order":
-                orders.append({
-                    "agent_id": msg.get("from"),
-                    "action": msg.get("action"),
-                    "quantity": msg.get("quantity"),
-                    "agent_type": msg.get("agent_type"),
-                })
-        return orders
-    
-    def _clear_market(self, orders: list) -> dict:
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                payload = inb.payload
+                if isinstance(payload, dict) and payload.get("type") == "order":
+                    orders.append(
+                        {
+                            "agent_id": inb.sender_id,
+                            "action": payload.get("action", "hold"),
+                            "quantity": payload.get("quantity", 0),
+                            "agent_type": payload.get("agent_type", ""),
+                        }
+                    )
+        self.state.custom_state["orders"] = orders
+
+    async def decide(self) -> Dict[str, Any]:
+        extras = self.config.extras
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        
+        orders = self.state.custom_state["orders"]
+        round_num = self.state.custom_state["round"]
+
+        price_impact = extras["price_impact"]
+        mean_reversion = extras["mean_reversion"]
+        noise_std = extras["noise_std"]
+
         buy_orders = [o for o in orders if o["action"] == "buy"]
         sell_orders = [o for o in orders if o["action"] == "sell"]
         total_buy = sum(o["quantity"] for o in buy_orders)
         total_sell = sum(o["quantity"] for o in sell_orders)
         net_demand = total_buy - total_sell
-        
-        price_impact = self.state.custom_state["price_impact"]
-        mean_reversion = self.state.custom_state["mean_reversion"]
-        noise_std = self.state.custom_state["noise_std"]
-        
+
         price_change = price_impact * net_demand
         reversion = mean_reversion * (fundamental - price)
         noise = random.gauss(0, noise_std)
-        
-        new_price = price + price_change + reversion + noise
-        new_price = max(new_price, 0.01)
-        
-        volume = min(total_buy, total_sell) + abs(net_demand) * 0.5
-        
-        return {
-            "price": new_price,
-            "volume": volume,
-            "net_demand": net_demand,
-        }
-    
-    def _update_state(self, market_result: dict) -> None:
-        self.state.custom_state["price"] = market_result["price"]
-        self.state.custom_state["price_history"].append(market_result["price"])
-        self.state.custom_state["volume_history"].append(market_result["volume"])
-    
-    def _log_market_state(self) -> None:
-        logger = logging.getLogger("{name}")
+
+        new_price = max(price + price_change + reversion + noise, 0.01)
+        deviation = (new_price - fundamental) / fundamental if fundamental > 0 else 0.0
+
+        self.state.custom_state["price"] = new_price
+        self.state.custom_state["price_history"].append(new_price)
+
         logger.debug(
-            "Round %%d: price=%%.2f",
-            self.state.custom_state["round"],
-            self.state.custom_state["price"],
+            "[Market] Round %d: price=%.2f, fundamental=%.2f, deviation=%+.2f%%",
+            round_num,
+            new_price,
+            fundamental,
+            deviation * 100,
         )
-    
-    async def step(self):
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = (price - fundamental) / fundamental if fundamental > 0 else 0
-        
+
         market_update = {
             "type": "market_update",
-            "price": price,
+            "price": new_price,
             "fundamental": fundamental,
             "deviation": deviation,
-            "round": self.state.custom_state["round"],
+            "round": round_num,
         }
-        
+        return {
+            "market_data": market_update,
+            "outbound_messages": [
+                {"payload": market_update, "content_type": "market_update"}
+            ],
+        }
+
+    async def act(self, decision_payload: Dict[str, Any]) -> Action:
         return Action(
             action_type="market_broadcast",
-            payload={"market_data": market_update, "outbound_messages": [{"payload": market_update, "content_type": "market_update"}]},
+            payload=decision_payload,
             source_id=self.identity,
         )
 
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        """Loss averse: values losses 2.25x more than gains (prospect theory).
-        
-        Sells winners too early (deviation > sell_gain_threshold) and
-        holds losers too long (reluctant to realize losses).
-        """
+class BaseInvestor(GeneralPlayer):
+    """Base class for all LossAversion investors."""
+
+    async def perceive(
+        self,
+        observation: Observation,
+        prev_result: Optional[StepResult] = None,
+    ) -> None:
+        self.state.custom_state["round"] = observation.round
+
+        if "cash" not in self.state.custom_state:
+            extras = self.config.extras
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["entry_price"] = extras.get(
+                "initial_price", extras.get("entry_price", 100.0)
+            )
+
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                payload = inb.payload if hasattr(inb, "payload") else inb
+                if isinstance(payload, dict) and payload.get("type") == "market_update":
+                    self.state.custom_state["price"] = payload["price"]
+                    self.state.custom_state["fundamental"] = payload["fundamental"]
+                    self.state.custom_state["deviation"] = payload["deviation"]
+
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> Dict[str, Any]:
+        """Override in subclasses to implement agent-specific trading logic."""
+        return {"action": "hold", "quantity": 0}
+
+    def _execute_trade(self, action: str, quantity: int) -> None:
+        price = self.state.custom_state["price"]
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+            self.state.custom_state["entry_price"] = price
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
+
+    async def decide(self) -> Dict[str, Any]:
+        price = self.state.custom_state.get("price", 100.0)
+        fundamental = self.state.custom_state.get("fundamental", 100.0)
+        deviation = self.state.custom_state.get("deviation", 0.0)
+
+        decision = self._make_decision(price, fundamental, deviation)
+        action = decision.get("action", "hold")
+        quantity = decision.get("quantity", 0)
+
+        self._execute_trade(action, quantity)
+
+        order = {
+            "type": "order",
+            "action": action,
+            "quantity": quantity,
+            "agent_type": self.__class__.__name__,
+        }
+        return {
+            **order,
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
+        }
+
+    async def act(self, decision_payload: Dict[str, Any]) -> Action:
+        return Action(
+            action_type="order",
+            payload=decision_payload,
+            source_id=self.identity,
+        )
+
+
+class LossAverseInvestor(BaseInvestor):
+    """Loss averse: values losses 2.25x more than gains (prospect theory).
+
+    Sells winners too early and holds losers too long.
+    """
+
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> Dict[str, Any]:
         extras = self.config.extras
-        cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         loss_lambda = extras["loss_aversion_lambda"]
         sell_gain = extras["sell_gain_threshold"]
-        
-        entry_price = self.state.custom_state["entry_price"]
-        pnl_pct = (price - entry_price) / entry_price if entry_price > 0 else 0
-        
+
+        entry_price = self.state.custom_state.get("entry_price", price)
+        pnl_pct = (price - entry_price) / entry_price if entry_price > 0 else 0.0
+
         if pnl_pct > sell_gain:
             sell_qty = min(max(position, 0), int(position * 0.7))
             if sell_qty > 0:
@@ -168,29 +233,41 @@ class Market(GeneralPlayer):
                 return {"action": "sell", "quantity": sell_qty}
         return {"action": "hold", "quantity": 0}
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        """Break-even effect: takes excessive risk to get back to break-even."""
+
+class BreakEvenTrader(BaseInvestor):
+    """Break-even effect: takes excessive risk to recover losses."""
+
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> Dict[str, Any]:
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
-        position = self.state.custom_state["position"]
         risk_increase = extras["risk_increase_factor"]
-        
-        entry_price = self.state.custom_state["entry_price"]
-        pnl_pct = (price - entry_price) / entry_price if entry_price > 0 else 0
-        
+
+        entry_price = self.state.custom_state.get("entry_price", price)
+        pnl_pct = (price - entry_price) / entry_price if entry_price > 0 else 0.0
+
         if pnl_pct < -0.05:
-            risky_qty = min(int(abs(pnl_pct) * risk_increase * 5000), int(cash / price) if price > 0 else 0)
+            risky_qty = min(
+                int(abs(pnl_pct) * risk_increase * 5000),
+                int(cash / price) if price > 0 else 0,
+            )
             if risky_qty > 0:
                 return {"action": "buy", "quantity": risky_qty}
         return {"action": "hold", "quantity": 0}
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        """Rational: makes decisions based on expected utility."""
+
+class RationalTrader(BaseInvestor):
+    """Rational: makes decisions based on expected utility, no bias."""
+
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> Dict[str, Any]:
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         risk_aversion = extras["risk_aversion"]
-        
+
         if abs(deviation) > 0.03:
             qty = min(500, int(abs(deviation) * risk_aversion * 3000))
             if deviation < 0:
@@ -203,13 +280,18 @@ class Market(GeneralPlayer):
                     return {"action": "sell", "quantity": sell_qty}
         return {"action": "hold", "quantity": 0}
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        """Momentum following."""
+
+class MomentumTrader(BaseInvestor):
+    """Momentum: follows price trends."""
+
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> Dict[str, Any]:
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         entry_threshold = extras["entry_threshold"]
-        
+
         if abs(deviation) > entry_threshold:
             qty = min(500, int(abs(deviation) * 3000))
             if deviation > 0:
@@ -222,17 +304,24 @@ class Market(GeneralPlayer):
                     return {"action": "sell", "quantity": sell_qty}
         return {"action": "hold", "quantity": 0}
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        """Market making: provides liquidity."""
+
+class MarketMaker(BaseInvestor):
+    """Market maker: provides liquidity and earns spread."""
+
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> Dict[str, Any]:
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         inventory_limit = extras["inventory_limit"]
-        
+
         if abs(position) < inventory_limit:
             qty = 300
             if deviation > 0:
-                return {"action": "sell", "quantity": min(qty, max(position, 0))}
+                sell_qty = min(qty, max(position, 0))
+                if sell_qty > 0:
+                    return {"action": "sell", "quantity": sell_qty}
             else:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
@@ -240,4 +329,12 @@ class Market(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
 
-__all__ = ["Market", "LossAverseInvestor", "BreakEvenTrader", "RationalTrader", "MomentumTrader", "MarketMaker"]
+__all__ = [
+    "Market",
+    "BaseInvestor",
+    "LossAverseInvestor",
+    "BreakEvenTrader",
+    "RationalTrader",
+    "MomentumTrader",
+    "MarketMaker",
+]

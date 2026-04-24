@@ -1,6 +1,6 @@
 """RumorSpreadRag Package"""
 
-from examples.RumorSpread.Rag.players import (
+from .players import (
     InformationEnvironment,
     RagLLMGullibleSpreader,
     RagLLMDistortingRelayer,

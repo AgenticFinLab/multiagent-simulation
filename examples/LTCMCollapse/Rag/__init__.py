@@ -1,5 +1,19 @@
 """LTCMCollapse Rag Variant"""
 
-from examples.LTCMCollapse.Rag.players import Market, LLMInvestor, LLMConvergenceArbitrageur, LLMLeverageTrader, LLMRiskManager, LLMLiquidityProvider, LLMCentralBank
+from examples.LTCMCollapse.Rag.players import (
+    Market,
+    RagLLMConvergenceArbitrageur,
+    RagLLMLeverageTrader,
+    RagLLMRiskManager,
+    RagLLMLiquidityProvider,
+    RagLLMCentralBank,
+)
 
-__all__ = ["Market", "LLMInvestor", "LLMConvergenceArbitrageur", "LLMLeverageTrader", "LLMRiskManager", "LLMLiquidityProvider", "LLMCentralBank"]
+__all__ = [
+    "Market",
+    "RagLLMConvergenceArbitrageur",
+    "RagLLMLeverageTrader",
+    "RagLLMRiskManager",
+    "RagLLMLiquidityProvider",
+    "RagLLMCentralBank",
+]

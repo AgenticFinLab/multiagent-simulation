@@ -1,17 +1,21 @@
 """SouthSeaBubble Rag Variant"""
 
-from examples.SouthSeaBubble.Rag.players import (
-    InsiderAdvantaged,
-    NarrativeBeliever,
-    SkepticalAnalyst,
-    Arbitrageur,
-    NoiseTrader,
+from .players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMInsiderAdvantaged,
+    RagLLMNarrativeBeliever,
+    RagLLMSkepticalAnalyst,
+    RagLLMArbitrageur,
+    RagLLMNoiseTrader,
 )
 
 __all__ = [
-    "InsiderAdvantaged",
-    "NarrativeBeliever",
-    "SkepticalAnalyst",
-    "Arbitrageur",
-    "NoiseTrader",
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMInsiderAdvantaged",
+    "RagLLMNarrativeBeliever",
+    "RagLLMSkepticalAnalyst",
+    "RagLLMArbitrageur",
+    "RagLLMNoiseTrader",
 ]

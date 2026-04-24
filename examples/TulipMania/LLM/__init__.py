@@ -1,17 +1,21 @@
 """TulipMania LLM Variant"""
 
-from examples.TulipMania.LLM.players import (
-    TrendChaser,
-    SocialProofFollower,
-    IntrinsicValueTrader,
-    EarlyExitTrader,
-    NoiseTrader,
+from .players import (
+    Market,
+    LLMInvestor,
+    LLMTrendChaser,
+    LLMSocialProofFollower,
+    LLMIntrinsicValueTrader,
+    LLMEarlyExitTrader,
+    LLMNoiseTrader,
 )
 
 __all__ = [
-    "TrendChaser",
-    "SocialProofFollower",
-    "IntrinsicValueTrader",
-    "EarlyExitTrader",
-    "NoiseTrader",
+    "Market",
+    "LLMInvestor",
+    "LLMTrendChaser",
+    "LLMSocialProofFollower",
+    "LLMIntrinsicValueTrader",
+    "LLMEarlyExitTrader",
+    "LLMNoiseTrader",
 ]

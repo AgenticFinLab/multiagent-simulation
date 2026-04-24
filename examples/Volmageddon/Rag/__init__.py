@@ -1,5 +1,21 @@
 """Volmageddon Rag Variant"""
 
-from examples.Volmageddon.Rag.players import Market, LLMInvestor, LLMShortVolTrader, LLMVolETNManager, LLMLongVolHedger, LLMVolArbitrageur, LLMEquityTrader
+from .players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMShortVolTrader,
+    RagLLMVolETNManager,
+    RagLLMLongVolHedger,
+    RagLLMVolArbitrageur,
+    RagLLMEquityTrader,
+)
 
-__all__ = ["Market", "LLMInvestor", "LLMShortVolTrader", "LLMVolETNManager", "LLMLongVolHedger", "LLMVolArbitrageur", "LLMEquityTrader"]
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMShortVolTrader",
+    "RagLLMVolETNManager",
+    "RagLLMLongVolHedger",
+    "RagLLMVolArbitrageur",
+    "RagLLMEquityTrader",
+]

@@ -1,5 +1,21 @@
-"""OverconfidenceBias Rag Variant"""
+"""OverconfidenceBias Rag Variant."""
 
-from examples.OverconfidenceBias.Rag.players import Market, LLMInvestor, LLMOverconfidentTrader, LLMSelfAttributor, LLMCalibratedTrader, LLMContrarianInvestor, LLMNoiseTrader
+from .players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMOverconfidentTrader,
+    RagLLMSelfAttributor,
+    RagLLMCalibratedTrader,
+    RagLLMContrarianInvestor,
+    RagLLMNoiseTrader,
+)
 
-__all__ = ["Market", "LLMInvestor", "LLMOverconfidentTrader", "LLMSelfAttributor", "LLMCalibratedTrader", "LLMContrarianInvestor", "LLMNoiseTrader"]
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMOverconfidentTrader",
+    "RagLLMSelfAttributor",
+    "RagLLMCalibratedTrader",
+    "RagLLMContrarianInvestor",
+    "RagLLMNoiseTrader",
+]

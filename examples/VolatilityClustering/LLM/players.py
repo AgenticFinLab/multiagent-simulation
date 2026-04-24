@@ -30,32 +30,25 @@ import json
 import random
 import re
 import math
-import importlib
 from typing import Any, Dict, Optional
-from dotenv import load_dotenv
 
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-# Shared utility for parsing LLM responses with analysis/decision format
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from examples.llm_utils import parse_llm_response_with_thinking
-
+from .prompts import (
+    LLM_FUNDAMENTALIST_SYS,
+    LLM_TREND_FOLLOWER_SYS,
+    LLM_NOISE_TRADER_SYS,
+    LLM_SLOW_ADAPTER_SYS,
+    LLM_VOLATILITY_TRADER_SYS,
+)
 
 logger = logging.getLogger("VolatilityClusteringLLM")
-
-
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt string from module path."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
 
 
 class Market(GeneralPlayer):
@@ -162,20 +155,30 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
 
         logger.debug(f"\n{'='*70}")  # pylint: disable=logging-fstring-interpolation
-        logger.debug(f"[Market] Round {round_num}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"[Market] Round {round_num}"
+        )  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"  Price: {current_price:.2f} → {new_price:.2f} ({return_pct:+.2f}%)"
         )
-        logger.debug(f"  Volatility: {current_vol:.3f} → {new_vol:.3f}")  # pylint: disable=logging-fstring-interpolation
-        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Volatility: {current_vol:.3f} → {new_vol:.3f}"
+        )  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}"
+        )  # pylint: disable=logging-fstring-interpolation
         if orders:
-            logger.debug(f"  LLM Orders ({len(orders)}):")  # pylint: disable=logging-fstring-interpolation
+            logger.debug(
+                f"  LLM Orders ({len(orders)}):"
+            )  # pylint: disable=logging-fstring-interpolation
             for o in orders:
                 logger.debug(
                     f"    {o['investor']:25s} [{o['strategy']:15s}]: Q={o['quantity']:+8.2f}"
                 )
                 if o["reasoning"]:
-                    logger.debug(f"      → {o['reasoning'][:80]}...")  # pylint: disable=logging-fstring-interpolation
+                    logger.debug(
+                        f"      → {o['reasoning'][:80]}..."
+                    )  # pylint: disable=logging-fstring-interpolation
 
         market_data = {
             "price": new_price,
@@ -206,10 +209,27 @@ class Market(GeneralPlayer):
 
 
 class LLMInvestor(GeneralPlayer):
-    """Base class for LLM-powered investors using lmbase.
+    """Base class for LLM-powered volatility-clustering investors."""
 
-    All parameters read from config.extras (no class constants).
-    """
+    _system_prompt: str = ""
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state.pop("_llm", None)
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._llm = None
+
+    def _get_llm(self) -> LangChainAPIInference:
+        """Lazy-initialize LLM client."""
+        llm_cfg = self.config.extras["llm"]
+        self._llm = LangChainAPIInference(
+            lm_name=llm_cfg["model"],
+            generation_config={"temperature": llm_cfg.get("temperature", 0.3)},
+        )
+        return self._llm
 
     async def perceive(
         self,
@@ -224,20 +244,6 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
             custom_state_hot_limit = extras["custom_state_hot_limit"]
-
-            load_dotenv()
-            llm_config = extras["llm"]
-            lm_name = llm_config["lm_name"]
-            generation_config = llm_config["generation_config"]
-
-            self.state.custom_state["lm_name"] = lm_name
-            self.state.custom_state["generation_config"] = generation_config
-
-            llm_client = LangChainAPIInference(
-                lm_name=lm_name,
-                generation_config=generation_config,
-            )
-            self.state.custom_state["llm_client"] = llm_client
 
             record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
@@ -259,26 +265,9 @@ class LLMInvestor(GeneralPlayer):
                     market_data["volatility"]
                 )
 
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        if "state" in state and hasattr(state["state"], "custom_state"):
-            custom = state["state"].custom_state
-            if "llm_client" in custom:
-                custom = dict(custom)
-                del custom["llm_client"]
-                state["state"].custom_state = custom
-        return state
-
     def __setstate__(self, state):
         self.__dict__.update(state)
-        if hasattr(self, "state") and hasattr(self.state, "custom_state"):
-            custom = self.state.custom_state
-            if "lm_name" in custom and "llm_client" not in custom:
-                llm_client = LangChainAPIInference(
-                    lm_name=custom["lm_name"],
-                    generation_config=custom["generation_config"],
-                )
-                custom["llm_client"] = llm_client
+        self._llm = None
 
     def _build_prompt(self, market_data: Dict[str, Any]) -> str:
         """Build user prompt with market data including volatility."""
@@ -293,23 +282,19 @@ class LLMInvestor(GeneralPlayer):
         recent_vols = (
             list(vol_history)[-5:] if len(vol_history) >= 5 else list(vol_history)
         )
-
-        llm_config = self.config.extras["llm"]
-        template = load_prompt(llm_config["user_message"])
-        return template.format(
-            price=market_data["price"],
-            prev_price=market_data["prev_price"],
-            return_pct=market_data["return_pct"],
-            volatility=market_data["volatility"],
-            prev_volatility=market_data["prev_volatility"],
-            volume=market_data["volume"],
-            net_demand=market_data["net_demand"],
-            fundamental=market_data["fundamental"],
-            recent_prices=recent_prices,
-            recent_vols=[f"{v:.3f}" for v in recent_vols],
-            cash=cash,
-            position=position,
-            portfolio_value=cash + position * market_data["price"],
+        return (
+            f"Price: ${market_data['price']:.2f}  prev=${market_data['prev_price']:.2f}"
+            f"  ret={market_data['return_pct']:+.2f}%\n"
+            f"Volatility: {market_data['volatility']:.4f}  prev={market_data['prev_volatility']:.4f}\n"
+            f"Volume: {market_data['volume']:.0f}  net_demand={market_data['net_demand']:+.2f}"
+            f"  fundamental=${market_data['fundamental']:.2f}\n"
+            f"Recent prices: {recent_prices}\n"
+            f"Recent vols: {[f'{v:.4f}' for v in recent_vols]}\n"
+            f"Portfolio: cash={cash:.2f}  position={position:.4f}"
+            f"  value={cash + position * market_data['price']:.2f}\n"
+            "Respond with <analysis>...</analysis> then "
+            '<decision>{"bid_price":...,"quantity":...,"reasoning":"..."}'
+            "</decision>"
         )
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
@@ -337,12 +322,11 @@ class LLMInvestor(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
-        llm_client = self.state.custom_state["llm_client"]
+        strategy_name = self.__class__.__name__
 
         user_prompt = self._build_prompt(market_data)
-
-        llm_config = self.config.extras["llm"]
-        system_prompt = load_prompt(llm_config["sys_message"])
+        system_prompt = self._system_prompt
+        llm_client = self._get_llm()
 
         max_retries = 3
         decision = None
@@ -415,7 +399,7 @@ class LLMInvestor(GeneralPlayer):
             "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": decision["reasoning"][:100],
-            "analysis": decision["analysis"],
+            "analysis": decision.get("analysis", ""),
             "cash": self.state.custom_state["cash"],
             "position": self.state.custom_state["position"],
         }
@@ -434,30 +418,41 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMFundamentalist(LLMInvestor):
-    """LLM-powered Fundamentalist - Slow mean reversion (STABILIZING, DELAYED)"""
+    """LLM-powered Fundamentalist - Slow mean reversion."""
 
-    pass
+    _system_prompt = LLM_FUNDAMENTALIST_SYS
 
 
 class LLMTrendFollower(LLMInvestor):
-    """LLM-powered Trend Follower - Fast momentum, vol-sensitive (DESTABILIZING)"""
+    """LLM-powered Trend Follower - Fast momentum, vol-sensitive."""
 
-    pass
+    _system_prompt = LLM_TREND_FOLLOWER_SYS
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-powered Noise Trader - Random liquidity (NEUTRAL)"""
+    """LLM-powered Noise Trader - Random liquidity."""
 
-    pass
+    _system_prompt = LLM_NOISE_TRADER_SYS
 
 
 class LLMSlowAdapter(LLMInvestor):
-    """LLM-powered Slow Adapter - Conservative, delayed (WEAK STABILIZING)"""
+    """LLM-powered Slow Adapter - Conservative, delayed."""
 
-    pass
+    _system_prompt = LLM_SLOW_ADAPTER_SYS
 
 
 class LLMVolatilityTrader(LLMInvestor):
-    """LLM-powered Volatility Trader - Trades vol regime (WEAK STABILIZING)"""
+    """LLM-powered Volatility Trader - Trades vol regime."""
 
-    pass
+    _system_prompt = LLM_VOLATILITY_TRADER_SYS
+
+
+__all__ = [
+    "Market",
+    "LLMInvestor",
+    "LLMFundamentalist",
+    "LLMTrendFollower",
+    "LLMNoiseTrader",
+    "LLMSlowAdapter",
+    "LLMVolatilityTrader",
+]

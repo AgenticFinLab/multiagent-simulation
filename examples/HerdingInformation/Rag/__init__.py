@@ -1,5 +1,21 @@
 """HerdingInformation Rag Variant"""
 
-from examples.HerdingInformation.Rag.players import Market, LLMInvestor, LLMCascadeFollower, LLMReputationHerder, LLMIndependentThinker, LLMContrarian, LLMNoiseTrader
+from examples.HerdingInformation.Rag.players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMCascadeFollower,
+    RagLLMReputationHerder,
+    RagLLMIndependentThinker,
+    RagLLMContrarian,
+    RagLLMNoiseTrader,
+)
 
-__all__ = ["Market", "LLMInvestor", "LLMCascadeFollower", "LLMReputationHerder", "LLMIndependentThinker", "LLMContrarian", "LLMNoiseTrader"]
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMCascadeFollower",
+    "RagLLMReputationHerder",
+    "RagLLMIndependentThinker",
+    "RagLLMContrarian",
+    "RagLLMNoiseTrader",
+]

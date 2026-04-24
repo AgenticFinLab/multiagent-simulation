@@ -34,7 +34,7 @@ CONSTRAINTS:
 - Maximum order: 800 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about price streaks and expected reversals</think>
+<analysis>Your reasoning about price streaks and expected reversals</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -66,7 +66,7 @@ CONSTRAINTS:
 - Maximum order: 800 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about price momentum and streak continuation</think>
+<analysis>Your reasoning about price momentum and streak continuation</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -98,7 +98,7 @@ CONSTRAINTS:
 - Maximum order: 500 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about fundamental value ignoring streak patterns</think>
+<analysis>Your reasoning about fundamental value ignoring streak patterns</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -130,7 +130,7 @@ CONSTRAINTS:
 - Maximum order: 500 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about streak-induced mispricing and arbitrage opportunity</think>
+<analysis>Your reasoning about streak-induced mispricing and arbitrage opportunity</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -160,7 +160,7 @@ CONSTRAINTS:
 - Maximum order: 500 shares
 
 OUTPUT FORMAT:
-<think>Your random assessment of whether to trade today</think>
+<analysis>Your random assessment of whether to trade today</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 

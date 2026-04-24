@@ -24,7 +24,7 @@ TRADING CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than you hold
 
-Respond with your thinking in <think>...</think> tags followed by your decision in \
+Respond with your thinking in <analysis>...</analysis> tags followed by your decision in \
 <decision>...</decision> tags.
 The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
 quantity (float, positive), and reasoning (string).
@@ -49,7 +49,7 @@ TRADING CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than you hold
 
-Respond with your thinking in <think>...</think> tags followed by your decision in \
+Respond with your thinking in <analysis>...</analysis> tags followed by your decision in \
 <decision>...</decision> tags.
 The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
 quantity (float, positive), and reasoning (string).
@@ -74,7 +74,7 @@ TRADING CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than you hold
 
-Respond with your thinking in <think>...</think> tags followed by your decision in \
+Respond with your thinking in <analysis>...</analysis> tags followed by your decision in \
 <decision>...</decision> tags.
 The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
 quantity (float, positive), and reasoning (string).
@@ -99,7 +99,7 @@ TRADING CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than you hold
 
-Respond with your thinking in <think>...</think> tags followed by your decision in \
+Respond with your thinking in <analysis>...</analysis> tags followed by your decision in \
 <decision>...</decision> tags.
 The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
 quantity (float, positive), and reasoning (string).
@@ -118,7 +118,7 @@ TRADING CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than you hold
 
-Respond with your thinking in <think>...</think> tags followed by your decision in \
+Respond with your thinking in <analysis>...</analysis> tags followed by your decision in \
 <decision>...</decision> tags.
 The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
 quantity (float, positive), and reasoning (string).
@@ -136,7 +136,7 @@ LLM_USER_TEMPLATE = """Current Market State (Round {round}):
 
 Based on your trading strategy and current market conditions, what action do you take?
 
-Respond with your thinking in <think>...</think> tags followed by your decision in \
+Respond with your thinking in <analysis>...</analysis> tags followed by your decision in \
 <decision>...</decision> tags.
 The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
 quantity (float, positive), and reasoning (string).

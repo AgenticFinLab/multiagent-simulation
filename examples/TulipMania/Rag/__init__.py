@@ -1,17 +1,21 @@
 """TulipMania Rag Variant"""
 
-from examples.TulipMania.Rag.players import (
-    TrendChaser,
-    SocialProofFollower,
-    IntrinsicValueTrader,
-    EarlyExitTrader,
-    NoiseTrader,
+from .players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMTrendChaser,
+    RagLLMSocialProofFollower,
+    RagLLMIntrinsicValueTrader,
+    RagLLMEarlyExitTrader,
+    RagLLMNoiseTrader,
 )
 
 __all__ = [
-    "TrendChaser",
-    "SocialProofFollower",
-    "IntrinsicValueTrader",
-    "EarlyExitTrader",
-    "NoiseTrader",
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMTrendChaser",
+    "RagLLMSocialProofFollower",
+    "RagLLMIntrinsicValueTrader",
+    "RagLLMEarlyExitTrader",
+    "RagLLMNoiseTrader",
 ]

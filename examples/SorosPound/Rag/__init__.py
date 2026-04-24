@@ -1,17 +1,21 @@
 """SorosPound Rag Variant"""
 
-from examples.SorosPound.Rag.players import (
-    MacroHedgeFund,
-    PegDefender,
-    ConvergenceTrader,
-    OpportunisticTrader,
-    NoiseTrader,
+from .players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMMacroHedgeFund,
+    RagLLMPegDefender,
+    RagLLMConvergenceTrader,
+    RagLLMOpportunisticTrader,
+    RagLLMNoiseTrader,
 )
 
 __all__ = [
-    "MacroHedgeFund",
-    "PegDefender",
-    "ConvergenceTrader",
-    "OpportunisticTrader",
-    "NoiseTrader",
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMMacroHedgeFund",
+    "RagLLMPegDefender",
+    "RagLLMConvergenceTrader",
+    "RagLLMOpportunisticTrader",
+    "RagLLMNoiseTrader",
 ]

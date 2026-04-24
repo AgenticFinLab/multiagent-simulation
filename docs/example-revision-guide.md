@@ -282,6 +282,69 @@ threshold = 0.05    # hardcoded — breaks configurability
 `decide()` must return a dict containing an `outbound_messages` list. Each item is `{"payload": <dict>, "content_type": <str>}`; the `payload` is exactly what the recipient sees in `inb.payload`.
 → See `examples/AssetBubble/Rule/players.py` — investor `decide()` return value for the canonical structure
 
+### 4.11 Canonical LLM Output Format
+
+All system prompts (LLM, RuleLLM, Rag variants) must instruct the LLM to produce output in the following **canonical two-tag format**:
+
+```
+<analysis>
+... reasoning about current market conditions, portfolio state, strategy logic ...
+</analysis>
+
+<decision>
+{"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+</decision>
+```
+
+**Tag semantics:**
+
+| Tag                        | Purpose                                                                            | Required |
+|----------------------------|------------------------------------------------------------------------------------|----------|
+| `<analysis>...</analysis>` | Chain-of-thought reasoning — step-by-step market analysis and strategy application | Yes      |
+| `<decision>...</decision>` | JSON trading decision — must be parseable by `parse_llm_response_with_thinking()`  | Yes      |
+
+**Rules:**
+- Use `<analysis>` not `<think>` — `<think>` is a deprecated legacy tag (parser accepts it as fallback only)
+- The `<decision>` block must contain valid JSON with the required fields: `action`, `bid_price`, `quantity`, `reasoning`
+- `bid_price` and `quantity` must be **numeric literals** — not expressions, not strings, not formulas
+- The `reasoning` field is a short string summary (< 150 chars) for logging
+- No text outside the two tag pairs is parsed — do not place JSON before or after `<decision>`
+
+**How to embed in prompts:**
+
+```python
+# At the end of every LLM/RuleLLM system prompt constant:
+OUTPUT_FORMAT_INSTRUCTION = """OUTPUT FORMAT:
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas."""
+```
+
+**Example:**
+
+```
+First output your reasoning inside <analysis>...</analysis> tags,
+then output your decision inside <decision>...</decision> tags.
+The decision must be valid JSON:
+{"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+```
+
+**Parser (`llm_utils.parse_llm_response_with_thinking`):**
+- Primary: reads `<analysis>...</analysis>`
+- Legacy fallback: reads `<think>...</think>` (deprecated — do not use in new prompts)
+- Primary: reads `<decision>...</decision>` for the JSON payload
+- Fallback: tries code block JSON, then bare JSON object scan
+
+**Common mistake:**
+```python
+# WRONG — uses deprecated <think> tag
+"Output your reasoning in <think>...</think> tags"
+
+# CORRECT — uses canonical <analysis> tag
+"Output your reasoning in <analysis>...</analysis> tags"
+```
+
 ---
 
 ## 5. Configuration File Standards
@@ -476,6 +539,7 @@ Key points: wrapped in `try/except`; checks `self.knowledge is not None`; builds
 | Character-split `__all__`         | `__all__ = ["M, a, r, k, e, t"]`                | `__all__ = ["Market"]`                                                   |
 | Wrong `Rag/prompts.py` import     | `from RuleLLM.prompts import LLM_USER_TEMPLATE` | Import `RULELLM_USER_TEMPLATE`; define `RAG_USER_TEMPLATE` locally       |
 | RAG context injected manually     | `user_prompt += rag_context` after `.format()`  | Include `{rag_context}` in template; pass via `.format(rag_context=...)` |
+| Wrong analysis tag in prompt      | `<think>...</think>` in OUTPUT FORMAT section   | Use `<analysis>...</analysis>` (canonical tag; `<think>` is deprecated)  |
 | Wrong HistoryBuffer args          | `HistoryBuffer(maxlen=100)`                     | `HistoryBuffer(folder=path, entry_limit=N)`                              |
 
 ### 7.2 Config Errors
@@ -539,6 +603,8 @@ For each of the 7 Python files (Rule/players.py, LLM/players.py, LLM/prompts.py,
 - [ ] `HistoryBuffer` uses `folder=` and `entry_limit=`, not `maxlen=`
 - [ ] `_get_rag_context()` present in Rag base class with graceful fallback
 - [ ] Prompt constants use correct naming: `LLM_<TYPE>_SYS`, `RULELLM_<TYPE>_SYS`, `RAG_<TYPE>_SYS`
+- [ ] All prompts use `<analysis>...</analysis>` output tag (NOT `<think>...</think>`)
+- [ ] All prompts use `<decision>...</decision>` for the JSON decision block
 - [ ] `LLM_USER_TEMPLATE` / `RULELLM_USER_TEMPLATE` / `RAG_USER_TEMPLATE` present
 - [ ] Run `python3 -m py_compile <file>` — no syntax errors
 

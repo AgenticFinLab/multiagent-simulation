@@ -1,7 +1,8 @@
 """SunkCostFallacy Rule Variant"""
 
-from examples.SunkCostFallacy.Rule.players import (
+from .players import (
     Market,
+    BaseInvestor,
     SunkCostHolder,
     CommitmentEscalator,
     RationalCutter,
@@ -11,6 +12,7 @@ from examples.SunkCostFallacy.Rule.players import (
 
 __all__ = [
     "Market",
+    "BaseInvestor",
     "SunkCostHolder",
     "CommitmentEscalator",
     "RationalCutter",

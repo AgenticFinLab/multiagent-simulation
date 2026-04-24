@@ -32,7 +32,7 @@ Relevant Domain Knowledge:
 
 Apply your trading rules to this market state, incorporating the domain knowledge above.
 Show your calculations in the thinking section.
-Respond with your thinking in <think>...</think> tags followed by your decision in \
+Respond with your thinking in <analysis>...</analysis> tags followed by your decision in \
 <decision>...</decision> tags.
 The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
 quantity (float, positive), and reasoning (string).

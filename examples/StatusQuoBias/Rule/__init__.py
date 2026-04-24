@@ -1,7 +1,8 @@
 """StatusQuoBias Rule Variant"""
 
-from examples.StatusQuoBias.Rule.players import (
+from .players import (
     Market,
+    BaseInvestor,
     InertialHolder,
     DefaultFollower,
     ActiveRebalancer,
@@ -11,6 +12,7 @@ from examples.StatusQuoBias.Rule.players import (
 
 __all__ = [
     "Market",
+    "BaseInvestor",
     "InertialHolder",
     "DefaultFollower",
     "ActiveRebalancer",

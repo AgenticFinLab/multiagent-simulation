@@ -46,7 +46,7 @@ Step 3 — Apply portfolio constraints:
 Check velocity condition, then decide whether to provide or withdraw liquidity.
 You MUST withdraw when velocity exceeds the threshold.
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
@@ -85,7 +85,7 @@ Step 3 — Apply portfolio constraints:
 == YOUR TASK ==
 Compute velocity and follow the momentum signal mechanically.
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
@@ -129,7 +129,7 @@ Step 3 — Apply portfolio constraints:
 == YOUR TASK ==
 Compute value deviation and trade accordingly. You stabilize the market.
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
@@ -166,7 +166,7 @@ Step 3 — The stop-loss rule is NON-NEGOTIABLE.
 == YOUR TASK ==
 Check if stop-loss is triggered. If yes, sell everything. If no, hold.
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "hold"|"sell", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
@@ -201,7 +201,7 @@ Step 3 — Apply portfolio constraints:
 == YOUR TASK ==
 Randomly decide whether to trade and in which direction.
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
@@ -229,7 +229,7 @@ RULELLM_USER_TEMPLATE = """
 
 Apply your DECISION RULES above to this data and output your trade decision.
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <your price as NUMBER>, "quantity": <shares as NUMBER, +buy/-sell>, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """

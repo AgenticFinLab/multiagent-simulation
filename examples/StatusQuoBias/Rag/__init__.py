@@ -1,17 +1,21 @@
 """StatusQuoBias Rag Variant"""
 
-from examples.StatusQuoBias.Rag.players import (
-    InertialHolder,
-    DefaultFollower,
-    ActiveRebalancer,
-    MomentumTrader,
-    NoiseTrader,
+from .players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMInertialHolder,
+    RagLLMDefaultFollower,
+    RagLLMActiveRebalancer,
+    RagLLMMomentumTrader,
+    RagLLMNoiseTrader,
 )
 
 __all__ = [
-    "InertialHolder",
-    "DefaultFollower",
-    "ActiveRebalancer",
-    "MomentumTrader",
-    "NoiseTrader",
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMInertialHolder",
+    "RagLLMDefaultFollower",
+    "RagLLMActiveRebalancer",
+    "RagLLMMomentumTrader",
+    "RagLLMNoiseTrader",
 ]

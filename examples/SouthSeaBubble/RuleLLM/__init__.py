@@ -1,17 +1,21 @@
 """SouthSeaBubble RuleLLM Variant"""
 
-from examples.SouthSeaBubble.RuleLLM.players import (
-    InsiderAdvantaged,
-    NarrativeBeliever,
-    SkepticalAnalyst,
-    Arbitrageur,
-    NoiseTrader,
+from .players import (
+    Market,
+    RuleLLMInvestor,
+    RuleLLMInsiderAdvantaged,
+    RuleLLMNarrativeBeliever,
+    RuleLLMSkepticalAnalyst,
+    RuleLLMArbitrageur,
+    RuleLLMNoiseTrader,
 )
 
 __all__ = [
-    "InsiderAdvantaged",
-    "NarrativeBeliever",
-    "SkepticalAnalyst",
-    "Arbitrageur",
-    "NoiseTrader",
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMInsiderAdvantaged",
+    "RuleLLMNarrativeBeliever",
+    "RuleLLMSkepticalAnalyst",
+    "RuleLLMArbitrageur",
+    "RuleLLMNoiseTrader",
 ]

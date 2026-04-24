@@ -36,7 +36,7 @@ CONSTRAINTS:
 - Maximum order: 800 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about deviation and your rule application</think>
+<analysis>Your reasoning about deviation and your rule application</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -68,7 +68,7 @@ CONSTRAINTS:
 - Maximum order: 800 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about loss exposure and your rule application</think>
+<analysis>Your reasoning about loss exposure and your rule application</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -100,7 +100,7 @@ CONSTRAINTS:
 - Maximum order: 500 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about fundamental value and your rule application</think>
+<analysis>Your reasoning about fundamental value and your rule application</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -132,7 +132,7 @@ CONSTRAINTS:
 - Maximum order: 500 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about framing mispricing and your rule application</think>
+<analysis>Your reasoning about framing mispricing and your rule application</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -161,7 +161,7 @@ CONSTRAINTS:
 - Maximum order: 500 shares
 
 OUTPUT FORMAT:
-<think>Your random assessment of whether to participate today</think>
+<analysis>Your random assessment of whether to participate today</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 

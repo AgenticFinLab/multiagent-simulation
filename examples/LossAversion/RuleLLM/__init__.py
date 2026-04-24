@@ -1,5 +1,21 @@
 """LossAversion RuleLLM Variant"""
 
-from examples.LossAversion.RuleLLM.players import Market, LLMInvestor, LLMLossAverseInvestor, LLMBreakEvenTrader, LLMRationalTrader, LLMMomentumTrader, LLMMarketMaker
+from .players import (
+    Market,
+    RuleLLMInvestor,
+    LLMLossAverseInvestor,
+    LLMBreakEvenTrader,
+    LLMRationalTrader,
+    LLMMomentumTrader,
+    LLMMarketMaker,
+)
 
-__all__ = ["Market", "LLMInvestor", "LLMLossAverseInvestor", "LLMBreakEvenTrader", "LLMRationalTrader", "LLMMomentumTrader", "LLMMarketMaker"]
+__all__ = [
+    "Market",
+    "RuleLLMInvestor",
+    "LLMLossAverseInvestor",
+    "LLMBreakEvenTrader",
+    "LLMRationalTrader",
+    "LLMMomentumTrader",
+    "LLMMarketMaker",
+]

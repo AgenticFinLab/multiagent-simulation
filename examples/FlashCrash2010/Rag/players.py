@@ -24,7 +24,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 from examples.llm_utils import parse_llm_response_with_thinking
-from masim.knowledge import KnowledgeLoader, KnowledgeQuery, KnowledgeStore, ResourceManager
+from masim.knowledge import (
+    KnowledgeLoader,
+    KnowledgeQuery,
+    KnowledgeStore,
+    ResourceManager,
+)
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
@@ -86,7 +91,9 @@ class RagLLMInvestor(GeneralPlayer):
         self.state.custom_state["lm_name"] = lm_name
         self.state.custom_state["generation_config"] = generation_config
 
-        llm_client = LangChainAPIInference(lm_name=lm_name, generation_config=generation_config)
+        llm_client = LangChainAPIInference(
+            lm_name=lm_name, generation_config=generation_config
+        )
         self.state.custom_state["llm_client"] = llm_client
 
         private_knowledge = extras["private_knowledge"]
@@ -104,8 +111,15 @@ class RagLLMInvestor(GeneralPlayer):
             knowledge_config = {
                 "backend": "local",
                 "global_uri": rag_cfg.get("docs_dir", "examples/document-sources"),
-                "preprocessing": {"parser": "mineru", "output_position": rag_cfg.get("mineru_output_dir", "MinerU_processed")},
-                "rag": {"output_position": rag_cfg.get("shared_rag_index_dir", "rag_index")},
+                "preprocessing": {
+                    "parser": "mineru",
+                    "output_position": rag_cfg.get(
+                        "mineru_output_dir", "MinerU_processed"
+                    ),
+                },
+                "rag": {
+                    "output_position": rag_cfg.get("shared_rag_index_dir", "rag_index")
+                },
             }
 
         resource_manager = ResourceManager(knowledge_config)
@@ -157,7 +171,9 @@ class RagLLMInvestor(GeneralPlayer):
         )
 
         if os.path.isdir(local_rag_dir):
-            index_files = [f for f in os.listdir(local_rag_dir) if not f.startswith(".")]
+            index_files = [
+                f for f in os.listdir(local_rag_dir) if not f.startswith(".")
+            ]
             if index_files:
                 try:
                     rag_store.load(local_rag_dir)
@@ -165,7 +181,11 @@ class RagLLMInvestor(GeneralPlayer):
                     self.state.custom_state["rag_cfg"] = resolved_rag
                     return
                 except Exception as exc:  # pylint: disable=broad-except
-                    logger.warning("[%s] Failed to load local index (%s); will try shared", self.identity, exc)
+                    logger.warning(
+                        "[%s] Failed to load local index (%s); will try shared",
+                        self.identity,
+                        exc,
+                    )
 
         shared_rag_dirs = resolved_rag.get("shared_rag_index_dirs", [])
         if not shared_rag_dirs and os.path.isdir(shared_rag_dir):
@@ -173,7 +193,9 @@ class RagLLMInvestor(GeneralPlayer):
 
         for s_dir in shared_rag_dirs:
             if os.path.isdir(s_dir):
-                shared_index_files = [f for f in os.listdir(s_dir) if not f.startswith(".")]
+                shared_index_files = [
+                    f for f in os.listdir(s_dir) if not f.startswith(".")
+                ]
                 if shared_index_files:
                     try:
                         for item in shared_index_files:
@@ -188,14 +210,20 @@ class RagLLMInvestor(GeneralPlayer):
                         self.state.custom_state["rag_cfg"] = resolved_rag
                         return
                     except Exception as exc:  # pylint: disable=broad-except
-                        logger.warning("[%s] Failed to copy shared index (%s); will build", self.identity, exc)
+                        logger.warning(
+                            "[%s] Failed to copy shared index (%s); will build",
+                            self.identity,
+                            exc,
+                        )
 
         loader = KnowledgeLoader()
         docs: List[Any] = []
         if os.path.isdir(processed_dir) and os.listdir(processed_dir):
             docs = loader.load_from_dir(processed_dir)
         else:
-            raise RuntimeError(f"[{self.identity}] No processed documents in {processed_dir}.")
+            raise RuntimeError(
+                f"[{self.identity}] No processed documents in {processed_dir}."
+            )
 
         rag_store.build(docs)
         try:
@@ -208,7 +236,9 @@ class RagLLMInvestor(GeneralPlayer):
                     else:
                         shutil.copy2(src, dst)
         except Exception as exc:  # pylint: disable=broad-except
-            logger.warning("[%s] Failed to copy to shared location: %s", self.identity, exc)
+            logger.warning(
+                "[%s] Failed to copy to shared location: %s", self.identity, exc
+            )
 
         self.state.custom_state["rag_store"] = rag_store
         self.state.custom_state["rag_cfg"] = resolved_rag
@@ -247,7 +277,9 @@ class RagLLMInvestor(GeneralPlayer):
                         elif embed_type == "openai":
                             embed_api_key = os.getenv("ARK_API_KEY", "")
                     rag_store = KnowledgeStore(
-                        embed_model_name=rag_cfg.get("embed_model", "openai/hunyuan-embedding"),
+                        embed_model_name=rag_cfg.get(
+                            "embed_model", "openai/hunyuan-embedding"
+                        ),
                         embed_api_key=embed_api_key,
                         embed_api_base=rag_cfg.get("embed_api_base", ""),
                         embed_type=embed_type,
@@ -320,12 +352,20 @@ class RagLLMInvestor(GeneralPlayer):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             infer_output = llm_client.run([infer_input])
             try:
-                decision = parse_llm_response_with_thinking(infer_output.outputs[0].response)
+                decision = parse_llm_response_with_thinking(
+                    infer_output.outputs[0].response
+                )
                 break
             except ValueError as e:
                 if attempt == max_retries - 1:
-                    raise RuntimeError(f"[{self.identity}] LLM failed after {max_retries} attempts: {e}") from e
-                logger.debug("[%s] Parse failed (attempt %d), retrying...", self.identity, attempt + 1)
+                    raise RuntimeError(
+                        f"[{self.identity}] LLM failed after {max_retries} attempts: {e}"
+                    ) from e
+                logger.debug(
+                    "[%s] Parse failed (attempt %d), retrying...",
+                    self.identity,
+                    attempt + 1,
+                )
 
         bid_price = float(decision.get("bid_price", price))
         quantity = float(decision.get("quantity", 0))

@@ -20,48 +20,50 @@ import os
 import json
 import random
 import re
-import sys
-import importlib
 from typing import Any, Dict, Optional
-from dotenv import load_dotenv
 
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from examples.llm_utils import parse_llm_response_with_thinking
+from ..Rule.players import InformationEnvironment
+from .prompts import (
+    RULELLM_GULLIBLE_SYS,
+    RULELLM_DISTORTING_SYS,
+    RULELLM_SKEPTICAL_SYS,
+    RULELLM_FACTCHECKER_SYS,
+    RULELLM_BYSTANDER_SYS,
+)
 
 logger = logging.getLogger("RumorSpreadRuleLLM")
 
 
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt string from module path."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
-
-
-# Reuse the same InformationEnvironment from Rule variant
-from examples.RumorSpread.Rule.players import InformationEnvironment
-
-
 class RuleLLMSocialAgent(GeneralPlayer):
-    """
-    Base class for hybrid Rule+LLM social agents.
+    """Base class for hybrid Rule+LLM social agents in RumorSpread."""
 
-    Each subclass uses a system prompt that encodes BOTH:
-    - Persona description (who the agent is, behavioral traits)
-    - Quantitative decision rules in text form (from rule-based)
+    _system_prompt: str = ""
 
-    Parameters from config extras:
-        - initial_belief, initial_credibility, custom_state_hot_limit, record_path
-        - llm: sys_message, user_message, lm_name, generation_config
-    """
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state.pop("_llm", None)
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._llm = None
+
+    def _get_llm(self) -> LangChainAPIInference:
+        """Lazy-initialize LLM client."""
+        llm_cfg = self.config.extras["llm"]
+        self._llm = LangChainAPIInference(
+            lm_name=llm_cfg["lm_name"],
+            generation_config=llm_cfg["generation_config"],
+        )
+        return self._llm
 
     async def perceive(
         self,
@@ -84,77 +86,32 @@ class RuleLLMSocialAgent(GeneralPlayer):
                 entry_limit=custom_state_hot_limit,
             )
 
-            load_dotenv()
-            llm_config = extras["llm"]
-            lm_name = llm_config["lm_name"]
-            generation_config = llm_config["generation_config"]
-
-            self.state.custom_state["lm_name"] = lm_name
-            self.state.custom_state["generation_config"] = generation_config
-
-            llm_client = LangChainAPIInference(
-                lm_name=lm_name,
-                generation_config=generation_config,
-            )
-            self.state.custom_state["llm_client"] = llm_client
-
         if observation.inbounds:
             for inb in observation.inbounds:
                 env_data = inb.payload
                 self.state.custom_state["env_data"] = env_data
                 self.state.custom_state["belief_history"].append(env_data["belief"])
 
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        if "state" in state and hasattr(state["state"], "custom_state"):
-            custom = state["state"].custom_state
-            if "llm_client" in custom:
-                custom = dict(custom)
-                del custom["llm_client"]
-                state["state"].custom_state = custom
-        return state
-
     def __setstate__(self, state):
         self.__dict__.update(state)
-        if hasattr(self, "state") and hasattr(self.state, "custom_state"):
-            custom = self.state.custom_state
-            if "lm_name" in custom and "llm_client" not in custom:
-                llm_client = LangChainAPIInference(
-                    lm_name=custom["lm_name"],
-                    generation_config=custom["generation_config"],
-                )
-                custom["llm_client"] = llm_client
+        self._llm = None
 
     def _build_prompt(self, env_data: Dict[str, Any]) -> str:
         """Build user prompt with current environment state."""
         my_belief = self.state.custom_state["my_belief"]
         round_num = self.state.custom_state["round"]
-
-        llm_config = self.config.extras["llm"]
-        if "user_message" in llm_config:
-            template = load_prompt(llm_config["user_message"])
-            return template.format(
-                round=round_num,
-                belief=env_data["belief"],
-                prev_belief=env_data["prev_belief"],
-                belief_change=env_data["belief_change"],
-                distortion=env_data["distortion"],
-                truth_value=env_data["truth_value"],
-                num_spreaders=env_data["num_spreaders"],
-                num_correctors=env_data["num_correctors"],
-                net_spread_intensity=env_data["net_spread_intensity"],
-                my_belief=my_belief,
-            )
-
-        return f"""
-Round: {round_num}
-Population Belief: {env_data['belief']:.3f} | Distortion: {env_data['distortion']:.3f} | Truth: {env_data['truth_value']:.3f}
-Spreaders: {env_data['num_spreaders']} | Correctors: {env_data['num_correctors']}
-Your Belief: {my_belief:.3f}
-
-Respond with ONLY valid JSON:
-{{"action_type": "spread"|"ignore"|"correct", "intensity": <0-1>, "reasoning": "<brief>"}}
-"""
+        return (
+            f"Round {round_num}\n"
+            f"Population Belief: {env_data['belief']:.3f}  prev={env_data['prev_belief']:.3f}"
+            f"  change={env_data['belief_change']:.3f}  distortion={env_data['distortion']:.3f}\n"
+            f"Truth Value: {env_data['truth_value']:.3f}\n"
+            f"Spreaders: {env_data['num_spreaders']}  Correctors: {env_data['num_correctors']}"
+            f"  net_spread={env_data['net_spread_intensity']:.3f}\n"
+            f"Your Personal Belief: {my_belief:.3f}\n"
+            "Respond with <analysis>...</analysis> then "
+            '<decision>{"action_type":"spread"|"ignore"|"correct","intensity":<0-1>,"reasoning":"..."}'
+            "</decision>"
+        )
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with analysis and decision sections."""
@@ -163,13 +120,11 @@ Respond with ONLY valid JSON:
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
         env_data = self.state.custom_state["env_data"]
-        llm_client = self.state.custom_state["llm_client"]
         strategy_name = self.__class__.__name__
 
         user_prompt = self._build_prompt(env_data)
-
-        llm_config = self.config.extras["llm"]
-        system_prompt = load_prompt(llm_config["sys_message"])
+        system_prompt = self._system_prompt
+        llm_client = self._get_llm()
 
         max_retries = 3
         decision = None
@@ -248,28 +203,39 @@ Respond with ONLY valid JSON:
 class RuleLLMGullibleSpreader(RuleLLMSocialAgent):
     """Hybrid: Allport & Postman leveling rules + LLM gullible reasoning."""
 
-    pass
+    _system_prompt = RULELLM_GULLIBLE_SYS
 
 
 class RuleLLMDistortingRelayer(RuleLLMSocialAgent):
     """Hybrid: Sharpening + assimilation rules + LLM distorting reasoning."""
 
-    pass
+    _system_prompt = RULELLM_DISTORTING_SYS
 
 
 class RuleLLMSkepticalEvaluator(RuleLLMSocialAgent):
     """Hybrid: Critical evaluation + correction threshold + LLM skeptical reasoning."""
 
-    pass
+    _system_prompt = RULELLM_SKEPTICAL_SYS
 
 
 class RuleLLMFactChecker(RuleLLMSocialAgent):
     """Hybrid: Active denial + credibility discount + LLM fact-checking reasoning."""
 
-    pass
+    _system_prompt = RULELLM_FACTCHECKER_SYS
 
 
 class RuleLLMUninformedBystander(RuleLLMSocialAgent):
     """Hybrid: Random engagement rule + LLM casual reasoning."""
 
-    pass
+    _system_prompt = RULELLM_BYSTANDER_SYS
+
+
+__all__ = [
+    "InformationEnvironment",
+    "RuleLLMSocialAgent",
+    "RuleLLMGullibleSpreader",
+    "RuleLLMDistortingRelayer",
+    "RuleLLMSkepticalEvaluator",
+    "RuleLLMFactChecker",
+    "RuleLLMUninformedBystander",
+]

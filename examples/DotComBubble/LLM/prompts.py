@@ -10,7 +10,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 LLM_IPO_FLIPPER_SYS = """You are a short-term trader who flips IPO stocks for quick profits.
 
@@ -22,7 +22,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 LLM_MOMENTUM_FOLLOWER_SYS = """You are a trend-following trader who rides price momentum.
 
@@ -34,7 +34,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 LLM_SKEPTICAL_VALUE_INVESTOR_SYS = """You are a value investor who is skeptical of the dot-com bubble and seeks margin of safety.
 
@@ -46,7 +46,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 LLM_SHORT_SELLER_SYS = """You are a short seller who bets against overvalued internet stocks.
 
@@ -58,7 +58,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 LLM_USER_TEMPLATE = """Current Market State (Round {round}):
 - Current Price: ${price:.2f}
@@ -69,4 +69,4 @@ LLM_USER_TEMPLATE = """Current Market State (Round {round}):
 - Portfolio Value: ${portfolio_value:.2f}
 
 Based on your strategy and current market conditions, decide your trading action.
-Respond with <think>...</think> and <decision>{{"action": "buy"|"sell"|"hold", "quantity": integer}}</decision>."""
+Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "quantity": integer}}</decision>."""

@@ -41,22 +41,11 @@ Environment Variables:
 
 from __future__ import annotations
 
-import importlib
-import json
 import logging
 import os
 import random
-import re
 import shutil
-import sys
-import time
-from pathlib import Path
 from typing import Any, Dict, List, Optional
-
-from dotenv import load_dotenv
-
-# Add examples directory to path for shared utilities
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -73,14 +62,16 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
+from .prompts import RAGLLM_USER_TEMPLATE
+from examples.MomentumEffect.RuleLLM.prompts import (
+    RULELLM_MOMENTUM_TRADER_SYS,
+    RULELLM_CONTRARIAN_TRADER_SYS,
+    RULELLM_INDEX_FUND_SYS,
+    RULELLM_MARKET_MAKER_SYS,
+    RULELLM_TECHNICAL_TRADER_SYS,
+)
+
 logger = logging.getLogger("MomentumEffectRag")
-
-
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt string from a module path (``module:VARIABLE``)."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
 
 
 # =============================================================================
@@ -242,22 +233,9 @@ class Market(GeneralPlayer):
 class RagLLMInvestor(GeneralPlayer):
     """
     Base class for RAG-augmented Rule+LLM momentum effect investors.
+    """  # noqa: D205
 
-    Each subclass uses a system prompt that encodes BOTH persona and rules
-    (identical to RuleLLMInvestor). In addition, at initialization:
-
-        1. Documents are loaded from shared/global or agent-local sources.
-        2. A LlamaIndex VectorStoreIndex is built over those documents.
-        3. At every decision round, a query is formulated from the current
-           market state and the top-k most relevant chunks are retrieved and
-           injected into the user prompt via the {rag_context} placeholder.
-
-    Parameters from config extras:
-        - initial_cash, initial_position, custom_state_hot_limit, record_path
-        - rag: docs_dir, url_csv, docs_save_dir, rag_persist_dir, top_k,
-               embed_model, embed_api_base
-        - llm: sys_message, user_message, lm_name, generation_config
-    """
+    _system_prompt: str = ""
 
     # ------------------------------------------------------------------
     # perceive
@@ -298,13 +276,6 @@ class RagLLMInvestor(GeneralPlayer):
         )
 
         # LLM client
-        project_root = Path(__file__).parent.parent.parent
-        load_dotenv(project_root / ".env")
-        if not os.getenv("ARK_API_KEY"):
-            raise RuntimeError(
-                "ARK_API_KEY not found after loading .env. "
-                f"Ensure .env file exists at {project_root / '.env'} and contains ARK_API_KEY."
-            )
         llm_config = extras["llm"]
         lm_name = llm_config["lm_name"]
         generation_config = llm_config["generation_config"]
@@ -637,7 +608,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = "(No relevant knowledge retrieved this round.)"
 
         llm_config = self.config.extras["llm"]
-        template = load_prompt(llm_config["user_message"])
+        template = RAGLLM_USER_TEMPLATE
         return template.format(
             round=round_num,
             rag_context=rag_context,
@@ -691,7 +662,7 @@ class RagLLMInvestor(GeneralPlayer):
         strategy_name = self.__class__.__name__
 
         user_prompt = self._build_prompt(market_data)
-        system_prompt = load_prompt(self.config.extras["llm"]["sys_message"])
+        system_prompt = self._system_prompt
 
         max_retries = 3
         decision: Dict[str, Any] = {}
@@ -740,8 +711,7 @@ class RagLLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": decision["reasoning"][:120],
-            "analysis": decision["analysis"],
+            "reasoning": decision.get("reasoning", "")[:120],
             "provides_liquidity": decision.get("provides_liquidity", False),
         }
 
@@ -766,28 +736,39 @@ class RagLLMInvestor(GeneralPlayer):
 class RagLLMMomentumTrader(RagLLMInvestor):
     """RAG-augmented: MomentumTrader rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RULELLM_MOMENTUM_TRADER_SYS
 
 
 class RagLLMContrarianTrader(RagLLMInvestor):
     """RAG-augmented: ContrarianTrader rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RULELLM_CONTRARIAN_TRADER_SYS
 
 
 class RagLLMTechnicalTrader(RagLLMInvestor):
     """RAG-augmented: TechnicalTrader rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RULELLM_INDEX_FUND_SYS
 
 
 class RagLLMTrendFollower(RagLLMInvestor):
     """RAG-augmented: TrendFollower rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RULELLM_MARKET_MAKER_SYS
 
 
 class RagLLMFundamentalAnchor(RagLLMInvestor):
     """RAG-augmented: FundamentalAnchor rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RULELLM_TECHNICAL_TRADER_SYS
+
+
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMMomentumTrader",
+    "RagLLMContrarianTrader",
+    "RagLLMTechnicalTrader",
+    "RagLLMTrendFollower",
+    "RagLLMFundamentalAnchor",
+]

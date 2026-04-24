@@ -1,5 +1,21 @@
-"""OverconfidenceBias Rule Variant"""
+"""OverconfidenceBias Rule Variant."""
 
-from examples.OverconfidenceBias.Rule.players import Market, OverconfidentTrader, SelfAttributor, CalibratedTrader, ContrarianInvestor, NoiseTrader
+from .players import (
+    Market,
+    BaseInvestor,
+    OverconfidentTrader,
+    SelfAttributor,
+    CalibratedTrader,
+    ContrarianInvestor,
+    NoiseTrader,
+)
 
-__all__ = ["Market", "OverconfidentTrader", "SelfAttributor", "CalibratedTrader", "ContrarianInvestor", "NoiseTrader"]
+__all__ = [
+    "Market",
+    "BaseInvestor",
+    "OverconfidentTrader",
+    "SelfAttributor",
+    "CalibratedTrader",
+    "ContrarianInvestor",
+    "NoiseTrader",
+]

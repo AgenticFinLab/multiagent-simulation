@@ -6,7 +6,7 @@ This module implements the Reversal Effect (De Bondt & Thaler, 1985):
 - Creates mean reversion in long-term returns
 """
 
-from examples.ReversalEffect.Rule.players import (
+from .players import (
     Market,
     ContrarianInvestor,
     MomentumInvestor,

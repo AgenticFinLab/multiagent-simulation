@@ -1,4 +1,4 @@
-"""MomentumEffectRuleLLM Prompts - Hybrid Rule + LLM System and User Message Templates
+"""MomentumEffect Rag Prompts - RAG-augmented Rule+LLM System and User Message Templates
 
 Design principle:
     Each agent's system prompt has two sections:
@@ -7,11 +7,11 @@ Design principle:
        counterpart (MomentumEffect), written as plain-text formulas and thresholds.
 
 Agents:
-    - RuleLLMMomentumTrader → MomentumTrader rules
-    - RuleLLMContrarianTrader → ContrarianTrader rules
-    - RuleLLMTechnicalTrader → IndexFund rules
-    - RuleLLMTrendFollower → MarketMaker rules
-    - RuleLLMFundamentalAnchor → TechnicalTrader rules
+    - RagLLMMomentumTrader → MomentumTrader rules
+    - RagLLMContrarianTrader → ContrarianTrader rules
+    - RagLLMTechnicalTrader → IndexFund rules
+    - RagLLMTrendFollower → MarketMaker rules
+    - RagLLMFundamentalAnchor → TechnicalTrader rules
 """
 
 # =============================================================================

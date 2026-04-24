@@ -1,6 +1,6 @@
 """RumorSpread LLM Variant"""
 
-from examples.RumorSpread.LLM.players import (
+from .players import (
     InformationEnvironment,
     LLMGullibleSpreader,
     LLMDistortingRelayer,

@@ -1,17 +1,21 @@
 """StatusQuoBias RuleLLM Variant"""
 
-from examples.StatusQuoBias.RuleLLM.players import (
-    InertialHolder,
-    DefaultFollower,
-    ActiveRebalancer,
-    MomentumTrader,
-    NoiseTrader,
+from .players import (
+    Market,
+    RuleLLMInvestor,
+    RuleLLMInertialHolder,
+    RuleLLMDefaultFollower,
+    RuleLLMActiveRebalancer,
+    RuleLLMMomentumTrader,
+    RuleLLMNoiseTrader,
 )
 
 __all__ = [
-    "InertialHolder",
-    "DefaultFollower",
-    "ActiveRebalancer",
-    "MomentumTrader",
-    "NoiseTrader",
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMInertialHolder",
+    "RuleLLMDefaultFollower",
+    "RuleLLMActiveRebalancer",
+    "RuleLLMMomentumTrader",
+    "RuleLLMNoiseTrader",
 ]

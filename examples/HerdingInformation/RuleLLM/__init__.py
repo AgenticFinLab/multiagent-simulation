@@ -1,5 +1,21 @@
 """HerdingInformation RuleLLM Variant"""
 
-from examples.HerdingInformation.RuleLLM.players import Market, LLMInvestor, LLMCascadeFollower, LLMReputationHerder, LLMIndependentThinker, LLMContrarian, LLMNoiseTrader
+from examples.HerdingInformation.RuleLLM.players import (
+    Market,
+    RuleLLMInvestor,
+    RuleLLMCascadeFollower,
+    RuleLLMReputationHerder,
+    RuleLLMIndependentThinker,
+    RuleLLMContrarian,
+    RuleLLMNoiseTrader,
+)
 
-__all__ = ["Market", "LLMInvestor", "LLMCascadeFollower", "LLMReputationHerder", "LLMIndependentThinker", "LLMContrarian", "LLMNoiseTrader"]
+__all__ = [
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMCascadeFollower",
+    "RuleLLMReputationHerder",
+    "RuleLLMIndependentThinker",
+    "RuleLLMContrarian",
+    "RuleLLMNoiseTrader",
+]

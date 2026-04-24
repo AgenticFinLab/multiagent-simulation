@@ -1,17 +1,21 @@
 """TulipMania RuleLLM Variant"""
 
-from examples.TulipMania.RuleLLM.players import (
-    TrendChaser,
-    SocialProofFollower,
-    IntrinsicValueTrader,
-    EarlyExitTrader,
-    NoiseTrader,
+from .players import (
+    Market,
+    RuleLLMInvestor,
+    RuleLLMTrendChaser,
+    RuleLLMSocialProofFollower,
+    RuleLLMIntrinsicValueTrader,
+    RuleLLMEarlyExitTrader,
+    RuleLLMNoiseTrader,
 )
 
 __all__ = [
-    "TrendChaser",
-    "SocialProofFollower",
-    "IntrinsicValueTrader",
-    "EarlyExitTrader",
-    "NoiseTrader",
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMTrendChaser",
+    "RuleLLMSocialProofFollower",
+    "RuleLLMIntrinsicValueTrader",
+    "RuleLLMEarlyExitTrader",
+    "RuleLLMNoiseTrader",
 ]

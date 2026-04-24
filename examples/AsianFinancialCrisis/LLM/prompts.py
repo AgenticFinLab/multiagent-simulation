@@ -26,15 +26,15 @@ HOW YOU READ THE MARKET:
 - Negative price returns: potential contagion spreading, exit quickly
 - Widening spread from fundamental value: systemic risk, reduce all positions
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside \
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside \
 <decision>...</decision> tags.
 
 Example format:
 
-<think>
+<analysis>
 The deviation is -0.07 (deeply negative), price is below fundamental. This is the warning sign \
 I watch for — hot money should exit now to protect capital.
-</think>
+</analysis>
 
 <decision>
 {"action": "sell", "bid_price": 95.00, "quantity": 1500.0, "reasoning": "Crisis signal: \
@@ -62,15 +62,15 @@ HOW YOU READ THE MARKET:
 - Stabilizing or rising prices with positive deviation: consider re-entry
 - High volatility: maintain high caution, defer new positions
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside \
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside \
 <decision>...</decision> tags.
 
 Example format:
 
-<think>
+<analysis>
 Deviation is -0.06 and price return is -3%. Both indicators negative — contagion is spreading. \
 I should reduce my regional exposure significantly.
-</think>
+</analysis>
 
 <decision>
 {"action": "sell", "bid_price": 94.00, "quantity": 2000.0, "reasoning": "Contagion signal: \
@@ -100,15 +100,15 @@ HOW YOU READ THE MARKET:
 - Price near or above fundamental: hold existing positions, no new buys
 - Rising prices after intervention: gradually reduce position over time
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside \
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside \
 <decision>...</decision> tags.
 
 Example format:
 
-<think>
+<analysis>
 Deviation is -0.09 — price is 9% below fundamental value. This is the emergency threshold. \
 I should deploy a stabilizing buy tranche to provide market support.
-</think>
+</analysis>
 
 <decision>
 {"action": "buy", "bid_price": 91.00, "quantity": 5000.0, "reasoning": "Emergency intervention: \
@@ -137,15 +137,15 @@ HOW YOU READ THE MARKET:
 - Small deviation in either direction: hold, wait for clearer signal
 - Volatile but near-fundamental prices: observe, preserve optionality
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside \
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside \
 <decision>...</decision> tags.
 
 Example format:
 
-<think>
+<analysis>
 Price is 8% below fundamental. Crisis-driven selling has created a clear value opportunity. \
 Contrarian logic says buy when others are panicking.
-</think>
+</analysis>
 
 <decision>
 {"action": "buy", "bid_price": 92.00, "quantity": 1000.0, "reasoning": "Contrarian buy: \
@@ -174,15 +174,15 @@ HOW YOU READ THE MARKET:
 - Falling price: sometimes you panic and sell, sometimes you freeze
 - You sometimes do the opposite of what makes sense
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside \
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside \
 <decision>...</decision> tags.
 
 Example format:
 
-<think>
+<analysis>
 The market looks a bit uncertain today. I'm not sure what to do. Maybe I'll buy a small \
 amount since prices have been moving around.
-</think>
+</analysis>
 
 <decision>
 {"action": "buy", "bid_price": 100.00, "quantity": 200.0, "reasoning": "Random trade based \
@@ -201,7 +201,7 @@ LLM_USER_TEMPLATE = """Current Market State (Round {round}):
 
 Based on your trading philosophy and current market conditions, what is your trading decision?
 
-Respond with your thinking in <think>...</think> tags followed by your decision in \
+Respond with your thinking in <analysis>...</analysis> tags followed by your decision in \
 <decision>...</decision> tags.
 The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
 quantity (float, positive), and reasoning (string).

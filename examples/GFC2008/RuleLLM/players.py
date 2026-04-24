@@ -22,7 +22,9 @@ class RuleLLMInvestor(GeneralPlayer):
 
     _system_prompt_path: str = ""
 
-    async def perceive(self, observation: Observation, prev_result: Optional[StepResult] = None) -> None:
+    async def perceive(
+        self, observation: Observation, prev_result: Optional[StepResult] = None
+    ) -> None:
         """Initialize portfolio and LLM client; read market update from inbounds."""
         self.state.custom_state["round"] = observation.round
 
@@ -31,15 +33,21 @@ class RuleLLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["price"] = extras.get("initial_price", 100.0)
-            self.state.custom_state["fundamental"] = extras.get("fundamental_value", 100.0)
+            self.state.custom_state["fundamental"] = extras.get(
+                "fundamental_value", 100.0
+            )
             self.state.custom_state["deviation"] = 0.0
             await self._initialize_agent()
 
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get("price", self.state.custom_state["price"])
-                self.state.custom_state["fundamental"] = payload.get("fundamental", self.state.custom_state["fundamental"])
+                self.state.custom_state["price"] = payload.get(
+                    "price", self.state.custom_state["price"]
+                )
+                self.state.custom_state["fundamental"] = payload.get(
+                    "fundamental", self.state.custom_state["fundamental"]
+                )
                 self.state.custom_state["deviation"] = payload.get("deviation", 0.0)
 
     async def _initialize_agent(self) -> None:
@@ -134,7 +142,10 @@ class RuleLLMInvestor(GeneralPlayer):
         }
         return Action(
             action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
             source_id=self.identity,
         )
 
@@ -154,13 +165,17 @@ class RuleLLMRatingAgency(RuleLLMInvestor):
 class RuleLLMLeveragedInvestor(RuleLLMInvestor):
     """RuleLLM-driven LeveragedInvestor: high leverage, forced to sell in downturn."""
 
-    _system_prompt_path = "examples.GFC2008.RuleLLM.prompts:RULELLM_LEVERAGED_INVESTOR_SYS"
+    _system_prompt_path = (
+        "examples.GFC2008.RuleLLM.prompts:RULELLM_LEVERAGED_INVESTOR_SYS"
+    )
 
 
 class RuleLLMDistressedBuyer(RuleLLMInvestor):
     """RuleLLM-driven DistressedBuyer: buys assets at deep discount during panic."""
 
-    _system_prompt_path = "examples.GFC2008.RuleLLM.prompts:RULELLM_DISTRESSED_BUYER_SYS"
+    _system_prompt_path = (
+        "examples.GFC2008.RuleLLM.prompts:RULELLM_DISTRESSED_BUYER_SYS"
+    )
 
 
 class RuleLLMRegulator(RuleLLMInvestor):

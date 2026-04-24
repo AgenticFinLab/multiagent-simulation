@@ -1,6 +1,6 @@
 """RepresentativenessBias Rule Variant"""
 
-from examples.RepresentativenessBias.Rule.players import (
+from .players import (
     Market,
     PatternMatcher,
     CategoryOvergeneralizer,

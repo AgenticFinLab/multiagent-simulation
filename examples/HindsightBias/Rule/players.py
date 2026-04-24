@@ -1,10 +1,7 @@
-import random
-import logging
-import re
-
 """HindsightBias Rule-Based Simulation
 
-Hindsight bias causes traders to overestimate how predictable past events were, distorting future risk assessment
+Hindsight bias causes traders to overestimate how predictable past events were,
+distorting future risk assessment.
 
 Theoretical Foundation:
 - Fischhoff (1975): Hindsight is not equal to foresight
@@ -12,18 +9,17 @@ Theoretical Foundation:
 - Roese & Vohs (2012): Hindsight bias
 
 Key Dynamics:
-- HindsightOverconfident: Believes past outcomes were obvious, leading to excessive confidence in predictions
-- OutcomeLearner: Learns only from outcomes not process, misattributes skill to luck and vice versa
-- ProcessEvaluator: Evaluates decisions by process quality not outcomes, resists hindsight distortion
+- HindsightOverconfident: Believes past outcomes were obvious, leading to excessive confidence
+- OutcomeLearner: Learns only from outcomes not process, misattributes skill to luck
+- ProcessEvaluator: Evaluates decisions by process quality, resists hindsight distortion
 - ContrarianSkeptic: Skeptic of post-hoc narratives, trades against hindsight-driven consensus
 - NoiseTrader: Random uninformed trader providing baseline liquidity
-
-Parameters from config (see configs/HindsightBias/Rule/players.yml):
 """
 
-from typing import Any, Dict, List, Optional
+import logging
+import random
 
-from masim.player.base import Action, Observation, StepResult
+from masim.player.base import Action
 from masim.player.general import GeneralPlayer
 
 logger = logging.getLogger("HindsightBias")
@@ -36,6 +32,7 @@ class Market(GeneralPlayer):
     Price Formation Model:
         P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
     """
+
     async def perceive(self, observation, prev_result=None) -> None:
         round_num = observation.round
         self.state.custom_state["round"] = round_num
@@ -58,9 +55,17 @@ class Market(GeneralPlayer):
 
     def _extract_orders(self, observation) -> list:
         orders = []
-        for msg in observation.messages:
-            if msg.get("type") == "order":
-                orders.append({"agent_id": msg.get("from"), "action": msg.get("action"), "quantity": msg.get("quantity"), "agent_type": msg.get("agent_type")})
+        for msg in observation.inbounds:
+            payload = msg.payload if hasattr(msg, "payload") else msg
+            if isinstance(payload, dict) and payload.get("type") == "order":
+                orders.append(
+                    {
+                        "agent_id": payload.get("from"),
+                        "action": payload.get("action"),
+                        "quantity": payload.get("quantity"),
+                        "agent_type": payload.get("agent_type"),
+                    }
+                )
         return orders
 
     def _clear_market(self, orders: list) -> dict:
@@ -88,16 +93,37 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(market_result["volume"])
 
     def _log_market_state(self) -> None:
-        logger.debug("Round %d: price=%.2f", self.state.custom_state["round"], self.state.custom_state["price"])
+        logger.debug(
+            "Round %d: price=%.2f",
+            self.state.custom_state["round"],
+            self.state.custom_state["price"],
+        )
 
-    async def step(self):
+    async def decide(self) -> dict:
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = (price - fundamental) / fundamental if fundamental > 0 else 0
-        market_update = {"type": "market_update", "price": price, "fundamental": fundamental, "deviation": deviation, "round": self.state.custom_state["round"]}
+        return {"price": price, "fundamental": fundamental, "deviation": deviation}
+
+    async def act(self, decision_payload: dict) -> Action:
+        price = decision_payload["price"]
+        fundamental = decision_payload["fundamental"]
+        deviation = decision_payload["deviation"]
+        market_update = {
+            "type": "market_update",
+            "price": price,
+            "fundamental": fundamental,
+            "deviation": deviation,
+            "round": self.state.custom_state["round"],
+        }
         return Action(
             action_type="market_broadcast",
-            payload={"market_data": market_update, "outbound_messages": [{"payload": market_update, "content_type": "market_update"}]},
+            payload={
+                "market_data": market_update,
+                "outbound_messages": [
+                    {"payload": market_update, "content_type": "market_update"}
+                ],
+            },
             source_id=self.identity,
         )
 
@@ -109,6 +135,7 @@ class HindsightOverconfident(GeneralPlayer):
     Theoretical Basis: Knew-it-all-along effect (Fischhoff, 1975)
     Market Role: destabilizing
     """
+
     async def perceive(self, observation, prev_result=None) -> None:
         round_num = observation.round
         self.state.custom_state["round"] = round_num
@@ -118,26 +145,28 @@ class HindsightOverconfident(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        for msg in observation.inbounds:
+            payload = msg.payload if hasattr(msg, "payload") else msg
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
+        price = self.state.custom_state.get("price", 0)
+        fundamental = self.state.custom_state.get("fundamental", 0)
+        deviation = self.state.custom_state.get("deviation", 0)
         return self._make_decision(price, fundamental, deviation)
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> dict:
         # Believes past outcomes were obvious, leading to excessive confidence in predictions
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        hindsight_inflation = extras["hindsight_inflation"]
-        prediction_overweight = extras["prediction_overweight"]
+        _ = extras.get("hindsight_inflation", 1.0)
+        __ = extras.get("prediction_overweight", 1.0)
 
         if abs(deviation) > 0.02:
             qty = min(800, int(abs(deviation) * 5000))
@@ -165,7 +194,10 @@ class HindsightOverconfident(GeneralPlayer):
 
         return Action(
             action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
             source_id=self.identity,
         )
 
@@ -177,6 +209,7 @@ class OutcomeLearner(GeneralPlayer):
     Theoretical Basis: Outcome bias (Fischhoff & Beyth, 1975)
     Market Role: destabilizing
     """
+
     async def perceive(self, observation, prev_result=None) -> None:
         round_num = observation.round
         self.state.custom_state["round"] = round_num
@@ -186,26 +219,28 @@ class OutcomeLearner(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        for msg in observation.inbounds:
+            payload = msg.payload if hasattr(msg, "payload") else msg
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
+        price = self.state.custom_state.get("price", 0)
+        fundamental = self.state.custom_state.get("fundamental", 0)
+        deviation = self.state.custom_state.get("deviation", 0)
         return self._make_decision(price, fundamental, deviation)
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> dict:
         # Learns only from outcomes not process, misattributes skill to luck and vice versa
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        success_attribution = extras["success_attribution"]
-        failure_discount = extras["failure_discount"]
+        _ = extras.get("success_attribution", 1.0)
+        __ = extras.get("failure_discount", 1.0)
 
         if abs(deviation) > 0.02:
             qty = min(800, int(abs(deviation) * 5000))
@@ -233,7 +268,10 @@ class OutcomeLearner(GeneralPlayer):
 
         return Action(
             action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
             source_id=self.identity,
         )
 
@@ -245,6 +283,7 @@ class ProcessEvaluator(GeneralPlayer):
     Theoretical Basis: Process-oriented rationality (Roese & Vohs, 2012 baseline)
     Market Role: stabilizing
     """
+
     async def perceive(self, observation, prev_result=None) -> None:
         round_num = observation.round
         self.state.custom_state["round"] = round_num
@@ -254,26 +293,28 @@ class ProcessEvaluator(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        for msg in observation.inbounds:
+            payload = msg.payload if hasattr(msg, "payload") else msg
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
+        price = self.state.custom_state.get("price", 0)
+        fundamental = self.state.custom_state.get("fundamental", 0)
+        deviation = self.state.custom_state.get("deviation", 0)
         return self._make_decision(price, fundamental, deviation)
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> dict:
         # Evaluates decisions by process quality not outcomes, resists hindsight distortion
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        process_weight = extras["process_weight"]
-        outcome_weight = extras["outcome_weight"]
+        _ = extras.get("process_weight", 1.0)
+        __ = extras.get("outcome_weight", 1.0)
 
         if abs(deviation) > 0.05:
             qty = min(500, int(abs(deviation) * 3000))
@@ -301,7 +342,10 @@ class ProcessEvaluator(GeneralPlayer):
 
         return Action(
             action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
             source_id=self.identity,
         )
 
@@ -313,6 +357,7 @@ class ContrarianSkeptic(GeneralPlayer):
     Theoretical Basis: Narrative skepticism (Roese & Vohs, 2012)
     Market Role: stabilizing
     """
+
     async def perceive(self, observation, prev_result=None) -> None:
         round_num = observation.round
         self.state.custom_state["round"] = round_num
@@ -322,26 +367,28 @@ class ContrarianSkeptic(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        for msg in observation.inbounds:
+            payload = msg.payload if hasattr(msg, "payload") else msg
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
+        price = self.state.custom_state.get("price", 0)
+        fundamental = self.state.custom_state.get("fundamental", 0)
+        deviation = self.state.custom_state.get("deviation", 0)
         return self._make_decision(price, fundamental, deviation)
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> dict:
         # Skeptic of post-hoc narratives, trades against hindsight-driven consensus
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        skepticism_level = extras["skepticism_level"]
-        position_size = extras["position_size"]
+        _ = extras.get("skepticism_level", 1.0)
+        __ = extras.get("position_size", 100)
 
         if abs(deviation) > 0.05:
             qty = min(500, int(abs(deviation) * 3000))
@@ -369,7 +416,10 @@ class ContrarianSkeptic(GeneralPlayer):
 
         return Action(
             action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
             source_id=self.identity,
         )
 
@@ -381,6 +431,7 @@ class NoiseTrader(GeneralPlayer):
     Theoretical Basis: Noise trader model (Black, 1986)
     Market Role: neutral
     """
+
     async def perceive(self, observation, prev_result=None) -> None:
         round_num = observation.round
         self.state.custom_state["round"] = round_num
@@ -390,25 +441,27 @@ class NoiseTrader(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
 
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
+        for msg in observation.inbounds:
+            payload = msg.payload if hasattr(msg, "payload") else msg
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
+        price = self.state.custom_state.get("price", 0)
+        fundamental = self.state.custom_state.get("fundamental", 0)
+        deviation = self.state.custom_state.get("deviation", 0)
         return self._make_decision(price, fundamental, deviation)
 
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> dict:
         # Random uninformed trader providing baseline liquidity
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        trade_probability = extras["trade_probability"]
+        _ = extras.get("trade_probability", 0.3)
 
         if random.random() < 0.3:
             qty = random.randint(100, 500)
@@ -435,9 +488,19 @@ class NoiseTrader(GeneralPlayer):
 
         return Action(
             action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
             source_id=self.identity,
         )
 
 
-__all__ = ["Market, HindsightOverconfident, OutcomeLearner, ProcessEvaluator, ContrarianSkeptic, NoiseTrader"]
+__all__ = [
+    "Market",
+    "HindsightOverconfident",
+    "OutcomeLearner",
+    "ProcessEvaluator",
+    "ContrarianSkeptic",
+    "NoiseTrader",
+]

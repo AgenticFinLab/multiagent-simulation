@@ -1,6 +1,6 @@
 """ShortSqueeze - Supply-Demand Imbalance Simulation"""
 
-from examples.ShortSqueeze.Rule.players import (
+from .players import (
     Market,
     ShortSeller,
     MomentumBuyer,

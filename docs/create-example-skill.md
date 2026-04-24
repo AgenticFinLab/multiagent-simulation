@@ -926,6 +926,22 @@ Methods:
 
 **Reference**: Use `examples/AssetBubble/LLM/prompts.py` as template.
 
+**CANONICAL OUTPUT FORMAT** (mandatory at end of every system prompt):
+
+```
+OUTPUT FORMAT:
+First output your reasoning inside <analysis>...</analysis> tags,
+then output your decision inside <decision>...</decision> tags.
+The decision must be valid JSON:
+{"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+```
+
+- `<analysis>` tag: chain-of-thought reasoning — market assessment, strategy logic, rationale
+- `<decision>` tag: the parseable JSON decision
+- **Never use `<think>` tags** — `<think>` is deprecated; `<analysis>` is the canonical tag
+- `bid_price` and `quantity` must be numeric literals, not formulas or strings
+
 Structure for each investor type:
 
 ```
@@ -972,8 +988,11 @@ System Prompt Structure:
 
 9. Output Format
    "OUTPUT FORMAT:
-    <analysis>Your reasoning</analysis>
-    <decision>{"action": "...", "quantity": N}</decision>"
+    First output your reasoning inside <analysis>...</analysis> tags,
+    then output your decision inside <decision>...</decision> tags.
+    The decision must be valid JSON:
+    {\"action\": \"buy\"|\"sell\"|\"hold\", \"bid_price\": float, \"quantity\": float, \"reasoning\": string}
+    IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas."
 
 User Prompt Template:
 
@@ -1038,7 +1057,14 @@ System Prompt Structure:
      - Explain when you follow vs override rules
      - Consider risk management"
 
-10. Output Format (same as LLM)
+10. Output Format
+    "OUTPUT FORMAT:
+     First output your reasoning inside <analysis>...</analysis> tags,
+     then output your decision inside <decision>...</decision> tags.
+     The decision must be valid JSON:
+     {\"action\": \"buy\"|\"sell\"|\"hold\", \"bid_price\": float, \"quantity\": float, \"reasoning\": string}
+     IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas."
+    (Identical to LLM variant — always use <analysis> not <think>)
 ```
 
 **Step 4.3.3: Implement Players**
@@ -1459,9 +1485,13 @@ Debugging Workflow
 - [ ] Rule/ run script works
 - [ ] Rule/ analysis.py generates plots
 - [ ] LLM/ prompts.py has all personalities
+- [ ] LLM/ prompts.py uses `<analysis>` tag (not `<think>`) in output format
+- [ ] LLM/ prompts.py decision JSON includes `bid_price`, `quantity`, `reasoning` fields
 - [ ] LLM/ players.py handles responses
 - [ ] RuleLLM/ hybrid prompts complete
+- [ ] RuleLLM/ prompts.py uses `<analysis>` tag in output format
 - [ ] Rag/ knowledge retrieval implemented
+- [ ] Rag/ prompts.py uses `<analysis>` tag in output format
 - [ ] All __init__.py files present
 
 **Configuration**

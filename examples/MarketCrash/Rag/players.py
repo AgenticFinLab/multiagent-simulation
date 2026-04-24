@@ -41,27 +41,25 @@ Environment Variables:
 
 from __future__ import annotations
 
-import importlib
-import json
 import logging
 import os
 import random
-import re
 import shutil
-import sys
-import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-
-from dotenv import load_dotenv
-
-# Add examples directory to path for shared utilities
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
 from examples.llm_utils import parse_llm_response_with_thinking
+from examples.MarketCrash.Rag.prompts import (
+    RAGLLM_RISK_PARITY_FUND_SYS,
+    RAGLLM_LEVERAGED_HEDGE_FUND_SYS,
+    RAGLLM_MARKET_MAKER_SYS,
+    RAGLLM_PASSIVE_INVESTOR_SYS,
+    RAGLLM_PANIC_SELLER_SYS,
+    RAGLLM_USER_TEMPLATE,
+)
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -74,13 +72,6 @@ from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("MarketCrashRag")
-
-
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt string from a module path (``module:VARIABLE``)."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
 
 
 # =============================================================================
@@ -256,8 +247,10 @@ class RagLLMInvestor(GeneralPlayer):
         - initial_cash, initial_position, custom_state_hot_limit, record_path
         - rag: docs_dir, url_csv, docs_save_dir, rag_persist_dir, top_k,
                embed_model, embed_api_base
-        - llm: sys_message, user_message, lm_name, generation_config
+        - llm: lm_name, generation_config
     """
+
+    _system_prompt: str = ""
 
     # ------------------------------------------------------------------
     # perceive
@@ -298,13 +291,6 @@ class RagLLMInvestor(GeneralPlayer):
         )
 
         # LLM client
-        project_root = Path(__file__).parent.parent.parent
-        load_dotenv(project_root / ".env")
-        if not os.getenv("ARK_API_KEY"):
-            raise RuntimeError(
-                "ARK_API_KEY not found after loading .env. "
-                f"Ensure .env file exists at {project_root / '.env'} and contains ARK_API_KEY."
-            )
         llm_config = extras["llm"]
         lm_name = llm_config["lm_name"]
         generation_config = llm_config["generation_config"]
@@ -636,9 +622,7 @@ class RagLLMInvestor(GeneralPlayer):
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
 
-        llm_config = self.config.extras["llm"]
-        template = load_prompt(llm_config["user_message"])
-        return template.format(
+        return RAGLLM_USER_TEMPLATE.format(
             round=round_num,
             rag_context=rag_context,
             price=market_data["price"],
@@ -691,7 +675,7 @@ class RagLLMInvestor(GeneralPlayer):
         strategy_name = self.__class__.__name__
 
         user_prompt = self._build_prompt(market_data)
-        system_prompt = load_prompt(self.config.extras["llm"]["sys_message"])
+        system_prompt = self._system_prompt
 
         max_retries = 3
         decision: Dict[str, Any] = {}
@@ -740,8 +724,7 @@ class RagLLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": decision["reasoning"][:120],
-            "analysis": decision["analysis"],
+            "reasoning": decision.get("reasoning", "")[:120],
             "provides_liquidity": decision.get("provides_liquidity", False),
         }
 
@@ -766,28 +749,39 @@ class RagLLMInvestor(GeneralPlayer):
 class RagLLMPanicSeller(RagLLMInvestor):
     """RAG-augmented: PanicSeller rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RAGLLM_PANIC_SELLER_SYS
 
 
 class RagLLMRiskParityFund(RagLLMInvestor):
     """RAG-augmented: RiskParityFund rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RAGLLM_RISK_PARITY_FUND_SYS
 
 
 class RagLLMLeveragedFund(RagLLMInvestor):
     """RAG-augmented: LeveragedFund rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RAGLLM_LEVERAGED_HEDGE_FUND_SYS
 
 
 class RagLLMMarketMaker(RagLLMInvestor):
     """RAG-augmented: MarketMaker rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RAGLLM_MARKET_MAKER_SYS
 
 
 class RagLLMBottomFisher(RagLLMInvestor):
     """RAG-augmented: BottomFisher rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RAGLLM_PASSIVE_INVESTOR_SYS
+
+
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMPanicSeller",
+    "RagLLMRiskParityFund",
+    "RagLLMLeveragedFund",
+    "RagLLMMarketMaker",
+    "RagLLMBottomFisher",
+]

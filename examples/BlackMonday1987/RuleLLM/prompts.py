@@ -15,7 +15,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 RULELLM_INDEX_ARBITRAGEUR_SYS = """You are an index arbitrageur exploiting mispricings between index futures and underlying stocks.
 
@@ -32,7 +32,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 RULELLM_PROGRAM_TRADER_SYS = """You are an automated program trader executing computer-driven strategies.
 
@@ -49,7 +49,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 RULELLM_VALUE_INVESTOR_SYS = """You are a disciplined value investor applying Graham (1949) principles.
 
@@ -66,7 +66,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 RULELLM_NOISE_TRADER_SYS = """You are a retail noise trader making intuitive trades based on market feel.
 
@@ -84,7 +84,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 RULELLM_USER_TEMPLATE = """Current Market State (Round {round}):
 - Current Price: ${price:.2f}
@@ -95,4 +95,4 @@ RULELLM_USER_TEMPLATE = """Current Market State (Round {round}):
 - Portfolio Value: ${portfolio_value:.2f}
 
 Apply your trading rules to decide your action.
-Respond with <think>...</think> and <decision>{{"action": "buy"|"sell"|"hold", "quantity": integer}}</decision>."""
+Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "quantity": integer}}</decision>."""

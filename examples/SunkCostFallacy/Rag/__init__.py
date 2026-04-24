@@ -1,17 +1,21 @@
 """SunkCostFallacy Rag Variant"""
 
-from examples.SunkCostFallacy.Rag.players import (
-    SunkCostHolder,
-    CommitmentEscalator,
-    RationalCutter,
-    OpportunityCostTrader,
-    NoiseTrader,
+from .players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMSunkCostHolder,
+    RagLLMCommitmentEscalator,
+    RagLLMRationalCutter,
+    RagLLMOpportunityCostTrader,
+    RagLLMNoiseTrader,
 )
 
 __all__ = [
-    "SunkCostHolder",
-    "CommitmentEscalator",
-    "RationalCutter",
-    "OpportunityCostTrader",
-    "NoiseTrader",
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMSunkCostHolder",
+    "RagLLMCommitmentEscalator",
+    "RagLLMRationalCutter",
+    "RagLLMOpportunityCostTrader",
+    "RagLLMNoiseTrader",
 ]

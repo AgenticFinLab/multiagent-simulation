@@ -1,17 +1,21 @@
 """SorosPound LLM Variant"""
 
-from examples.SorosPound.LLM.players import (
-    MacroHedgeFund,
-    PegDefender,
-    ConvergenceTrader,
-    OpportunisticTrader,
-    NoiseTrader,
+from .players import (
+    Market,
+    LLMInvestor,
+    LLMMacroHedgeFund,
+    LLMPegDefender,
+    LLMConvergenceTrader,
+    LLMOpportunisticTrader,
+    LLMNoiseTrader,
 )
 
 __all__ = [
-    "MacroHedgeFund",
-    "PegDefender",
-    "ConvergenceTrader",
-    "OpportunisticTrader",
-    "NoiseTrader",
+    "Market",
+    "LLMInvestor",
+    "LLMMacroHedgeFund",
+    "LLMPegDefender",
+    "LLMConvergenceTrader",
+    "LLMOpportunisticTrader",
+    "LLMNoiseTrader",
 ]

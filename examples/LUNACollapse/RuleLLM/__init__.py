@@ -1,5 +1,19 @@
 """LUNACollapse RuleLLM Variant"""
 
-from examples.LUNACollapse.RuleLLM.players import Market, LLMInvestor, LLMStablecoinHolder, LLMArbitrageur, LLMDeFiLender, LLMAnchorDepositor, LLMValueBuyer
+from examples.LUNACollapse.RuleLLM.players import (
+    Market,
+    RuleLLMStablecoinHolder,
+    RuleLLMArbitrageur,
+    RuleLLMDeFiLender,
+    RuleLLMAnchorDepositor,
+    RuleLLMValueBuyer,
+)
 
-__all__ = ["Market", "LLMInvestor", "LLMStablecoinHolder", "LLMArbitrageur", "LLMDeFiLender", "LLMAnchorDepositor", "LLMValueBuyer"]
+__all__ = [
+    "Market",
+    "RuleLLMStablecoinHolder",
+    "RuleLLMArbitrageur",
+    "RuleLLMDeFiLender",
+    "RuleLLMAnchorDepositor",
+    "RuleLLMValueBuyer",
+]

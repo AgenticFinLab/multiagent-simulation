@@ -22,7 +22,9 @@ class RagLLMInvestor(GeneralPlayer):
 
     _system_prompt_path: str = ""
 
-    async def perceive(self, observation: Observation, prev_result: Optional[StepResult] = None) -> None:
+    async def perceive(
+        self, observation: Observation, prev_result: Optional[StepResult] = None
+    ) -> None:
         """Initialize portfolio and LLM client; read market update from inbounds."""
         self.state.custom_state["round"] = observation.round
 
@@ -31,15 +33,21 @@ class RagLLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["price"] = extras.get("initial_price", 100.0)
-            self.state.custom_state["fundamental"] = extras.get("fundamental_value", 100.0)
+            self.state.custom_state["fundamental"] = extras.get(
+                "fundamental_value", 100.0
+            )
             self.state.custom_state["deviation"] = 0.0
             await self._initialize_agent()
 
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get("price", self.state.custom_state["price"])
-                self.state.custom_state["fundamental"] = payload.get("fundamental", self.state.custom_state["fundamental"])
+                self.state.custom_state["price"] = payload.get(
+                    "price", self.state.custom_state["price"]
+                )
+                self.state.custom_state["fundamental"] = payload.get(
+                    "fundamental", self.state.custom_state["fundamental"]
+                )
                 self.state.custom_state["deviation"] = payload.get("deviation", 0.0)
 
     async def _initialize_agent(self) -> None:
@@ -161,7 +169,10 @@ class RagLLMInvestor(GeneralPlayer):
         }
         return Action(
             action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
+            payload={
+                "order": order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            },
             source_id=self.identity,
         )
 
@@ -169,25 +180,33 @@ class RagLLMInvestor(GeneralPlayer):
 class RagLLMGainFrameFollower(RagLLMInvestor):
     """RAG-augmented GainFrameFollower: overweights gains-framed information."""
 
-    _system_prompt_path = "examples.FramingEffect.Rag.prompts:RAGLLM_GAIN_FRAME_FOLLOWER_SYS"
+    _system_prompt_path = (
+        "examples.FramingEffect.Rag.prompts:RAGLLM_GAIN_FRAME_FOLLOWER_SYS"
+    )
 
 
 class RagLLMLossFrameReactor(RagLLMInvestor):
     """RAG-augmented LossFrameReactor: overweights loss-framed information."""
 
-    _system_prompt_path = "examples.FramingEffect.Rag.prompts:RAGLLM_LOSS_FRAME_REACTOR_SYS"
+    _system_prompt_path = (
+        "examples.FramingEffect.Rag.prompts:RAGLLM_LOSS_FRAME_REACTOR_SYS"
+    )
 
 
 class RagLLMFrameInvariantTrader(RagLLMInvestor):
     """RAG-augmented FrameInvariantTrader: evaluates by substance regardless of framing."""
 
-    _system_prompt_path = "examples.FramingEffect.Rag.prompts:RAGLLM_FRAME_INVARIANT_TRADER_SYS"
+    _system_prompt_path = (
+        "examples.FramingEffect.Rag.prompts:RAGLLM_FRAME_INVARIANT_TRADER_SYS"
+    )
 
 
 class RagLLMArbitrageFramer(RagLLMInvestor):
     """RAG-augmented ArbitrageFramer: exploits framing-induced mispricing."""
 
-    _system_prompt_path = "examples.FramingEffect.Rag.prompts:RAGLLM_ARBITRAGE_FRAMER_SYS"
+    _system_prompt_path = (
+        "examples.FramingEffect.Rag.prompts:RAGLLM_ARBITRAGE_FRAMER_SYS"
+    )
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):

@@ -1,6 +1,6 @@
 """RumorSpread RuleLLM Variant"""
 
-from examples.RumorSpread.RuleLLM.players import (
+from .players import (
     InformationEnvironment,
     RuleLLMGullibleSpreader,
     RuleLLMDistortingRelayer,

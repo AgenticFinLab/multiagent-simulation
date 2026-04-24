@@ -1,17 +1,21 @@
 """StatusQuoBias LLM Variant"""
 
-from examples.StatusQuoBias.LLM.players import (
-    InertialHolder,
-    DefaultFollower,
-    ActiveRebalancer,
-    MomentumTrader,
-    NoiseTrader,
+from .players import (
+    Market,
+    LLMInvestor,
+    LLMInertialHolder,
+    LLMDefaultFollower,
+    LLMActiveRebalancer,
+    LLMMomentumTrader,
+    LLMNoiseTrader,
 )
 
 __all__ = [
-    "InertialHolder",
-    "DefaultFollower",
-    "ActiveRebalancer",
-    "MomentumTrader",
-    "NoiseTrader",
+    "Market",
+    "LLMInvestor",
+    "LLMInertialHolder",
+    "LLMDefaultFollower",
+    "LLMActiveRebalancer",
+    "LLMMomentumTrader",
+    "LLMNoiseTrader",
 ]

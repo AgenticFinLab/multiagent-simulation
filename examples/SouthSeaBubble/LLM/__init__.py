@@ -1,17 +1,21 @@
 """SouthSeaBubble LLM Variant"""
 
-from examples.SouthSeaBubble.LLM.players import (
-    InsiderAdvantaged,
-    NarrativeBeliever,
-    SkepticalAnalyst,
-    Arbitrageur,
-    NoiseTrader,
+from .players import (
+    Market,
+    LLMInvestor,
+    LLMInsiderAdvantaged,
+    LLMNarrativeBeliever,
+    LLMSkepticalAnalyst,
+    LLMArbitrageur,
+    LLMNoiseTrader,
 )
 
 __all__ = [
-    "InsiderAdvantaged",
-    "NarrativeBeliever",
-    "SkepticalAnalyst",
-    "Arbitrageur",
-    "NoiseTrader",
+    "Market",
+    "LLMInvestor",
+    "LLMInsiderAdvantaged",
+    "LLMNarrativeBeliever",
+    "LLMSkepticalAnalyst",
+    "LLMArbitrageur",
+    "LLMNoiseTrader",
 ]

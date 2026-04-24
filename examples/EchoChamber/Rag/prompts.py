@@ -32,7 +32,7 @@ Relevant Domain Knowledge:
 {rag_context}
 
 Apply your DECISION RULES and the domain knowledge above to decide your action.
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {{"action_type": "polarize" | "neutral" | "depolarize", "intensity": <float 0-1>, "reasoning": "<brief>"}}
 IMPORTANT: intensity MUST be a numeric value between 0 and 1, NOT an expression."""
 

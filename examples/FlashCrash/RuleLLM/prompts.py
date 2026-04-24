@@ -56,16 +56,16 @@ You MAY adjust the exact quantity up/down by up to 20% based on qualitative
 judgment about market context, but the sign (buy/sell/hold) and approximate
 scale MUST follow the rule above.
 
-First, think through your analysis step by step inside <think>...</think> tags.
+First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 
 Example format:
-<think>
+<analysis>
 Short momentum is +0.02 (2% up), signal = 0.02 × 3.0 = 0.06. quantity = 0.06 × 40 × 1.5 = 3.6 shares BUY...
-</think>
+</analysis>
 
 <decision>
 {"action": "buy", "bid_price": 100.00, "quantity": 3.6, "reasoning": "Positive momentum detected"}
@@ -118,7 +118,7 @@ Check the volatility condition, then decide whether to provide or withdraw liqui
 You MAY adjust quantity by up to 15% based on additional context, but you MUST
 withdraw when volatility exceeds the threshold.
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
@@ -161,7 +161,7 @@ Step 3 — Apply portfolio constraints:
 Compute the trend signal as defined above, then follow the algorithm.
 You MAY adjust quantity by up to 10%, but the algorithm direction MUST be followed.
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": false}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
@@ -206,7 +206,7 @@ Step 3 — Apply portfolio constraints:
 Check if the stop-loss is triggered. If yes, sell everything. If no, hold.
 The stop-loss rule is NON-NEGOTIABLE — you MUST sell when triggered.
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": false}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
@@ -263,7 +263,7 @@ Compute the value deviation and trade accordingly. You are the STABILIZING force
 in the market — your buying during crashes helps price recovery.
 You MAY adjust quantity by up to 15% based on crash severity context.
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
@@ -291,7 +291,7 @@ RULELLM_USER_TEMPLATE = """
 
 Apply your DECISION RULES above to this data and output your trade decision.
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <your price as NUMBER>, "quantity": <shares as NUMBER, +buy/-sell>, "reasoning": "<brief>", "provides_liquidity": <true|false>}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """

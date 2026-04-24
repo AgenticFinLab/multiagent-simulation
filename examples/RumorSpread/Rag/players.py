@@ -42,24 +42,16 @@ Environment Variables:
 
 from __future__ import annotations
 
-import importlib
 import json
 import logging
 import os
 import random
 import shutil
-import sys
-from pathlib import Path
 from typing import Any, Dict, List, Optional
-
-from dotenv import load_dotenv
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -70,15 +62,17 @@ from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
+from masim.utils.llm_utils import parse_llm_response_with_thinking
+
+from .prompts import (
+    RAG_GULLIBLE_SYS,
+    RAG_DISTORTING_SYS,
+    RAG_SKEPTICAL_SYS,
+    RAG_FACTCHECKER_SYS,
+    RAG_BYSTANDER_SYS,
+)
 
 logger = logging.getLogger("RumorSpreadRag")
-
-
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt string from a module path (``module:VARIABLE``)."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
 
 
 # =============================================================================
@@ -229,25 +223,27 @@ class InformationEnvironment(GeneralPlayer):
 
 
 class RagLLMSocialAgent(GeneralPlayer):
-    """
-    Base class for RAG-augmented Rule+LLM social agents.
+    """Base class for RAG-augmented Rule+LLM social agents in RumorSpread."""
 
-    Each subclass uses a system prompt that encodes BOTH persona and rules
-    (identical to RuleLLMSocialAgent). In addition, at initialization:
+    _system_prompt: str = ""
 
-        1. Documents are loaded from the knowledge source configured in
-           players.yml and indexed with the configured embedding API.
-        2. A KnowledgeStore (vector index) is built and persisted.
-        3. At every decision round, a query is formulated from the current
-           environment state and the top-k most relevant chunks are
-           retrieved and injected into the user prompt.
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state.pop("_llm", None)
+        return state
 
-    Parameters from config extras:
-        - initial_belief, initial_credibility, custom_state_hot_limit, record_path
-        - rag: docs_dir, url_csv, docs_save_dir, rag_persist_dir, top_k,
-               embed_model, embed_api_base
-        - llm: sys_message, user_message, lm_name, generation_config
-    """
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._llm = None
+
+    def _get_llm(self) -> LangChainAPIInference:
+        """Lazy-initialize LLM client."""
+        llm_cfg = self.config.extras["llm"]
+        self._llm = LangChainAPIInference(
+            lm_name=llm_cfg["lm_name"],
+            generation_config=llm_cfg["generation_config"],
+        )
+        return self._llm
 
     async def perceive(
         self,
@@ -280,26 +276,8 @@ class RagLLMSocialAgent(GeneralPlayer):
             entry_limit=hot_limit,
         )
 
-        project_root = Path(__file__).parent.parent.parent
-        load_dotenv(project_root / ".env")
-        if not os.getenv("ARK_API_KEY"):
-            raise RuntimeError(
-                "ARK_API_KEY not found after loading .env. "
-                f"Ensure .env file exists at {project_root / '.env'} and contains ARK_API_KEY."
-            )
-
-        llm_config = extras["llm"]
-        lm_name = llm_config["lm_name"]
-        generation_config = llm_config["generation_config"]
-
-        self.state.custom_state["lm_name"] = lm_name
-        self.state.custom_state["generation_config"] = generation_config
-
-        llm_client = LangChainAPIInference(
-            lm_name=lm_name,
-            generation_config=generation_config,
-        )
-        self.state.custom_state["llm_client"] = llm_client
+        # LLM client for RAG initialization
+        llm_client = self._get_llm()
 
         private_knowledge = extras["private_knowledge"]
         rag_cfg = private_knowledge.get("rag", extras.get("rag", {}))
@@ -570,20 +548,18 @@ class RagLLMSocialAgent(GeneralPlayer):
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
 
-        llm_config = self.config.extras["llm"]
-        template = load_prompt(llm_config["user_message"])
-        return template.format(
-            round=round_num,
-            rag_context=rag_context,
-            belief=env_data["belief"],
-            prev_belief=env_data["prev_belief"],
-            belief_change=env_data["belief_change"],
-            distortion=env_data["distortion"],
-            truth_value=env_data["truth_value"],
-            num_spreaders=env_data["num_spreaders"],
-            num_correctors=env_data["num_correctors"],
-            net_spread_intensity=env_data["net_spread_intensity"],
-            my_belief=my_belief,
+        return (
+            f"Round {round_num}\n"
+            f"RAG Context:\n{rag_context}\n\n"
+            f"Population Belief: {env_data['belief']:.3f}  prev={env_data['prev_belief']:.3f}"
+            f"  change={env_data['belief_change']:.3f}  distortion={env_data['distortion']:.3f}\n"
+            f"Truth Value: {env_data['truth_value']:.3f}\n"
+            f"Spreaders: {env_data['num_spreaders']}  Correctors: {env_data['num_correctors']}"
+            f"  net_spread={env_data['net_spread_intensity']:.3f}\n"
+            f"Your Personal Belief: {my_belief:.3f}\n"
+            "Respond with <analysis>...</analysis> then "
+            '<decision>{"action_type":"spread"|"ignore"|"correct","intensity":<0-1>,"reasoning":"..."}'
+            "</decision>"
         )
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
@@ -593,11 +569,11 @@ class RagLLMSocialAgent(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
         env_data = self.state.custom_state["env_data"]
-        llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
         strategy_name = self.__class__.__name__
 
         user_prompt = self._build_prompt(env_data)
-        system_prompt = load_prompt(self.config.extras["llm"]["sys_message"])
+        system_prompt = self._system_prompt
+        llm_client = self._get_llm()
 
         max_retries = 3
         decision = None
@@ -686,30 +662,41 @@ class RagLLMSocialAgent(GeneralPlayer):
 
 
 class RagLLMGullibleSpreader(RagLLMSocialAgent):
-    """RAG-augmented: Allport & Postman leveling rules + LLM gullible reasoning + retrieved knowledge."""
+    """RAG-augmented gullible spreader."""
 
-    pass
+    _system_prompt = RAG_GULLIBLE_SYS
 
 
 class RagLLMDistortingRelayer(RagLLMSocialAgent):
-    """RAG-augmented: Sharpening + assimilation rules + LLM distorting reasoning + retrieved knowledge."""
+    """RAG-augmented distorting relayer."""
 
-    pass
+    _system_prompt = RAG_DISTORTING_SYS
 
 
 class RagLLMSkepticalEvaluator(RagLLMSocialAgent):
-    """RAG-augmented: Critical evaluation + correction threshold + LLM skeptical reasoning + retrieved knowledge."""
+    """RAG-augmented skeptical evaluator."""
 
-    pass
+    _system_prompt = RAG_SKEPTICAL_SYS
 
 
 class RagLLMFactChecker(RagLLMSocialAgent):
-    """RAG-augmented: Active denial + credibility discount + LLM fact-checking reasoning + retrieved knowledge."""
+    """RAG-augmented fact checker."""
 
-    pass
+    _system_prompt = RAG_FACTCHECKER_SYS
 
 
 class RagLLMUninformedBystander(RagLLMSocialAgent):
-    """RAG-augmented: Random engagement rule + LLM casual reasoning + retrieved knowledge."""
+    """RAG-augmented uninformed bystander."""
 
-    pass
+    _system_prompt = RAG_BYSTANDER_SYS
+
+
+__all__ = [
+    "InformationEnvironment",
+    "RagLLMSocialAgent",
+    "RagLLMGullibleSpreader",
+    "RagLLMDistortingRelayer",
+    "RagLLMSkepticalEvaluator",
+    "RagLLMFactChecker",
+    "RagLLMUninformedBystander",
+]

@@ -23,31 +23,25 @@ import os
 import json
 import random
 import re
-import sys
-import importlib
 from typing import Any, Dict, Optional
-from dotenv import load_dotenv
 
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-# Add examples directory to path for shared utilities
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from examples.llm_utils import parse_llm_response_with_thinking
-
+from .prompts import (
+    LLM_SHORT_SELLER_SYS,
+    LLM_RETAIL_COORD_SYS,
+    LLM_MOMENTUM_SYS,
+    LLM_VALUE_SYS,
+    LLM_INSTITUTIONAL_SYS,
+)
 
 logger = logging.getLogger("ShortSqueezeLLM")
-
-
-def load_prompt(prompt_path: str) -> str:
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
 
 
 class Market(GeneralPlayer):
@@ -172,10 +166,27 @@ class Market(GeneralPlayer):
 
 
 class LLMInvestor(GeneralPlayer):
-    """Base class for LLM-powered investors.
+    """Base class for LLM-powered short-squeeze investors."""
 
-    All parameters read from config.extras (no class constants).
-    """
+    _system_prompt: str = ""
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state.pop("_llm", None)
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._llm = None
+
+    def _get_llm(self) -> LangChainAPIInference:
+        """Lazy-initialize LLM client."""
+        llm_cfg = self.config.extras["llm"]
+        self._llm = LangChainAPIInference(
+            lm_name=llm_cfg["model"],
+            generation_config={"temperature": llm_cfg.get("temperature", 0.3)},
+        )
+        return self._llm
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
@@ -189,56 +200,26 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["short_position"] = 0.0
 
-            load_dotenv()
-            llm_config = extras["llm"]
-            self.state.custom_state["lm_name"] = llm_config["lm_name"]
-            self.state.custom_state["generation_config"] = llm_config[
-                "generation_config"
-            ]
-            self.state.custom_state["llm_client"] = LangChainAPIInference(
-                lm_name=llm_config["lm_name"],
-                generation_config=llm_config["generation_config"],
-            )
-
         if observation.inbounds:
             for inb in observation.inbounds:
                 self.state.custom_state["market_data"] = inb.payload
 
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        if "state" in state and hasattr(state["state"], "custom_state"):
-            custom = state["state"].custom_state
-            if "llm_client" in custom:
-                custom = dict(custom)
-                del custom["llm_client"]
-                state["state"].custom_state = custom
-        return state
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-        if hasattr(self, "state") and hasattr(self.state, "custom_state"):
-            custom = self.state.custom_state
-            if "lm_name" in custom and "llm_client" not in custom:
-                custom["llm_client"] = LangChainAPIInference(
-                    lm_name=custom["lm_name"],
-                    generation_config=custom["generation_config"],
-                )
-
     def _build_prompt(self, market_data: Dict[str, Any]) -> str:
-        llm_config = self.config.extras["llm"]
-        template = load_prompt(llm_config["user_message"])
-        return template.format(
-            price=market_data["price"],
-            prev_price=market_data["prev_price"],
-            return_pct=market_data["return_pct"],
-            short_interest=market_data["short_interest"],
-            squeeze_pressure=market_data["squeeze_pressure"],
-            fundamental=market_data["fundamental"],
-            cash=self.state.custom_state["cash"],
-            position=self.state.custom_state["position"],
-            short_position=self.state.custom_state["short_position"],
-            portfolio_value=self.state.custom_state["cash"]
-            + self.state.custom_state["position"] * market_data["price"],
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
+        short_pos = self.state.custom_state["short_position"]
+        return (
+            f"Price: ${market_data['price']:.2f}  prev=${market_data['prev_price']:.2f}"
+            f"  ret={market_data['return_pct']:.2f}%\n"
+            f"Short interest: {market_data['short_interest']:.1f}%"
+            f"  squeeze_pressure={market_data['squeeze_pressure']:.2f}"
+            f"  fundamental=${market_data['fundamental']:.2f}\n"
+            f"Portfolio: cash={cash:.2f}  position={position:.4f}"
+            f"  short_pos={short_pos:.4f}"
+            f"  value={cash + position * market_data['price']:.2f}\n"
+            "Respond with <analysis>...</analysis> then "
+            '<decision>{"bid_price":...,"quantity":...,"is_short_cover":false,"reasoning":"..."}'
+            "</decision>"
         )
 
     def _parse_response(self, text: str) -> Dict[str, Any]:
@@ -266,10 +247,17 @@ class LLMInvestor(GeneralPlayer):
 
     async def decide(self) -> Dict[str, Any]:
         market_data = self.state.custom_state["market_data"]
-        llm_client = self.state.custom_state["llm_client"]
-        llm_config = self.config.extras["llm"]
-        system_prompt = load_prompt(llm_config["sys_message"])
+        system_prompt = self._system_prompt
+        llm_client = self._get_llm()
 
+        decision: Dict[str, Any] = {
+            "action": "hold",
+            "bid_price": market_data["price"],
+            "quantity": 0,
+            "is_short_cover": False,
+            "reasoning": "error",
+            "analysis": "",
+        }
         for _ in range(3):
             try:
                 output = llm_client.run(
@@ -282,14 +270,8 @@ class LLMInvestor(GeneralPlayer):
                 )
                 decision = self._parse_response(output.outputs[0].response)
                 break
-            except:
-                decision = {
-                    "action": "hold",
-                    "bid_price": market_data["price"],
-                    "quantity": 0,
-                    "is_short_cover": False,
-                    "reasoning": "error",
-                }
+            except Exception:
+                pass
 
         bid_price = float(decision.get("bid_price", market_data["price"]))
         quantity = float(decision.get("quantity", 0))
@@ -319,7 +301,7 @@ class LLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "is_short_cover": is_short_cover,
             "reasoning": decision["reasoning"][:100],
-            "analysis": decision["analysis"],
+            "analysis": decision.get("analysis", ""),
         }
         return {
             **order,
@@ -337,28 +319,39 @@ class LLMInvestor(GeneralPlayer):
 class LLMShortSeller(LLMInvestor):
     """Short seller - manages short position risk."""
 
-    pass
+    _system_prompt = LLM_SHORT_SELLER_SYS
 
 
 class LLMRetailCoordinator(LLMInvestor):
     """Retail trader - aggressive bullish buyer."""
 
-    pass
+    _system_prompt = LLM_RETAIL_COORD_SYS
 
 
 class LLMMomentumBuyer(LLMInvestor):
     """Momentum trader - follows price trends."""
 
-    pass
+    _system_prompt = LLM_MOMENTUM_SYS
 
 
 class LLMValueInvestor(LLMInvestor):
     """Value investor - fundamentals-focused."""
 
-    pass
+    _system_prompt = LLM_VALUE_SYS
 
 
 class LLMInstitutionalHolder(LLMInvestor):
     """Large institutional holder - manages large position."""
 
-    pass
+    _system_prompt = LLM_INSTITUTIONAL_SYS
+
+
+__all__ = [
+    "Market",
+    "LLMInvestor",
+    "LLMShortSeller",
+    "LLMRetailCoordinator",
+    "LLMMomentumBuyer",
+    "LLMValueInvestor",
+    "LLMInstitutionalHolder",
+]

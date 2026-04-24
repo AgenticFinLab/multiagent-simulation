@@ -10,7 +10,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 LLM_INDEX_ARBITRAGEUR_SYS = """You are an index arbitrageur exploiting price gaps between index futures and underlying stocks.
 
@@ -22,7 +22,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 LLM_PROGRAM_TRADER_SYS = """You are an automated program trader executing systematic strategies in financial markets.
 
@@ -34,7 +34,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 LLM_VALUE_INVESTOR_SYS = """You are a disciplined value investor who buys stocks when they trade below intrinsic value.
 
@@ -46,7 +46,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 LLM_NOISE_TRADER_SYS = """You are a retail noise trader making intuitive trading decisions in financial markets.
 
@@ -58,7 +58,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <think>...</think> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
 
 LLM_USER_TEMPLATE = """Current Market State (Round {round}):
 - Current Price: ${price:.2f}
@@ -69,4 +69,4 @@ LLM_USER_TEMPLATE = """Current Market State (Round {round}):
 - Portfolio Value: ${portfolio_value:.2f}
 
 Based on your strategy and current market conditions, decide your trading action.
-Respond with <think>...</think> and <decision>{{"action": "buy"|"sell"|"hold", "quantity": integer}}</decision>."""
+Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "quantity": integer}}</decision>."""

@@ -1,7 +1,8 @@
 """TulipMania Rule Variant"""
 
-from examples.TulipMania.Rule.players import (
+from .players import (
     Market,
+    BaseInvestor,
     TrendChaser,
     SocialProofFollower,
     IntrinsicValueTrader,
@@ -11,6 +12,7 @@ from examples.TulipMania.Rule.players import (
 
 __all__ = [
     "Market",
+    "BaseInvestor",
     "TrendChaser",
     "SocialProofFollower",
     "IntrinsicValueTrader",

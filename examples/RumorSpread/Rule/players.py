@@ -641,3 +641,13 @@ class UninformedBystander(BaseSocialAgent):
             **action,
             "outbound_messages": [{"payload": action, "content_type": "social_action"}],
         }
+
+__all__ = [
+    "InformationEnvironment",
+    "BaseSocialAgent",
+    "GullibleSpreader",
+    "DistortingRelayer",
+    "SkepticalEvaluator",
+    "FactChecker",
+    "UninformedBystander",
+]

@@ -1,5 +1,21 @@
-"""OverconfidenceBias RuleLLM Variant"""
+"""OverconfidenceBias RuleLLM Variant."""
 
-from examples.OverconfidenceBias.RuleLLM.players import Market, LLMInvestor, LLMOverconfidentTrader, LLMSelfAttributor, LLMCalibratedTrader, LLMContrarianInvestor, LLMNoiseTrader
+from .players import (
+    Market,
+    RuleLLMInvestor,
+    RuleLLMOverconfidentTrader,
+    RuleLLMSelfAttributor,
+    RuleLLMCalibratedTrader,
+    RuleLLMContrarianInvestor,
+    RuleLLMNoiseTrader,
+)
 
-__all__ = ["Market", "LLMInvestor", "LLMOverconfidentTrader", "LLMSelfAttributor", "LLMCalibratedTrader", "LLMContrarianInvestor", "LLMNoiseTrader"]
+__all__ = [
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMOverconfidentTrader",
+    "RuleLLMSelfAttributor",
+    "RuleLLMCalibratedTrader",
+    "RuleLLMContrarianInvestor",
+    "RuleLLMNoiseTrader",
+]

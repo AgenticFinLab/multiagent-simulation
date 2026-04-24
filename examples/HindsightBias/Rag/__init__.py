@@ -1,17 +1,19 @@
 """HindsightBias Rag Variant"""
 
 from examples.HindsightBias.Rag.players import (
-    HindsightOverconfident,
-    OutcomeLearner,
-    ProcessEvaluator,
-    ContrarianSkeptic,
-    NoiseTrader,
+    Market,
+    RagLLMHindsightOverconfident,
+    RagLLMOutcomeLearner,
+    RagLLMProcessEvaluator,
+    RagLLMContrarianSkeptic,
+    RagLLMNoiseTrader,
 )
 
 __all__ = [
-    "HindsightOverconfident",
-    "OutcomeLearner",
-    "ProcessEvaluator",
-    "ContrarianSkeptic",
-    "NoiseTrader",
+    "Market",
+    "RagLLMHindsightOverconfident",
+    "RagLLMOutcomeLearner",
+    "RagLLMProcessEvaluator",
+    "RagLLMContrarianSkeptic",
+    "RagLLMNoiseTrader",
 ]

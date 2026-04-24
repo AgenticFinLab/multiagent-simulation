@@ -22,7 +22,7 @@ CONSTRAINTS:
 - Maximum order: 1000 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about origination volume and distribution</think>
+<analysis>Your reasoning about origination volume and distribution</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -41,7 +41,7 @@ CONSTRAINTS:
 - Maximum order: 300 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning using your inflated fundamental assessment</think>
+<analysis>Your reasoning using your inflated fundamental assessment</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -60,7 +60,7 @@ CONSTRAINTS:
 - Maximum order: 1000 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about margin call trigger and fire sale necessity</think>
+<analysis>Your reasoning about margin call trigger and fire sale necessity</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -78,7 +78,7 @@ CONSTRAINTS:
 - Maximum order: 1000 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about discount depth and buying opportunity</think>
+<analysis>Your reasoning about discount depth and buying opportunity</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -96,7 +96,7 @@ CONSTRAINTS:
 - Maximum order: 3000 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about systemic crisis threshold and intervention decision</think>
+<analysis>Your reasoning about systemic crisis threshold and intervention decision</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 

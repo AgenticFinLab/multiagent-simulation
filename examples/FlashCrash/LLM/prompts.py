@@ -20,7 +20,7 @@ BEHAVIOR:
 - Low liquidity: May INCREASE trade size for market impact
 
 Your rapid trading can amplify price movements.
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
@@ -36,7 +36,7 @@ BEHAVIOR:
 - During extreme volatility (in_crash=True): WITHDRAW to manage risk
 - Liquidity < 50: Very cautious about providing quotes
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 State "ACTIVE" or "WITHDRAWN" in reasoning.
@@ -54,7 +54,7 @@ RULES (MANDATORY):
 - Price < $85: Exit position entirely
 
 These are strict risk management rules - no exceptions.
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
@@ -71,7 +71,7 @@ BEHAVIOR:
 - Price < $90: Consider buying
 - Price < $85: Strong buying opportunity
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
@@ -88,7 +88,7 @@ ALGORITHM:
 - Otherwise: Hold (no signal)
 
 Follow rules mechanically.
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
@@ -111,7 +111,7 @@ Your Portfolio:
 - Position: {position:.2f} shares
 - Portfolio Value: ${portfolio_value:.2f}
 
-First output your reasoning inside <think>...</think> tags, then output your decision inside <decision>...</decision> tags.
+First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON:
 {{"action": "buy" | "sell" | "hold", "bid_price": <price as NUMBER>, "quantity": <+buy/-sell as NUMBER>, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.

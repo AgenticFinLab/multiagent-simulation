@@ -1,17 +1,21 @@
 """SunkCostFallacy RuleLLM Variant"""
 
-from examples.SunkCostFallacy.RuleLLM.players import (
-    SunkCostHolder,
-    CommitmentEscalator,
-    RationalCutter,
-    OpportunityCostTrader,
-    NoiseTrader,
+from .players import (
+    Market,
+    RuleLLMInvestor,
+    RuleLLMSunkCostHolder,
+    RuleLLMCommitmentEscalator,
+    RuleLLMRationalCutter,
+    RuleLLMOpportunityCostTrader,
+    RuleLLMNoiseTrader,
 )
 
 __all__ = [
-    "SunkCostHolder",
-    "CommitmentEscalator",
-    "RationalCutter",
-    "OpportunityCostTrader",
-    "NoiseTrader",
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMSunkCostHolder",
+    "RuleLLMCommitmentEscalator",
+    "RuleLLMRationalCutter",
+    "RuleLLMOpportunityCostTrader",
+    "RuleLLMNoiseTrader",
 ]

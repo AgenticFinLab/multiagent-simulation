@@ -1,5 +1,19 @@
 """LUNACollapse Rag Variant"""
 
-from examples.LUNACollapse.Rag.players import Market, LLMInvestor, LLMStablecoinHolder, LLMArbitrageur, LLMDeFiLender, LLMAnchorDepositor, LLMValueBuyer
+from examples.LUNACollapse.Rag.players import (
+    Market,
+    RagLLMStablecoinHolder,
+    RagLLMArbitrageur,
+    RagLLMDeFiLender,
+    RagLLMAnchorDepositor,
+    RagLLMValueBuyer,
+)
 
-__all__ = ["Market", "LLMInvestor", "LLMStablecoinHolder", "LLMArbitrageur", "LLMDeFiLender", "LLMAnchorDepositor", "LLMValueBuyer"]
+__all__ = [
+    "Market",
+    "RagLLMStablecoinHolder",
+    "RagLLMArbitrageur",
+    "RagLLMDeFiLender",
+    "RagLLMAnchorDepositor",
+    "RagLLMValueBuyer",
+]

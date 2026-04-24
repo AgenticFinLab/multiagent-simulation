@@ -1,4 +1,4 @@
-"""LiquidityDryupRuleLLM Prompts - Hybrid Rule + LLM System and User Message Templates
+"""LiquidityDryupRag Prompts - RAG-augmented Rule+LLM System and User Message Templates
 
 Design principle:
     Each agent's system prompt has two sections:

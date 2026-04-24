@@ -36,7 +36,7 @@ CONSTRAINTS:
 - Maximum order: 1000 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about current market conditions and framing</think>
+<analysis>Your reasoning about current market conditions and framing</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -69,7 +69,7 @@ CONSTRAINTS:
 - Maximum order: 1000 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about current market conditions and loss exposure</think>
+<analysis>Your reasoning about current market conditions and loss exposure</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -102,7 +102,7 @@ CONSTRAINTS:
 - Maximum order: 1000 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about fundamental value vs current price</think>
+<analysis>Your reasoning about fundamental value vs current price</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -135,7 +135,7 @@ CONSTRAINTS:
 - Maximum order: 1000 shares
 
 OUTPUT FORMAT:
-<think>Your reasoning about framing-induced mispricing and arbitrage opportunity</think>
+<analysis>Your reasoning about framing-induced mispricing and arbitrage opportunity</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 
@@ -167,7 +167,7 @@ CONSTRAINTS:
 - Maximum order: 500 shares
 
 OUTPUT FORMAT:
-<think>Your random assessment of whether to trade today</think>
+<analysis>Your random assessment of whether to trade today</analysis>
 <decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
 """
 

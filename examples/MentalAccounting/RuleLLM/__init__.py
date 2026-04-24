@@ -1,5 +1,21 @@
 """MentalAccounting RuleLLM Variant"""
 
-from examples.MentalAccounting.RuleLLM.players import Market, LLMInvestor, LLMMentalAccountant, LLMHouseMoneyTrader, LLMRationalPortfolioManager, LLMSunkCostHolder, LLMNoiseTrader
+from .players import (
+    Market,
+    RuleLLMInvestor,
+    RuleLLMMentalAccountant,
+    RuleLLMHouseMoneyTrader,
+    RuleLLMRationalPortfolioManager,
+    RuleLLMSunkCostHolder,
+    RuleLLMNoiseTrader,
+)
 
-__all__ = ["Market", "LLMInvestor", "LLMMentalAccountant", "LLMHouseMoneyTrader", "LLMRationalPortfolioManager", "LLMSunkCostHolder", "LLMNoiseTrader"]
+__all__ = [
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMMentalAccountant",
+    "RuleLLMHouseMoneyTrader",
+    "RuleLLMRationalPortfolioManager",
+    "RuleLLMSunkCostHolder",
+    "RuleLLMNoiseTrader",
+]

@@ -1,27 +1,26 @@
-import random
-import logging
-import re
-
 """SunkCostFallacy Rule-Based Simulation
 
-Sunk cost fallacy causes traders to continue investing based on past unrecoverable costs rather than future prospects
+Sunk cost fallacy causes traders to continue investing based on past unrecoverable
+costs rather than future prospects, leading to suboptimal capital allocation.
 
 Theoretical Foundation:
 - Arkes & Blumer (1985): The psychology of sunk cost
 - Thaler (1980): Toward a positive theory of consumer choice
-- Dawes (1998): Behavioral decision making and judgment
+- Staw (1976): Knee-deep in the big muddy: A study of escalating commitment
 
 Key Dynamics:
 - SunkCostHolder: Holds losing positions because of prior investment, refuses to cut losses
-- CommitmentEscalator: Doubles down on losing positions, increasing exposure to justify prior commitment
-- RationalCutter: Cuts losses ruthlessly based on forward-looking assessment, ignores past investment
-- OpportunityCostTrader: Evaluates positions by opportunity cost, reallocates capital from underperformers
+- CommitmentEscalator: Doubles down on losing positions to justify prior commitment
+- RationalCutter: Cuts losses based on forward-looking assessment, ignores past investment
+- OpportunityCostTrader: Evaluates by opportunity cost, reallocates from underperformers
 - NoiseTrader: Random uninformed trader providing baseline liquidity
 
-Parameters from config (see configs/SunkCostFallacy/Rule/players.yml):
+Parameters from config extras (see configs/SunkCostFallacy/Rule/players.yml).
 """
 
-from typing import Any, Dict, List, Optional
+import logging
+import random
+from typing import Any, Dict, Optional
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
@@ -30,115 +29,163 @@ logger = logging.getLogger("SunkCostFallacy")
 
 
 class Market(GeneralPlayer):
-    """
-    Market agent for SunkCostFallacy simulation.
+    """Market agent for SunkCostFallacy simulation.
 
     Price Formation Model:
         P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
     """
-    async def perceive(self, observation, prev_result=None) -> None:
+
+    async def perceive(
+        self, observation: Observation, prev_result: Optional[StepResult] = None
+    ) -> None:
         round_num = observation.round
         self.state.custom_state["round"] = round_num
         if "price" not in self.state.custom_state:
-            self._initialize_market_state()
-        orders = self._extract_orders(observation)
-        market_result = self._clear_market(orders)
-        self._update_state(market_result)
-        self._log_market_state()
+            extras = self.config.extras
+            self.state.custom_state["price"] = extras["initial_price"]
+            self.state.custom_state["fundamental"] = extras["fundamental_value"]
+            self.state.custom_state["price_history"] = []
+            self.state.custom_state["volume_history"] = []
+            self.state.custom_state["price_impact"] = extras["price_impact"]
+            self.state.custom_state["mean_reversion"] = extras["mean_reversion"]
+            self.state.custom_state["noise_std"] = extras["noise_std"]
 
-    def _initialize_market_state(self) -> None:
-        extras = self.config.extras
-        self.state.custom_state["price"] = extras["initial_price"]
-        self.state.custom_state["fundamental"] = extras["fundamental_value"]
-        self.state.custom_state["price_history"] = []
-        self.state.custom_state["volume_history"] = []
-        self.state.custom_state["price_impact"] = extras["price_impact"]
-        self.state.custom_state["mean_reversion"] = extras["mean_reversion"]
-        self.state.custom_state["noise_std"] = extras["noise_std"]
-
-    def _extract_orders(self, observation) -> list:
         orders = []
-        for msg in observation.messages:
-            if msg.get("type") == "order":
-                orders.append({"agent_id": msg.get("from"), "action": msg.get("action"), "quantity": msg.get("quantity"), "agent_type": msg.get("agent_type")})
-        return orders
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                payload = inb.payload
+                if (
+                    isinstance(payload, dict)
+                    and payload.get("content_type") == "investor_order"
+                ):
+                    orders.append(payload)
+                elif isinstance(payload, dict) and "action" in payload:
+                    orders.append(payload)
 
-    def _clear_market(self, orders: list) -> dict:
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        buy_orders = [o for o in orders if o["action"] == "buy"]
-        sell_orders = [o for o in orders if o["action"] == "sell"]
-        total_buy = sum(o["quantity"] for o in buy_orders)
-        total_sell = sum(o["quantity"] for o in sell_orders)
+        buy_orders = [o for o in orders if o.get("action") == "buy"]
+        sell_orders = [o for o in orders if o.get("action") == "sell"]
+        total_buy = sum(o.get("quantity", 0) for o in buy_orders)
+        total_sell = sum(o.get("quantity", 0) for o in sell_orders)
         net_demand = total_buy - total_sell
+
         price_impact = self.state.custom_state["price_impact"]
         mean_reversion = self.state.custom_state["mean_reversion"]
         noise_std = self.state.custom_state["noise_std"]
         price_change = price_impact * net_demand
         reversion = mean_reversion * (fundamental - price)
         noise = random.gauss(0, noise_std)
-        new_price = price + price_change + reversion + noise
-        new_price = max(new_price, 0.01)
+        new_price = max(price + price_change + reversion + noise, 0.01)
         volume = min(total_buy, total_sell) + abs(net_demand) * 0.5
-        return {"price": new_price, "volume": volume, "net_demand": net_demand}
 
-    def _update_state(self, market_result: dict) -> None:
-        self.state.custom_state["price"] = market_result["price"]
-        self.state.custom_state["price_history"].append(market_result["price"])
-        self.state.custom_state["volume_history"].append(market_result["volume"])
+        self.state.custom_state["price"] = new_price
+        self.state.custom_state["price_history"].append(new_price)
+        self.state.custom_state["volume_history"].append(volume)
+        logger.debug(
+            "Round %d: price=%.2f fundamental=%.2f",
+            round_num,
+            new_price,
+            fundamental,
+        )
 
-    def _log_market_state(self) -> None:
-        logger.debug("Round %d: price=%.2f", self.state.custom_state["round"], self.state.custom_state["price"])
-
-    async def step(self):
+    async def decide(self) -> Dict[str, Any]:
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        deviation = (price - fundamental) / fundamental if fundamental > 0 else 0
-        market_update = {"type": "market_update", "price": price, "fundamental": fundamental, "deviation": deviation, "round": self.state.custom_state["round"]}
+        deviation = (price - fundamental) / fundamental if fundamental > 0 else 0.0
+        market_data = {
+            "price": price,
+            "fundamental": fundamental,
+            "deviation": deviation,
+            "round": self.state.custom_state["round"],
+        }
+        return {
+            "market_data": market_data,
+            "outbound_messages": [
+                {"payload": market_data, "content_type": "market_update"}
+            ],
+        }
+
+    async def act(self, decision_payload: Dict[str, Any]) -> Action:
         return Action(
             action_type="market_broadcast",
-            payload={"market_data": market_update, "outbound_messages": [{"payload": market_update, "content_type": "market_update"}]},
+            payload=decision_payload,
             source_id=self.identity,
         )
 
 
-class SunkCostHolder(GeneralPlayer):
-    """
-    Holds losing positions because of prior investment, refuses to cut losses
+class BaseInvestor(GeneralPlayer):
+    """Base class for SunkCostFallacy investors."""
+
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> Dict[str, Any]:
+        return {"action": "hold", "quantity": 0}
+
+    async def perceive(
+        self, observation: Observation, prev_result: Optional[StepResult] = None
+    ) -> None:
+        round_num = observation.round
+        self.state.custom_state["round"] = round_num
+        if "cash" not in self.state.custom_state:
+            extras = self.config.extras
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                market_data = inb.payload
+                if isinstance(market_data, dict):
+                    self.state.custom_state["price"] = market_data.get("price", 100.0)
+                    self.state.custom_state["fundamental"] = market_data.get(
+                        "fundamental", 100.0
+                    )
+                    self.state.custom_state["deviation"] = market_data.get(
+                        "deviation", 0.0
+                    )
+
+    async def decide(self) -> Dict[str, Any]:
+        price = self.state.custom_state.get("price", 100.0)
+        fundamental = self.state.custom_state.get("fundamental", 100.0)
+        deviation = self.state.custom_state.get("deviation", 0.0)
+        order = self._make_decision(price, fundamental, deviation)
+
+        action = order.get("action", "hold")
+        quantity = order.get("quantity", 0)
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
+
+        return {
+            **order,
+            "agent_type": self.__class__.__name__,
+            "outbound_messages": [{"payload": order, "content_type": "investor_order"}],
+        }
+
+    async def act(self, decision_payload: Dict[str, Any]) -> Action:
+        return Action(
+            action_type="investor_order",
+            payload=decision_payload,
+            source_id=self.identity,
+        )
+
+
+class SunkCostHolder(BaseInvestor):
+    """Holds losing positions because of prior investment, refuses to cut losses.
 
     Theoretical Basis: Sunk cost escalation (Arkes & Blumer, 1985)
     Market Role: destabilizing
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
-        if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
-
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
-
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Holds losing positions because of prior investment, refuses to cut losses
-        extras = self.config.extras
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        escalation_factor = extras["escalation_factor"]
-        cut_loss_threshold = extras["cut_loss_threshold"]
-
         if abs(deviation) > 0.02:
             qty = min(800, int(abs(deviation) * 5000))
             if deviation > 0:
@@ -146,67 +193,24 @@ class SunkCostHolder(GeneralPlayer):
                 if buy_qty > 0:
                     return {"action": "buy", "quantity": buy_qty}
             else:
-                sell_qty = min(qty, max(position, 0))
+                sell_qty = min(qty, int(position))
                 if sell_qty > 0:
                     return {"action": "sell", "quantity": sell_qty}
         return {"action": "hold", "quantity": 0}
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
 
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
-
-        return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
-        )
-
-
-class CommitmentEscalator(GeneralPlayer):
-    """
-    Doubles down on losing positions, increasing exposure to justify prior commitment
+class CommitmentEscalator(BaseInvestor):
+    """Doubles down on losing positions, increasing exposure to justify prior commitment.
 
     Theoretical Basis: Escalation of commitment (Staw, 1976)
     Market Role: destabilizing
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
-        if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
-
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
-
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Doubles down on losing positions, increasing exposure to justify prior commitment
-        extras = self.config.extras
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        double_down_threshold = extras["double_down_threshold"]
-        max_escalation = extras["max_escalation"]
-
         if abs(deviation) > 0.02:
             qty = min(800, int(abs(deviation) * 5000))
             if deviation > 0:
@@ -214,67 +218,24 @@ class CommitmentEscalator(GeneralPlayer):
                 if buy_qty > 0:
                     return {"action": "buy", "quantity": buy_qty}
             else:
-                sell_qty = min(qty, max(position, 0))
+                sell_qty = min(qty, int(position))
                 if sell_qty > 0:
                     return {"action": "sell", "quantity": sell_qty}
         return {"action": "hold", "quantity": 0}
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
 
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
-
-        return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
-        )
-
-
-class RationalCutter(GeneralPlayer):
-    """
-    Cuts losses ruthlessly based on forward-looking assessment, ignores past investment
+class RationalCutter(BaseInvestor):
+    """Cuts losses based on forward-looking assessment, ignores past investment.
 
     Theoretical Basis: Forward-looking rationality (Dawes, 1998 baseline)
     Market Role: stabilizing
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
-        if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
-
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
-
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Cuts losses ruthlessly based on forward-looking assessment, ignores past investment
-        extras = self.config.extras
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        stop_loss = extras["stop_loss"]
-        position_size = extras["position_size"]
-
         if abs(deviation) > 0.05:
             qty = min(500, int(abs(deviation) * 3000))
             if deviation < 0:
@@ -282,67 +243,24 @@ class RationalCutter(GeneralPlayer):
                 if buy_qty > 0:
                     return {"action": "buy", "quantity": buy_qty}
             else:
-                sell_qty = min(qty, max(position, 0))
+                sell_qty = min(qty, int(position))
                 if sell_qty > 0:
                     return {"action": "sell", "quantity": sell_qty}
         return {"action": "hold", "quantity": 0}
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
 
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
-
-        return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
-        )
-
-
-class OpportunityCostTrader(GeneralPlayer):
-    """
-    Evaluates positions by opportunity cost, reallocates capital from underperformers
+class OpportunityCostTrader(BaseInvestor):
+    """Evaluates positions by opportunity cost, reallocates capital from underperformers.
 
     Theoretical Basis: Opportunity cost analysis (Thaler, 1980 baseline)
     Market Role: stabilizing
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
-        if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
-
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
-
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Evaluates positions by opportunity cost, reallocates capital from underperformers
-        extras = self.config.extras
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        reallocation_threshold = extras["reallocation_threshold"]
-        position_size = extras["position_size"]
-
         if abs(deviation) > 0.05:
             qty = min(500, int(abs(deviation) * 3000))
             if deviation < 0:
@@ -350,94 +268,42 @@ class OpportunityCostTrader(GeneralPlayer):
                 if buy_qty > 0:
                     return {"action": "buy", "quantity": buy_qty}
             else:
-                sell_qty = min(qty, max(position, 0))
+                sell_qty = min(qty, int(position))
                 if sell_qty > 0:
                     return {"action": "sell", "quantity": sell_qty}
         return {"action": "hold", "quantity": 0}
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
 
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
-
-        return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
-        )
-
-
-class NoiseTrader(GeneralPlayer):
-    """
-    Random uninformed trader providing baseline liquidity
+class NoiseTrader(BaseInvestor):
+    """Random uninformed trader providing baseline liquidity.
 
     Theoretical Basis: Noise trader model (Black, 1986)
     Market Role: neutral
     """
-    async def perceive(self, observation, prev_result=None) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
 
-        if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
-
-        for msg in observation.messages:
-            if msg.get("type") == "market_update":
-                self.state.custom_state["price"] = msg.get("price")
-                self.state.custom_state["fundamental"] = msg.get("fundamental")
-                self.state.custom_state["deviation"] = msg.get("deviation")
-
-    async def decide(self) -> dict:
-        price = self.state.custom_state["price"]
-        fundamental = self.state.custom_state["fundamental"]
-        deviation = self.state.custom_state["deviation"]
-        extras = self.config.extras
-        return self._make_decision(price, fundamental, deviation)
-
-    def _make_decision(self, price: float, fundamental: float, deviation: float) -> dict:
-        # Random uninformed trader providing baseline liquidity
-        extras = self.config.extras
+    def _make_decision(
+        self, price: float, fundamental: float, deviation: float
+    ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        trade_probability = extras["trade_probability"]
-
         if random.random() < 0.3:
             qty = random.randint(100, 500)
             action = "buy" if random.random() > 0.5 else "sell"
             if action == "buy":
                 qty = min(qty, int(cash / price) if price > 0 else 0)
             else:
-                qty = min(qty, max(position, 0))
+                qty = min(qty, int(position))
             if qty > 0:
                 return {"action": action, "quantity": qty}
         return {"action": "hold", "quantity": 0}
 
-    async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
 
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
-
-        return Action(
-            action_type="order",
-            payload={"order": order, "outbound_messages": [{"payload": order, "content_type": "order"}]},
-            source_id=self.identity,
-        )
-
-
-__all__ = ["Market, SunkCostHolder, CommitmentEscalator, RationalCutter, OpportunityCostTrader, NoiseTrader"]
+__all__ = [
+    "Market",
+    "BaseInvestor",
+    "SunkCostHolder",
+    "CommitmentEscalator",
+    "RationalCutter",
+    "OpportunityCostTrader",
+    "NoiseTrader",
+]

@@ -21,18 +21,13 @@ Investor Parameters (from config.extras):
     - initial_cash: Starting cash balance
     - initial_position: Starting share position
     - custom_state_hot_limit: Maximum history buffer size
-    - llm: LLM configuration (sys_message, user_message, lm_name, generation_config)
+    - llm: LLM configuration (model, temperature)
 """
 
 import logging
 import os
-import json
 import random
-import re
-import sys
-import importlib
 from typing import Any, Dict, Optional
-from dotenv import load_dotenv
 
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
@@ -41,19 +36,18 @@ from masim.utils.history import HistoryBuffer
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-# Add examples directory to path for shared utilities
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from examples.llm_utils import parse_llm_response_with_thinking
+from examples.LiquidityDryup.LLM.prompts import (
+    LLM_MARKET_MAKER_SYS,
+    LLM_LIQUIDITY_DEMANDER_SYS,
+    LLM_ARBITRAGEUR_SYS,
+    LLM_VALUE_SYS,
+    LLM_FORCED_SELLER_SYS,
+    LLM_USER_TEMPLATE,
+)
 
 
 logger = logging.getLogger("LiquidityDryupLLM")
-
-
-def load_prompt(prompt_path: str) -> str:
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
 
 
 class Market(GeneralPlayer):
@@ -132,12 +126,19 @@ class Market(GeneralPlayer):
             if total_liquidity < 30
             else "Stressed" if total_liquidity < 60 else "Normal"
         )
-        logger.debug(f"\n{'='*60}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("\n%s", "=" * 60)
         logger.debug(
-            f"[Market] Round {round_num}: ${current_price:.2f} → ${new_price:.2f} ({price_return*100:+.2f}%)"
+            "[Market] Round %d: $%.2f → $%.2f (%+.2f%%)",
+            round_num,
+            current_price,
+            new_price,
+            price_return * 100,
         )
         logger.debug(
-            f"  Liquidity: {total_liquidity:.1f}, Impact Factor: {liquidity_factor:.2f}x [{status}]"
+            "  Liquidity: %.1f, Impact Factor: %.2fx [%s]",
+            total_liquidity,
+            liquidity_factor,
+            status,
         )
 
         market_data = {
@@ -168,7 +169,19 @@ class LLMInvestor(GeneralPlayer):
     """Base class for LLM-powered investors.
 
     All parameters read from config.extras (no class constants).
+    Subclasses set _system_prompt to their agent-specific system message.
     """
+
+    _system_prompt: str = ""
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state.pop("_llm", None)
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._llm = None
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
@@ -179,45 +192,19 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
 
-            load_dotenv()
-            llm_config = extras["llm"]
-            self.state.custom_state["lm_name"] = llm_config["lm_name"]
-            self.state.custom_state["generation_config"] = llm_config[
-                "generation_config"
-            ]
-            self.state.custom_state["llm_client"] = LangChainAPIInference(
-                lm_name=llm_config["lm_name"],
-                generation_config=llm_config["generation_config"],
-            )
-
         if observation.inbounds:
             for inb in observation.inbounds:
                 self.state.custom_state["market_data"] = inb.payload
 
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        if "state" in state and hasattr(state["state"], "custom_state"):
-            custom = state["state"].custom_state
-            if "llm_client" in custom:
-                custom = dict(custom)
-                del custom["llm_client"]
-                state["state"].custom_state = custom
-        return state
+    async def decide(self) -> Dict[str, Any]:
+        market_data = self.state.custom_state["market_data"]
+        llm_cfg = self.config.extras.get("llm", {})
+        llm = LangChainAPIInference(
+            lm_name=llm_cfg["model"],
+            generation_config={"temperature": llm_cfg.get("temperature", 0.3)},
+        )
 
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-        if hasattr(self, "state") and hasattr(self.state, "custom_state"):
-            custom = self.state.custom_state
-            if "lm_name" in custom and "llm_client" not in custom:
-                custom["llm_client"] = LangChainAPIInference(
-                    lm_name=custom["lm_name"],
-                    generation_config=custom["generation_config"],
-                )
-
-    def _build_prompt(self, market_data: Dict[str, Any]) -> str:
-        llm_config = self.config.extras["llm"]
-        template = load_prompt(llm_config["user_message"])
-        return template.format(
+        user_msg = LLM_USER_TEMPLATE.format(
             price=market_data["price"],
             prev_price=market_data["prev_price"],
             return_pct=market_data["return_pct"],
@@ -230,64 +217,34 @@ class LLMInvestor(GeneralPlayer):
             + self.state.custom_state["position"] * market_data["price"],
         )
 
-    def _parse_response(self, text: str) -> Dict[str, Any]:
-        """Parse LLM response and validate required fields are present and non-null."""
-        parsed = None
-        try:
-            parsed = json.loads(text)
-        except:
-            match = re.search(r"\{.*\}", text, re.DOTALL)
-            if match:
-                parsed = json.loads(match.group(0))
-        if parsed is None:
-            raise ValueError(f"Parse failed: {text[:100]}")
-
-        # Validate required fields with fallback to trigger retry
-        required_fields = ["bid_price", "quantity", "reasoning"]
-        missing_or_null = []
-        for field in required_fields:
-            if field not in parsed or parsed[field] is None:
-                missing_or_null.append(field)
-        if missing_or_null:
-            raise ValueError(f"Fields missing or null: {missing_or_null}")
-
-        return parsed
-
-    async def decide(self) -> Dict[str, Any]:
-        market_data = self.state.custom_state["market_data"]
-        llm_client = self.state.custom_state["llm_client"]
-        llm_config = self.config.extras["llm"]
-        system_prompt = load_prompt(llm_config["sys_message"])
-
-        for _ in range(3):
+        decision: Dict[str, Any] = {}
+        for attempt in range(3):
             try:
-                output = llm_client.run(
-                    [
-                        InferInput(
-                            system_msg=system_prompt,
-                            user_msg=self._build_prompt(market_data),
-                        )
-                    ]
+                output = llm.run(
+                    [InferInput(system_msg=self._system_prompt, user_msg=user_msg)]
                 )
-                decision = self._parse_response(output.outputs[0].response)
+                decision = parse_llm_response_with_thinking(output.outputs[0].response)
                 break
-            except:
+            except (ValueError, RuntimeError) as exc:
+                logger.debug(
+                    "[%s] LLM parse failed (attempt %d): %s",
+                    self.identity,
+                    attempt + 1,
+                    exc,
+                )
                 decision = {
-                    "action": "hold",
                     "bid_price": market_data["price"],
-                    "quantity": 0,
-                    "provides_liquidity": 0,
-                    "reasoning": "error",
+                    "quantity": 0.0,
+                    "provides_liquidity": 0.0,
+                    "reasoning": "parse error – hold",
                 }
 
         bid_price = float(decision.get("bid_price", market_data["price"]))
-        quantity = float(decision.get("quantity", 0))
-        provides_liquidity = float(decision.get("provides_liquidity", 0))
+        quantity = float(decision.get("quantity", 0.0))
+        provides_liquidity = float(decision.get("provides_liquidity", 0.0))
 
-        cash, position = (
-            self.state.custom_state["cash"],
-            self.state.custom_state["position"],
-        )
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
         if quantity > 0:
             quantity = min(quantity, cash / bid_price if bid_price > 0 else 0)
         else:
@@ -307,8 +264,7 @@ class LLMInvestor(GeneralPlayer):
             "strategy": strategy_name,
             "investor": self.identity,
             "provides_liquidity": provides_liquidity,
-            "reasoning": decision["reasoning"][:100],
-            "analysis": decision["analysis"],
+            "reasoning": decision.get("reasoning", "")[:100],
         }
         return {
             **order,
@@ -326,28 +282,39 @@ class LLMInvestor(GeneralPlayer):
 class LLMMarketMaker(LLMInvestor):
     """Market maker - provides liquidity."""
 
-    pass
+    _system_prompt = LLM_MARKET_MAKER_SYS
 
 
 class LLMLiquidityDemander(LLMInvestor):
     """Liquidity demander - takes liquidity."""
 
-    pass
+    _system_prompt = LLM_LIQUIDITY_DEMANDER_SYS
 
 
 class LLMArbitrageur(LLMInvestor):
     """Arbitrageur - seeks opportunities."""
 
-    pass
+    _system_prompt = LLM_ARBITRAGEUR_SYS
 
 
 class LLMValueInvestor(LLMInvestor):
     """Value investor - patient buyer."""
 
-    pass
+    _system_prompt = LLM_VALUE_SYS
 
 
 class LLMForcedSeller(LLMInvestor):
     """Forced seller - must sell."""
 
-    pass
+    _system_prompt = LLM_FORCED_SELLER_SYS
+
+
+__all__ = [
+    "Market",
+    "LLMInvestor",
+    "LLMMarketMaker",
+    "LLMLiquidityDemander",
+    "LLMArbitrageur",
+    "LLMValueInvestor",
+    "LLMForcedSeller",
+]
