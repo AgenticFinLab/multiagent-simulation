@@ -1,27 +1,30 @@
 """AnchoringEffect Rule-Based Simulation
 
-Anchoring causes traders to insufficiently adjust from reference prices,
-creating slow price discovery and persistent mispricings.
+Deterministic baseline variant implementing the AnchoringEffect simulation design.
+All agent decisions are formula-driven; no LLM calls anywhere.
 
-Theoretical Foundation:
-    - Tversky & Kahneman (1974): Judgment under Uncertainty: Heuristics and Biases
-    - Northcraft & Neale (1987): Experts, amateurs, and real estate
-    - Campbell & Sharpe (2009): Anchoring bias in consensus forecasts
+Design Foundation:
+    - Phenomenon definition: simulation-bases.md §1
+    - Theoretical foundation: simulation-bases.md §2.1–§2.6
+    - Market price formation: simulation-bases.md §3.1
+    - Investor taxonomy: simulation-bases.md §4
+    - Parameter table: simulation-bases.md §6
 
-Key Dynamics:
-    - AnchoredTrader: Anchors to initial price, adjusts insufficiently toward fundamental
-    - HistoricalAnchor: Anchors to historical average price
-    - RationalUpdater: Updates beliefs correctly without anchoring bias (benchmark)
-    - MomentumTrader: Follows price trends
-    - NoiseTrader: Random uninformed trader
+Agent Classes:
+    - Market: rule-based price coordinator — simulation-bases.md §3.1
+    - AnchoredTrader: anchors to first price — simulation-bases.md §4, §2.1
+    - HistoricalAnchor: anchors to rolling average — simulation-bases.md §4, §2.2
+    - RationalUpdater: unbiased fundamental updater — simulation-bases.md §4, §2.4
+    - MomentumTrader: trend-following amplifier — simulation-bases.md §4, §2.5
+    - NoiseTrader: uninformed random trader — simulation-bases.md §4, §2.6
 
-All parameters are configured via players.yml config file.
+All numeric parameters are loaded from players.yml extras; no hardcoded values.
 """
 
 import logging
 import os
 import random
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
@@ -32,16 +35,20 @@ logger = logging.getLogger("AnchoringEffect")
 
 class Market(GeneralPlayer):
     """
-    Central market for AnchoringEffect simulation.
+    Central market coordinator for AnchoringEffect simulation.
 
-    Price Formation Model:
+    Implements simulation-bases.md §3.1 — Price Formation Model:
         P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
 
-    Where:
-        lambda: price_impact coefficient (low → anchoring slows price discovery)
-        gamma:  mean_reversion strength
-        F:      fundamental value
-        epsilon: random noise
+    Variable mapping (simulation-bases.md §3.1 → code):
+        lambda (price_impact):    extras["price_impact"]      = 0.01
+        gamma (mean_reversion):   extras["mean_reversion"]    = 0.01
+        F (fundamental value):    extras["fundamental_value"] = 100.0
+        epsilon (noise):          random.gauss(0, noise_std)
+
+    See also:
+        - simulation-bases.md §3.2: price floor mechanism (max(new_price, 0.01))
+        - simulation-bases.md §3.3: information broadcast design (market_data payload)
     """
 
     async def perceive(
@@ -141,9 +148,19 @@ class AnchoredTrader(GeneralPlayer):
     """
     Anchors to initial price, adjusts insufficiently toward fundamental.
 
-    Theory: Tversky & Kahneman (1974) — Anchoring and Insufficient Adjustment.
-    Perceived target = anchor + (fundamental - anchor) * adjustment_factor
-    Trades when price deviates from perceived target by > 3%.
+    Implements simulation-bases.md §4 — AnchoredTrader.
+    Theoretical basis: simulation-bases.md §2.1 (Tversky & Kahneman, 1974).
+
+    Decision rule (simulation-bases.md §4 AnchoredTrader — Rule-Based Behavior):
+        anchor_price = first market price observed (set on first perceive call)
+        perceived_target = anchor_price + (fundamental - anchor_price) * adjustment_factor
+        perceived_dev = (price - perceived_target) / perceived_target
+        if abs(perceived_dev) > 0.03: trade in corrective direction
+        quantity = min(base_position_size, abs(perceived_dev) * 1000)
+
+    Parameters (simulation-bases.md §6):
+        adjustment_factor: 0.3 (calibrated from Tversky & Kahneman 1974 experimental data)
+        base_position_size: loaded from extras["base_position_size"]
     """
 
     async def perceive(
@@ -248,9 +265,19 @@ class HistoricalAnchor(GeneralPlayer):
     """
     Anchors to historical average price, adjusts insufficiently.
 
-    Theory: Northcraft & Neale (1987) — Experts anchor to past prices.
-    Perceived deviation = (price - hist_avg) / hist_avg * (1 - anchor_weight)
-    Trades when perceived deviation exceeds 3%.
+    Implements simulation-bases.md §4 — HistoricalAnchor.
+    Theoretical basis: simulation-bases.md §2.2 (Northcraft & Neale, 1987).
+
+    Decision rule (simulation-bases.md §4 HistoricalAnchor — Rule-Based Behavior):
+        hist_avg = mean of last `lookback` prices (rolling window)
+        perceived_dev = (price - hist_avg) / hist_avg * (1 - anchor_weight)
+        if abs(perceived_dev) > 0.03: trade in corrective direction
+        quantity = min(base_position_size, abs(perceived_dev) * 1000)
+
+    Parameters (simulation-bases.md §6):
+        anchor_weight: 0.5 (dampening factor; higher = stronger anchoring)
+        lookback: 60 rounds (rolling window for historical average)
+        base_position_size: loaded from extras["base_position_size"]
     """
 
     async def perceive(
@@ -357,9 +384,19 @@ class HistoricalAnchor(GeneralPlayer):
 
 class RationalUpdater(GeneralPlayer):
     """
-    Bayesian updater — trades without anchoring bias (benchmark).
+    Bayesian updater — trades without anchoring bias (rational benchmark).
 
-    Trades directly on true fundamental deviation.
+    Implements simulation-bases.md §4 — RationalUpdater.
+    Theoretical basis: simulation-bases.md §2.4 (Muth, 1961 — Rational Expectations).
+
+    Decision rule (simulation-bases.md §4 RationalUpdater — Rule-Based Behavior):
+        deviation = (price - fundamental) / fundamental  (from market broadcast)
+        if abs(deviation) > 0.02: trade proportionally
+        quantity = min(base_position_size, abs(deviation) * 1000)
+
+    Parameters (simulation-bases.md §6):
+        threshold: 0.02 (2% deviation triggers trade)
+        base_position_size: loaded from extras["base_position_size"]
     """
 
     async def perceive(
@@ -450,8 +487,17 @@ class MomentumTrader(GeneralPlayer):
     """
     Follows price trends — buys when price rises, sells when it falls.
 
-    Theory: Jegadeesh & Titman (1993) — Momentum effect.
-    Trades when deviation exceeds entry_threshold.
+    Implements simulation-bases.md §4 — MomentumTrader.
+    Theoretical basis: simulation-bases.md §2.5 (Jegadeesh & Titman, 1993).
+
+    Decision rule (simulation-bases.md §4 MomentumTrader — Rule-Based Behavior):
+        return_pct = (price - prev_price) / prev_price
+        if abs(return_pct) > entry_threshold: follow momentum direction
+        quantity = min(base_position_size, abs(return_pct) * 1000)
+
+    Parameters (simulation-bases.md §6):
+        entry_threshold: 0.02 (2% return triggers momentum entry)
+        base_position_size: loaded from extras["base_position_size"]
     """
 
     async def perceive(
@@ -544,10 +590,19 @@ class MomentumTrader(GeneralPlayer):
 
 class NoiseTrader(GeneralPlayer):
     """
-    Random uninformed trader providing background liquidity.
+    Random uninformed trader providing background market liquidity.
 
-    Theory: Black (1986) — Noise traders.
-    Trades randomly with probability trade_probability each round.
+    Implements simulation-bases.md §4 — NoiseTrader.
+    Theoretical basis: simulation-bases.md §2.6 (Black, 1986 — Noise Trader Risk).
+
+    Decision rule (simulation-bases.md §4 NoiseTrader — Rule-Based Behavior):
+        trade with probability trade_probability (0.05) each round
+        direction: buy or sell with equal probability (0.5 each)
+        quantity: random.uniform(min_order, max_order)
+
+    Parameters (simulation-bases.md §6):
+        trade_probability: 0.05 (5% chance of trading per round)
+        min_order: 100; max_order: 500 (quantity bounds)
     """
 
     async def perceive(

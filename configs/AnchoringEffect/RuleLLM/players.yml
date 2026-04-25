@@ -57,7 +57,7 @@ rulellm_anchored:
       adjustment_factor: 0.3
       base_position_size: 20.0
       llm:
-        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_ANCHORED_SYS"
+        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_ANCHORED_TRADER_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"
@@ -92,7 +92,7 @@ rulellm_historical:
       lookback: 60
       base_position_size: 20.0
       llm:
-        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_HISTORICAL_SYS"
+        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_HISTORICAL_ANCHOR_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"
@@ -123,7 +123,7 @@ rulellm_rational:
       # Rule parameters (from AnchoringEffect RationalUpdater)
       base_position_size: 25.0
       llm:
-        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_RATIONAL_SYS"
+        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_RATIONAL_UPDATER_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"
@@ -156,7 +156,7 @@ rulellm_momentum:
       entry_threshold: 0.02
       base_position_size: 20.0
       llm:
-        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_MOMENTUM_SYS"
+        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_MOMENTUM_TRADER_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"
@@ -190,7 +190,7 @@ rulellm_noise:
       min_order: 100.0
       max_order: 500.0
       llm:
-        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_NOISE_SYS"
+        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"

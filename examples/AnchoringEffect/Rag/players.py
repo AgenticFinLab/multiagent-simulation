@@ -350,11 +350,19 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = "(No relevant knowledge retrieved this round.)"
 
         template = load_prompt(self.config.extras["llm"]["user_message"])
+        # Compute price_change for template (not broadcast by Market)
+        price_change = (
+            (market_data["price"] - market_data["prev_price"])
+            / market_data["prev_price"]
+            if market_data["prev_price"] > 0
+            else 0.0
+        )
         return template.format(
             round=round_num,
             price=market_data["price"],
             prev_price=market_data["prev_price"],
             fundamental=market_data["fundamental"],
+            price_change=price_change,
             deviation=market_data["deviation"],
             cash=cash,
             position=position,

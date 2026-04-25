@@ -50,7 +50,7 @@ anchored_trader:
       initial_position: 0.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_ANCHORED_SYS"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_ANCHORED_TRADER_SYS"
         user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"
@@ -80,7 +80,7 @@ historical_anchor:
       initial_position: 0.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_HISTORICAL_SYS"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_HISTORICAL_ANCHOR_SYS"
         user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"
@@ -108,7 +108,7 @@ rational_updater:
       initial_position: 0.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_RATIONAL_SYS"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_RATIONAL_UPDATER_SYS"
         user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"
@@ -138,7 +138,7 @@ momentum_trader:
       initial_position: 0.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_MOMENTUM_SYS"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_MOMENTUM_TRADER_SYS"
         user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"
@@ -168,7 +168,7 @@ noise_trader:
       initial_position: 0.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_NOISE_SYS"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"

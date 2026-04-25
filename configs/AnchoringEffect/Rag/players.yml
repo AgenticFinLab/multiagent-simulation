@@ -141,7 +141,7 @@ ragllm_anchored:
       # LLM Configuration
       # ------------------------------------------------------------------
       llm:
-        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_ANCHORED_SYS"
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_ANCHORED_TRADER_SYS"
         user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"
@@ -202,7 +202,7 @@ ragllm_historical:
       # LLM Configuration
       # ------------------------------------------------------------------
       llm:
-        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_HISTORICAL_SYS"
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_HISTORICAL_ANCHOR_SYS"
         user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"
@@ -259,7 +259,7 @@ ragllm_rational:
       # LLM Configuration
       # ------------------------------------------------------------------
       llm:
-        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_RATIONAL_SYS"
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_RATIONAL_UPDATER_SYS"
         user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"
@@ -317,7 +317,7 @@ ragllm_momentum:
       # LLM Configuration
       # ------------------------------------------------------------------
       llm:
-        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_MOMENTUM_SYS"
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_MOMENTUM_TRADER_SYS"
         user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"
@@ -376,7 +376,7 @@ ragllm_noise:
       # LLM Configuration
       # ------------------------------------------------------------------
       llm:
-        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_NOISE_SYS"
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-1-6-lite-250115"

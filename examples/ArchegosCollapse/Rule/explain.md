@@ -1,81 +1,201 @@
-# ArchegosCollapse Simulation
+# ArchegosCollapse Rule — Implementation Explanation
 
 ## Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | March 2021 - Archegos Capital Management lost $20B, triggering block trade fire sales |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Archegos collapse simulation with total return swaps, concentrated positions, and prime broker liquidation cascade |
-| **Academic Value** | Understanding march 2021 - archegos capital management lost $20b, triggering block trade fire sales through multi-agent simulation |
+| Item                                   | Description                                                                                                                                   |
+|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| **Variant**                            | Rule (deterministic baseline)                                                                                                                 |
+| **Implements**                         | `../simulation-bases.md`                                                                                                                      |
+| **Decision Logic**                     | Fixed thresholds and formulas — all parameters loaded from config; no LLM calls                                                               |
+| **Key Difference from Other Variants** | Fully deterministic; every decision is a traceable formula with no stochastic LLM component                                                   |
+| **Primary Research Contribution**      | Establish the deterministic baseline: do liquidation cascade rules alone reproduce the self-reinforcing prime broker race and price collapse? |
 
-## Theoretical Foundation
+---
 
-- Total return swap leverage (Becketti, 2021)
-- Concentrated portfolio liquidation
-- Prime broker competition and information asymmetry
+## 1. How Theoretical Design Is Implemented
 
-## Agent Descriptions
+### ConcentratedFund: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4 — ConcentratedFund)*
 
-### ConcentratedFund
-**Theoretical Basis**: Concentrated leveraged portfolio
-**Market Role**: destabilizing
-**Description**: Holds large concentrated positions via total return swaps
-**Parameters**: leverage=5.0, concentration=0.3, swap_positions=8
+| Theoretical Design Element                                            | Implementation                                                                                    |
+|-----------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| TRS Leverage → simulation-bases.md §2 (TRS Leverage Theory)           | Class docstring cites Becketti (2021); `players.py` `ConcentratedFund` class                      |
+| Margin call trigger: `deviation < -leverage_trigger` → sim-bases §4   | `if deviation < margin_threshold:` in `decide()`; `margin_threshold = extras["margin_threshold"]` |
+| Leverage trigger = −0.15 → sim-bases §6                               | `margin_threshold = extras["margin_threshold"]` loaded from `players.yml`                         |
+| Sell `liquidation_fraction × position` → sim-bases §4 (Rule Behavior) | `quantity = position * trs_sell_ratio`; `trs_sell_ratio = extras["trs_sell_ratio"]`               |
+| Position constraint → sim-bases §6                                    | `quantity = min(quantity, max(position, 0.0))` in `decide()`                                      |
+| Cash update on execution → sim-bases §4                               | `self.state.custom_state["cash"] += quantity * price` in `act()`                                  |
 
-### PrimeBroker1
-**Theoretical Basis**: Prime broker liquidation race
-**Market Role**: destabilizing
-**Description**: First to liquidate gains advantage; creates cascade
-**Parameters**: liquidation_speed=fast, information_sharing=limited, threshold=0.1
+### PrimeBroker1: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4 — PrimeBroker1)*
 
-### PrimeBroker2
-**Theoretical Basis**: Prime broker competition
-**Market Role**: destabilizing
-**Description**: Second broker forced to liquidate at worse prices
-**Parameters**: liquidation_speed=moderate, information_sharing=limited, threshold=0.1
+| Theoretical Design Element                                               | Implementation                                                                                          |
+|--------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| First-mover liquidation race → simulation-bases.md §2 (Liquidation Race) | Class docstring cites Gorton & Metrick (2012)                                                           |
+| Lower threshold (acts first): `deviation < -0.10` → sim-bases §4         | `if deviation < liquidation_threshold:` where `liquidation_threshold = extras["liquidation_threshold"]` |
+| Sell `liquidation_sell_ratio × position` → sim-bases §4                  | `quantity = position * liquidation_sell_ratio`; ratio loaded from `extras`                              |
+| Receives full market price (first-mover advantage) → sim-bases §4        | No `price_penalty` applied; `cash += quantity * price` directly in `act()`                              |
 
-### BlockTradeBuyer
-**Theoretical Basis**: Opportunistic block trading
-**Market Role**: stabilizing
-**Description**: Buys large blocks at discount during liquidation
-**Parameters**: discount_threshold=0.1, max_block_size=50000, patience=moderate
+### PrimeBroker2: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4 — PrimeBroker2)*
 
-### InformationTrader
-**Theoretical Basis**: Information-based trading
-**Market Role**: neutral
-**Description**: Detects liquidation activity and trades ahead
-**Parameters**: detection_ability=0.5, front_run_size=1000
+| Theoretical Design Element                                                   | Implementation                                                                       |
+|------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| Second-mover disadvantage → simulation-bases.md §2 (Liquidation Race)        | Class docstring; higher `liquidation_threshold` = 0.15 vs PrimeBroker1's 0.10        |
+| Price penalty: effective_price = market_price × price_penalty → sim-bases §4 | `effective_price = price * price_penalty`; `price_penalty = extras["price_penalty"]` |
+| Cash update at effective price → sim-bases §4                                | `cash += quantity * effective_price` in `act()` (vs PrimeBroker1 using full price)   |
 
+### BlockTradeBuyer: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4 — BlockTradeBuyer)*
 
-## Usage
+| Theoretical Design Element                                                | Implementation                                                                                 |
+|---------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
+| Opportunistic buying at discount → simulation-bases.md §2 (Block Trading) | Class docstring cites Grossman & Miller (1988)                                                 |
+| Buy condition: `deviation < -discount_threshold` → sim-bases §4           | `if deviation < discount_threshold:` where `discount_threshold = extras["discount_threshold"]` |
+| Deploy `buy_ratio × cash` → sim-bases §4                                  | `quantity = (cash * buy_ratio) / price`; `buy_ratio = extras["buy_ratio"]`                     |
+| Cash constraint → sim-bases §6                                            | Quantity naturally bounded by cash; `cash -= quantity * price` in `act()`                      |
 
-### Rule Variant
+### InformationTrader: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4 — InformationTrader)*
+
+| Theoretical Design Element                                                       | Implementation                                                                                    |
+|----------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| Information-based front-running → simulation-bases.md §2 (Kyle, 1985)            | Class docstring; probabilistic detection simulates partial information advantage                  |
+| Detection: `deviation < -detection_threshold` AND `random() < detection_ability` | `if deviation < detection_threshold and random.random() < detection_ability:` in `decide()`       |
+| Front-run size = min(front_run_size, position) → sim-bases §4                    | `sell_qty = min(front_run_size, max(position, 0.0))`; `front_run_size = extras["front_run_size"]` |
+| Cover short when recovery: `deviation > cover_threshold` → sim-bases §4          | `elif deviation > cover_threshold and short_position > 0:` branch in `decide()`                   |
+
+---
+
+## 2. Market Mechanism Implementation
+
+*Formula source: simulation-bases.md §3.1*
+
+```
+P(t+1) = P(t) + λ × D(t) + γ × [F − P(t)] + ε(t)
+```
+
+Implemented in: `players.py → Market.perceive()` (inline computation after order collection)
+
+Code translation:
+
+| sim-bases variable   | Python variable                      | Config path                        | Value |
+|----------------------|--------------------------------------|------------------------------------|-------|
+| `λ` (price_impact)   | `price_impact`                       | `extras["price_impact"]`           | 0.03  |
+| `γ` (mean_reversion) | `mean_reversion`                     | `extras["mean_reversion"]`         | 0.01  |
+| `F` (fundamental)    | `fundamental`                        | `extras["fundamental_value"]`      | 100.0 |
+| `D(t)` (net demand)  | `net_demand = buy_qty − sell_qty`    | computed from incoming orders      | —     |
+| `ε(t)` (noise)       | `noise = random.gauss(0, noise_std)` | `extras["noise_std"]`              | 0.015 |
+| `P(t)` (current)     | `current_price`                      | `self.state.custom_state["price"]` | —     |
+
+Price floor: `new_price = max(new_price, 0.01)` — prevents negative prices during extreme cascades.
+
+Deviation broadcast: `deviation = (new_price − fundamental) / fundamental` — key cascade signal.
+
+Additional mechanisms (simulation-bases.md §3.2):
+- Short selling allowed: `InformationTrader` can hold negative `position` and short `front_run_size` shares
+- PrimeBroker2 price penalty: `effective_price = price * price_penalty` — models second-mover worse execution
+
+Deviations from simulation-bases.md design: None — all formula variables map directly.
+
+---
+
+## 3. Variant-Specific Features
+
+*(Reference: simulation-bases.md §9 — Rule variant entry)*
+
+**Fully deterministic**: All thresholds are loaded from `extras` in `players.yml`. Given the same config and random seed, the same cascade triggers at the same round every time. This makes the Rule variant the calibration baseline for cross-variant comparison.
+
+**Threshold asymmetry implementation**: The key first-mover advantage is encoded as `liquidation_threshold` difference:
+- PrimeBroker1: `extras["liquidation_threshold"]` = −0.10 (acts first)
+- PrimeBroker2: `extras["liquidation_threshold"]` = −0.15 (acts after price has already fallen further)
+
+**No LLM delay**: ConcentratedFund sells immediately when `deviation < margin_threshold` — no hesitation or denial psychology. This creates the fastest, deepest cascade of any variant.
+
+**Detection probability**: `InformationTrader` uses `random.random() < detection_ability` (0.50) — the only stochastic element. This makes the cascade onset round slightly variable even in Rule variant (front-running timing uncertainty).
+
+---
+
+## 4. Architecture Diagram
+
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║                              ROUND N                                  ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  Market.perceive()                                                    ║
+║    ├── Collect orders from all investors (inbounds)                   ║
+║    ├── buy_qty = Σ buy orders; sell_qty = Σ sell orders              ║
+║    ├── net_demand = buy_qty − sell_qty                                ║
+║    ├── P(t+1) = P(t) + 0.03×D + 0.01×(100−P) + N(0, 0.015²)       ║
+║    └── deviation = (P(t+1) − 100) / 100                              ║
+║                                                                       ║
+║  Market.decide() → broadcast {price, prev_price, fundamental,        ║
+║                               deviation, round} to all investors      ║
+║                                                                       ║
+║  ConcentratedFund:  deviation < −0.15? → SELL 50% position           ║
+║  PrimeBroker1:      deviation < −0.10? → SELL 40% position           ║
+║  PrimeBroker2:      deviation < −0.15? → SELL 35% position @ −3%    ║
+║  BlockTradeBuyer:   deviation < −0.10? → BUY 30% of cash / price    ║
+║  InformationTrader: deviation < −0.05 AND rand<0.5? → SELL 1000      ║
+║         │                                                             ║
+║         └──── send orders → Market.perceive() [next round]           ║
+╚══════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## 5. Configuration Reference
+
+Key Configuration Parameters (`configs/ArchegosCollapse/Rule/players.yml`):
+
+| Parameter               | Config Path                    | Value         | Design Justification                                                        |
+|-------------------------|--------------------------------|---------------|-----------------------------------------------------------------------------|
+| `price_impact`          | `extras.price_impact`          | 0.03          | High λ — large liquidation blocks cause significant price impact            |
+| `mean_reversion`        | `extras.mean_reversion`        | 0.01          | Low γ — ensures cascade persists; not immediately corrected                 |
+| `fundamental_value`     | `extras.fundamental_value`     | 100.0         | Stable benchmark; all deviations relative to this                           |
+| `initial_price`         | `extras.initial_price`         | 100.0         | Starts at fair value; cascade driven by liquidation, not initial mispricing |
+| `margin_threshold`      | `extras.margin_threshold`      | −0.15         | Becketti (2021) TRS margin call level; see sim-bases §6                     |
+| `trs_sell_ratio`        | `extras.trs_sell_ratio`        | 0.50          | Archegos post-mortem: 50% position forced liquidation                       |
+| `liquidation_threshold` | `extras.liquidation_threshold` | −0.10 / −0.15 | PrimeBroker1/2 asymmetry captures first-mover timing                        |
+| `price_penalty`         | `extras.price_penalty`         | 0.97          | PrimeBroker2 sells at 3% discount — second-mover disadvantage               |
+| `discount_threshold`    | `extras.discount_threshold`    | −0.10         | Grossman & Miller (1988) block buyer entry level; see sim-bases §6          |
+| `detection_threshold`   | `extras.detection_threshold`   | −0.05         | Kyle (1985) information signal threshold; see sim-bases §6                  |
+
+---
+
+## 6. Running Instructions
+
 ```bash
 python examples/ArchegosCollapse/Rule/run_archegsoscollapse.py \
     -c configs/ArchegosCollapse/Rule/simulation.yml
 ```
 
-### LLM Variant
-```bash
-python examples/ArchegosCollapse/LLM/run_archegsoscollapse_llm.py \
-    -c configs/ArchegosCollapse/LLM/simulation.yml
-```
+Required environment variables: None (Rule variant requires no API keys)
 
-### RuleLLM Variant
-```bash
-python examples/ArchegosCollapse/RuleLLM/run_archegsoscollapse_rulellm.py \
-    -c configs/ArchegosCollapse/RuleLLM/simulation.yml
-```
+Expected runtime: ~10–30 seconds for 100 rounds (pure Python, no LLM calls)
 
-### RAG Variant
-```bash
-python examples/ArchegosCollapse/Rag/run_archegsoscollapse_rag.py \
-    -c configs/ArchegosCollapse/Rag/simulation.yml
-```
+Output location: `EXPERIMENT/ArchegosCollapse/Rule/`
 
-## References
+---
 
-- Total return swap leverage (Becketti, 2021)
-- Concentrated portfolio liquidation
-- Prime broker competition and information asymmetry
+## 7. Expected Behavior Patterns
+
+| Phase         | Rounds | Expected Agent Behavior                                                               | Expected Price Dynamics                            |
+|---------------|--------|---------------------------------------------------------------------------------------|----------------------------------------------------|
+| Pre-Cascade   | 1–10   | All agents hold; InformationTrader may detect early signal at ~5% deviation           | Price near 100; small fluctuations from noise      |
+| Cascade Onset | 10–20  | PrimeBroker1 triggers at −10%; ConcentratedFund at −15%; InformationTrader front-runs | Sharp price drop; deviation crosses −10% then −15% |
+| Peak Cascade  | 20–35  | PrimeBroker2 forced to sell at discounted prices; BlockTradeBuyer activates           | Price trough; max drawdown; deviation −20% to −40% |
+| Recovery      | 35–100 | BlockTradeBuyer absorbs supply; InformationTrader covers short; mean reversion        | Price gradually recovers toward fundamental (100)  |
+
+---
+
+## 8. References
+
+*Do not repeat citations from simulation-bases.md §2. Cross-references only:*
+
+- TRS leverage / ConcentratedFund behavior → `simulation-bases.md §2, §4 — ConcentratedFund`
+- Creditor run / prime broker liquidation race → `simulation-bases.md §2, §4 — PrimeBroker1, PrimeBroker2`
+- Opportunistic block trading / price floor → `simulation-bases.md §2, §4 — BlockTradeBuyer`
+- Information-based front-running → `simulation-bases.md §2, §4 — InformationTrader`
+- Price formula implementation → `simulation-bases.md §3.1`
+- Full parameter table with source citations → `simulation-bases.md §6`

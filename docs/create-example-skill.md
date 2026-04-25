@@ -1,8 +1,734 @@
 # Financial Multi-Agent Simulation Creation Guide
 
+
 ## How to Use This Guide
 
 This document provides a complete 10-step methodology for creating financial market simulations. Each step references specific template files from the AssetBubble implementation. Follow the steps sequentially, using the referenced files as guides for structure and content.
+
+**Read the MANDATORY FILE STRUCTURE section first** — it defines the required directory layout and documentation files every simulation must have before any implementation begins.
+
+---
+
+## MANDATORY FILE STRUCTURE
+
+Every simulation must conform to the following fixed directory and file layout. All listed files are **required** — no simulation is considered complete without them.
+
+### Complete Required Layout
+
+```
+examples/{SimulationName}/
+├── __init__.py                    # Package init (empty or minimal)
+├── simulation-bases.md            # ROOT: Theoretical & design foundation
+├── analysis-bases.md              # ROOT: Analysis methodology foundation
+│
+├── Rule/
+│   ├── __init__.py
+│   ├── players.py
+│   ├── run_{name}.py
+│   ├── analysis.py
+│   ├── explain.md                 # How Rule implements simulation-bases.md
+│   └── analysis.md                # How Rule implements analysis-bases.md
+│
+├── LLM/
+│   ├── __init__.py
+│   ├── players.py
+│   ├── prompts.py
+│   ├── run_{name}_llm.py
+│   ├── analysis.py
+│   ├── explain.md                 # How LLM implements simulation-bases.md
+│   └── analysis.md                # How LLM implements analysis-bases.md
+│
+├── RuleLLM/
+│   ├── __init__.py
+│   ├── players.py
+│   ├── prompts.py
+│   ├── run_{name}_rulellm.py
+│   ├── analysis.py
+│   ├── explain.md                 # How RuleLLM implements simulation-bases.md
+│   └── analysis.md                # How RuleLLM implements analysis-bases.md
+│
+└── Rag/
+    ├── __init__.py
+    ├── players.py
+    ├── prompts.py
+    ├── run_{name}_rag.py
+    ├── analysis.py
+    ├── explain.md                 # How Rag implements simulation-bases.md
+    └── analysis.md                # How Rag implements analysis-bases.md
+```
+
+### File Roles at a Glance
+
+| File                    | Scope               | Purpose                                                                                       |
+|-------------------------|---------------------|-----------------------------------------------------------------------------------------------|
+| `simulation-bases.md`   | Root (all variants) | Single source of truth: phenomenon theory, market design, investor taxonomy, model parameters |
+| `analysis-bases.md`     | Root (all variants) | Single source of truth: analysis dimensions, metrics, expected outcomes, evaluation rationale |
+| `{Variant}/explain.md`  | Per variant         | How this variant concretely implements the design in `simulation-bases.md`                    |
+| `{Variant}/analysis.md` | Per variant         | How this variant concretely executes the analysis defined in `analysis-bases.md`              |
+| `{Variant}/players.py`  | Per variant         | All agent class implementations                                                               |
+| `{Variant}/prompts.py`  | LLM/RuleLLM/Rag     | System and user prompt constants                                                              |
+| `{Variant}/run_*.py`    | Per variant         | Simulation entry point                                                                        |
+| `{Variant}/analysis.py` | Per variant         | Analysis script generating plots and reports                                                  |
+
+### Key Design Principle
+
+```
+simulation-bases.md          analysis-bases.md
+        │                            │
+        │ implements                 │ implements
+        ▼                            ▼
+{Variant}/explain.md        {Variant}/analysis.md
+        │                            │
+        │ documents                  │ documents
+        ▼                            ▼
+{Variant}/players.py        {Variant}/analysis.py
+```
+
+- `simulation-bases.md` and `analysis-bases.md` are written **once** and shared across all four variants.
+- Each variant's `explain.md` and `analysis.md` inherit from the root documents and specify variant-specific implementation details.
+- The code (`players.py`, `analysis.py`) always has a corresponding documentation file (`explain.md`, `analysis.md`) that explains it.
+
+### Variant Construction Principles
+
+Each variant has a distinct construction approach, goal, and set of non-negotiable constraints. Use this table as the primary reference when starting to build or review any variant. The table is designed to be extended: add new rows as new variant types are introduced.
+
+| Variant     | What to Build                                                                                                                                                            | How to Build It                                                                                                                                                                                                                                                    | Goal / Research Purpose                                                                                                                                                                    |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Rule**    | `players.py` (all rule-based agents), `run_*.py`, `analysis.py`, `explain.md`, `analysis.md`                                                                             | Implement each investor as deterministic formulas; all thresholds and parameters loaded from config; no LLM calls anywhere                                                                                                                                         | Establish the deterministic baseline; verify that the target phenomenon emerges purely from mathematical rules and agent interactions                                                      |
+| **LLM**     | `players.py` (Market rule-based + LLM investors), `prompts.py`, `run_*_llm.py`, `analysis.py`, `explain.md`, `analysis.md`                                               | Market is identical to Rule variant; each investor has a system prompt (persona only — no phenomenon name) and a user prompt template; LLM output parsed as `<analysis>` reasoning + `<decision>` JSON                                                             | Test whether LLM agents, guided only by personality and market data, can reproduce realistic investor psychology and emergent phenomena without explicit quantitative rules                |
+| **RuleLLM** | `players.py`, `prompts.py` (PERSONA + DECISION RULES dual-section), `run_*_rulellm.py`, `analysis.py`, `explain.md`, `analysis.md`                                       | Every system prompt has two mandatory sections: **PERSONA** (who the agent is, risk style, emotional traits) and **DECISION RULES** (the exact Rule-variant formulas re-expressed in plain text); LLM may adjust quantities by ±20% but must follow sign and scale | Isolate the effect of language reasoning: with identical quantitative constraints embedded in the prompt, does LLM reasoning alter phenomenon dynamics compared to the pure Rule baseline? |
+| **Rag**     | `players.py` (RAG pipeline added to RuleLLM base), `prompts.py` (PERSONA + DECISION RULES + `{rag_context}`), `run_*_rag.py`, `analysis.py`, `explain.md`, `analysis.md` | Extends RuleLLM: at initialization, each agent builds a personal `KnowledgeStore` from documents; at every decision round, the agent queries the store and injects top-k retrieved chunks into the user prompt as `{rag_context}`                                  | Test the effect of external domain knowledge: does access to retrieved financial literature change decision quality and phenomenon intensity compared to RuleLLM?                          |
+
+---
+
+#### Rule
+
+- **Purpose**: Deterministic baseline implementation — every decision is a formula, every parameter is traceable to a config value and a literature source.
+- **Required components**:
+  - `players.py`: Market class + one class per investor type (all rule-based, no LLM)
+  - `run_{name}.py`: simulation entry point
+  - `analysis.py`: all metrics from `analysis-bases.md §2` implemented as functions
+  - `explain.md`: complete 9-section implementation guide (§2 maps each investor to code, §3 maps price formula to `_clear_market()`)
+  - `analysis.md`: complete 7-section analysis guide (§2 maps each metric to `analysis.py` function)
+- **Core construction rule**: No hardcoded values. Every numeric threshold, position size, or parameter must be read from `extras` in `players.yml`. Every parameter in `players.yml` must have a source citation comment.
+- **Validation criterion**: Run 100 rounds → target phenomenon clearly visible in price chart. Swap parameter values in `players.yml` → behavior changes predictably.
+
+---
+
+#### LLM
+
+- **Purpose**: Replace deterministic agent decision logic with LLM reasoning, keeping the market mechanism identical to Rule, to test behavioral realism of language model investors.
+- **Required components**:
+  - `players.py`: Market class (copy from Rule), one LLM investor class per type
+  - `prompts.py`: one system prompt constant + shared user prompt template per investor type
+  - `run_{name}_llm.py`: simulation entry point
+  - `analysis.py`: same metrics as Rule variant
+  - `explain.md`, `analysis.md`: complete spec docs
+- **Core construction rule**: System prompts define **personality only** — they must not name the phenomenon, mention the price formula, or hint at what market event is occurring. The LLM must discover market dynamics from the user prompt data alone. Output format is always `<analysis>...</analysis><decision>...</decision>` with JSON containing `action`, `bid_price`, `quantity`, `reasoning`.
+- **Validation criterion**: LLM agents produce varied but coherent reasoning traces. Phenomenon still emerges. Behavior differs visibly from Rule variant in at least one measurable metric (e.g., peak bubble ratio, timing, crash depth).
+
+---
+
+#### RuleLLM
+
+- **Purpose**: Hybrid variant that anchors LLM reasoning to explicit quantitative rules, enabling direct comparison of constrained vs. unconstrained LLM behavior vs. pure rule execution.
+- **Required components**:
+  - `players.py`: Market (copy from Rule), one hybrid investor class per type
+  - `prompts.py`: each system prompt has two mandatory labeled sections (`== PERSONA ==` and `== DECISION RULES ==`)
+  - `run_{name}_rulellm.py`, `analysis.py`, `explain.md`, `analysis.md`
+- **Core construction rule**: The DECISION RULES section in every prompt must reproduce the exact formulas from the Rule variant, expressed step-by-step in plain text. The LLM is instructed to follow the rule sign (buy/sell/hold) strictly, with at most ±20% quantity adjustment. Rules must match Rule variant — if Rule parameters change, the embedded prompt rules must be updated.
+- **Validation criterion**: LLM decisions align directionally with Rule-variant decisions in ≥80% of rounds. The ±20% deviation range produces measurable but bounded difference from the Rule baseline.
+
+---
+
+#### Rag
+
+- **Purpose**: Extends RuleLLM with dynamic external knowledge retrieval, to test whether access to domain-specific financial literature changes agent decision quality and phenomenon dynamics.
+- **Required components**:
+  - `players.py`: extends RuleLLM agents with `_initialize_rag()`, `_build_prompt()` (with retrieval), `KnowledgeStore` integration
+  - `prompts.py`: user prompt template includes `{rag_context}` placeholder; system prompts identical to RuleLLM
+  - `run_{name}_rag.py`, `analysis.py`, `explain.md`, `analysis.md`
+  - `players.yml`: each agent has a `rag:` block specifying `docs_dir`/`url_csv`/`docs_save_dir`, `rag_persist_dir`, `embed_model`, `top_k`
+- **Core construction rule**: Knowledge retrieval is per-agent (each agent has its own `KnowledgeStore`, not shared). On first run, the index is built and persisted; subsequent runs load from disk. The `{rag_context}` field in the user prompt is always populated — if no documents are retrieved, inject `"(No relevant knowledge retrieved this round.)"`.
+- **Validation criterion**: RAG index builds successfully on first run and loads from disk on subsequent runs. Retrieved context is visible in agent reasoning traces. At least one measurable metric (e.g., timing of crash, peak deviation) differs from RuleLLM baseline.
+
+---
+
+## ROOT DOCUMENT SPECIFICATIONS
+
+### simulation-bases.md — Theoretical and Design Foundation
+
+This is the **master design document** for the entire simulation. It is written once and serves as the authoritative reference for all four variant implementations.
+
+**Location**: `examples/{SimulationName}/simulation-bases.md`
+
+**Required Sections**:
+
+#### Section 1: Simulation Overview
+
+```
+# {SimulationName} — Simulation Design Basis
+
+## 1. Phenomenon Definition
+
+| Item               | Description                                            |
+|--------------------|--------------------------------------------------------|
+| Phenomenon Name    | [Full name and brief description]                      |
+| Category           | [Type: herding / bubble / crash / manipulation / etc.] |
+| Core Mechanism     | [1-2 sentences on the key dynamic]                     |
+| Real-World Origin  | [Historical event(s) that exemplify this]              |
+| Research Relevance | [Why this phenomenon matters academically]             |
+```
+
+#### Section 2: Theoretical Foundation
+
+For EACH theory underpinning the simulation:
+
+```
+### Theory: [Full Theory Name]
+
+- Citation: [Author, Year, Journal/Book, DOI]
+- Core Insight: [2-3 sentence summary]
+- Mathematical Formulation: [Equation if applicable]
+- Relevance to This Simulation: [How it drives agent behavior or market dynamics]
+- Implementation Notes: [How to operationalize in players.py]
+```
+
+Minimum 2 theories required. Cite academic sources for every claim.
+
+#### Section 3: Market Design Principles
+
+```
+### 3.1 Price Formation Model
+
+Formula:      [Complete equation, e.g. P(t+1) = P(t) + λ·D(t) + γ·[F - P(t)] + ε]
+Variable List:
+  P(t)         — [Definition]
+  D(t)         — [Net demand calculation]
+  F            — [Fundamental value definition]
+  λ (lambda)   — [Price impact; typical range; chosen value; source]
+  γ (gamma)    — [Mean reversion; typical range; chosen value; source]
+  ε (epsilon)  — [Noise term; distribution; parameters; rationale]
+
+Economic Rationale: [Why each term is included and how it produces the phenomenon]
+Dynamic Properties:
+  - When D(t) > 0: [What happens]
+  - When P >> F:   [What happens]
+  - Noise effect:  [What it represents]
+
+### 3.2 Additional Market Mechanisms
+
+[For each mechanism: name, trigger condition, action taken, economic rationale]
+  Examples: circuit breakers, short-selling constraints, margin calls, price floors/ceilings
+
+### 3.3 Information Broadcast Design
+
+Each round, the Market sends to all investors:
+  - [Field 1]: [Description and rationale for inclusion]
+  - [Field 2]: ...
+  - [Derived metrics]: [E.g., bubble_ratio = P/F; price_change_pct; volume]
+```
+
+#### Section 4: Investor Taxonomy
+
+For EACH investor type (4–6 types required):
+
+```
+### Investor: [ClassName]
+
+| Attribute         | Description                                          |
+|-------------------|------------------------------------------------------|
+| Role Name         | [Descriptive name]                                   |
+| Market Role       | [Stabilizing / Destabilizing / Neutral / Amplifying] |
+| Theoretical Basis | [Theory name + citation]                             |
+| Time Horizon      | [High-frequency / Day trader / Long-term]            |
+| Risk Tolerance    | [Low / Medium / High / Extreme]                      |
+| Information Used  | [Which fields from Market broadcast]                 |
+
+Rule-Based Behavior:
+  - Buy condition:  [Precise condition with formula if applicable]
+  - Sell condition: [Precise condition]
+  - Hold condition: [Default]
+  - Position sizing: [Formula, constraints, bounds]
+
+LLM Persona:
+  - Core Belief:   [One sentence guiding all decisions]
+  - Psychological Profile: [2-3 sentences on mindset, biases, tendencies]
+  - Decision Framework: [Ordered steps]
+  - Signal Interpretation: [How they read rising/falling/stable prices]
+  - Position Size Range: [Aggressive / Moderate / Conservative shares]
+
+RuleLLM Hybrid Notes:
+  - Embedded quantitative rules to include in prompt
+  - When to override rules with judgment
+
+Expected Market Impact: [How this investor affects price dynamics]
+```
+
+#### Section 5: Agent Diversity Verification
+
+```
+Diversity Check:
+  Different time horizons:     [Yes — examples]
+  Different information sets:  [Yes — examples]
+  Conflicting incentives:      [Yes — examples]
+  Mix of stabilizing/destabilizing: [Counts and names]
+  Different risk tolerances:   [Yes — range from Low to Extreme]
+```
+
+#### Section 6: Parameter Table
+
+| Parameter | Value | Source Citation | Description | Sensitivity                             |
+|-----------|-------|-----------------|-------------|-----------------------------------------|
+| [name]    | [val] | [Author, Year]  | [Purpose]   | [High/Med/Low — what changes if varied] |
+
+All numeric parameter values must have a source citation. Document sensitivity.
+
+#### Section 7: Communication and Round Structure
+
+```
+Round N:
+  1. Market broadcasts state to all investors
+     Payload: {field1, field2, ...}
+  2. Each investor:
+     a. perceive() — extract and store market data
+     b. decide()   — apply strategy (rule / LLM call)
+     c. act()      — send order to Market
+  3. Market:
+     a. perceive() — collect all orders
+     b. decide()   — apply price formula
+     c. act()      — broadcast new state
+  4. Logging and state persistence
+```
+
+#### Section 8: Historical Case Studies
+
+For EACH real-world event referenced:
+
+```
+Event: [Name]
+Date:  [Period]
+Market: [Asset class / exchange]
+Trigger: [What started it]
+Key Dynamics: [Timeline of key events]
+Quantitative Data: [Price peak, trough, % change, duration]
+Agents Modeled After: [Which investor type maps to which real participant]
+Lesson for Simulation: [What to preserve in the model]
+```
+
+#### Section 9: Variant Comparison Preview
+
+| Aspect                   | Rule                 | LLM              | RuleLLM              | Rag               |
+|--------------------------|----------------------|------------------|----------------------|-------------------|
+| Decision Logic           | Fixed formulas       | Prompt + LLM     | Formula-anchored LLM | RAG-augmented LLM |
+| Determinism              | Deterministic        | Stochastic       | Semi-deterministic   | Stochastic        |
+| Expected Bubble Strength | [Calibration target] | [Expected range] | [Expected range]     | [Expected range]  |
+| Research Question        | [Rule-specific]      | [LLM-specific]   | [Hybrid-specific]    | [RAG-specific]    |
+
+---
+
+### analysis-bases.md — Analysis Methodology Foundation
+
+This is the **master analysis document** for the entire simulation. It defines all analysis dimensions, metrics, and evaluation frameworks used across all four variants.
+
+**Location**: `examples/{SimulationName}/analysis-bases.md`
+
+**Required Sections**:
+
+#### Section 1: Analysis Objectives
+
+```
+# {SimulationName} — Analysis Methodology Basis
+
+## 1. Analysis Objectives
+
+| Objective | Research Question | Metric(s)      | Expected Finding  |
+|-----------|-------------------|----------------|-------------------|
+| [O1]      | [Question]        | [How measured] | [From literature] |
+| [O2]      | ...               | ...            | ...               |
+```
+
+Minimum 3 analysis objectives. Each must map to at least one concrete metric.
+
+#### Section 2: Core Metrics Catalogue
+
+For EACH metric:
+
+```
+### Metric: [Metric Name]
+
+- Category:    [Price Dynamics / Volatility / Behavioral / Portfolio / Phenomenon-Specific]
+- Definition:  [Precise mathematical definition]
+- Formula:     [Equation]
+- Interpretation:
+    - Value = 0:      [What it means]
+    - Value > threshold: [What it indicates]
+    - Value < threshold: [What it indicates]
+- Academic Basis: [Citation or established standard]
+- Normal Range:   [Typical values from literature for this phenomenon]
+- Red Flag:       [Value that indicates calibration problem]
+```
+
+Minimum metrics required:
+- Price deviation from fundamental  (primary phenomenon metric)
+- Phenomenon intensity measure      (e.g., bubble ratio, crash depth, herding index)
+- Volatility metric                  (rolling std of returns or similar)
+- Portfolio/wealth metric            (agent performance, Sharpe or cumulative return)
+- Volume or activity metric          (trading intensity proxy)
+- At least one phenomenon-specific metric unique to this simulation
+
+#### Section 3: Analysis Dimensions
+
+Define the distinct analysis perspectives for this simulation:
+
+```
+### Dimension 1: [Name, e.g., Price Dynamics Analysis]
+
+Purpose: [What question this dimension answers]
+Metrics Used: [List from Section 2]
+Visualization: [What plot type; x-axis; y-axis; overlays]
+Expected Pattern: [What the chart should show if simulation works correctly]
+Comparison Baseline: [Historical data / theoretical prediction / other variant]
+
+### Dimension 2: [Name, e.g., Investor Behavior Analysis]
+...
+
+### Dimension 3: [Name, e.g., Phenomenon Emergence Verification]
+...
+```
+
+Minimum 3 analysis dimensions. Typical simulations cover:
+- Price dynamics (phenomenon emergence)
+- Agent/investor behavior and portfolio performance
+- Phenomenon intensity and lifecycle (phases: onset → peak → resolution)
+- Cross-variant comparison
+
+#### Section 4: Phase Analysis Framework
+
+Define the phases of the phenomenon and how to detect them:
+
+```
+Phase Detection Rules:
+
+| Phase | Name              | Entry Condition    | Exit Condition     | Key Indicators    |
+|-------|-------------------|--------------------|--------------------|-------------------|
+| 1     | [e.g. Onset]      | [Metric threshold] | [Metric threshold] | [What to observe] |
+| 2     | [e.g. Escalation] | ...                | ...                | ...               |
+| 3     | [e.g. Peak]       | ...                | ...                | ...               |
+| 4     | [e.g. Resolution] | ...                | ...                | ...               |
+```
+
+#### Section 5: Cross-Variant Comparison Framework
+
+```
+Comparison Protocol:
+
+1. Normalize: [How to make metrics comparable across variants]
+2. Statistical test: [What test to use; significance level]
+3. Key comparison axes:
+   - Phenomenon emergence speed  (Rule vs LLM vs RuleLLM vs Rag)
+   - Phenomenon intensity         (Peak metric value across variants)
+   - Behavioral realism           (Qualitative assessment criteria)
+   - Decision quality             (Portfolio outcomes)
+4. Reporting format: [Table structure for comparison results]
+```
+
+#### Section 6: Expected Results and Validation
+
+```
+Expected Stylized Facts (from literature):
+  - [Fact 1]: [Source citation] — How to verify in simulation
+  - [Fact 2]: ...
+  - [Fact 3]: ...
+
+Calibration Targets:
+  - Metric A should be in range [X, Y]: [Source]
+  - Metric B should be in range [X, Y]: [Source]
+
+Validation Failure Signs:
+  - [Sign 1]: [Diagnosis] → [Corrective action]
+  - [Sign 2]: ...
+```
+
+#### Section 7: Visualization Catalogue
+
+| Plot Name | Type                         | X-axis  | Y-axis  | Overlays         | Purpose           |
+|-----------|------------------------------|---------|---------|------------------|-------------------|
+| [Name]    | [Line/Bar/Scatter/Histogram] | [Field] | [Field] | [Optional lines] | [What it reveals] |
+
+Minimum required plots:
+- Price vs. Fundamental over time
+- Phenomenon intensity metric over time
+- Investor/portfolio performance comparison
+- Phase detection overlay on price chart
+- Cross-variant comparison summary
+
+---
+
+## VARIANT DOCUMENT SPECIFICATIONS
+
+### {Variant}/explain.md — Variant Implementation Guide
+
+This file documents **how the specific variant concretely implements** the theoretical design in `simulation-bases.md`. It is written per variant and must directly trace every design element to its implementation.
+
+> **CROSS-REFERENCE PRINCIPLE**: `explain.md` must NOT duplicate content from `simulation-bases.md`.
+> Instead, **cite the exact section** of `simulation-bases.md` that defines each theoretical element,
+> then explain only how this variant implements it. This keeps `simulation-bases.md` as the
+> single authoritative source, and ensures the implementation stays consistent with the design.
+>
+> Pattern: `"[Implementation detail] — implements simulation-bases.md §N.M"`
+
+**Required Sections**:
+
+#### Section 1: Variant Overview
+
+```
+# {SimulationName} {Variant} — Implementation Explanation
+
+## Overview
+
+| Item                               | Description                                                 |
+|------------------------------------|-------------------------------------------------------------|
+| Variant                            | [Rule / LLM / RuleLLM / Rag]                                |
+| Implements                         | `../simulation-bases.md`                                    |
+| Decision Logic                     | [Fixed formulas / LLM prompts / Hybrid / RAG-augmented LLM] |
+| Key Difference from Other Variants | [1-2 sentences]                                             |
+| Primary Research Contribution      | [What unique insight this variant enables]                  |
+```
+
+#### Section 2: How Theoretical Design Is Implemented
+
+For EACH investor type from `simulation-bases.md §4`:
+
+> **Do NOT re-state the theory here.** Instead, write
+> `"Theory defined in simulation-bases.md §4 — [ClassName]"` and then
+> immediately specify the implementation detail (method name, formula, config path).
+> The goal is: reader looks up `simulation-bases.md §4` to understand the theory,
+> then comes here to see exactly how that theory is encoded in code.
+
+```
+### {ClassName}: Theory → Implementation Mapping
+                   (Theory defined in simulation-bases.md §4)
+
+| Theoretical Design Element                             | Implementation                                     |
+|--------------------------------------------------------|----------------------------------------------------|
+| Theoretical basis → simulation-bases.md §4.{N}         | [Class docstring reference; file line range]       |
+| Rule-based behavior (buy/sell/hold) → sim-bases §4.{N} | [Method name; formula in code; parameter source]   |
+| LLM persona → simulation-bases.md §4.{N} LLM Persona   | [Prompt constant name; which section of prompt]    |
+| Parameter values → simulation-bases.md §6              | [Where loaded from config; default value]          |
+| Market impact mechanism → simulation-bases.md §4.{N}   | [How the code produces the expected market impact] |
+```
+
+#### Section 3: Market Mechanism Implementation
+
+> **Do NOT re-derive the formula here.** The formula, its variables, and economic rationale
+> are fully defined in `simulation-bases.md §3.1`. Here, only document how it is
+> **translated into code**: variable names, config paths, and any implementation approximations.
+
+```
+### Price Formula Implementation
+
+Formula source: simulation-bases.md §3.1
+  P(t+1) = [copy equation from §3.1 — do not re-explain it]
+
+Implemented in: players.py → Market._clear_market()
+Code translation:
+  [sim-bases variable] → [Python variable name] → [config path in players.yml]
+  λ (lambda)           → price_impact           → extras.price_impact
+  γ (gamma)            → mean_reversion          → extras.mean_reversion
+  F (fundamental)      → self._fundamental       → extras.fundamental_value
+  ...
+
+Additional mechanisms: simulation-bases.md §3.2
+  [mechanism name] → [implementing method in players.py] → [config parameter]
+
+Deviations from simulation-bases.md design: [None / List any approximations made]
+```
+
+#### Section 4: Variant-Specific Features
+
+Document what is **unique** to this variant versus others. For each feature, cite the
+`simulation-bases.md §9` (Variant Comparison Preview) entry that motivated this choice:
+
+- **Rule**: Document the specific formulas, thresholds, and algorithmic decision logic
+  — cite simulation-bases.md §4 for each investor's rule-based behavior spec
+- **LLM**: Document prompt design choices — what personality cues trigger what behaviors;
+  expected LLM response patterns; how JSON parsing works
+  — cite simulation-bases.md §4 LLM Persona for each investor's prompt design
+- **RuleLLM**: Document which rules are embedded in prompts; how rule-judgment balance is handled
+  — cite simulation-bases.md §4 RuleLLM Hybrid Notes for each investor
+- **Rag**: Document the knowledge base content design; retrieval query strategy; how retrieved
+  context modifies decisions — cite simulation-bases.md §8 (Historical Case Studies) as the
+  source for knowledge base content choices
+
+#### Section 5: Architecture Diagram
+
+ASCII diagram showing:
+- Agent types and their roles
+- Message flow between Market and investors
+- For LLM variants: LLM API call flow
+- For Rag variant: Knowledge retrieval flow
+
+#### Section 6: Configuration Reference
+
+```
+Key Configuration Parameters (configs/{SimulationName}/{Variant}/players.yml):
+
+| Parameter | Config Path   | Value   | Design Justification                   |
+|-----------|---------------|---------|----------------------------------------|
+| [name]    | extras.[name] | [value] | [Why this value implements the design] |
+```
+
+#### Section 7: Running Instructions
+
+```
+Execution:
+  python examples/{SimulationName}/{Variant}/run_{name}[_suffix].py \
+      -c configs/{SimulationName}/{Variant}/simulation.yml
+
+Required environment variables:
+  [VAR_NAME]: [What it is; where to obtain]
+
+Expected runtime: [Estimate for 200 rounds]
+Output location:  EXPERIMENT/{SimulationName}/{Variant}/
+```
+
+#### Section 8: Expected Behavior Patterns
+
+```
+| Phase        | Rounds  | Expected Agent Behavior | Expected Price Dynamics |
+|--------------|---------|-------------------------|-------------------------|
+| [Phase name] | [Range] | [Agent decisions]       | [Price movement]        |
+```
+
+#### Section 9: References
+
+Do **NOT** repeat full citations already listed in `simulation-bases.md §2`. Instead:
+- List only references that are **new to this variant** (not in `simulation-bases.md`)
+- For all shared references, write: `"See simulation-bases.md §2 — [Theory Name]"`
+- Cross-reference every cited item to the `simulation-bases.md` section where it is
+  discussed in depth, e.g.: `"Greater Fool Theory → simulation-bases.md §2, §4 — MomentumSpeculator"`
+
+---
+
+### {Variant}/analysis.md — Variant Analysis Guide
+
+This file documents **how the specific variant concretely executes** the analysis methodology defined in `analysis-bases.md`. It traces analysis objectives to specific implementation details in `analysis.py`.
+
+**Required Sections**:
+
+#### Section 1: Analysis Overview
+
+```
+# {SimulationName} {Variant} — Analysis Documentation
+
+## Overview
+
+| Item                            | Description                                       |
+|---------------------------------|---------------------------------------------------|
+| Implements                      | `../analysis-bases.md`                            |
+| Analysis Script                 | `analysis.py` in this directory                   |
+| Output Location                 | `EXPERIMENT/{SimulationName}/{Variant}/analysis/` |
+| Variant-Specific Considerations | [Key differences from other variants]             |
+```
+
+#### Section 2: Metric Implementation
+
+For EACH metric from `analysis-bases.md §2`:
+
+```
+### Metric: [Name]
+
+- Defined in: `analysis-bases.md §2`
+- Implemented in: `analysis.py → [function_name]()`
+- Data source: `EXPERIMENT/{Sim}/{Variant}/records/[file_pattern]`
+- Variant-specific notes: [Any differences in how this metric behaves for this variant]
+  (e.g., "LLM variant shows higher variance due to stochastic LLM decisions")
+- Expected range for this variant: [Min, Max based on calibration]
+```
+
+#### Section 3: Dimension-by-Dimension Analysis
+
+For EACH dimension from `analysis-bases.md §3`:
+
+```
+### Dimension [N]: [Name]
+
+Objective (from analysis-bases.md): [Copy objective statement]
+
+Implementation in analysis.py:
+  - Function: [function_name]()
+  - Input data: [files loaded]
+  - Computation: [brief description of steps]
+  - Output: [plot file name; report section]
+
+Variant-Specific Interpretation:
+  [How to interpret this dimension's results for this specific variant]
+  [What patterns are expected that differ from other variants]
+  [What constitutes a successful result for this variant]
+
+Expected Output Sample:
+  [Text description or ASCII sketch of expected chart/table]
+```
+
+#### Section 4: Variant-Specific Observable Phenomena
+
+Document phenomena that are **unique to this variant** and not present in others:
+
+```
+| Phenomenon | Description  | How to Observe         | Contrast with Rule-Based |
+|------------|--------------|------------------------|--------------------------|
+| [Name]     | [What it is] | [Which metric / chart] | [What differs]           |
+```
+
+Examples by variant type:
+- **Rule**: Exact formula-driven thresholds; deterministic phase transitions
+- **LLM**: Reasoning variability; emergent caution after observed crashes; narrative framing effects
+- **RuleLLM**: Rule override events; when LLM judgment departs from formula recommendation
+- **Rag**: Effect of knowledge retrieval; how historical context modifies decisions vs. no-RAG baseline
+
+#### Section 5: Scaling and Sensitivity Analysis
+
+```
+### Round Scaling
+
+| Total Rounds | Expected Observable | Phenomenon Clarity |
+|--------------|--------------------|--------------------|[...]
+
+### Agent Count Scaling
+
+| Agent Count | Expected Observable | Market Dynamics |
+|-------------|---------------------|-----------------|
+[...]
+
+### Parameter Sensitivity
+
+| Parameter | Change | Expected Effect on Analysis |
+|-----------|--------|-----------------------------|
+[...]
+```
+
+#### Section 6: Output Files Reference
+
+```
+All outputs written to: EXPERIMENT/{SimulationName}/{Variant}/analysis/
+
+| Output File | Generated By | Contents       | Interpretation   |
+|-------------|--------------|----------------|------------------|
+| [filename]  | [function()] | [what's in it] | [how to read it] |
+```
+
+#### Section 7: Cross-Variant Comparison Notes
+
+For each cross-variant comparison from `analysis-bases.md §5`:
+
+```
+This variant's expected position in cross-variant comparison:
+- Phenomenon emergence speed:  [Faster / Same / Slower than other variants; reason]
+- Phenomenon intensity:        [Higher / Same / Lower; reason]
+- Behavioral realism:          [Assessment; what makes this variant more/less realistic]
+- Decision quality:            [Portfolio performance expectation vs. other variants]
+```
 
 ---
 
@@ -668,18 +1394,22 @@ Market Agent Implementation
 
 Module Docstring:
 - Phenomenon description
-- Theoretical foundation (cite papers)
-- Key dynamics
-- Parameter configuration note
+- Theoretical foundation: cite theories WITH simulation-bases.md section numbers
+  e.g. "Implements price formation model from simulation-bases.md §3.1"
+       "Agent taxonomy defined in simulation-bases.md §4"
+- Key dynamics summary (brief — full detail in simulation-bases.md §3.1)
+- Note: "See simulation-bases.md for complete theoretical foundation"
 
 Class: Market
 -------------
 
 Docstring:
 - Purpose
-- Price formula with all terms
-- Parameter descriptions
-- Dynamic properties
+- Price formula: copy the equation from simulation-bases.md §3.1 (one line),
+  then write "Full derivation and rationale: simulation-bases.md §3.1"
+- Parameter list: for each parameter, write
+  "[param_name]: [brief description] — see simulation-bases.md §6 for source and calibration"
+- Dynamic properties (1-line each — full economic rationale in simulation-bases.md §3.1)
 
 Methods to implement:
 
@@ -702,9 +1432,9 @@ Methods to implement:
 
 4. _clear_market()
    - Calculate net demand
-   - Apply price impact
-   - Apply mean reversion
-   - Add noise
+   - Apply price impact           # λ term from simulation-bases.md §3.1
+   - Apply mean reversion         # γ term from simulation-bases.md §3.1
+   - Add noise                    # ε term from simulation-bases.md §3.1
    - Update fundamental
    - Return market result
 
@@ -718,7 +1448,7 @@ Methods to implement:
    - Use appropriate log level
 
 7. step()
-   - Broadcast market state
+   - Broadcast market state (fields defined in simulation-bases.md §3.3)
    - Include all relevant metrics
    - Return Action with outbounds
 ```
@@ -734,10 +1464,12 @@ Investor Agent Implementation
 =============================
 
 Class Docstring:
-- Investor description
-- Theoretical basis (cite paper)
-- Strategy summary
-- Parameters from config
+- Investor description (1-2 sentences — keep brief)
+- Cross-reference: "Theoretical basis: simulation-bases.md §4 — [ClassName] / [Theory Name]"
+- Cross-reference: "Strategy specification: simulation-bases.md §4 — Rule-Based Behavior"
+- Cross-reference: "Parameters: simulation-bases.md §6"
+- Do NOT re-state the full theory or parameter rationale here;
+  write "See simulation-bases.md §4 for full investor design specification"
 
 Methods to implement:
 
@@ -747,8 +1479,8 @@ Methods to implement:
    - Store in custom_state
 
 2. _initialize_investor_state()
-   - Load wealth parameters
-   - Load strategy parameters
+   - Load wealth parameters  (values from simulation-bases.md §6)
+   - Load strategy parameters (values from simulation-bases.md §6)
    - Set up history buffers
 
 3. step()
@@ -759,9 +1491,9 @@ Methods to implement:
    - Send order message
 
 4. _make_decision()
-   - Implement strategy logic
-   - Check all conditions
-   - Calculate position size
+   - Implement strategy logic (from simulation-bases.md §4 — Rule-Based Behavior)
+   - Check all conditions (thresholds from simulation-bases.md §6)
+   - Calculate position size (formula from simulation-bases.md §4)
    - Respect constraints
    - Return decision dict
 ```
@@ -1307,94 +2039,91 @@ Analysis Script Components
 
 ## STEP 8: Create Documentation
 
-### 8.1 explain.md Structure
+> **All documentation follows the MANDATORY FILE STRUCTURE defined at the top of this guide.**
+> Write `simulation-bases.md` and `analysis-bases.md` once at the root level,
+> then write `explain.md` and `analysis.md` per variant.
 
-**Reference**: Use `examples/AssetBubble/Rule/explain.md` as template.
+### 8.1 Root Documents (Written Once)
 
-Required sections:
+#### 8.1.1 simulation-bases.md
+
+**Location**: `examples/{SimulationName}/simulation-bases.md`
+
+Follow the specification in **ROOT DOCUMENT SPECIFICATIONS → simulation-bases.md** above.
+
+Key writing guidance:
+- Write this **before** any code. The design in this document drives all implementations.
+- Every investor type defined here must have a corresponding class in all four `players.py` files.
+- Every parameter value must have a source citation.
+- Sections 3 (Market Design) and 4 (Investor Taxonomy) are the most critical — spend the most time here.
+- Section 9 (Variant Comparison Preview) should be revisited and updated after all variants are implemented.
+
+**Reference**: See `examples/AssetBubble/LLM/explain.md` for the style of theory-to-implementation mapping.
+
+#### 8.1.2 analysis-bases.md
+
+**Location**: `examples/{SimulationName}/analysis-bases.md`
+
+Follow the specification in **ROOT DOCUMENT SPECIFICATIONS → analysis-bases.md** above.
+
+Key writing guidance:
+- Write this alongside `simulation-bases.md`, before implementing `analysis.py`.
+- Every metric in Section 2 must be implemented in every variant's `analysis.py`.
+- Section 6 (Expected Results) should cite specific values from literature — these serve as calibration targets.
+- At minimum include: price deviation, phenomenon intensity, volatility, portfolio metrics, volume, and one phenomenon-specific metric.
+
+**Reference**: See `examples/AssetBubble/LLM/analysis.md` for style reference.
+
+### 8.2 Per-Variant Documents (Written Four Times)
+
+#### 8.2.1 {Variant}/explain.md
+
+**Location**: `examples/{SimulationName}/{Variant}/explain.md` (Rule, LLM, RuleLLM, Rag)
+
+Follow the specification in **VARIANT DOCUMENT SPECIFICATIONS → {Variant}/explain.md** above.
+
+Key writing guidance:
+- Write this **immediately after implementing** the variant's `players.py` — it documents implementation decisions while they are fresh.
+- **NEVER duplicate `simulation-bases.md` content.** Every piece of theory, parameter rationale, and economic reasoning belongs in `simulation-bases.md`. This file only records *how the code maps to that design*.
+- **Always cite exact sections**: use the form `"simulation-bases.md §N.M"` whenever pointing to a theory, parameter, investor spec, or historical event. The reader will go to `simulation-bases.md` for depth; they come here only for implementation tracing.
+- Section 2 (Theory → Implementation Mapping) is the most important: every theoretical design element must trace to a specific code location using `simulation-bases.md §` references.
+- Section 3 (Market Mechanism): copy the formula equation from `simulation-bases.md §3.1`, then map each symbol to its Python variable and config path. Do not re-explain the formula.
+- Section 4 (Variant-Specific Features): cite `simulation-bases.md §9` to justify why this variant's choices differ from others.
+- The Architecture Diagram must accurately reflect actual message flow, not just conceptual design.
+- For LLM variants: cite `simulation-bases.md §4 LLM Persona` for each investor's prompt source.
+- For Rag variant: cite `simulation-bases.md §8` as the source of knowledge base content.
+
+**Reference**: `examples/AssetBubble/LLM/explain.md` demonstrates the complete structure.
+
+#### 8.2.2 {Variant}/analysis.md
+
+**Location**: `examples/{SimulationName}/{Variant}/analysis.md` (Rule, LLM, RuleLLM, Rag)
+
+Follow the specification in **VARIANT DOCUMENT SPECIFICATIONS → {Variant}/analysis.md** above.
+
+Key writing guidance:
+- Write this **after implementing** the variant's `analysis.py` — document what the script actually does.
+- For every analysis dimension, specify the exact function in `analysis.py` that implements it.
+- Section 4 (Variant-Specific Observable Phenomena) is critical: what unique behaviors can only be observed in this variant?
+- LLM variant `analysis.md` must document reasoning variability and how to analyze LLM decision quality.
+- Rag variant `analysis.md` must document how retrieval quality affects outcomes.
+
+**Reference**: `examples/AssetBubble/LLM/analysis.md` demonstrates the structure.
+
+### 8.3 Documentation Completion Order
 
 ```
-explain.md Structure
-====================
+Recommended writing order:
 
-1. Header with Title
-
-2. Overview Table
-   | Item | Description |
-   | Phenomenon | [Name and brief] |
-   | Model | [Rule/LLM/Hybrid] |
-   | Key Feature | [Unique aspect] |
-   | Academic Value | [Research contribution] |
-
-3. Theoretical Foundation
-   - Primary theory with citation
-   - Mathematical model
-   - Key insight
-   - Supporting theories
-
-4. Architecture Diagram
-   - ASCII art showing agents
-   - Message flow
-   - Information structure
-
-5. Agent Descriptions
-   - Market: mechanism, parameters
-   - For each investor:
-     * Theoretical basis
-     * Behavior description
-     * Parameters
-     * Expected impact
-
-6. Variant Comparison
-   - Table comparing Rule/LLM/RuleLLM/RAG
-   - When to use each
-   - Expected differences
-
-7. Usage Instructions
-   - Command to run each variant
-   - Environment variables needed
-   - Expected runtime
-   - Output locations
-
-8. Expected Results
-   - Stylized facts to observe
-   - Typical metric ranges
-   - Interpretation guidance
-
-9. References
-   - Complete academic citations
-   - Related work
-```
-
-### 8.2 analysis.md Structure
-
-**Reference**: Use `examples/AssetBubble/Rule/analysis.md` as template.
-
-Required sections:
-
-```
-analysis.md Structure
-=====================
-
-1. Metrics Guide
-   - Definition of each metric
-   - How to calculate
-   - Interpretation of values
-
-2. Visualization Guide
-   - What each plot shows
-   - How to read patterns
-   - Red flags to watch for
-
-3. Comparative Framework
-   - How to compare variants
-   - Statistical approaches
-   - Reporting standards
-
-4. Troubleshooting
-   - Common issues in results
-   - How to diagnose
-   - Parameter adjustments
+1. simulation-bases.md          ← Design first (before any code)
+2. analysis-bases.md            ← Plan analysis alongside design
+3. Rule/players.py              ← Implement first variant
+4. Rule/explain.md              ← Document immediately after
+5. Rule/analysis.py             ← Implement analysis
+6. Rule/analysis.md             ← Document immediately after
+7. (Repeat steps 3-6 for LLM, RuleLLM, Rag)
+8. Update simulation-bases.md   ← Revise Section 9 with real variant comparison
+   Section 9 Variant Preview
 ```
 
 ---
@@ -1480,6 +2209,18 @@ Debugging Workflow
 
 ### 10.1 Completeness Checklist
 
+**Root Documentation**
+- [ ] `simulation-bases.md` exists at `examples/{SimulationName}/simulation-bases.md`
+- [ ] `simulation-bases.md` contains all 9 required sections
+- [ ] Every investor type in Section 4 has a corresponding class in all four `players.py` files
+- [ ] Every parameter in Section 6 has a source citation
+- [ ] Section 9 (Variant Comparison Preview) updated after all variants complete
+- [ ] `analysis-bases.md` exists at `examples/{SimulationName}/analysis-bases.md`
+- [ ] `analysis-bases.md` contains all 7 required sections
+- [ ] At least 6 metrics defined in Section 2 (including all minimum required metrics)
+- [ ] At least 3 analysis dimensions defined in Section 3
+- [ ] Section 6 (Expected Results) has calibration targets with source citations
+
 **Code**
 - [ ] Rule/ players.py implements all agents
 - [ ] Rule/ run script works
@@ -1494,6 +2235,19 @@ Debugging Workflow
 - [ ] Rag/ prompts.py uses `<analysis>` tag in output format
 - [ ] All __init__.py files present
 
+**Per-Variant Documentation (verify for Rule, LLM, RuleLLM, Rag)**
+- [ ] `{Variant}/explain.md` exists
+- [ ] `explain.md` Section 2: every investor type mapped to code location
+- [ ] `explain.md` Section 3: price formula implementation documented
+- [ ] `explain.md` Section 4: variant-specific features documented
+- [ ] `explain.md` Section 5: Architecture Diagram present and accurate
+- [ ] `explain.md` Section 7: Running Instructions complete
+- [ ] `{Variant}/analysis.md` exists
+- [ ] `analysis.md` Section 2: every metric from `analysis-bases.md` mapped to `analysis.py` function
+- [ ] `analysis.md` Section 3: all analysis dimensions implemented
+- [ ] `analysis.md` Section 4: variant-specific observable phenomena documented
+- [ ] `analysis.md` Section 6: all output files listed
+
 **Configuration**
 - [ ] All simulation.yml files valid
 - [ ] All players.yml files valid
@@ -1501,14 +2255,6 @@ Debugging Workflow
 - [ ] All persona.yml files valid
 - [ ] Paths correct in all files
 - [ ] Parameters documented
-
-**Documentation**
-- [ ] Rule/explain.md complete
-- [ ] Rule/analysis.md complete
-- [ ] LLM/explain.md complete
-- [ ] LLM/analysis.md complete
-- [ ] All citations included
-- [ ] Usage examples provided
 
 **Integration**
 - [ ] SCENARIO_PATH_MAP updated

@@ -3,12 +3,17 @@
 Phenomenon: Asset Bubbles
     Asset prices severely and persistently deviate from fundamental value,
     driven by speculative momentum and limited arbitrage forces.
+    → simulation-bases.md §1
 
 Theoretical Foundation:
     - Greater Fool Theory: Buy expensive expecting to sell higher
+      → simulation-bases.md §2.1
     - Limits to Arbitrage (Shleifer & Vishny, 1997)
+      → simulation-bases.md §2.2
     - Noise Trader Risk (De Long et al., 1990)
+      → simulation-bases.md §2.3
     - Synchronization Risk (Abreu & Brunnermeier, 2003)
+      → simulation-bases.md §2.4
 
 Key Dynamics:
     1. Initial positive shock → Price rises above fundamental
@@ -16,8 +21,10 @@ Key Dynamics:
     3. Arbitrageurs attempt to short → But face constraints
     4. Noise traders follow the crowd → Amplify bubble
     5. Eventually bubble bursts when speculators run out
+    → simulation-bases.md §3
 
 All parameters are configured via players.yml config file.
+    → simulation-bases.md §6
 """
 
 import logging
@@ -41,24 +48,27 @@ logger = logging.getLogger("AssetBubble")
 class Market(GeneralPlayer):
     """
     Central market with price dynamics favorable to bubble formation.
+    → simulation-bases.md §3
 
     Price Model:
         P(t+1) = P(t) + λ × NetDemand + γ × [F - P(t)] + ε
+        → simulation-bases.md §3.1
 
     Where:
-        - λ: High price impact (amplifies demand effects)
-        - γ: Low mean reversion (slow correction to fundamentals)
-        - F: Fundamental value (grows slowly)
+        - λ: High price impact (amplifies demand effects)    → simulation-bases.md §6
+        - γ: Low mean reversion (slow correction to fundamentals)  → simulation-bases.md §6
+        - F: Fundamental value (grows slowly)               → simulation-bases.md §3.2
 
     The key to bubble formation:
         - High λ: Small excess demand causes big price moves
         - Low γ: Price doesn't quickly return to fundamental
         - This creates positive feedback loop
+        → simulation-bases.md §3.3
 
     All parameters configured via extras in players.yml:
-        - fundamental_value, initial_price
-        - price_impact, mean_reversion, fundamental_growth, noise_std
-        - short_cost_rate, custom_state_hot_limit
+        - fundamental_value, initial_price                  → simulation-bases.md §6
+        - price_impact, mean_reversion, fundamental_growth, noise_std  → simulation-bases.md §6
+        - short_cost_rate, custom_state_hot_limit            → simulation-bases.md §6
     """
 
     async def perceive(
@@ -153,7 +163,9 @@ class Market(GeneralPlayer):
         # Log
         logger.debug(f"\n{'='*70}")
         logger.debug(f"[Market] Round {round_num}")
-        logger.debug(f"  Price: {current_price:.2f} → {new_price:.2f} ({return_pct:+.2f}%)")
+        logger.debug(
+            f"  Price: {current_price:.2f} → {new_price:.2f} ({return_pct:+.2f}%)"
+        )
         logger.debug(f"  Fundamental: {new_fundamental:.2f}")
         logger.debug(f"  Bubble Ratio: {bubble_ratio:.2f}x")
         logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
@@ -200,9 +212,11 @@ class Market(GeneralPlayer):
 class BaseInvestor(GeneralPlayer):
     """
     Base class for bubble simulation investors.
+    → simulation-bases.md §4
 
     All parameters configured via extras in players.yml:
         - initial_cash, initial_position, custom_state_hot_limit
+        → simulation-bases.md §6
     """
 
     async def perceive(
@@ -283,9 +297,11 @@ class BaseInvestor(GeneralPlayer):
 class MomentumSpeculator(BaseInvestor):
     """
     Momentum speculator that drives bubble formation.
+    → simulation-bases.md §4 — MomentumSpeculator
 
     Theory: Greater Fool Theory
         Buy even if overvalued, expecting to sell to a "greater fool."
+        → simulation-bases.md §2.1
 
     Behavior:
         - Only looks at price momentum, ignores fundamentals
@@ -298,9 +314,11 @@ class MomentumSpeculator(BaseInvestor):
     Formula:
         momentum = (price - MA_short) / MA_short
         quantity = aggressiveness × momentum × base_size
+        → simulation-bases.md §4 — MomentumSpeculator (Rule-Based Behavior)
 
     Parameters from config extras:
         - lookback_short, aggressiveness, base_position_size, leverage_multiplier
+        → simulation-bases.md §6
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -370,11 +388,13 @@ class MomentumSpeculator(BaseInvestor):
 class RationalArbitrageur(BaseInvestor):
     """
     Rational arbitrageur attempting to correct mispricings.
+    → simulation-bases.md §4 — RationalArbitrageur
 
     Theory: Limits to Arbitrage (Shleifer & Vishny, 1997)
         - Arbitrageurs face constraints: short-selling costs, margin requirements
         - Cannot fully correct mispricings due to these limits
         - May be forced to close positions before prices correct
+        → simulation-bases.md §2.2
 
     Behavior:
         - Estimates true value (fundamental)
@@ -388,9 +408,11 @@ class RationalArbitrageur(BaseInvestor):
         deviation = (price - fundamental) / fundamental
         If deviation > threshold: short (with cost penalty)
         If deviation < -threshold: buy
+        → simulation-bases.md §4 — RationalArbitrageur (Rule-Based Behavior)
 
     Parameters from config extras:
         - deviation_threshold, base_position_size, max_short_position, short_cost_sensitivity
+        → simulation-bases.md §6
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -466,9 +488,11 @@ class RationalArbitrageur(BaseInvestor):
 class NoiseTrader(BaseInvestor):
     """
     Noise trader driven by sentiment and crowd behavior.
+    → simulation-bases.md §4 — NoiseTrader
 
     Theory: De Long et al. (1990) - Noise Trader Risk
         Uninformed traders who create systematic deviations from fundamental value.
+        → simulation-bases.md §2.3
 
     Behavior:
         - Trades based on "sentiment" (random with bias)
@@ -478,8 +502,13 @@ class NoiseTrader(BaseInvestor):
 
     Effect: DESTABILIZING - Amplifies bubbles through herding
 
+    Formula:
+        total_sentiment = random_sentiment + herding_weight × price_return × 10
+        → simulation-bases.md §4 — NoiseTrader (Rule-Based Behavior)
+
     Parameters from config extras:
         - sentiment_volatility, herding_weight, base_position_size
+        → simulation-bases.md §6
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -544,8 +573,10 @@ class NoiseTrader(BaseInvestor):
 class FundamentalInvestor(BaseInvestor):
     """
     Fundamental investor anchoring to intrinsic value.
+    → simulation-bases.md §4 — FundamentalInvestor
 
     Theory: Traditional value investing
+        → simulation-bases.md §2 (context: slow correction vs momentum forces)
 
     Behavior:
         - Compares price to fundamental value
@@ -555,8 +586,14 @@ class FundamentalInvestor(BaseInvestor):
 
     Effect: WEAKLY STABILIZING - Too slow to prevent bubbles
 
+    Formula:
+        deviation = (fundamental - price) / price
+        quantity = value_sensitivity × deviation × base_position_size  (every N rounds)
+        → simulation-bases.md §4 — FundamentalInvestor (Rule-Based Behavior)
+
     Parameters from config extras:
         - trade_frequency, value_sensitivity, base_position_size
+        → simulation-bases.md §6
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -616,10 +653,12 @@ class FundamentalInvestor(BaseInvestor):
 class LeveragedBuyer(BaseInvestor):
     """
     Leveraged buyer using margin to amplify positions.
+    → simulation-bases.md §4 — LeveragedBuyer
 
     Theory: Leverage amplifies both gains and losses
         During bubbles, leveraged buyers amplify upside
         During crashes, forced deleveraging amplifies downside
+        → simulation-bases.md §2 (context: synchronization risk and crash dynamics)
 
     Behavior:
         - Uses leverage to increase position sizes
@@ -628,8 +667,15 @@ class LeveragedBuyer(BaseInvestor):
 
     Effect: STRONGLY DESTABILIZING - Amplifies both bubbles and crashes
 
+    Formula:
+        equity_ratio = portfolio_value / initial_equity
+        If equity_ratio < margin_call_threshold: forced deleverage (sell 50%)
+        Else: quantity = price_return × base_position_size × leverage_ratio
+        → simulation-bases.md §4 — LeveragedBuyer (Rule-Based Behavior)
+
     Parameters from config extras:
         - leverage_ratio, margin_call_threshold, base_position_size, initial_equity
+        → simulation-bases.md §6
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -701,6 +747,7 @@ class LeveragedBuyer(BaseInvestor):
 class ConservativeHolder(BaseInvestor):
     """
     Conservative long-term holder providing stability.
+    → simulation-bases.md §4 — ConservativeHolder
 
     Behavior:
         - Holds steady position
@@ -710,8 +757,14 @@ class ConservativeHolder(BaseInvestor):
 
     Effect: VERY WEAKLY STABILIZING
 
+    Formula:
+        gap = target_position - position
+        quantity = gap × rebalance_rate  (every N rounds, capped at ±10)
+        → simulation-bases.md §4 — ConservativeHolder (Rule-Based Behavior)
+
     Parameters from config extras:
         - target_position, rebalance_frequency, rebalance_rate
+        → simulation-bases.md §6
     """
 
     async def decide(self) -> Dict[str, Any]:

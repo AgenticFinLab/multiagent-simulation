@@ -1,27 +1,82 @@
-# BlackMonday1987 Analysis Guide
+# BlackMonday1987 RuleLLM — Analysis Documentation
 
-## Metrics
+## Overview
 
-| Metric | Description | Expected Range |
-|--------|-------------|----------------|
-| Price deviation | Deviation from fundamental | Varies by scenario |
-| Max drawdown | Largest peak-to-trough decline | Varies by scenario |
-| Volatility | Annualized return volatility | Varies by scenario |
+| Item                                | Description                                                                                                                              |
+|-------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| **Implements**                      | `../analysis-bases.md`                                                                                                                   |
+| **Analysis Script**                 | `analysis.py` in this directory                                                                                                          |
+| **Output Location**                 | `EXPERIMENT/BlackMonday1987/RuleLLM/records/analysis/`                                                                                   |
+| **Variant-Specific Considerations** | Formula-anchored hybrid — key metric is rule adherence rate; feedback amplification formula embedded in prompts must be preserved by LLM |
 
-## Visualization Guide
+---
 
-1. **Price vs Fundamental**: Shows whether agents create mispricings
-2. **Deviation Plot**: Magnitude and persistence of mispricings
-3. **Return Distribution**: Should show fat tails for behavioral scenarios
+## 1. Metric Implementation
 
-## Troubleshooting
+RuleLLM `analysis.py` imports core functions from `Rule/analysis.py` and adds `analyze_rule_adherence()`.
 
-- **No phenomenon observed**: Adjust agent parameters
-- **Too extreme**: Add more stabilizing agents or increase mean reversion
-- **Too stable**: Increase destabilizing agent parameters
+| Metric                     | Function                   | analysis-bases.md Ref   | RuleLLM-Specific Notes                                                                |
+|----------------------------|----------------------------|-------------------------|---------------------------------------------------------------------------------------|
+| **Price Deviation**        | `calculate_metrics()`      | `§2.1`                  | Near-Rule; ±20% quantity variation has limited impact on deviation                    |
+| **Maximum Drawdown**       | `calculate_metrics()`      | `§2.2`                  | Within ±20% of Rule; amplification formula preserved in prompt                        |
+| **Crash Velocity**         | `calculate_metrics()`      | `§2.3`                  | Near-Rule velocity; amplification formula directs LLM to increase size with deviation |
+| **Return Autocorrelation** | `calculate_metrics()`      | `§2.4`                  | Near-Rule positive AC1 during crash; rule ensures feedback self-reinforcement         |
+| **Agent-Type Volume**      | `calculate_metrics()`      | `§2.5`                  | Within ±20% of Rule volumes per agent                                                 |
+| **Crash Onset Round**      | `calculate_metrics()`      | `§2.6`                  | Near-Rule; rules force sell when threshold breached                                   |
+| **Rule Adherence Rate**    | `analyze_rule_adherence()` | `§2` (variant-specific) | **RuleLLM-only**: directional alignment target ≥80% per agent                         |
+
+---
+
+## 2. Dimension-by-Dimension Analysis
+
+### Dimension 2: Agent Behavior + Rule Adherence
+*(Objective from analysis-bases.md §3.2)*
+
+**Implementation in analysis.py:**
+- Function: `analyze_rule_adherence()` — verifies LLM direction matches Rule formula direction
+- Output: Plot 4 = rule adherence bar chart (green ≥80%, red <80%); `rule_adherence.json`
+
+**Variant-Specific Interpretation:**
+ProgramTrader should show near-perfect adherence (strong amplification signal). PortfolioInsurer adherence near-perfect (clear formula). IndexArbitrageur may show lower adherence at boundary conditions (deviation near ±0.005 is ambiguous).
+
+---
+
+## 3. Variant-Specific Observable Phenomena
+
+| Phenomenon                   | Description                                                      | How to Observe                               | Contrast with Rule            |
+|------------------------------|------------------------------------------------------------------|----------------------------------------------|-------------------------------|
+| **Rule Override Events**     | LLM holds when rule says sell (adherence failure)                | `rule_adherence.json` — direction mismatches | Rule: never overrides formula |
+| **Step-by-Step Calculation** | LLM shows feedback amplification steps in `<analysis>` reasoning | Order record reasoning field                 | Rule: no visible reasoning    |
+| **Near-Rule Crash Timing**   | Crash onset within ±3 rounds of Rule baseline                    | Crash onset round comparison                 | LLM: ±10+ rounds difference   |
+
+---
+
+## 4. Output Files Reference
+
+All outputs written to `EXPERIMENT/BlackMonday1987/RuleLLM/records/analysis/`.
+
+| Output File                            | Generated By               | Contents                                           | Interpretation                                 |
+|----------------------------------------|----------------------------|----------------------------------------------------|------------------------------------------------|
+| `blackmonday1987_rulellm_analysis.png` | `main()`                   | 4-panel: Price, Deviation, Returns, Rule Adherence | Primary RuleLLM crash + adherence verification |
+| `summary.json`                         | `main()`                   | `{"variant": "RuleLLM", metrics}`                  | Cross-variant comparison input                 |
+| `rule_adherence.json`                  | `analyze_rule_adherence()` | Per-agent adherence rate, meets_target (≥80%)      | Rule-following quality validation              |
+
+---
+
+## 5. Cross-Variant Comparison Notes
+
+- **Crash emergence speed**: Near-Rule (formula ensures trigger)
+- **Crash intensity**: Within ±20% of Rule drawdown
+- **Behavioral realism**: Higher than Rule (explicit calculations visible); lower than LLM (constrained)
+- **Feedback preservation**: Critical test — does embedded amplification formula produce near-Rule crash velocity?
+
+Cross-variant comparison protocol: `../analysis-bases.md §5`.
+
+---
 
 ## References
 
-- Brady Commission (1988): Portfolio insurance as key amplifier
-- Genotte & Leland (1990): Noise trading and portfolio insurance
-- Jacklin et al. (1992): Information cascades during crash
+- `../analysis-bases.md` — master analysis specification
+- `../simulation-bases.md §4 RuleLLM Hybrid Notes` — ±20% ranges per agent
+- `analysis.py → analyze_rule_adherence()` — adherence computation
+- `Rule/analysis.py` — imported metric functions

@@ -1,81 +1,189 @@
-# ArchegosCollapse Simulation
+# ArchegosCollapse Rag — Implementation Explanation
 
 ## Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | March 2021 - Archegos Capital Management lost $20B, triggering block trade fire sales |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Archegos collapse simulation with total return swaps, concentrated positions, and prime broker liquidation cascade |
-| **Academic Value** | Understanding march 2021 - archegos capital management lost $20b, triggering block trade fire sales through multi-agent simulation |
+| Item                                   | Description                                                                                                                                                               |
+|----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Variant**                            | Rag (RAG-augmented hybrid)                                                                                                                                                |
+| **Implements**                         | `../simulation-bases.md`                                                                                                                                                  |
+| **Decision Logic**                     | RuleLLM-identical system prompts augmented with retrieved historical domain knowledge in each user message                                                                |
+| **Key Difference from Other Variants** | Each decision round retrieves relevant knowledge from a vector store (historical Archegos case, LTCM precedents) and injects it into the user message via `{rag_context}` |
+| **Primary Research Contribution**      | Does access to historical crisis knowledge modify broker and fund behavior vs. the no-RAG baseline? Does recalling LTCM or Archegos precedents change cascade dynamics?   |
 
-## Theoretical Foundation
+---
 
-- Total return swap leverage (Becketti, 2021)
-- Concentrated portfolio liquidation
-- Prime broker competition and information asymmetry
+## 1. How Theoretical Design Is Implemented
 
-## Agent Descriptions
+### ConcentratedFund: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4 — ConcentratedFund)*
 
-### ConcentratedFund
-**Theoretical Basis**: Concentrated leveraged portfolio
-**Market Role**: destabilizing
-**Description**: Holds large concentrated positions via total return swaps
-**Parameters**: leverage=5.0, concentration=0.3, swap_positions=8
+| Theoretical Design Element                                         | Implementation                                                                                          |
+|--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| TRS leverage rules → sim-bases §4 Rule-Based Behavior              | System prompt = `RAG_CONCENTRATED_FUND_SYS` = `RULELLM_CONCENTRATED_FUND_SYS` (identical rules/persona) |
+| Historical case knowledge → sim-bases §8 (Historical Case Studies) | RAG knowledge base sources from Archegos collapse (March 2021) described in sim-bases §8                |
+| `{rag_context}` injection → sim-bases §4 Rag notes                 | `RAG_USER_TEMPLATE` contains `"Relevant Domain Knowledge:\n{rag_context}"` section                      |
+| No-retrieval fallback                                              | When retrieval fails: `"(No relevant knowledge retrieved this round.)"` replaces `{rag_context}`        |
 
-### PrimeBroker1
-**Theoretical Basis**: Prime broker liquidation race
-**Market Role**: destabilizing
-**Description**: First to liquidate gains advantage; creates cascade
-**Parameters**: liquidation_speed=fast, information_sharing=limited, threshold=0.1
+### PrimeBroker1: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4 — PrimeBroker1)*
 
-### PrimeBroker2
-**Theoretical Basis**: Prime broker competition
-**Market Role**: destabilizing
-**Description**: Second broker forced to liquidate at worse prices
-**Parameters**: liquidation_speed=moderate, information_sharing=limited, threshold=0.1
+| Theoretical Design Element                          | Implementation                                                                       |
+|-----------------------------------------------------|--------------------------------------------------------------------------------------|
+| First-mover rules → sim-bases §4                    | `RAG_PRIME_BROKER1_SYS` = `RULELLM_PRIME_BROKER1_SYS` (deviation < −0.10 → SELL 40%) |
+| Historical precedent of broker races → sim-bases §8 | RAG may retrieve LTCM/Archegos prime broker behavior examples                        |
+| RAG augmentation modifying urgency                  | Retrieved "first-mover precedents" may reinforce faster/larger liquidation decisions |
 
-### BlockTradeBuyer
-**Theoretical Basis**: Opportunistic block trading
-**Market Role**: stabilizing
-**Description**: Buys large blocks at discount during liquidation
-**Parameters**: discount_threshold=0.1, max_block_size=50000, patience=moderate
+### PrimeBroker2: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4 — PrimeBroker2)*
 
-### InformationTrader
-**Theoretical Basis**: Information-based trading
-**Market Role**: neutral
-**Description**: Detects liquidation activity and trades ahead
-**Parameters**: detection_ability=0.5, front_run_size=1000
+| Theoretical Design Element                                  | Implementation                                                                       |
+|-------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| Second-mover rules → sim-bases §4                           | `RAG_PRIME_BROKER2_SYS` = `RULELLM_PRIME_BROKER2_SYS` (deviation < −0.15 → SELL 35%) |
+| Learning from historical second-mover losses → sim-bases §8 | RAG may retrieve Credit Suisse/Nomura late-liquidation loss examples                 |
 
+### BlockTradeBuyer: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4 — BlockTradeBuyer)*
 
-## Usage
+| Theoretical Design Element                              | Implementation                                                                            |
+|---------------------------------------------------------|-------------------------------------------------------------------------------------------|
+| Block trading rules → sim-bases §4                      | `RAG_BLOCK_TRADE_BUYER_SYS` = `RULELLM_BLOCK_TRADE_BUYER_SYS` (deviation < −0.10 → BUY)   |
+| Historical block trade recovery examples → sim-bases §8 | RAG may retrieve institutional buyers in Archegos block trades; reinforces buy conviction |
 
-### Rule Variant
-```bash
-python examples/ArchegosCollapse/Rule/run_archegsoscollapse.py \
-    -c configs/ArchegosCollapse/Rule/simulation.yml
+### InformationTrader: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4 — InformationTrader)*
+
+| Theoretical Design Element                              | Implementation                                                                       |
+|---------------------------------------------------------|--------------------------------------------------------------------------------------|
+| Detection and front-run rules → sim-bases §4            | `RAG_INFORMATION_TRADER_SYS` = `RULELLM_INFORMATION_TRADER_SYS`                      |
+| Historical signal patterns from Archegos → sim-bases §8 | RAG may provide historical context on unusual block flow patterns before the cascade |
+
+---
+
+## 2. Market Mechanism Implementation
+
+*Formula source: simulation-bases.md §3.1*
+
+```
+P(t+1) = P(t) + λ × D(t) + γ × [F − P(t)] + ε(t)
 ```
 
-### LLM Variant
-```bash
-python examples/ArchegosCollapse/LLM/run_archegsoscollapse_llm.py \
-    -c configs/ArchegosCollapse/LLM/simulation.yml
+Implemented in: `players.py` — same `Market` imported from `Rule.players`. Identical to Rule/RuleLLM variants.
+
+RAG user template (`RAG_USER_TEMPLATE`) differs from `RULELLM_USER_TEMPLATE` by adding:
+```
+Relevant Domain Knowledge:
+{rag_context}
+```
+between the market state and the decision instruction. When RAG retrieval succeeds, `{rag_context}` is filled with retrieved text chunks. When it fails, the fallback string is substituted.
+
+RAG fallback constant (in `analysis.py`):
+```python
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 ```
 
-### RuleLLM Variant
-```bash
-python examples/ArchegosCollapse/RuleLLM/run_archegsoscollapse_rulellm.py \
-    -c configs/ArchegosCollapse/RuleLLM/simulation.yml
+Deviations from simulation-bases.md design: None in market mechanics.
+
+---
+
+## 3. Variant-Specific Features
+
+*(Reference: simulation-bases.md §9 — Rag variant entry)*
+
+**System prompts reuse**: `RAG_*_SYS` constants are aliases for the corresponding `RULELLM_*_SYS` prompts (imported from `RuleLLM.prompts`). The only RAG-specific addition is the knowledge context in the user message.
+
+**Knowledge base content design**: Inspired by `simulation-bases.md §8 — Historical Case Studies`. The RAG corpus should contain:
+- Archegos Capital collapse timeline (March 24–29, 2021)
+- Prime broker liquidation race: Morgan Stanley first, Credit Suisse/Nomura delayed
+- TRS leverage mechanics and margin call dynamics
+- Historical parallels: LTCM 1998 (similar prime broker coordination failure)
+
+**Retrieval query strategy**: The query sent to the vector store each round is constructed from the current market state (deviation level, round number) to retrieve contextually relevant historical precedents.
+
+**Fallback behavior**: When the vector store retrieves nothing (low similarity, empty corpus), the `_RAG_FALLBACK` string is injected — the agent then decides based only on rules and state, behaving identically to RuleLLM.
+
+**RAG knowledge effect analysis**: `analysis.py → analyze_rag_knowledge_effect()` classifies each round as retrieval success or fallback, then tests whether decision distributions differ between retrieved vs. non-retrieved rounds.
+
+---
+
+## 4. Architecture Diagram
+
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║                              ROUND N                                  ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  Market (Rule-identical) → broadcasts market state                    ║
+║                                                                       ║
+║  Each RagInvestor.decide():                                           ║
+║    ├── retrieve_context(query=f"cascade deviation={deviation:.2f}")   ║
+║    │       │                                                          ║
+║    │       ├── VectorStore.query(k=3)                                 ║
+║    │       │     → top-k chunks from Archegos/LTCM knowledge base    ║
+║    │       └── fallback: "(No relevant knowledge retrieved)"          ║
+║    │                                                                  ║
+║    ├── builds RAG_USER_TEMPLATE.format(**state, rag_context=context)  ║
+║    │                                                                  ║
+║    └── calls LangChainAPIInference(sys_prompt, user_message)  → LLM  ║
+║          → LLM reads rules + historical knowledge                     ║
+║          → outputs <decision>{"action","bid_price","quantity",...}</decision>
+║                                                                       ║
+║  RAG flow: Rules (DECISION RULES) + Knowledge ({rag_context})        ║
+║    → combined reasoning → decision near Rule baseline                 ║
+║    → but potentially modified by historical precedent recall          ║
+╚══════════════════════════════════════════════════════════════════════╝
 ```
 
-### RAG Variant
+---
+
+## 5. Configuration Reference
+
+Key Configuration Parameters (`configs/ArchegosCollapse/Rag/players.yml`):
+
+| Parameter            | Config Path                 | Value                                             | Design Justification                                            |
+|----------------------|-----------------------------|---------------------------------------------------|-----------------------------------------------------------------|
+| `price_impact`       | `extras.price_impact`       | 0.03                                              | Identical to Rule/RuleLLM                                       |
+| `mean_reversion`     | `extras.mean_reversion`     | 0.01                                              | Identical to Rule/RuleLLM                                       |
+| `sys_prompt_path`    | `extras.sys_prompt_path`    | `examples.ArchegosCollapse.Rag.prompts:RAG_*_SYS` | Module path for RAG system prompts (aliases to RuleLLM prompts) |
+| `rag.knowledge_base` | `extras.rag.knowledge_base` | Path to Archegos/LTCM vector store                | Source of historical crisis knowledge for retrieval             |
+| `rag.top_k`          | `extras.rag.top_k`          | 3                                                 | Number of chunks retrieved per round                            |
+| `llm.temperature`    | `extras.llm.temperature`    | 0.3                                               | Low temperature — rules + knowledge → near-deterministic        |
+
+---
+
+## 6. Running Instructions
+
 ```bash
+export ARK_API_KEY="your-bytedance-ark-api-key"
 python examples/ArchegosCollapse/Rag/run_archegsoscollapse_rag.py \
     -c configs/ArchegosCollapse/Rag/simulation.yml
 ```
 
-## References
+Required environment variables:
+- `ARK_API_KEY`: ByteDance Doubao API key
 
-- Total return swap leverage (Becketti, 2021)
-- Concentrated portfolio liquidation
-- Prime broker competition and information asymmetry
+Expected runtime: ~5–20 minutes for 100 rounds (retrieval adds latency per round)
+
+Output location: `EXPERIMENT/ArchegosCollapse/Rag/`
+
+---
+
+## 7. Expected Behavior Patterns
+
+| Phase         | Rounds | Expected Agent Behavior                                                                                                          | Expected Price Dynamics                                                         |
+|---------------|--------|----------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| Pre-Cascade   | 1–15   | RAG retrieves contextual knowledge; agents follow rules; historical precedents referenced                                        | Price near 100; behavior near-identical to RuleLLM                              |
+| Cascade Onset | 10–20  | Historical Archegos/LTCM context may accelerate broker decisions; rules still binding                                            | Cascade onset similar to RuleLLM; potentially earlier if RAG reinforces urgency |
+| Peak Cascade  | 20–35  | PrimeBroker2 recalled Credit Suisse delays → may act more decisively; BlockTradeBuyer more aggressive with historical conviction | Cascade depth near RuleLLM; slight modification from knowledge                  |
+| Recovery      | 35–100 | Historical recovery patterns may guide BlockTradeBuyer and InformationTrader cover decisions                                     | Recovery speed may differ from RuleLLM if RAG context is strong                 |
+
+---
+
+## 8. References
+
+*Do not repeat citations from simulation-bases.md §2. Cross-references only:*
+
+- Historical Archegos case used as RAG knowledge source → `simulation-bases.md §8 — Historical Case Studies`
+- RuleLLM system prompt structure (reused as RAG_*_SYS) → `ArchegosCollapse/RuleLLM/explain.md`
+- RAG knowledge effect analysis → `analysis.py → analyze_rag_knowledge_effect()`
+- RAG fallback string constant → `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"`
+- Price formula → `simulation-bases.md §3.1`
+- Variant comparison → `simulation-bases.md §9 (Rag column)`

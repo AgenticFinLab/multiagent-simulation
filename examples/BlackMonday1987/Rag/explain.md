@@ -1,81 +1,137 @@
-# BlackMonday1987 Simulation
+# BlackMonday1987 Rag — Implementation Explanation
 
 ## Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | October 19, 1987 stock market crash - Dow fell 22.6% in one day |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Black Monday 1987 crash simulation with portfolio insurance, index arbitrage, and program trading feedback loops |
-| **Academic Value** | Understanding october 19, 1987 stock market crash - dow fell 22 through multi-agent simulation |
+| Item                                   | Description                                                                                                                                                                                               |
+|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Variant**                            | Rag (RAG-augmented hybrid)                                                                                                                                                                                |
+| **Implements**                         | `../simulation-bases.md`                                                                                                                                                                                  |
+| **Decision Logic**                     | RuleLLM-identical system prompts augmented with retrieved Black Monday 1987 historical knowledge per round                                                                                                |
+| **Key Difference from Other Variants** | `{rag_context}` in user message injects retrieved historical knowledge about portfolio insurance, program trading, and the 1987 crash timeline                                                            |
+| **Primary Research Contribution**      | Does knowing about the 1987 Black Monday feedback loop mechanics cause portfolio insurers and program traders to self-reinforce the crash more aggressively, or does historical awareness create caution? |
 
-## Theoretical Foundation
+---
 
-- Brady Commission (1988): Portfolio insurance as key amplifier
-- Genotte & Leland (1990): Noise trading and portfolio insurance
-- Jacklin et al. (1992): Information cascades during crash
+## 1. How Theoretical Design Is Implemented
 
-## Agent Descriptions
+### All Agents: Theory → Implementation Mapping
 
-### PortfolioInsurer
-**Theoretical Basis**: Portfolio insurance (Leland & Rubinstein, 1980)
-**Market Role**: destabilizing
-**Description**: Dynamic hedging strategy that sells as prices fall
-**Parameters**: hedge_ratio=0.5, rebalance_threshold=0.02, initial_insurance=1000000
+| Theoretical Design Element                                             | Implementation                                                                                          |
+|------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| Rule formulas → sim-bases §4 Rule-Based Behavior                       | System prompts = `RAG_*_SYS` = `RULELLM_*_SYS` aliases (imported from `RuleLLM.prompts`)                |
+| Historical 1987 crash knowledge → sim-bases §8 Historical Case Studies | RAG knowledge base sourced from Black Monday event described in sim-bases §8                            |
+| `{rag_context}` injection → `RAG_USER_TEMPLATE`                        | User template contains "Relevant Domain Knowledge:\n{rag_context}" between market state and instruction |
+| Fallback constant                                                      | `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"` in `analysis.py`                      |
 
-### IndexArbitrageur
-**Theoretical Basis**: Index arbitrage between futures and spot
-**Market Role**: destabilizing
-**Description**: Exploits price gaps between index futures and stocks
-**Parameters**: arbitrage_threshold=0.005, position_size=500, speed=fast
+Note: `RAG_USER_TEMPLATE` (BlackMonday1987) instructs "Apply your DECISION RULES step-by-step, **incorporating the domain knowledge above**."
 
-### ProgramTrader
-**Theoretical Basis**: Program trading feedback (Brady Commission, 1988)
-**Market Role**: destabilizing
-**Description**: Automated trading that amplifies price moves
-**Parameters**: trigger_threshold=0.01, sell_size=1000, feedback_strength=0.3
+---
 
-### ValueInvestor
-**Theoretical Basis**: Value investing (Graham, 1949)
-**Market Role**: stabilizing
-**Description**: Buys when price falls below intrinsic value
-**Parameters**: value_discount=0.15, order_size=800, patience=high
+## 2. Market Mechanism Implementation
 
-### NoiseTrader
-**Theoretical Basis**: Black (1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader
-**Parameters**: trade_probability=0.05, min_order=100, max_order=500
+*Formula source: simulation-bases.md §3.1*
 
-
-## Usage
-
-### Rule Variant
-```bash
-python examples/BlackMonday1987/Rule/run_blackmonday1987.py \
-    -c configs/BlackMonday1987/Rule/simulation.yml
+```
+P(t+1) = P(t) + λ × D(t) + γ × [F − P(t)] + ε(t)
 ```
 
-### LLM Variant
-```bash
-python examples/BlackMonday1987/LLM/run_blackmonday1987_llm.py \
-    -c configs/BlackMonday1987/LLM/simulation.yml
+Identical to Rule and RuleLLM variants. See Rule `explain.md §2`.
+
+RAG user template note: `{rag_context}` is placed between the market state block and the "Apply DECISION RULES" instruction. Retrieved knowledge modifies LLM reasoning before the formula is applied.
+
+---
+
+## 3. Variant-Specific Features
+
+*(Reference: simulation-bases.md §9 — Rag variant entry)*
+
+**Knowledge base content design**: Inspired by `simulation-bases.md §8 — Historical Case Studies`. The RAG corpus should contain:
+- Black Monday timeline (October 19, 1987 intraday events)
+- Portfolio insurance mechanics: how selling begets selling
+- Program trading feedback loops: Brady Commission findings
+- Index arbitrage transmission of futures crash to spot
+- ValueInvestor precedents: institutional buying during crash (Buffett)
+- Post-crash policy response: Greenspan's liquidity guarantee, circuit breaker introduction
+
+**Retrieval modification hypothesis**: When PortfolioInsurer retrieves knowledge about how portfolio insurance amplified the 1987 crash, it may either:
+1. Sell MORE aggressively (historical precedent reinforces mechanical discipline)
+2. Become CAUTIOUS (recognizing the systemic harm — unintended consequence awareness)
+
+Both outcomes are scientifically interesting research findings.
+
+**No-retrieval fallback**: Same `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"` as ArchegosCollapse. Agent defaults to pure RuleLLM behavior.
+
+---
+
+## 4. Architecture Diagram
+
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║  Market (Rule-identical) → broadcasts {price, fundamental,            ║
+║                             deviation, round}                         ║
+║                                                                       ║
+║  Each RagInvestor.decide():                                           ║
+║    ├── retrieve_context(query=f"1987 crash deviation={deviation:.2f}")║
+║    │       → VectorStore: 1987 Black Monday / portfolio insurance     ║
+║    │       → fallback: "(No relevant knowledge retrieved)"            ║
+║    │                                                                  ║
+║    ├── RAG_USER_TEMPLATE.format(**state, rag_context=context)         ║
+║    │                                                                  ║
+║    └── LangChainAPIInference(sys_prompt, user_message)  →  LLM       ║
+║          → DECISION RULES + domain knowledge → decision               ║
+╚══════════════════════════════════════════════════════════════════════╝
 ```
 
-### RuleLLM Variant
-```bash
-python examples/BlackMonday1987/RuleLLM/run_blackmonday1987_rulellm.py \
-    -c configs/BlackMonday1987/RuleLLM/simulation.yml
-```
+---
 
-### RAG Variant
+## 5. Configuration Reference
+
+Key Configuration Parameters (`configs/BlackMonday1987/Rag/players.yml`):
+
+| Parameter            | Config Path                 | Value                                            | Design Justification                              |
+|----------------------|-----------------------------|--------------------------------------------------|---------------------------------------------------|
+| `price_impact`       | `extras.price_impact`       | 0.002                                            | Identical to Rule/RuleLLM                         |
+| `sys_prompt_path`    | `extras.sys_prompt_path`    | `examples.BlackMonday1987.Rag.prompts:RAG_*_SYS` | Aliases to RuleLLM prompts                        |
+| `rag.knowledge_base` | `extras.rag.knowledge_base` | Path to 1987 Black Monday vector store           | Historical crash knowledge corpus                 |
+| `rag.top_k`          | `extras.rag.top_k`          | 3                                                | 3 most relevant knowledge chunks per round        |
+| `llm.temperature`    | `extras.llm.temperature`    | 0.3                                              | Low temperature for rule-following with knowledge |
+
+---
+
+## 6. Running Instructions
+
 ```bash
+export ARK_API_KEY="your-bytedance-ark-api-key"
 python examples/BlackMonday1987/Rag/run_blackmonday1987_rag.py \
     -c configs/BlackMonday1987/Rag/simulation.yml
 ```
 
-## References
+Required environment variables: `ARK_API_KEY`
 
-- Brady Commission (1988): Portfolio insurance as key amplifier
-- Genotte & Leland (1990): Noise trading and portfolio insurance
-- Jacklin et al. (1992): Information cascades during crash
+Expected runtime: ~5–20 minutes for 100 rounds
+
+Output location: `EXPERIMENT/BlackMonday1987/Rag/`
+
+---
+
+## 7. Expected Behavior Patterns
+
+| Phase            | Rounds | Expected Agent Behavior                                                                       | Expected Price Dynamics                                                  |
+|------------------|--------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| Pre-Crash        | 1–15   | RAG retrieves context; agents follow rules; historical crash mechanics may be referenced      | Near-identical to RuleLLM                                                |
+| Feedback Onset   | 5–20   | PortfolioInsurer may cite historical feedback loop knowledge; ProgramTrader executes per rule | Near-RuleLLM onset; potentially faster if knowledge reinforces urgency   |
+| Crash Escalation | 10–25  | Historical amplification knowledge may increase/decrease ProgramTrader sell sizes             | Crash depth near-RuleLLM ± knowledge effect                              |
+| Recovery         | 35–100 | ValueInvestor may cite 1987 post-crash recovery to justify larger buys                        | Recovery potentially faster if historical precedent guides ValueInvestor |
+
+---
+
+## 8. References
+
+*Do not repeat citations from simulation-bases.md §2. Cross-references only:*
+
+- 1987 Black Monday historical case → `simulation-bases.md §8 — Historical Case Studies`
+- RuleLLM prompt structure (reused as RAG_*_SYS) → `BlackMonday1987/RuleLLM/explain.md`
+- RAG knowledge effect analysis → `analysis.py → analyze_rag_knowledge_effect()`
+- Fallback string → `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"`
+- Price formula → `simulation-bases.md §3.1`
+- Variant comparison → `simulation-bases.md §9 (Rag column)`
