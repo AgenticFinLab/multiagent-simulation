@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 """Batch Simulation Runner — tmux-based parallel orchestrator.
 
-Launches simulation scenarios in parallel tmux windows.  Within each window
-the selected variants (Rule -> LLM -> RuleLLM -> Rag) are executed
-sequentially:  run_*.py  ->  analysis.py  ->  (next variant) ...
+Each scenario gets its own tmux session (``masim-<ScenarioName>``), visible
+via ``tmux ls``.  Within each session the selected variants
+(Rule -> LLM -> RuleLLM -> Rag) are executed sequentially:
+  run_*.py  ->  analysis.py  ->  (next variant) ...
 
 Run commands are extracted automatically from the ``Usage:`` section in each
 script's module docstring, so no manual command construction is needed.
@@ -29,9 +30,9 @@ Tip: run this script itself inside tmux so it survives SSH disconnects:
 python examples/run/script.py --scenarios AnchoringEffect ArchegosCollapse AsianFinancialCrisis AvailabilityBias BlackMonday1987 CarryTradeUnwind ConfirmationBias CreditCycle CurrencyCrisis DispositionEffect --max-parallel 3
 
 tmux cheat-sheet while running:
-  Attach:   tmux attach -t masim
-  Windows:  Ctrl-b n / Ctrl-b p  (next / prev)
-  Detach:   Ctrl-b d
+  List all :  tmux ls | grep masim
+  Attach   :  tmux attach -t masim-AnchoringEffect
+  Detach   :  Ctrl-b d
 """
 
 import argparse
@@ -214,26 +215,14 @@ def _tmux(*args: str, check: bool = True):
     )
 
 
-def _ensure_session(session: str):
-    """Create the tmux session if it does not already exist."""
-    exists = _tmux("has-session", "-t", session, check=False).returncode == 0
-    if not exists:
-        _tmux("new-session", "-d", "-s", session, "-n", "_control")
-    # Keep finished panes visible so the user can scroll back.
-    _tmux(
-        "set-option",
-        "-t",
-        session,
-        "remain-on-exit",
-        "on",
-        check=False,
-    )
-
-
-def _launch(session: str, scenario: str, script: Path):
-    """Open a new tmux window that runs *script*."""
-    _tmux("kill-window", "-t", f"{session}:{scenario}", check=False)
-    _tmux("new-window", "-t", session, "-n", scenario, f'bash "{script}"')
+def _launch(session_prefix: str, scenario: str, script: Path):
+    """Create a dedicated tmux session for *scenario* and run *script*."""
+    name = f"{session_prefix}-{scenario}"
+    # Remove stale session with the same name from a previous run.
+    _tmux("kill-session", "-t", name, check=False)
+    _tmux("new-session", "-d", "-s", name, f'bash "{script}"')
+    # Keep the pane visible after the script exits so user can inspect output.
+    _tmux("set-option", "-t", name, "remain-on-exit", "on", check=False)
 
 
 def _is_done(scenario: str) -> bool:
@@ -321,7 +310,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--session",
         default="masim",
         metavar="NAME",
-        help="tmux session name (default: masim)",
+        help="tmux session name prefix; each scenario creates <prefix>-<name> (default: masim)",
     )
     return p
 
@@ -398,9 +387,8 @@ def main() -> None:
     for s, cmds in plan.items():
         scripts[s] = _generate_script(s, cmds)
 
-    # ── tmux session ───────────────────────────────────────────────────────
+    # ── tmux session prefix ───────────────────────────────────────────────
     session = args.session
-    _ensure_session(session)
 
     # ── orchestration loop ─────────────────────────────────────────────────
     pending = list(plan.keys())
@@ -414,8 +402,8 @@ def main() -> None:
     print(f"  Steps     : {total_steps}")
     print(f"  Variants  : {' -> '.join(args.variants)}")
     print(f"  Parallel  : {args.max_parallel}")
-    print(f"  Session   : {session}")
-    print(f"  Attach    : tmux attach -t {session}")
+    print(f"  Sessions  : {session}-<ScenarioName>")
+    print(f"  List all  : tmux ls | grep {session}")
     print(f"{'=' * 64}\n")
 
     t0 = time.time()
@@ -431,7 +419,7 @@ def main() -> None:
                 f"  >> LAUNCH  {s:<35s}  "
                 f"({len(running)}/{args.max_parallel} slots)\n"
                 f"             {step_labels}\n"
-                f"             tmux attach -t {session}:{s}"
+                f"             tmux attach -t {session}-{s}"
             )
 
         # Poll for completion.
@@ -446,7 +434,7 @@ def main() -> None:
                 failed.append((s, elapsed, label))
                 print(
                     f"  !! FAIL    {s:<35s}  at {label}  ({elapsed / 60:.1f} min)\n"
-                    f"             -> tmux attach -t {session}:{s}"
+                    f"             -> tmux attach -t {session}-{s}"
                 )
 
         if running:
@@ -478,7 +466,7 @@ def main() -> None:
             print(f"    - {s:<35s}  at {label}  ({t / 60:.1f} min)")
     print(f"\n  Wall clock : {wall / 60:.1f} min")
     print(f"  Logs       : {MARKER_DIR}/")
-    print(f"  tmux       : tmux attach -t {session}")
+    print(f"  tmux       : tmux ls | grep {session}")
     print()
 
     sys.exit(1 if failed else 0)
