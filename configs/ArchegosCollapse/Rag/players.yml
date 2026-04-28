@@ -96,7 +96,7 @@ ragllm_concentrated_fund:
         sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_CONCENTRATED_FUND_SYS"
         user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_new_tokens: 600
@@ -144,7 +144,7 @@ ragllm_prime_broker1:
         sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_PRIME_BROKER1_SYS"
         user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_new_tokens: 600
@@ -192,7 +192,7 @@ ragllm_prime_broker2:
         sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_PRIME_BROKER2_SYS"
         user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_new_tokens: 600
@@ -240,7 +240,7 @@ ragllm_block_trade_buyer:
         sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_BLOCK_TRADE_BUYER_SYS"
         user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_new_tokens: 600
@@ -289,7 +289,7 @@ ragllm_information_trader:
         sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_INFORMATION_TRADER_SYS"
         user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_new_tokens: 600

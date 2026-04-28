@@ -89,7 +89,7 @@ ragllm_momentum:
         sys_message: "examples.HerdEffect.Rag.prompts:RAGLLM_MOMENTUM_SYS"
         user_message: "examples.HerdEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -133,7 +133,7 @@ ragllm_contrarian:
         sys_message: "examples.HerdEffect.Rag.prompts:RAGLLM_CONTRARIAN_SYS"
         user_message: "examples.HerdEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -177,7 +177,7 @@ ragllm_risk_averse:
         sys_message: "examples.HerdEffect.Rag.prompts:RAGLLM_RISK_AVERSE_SYS"
         user_message: "examples.HerdEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -221,7 +221,7 @@ ragllm_aggressive:
         sys_message: "examples.HerdEffect.Rag.prompts:RAGLLM_AGGRESSIVE_SYS"
         user_message: "examples.HerdEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -265,7 +265,7 @@ ragllm_noise:
         sys_message: "examples.HerdEffect.Rag.prompts:RAGLLM_NOISE_SYS"
         user_message: "examples.HerdEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_new_tokens: 600

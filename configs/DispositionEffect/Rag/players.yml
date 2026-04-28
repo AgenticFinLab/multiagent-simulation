@@ -49,7 +49,7 @@ rag_disposition:
         sys_message: "examples.DispositionEffect.Rag.prompts:RULELLM_DISPOSITION_BIASED_SYS"
         user_message: "examples.DispositionEffect.Rag.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -129,7 +129,7 @@ rag_rational:
         sys_message: "examples.DispositionEffect.Rag.prompts:RULELLM_RATIONAL_SYS"
         user_message: "examples.DispositionEffect.Rag.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -179,7 +179,7 @@ rag_tax_aware:
         sys_message: "examples.DispositionEffect.Rag.prompts:RULELLM_TAX_AWARE_SYS"
         user_message: "examples.DispositionEffect.Rag.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500

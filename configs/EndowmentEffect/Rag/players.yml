@@ -60,7 +60,7 @@ endowedholder:
         sys_message: "examples.EndowmentEffect.Rag.prompts:RAG_ENDOWED_HOLDER_SYS"
         user_message: "examples.EndowmentEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.6
           max_tokens: 512
@@ -104,7 +104,7 @@ statusquoseller:
         sys_message: "examples.EndowmentEffect.Rag.prompts:RAG_STATUS_QUO_SELLER_SYS"
         user_message: "examples.EndowmentEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_tokens: 512
@@ -148,7 +148,7 @@ rationalarbitrageur:
         sys_message: "examples.EndowmentEffect.Rag.prompts:RAG_RATIONAL_ARBITRAGEUR_SYS"
         user_message: "examples.EndowmentEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -192,7 +192,7 @@ newbuyer:
         sys_message: "examples.EndowmentEffect.Rag.prompts:RAG_NEW_BUYER_SYS"
         user_message: "examples.EndowmentEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -236,7 +236,7 @@ noisetrader:
         sys_message: "examples.EndowmentEffect.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.EndowmentEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.9
           max_tokens: 512

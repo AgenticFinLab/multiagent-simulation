@@ -81,7 +81,7 @@ convergencearbitrageur:
         sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_CONVERGENCE_ARBITRAGEUR_SYS"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -128,7 +128,7 @@ leveragetrader:
         sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_LEVERAGE_TRADER_SYS"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_tokens: 600
@@ -174,7 +174,7 @@ riskmanager:
         sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_RISK_MANAGER_SYS"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -221,7 +221,7 @@ liquidityprovider:
         sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_LIQUIDITY_PROVIDER_SYS"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 600
@@ -267,7 +267,7 @@ noisetrader:
         sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.95
           max_tokens: 600

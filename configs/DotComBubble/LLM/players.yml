@@ -42,7 +42,7 @@ neweconomyevangelist:
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_NEW_ECONOMY_EVANGELIST_SYS"
         user_message: "examples.DotComBubble.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.8
           max_tokens: 512
@@ -70,7 +70,7 @@ ipoflipper:
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_IPO_FLIPPER_SYS"
         user_message: "examples.DotComBubble.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -97,7 +97,7 @@ momentumfollower:
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_MOMENTUM_FOLLOWER_SYS"
         user_message: "examples.DotComBubble.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -125,7 +125,7 @@ skepticalvalueinvestor:
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_SKEPTICAL_VALUE_SYS"
         user_message: "examples.DotComBubble.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -153,7 +153,7 @@ shortseller:
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_SHORT_SELLER_SYS"
         user_message: "examples.DotComBubble.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_tokens: 512

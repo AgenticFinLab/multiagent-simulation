@@ -53,7 +53,7 @@ sunkcostholder:
       llm:
         sys_message: "examples.SunkCostFallacy.Rag.prompts:RAG_SUNK_COST_HOLDER_SYS"
         user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -87,7 +87,7 @@ commitmentescalator:
       llm:
         sys_message: "examples.SunkCostFallacy.Rag.prompts:RAG_COMMITMENT_ESCALATOR_SYS"
         user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -121,7 +121,7 @@ rationalcutter:
       llm:
         sys_message: "examples.SunkCostFallacy.Rag.prompts:RAG_RATIONAL_CUTTER_SYS"
         user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -155,7 +155,7 @@ opportunitycosttrader:
       llm:
         sys_message: "examples.SunkCostFallacy.Rag.prompts:RAG_OPPORTUNITY_COST_TRADER_SYS"
         user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -189,7 +189,7 @@ noisetrader:
       llm:
         sys_message: "examples.SunkCostFallacy.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 600

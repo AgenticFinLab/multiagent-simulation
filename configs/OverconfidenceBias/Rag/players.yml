@@ -79,7 +79,7 @@ overconfidenttrader:
         sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_OVERCONFIDENT_TRADER_SYS"
         user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.8
           max_tokens: 600
@@ -125,7 +125,7 @@ selfattributor:
         sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_SELF_ATTRIBUTOR_SYS"
         user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -171,7 +171,7 @@ calibratedtrader:
         sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_CALIBRATED_TRADER_SYS"
         user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -217,7 +217,7 @@ contrarianinvestor:
         sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_CONTRARIAN_INVESTOR_SYS"
         user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 600
@@ -263,7 +263,7 @@ noisetrader:
         sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.95
           max_tokens: 600

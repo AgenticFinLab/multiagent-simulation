@@ -60,7 +60,7 @@ rulellm_anchored:
         sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_ANCHORED_TRADER_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -95,7 +95,7 @@ rulellm_historical:
         sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_HISTORICAL_ANCHOR_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -126,7 +126,7 @@ rulellm_rational:
         sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_RATIONAL_UPDATER_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_tokens: 512
@@ -159,7 +159,7 @@ rulellm_momentum:
         sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_MOMENTUM_TRADER_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -193,7 +193,7 @@ rulellm_noise:
         sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.9
           max_tokens: 512

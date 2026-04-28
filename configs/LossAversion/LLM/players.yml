@@ -44,7 +44,7 @@ lossaverseinvestor:
         sys_message: "examples.LossAversion.LLM.prompts:LLM_LOSS_AVERSE_INVESTOR_SYS"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -73,7 +73,7 @@ breakeventrader:
         sys_message: "examples.LossAversion.LLM.prompts:LLM_BREAK_EVEN_TRADER_SYS"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.8
           max_tokens: 600
@@ -102,7 +102,7 @@ rationaltrader:
         sys_message: "examples.LossAversion.LLM.prompts:LLM_RATIONAL_TRADER_SYS"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -131,7 +131,7 @@ dispositiontrader:
         sys_message: "examples.LossAversion.LLM.prompts:LLM_DISPOSITION_TRADER_SYS"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -160,7 +160,7 @@ noisetrader:
         sys_message: "examples.LossAversion.LLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.95
           max_tokens: 600

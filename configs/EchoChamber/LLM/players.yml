@@ -55,7 +55,7 @@ llm_ideologue:
         sys_message: "examples.EchoChamber.LLM.prompts:LLM_IDEOLOGUE_SYS"
         user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -82,7 +82,7 @@ llm_conformist:
         sys_message: "examples.EchoChamber.LLM.prompts:LLM_CONFORMIST_SYS"
         user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -109,7 +109,7 @@ llm_critical_thinker:
         sys_message: "examples.EchoChamber.LLM.prompts:LLM_CRITICAL_SYS"
         user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -136,7 +136,7 @@ llm_bridge_builder:
         sys_message: "examples.EchoChamber.LLM.prompts:LLM_BRIDGE_SYS"
         user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -163,7 +163,7 @@ llm_passive_bystander:
         sys_message: "examples.EchoChamber.LLM.prompts:LLM_BYSTANDER_SYS"
         user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500

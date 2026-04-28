@@ -45,7 +45,7 @@ convergencearbitrageur:
         sys_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_CONVERGENCE_ARBITRAGEUR_SYS"
         user_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.2
           max_tokens: 600
@@ -75,7 +75,7 @@ leveragetrader:
         sys_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_LEVERAGE_TRADER_SYS"
         user_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -104,7 +104,7 @@ riskmanager:
         sys_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_RISK_MANAGER_SYS"
         user_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.2
           max_tokens: 600
@@ -134,7 +134,7 @@ liquidityprovider:
         sys_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_LIQUIDITY_PROVIDER_SYS"
         user_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -163,7 +163,7 @@ noisetrader:
         sys_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.LTCMCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.95
           max_tokens: 600

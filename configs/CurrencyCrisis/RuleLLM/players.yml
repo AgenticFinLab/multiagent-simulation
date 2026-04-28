@@ -43,7 +43,7 @@ speculativeattacker:
         sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_SPECULATIVE_ATTACKER_SYS"
         user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -71,7 +71,7 @@ selffulfillingtrader:
         sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_SELF_FULFILLING_TRADER_SYS"
         user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -98,7 +98,7 @@ centralbankdefender:
         sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_CENTRAL_BANK_DEFENDER_SYS"
         user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -125,7 +125,7 @@ fundamentalhedger:
         sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_FUNDAMENTAL_HEDGER_SYS"
         user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -152,7 +152,7 @@ noisetrader:
         sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.9
           max_tokens: 512

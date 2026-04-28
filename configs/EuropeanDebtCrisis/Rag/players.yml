@@ -64,7 +64,7 @@ peripherybondseller:
         sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_PERIPHERY_BOND_SELLER_SYS"
         user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -111,7 +111,7 @@ creditorpanicker:
         sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_CREDITOR_PANICKER_SYS"
         user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.8
           max_tokens: 512
@@ -158,7 +158,7 @@ corebondbuyer:
         sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_CORE_BOND_BUYER_SYS"
         user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_tokens: 512
@@ -205,7 +205,7 @@ ecbintervenor:
         sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_ECB_INTERVENOR_SYS"
         user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -253,7 +253,7 @@ hedgedfundtrader:
         sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_HEDGED_FUND_SYS"
         user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.6
           max_tokens: 512

@@ -43,7 +43,7 @@ stablecoinholder:
         sys_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_STABLECOIN_HOLDER_SYS"
         user_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -72,7 +72,7 @@ arbitrageur:
         sys_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_ARBITRAGEUR_SYS"
         user_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -101,7 +101,7 @@ defilender:
         sys_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_DEFI_LENDER_SYS"
         user_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.2
           max_tokens: 600
@@ -130,7 +130,7 @@ anchordepositor:
         sys_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_ANCHOR_DEPOSITOR_SYS"
         user_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -159,7 +159,7 @@ valuebuyer:
         sys_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_VALUE_BUYER_SYS"
         user_message: "examples.LUNACollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 600

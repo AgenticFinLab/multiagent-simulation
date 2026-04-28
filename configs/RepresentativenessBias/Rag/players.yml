@@ -79,7 +79,7 @@ patternmatcher:
         sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_PATTERN_MATCHER_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.8
           max_tokens: 600
@@ -125,7 +125,7 @@ categoryovergeneralizer:
         sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_CATEGORY_OVERGENERALIZER_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -171,7 +171,7 @@ bayesianupdater:
         sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_BAYESIAN_UPDATER_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -217,7 +217,7 @@ contrarianstatistical:
         sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_CONTRARIAN_STATISTICAL_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 600
@@ -263,7 +263,7 @@ noisetrader:
         sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.95
           max_tokens: 600

@@ -59,7 +59,7 @@ llm_gullible_spreader:
         sys_message: "examples.RumorSpread.LLM.prompts:LLM_GULLIBLE_SYS"
         user_message: "examples.RumorSpread.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -87,7 +87,7 @@ llm_distorting_relayer:
         sys_message: "examples.RumorSpread.LLM.prompts:LLM_DISTORTING_SYS"
         user_message: "examples.RumorSpread.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -115,7 +115,7 @@ llm_skeptical_evaluator:
         sys_message: "examples.RumorSpread.LLM.prompts:LLM_SKEPTICAL_SYS"
         user_message: "examples.RumorSpread.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -143,7 +143,7 @@ llm_fact_checker:
         sys_message: "examples.RumorSpread.LLM.prompts:LLM_FACTCHECKER_SYS"
         user_message: "examples.RumorSpread.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -171,7 +171,7 @@ llm_uninformed_bystander:
         sys_message: "examples.RumorSpread.LLM.prompts:LLM_BYSTANDER_SYS"
         user_message: "examples.RumorSpread.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_new_tokens: 500

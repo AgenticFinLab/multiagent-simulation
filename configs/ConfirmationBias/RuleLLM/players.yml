@@ -49,7 +49,7 @@ rulellm_belief_anchor:
         sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_BELIEF_ANCHOR_SYS"
         user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -79,7 +79,7 @@ rulellm_selective_scanner:
         sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_SELECTIVE_SCANNER_SYS"
         user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -108,7 +108,7 @@ rulellm_balanced_analyst:
         sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_BALANCED_ANALYST_SYS"
         user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.2
           max_tokens: 512
@@ -136,7 +136,7 @@ rulellm_contrarian_trader:
         sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_CONTRARIAN_SYS"
         user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.2
           max_tokens: 512
@@ -166,7 +166,7 @@ rulellm_noise_trader:
         sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.9
           max_tokens: 512

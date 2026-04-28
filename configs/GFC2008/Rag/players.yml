@@ -79,7 +79,7 @@ mbsoriginator:
         sys_message: "examples.GFC2008.Rag.prompts:RAG_MBS_ORIGINATOR_SYS"
         user_message: "examples.GFC2008.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -127,7 +127,7 @@ leveragedinvestor:
         sys_message: "examples.GFC2008.Rag.prompts:RAG_LEVERAGED_INVESTOR_SYS"
         user_message: "examples.GFC2008.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_tokens: 600
@@ -173,7 +173,7 @@ ratingagency:
         sys_message: "examples.GFC2008.Rag.prompts:RAG_RATING_AGENCY_SYS"
         user_message: "examples.GFC2008.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 600
@@ -219,7 +219,7 @@ distressedbuyer:
         sys_message: "examples.GFC2008.Rag.prompts:RAG_DISTRESSED_BUYER_SYS"
         user_message: "examples.GFC2008.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 600
@@ -266,7 +266,7 @@ regulator:
         sys_message: "examples.GFC2008.Rag.prompts:RAG_REGULATOR_SYS"
         user_message: "examples.GFC2008.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.2
           max_tokens: 600

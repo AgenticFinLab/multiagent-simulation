@@ -79,7 +79,7 @@ hindsightoverconfident:
         sys_message: "examples.HindsightBias.Rag.prompts:RAG_HINDSIGHT_OVERCONFIDENT_SYS"
         user_message: "examples.HindsightBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.9
           max_tokens: 600
@@ -125,7 +125,7 @@ outcomelearner:
         sys_message: "examples.HindsightBias.Rag.prompts:RAG_OUTCOME_LEARNER_SYS"
         user_message: "examples.HindsightBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.8
           max_tokens: 600
@@ -171,7 +171,7 @@ processevaluator:
         sys_message: "examples.HindsightBias.Rag.prompts:RAG_PROCESS_EVALUATOR_SYS"
         user_message: "examples.HindsightBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 600
@@ -217,7 +217,7 @@ contrarianskeptic:
         sys_message: "examples.HindsightBias.Rag.prompts:RAG_CONTRARIAN_SKEPTIC_SYS"
         user_message: "examples.HindsightBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_tokens: 600
@@ -263,7 +263,7 @@ noisetrader:
         sys_message: "examples.HindsightBias.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.HindsightBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.95
           max_tokens: 600

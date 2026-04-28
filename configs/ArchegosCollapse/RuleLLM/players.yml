@@ -56,7 +56,7 @@ concentrated_fund:
         sys_message: "examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_CONCENTRATED_FUND_SYS"
         user_message: "examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_tokens: 512
@@ -87,7 +87,7 @@ prime_broker1:
         sys_message: "examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_PRIME_BROKER1_SYS"
         user_message: "examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -118,7 +118,7 @@ prime_broker2:
         sys_message: "examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_PRIME_BROKER2_SYS"
         user_message: "examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -149,7 +149,7 @@ block_trade_buyer:
         sys_message: "examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_BLOCK_TRADE_BUYER_SYS"
         user_message: "examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -181,7 +181,7 @@ information_trader:
         sys_message: "examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_INFORMATION_TRADER_SYS"
         user_message: "examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_tokens: 512

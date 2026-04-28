@@ -43,7 +43,7 @@ llm_short_seller:
         sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_SHORT_SELLER_SYS"
         user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -69,7 +69,7 @@ llm_retail_coord:
         sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_RETAIL_COORD_SYS"
         user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_new_tokens: 500
@@ -95,7 +95,7 @@ llm_momentum:
         sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_MOMENTUM_SYS"
         user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -121,7 +121,7 @@ llm_value:
         sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_VALUE_SYS"
         user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -146,7 +146,7 @@ llm_institutional:
         sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_INSTITUTIONAL_SYS"
         user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500

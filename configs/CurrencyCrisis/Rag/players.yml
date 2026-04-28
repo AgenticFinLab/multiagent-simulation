@@ -79,7 +79,7 @@ speculativeattacker:
         sys_message: "examples.CurrencyCrisis.Rag.prompts:RAG_SPECULATIVE_ATTACKER_SYS"
         user_message: "examples.CurrencyCrisis.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 600
@@ -124,7 +124,7 @@ selffulfillingtrader:
         sys_message: "examples.CurrencyCrisis.Rag.prompts:RAG_SELF_FULFILLING_TRADER_SYS"
         user_message: "examples.CurrencyCrisis.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_tokens: 600
@@ -168,7 +168,7 @@ centralbankdefender:
         sys_message: "examples.CurrencyCrisis.Rag.prompts:RAG_CENTRAL_BANK_DEFENDER_SYS"
         user_message: "examples.CurrencyCrisis.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -212,7 +212,7 @@ fundamentalhedger:
         sys_message: "examples.CurrencyCrisis.Rag.prompts:RAG_FUNDAMENTAL_HEDGER_SYS"
         user_message: "examples.CurrencyCrisis.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -256,7 +256,7 @@ noisetrader:
         sys_message: "examples.CurrencyCrisis.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.CurrencyCrisis.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.9
           max_tokens: 600

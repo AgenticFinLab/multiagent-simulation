@@ -44,7 +44,7 @@ macrohedgefund:
         sys_message: "examples.SorosPound.RuleLLM.prompts:RULELLM_MACRO_HEDGE_FUND_SYS"
         user_message: "examples.SorosPound.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.8
           max_tokens: 512
@@ -73,7 +73,7 @@ pegdefender:
         sys_message: "examples.SorosPound.RuleLLM.prompts:RULELLM_PEG_DEFENDER_SYS"
         user_message: "examples.SorosPound.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -102,7 +102,7 @@ convergencetrader:
         sys_message: "examples.SorosPound.RuleLLM.prompts:RULELLM_CONVERGENCE_TRADER_SYS"
         user_message: "examples.SorosPound.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -131,7 +131,7 @@ opportunistictrader:
         sys_message: "examples.SorosPound.RuleLLM.prompts:RULELLM_OPPORTUNISTIC_TRADER_SYS"
         user_message: "examples.SorosPound.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -160,7 +160,7 @@ noisetrader:
         sys_message: "examples.SorosPound.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.SorosPound.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-250115"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.9
           max_tokens: 512
