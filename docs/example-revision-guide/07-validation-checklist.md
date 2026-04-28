@@ -219,6 +219,46 @@ for variant in LLM RuleLLM Rag; do
 done
 ```
 
+### §3.6 `analysis.py` output standard
+
+Verify each `Rule/analysis.py` produces a structured validation report. Run the analysis script and check its output against the requirements in `docs/create-example-skill/08-step4-implement.md §4.1.4`.
+
+```bash
+# 1. Run Rule analysis
+conda run -n LMSim python examples/<Scenario>/Rule/analysis.py \
+    -c configs/<Scenario>/Rule/simulation.yml
+
+# 2. Check output directory contents
+ls EXPERIMENT/<Scenario>/Rule/analysis/
+# Expected: 01_*.png  02_*.png  03_*.png  summary.json
+
+# 3. Check summary.json has validation block
+python3 -c "
+import json
+d = json.load(open('EXPERIMENT/<Scenario>/Rule/analysis/summary.json'))
+print('score:', d['validation']['score'])
+print('is_valid:', d['validation']['is_valid'])
+print('criteria keys:', list(d['validation']['criteria'].keys()))
+"
+
+# 4. Check all four variants compile
+conda run -n LMSim python -c "
+import glob, py_compile, sys
+for f in sorted(glob.glob('examples/<Scenario>/*/analysis.py')):
+    try: py_compile.compile(f, doraise=True); print('OK:', f)
+    except py_compile.PyCompileError as e: print('ERROR:', e); sys.exit(1)
+"
+```
+
+**Pass criteria**:
+- [ ] Console output contains `=== {SCENARIO} SIMULATION VALIDATION: VALID|INVALID ===`
+- [ ] Console output contains `Overall Fit Score: XX.X% (threshold: 50%)`
+- [ ] Console output contains `[1]`, `[2]` criterion blocks with `Observed:`, `Expected:`, `Score:`, `Assessment:`
+- [ ] Console output contains `[SUMMARY]` block
+- [ ] `01_*.png`, `02_*.png`, `03_*.png` all present in `analysis/`
+- [ ] `summary.json` contains `validation.score`, `validation.is_valid`, `validation.criteria`
+- [ ] All four variant `analysis.py` files pass `py_compile`
+
 ---
 
 ## Layer 4 — Cross-Consistency
@@ -289,6 +329,7 @@ Use this table to track results:
 | Layer 3 | Import correctness            | PASS / FAIL |
 | Layer 3 | Output format tags            | PASS / FAIL |
 | Layer 3 | Ray serialization             | PASS / FAIL |
+| Layer 3 | analysis.py output standard   | PASS / FAIL |
 | Layer 4 | §4.N numbering consistency    | PASS / FAIL |
 | Layer 4 | Investor count consistency    | PASS / FAIL |
 | Layer 4 | Function name consistency     | PASS / FAIL |

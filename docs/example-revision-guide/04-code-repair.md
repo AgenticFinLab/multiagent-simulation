@@ -1190,3 +1190,58 @@ A regex replacing `(?<!\w)system\s*=` with `system_msg=` will correctly fix `Inf
 #### `analysis.py` and `run_*.py` exemption
 
 The `.get(key, default)` prohibition applies strictly to `players.py`. Analysis scripts and runner scripts work with potentially incomplete records and may legitimately use `.get()` for safe data extraction. Do not apply automated fixes to those files.
+
+---
+
+## §11 EXPERIMENT Record Structure and `analysis.py` Loading API
+
+Full reference: **`docs/save-structure.md`**
+
+Key rule: `analysis.py` must never parse batch/turn JSON files directly. Always use `masim.utils.load_results()`. `docs/save-structure.md` covers: how `simulation.yml` config keys map to save paths, the full EXPERIMENT directory layout, batch store JSON format, turn record JSON format, the complete `load_results` API tables, and the canonical `_load_data` pattern.
+
+### Quick summary of the on-disk layout
+
+After running a simulation with `record_path: EXPERIMENT/{Scenario}/{Variant}/records`, the framework writes:
+
+```
+EXPERIMENT/{Scenario}/{Variant}/
+├── records/
+│   ├── market/                         ← coordinator player
+│   │   ├── price/                      ← batch store (scenario-specific name)
+│   │   ├── fundamental/                ← batch store
+│   │   ├── volume/                     ← batch store
+│   │   ├── turns/                      ← per-round turn records
+│   │   └── messages/
+│   ├── {investor_id}/               ← one dir per investor player
+│   │   ├── turns/
+│   │   └── messages/
+│   └── ...
+└── communication/               ← set via communication.storage_path
+```
+
+Batch store names under `market/` depend on what the scenario's `Market.act()` registers. Common: `price`, `fundamental`, `volume`. Scenario-specific: `bubble_metric` (AssetBubble), `stock` (EquityPremium). Full details in `docs/save-structure.md`.
+
+### `analysis.py` loading compliance checklist
+
+- [ ] `from masim.utils import load_config, load_results` at top of file
+- [ ] Coordinator data via `player.batch(name).all()` — not manual file parsing
+- [ ] Investor data via `player.turns.payloads()` or `player.turns.field(name)`
+- [ ] `main()` calls `load_results(config)` then `_load_data(results)`
+- [ ] LLM/RuleLLM/Rag `analysis.py` imports `_load_data` from `Rule/analysis.py`
+- [ ] `py_compile` passes on all four variant `analysis.py` files
+
+### `analysis.py` output standard compliance checklist
+
+Every `Rule/analysis.py` must produce a structured validation report. When reviewing or repairing an `analysis.py`, verify all of the following:
+
+- [ ] Console output includes `=== {SCENARIO} SIMULATION VALIDATION: VALID|INVALID ===` header
+- [ ] `Overall Fit Score: XX.X% (threshold: 50%)` line present
+- [ ] At least 2 criterion blocks, each formatted as `[N] {NAME}` with `Observed:`, `Expected:`, `Score:`, `Assessment:`
+- [ ] `Expected:` lines reference calibration ranges from `analysis-bases.md §6`, not invented values
+- [ ] `Assessment:` text cites the calibration source (e.g., `Campbell & Sharpe 2009`)
+- [ ] `[SUMMARY]` block at end of validation output
+- [ ] `_validate_{scenario}()` docstring documents criterion weights (must sum to 1.0)
+- [ ] Saves `summary.json` with `metrics` dict and `validation` dict (`.score`, `.is_valid`, `.criteria`, `.interpretation`)
+- [ ] Saves `agent_volumes.json` or equivalent investor breakdown if applicable
+- [ ] Generates exactly 3 PNG files: `01_*.png`, `02_*.png`, `03_*.png` in `{base_dir}/analysis/`
+- [ ] `base_dir` is `os.path.dirname(config["setting"]["record_path"])`, not `record_path` itself

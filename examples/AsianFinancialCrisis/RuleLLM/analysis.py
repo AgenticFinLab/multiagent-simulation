@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-"""BlackMonday1987 RuleLLM Simulation Analysis
+"""AsianFinancialCrisis RuleLLM Simulation Analysis
 
-RuleLLM-variant analysis for the BlackMonday1987 simulation.
+RuleLLM-variant analysis for the AsianFinancialCrisis simulation.
 Reuses all metric/validation functions from Rule/analysis.py and adds
 Rule-Adherence Analysis (analysis-bases.md §3 Dimension 2).
 
@@ -10,8 +10,8 @@ RuleLLM-variant note (analysis-bases.md §4):
     Target: >= 80% directional alignment between LLM and Rule decisions.
 
 Usage:
-    python examples/BlackMonday1987/RuleLLM/analysis.py \\
-        -c configs/BlackMonday1987/RuleLLM/simulation.yml
+    python examples/AsianFinancialCrisis/RuleLLM/analysis.py \\
+        -c configs/AsianFinancialCrisis/RuleLLM/simulation.yml
 """
 
 import argparse
@@ -23,12 +23,12 @@ import numpy as np
 
 from masim.utils import load_config, load_results
 
-from examples.BlackMonday1987.Rule.analysis import (
+from examples.AsianFinancialCrisis.Rule.analysis import (
     _batch_to_rounds,
     _load_data,
-    _validate_black_monday,
+    _validate_asian_financial_crisis,
     _build_interpretation,
-    analyze_black_monday,
+    analyze_asian_financial_crisis,
 )
 
 
@@ -39,6 +39,9 @@ def analyze_rule_adherence(
 
     Measures the fraction of rounds where the LLM's action direction matches
     what the embedded rule would prescribe (as recorded in the decision trace).
+
+    A round is adherent if:
+        - Both Rule and LLM output the same action (buy/sell/hold)
 
     Target: adherence_rate >= 0.80 (analysis-bases.md §3)
 
@@ -93,14 +96,14 @@ def analyze_rule_adherence(
 
 
 def main() -> None:
-    """Run full BlackMonday1987 RuleLLM analysis pipeline.
+    """Run full AsianFinancialCrisis RuleLLM analysis pipeline.
 
-    Reuses all metrics from Rule/analysis.py via analyze_black_monday().
+    Reuses all metrics from Rule/analysis.py via analyze_asian_financial_crisis().
     Adds Rule-Adherence Analysis (analysis-bases.md §3 Dimension 2).
     Rule-adherence target: >= 80% directional alignment (analysis-bases.md §3).
     """
     parser = argparse.ArgumentParser(
-        description="Analyze BlackMonday1987 RuleLLM simulation results"
+        description="Analyze AsianFinancialCrisis RuleLLM simulation results"
     )
     parser.add_argument(
         "-c",
@@ -120,7 +123,7 @@ def main() -> None:
     data = _load_data(results)
 
     # Core analysis via Rule/analysis.py
-    summary = analyze_black_monday(data, config, output_dir)
+    summary = analyze_asian_financial_crisis(data, config, output_dir)
 
     # RuleLLM-specific: rule-adherence analysis
     adherence = analyze_rule_adherence(data["investor_payloads"])

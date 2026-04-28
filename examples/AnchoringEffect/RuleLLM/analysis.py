@@ -23,24 +23,24 @@ from typing import Any, Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.utils.config import load_config
+from masim.utils import load_config, load_results
 
 from examples.AnchoringEffect.Rule.analysis import (
-    _load_agent_records,
-    _load_price_records,
-    calculate_anchoring_bias_magnitude,
-    calculate_anchoring_persistence,
-    calculate_autocorrelation,
-    calculate_max_drawdown,
-    calculate_mean_abs_deviation,
-    calculate_price_deviation,
-    calculate_rolling_volatility,
-    calculate_agent_volumes,
+    _load_data,
+    _validate_anchoring_effect,
+    _build_interpretation,
+    _compute_mad,
+    _compute_half_life,
+    _compute_autocorrelation,
+    _compute_max_drawdown,
+    _compute_rolling_volatility,
+    _compute_bias_magnitude,
+    analyze_anchoring,
 )
 
 
 def analyze_rule_adherence(
-    agent_records: Dict[str, List[Dict[str, Any]]],
+    investor_payloads: Dict[str, Dict[int, Dict[str, Any]]],
 ) -> Dict[str, Any]:
     """Compute rule-adherence rate for RuleLLM agents — analysis-bases.md §3 Dimension 2.
 
@@ -53,20 +53,20 @@ def analyze_rule_adherence(
     Target: adherence_rate >= 0.80 (analysis-bases.md §3)
 
     Args:
-        agent_records: Dict mapping agent_id to list of decision records.
+        investor_payloads: Dict mapping agent_id to {round_num: payload_dict}.
 
     Returns:
         Dict with adherence stats per agent and aggregate.
     """
     adherence: Dict[str, Any] = {}
 
-    for agent_id, records in agent_records.items():
+    for agent_id, round_payloads in investor_payloads.items():
         rule_actions = []
         llm_actions = []
 
-        for record in records:
-            rule_action = record.get("rule_action", None)
-            llm_action = record.get("action", None)
+        for payload in round_payloads.values():
+            rule_action = payload.get("rule_action", None)
+            llm_action = payload.get("action", None)
             if rule_action is not None and llm_action is not None:
                 rule_actions.append(rule_action)
                 llm_actions.append(llm_action)
@@ -248,7 +248,8 @@ def create_visualizations_rulellm(
 def main() -> None:
     """Run full AnchoringEffect RuleLLM analysis pipeline.
 
-    Reuses all 8 metrics from Rule/analysis.py and adds Rule-Adherence Analysis.
+    Reuses all metrics from Rule/analysis.py via analyze_anchoring().
+    Adds Rule-Adherence Analysis (analysis-bases.md §3 Dimension 2).
     Rule-adherence target: >= 80% directional alignment (analysis-bases.md §3).
     """
     parser = argparse.ArgumentParser(
@@ -258,83 +259,35 @@ def main() -> None:
         "-c",
         "--config",
         type=str,
-        default="configs/AnchoringEffect/RuleLLM/simulation.yml",
+        required=True,
         help="Path to simulation config file",
     )
     args = parser.parse_args()
 
     config = load_config(args.config)
-    record_path = config["setting"]["record_path"]
+    base_dir = os.path.dirname(config["setting"]["record_path"])
+    output_dir = os.path.join(base_dir, "analysis")
+    os.makedirs(output_dir, exist_ok=True)
 
-    prices, fundamentals = _load_price_records(record_path)
+    results = load_results(config)
+    data = _load_data(results)
 
-    if not prices:
-        print("No simulation data found. Run simulation first.")
-        return
-
-    agent_records = _load_agent_records(record_path)
-
-    adjustment_factor = config.get("extras", {}).get("adjustment_factor", 0.3)
-
-    # Compute all 8 metrics from analysis-bases.md §2
-    price_deviation = calculate_price_deviation(prices, fundamentals)
-    mad = calculate_mean_abs_deviation(prices, fundamentals)
-    persistence = calculate_anchoring_persistence(prices, fundamentals)
-    rolling_vol = calculate_rolling_volatility(prices)
-    autocorr = calculate_autocorrelation(prices)
-    max_drawdown = calculate_max_drawdown(prices)
-    agent_volumes = calculate_agent_volumes(agent_records)
-    bias_magnitude = calculate_anchoring_bias_magnitude(
-        prices, fundamentals, adjustment_factor
-    )
+    # Core analysis via Rule/analysis.py
+    summary = analyze_anchoring(data, config, output_dir)
 
     # RuleLLM-specific: rule-adherence analysis
-    adherence = analyze_rule_adherence(agent_records)
+    adherence = analyze_rule_adherence(data["investor_payloads"])
+    summary["rule_adherence"] = adherence
 
-    analysis_path = os.path.join(record_path, "analysis")
-    os.makedirs(analysis_path, exist_ok=True)
-
-    create_visualizations_rulellm(
-        prices, fundamentals, agent_records, adherence, analysis_path
-    )
-
-    summary = {
-        "variant": "RuleLLM",
-        "simulation": "AnchoringEffect",
-        "rounds": len(prices),
-        "metrics": {
-            "price_deviation": price_deviation,
-            "mean_absolute_deviation_pct": float(mad * 100),
-            "anchoring_persistence": persistence,
-            "rolling_volatility": rolling_vol,
-            "return_autocorrelation_lag1": autocorr,
-            "max_drawdown": max_drawdown,
-            "agent_volumes": agent_volumes,
-            "anchoring_bias_magnitude": float(bias_magnitude),
-        },
-        "rule_adherence": adherence,
-    }
-
-    summary_path = os.path.join(analysis_path, "summary.json")
-    with open(summary_path, "w", encoding="utf-8") as fh:
-        json.dump(summary, fh, indent=2)
-
-    agent_volumes_path = os.path.join(analysis_path, "agent_volumes.json")
-    with open(agent_volumes_path, "w", encoding="utf-8") as fh:
-        json.dump(agent_volumes, fh, indent=2)
-
-    adherence_path = os.path.join(analysis_path, "rule_adherence.json")
+    adherence_path = os.path.join(output_dir, "rule_adherence.json")
     with open(adherence_path, "w", encoding="utf-8") as fh:
         json.dump(adherence, fh, indent=2)
 
-    print(f"Analysis complete. Results written to: {analysis_path}")
-    print(f"MAD: {mad * 100:.2f}%")
-    print(f"Half-life: {persistence['half_life_rounds']:.0f} rounds")
-    print(f"Max drawdown: {max_drawdown['max_drawdown_pct']:.2f}%")
-    print(f"Lag-1 autocorrelation: {autocorr:.3f}")
     agg = adherence.get("aggregate", {})
     if agg:
         print(f"Mean rule-adherence rate: {agg.get('mean_adherence_rate', 0):.1%}")
+
+    return summary
 
 
 if __name__ == "__main__":

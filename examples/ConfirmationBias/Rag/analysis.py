@@ -2,9 +2,8 @@
 """ConfirmationBias Rag Simulation Analysis
 
 Rag-variant analysis for the ConfirmationBias simulation.
-Reuses core metric functions from Rule/analysis.py and adds
-RAG knowledge-effect analysis specific to the Rag variant.
-See analysis-bases.md for metric definitions.
+Reuses all metric/validation functions from Rule/analysis.py and adds
+RAG Knowledge Effect Analysis (analysis-bases.md §3 — Rag-specific dimension).
 
 Usage:
     python examples/ConfirmationBias/Rag/analysis.py \\
@@ -14,90 +13,75 @@ Usage:
 import argparse
 import json
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict
 
-import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.utils.config import load_config
+from masim.utils import load_config, load_results
 
 from examples.ConfirmationBias.Rule.analysis import (
-    calculate_metrics,
-    load_simulation_data,
+    _batch_to_rounds,
+    _load_data,
+    _validate_confirmation_bias,
+    _build_interpretation,
+    analyze_confirmation_bias,
 )
-
-__all__ = ["analyze_rag_knowledge_effect", "main"]
 
 _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def analyze_rag_knowledge_effect(
-    agent_records: Dict[str, List[Dict[str, Any]]],
+    investor_payloads: Dict[str, Dict[int, Dict[str, Any]]],
 ) -> Dict[str, Any]:
-    """Compute RAG knowledge retrieval statistics for Rag agents.
-
-    Checks rag_context field in each per-round record to determine
-    whether the KnowledgeStore returned useful content.
-    Target retrieval success rate >= 0.70.
+    """Analyze RAG knowledge retrieval effects — analysis-bases.md §3 Rag-specific.
 
     Args:
-        agent_records: Mapping of agent_id → list of per-round record dicts.
-            Each record may contain "rag_context" key.
+        investor_payloads: Dict mapping agent_id to {round_num: payload_dict}.
 
     Returns:
-        Dict mapping agent_id → retrieval statistics.
+        Dict with RAG effect stats per agent and aggregate.
     """
-    rag_effect: Dict[str, Any] = {}
-    for agent_id, records in agent_records.items():
-        total_rag_rounds = 0
-        success_rounds = 0
+    rag_stats: Dict[str, Any] = {}
+
+    for agent_id, round_payloads in investor_payloads.items():
         failure_rounds = 0
-        for record in records:
-            rag_context = record.get("rag_context")
-            if rag_context is not None:
-                total_rag_rounds += 1
-                if rag_context != _RAG_FALLBACK and rag_context.strip():
-                    success_rounds += 1
-                else:
-                    failure_rounds += 1
-        if total_rag_rounds > 0:
-            retrieval_rate = float(success_rounds / total_rag_rounds)
-            rag_effect[agent_id] = {
-                "retrieval_success_rate": retrieval_rate,
-                "success_rounds": success_rounds,
-                "failure_rounds": failure_rounds,
-                "total_rag_rounds": total_rag_rounds,
-                "meets_target": (retrieval_rate >= 0.70),
-            }
-    return rag_effect
+        success_rounds = 0
+        total_rag_rounds = 0
 
+        for payload in round_payloads.values():
+            rag_context = payload.get("rag_context", None)
+            if rag_context is None:
+                continue
+            total_rag_rounds += 1
+            if rag_context.strip() == _RAG_FALLBACK.strip():
+                failure_rounds += 1
+            else:
+                success_rounds += 1
 
-def _load_agent_records(record_path: str) -> Dict[str, List[Dict[str, Any]]]:
-    """Load per-round records for all non-market agents."""
-    agent_records: Dict[str, List[Dict[str, Any]]] = {}
-    if not os.path.exists(record_path):
-        return agent_records
-    for agent_folder in os.listdir(record_path):
-        agent_path = os.path.join(record_path, agent_folder)
-        if not os.path.isdir(agent_path) or agent_folder in ("market", "analysis"):
+        if total_rag_rounds == 0:
+            rag_stats[agent_id] = {"note": "no rag_context field in records"}
             continue
-        records: List[Dict[str, Any]] = []
-        for fname in sorted(os.listdir(agent_path)):
-            if fname.endswith(".json"):
-                with open(os.path.join(agent_path, fname), "r", encoding="utf-8") as f:
-                    records.append(json.load(f))
-        if records:
-            agent_records[agent_folder] = records
-    return agent_records
+
+        rag_stats[agent_id] = {
+            "total_rag_rounds": total_rag_rounds,
+            "retrieval_success_rounds": success_rounds,
+            "retrieval_failure_rounds": failure_rounds,
+            "retrieval_failure_rate": float(failure_rounds / total_rag_rounds),
+        }
+
+    agents_with_data = [v for v in rag_stats.values() if "retrieval_failure_rate" in v]
+    if agents_with_data:
+        failure_rates = [v["retrieval_failure_rate"] for v in agents_with_data]
+        rag_stats["aggregate"] = {
+            "mean_retrieval_failure_rate": float(np.mean(failure_rates)),
+            "max_retrieval_failure_rate": float(np.max(failure_rates)),
+        }
+
+    return rag_stats
 
 
 def main() -> None:
-    """Run ConfirmationBias Rag analysis: metrics + RAG knowledge effect.
-
-    Implements analysis-bases.md §2 core metrics plus Rag-specific
-    retrieval analysis. Output written to
-    EXPERIMENT/ConfirmationBias/Rag/records/analysis/.
-    """
+    """Run full ConfirmationBias Rag analysis pipeline."""
     parser = argparse.ArgumentParser(
         description="Analyze ConfirmationBias Rag simulation results"
     )
@@ -105,116 +89,39 @@ def main() -> None:
         "-c",
         "--config",
         type=str,
-        default="configs/ConfirmationBias/Rag/simulation.yml",
+        required=True,
+        help="Path to simulation config file",
     )
     args = parser.parse_args()
 
     config = load_config(args.config)
-    record_path = config["setting"]["record_path"]
-    data = load_simulation_data(config)
+    base_dir = os.path.dirname(config["setting"]["record_path"])
+    output_dir = os.path.join(base_dir, "analysis")
+    os.makedirs(output_dir, exist_ok=True)
 
-    if not data["prices"]:
-        print("No simulation data found. Run simulation first.")
-        return
+    results = load_results(config)
+    data = _load_data(results)
 
-    metrics = calculate_metrics(data)
-    agent_records = _load_agent_records(record_path)
-    rag_effect = analyze_rag_knowledge_effect(agent_records)
+    summary = analyze_confirmation_bias(data, config, output_dir)
 
-    analysis_path = os.path.join(record_path, "analysis")
-    os.makedirs(analysis_path, exist_ok=True)
+    rag_stats = analyze_rag_knowledge_effect(data["investor_payloads"])
+    summary["rag_knowledge_effect"] = rag_stats
 
-    prices = np.array(data["prices"])
-    fundamentals = np.array(data["fundamentals"])
-    rounds = np.arange(len(prices))
+    rag_stats_path = os.path.join(output_dir, "rag_stats.json")
+    with open(rag_stats_path, "w", encoding="utf-8") as fh:
+        json.dump(rag_stats, fh, indent=2)
 
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    fig.suptitle(
-        "ConfirmationBias Rag Simulation Analysis", fontsize=14, fontweight="bold"
-    )
-
-    axes[0, 0].plot(rounds, prices, label="Asset Price", color="steelblue")
-    axes[0, 0].plot(
-        rounds, fundamentals, label="Fundamental", color="orange", linestyle="--"
-    )
-    axes[0, 0].set_title("Asset Price vs Fundamental (Rag)")
-    axes[0, 0].legend()
-    axes[0, 0].grid(True, alpha=0.3)
-
-    if len(fundamentals) > 0 and np.any(fundamentals > 0):
-        deviation_pct = (
-            (prices - fundamentals)
-            / np.where(fundamentals > 0, fundamentals, 1.0)
-            * 100
-        )
-        axes[0, 1].plot(rounds, deviation_pct, color="crimson")
-        axes[0, 1].axhline(y=0, color="black", linestyle="--", alpha=0.5)
-        axes[0, 1].axhline(
-            y=2, color="orange", linestyle=":", alpha=0.7, label="+2% bias threshold"
-        )
-        axes[0, 1].axhline(y=-2, color="orange", linestyle=":", alpha=0.7)
-        axes[0, 1].set_title("Price Deviation from Fundamental (%)")
-        axes[0, 1].legend()
-        axes[0, 1].grid(True, alpha=0.3)
-
-    if len(prices) > 1:
-        returns = np.diff(prices) / np.where(prices[:-1] > 0, prices[:-1], 1.0) * 100
-        axes[1, 0].plot(rounds[1:], returns, color="darkorange", alpha=0.7)
-        axes[1, 0].axhline(y=0, color="black", linestyle="--", alpha=0.5)
-        axes[1, 0].set_title("Round Returns (%) — Rag")
-        axes[1, 0].grid(True, alpha=0.3)
-
-    # RAG retrieval success rate bar chart
-    if rag_effect:
-        agent_ids = list(rag_effect.keys())
-        rates = [rag_effect[a]["retrieval_success_rate"] for a in agent_ids]
-        colors = ["green" if r >= 0.70 else "red" for r in rates]
-        bars = axes[1, 1].bar(range(len(agent_ids)), rates, color=colors, alpha=0.8)
-        axes[1, 1].axhline(
-            y=0.70, color="black", linestyle="--", linewidth=1.5, label="Target (70%)"
-        )
-        axes[1, 1].set_xticks(range(len(agent_ids)))
-        axes[1, 1].set_xticklabels(agent_ids, rotation=30, ha="right", fontsize=7)
-        axes[1, 1].set_ylim(0, 1.05)
-        axes[1, 1].set_title("RAG Retrieval Success Rate by Agent (target ≥70%)")
-        axes[1, 1].legend()
-        axes[1, 1].grid(True, alpha=0.3, axis="y")
-        for bar, rate in zip(bars, rates):
-            axes[1, 1].text(
-                bar.get_x() + bar.get_width() / 2,
-                bar.get_height() + 0.01,
-                f"{rate:.0%}",
-                ha="center",
-                va="bottom",
-                fontsize=7,
-            )
-    else:
-        axes[1, 1].text(
-            0.5,
-            0.5,
-            "No RAG retrieval data",
-            ha="center",
-            va="center",
-            transform=axes[1, 1].transAxes,
+    agg = rag_stats.get("aggregate", {})
+    if agg:
+        print(
+            f"Mean RAG retrieval failure rate: "
+            f"{agg.get('mean_retrieval_failure_rate', 0):.1%}"
         )
 
-    plt.tight_layout()
-    plt.savefig(
-        os.path.join(analysis_path, "confirmationbias_rag_analysis.png"), dpi=150
-    )
-    plt.close()
+    return summary
 
-    summary = {"variant": "Rag", **metrics, "rag_knowledge_effect": rag_effect}
-    with open(os.path.join(analysis_path, "summary.json"), "w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=2)
 
-    with open(
-        os.path.join(analysis_path, "rag_knowledge_effect.json"), "w", encoding="utf-8"
-    ) as f:
-        json.dump(rag_effect, f, indent=2)
-
-    print("Rag analysis complete. Results in:", analysis_path)
-
+__all__ = ["analyze_rag_knowledge_effect", "main"]
 
 if __name__ == "__main__":
     main()

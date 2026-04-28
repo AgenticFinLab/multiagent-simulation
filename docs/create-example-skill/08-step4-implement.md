@@ -119,48 +119,183 @@ if __name__ == "__main__":
 
 ### 4.1.4 `analysis.py` Structure (Rule Variant — Authoritative)
 
-**Reference**: `examples/AssetBubble/Rule/analysis.py`
+**Reference implementation**: `examples/AssetBubble/Rule/analysis.py`, `examples/AnchoringEffect/Rule/analysis.py`
+**Record structure + API reference**: `docs/save-structure.md`
 
-```python
-"""
-{SimulationName} Rule Variant — Analysis Script
+**Key rule**: Never parse EXPERIMENT files directly. Use `masim.utils.load_results()`.
 
-Loads simulation records and produces:
-1. Price dynamics plots
-2. Phenomenon-specific metrics
-3. Agent behavior summary
-4. Text report
+#### Required top-level functions
 
-Usage: python examples/{SimulationName}/Rule/analysis.py -c configs/{SimulationName}/Rule/simulation.yml
-"""
+| Function                                       | Purpose                                                                                                                                                 |
+|------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `_batch_to_rounds(values)`                     | Convert batch store list to `{round_num: value}` (1-based)                                                                                              |
+| `_load_data(results)`                          | Load all coordinator batch stores + investor turn payloads from `SimulationResults`                                                                     |
+| `_validate_{scenario}(...)`                    | Validate results against `analysis-bases.md §6` calibration targets; returns a result object with `.score`, `.is_valid`, `.criteria`, `.interpretation` |
+| `analyze_{scenario}(data, config, output_dir)` | Orchestrates metrics → validation → plots → `summary.json`; prints structured report                                                                    |
+| `main()`                                       | `load_config` → `load_results` → `_load_data` → `analyze_{scenario}`                                                                                    |
 
-__all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations"]
+#### Output standard: structured validation report
 
-def load_simulation_data(experiment_dir: str) -> dict:
-    """Load all simulation records from EXPERIMENT directory."""
+Every `Rule/analysis.py` **must** produce a console report in this exact format:
+
+```
+==================================================
+{SCENARIO NAME} ANALYSIS
+==================================================
+{Metric 1}: {value}  (target: {range from analysis-bases.md §6})
+{Metric 2}: {value}  (target: {range})
+...
+
+VALIDATION: === {SCENARIO} SIMULATION VALIDATION: VALID|INVALID ===
+Overall Fit Score: XX.X% (threshold: 50%)
+
+[1] {CRITERION NAME}
+    Observed: {observed value with units}
+    Expected: {calibration range} ({citation from analysis-bases.md §2})
+    Score: XX.X%
+    Assessment: {LABEL} — {1-2 sentences of qualitative discussion}
+    {Diagnostic advice if not optimal}
+
+[2] {CRITERION NAME}
     ...
 
-def calculate_metrics(data: dict) -> dict:
-    """
-    Calculate all metrics from analysis-bases.md §2.
-
-    Returns dict with keys:
-        price_metrics: {initial, final, min, max}
-        phenomenon_metrics: {[all phenomenon-specific metrics]}
-        market_metrics: {return_autocorrelation_ac1, annualized_vol_pct}
-    """
-    ...
-
-def create_visualizations(data: dict, metrics: dict, output_dir: str) -> None:
-    """Generate all plots from analysis-bases.md §7."""
-    ...
-
-def main():
-    """Entry point: parse config, load data, calculate metrics, create visualizations."""
-    ...
+[SUMMARY]
+{2-3 sentences on whether the phenomenon was reproduced.}
+{Academic references that calibrate the expected behavior.}
+Fit Score: XX.X%
 ```
 
-**Critical**: `Rule/analysis.py` must export exactly `__all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations"]`. All other variants import these three functions.
+Rules:
+- **Criterion labels** must match metric names from `analysis-bases.md §2`
+- **Expected ranges** must be the exact values from `analysis-bases.md §6` calibration table
+- **Citations** in Assessment text must name the calibration source (e.g., `Campbell & Sharpe 2009`, `Kindleberger 2000`)
+- **Threshold**: 50% overall Fit Score for VALID verdict (configurable per scenario)
+- **Per-criterion scores** are weighted; weights must sum to 1.0 (document in code comment)
+
+#### Validation logic pattern
+
+```python
+from dataclasses import dataclass, field
+from typing import Any, Dict
+
+@dataclass
+class {Scenario}ValidationResult:
+    is_valid: bool
+    score: float              # 0–1 overall Fit Score
+    criteria: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    interpretation: str = ""
+
+    def to_dict(self):
+        return {"is_valid": self.is_valid, "score": round(self.score, 4),
+                "criteria": self.criteria, "interpretation": self.interpretation}
+
+
+def _validate_{scenario}(
+    metric_a: float,   # from _compute_* functions
+    metric_b: float,
+    total_rounds: int,
+) -> {Scenario}ValidationResult:
+    """
+    Validate against analysis-bases.md §6 calibration targets.
+
+    Criteria (weights must sum to 1.0):
+        1. {Criterion A}  target: {range}  weight: 0.40  source: {citation}
+        2. {Criterion B}  target: {range}  weight: 0.40  source: {citation}
+        3. {Criterion C}  target: {range}  weight: 0.20  source: {citation}
+    """
+    criteria = {}
+
+    # --- Criterion 1: {Name} ---
+    score_a = 0.0
+    if {optimal_condition}:
+        score_a = 1.0
+    elif {marginal_condition}:
+        score_a = 0.5 + ...  # linear interpolation toward 1.0
+    else:
+        score_a = ...        # penalized score
+    criteria["{name}"] = {
+        "value": round(metric_a, 3),
+        "target": "{range}",
+        "score": round(score_a, 3),
+        "passed": {boolean_test},
+    }
+
+    # ... repeat for criteria 2, 3
+
+    overall = score_a * 0.40 + score_b * 0.40 + score_c * 0.20
+    is_valid = overall > 0.50 and {primary_condition}
+    interpretation = _build_interpretation(...)
+    return {Scenario}ValidationResult(is_valid=is_valid, score=overall,
+                                      criteria=criteria, interpretation=interpretation)
+```
+
+#### Interpretation builder pattern
+
+```python
+def _build_interpretation(
+    is_valid, overall_score,
+    metric_a, metric_b, ...,
+    score_a, score_b, ...,
+) -> str:
+    lines = []
+    verdict = "VALID" if is_valid else "INVALID"
+    lines.append(f"=== {SCENARIO} SIMULATION VALIDATION: {verdict} ===")
+    lines.append(f"Overall Fit Score: {overall_score:.1%} (threshold: 50%)")
+    lines.append("")
+
+    # One block per criterion:
+    lines.append("[1] {CRITERION NAME}")
+    lines.append(f"    Observed: {metric_a:.2f} {units}")
+    lines.append(f"    Expected: {range} ({citation})")
+    lines.append(f"    Score: {score_a:.1%}")
+    if {optimal}:   lines.append("    Assessment: OPTIMAL — ...")
+    elif {marginal}: lines.append("    Assessment: MARGINAL — ...")
+    else:           lines.append("    Assessment: INSUFFICIENT — ...")
+    lines.append("")
+
+    # [SUMMARY] block:
+    lines.append("[SUMMARY]")
+    if is_valid:
+        lines.append("The simulation successfully reproduces {phenomenon}: ...")
+        lines.append("Results are consistent with {primary references}.")
+    else:
+        lines.append("The simulation does not fully reproduce {phenomenon}.")
+        lines.append(f"Key issues: {', '.join(missing)}.")
+    lines.append(f"Fit Score: {overall_score:.1%}")
+    return "\n".join(lines)
+```
+
+#### Three mandatory plots
+
+Every `Rule/analysis.py` must produce exactly three PNG files in `{base_dir}/analysis/`:
+
+| Filename                     | Contents                                        | Primary metrics shown        |
+|------------------------------|-------------------------------------------------|------------------------------|
+| `01_{scenario}_dynamics.png` | Price vs. Fundamental time-series + Deviation % | Main phenomenon trajectory   |
+| `02_{scenario}_analysis.png` | Phenomenon-specific deep-dive                   | Scenario-specific metric(s)  |
+| `03_summary.png`             | Agent volume bar + Persistence/Residual chart   | Agent behavior + convergence |
+
+All three correspond directly to dimensions in `analysis-bases.md §3`.
+
+#### `main()` skeleton
+
+```python
+from masim.utils import load_config, load_results
+
+def main():
+    import argparse, os
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--config", required=True)
+    args = parser.parse_args()
+    config = load_config(args.config)
+    base_dir = os.path.dirname(config["setting"]["record_path"])
+    output_dir = os.path.join(base_dir, "analysis")
+    os.makedirs(output_dir, exist_ok=True)
+    results = load_results(config)
+    data = _load_data(results)
+    summary = analyze_{scenario}(data, config, output_dir)
+    return summary
+```
 
 ---
 
@@ -258,7 +393,8 @@ import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 
 from examples.{SimulationName}.Rule.analysis import (
-    load_simulation_data,
+    _batch_to_rounds,
+    _load_data,
     calculate_metrics,
     create_visualizations,
 )
@@ -268,7 +404,7 @@ def analyze_action_distribution(agent_records):
     ...
 
 def main():
-    # Reuses load_simulation_data, calculate_metrics, create_visualizations from Rule
+    # Reuses _load_data, calculate_metrics, create_visualizations from Rule
     # Adds action_distribution analysis
     ...
 ```
@@ -435,7 +571,20 @@ After implementing each variant:
 - [ ] LLM prompts do NOT name the phenomenon or mention the price formula
 - [ ] LLM prompts end with canonical `OUTPUT FORMAT` block using `<analysis>` tags
 - [ ] RuleLLM prompts have both `== PERSONA ==` and `== DECISION RULES ==` sections
-- [ ] `Rule/analysis.py` exports `__all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations"]`
-- [ ] LLM/RuleLLM/Rag `analysis.py` imports these 3 functions from `Rule/analysis.py`
+- [ ] `Rule/analysis.py` uses `load_results()` + `_load_data()` — no raw `os.listdir()` + `json.load()` on record files
+- [ ] `Rule/analysis.py` exports `_load_data` and metric/validation functions for import by other variants
+- [ ] LLM/RuleLLM/Rag `analysis.py` imports `_load_data` from `Rule/analysis.py`
 - [ ] Rag `analysis.py` defines `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"`
 - [ ] All `__init__.py` files present
+
+#### `analysis.py` output standard checklist
+
+- [ ] Console output header: `=== {SCENARIO} SIMULATION VALIDATION: VALID|INVALID ===`
+- [ ] Overall Fit Score printed with `(threshold: 50%)` label
+- [ ] Each criterion block has: `[N]` label, `Observed:`, `Expected:` with calibration range, `Score:`, `Assessment:` with qualitative discussion
+- [ ] Assessment text cites the calibration source from `analysis-bases.md §6` (author + year)
+- [ ] Criterion weights documented in `_validate_*` docstring and sum to 1.0
+- [ ] `[SUMMARY]` block present at end of interpretation
+- [ ] Produces exactly 3 PNG files: `01_*.png`, `02_*.png`, `03_*.png` in `{base_dir}/analysis/`
+- [ ] Saves `summary.json` containing `metrics`, `validation` (with `.score`, `.is_valid`, `.criteria`, `.interpretation`)
+- [ ] `py_compile` passes on all four variant `analysis.py` files

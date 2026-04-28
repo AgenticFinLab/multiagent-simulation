@@ -1,14 +1,15 @@
 #!/usr/bin/env python
-"""ArchegosCollapse LLM Simulation Analysis
+"""CurrencyCrisis LLM Simulation Analysis
 
-LLM-variant analysis for the ArchegosCollapse simulation.
+LLM-variant analysis for the CurrencyCrisis simulation.
 Reuses all metric/validation functions from Rule/analysis.py.
-LLM-variant note (analysis-bases.md §4): stochastic LLM decisions introduce
-additional variance vs. the deterministic Rule baseline.
+LLM-variant note (analysis-bases.md §5): stochastic LLM decisions introduce
+additional variance vs. the deterministic Rule baseline; LLM panic agents
+may deepen crisis and SelfFulfillingTrader LLM may exhibit richer coordination.
 
 Usage:
-    python examples/ArchegosCollapse/LLM/analysis.py \\
-        -c configs/ArchegosCollapse/LLM/simulation.yml
+    python examples/CurrencyCrisis/LLM/analysis.py \
+        -c configs/CurrencyCrisis/LLM/simulation.yml
 """
 
 import argparse
@@ -16,24 +17,24 @@ import os
 
 from masim.utils import load_config, load_results
 
-from examples.ArchegosCollapse.Rule.analysis import (
+from examples.CurrencyCrisis.Rule.analysis import (
     _batch_to_rounds,
     _load_data,
-    _validate_archegos_collapse,
+    _validate_currency_crisis,
     _build_interpretation,
-    analyze_archegos_collapse,
+    analyze_currency_crisis,
 )
 
 
 def main() -> None:
-    """Run full ArchegosCollapse LLM analysis pipeline.
+    """Run full CurrencyCrisis LLM analysis pipeline.
 
-    Reuses all metrics from Rule/analysis.py via analyze_archegos_collapse().
+    Reuses all metrics from Rule/analysis.py via analyze_currency_crisis().
     LLM-variant note: stochastic decisions may produce higher variance in
-    drawdown depth and cascade timing vs. Rule baseline.
+    attack intensity and self-fulfilling amplification vs. Rule baseline.
     """
     parser = argparse.ArgumentParser(
-        description="Analyze ArchegosCollapse LLM simulation results"
+        description="Analyze CurrencyCrisis LLM simulation results"
     )
     parser.add_argument(
         "-c",
@@ -52,7 +53,7 @@ def main() -> None:
     results = load_results(config)
     data = _load_data(results)
 
-    summary = analyze_archegos_collapse(data, config, output_dir)
+    summary = analyze_currency_crisis(data, config, output_dir)
     return summary
 
 

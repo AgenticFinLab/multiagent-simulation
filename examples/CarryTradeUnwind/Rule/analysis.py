@@ -1,280 +1,718 @@
 #!/usr/bin/env python
 """CarryTradeUnwind Rule-Based Simulation Analysis
 
-Authoritative analysis module for the CarryTradeUnwind simulation.
-All LLM, RuleLLM, and Rag variants import core functions from this module.
-See analysis-bases.md for full metric definitions and methodology.
+Analyzes simulation results for FX carry-trade cascade dynamics.
+Based on analysis-bases.md §6 calibration targets
+(Brunnermeier, Nagel & Pedersen 2009; Rogoff 1996; Lo & MacKinlay 1988).
 
 Usage:
-    python examples/CarryTradeUnwind/Rule/analysis.py \\
+    python examples/CarryTradeUnwind/Rule/analysis.py \
         -c configs/CarryTradeUnwind/Rule/simulation.yml
 """
 
 import argparse
 import json
 import os
-from typing import Any, Dict, List
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.utils.config import load_config
+from masim.utils import load_config, load_results
 
-__all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations"]
+__all__ = [
+    "_batch_to_rounds",
+    "_load_data",
+    "_validate_carry_trade_unwind",
+    "_build_interpretation",
+    "analyze_carry_trade_unwind",
+]
 
 
-def load_simulation_data(config: dict) -> dict:
-    """Load simulation data from experiment records.
+# ---------------------------------------------------------------------------
+# Data loading
+# ---------------------------------------------------------------------------
 
-    Reads per-round JSON records written by the Market agent to extract
-    the price series and fundamental series.
 
-    Args:
-        config: Parsed simulation YAML config (from masim.utils.config.load_config).
+def _batch_to_rounds(values: list) -> Dict[int, float]:
+    """Convert batch store list to {round_num: value}, round_num is 1-based."""
+    return {i + 1: v for i, v in enumerate(values)}
 
-    Returns:
-        dict with keys:
-            "prices"      — list[float] exchange rate per round
-            "fundamentals"— list[float] PPP fundamental per round
-            "deviations"  — list[float] (price-fundamental)/fundamental per round
+
+def _load_data(results) -> Dict[str, Any]:
+    """Load price/fundamental batch stores and investor turn payloads.
+
+    Returns
+    -------
+    dict with keys:
+        market_prices       : {round_num: float}
+        fundamentals        : {round_num: float}
+        investor_payloads   : {player_id: {round_num: dict}}
     """
-    record_path = config["setting"]["record_path"]
-    data: dict = {"prices": [], "fundamentals": [], "deviations": []}
+    market_prices: Dict[int, float] = {}
+    fundamentals: Dict[int, float] = {}
 
-    market_path = os.path.join(record_path, "market")
-    if os.path.exists(market_path):
-        for filename in sorted(os.listdir(market_path)):
-            if filename.endswith(".json"):
-                fpath = os.path.join(market_path, filename)
-                with open(fpath, "r", encoding="utf-8") as f:
-                    record = json.load(f)
-                custom = record.get("custom_state", {})
-                price = custom.get("price", 0.0)
-                fundamental = custom.get("fundamental", 0.0)
-                deviation = custom.get("deviation", 0.0)
-                data["prices"].append(float(price))
-                data["fundamentals"].append(float(fundamental))
-                data["deviations"].append(float(deviation))
+    for player in results.players_by_role("coordinator").values():
+        if "price" in player.batch_store_names:
+            market_prices.update(_batch_to_rounds(player.batch("price").all()))
+        if "fundamental" in player.batch_store_names:
+            fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
 
-    return data
-
-
-def calculate_metrics(data: dict) -> dict:
-    """Calculate CarryTradeUnwind-specific simulation metrics.
-
-    Implements all metrics defined in analysis-bases.md §2:
-      §2.1  max_drawdown_pct  — maximum peak-to-trough FX decline
-      §2.2  unwind_velocity   — fastest single-round FX move (abs)
-      §2.3  unwind_duration   — rounds with deviation < -0.05
-      §2.4  crisis_onset      — first round where deviation < -0.05
-      §2.5  recovery_ratio    — (|dev_min| - |dev_final|) / |dev_min|
-      §2.6  AC(1)             — first-order return autocorrelation
-      §2.7  annualized_vol    — std(returns) * sqrt(252) * 100
-
-    Args:
-        data: Output of load_simulation_data().
-
-    Returns:
-        Nested dict with keys: price_metrics, unwind_metrics, market_metrics.
-    """
-    prices = np.array(data["prices"])
-    fundamentals = np.array(data["fundamentals"])
-    deviations = np.array(data["deviations"])
-
-    if len(prices) == 0:
-        return {}
-
-    # §2.1 Max drawdown
-    peak = np.maximum.accumulate(prices)
-    drawdowns = (peak - prices) / np.where(peak > 0, peak, 1.0)
-    max_drawdown = float(np.max(drawdowns) * 100)
-
-    # §2.2 Unwind velocity (fastest single-round absolute move)
-    if len(prices) > 1:
-        price_changes = np.abs(np.diff(prices))
-        unwind_velocity = float(np.max(price_changes))
-    else:
-        unwind_velocity = 0.0
-
-    # §2.3 Unwind duration (rounds where deviation < -0.05)
-    CRISIS_THRESHOLD = -0.05
-    crisis_mask = deviations < CRISIS_THRESHOLD
-    unwind_duration = int(np.sum(crisis_mask))
-
-    # §2.4 Crisis onset round
-    crisis_indices = np.where(crisis_mask)[0]
-    crisis_onset = int(crisis_indices[0]) if len(crisis_indices) > 0 else -1
-
-    # §2.5 Recovery ratio
-    if len(deviations) > 0:
-        dev_min = float(np.min(deviations))
-        dev_final = float(deviations[-1])
-        if abs(dev_min) > 1e-9:
-            recovery_ratio = float((abs(dev_min) - abs(dev_final)) / abs(dev_min))
-        else:
-            recovery_ratio = 0.0
-    else:
-        dev_min = dev_final = recovery_ratio = 0.0
-
-    # §2.6 AC(1) — first-order return autocorrelation
-    if len(prices) > 2:
-        returns = np.diff(prices) / np.where(prices[:-1] > 0, prices[:-1], 1.0)
-        if len(returns) > 2:
-            ac1 = float(np.corrcoef(returns[:-1], returns[1:])[0, 1])
-        else:
-            ac1 = 0.0
-    else:
-        returns = np.array([])
-        ac1 = 0.0
-
-    # §2.7 Annualized volatility
-    if len(returns) > 1:
-        ann_vol = float(np.std(returns) * np.sqrt(252) * 100)
-    else:
-        ann_vol = 0.0
+    investor_payloads: Dict[str, Dict[int, dict]] = {}
+    for pid, player in results.players_by_role("player").items():
+        payloads = player.turns.payloads()
+        if payloads:
+            investor_payloads[pid] = payloads
 
     return {
-        "price_metrics": {
-            "initial": float(prices[0]),
-            "final": float(prices[-1]),
-            "min": float(np.min(prices)),
-            "max": float(np.max(prices)),
-        },
-        "unwind_metrics": {
-            "max_drawdown_pct": max_drawdown,
-            "unwind_velocity": unwind_velocity,
-            "unwind_duration_rounds": unwind_duration,
-            "crisis_onset_round": crisis_onset,
-            "recovery_ratio": recovery_ratio,
-            "min_deviation_pct": float(dev_min * 100),
-            "final_deviation_pct": float(dev_final * 100),
-        },
-        "market_metrics": {
-            "return_autocorrelation_ac1": ac1,
-            "annualized_vol_pct": ann_vol,
-        },
+        "market_prices": market_prices,
+        "fundamentals": fundamentals,
+        "investor_payloads": investor_payloads,
     }
 
 
-def create_visualizations(data: dict, output_path: str, variant: str = "Rule") -> None:
-    """Create standard CarryTradeUnwind analysis plots.
+# ---------------------------------------------------------------------------
+# Metrics
+# ---------------------------------------------------------------------------
 
-    Generates a 2×2 figure:
-      [0,0] FX rate vs PPP fundamental
-      [0,1] Deviation from fundamental (%)
-      [1,0] Round-by-round returns (%)
-      [1,1] Return distribution histogram
 
-    Args:
-        data:        Output of load_simulation_data().
-        output_path: Directory where the PNG will be saved.
-        variant:     Variant label for plot title and filename.
+def _compute_max_drawdown(prices_list: List[float]) -> float:
+    """Maximum peak-to-trough drawdown (%, positive value)."""
+    arr = np.array(prices_list)
+    if len(arr) < 2:
+        return 0.0
+    peak = arr[0]
+    max_dd = 0.0
+    for price in arr:
+        if price > peak:
+            peak = price
+        dd = (peak - price) / peak if peak > 0 else 0.0
+        if dd > max_dd:
+            max_dd = dd
+    return float(max_dd * 100)
+
+
+def _compute_recovery_ratio(prices_list: List[float]) -> float:
+    """Recovery ratio: (final - trough) / (peak - trough)."""
+    arr = np.array(prices_list)
+    if len(arr) < 2:
+        return 0.0
+    peak = float(np.max(arr))
+    trough = float(np.min(arr))
+    if peak == trough:
+        return 1.0
+    return float((arr[-1] - trough) / (peak - trough))
+
+
+def _compute_cascade_onset(
+    prices_list: List[float], fundamental: float, threshold: float = -0.05
+) -> Optional[int]:
+    """First round where deviation crosses threshold."""
+    for i, p in enumerate(prices_list):
+        if fundamental > 0 and (p - fundamental) / fundamental < threshold:
+            return i + 1
+    return None
+
+
+def _compute_peak_rolling_volatility(
+    prices_list: List[float], window: int = 10
+) -> float:
+    """Peak rolling volatility of returns (std dev per window, %)."""
+    arr = np.array(prices_list)
+    if len(arr) < 2:
+        return 0.0
+    returns = np.diff(arr) / arr[:-1] * 100
+    peak_vol = 0.0
+    for i in range(len(returns)):
+        start = max(0, i - window + 1)
+        vol = float(np.std(returns[start : i + 1]))
+        if vol > peak_vol:
+            peak_vol = vol
+    return peak_vol
+
+
+def _compute_rolling_volatility(
+    prices_list: List[float], window: int = 10
+) -> List[float]:
+    """Rolling volatility time series."""
+    arr = np.array(prices_list)
+    if len(arr) < 2:
+        return []
+    returns = np.diff(arr) / arr[:-1] * 100
+    vols = []
+    for i in range(len(returns)):
+        start = max(0, i - window + 1)
+        vols.append(float(np.std(returns[start : i + 1])))
+    return vols
+
+
+def _compute_autocorrelation(prices_list: List[float], lag: int = 1) -> float:
+    """Lag-1 autocorrelation of returns."""
+    arr = np.array(prices_list)
+    if len(arr) < lag + 2:
+        return 0.0
+    returns = np.diff(arr) / arr[:-1]
+    n = len(returns)
+    if n <= lag:
+        return 0.0
+    mu = np.mean(returns)
+    centered = returns - mu
+    autocov = np.mean(centered[: n - lag] * centered[lag:])
+    var = np.var(centered)
+    if var < 1e-12:
+        return 0.0
+    return float(autocov / var)
+
+
+def _compute_agent_vwap(
+    investor_payloads: Dict[str, Dict[int, dict]],
+    market_prices: Dict[int, float],
+) -> Dict[str, Dict[str, float]]:
+    """Compute VWAP and total volume by agent."""
+    vwap_data: Dict[str, Dict[str, float]] = {}
+    for aid, round_payloads in investor_payloads.items():
+        price_volume_sum = 0.0
+        total_vol = 0.0
+        total_buy = 0.0
+        total_sell = 0.0
+        for rnd, payload in round_payloads.items():
+            qty = float(payload.get("quantity", 0))
+            price = market_prices.get(rnd, 0.0)
+            abs_qty = abs(qty)
+            price_volume_sum += abs_qty * price
+            total_vol += abs_qty
+            if qty > 0:
+                total_buy += qty
+            else:
+                total_sell += abs_qty
+        vwap_data[aid] = {
+            "vwap": price_volume_sum / total_vol if total_vol > 0 else 0.0,
+            "total_volume": total_vol,
+            "total_buy": total_buy,
+            "total_sell": total_sell,
+        }
+    return vwap_data
+
+
+# ---------------------------------------------------------------------------
+# Validation
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class CarryTradeUnwindValidationResult:
+    """Result of CarryTradeUnwind simulation validation."""
+
+    is_valid: bool
+    score: float
+    criteria: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    interpretation: str = ""
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "is_valid": self.is_valid,
+            "score": round(self.score, 4),
+            "criteria": self.criteria,
+            "interpretation": self.interpretation,
+        }
+
+
+def _validate_carry_trade_unwind(
+    max_drawdown_pct: float,
+    recovery_ratio: float,
+    peak_volatility_pct: float,
+    autocorr_lag1: float,
+    total_rounds: int,
+) -> CarryTradeUnwindValidationResult:
+    """Validate CarryTradeUnwind results against analysis-bases.md §6.
+
+    Criteria
+    --------
+    1. Max FX drawdown     target [10%, 25%]  weight 0.35  (Brunnermeier et al. 2009)
+    2. Recovery ratio      target [0.3, 0.7]  weight 0.25  (Rogoff 1996 PPP convergence)
+    3. Peak volatility     target > 20%       weight 0.20  (BIS 2022; Menkhoff 2012)
+    4. AC1 cascade         target > +0.2      weight 0.20  (Lo & MacKinlay 1988)
     """
-    prices = np.array(data["prices"])
-    fundamentals = np.array(data["fundamentals"])
+    criteria = {}
 
-    if len(prices) == 0:
-        return
+    # --- Criterion 1: Max drawdown in [10%, 25%] ---
+    if 10.0 <= max_drawdown_pct <= 25.0:
+        dd_score = 1.0
+    elif 5.0 <= max_drawdown_pct < 10.0:
+        dd_score = 0.4 + (max_drawdown_pct - 5.0) / 5.0 * 0.6
+    elif 25.0 < max_drawdown_pct <= 40.0:
+        dd_score = 1.0 - (max_drawdown_pct - 25.0) / 15.0 * 0.5
+    elif max_drawdown_pct > 40.0:
+        dd_score = 0.1
+    else:
+        dd_score = max_drawdown_pct / 10.0 * 0.4
 
-    rounds = np.arange(len(prices))
+    criteria["max_drawdown"] = {
+        "value": round(max_drawdown_pct, 3),
+        "target": "10–25%",
+        "score": round(dd_score, 3),
+        "passed": 5.0 <= max_drawdown_pct <= 40.0,
+    }
 
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    fig.suptitle(
-        f"CarryTradeUnwind {variant} Simulation Analysis",
-        fontsize=14,
-        fontweight="bold",
+    # --- Criterion 2: Recovery ratio in [0.3, 0.7] ---
+    if 0.3 <= recovery_ratio <= 0.7:
+        rr_score = 1.0
+    elif 0.1 <= recovery_ratio < 0.3:
+        rr_score = 0.4 + (recovery_ratio - 0.1) / 0.2 * 0.6
+    elif 0.7 < recovery_ratio <= 0.9:
+        rr_score = 1.0 - (recovery_ratio - 0.7) / 0.2 * 0.4
+    elif recovery_ratio > 0.9:
+        rr_score = 0.3
+    else:
+        rr_score = recovery_ratio / 0.3 * 0.4
+
+    criteria["recovery_ratio"] = {
+        "value": round(recovery_ratio, 4),
+        "target": "0.3–0.7",
+        "score": round(rr_score, 3),
+        "passed": 0.1 <= recovery_ratio <= 0.9,
+    }
+
+    # --- Criterion 3: Peak volatility > 20% (annualized-equivalent) ---
+    # We use rolling vol in % per round; scale by sqrt(252) is scenario-specific.
+    # Here we use raw peak rolling vol as proxy.
+    if peak_volatility_pct >= 3.0:
+        vol_score = min(1.0, 0.6 + (peak_volatility_pct - 3.0) / 5.0 * 0.4)
+    elif peak_volatility_pct >= 1.5:
+        vol_score = 0.3 + (peak_volatility_pct - 1.5) / 1.5 * 0.3
+    else:
+        vol_score = peak_volatility_pct / 1.5 * 0.3
+
+    criteria["peak_volatility"] = {
+        "value": round(peak_volatility_pct, 3),
+        "target": ">3% per round (≈>20% annualized)",
+        "score": round(vol_score, 3),
+        "passed": peak_volatility_pct >= 1.5,
+    }
+
+    # --- Criterion 4: AC1 > +0.2 ---
+    if autocorr_lag1 >= 0.20:
+        ac_score = min(1.0, 0.6 + (autocorr_lag1 - 0.20) / 0.30 * 0.4)
+    elif 0.10 <= autocorr_lag1 < 0.20:
+        ac_score = 0.3 + (autocorr_lag1 - 0.10) / 0.10 * 0.3
+    elif autocorr_lag1 < 0.0:
+        ac_score = max(0.0, 0.1 + autocorr_lag1 * 0.5)
+    else:
+        ac_score = autocorr_lag1 / 0.20 * 0.3
+
+    criteria["autocorrelation"] = {
+        "value": round(autocorr_lag1, 4),
+        "target": ">+0.2",
+        "score": round(ac_score, 3),
+        "passed": autocorr_lag1 >= 0.10,
+    }
+
+    overall_score = (
+        dd_score * 0.35 + rr_score * 0.25 + vol_score * 0.20 + ac_score * 0.20
+    )
+    is_valid = overall_score > 0.50 and max_drawdown_pct >= 3.0
+
+    interpretation = _build_interpretation(
+        is_valid=is_valid,
+        overall_score=overall_score,
+        max_drawdown_pct=max_drawdown_pct,
+        recovery_ratio=recovery_ratio,
+        peak_volatility_pct=peak_volatility_pct,
+        autocorr_lag1=autocorr_lag1,
+        total_rounds=total_rounds,
+        dd_score=dd_score,
+        rr_score=rr_score,
+        vol_score=vol_score,
+        ac_score=ac_score,
     )
 
-    # [0,0] FX rate vs PPP fundamental
-    axes[0, 0].plot(rounds, prices, label="FX Rate", color="steelblue")
-    axes[0, 0].plot(
-        rounds, fundamentals, label="Fundamental (PPP)", color="orange", linestyle="--"
+    return CarryTradeUnwindValidationResult(
+        is_valid=is_valid,
+        score=overall_score,
+        criteria=criteria,
+        interpretation=interpretation,
     )
-    axes[0, 0].set_title("FX Rate vs PPP Fundamental")
-    axes[0, 0].set_xlabel("Round")
-    axes[0, 0].set_ylabel("Price")
-    axes[0, 0].legend()
-    axes[0, 0].grid(True, alpha=0.3)
 
-    # [0,1] Deviation (%)
-    if len(fundamentals) > 0 and np.any(fundamentals > 0):
-        deviation_pct = (
-            (prices - fundamentals)
-            / np.where(fundamentals > 0, fundamentals, 1.0)
-            * 100
-        )
-        axes[0, 1].plot(rounds, deviation_pct, color="crimson")
-        axes[0, 1].axhline(y=0, color="black", linestyle="--", alpha=0.5)
-        axes[0, 1].axhline(
-            y=-5, color="red", linestyle=":", alpha=0.7, label="-5% crisis threshold"
-        )
-        axes[0, 1].set_title("Price Deviation from Fundamental (%)")
-        axes[0, 1].set_xlabel("Round")
-        axes[0, 1].set_ylabel("Deviation (%)")
-        axes[0, 1].legend()
-        axes[0, 1].grid(True, alpha=0.3)
 
-    # [1,0] Returns
-    if len(prices) > 1:
-        returns = np.diff(prices) / np.where(prices[:-1] > 0, prices[:-1], 1.0) * 100
-        axes[1, 0].plot(rounds[1:], returns, color="darkorange", alpha=0.7)
-        axes[1, 0].axhline(y=0, color="black", linestyle="--", alpha=0.5)
-        axes[1, 0].set_title("Round Returns (%)")
-        axes[1, 0].set_xlabel("Round")
-        axes[1, 0].set_ylabel("Return (%)")
-        axes[1, 0].grid(True, alpha=0.3)
+def _build_interpretation(
+    is_valid: bool,
+    overall_score: float,
+    max_drawdown_pct: float,
+    recovery_ratio: float,
+    peak_volatility_pct: float,
+    autocorr_lag1: float,
+    total_rounds: int,
+    dd_score: float,
+    rr_score: float,
+    vol_score: float,
+    ac_score: float,
+) -> str:
+    """Build structured validation report following analysis-bases.md §6."""
+    verdict = "VALID" if is_valid else "INVALID"
+    lines = []
+    lines.append(f"=== CARRY TRADE UNWIND SIMULATION VALIDATION: {verdict} ===")
+    lines.append(f"Overall Fit Score: {overall_score:.1%} (threshold: 50%)")
+    lines.append("")
 
-        # [1,1] Return distribution
-        axes[1, 1].hist(
-            returns, bins=30, color="steelblue", alpha=0.7, edgecolor="white"
+    # Criterion 1
+    if max_drawdown_pct >= 10.0:
+        dd_assess = "PASS — FX drawdown consistent with carry-trade crisis literature."
+    elif max_drawdown_pct >= 5.0:
+        dd_assess = (
+            "WEAK — Drawdown present but below calibration; increase LCF leverage."
         )
-        axes[1, 1].set_title("Return Distribution")
-        axes[1, 1].set_xlabel("Return (%)")
-        axes[1, 1].set_ylabel("Frequency")
-        axes[1, 1].grid(True, alpha=0.3)
+    else:
+        dd_assess = "FAIL — Drawdown too shallow; LCF stop-loss not triggered."
+    lines.append("[1] FX CASCADE DEPTH (MAX DRAWDOWN)")
+    lines.append(f"    Observed: Max drawdown = {max_drawdown_pct:.2f}%")
+    lines.append("    Expected: 10–25% (Brunnermeier, Nagel & Pedersen 2009)")
+    lines.append(f"    Score: {dd_score:.1%}")
+    lines.append(f"    Assessment: {dd_assess}")
+    lines.append("")
+
+    # Criterion 2
+    if 0.3 <= recovery_ratio <= 0.7:
+        rr_assess = "PASS — Partial recovery consistent with PPP convergence dynamics."
+    elif recovery_ratio < 0.3:
+        rr_assess = "WEAK — Recovery insufficient; increase γ or FCB position_size."
+    else:
+        rr_assess = "WEAK — Recovery too complete; crisis may be under-parameterized."
+    lines.append("[2] RECOVERY DYNAMICS (RECOVERY RATIO)")
+    lines.append(f"    Observed: Recovery ratio = {recovery_ratio:.3f}")
+    lines.append("    Expected: 0.3–0.7 (Rogoff 1996 PPP convergence)")
+    lines.append(f"    Score: {rr_score:.1%}")
+    lines.append(f"    Assessment: {rr_assess}")
+    lines.append("")
+
+    # Criterion 3
+    if peak_volatility_pct >= 3.0:
+        vol_assess = (
+            "PASS — Crisis-level volatility consistent with carry crash turbulence."
+        )
+    elif peak_volatility_pct >= 1.5:
+        vol_assess = "WEAK — Moderate volatility; cascade partially active."
+    else:
+        vol_assess = "FAIL — Volatility too low; no crisis-level turbulence."
+    lines.append("[3] CRISIS INTENSITY (PEAK ROLLING VOLATILITY)")
+    lines.append(
+        f"    Observed: Peak 10-round volatility = {peak_volatility_pct:.2f}% per round"
+    )
+    lines.append(
+        "    Expected: >3% per round ≈ >20% annualized (BIS 2022; Menkhoff et al. 2012)"
+    )
+    lines.append(f"    Score: {vol_score:.1%}")
+    lines.append(f"    Assessment: {vol_assess}")
+    lines.append("")
+
+    # Criterion 4
+    if autocorr_lag1 >= 0.20:
+        ac_assess = (
+            "PASS — Positive momentum confirms carry-trade cascade self-reinforcement."
+        )
+    elif autocorr_lag1 >= 0.10:
+        ac_assess = "WEAK — Mild momentum; cascade partially self-reinforcing."
+    else:
+        ac_assess = "FAIL — No momentum signature; cascade not self-reinforcing."
+    lines.append("[4] CASCADE SELF-REINFORCEMENT (RETURN AUTOCORRELATION AC1)")
+    lines.append(f"    Observed: Lag-1 autocorrelation = {autocorr_lag1:.3f}")
+    lines.append("    Expected: >+0.2 (Lo & MacKinlay 1988 momentum detection)")
+    lines.append(f"    Score: {ac_score:.1%}")
+    lines.append(f"    Assessment: {ac_assess}")
+    lines.append("")
+
+    # Summary
+    lines.append("[SUMMARY]")
+    if is_valid:
+        lines.append(
+            f"The simulation successfully reproduces carry-trade unwind cascade dynamics: "
+            f"a {max_drawdown_pct:.1f}% drawdown with "
+            f"recovery ratio {recovery_ratio:.2f}, "
+            f"peak volatility {peak_volatility_pct:.1f}% per round, and AC1 {autocorr_lag1:.2f}. "
+            f"Fit Score: {overall_score:.1%}."
+        )
+    else:
+        lines.append(
+            f"The simulation does not fully reproduce carry-trade unwind dynamics. "
+            f"Overall Fit Score {overall_score:.1%} is below the 50% threshold. "
+            f"Key issues: "
+            + ("drawdown too low; " if max_drawdown_pct < 10.0 else "")
+            + ("recovery insufficient; " if recovery_ratio < 0.3 else "")
+            + ("volatility too low; " if peak_volatility_pct < 3.0 else "")
+            + ("no momentum; " if autocorr_lag1 < 0.10 else "")
+            + "Review analysis-bases.md §6 Validation Failure Diagnostics."
+        )
+    lines.append(f"Fit Score: {overall_score:.1%}")
+
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Visualizations
+# ---------------------------------------------------------------------------
+
+
+def _create_visualizations(
+    market_prices: Dict[int, float],
+    fundamentals: Dict[int, float],
+    investor_payloads: Dict[str, Dict[int, dict]],
+    rolling_vols: List[float],
+    cascade_onset_round: Optional[int],
+    output_dir: str,
+) -> None:
+    """Create 3 analysis plots per analysis-bases.md §7."""
+    rounds_sorted = sorted(market_prices.keys())
+    prices_list = [market_prices[r] for r in rounds_sorted]
+    fund_list = [fundamentals.get(r, 100.0) for r in rounds_sorted]
+    rounds_arr = np.array(rounds_sorted)
+    prices_arr = np.array(prices_list)
+    fund_arr = np.array(fund_list)
+    deviation = (prices_arr - fund_arr) / fund_arr * 100
+
+    # ---- Plot 01: Price Dynamics ----
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    fig.suptitle("CarryTradeUnwind — FX Rate Dynamics", fontsize=13, fontweight="bold")
+
+    axes[0].plot(rounds_arr, prices_arr, label="FX Rate", color="red", linewidth=1.5)
+    axes[0].plot(
+        rounds_arr,
+        fund_arr,
+        label="Fundamental (PPP)",
+        color="blue",
+        linestyle="--",
+        linewidth=1.2,
+    )
+    if cascade_onset_round:
+        axes[0].axvline(
+            x=cascade_onset_round,
+            color="orange",
+            linestyle=":",
+            label=f"Cascade onset (r={cascade_onset_round})",
+        )
+    axes[0].set_xlabel("Round")
+    axes[0].set_ylabel("FX Rate")
+    axes[0].set_title("FX Rate vs. Fundamental")
+    axes[0].legend(fontsize=8)
+    axes[0].grid(True, alpha=0.3)
+
+    axes[1].plot(rounds_arr, deviation, color="purple", linewidth=1.2)
+    axes[1].axhline(y=0, color="black", linestyle="--", alpha=0.5)
+    for th in [-5, -10, -15]:
+        axes[1].axhline(y=th, color="gray", linestyle=":", alpha=0.4)
+    axes[1].set_xlabel("Round")
+    axes[1].set_ylabel("Deviation (%)")
+    axes[1].set_title("FX Deviation from Fundamental")
+    axes[1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    fname = f"carrytradeunwind_{variant.lower()}_analysis.png"
-    plt.savefig(os.path.join(output_path, fname), dpi=150)
+    plt.savefig(
+        os.path.join(output_dir, "01_price_dynamics.png"),
+        dpi=150,
+        bbox_inches="tight",
+    )
+    plt.close()
+
+    # ---- Plot 02: Cascade Dynamics ----
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    fig.suptitle(
+        "CarryTradeUnwind — Cascade Intensity Dynamics", fontsize=13, fontweight="bold"
+    )
+
+    if rolling_vols:
+        vol_rounds = rounds_arr[1:] if len(rounds_arr) > 1 else rounds_arr
+        if len(vol_rounds) == len(rolling_vols):
+            axes[0].plot(vol_rounds, rolling_vols, color="darkorange", linewidth=1.2)
+        else:
+            axes[0].plot(rolling_vols, color="darkorange", linewidth=1.2)
+        axes[0].axhline(
+            y=3.0, color="red", linestyle=":", alpha=0.5, label="3% threshold"
+        )
+        axes[0].set_xlabel("Round")
+        axes[0].set_ylabel("Rolling Volatility (%)")
+        axes[0].set_title("10-Round Rolling Volatility")
+        axes[0].legend(fontsize=8)
+        axes[0].grid(True, alpha=0.3)
+
+    if len(prices_arr) > 1:
+        returns = np.diff(prices_arr) / prices_arr[:-1] * 100
+        axes[1].bar(rounds_arr[1:], returns, color="crimson", alpha=0.7)
+        axes[1].axhline(y=0, color="black", linestyle="--", alpha=0.5)
+        axes[1].set_xlabel("Round")
+        axes[1].set_ylabel("Return (%)")
+        axes[1].set_title("Per-Round FX Returns")
+        axes[1].grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig(
+        os.path.join(output_dir, "02_cascade_dynamics.png"),
+        dpi=150,
+        bbox_inches="tight",
+    )
+    plt.close()
+
+    # ---- Plot 03: Agent Summary ----
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    fig.suptitle(
+        "CarryTradeUnwind — Agent Activity Summary", fontsize=13, fontweight="bold"
+    )
+
+    agent_ids = sorted(investor_payloads.keys())
+    if agent_ids:
+        vwap_data = _compute_agent_vwap(investor_payloads, market_prices)
+        vwaps = [vwap_data[a]["vwap"] for a in agent_ids]
+        volumes = [vwap_data[a]["total_volume"] for a in agent_ids]
+        x_pos = np.arange(len(agent_ids))
+        axes[0].bar(x_pos, vwaps, color="steelblue", alpha=0.8)
+        if fund_arr.size > 0:
+            axes[0].axhline(
+                y=float(fund_arr[0]),
+                color="blue",
+                linestyle="--",
+                alpha=0.7,
+                label=f"Fundamental={fund_arr[0]:.1f}",
+            )
+        axes[0].set_xticks(x_pos)
+        axes[0].set_xticklabels(agent_ids, rotation=30, ha="right", fontsize=8)
+        axes[0].set_title("Agent VWAP")
+        axes[0].set_ylabel("VWAP")
+        axes[0].legend(fontsize=8)
+        axes[0].grid(True, alpha=0.3)
+
+        axes[1].bar(x_pos, volumes, color="coral", alpha=0.8)
+        axes[1].set_xticks(x_pos)
+        axes[1].set_xticklabels(agent_ids, rotation=30, ha="right", fontsize=8)
+        axes[1].set_title("Agent Total Trading Volume")
+        axes[1].set_ylabel("Total Volume")
+        axes[1].grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig(
+        os.path.join(output_dir, "03_summary.png"), dpi=150, bbox_inches="tight"
+    )
     plt.close()
 
 
-def main() -> None:
-    """Run CarryTradeUnwind Rule analysis: compute metrics + generate plots.
+# ---------------------------------------------------------------------------
+# Orchestrator
+# ---------------------------------------------------------------------------
 
-    Implements analysis-bases.md §2 core metrics. Output written to
-    EXPERIMENT/CarryTradeUnwind/Rule/records/analysis/.
-    """
-    parser = argparse.ArgumentParser(
-        description="Analyze CarryTradeUnwind Rule simulation results"
+
+def analyze_carry_trade_unwind(
+    data: Dict[str, Any],
+    config: dict,
+    output_dir: str,
+) -> Dict[str, Any]:
+    """Run full CarryTradeUnwind analysis pipeline."""
+    market_prices = data["market_prices"]
+    fundamentals = data["fundamentals"]
+    investor_payloads = data["investor_payloads"]
+
+    rounds_sorted = sorted(market_prices.keys())
+    prices_list = [market_prices[r] for r in rounds_sorted]
+    fund_value = float(np.mean(list(fundamentals.values()))) if fundamentals else 100.0
+    total_rounds = len(rounds_sorted)
+
+    # Metrics
+    max_drawdown_pct = _compute_max_drawdown(prices_list)
+    recovery_ratio = _compute_recovery_ratio(prices_list)
+    cascade_onset_round = _compute_cascade_onset(
+        prices_list, fund_value, threshold=-0.05
     )
+    peak_volatility_pct = _compute_peak_rolling_volatility(prices_list)
+    rolling_vols = _compute_rolling_volatility(prices_list)
+    autocorr = _compute_autocorrelation(prices_list)
+
+    # Agent VWAP
+    vwap_data = _compute_agent_vwap(investor_payloads, market_prices)
+
+    # Validation
+    validation = _validate_carry_trade_unwind(
+        max_drawdown_pct=max_drawdown_pct,
+        recovery_ratio=recovery_ratio,
+        peak_volatility_pct=peak_volatility_pct,
+        autocorr_lag1=autocorr,
+        total_rounds=total_rounds,
+    )
+
+    # Plots
+    print(f"Generating analysis plots in {output_dir}/")
+    _create_visualizations(
+        market_prices=market_prices,
+        fundamentals=fundamentals,
+        investor_payloads=investor_payloads,
+        rolling_vols=rolling_vols,
+        cascade_onset_round=cascade_onset_round,
+        output_dir=output_dir,
+    )
+
+    # Summary
+    summary = {
+        "scenario": "CarryTradeUnwind",
+        "variant": "Rule",
+        "total_rounds": total_rounds,
+        "fundamental_value": round(fund_value, 4),
+        "metrics": {
+            "max_drawdown_pct": round(max_drawdown_pct, 4),
+            "recovery_ratio": round(recovery_ratio, 4),
+            "cascade_onset_round": cascade_onset_round,
+            "peak_rolling_vol_pct": round(peak_volatility_pct, 4),
+            "return_autocorr_lag1": round(autocorr, 4),
+        },
+        "price": {
+            "initial": round(prices_list[0], 4) if prices_list else None,
+            "final": round(prices_list[-1], 4) if prices_list else None,
+            "min": round(min(prices_list), 4) if prices_list else None,
+            "max": round(max(prices_list), 4) if prices_list else None,
+        },
+        "agent_vwap": {
+            k: {sk: round(sv, 4) for sk, sv in v.items()} for k, v in vwap_data.items()
+        },
+        "validation": validation.to_dict(),
+    }
+
+    with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2)
+
+    # Console output
+    print("\n" + "=" * 50)
+    print("CARRY TRADE UNWIND ANALYSIS")
+    print("=" * 50)
+    print(f"Max drawdown: {max_drawdown_pct:.2f}%  (target: 10–25%)")
+    print(f"Recovery ratio: {recovery_ratio:.3f}  (target: 0.3–0.7)")
+    print(f"Peak volatility: {peak_volatility_pct:.2f}% per round  (target: >3%)")
+    print(f"Lag-1 autocorrelation: {autocorr:.3f}  (target: >+0.2)")
+    print(f"\nVALIDATION: {validation.interpretation}")
+    print(f"Fit Score: {validation.score:.1%}")
+
+    return summary
+
+
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
+
+
+def main():
+    """Run CarryTradeUnwind Rule analysis."""
+    parser = argparse.ArgumentParser(description="Analyze CarryTradeUnwind simulation")
     parser.add_argument(
         "-c",
         "--config",
         type=str,
-        default="configs/CarryTradeUnwind/Rule/simulation.yml",
+        required=True,
+        help="Path to simulation configuration file (YAML)",
     )
     args = parser.parse_args()
 
     config = load_config(args.config)
-    data = load_simulation_data(config)
+    base_dir = os.path.dirname(config["setting"]["record_path"])
+    output_dir = os.path.join(base_dir, "analysis")
+    os.makedirs(output_dir, exist_ok=True)
 
-    if not data["prices"]:
-        print("No simulation data found. Run simulation first.")
-        return
-
-    metrics = calculate_metrics(data)
-
-    analysis_path = os.path.join(config["setting"]["record_path"], "analysis")
-    os.makedirs(analysis_path, exist_ok=True)
-
-    create_visualizations(data, analysis_path, variant="Rule")
-
-    with open(os.path.join(analysis_path, "metrics.json"), "w", encoding="utf-8") as f:
-        json.dump(metrics, f, indent=2)
-
-    print("Analysis complete. Results in:", analysis_path)
-    print(json.dumps(metrics, indent=2))
+    results = load_results(config)
+    data = _load_data(results)
+    summary = analyze_carry_trade_unwind(data, config, output_dir)
+    return summary
 
 
 if __name__ == "__main__":

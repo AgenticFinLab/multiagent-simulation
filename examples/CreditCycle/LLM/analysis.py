@@ -1,14 +1,15 @@
 #!/usr/bin/env python
-"""ArchegosCollapse LLM Simulation Analysis
+"""CreditCycle LLM Simulation Analysis
 
-LLM-variant analysis for the ArchegosCollapse simulation.
+LLM-variant analysis for the CreditCycle simulation.
 Reuses all metric/validation functions from Rule/analysis.py.
-LLM-variant note (analysis-bases.md §4): stochastic LLM decisions introduce
-additional variance vs. the deterministic Rule baseline.
+LLM-variant note (analysis-bases.md §5): stochastic LLM decisions introduce
+additional variance vs. the deterministic Rule baseline; boom phases may extend
+via narrative momentum.
 
 Usage:
-    python examples/ArchegosCollapse/LLM/analysis.py \\
-        -c configs/ArchegosCollapse/LLM/simulation.yml
+    python examples/CreditCycle/LLM/analysis.py \
+        -c configs/CreditCycle/LLM/simulation.yml
 """
 
 import argparse
@@ -16,24 +17,24 @@ import os
 
 from masim.utils import load_config, load_results
 
-from examples.ArchegosCollapse.Rule.analysis import (
+from examples.CreditCycle.Rule.analysis import (
     _batch_to_rounds,
     _load_data,
-    _validate_archegos_collapse,
+    _validate_credit_cycle,
     _build_interpretation,
-    analyze_archegos_collapse,
+    analyze_credit_cycle,
 )
 
 
 def main() -> None:
-    """Run full ArchegosCollapse LLM analysis pipeline.
+    """Run full CreditCycle LLM analysis pipeline.
 
-    Reuses all metrics from Rule/analysis.py via analyze_archegos_collapse().
+    Reuses all metrics from Rule/analysis.py via analyze_credit_cycle().
     LLM-variant note: stochastic decisions may produce higher variance in
-    drawdown depth and cascade timing vs. Rule baseline.
+    boom amplitude and Minsky fragility timing vs. Rule baseline.
     """
     parser = argparse.ArgumentParser(
-        description="Analyze ArchegosCollapse LLM simulation results"
+        description="Analyze CreditCycle LLM simulation results"
     )
     parser.add_argument(
         "-c",
@@ -52,7 +53,7 @@ def main() -> None:
     results = load_results(config)
     data = _load_data(results)
 
-    summary = analyze_archegos_collapse(data, config, output_dir)
+    summary = analyze_credit_cycle(data, config, output_dir)
     return summary
 
 

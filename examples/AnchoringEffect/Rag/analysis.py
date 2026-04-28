@@ -24,19 +24,19 @@ from typing import Any, Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.utils.config import load_config
+from masim.utils import load_config, load_results
 
 from examples.AnchoringEffect.Rule.analysis import (
-    _load_agent_records,
-    _load_price_records,
-    calculate_anchoring_bias_magnitude,
-    calculate_anchoring_persistence,
-    calculate_autocorrelation,
-    calculate_max_drawdown,
-    calculate_mean_abs_deviation,
-    calculate_price_deviation,
-    calculate_rolling_volatility,
-    calculate_agent_volumes,
+    _load_data,
+    _validate_anchoring_effect,
+    _build_interpretation,
+    _compute_mad,
+    _compute_half_life,
+    _compute_autocorrelation,
+    _compute_max_drawdown,
+    _compute_rolling_volatility,
+    _compute_bias_magnitude,
+    analyze_anchoring,
 )
 
 # Fallback string used when no documents are retrieved (Rag/players.py)
@@ -44,33 +44,28 @@ _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def analyze_rag_knowledge_effect(
-    agent_records: Dict[str, List[Dict[str, Any]]],
+    investor_payloads: Dict[str, Dict[int, Dict[str, Any]]],
 ) -> Dict[str, Any]:
     """Analyze RAG knowledge retrieval effects — analysis-bases.md §3 Rag-specific.
 
     Counts retrieval failure rounds, knowledge reinforcement events, and
-    knowledge correction events from agent decision records.
-
-    Metrics (analysis-bases.md §4 Rag-specific):
-        - retrieval_failure_rounds: rounds where rag_context == fallback string
-        - retrieval_success_rounds: rounds with actual retrieved content
-        - retrieval_failure_rate: fraction of rounds with no retrieval
+    knowledge correction events from investor turn payloads.
 
     Args:
-        agent_records: Dict mapping agent_id to list of decision records.
+        investor_payloads: Dict mapping agent_id to {round_num: payload_dict}.
 
     Returns:
         Dict with RAG effect stats per agent and aggregate.
     """
     rag_stats: Dict[str, Any] = {}
 
-    for agent_id, records in agent_records.items():
+    for agent_id, round_payloads in investor_payloads.items():
         failure_rounds = 0
         success_rounds = 0
         total_rag_rounds = 0
 
-        for record in records:
-            rag_context = record.get("rag_context", None)
+        for payload in round_payloads.values():
+            rag_context = payload.get("rag_context", None)
             if rag_context is None:
                 continue
             total_rag_rounds += 1
@@ -249,8 +244,8 @@ def create_visualizations_rag(
 def main() -> None:
     """Run full AnchoringEffect Rag analysis pipeline.
 
-    Reuses all 8 metrics from Rule/analysis.py and adds RAG Knowledge Effect Analysis.
-    Outputs summary.json, agent_volumes.json, and rag_stats.json.
+    Reuses all metrics from Rule/analysis.py via analyze_anchoring().
+    Adds RAG Knowledge Effect Analysis (analysis-bases.md §3 Rag-specific).
     """
     parser = argparse.ArgumentParser(
         description="Analyze AnchoringEffect Rag simulation results"
@@ -259,86 +254,38 @@ def main() -> None:
         "-c",
         "--config",
         type=str,
-        default="configs/AnchoringEffect/Rag/simulation.yml",
+        required=True,
         help="Path to simulation config file",
     )
     args = parser.parse_args()
 
     config = load_config(args.config)
-    record_path = config["setting"]["record_path"]
+    base_dir = os.path.dirname(config["setting"]["record_path"])
+    output_dir = os.path.join(base_dir, "analysis")
+    os.makedirs(output_dir, exist_ok=True)
 
-    prices, fundamentals = _load_price_records(record_path)
+    results = load_results(config)
+    data = _load_data(results)
 
-    if not prices:
-        print("No simulation data found. Run simulation first.")
-        return
-
-    agent_records = _load_agent_records(record_path)
-
-    adjustment_factor = config.get("extras", {}).get("adjustment_factor", 0.3)
-
-    # Compute all 8 metrics from analysis-bases.md §2
-    price_deviation = calculate_price_deviation(prices, fundamentals)
-    mad = calculate_mean_abs_deviation(prices, fundamentals)
-    persistence = calculate_anchoring_persistence(prices, fundamentals)
-    rolling_vol = calculate_rolling_volatility(prices)
-    autocorr = calculate_autocorrelation(prices)
-    max_drawdown = calculate_max_drawdown(prices)
-    agent_volumes = calculate_agent_volumes(agent_records)
-    bias_magnitude = calculate_anchoring_bias_magnitude(
-        prices, fundamentals, adjustment_factor
-    )
+    # Core analysis via Rule/analysis.py
+    summary = analyze_anchoring(data, config, output_dir)
 
     # Rag-specific: RAG knowledge effect analysis
-    rag_stats = analyze_rag_knowledge_effect(agent_records)
+    rag_stats = analyze_rag_knowledge_effect(data["investor_payloads"])
+    summary["rag_knowledge_effect"] = rag_stats
 
-    analysis_path = os.path.join(record_path, "analysis")
-    os.makedirs(analysis_path, exist_ok=True)
-
-    create_visualizations_rag(
-        prices, fundamentals, agent_records, rag_stats, analysis_path
-    )
-
-    summary = {
-        "variant": "Rag",
-        "simulation": "AnchoringEffect",
-        "rounds": len(prices),
-        "metrics": {
-            "price_deviation": price_deviation,
-            "mean_absolute_deviation_pct": float(mad * 100),
-            "anchoring_persistence": persistence,
-            "rolling_volatility": rolling_vol,
-            "return_autocorrelation_lag1": autocorr,
-            "max_drawdown": max_drawdown,
-            "agent_volumes": agent_volumes,
-            "anchoring_bias_magnitude": float(bias_magnitude),
-        },
-        "rag_knowledge_effect": rag_stats,
-    }
-
-    summary_path = os.path.join(analysis_path, "summary.json")
-    with open(summary_path, "w", encoding="utf-8") as fh:
-        json.dump(summary, fh, indent=2)
-
-    agent_volumes_path = os.path.join(analysis_path, "agent_volumes.json")
-    with open(agent_volumes_path, "w", encoding="utf-8") as fh:
-        json.dump(agent_volumes, fh, indent=2)
-
-    rag_stats_path = os.path.join(analysis_path, "rag_stats.json")
+    rag_stats_path = os.path.join(output_dir, "rag_stats.json")
     with open(rag_stats_path, "w", encoding="utf-8") as fh:
         json.dump(rag_stats, fh, indent=2)
 
-    print(f"Analysis complete. Results written to: {analysis_path}")
-    print(f"MAD: {mad * 100:.2f}%")
-    print(f"Half-life: {persistence['half_life_rounds']:.0f} rounds")
-    print(f"Max drawdown: {max_drawdown['max_drawdown_pct']:.2f}%")
-    print(f"Lag-1 autocorrelation: {autocorr:.3f}")
     agg = rag_stats.get("aggregate", {})
     if agg:
         print(
             f"Mean RAG retrieval failure rate: "
             f"{agg.get('mean_retrieval_failure_rate', 0):.1%}"
         )
+
+    return summary
 
 
 if __name__ == "__main__":

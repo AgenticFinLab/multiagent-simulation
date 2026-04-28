@@ -142,8 +142,8 @@ class RagLLMInvestor(GeneralPlayer):
         )
         self.state.custom_state["llm_client"] = llm_client
 
-        private_knowledge = extras.get("private_knowledge", {})
-        rag_cfg = private_knowledge.get("rag", extras.get("rag", {}))
+        private_knowledge = extras["private_knowledge"]
+        rag_cfg = private_knowledge["rag"]
         await self._initialize_rag(rag_cfg, llm_client, extras["llm"])
 
     async def _initialize_rag(
@@ -161,27 +161,25 @@ class RagLLMInvestor(GeneralPlayer):
             4. Fallback: load processed docs and build local index from scratch
         """
         extras = self.config.extras
-        record_path = extras.get("record_path", "EXPERIMENT")
+        record_path = extras["record_path"]
 
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
-                "global_uri": rag_cfg.get("docs_dir", "examples/document-sources"),
+                "global_uri": rag_cfg["docs_dir"],
                 "preprocessing": {
                     "parser": "mineru",
-                    "output_position": rag_cfg.get(
-                        "mineru_output_dir", "MinerU_processed"
-                    ),
+                    "output_position": rag_cfg["mineru_output_dir"],
                 },
                 "rag": {
-                    "output_position": rag_cfg.get("shared_rag_index_dir", "rag_index"),
+                    "output_position": rag_cfg["shared_rag_index_dir"],
                 },
             }
 
         resource_manager = ResourceManager(knowledge_config)
 
-        private_knowledge = extras.get("private_knowledge", {})
+        private_knowledge = extras["private_knowledge"]
         if not private_knowledge:
             private_knowledge = {
                 "from_global_resources": ["MinerU_processed"],
@@ -219,12 +217,12 @@ class RagLLMInvestor(GeneralPlayer):
             local_rag_dir,
         )
 
-        embed_type = resolved_rag.get("embed_type", "litellm")
-        embed_model = resolved_rag.get("embed_model", "openai/hunyuan-embedding")
-        embed_api_base = resolved_rag.get("embed_api_base", "")
-        embed_api_key = resolved_rag.get("embed_api_key", "")
-        chunk_size = int(resolved_rag.get("chunk_size", 512))
-        chunk_overlap = int(resolved_rag.get("chunk_overlap", 64))
+        embed_type = resolved_rag["embed_type"]
+        embed_model = resolved_rag["embed_model"]
+        embed_api_base = resolved_rag["embed_api_base"]
+        embed_api_key = resolved_rag["embed_api_key"]
+        chunk_size = int(resolved_rag["chunk_size"])
+        chunk_overlap = int(resolved_rag["chunk_overlap"])
 
         if not embed_api_key:
             if embed_type == "litellm":
@@ -269,7 +267,11 @@ class RagLLMInvestor(GeneralPlayer):
                         exc,
                     )
 
-        shared_rag_dirs = resolved_rag.get("shared_rag_index_dirs", [])
+        shared_rag_dirs = (
+            resolved_rag["shared_rag_index_dirs"]
+            if "shared_rag_index_dirs" in resolved_rag
+            else []
+        )
         if not shared_rag_dirs and os.path.isdir(shared_rag_dir):
             shared_rag_dirs = [shared_rag_dir]
 
@@ -388,11 +390,13 @@ class RagLLMInvestor(GeneralPlayer):
                 )
             if "rag_cfg" in custom and "rag_store" not in custom:
                 rag_cfg = custom["rag_cfg"]
-                local_rag_dir = rag_cfg.get("local_index_dir", "")
-                if not local_rag_dir:
-                    local_workspace_dir = rag_cfg.get("local_workspace_dir", "")
-                    if local_workspace_dir:
-                        local_rag_dir = os.path.join(local_workspace_dir, "rag_index")
+                local_rag_dir = (
+                    rag_cfg["local_index_dir"] if "local_index_dir" in rag_cfg else ""
+                )
+                if not local_rag_dir and "local_workspace_dir" in rag_cfg:
+                    local_rag_dir = os.path.join(
+                        rag_cfg["local_workspace_dir"], "rag_index"
+                    )
 
                 if not local_rag_dir:
                     logger.warning(
@@ -400,8 +404,8 @@ class RagLLMInvestor(GeneralPlayer):
                     )
                     return
 
-                embed_type = rag_cfg.get("embed_type", "litellm")
-                embed_api_key = rag_cfg.get("embed_api_key", "")
+                embed_type = rag_cfg["embed_type"]
+                embed_api_key = rag_cfg["embed_api_key"]
                 if not embed_api_key:
                     if embed_type == "litellm":
                         embed_api_key = os.getenv("HUNYUAN_API_KEY", "")
@@ -409,15 +413,13 @@ class RagLLMInvestor(GeneralPlayer):
                         embed_api_key = os.getenv("ARK_API_KEY", "")
 
                 rag_store = KnowledgeStore(
-                    embed_model_name=rag_cfg.get(
-                        "embed_model", "openai/hunyuan-embedding"
-                    ),
+                    embed_model_name=rag_cfg["embed_model"],
                     embed_api_key=embed_api_key,
-                    embed_api_base=rag_cfg.get("embed_api_base", ""),
+                    embed_api_base=rag_cfg["embed_api_base"],
                     embed_type=embed_type,
                     persist_dir=local_rag_dir,
-                    chunk_size=int(rag_cfg.get("chunk_size", 512)),
-                    chunk_overlap=int(rag_cfg.get("chunk_overlap", 64)),
+                    chunk_size=int(rag_cfg["chunk_size"]),
+                    chunk_overlap=int(rag_cfg["chunk_overlap"]),
                 )
                 if os.path.isdir(local_rag_dir):
                     try:
@@ -436,11 +438,11 @@ class RagLLMInvestor(GeneralPlayer):
         price_history = self.state.custom_state["price_history"]
         round_num = self.state.custom_state["round"]
         rag_store: KnowledgeStore = self.state.custom_state.get("rag_store")
-        rag_cfg: Dict[str, Any] = self.state.custom_state.get("rag_cfg", {})
+        rag_cfg: Dict[str, Any] = self.state.custom_state.get("rag_cfg") or {}
 
         rag_context = ""
         if rag_store and rag_store.is_built():
-            top_k = rag_cfg.get("top_k", 3)
+            top_k = rag_cfg["top_k"] if "top_k" in rag_cfg else 3
             query = KnowledgeQuery(
                 text=(
                     f"investment strategy when: "

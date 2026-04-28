@@ -22,19 +22,20 @@ from typing import Any, Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.utils.config import load_config
+from masim.utils import load_config, load_results
 
 from examples.AnchoringEffect.Rule.analysis import (
-    _load_agent_records,
-    _load_price_records,
-    calculate_anchoring_bias_magnitude,
-    calculate_anchoring_persistence,
-    calculate_autocorrelation,
-    calculate_max_drawdown,
-    calculate_mean_abs_deviation,
-    calculate_price_deviation,
-    calculate_rolling_volatility,
-    calculate_agent_volumes,
+    _batch_to_rounds,
+    _load_data,
+    _validate_anchoring_effect,
+    _build_interpretation,
+    _compute_mad,
+    _compute_half_life,
+    _compute_autocorrelation,
+    _compute_max_drawdown,
+    _compute_rolling_volatility,
+    _compute_bias_magnitude,
+    analyze_anchoring,
 )
 
 
@@ -177,8 +178,7 @@ def create_visualizations_llm(
 def main() -> None:
     """Run full AnchoringEffect LLM analysis pipeline.
 
-    Reuses all 8 metrics from Rule/analysis.py. Outputs summary.json
-    and a 6-plot visualization labelled for LLM variant.
+    Reuses all metrics from Rule/analysis.py via analyze_anchoring().
     LLM variant: expect higher metric variance vs. Rule (analysis-bases.md §4).
     """
     parser = argparse.ArgumentParser(
@@ -188,70 +188,20 @@ def main() -> None:
         "-c",
         "--config",
         type=str,
-        default="configs/AnchoringEffect/LLM/simulation.yml",
+        required=True,
         help="Path to simulation config file",
     )
     args = parser.parse_args()
 
     config = load_config(args.config)
-    record_path = config["setting"]["record_path"]
+    base_dir = os.path.dirname(config["setting"]["record_path"])
+    output_dir = os.path.join(base_dir, "analysis")
+    os.makedirs(output_dir, exist_ok=True)
 
-    prices, fundamentals = _load_price_records(record_path)
-
-    if not prices:
-        print("No simulation data found. Run simulation first.")
-        return
-
-    agent_records = _load_agent_records(record_path)
-
-    adjustment_factor = config.get("extras", {}).get("adjustment_factor", 0.3)
-
-    # Compute all 8 metrics from analysis-bases.md §2
-    price_deviation = calculate_price_deviation(prices, fundamentals)
-    mad = calculate_mean_abs_deviation(prices, fundamentals)
-    persistence = calculate_anchoring_persistence(prices, fundamentals)
-    rolling_vol = calculate_rolling_volatility(prices)
-    autocorr = calculate_autocorrelation(prices)
-    max_drawdown = calculate_max_drawdown(prices)
-    agent_volumes = calculate_agent_volumes(agent_records)
-    bias_magnitude = calculate_anchoring_bias_magnitude(
-        prices, fundamentals, adjustment_factor
-    )
-
-    analysis_path = os.path.join(record_path, "analysis")
-    os.makedirs(analysis_path, exist_ok=True)
-
-    create_visualizations_llm(prices, fundamentals, agent_records, analysis_path)
-
-    summary = {
-        "variant": "LLM",
-        "simulation": "AnchoringEffect",
-        "rounds": len(prices),
-        "metrics": {
-            "price_deviation": price_deviation,
-            "mean_absolute_deviation_pct": float(mad * 100),
-            "anchoring_persistence": persistence,
-            "rolling_volatility": rolling_vol,
-            "return_autocorrelation_lag1": autocorr,
-            "max_drawdown": max_drawdown,
-            "agent_volumes": agent_volumes,
-            "anchoring_bias_magnitude": float(bias_magnitude),
-        },
-    }
-
-    summary_path = os.path.join(analysis_path, "summary.json")
-    with open(summary_path, "w", encoding="utf-8") as fh:
-        json.dump(summary, fh, indent=2)
-
-    agent_volumes_path = os.path.join(analysis_path, "agent_volumes.json")
-    with open(agent_volumes_path, "w", encoding="utf-8") as fh:
-        json.dump(agent_volumes, fh, indent=2)
-
-    print(f"Analysis complete. Results written to: {analysis_path}")
-    print(f"MAD: {mad * 100:.2f}%")
-    print(f"Half-life: {persistence['half_life_rounds']:.0f} rounds")
-    print(f"Max drawdown: {max_drawdown['max_drawdown_pct']:.2f}%")
-    print(f"Lag-1 autocorrelation: {autocorr:.3f}")
+    results = load_results(config)
+    data = _load_data(results)
+    summary = analyze_anchoring(data, config, output_dir)
+    return summary
 
 
 if __name__ == "__main__":

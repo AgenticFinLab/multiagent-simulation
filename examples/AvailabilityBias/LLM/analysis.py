@@ -1,14 +1,14 @@
 #!/usr/bin/env python
-"""ArchegosCollapse LLM Simulation Analysis
+"""AvailabilityBias LLM Simulation Analysis
 
-LLM-variant analysis for the ArchegosCollapse simulation.
+LLM-variant analysis for the AvailabilityBias simulation.
 Reuses all metric/validation functions from Rule/analysis.py.
 LLM-variant note (analysis-bases.md §4): stochastic LLM decisions introduce
 additional variance vs. the deterministic Rule baseline.
 
 Usage:
-    python examples/ArchegosCollapse/LLM/analysis.py \\
-        -c configs/ArchegosCollapse/LLM/simulation.yml
+    python examples/AvailabilityBias/LLM/analysis.py \\
+        -c configs/AvailabilityBias/LLM/simulation.yml
 """
 
 import argparse
@@ -16,24 +16,24 @@ import os
 
 from masim.utils import load_config, load_results
 
-from examples.ArchegosCollapse.Rule.analysis import (
+from examples.AvailabilityBias.Rule.analysis import (
     _batch_to_rounds,
     _load_data,
-    _validate_archegos_collapse,
+    _validate_availability_bias,
     _build_interpretation,
-    analyze_archegos_collapse,
+    analyze_availability_bias,
 )
 
 
 def main() -> None:
-    """Run full ArchegosCollapse LLM analysis pipeline.
+    """Run full AvailabilityBias LLM analysis pipeline.
 
-    Reuses all metrics from Rule/analysis.py via analyze_archegos_collapse().
+    Reuses all metrics from Rule/analysis.py via analyze_availability_bias().
     LLM-variant note: stochastic decisions may produce higher variance in
-    drawdown depth and cascade timing vs. Rule baseline.
+    bias episode depth and persistence vs. Rule baseline.
     """
     parser = argparse.ArgumentParser(
-        description="Analyze ArchegosCollapse LLM simulation results"
+        description="Analyze AvailabilityBias LLM simulation results"
     )
     parser.add_argument(
         "-c",
@@ -52,7 +52,7 @@ def main() -> None:
     results = load_results(config)
     data = _load_data(results)
 
-    summary = analyze_archegos_collapse(data, config, output_dir)
+    summary = analyze_availability_bias(data, config, output_dir)
     return summary
 
 

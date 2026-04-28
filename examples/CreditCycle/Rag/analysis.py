@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-"""CarryTradeUnwind Rag Simulation Analysis
+"""CreditCycle Rag Simulation Analysis
 
-Rag-variant analysis for the CarryTradeUnwind simulation.
+RAG-variant analysis for the CreditCycle simulation.
 Reuses all metric/validation functions from Rule/analysis.py and adds
-RAG Knowledge Effect Analysis (analysis-bases.md §3 — Rag-specific dimension).
+RAG knowledge retrieval effect analysis.
 
 Usage:
-    python examples/CarryTradeUnwind/Rag/analysis.py \\
-        -c configs/CarryTradeUnwind/Rag/simulation.yml
+    python examples/CreditCycle/Rag/analysis.py \
+        -c configs/CreditCycle/Rag/simulation.yml
 """
 
 import argparse
@@ -19,13 +19,14 @@ import numpy as np
 
 from masim.utils import load_config, load_results
 
-from examples.CarryTradeUnwind.Rule.analysis import (
+from examples.CreditCycle.Rule.analysis import (
     _batch_to_rounds,
     _load_data,
-    _validate_carry_trade_unwind,
+    _validate_credit_cycle,
     _build_interpretation,
-    analyze_carry_trade_unwind,
+    analyze_credit_cycle,
 )
+
 
 _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
@@ -33,7 +34,10 @@ _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 def analyze_rag_knowledge_effect(
     investor_payloads: Dict[str, Dict[int, Dict[str, Any]]],
 ) -> Dict[str, Any]:
-    """Analyze RAG knowledge retrieval effects — analysis-bases.md §3 Rag-specific.
+    """Analyze RAG knowledge retrieval effects — analysis-bases.md §5 Rag-specific.
+
+    Counts retrieval failure rounds, knowledge reinforcement events, and
+    knowledge correction events from investor turn payloads.
 
     Args:
         investor_payloads: Dict mapping agent_id to {round_num: payload_dict}.
@@ -81,9 +85,13 @@ def analyze_rag_knowledge_effect(
 
 
 def main() -> None:
-    """Run full CarryTradeUnwind Rag analysis pipeline."""
+    """Run full CreditCycle Rag analysis pipeline.
+
+    Reuses all metrics from Rule/analysis.py via analyze_credit_cycle(),
+    then adds RAG knowledge effect analysis.
+    """
     parser = argparse.ArgumentParser(
-        description="Analyze CarryTradeUnwind Rag simulation results"
+        description="Analyze CreditCycle Rag simulation results"
     )
     parser.add_argument(
         "-c",
@@ -102,21 +110,12 @@ def main() -> None:
     results = load_results(config)
     data = _load_data(results)
 
-    summary = analyze_carry_trade_unwind(data, config, output_dir)
+    summary = analyze_credit_cycle(data, config, output_dir)
 
+    # RAG knowledge effect analysis
     rag_stats = analyze_rag_knowledge_effect(data["investor_payloads"])
-    summary["rag_knowledge_effect"] = rag_stats
-
-    rag_stats_path = os.path.join(output_dir, "rag_stats.json")
-    with open(rag_stats_path, "w", encoding="utf-8") as fh:
-        json.dump(rag_stats, fh, indent=2)
-
-    agg = rag_stats.get("aggregate", {})
-    if agg:
-        print(
-            f"Mean RAG retrieval failure rate: "
-            f"{agg.get('mean_retrieval_failure_rate', 0):.1%}"
-        )
+    with open(os.path.join(output_dir, "rag_stats.json"), "w", encoding="utf-8") as f:
+        json.dump(rag_stats, f, indent=2)
 
     return summary
 

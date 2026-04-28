@@ -2,9 +2,8 @@
 """ConfirmationBias RuleLLM Simulation Analysis
 
 RuleLLM-variant analysis for the ConfirmationBias simulation.
-Reuses core metric functions from Rule/analysis.py and adds
-rule-adherence analysis specific to the RuleLLM hybrid variant.
-See analysis-bases.md for metric definitions.
+Reuses all metric/validation functions from Rule/analysis.py and adds
+Rule-Adherence Analysis (analysis-bases.md §3 Dimension 2).
 
 Usage:
     python examples/ConfirmationBias/RuleLLM/analysis.py \\
@@ -14,83 +13,80 @@ Usage:
 import argparse
 import json
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict
 
-import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.utils.config import load_config
+from masim.utils import load_config, load_results
 
 from examples.ConfirmationBias.Rule.analysis import (
-    calculate_metrics,
-    load_simulation_data,
+    _batch_to_rounds,
+    _load_data,
+    _validate_confirmation_bias,
+    _build_interpretation,
+    analyze_confirmation_bias,
 )
-
-__all__ = ["analyze_rule_adherence", "main"]
 
 
 def analyze_rule_adherence(
-    agent_records: Dict[str, List[Dict[str, Any]]],
+    investor_payloads: Dict[str, Dict[int, Dict[str, Any]]],
 ) -> Dict[str, Any]:
-    """Compute rule-adherence rate for RuleLLM agents.
+    """Compute rule-adherence rate for RuleLLM agents — analysis-bases.md §3 Dimension 2.
 
-    Compares LLM-produced action against the expected rule action stored
-    in record["rule_action"]. Target adherence rate >= 0.80.
+    Target: adherence_rate >= 0.80
 
     Args:
-        agent_records: Mapping of agent_id → list of per-round record dicts.
-            Each record should contain "action" and optionally "rule_action".
+        investor_payloads: Dict mapping agent_id to {round_num: payload_dict}.
 
     Returns:
-        Dict mapping agent_id → adherence statistics.
+        Dict with adherence stats per agent and aggregate.
     """
     adherence: Dict[str, Any] = {}
-    for agent_id, records in agent_records.items():
-        total = 0
-        matching = 0
-        for record in records:
-            rule_action = record.get("rule_action")
-            llm_action = record.get("action")
+
+    for agent_id, round_payloads in investor_payloads.items():
+        rule_actions = []
+        llm_actions = []
+
+        for payload in round_payloads.values():
+            rule_action = payload.get("rule_action", None)
+            llm_action = payload.get("action", None)
             if rule_action is not None and llm_action is not None:
-                total += 1
-                if rule_action == llm_action:
-                    matching += 1
-        if total > 0:
+                rule_actions.append(rule_action)
+                llm_actions.append(llm_action)
+
+        if not rule_actions:
             adherence[agent_id] = {
-                "adherence_rate": float(matching / total),
-                "matching_rounds": matching,
-                "total_rounds": total,
-                "meets_target": (matching / total >= 0.80),
+                "adherence_rate": None,
+                "note": "no rule_action field",
             }
+            continue
+
+        matching = sum(r == l for r, l in zip(rule_actions, llm_actions))
+        total = len(rule_actions)
+        adherence[agent_id] = {
+            "adherence_rate": float(matching / total) if total > 0 else 0.0,
+            "matching_rounds": matching,
+            "total_rounds": total,
+            "meets_target": (matching / total >= 0.80) if total > 0 else False,
+        }
+
+    if adherence:
+        rates = [
+            v["adherence_rate"]
+            for v in adherence.values()
+            if v.get("adherence_rate") is not None
+        ]
+        adherence["aggregate"] = {
+            "mean_adherence_rate": float(np.mean(rates)) if rates else 0.0,
+            "min_adherence_rate": float(np.min(rates)) if rates else 0.0,
+            "target_80pct_met": all(r >= 0.80 for r in rates) if rates else False,
+        }
+
     return adherence
 
 
-def _load_agent_records(record_path: str) -> Dict[str, List[Dict[str, Any]]]:
-    """Load per-round records for all non-market agents."""
-    agent_records: Dict[str, List[Dict[str, Any]]] = {}
-    if not os.path.exists(record_path):
-        return agent_records
-    for agent_folder in os.listdir(record_path):
-        agent_path = os.path.join(record_path, agent_folder)
-        if not os.path.isdir(agent_path) or agent_folder in ("market", "analysis"):
-            continue
-        records: List[Dict[str, Any]] = []
-        for fname in sorted(os.listdir(agent_path)):
-            if fname.endswith(".json"):
-                with open(os.path.join(agent_path, fname), "r", encoding="utf-8") as f:
-                    records.append(json.load(f))
-        if records:
-            agent_records[agent_folder] = records
-    return agent_records
-
-
 def main() -> None:
-    """Run ConfirmationBias RuleLLM analysis: metrics + rule-adherence report.
-
-    Implements analysis-bases.md §2 core metrics plus RuleLLM-specific
-    rule-adherence analysis. Output written to
-    EXPERIMENT/ConfirmationBias/RuleLLM/records/analysis/.
-    """
+    """Run full ConfirmationBias RuleLLM analysis pipeline."""
     parser = argparse.ArgumentParser(
         description="Analyze ConfirmationBias RuleLLM simulation results"
     )
@@ -98,116 +94,36 @@ def main() -> None:
         "-c",
         "--config",
         type=str,
-        default="configs/ConfirmationBias/RuleLLM/simulation.yml",
+        required=True,
+        help="Path to simulation config file",
     )
     args = parser.parse_args()
 
     config = load_config(args.config)
-    record_path = config["setting"]["record_path"]
-    data = load_simulation_data(config)
+    base_dir = os.path.dirname(config["setting"]["record_path"])
+    output_dir = os.path.join(base_dir, "analysis")
+    os.makedirs(output_dir, exist_ok=True)
 
-    if not data["prices"]:
-        print("No simulation data found. Run simulation first.")
-        return
+    results = load_results(config)
+    data = _load_data(results)
 
-    metrics = calculate_metrics(data)
-    agent_records = _load_agent_records(record_path)
-    rule_adherence = analyze_rule_adherence(agent_records)
+    summary = analyze_confirmation_bias(data, config, output_dir)
 
-    analysis_path = os.path.join(record_path, "analysis")
-    os.makedirs(analysis_path, exist_ok=True)
+    adherence = analyze_rule_adherence(data["investor_payloads"])
+    summary["rule_adherence"] = adherence
 
-    prices = np.array(data["prices"])
-    fundamentals = np.array(data["fundamentals"])
-    rounds = np.arange(len(prices))
+    adherence_path = os.path.join(output_dir, "rule_adherence.json")
+    with open(adherence_path, "w", encoding="utf-8") as fh:
+        json.dump(adherence, fh, indent=2)
 
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    fig.suptitle(
-        "ConfirmationBias RuleLLM Simulation Analysis", fontsize=14, fontweight="bold"
-    )
+    agg = adherence.get("aggregate", {})
+    if agg:
+        print(f"Mean rule-adherence rate: {agg.get('mean_adherence_rate', 0):.1%}")
 
-    axes[0, 0].plot(rounds, prices, label="Asset Price", color="steelblue")
-    axes[0, 0].plot(
-        rounds, fundamentals, label="Fundamental", color="orange", linestyle="--"
-    )
-    axes[0, 0].set_title("Asset Price vs Fundamental (RuleLLM)")
-    axes[0, 0].legend()
-    axes[0, 0].grid(True, alpha=0.3)
+    return summary
 
-    if len(fundamentals) > 0 and np.any(fundamentals > 0):
-        deviation_pct = (
-            (prices - fundamentals)
-            / np.where(fundamentals > 0, fundamentals, 1.0)
-            * 100
-        )
-        axes[0, 1].plot(rounds, deviation_pct, color="crimson")
-        axes[0, 1].axhline(y=0, color="black", linestyle="--", alpha=0.5)
-        axes[0, 1].axhline(
-            y=2, color="orange", linestyle=":", alpha=0.7, label="+2% bias threshold"
-        )
-        axes[0, 1].axhline(y=-2, color="orange", linestyle=":", alpha=0.7)
-        axes[0, 1].set_title("Price Deviation from Fundamental (%)")
-        axes[0, 1].legend()
-        axes[0, 1].grid(True, alpha=0.3)
 
-    if len(prices) > 1:
-        returns = np.diff(prices) / np.where(prices[:-1] > 0, prices[:-1], 1.0) * 100
-        axes[1, 0].plot(rounds[1:], returns, color="darkorange", alpha=0.7)
-        axes[1, 0].axhline(y=0, color="black", linestyle="--", alpha=0.5)
-        axes[1, 0].set_title("Round Returns (%) — RuleLLM")
-        axes[1, 0].grid(True, alpha=0.3)
-
-    # Rule-adherence bar chart
-    if rule_adherence:
-        agent_ids = list(rule_adherence.keys())
-        rates = [rule_adherence[a]["adherence_rate"] for a in agent_ids]
-        colors = ["green" if r >= 0.80 else "red" for r in rates]
-        bars = axes[1, 1].bar(range(len(agent_ids)), rates, color=colors, alpha=0.8)
-        axes[1, 1].axhline(
-            y=0.80, color="black", linestyle="--", linewidth=1.5, label="Target (80%)"
-        )
-        axes[1, 1].set_xticks(range(len(agent_ids)))
-        axes[1, 1].set_xticklabels(agent_ids, rotation=30, ha="right", fontsize=7)
-        axes[1, 1].set_ylim(0, 1.05)
-        axes[1, 1].set_title("Rule Adherence Rate by Agent (target ≥80%)")
-        axes[1, 1].legend()
-        axes[1, 1].grid(True, alpha=0.3, axis="y")
-        for bar, rate in zip(bars, rates):
-            axes[1, 1].text(
-                bar.get_x() + bar.get_width() / 2,
-                bar.get_height() + 0.01,
-                f"{rate:.0%}",
-                ha="center",
-                va="bottom",
-                fontsize=7,
-            )
-    else:
-        axes[1, 1].text(
-            0.5,
-            0.5,
-            "No rule-adherence data",
-            ha="center",
-            va="center",
-            transform=axes[1, 1].transAxes,
-        )
-
-    plt.tight_layout()
-    plt.savefig(
-        os.path.join(analysis_path, "confirmationbias_rulellm_analysis.png"), dpi=150
-    )
-    plt.close()
-
-    summary = {"variant": "RuleLLM", **metrics, "rule_adherence": rule_adherence}
-    with open(os.path.join(analysis_path, "summary.json"), "w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=2)
-
-    with open(
-        os.path.join(analysis_path, "rule_adherence.json"), "w", encoding="utf-8"
-    ) as f:
-        json.dump(rule_adherence, f, indent=2)
-
-    print("RuleLLM analysis complete. Results in:", analysis_path)
-
+__all__ = ["analyze_rule_adherence", "main"]
 
 if __name__ == "__main__":
     main()

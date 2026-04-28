@@ -2,9 +2,7 @@
 """CarryTradeUnwind LLM Simulation Analysis
 
 LLM-variant analysis for the CarryTradeUnwind simulation.
-Reuses core metric functions from Rule/analysis.py and adds
-LLM-specific behavior visualization.
-See analysis-bases.md for metric definitions.
+Reuses all metric/validation functions from Rule/analysis.py.
 
 Usage:
     python examples/CarryTradeUnwind/LLM/analysis.py \\
@@ -12,51 +10,21 @@ Usage:
 """
 
 import argparse
-import json
 import os
-from typing import Any, Dict, List
 
-import matplotlib.pyplot as plt
-import numpy as np
-
-from masim.utils.config import load_config
+from masim.utils import load_config, load_results
 
 from examples.CarryTradeUnwind.Rule.analysis import (
-    calculate_metrics,
-    create_visualizations,
-    load_simulation_data,
+    _batch_to_rounds,
+    _load_data,
+    _validate_carry_trade_unwind,
+    _build_interpretation,
+    analyze_carry_trade_unwind,
 )
-
-__all__ = ["main"]
-
-
-def _load_agent_actions(record_path: str) -> Dict[str, List[str]]:
-    """Load per-round action sequences for all non-market agents."""
-    agent_actions: Dict[str, List[str]] = {}
-    if not os.path.exists(record_path):
-        return agent_actions
-    for agent_folder in os.listdir(record_path):
-        agent_path = os.path.join(record_path, agent_folder)
-        if not os.path.isdir(agent_path) or agent_folder in ("market", "analysis"):
-            continue
-        actions: List[str] = []
-        for fname in sorted(os.listdir(agent_path)):
-            if fname.endswith(".json"):
-                with open(os.path.join(agent_path, fname), "r", encoding="utf-8") as f:
-                    rec = json.load(f)
-                actions.append(rec.get("action", "hold"))
-        if actions:
-            agent_actions[agent_folder] = actions
-    return agent_actions
 
 
 def main() -> None:
-    """Run CarryTradeUnwind LLM analysis: metrics + LLM action distribution.
-
-    Implements analysis-bases.md §2 core metrics plus LLM-specific
-    action-frequency visualization. Output written to
-    EXPERIMENT/CarryTradeUnwind/LLM/records/analysis/.
-    """
+    """Run full CarryTradeUnwind LLM analysis pipeline."""
     parser = argparse.ArgumentParser(
         description="Analyze CarryTradeUnwind LLM simulation results"
     )
@@ -64,57 +32,24 @@ def main() -> None:
         "-c",
         "--config",
         type=str,
-        default="configs/CarryTradeUnwind/LLM/simulation.yml",
+        required=True,
+        help="Path to simulation config file",
     )
     args = parser.parse_args()
 
     config = load_config(args.config)
-    record_path = config["setting"]["record_path"]
-    data = load_simulation_data(config)
+    base_dir = os.path.dirname(config["setting"]["record_path"])
+    output_dir = os.path.join(base_dir, "analysis")
+    os.makedirs(output_dir, exist_ok=True)
 
-    if not data["prices"]:
-        print("No simulation data found. Run simulation first.")
-        return
+    results = load_results(config)
+    data = _load_data(results)
 
-    metrics = calculate_metrics(data)
-    agent_actions = _load_agent_actions(record_path)
+    summary = analyze_carry_trade_unwind(data, config, output_dir)
+    return summary
 
-    analysis_path = os.path.join(record_path, "analysis")
-    os.makedirs(analysis_path, exist_ok=True)
 
-    # Core 2×2 plot (reuse Rule visualizations)
-    create_visualizations(data, analysis_path, variant="LLM")
-
-    # LLM action distribution plot
-    if agent_actions:
-        fig, ax = plt.subplots(figsize=(10, 5))
-        fig.suptitle("CarryTradeUnwind LLM — Action Distribution by Agent", fontsize=12)
-        x = np.arange(len(agent_actions))
-        width = 0.25
-        agents = list(agent_actions.keys())
-        buy_counts = [agent_actions[a].count("buy") for a in agents]
-        sell_counts = [agent_actions[a].count("sell") for a in agents]
-        hold_counts = [agent_actions[a].count("hold") for a in agents]
-        ax.bar(x - width, buy_counts, width, label="buy", color="green", alpha=0.8)
-        ax.bar(x, sell_counts, width, label="sell", color="red", alpha=0.8)
-        ax.bar(x + width, hold_counts, width, label="hold", color="gray", alpha=0.8)
-        ax.set_xticks(x)
-        ax.set_xticklabels(agents, rotation=30, ha="right", fontsize=8)
-        ax.set_ylabel("Number of Rounds")
-        ax.legend()
-        ax.grid(True, alpha=0.3, axis="y")
-        plt.tight_layout()
-        plt.savefig(
-            os.path.join(analysis_path, "carrytradeunwind_llm_actions.png"), dpi=150
-        )
-        plt.close()
-
-    summary = {"variant": "LLM", **metrics}
-    with open(os.path.join(analysis_path, "summary.json"), "w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=2)
-
-    print("LLM analysis complete. Results in:", analysis_path)
-
+__all__ = ["main"]
 
 if __name__ == "__main__":
     main()
