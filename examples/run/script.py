@@ -26,6 +26,8 @@ Tip: run this script itself inside tmux so it survives SSH disconnects:
 
   tmux new -s orchestrator 'python examples/run/script.py --all --max-parallel 4'
 
+python examples/run/script.py --scenarios AnchoringEffect ArchegosCollapse AsianFinancialCrisis AvailabilityBias BlackMonday1987 CarryTradeUnwind ConfirmationBias CreditCycle CurrencyCrisis DispositionEffect --max-parallel 3
+
 tmux cheat-sheet while running:
   Attach:   tmux attach -t masim
   Windows:  Ctrl-b n / Ctrl-b p  (next / prev)
@@ -146,6 +148,7 @@ def _generate_script(
     done = MARKER_DIR / f"{scenario}.done"
     fail = MARKER_DIR / f"{scenario}.fail"
     log = MARKER_DIR / f"{scenario}.log"
+    step = MARKER_DIR / f"{scenario}.step"
     n = len(commands)
 
     lines = [
@@ -170,6 +173,7 @@ def _generate_script(
     for i, (label, cmd) in enumerate(commands, 1):
         lines += [
             "",
+            f'echo "{i}/{n} {label}" > "{step}"',
             f'echo ""',
             f'echo ">> [{i}/{n}] {label}"',
             f'echo "   {cmd}"',
@@ -238,6 +242,14 @@ def _is_done(scenario: str) -> bool:
 
 def _is_failed(scenario: str) -> bool:
     return (MARKER_DIR / f"{scenario}.fail").exists()
+
+
+def _read_step(scenario: str) -> str:
+    """Read the current step label for a running scenario."""
+    try:
+        return (MARKER_DIR / f"{scenario}.step").read_text().strip()
+    except FileNotFoundError:
+        return "starting..."
 
 
 def _clean_markers():
@@ -414,11 +426,12 @@ def main() -> None:
             s = pending.pop(0)
             _launch(session, s, scripts[s])
             running[s] = time.time()
-            n_steps = len(plan[s])
+            step_labels = " -> ".join(lbl for lbl, _ in plan[s])
             print(
                 f"  >> LAUNCH  {s:<35s}  "
-                f"({n_steps} steps, "
-                f"{len(running)}/{args.max_parallel} slots)"
+                f"({len(running)}/{args.max_parallel} slots)\n"
+                f"             {step_labels}\n"
+                f"             tmux attach -t {session}:{s}"
             )
 
         # Poll for completion.
@@ -426,17 +439,28 @@ def main() -> None:
             if _is_done(s):
                 elapsed = time.time() - running.pop(s)
                 completed.append((s, elapsed))
-                print(f"  << DONE    {s:<35s}  " f"({elapsed / 60:.1f} min)")
+                print(f"  << DONE    {s:<35s}  ({elapsed / 60:.1f} min)")
             elif _is_failed(s):
                 elapsed = time.time() - running.pop(s)
                 label = (MARKER_DIR / f"{s}.fail").read_text().strip()
                 failed.append((s, elapsed, label))
                 print(
-                    f"  !! FAIL    {s:<35s}  " f"at {label}  ({elapsed / 60:.1f} min)"
+                    f"  !! FAIL    {s:<35s}  at {label}  ({elapsed / 60:.1f} min)\n"
+                    f"             -> tmux attach -t {session}:{s}"
                 )
 
         if running:
             time.sleep(POLL_INTERVAL_S)
+            # Periodic status: show current step per running scenario.
+            wall_now = time.time() - t0
+            print(
+                f"\n  -- {wall_now / 60:.1f} min | "
+                f"{len(completed)} done, "
+                f"{len(running)} running, "
+                f"{len(pending)} queued --"
+            )
+            for s_run in running:
+                print(f"     {s_run:<30s}  [{_read_step(s_run)}]")
 
     wall = time.time() - t0
 
