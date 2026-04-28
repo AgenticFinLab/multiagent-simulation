@@ -138,9 +138,11 @@ class RecentEventOverweighter(GeneralPlayer):
     """
     Overweights recent dramatic market events in decision-making.
 
-    Theory: Tversky & Kahneman (1973) — Availability heuristic.
+    Theory: simulation-bases.md §4.1 — RecentEventOverweighter
+    Theoretical basis: Tversky & Kahneman (1973) — Availability heuristic recency channel.
     Perceived signal = recency_weight * recent_return + (1-recency_weight) * deviation.
     Trades when perceived signal exceeds salience_threshold.
+    See simulation-bases.md §4.1.4.3 for mathematical model.
     """
 
     async def perceive(
@@ -238,8 +240,11 @@ class MediaInfluencedTrader(GeneralPlayer):
     """
     Overweights information from prominent media/social coverage.
 
+    Theory: simulation-bases.md §4.2 — MediaInfluencedTrader
+    Theoretical basis: Schwarz et al. (1991); Tetlock (2007) — Media-driven availability channel.
     Amplifies the perceived deviation by social_amplification factor,
     then trades when media-weighted signal exceeds threshold.
+    See simulation-bases.md §4.2.4.3 for mathematical model.
     """
 
     async def perceive(
@@ -336,7 +341,10 @@ class SystematicAnalyst(GeneralPlayer):
     """
     Systematic analyst — weighs all information by objective relevance (benchmark).
 
+    Theory: simulation-bases.md §4.3 — SystematicAnalyst
+    Theoretical basis: Mullainathan (2002) — Bayesian rational processing; absence of bias.
     Trades on fundamental deviation without availability bias.
+    See simulation-bases.md §4.3.4.3 for mathematical model.
     """
 
     async def perceive(
@@ -425,7 +433,10 @@ class ValueTrader(GeneralPlayer):
     """
     Value trader — trades on fundamentals, ignores media narratives.
 
+    Theory: simulation-bases.md §4.4 — ValueTrader
+    Theoretical basis: Graham (1949); Baker & Wurgler (2007) — Value investing discipline.
     Trades when deviation exceeds deviation_threshold with fixed position_size.
+    See simulation-bases.md §4.4.4.3 for mathematical model.
     """
 
     async def perceive(
@@ -516,8 +527,10 @@ class NoiseTrader(GeneralPlayer):
     """
     Random uninformed trader providing baseline liquidity.
 
-    Theory: Black (1986) — Noise traders.
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+    Theoretical basis: Black (1986) — Noise traders.
     Trades randomly with probability trade_probability each round.
+    See simulation-bases.md §4.5.4.3 for mathematical model.
     """
 
     async def perceive(

@@ -1,27 +1,44 @@
-# GameStopShortSqueeze Analysis Guide
+# GameStopShortSqueeze — RuleLLM Variant Analysis
 
-## Metrics
+## §1 Overview
 
-| Metric | Description | Expected Range |
-|--------|-------------|----------------|
-| Price deviation | Deviation from fundamental | Varies by scenario |
-| Max drawdown | Largest peak-to-trough decline | Varies by scenario |
-| Volatility | Annualized return volatility | Varies by scenario |
+Analysis for the **RuleLLM variant** of GameStopShortSqueeze. Metric definitions from `../analysis-bases.md §2`. Expected near-Rule baseline.
 
-## Visualization Guide
+| Aspect         | Detail                 |
+|----------------|------------------------|
+| Variant        | RuleLLM                |
+| Simulation     | GameStopShortSqueeze   |
+| Analysis basis | `../analysis-bases.md` |
 
-1. **Price vs Fundamental**: Shows whether agents create mispricings
-2. **Deviation Plot**: Magnitude and persistence of mispricings
-3. **Return Distribution**: Should show fat tails for behavioral scenarios
+---
 
-## Troubleshooting
+## §2 Metric → Function Mapping
 
-- **No phenomenon observed**: Adjust agent parameters
-- **Too extreme**: Add more stabilizing agents or increase mean reversion
-- **Too stable**: Increase destabilizing agent parameters
+| Metric | Function                                                                  | analysis-bases.md ref |
+|--------|---------------------------------------------------------------------------|-----------------------|
+| SQI    | `squeeze_intensity_index(price_history, fundamental)`                     | §2.1                  |
+| PAR    | `price_area_ratio(price_history, fundamental)`                            | §2.2                  |
+| ACC    | `agent_coalition_contribution(trade_history, price_history, fundamental)` | §2.3                  |
+| SCD    | `squeeze_collapse_duration(price_history, fundamental)`                   | §2.4                  |
+| IEP    | `institutional_exhaustion_point(agent_states_history)`                    | §2.5                  |
+| WTI    | `wealth_transfer_index(agent_states, final_price)`                        | §2.6                  |
 
-## References
+---
 
-- Gamma squeeze dynamics (Jarrow & Li, 2021)
-- Social media and retail coordination (Lyocsa et al., 2022)
-- Short sale constraints (Jones & Lamont, 2002)
+## §3 RuleLLM-Specific Notes
+
+- All squeeze mechanics anchored by embedded rules; near-Rule baseline expected.
+- LLM quantity modulation may slightly affect ACC distribution across §4.1–§4.3.
+- Research value: RuleLLM vs. LLM shows impact of rule constraints on squeeze dynamics.
+
+---
+
+## §4 Expected Ranges (RuleLLM Variant)
+
+| Metric | RuleLLM Expected Range | vs. Rule |
+|--------|------------------------|----------|
+| SQI    | 1.0–5.5                | ≈ Rule   |
+| PAR    | 0.2–1.1                | ≈ Rule   |
+| SCD    | 2–9 rounds             | ≈ Rule   |
+| IEP    | Rounds 3–11            | ≈ Rule   |
+| WTI    | 0.10–0.42              | ≈ Rule   |

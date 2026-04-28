@@ -266,6 +266,10 @@ class DispositionInvestor(BaseInvestor):
     Parameters from config extras:
         - gain_threshold, loss_threshold, loss_aversion
         - sell_fraction_gain, sell_fraction_loss
+
+    Theory: simulation-bases.md §4.1 — DispositionInvestor
+    Theoretical basis: Kahneman & Tversky (1979) Prospect Theory; asymmetric gain/loss treatment with λ = 2.25.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -403,6 +407,10 @@ class RationalInvestor(BaseInvestor):
 
     Parameters from config extras:
         - target_allocation, rebalance_threshold
+
+    Theory: simulation-bases.md §4.2 — RationalInvestor
+    Theoretical basis: Expected Utility Theory (von Neumann & Morgenstern, 1944); ignores purchase price.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -512,6 +520,10 @@ class TaxAwareInvestor(BaseInvestor):
 
     Parameters from config extras:
         - tax_loss_threshold, capital_gains_hold, tax_harvest_fraction
+
+    Theory: simulation-bases.md §4.3 — TaxAwareInvestor
+    Theoretical basis: Constantinides (1983) tax-loss harvesting; anti-disposition via economic incentive.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -617,7 +629,12 @@ class TaxAwareInvestor(BaseInvestor):
 
 
 class IndexHolder(BaseInvestor):
-    """Passive buy-and-hold investor (no active trading)."""
+    """Passive buy-and-hold investor (no active trading).
+
+    Theory: simulation-bases.md §4.4 — IndexHolder
+    Theoretical basis: Sharpe (1991) passive investing; zero disposition effect by design.
+    See simulation-bases.md §4.4 for mathematical model.
+    """
 
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
@@ -673,6 +690,10 @@ class InstitutionalInvestor(BaseInvestor):
 
     Parameters from config extras:
         - gain_threshold, loss_threshold, sell_fraction
+
+    Theory: simulation-bases.md §4.5 — InstitutionalInvestor
+    Theoretical basis: Shapira & Venezia (2001) professional discipline; symmetric thresholds reduce disposition bias.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def decide(self) -> Dict[str, Any]:

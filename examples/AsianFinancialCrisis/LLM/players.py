@@ -208,31 +208,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMHotMoneyFunder(LLMInvestor):
-    """LLM-driven hot money funder — rapidly reverses at first crisis signal."""
+    """LLM-driven hot money funder — rapidly reverses at first crisis signal. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class LLMContagionTrader(LLMInvestor):
-    """LLM-driven contagion trader — spreads selling across borders."""
+    """LLM-driven contagion trader — spreads selling across borders. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class LLMIMFRescuer(LLMInvestor):
-    """LLM-driven IMF rescuer — stabilizing emergency liquidity provider."""
+    """LLM-driven IMF rescuer — stabilizing emergency liquidity provider. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class LLMValueContrarian(LLMInvestor):
-    """LLM-driven value contrarian — buys oversold crisis assets."""
+    """LLM-driven value contrarian — buys oversold crisis assets. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven noise trader — uninformed random participant."""
+    """LLM-driven noise trader — uninformed random participant. Theory: simulation-bases.md §4.5."""
 
     pass
 

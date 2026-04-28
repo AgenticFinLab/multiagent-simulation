@@ -103,8 +103,9 @@ class Market(GeneralPlayer):
 class NewEconomyEvangelist(GeneralPlayer):
     """Believes in new paradigm — ignores traditional valuation metrics during internet bubble.
 
-    Theory: Shiller (2000) narrative economics. Tech evangelists drove NASDAQ to
-    extreme valuations by dismissing P/E ratios as irrelevant.
+    Theory: simulation-bases.md §4.1 — NewEconomyEvangelist
+    Theoretical basis: Shiller (2000) narrative economics; tech evangelists dismiss P/E ratios as irrelevant.
+    See simulation-bases.md §4.1 for mathematical model.
     Role: destabilizing.
     """
 
@@ -177,8 +178,9 @@ class NewEconomyEvangelist(GeneralPlayer):
 class IPOFlipper(GeneralPlayer):
     """Buys IPOs and quickly sells for short-term profit.
 
-    Theory: Ofek & Richardson (2003) IPO dynamics. Flippers profit from
-    initial underpricing and sell immediately on first-day pops.
+    Theory: simulation-bases.md §4.2 — IPOFlipper
+    Theoretical basis: Ofek & Richardson (2003) IPO dynamics; Ritter (1991) underpricing and flipping.
+    See simulation-bases.md §4.2 for mathematical model.
     Role: destabilizing.
     """
 
@@ -251,8 +253,9 @@ class IPOFlipper(GeneralPlayer):
 class MomentumFollower(GeneralPlayer):
     """Follows price trends and amplifies moves — trend-chasing behavior.
 
-    Theory: Abreu & Brunnermeier (2003) momentum synchronization. Trend followers
-    ride the bubble higher even knowing it's overvalued.
+    Theory: simulation-bases.md §4.3 — MomentumFollower
+    Theoretical basis: Abreu & Brunnermeier (2003) momentum synchronization; Jegadeesh & Titman (1993).
+    See simulation-bases.md §4.3 for mathematical model.
     Role: destabilizing.
     """
 
@@ -331,8 +334,9 @@ class MomentumFollower(GeneralPlayer):
 class SkepticalValueInvestor(GeneralPlayer):
     """Avoids overvalued tech stocks — waits for correction, then buys.
 
-    Theory: Graham (1949) value investing. Skeptics correctly identified bubble
-    but underestimated how long it could last (Abreu & Brunnermeier 2003).
+    Theory: simulation-bases.md §4.4 — SkepticalValueInvestor
+    Theoretical basis: Graham (1949) value investing; Abreu & Brunnermeier (2003) rational arbitrageurs too early.
+    See simulation-bases.md §4.4 for mathematical model.
     Role: stabilizing.
     """
 
@@ -406,8 +410,9 @@ class SkepticalValueInvestor(GeneralPlayer):
 class ShortSeller(GeneralPlayer):
     """Bets against overvalued stocks — faces squeeze risk during bubble.
 
-    Theory: Abreu & Brunnermeier (2003) limits to arbitrage. Short sellers
-    are correct about bubble but face mark-to-market losses and margin calls.
+    Theory: simulation-bases.md §4.5 — ShortSeller
+    Theoretical basis: Abreu & Brunnermeier (2003) limits to arbitrage; short sellers face synchronization risk.
+    See simulation-bases.md §4.5 for mathematical model.
     Role: stabilizing.
     """
 

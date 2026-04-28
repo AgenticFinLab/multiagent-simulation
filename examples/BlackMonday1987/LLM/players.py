@@ -156,7 +156,7 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMPortfolioInsurer(LLMInvestor):
-    """LLM-driven portfolio insurer."""
+    """LLM-driven portfolio insurer — dynamic hedging seller. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.BlackMonday1987.LLM.prompts:LLM_PORTFOLIO_INSURER_SYS"
@@ -164,7 +164,7 @@ class LLMPortfolioInsurer(LLMInvestor):
 
 
 class LLMIndexArbitrageur(LLMInvestor):
-    """LLM-driven index arbitrageur."""
+    """LLM-driven index arbitrageur — exploits futures/spot gaps. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.BlackMonday1987.LLM.prompts:LLM_INDEX_ARBITRAGEUR_SYS"
@@ -172,19 +172,19 @@ class LLMIndexArbitrageur(LLMInvestor):
 
 
 class LLMProgramTrader(LLMInvestor):
-    """LLM-driven program trader."""
+    """LLM-driven program trader — automated feedback amplifier. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = "examples.BlackMonday1987.LLM.prompts:LLM_PROGRAM_TRADER_SYS"
 
 
 class LLMValueInvestor(LLMInvestor):
-    """LLM-driven value investor."""
+    """LLM-driven value investor — buys at deep discount to fundamentals. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = "examples.BlackMonday1987.LLM.prompts:LLM_VALUE_INVESTOR_SYS"
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven noise trader."""
+    """LLM-driven noise trader — random uninformed liquidity provider. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.BlackMonday1987.LLM.prompts:LLM_NOISE_TRADER_SYS"
 

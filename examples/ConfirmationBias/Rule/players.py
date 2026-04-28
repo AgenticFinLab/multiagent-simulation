@@ -104,9 +104,10 @@ class Market(GeneralPlayer):
 class BeliefAnchor(GeneralPlayer):
     """Forms strong prior beliefs and selectively filters confirming evidence.
 
-    Theory: Nickerson (1998) confirmation bias. Overweights information that
-    confirms existing belief direction, amplifying trend.
-    Role: destabilizing.
+    Theory: simulation-bases.md §4.1 — BeliefAnchor
+    Theoretical basis: Nickerson (1998) confirmation bias; overweights information
+    confirming existing belief direction, amplifying trend and causing mispricing.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -187,9 +188,10 @@ class BeliefAnchor(GeneralPlayer):
 class SelectiveScanner(GeneralPlayer):
     """Seeks information supporting current position, ignores contradictions.
 
-    Theory: Lord, Ross & Lepper (1979) biased assimilation. Filters market
-    signals to amplify current position direction.
-    Role: destabilizing.
+    Theory: simulation-bases.md §4.2 — SelectiveScanner
+    Theoretical basis: Lord, Ross & Lepper (1979) biased assimilation; filters market
+    signals to amplify current position direction, reinforcing mispricing.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -262,8 +264,10 @@ class SelectiveScanner(GeneralPlayer):
 class BalancedAnalyst(GeneralPlayer):
     """Evaluates all evidence equally regardless of prior beliefs.
 
-    Theory: Bayesian rational updating. Processes signals without cognitive bias.
-    Role: stabilizing.
+    Theory: simulation-bases.md §4.3 — BalancedAnalyst
+    Theoretical basis: Bayesian rational updating; processes signals without cognitive
+    bias, providing mean-reversion force that stabilizes price around fundamentals.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -333,8 +337,10 @@ class BalancedAnalyst(GeneralPlayer):
 class ContrarianTrader(GeneralPlayer):
     """Looks for disconfirming evidence, trades against biased consensus.
 
-    Theory: Rabin & Schrag (1999) — rational traders exploit systematic bias errors.
-    Role: stabilizing.
+    Theory: simulation-bases.md §4.4 — ContrarianTrader
+    Theoretical basis: Rabin & Schrag (1999) — rational traders exploit systematic
+    bias errors; profits from mean-reversion when biased traders overshoot.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -405,8 +411,10 @@ class ContrarianTrader(GeneralPlayer):
 class NoiseTrader(GeneralPlayer):
     """Random uninformed trader providing baseline liquidity.
 
-    Theory: Black (1986) noise trader model.
-    Role: neutral.
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+    Theoretical basis: Black (1986) noise trader model; random orders provide
+    liquidity and background price variance independent of cognitive biases.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:

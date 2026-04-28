@@ -1,81 +1,72 @@
-# GFC2008 Simulation
+# GFC2008 — LLM Variant
 
-## Overview
+## §1 Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | 2007-2009 financial crisis - Housing bubble burst triggered global recession |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | 2008 Global Financial Crisis simulation with mortgage-backed securities, rating agency failures, and systemic contagion |
-| **Academic Value** | Understanding 2007-2009 financial crisis - housing bubble burst triggered global recession through multi-agent simulation |
+| Aspect             | Detail                                                        |
+|--------------------|---------------------------------------------------------------|
+| Variant            | LLM                                                           |
+| Simulation         | GFC2008                                                       |
+| Decision Mechanism | LLM-driven (LangChainAPIInference)                            |
+| Theory Reference   | `simulation-bases.md §4.1–§4.5`                               |
+| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`                  |
+| Price Model        | `P(t+1) = P(t) + λ·NetDemand + γ·(F−P(t)) + ε` (same as Rule) |
 
-## Theoretical Foundation
+---
 
-- Gorton (2010): Securitized banking and the run on repo
-- Brunnermeier (2009): Deciphering the liquidity and credit crunch
-- Acharya & Richardson (2009): Restoring financial stability
+## §2 Theory → Implementation Mapping
 
-## Agent Descriptions
+### §2.1 LLMMBSOriginator (`simulation-bases.md §4.1`)
+| Theory Component              | Implementation                                                                              |
+|-------------------------------|---------------------------------------------------------------------------------------------|
+| Originate-to-distribute model | System prompt: mortgage originator persona; LLM decides sell quantity based on market state |
+| Lax screening bias            | Prompt encodes origination pressure: "maximize origination volume" narrative                |
+| Supply shock                  | LLM output parsed for buy/sell/quantity via `parse_llm_response_with_thinking`              |
 
-### MBSOriginator
-**Theoretical Basis**: Originate-to-distribute model (Keys et al., 2010)
-**Market Role**: destabilizing
-**Description**: Creates mortgage-backed securities with lax screening
-**Parameters**: origination_rate=0.8, screening_quality=0.3, securitization_speed=fast
+### §2.2 LLMRatingAgency (`simulation-bases.md §4.2`)
+| Theory Component     | Implementation                                                              |
+|----------------------|-----------------------------------------------------------------------------|
+| Issuer-pays conflict | System prompt: rating analyst with inflated valuation bias                  |
+| Inflated fundamental | Prompt encodes overrating tendency; LLM may override strict threshold logic |
+| Variability          | LLM can express nuanced overrating: partial buy, conditional hold           |
 
-### RatingAgency
-**Theoretical Basis**: Rating agency conflict of interest (Bolton et al., 2012)
-**Market Role**: destabilizing
-**Description**: Overrates securities due to issuer-pays model
-**Parameters**: overrating_bias=0.3, competition_pressure=0.5
+### §2.3 LLMLeveragedInvestor (`simulation-bases.md §4.3`)
+| Theory Component | Implementation                                                               |
+|------------------|------------------------------------------------------------------------------|
+| Leverage cycle   | System prompt: highly leveraged fund under margin pressure                   |
+| Fire sale        | LLM may sell preemptively (before margin call) vs. Rule's strict threshold   |
+| Dynamic fear     | Temperature > 0 adds panic variability — fire sales may be larger or smaller |
 
-### LeveragedInvestor
-**Theoretical Basis**: Leverage cycle (Adrian & Shin, 2010)
-**Market Role**: destabilizing
-**Description**: Uses high leverage, forced to sell in downturn
-**Parameters**: leverage=30, margin_call_trigger=0.05, fire_sale_discount=0.2
+### §2.4 LLMDistressedBuyer (`simulation-bases.md §4.4`)
+| Theory Component        | Implementation                                                          |
+|-------------------------|-------------------------------------------------------------------------|
+| Deep discount buying    | System prompt: distressed asset buyer; LLM evaluates discount depth     |
+| Capital deployment      | LLM may deploy capital more opportunistically than fixed 30% Rule logic |
+| Contrarian intelligence | LLM can reason about expected recovery — partial vs. full deployment    |
 
-### DistressedBuyer
-**Theoretical Basis**: Distressed debt investing
-**Market Role**: stabilizing
-**Description**: Buys assets at deep discount during panic
-**Parameters**: discount_threshold=0.4, investment_horizon=long, patience=high
+### §2.5 LLMRegulator (`simulation-bases.md §4.5`)
+| Theory Component      | Implementation                                                                             |
+|-----------------------|--------------------------------------------------------------------------------------------|
+| Systemic risk monitor | System prompt: central bank / regulator persona                                            |
+| Intervention decision | LLM reasons about systemic threshold; may intervene more/less than Rule's stochastic logic |
+| Policy nuance         | Can express graduated response (moderate buy vs. large rescue)                             |
 
-### Regulator
-**Theoretical Basis**: Macroprudential regulation
-**Market Role**: stabilizing
-**Description**: Monitors systemic risk and may intervene
-**Parameters**: intervention_threshold=0.15, rescue_probability=0.6
+---
 
+## §3 LLM-Specific Notes
 
-## Usage
+- **Prompt-driven differentiation**: Unlike Rule where §4.1/§4.3/§4.4 share threshold logic, LLM expresses genuinely different reasoning per agent persona.
+- **Temperature effect**: Higher temperature → more variable crisis arcs; lower temperature → more deterministic, closer to Rule behavior.
+- **Fire sale timing**: LLMLeveragedInvestor may preemptively sell before reaching Rule threshold — produces earlier but potentially shallower CII.
 
-### Rule Variant
-```bash
-python examples/GFC2008/Rule/run_gfc2008.py \
-    -c configs/GFC2008/Rule/simulation.yml
-```
+---
 
-### LLM Variant
-```bash
-python examples/GFC2008/LLM/run_gfc2008_llm.py \
-    -c configs/GFC2008/LLM/simulation.yml
-```
+## §4 Expected Ranges (LLM vs. Rule Baseline)
 
-### RuleLLM Variant
-```bash
-python examples/GFC2008/RuleLLM/run_gfc2008_rulellm.py \
-    -c configs/GFC2008/RuleLLM/simulation.yml
-```
-
-### RAG Variant
-```bash
-python examples/GFC2008/Rag/run_gfc2008_rag.py \
-    -c configs/GFC2008/Rag/simulation.yml
-```
-
-## References
-
-- Gorton (2010): Securitized banking and the run on repo
-- Brunnermeier (2009): Deciphering the liquidity and credit crunch
-- Acharya & Richardson (2009): Restoring financial stability
+| Metric | LLM Expected Range | vs. Rule | Basis                                               |
+|--------|--------------------|----------|-----------------------------------------------------|
+| BBI    | 0.03–0.25          | Wider    | LLM RatingAgency may over- or under-inflate         |
+| CII    | 0.05–0.40          | Wider    | Preemptive or delayed fire sales vs. Rule threshold |
+| FSI    | 1–10 rounds        | Wider    | LLM fire-sale timing more variable                  |
+| RRI    | 0.15–0.70          | Variable | LLM Regulator may intervene more actively           |
+| OSP    | 0.50–0.90          | Similar  | Origination pattern LLM-modulated                   |
+| WDI    | 0.08–0.35          | Similar  | Wealth transfer depends on crisis arc               |

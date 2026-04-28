@@ -130,10 +130,11 @@ class Market(GeneralPlayer):
 
 class HindsightOverconfident(GeneralPlayer):
     """
-    Believes past outcomes were obvious, leading to excessive confidence in predictions
+    Theory: simulation-bases.md §4.1 — HindsightOverconfident
 
-    Theoretical Basis: Knew-it-all-along effect (Fischhoff, 1975)
-    Market Role: destabilizing
+    Theoretical basis: Knew-it-all-along effect (Fischhoff, 1975).
+    Believes past outcomes were obvious, leading to excessive confidence in predictions.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -204,10 +205,11 @@ class HindsightOverconfident(GeneralPlayer):
 
 class OutcomeLearner(GeneralPlayer):
     """
-    Learns only from outcomes not process, misattributes skill to luck and vice versa
+    Theory: simulation-bases.md §4.2 — OutcomeLearner
 
-    Theoretical Basis: Outcome bias (Fischhoff & Beyth, 1975)
-    Market Role: destabilizing
+    Theoretical basis: Outcome bias (Fischhoff & Beyth, 1975).
+    Learns only from outcomes not process, misattributes skill to luck.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -278,10 +280,11 @@ class OutcomeLearner(GeneralPlayer):
 
 class ProcessEvaluator(GeneralPlayer):
     """
-    Evaluates decisions by process quality not outcomes, resists hindsight distortion
+    Theory: simulation-bases.md §4.3 — ProcessEvaluator
 
-    Theoretical Basis: Process-oriented rationality (Roese & Vohs, 2012 baseline)
-    Market Role: stabilizing
+    Theoretical basis: Process-oriented rationality (Roese & Vohs, 2012).
+    Evaluates decisions by process quality, resists hindsight distortion.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -352,10 +355,11 @@ class ProcessEvaluator(GeneralPlayer):
 
 class ContrarianSkeptic(GeneralPlayer):
     """
-    Skeptic of post-hoc narratives, trades against hindsight-driven consensus
+    Theory: simulation-bases.md §4.4 — ContrarianSkeptic
 
-    Theoretical Basis: Narrative skepticism (Roese & Vohs, 2012)
-    Market Role: stabilizing
+    Theoretical basis: Narrative skepticism (Roese & Vohs, 2012).
+    Skeptic of post-hoc narratives, trades against hindsight-driven consensus.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -426,10 +430,11 @@ class ContrarianSkeptic(GeneralPlayer):
 
 class NoiseTrader(GeneralPlayer):
     """
-    Random uninformed trader providing baseline liquidity
+    Theory: simulation-bases.md §4.5 — NoiseTrader
 
-    Theoretical Basis: Noise trader model (Black, 1986)
-    Market Role: neutral
+    Theoretical basis: Noise trader model (Black, 1986).
+    Random uninformed trader providing baseline liquidity.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:

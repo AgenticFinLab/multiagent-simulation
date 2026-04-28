@@ -1,222 +1,109 @@
-# FlashCrash2010 Simulation
+# FlashCrash2010 Rule — Explain
 
-## Overview
+## §1 Overview
 
-| Item               | Description                                                         |
-|--------------------|---------------------------------------------------------------------|
-| **Phenomenon**     | 2010 Flash Crash - High-frequency trading induced market collapse   |
-| **Model**          | Rule-based / LLM / RuleLLM / RAG                                    |
-| **Key Feature**    | Order book depth dynamics, HFT liquidity withdrawal, feedback loops |
-| **Academic Value** | Market microstructure fragility, algorithmic trading risks          |
+| Item             | Description                                                                                                                             |
+|------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| **Variant**      | Rule                                                                                                                                    |
+| **Scenario**     | FlashCrash2010                                                                                                                          |
+| **Phenomenon**   | May 6, 2010 Flash Crash — order-book depth collapse, HFT withdrawal, stop-loss cascade                                                  |
+| **Agent count**  | 5 types: HFTMarketMaker, MomentumChaser, FundamentalTrader, StopLossTrader, NoiseTrader                                                 |
+| **Market model** | Order-book depth model: `P(t+1) = P(t) + λ × NetFlow / Depth(t) + γ × (F − P) + ε`; `Depth` driven by volatility and HFT participation  |
+| **Key feature**  | `HFTMarketMaker.agent_type = "hft"` drives `hft_participation`; withdrawal collapses `stress_factor` → `Depth` → amplified price impact |
+| **Determinism**  | High — all thresholds and formulae are fixed                                                                                            |
 
-## Theoretical Foundation
+## §2 Theory → Implementation Mapping
 
-### Primary Theory: Market Microstructure and Liquidity
+| Theory construct       | simulation-bases.md reference | Rule implementation                                                                                                                     |
+|------------------------|-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| HFT stress withdrawal  | §4.1 HFTMarketMaker           | `velocity = mean(                                                                                                                       |
+| Momentum amplification | §4.2 MomentumChaser           | `velocity = (price[-1] - price[-lookback]) / price[-lookback]; quantity = int(min(abs(velocity) × position_multiplier, 1000))`          |
+| Value stabilisation    | §4.3 FundamentalTrader        | `deviation = (price - fundamental) / fundamental; if deviation < -trigger: buy(order_size); elif deviation > trigger: sell(order_size)` |
+| Stop-loss cascade      | §4.4 StopLossTrader           | `stop_level = entry_price × (1 - stop_percentage); if price <= stop_level: sell(-position); stopped=True`                               |
+| Noise background       | §4.5 NoiseTrader              | `if random() > trade_probability: qty=0 else: qty = ±randint(min_order, max_order)`                                                     |
+| Order-book depth       | §3 Market Design              | `stress_factor` depressed by `volatility > 0.01` and `hft_participation < 0.30`; `Depth = base_depth × max(stress_factor, 0.1)`         |
+| Spread widening        | §3 Market Design              | `spread = base_spread + volatility × 0.5; if hft_participation < 0.30: spread × 3; if volatility > 0.02: spread × 5`                    |
 
-**Kirilenko, Kyle, Samadi & Tuzun (2017)** - "The Flash Crash: High-Frequency Trading in an Electronic Market"
-- *Journal of Finance*, 72(3), 967-998
-
-Key Insight: High-frequency traders (HFTs) initially provide liquidity but withdraw it during stress,
-creating a "hot potato" effect where intermediaries rapidly pass inventory among themselves
-without absorbing it, leading to liquidity evaporation.
-
-### Supporting Theories
-
-1. **Order Book Dynamics** (Biais, Foucault & Moinas, 2015)
-   - Bid-ask spread expansion under stress
-   - Market depth disappearance
-
-2. **Feedback Trading** (De Long et al., 1990)
-   - Positive feedback loops amplify price movements
-   - Momentum chasing by automated systems
-
-3. **Synchronization Risk** (Abreu & Brunnermeier, 2003)
-   - Coordinated withdrawal of liquidity
-   - Strategic complementarity among HFTs
-
-## Architecture
+## §3 Agent Interaction Flow
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     MARKET (Order Book)                      │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │   Bid Side   │  │   Mid Price  │  │   Ask Side   │      │
-│  │  (Buyers)    │  │              │  │  (Sellers)   │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
-                              │
-        ┌─────────────────────┼─────────────────────┐
-        │                     │                     │
-   ┌────▼────┐           ┌────▼────┐           ┌────▼────┐
-   │  HFT    │           │  HFT    │           │  HFT    │
-   │Market   │◄─────────►│Market   │◄─────────►│Market   │
-   │Maker    │           │Maker    │           │Maker    │
-   └────┬────┘           └────┬────┘           └────┬────┘
-        │                     │                     │
-   ┌────▼────┐           ┌────▼────┐           ┌────▼────┐
-   │Fundamental│          │Momentum │           │StopLoss │
-   │Trader    │          │Chaser   │           │Trader   │
-   └─────────┘           └─────────┘           └─────────┘
+Round t:
+  Market.perceive() — collect all orders; compute hft_participation
+  Market.decide()   — compute volatility, stress_factor, Depth, spread, new_price
+  Market.act()      — broadcast: price, prev_price, return_pct, fundamental, deviation,
+                                  spread, depth, volume, volatility, round
+  Investors.perceive() — read market_data; update price_history
+  Investors.decide()   — compute quantity, agent_type, provides_liquidity
+  Investors.act()      — send order to Market
 ```
 
-## Agent Descriptions
+## §4 Crash Mechanism (Rule Logic)
 
-### Market (Order Book Mechanism)
-
-**Mechanism**: Continuous double auction with order book depth
-
-**Price Formation**:
 ```
-P(t+1) = P(t) + λ × NetOrderFlow / Depth(t) + ε
+Phase 1 (Normal):
+  HFTMarketMaker.velocity < withdrawal_threshold → provides_liquidity=True, quantity=500
+  hft_participation ≈ 0.6–0.7 → stress_factor = 1.0 → Depth ≈ base_depth
 
-Where:
-- Depth(t) = f(Spread, Recent Volatility, HFT Participation)
-- λ = Price impact coefficient (increases as depth decreases)
-- ε = Noise term
+Phase 2 (Trigger):
+  MomentumChaser.velocity > entry_threshold → sell (quantity ∝ velocity)
+  price drops → HFTMarketMaker.velocity rises toward withdrawal_threshold
+
+Phase 3 (Cascade):
+  velocity > withdrawal_threshold → HFTMarketMaker withdraws (quantity=0)
+  hft_participation drops < 0.30 → stress_factor × 0.5 → Depth collapses
+  spread × 3 or × 5 → amplified impact
+  StopLossTrader: price <= stop_level → sell entire position
+
+Phase 4 (Recovery):
+  FundamentalTrader: deviation < -value_trigger → buy(order_size)
+  HFTMarketMaker velocity drops → returns gradually
 ```
 
-**Key Features**:
-- Dynamic order book depth (shrinks during stress)
-- Bid-ask spread widening
-- Trade-through protection
+## §5 Key Parameters
 
-### Agent Types
+| Parameter              | Location                 | Effect on crash                           |
+|------------------------|--------------------------|-------------------------------------------|
+| `withdrawal_threshold` | HFTMarketMaker extras    | Lower → earlier withdrawal → deeper crash |
+| `base_depth`           | Market extras            | Lower → more severe price impact          |
+| `price_impact` (λ)     | Market extras            | Higher → more sensitive to order flow     |
+| `stop_percentage`      | StopLossTrader extras    | Lower → triggers earlier in cascade       |
+| `entry_threshold`      | MomentumChaser extras    | Lower → earlier momentum entry            |
+| `value_trigger`        | FundamentalTrader extras | Lower → earlier recovery entry            |
 
-#### 1. HFT Market Maker
-**Theoretical Basis**: Kirilenko et al. (2017)
+## §6 Files
 
-**Behavior**:
-- Provides liquidity via limit orders
-- Tight spreads in normal conditions
-- **Withdraws liquidity when**:
-  - Price velocity exceeds threshold
-  - Inventory builds up beyond limit
-  - Spread widens beyond comfort zone
+| File                                         | Purpose                                |
+|----------------------------------------------|----------------------------------------|
+| `players.py`                                 | Market + 5 rule-based investor classes |
+| `run_flashcrash2010.py`                      | Entry point                            |
+| `configs/FlashCrash2010/Rule/simulation.yml` | Main simulation config                 |
+| `configs/FlashCrash2010/Rule/players.yml`    | Agent parameter definitions            |
+| `configs/FlashCrash2010/Rule/topology.yml`   | Star topology                          |
+| `simulation-bases.md`                        | Full theoretical foundations           |
+| `analysis-bases.md`                          | Metrics and analysis guide             |
 
-**Parameters**:
-- Normal spread: 0.01% of price
-- Stress spread: 0.5% of price
-- Inventory limit: 1000 shares
-- Withdrawal threshold: 2% price change in 1 minute
+## §7 Running
 
-#### 2. Momentum Chaser (HFT)
-**Theoretical Basis**: Feedback trading models
-
-**Behavior**:
-- Detects price trends using short-term signals
-- Accelerates moves by chasing momentum
-- Creates positive feedback loops
-
-**Parameters**:
-- Lookback window: 10 seconds
-- Entry threshold: 0.1% move
-- Position size: Proportional to velocity
-
-#### 3. Fundamental Trader
-**Theoretical Basis**: Value investing
-
-**Behavior**:
-- Knows true fundamental value
-- Buys when price < 0.95 × fundamental
-- Sells when price > 1.05 × fundamental
-- Provides stabilizing force
-
-**Parameters**:
-- Fundamental value: $40.00
-- Trigger threshold: ±5%
-- Order size: 500 shares
-
-#### 4. Stop-Loss Trader
-**Theoretical Basis**: Predatory trading (Brunnermeier & Pedersen, 2005)
-
-**Behavior**:
-- Places stop-loss orders at -3% from entry
-- When triggered, converts to market orders
-- Creates "magnet effect" near stop levels
-
-**Parameters**:
-- Stop level: -3% from average entry
-- Position size: 1000 shares
-- Entry price: $40.00
-
-#### 5. Noise Trader
-**Theoretical Basis**: Black (1986)
-
-**Behavior**:
-- Random buy/sell decisions
-- Creates background trading activity
-- Represents uninformed flow
-
-**Parameters**:
-- Trade probability: 5% per round
-- Order size: Random 100-500 shares
-
-## Variant Comparison
-
-| Variant     | HFT Behavior             | Key Difference                                     |
-|-------------|--------------------------|----------------------------------------------------|
-| **Rule**    | Deterministic algorithms | Fixed thresholds, predictable withdrawal           |
-| **LLM**     | LLM-driven decisions     | Adaptive behavior based on market context          |
-| **RuleLLM** | Rules + LLM judgment     | Can override rules based on qualitative assessment |
-| **RAG**     | Rules + LLM + Knowledge  | Access to historical flash crash cases             |
-
-## Usage
-
-### Rule Variant
 ```bash
-python examples/FlashCrash2010/Rule/run_flashcrash2010.py \
-    -c configs/FlashCrash2010/Rule/simulation.yml
+python examples/FlashCrash2010/Rule/run_flashcrash2010.py -c configs/FlashCrash2010/Rule/simulation.yml
 ```
 
-### LLM Variant
-```bash
-python examples/FlashCrash2010/LLM/run_flashcrash2010_llm.py \
-    -c configs/FlashCrash2010/LLM/simulation.yml
-```
+## §8 Expected Behaviour
 
-### RuleLLM Variant
-```bash
-python examples/FlashCrash2010/RuleLLM/run_flashcrash2010_rulellm.py \
-    -c configs/FlashCrash2010/RuleLLM/simulation.yml
-```
+| Phase    | Rounds | Key observable                                       |
+|----------|--------|------------------------------------------------------|
+| Normal   | 1–10   | `depth` ≈ `base_depth`; HFT active; spread tight     |
+| Trigger  | 11–15  | MomentumChaser selling; HFT first stress             |
+| Cascade  | 16–25  | `depth` < 20 % base; spread × 5–50; stop-losses fire |
+| Trough   | 26–30  | Min price; max spread; FT buying begins              |
+| Recovery | 31–50  | `depth` rebuilds; price → fundamental                |
 
-### RAG Variant
-```bash
-python examples/FlashCrash2010/Rag/run_flashcrash2010_rag.py \
-    -c configs/FlashCrash2010/Rag/simulation.yml
-```
+## §9 References
 
-## Expected Results
-
-### Stylized Facts to Observe
-
-1. **Order Book Depth Collapse**: Depth should decrease by 80-90% during crash
-2. **Spread Widening**: Bid-ask spread should expand 10-50x
-3. **Price Cascade**: Sharp decline followed by rapid recovery
-4. **HFT Withdrawal**: HFT participation drops during stress
-5. **Volume Spike**: Trading volume increases dramatically
-
-### Typical Metric Ranges
-
-| Metric            | Normal     | Crash       | Recovery   |
-|-------------------|------------|-------------|------------|
-| Bid-Ask Spread    | 0.01-0.02% | 0.5-2.0%    | 0.05-0.1%  |
-| Order Book Depth  | 5000-10000 | 500-1000    | 2000-5000  |
-| Price Change/Min  | ±0.1%      | -5% to -10% | +3% to +5% |
-| HFT Participation | 60-70%     | 10-20%      | 40-50%     |
-
-## References
-
-1. Kirilenko, A., Kyle, A. S., Samadi, M., & Tuzun, T. (2017). "The Flash Crash: High-Frequency Trading in an Electronic Market." *Journal of Finance*, 72(3), 967-998.
-
-2. CFTC-SEC (2010). "Findings Regarding the Market Events of May 6, 2010." Report.
-
-3. Biais, B., Foucault, T., & Moinas, S. (2015). "Equilibrium Fast Trading." *Journal of Financial Economics*, 116(2), 292-313.
-
-4. Brunnermeier, M. K., & Pedersen, L. H. (2005). "Predatory Trading." *Journal of Finance*, 60(4), 1825-1863.
-
-5. Abreu, D., & Brunnermeier, M. K. (2003). "Bubbles and Crashes." *Econometrica*, 71(1), 173-204.
-
-6. De Long, J. B., Shleifer, A., Summers, L. H., & Waldmann, R. J. (1990). "Positive Feedback Investment Strategies and Destabilizing Rational Speculation." *Journal of Finance*, 45(2), 379-395.
-
-7. Black, F. (1986). "Noise." *Journal of Finance*, 41(3), 529-543.
+1. Kirilenko, A., Kyle, A. S., Samadi, M., & Tuzun, T. (2017). *Journal of Finance*, 72(3), 967-998. doi:10.1111/jofi.12498
+2. CFTC-SEC Joint Report (2010). *Findings Regarding the Market Events of May 6, 2010.*
+3. Biais, B., Foucault, T., & Moinas, S. (2015). *Journal of Financial Economics*, 116(2), 292-313. doi:10.1016/j.jfineco.2015.03.004
+4. De Long, J. B., Shleifer, A., Summers, L. H., & Waldmann, R. J. (1990). *Journal of Finance*, 45(2), 379-395.
+5. Brunnermeier, M. K., & Pedersen, L. H. (2005). *Journal of Finance*, 60(4), 1825-1863.
+6. Shiller, R. J. (1981). *American Economic Review*, 71(3), 421-436.
+7. Black, F. (1986). *Journal of Finance*, 41(3), 529-543.

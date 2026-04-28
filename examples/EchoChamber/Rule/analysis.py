@@ -334,6 +334,7 @@ def create_visualizations(data: dict, output_dir: str) -> None:
 
     # Panel 4: Per-agent opinion trajectories
     agent_opinions = data.get("agent_opinions", {})
+    # pylint: disable=no-member
     colors = plt.cm.coolwarm(np.linspace(0, 1, max(len(agent_opinions), 1)))
     for idx, (agent_id, agent_opinion) in enumerate(sorted(agent_opinions.items())):
         if agent_opinion:
@@ -343,6 +344,7 @@ def create_visualizations(data: dict, output_dir: str) -> None:
             axes[1, 1].plot(
                 agent_rounds,
                 agent_opinion,
+                # pylint: disable=no-member
                 color=plt.cm.coolwarm(color_val),
                 alpha=0.6,
                 linewidth=1,

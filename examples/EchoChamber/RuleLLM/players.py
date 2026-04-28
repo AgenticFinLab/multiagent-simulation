@@ -226,28 +226,32 @@ class OpinionEnvironment(GeneralPlayer):
         )
 
         # Log
-        logger.debug(f"\n{'='*70}")  # pylint: disable=logging-fstring-interpolation
-        logger.debug(f"[OpinionEnv] Round {round_num}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("\n%s", "=" * 70)
+        logger.debug("[OpinionEnv] Round %d", round_num)
         logger.debug(
-            f"  Polarization: {current_polarization:.3f} -> {new_polarization:.3f}"
+            "  Polarization: %.3f -> %.3f", current_polarization, new_polarization
         )
-        logger.debug(f"  Mean Opinion: {new_mean_opinion:.3f}")  # pylint: disable=logging-fstring-interpolation
-        logger.debug(f"  Cluster Separation: {new_cluster_separation:.3f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("  Mean Opinion: %.3f", new_mean_opinion)
+        logger.debug("  Cluster Separation: %.3f", new_cluster_separation)
         logger.debug(
-            f"  Polarizers: {len(polarize_actions)}, "
-            f"Depolarizers: {len(depolarize_actions)}"
+            "  Polarizers: %d, Depolarizers: %d",
+            len(polarize_actions),
+            len(depolarize_actions),
         )
-        logger.debug(f"  Net Polarization Intensity: {net_polarization:+.3f}")  # pylint: disable=logging-fstring-interpolation
-        logger.debug(f"  Cross-cutting Exposure: {new_cross_cutting:.3f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("  Net Polarization Intensity: %+.3f", net_polarization)
+        logger.debug("  Cross-cutting Exposure: %.3f", new_cross_cutting)
         if actions:
-            logger.debug(f"  RuleLLM Actions ({len(actions)}):")  # pylint: disable=logging-fstring-interpolation
+            logger.debug("  RuleLLM Actions (%d):", len(actions))
             for a in actions:
                 logger.debug(
-                    f"    {a['agent_id']:20s} [{a['agent_role']:15s}]: "
-                    f"A={a['action_type']:10s} I={a['intensity']:.3f}"
+                    "    %s [%s]: A=%s I=%.3f",
+                    a["agent_id"],
+                    a["agent_role"],
+                    a["action_type"],
+                    a["intensity"],
                 )
                 if a.get("reasoning"):
-                    logger.debug(f"      -> {a['reasoning'][:80]}...")  # pylint: disable=logging-fstring-interpolation
+                    logger.debug("      -> %s...", a["reasoning"][:80])
 
         env_data = {
             "polarization": new_polarization,
@@ -436,14 +440,18 @@ Respond with ONLY valid JSON:
                 last_error = e
                 if attempt < max_retries - 1:
                     logger.debug(
-                        f"[{self.identity}] LLM parse failed (attempt {attempt+1}), retrying..."
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
                     )
 
         # If LLM failed after all retries, skip action this round (neutral)
         if decision is None:
             logger.warning(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}. "
-                f"Skipping action this round."
+                "[%s] LLM failed after %d attempts: %s. Skipping action this round.",
+                self.identity,
+                max_retries,
+                last_error,
             )
             action = {
                 "action_type": "neutral",
@@ -461,8 +469,8 @@ Respond with ONLY valid JSON:
                 ],
             }
 
-        action_type = decision.get("action_type", "neutral")
-        intensity = float(decision.get("intensity", 0.0))
+        action_type = decision["action_type"]
+        intensity = float(decision["intensity"])
         intensity = self._apply_intensity_constraints(intensity)
 
         # Update opinion based on LLM-decided action type
@@ -479,8 +487,13 @@ Respond with ONLY valid JSON:
         self.state.custom_state["my_opinion"] = my_opinion
 
         logger.debug(
-            f"[{self.identity:20s}] R{round_num} ({strategy_name:25s}): "
-            f"A={action_type:10s} I={intensity:.3f} opinion={my_opinion:.3f}"
+            "[%s] R%d (%s): A=%s I=%.3f opinion=%.3f",
+            self.identity,
+            round_num,
+            strategy_name,
+            action_type,
+            intensity,
+            my_opinion,
         )
 
         action = {
@@ -489,8 +502,8 @@ Respond with ONLY valid JSON:
             "agent_role": strategy_name,
             "agent_id": self.identity,
             "opinion": my_opinion,
-            "reasoning": decision.get("reasoning", "")[:120],
-            "analysis": decision.get("analysis", ""),
+            "reasoning": decision["reasoning"][:120],
+            "analysis": decision["analysis"],
         }
 
         return {
@@ -512,33 +525,23 @@ Respond with ONLY valid JSON:
 
 
 class RuleLLMIdeologue(RuleLLMSocialAgent):
-    """Hybrid: Sunstein echo chamber + in-group amplification formula + LLM reasoning."""
-
-    pass
+    """RuleLLM ideologue — in-group amplification formula + LLM reasoning on echo chamber dynamics. Theory: simulation-bases.md §4.1."""
 
 
 class RuleLLMConformist(RuleLLMSocialAgent):
-    """Hybrid: Asch conformity + group alignment formula + LLM reasoning."""
-
-    pass
+    """RuleLLM conformist — Asch conformity formula + LLM group alignment reasoning. Theory: simulation-bases.md §4.2."""
 
 
 class RuleLLMCriticalThinker(RuleLLMSocialAgent):
-    """Hybrid: Isenberg critical evaluation + depolarization formula + LLM reasoning."""
-
-    pass
+    """RuleLLM critical thinker — Isenberg depolarization formula + LLM evidence evaluation. Theory: simulation-bases.md §4.3."""
 
 
 class RuleLLMBridgeBuilder(RuleLLMSocialAgent):
-    """Hybrid: Pariser bridge-building + centering formula + LLM reasoning."""
-
-    pass
+    """RuleLLM bridge builder — centering formula + LLM cross-group engagement reasoning. Theory: simulation-bases.md §4.4."""
 
 
 class RuleLLMPassiveFollower(RuleLLMSocialAgent):
-    """Hybrid: Lazarsfeld mass communication + drift formula + LLM reasoning."""
-
-    pass
+    """RuleLLM passive follower — Lazarsfeld drift formula + LLM low-engagement reasoning. Theory: simulation-bases.md §4.5."""
 
 
 __all__ = [

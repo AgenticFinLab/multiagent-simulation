@@ -49,16 +49,12 @@ class Market(GeneralPlayer):
         extras = self.config.extras
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        buy_volume = sum(
-            o.get("quantity", 0) for o in orders if o.get("action") == "buy"
-        )
-        sell_volume = sum(
-            o.get("quantity", 0) for o in orders if o.get("action") == "sell"
-        )
+        buy_volume = sum(o["quantity"] for o in orders if o.get("action") == "buy")
+        sell_volume = sum(o["quantity"] for o in orders if o.get("action") == "sell")
         net_demand = buy_volume - sell_volume
-        price_impact = float(extras.get("price_impact", 0.0001))
-        mean_reversion = float(extras.get("mean_reversion", 0.02))
-        noise_std = float(extras.get("noise_std", 0.5))
+        price_impact = float(extras["price_impact"])
+        mean_reversion = float(extras["mean_reversion"])
+        noise_std = float(extras["noise_std"])
         noise = random.gauss(0, noise_std)
         new_price = (
             price
@@ -98,8 +94,10 @@ class Market(GeneralPlayer):
 class EndowedHolder(GeneralPlayer):
     """Values owned assets above market price, reluctant to sell at fair value.
 
-    Theory: Kahneman et al. (1990) — Ownership-based overvaluation.
-    Effect: DESTABILIZING — inflates prices by withholding supply.
+    Theory: simulation-bases.md §4.1 — EndowedHolder
+    Theoretical basis: Kahneman, Knetsch & Thaler (1990) endowment effect; ownership
+    increases subjective value above market price, suppressing rational selling.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -107,6 +105,7 @@ class EndowedHolder(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = float(extras["initial_cash"])
             self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["market_data"] = {}
             self.state.custom_state["history_buffer"] = HistoryBuffer(
                 folder="EndowmentEffect/Rule/EndowedHolder", entry_limit=200
             )
@@ -118,15 +117,15 @@ class EndowedHolder(GeneralPlayer):
                     self.state.custom_state["market_data"] = data
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        fundamental = market_data.get("fundamental", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        fundamental = market_data["fundamental"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        endowment_premium = float(extras.get("endowment_premium", 0.15))
-        sell_reluctance = float(extras.get("sell_reluctance", 0.8))
+        endowment_premium = float(extras["endowment_premium"])
+        sell_reluctance = float(extras["sell_reluctance"])
         action, quantity = "hold", 0
         # Buy when price is below fundamental (endowed holder still buys undervalued)
         if deviation < -0.05:
@@ -160,8 +159,10 @@ class EndowedHolder(GeneralPlayer):
 class StatusQuoSeller(GeneralPlayer):
     """Holds positions too long due to status quo bias, demands premium to sell.
 
-    Theory: Samuelson & Zeckhauser (1988) — Status quo bias in decision making.
-    Effect: DESTABILIZING — reduces liquidity by hoarding positions.
+    Theory: simulation-bases.md §4.2 — StatusQuoSeller
+    Theoretical basis: Samuelson & Zeckhauser (1988) status quo bias; inertia
+    prevents rational rebalancing even at significant overvaluation.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -169,6 +170,7 @@ class StatusQuoSeller(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = float(extras["initial_cash"])
             self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["market_data"] = {}
             self.state.custom_state["history_buffer"] = HistoryBuffer(
                 folder="EndowmentEffect/Rule/StatusQuoSeller", entry_limit=200
             )
@@ -180,14 +182,14 @@ class StatusQuoSeller(GeneralPlayer):
                     self.state.custom_state["market_data"] = data
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        fundamental = market_data.get("fundamental", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        fundamental = market_data["fundamental"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        status_quo_threshold = float(extras.get("status_quo_threshold", 0.20))
+        status_quo_threshold = float(extras["status_quo_threshold"])
         action, quantity = "hold", 0
         # Only sell with large premium above fundamental
         if deviation > status_quo_threshold:
@@ -220,8 +222,10 @@ class StatusQuoSeller(GeneralPlayer):
 class RationalArbitrageur(GeneralPlayer):
     """Exploits the gap between subjective and objective valuations.
 
-    Theory: Shleifer & Vishny (1997) — Limits to arbitrage.
-    Effect: STABILIZING — pushes prices toward fundamental value.
+    Theory: simulation-bases.md §4.3 — RationalArbitrageur
+    Theoretical basis: Shleifer & Vishny (1997) limits to arbitrage; exploits
+    the price gap created by endowment bias, pushing prices toward fundamental.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -229,6 +233,7 @@ class RationalArbitrageur(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = float(extras["initial_cash"])
             self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["market_data"] = {}
             self.state.custom_state["history_buffer"] = HistoryBuffer(
                 folder="EndowmentEffect/Rule/RationalArbitrageur", entry_limit=200
             )
@@ -240,14 +245,14 @@ class RationalArbitrageur(GeneralPlayer):
                     self.state.custom_state["market_data"] = data
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        fundamental = market_data.get("fundamental", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        fundamental = market_data["fundamental"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        arb_threshold = float(extras.get("arb_threshold", 0.05))
+        arb_threshold = float(extras["arb_threshold"])
         action, quantity = "hold", 0
         if deviation < -arb_threshold:
             qty = min(600, int(cash / price) if price > 0 else 0)
@@ -279,8 +284,10 @@ class RationalArbitrageur(GeneralPlayer):
 class NewBuyer(GeneralPlayer):
     """Evaluates assets at market price without ownership bias.
 
-    Theory: Kahneman et al. (1990) — Buyers unaffected by endowment effect.
-    Effect: STABILIZING — provides rational price discovery from buyer side.
+    Theory: simulation-bases.md §4.4 — NewBuyer
+    Theoretical basis: Kahneman et al. (1990) — buyers unaffected by endowment effect;
+    provides rational price discovery and stabilizes the market from the buy side.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -288,6 +295,7 @@ class NewBuyer(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = float(extras["initial_cash"])
             self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["market_data"] = {}
             self.state.custom_state["history_buffer"] = HistoryBuffer(
                 folder="EndowmentEffect/Rule/NewBuyer", entry_limit=200
             )
@@ -299,14 +307,14 @@ class NewBuyer(GeneralPlayer):
                     self.state.custom_state["market_data"] = data
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        fundamental = market_data.get("fundamental", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        fundamental = market_data["fundamental"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        buy_threshold = float(extras.get("buy_threshold", -0.03))
+        buy_threshold = float(extras["buy_threshold"])
         action, quantity = "hold", 0
         if deviation < buy_threshold:
             qty = min(500, int(cash / price) if price > 0 else 0)
@@ -338,8 +346,10 @@ class NewBuyer(GeneralPlayer):
 class NoiseTrader(GeneralPlayer):
     """Random uninformed trader providing baseline liquidity.
 
-    Theory: Black (1986) — Noise trading and market efficiency.
-    Effect: NEUTRAL — provides random liquidity with no directional bias.
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+    Theoretical basis: Black (1986) noise trading and market efficiency; uninformed
+    random trades provide liquidity and prevent trivial equilibria.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -347,6 +357,7 @@ class NoiseTrader(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = float(extras["initial_cash"])
             self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["market_data"] = {}
             self.state.custom_state["history_buffer"] = HistoryBuffer(
                 folder="EndowmentEffect/Rule/NoiseTrader", entry_limit=200
             )
@@ -358,12 +369,12 @@ class NoiseTrader(GeneralPlayer):
                     self.state.custom_state["market_data"] = data
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        trade_probability = float(extras.get("trade_probability", 0.4))
+        trade_probability = float(extras["trade_probability"])
         action, quantity = "hold", 0
         if random.random() < trade_probability:
             if random.random() < 0.5:

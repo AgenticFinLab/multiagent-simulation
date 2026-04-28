@@ -280,31 +280,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMMarketMaker(LLMInvestor):
-    """Market maker - provides liquidity."""
+    """Market maker - provides liquidity. Theory: simulation-bases.md §4.1"""
 
     _system_prompt = LLM_MARKET_MAKER_SYS
 
 
 class LLMLiquidityDemander(LLMInvestor):
-    """Liquidity demander - takes liquidity."""
+    """Liquidity demander - takes liquidity. Theory: simulation-bases.md §4.2"""
 
     _system_prompt = LLM_LIQUIDITY_DEMANDER_SYS
 
 
 class LLMArbitrageur(LLMInvestor):
-    """Arbitrageur - seeks opportunities."""
+    """Arbitrageur - seeks opportunities. Theory: simulation-bases.md §4.3"""
 
     _system_prompt = LLM_ARBITRAGEUR_SYS
 
 
 class LLMValueInvestor(LLMInvestor):
-    """Value investor - patient buyer."""
+    """Value investor - patient buyer. Theory: simulation-bases.md §4.4"""
 
     _system_prompt = LLM_VALUE_SYS
 
 
 class LLMForcedSeller(LLMInvestor):
-    """Forced seller - must sell."""
+    """Forced seller - must sell. Theory: simulation-bases.md §4.5"""
 
     _system_prompt = LLM_FORCED_SELLER_SYS
 

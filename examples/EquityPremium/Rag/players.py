@@ -145,7 +145,7 @@ class Market(GeneralPlayer):
                         "price": order["bid_price"],
                         "quantity": order["quantity"],
                         "strategy": order["strategy"],
-                        "provides_liquidity": order.get("provides_liquidity", False),
+                        "provides_liquidity": order["provides_liquidity"],
                     }
                 )
         self.state.custom_state["orders"] = orders
@@ -742,7 +742,7 @@ class RagLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
-            "provides_liquidity": decision.get("provides_liquidity", False),
+            "provides_liquidity": decision["provides_liquidity"],
         }
 
         return {
@@ -764,31 +764,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMMyopicLossAverse(RagLLMInvestor):
-    """RAG-augmented: MyopicLossAverse rules + LLM + retrieved knowledge."""
+    """RAG-augmented myopic loss-averse investor — short-term evaluation + loss aversion via RAG+LLM. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class RagLLMLongTermInvestor(RagLLMInvestor):
-    """RAG-augmented: LongTermInvestor rules + LLM + retrieved knowledge."""
+    """RAG-augmented long-term investor — fundamental value anchoring via RAG+LLM reasoning. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class RagLLMInstitutionalInvestor(RagLLMInvestor):
-    """RAG-augmented: InstitutionalInvestor rules + LLM + retrieved knowledge."""
+    """RAG-augmented institutional investor — diversification and rebalancing via RAG+LLM. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class RagLLMRiskAverseSaver(RagLLMInvestor):
-    """RAG-augmented: RiskAverseSaver rules + LLM + retrieved knowledge."""
+    """RAG-augmented risk-averse saver — capital preservation with retrieved knowledge. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class RagLLMRationalOptimizer(RagLLMInvestor):
-    """RAG-augmented: RationalOptimizer rules + LLM + retrieved knowledge."""
+    """RAG-augmented rational optimizer — noise trader rules + LLM expected-utility with RAG. Theory: simulation-bases.md §4.5."""
 
     pass
 

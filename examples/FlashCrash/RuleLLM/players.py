@@ -128,7 +128,7 @@ class Market(GeneralPlayer):
                         "price": order["bid_price"],
                         "quantity": order["quantity"],
                         "strategy": order["strategy"],
-                        "provides_liquidity": order.get("provides_liquidity", False),
+                        "provides_liquidity": order["provides_liquidity"],
                     }
                 )
         self.state.custom_state["orders"] = orders
@@ -177,19 +177,20 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
         self.state.custom_state["liquidity_history"].append(total_liquidity)
 
-        logger.debug(f"\n{'='*70}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("\n%s", "=" * 70)
+        logger.debug("[Market] Round %s", round_num)
         logger.debug(
-            f"[Market] Round {round_num}"
-        )  # pylint: disable=logging-fstring-interpolation
-        logger.debug(
-            f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
+            "  Price: %.2f → %.2f (%+.2f%%)",
+            current_price,
+            new_price,
+            price_return * 100,
         )
         logger.debug(
-            f"  Liquidity: {total_liquidity:.1f}, Impact Factor: {liquidity_factor:.2f}"
+            "  Liquidity: %.1f, Impact Factor: %.2f",
+            total_liquidity,
+            liquidity_factor,
         )
-        logger.debug(
-            f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}"
-        )  # pylint: disable=logging-fstring-interpolation
+        logger.debug("  Net Demand: %+.2f, Volume: %.2f", net_demand, total_volume)
 
         market_data = {
             "price": new_price,
@@ -388,21 +389,25 @@ Respond with ONLY valid JSON:
                 last_error = e
                 if attempt < max_retries - 1:
                     logger.debug(
-                        f"[{self.identity}] LLM parse failed (attempt {attempt+1}), retrying..."
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
                     )
 
         # If LLM failed after all retries, skip trading this round (hold)
         if decision is None:
             logger.warning(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}. "
-                f"Skipping trade this round."
+                "[%s] LLM failed after %d attempts: %s. Skipping trade this round.",
+                self.identity,
+                max_retries,
+                last_error,
             )
             order = {
                 "bid_price": market_data["price"],
                 "quantity": 0.0,
                 "strategy": strategy_name,
                 "investor": self.identity,
-                "reasoning": f"LLM parse failed: held position",
+                "reasoning": "LLM parse failed: held position",
                 "analysis": "",
                 "provides_liquidity": False,
             }
@@ -428,10 +433,14 @@ Respond with ONLY valid JSON:
             self.state.custom_state["position"] += quantity
 
         logger.debug(
-            f"[{self.identity:25s}] R{round_num} ({strategy_name:25s}): "
-            f"P={bid_price:7.2f}, Q={quantity:+7.2f} | "
-            f"Cash={self.state.custom_state['cash']:8.2f}, "
-            f"Pos={self.state.custom_state['position']:+7.2f}"
+            "[%-25s] R%s (%-25s): P=%7.2f, Q=%+7.2f | Cash=%8.2f, Pos=%+7.2f",
+            self.identity,
+            round_num,
+            strategy_name,
+            bid_price,
+            quantity,
+            self.state.custom_state["cash"],
+            self.state.custom_state["position"],
         )
 
         order = {
@@ -441,7 +450,7 @@ Respond with ONLY valid JSON:
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
-            "provides_liquidity": decision.get("provides_liquidity", False),
+            "provides_liquidity": decision["provides_liquidity"],
         }
 
         return {
@@ -463,31 +472,31 @@ Respond with ONLY valid JSON:
 
 
 class RuleLLMHighFrequencyTrader(RuleLLMInvestor):
-    """Hybrid: HFT momentum rules + LLM rapid reasoning."""
+    """Hybrid: HFT momentum rules + LLM rapid reasoning. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class RuleLLMMarketMaker(RuleLLMInvestor):
-    """Hybrid: Liquidity provision + withdrawal rules + LLM risk reasoning."""
+    """Hybrid: Liquidity provision + withdrawal rules + LLM risk reasoning. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class RuleLLMAlgorithmicTrader(RuleLLMInvestor):
-    """Hybrid: Trend-following algorithm rules + LLM systematic reasoning."""
+    """Hybrid: Trend-following algorithm rules + LLM systematic reasoning. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class RuleLLMStopLossTrader(RuleLLMInvestor):
-    """Hybrid: Stop-loss cascade rules + LLM risk management reasoning."""
+    """Hybrid: Stop-loss cascade rules + LLM risk management reasoning. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class RuleLLMFundamentalTrader(RuleLLMInvestor):
-    """Hybrid: Value deviation rules + LLM analytical reasoning."""
+    """Hybrid: Value deviation rules + LLM analytical reasoning. Theory: simulation-bases.md §4.5."""
 
     pass
 

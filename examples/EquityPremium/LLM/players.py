@@ -136,11 +136,15 @@ class Market(GeneralPlayer):
         self.state.custom_state["stock_price"] = new_price
         self.state.custom_state["stock_history"].append(new_price)
 
-        logger.debug(f"\n{'='*60}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("\n%s", "=" * 60)
         logger.debug(
-            f"[Market] Round {round_num}: Stock ${current_price:.2f} → ${new_price:.2f} ({stock_return*100:+.2f}%)"
+            "[Market] Round %s: Stock $%.2f → $%.2f (%+.2f%%)",
+            round_num,
+            current_price,
+            new_price,
+            stock_return * 100,
         )
-        logger.debug(f"  Bond Return: {bond_return*100*252:.2f}% annual")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("  Bond Return: %.2f%% annual", bond_return * 100 * 252)
 
         market_data = {
             "stock_price": new_price,
@@ -330,31 +334,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMMyopicLossAverse(LLMInvestor):
-    """Myopic loss averse - evaluates frequently, demands high premium."""
+    """LLM-driven myopic loss averse — frequent evaluation with high loss sensitivity via LLM. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class LLMLongTermInvestor(LLMInvestor):
-    """Long-term investor - evaluates infrequently, more stocks."""
+    """LLM-driven long-horizon investor — accepts more equity risk via extended evaluation window. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class LLMInstitutionalInvestor(LLMInvestor):
-    """Institutional investor - balanced allocation."""
+    """LLM-driven institutional investor — balanced allocation using risk-neutral framework. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class LLMRiskAverseSaver(LLMInvestor):
-    """Risk-averse saver - prefers bonds."""
+    """LLM-driven risk-averse saver — strong bond preference with prospect theory reasoning. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class LLMRationalOptimizer(LLMInvestor):
-    """Rational optimizer - expected utility maximizer."""
+    """LLM-driven rational optimizer — expected utility maximizer modeling benchmark behavior. Theory: simulation-bases.md §4.5."""
 
     pass
 

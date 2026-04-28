@@ -3,10 +3,12 @@
 LLM-driven agents for the GamblerFallacy simulation using LangChainAPIInference.
 """
 
+import importlib
 import logging
 from typing import Any, Dict, Optional
 
-from lmbase.inference import InferInput, LangChainAPIInference
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
@@ -15,6 +17,13 @@ from examples.GamblerFallacy.Rule.players import Market
 from examples.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("GamblerFallacy.LLM")
+
+
+def load_prompt(prompt_path: str) -> str:
+    """Load a prompt constant from 'module:VAR' path."""
+    module_path, var_name = prompt_path.rsplit(":", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, var_name)
 
 
 class LLMInvestor(GeneralPlayer):
@@ -54,12 +63,12 @@ class LLMInvestor(GeneralPlayer):
         """Initialize LangChainAPIInference client from config."""
         llm_cfg = self.config.extras.get("llm", {})
         self._llm_params = {
-            "model": llm_cfg["model"],
-            "temperature": llm_cfg.get("temperature", 0.3),
+            "lm_name": llm_cfg["lm_name"],
+            "generation_config": llm_cfg["generation_config"],
         }
         self._llm_client = LangChainAPIInference(
-            lm_name=self._llm_params["model"],
-            generation_config={"temperature": self._llm_params["temperature"]},
+            lm_name=self._llm_params["lm_name"],
+            generation_config=self._llm_params["generation_config"],
         )
 
     def __getstate__(self) -> dict:
@@ -71,14 +80,13 @@ class LLMInvestor(GeneralPlayer):
         self.__dict__.update(state)
         if hasattr(self, "_llm_params"):
             self._llm_client = LangChainAPIInference(
-                lm_name=self._llm_params["model"],
-                generation_config={"temperature": self._llm_params["temperature"]},
+                lm_name=self._llm_params["lm_name"],
+                generation_config=self._llm_params["generation_config"],
             )
 
     async def decide(self) -> dict:
         """Call LLM with market state; parse decision."""
         from examples.GamblerFallacy.LLM.prompts import LLM_USER_TEMPLATE
-        from masim.utils.prompt_loader import load_prompt
 
         system_msg = load_prompt(self._system_prompt_path)
         price = self.state.custom_state["price"]
@@ -151,7 +159,7 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMStreakReversalTrader(LLMInvestor):
-    """LLM-driven StreakReversalTrader: expects reversals after consecutive moves."""
+    """LLM-driven StreakReversalTrader: expects reversals after consecutive moves. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.GamblerFallacy.LLM.prompts:LLM_STREAK_REVERSAL_TRADER_SYS"
@@ -159,13 +167,13 @@ class LLMStreakReversalTrader(LLMInvestor):
 
 
 class LLMHotHandTrader(LLMInvestor):
-    """LLM-driven HotHandTrader: believes winning streaks will continue."""
+    """LLM-driven HotHandTrader: believes winning streaks will continue. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = "examples.GamblerFallacy.LLM.prompts:LLM_HOT_HAND_TRADER_SYS"
 
 
 class LLMIndependentAssessor(LLMInvestor):
-    """LLM-driven IndependentAssessor: treats each price change as independent."""
+    """LLM-driven IndependentAssessor: treats each price change as independent. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.GamblerFallacy.LLM.prompts:LLM_INDEPENDENT_ASSESSOR_SYS"
@@ -173,13 +181,13 @@ class LLMIndependentAssessor(LLMInvestor):
 
 
 class LLMArbitrageur(LLMInvestor):
-    """LLM-driven Arbitrageur: exploits mispricing caused by streak-based traders."""
+    """LLM-driven Arbitrageur: exploits mispricing caused by streak-based traders. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = "examples.GamblerFallacy.LLM.prompts:LLM_ARBITRAGEUR_SYS"
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven NoiseTrader: random uninformed trader."""
+    """LLM-driven NoiseTrader: random uninformed trader. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.GamblerFallacy.LLM.prompts:LLM_NOISE_TRADER_SYS"
 

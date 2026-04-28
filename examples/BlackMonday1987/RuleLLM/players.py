@@ -156,7 +156,7 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMPortfolioInsurer(RuleLLMInvestor):
-    """RuleLLM-driven portfolio insurer."""
+    """RuleLLM-driven portfolio insurer — dynamic hedging seller. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_PORTFOLIO_INSURER_SYS"
@@ -164,7 +164,7 @@ class RuleLLMPortfolioInsurer(RuleLLMInvestor):
 
 
 class RuleLLMIndexArbitrageur(RuleLLMInvestor):
-    """RuleLLM-driven index arbitrageur."""
+    """RuleLLM-driven index arbitrageur — exploits futures/spot gaps. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_INDEX_ARBITRAGEUR_SYS"
@@ -172,7 +172,7 @@ class RuleLLMIndexArbitrageur(RuleLLMInvestor):
 
 
 class RuleLLMProgramTrader(RuleLLMInvestor):
-    """RuleLLM-driven program trader."""
+    """RuleLLM-driven program trader — automated feedback amplifier. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_PROGRAM_TRADER_SYS"
@@ -180,7 +180,7 @@ class RuleLLMProgramTrader(RuleLLMInvestor):
 
 
 class RuleLLMValueInvestor(RuleLLMInvestor):
-    """RuleLLM-driven value investor."""
+    """RuleLLM-driven value investor — buys at deep discount to fundamentals. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_VALUE_INVESTOR_SYS"
@@ -188,7 +188,7 @@ class RuleLLMValueInvestor(RuleLLMInvestor):
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """RuleLLM-driven noise trader."""
+    """RuleLLM-driven noise trader — random uninformed liquidity provider. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = (
         "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"

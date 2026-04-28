@@ -328,13 +328,15 @@ Respond with JSON: {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantit
             except ValueError as e:
                 last_error = e
                 if attempt < max_retries - 1:
-                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")  # pylint: disable=logging-fstring-interpolation
+                    logger.debug("[%s] LLM parse failed, retrying...", self.identity)
 
         # If LLM failed after all retries, skip trading this round (hold)
         if decision is None:
             logger.warning(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}. "
-                f"Skipping trade this round."
+                "[%s] LLM failed after %d attempts: %s. Skipping trade this round.",
+                self.identity,
+                max_retries,
+                last_error,
             )
             order = {
                 "bid_price": market_data["price"],
@@ -398,31 +400,31 @@ Respond with JSON: {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantit
 
 
 class LLMDispositionBiased(LLMInvestor):
-    """Loss-averse investor."""
+    """LLM-driven disposition-biased investor — sells winners early, holds losers. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class LLMRationalInvestor(LLMInvestor):
-    """Rational utility maximizer."""
+    """LLM-driven rational investor — trades on fundamentals, ignores reference point. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class LLMTaxAwareInvestor(LLMInvestor):
-    """Tax-aware investor."""
+    """LLM-driven tax-aware investor — harvests losses, defers gains for tax optimization. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class LLMInstitutionalInvestor(LLMInvestor):
-    """Professional institutional investor."""
+    """LLM-driven institutional investor — professional symmetric thresholds, weak disposition. Theory: simulation-bases.md §4.5."""
 
     pass
 
 
 class LLMLossAverse(LLMInvestor):
-    """Highly loss-averse investor."""
+    """LLM-driven extreme loss-averse investor — very reluctant to realize losses. Theory: simulation-bases.md §4.1."""
 
     pass
 

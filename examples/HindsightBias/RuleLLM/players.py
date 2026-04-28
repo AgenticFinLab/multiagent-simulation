@@ -5,7 +5,8 @@ RuleLLM agents use LangChainAPIInference (lmbase) for LLM calls.
 
 import logging
 
-from lmbase.inference import LangChainAPIInference, InferInput
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 
 from masim.player.base import Action
 from masim.player.general import GeneralPlayer
@@ -111,31 +112,31 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMHindsightOverconfident(RuleLLMInvestor):
-    """RuleLLM HindsightOverconfident: excessive confidence from hindsight reasoning."""
+    """RuleLLM HindsightOverconfident: excessive confidence from hindsight reasoning. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RULELLM_HINDSIGHTOVERCONFIDENT_PROMPT
 
 
 class RuleLLMOutcomeLearner(RuleLLMInvestor):
-    """RuleLLM OutcomeLearner: judges decisions by outcomes, not process."""
+    """RuleLLM OutcomeLearner: judges decisions by outcomes, not process. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RULELLM_OUTCOMELEARNER_PROMPT
 
 
 class RuleLLMProcessEvaluator(RuleLLMInvestor):
-    """RuleLLM ProcessEvaluator: evaluates decisions by process quality."""
+    """RuleLLM ProcessEvaluator: evaluates decisions by process quality. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RULELLM_PROCESSEVALUATOR_PROMPT
 
 
 class RuleLLMContrarianSkeptic(RuleLLMInvestor):
-    """RuleLLM ContrarianSkeptic: distrusts post-hoc narratives."""
+    """RuleLLM ContrarianSkeptic: distrusts post-hoc narratives. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RULELLM_CONTRARIANSKEPTIC_PROMPT
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """RuleLLM NoiseTrader: random trader providing baseline liquidity."""
+    """RuleLLM NoiseTrader: random trader providing baseline liquidity. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RULELLM_NOISETRADER_PROMPT
 

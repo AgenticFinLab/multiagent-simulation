@@ -105,7 +105,7 @@ class RuleLLMInvestor(GeneralPlayer):
                 )
 
     async def decide(self) -> Dict[str, Any]:
-        market_data = self.state.custom_state.get("market_data", {})
+        market_data = self.state.custom_state["market_data"]
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
@@ -115,20 +115,20 @@ class RuleLLMInvestor(GeneralPlayer):
         system_prompt = load_prompt(llm_cfg["sys_message"])
         user_template = load_prompt(llm_cfg["user_message"])
 
-        price = market_data.get("price", 0.0)
+        price = market_data["price"]
         price_hist = list(self.state.custom_state["price_history"])
         recent_prices = price_hist[-5:] if len(price_hist) >= 5 else price_hist
 
         user_prompt = user_template.format(
             round=round_num,
             price=price,
-            prev_price=market_data.get("prev_price", price),
-            return_pct=market_data.get("return_pct", 0.0),
-            fundamental=market_data.get("fundamental", price),
-            deviation=market_data.get("deviation", 0.0) * 100,
-            spread=market_data.get("spread", 0.0),
-            depth=market_data.get("depth", 0.0),
-            volatility=market_data.get("volatility", 0.0),
+            prev_price=market_data["prev_price"],
+            return_pct=market_data["return_pct"],
+            fundamental=market_data["fundamental"],
+            deviation=market_data["deviation"] * 100,
+            spread=market_data["spread"],
+            depth=market_data["depth"],
+            volatility=market_data["volatility"],
             recent_prices=recent_prices,
             cash=cash,
             position=position,
@@ -178,8 +178,8 @@ class RuleLLMInvestor(GeneralPlayer):
                 ],
             }
 
-        bid_price = float(decision.get("bid_price", price))
-        quantity = float(decision.get("quantity", 0))
+        bid_price = float(decision["bid_price"])
+        quantity = float(decision["quantity"])
 
         if quantity > 0:
             max_buy = cash / bid_price if bid_price > 0 else 0
@@ -209,9 +209,9 @@ class RuleLLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": str(decision.get("reasoning", ""))[:120],
-            "analysis": str(decision.get("analysis", "")),
-            "provides_liquidity": bool(decision.get("provides_liquidity", False)),
+            "reasoning": str(decision["reasoning"])[:120],
+            "analysis": str(decision["analysis"]),
+            "provides_liquidity": bool(decision["provides_liquidity"]),
         }
         return {
             **order,
@@ -227,23 +227,23 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMHFTMarketMaker(RuleLLMInvestor):
-    """Hybrid: HFT liquidity withdrawal rules + LLM reasoning."""
+    """Hybrid: HFT liquidity withdrawal rules + LLM reasoning. Theory: simulation-bases.md §4.1."""
 
 
 class RuleLLMMomentumChaser(RuleLLMInvestor):
-    """Hybrid: Trend-following momentum rules + LLM reasoning."""
+    """Hybrid: Trend-following momentum rules + LLM reasoning. Theory: simulation-bases.md §4.2."""
 
 
 class RuleLLMFundamentalTrader(RuleLLMInvestor):
-    """Hybrid: Value deviation rules + LLM analytical reasoning."""
+    """Hybrid: Value deviation rules + LLM analytical reasoning. Theory: simulation-bases.md §4.3."""
 
 
 class RuleLLMStopLossTrader(RuleLLMInvestor):
-    """Hybrid: Stop-loss trigger rules + LLM risk management reasoning."""
+    """Hybrid: Stop-loss trigger rules + LLM risk management reasoning. Theory: simulation-bases.md §4.4."""
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """Hybrid: Random trading probability rules + LLM reasoning."""
+    """Hybrid: Random trading probability rules + LLM reasoning. Theory: simulation-bases.md §4.5."""
 
 
 __all__ = [

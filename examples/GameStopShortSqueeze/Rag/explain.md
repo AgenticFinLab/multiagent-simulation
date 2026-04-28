@@ -1,81 +1,65 @@
-# GameStopShortSqueeze Simulation
+# GameStopShortSqueeze — Rag Variant
 
-## Overview
+## §1 Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | January 2021 GameStop short squeeze - Reddit coordination drove 1,700% price increase |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | GameStop short squeeze simulation with retail coordination, gamma exposure, and social media-driven trading |
-| **Academic Value** | Understanding january 2021 gamestop short squeeze - reddit coordination drove 1,700% price increase through multi-agent simulation |
+The Rag variant implements the short squeeze with RAG-augmented LLM reasoning. Retrieved documents about the GME 2021 event, Reddit WallStreetBets posts, short squeeze mechanics, and historical squeezes (VW 2008, Silver 1979) reinforce each agent's behavioral role. Rag retrieval may amplify §4.1 retail enthusiasm (through GME historical momentum retrieval) or §4.2 fear (through retrieved squeeze postmortem data).
 
-## Theoretical Foundation
+| Aspect             | Detail                                       |
+|--------------------|----------------------------------------------|
+| Variant            | Rag                                          |
+| Simulation         | GameStopShortSqueeze                         |
+| Decision Mechanism | RAG-augmented LLM                            |
+| Theory Reference   | `simulation-bases.md §4.1–§4.5`              |
+| Market Broadcast   | `price`, `fundamental`, `deviation`, `round` |
 
-- Gamma squeeze dynamics (Jarrow & Li, 2021)
-- Social media and retail coordination (Lyocsa et al., 2022)
-- Short sale constraints (Jones & Lamont, 2002)
+---
 
-## Agent Descriptions
+## §2 Theory → Implementation Mapping
 
-### RetailCoordinated
-**Theoretical Basis**: Social media coordination
-**Market Role**: destabilizing
-**Description**: Retail traders coordinating via social media to buy and hold
-**Parameters**: diamond_hands=True, buy_pressure=0.8, coordination_strength=0.6
+### §2.1 RagLLMRetailCoordinated (`simulation-bases.md §4.1`)
+| Theory Component         | Implementation                                                                                    |
+|--------------------------|---------------------------------------------------------------------------------------------------|
+| Social coordination      | System prompt: retail coordinator; RAG retrieves WallStreetBets posts, GME Jan 2021 momentum data |
+| Historical reinforcement | Retrieved GME squeeze data may amplify buying conviction                                          |
 
-### ShortSellerHF
-**Theoretical Basis**: Short selling and squeeze dynamics
-**Market Role**: destabilizing
-**Description**: Heavily short hedge fund forced to cover at higher prices
-**Parameters**: short_interest=1.4, margin_requirement=0.5, cover_threshold=0.3
+### §2.2 RagLLMShortSellerHF (`simulation-bases.md §4.2`)
+| Theory Component   | Implementation                                                                                     |
+|--------------------|----------------------------------------------------------------------------------------------------|
+| Forced covering    | System prompt: short-seller persona; RAG retrieves Melvin Capital postmortem, VW 2008 squeeze data |
+| Fear amplification | Retrieved squeeze postmortems reinforce covering urgency                                           |
 
-### MarketMakerGamma
-**Theoretical Basis**: Delta hedging and gamma exposure
-**Market Role**: neutral
-**Description**: Market maker hedging options exposure creates buying pressure
-**Parameters**: gamma_exposure=0.3, hedge_frequency=continuous
+### §2.3 RagLLMMarketMakerGamma (`simulation-bases.md §4.3`)
+| Theory Component | Implementation                                                                           |
+|------------------|------------------------------------------------------------------------------------------|
+| Gamma hedging    | System prompt: market maker; RAG retrieves options flow data and gamma squeeze mechanics |
 
-### InstitutionalValue
-**Theoretical Basis**: Fundamental analysis
-**Market Role**: stabilizing
-**Description**: Values company based on fundamentals, sees extreme overvaluation
-**Parameters**: fundamental_value=20.0, sell_threshold=3.0, patience=high
+### §2.4 RagLLMInstitutionalValue (`simulation-bases.md §4.4`)
+| Theory Component        | Implementation                                                                        |
+|-------------------------|---------------------------------------------------------------------------------------|
+| Fundamental value       | System prompt: value investor; RAG retrieves analyst reports on GameStop fundamentals |
+| Conviction strengthened | Retrieved fundamental analysis may reinforce early exit decision                      |
 
-### MomentumRetail
-**Theoretical Basis**: FOMO trading
-**Market Role**: neutral
-**Description**: Retail momentum trader driven by fear of missing out
-**Parameters**: fomo_threshold=0.1, position_size=50, attention_span=short
+### §2.5 RagLLMMomentumRetail (`simulation-bases.md §4.5`)
+| Theory Component | Implementation                                                      |
+|------------------|---------------------------------------------------------------------|
+| FOMO             | System prompt: FOMO retail; RAG retrieves social media buzz metrics |
 
+---
 
-## Usage
+## §3 Rag-Specific Notes
 
-### Rule Variant
-```bash
-python examples/GameStopShortSqueeze/Rule/run_gamestopshortsqueeze.py \
-    -c configs/GameStopShortSqueeze/Rule/simulation.yml
-```
+- **SQI amplification likely**: Retrieved GME momentum data reinforces §4.1 buying, potentially pushing SQI higher than Rule.
+- **Faster covering**: Retrieved squeeze postmortems may accelerate §4.2 covering (fear), shortening SCD vs. Rule.
+- **Corpus dependency**: Key — if retrieval corpus is GME-focused, all metrics skew toward historical GME values.
 
-### LLM Variant
-```bash
-python examples/GameStopShortSqueeze/LLM/run_gamestopshortsqueeze_llm.py \
-    -c configs/GameStopShortSqueeze/LLM/simulation.yml
-```
+---
 
-### RuleLLM Variant
-```bash
-python examples/GameStopShortSqueeze/RuleLLM/run_gamestopshortsqueeze_rulellm.py \
-    -c configs/GameStopShortSqueeze/RuleLLM/simulation.yml
-```
+## §4 Expected Ranges (Rag Variant vs. Rule Baseline)
 
-### RAG Variant
-```bash
-python examples/GameStopShortSqueeze/Rag/run_gamestopshortsqueeze_rag.py \
-    -c configs/GameStopShortSqueeze/Rag/simulation.yml
-```
-
-## References
-
-- Gamma squeeze dynamics (Jarrow & Li, 2021)
-- Social media and retail coordination (Lyocsa et al., 2022)
-- Short sale constraints (Jones & Lamont, 2002)
+| Metric | Rag Expected Range | vs. Rule | Basis                                               |
+|--------|--------------------|----------|-----------------------------------------------------|
+| SQI    | 1.5–7.0            | Higher   | Retrieved squeeze cases reinforce §4.1 buying       |
+| PAR    | 0.3–1.5            | Higher   | Larger and longer squeeze                           |
+| SCD    | 1–6 rounds         | Shorter  | Faster covering due to retrieved fear evidence      |
+| IEP    | Rounds 2–8         | Earlier  | Retrieved fundamental analysis prompts earlier sell |
+| WTI    | 0.15–0.50          | Higher   | Larger wealth transfer in amplified squeeze         |

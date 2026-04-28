@@ -197,31 +197,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMConcentratedFund(LLMInvestor):
-    """LLM-driven concentrated fund — TRS-leveraged, slow to react to margin calls."""
+    """LLM-driven concentrated fund — TRS-leveraged, slow to react to margin calls. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class LLMPrimeBroker1(LLMInvestor):
-    """LLM-driven prime broker 1 — first-mover liquidator."""
+    """LLM-driven prime broker 1 — first-mover liquidator. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class LLMPrimeBroker2(LLMInvestor):
-    """LLM-driven prime broker 2 — delayed liquidator at worse prices."""
+    """LLM-driven prime broker 2 — delayed liquidator at worse prices. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class LLMBlockTradeBuyer(LLMInvestor):
-    """LLM-driven block trade buyer — opportunistic discount buyer."""
+    """LLM-driven block trade buyer — opportunistic discount buyer. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class LLMInformationTrader(LLMInvestor):
-    """LLM-driven information trader — front-runs liquidation cascade."""
+    """LLM-driven information trader — front-runs liquidation cascade. Theory: simulation-bases.md §4.5."""
 
     pass
 

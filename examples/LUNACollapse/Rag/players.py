@@ -5,7 +5,8 @@ RAG-augmented agents for the LUNACollapse simulation using LangChainAPIInference
 
 import logging
 
-from lmbase.inference import LangChainAPIInference, InferInput
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 
 from masim.player.base import Action
 from masim.player.general import GeneralPlayer

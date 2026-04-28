@@ -197,19 +197,20 @@ class OpinionEnvironment(GeneralPlayer):
         )
 
         # Log
-        logger.debug(f"\n{'='*70}")  # pylint: disable=logging-fstring-interpolation
-        logger.debug(f"[OpinionEnv] Round {round_num}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("\n%s", "=" * 70)
+        logger.debug("[OpinionEnv] Round %d", round_num)
         logger.debug(
-            f"  Polarization: {current_polarization:.3f} -> {new_polarization:.3f}"
+            "  Polarization: %.3f -> %.3f", current_polarization, new_polarization
         )
-        logger.debug(f"  Mean Opinion: {new_mean_opinion:.3f}")  # pylint: disable=logging-fstring-interpolation
-        logger.debug(f"  Cluster Separation: {new_cluster_separation:.3f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("  Mean Opinion: %.3f", new_mean_opinion)
+        logger.debug("  Cluster Separation: %.3f", new_cluster_separation)
         logger.debug(
-            f"  Polarizers: {len(polarize_actions)}, "
-            f"Depolarizers: {len(depolarize_actions)}"
+            "  Polarizers: %d, Depolarizers: %d",
+            len(polarize_actions),
+            len(depolarize_actions),
         )
-        logger.debug(f"  Net Polarization Intensity: {net_polarization:+.3f}")  # pylint: disable=logging-fstring-interpolation
-        logger.debug(f"  Cross-cutting Exposure: {new_cross_cutting:.3f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("  Net Polarization Intensity: %+.3f", net_polarization)
+        logger.debug("  Cross-cutting Exposure: %.3f", new_cross_cutting)
 
         env_data = {
             "polarization": new_polarization,
@@ -308,26 +309,10 @@ class Ideologue(BaseSocialAgent):
     """
     Ideologue who holds strong views and amplifies in-group consensus.
 
-    Theory: Sunstein (2001) — Echo Chambers
-        Group polarization occurs when like-minded people discuss shared
-        concerns. Ideologues are the primary drivers: they reject out-group
-        information, amplify in-group consensus, and push opinions toward
-        more extreme versions of their initial position.
-
-    Behavior:
-        - Strong initial opinion, resistant to opposing views
-        - Amplifies in-group consensus (moves opinion toward group mean + extremity)
-        - Rejects or discounts cross-cutting information
-        - High polarizing intensity proportional to certainty
-
-    Effect: STRONGLY DESTABILIZING — Primary polarization driver
-
-    Formula:
-        opinion_update = in_group_weight * (group_mean * extremity_boost - my_opinion)
-        polarize_intensity = |my_opinion| * certainty * spread_eagerness
-
-    Parameters from config extras:
-        - in_group_weight, extremity_boost, out_group_discount, spread_eagerness
+    Theory: simulation-bases.md §4.1 — Ideologue
+    Theoretical basis: Sunstein (2001) echo chamber amplification; group polarization
+    occurs when like-minded individuals discuss shared concerns, driving opinions extreme.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -366,8 +351,13 @@ class Ideologue(BaseSocialAgent):
 
         strategy_name = "ideologue"
         logger.debug(
-            f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
-            f"A={action_type:10s} I={intensity:.3f} opinion={my_opinion:.3f}"
+            "[%-25s] R%s (%-20s): A=%-10s I=%.3f opinion=%.3f",
+            self.identity,
+            round_num,
+            strategy_name,
+            action_type,
+            intensity,
+            my_opinion,
         )
 
         action = {
@@ -393,26 +383,10 @@ class Conformist(BaseSocialAgent):
     """
     Conformist who adopts prevailing group opinion, reinforcing homophily.
 
-    Theory: Asch (1951) — Conformity; Sunstein (2001) — Group Polarization
-        Conformists amplify existing group tendencies by adopting the
-        prevailing opinion of their social circle. They do not hold strong
-        independent views but gravitate toward whichever group they are
-        surrounded by, reinforcing echo chamber effects.
-
-    Behavior:
-        - Weakly held initial opinion, highly susceptible to social influence
-        - Moves toward local group mean with high conformity
-        - Does not distinguish in-group from out-group well
-        - Reinforces whichever cluster they are near
-
-    Effect: DESTABILIZING — Reinforces existing polarization through conformity
-
-    Formula:
-        opinion_update = conformity * (group_mean - my_opinion)
-        polarize_intensity = |my_opinion| * conformity_eagerness
-
-    Parameters from config extras:
-        - conformity, conformity_eagerness, group_proximity_threshold
+    Theory: simulation-bases.md §4.2 — Conformist
+    Theoretical basis: Asch (1951) conformity; Sunstein (2001) group polarization;
+    conformists amplify existing group tendencies by adopting the prevailing opinion.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -451,8 +425,13 @@ class Conformist(BaseSocialAgent):
 
         strategy_name = "conformist"
         logger.debug(
-            f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
-            f"A={action_type:10s} I={intensity:.3f} opinion={my_opinion:.3f}"
+            "[%-25s] R%s (%-20s): A=%-10s I=%.3f opinion=%.3f",
+            self.identity,
+            round_num,
+            strategy_name,
+            action_type,
+            intensity,
+            my_opinion,
         )
 
         action = {
@@ -478,27 +457,10 @@ class CriticalThinker(BaseSocialAgent):
     """
     Critical thinker who evaluates evidence and resists group pressure.
 
-    Theory: Isenberg (1986) — Persuasive arguments vs social comparison
-        Critical thinkers resist the social comparison mechanism of group
-        polarization. They evaluate arguments on merit rather than source,
-        and maintain their position when evidence is insufficient. They
-        serve as intellectual anchors against runaway polarization.
-
-    Behavior:
-        - Evaluates information independently before updating opinion
-        - Resists social proof — does not follow majority uncritically
-        - Moves opinion slowly, only when evidence is compelling
-        - Depolarizes by pulling opinions toward moderate center
-
-    Effect: STABILIZING — Reduces polarization through critical evaluation
-
-    Formula:
-        opinion_update = critical_weight * (evidence_signal - my_opinion)
-        depolarize_intensity = |my_opinion - group_mean| * critical_eagerness
-            if moving toward center
-
-    Parameters from config extras:
-        - critical_weight, critical_eagerness, evidence_sensitivity
+    Theory: simulation-bases.md §4.3 — CriticalThinker
+    Theoretical basis: Isenberg (1986) persuasive arguments vs social comparison;
+    critical thinkers resist social proof and move opinion slowly on merit alone.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -534,8 +496,13 @@ class CriticalThinker(BaseSocialAgent):
 
         strategy_name = "critical_thinker"
         logger.debug(
-            f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
-            f"A={action_type:10s} I={intensity:.3f} opinion={my_opinion:.3f}"
+            "[%-25s] R%s (%-20s): A=%-10s I=%.3f opinion=%.3f",
+            self.identity,
+            round_num,
+            strategy_name,
+            action_type,
+            intensity,
+            my_opinion,
         )
 
         action = {
@@ -561,25 +528,10 @@ class BridgeBuilder(BaseSocialAgent):
     """
     Bridge builder who actively engages across groups to reduce polarization.
 
-    Theory: Sunstein (2001) — Deliberative democracy; Pariser (2011) —
-    Serendipity by design. Bridge builders counter echo chambers by
-    deliberately engaging with diverse viewpoints. They increase
-    cross-cutting exposure and find common ground between groups.
-
-    Behavior:
-        - Actively seeks out and engages with opposing viewpoints
-        - Maintains moderate position as a bridge between extremes
-        - Depolarizes by demonstrating common ground exists
-        - More effective when cluster separation is large
-
-    Effect: STRONGLY STABILIZING — Primary depolarization mechanism
-
-    Formula:
-        opinion_update = bridge_weight * (0 - my_opinion)  # pulls toward center
-        depolarize_intensity = bridge_strength * cluster_separation
-
-    Parameters from config extras:
-        - bridge_weight, bridge_strength, centering_tendency
+    Theory: simulation-bases.md §4.4 — BridgeBuilder
+    Theoretical basis: Sunstein (2001) deliberative democracy; Pariser (2011) serendipity
+    by design; bridge builders increase cross-cutting exposure and find common ground.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -614,8 +566,13 @@ class BridgeBuilder(BaseSocialAgent):
 
         strategy_name = "bridge_builder"
         logger.debug(
-            f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
-            f"A={action_type:10s} I={intensity:.3f} opinion={my_opinion:.3f}"
+            "[%-25s] R%s (%-20s): A=%-10s I=%.3f opinion=%.3f",
+            self.identity,
+            round_num,
+            strategy_name,
+            action_type,
+            intensity,
+            my_opinion,
         )
 
         action = {
@@ -641,22 +598,10 @@ class PassiveFollower(BaseSocialAgent):
     """
     Passive follower with low engagement and occasional group alignment.
 
-    Theory: Lazarsfeld & Merton (1954) — Mass communication; Pariser (2011)
-        Passive followers represent the majority of the population: they
-        don't actively polarize or depolarize but drift toward whatever
-        group they are closest to. They provide the baseline mass that
-        can be swayed by active agents on either side.
-
-    Behavior:
-        - Low and sporadic engagement
-        - Occasionally aligns with nearest group
-        - Small social influence on opinion
-        - Neither confirms nor challenges group consensus
-
-    Effect: NEUTRAL — Provides background mass in opinion dynamics
-
-    Parameters from config extras:
-        - engagement_probability, drift_rate, alignment_strength
+    Theory: simulation-bases.md §4.5 — PassiveFollower
+    Theoretical basis: Lazarsfeld & Merton (1954) mass communication; passive followers
+    drift toward whichever group they are closest to, providing background population mass.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -691,8 +636,13 @@ class PassiveFollower(BaseSocialAgent):
 
         strategy_name = "passive_follower"
         logger.debug(
-            f"[{self.identity:25s}] R{round_num} ({strategy_name:20s}): "
-            f"A={action_type:10s} I={intensity:.3f} opinion={my_opinion:.3f}"
+            "[%-25s] R%s (%-20s): A=%-10s I=%.3f opinion=%.3f",
+            self.identity,
+            round_num,
+            strategy_name,
+            action_type,
+            intensity,
+            my_opinion,
         )
 
         action = {

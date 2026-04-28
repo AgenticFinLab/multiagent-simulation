@@ -130,7 +130,7 @@ class RuleLLMInvestor(GeneralPlayer):
                 elif action_str == "sell":
                     quantity = min(quantity, max(position, 0))
                 break
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
                 if attempt == 2:
                     action_str, quantity = "hold", 0
@@ -156,7 +156,7 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMBeliefAnchor(RuleLLMInvestor):
-    """RuleLLM-driven belief anchor."""
+    """RuleLLM-driven belief anchor — strong prior, selectively filters confirming signals. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_BELIEF_ANCHOR_SYS"
@@ -164,7 +164,7 @@ class RuleLLMBeliefAnchor(RuleLLMInvestor):
 
 
 class RuleLLMSelectiveScanner(RuleLLMInvestor):
-    """RuleLLM-driven selective scanner."""
+    """RuleLLM-driven selective scanner — seeks confirming info, ignores contradictions. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_SELECTIVE_SCANNER_SYS"
@@ -172,7 +172,7 @@ class RuleLLMSelectiveScanner(RuleLLMInvestor):
 
 
 class RuleLLMBalancedAnalyst(RuleLLMInvestor):
-    """RuleLLM-driven balanced analyst."""
+    """RuleLLM-driven balanced analyst — Bayesian rational updater, no cognitive bias. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_BALANCED_ANALYST_SYS"
@@ -180,7 +180,7 @@ class RuleLLMBalancedAnalyst(RuleLLMInvestor):
 
 
 class RuleLLMContrarianTrader(RuleLLMInvestor):
-    """RuleLLM-driven contrarian trader."""
+    """RuleLLM-driven contrarian — exploits systematic bias errors of biased traders. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_CONTRARIAN_TRADER_SYS"
@@ -188,7 +188,7 @@ class RuleLLMContrarianTrader(RuleLLMInvestor):
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """RuleLLM-driven noise trader."""
+    """RuleLLM-driven noise trader — random uninformed liquidity provider. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = (
         "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"

@@ -209,7 +209,15 @@ class BaseLLMInvestor(GeneralPlayer):
 
     def _get_llm_config(self) -> Dict[str, Any]:
         """Get LLM configuration from extras."""
-        return self.config.extras.get("llm", {})
+        return self.config.extras["llm"]
+
+    def __getstate__(self) -> Dict[str, Any]:
+        """Return picklable state for Ray serialization."""
+        return self.__dict__.copy()
+
+    def __setstate__(self, state: Dict[str, Any]) -> None:
+        """Restore state after Ray deserialization."""
+        self.__dict__.update(state)
 
     async def perceive(
         self,
@@ -280,7 +288,7 @@ class BaseLLMInvestor(GeneralPlayer):
         price_return = market_data["return"]
         volume = market_data["volume"]
         net_demand = market_data["net_demand"]
-        news_shock = market_data.get("news_shock", 0)
+        news_shock = market_data["news_shock"]
 
         # Compute gain/loss
         if purchase_price > 0:
@@ -289,8 +297,8 @@ class BaseLLMInvestor(GeneralPlayer):
             gain_loss = 0
 
         # Build prompt - resolve module paths to actual prompt content
-        sys_msg_path = llm_config.get("sys_message", "")
-        user_msg_path = llm_config.get("user_message", "")
+        sys_msg_path = llm_config["sys_message"]
+        user_msg_path = llm_config["user_message"]
 
         sys_msg = load_prompt(sys_msg_path) if sys_msg_path else ""
         user_template = load_prompt(user_msg_path) if user_msg_path else ""
@@ -321,9 +329,9 @@ class BaseLLMInvestor(GeneralPlayer):
             try:
                 infer_output = await call_llm(
                     messages=messages,
-                    lm_type=llm_config.get("lm_type", "api"),
-                    lm_name=llm_config.get("lm_name", ""),
-                    generation_config=llm_config.get("generation_config", {}),
+                    lm_type=llm_config["lm_type"],
+                    lm_name=llm_config["lm_name"],
+                    generation_config=llm_config["generation_config"],
                 )
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
@@ -332,24 +340,26 @@ class BaseLLMInvestor(GeneralPlayer):
             except (json.JSONDecodeError, ValueError, KeyError) as e:
                 last_error = e
                 if attempt < max_retries - 1:
-                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")  # pylint: disable=logging-fstring-interpolation
+                    logger.debug("[%s] LLM parse failed, retrying...", self.identity)
 
         # If LLM failed after all retries, skip trading this round (hold)
         if decision is None:
             logger.warning(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}. "
-                f"Skipping trade this round."
+                "[%s] LLM failed after %d attempts: %s. Skipping trade this round.",
+                self.identity,
+                max_retries,
+                last_error,
             )
             return self._hold_order(
                 round_num, strategy_name, reason=f"LLM failed: {last_error}"
             )
 
         # Extract decision
-        action = decision.get("action", "hold")
-        bid_price = float(decision.get("bid_price", price))
-        quantity = float(decision.get("quantity", 0))
-        reasoning = decision.get("reasoning", "")
-        analysis = decision.get("analysis", "")
+        action = decision["action"]
+        bid_price = float(decision["bid_price"])
+        quantity = float(decision["quantity"])
+        reasoning = decision["reasoning"]
+        analysis = decision["analysis"]
 
         # Determine move_reference based on agent type
         move_reference = "DispositionBiased" not in strategy_name
@@ -437,31 +447,31 @@ class BaseLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMDispositionBiased(BaseLLMInvestor):
-    """Hybrid rule+LLM investor with disposition effect rules."""
+    """Hybrid rule+LLM disposition-biased investor — Prospect Theory rules embedded. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class RuleLLMRationalInvestor(BaseLLMInvestor):
-    """Hybrid rule+LLM rational investor with rebalancing rules."""
+    """Hybrid rule+LLM rational investor — rebalancing rules embedded, no reference point. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class RuleLLMTaxAwareInvestor(BaseLLMInvestor):
-    """Hybrid rule+LLM tax-aware investor with tax-loss harvesting rules."""
+    """Hybrid rule+LLM tax-aware investor — tax-loss harvesting rules embedded. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class RuleLLMInstitutionalInvestor(BaseLLMInvestor):
-    """Hybrid rule+LLM institutional investor with symmetric rules."""
+    """Hybrid rule+LLM institutional investor — symmetric gain/loss rules embedded. Theory: simulation-bases.md §4.5."""
 
     pass
 
 
 class RuleLLMLossAverse(BaseLLMInvestor):
-    """Hybrid rule+LLM investor with extreme loss aversion rules."""
+    """Hybrid rule+LLM extreme loss-averse investor — high λ rules embedded. Theory: simulation-bases.md §4.1."""
 
     pass
 

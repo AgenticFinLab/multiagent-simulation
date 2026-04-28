@@ -155,7 +155,7 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMSpeculativeAttacker(LLMInvestor):
-    """LLM-driven speculative attacker."""
+    """LLM-driven speculative attacker — shorts vulnerable currency on reserve weakness. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.CurrencyCrisis.LLM.prompts:LLM_SPECULATIVE_ATTACKER_SYS"
@@ -163,7 +163,7 @@ class LLMSpeculativeAttacker(LLMInvestor):
 
 
 class LLMSelfFulfillingTrader(LLMInvestor):
-    """LLM-driven self-fulfilling trader."""
+    """LLM-driven self-fulfilling trader — sells on expectation others will sell. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.CurrencyCrisis.LLM.prompts:LLM_SELF_FULFILLING_TRADER_SYS"
@@ -171,7 +171,7 @@ class LLMSelfFulfillingTrader(LLMInvestor):
 
 
 class LLMCentralBankDefender(LLMInvestor):
-    """LLM-driven central bank defender."""
+    """LLM-driven central bank defender — buys domestic currency to defend peg. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.CurrencyCrisis.LLM.prompts:LLM_CENTRAL_BANK_DEFENDER_SYS"
@@ -179,7 +179,7 @@ class LLMCentralBankDefender(LLMInvestor):
 
 
 class LLMFundamentalHedger(LLMInvestor):
-    """LLM-driven fundamental hedger."""
+    """LLM-driven fundamental hedger — trades on fundamental value, not speculation. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.CurrencyCrisis.LLM.prompts:LLM_FUNDAMENTAL_HEDGER_SYS"
@@ -187,7 +187,7 @@ class LLMFundamentalHedger(LLMInvestor):
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven noise trader."""
+    """LLM-driven noise trader — random uninformed FX liquidity provider. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.CurrencyCrisis.LLM.prompts:LLM_NOISE_TRADER_SYS"
 

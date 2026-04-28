@@ -145,12 +145,19 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
 
         status = "HIGH VOLATILITY" if in_high_vol else "Normal"
-        logger.debug(f"\n{'='*60}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("\n%s", "=" * 60)
         logger.debug(
-            f"[Market] Round {round_num}: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%) [{status}]"
+            "[Market] Round %s: %.2f → %.2f (%+.2f%%) [%s]",
+            round_num,
+            current_price,
+            new_price,
+            price_return * 100,
+            status,
         )
         logger.debug(
-            f"  Liquidity: {liquidity:.1f}, Impact Mult: {impact_multiplier:.1f}x"
+            "  Liquidity: %.1f, Impact Mult: %.1fx",
+            liquidity,
+            impact_multiplier,
         )
 
         market_data = {
@@ -336,31 +343,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMHighFrequencyTrader(LLMInvestor):
-    """High-Frequency Trader - fast momentum trading."""
+    """LLM-driven high-frequency trader — momentum detection and rapid bets via LLM reasoning. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class LLMFlashMarketMaker(LLMInvestor):
-    """Market Maker - provides liquidity, manages risk."""
+    """LLM-driven market maker — liquidity provision and stress withdrawal via LLM risk reasoning. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class LLMStopLossTrader(LLMInvestor):
-    """Stop-Loss Trader - rule-based position management."""
+    """LLM-driven stop-loss trader — cascade selling triggers via LLM position management. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class LLMFundamentalTrader(LLMInvestor):
-    """Fundamental Trader - value-focused."""
+    """LLM-driven fundamental trader — value-based recovery buying via LLM analytical reasoning. Theory: simulation-bases.md §4.5."""
 
     pass
 
 
 class LLMAlgorithmicTrader(LLMInvestor):
-    """Algorithmic Trader - systematic trading."""
+    """LLM-driven algorithmic trader — trend-following momentum via LLM systematic reasoning. Theory: simulation-bases.md §4.3."""
 
     pass
 

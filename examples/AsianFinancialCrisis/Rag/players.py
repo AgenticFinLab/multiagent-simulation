@@ -565,31 +565,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMHotMoneyFunder(RagLLMInvestor):
-    """RAG-augmented hot money funder — rapidly reverses at first crisis signal."""
+    """RAG-augmented hot money funder — rapidly reverses at first crisis signal. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class RagLLMContagionTrader(RagLLMInvestor):
-    """RAG-augmented contagion trader — spreads selling across borders."""
+    """RAG-augmented contagion trader — spreads selling across borders. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class RagLLMIMFRescuer(RagLLMInvestor):
-    """RAG-augmented IMF rescuer — stabilizing emergency liquidity provider."""
+    """RAG-augmented IMF rescuer — stabilizing emergency liquidity provider. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class RagLLMValueContrarian(RagLLMInvestor):
-    """RAG-augmented value contrarian — buys oversold crisis assets."""
+    """RAG-augmented value contrarian — buys oversold crisis assets. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented noise trader — uninformed random participant."""
+    """RAG-augmented noise trader — uninformed random participant. Theory: simulation-bases.md §4.5."""
 
     pass
 

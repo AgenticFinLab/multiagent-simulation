@@ -61,11 +61,8 @@ class RuleLLMInvestor(GeneralPlayer):
         llm_cfg = extras["llm"]
         self.state.custom_state["llm_params"] = llm_cfg
         self.state.custom_state["llm_client"] = LangChainAPIInference(
-            lm_name=llm_cfg["model"],
-            generation_config={
-                "temperature": llm_cfg.get("temperature", 0.3),
-                "max_tokens": llm_cfg.get("max_tokens", 512),
-            },
+            lm_name=llm_cfg["lm_name"],
+            generation_config=llm_cfg["generation_config"],
         )
 
     def __getstate__(self) -> Dict:
@@ -83,21 +80,18 @@ class RuleLLMInvestor(GeneralPlayer):
             if "llm_params" in custom and "llm_client" not in custom:
                 llm_cfg = custom["llm_params"]
                 custom["llm_client"] = LangChainAPIInference(
-                    lm_name=llm_cfg["model"],
-                    generation_config={
-                        "temperature": llm_cfg.get("temperature", 0.3),
-                        "max_tokens": llm_cfg.get("max_tokens", 512),
-                    },
+                    lm_name=llm_cfg["lm_name"],
+                    generation_config=llm_cfg["generation_config"],
                 )
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        fundamental = market_data.get("fundamental", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        fundamental = market_data["fundamental"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        round_num = self.state.custom_state.get("round", 0)
+        round_num = self.state.custom_state["round"]
         portfolio_value = cash + position * price
         system_prompt = load_prompt(self._system_prompt_path)
         user_template = load_prompt(
@@ -120,8 +114,8 @@ class RuleLLMInvestor(GeneralPlayer):
                 result = llm_client.run([infer_input])
                 response = result.outputs[0].response
                 parsed = parse_llm_response_with_thinking(response)
-                action_str = parsed.get("action", "hold")
-                quantity = int(parsed.get("quantity", 0))
+                action_str = parsed["action"]
+                quantity = int(parsed["quantity"])
                 if action_str not in ("buy", "sell", "hold"):
                     action_str = "hold"
                 quantity = max(0, quantity)
@@ -130,7 +124,7 @@ class RuleLLMInvestor(GeneralPlayer):
                 elif action_str == "sell":
                     quantity = min(quantity, max(position, 0))
                 break
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
                 if attempt == 2:
                     action_str, quantity = "hold", 0
@@ -154,7 +148,7 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMEndowedHolder(RuleLLMInvestor):
-    """RuleLLM endowed holder with explicit endowment premium rules."""
+    """RuleLLM endowed holder — ownership premium suppresses selling below threshold. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.EndowmentEffect.RuleLLM.prompts:RULELLM_ENDOWED_HOLDER_SYS"
@@ -162,7 +156,7 @@ class RuleLLMEndowedHolder(RuleLLMInvestor):
 
 
 class RuleLLMStatusQuoSeller(RuleLLMInvestor):
-    """RuleLLM status-quo-biased seller with inertia rules."""
+    """RuleLLM status-quo-biased seller — inertia rules require large premium before selling. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.EndowmentEffect.RuleLLM.prompts:RULELLM_STATUS_QUO_SELLER_SYS"
@@ -170,7 +164,7 @@ class RuleLLMStatusQuoSeller(RuleLLMInvestor):
 
 
 class RuleLLMRationalArbitrageur(RuleLLMInvestor):
-    """RuleLLM rational arbitrageur with explicit arbitrage rules."""
+    """RuleLLM rational arbitrageur — exploits endowment-bias gap with explicit arbitrage rules. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.EndowmentEffect.RuleLLM.prompts:RULELLM_RATIONAL_ARBITRAGEUR_SYS"
@@ -178,7 +172,7 @@ class RuleLLMRationalArbitrageur(RuleLLMInvestor):
 
 
 class RuleLLMNewBuyer(RuleLLMInvestor):
-    """RuleLLM unbiased new buyer with fundamental evaluation rules."""
+    """RuleLLM unbiased new buyer — fundamental evaluation rules, no ownership bias. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.EndowmentEffect.RuleLLM.prompts:RULELLM_NEW_BUYER_SYS"
@@ -186,7 +180,7 @@ class RuleLLMNewBuyer(RuleLLMInvestor):
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """RuleLLM noise trader with probabilistic trading rules."""
+    """RuleLLM noise trader — probabilistic trading rules with random direction selection. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = (
         "examples.EndowmentEffect.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"

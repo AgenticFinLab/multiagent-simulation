@@ -3,10 +3,12 @@
 LLM-driven agents for the FramingEffect simulation using LangChainAPIInference.
 """
 
+import importlib
 import logging
 from typing import Any, Dict, Optional
 
-from lmbase.inference import InferInput, LangChainAPIInference
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
@@ -15,6 +17,13 @@ from examples.FramingEffect.Rule.players import Market
 from examples.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("FramingEffect.LLM")
+
+
+def load_prompt(prompt_path: str) -> str:
+    """Load a prompt constant from 'module:VAR' path."""
+    module_path, var_name = prompt_path.rsplit(":", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, var_name)
 
 
 class LLMInvestor(GeneralPlayer):
@@ -54,12 +63,12 @@ class LLMInvestor(GeneralPlayer):
         """Initialize LangChainAPIInference client from config."""
         llm_cfg = self.config.extras.get("llm", {})
         self._llm_params = {
-            "model": llm_cfg["model"],
-            "temperature": llm_cfg.get("temperature", 0.3),
+            "lm_name": llm_cfg["lm_name"],
+            "generation_config": llm_cfg["generation_config"],
         }
         self._llm_client = LangChainAPIInference(
-            lm_name=self._llm_params["model"],
-            generation_config={"temperature": self._llm_params["temperature"]},
+            lm_name=self._llm_params["lm_name"],
+            generation_config=self._llm_params["generation_config"],
         )
 
     def __getstate__(self) -> dict:
@@ -71,14 +80,13 @@ class LLMInvestor(GeneralPlayer):
         self.__dict__.update(state)
         if hasattr(self, "_llm_params"):
             self._llm_client = LangChainAPIInference(
-                lm_name=self._llm_params["model"],
-                generation_config={"temperature": self._llm_params["temperature"]},
+                lm_name=self._llm_params["lm_name"],
+                generation_config=self._llm_params["generation_config"],
             )
 
     async def decide(self) -> dict:
         """Call LLM with market state; parse decision."""
         from examples.FramingEffect.LLM.prompts import LLM_USER_TEMPLATE
-        from masim.utils.prompt_loader import load_prompt
 
         system_msg = load_prompt(self._system_prompt_path)
         price = self.state.custom_state["price"]
@@ -151,7 +159,7 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMGainFrameFollower(LLMInvestor):
-    """LLM-driven GainFrameFollower: overweights gains-framed information."""
+    """LLM-driven GainFrameFollower: overweights gains-framed information. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.FramingEffect.LLM.prompts:LLM_GAIN_FRAME_FOLLOWER_SYS"
@@ -159,7 +167,7 @@ class LLMGainFrameFollower(LLMInvestor):
 
 
 class LLMLossFrameReactor(LLMInvestor):
-    """LLM-driven LossFrameReactor: overweights loss-framed information."""
+    """LLM-driven LossFrameReactor: overweights loss-framed information. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.FramingEffect.LLM.prompts:LLM_LOSS_FRAME_REACTOR_SYS"
@@ -167,7 +175,7 @@ class LLMLossFrameReactor(LLMInvestor):
 
 
 class LLMFrameInvariantTrader(LLMInvestor):
-    """LLM-driven FrameInvariantTrader: evaluates by substance regardless of framing."""
+    """LLM-driven FrameInvariantTrader: evaluates by substance regardless of framing. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.FramingEffect.LLM.prompts:LLM_FRAME_INVARIANT_TRADER_SYS"
@@ -175,13 +183,13 @@ class LLMFrameInvariantTrader(LLMInvestor):
 
 
 class LLMArbitrageFramer(LLMInvestor):
-    """LLM-driven ArbitrageFramer: exploits framing-induced mispricing."""
+    """LLM-driven ArbitrageFramer: exploits framing-induced mispricing. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = "examples.FramingEffect.LLM.prompts:LLM_ARBITRAGE_FRAMER_SYS"
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven NoiseTrader: random uninformed trader."""
+    """LLM-driven NoiseTrader: random uninformed trader. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.FramingEffect.LLM.prompts:LLM_NOISE_TRADER_SYS"
 

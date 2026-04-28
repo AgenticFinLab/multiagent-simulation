@@ -196,31 +196,31 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMConcentratedFund(RuleLLMInvestor):
-    """RuleLLM concentrated fund — TRS-leveraged, margin call driven."""
+    """RuleLLM concentrated fund — TRS-leveraged, margin call driven. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class RuleLLMPrimeBroker1(RuleLLMInvestor):
-    """RuleLLM prime broker 1 — first-mover liquidator."""
+    """RuleLLM prime broker 1 — first-mover liquidator. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class RuleLLMPrimeBroker2(RuleLLMInvestor):
-    """RuleLLM prime broker 2 — delayed liquidator at worse prices."""
+    """RuleLLM prime broker 2 — delayed liquidator at worse prices. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class RuleLLMBlockTradeBuyer(RuleLLMInvestor):
-    """RuleLLM block trade buyer — opportunistic discount buyer."""
+    """RuleLLM block trade buyer — opportunistic discount buyer. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class RuleLLMInformationTrader(RuleLLMInvestor):
-    """RuleLLM information trader — front-runs liquidation cascade."""
+    """RuleLLM information trader — front-runs liquidation cascade. Theory: simulation-bases.md §4.5."""
 
     pass
 

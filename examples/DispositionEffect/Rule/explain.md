@@ -1,242 +1,92 @@
-# DispositionEffect - Disposition Effect Simulation
+# DispositionEffect Rule Variant — explain.md
 
-## What is This?
+## §1 Overview
 
-| Item               | Description                                                                                   |
-|--------------------|-----------------------------------------------------------------------------------------------|
-| **Phenomenon**     | **Disposition Effect (处置效应)** - Investors sell winners too early and hold losers too long |
-| **Model**          | Rule-based investors with Prospect Theory parameters + Rule-based market clearing             |
-| **Key Feature**    | Reference point tracking (purchase price) with asymmetric gain/loss thresholds                |
-| **Academic Value** | Tests whether Prospect Theory parameters (λ=2.25) generate realistic disposition behavior     |
+The Rule variant implements DispositionEffect with deterministic threshold rules grounded in Prospect Theory. DispositionInvestor tracks reference points (purchase price) and applies fixed gain/loss thresholds to trigger sell decisions. This provides the mechanically exact Prospect Theory baseline.
 
-## Rule-Based vs LLM-Based Comparison
+| Aspect             | Detail                                                                |
+|--------------------|-----------------------------------------------------------------------|
+| Variant            | Rule                                                                  |
+| Simulation         | DispositionEffect                                                     |
+| Decision Mechanism | Threshold rules on `gain_loss = (P − P_ref) / P_ref`                  |
+| Theory Reference   | `simulation-bases.md §4.1–§4.5`                                       |
+| Market Broadcast   | `price`, `prev_price`, `return`, `volume`, `net_demand`, `news_shock` |
 
-| Aspect             | DispositionEffect (Rule-Based)         | DispositionEffect LLM (LLM-Based)          |
-|--------------------|----------------------------------------|--------------------------------------------|
-| **Decision Logic** | Fixed gain/loss threshold formulas     | LLM reasons about gains/losses via prompts |
-| **Investor Types** | 5 types with hardcoded strategies      | 5 types with personality-defining prompts  |
-| **Behavior**       | Deterministic reference point tracking | Stochastic emotional responses             |
-| **Market**         | Rule-based order clearing              | **Same** rule-based order clearing         |
-| **Psychology**     | From mathematical λ=2.25 formula       | From LLM "fear of loss" reasoning          |
-| **Research Value** | Mechanism validation                   | LLM emotional realism + emergent biases    |
+## §2 Theory → Implementation Mapping
 
-## Theoretical Foundation
+### §2.1 DispositionInvestor (simulation-bases.md §4.1)
 
-### Primary Theory: Prospect Theory (Kahneman & Tversky, 1979)
+| Theory Component                                       | Implementation                                           |
+|--------------------------------------------------------|----------------------------------------------------------|
+| Prospect Theory gain domain (Kahneman & Tversky, 1979) | `if gain_loss >= 0.03: sell position × 0.50`             |
+| Prospect Theory loss domain                            | `if gain_loss <= -0.10: sell position × 0.15`            |
+| Reference point anchoring                              | `purchase_price` tracked per investor; updated on trades |
+| Buy at reference point                                 | `if                                                      |
+| Loss aversion λ = 2.25                                 | Asymmetric sell fractions (50% gain, 15% loss)           |
 
-**Core Insight**: Investors evaluate outcomes relative to a reference point (typically purchase price), not in absolute terms. The value function is:
-- **Concave for gains** (risk-averse when winning)
-- **Convex for losses** (risk-seeking when losing)
-- **Steeper for losses** (loss aversion: λ ≈ 2.25)
+### §2.2 RationalInvestor (simulation-bases.md §4.2)
 
-**Key Parameters**:
-| Parameter         | Value       | Source                    | Description                                    |
-|-------------------|-------------|---------------------------|------------------------------------------------|
-| Loss Aversion (λ) | 2.25        | Kahneman & Tversky (1979) | Losses feel 2.25x worse than equivalent gains  |
-| Gain Threshold    | 3-5%        | Odean (1998)              | Point at which investors start selling winners |
-| Loss Threshold    | -10 to -15% | Empirical studies         | Point at which investors finally sell losers   |
+| Theory Component                                          | Implementation                                                                                |
+|-----------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| Expected Utility Theory (von Neumann & Morgenstern, 1944) | `current_alloc = equity_value / total_value`                                                  |
+| Target allocation rebalancing                             | Buy when `current_alloc < target - threshold`; sell when `current_alloc > target + threshold` |
+| No reference point                                        | Ignores `purchase_price`; acts on portfolio weight deviation only                             |
 
-### Supporting Theory: Disposition Effect (Shefrin & Statman, 1985)
+### §2.3 TaxAwareInvestor (simulation-bases.md §4.3)
 
-**Core Insight**: Named and systematized the tendency to "sell winners too early, hold losers too long."
+| Theory Component                           | Implementation                                        |
+|--------------------------------------------|-------------------------------------------------------|
+| Tax-loss harvesting (Constantinides, 1983) | `if gain_loss <= -0.05: sell × tax_harvest_fraction`  |
+| Capital gains deferral                     | `if gain_loss >= 0.15: action = "DEFER_GAINS"` (hold) |
 
-**Four Psychological Mechanisms**:
+### §2.4 IndexHolder (simulation-bases.md §4.4)
 
-| Mechanism                 | Explanation                       | Implementation               |
-|---------------------------|-----------------------------------|------------------------------|
-| **Loss Aversion**         | Losses hurt 2.25x more than gains | Asymmetric sell fractions    |
-| **Mental Accounting**     | Each position tracked separately  | Per-position reference point |
-| **Regret Avoidance**      | Selling loss = admitting mistake  | Higher loss threshold        |
-| **Self-Control Conflict** | Know should stop, but can't       | Delayed loss realization     |
+| Theory Component                    | Implementation        |
+|-------------------------------------|-----------------------|
+| Passive buy-and-hold (Sharpe, 1991) | `quantity = 0` always |
 
-### Empirical Evidence
+### §2.5 InstitutionalInvestor (simulation-bases.md §4.5)
 
-**Odean (1998)** - Analysis of 10,000 individual investor accounts:
-- PGR (Proportion of Gains Realized): ~14.8%
-- PLR (Proportion of Losses Realized): ~9.8%
-- Winners sold 60% more frequently than losers
+| Theory Component                                  | Implementation                                    |
+|---------------------------------------------------|---------------------------------------------------|
+| Professional discipline (Shapira & Venezia, 2001) | Same `sell_fraction` for gains and losses (0.30)  |
+| Symmetric thresholds                              | `gain_threshold = 0.08`, `loss_threshold = -0.08` |
 
-**Tax Effect** (December reversal):
-- In December, PLR > PGR for tax-loss harvesting
-- Disposition effect reverses temporarily
-
-**Cross-Market Validation**:
-- Confirmed in Finland, China, Taiwan, Australia
-- Stronger for individual investors than institutions
-
-**Performance Impact**:
-- Annual return drag of 3.2% to 5.7%
-
-## Architecture
+## §3 Market Mechanism
 
 ```
-                    ┌──────────────────────────────────────────┐
-                    │    DispositionEffect Architecture        │
-                    └──────────────────────────────────────────┘
-
-   ┌─────────────────────────────────────────────────────────────────────┐
-   │                         Market (Rule-Based)                         │
-   │   P(t+1) = P(t) + λ×NetDemand + γ×[F-P(t)] + ε + NewsShock         │
-   │   News shocks create price movements that trigger gain/loss states  │
-   └─────────────────────────────────────────────────────────────────────┘
-                                     │
-                                     │ Broadcast: {price, return, volume, news_shock}
-                                     ▼
-   ┌─────────────────────────────────────────────────────────────────────┐
-   │                    Investors (5 Types)                              │
-   │                                                                     │
-   │   ┌───────────────┐ ┌───────────────┐ ┌───────────────┐            │
-   │   │Disposition    │ │Rational       │ │TaxAware       │            │
-   │   │Investor       │ │Investor       │ │Investor       │            │
-   │   │(⭐ effect     │ │(stabilizing)  │ │(anti-         │            │
-   │   │  driver)      │ │               │ │ disposition)  │            │
-   │   └───────┬───────┘ └───────┬───────┘ └───────┬───────┘            │
-   │           │                 │                 │                     │
-   │   ┌───────────────┐ ┌───────────────┐                              │
-   │   │IndexHolder    │ │Institutional  │                              │
-   │   │(passive)      │ │Investor       │                              │
-   │   │               │ │(disciplined)  │                              │
-   │   └───────┬───────┘ └───────┬───────┘                              │
-   │           │                 │                                       │
-   │           ▼                 ▼                                       │
-   │   Key Mechanism: Reference Point Tracking                           │
-   │   - Each investor tracks purchase_price                             │
-   │   - gain_loss = (current_price - purchase_price) / purchase_price   │
-   │   - DispositionInvestor: sell quickly at gain, hold at loss         │
-   └─────────────────────────────────────────────────────────────────────┘
+P(t+1) = P(t) + λ·NetDemand(t) + γ·[F(t)−P(t)] + ε(t) + NewsShock(t)
+λ = 0.08, γ = 0.05
+NewsShock: probability 0.15, magnitude ~ Uniform(−4, +4)
 ```
 
-## Agent Types
+## §4 Variant-Specific Features
 
-### Market (Rule-Based Coordinator)
+- **Reference point tracking**: Each investor maintains `purchase_price`; `update_reference_point()` called on every trade.
+- **Asymmetric sell fractions**: DispositionInvestor sells 50% of position on gain trigger but only 15% on loss trigger — core Prospect Theory asymmetry.
+- **News shocks**: Random shocks create gain/loss states that trigger investor decisions; essential for observing disposition behavior.
+- **move_reference=False**: DispositionInvestor preserves original purchase price on buys — maintains psychological anchor.
 
-**Price Formation**: Standard with news shocks to create gain/loss scenarios
+## §5 Config Reference
 
-**Key Parameters**:
-| Parameter         | Value | Justification                   |
-|-------------------|-------|---------------------------------|
-| price_impact      | 0.08  | Moderate price impact           |
-| mean_reversion    | 0.05  | Returns to fundamental          |
-| news_probability  | 0.15  | 15% chance of news each round   |
-| news_impact_range | 4.0   | Creates ~4% price moves on news |
+Config file: `DispositionEffect/Rule/config.yaml`
 
-### Investor 1: DispositionInvestor (⭐ Primary Effect Driver)
+Key extras: `initial_price`, `fundamental_value`, `price_impact`, `mean_reversion`, `noise_std`, `news_probability`, `news_impact_range`, `gain_threshold`, `loss_threshold`, `loss_aversion`, `sell_fraction_gain`, `sell_fraction_loss`, `target_allocation`, `tax_loss_threshold`.
 
-**Theoretical Basis**: Prospect Theory (Kahneman & Tversky, 1979)
-
-**Behavior**:
-- **When to sell (gain)**: gain_loss > gain_threshold (3%)
-- **When to sell (loss)**: gain_loss < loss_threshold (-10%) - reluctantly
-- **Position sizing**: Sell 50% of position on gain, only 15% on loss
-
-**Parameters**:
-| Parameter          | Value | Source                     |
-|--------------------|-------|----------------------------|
-| gain_threshold     | 0.03  | Odean (1998) PGR analysis  |
-| loss_threshold     | -0.10 | Empirical average          |
-| loss_aversion (λ)  | 2.25  | Kahneman & Tversky (1979)  |
-| sell_fraction_gain | 0.50  | Quick profit taking        |
-| sell_fraction_loss | 0.15  | Reluctant loss realization |
-
-### Investor 2: RationalInvestor (Stabilizing)
-
-**Theoretical Basis**: Expected Utility Theory
-
-**Behavior**:
-- **When to buy**: Price < 0.95 × fundamental
-- **When to sell**: Price > 1.05 × fundamental
-- **Key feature**: Ignores purchase price, focuses only on fundamentals
-
-### Investor 3: TaxAwareInvestor (Anti-Disposition)
-
-**Theoretical Basis**: Tax-loss harvesting
-
-**Behavior**:
-- **Sells losers** for tax benefits (opposite of disposition)
-- **Holds winners** to defer capital gains
-- Creates December effect reversal
-
-### Investor 4: IndexHolder (Passive)
-
-**Theoretical Basis**: Buy-and-hold strategy
-
-**Behavior**:
-- Minimal trading
-- Ignores price movements
-- Provides liquidity baseline
-
-### Investor 5: InstitutionalInvestor (Disciplined)
-
-**Theoretical Basis**: Professional portfolio management
-
-**Behavior**:
-- Less prone to disposition effect
-- Systematic rebalancing
-- Position-weighted decisions
-
-## Variants
-
-### Rule
-Pure rule-based implementation with fixed thresholds and Prospect Theory parameters.
-
-### LLM
-LLM-powered investors with personality prompts defining their relationship with gains and losses. Market remains rule-based.
-
-### RuleLLM
-Hybrid: LLM agents with embedded Prospect Theory formulas in prompts. Shows how reasoning interacts with quantitative rules.
-
-### RAG
-RAG-enhanced LLM with historical disposition effect cases and academic research retrieval.
-
-## Usage
+## §6 Running Instructions
 
 ```bash
-# Rule-based
-python examples/DispositionEffect/Rule/run_disposition.py \
-    -c configs/DispositionEffect/Rule/simulation.yml
-
-# LLM-based
-python examples/DispositionEffect/LLM/run_disposition_llm.py \
-    -c configs/DispositionEffect/LLM/simulation.yml
-
-# Analysis
-python examples/DispositionEffect/Rule/analysis.py \
-    -c configs/DispositionEffect/Rule/simulation.yml
+python -m examples.DispositionEffect.Rule.run_disposition
 ```
 
-## Expected Results
+## §7 Expected Behavior
 
-### Stylized Facts to Observe
+- PGR ≈ 0.10–0.20 (calibrated to Odean 1998 benchmark of 14.8%)
+- PLR ≈ 0.06–0.12 (calibrated to Odean benchmark of 9.8%)
+- PGR/PLR ≈ 1.4–1.7
+- DispositionInvestor wealth < RationalInvestor wealth (3–5% annual drag)
+- TaxAwareInvestor PLR > DispositionInvestor PLR (anti-disposition via tax incentive)
 
-1. **PGR > PLR**: Proportion of Gains Realized should exceed Proportion of Losses Realized by ~50%
-2. **Asymmetric selling**: Winners sold more quickly than losers
-3. **Reference point anchoring**: DispositionInvestors track purchase price religiously
-4. **Performance drag**: DispositionInvestors underperform RationalInvestors by ~3-5% annually
+## §8 References
 
-### Metrics to Track
-
-| Metric                  | Formula                        | Expected Value |
-|-------------------------|--------------------------------|----------------|
-| PGR                     | Realized Gains / Total Gains   | ~15%           |
-| PLR                     | Realized Losses / Total Losses | ~10%           |
-| PGR/PLR Ratio           | PGR ÷ PLR                      | ~1.5           |
-| Disposition Coefficient | PGR - PLR                      | ~0.05          |
-
-## Market Implications
-
-**Momentum Connection**:
-- Disposition effect slows price adjustment to information
-- Winners face selling pressure (caps upside)
-- Losers get support from holders (floors downside)
-- Creates short-term momentum persistence
-
-**Tax Season Effect**:
-- December shows reversal (PLR > PGR)
-- Year-end tax-loss harvesting
-- Useful for testing policy interventions
-
-## References
-
-- Shefrin, H., & Statman, M. (1985). The disposition to sell winners too early and ride losers too long. *Journal of Finance*, 40(3), 777-790.
-- Kahneman, D., & Tversky, A. (1979). Prospect Theory: An analysis of decision under risk. *Econometrica*, 47(2), 263-291.
-- Odean, T. (1998). Are investors reluctant to realize their losses? *Journal of Finance*, 53(5), 1775-1798.
+See `simulation-bases.md §2` for full DOI citations.

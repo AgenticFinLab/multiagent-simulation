@@ -1,27 +1,59 @@
-# GFC2008 Analysis Guide
+# GFC2008 — Rag Variant Analysis
 
-## Metrics
+## §1 Overview
 
-| Metric | Description | Expected Range |
-|--------|-------------|----------------|
-| Price deviation | Deviation from fundamental | Varies by scenario |
-| Max drawdown | Largest peak-to-trough decline | Varies by scenario |
-| Volatility | Annualized return volatility | Varies by scenario |
+| Aspect    | Detail                       |
+|-----------|------------------------------|
+| Variant   | Rag                          |
+| Metrics   | BBI, CII, FSI, RRI, OSP, WDI |
+| Reference | `analysis-bases.md`          |
+| Baseline  | Rule variant                 |
 
-## Visualization Guide
+---
 
-1. **Price vs Fundamental**: Shows whether agents create mispricings
-2. **Deviation Plot**: Magnitude and persistence of mispricings
-3. **Return Distribution**: Should show fat tails for behavioral scenarios
+## §2 Metric → Function Mapping
 
-## Troubleshooting
+| Metric | Function Signature                                              | Key Args                                                 |
+|--------|-----------------------------------------------------------------|----------------------------------------------------------|
+| BBI    | `bubble_build_index(dev_history)`                               | `dev_history: list`                                      |
+| CII    | `crisis_intensity_index(dev_history)`                           | `dev_history: list`                                      |
+| FSI    | `fire_sale_index(order_history, deviation_history)`             | `order_history: list`, `deviation_history: list`         |
+| RRI    | `rescue_response_index(stabilizer_volume, destabilizer_volume)` | `stabilizer_volume: float`, `destabilizer_volume: float` |
+| OSP    | `originator_sell_pressure(mbs_sell_volume, total_sell_volume)`  | `mbs_sell_volume: float`, `total_sell_volume: float`     |
+| WDI    | `wealth_distribution_index(final_wealth)`                       | `final_wealth: dict`                                     |
 
-- **No phenomenon observed**: Adjust agent parameters
-- **Too extreme**: Add more stabilizing agents or increase mean reversion
-- **Too stable**: Increase destabilizing agent parameters
+---
 
-## References
+## §3 Rag-Specific Notes
 
-- Gorton (2010): Securitized banking and the run on repo
-- Brunnermeier (2009): Deciphering the liquidity and credit crunch
-- Acharya & Richardson (2009): Restoring financial stability
+### §3.1 RagLLMMBSOriginator
+- Retrieved origination cases may push OSP higher; watch for OSP > 0.90 (over-origination).
+
+### §3.2 RagLLMRatingAgency
+- BBI likely above Rule if corpus contains CDO overvaluation cases (15–30% overrating literature).
+- BBI > 0.25 indicates strong rating inflation retrieval — calibrate corpus if too high.
+
+### §3.3 RagLLMLeveragedInvestor
+- CII and FSI may be higher than Rule if Lehman/LTCM scenarios retrieved.
+- Key finding: RAG amplifies crisis severity vs. Rule via historical panic memory.
+
+### §3.4 RagLLMDistressedBuyer
+- RRI improves vs. LLM: retrieved Paulson/Tepper case studies anchor better entry timing.
+- Expect RRI = 0.30–0.70 (vs. Rule 0.20–0.60).
+
+### §3.5 RagLLMRegulator
+- TARP/bailout retrieval anchors intervention size at 3000–5000 units.
+- Effective rescue_probability higher than Rule's stochastic 0.30.
+
+---
+
+## §4 Expected Ranges (Rag vs. Rule Baseline)
+
+| Metric | Rag Expected Range | vs. Rule | Basis                                       |
+|--------|--------------------|----------|---------------------------------------------|
+| BBI    | 0.08–0.28          | Higher   | Retrieved CDO overvaluation literature      |
+| CII    | 0.12–0.45          | Higher   | Retrieved crisis panic cases                |
+| FSI    | 2–10 rounds        | Longer   | Historical leverage cascade memory          |
+| RRI    | 0.25–0.70          | Higher   | Retrieved bailout data anchors intervention |
+| OSP    | 0.60–0.92          | Similar  | Origination history retrieval               |
+| WDI    | 0.12–0.35          | Higher   | Deeper crisis → greater wealth transfer     |

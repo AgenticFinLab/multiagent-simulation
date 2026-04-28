@@ -1,81 +1,63 @@
-# GameStopShortSqueeze Simulation
+# GameStopShortSqueeze — RuleLLM Variant
 
-## Overview
+## §1 Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | January 2021 GameStop short squeeze - Reddit coordination drove 1,700% price increase |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | GameStop short squeeze simulation with retail coordination, gamma exposure, and social media-driven trading |
-| **Academic Value** | Understanding january 2021 gamestop short squeeze - reddit coordination drove 1,700% price increase through multi-agent simulation |
+The RuleLLM variant implements the short squeeze with rule-embedded LLM reasoning. Embedded thresholds anchor squeeze mechanics (cover_threshold for §4.2, sell_threshold for §4.4, buy_pressure for §4.1) to Rule baseline while LLM provides contextualised decision reasoning.
 
-## Theoretical Foundation
+| Aspect             | Detail                                       |
+|--------------------|----------------------------------------------|
+| Variant            | RuleLLM                                      |
+| Simulation         | GameStopShortSqueeze                         |
+| Decision Mechanism | Rule-embedded LLM                            |
+| Theory Reference   | `simulation-bases.md §4.1–§4.5`              |
+| Market Broadcast   | `price`, `fundamental`, `deviation`, `round` |
 
-- Gamma squeeze dynamics (Jarrow & Li, 2021)
-- Social media and retail coordination (Lyocsa et al., 2022)
-- Short sale constraints (Jones & Lamont, 2002)
+---
 
-## Agent Descriptions
+## §2 Theory → Implementation Mapping
 
-### RetailCoordinated
-**Theoretical Basis**: Social media coordination
-**Market Role**: destabilizing
-**Description**: Retail traders coordinating via social media to buy and hold
-**Parameters**: diamond_hands=True, buy_pressure=0.8, coordination_strength=0.6
+### §2.1 RuleLLMRetailCoordinated (`simulation-bases.md §4.1`)
+| Theory Component      | Implementation                                                           |
+|-----------------------|--------------------------------------------------------------------------|
+| Social coordination   | Embedded: "buy when cash > price×50; use buy_pressure = 0.3 of cash"     |
+| LLM contextualisation | LLM reasons about social momentum; may amplify buy_pressure in narrative |
 
-### ShortSellerHF
-**Theoretical Basis**: Short selling and squeeze dynamics
-**Market Role**: destabilizing
-**Description**: Heavily short hedge fund forced to cover at higher prices
-**Parameters**: short_interest=1.4, margin_requirement=0.5, cover_threshold=0.3
+### §2.2 RuleLLMShortSellerHF (`simulation-bases.md §4.2`)
+| Theory Component | Implementation                                                                    |
+|------------------|-----------------------------------------------------------------------------------|
+| Forced covering  | Embedded: "cover 50% of short position when deviation > cover_threshold"          |
+| LLM framing      | LLM explains covering decision; embedded rule prevents full avoidance of covering |
 
-### MarketMakerGamma
-**Theoretical Basis**: Delta hedging and gamma exposure
-**Market Role**: neutral
-**Description**: Market maker hedging options exposure creates buying pressure
-**Parameters**: gamma_exposure=0.3, hedge_frequency=continuous
+### §2.3 RuleLLMMarketMakerGamma (`simulation-bases.md §4.3`)
+| Theory Component | Implementation                                                              |
+|------------------|-----------------------------------------------------------------------------|
+| Gamma hedging    | Embedded: "buy hedge_qty shares proportional to deviation × gamma_exposure" |
 
-### InstitutionalValue
-**Theoretical Basis**: Fundamental analysis
-**Market Role**: stabilizing
-**Description**: Values company based on fundamentals, sees extreme overvaluation
-**Parameters**: fundamental_value=20.0, sell_threshold=3.0, patience=high
+### §2.4 RuleLLMInstitutionalValue (`simulation-bases.md §4.4`)
+| Theory Component          | Implementation                                   |
+|---------------------------|--------------------------------------------------|
+| Fundamental value selling | Embedded: "sell when deviation > sell_threshold" |
 
-### MomentumRetail
-**Theoretical Basis**: FOMO trading
-**Market Role**: neutral
-**Description**: Retail momentum trader driven by fear of missing out
-**Parameters**: fomo_threshold=0.1, position_size=50, attention_span=short
+### §2.5 RuleLLMMomentumRetail (`simulation-bases.md §4.5`)
+| Theory Component | Implementation                                             |
+|------------------|------------------------------------------------------------|
+| FOMO buying      | Embedded: "buy ≤50 shares when deviation > fomo_threshold" |
 
+---
 
-## Usage
+## §3 RuleLLM-Specific Notes
 
-### Rule Variant
-```bash
-python examples/GameStopShortSqueeze/Rule/run_gamestopshortsqueeze.py \
-    -c configs/GameStopShortSqueeze/Rule/simulation.yml
-```
+- **Near-Rule baseline**: Embedded thresholds anchor squeeze mechanics; SQI, PAR, IEP expected close to Rule baseline.
+- **Quantity modulation**: LLM may adjust quantity within allowed range; SCD may vary slightly.
 
-### LLM Variant
-```bash
-python examples/GameStopShortSqueeze/LLM/run_gamestopshortsqueeze_llm.py \
-    -c configs/GameStopShortSqueeze/LLM/simulation.yml
-```
+---
 
-### RuleLLM Variant
-```bash
-python examples/GameStopShortSqueeze/RuleLLM/run_gamestopshortsqueeze_rulellm.py \
-    -c configs/GameStopShortSqueeze/RuleLLM/simulation.yml
-```
+## §4 Expected Ranges (RuleLLM Variant)
 
-### RAG Variant
-```bash
-python examples/GameStopShortSqueeze/Rag/run_gamestopshortsqueeze_rag.py \
-    -c configs/GameStopShortSqueeze/Rag/simulation.yml
-```
-
-## References
-
-- Gamma squeeze dynamics (Jarrow & Li, 2021)
-- Social media and retail coordination (Lyocsa et al., 2022)
-- Short sale constraints (Jones & Lamont, 2002)
+| Metric | RuleLLM Expected Range | vs. Rule |
+|--------|------------------------|----------|
+| SQI    | 1.0–5.5                | ≈ Rule   |
+| PAR    | 0.2–1.1                | ≈ Rule   |
+| SCD    | 2–9 rounds             | ≈ Rule   |
+| IEP    | Rounds 3–11            | ≈ Rule   |
+| WTI    | 0.10–0.42              | ≈ Rule   |

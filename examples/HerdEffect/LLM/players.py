@@ -432,30 +432,30 @@ Respond with ONLY valid JSON:
 
 
 class LLMMomentumInvestor(LLMInvestor):
-    """LLM-powered Momentum Investor - Trend Following."""
+    """LLM-powered MomentumInvestor: trend following strategy. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class LLMContrarianInvestor(LLMInvestor):
-    """LLM-powered Contrarian Investor - Value Investing."""
+    """LLM-powered ContrarianInvestor: value investing against the crowd. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class LLMRiskAverseInvestor(LLMInvestor):
-    """LLM-powered Risk-Averse Investor - Volatility Sensitive."""
+    """LLM-powered RiskAverseInvestor: volatility-sensitive mean-variance strategy. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class LLMAggressiveInvestor(LLMInvestor):
-    """LLM-powered Aggressive Investor - Leveraged Momentum."""
+    """LLM-powered AggressiveInvestor: leveraged momentum with acceleration bonus. Theory: simulation-bases.md §4.5."""
 
     pass
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-powered Noise Trader - Random/Uninformed."""
+    """LLM-powered NoiseTrader: random uninformed trading. Theory: simulation-bases.md §4.4."""
 
     pass

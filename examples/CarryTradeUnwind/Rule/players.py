@@ -104,8 +104,10 @@ class Market(GeneralPlayer):
 class CarryTrader(GeneralPlayer):
     """Borrows low-yield currency to invest in high-yield — profits from interest differential.
 
-    Theory: Uncovered interest parity deviation (Brunnermeier et al., 2009).
-    Role: destabilizing — unwinds aggressively when funding currency appreciates.
+    Theory: simulation-bases.md §4.1 — CarryTrader
+    Theoretical basis: Uncovered interest parity deviation (Brunnermeier et al., 2009);
+    unwinds aggressively when funding currency appreciates, destabilizing exchange rates.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -176,8 +178,10 @@ class CarryTrader(GeneralPlayer):
 class LeveragedCarryFund(GeneralPlayer):
     """Highly leveraged carry position — forced to unwind rapidly on funding appreciation.
 
-    Theory: Leveraged currency positions (Plantin & Shin, 2018).
-    Role: destabilizing — amplifies selling pressure during unwind.
+    Theory: simulation-bases.md §4.2 — LeveragedCarryFund
+    Theoretical basis: Leveraged currency positions (Plantin & Shin, 2018);
+    amplifies selling pressure during unwind due to high leverage and margin calls.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -248,8 +252,10 @@ class LeveragedCarryFund(GeneralPlayer):
 class FundingCurrencyBuyer(GeneralPlayer):
     """Buys funding currency during stress — provides natural safe-haven hedge flow.
 
-    Theory: Safe haven currency dynamics (Menkhoff et al., 2012).
-    Role: stabilizing — counter-cyclical buying during carry unwind.
+    Theory: simulation-bases.md §4.3 — FundingCurrencyBuyer
+    Theoretical basis: Safe haven currency dynamics (Menkhoff et al., 2012);
+    counter-cyclical buying during carry unwind provides stabilizing offset flow.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -320,8 +326,10 @@ class FundingCurrencyBuyer(GeneralPlayer):
 class HedgedCarryTrader(GeneralPlayer):
     """Carry positions with volatility-adjusted hedging — limits drawdown.
 
-    Theory: Volatility-adjusted carry (Menkhoff et al., 2012).
-    Role: stabilizing — reduces unwind speed via hedges.
+    Theory: simulation-bases.md §4.4 — HedgedCarryTrader
+    Theoretical basis: Volatility-adjusted carry (Menkhoff et al., 2012);
+    reduces unwind speed via dynamic hedges scaled by realized volatility.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -394,8 +402,10 @@ class HedgedCarryTrader(GeneralPlayer):
 class NoiseTrader(GeneralPlayer):
     """Random uninformed trader providing baseline liquidity.
 
-    Theory: Noise trader model (Black, 1986).
-    Role: neutral.
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+    Theoretical basis: Noise trader model (Black, 1986); random buy/sell orders
+    provide liquidity and baseline variance independent of carry dynamics.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:

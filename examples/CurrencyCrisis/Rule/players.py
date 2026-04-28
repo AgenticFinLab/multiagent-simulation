@@ -104,9 +104,10 @@ class Market(GeneralPlayer):
 class SpeculativeAttacker(GeneralPlayer):
     """Builds short positions in vulnerable currency, profiting from forced devaluation.
 
-    Theory: Krugman (1979) first-generation crisis model. Speculators attack when
-    reserves are insufficient to maintain the peg.
-    Role: destabilizing.
+    Theory: simulation-bases.md §4.1 — SpeculativeAttacker
+    Theoretical basis: Krugman (1979) first-generation crisis model; speculators attack
+    when reserves appear insufficient; attack size scales with deviation severity.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -178,9 +179,10 @@ class SpeculativeAttacker(GeneralPlayer):
 class SelfFulfillingTrader(GeneralPlayer):
     """Sells currency based on expectation that others will sell — making crisis inevitable.
 
-    Theory: Obstfeld (1996) second-generation model. Crises arise from self-fulfilling
-    expectations even when fundamentals are sound.
-    Role: destabilizing.
+    Theory: simulation-bases.md §4.2 — SelfFulfillingTrader
+    Theoretical basis: Obstfeld (1996) second-generation model; crises arise from
+    self-fulfilling expectations when momentum signals coordination among sellers.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -251,9 +253,10 @@ class SelfFulfillingTrader(GeneralPlayer):
 class CentralBankDefender(GeneralPlayer):
     """Defends currency peg using foreign reserves and interest rate adjustments.
 
-    Theory: Central bank defense mechanisms (Obstfeld 1996). Intervenes by buying
-    the currency when it weakens.
-    Role: stabilizing.
+    Theory: simulation-bases.md §4.3 — CentralBankDefender
+    Theoretical basis: Central bank defense mechanisms (Obstfeld, 1996); intervenes
+    by buying domestic currency; limited by reserve capacity.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -325,9 +328,10 @@ class CentralBankDefender(GeneralPlayer):
 class FundamentalHedger(GeneralPlayer):
     """Hedges based on fundamental analysis rather than speculative expectations.
 
-    Theory: Morris & Shin (1998) — fundamental analysis provides anchor against
-    self-fulfilling crises. Trades based on fundamental value, not crowd behavior.
-    Role: stabilizing.
+    Theory: simulation-bases.md §4.4 — FundamentalHedger
+    Theoretical basis: Morris & Shin (1998) global games; fundamental analysis anchors
+    against self-fulfilling crises when underlying value is sound.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -397,8 +401,10 @@ class FundamentalHedger(GeneralPlayer):
 class NoiseTrader(GeneralPlayer):
     """Random uninformed trader providing baseline liquidity.
 
-    Theory: Black (1986) noise trader model.
-    Role: neutral.
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+    Theoretical basis: Black (1986) noise trader model; random orders provide
+    FX market thickness and baseline variance independent of crisis dynamics.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:

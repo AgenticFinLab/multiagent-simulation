@@ -135,10 +135,11 @@ class Market(GeneralPlayer):
 
 class StreakReversalTrader(GeneralPlayer):
     """
-    Expects reversals after consecutive price moves, betting against streaks.
+    Theory: simulation-bases.md §4.1 — StreakReversalTrader
 
-    Theoretical Basis: Law of small numbers misconception (Tversky & Kahneman, 1971)
-    Market Role: destabilizing
+    Theoretical basis: Law of small numbers misconception (Tversky & Kahneman, 1971).
+    Expects reversals after consecutive price moves, betting against streaks.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def perceive(
@@ -218,10 +219,11 @@ class StreakReversalTrader(GeneralPlayer):
 
 class HotHandTrader(GeneralPlayer):
     """
-    Believes winning streaks will continue, over-betting on recent winners.
+    Theory: simulation-bases.md §4.2 — HotHandTrader
 
-    Theoretical Basis: Hot hand fallacy (Gilovich et al., 1985)
-    Market Role: destabilizing
+    Theoretical basis: Hot hand fallacy (Gilovich et al., 1985).
+    Believes winning streaks will continue, over-betting on recent winners.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def perceive(
@@ -301,10 +303,11 @@ class HotHandTrader(GeneralPlayer):
 
 class IndependentAssessor(GeneralPlayer):
     """
-    Correctly treats each price change as independent, no streak bias.
+    Theory: simulation-bases.md §4.3 — IndependentAssessor
 
-    Theoretical Basis: Independence of sequential events (Rabin, 2002 baseline)
-    Market Role: stabilizing
+    Theoretical basis: Independence of sequential events (Rabin, 2002 baseline).
+    Correctly treats each price change as independent, no streak bias.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def perceive(
@@ -384,10 +387,11 @@ class IndependentAssessor(GeneralPlayer):
 
 class Arbitrageur(GeneralPlayer):
     """
-    Exploits mispricing caused by streak-based traders.
+    Theory: simulation-bases.md §4.4 — Arbitrageur
 
-    Theoretical Basis: Limits to arbitrage (Shleifer & Vishny, 1997)
-    Market Role: stabilizing
+    Theoretical basis: Limits to arbitrage (Shleifer & Vishny, 1997).
+    Exploits mispricing caused by streak-based traders.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def perceive(
@@ -467,10 +471,11 @@ class Arbitrageur(GeneralPlayer):
 
 class NoiseTrader(GeneralPlayer):
     """
-    Random uninformed trader providing baseline liquidity.
+    Theory: simulation-bases.md §4.5 — NoiseTrader
 
-    Theoretical Basis: Noise trader model (Black, 1986)
-    Market Role: neutral
+    Theoretical basis: Noise trader model (Black, 1986).
+    Random uninformed trader providing baseline liquidity.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def perceive(

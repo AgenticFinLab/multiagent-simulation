@@ -764,30 +764,30 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMMomentumInvestor(RagLLMInvestor):
-    """RAG-augmented: MomentumInvestor rules + LLM + retrieved knowledge."""
+    """RAG-augmented MomentumInvestor: trend following with retrieved knowledge. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class RagLLMContrarianInvestor(RagLLMInvestor):
-    """RAG-augmented: ContrarianInvestor rules + LLM + retrieved knowledge."""
+    """RAG-augmented ContrarianInvestor: value investing with retrieved knowledge. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class RagLLMRiskAverseInvestor(RagLLMInvestor):
-    """RAG-augmented: RiskAverseInvestor rules + LLM + retrieved knowledge."""
+    """RAG-augmented RiskAverseInvestor: volatility-sensitive strategy with retrieved knowledge. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class RagLLMAggressiveInvestor(RagLLMInvestor):
-    """RAG-augmented: AggressiveInvestor rules + LLM + retrieved knowledge."""
+    """RAG-augmented AggressiveInvestor: leveraged momentum with retrieved knowledge. Theory: simulation-bases.md §4.5."""
 
     pass
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented: NoiseTrader rules + LLM + retrieved knowledge."""
+    """RAG-augmented NoiseTrader: random uninformed trading with retrieved knowledge. Theory: simulation-bases.md §4.4."""
 
     pass

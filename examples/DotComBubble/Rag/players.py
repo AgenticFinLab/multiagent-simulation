@@ -340,7 +340,7 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMNewEconomyEvangelist(RagLLMInvestor):
-    """RAG-augmented new economy evangelist."""
+    """RAG-augmented new economy evangelist — narrative-driven buyer with historical bubble context. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.DotComBubble.Rag.prompts:RAG_NEW_ECONOMY_EVANGELIST_SYS"
@@ -348,19 +348,19 @@ class RagLLMNewEconomyEvangelist(RagLLMInvestor):
 
 
 class RagLLMIPOFlipper(RagLLMInvestor):
-    """RAG-augmented IPO flipper."""
+    """RAG-augmented IPO flipper — short-term flip strategy with historical IPO knowledge. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = "examples.DotComBubble.Rag.prompts:RAG_IPO_FLIPPER_SYS"
 
 
 class RagLLMMomentumFollower(RagLLMInvestor):
-    """RAG-augmented momentum follower."""
+    """RAG-augmented momentum follower — trend amplifier with historical momentum research. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = "examples.DotComBubble.Rag.prompts:RAG_MOMENTUM_FOLLOWER_SYS"
 
 
 class RagLLMSkepticalValueInvestor(RagLLMInvestor):
-    """RAG-augmented skeptical value investor."""
+    """RAG-augmented skeptical value investor — fundamental anchor with historical crash knowledge. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.DotComBubble.Rag.prompts:RAG_SKEPTICAL_VALUE_INVESTOR_SYS"
@@ -368,7 +368,7 @@ class RagLLMSkepticalValueInvestor(RagLLMInvestor):
 
 
 class RagLLMShortSeller(RagLLMInvestor):
-    """RAG-augmented short seller."""
+    """RAG-augmented short seller — bets against bubble with historical limits-to-arbitrage knowledge. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.DotComBubble.Rag.prompts:RAG_SHORT_SELLER_SYS"
 

@@ -195,31 +195,31 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMRecentEventOverweighter(RuleLLMInvestor):
-    """RuleLLM — overweights recent dramatic market events."""
+    """RuleLLM — overweights recent dramatic market events. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class RuleLLMMediaInfluencedTrader(RuleLLMInvestor):
-    """RuleLLM — influenced by media coverage and social signals."""
+    """RuleLLM — influenced by media coverage and social signals. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class RuleLLMSystematicAnalyst(RuleLLMInvestor):
-    """RuleLLM systematic analyst — objective information weighting (benchmark)."""
+    """RuleLLM systematic analyst — objective information weighting (benchmark). Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class RuleLLMValueTrader(RuleLLMInvestor):
-    """RuleLLM value trader — fundamentals only, ignores media narratives."""
+    """RuleLLM value trader — fundamentals only, ignores media narratives. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """RuleLLM noise trader — uninformed random participant."""
+    """RuleLLM noise trader — uninformed random participant. Theory: simulation-bases.md §4.5."""
 
     pass
 

@@ -191,22 +191,25 @@ class OpinionEnvironment(GeneralPlayer):
             len(depolarize_actions)
         )
 
-        logger.debug(f"\n{'='*70}")  # pylint: disable=logging-fstring-interpolation
-        logger.debug(f"[OpinionEnv] Round {round_num}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("\n%s", "=" * 70)
+        logger.debug("[OpinionEnv] Round %d", round_num)
         logger.debug(
-            f"  Polarization: {current_polarization:.3f} -> {new_polarization:.3f}"
+            "  Polarization: %.3f -> %.3f", current_polarization, new_polarization
         )
-        logger.debug(f"  Mean Opinion: {new_mean_opinion:.3f}")  # pylint: disable=logging-fstring-interpolation
-        logger.debug(f"  Cluster Separation: {new_cluster_separation:.3f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("  Mean Opinion: %.3f", new_mean_opinion)
+        logger.debug("  Cluster Separation: %.3f", new_cluster_separation)
         if actions:
-            logger.debug(f"  LLM Actions ({len(actions)}):")  # pylint: disable=logging-fstring-interpolation
+            logger.debug("  LLM Actions (%d):", len(actions))
             for a in actions:
                 logger.debug(
-                    f"    {a['agent_id']:20s} [{a['agent_role']:15s}]: "
-                    f"A={a['action_type']:10s} I={a['intensity']:.3f}"
+                    "    %s [%s]: A=%s I=%.3f",
+                    a["agent_id"],
+                    a["agent_role"],
+                    a["action_type"],
+                    a["intensity"],
                 )
                 if a.get("reasoning"):
-                    logger.debug(f"      -> {a['reasoning'][:80]}...")  # pylint: disable=logging-fstring-interpolation
+                    logger.debug("      -> %s...", a["reasoning"][:80])
 
         env_data = {
             "polarization": new_polarization,
@@ -370,12 +373,14 @@ Respond with ONLY valid JSON:
             except ValueError as e:
                 last_error = e
                 if attempt < max_retries - 1:
-                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")  # pylint: disable=logging-fstring-interpolation
+                    logger.debug("[%s] LLM parse failed, retrying...", self.identity)
 
         if decision is None:
             logger.warning(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}. "
-                f"Skipping action this round."
+                "[%s] LLM failed after %d attempts: %s. Skipping action this round.",
+                self.identity,
+                max_retries,
+                last_error,
             )
             action = {
                 "action_type": "neutral",
@@ -383,7 +388,7 @@ Respond with ONLY valid JSON:
                 "agent_role": strategy_name,
                 "agent_id": self.identity,
                 "opinion": self.state.custom_state["my_opinion"],
-                "reasoning": f"LLM parse failed: stayed neutral",
+                "reasoning": "LLM parse failed: stayed neutral",
                 "analysis": "",
             }
             return {
@@ -393,8 +398,8 @@ Respond with ONLY valid JSON:
                 ],
             }
 
-        action_type = decision.get("action_type", "neutral")
-        intensity = float(decision.get("intensity", 0.0))
+        action_type = decision["action_type"]
+        intensity = float(decision["intensity"])
         intensity = max(0.0, min(1.0, intensity))
 
         # Update opinion based on LLM action
@@ -407,8 +412,13 @@ Respond with ONLY valid JSON:
         self.state.custom_state["my_opinion"] = my_opinion
 
         logger.debug(
-            f"[{self.identity:20s}] R{round_num} ({strategy_name:15s}): "
-            f"A={action_type:10s} I={intensity:.3f} opinion={my_opinion:.3f}"
+            "[%s] R%d (%s): A=%s I=%.3f opinion=%.3f",
+            self.identity,
+            round_num,
+            strategy_name,
+            action_type,
+            intensity,
+            my_opinion,
         )
 
         action = {
@@ -417,8 +427,8 @@ Respond with ONLY valid JSON:
             "agent_role": strategy_name,
             "agent_id": self.identity,
             "opinion": my_opinion,
-            "reasoning": decision.get("reasoning", "")[:100],
-            "analysis": decision.get("analysis", ""),
+            "reasoning": decision["reasoning"][:100],
+            "analysis": decision["analysis"],
         }
 
         return {
@@ -435,33 +445,23 @@ Respond with ONLY valid JSON:
 
 
 class LLMIdeologue(LLMSocialAgent):
-    """LLM Strong Opinion Holder."""
-
-    pass
+    """LLM-driven ideologue — amplifies in-group consensus, rejects out-group information. Theory: simulation-bases.md §4.1."""
 
 
 class LLMConformist(LLMSocialAgent):
-    """LLM Social Conformist."""
-
-    pass
+    """LLM-driven conformist — adopts prevailing group opinion, reinforcing homophily. Theory: simulation-bases.md §4.2."""
 
 
 class LLMCriticalThinker(LLMSocialAgent):
-    """LLM Critical Thinker."""
-
-    pass
+    """LLM-driven critical thinker — evaluates evidence independently, resists social proof. Theory: simulation-bases.md §4.3."""
 
 
 class LLMBridgeBuilder(LLMSocialAgent):
-    """LLM Bridge Builder."""
-
-    pass
+    """LLM-driven bridge builder — engages across groups, depolarizes by finding common ground. Theory: simulation-bases.md §4.4."""
 
 
 class LLMPassiveBystander(LLMSocialAgent):
-    """LLM Passive Bystander."""
-
-    pass
+    """LLM-driven passive bystander — low engagement, occasional group alignment, background mass. Theory: simulation-bases.md §4.5."""
 
 
 __all__ = [

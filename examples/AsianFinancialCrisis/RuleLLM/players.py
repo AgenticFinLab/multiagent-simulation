@@ -210,31 +210,31 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMHotMoneyFunder(RuleLLMInvestor):
-    """RuleLLM hot money funder with explicit reversal threshold rules."""
+    """RuleLLM hot money funder with explicit reversal threshold rules. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class RuleLLMContagionTrader(RuleLLMInvestor):
-    """RuleLLM contagion trader with explicit signal formula rules."""
+    """RuleLLM contagion trader with explicit signal formula rules. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class RuleLLMIMFRescuer(RuleLLMInvestor):
-    """RuleLLM IMF rescuer with explicit intervention threshold rules."""
+    """RuleLLM IMF rescuer with explicit intervention threshold rules. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class RuleLLMValueContrarian(RuleLLMInvestor):
-    """RuleLLM value contrarian with explicit oversold/overbought threshold rules."""
+    """RuleLLM value contrarian with explicit oversold/overbought threshold rules. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """RuleLLM noise trader with explicit trade probability rules."""
+    """RuleLLM noise trader with explicit trade probability rules. Theory: simulation-bases.md §4.5."""
 
     pass
 

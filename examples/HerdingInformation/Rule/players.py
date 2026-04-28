@@ -108,7 +108,13 @@ class Market(GeneralPlayer):
 
 
 class CascadeFollower(GeneralPlayer):
-    """Information cascade follower: ignores private signal, follows observed actions."""
+    """
+    Theory: simulation-bases.md §4.1 — CascadeFollower
+
+    Theoretical basis: Information cascade theory (Bikhchandani et al., 1992).
+    Information cascade follower: ignores private signal, follows observed actions.
+    See simulation-bases.md §4.1 for mathematical model.
+    """
 
     async def perceive(self, observation, prev_result=None) -> None:
         self.state.custom_state["round"] = observation.round
@@ -173,7 +179,13 @@ class CascadeFollower(GeneralPlayer):
 
 
 class ReputationHerder(GeneralPlayer):
-    """Reputation herder: follows consensus to protect professional reputation."""
+    """
+    Theory: simulation-bases.md §4.2 — ReputationHerder
+
+    Theoretical basis: Reputation-based herding (Scharfstein & Stein, 1990).
+    Reputation herder: follows consensus to protect professional reputation.
+    See simulation-bases.md §4.2 for mathematical model.
+    """
 
     async def perceive(self, observation, prev_result=None) -> None:
         self.state.custom_state["round"] = observation.round
@@ -230,7 +242,13 @@ class ReputationHerder(GeneralPlayer):
 
 
 class IndependentThinker(GeneralPlayer):
-    """Independent thinker: processes private signals correctly without social bias."""
+    """
+    Theory: simulation-bases.md §4.3 — IndependentThinker
+
+    Theoretical basis: Independent private signal processing (Banerjee, 1992 baseline).
+    Independent thinker: processes private signals correctly without social bias.
+    See simulation-bases.md §4.3 for mathematical model.
+    """
 
     async def perceive(self, observation, prev_result=None) -> None:
         self.state.custom_state["round"] = observation.round
@@ -287,7 +305,13 @@ class IndependentThinker(GeneralPlayer):
 
 
 class Contrarian(GeneralPlayer):
-    """Contrarian trader: deliberately goes against the crowd."""
+    """
+    Theory: simulation-bases.md §4.4 — Contrarian
+
+    Theoretical basis: Anti-herding / contrarian strategy (Froot et al., 1992).
+    Contrarian trader: deliberately goes against the crowd.
+    See simulation-bases.md §4.4 for mathematical model.
+    """
 
     async def perceive(self, observation, prev_result=None) -> None:
         self.state.custom_state["round"] = observation.round
@@ -346,7 +370,13 @@ class Contrarian(GeneralPlayer):
 
 
 class NoiseTrader(GeneralPlayer):
-    """Noise trader: random uninformed trading providing liquidity."""
+    """
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+
+    Theoretical basis: Noise trader model (Black, 1986).
+    Noise trader: random uninformed trading providing liquidity.
+    See simulation-bases.md §4.5 for mathematical model.
+    """
 
     async def perceive(self, observation, prev_result=None) -> None:
         self.state.custom_state["round"] = observation.round

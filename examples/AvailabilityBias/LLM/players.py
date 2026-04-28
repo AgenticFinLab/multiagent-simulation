@@ -197,31 +197,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMRecentEventOverweighter(LLMInvestor):
-    """LLM-driven trader who overweights recent dramatic market events."""
+    """LLM-driven trader who overweights recent dramatic market events. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class LLMMediaInfluencedTrader(LLMInvestor):
-    """LLM-driven trader influenced by media coverage and social signals."""
+    """LLM-driven trader influenced by media coverage and social signals. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class LLMSystematicAnalyst(LLMInvestor):
-    """LLM-driven systematic analyst — objective information weighting (benchmark)."""
+    """LLM-driven systematic analyst — objective information weighting (benchmark). Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class LLMValueTrader(LLMInvestor):
-    """LLM-driven value trader — fundamentals only, ignores media narratives."""
+    """LLM-driven value trader — fundamentals only, ignores media narratives. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven noise trader — uninformed random participant."""
+    """LLM-driven noise trader — uninformed random participant. Theory: simulation-bases.md §4.5."""
 
     pass
 

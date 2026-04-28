@@ -1,81 +1,73 @@
-# GFC2008 Simulation
+# GFC2008 — Rag Variant
 
-## Overview
+## §1 Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | 2007-2009 financial crisis - Housing bubble burst triggered global recession |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | 2008 Global Financial Crisis simulation with mortgage-backed securities, rating agency failures, and systemic contagion |
-| **Academic Value** | Understanding 2007-2009 financial crisis - housing bubble burst triggered global recession through multi-agent simulation |
+| Aspect             | Detail                                         |
+|--------------------|------------------------------------------------|
+| Variant            | Rag                                            |
+| Simulation         | GFC2008                                        |
+| Decision Mechanism | RAG-augmented LLM                              |
+| Theory Reference   | `simulation-bases.md §4.1–§4.5`                |
+| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`   |
+| Price Model        | `P(t+1) = P(t) + λ·NetDemand + γ·(F−P(t)) + ε` |
 
-## Theoretical Foundation
+---
 
-- Gorton (2010): Securitized banking and the run on repo
-- Brunnermeier (2009): Deciphering the liquidity and credit crunch
-- Acharya & Richardson (2009): Restoring financial stability
+## §2 Theory → Implementation Mapping
 
-## Agent Descriptions
+### §2.1 RagLLMMBSOriginator (`simulation-bases.md §4.1`)
+| Theory Component              | Implementation                                                                                          |
+|-------------------------------|---------------------------------------------------------------------------------------------------------|
+| Originate-to-distribute model | System prompt: mortgage originator; RAG retrieves Keys et al. (2010), subprime origination case studies |
+| Lax screening                 | Retrieved documents reinforce origination-volume maximization bias                                      |
+| Historical anchoring          | RAG may retrieve 2004–2006 origination ramp-up data, amplifying sell pressure                           |
 
-### MBSOriginator
-**Theoretical Basis**: Originate-to-distribute model (Keys et al., 2010)
-**Market Role**: destabilizing
-**Description**: Creates mortgage-backed securities with lax screening
-**Parameters**: origination_rate=0.8, screening_quality=0.3, securitization_speed=fast
+### §2.2 RagLLMRatingAgency (`simulation-bases.md §4.2`)
+| Theory Component     | Implementation                                                                                |
+|----------------------|-----------------------------------------------------------------------------------------------|
+| Issuer-pays conflict | System prompt: rating analyst; RAG retrieves Bolton et al. (2012), Moody's CDO rating history |
+| Inflated fundamental | Retrieved historical overrating cases reinforce buy at inflated prices                        |
+| BBI amplification    | Retrieved CDO overvaluation studies may push perceived_fundamental higher                     |
 
-### RatingAgency
-**Theoretical Basis**: Rating agency conflict of interest (Bolton et al., 2012)
-**Market Role**: destabilizing
-**Description**: Overrates securities due to issuer-pays model
-**Parameters**: overrating_bias=0.3, competition_pressure=0.5
+### §2.3 RagLLMLeveragedInvestor (`simulation-bases.md §4.3`)
+| Theory Component        | Implementation                                                                        |
+|-------------------------|---------------------------------------------------------------------------------------|
+| Leverage cycle          | System prompt: leveraged fund; RAG retrieves LTCM collapse, Lehman deleveraging cases |
+| Fire sale amplification | Retrieved panic-selling case studies may trigger larger or earlier sell decisions     |
+| Crisis memory           | RAG knowledge of historical cascade dynamics may paradoxically accelerate fear        |
 
-### LeveragedInvestor
-**Theoretical Basis**: Leverage cycle (Adrian & Shin, 2010)
-**Market Role**: destabilizing
-**Description**: Uses high leverage, forced to sell in downturn
-**Parameters**: leverage=30, margin_call_trigger=0.05, fire_sale_discount=0.2
+### §2.4 RagLLMDistressedBuyer (`simulation-bases.md §4.4`)
+| Theory Component     | Implementation                                                                          |
+|----------------------|-----------------------------------------------------------------------------------------|
+| Deep discount buying | System prompt: distressed buyer; RAG retrieves Griffin & Xu (2009), Paulson trade cases |
+| Entry timing         | Retrieved successful distressed trades reinforce conviction at deep discounts           |
+| Better RRI           | RAG context about recovery timing may improve deployment efficiency                     |
 
-### DistressedBuyer
-**Theoretical Basis**: Distressed debt investing
-**Market Role**: stabilizing
-**Description**: Buys assets at deep discount during panic
-**Parameters**: discount_threshold=0.4, investment_horizon=long, patience=high
+### §2.5 RagLLMRegulator (`simulation-bases.md §4.5`)
+| Theory Component         | Implementation                                                                   |
+|--------------------------|----------------------------------------------------------------------------------|
+| Systemic risk monitor    | System prompt: central bank; RAG retrieves TARP, Fed intervention records        |
+| Intervention calibration | Retrieved bailout sizes anchor rescue quantity decisions                         |
+| Policy confidence        | Historical intervention success/failure calibrates stochastic rescue probability |
 
-### Regulator
-**Theoretical Basis**: Macroprudential regulation
-**Market Role**: stabilizing
-**Description**: Monitors systemic risk and may intervene
-**Parameters**: intervention_threshold=0.15, rescue_probability=0.6
+---
 
+## §3 Rag-Specific Notes
 
-## Usage
+- **BBI amplification**: Retrieved CDO overvaluation studies may push BBI above Rule range.
+- **CII deepening**: If RAG retrieves Lehman collapse data, LeveragedInvestor may fire-sell more aggressively.
+- **RRI improvement**: Retrieved TARP/bailout data helps Regulator calibrate intervention size.
+- **Corpus dependency**: All metrics shift toward retrieved historical GFC values — key confound for research.
 
-### Rule Variant
-```bash
-python examples/GFC2008/Rule/run_gfc2008.py \
-    -c configs/GFC2008/Rule/simulation.yml
-```
+---
 
-### LLM Variant
-```bash
-python examples/GFC2008/LLM/run_gfc2008_llm.py \
-    -c configs/GFC2008/LLM/simulation.yml
-```
+## §4 Expected Ranges (Rag vs. Rule Baseline)
 
-### RuleLLM Variant
-```bash
-python examples/GFC2008/RuleLLM/run_gfc2008_rulellm.py \
-    -c configs/GFC2008/RuleLLM/simulation.yml
-```
-
-### RAG Variant
-```bash
-python examples/GFC2008/Rag/run_gfc2008_rag.py \
-    -c configs/GFC2008/Rag/simulation.yml
-```
-
-## References
-
-- Gorton (2010): Securitized banking and the run on repo
-- Brunnermeier (2009): Deciphering the liquidity and credit crunch
-- Acharya & Richardson (2009): Restoring financial stability
+| Metric | Rag Expected Range | vs. Rule | Basis                                                      |
+|--------|--------------------|----------|------------------------------------------------------------|
+| BBI    | 0.08–0.28          | Higher   | Retrieved CDO overvaluation cases amplify rating inflation |
+| CII    | 0.12–0.45          | Higher   | Retrieved panic-selling cases amplify fire sales           |
+| FSI    | 2–10 rounds        | Longer   | Historical crisis memory prolongs leveraged selling        |
+| RRI    | 0.25–0.70          | Higher   | Retrieved bailout data improves Regulator calibration      |
+| OSP    | 0.60–0.92          | Similar  | Origination driven by historical origination cases         |
+| WDI    | 0.12–0.35          | Higher   | Larger crisis → more wealth transfer                       |

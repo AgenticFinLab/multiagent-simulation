@@ -297,31 +297,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class LLMLossAverseInvestor(RagLLMInvestor):
-    """RAG-augmented: LossAverseInvestor rules + LLM + retrieved knowledge."""
+    """RAG-augmented: LossAverseInvestor rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.1"""
 
     _system_prompt = RULELLM_LOSS_AVERSE_PROMPT
 
 
 class LLMBreakEvenTrader(RagLLMInvestor):
-    """RAG-augmented: BreakEvenTrader rules + LLM + retrieved knowledge."""
+    """RAG-augmented: BreakEvenTrader rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.2"""
 
     _system_prompt = RULELLM_BREAK_EVEN_PROMPT
 
 
 class LLMRationalTrader(RagLLMInvestor):
-    """RAG-augmented: RationalTrader rules + LLM + retrieved knowledge."""
+    """RAG-augmented: RationalTrader rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.3"""
 
     _system_prompt = RULELLM_RATIONAL_PROMPT
 
 
 class LLMMomentumTrader(RagLLMInvestor):
-    """RAG-augmented: MomentumTrader rules + LLM + retrieved knowledge."""
+    """RAG-augmented: MomentumTrader rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.4"""
 
     _system_prompt = RULELLM_MOMENTUM_PROMPT
 
 
 class LLMMarketMaker(RagLLMInvestor):
-    """RAG-augmented: MarketMaker rules + LLM + retrieved knowledge."""
+    """RAG-augmented: MarketMaker rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.5"""
 
     _system_prompt = RULELLM_MARKET_MAKER_PROMPT
 

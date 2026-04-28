@@ -41,7 +41,6 @@ Environment Variables:
 
 from __future__ import annotations
 
-import json
 import logging
 import os
 import random
@@ -49,6 +48,7 @@ import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from dotenv import load_dotenv
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
@@ -761,31 +761,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMMarketMaker(RagLLMInvestor):
-    """RAG-augmented: MarketMaker rules + LLM + retrieved knowledge."""
+    """RAG-augmented: MarketMaker rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.1"""
 
     _system_prompt = RAGLLM_MARKET_MAKER_SYS
 
 
 class RagLLMLiquidityDemander(RagLLMInvestor):
-    """RAG-augmented: LiquidityDemander rules + LLM + retrieved knowledge."""
+    """RAG-augmented: LiquidityDemander rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.2"""
 
     _system_prompt = RAGLLM_LIQUIDITY_SEEKER_SYS
 
 
 class RagLLMArbitrageur(RagLLMInvestor):
-    """RAG-augmented: Arbitrageur rules + LLM + retrieved knowledge."""
+    """RAG-augmented: Arbitrageur rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.3"""
 
     _system_prompt = RAGLLM_VALUE_TRADER_SYS
 
 
 class RagLLMValueInvestor(RagLLMInvestor):
-    """RAG-augmented: ValueInvestor rules + LLM + retrieved knowledge."""
+    """RAG-augmented: ValueInvestor rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.4"""
 
     _system_prompt = RAGLLM_MOMENTUM_TRADER_SYS
 
 
 class RagLLMForcedSeller(RagLLMInvestor):
-    """RAG-augmented: ForcedSeller rules + LLM + retrieved knowledge."""
+    """RAG-augmented: ForcedSeller rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.5"""
 
     _system_prompt = RAGLLM_NOISE_TRADER_SYS
 

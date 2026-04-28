@@ -257,6 +257,8 @@ After a successful 200-round run, verify:
 - [ ] All 4 variants run successfully
 - [ ] Analysis scripts produce output for at least Rule variant
 - [ ] Phenomenon clearly visible in price chart output
+- [ ] `SCENARIO_PATH_MAP` in WebUI updated to include new simulation
+- [ ] WebUI discovers simulation (run WebUI and verify it appears in scenario list)
 
 ### 10.2 Quality Standards Summary
 

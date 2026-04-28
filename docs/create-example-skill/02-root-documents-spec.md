@@ -33,37 +33,176 @@ These documents are the single source of truth for their respective domains. All
 | Core Mechanism     | [2-3 sentences: the key self-reinforcing or dynamic that produces the phenomenon]                    |
 | Real-World Origin  | [Historical event(s), dates, markets, and scale of impact]                                           |
 | Research Relevance | [Why this phenomenon matters to financial stability, behavioral finance, market efficiency research] |
+
+### 1.1 Origin and Source Analysis
+
+This subsection provides a deep account of where the simulation phenomenon originates —
+its roots in academic literature, its grounding in real-world finance, and the chain of
+intellectual development that connects historical events to the theoretical models to this
+simulation's design.
+
+#### 1.1.1 Intellectual Lineage
+
+[3–5 paragraphs tracing the origin of this phenomenon:]
+
+Paragraph 1 — Foundational observation: Who first described or documented this phenomenon?
+In what context — an empirical observation, a laboratory experiment, a market crisis post-mortem?
+What was the original evidence?
+
+Paragraph 2 — Theoretical formalisation: Which academic works first built a mathematical or
+conceptual model of this phenomenon? What simplifying assumptions were made? What has been
+preserved vs. modified in this simulation?
+
+Paragraph 3 — Empirical confirmation: Which large-scale empirical studies confirmed the
+phenomenon across multiple markets, time periods, or asset classes? What are the key stylised
+facts established in this literature?
+
+Paragraph 4 — Connection to agent-based modelling: How has this phenomenon been previously
+modelled in the ABM / computational finance literature? Which prior ABM studies are closest to
+this simulation? What does this simulation add or change?
+
+Paragraph 5 — Simulation design choices: Which specific decisions in this simulation's design
+(agent types, thresholds, market mechanism) derive directly from the above literature? Cite
+the specific source for each major design choice.
+
+#### 1.1.2 Real-World Event Catalogue
+
+A comprehensive search of all documented real-world events that correspond to this simulation's
+phenomenon. This table is the primary RAG knowledge base seed for the Rag variant.
+
+| Event Name | Date(s) | Market / Asset | Trigger             | Magnitude                      | Duration             | Correspondence to Simulation                  | Primary Source                 |
+|------------|---------|----------------|---------------------|--------------------------------|----------------------|-----------------------------------------------|--------------------------------|
+| [Event 1]  | [Date]  | [Market]       | [What initiated it] | [Peak deviation / loss / drop] | [Time to resolution] | [Which agents, which mechanism — be specific] | [Author/Report, Year, DOI/URL] |
+| [Event 2]  | [Date]  | [Market]       | [Trigger]           | [Magnitude]                    | [Duration]           | [Correspondence]                              | [Source]                       |
+| [Event 3]  | ...     | ...            | ...                 | ...                            | ...                  | ...                                           | ...                            |
+
+**Minimum**: 3 events. **Recommended**: 5–7 events spanning different time periods and geographic markets.
+
+**Catalogue quality criteria**:
+- Every event must have a verifiable primary source (academic paper, regulatory report, or reputable journalism with date and URL)
+- Magnitude must be a quantitative figure (%, $, basis points) — not "large" or "significant"
+- Correspondence column must name specific simulation agents and mechanisms — not "similar dynamics"
+- Events should span multiple decades and geographies to demonstrate the phenomenon's generality
+
+#### 1.1.3 Book and Practitioner Literature
+
+| Title        | Author(s) | Year   | Publisher   | Relevance to This Simulation                                               |
+|--------------|-----------|--------|-------------|----------------------------------------------------------------------------|
+| [Book Title] | [Author]  | [Year] | [Publisher] | [Specific chapter(s) or concept(s) that directly inform simulation design] |
+| [Book Title] | [Author]  | [Year] | [Publisher] | [Relevance]                                                                |
+
+Minimum 2 entries. Include both academic textbooks and practitioner accounts (e.g., memoirs,
+regulatory post-mortems) where they document behavioural mechanisms that the simulation models.
 ```
 
-**Quality criteria**: The Core Mechanism must be specific enough that a reader unfamiliar with the phenomenon can understand what drives it. Avoid generic phrases like "positive feedback." State what specific agent behavior creates the feedback.
+**Quality criteria**:
+- The Core Mechanism must be specific enough that a reader unfamiliar with the phenomenon can understand what drives it. Avoid generic phrases like "positive feedback." State what specific agent behavior creates the feedback.
+- §1.1.2 Real-World Event Catalogue is **mandatory** — not optional. A simulation with no documented real-world correspondence is not deployable.
+- Every entry in the event catalogue must have a quantitative magnitude column.
+- The Intellectual Lineage must trace the path from historical observation → theory → this simulation. It must not simply list references — it must narrate the chain of influence.
 
 ---
 
 ### §2 Theoretical Foundation
 
-This section establishes the academic basis for the entire simulation. Every theory here is later referenced by investor entries in §4 and parameters in §6.
+This section establishes the complete academic basis for the entire simulation. Every theory here is later referenced by investor entries in §4 and parameters in §6. The goal is to make this section a self-contained theoretical survey — a reader should be able to understand the intellectual foundation of the simulation without consulting outside sources.
 
-**For EACH theory (minimum 2, maximum 6):**
+**Minimum**: 3 theories. **Recommended**: 4–6. Each theory must have a full entry as specified below.
+
+**For EACH theory:**
 
 ```markdown
-### Theory: [Full Theory Name]
+### Theory N: [Full Theory Name]
 
-- **Citation**: [Author, Year. "Title." *Journal Name*, Volume(Issue), Pages. https://doi.org/...]
-- **Core Insight**: [2-3 sentences on the key mechanism this theory establishes. Use precise language — avoid paraphrasing away the rigor.]
-- **Mathematical Formulation**:
-  [The central equation(s) of this theory, as they apply to this simulation. Use LaTeX-style notation if helpful.]
-  Example: `D_spec(t) ∝ (P(t) − MA(t)) / MA(t)` — momentum demand proportional to trend
-- **Empirical Evidence**:
-  [Key empirical studies and stylized facts that support this theory. Include parameter estimates where available.]
-  Example: "Jegadeesh & Titman (1993) document momentum returns of 1–2% per month over 3–12 month horizons."
-- **Relevance to This Simulation**: [Which investor(s) in §4 embody this theory; what aspect of the phenomenon this theory explains.]
-- **Calibration Implication**: [What this theory implies about parameter choices — especially thresholds, sizes, and timing.]
+#### N.1 Citation and Status
+
+- **Primary Citation**: [Author(s), Year. "Full Title." *Journal Name*, Volume(Issue), Pages. https://doi.org/...]
+- **Theory Status**: [Foundational / Contested / Widely-applied / Emerging — with 1-sentence justification]
+- **Original Context**: [The phenomenon/market this theory was originally developed to explain; year of original formulation if different from first citation]
+
+#### N.2 Core Theoretical Mechanism
+
+[3–5 paragraphs. This is the heart of the theory entry:]
+
+Paragraph 1 — Central claim: What does this theory assert about agent behaviour or market dynamics?
+State it as a precise, falsifiable claim. Avoid hedged language like "suggests" — be direct.
+
+Paragraph 2 — Mechanism: What is the causal chain the theory proposes? What specific decision
+process or incentive structure produces the asserted outcome? Walk through the mechanism step
+by step (e.g., "A rises → B responds → C adjusts → D results, which feeds back to A").
+
+Paragraph 3 — Boundary conditions: Under what conditions does the theory hold? What assumptions
+are required? Which real-world frictions does it abstract away? Are those abstractions appropriate
+for this simulation?
+
+Paragraph 4 — Theoretical debates: What are the main critiques of this theory in the literature?
+Are there competing theories that predict different outcomes? How does this simulation resolve
+that ambiguity in its design?
+
+#### N.3 Mathematical Formulation
+
+**Core Model**:
+```
+[Central equation(s) — write the full formal model, not just a sketch]
+[Define every symbol inline or in the notation table below]
+```
+
+**Notation**:
+
+| Symbol | Meaning                  | Units / Type    | Typical Range               | Source     |
+|--------|--------------------------|-----------------|-----------------------------|------------|
+| [sym]  | [Plain-language meaning] | [Units or type] | [From empirical literature] | [Citation] |
+
+**Derivation sketch** (if non-trivial):
+[The key steps that lead from primitives to the central equation, if the equation is not self-evident.
+For well-known models, a 2-3 step sketch is sufficient. For novel combinations, be thorough.]
+
+**Model variants or extensions**:
+[Any important extensions of the base model that are relevant to this simulation. For example,
+if the base model assumes rational agents but this simulation uses a bounded-rational version,
+explain the modification and its source.]
+
+#### N.4 Empirical Evidence
+
+**Supporting Studies**:
+
+| Study                                     | Finding                         | Market / Period      | Sample Size | Relevance                                   |
+|-------------------------------------------|---------------------------------|----------------------|-------------|---------------------------------------------|
+| [Author(s), Year — "Title," Journal, DOI] | [Specific quantitative finding] | [Where/when studied] | [N]         | [How this supports the theory as used here] |
+| [Study 2]                                 | [Finding with numbers]          | [Market]             | [N]         | [Relevance]                                 |
+
+**Key Stylised Facts** (as established by this literature):
+
+1. [Fact 1 — quantitative, e.g., "Mean momentum return = 1.01% per month at 12-month horizon"]
+2. [Fact 2]
+3. [Fact 3]
+
+**Contradicting Evidence** (if any):
+[Studies that find weak or null effects; markets where the phenomenon does not hold; periods of
+breakdown. Acknowledging contradicting evidence strengthens the theoretical grounding, not
+weakens it.]
+
+#### N.5 Relevance to This Simulation
+
+**Agent mapping**: [Which investor type(s) in §4 embody this theory, and how specifically.]
+
+**Mechanism mapping**: [Which part of the simulation's price formation or decision logic this
+theory directly explains — cite §3.1 or §4.N references explicitly.]
+
+**Parameter calibration implication**: [What this theory implies about specific parameter values,
+thresholds, or ranges — be quantitative where possible. E.g., "Tversky & Kahneman (1992) estimate
+loss aversion coefficient λ ≈ 2.25; this directly calibrates the loss_aversion parameter in §6."]
+
+**Limitations in this context**: [What aspects of the full theory are not captured by this simulation,
+and why the simplification is acceptable for the research question being addressed.]
 ```
 
 **Quality criteria**:
 - Every citation must include journal name, volume/issue, pages, and DOI where available.
-- Mathematical Formulation must be present for every theory — do not omit because "no closed form exists"; write the verbal model precisely.
-- Empirical Evidence must cite specific studies with quantitative findings, not just "has been documented."
+- Mathematical Formulation §N.3 must be present for every theory — do not omit because "no closed form exists"; write the verbal model precisely and include the notation table.
+- Empirical Evidence §N.4 must include a supporting studies table with quantitative findings, not just "has been documented."
+- The Relevance §N.5 must name specific §4 investor numbers — "This theory is embodied by §4.2 MarketMaker" not "some agents."
+- Theories must be ordered from most foundational to most specific to this simulation.
 
 ---
 
@@ -491,45 +630,81 @@ E.g., "Each round represents one trading day." Justify this choice.]
 
 ### §8 Historical Case Studies
 
-For EACH real-world event (minimum 1, recommended 2):
+**Purpose**: Section §8 is the empirical grounding of the simulation. It connects the abstract agent-based model to documented real-world episodes, establishes calibration targets derived from historical data, and populates the RAG variant's knowledge base. A simulation without this section cannot be externally validated.
+
+**Minimum**: 2 events. **Recommended**: 3–5, spanning different time periods, markets, and geographic regions to demonstrate the phenomenon's generality.
+
+For EACH real-world event:
 
 ```markdown
 ## 8. Historical Case Studies
 
-### Event: [Full Event Name]
+### Case N: [Full Event Name]
 
-| Item      | Detail                                                     |
-|-----------|------------------------------------------------------------|
-| Date      | [Specific dates or period, e.g., "March 24–29, 2021"]      |
-| Market    | [Asset class, exchange, geographic scope]                  |
-| Trigger   | [The specific catalyst — be precise, not generic]          |
-| Duration  | [From onset to resolution; in days, weeks, or months]      |
-| Magnitude | [Key quantitative data: peak decline %, losses in $, etc.] |
+#### N.1 Event Profile
 
-**Key Dynamics Timeline**:
+| Item       | Detail                                                                              |
+|------------|-------------------------------------------------------------------------------------|
+| Date Range | [Specific dates or period, e.g., "March 24–29, 2021"; "August–October 1987"]        |
+| Market     | [Asset class, exchange, geographic scope, e.g., "US equity markets, NYSE + NASDAQ"] |
+| Trigger    | [The specific catalyst — precise and verifiable, not generic]                       |
+| Duration   | [From onset to resolution; in hours, days, weeks, or months]                        |
+| Magnitude  | [Key quantitative data: peak decline %, total loss in $, volatility spike in bps]   |
+| Resolution | [How the episode ended: policy intervention, natural correction, bankruptcy, etc.]  |
+| Sources    | [Primary sources for this section: regulatory reports, academic papers, articles]   |
 
-| Date / Period | Event           | Market Effect         |
-|---------------|-----------------|-----------------------|
-| [Date]        | [What happened] | [Price/volume effect] |
-| [Date]        | [What happened] | [Effect]              |
-| ...           | ...             | ...                   |
+#### N.2 Chronological Dynamics
 
-**Quantitative Evidence**:
-[Specific data points with sources — e.g., "ViacomCBS fell 60% from $100 to $40 (SEC, 2022, Archegos Report p.47)"]
+| Date / Period | Event                                             | Market Effect                | Quantitative Measure           |
+|---------------|---------------------------------------------------|------------------------------|--------------------------------|
+| [Date]        | [What happened — specific action or announcement] | [Price/volume/spread effect] | [Number with units and source] |
+| [Date]        | [Event]                                           | [Effect]                     | [Measure]                      |
+| [Date]        | ...                                               | ...                          | ...                            |
 
-**Agent Mappings**:
+**Narrative**: [3–5 sentences describing the episode's progression in plain language, tying together the timeline entries above. What made this event escalate? What eventually halted it?]
 
-| Simulation Agent | Real-World Counterpart | Evidence for Mapping                  |
-|------------------|------------------------|---------------------------------------|
-| [ClassName]      | [Real participant]     | [What makes this mapping appropriate] |
+#### N.3 Quantitative Evidence
 
-**Lessons for Simulation Calibration**:
-[What specific parameter values, timing, or behavioral patterns from this event should be
-preserved in the simulation. This section is a key source for RAG variant knowledge base content.]
+[Specific data points with sources. Each bullet must include a number, a unit, and a full source citation.]
 
-**Primary Sources**:
-[Full citations for the data and analysis in this section.]
+- [Metric]: [Value] ([Source: Author/Org, Year, report title or URL, page if applicable])
+- [Metric]: [Value] ([Source])
+- [Metric]: [Value] ([Source])
+
+Minimum 4 quantitative data points per event.
+
+#### N.4 Agent Mappings
+
+| Simulation Agent | Real-World Counterpart              | Evidence for Mapping                                                       | Behavioural Correspondence                                                     |
+|------------------|-------------------------------------|----------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| [ClassName §4.N] | [Real institution/participant type] | [Quote, regulatory filing, or academic analysis establishing this mapping] | [Specific behaviour in the real event that matches the agent's decision logic] |
+| [ClassName §4.N] | [Real counterpart]                  | [Evidence]                                                                 | [Correspondence]                                                               |
+
+#### N.5 Simulation Calibration Lessons
+
+[What specific parameter values, timing, or behavioural patterns from this event should inform simulation calibration. Be precise: cite the quantitative evidence from §N.3 and connect it to specific parameters in §6.]
+
+| Parameter (§6) | Historical Value from This Event | Source     | Calibration Implication              |
+|----------------|----------------------------------|------------|--------------------------------------|
+| [param_name]   | [Value from historical data]     | [Citation] | [How to set or bound this parameter] |
+
+#### N.6 Distinguishing Features
+
+[What makes this specific episode unique compared to other events in this catalogue? What aspect of the simulation does this event best validate? What is the most important lesson this event provides that is NOT captured by other events in the list?]
+
+#### N.7 References for This Case
+
+| # | Full Citation                                               | Content Referenced                          |
+|---|-------------------------------------------------------------|---------------------------------------------|
+| 1 | [Author(s)/Org, Year. "Title." Journal/Report. DOI or URL.] | [Which part of this case entry it supports] |
+| 2 | ...                                                         | ...                                         |
 ```
+
+**§8 Quality criteria**:
+- §N.3 Quantitative Evidence: every data point must have a number, unit, and source. "Prices fell significantly" is not acceptable.
+- §N.4 Agent Mappings: every simulation agent must appear in at least one case's mapping table across the full §8. If an agent has no historical counterpart in any documented event, its design must be re-examined.
+- §N.5 Calibration Lessons: must close the loop between historical data and §6 parameter values. This section makes §8 actionable, not merely illustrative.
+- Events in the catalogue should collectively cover all investor types from §4 — i.e., each investor type should be mapped to at least one real-world counterpart across the full set of cases.
 
 ---
 
@@ -582,26 +757,70 @@ Minimum 3 objectives. Each must be answerable from simulation output — no vagu
 For EACH metric (minimum 6, including all mandatory types):
 
 ```markdown
-### Metric: [Metric Name]
+### Metric: [Metric Name] ([Abbreviation])
 
-- **Category**: [Price Dynamics / Volatility / Behavioral / Portfolio / Phenomenon-Specific / Agent Activity]
-- **Definition**: [Complete, unambiguous plain-language definition. No ambiguity allowed.]
-- **Formula**:
-  ```
-  [Equation in precise notation]
-  where [define every symbol]
-  ```
-- **Interpretation**:
-  - Value = 0: [What this means economically]
-  - Value > [threshold]: [What it indicates about the phenomenon]
-  - Value < [threshold]: [What it indicates]
-  - Typical "healthy" range: [X to Y — from literature or calibration]
-- **Academic Basis**:
-  [Full citation: Author(s), Year. "Title." *Journal*, Vol(Issue), Pages. DOI.]
-  [Brief note on what this citation establishes about this metric's validity or interpretation.]
-- **Normal Range**: [Typical values from literature for this type of phenomenon; be specific]
-- **Red Flag Threshold**: [Value that indicates a calibration problem; what to adjust]
-- **Implementation Notes**: [Which function in `Rule/analysis.py` computes this; data source file]
+#### Category
+[Price Dynamics / Volatility / Behavioral / Portfolio / Phenomenon-Specific / Agent Activity / Microstructure]
+
+#### Definition
+[Complete, unambiguous plain-language definition. No ambiguity allowed. State what is being
+measured, over what time window, and with respect to what baseline or reference value.]
+
+#### Formula
+```
+[Equation in precise, unambiguous notation — define every symbol]
+where:
+  [symbol] = [complete definition including units and computation method]
+  [symbol] = [definition]
+```
+
+**Computation notes**: [How to compute this from raw simulation output. Which data files / fields
+are inputs. Any edge cases — e.g., "If fundamental = 0, return NaN."]
+
+#### Interpretation
+
+| Range                           | Economic Meaning                                      | Simulation Interpretation                       |
+|---------------------------------|-------------------------------------------------------|-------------------------------------------------|
+| = 0                             | [What zero means theoretically]                       | [What it means in this simulation specifically] |
+| (0, threshold_low)              | [Low value meaning]                                   | [Simulation meaning]                            |
+| [threshold_low, threshold_high] | [Normal range meaning]                                | [Expected during normal phase]                  |
+| > threshold_high                | [High value meaning — what phenomenon this indicates] | [Which phase; which agents active]              |
+
+#### Academic Basis
+
+**Primary source**:
+[Full citation: Author(s), Year. "Title." *Journal*, Vol(Issue), Pages. DOI.]
+
+[2–3 sentences: How does this source establish this metric? Was it proposed here, validated here,
+or applied in the same phenomenal context? Does the cited paper define the formula exactly as
+written above, or is there an adaptation?]
+
+**Supporting studies**:
+
+| Study                                     | Context          | Finding               | Relevance to This Metric                            |
+|-------------------------------------------|------------------|-----------------------|-----------------------------------------------------|
+| [Author(s), Year. "Title." Journal. DOI.] | [Market, period] | [Quantitative result] | [Why this validates the metric for this simulation] |
+| [Study 2]                                 | ...              | ...                   | ...                                                 |
+
+#### Normal Range (from literature)
+[Typical values for this metric type in the relevant phenomenon literature. Be specific:
+e.g., "Bubble duration in stock markets: 12–24 months (Hong & Stein, 2003); in housing markets:
+3–7 years (Glaeser et al., 2008)." Provide the range that would indicate the simulation is
+producing realistic-scale output.]
+
+#### Red Flag Threshold
+- **Too high** (> [value]): [Diagnosis — which parameter is miscalibrated; direction to adjust]
+- **Too low** (< [value]): [Diagnosis — adjustment direction]
+- **Zero for all rounds**: [What this symptom indicates; immediate corrective action]
+
+#### Relationship to Other Metrics
+[How this metric relates to the others in §2. Does it correlate, diverge, or act as a leading
+indicator of another metric? Example: "BAI typically peaks 3–5 rounds before BD crosses threshold;
+if both peak simultaneously, the cascade is unusually fast and price_impact may be too high."]
+
+#### Implementation Notes
+[Which function in `Rule/analysis.py` computes this; input data source (price_history, agent_states,
+trade_history); return type and units.]
 ```
 
 **Mandatory metrics** (must appear in every simulation's `analysis-bases.md`):
@@ -711,26 +930,49 @@ Example: "Two-sample t-test on max_drawdown across 10 simulation runs; α = 0.05
 ```markdown
 ## 6. Expected Results and Validation
 
-### Expected Stylized Facts
+### 6.1 Expected Stylised Facts
 
-| Fact     | Quantitative Target           | Literature Source (full citation) | How to Verify in Simulation |
-|----------|-------------------------------|-----------------------------------|-----------------------------|
-| [Fact 1] | [Specific range or threshold] | [Author, Year, Journal, DOI]      | [Which metric, which plot]  |
-| [Fact 2] | ...                           | ...                               | ...                         |
+For each stylised fact that this simulation is designed to reproduce, provide the quantitative
+target, the literature source, and the verification method.
 
-### Calibration Targets
+| Fact                                                                           | Quantitative Target                                                         | Literature Source (full citation + DOI) | How to Verify in Simulation             | Failure Indicator                                 |
+|--------------------------------------------------------------------------------|-----------------------------------------------------------------------------|-----------------------------------------|-----------------------------------------|---------------------------------------------------|
+| [Fact 1 — a specific, measurable stylised fact from the phenomenon literature] | [Specific range or threshold — e.g., "bubble peak ≥ 20% above fundamental"] | [Author, Year, Journal, DOI]            | [Which metric, which phase, which plot] | [What would indicate this fact is NOT reproduced] |
+| [Fact 2]                                                                       | ...                                                                         | ...                                     | ...                                     | ...                                               |
+| [Fact 3]                                                                       | ...                                                                         | ...                                     | ...                                     | ...                                               |
 
-| Metric     | Target Range | Source          | Adjustment if Out of Range             |
-|------------|--------------|-----------------|----------------------------------------|
-| [Metric A] | [Min, Max]   | [Full citation] | [Which parameter to adjust; direction] |
-| [Metric B] | ...          | ...             | ...                                    |
+Minimum 4 stylised facts. Each must be verifiable from simulation output within a single run.
 
-### Validation Failure Signs
+### 6.2 Calibration Targets
 
-| Symptom              | Diagnosis                                                    | Corrective Action                                 |
-|----------------------|--------------------------------------------------------------|---------------------------------------------------|
-| [Observable problem] | [Root cause — which parameter or mechanism is miscalibrated] | [Specific adjustment: parameter name + direction] |
-| [Problem]            | [Diagnosis]                                                  | [Action]                                          |
+| Metric     | Target Range | Lower Bound Source | Upper Bound Source | Adjustment if Below Range     | Adjustment if Above Range     |
+|------------|--------------|--------------------|--------------------|-------------------------------|-------------------------------|
+| [Metric A] | [Min, Max]   | [Full citation]    | [Full citation]    | [Which parameter + direction] | [Which parameter + direction] |
+| [Metric B] | ...          | ...                | ...                | ...                           | ...                           |
+
+**Calibration protocol**:
+1. Run the Rule variant for 10 seeds with default parameters.
+2. Compute the mean of each metric across runs.
+3. Compare against target ranges above.
+4. Adjust parameters using the guidance above.
+5. Re-run and verify before proceeding to LLM/RuleLLM/Rag variants.
+
+### 6.3 Cross-Variant Predictions
+
+Based on the theoretical expectations from `simulation-bases.md §9`, state the expected direction
+of metric change for each variant relative to the Rule baseline.
+
+| Metric     | Rule (Baseline)           | LLM Expected                                    | RuleLLM Expected     | Rag Expected         | Theoretical Basis                       |
+|------------|---------------------------|-------------------------------------------------|----------------------|----------------------|-----------------------------------------|
+| [Metric A] | [Baseline value or range] | [Higher / Lower / Similar — with justification] | [Expected direction] | [Expected direction] | [§2 theory that predicts this ordering] |
+
+### 6.4 Validation Failure Signs
+
+| Symptom                                                                    | Diagnosis                    | Root Cause                                       | Corrective Action                                           |
+|----------------------------------------------------------------------------|------------------------------|--------------------------------------------------|-------------------------------------------------------------|
+| [Observable problem — e.g., "Price never deviates > 10% from fundamental"] | [What this symptom tells us] | [Which parameter or mechanism is the root cause] | [Specific adjustment: parameter name, direction, magnitude] |
+| [Symptom 2]                                                                | [Diagnosis]                  | [Root cause]                                     | [Action]                                                    |
+| [Symptom 3]                                                                | ...                          | ...                                              | ...                                                         |
 ```
 
 ---

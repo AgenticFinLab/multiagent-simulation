@@ -148,14 +148,22 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
 
         logger.debug(f"\n{'='*60}")  # pylint: disable=logging-fstring-interpolation
-        logger.debug(f"[Market] Round {round_num}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"[Market] Round {round_num}"
+        )  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"  Price: {prev_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        logger.debug(f"  Net Demand: {net_demand:+.2f}")  # pylint: disable=logging-fstring-interpolation
-        logger.debug(f"  Total Volume: {total_volume:.2f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Net Demand: {net_demand:+.2f}"
+        )  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Total Volume: {total_volume:.2f}"
+        )  # pylint: disable=logging-fstring-interpolation
         if orders:
-            logger.debug(f"  Orders ({len(orders)}):")  # pylint: disable=logging-fstring-interpolation
+            logger.debug(
+                f"  Orders ({len(orders)}):"
+            )  # pylint: disable=logging-fstring-interpolation
             for o in orders:
                 logger.debug(
                     f"    {o['investor']:20s} [{o['strategy']:12s}]: "
@@ -304,7 +312,9 @@ class BaseLLMInvestor(GeneralPlayer):
             except (json.JSONDecodeError, ValueError, KeyError) as e:
                 last_error = e
                 if attempt < max_retries - 1:
-                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")  # pylint: disable=logging-fstring-interpolation
+                    logger.debug(
+                        f"[{self.identity}] LLM parse failed, retrying..."
+                    )  # pylint: disable=logging-fstring-interpolation
 
         # If LLM failed after all retries, skip trading this round (hold)
         if decision is None:
@@ -413,30 +423,30 @@ class BaseLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMMomentumInvestor(BaseLLMInvestor):
-    """Hybrid rule+LLM momentum investor following trend signals."""
+    """Hybrid rule+LLM MomentumInvestor: following trend signals. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class RuleLLMContrarianInvestor(BaseLLMInvestor):
-    """Hybrid rule+LLM contrarian investor betting against the crowd."""
+    """Hybrid rule+LLM ContrarianInvestor: betting against the crowd. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class RuleLLMRiskAverseInvestor(BaseLLMInvestor):
-    """Hybrid rule+LLM risk-averse investor managing volatility."""
+    """Hybrid rule+LLM RiskAverseInvestor: managing volatility. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class RuleLLMAggressiveInvestor(BaseLLMInvestor):
-    """Hybrid rule+LLM aggressive investor with acceleration bonus."""
+    """Hybrid rule+LLM AggressiveInvestor: acceleration bonus momentum. Theory: simulation-bases.md §4.5."""
 
     pass
 
 
 class RuleLLMNoiseTrader(BaseLLMInvestor):
-    """Hybrid rule+LLM noise trader making random decisions."""
+    """Hybrid rule+LLM NoiseTrader: random uninformed decisions. Theory: simulation-bases.md §4.4."""
 
     pass

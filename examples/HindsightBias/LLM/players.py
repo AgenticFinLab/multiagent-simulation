@@ -5,7 +5,8 @@ LLM-driven agents for the HindsightBias simulation using LangChainAPIInference.
 
 import logging
 
-from lmbase.inference import LangChainAPIInference, InferInput
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 
 from masim.player.base import Action
 from masim.player.general import GeneralPlayer
@@ -53,8 +54,8 @@ class LLMInvestor(GeneralPlayer):
     async def decide(self) -> dict:
         llm_cfg = self.config.extras.get("llm", {})
         llm = LangChainAPIInference(
-            lm_name=llm_cfg["model"],
-            generation_config={"temperature": llm_cfg.get("temperature", 0.3)},
+            lm_name=llm_cfg["lm_name"],
+            generation_config=llm_cfg.get("generation_config", {}),
         )
         price = self.state.custom_state.get("price", 0)
         fundamental = self.state.custom_state.get("fundamental", 0)
@@ -111,31 +112,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMHindsightOverconfident(LLMInvestor):
-    """LLM-driven HindsightOverconfident: excessive confidence from hindsight reasoning."""
+    """LLM-driven HindsightOverconfident: excessive confidence from hindsight reasoning. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = LLM_HINDSIGHTOVERCONFIDENT_PROMPT
 
 
 class LLMOutcomeLearner(LLMInvestor):
-    """LLM-driven OutcomeLearner: judges decisions by outcomes, not process."""
+    """LLM-driven OutcomeLearner: judges decisions by outcomes, not process. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = LLM_OUTCOMELEARNER_PROMPT
 
 
 class LLMProcessEvaluator(LLMInvestor):
-    """LLM-driven ProcessEvaluator: evaluates decisions by process quality."""
+    """LLM-driven ProcessEvaluator: evaluates decisions by process quality. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = LLM_PROCESSEVALUATOR_PROMPT
 
 
 class LLMContrarianSkeptic(LLMInvestor):
-    """LLM-driven ContrarianSkeptic: distrusts post-hoc narratives, takes contrarian positions."""
+    """LLM-driven ContrarianSkeptic: distrusts post-hoc narratives, takes contrarian positions. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = LLM_CONTRARIANSKEPTIC_PROMPT
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven NoiseTrader: random trader providing baseline liquidity."""
+    """LLM-driven NoiseTrader: random trader providing baseline liquidity. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = LLM_NOISETRADER_PROMPT
 

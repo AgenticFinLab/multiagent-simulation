@@ -112,7 +112,13 @@ class Market(GeneralPlayer):
 
 
 class RetailCoordinated(GeneralPlayer):
-    """Retail trader coordinating via social media: buys and holds aggressively."""
+    """
+    Theory: simulation-bases.md §4.1 — RetailCoordinated
+
+    Theoretical basis: Social media retail coordination (Lyocsa et al., 2022).
+    Retail trader coordinating via social media: buys and holds aggressively.
+    See simulation-bases.md §4.1 for mathematical model.
+    """
 
     async def perceive(self, observation, prev_result=None) -> None:
         self.state.custom_state["round"] = observation.round
@@ -157,7 +163,13 @@ class RetailCoordinated(GeneralPlayer):
 
 
 class ShortSellerHF(GeneralPlayer):
-    """Heavily short hedge fund forced to cover when price rises above threshold."""
+    """
+    Theory: simulation-bases.md §4.2 — ShortSellerHF
+
+    Theoretical basis: Short sale constraints (Jones & Lamont, 2002).
+    Heavily short hedge fund forced to cover when price rises above threshold.
+    See simulation-bases.md §4.2 for mathematical model.
+    """
 
     async def perceive(self, observation, prev_result=None) -> None:
         self.state.custom_state["round"] = observation.round
@@ -202,7 +214,13 @@ class ShortSellerHF(GeneralPlayer):
 
 
 class MarketMakerGamma(GeneralPlayer):
-    """Market maker delta-hedging options exposure: buys more when price rises."""
+    """
+    Theory: simulation-bases.md §4.3 — MarketMakerGamma
+
+    Theoretical basis: Gamma squeeze dynamics (Jarrow & Li, 2021).
+    Market maker delta-hedging options exposure: buys more when price rises.
+    See simulation-bases.md §4.3 for mathematical model.
+    """
 
     async def perceive(self, observation, prev_result=None) -> None:
         self.state.custom_state["round"] = observation.round
@@ -249,7 +267,13 @@ class MarketMakerGamma(GeneralPlayer):
 
 
 class InstitutionalValue(GeneralPlayer):
-    """Fundamental value investor: sells aggressively when price is extremely overvalued."""
+    """
+    Theory: simulation-bases.md §4.4 — InstitutionalValue
+
+    Theoretical basis: Fundamental valuation (Shleifer & Vishny, 1997).
+    Fundamental value investor: sells aggressively when price is extremely overvalued.
+    See simulation-bases.md §4.4 for mathematical model.
+    """
 
     async def perceive(self, observation, prev_result=None) -> None:
         self.state.custom_state["round"] = observation.round
@@ -294,7 +318,13 @@ class InstitutionalValue(GeneralPlayer):
 
 
 class MomentumRetail(GeneralPlayer):
-    """FOMO retail trader: buys when price is rising above FOMO threshold."""
+    """
+    Theory: simulation-bases.md §4.5 — MomentumRetail
+
+    Theoretical basis: FOMO and momentum trading (Barber & Odean, 2008).
+    FOMO retail trader: buys when price is rising above FOMO threshold.
+    See simulation-bases.md §4.5 for mathematical model.
+    """
 
     async def perceive(self, observation, prev_result=None) -> None:
         self.state.custom_state["round"] = observation.round

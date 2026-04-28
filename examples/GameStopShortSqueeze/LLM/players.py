@@ -7,9 +7,11 @@ Design:
 - Investors: LLM-driven with personas from prompts.py
 """
 
+import importlib
 import logging
 
-from lmbase.inference import LangChainAPIInference, InferInput
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 
 from masim.player.base import Action
 from masim.player.general import GeneralPlayer
@@ -18,6 +20,13 @@ from examples.GameStopShortSqueeze.Rule.players import Market  # noqa: F401
 from examples.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("GameStopShortSqueeze.LLM")
+
+
+def load_prompt(prompt_path: str) -> str:
+    """Load a prompt constant from 'module:VAR' path."""
+    module_path, var_name = prompt_path.rsplit(":", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, var_name)
 
 
 class LLMInvestor(GeneralPlayer):
@@ -42,12 +51,12 @@ class LLMInvestor(GeneralPlayer):
         self.state.custom_state["position"] = extras.get("initial_position", 0)
         llm_cfg = extras.get("llm", {})
         self._llm_params = {
-            "model": llm_cfg["model"],
-            "temperature": llm_cfg.get("temperature", 0.3),
+            "lm_name": llm_cfg["lm_name"],
+            "generation_config": llm_cfg["generation_config"],
         }
         self._llm_client = LangChainAPIInference(
-            lm_name=self._llm_params["model"],
-            generation_config={"temperature": self._llm_params["temperature"]},
+            lm_name=self._llm_params["lm_name"],
+            generation_config=self._llm_params["generation_config"],
         )
 
     def __getstate__(self):
@@ -60,13 +69,12 @@ class LLMInvestor(GeneralPlayer):
         params = self.__dict__.get("_llm_params", {})
         if params:
             self._llm_client = LangChainAPIInference(
-                lm_name=params["model"],
-                generation_config={"temperature": params.get("temperature", 0.3)},
+                lm_name=params["lm_name"],
+                generation_config=params["generation_config"],
             )
 
     async def decide(self):
         from examples.GameStopShortSqueeze.LLM.prompts import LLM_USER_TEMPLATE
-        from masim.utils.prompt_loader import load_prompt
 
         price = self.state.custom_state.get("price", 0.0)
         fundamental = self.state.custom_state.get("fundamental", 0.0)
@@ -123,7 +131,7 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMRetailCoordinated(LLMInvestor):
-    """LLM-driven retail coordinated buyer."""
+    """LLM-driven retail coordinated buyer. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.GameStopShortSqueeze.LLM.prompts:LLM_RETAIL_COORDINATED_SYS"
@@ -131,7 +139,7 @@ class LLMRetailCoordinated(LLMInvestor):
 
 
 class LLMShortSellerHF(LLMInvestor):
-    """LLM-driven short seller hedge fund."""
+    """LLM-driven short seller hedge fund. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.GameStopShortSqueeze.LLM.prompts:LLM_SHORT_SELLER_HF_SYS"
@@ -139,7 +147,7 @@ class LLMShortSellerHF(LLMInvestor):
 
 
 class LLMMarketMakerGamma(LLMInvestor):
-    """LLM-driven gamma-hedging market maker."""
+    """LLM-driven gamma-hedging market maker. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.GameStopShortSqueeze.LLM.prompts:LLM_MARKET_MAKER_GAMMA_SYS"
@@ -147,7 +155,7 @@ class LLMMarketMakerGamma(LLMInvestor):
 
 
 class LLMInstitutionalValue(LLMInvestor):
-    """LLM-driven institutional value investor."""
+    """LLM-driven institutional value investor. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.GameStopShortSqueeze.LLM.prompts:LLM_INSTITUTIONAL_VALUE_SYS"
@@ -155,7 +163,7 @@ class LLMInstitutionalValue(LLMInvestor):
 
 
 class LLMMomentumRetail(LLMInvestor):
-    """LLM-driven FOMO momentum retail trader."""
+    """LLM-driven FOMO momentum retail trader. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = (
         "examples.GameStopShortSqueeze.LLM.prompts:LLM_MOMENTUM_RETAIL_SYS"

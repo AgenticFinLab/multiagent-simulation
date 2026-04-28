@@ -155,7 +155,7 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMNewEconomyEvangelist(RuleLLMInvestor):
-    """RuleLLM-driven new economy evangelist."""
+    """RuleLLM-driven new economy evangelist — narrative rules embedded. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.DotComBubble.RuleLLM.prompts:RULELLM_NEW_ECONOMY_EVANGELIST_SYS"
@@ -163,7 +163,7 @@ class RuleLLMNewEconomyEvangelist(RuleLLMInvestor):
 
 
 class RuleLLMIPOFlipper(RuleLLMInvestor):
-    """RuleLLM-driven IPO flipper."""
+    """RuleLLM-driven IPO flipper — flip threshold rules embedded. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.DotComBubble.RuleLLM.prompts:RULELLM_IPO_FLIPPER_SYS"
@@ -171,7 +171,7 @@ class RuleLLMIPOFlipper(RuleLLMInvestor):
 
 
 class RuleLLMMomentumFollower(RuleLLMInvestor):
-    """RuleLLM-driven momentum follower."""
+    """RuleLLM-driven momentum follower — momentum threshold rules embedded. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.DotComBubble.RuleLLM.prompts:RULELLM_MOMENTUM_FOLLOWER_SYS"
@@ -179,7 +179,7 @@ class RuleLLMMomentumFollower(RuleLLMInvestor):
 
 
 class RuleLLMSkepticalValueInvestor(RuleLLMInvestor):
-    """RuleLLM-driven skeptical value investor."""
+    """RuleLLM-driven skeptical value investor — value threshold rules embedded. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.DotComBubble.RuleLLM.prompts:RULELLM_SKEPTICAL_VALUE_INVESTOR_SYS"
@@ -187,7 +187,7 @@ class RuleLLMSkepticalValueInvestor(RuleLLMInvestor):
 
 
 class RuleLLMShortSeller(RuleLLMInvestor):
-    """RuleLLM-driven short seller."""
+    """RuleLLM-driven short seller — short/cover threshold rules embedded. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = (
         "examples.DotComBubble.RuleLLM.prompts:RULELLM_SHORT_SELLER_SYS"

@@ -135,10 +135,11 @@ class Market(GeneralPlayer):
 
 class GainFrameFollower(GeneralPlayer):
     """
-    Overweights gains-framed information, becomes risk-averse when returns are presented as gains.
+    Theory: simulation-bases.md §4.1 — GainFrameFollower
 
-    Theoretical Basis: Gain frame risk aversion (Tversky & Kahneman, 1981)
-    Market Role: destabilizing
+    Theoretical basis: Gain frame risk aversion (Tversky & Kahneman, 1981).
+    Overweights gains-framed information; becomes risk-averse when returns are presented as gains.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def perceive(
@@ -218,10 +219,11 @@ class GainFrameFollower(GeneralPlayer):
 
 class LossFrameReactor(GeneralPlayer):
     """
-    Overweights loss-framed information, becomes risk-seeking when presented with potential losses.
+    Theory: simulation-bases.md §4.2 — LossFrameReactor
 
-    Theoretical Basis: Loss frame risk seeking (Tversky & Kahneman, 1981)
-    Market Role: destabilizing
+    Theoretical basis: Loss frame risk seeking (Tversky & Kahneman, 1981).
+    Overweights loss-framed information; becomes risk-seeking when presented with potential losses.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def perceive(
@@ -301,10 +303,11 @@ class LossFrameReactor(GeneralPlayer):
 
 class FrameInvariantTrader(GeneralPlayer):
     """
-    Evaluates information by substance regardless of framing, computes equivalent outcomes.
+    Theory: simulation-bases.md §4.3 — FrameInvariantTrader
 
-    Theoretical Basis: Frame-invariant rationality (Levin et al., 1998 baseline)
-    Market Role: stabilizing
+    Theoretical basis: Frame-invariant rationality (Levin et al., 1998 baseline).
+    Evaluates information by substance regardless of framing; computes equivalent outcomes.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def perceive(
@@ -384,10 +387,11 @@ class FrameInvariantTrader(GeneralPlayer):
 
 class ArbitrageFramer(GeneralPlayer):
     """
-    Exploits framing-induced mispricing by recognizing when same data drives different prices.
+    Theory: simulation-bases.md §4.4 — ArbitrageFramer
 
-    Theoretical Basis: Framing arbitrage (Kuhberger, 1998)
-    Market Role: stabilizing
+    Theoretical basis: Framing arbitrage (Kuhberger, 1998).
+    Exploits framing-induced mispricing by recognizing when same data drives different prices.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def perceive(
@@ -467,10 +471,11 @@ class ArbitrageFramer(GeneralPlayer):
 
 class NoiseTrader(GeneralPlayer):
     """
-    Random uninformed trader providing baseline liquidity.
+    Theory: simulation-bases.md §4.5 — NoiseTrader
 
-    Theoretical Basis: Noise trader model (Black, 1986)
-    Market Role: neutral
+    Theoretical basis: Noise trader model (Black, 1986).
+    Random uninformed trader providing baseline liquidity.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def perceive(

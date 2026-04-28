@@ -145,7 +145,7 @@ class Market(GeneralPlayer):
                         "price": order["bid_price"],
                         "quantity": order["quantity"],
                         "strategy": order["strategy"],
-                        "provides_liquidity": order.get("provides_liquidity", False),
+                        "provides_liquidity": order["provides_liquidity"],
                     }
                 )
         self.state.custom_state["orders"] = orders
@@ -742,7 +742,7 @@ class RagLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
-            "provides_liquidity": decision.get("provides_liquidity", False),
+            "provides_liquidity": decision["provides_liquidity"],
         }
 
         return {
@@ -764,31 +764,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMHighFrequencyTrader(RagLLMInvestor):
-    """RAG-augmented: HFT momentum rules + LLM + retrieved knowledge."""
+    """RAG-augmented HFT — momentum rules + LLM rapid reasoning + retrieved knowledge. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class RagLLMMarketMaker(RagLLMInvestor):
-    """RAG-augmented: Liquidity provision + withdrawal rules + LLM + retrieved knowledge."""
+    """RAG-augmented market maker — liquidity provision/withdrawal rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class RagLLMAlgorithmicTrader(RagLLMInvestor):
-    """RAG-augmented: Trend-following algorithm rules + LLM + retrieved knowledge."""
+    """RAG-augmented algorithmic trader — trend-following rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class RagLLMStopLossTrader(RagLLMInvestor):
-    """RAG-augmented: Stop-loss cascade rules + LLM + retrieved knowledge."""
+    """RAG-augmented stop-loss trader — cascade rules + LLM risk management + retrieved knowledge. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class RagLLMFundamentalTrader(RagLLMInvestor):
-    """RAG-augmented: Value deviation rules + LLM + retrieved knowledge."""
+    """RAG-augmented fundamental trader — value deviation rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.5."""
 
     pass
 

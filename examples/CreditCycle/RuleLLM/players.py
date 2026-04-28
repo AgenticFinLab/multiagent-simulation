@@ -155,7 +155,7 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMProCyclicalLender(RuleLLMInvestor):
-    """RuleLLM-driven pro-cyclical lender."""
+    """RuleLLM-driven pro-cyclical lender — expands credit in booms, tightens in busts. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.CreditCycle.RuleLLM.prompts:RULELLM_PRO_CYCLICAL_LENDER_SYS"
@@ -163,7 +163,7 @@ class RuleLLMProCyclicalLender(RuleLLMInvestor):
 
 
 class RuleLLMMinskyBorrower(RuleLLMInvestor):
-    """RuleLLM-driven Minsky borrower."""
+    """RuleLLM-driven Minsky borrower — accumulates leverage during stability, Ponzi phase. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.CreditCycle.RuleLLM.prompts:RULELLM_MINSKY_BORROWER_SYS"
@@ -171,7 +171,7 @@ class RuleLLMMinskyBorrower(RuleLLMInvestor):
 
 
 class RuleLLMCounterCyclicalLender(RuleLLMInvestor):
-    """RuleLLM-driven counter-cyclical lender."""
+    """RuleLLM-driven counter-cyclical lender — reserves in booms, liquidity in busts. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.CreditCycle.RuleLLM.prompts:RULELLM_COUNTER_CYCLICAL_LENDER_SYS"
@@ -179,7 +179,7 @@ class RuleLLMCounterCyclicalLender(RuleLLMInvestor):
 
 
 class RuleLLMValueInvestor(RuleLLMInvestor):
-    """RuleLLM-driven value investor."""
+    """RuleLLM-driven value investor — fundamental-anchored credit buyer at deep discount. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.CreditCycle.RuleLLM.prompts:RULELLM_VALUE_INVESTOR_SYS"
@@ -187,7 +187,7 @@ class RuleLLMValueInvestor(RuleLLMInvestor):
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """RuleLLM-driven noise trader."""
+    """RuleLLM-driven noise trader — random uninformed liquidity provider. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = (
         "examples.CreditCycle.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"

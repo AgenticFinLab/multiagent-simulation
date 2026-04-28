@@ -1,70 +1,42 @@
-# DispositionEffect LLM Analysis Methodology
+# DispositionEffect LLM Variant — analysis.md
 
-## Overview
+## §1 Metrics and Functions
 
-This document describes the evaluation metrics for the **LLM-based disposition effect** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
+| Metric                              | Function                                                                  | analysis-bases.md Ref |
+|-------------------------------------|---------------------------------------------------------------------------|-----------------------|
+| Proportion of Gains Realized (PGR)  | `proportion_of_gains_realized(trades, price_history, purchase_prices)`    | §2.1                  |
+| Proportion of Losses Realized (PLR) | `proportion_of_losses_realized(trades, price_history, purchase_prices)`   | §2.2                  |
+| Disposition Coefficient (DC)        | `disposition_coefficient(pgr, plr)`                                       | §2.3                  |
+| PGR/PLR Ratio                       | `pgr_plr_ratio(pgr, plr)`                                                 | §2.4                  |
+| Holding Period Asymmetry (HPA)      | `holding_period_asymmetry(sell_events)`                                   | §2.5                  |
+| Performance Drag Index (PDI)        | `performance_drag_index(disposition_final_wealth, rational_final_wealth)` | §2.6                  |
+| Tax Reversal Index (TRI)            | `tax_reversal_index(tax_plr, disposition_plr)`                            | §2.7                  |
 
-For detailed metric definitions and financial theory, see: **`../DispositionEffect/analysis.md`**
+## §2 LLM Variant Notes
 
----
+**Analysis script**: `DispositionEffect/LLM/analysis.py`
 
-## Key Metrics (Summary)
+Key LLM-variant-specific analysis notes:
 
-| Metric                           | Purpose                        |
-|----------------------------------|--------------------------------|
-| PGR (Proportion Gains Realized)  | % of gains sold                |
-| PLR (Proportion Losses Realized) | % of losses sold               |
-| Disposition Coefficient          | DC = PGR - PLR (should be > 0) |
-| Holding Period                   | Gains sold faster than losses  |
+- **PGR/PLR variance**: LLM threshold drift produces higher variance; report mean ± std across multiple runs.
+- **DC emergent strength**: LLM DC may exceed Rule DC (emotional "can't sell" reasoning) or be weaker (LLM capitulates under pressure). Compare to Rule DC ≈ 0.05.
+- **Reasoning trace analysis**: Extract `<analysis>` tags from LLM outputs; count mentions of "purchase price", "loss", "pain" as proxy for anchoring strength.
+- **LLMLossAverse vs. LLMDispositionBiased**: Compare PLR between these two agents; LLMLossAverse should have lower PLR.
+- **Emergent rationality**: Check if LLMRationalInvestor shows non-zero DC (emergent disposition from LLM training data).
 
----
+## §3 Output Files
 
-## LLM-Specific Observable Phenomena
+LLM variant produces the following output files in `outputs/DispositionEffect/LLM/`:
 
-### Emergent Behaviors
+| File                   | Content                                            |
+|------------------------|----------------------------------------------------|
+| `price_history.csv`    | Round-by-round price, return, news shock           |
+| `agent_orders.csv`     | Per-agent action, quantity, strategy, round        |
+| `agent_wealth.csv`     | Per-agent cash, position, wealth by round          |
+| `metrics_summary.json` | PGR, PLR, DC, PGR/PLR ratio, HPA, PDI, TRI         |
+| `llm_responses.jsonl`  | Raw LLM outputs with thinking and parsed decisions |
 
-| Phenomenon              | LLM Behavior                                       | Contrast with Rule-Based           |
-|-------------------------|----------------------------------------------------|------------------------------------|
-| **Loss Language**       | LLM reasoning shows reluctance to "lock in" losses | Rule-based uses value function     |
-| **Gain Eagerness**      | LLM expresses desire to "take profits"             | Rule-based uses fixed threshold    |
-| **Reference Anchoring** | LLM explicitly mentions purchase price             | Rule-based computes mathematically |
+## §4 References
 
-### Round and Agent Scaling
-
-| Scale          | LLM-Specific Observation                      |
-|----------------|-----------------------------------------------|
-| **50 rounds**  | PGR/PLR pattern visible; limited data         |
-| **100 rounds** | Clear disposition coefficient; stable pattern |
-| **5 agents**   | Individual LLM loss aversion dominates        |
-| **10 agents**  | Diverse disposition strength across LLMs      |
-
----
-
-## LLM-Specific Considerations
-
-1. **Loss Aversion**: LLM prompts can include prospect theory framing
-2. **Reference Point**: Clear purchase price as reference
-3. **Natural Disposition**: LLM may exhibit disposition effect naturally
-
----
-
-## Using Centralized Evaluation Module
-
-```python
-from masim.evaluation.finance import (
-    calculate_returns,
-    calculate_strategy_contribution,
-    plot_agent_activity,
-)
-
-# Same analysis as rule-based version
-# PGR/PLR calculated from investor trade records
-prices = {...}
-investor_trades = {...}  # Track buy/sell relative to entry price
-```
-
----
-
-## References
-
-See `../DispositionEffect/analysis.md` for complete academic references.
+All metric definitions with DOI citations: `analysis-bases.md §2`.  
+Investor theory references: `simulation-bases.md §4.1–§4.5`.

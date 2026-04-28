@@ -154,31 +154,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMLossAverseInvestor(LLMInvestor):
-    """LLM-driven LossAverseInvestor."""
+    """LLM-driven LossAverseInvestor. Theory: simulation-bases.md §4.1"""
 
     _system_prompt = LLM_LOSS_AVERSE_PROMPT
 
 
 class LLMBreakEvenTrader(LLMInvestor):
-    """LLM-driven BreakEvenTrader."""
+    """LLM-driven BreakEvenTrader. Theory: simulation-bases.md §4.2"""
 
     _system_prompt = LLM_BREAK_EVEN_PROMPT
 
 
 class LLMRationalTrader(LLMInvestor):
-    """LLM-driven RationalTrader."""
+    """LLM-driven RationalTrader. Theory: simulation-bases.md §4.3"""
 
     _system_prompt = LLM_RATIONAL_PROMPT
 
 
 class LLMMomentumTrader(LLMInvestor):
-    """LLM-driven MomentumTrader."""
+    """LLM-driven MomentumTrader. Theory: simulation-bases.md §4.4"""
 
     _system_prompt = LLM_MOMENTUM_PROMPT
 
 
 class LLMMarketMaker(LLMInvestor):
-    """LLM-driven MarketMaker."""
+    """LLM-driven MarketMaker. Theory: simulation-bases.md §4.5"""
 
     _system_prompt = LLM_MARKET_MAKER_PROMPT
 

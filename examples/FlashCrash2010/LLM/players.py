@@ -82,11 +82,8 @@ class LLMInvestor(GeneralPlayer):
         llm_cfg = extras["llm"]
         self.state.custom_state["llm_params"] = llm_cfg
         self.state.custom_state["llm_client"] = LangChainAPIInference(
-            lm_name=llm_cfg["model"],
-            generation_config={
-                "temperature": llm_cfg.get("temperature", 0.3),
-                "max_tokens": llm_cfg.get("max_tokens", 512),
-            },
+            lm_name=llm_cfg["lm_name"],
+            generation_config=llm_cfg["generation_config"],
         )
 
     def __getstate__(self):
@@ -104,15 +101,12 @@ class LLMInvestor(GeneralPlayer):
             if "llm_params" in custom and "llm_client" not in custom:
                 llm_cfg = custom["llm_params"]
                 custom["llm_client"] = LangChainAPIInference(
-                    lm_name=llm_cfg["model"],
-                    generation_config={
-                        "temperature": llm_cfg.get("temperature", 0.3),
-                        "max_tokens": llm_cfg.get("max_tokens", 512),
-                    },
+                    lm_name=llm_cfg["lm_name"],
+                    generation_config=llm_cfg["generation_config"],
                 )
 
     async def decide(self) -> Dict[str, Any]:
-        market_data = self.state.custom_state.get("market_data", {})
+        market_data = self.state.custom_state["market_data"]
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
@@ -122,17 +116,17 @@ class LLMInvestor(GeneralPlayer):
         system_prompt = load_prompt(llm_cfg["sys_message"])
         user_template = load_prompt(llm_cfg["user_message"])
 
-        price = market_data.get("price", 0.0)
+        price = market_data["price"]
         user_prompt = user_template.format(
             round=round_num,
             price=price,
-            prev_price=market_data.get("prev_price", price),
-            return_pct=market_data.get("return_pct", 0.0),
-            fundamental=market_data.get("fundamental", price),
-            deviation=market_data.get("deviation", 0.0) * 100,
-            spread=market_data.get("spread", 0.0),
-            depth=market_data.get("depth", 0.0),
-            volatility=market_data.get("volatility", 0.0),
+            prev_price=market_data["prev_price"],
+            return_pct=market_data["return_pct"],
+            fundamental=market_data["fundamental"],
+            deviation=market_data["deviation"] * 100,
+            spread=market_data["spread"],
+            depth=market_data["depth"],
+            volatility=market_data["volatility"],
             cash=cash,
             position=position,
             portfolio_value=cash + position * price,
@@ -146,7 +140,7 @@ class LLMInvestor(GeneralPlayer):
                 )
                 decision = parse_llm_response_with_thinking(output.outputs[0].response)
                 break
-            except Exception:  # pylint: disable=broad-except
+            except Exception:
                 decision = None
 
         if decision is None:
@@ -157,8 +151,8 @@ class LLMInvestor(GeneralPlayer):
                 "analysis": "",
             }
 
-        bid_price = float(decision.get("bid_price", price))
-        quantity = float(decision.get("quantity", 0))
+        bid_price = float(decision["bid_price"])
+        quantity = float(decision["quantity"])
 
         if quantity > 0:
             max_buy = cash / bid_price if bid_price > 0 else 0
@@ -179,8 +173,8 @@ class LLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": str(decision.get("reasoning", ""))[:120],
-            "analysis": str(decision.get("analysis", "")),
+            "reasoning": str(decision["reasoning"])[:120],
+            "analysis": str(decision["analysis"]),
             "agent_type": "llm",
             "provides_liquidity": False,
         }
@@ -198,31 +192,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMHFTMarketMaker(LLMInvestor):
-    """LLM-driven HFT market maker."""
+    """LLM-driven HFT market maker — liquidity withdrawal under stress via LLM reasoning. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = "examples.FlashCrash2010.LLM.prompts:LLM_HFT_MARKET_MAKER_SYS"
 
 
 class LLMMomentumChaser(LLMInvestor):
-    """LLM-driven momentum chaser."""
+    """LLM-driven momentum chaser — trend amplification via LLM systematic reasoning. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = "examples.FlashCrash2010.LLM.prompts:LLM_MOMENTUM_CHASER_SYS"
 
 
 class LLMFundamentalTrader(LLMInvestor):
-    """LLM-driven fundamental trader."""
+    """LLM-driven fundamental trader — value-based stabilization via LLM analytical reasoning. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = "examples.FlashCrash2010.LLM.prompts:LLM_FUNDAMENTAL_SYS"
 
 
 class LLMStopLossTrader(LLMInvestor):
-    """LLM-driven stop-loss trader."""
+    """LLM-driven stop-loss trader — cascade selling via LLM risk management reasoning. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = "examples.FlashCrash2010.LLM.prompts:LLM_STOP_LOSS_SYS"
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven noise trader."""
+    """LLM-driven noise trader — random background activity via LLM reasoning. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.FlashCrash2010.LLM.prompts:LLM_NOISE_TRADER_SYS"
 

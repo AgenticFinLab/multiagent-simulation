@@ -162,7 +162,7 @@ class RagLLMInvestor(GeneralPlayer):
                     self.state.custom_state["rag_store"] = rag_store
                     self.state.custom_state["rag_cfg"] = resolved_rag
                     return
-                except Exception as exc:  # pylint: disable=broad-except
+                except Exception as exc:
                     logger.warning(
                         "[%s] Local index load failed: %s", self.identity, exc
                     )
@@ -187,7 +187,7 @@ class RagLLMInvestor(GeneralPlayer):
                         self.state.custom_state["rag_store"] = rag_store
                         self.state.custom_state["rag_cfg"] = resolved_rag
                         return
-                    except Exception as exc:  # pylint: disable=broad-except
+                    except Exception as exc:
                         logger.warning(
                             "[%s] Shared copy failed: %s", self.identity, exc
                         )
@@ -211,7 +211,7 @@ class RagLLMInvestor(GeneralPlayer):
                     shutil.copytree(src, dst, dirs_exist_ok=True)
                 else:
                     shutil.copy2(src, dst)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             logger.warning("[%s] Copy to shared failed: %s", self.identity, exc)
 
         self.state.custom_state["rag_store"] = rag_store
@@ -266,7 +266,7 @@ class RagLLMInvestor(GeneralPlayer):
                 if os.path.isdir(local_rag_dir):
                     try:
                         rag_store.load(local_rag_dir)
-                    except Exception as exc:  # pylint: disable=broad-except
+                    except Exception as exc:
                         logger.warning("RAG store reload failed: %s", exc)
                 custom["rag_store"] = rag_store
 
@@ -340,7 +340,7 @@ class RagLLMInvestor(GeneralPlayer):
                 elif action_str == "sell":
                     quantity = min(quantity, max(position, 0))
                 break
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
                 if attempt == 2:
                     action_str, quantity = "hold", 0
@@ -366,13 +366,13 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMCarryTrader(RagLLMInvestor):
-    """RAG-augmented carry trader."""
+    """RAG-augmented carry trader — borrows low-yield, invests high-yield. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = "examples.CarryTradeUnwind.Rag.prompts:RAG_CARRY_TRADER_SYS"
 
 
 class RagLLMLeveragedCarryFund(RagLLMInvestor):
-    """RAG-augmented leveraged carry fund."""
+    """RAG-augmented leveraged carry fund — forced rapid unwind on margin calls. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.CarryTradeUnwind.Rag.prompts:RAG_LEVERAGED_CARRY_FUND_SYS"
@@ -380,7 +380,7 @@ class RagLLMLeveragedCarryFund(RagLLMInvestor):
 
 
 class RagLLMFundingCurrencyBuyer(RagLLMInvestor):
-    """RAG-augmented funding currency buyer."""
+    """RAG-augmented funding currency buyer — safe-haven counter-cyclical flow. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.CarryTradeUnwind.Rag.prompts:RAG_FUNDING_CURRENCY_BUYER_SYS"
@@ -388,7 +388,7 @@ class RagLLMFundingCurrencyBuyer(RagLLMInvestor):
 
 
 class RagLLMHedgedCarryTrader(RagLLMInvestor):
-    """RAG-augmented hedged carry trader."""
+    """RAG-augmented hedged carry trader — volatility-adjusted carry positions. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.CarryTradeUnwind.Rag.prompts:RAG_HEDGED_CARRY_TRADER_SYS"
@@ -396,7 +396,7 @@ class RagLLMHedgedCarryTrader(RagLLMInvestor):
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented noise trader."""
+    """RAG-augmented noise trader — random uninformed liquidity provider. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.CarryTradeUnwind.Rag.prompts:RAG_NOISE_TRADER_SYS"
 

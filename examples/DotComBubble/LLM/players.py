@@ -155,7 +155,7 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMNewEconomyEvangelist(LLMInvestor):
-    """LLM-driven new economy evangelist."""
+    """LLM-driven new economy evangelist — ignores valuation, buys internet narrative. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.DotComBubble.LLM.prompts:LLM_NEW_ECONOMY_EVANGELIST_SYS"
@@ -163,19 +163,19 @@ class LLMNewEconomyEvangelist(LLMInvestor):
 
 
 class LLMIPOFlipper(LLMInvestor):
-    """LLM-driven IPO flipper."""
+    """LLM-driven IPO flipper — buys at dip, sells on pop for short-term profit. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = "examples.DotComBubble.LLM.prompts:LLM_IPO_FLIPPER_SYS"
 
 
 class LLMMomentumFollower(LLMInvestor):
-    """LLM-driven momentum follower."""
+    """LLM-driven momentum follower — amplifies trends, rides bubble. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = "examples.DotComBubble.LLM.prompts:LLM_MOMENTUM_FOLLOWER_SYS"
 
 
 class LLMSkepticalValueInvestor(LLMInvestor):
-    """LLM-driven skeptical value investor."""
+    """LLM-driven skeptical value investor — avoids overvalued tech, waits for crash. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.DotComBubble.LLM.prompts:LLM_SKEPTICAL_VALUE_INVESTOR_SYS"
@@ -183,7 +183,7 @@ class LLMSkepticalValueInvestor(LLMInvestor):
 
 
 class LLMShortSeller(LLMInvestor):
-    """LLM-driven short seller."""
+    """LLM-driven short seller — bets against overvaluation, faces squeeze risk. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.DotComBubble.LLM.prompts:LLM_SHORT_SELLER_SYS"
 

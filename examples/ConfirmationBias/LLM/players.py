@@ -63,8 +63,8 @@ class LLMInvestor(GeneralPlayer):
         self.state.custom_state["llm_client"] = LangChainAPIInference(
             lm_name=llm_cfg["model"],
             generation_config={
-                "temperature": llm_cfg.get("temperature", 0.3),
-                "max_tokens": llm_cfg.get("max_tokens", 512),
+                "temperature": llm_cfg["temperature"],
+                "max_tokens": llm_cfg["max_tokens"],
             },
         )
 
@@ -82,20 +82,20 @@ class LLMInvestor(GeneralPlayer):
             cs["llm_client"] = LangChainAPIInference(
                 lm_name=llm_cfg["model"],
                 generation_config={
-                    "temperature": llm_cfg.get("temperature", 0.3),
-                    "max_tokens": llm_cfg.get("max_tokens", 512),
+                    "temperature": llm_cfg["temperature"],
+                    "max_tokens": llm_cfg["max_tokens"],
                 },
             )
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        fundamental = market_data.get("fundamental", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        fundamental = market_data["fundamental"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         portfolio_value = cash + position * price
-        round_num = self.state.custom_state.get("round", 0)
+        round_num = self.state.custom_state["round"]
 
         system_prompt = load_prompt(self._system_prompt_path)
         user_template = load_prompt(
@@ -119,8 +119,8 @@ class LLMInvestor(GeneralPlayer):
                 result = llm_client.run([infer_input])
                 response = result.outputs[0].response
                 parsed = parse_llm_response_with_thinking(response)
-                action_str = parsed.get("action", "hold")
-                quantity = int(parsed.get("quantity", 0))
+                action_str = parsed["action"]
+                quantity = int(parsed["quantity"])
                 if action_str not in ("buy", "sell", "hold"):
                     action_str = "hold"
                 quantity = max(0, quantity)
@@ -129,7 +129,7 @@ class LLMInvestor(GeneralPlayer):
                 elif action_str == "sell":
                     quantity = min(quantity, max(position, 0))
                 break
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
                 if attempt == 2:
                     action_str, quantity = "hold", 0
@@ -155,13 +155,13 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMBeliefAnchor(LLMInvestor):
-    """LLM-driven belief anchor trader."""
+    """LLM-driven belief anchor — strong prior, selectively filters confirming signals. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = "examples.ConfirmationBias.LLM.prompts:LLM_BELIEF_ANCHOR_SYS"
 
 
 class LLMSelectiveScanner(LLMInvestor):
-    """LLM-driven selective scanner."""
+    """LLM-driven selective scanner — seeks confirming information, ignores contradictions. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.ConfirmationBias.LLM.prompts:LLM_SELECTIVE_SCANNER_SYS"
@@ -169,7 +169,7 @@ class LLMSelectiveScanner(LLMInvestor):
 
 
 class LLMBalancedAnalyst(LLMInvestor):
-    """LLM-driven balanced analyst."""
+    """LLM-driven balanced analyst — Bayesian rational updater, no cognitive bias. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.ConfirmationBias.LLM.prompts:LLM_BALANCED_ANALYST_SYS"
@@ -177,7 +177,7 @@ class LLMBalancedAnalyst(LLMInvestor):
 
 
 class LLMContrarianTrader(LLMInvestor):
-    """LLM-driven contrarian trader."""
+    """LLM-driven contrarian — exploits systematic bias errors of biased traders. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.ConfirmationBias.LLM.prompts:LLM_CONTRARIAN_TRADER_SYS"
@@ -185,7 +185,7 @@ class LLMContrarianTrader(LLMInvestor):
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven noise trader."""
+    """LLM-driven noise trader — random uninformed liquidity provider. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.ConfirmationBias.LLM.prompts:LLM_NOISE_TRADER_SYS"
 

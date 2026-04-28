@@ -149,7 +149,7 @@ class RagLLMInvestor(GeneralPlayer):
                     self.state.custom_state["rag_store"] = rag_store
                     self.state.custom_state["rag_cfg"] = resolved_rag
                     return
-                except Exception as exc:  # pylint: disable=broad-except
+                except Exception as exc:
                     logger.warning(
                         "[%s] Local index load failed: %s", self.identity, exc
                     )
@@ -172,7 +172,7 @@ class RagLLMInvestor(GeneralPlayer):
                         self.state.custom_state["rag_store"] = rag_store
                         self.state.custom_state["rag_cfg"] = resolved_rag
                         return
-                    except Exception as exc:  # pylint: disable=broad-except
+                    except Exception as exc:
                         logger.warning(
                             "[%s] Shared copy failed: %s", self.identity, exc
                         )
@@ -194,7 +194,7 @@ class RagLLMInvestor(GeneralPlayer):
                     shutil.copytree(src, dst, dirs_exist_ok=True)
                 else:
                     shutil.copy2(src, dst)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             logger.warning("[%s] Copy to shared failed: %s", self.identity, exc)
         self.state.custom_state["rag_store"] = rag_store
         self.state.custom_state["rag_cfg"] = resolved_rag
@@ -248,17 +248,17 @@ class RagLLMInvestor(GeneralPlayer):
                 if os.path.isdir(local_rag_dir):
                     try:
                         rag_store.load(local_rag_dir)
-                    except Exception as exc:  # pylint: disable=broad-except
+                    except Exception as exc:
                         logger.warning("RAG store reload failed: %s", exc)
                 custom["rag_store"] = rag_store
 
     def _build_prompt(self, market_data: Dict[str, Any]) -> str:
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        round_num = self.state.custom_state.get("round", 0)
-        price = market_data.get("price", 100.0)
-        fundamental = market_data.get("fundamental", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        round_num = self.state.custom_state["round"]
+        price = market_data["price"]
+        fundamental = market_data["fundamental"]
+        deviation = market_data["deviation"]
         portfolio_value = cash + position * price
         rag_store: Optional[KnowledgeStore] = self.state.custom_state.get("rag_store")
         rag_cfg: Dict[str, Any] = self.state.custom_state.get("rag_cfg", {})
@@ -291,7 +291,7 @@ class RagLLMInvestor(GeneralPlayer):
         )
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
+        market_data = self.state.custom_state["market_data"]
         price = market_data.get("price", 100.0)
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
@@ -305,8 +305,8 @@ class RagLLMInvestor(GeneralPlayer):
                 result = llm_client.run([infer_input])
                 response = result.outputs[0].response
                 parsed = parse_llm_response_with_thinking(response)
-                action_str = parsed.get("action", "hold")
-                quantity = int(parsed.get("quantity", 0))
+                action_str = parsed["action"]
+                quantity = int(parsed["quantity"])
                 if action_str not in ("buy", "sell", "hold"):
                     action_str = "hold"
                 quantity = max(0, quantity)
@@ -315,7 +315,7 @@ class RagLLMInvestor(GeneralPlayer):
                 elif action_str == "sell":
                     quantity = min(quantity, max(position, 0))
                 break
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
                 if attempt == 2:
                     action_str, quantity = "hold", 0
@@ -339,13 +339,13 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMEndowedHolder(RagLLMInvestor):
-    """RAG-augmented endowed holder."""
+    """RAG-augmented endowed holder — ownership premium with historical ownership bias literature. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = "examples.EndowmentEffect.Rag.prompts:RAG_ENDOWED_HOLDER_SYS"
 
 
 class RagLLMStatusQuoSeller(RagLLMInvestor):
-    """RAG-augmented status quo seller."""
+    """RAG-augmented status quo seller — inertia-driven holding with status quo bias literature. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.EndowmentEffect.Rag.prompts:RAG_STATUS_QUO_SELLER_SYS"
@@ -353,7 +353,7 @@ class RagLLMStatusQuoSeller(RagLLMInvestor):
 
 
 class RagLLMRationalArbitrageur(RagLLMInvestor):
-    """RAG-augmented rational arbitrageur."""
+    """RAG-augmented rational arbitrageur — fundamental gap trading with arbitrage limit literature. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.EndowmentEffect.Rag.prompts:RAG_RATIONAL_ARBITRAGEUR_SYS"
@@ -361,13 +361,13 @@ class RagLLMRationalArbitrageur(RagLLMInvestor):
 
 
 class RagLLMNewBuyer(RagLLMInvestor):
-    """RAG-augmented new buyer."""
+    """RAG-augmented new buyer — unbiased fundamental evaluation with buyer behavior literature. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = "examples.EndowmentEffect.Rag.prompts:RAG_NEW_BUYER_SYS"
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented noise trader."""
+    """RAG-augmented noise trader — random uninformed trading with noise trading literature. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.EndowmentEffect.Rag.prompts:RAG_NOISE_TRADER_SYS"
 

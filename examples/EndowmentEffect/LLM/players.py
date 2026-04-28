@@ -61,11 +61,8 @@ class LLMInvestor(GeneralPlayer):
         llm_cfg = extras["llm"]
         self.state.custom_state["llm_params"] = llm_cfg
         self.state.custom_state["llm_client"] = LangChainAPIInference(
-            lm_name=llm_cfg["model"],
-            generation_config={
-                "temperature": llm_cfg.get("temperature", 0.3),
-                "max_tokens": llm_cfg.get("max_tokens", 512),
-            },
+            lm_name=llm_cfg["lm_name"],
+            generation_config=llm_cfg["generation_config"],
         )
 
     def __getstate__(self) -> Dict:
@@ -83,21 +80,18 @@ class LLMInvestor(GeneralPlayer):
             if "llm_params" in custom and "llm_client" not in custom:
                 llm_cfg = custom["llm_params"]
                 custom["llm_client"] = LangChainAPIInference(
-                    lm_name=llm_cfg["model"],
-                    generation_config={
-                        "temperature": llm_cfg.get("temperature", 0.3),
-                        "max_tokens": llm_cfg.get("max_tokens", 512),
-                    },
+                    lm_name=llm_cfg["lm_name"],
+                    generation_config=llm_cfg["generation_config"],
                 )
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        fundamental = market_data.get("fundamental", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        fundamental = market_data["fundamental"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        round_num = self.state.custom_state.get("round", 0)
+        round_num = self.state.custom_state["round"]
         portfolio_value = cash + position * price
         system_prompt = load_prompt(self._system_prompt_path)
         user_template = load_prompt(
@@ -120,8 +114,8 @@ class LLMInvestor(GeneralPlayer):
                 result = llm_client.run([infer_input])
                 response = result.outputs[0].response
                 parsed = parse_llm_response_with_thinking(response)
-                action_str = parsed.get("action", "hold")
-                quantity = int(parsed.get("quantity", 0))
+                action_str = parsed["action"]
+                quantity = int(parsed["quantity"])
                 if action_str not in ("buy", "sell", "hold"):
                     action_str = "hold"
                 quantity = max(0, quantity)
@@ -130,7 +124,7 @@ class LLMInvestor(GeneralPlayer):
                 elif action_str == "sell":
                     quantity = min(quantity, max(position, 0))
                 break
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
                 if attempt == 2:
                     action_str, quantity = "hold", 0
@@ -154,13 +148,13 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMEndowedHolder(LLMInvestor):
-    """LLM attachment-driven endowed holder."""
+    """LLM-driven endowed holder — attachment bias suppresses selling via LLM reasoning. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = "examples.EndowmentEffect.LLM.prompts:LLM_ENDOWED_HOLDER_SYS"
 
 
 class LLMStatusQuoSeller(LLMInvestor):
-    """LLM status-quo-biased seller."""
+    """LLM-driven status-quo-biased seller — inertia and loss aversion modeled via LLM. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.EndowmentEffect.LLM.prompts:LLM_STATUS_QUO_SELLER_SYS"
@@ -168,7 +162,7 @@ class LLMStatusQuoSeller(LLMInvestor):
 
 
 class LLMRationalArbitrageur(LLMInvestor):
-    """LLM rational arbitrageur."""
+    """LLM-driven rational arbitrageur — exploits endowment-bias gap via fundamental analysis. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.EndowmentEffect.LLM.prompts:LLM_RATIONAL_ARBITRAGEUR_SYS"
@@ -176,13 +170,13 @@ class LLMRationalArbitrageur(LLMInvestor):
 
 
 class LLMNewBuyer(LLMInvestor):
-    """LLM unbiased new buyer."""
+    """LLM-driven unbiased new buyer — evaluates assets at market price, no ownership distortion. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = "examples.EndowmentEffect.LLM.prompts:LLM_NEW_BUYER_SYS"
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM noise trader."""
+    """LLM-driven noise trader — random uninformed trades modeled with probabilistic LLM persona. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.EndowmentEffect.LLM.prompts:LLM_NOISE_TRADER_SYS"
 

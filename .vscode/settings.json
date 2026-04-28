@@ -11,5 +11,11 @@
     "python-envs.defaultPackageManager": "ms-python.python:conda",
     "python-envs.pythonProjects": [],
     "trae.tab.enableRename": false,
-    "trae.tab.enableAutoImport": false
+    "trae.tab.enableAutoImport": false,
+    "qoder.agent.autoApprove": true,
+    "qoder.tool.confirmationThreshold": 0,
+    "qoder.agent.autoResumeOnLimit": true,
+    "qoder.tool.autoApprove": true,
+    "qoder.agent.toolLimitBypass": true,
+    "qoder.workspace.trust": true
 }

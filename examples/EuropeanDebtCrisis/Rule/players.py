@@ -48,16 +48,12 @@ class Market(GeneralPlayer):
         extras = self.config.extras
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        buy_volume = sum(
-            o.get("quantity", 0) for o in orders if o.get("action") == "buy"
-        )
-        sell_volume = sum(
-            o.get("quantity", 0) for o in orders if o.get("action") == "sell"
-        )
+        buy_volume = sum(o["quantity"] for o in orders if o.get("action") == "buy")
+        sell_volume = sum(o["quantity"] for o in orders if o.get("action") == "sell")
         net_demand = buy_volume - sell_volume
-        price_impact = float(extras.get("price_impact", 0.0001))
-        mean_reversion = float(extras.get("mean_reversion", 0.02))
-        noise_std = float(extras.get("noise_std", 0.5))
+        price_impact = float(extras["price_impact"])
+        mean_reversion = float(extras["mean_reversion"])
+        noise_std = float(extras["noise_std"])
         noise = random.gauss(0, noise_std)
         new_price = (
             price
@@ -97,8 +93,10 @@ class Market(GeneralPlayer):
 class PeripheryBondSeller(GeneralPlayer):
     """Sells periphery sovereign bonds on risk signals, amplifying yield spreads.
 
-    Theory: De Grauwe (2011) — Self-fulfilling speculation in sovereign bond markets.
-    Effect: DESTABILIZING — sells on negative signals, amplifying price falls.
+    Theory: simulation-bases.md §4.1 — PeripheryBondSeller
+    Theoretical basis: De Grauwe (2011) self-fulfilling speculation; speculative
+    selling on negative signals amplifies price falls in a reflexive crisis loop.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -106,6 +104,7 @@ class PeripheryBondSeller(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = float(extras["initial_cash"])
             self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["market_data"] = {}
             self.state.custom_state["history_buffer"] = HistoryBuffer(
                 folder="EuropeanDebtCrisis/Rule/PeripheryBondSeller", entry_limit=200
             )
@@ -117,14 +116,14 @@ class PeripheryBondSeller(GeneralPlayer):
                     self.state.custom_state["market_data"] = data
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        fundamental = market_data.get("fundamental", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        fundamental = market_data["fundamental"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        sell_threshold = float(extras.get("sell_threshold", -0.03))
+        sell_threshold = float(extras["sell_threshold"])
         action, quantity = "hold", 0
         if deviation < sell_threshold:
             qty = min(600, max(position, 0))
@@ -156,8 +155,10 @@ class PeripheryBondSeller(GeneralPlayer):
 class CreditorPanicker(GeneralPlayer):
     """Withdraws funding from periphery banks on spread widening.
 
-    Theory: Acharya et al. (2014) — Contagion from sovereign to bank credit risk.
-    Effect: DESTABILIZING — amplifies crisis through funding withdrawal.
+    Theory: simulation-bases.md §4.2 — CreditorPanicker
+    Theoretical basis: Acharya et al. (2014) sovereign-bank contagion; funding
+    withdrawal amplifies the crisis by cutting off periphery bank liquidity.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -165,6 +166,7 @@ class CreditorPanicker(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = float(extras["initial_cash"])
             self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["market_data"] = {}
             self.state.custom_state["history_buffer"] = HistoryBuffer(
                 folder="EuropeanDebtCrisis/Rule/CreditorPanicker", entry_limit=200
             )
@@ -176,13 +178,13 @@ class CreditorPanicker(GeneralPlayer):
                     self.state.custom_state["market_data"] = data
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        panic_threshold = float(extras.get("panic_threshold", -0.05))
+        panic_threshold = float(extras["panic_threshold"])
         action, quantity = "hold", 0
         if deviation < panic_threshold:
             qty = min(700, max(position, 0))
@@ -214,8 +216,10 @@ class CreditorPanicker(GeneralPlayer):
 class CoreBondBuyer(GeneralPlayer):
     """Buys core sovereign bonds as flight-to-quality, compressing core yields.
 
-    Theory: De Grauwe & Ji (2012) — Flight-to-safety in eurozone sovereign markets.
-    Effect: NEUTRAL — moves capital from periphery to core, indirectly destabilizing.
+    Theory: simulation-bases.md §4.3 — CoreBondBuyer
+    Theoretical basis: De Grauwe & Ji (2012) flight-to-safety; capital rotation
+    from periphery to core bonds indirectly deepens the periphery crisis.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -223,6 +227,7 @@ class CoreBondBuyer(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = float(extras["initial_cash"])
             self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["market_data"] = {}
             self.state.custom_state["history_buffer"] = HistoryBuffer(
                 folder="EuropeanDebtCrisis/Rule/CoreBondBuyer", entry_limit=200
             )
@@ -234,13 +239,13 @@ class CoreBondBuyer(GeneralPlayer):
                     self.state.custom_state["market_data"] = data
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        flight_threshold = float(extras.get("flight_threshold", -0.04))
+        flight_threshold = float(extras["flight_threshold"])
         action, quantity = "hold", 0
         if deviation < flight_threshold:
             qty = min(400, int(cash / price) if price > 0 else 0)
@@ -272,8 +277,10 @@ class CoreBondBuyer(GeneralPlayer):
 class ECBIntervenor(GeneralPlayer):
     """Provides liquidity support and bond purchases to stabilize spreads.
 
-    Theory: Draghi (2012) — 'Whatever it takes' ECB backstop mechanism.
-    Effect: STRONGLY STABILIZING — primary crisis backstop.
+    Theory: simulation-bases.md §4.4 — ECBIntervenor
+    Theoretical basis: Draghi (2012) 'whatever it takes' backstop mechanism; credible
+    central bank commitment halts self-fulfilling crisis spiral.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -281,6 +288,7 @@ class ECBIntervenor(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = float(extras["initial_cash"])
             self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["market_data"] = {}
             self.state.custom_state["history_buffer"] = HistoryBuffer(
                 folder="EuropeanDebtCrisis/Rule/ECBIntervenor", entry_limit=200
             )
@@ -292,14 +300,14 @@ class ECBIntervenor(GeneralPlayer):
                     self.state.custom_state["market_data"] = data
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        fundamental = market_data.get("fundamental", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        fundamental = market_data["fundamental"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        intervention_threshold = float(extras.get("intervention_threshold", -0.06))
+        intervention_threshold = float(extras["intervention_threshold"])
         action, quantity = "hold", 0
         if deviation < intervention_threshold:
             qty = min(800, int(cash / price) if price > 0 else 0)
@@ -331,8 +339,10 @@ class ECBIntervenor(GeneralPlayer):
 class HedgedFund(GeneralPlayer):
     """Takes relative value positions between core and periphery bonds.
 
-    Theory: Shleifer & Vishny (1997) — Limits to arbitrage in crisis conditions.
-    Effect: NEUTRAL/STABILIZING — exploits spread opportunities.
+    Theory: simulation-bases.md §4.5 — HedgedFund
+    Theoretical basis: Shleifer & Vishny (1997) limits to arbitrage; exploits
+    spread dislocations but constrained by margin calls and fund redemptions.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -340,6 +350,7 @@ class HedgedFund(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = float(extras["initial_cash"])
             self.state.custom_state["position"] = int(extras["initial_position"])
+            self.state.custom_state["market_data"] = {}
             self.state.custom_state["history_buffer"] = HistoryBuffer(
                 folder="EuropeanDebtCrisis/Rule/HedgedFund", entry_limit=200
             )
@@ -351,13 +362,13 @@ class HedgedFund(GeneralPlayer):
                     self.state.custom_state["market_data"] = data
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        entry_threshold = float(extras.get("entry_threshold", 0.05))
+        entry_threshold = float(extras["entry_threshold"])
         action, quantity = "hold", 0
         if deviation < -entry_threshold:
             qty = min(500, int(cash / price) if price > 0 else 0)

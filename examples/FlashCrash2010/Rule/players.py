@@ -93,8 +93,8 @@ class Market(GeneralPlayer):
         mean_reversion = float(extras["mean_reversion"])
         noise_std = float(extras["noise_std"])
 
-        buy_orders = [o for o in orders if o.get("quantity", 0) > 0]
-        sell_orders = [o for o in orders if o.get("quantity", 0) < 0]
+        buy_orders = [o for o in orders if o["quantity"] > 0]
+        sell_orders = [o for o in orders if o["quantity"] < 0]
         total_buy = sum(o["quantity"] for o in buy_orders)
         total_sell = abs(sum(o["quantity"] for o in sell_orders))
         net_flow = total_buy - total_sell
@@ -186,6 +186,12 @@ class HFTMarketMaker(GeneralPlayer):
     """
     HFT market maker with liquidity withdrawal under stress.
 
+    Theory: simulation-bases.md §4.1 — HFTMarketMaker
+    Theoretical basis: Kirilenko et al. (2017) HFT market maker stress response;
+    rapid spread widening and withdrawal when volatility exceeds threshold
+    creates a self-reinforcing liquidity vacuum during the 2010 flash crash.
+    See simulation-bases.md §4.1 for mathematical model.
+
     Parameters from config extras:
         - initial_cash, initial_position, normal_spread, stress_spread,
           inventory_limit, withdrawal_threshold, custom_state_hot_limit, record_path
@@ -224,8 +230,8 @@ class HFTMarketMaker(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", float(extras["initial_cash"]) / 1000)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
 
         withdrawal_threshold = float(extras["withdrawal_threshold"])
         normal_spread = float(extras["normal_spread"])
@@ -295,6 +301,11 @@ class MomentumChaser(GeneralPlayer):
     """
     HFT momentum chaser - trend-following, amplifies moves.
 
+    Theory: simulation-bases.md §4.2 — MomentumChaser
+    Theoretical basis: Positive-feedback trading amplifies directional price
+    moves; velocity threshold determines entry, position size scaled by momentum.
+    See simulation-bases.md §4.2 for mathematical model.
+
     Parameters from config extras:
         - initial_cash, initial_position, lookback_window, entry_threshold,
           position_multiplier, custom_state_hot_limit, record_path
@@ -333,8 +344,8 @@ class MomentumChaser(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
 
         lookback = int(extras["lookback_window"])
         threshold = float(extras["entry_threshold"])
@@ -400,6 +411,11 @@ class FundamentalTrader(GeneralPlayer):
     """
     Value-based fundamental trader - stabilizing force.
 
+    Theory: simulation-bases.md §4.3 — FundamentalTrader
+    Theoretical basis: Shiller (1981) excess volatility; fundamental traders
+    recognize undervaluation and buy aggressively, providing the recovery force.
+    See simulation-bases.md §4.3 for mathematical model.
+
     Parameters from config extras:
         - initial_cash, initial_position, value_trigger, order_size,
           custom_state_hot_limit, record_path
@@ -437,11 +453,9 @@ class FundamentalTrader(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 0.0)
-        fundamental = market_data.get(
-            "fundamental", float(extras.get("fundamental_value", price))
-        )
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        fundamental = market_data["fundamental"]
 
         trigger = float(extras["value_trigger"])
         order_size = int(extras["order_size"])
@@ -499,6 +513,11 @@ class StopLossTrader(GeneralPlayer):
     """
     Trader with stop-loss orders - creates cascade selling.
 
+    Theory: simulation-bases.md §4.4 — StopLossTrader
+    Theoretical basis: Stop-loss cascade mechanism; fixed stop levels trigger
+    correlated market sells that accelerate the crash once momentum begins.
+    See simulation-bases.md §4.4 for mathematical model.
+
     Parameters from config extras:
         - initial_cash, initial_position, stop_percentage, position_size, entry_price,
           custom_state_hot_limit, record_path
@@ -540,8 +559,8 @@ class StopLossTrader(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
 
         stop_level = self.state.custom_state["stop_level"]
         stopped = self.state.custom_state["stopped"]
@@ -591,6 +610,11 @@ class NoiseTrader(GeneralPlayer):
     """
     Uninformed noise trader - random background activity.
 
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+    Theoretical basis: Black (1986) noise trader model; random trading provides
+    background volume and prevents market microstructure from being trivial.
+    See simulation-bases.md §4.5 for mathematical model.
+
     Parameters from config extras:
         - initial_cash, initial_position, trade_probability, min_order, max_order,
           custom_state_hot_limit, record_path
@@ -628,8 +652,8 @@ class NoiseTrader(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
 
         prob = float(extras["trade_probability"])
         min_order = int(extras["min_order"])

@@ -134,10 +134,11 @@ class Market(GeneralPlayer):
 
 class MBSOriginator(GeneralPlayer):
     """
-    Creates mortgage-backed securities with lax screening; originate-to-distribute model.
+    Theory: simulation-bases.md §4.1 — MBSOriginator
 
-    Theoretical Basis: Originate-to-distribute model (Keys et al., 2010)
-    Market Role: destabilizing
+    Theoretical basis: Originate-to-distribute model (Keys et al., 2010).
+    Creates mortgage-backed securities with lax screening; originate-to-distribute model.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def perceive(
@@ -209,10 +210,11 @@ class MBSOriginator(GeneralPlayer):
 
 class RatingAgency(GeneralPlayer):
     """
-    Overrates securities due to issuer-pays model; creates inflated valuations.
+    Theory: simulation-bases.md §4.2 — RatingAgency
 
-    Theoretical Basis: Rating agency conflict of interest (Bolton et al., 2012)
-    Market Role: destabilizing
+    Theoretical basis: Rating agency conflict of interest (Bolton et al., 2012).
+    Overrates securities due to issuer-pays model; creates inflated valuations.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def perceive(
@@ -288,10 +290,11 @@ class RatingAgency(GeneralPlayer):
 
 class LeveragedInvestor(GeneralPlayer):
     """
-    Uses high leverage; forced to sell in downturn (margin call / fire sale).
+    Theory: simulation-bases.md §4.3 — LeveragedInvestor
 
-    Theoretical Basis: Leverage cycle (Adrian & Shin, 2010)
-    Market Role: destabilizing
+    Theoretical basis: Leverage cycle (Adrian & Shin, 2010).
+    Uses high leverage; forced to sell in downturn (margin call / fire sale).
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def perceive(
@@ -365,10 +368,11 @@ class LeveragedInvestor(GeneralPlayer):
 
 class DistressedBuyer(GeneralPlayer):
     """
-    Buys assets at deep discount during panic selling.
+    Theory: simulation-bases.md §4.4 — DistressedBuyer
 
-    Theoretical Basis: Distressed debt investing (Griffin & Xu, 2009)
-    Market Role: stabilizing
+    Theoretical basis: Distressed debt investing (Griffin & Xu, 2009).
+    Buys assets at deep discount during panic selling.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def perceive(
@@ -443,10 +447,11 @@ class DistressedBuyer(GeneralPlayer):
 
 class Regulator(GeneralPlayer):
     """
-    Monitors systemic risk and may intervene during market stress.
+    Theory: simulation-bases.md §4.5 — Regulator
 
-    Theoretical Basis: Macroprudential regulation (Bernanke, 2015)
-    Market Role: stabilizing
+    Theoretical basis: Macroprudential regulation (Bernanke, 2015).
+    Monitors systemic risk and may intervene during market stress.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def perceive(

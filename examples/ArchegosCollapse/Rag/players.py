@@ -430,31 +430,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMConcentratedFund(RagLLMInvestor):
-    """RAG-augmented concentrated fund — TRS-leveraged, margin call driven."""
+    """RAG-augmented concentrated fund — TRS-leveraged, margin call driven. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class RagLLMPrimeBroker1(RagLLMInvestor):
-    """RAG-augmented prime broker 1 — first-mover liquidator."""
+    """RAG-augmented prime broker 1 — first-mover liquidator. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class RagLLMPrimeBroker2(RagLLMInvestor):
-    """RAG-augmented prime broker 2 — delayed liquidator at worse prices."""
+    """RAG-augmented prime broker 2 — delayed liquidator at worse prices. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class RagLLMBlockTradeBuyer(RagLLMInvestor):
-    """RAG-augmented block trade buyer — opportunistic discount buyer."""
+    """RAG-augmented block trade buyer — opportunistic discount buyer. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class RagLLMInformationTrader(RagLLMInvestor):
-    """RAG-augmented information trader — front-runs liquidation cascade."""
+    """RAG-augmented information trader — front-runs liquidation cascade. Theory: simulation-bases.md §4.5."""
 
     pass
 

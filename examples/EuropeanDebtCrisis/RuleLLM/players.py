@@ -62,11 +62,8 @@ class RuleLLMInvestor(GeneralPlayer):
         llm_cfg = extras["llm"]
         self.state.custom_state["llm_params"] = llm_cfg
         self.state.custom_state["llm_client"] = LangChainAPIInference(
-            lm_name=llm_cfg["model"],
-            generation_config={
-                "temperature": llm_cfg.get("temperature", 0.3),
-                "max_tokens": llm_cfg.get("max_tokens", 512),
-            },
+            lm_name=llm_cfg["lm_name"],
+            generation_config=llm_cfg["generation_config"],
         )
 
     def __getstate__(self) -> Dict:
@@ -84,21 +81,18 @@ class RuleLLMInvestor(GeneralPlayer):
             if "llm_params" in custom and "llm_client" not in custom:
                 llm_cfg = custom["llm_params"]
                 custom["llm_client"] = LangChainAPIInference(
-                    lm_name=llm_cfg["model"],
-                    generation_config={
-                        "temperature": llm_cfg.get("temperature", 0.3),
-                        "max_tokens": llm_cfg.get("max_tokens", 512),
-                    },
+                    lm_name=llm_cfg["lm_name"],
+                    generation_config=llm_cfg["generation_config"],
                 )
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        fundamental = market_data.get("fundamental", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        fundamental = market_data["fundamental"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        round_num = self.state.custom_state.get("round", 0)
+        round_num = self.state.custom_state["round"]
         portfolio_value = cash + position * price
         system_prompt = load_prompt(self._system_prompt_path)
         user_template = load_prompt(
@@ -121,8 +115,8 @@ class RuleLLMInvestor(GeneralPlayer):
                 result = llm_client.run([infer_input])
                 response = result.outputs[0].response
                 parsed = parse_llm_response_with_thinking(response)
-                action_str = parsed.get("action", "hold")
-                quantity = int(parsed.get("quantity", 0))
+                action_str = parsed["action"]
+                quantity = int(parsed["quantity"])
                 if action_str not in ("buy", "sell", "hold"):
                     action_str = "hold"
                 quantity = max(0, quantity)
@@ -131,7 +125,7 @@ class RuleLLMInvestor(GeneralPlayer):
                 elif action_str == "sell":
                     quantity = min(quantity, max(position, 0))
                 break
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
                 if attempt == 2:
                     action_str, quantity = "hold", 0
@@ -155,7 +149,7 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMPeripheryBondSeller(RuleLLMInvestor):
-    """RuleLLM periphery bond seller with explicit spread rules."""
+    """RuleLLM periphery bond seller — explicit spread threshold rules with LLM crisis narrative. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_PERIPHERY_BOND_SELLER_SYS"
@@ -163,7 +157,7 @@ class RuleLLMPeripheryBondSeller(RuleLLMInvestor):
 
 
 class RuleLLMCreditorPanicker(RuleLLMInvestor):
-    """RuleLLM creditor panicker with explicit panic threshold rules."""
+    """RuleLLM creditor panicker — explicit panic threshold rules with LLM contagion reasoning. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_CREDITOR_PANICKER_SYS"
@@ -171,7 +165,7 @@ class RuleLLMCreditorPanicker(RuleLLMInvestor):
 
 
 class RuleLLMCoreBondBuyer(RuleLLMInvestor):
-    """RuleLLM flight-to-quality core bond buyer."""
+    """RuleLLM core bond buyer — flight-to-quality rules with LLM safe-haven reasoning. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_CORE_BOND_BUYER_SYS"
@@ -179,7 +173,7 @@ class RuleLLMCoreBondBuyer(RuleLLMInvestor):
 
 
 class RuleLLMECBIntervenor(RuleLLMInvestor):
-    """RuleLLM ECB-style intervenor with backstop rules."""
+    """RuleLLM ECB intervenor — backstop threshold rules with LLM policy reasoning. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_ECB_INTERVENOR_SYS"
@@ -187,7 +181,7 @@ class RuleLLMECBIntervenor(RuleLLMInvestor):
 
 
 class RuleLLMHedgedFund(RuleLLMInvestor):
-    """RuleLLM relative-value hedge fund with spread arbitrage rules."""
+    """RuleLLM hedge fund — spread arbitrage rules with LLM relative-value reasoning. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = (
         "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_HEDGED_FUND_SYS"

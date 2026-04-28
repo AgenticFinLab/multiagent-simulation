@@ -1,81 +1,89 @@
-# DotComBubble Simulation
+# DotComBubble Rule Variant — explain.md
 
-## Overview
+## §1 Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | 1995-2001 Internet bubble - NASDAQ rose 400% then fell 78% |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Dot-com bubble simulation with new economy narrative, IPO frenzy, and valuation disconnect |
-| **Academic Value** | Understanding 1995-2001 internet bubble - nasdaq rose 400% then fell 78% through multi-agent simulation |
+The Rule variant implements DotComBubble with deterministic threshold rules. Bubble dynamics emerge from the interaction of narrative-driven buyers, momentum amplifiers, and value-anchored sellers, all governed by fixed deviation thresholds.
 
-## Theoretical Foundation
+| Aspect             | Detail                                                             |
+|--------------------|--------------------------------------------------------------------|
+| Variant            | Rule                                                               |
+| Simulation         | DotComBubble                                                       |
+| Decision Mechanism | Threshold rules on `deviation = (P − F) / F` and 1-period momentum |
+| Theory Reference   | `simulation-bases.md §4.1–§4.5`                                    |
+| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`                       |
 
-- Shiller (2000): Irrational Exuberance and narrative economics
-- Ofek & Richardson (2003): Internet bubble dynamics
-- Abreu & Brunnermeier (2003): Synchronization risk and bubble persistence
+## §2 Theory → Implementation Mapping
 
-## Agent Descriptions
+### §2.1 NewEconomyEvangelist (simulation-bases.md §4.1)
 
-### NewEconomyEvangelist
-**Theoretical Basis**: Narrative economics (Shiller, 2019)
-**Market Role**: destabilizing
-**Description**: Believes in new paradigm, ignores traditional valuation
-**Parameters**: narrative_strength=0.8, valuation_multiplier=3.0, time_horizon=long
+| Theory Component                    | Implementation                                                             |
+|-------------------------------------|----------------------------------------------------------------------------|
+| Narrative economics (Shiller, 2000) | `if deviation > -0.20: buy order_size (600)` — buys even when overvalued   |
+| Crash capitulation                  | `if deviation < -0.30: sell order_size // 2` — only sells at extreme crash |
 
-### IPOFlipper
-**Theoretical Basis**: IPO underpricing and flipping (Ritter, 1991)
-**Market Role**: destabilizing
-**Description**: Buys IPOs and quickly sells for short-term profit
-**Parameters**: flip_days=3, target_return=0.2, max_ipo_participation=500
+### §2.2 IPOFlipper (simulation-bases.md §4.2)
 
-### MomentumFollower
-**Theoretical Basis**: Momentum trading (Jegadeesh & Titman, 1993)
-**Market Role**: destabilizing
-**Description**: Follows price trends and amplifies moves
-**Parameters**: lookback=20, entry_threshold=0.05, position_multiplier=2000
+| Theory Component                                | Implementation                                                                 |
+|-------------------------------------------------|--------------------------------------------------------------------------------|
+| IPO underpricing flip (Ofek & Richardson, 2003) | `if deviation > flip_threshold (0.05) and position > 0: sell order_size (700)` |
+| Accumulate for flip                             | `if deviation < 0: buy order_size`                                             |
 
-### SkepticalValueInvestor
-**Theoretical Basis**: Value investing (Graham, 1949)
-**Market Role**: stabilizing
-**Description**: Avoids overvalued tech stocks, waits for correction
-**Parameters**: max_pe=30, patience=very_high, cash_reserve=0.5
+### §2.3 MomentumFollower (simulation-bases.md §4.3)
 
-### ShortSeller
-**Theoretical Basis**: Short selling and price discovery
-**Market Role**: stabilizing
-**Description**: Bets against overvalued stocks but faces squeeze risk
-**Parameters**: short_threshold=2.0, max_short_position=2000, squeeze_tolerance=0.3
+| Theory Component                             | Implementation                                           |
+|----------------------------------------------|----------------------------------------------------------|
+| 1-period momentum (Jegadeesh & Titman, 1993) | `m = (P[-1] − P[-2]) / P[-2]`                            |
+| Buy on uptrend                               | `if m > momentum_threshold (0.02): buy order_size (500)` |
+| Sell on downtrend                            | `if m < -momentum_threshold: sell order_size`            |
 
+### §2.4 SkepticalValueInvestor (simulation-bases.md §4.4)
 
-## Usage
+| Theory Component                 | Implementation                               |
+|----------------------------------|----------------------------------------------|
+| Post-crash buying (Graham, 1949) | `if deviation < -0.10: buy order_size (400)` |
+| Exit overvaluation               | `if deviation > 0.20: sell order_size`       |
 
-### Rule Variant
-```bash
-python examples/DotComBubble/Rule/run_dotcombubble.py \
-    -c configs/DotComBubble/Rule/simulation.yml
+### §2.5 ShortSeller (simulation-bases.md §4.5)
+
+| Theory Component                                 | Implementation                                                 |
+|--------------------------------------------------|----------------------------------------------------------------|
+| Short overvaluation (Abreu & Brunnermeier, 2003) | `if deviation > short_threshold (0.15): sell order_size (400)` |
+| Cover on crash                                   | `if deviation < cover_threshold (-0.05): buy order_size`       |
+
+## §3 Market Mechanism
+
+```
+P(t+1) = P(t) + λ·NetDemand(t) + γ·[F(t)−P(t)] + ε(t)
+λ = 0.01, γ = 0.005 (weak mean-reversion — bubble persistence design)
 ```
 
-### LLM Variant
+## §4 Variant-Specific Features
+
+- **Weak mean reversion**: γ = 0.005 allows bubble to persist far beyond fundamental — calibrated to dot-com's multi-year duration.
+- **1-period momentum**: MomentumFollower uses single-period return, not multi-period lookback — simple but effective in trending markets.
+- **NewEconomyEvangelist extreme hold**: Only sells at δ < −0.30 — models behavioral commitment to internet narrative.
+- **IPOFlipper asymmetry**: Buys at any dip but only flips above δ = 0.05 — creates asymmetric buy/sell pressure.
+
+## §5 Config Reference
+
+Config file: `DotComBubble/Rule/config.yaml`
+
+Key extras: `initial_price`, `fundamental_value`, `price_impact`, `mean_reversion`, `noise_std`, `order_size`, `flip_threshold`, `momentum_threshold`, `value_buy_threshold`, `value_sell_threshold`, `short_threshold`, `cover_threshold`.
+
+## §6 Running Instructions
+
 ```bash
-python examples/DotComBubble/LLM/run_dotcombubble_llm.py \
-    -c configs/DotComBubble/LLM/simulation.yml
+python -m examples.DotComBubble.Rule.run_dotcombubble
 ```
 
-### RuleLLM Variant
-```bash
-python examples/DotComBubble/RuleLLM/run_dotcombubble_rulellm.py \
-    -c configs/DotComBubble/RuleLLM/simulation.yml
-```
+## §7 Expected Behavior
 
-### RAG Variant
-```bash
-python examples/DotComBubble/Rag/run_dotcombubble_rag.py \
-    -c configs/DotComBubble/Rag/simulation.yml
-```
+- BAI ≈ 0.5–1.5 (50–150% above fundamental)
+- BD ≈ 20–50 rounds
+- CS ≈ 0.4–0.7 (40–70% crash)
+- SkepticalValueInvestor and ShortSeller outperform during and after crash
+- WDI negative at end (stabilizing agents vindicated by crash)
 
-## References
+## §8 References
 
-- Shiller (2000): Irrational Exuberance and narrative economics
-- Ofek & Richardson (2003): Internet bubble dynamics
-- Abreu & Brunnermeier (2003): Synchronization risk and bubble persistence
+See `simulation-bases.md §2` for full DOI citations.

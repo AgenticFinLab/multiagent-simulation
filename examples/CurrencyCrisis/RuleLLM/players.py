@@ -155,7 +155,7 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMSpeculativeAttacker(RuleLLMInvestor):
-    """RuleLLM-driven speculative attacker."""
+    """RuleLLM-driven speculative attacker — shorts vulnerable currency on reserve weakness. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_SPECULATIVE_ATTACKER_SYS"
@@ -163,7 +163,7 @@ class RuleLLMSpeculativeAttacker(RuleLLMInvestor):
 
 
 class RuleLLMSelfFulfillingTrader(RuleLLMInvestor):
-    """RuleLLM-driven self-fulfilling trader."""
+    """RuleLLM-driven self-fulfilling trader — sells on expectation others will sell. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_SELF_FULFILLING_TRADER_SYS"
@@ -171,7 +171,7 @@ class RuleLLMSelfFulfillingTrader(RuleLLMInvestor):
 
 
 class RuleLLMCentralBankDefender(RuleLLMInvestor):
-    """RuleLLM-driven central bank defender."""
+    """RuleLLM-driven central bank defender — buys domestic currency to defend peg. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_CENTRAL_BANK_DEFENDER_SYS"
@@ -179,7 +179,7 @@ class RuleLLMCentralBankDefender(RuleLLMInvestor):
 
 
 class RuleLLMFundamentalHedger(RuleLLMInvestor):
-    """RuleLLM-driven fundamental hedger."""
+    """RuleLLM-driven fundamental hedger — trades on fundamental value, not speculation. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_FUNDAMENTAL_HEDGER_SYS"
@@ -187,7 +187,7 @@ class RuleLLMFundamentalHedger(RuleLLMInvestor):
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """RuleLLM-driven noise trader."""
+    """RuleLLM-driven noise trader — random uninformed FX liquidity provider. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = (
         "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"

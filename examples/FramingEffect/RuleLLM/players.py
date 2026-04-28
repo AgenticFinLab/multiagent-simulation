@@ -3,10 +3,12 @@
 Rule-embedded LLM-driven agents for the FramingEffect simulation.
 """
 
+import importlib
 import logging
 from typing import Any, Dict, Optional
 
-from lmbase.inference import InferInput, LangChainAPIInference
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
@@ -15,6 +17,13 @@ from examples.FramingEffect.Rule.players import Market
 from examples.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("FramingEffect.RuleLLM")
+
+
+def load_prompt(prompt_path: str) -> str:
+    """Load a prompt constant from 'module:VAR' path."""
+    module_path, var_name = prompt_path.rsplit(":", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, var_name)
 
 
 class RuleLLMInvestor(GeneralPlayer):
@@ -78,7 +87,6 @@ class RuleLLMInvestor(GeneralPlayer):
     async def decide(self) -> dict:
         """Call LLM with embedded rules; parse decision."""
         from examples.FramingEffect.RuleLLM.prompts import RULELLM_USER_TEMPLATE
-        from masim.utils.prompt_loader import load_prompt
 
         system_msg = load_prompt(self._system_prompt_path)
         price = self.state.custom_state["price"]
@@ -151,7 +159,7 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMGainFrameFollower(RuleLLMInvestor):
-    """RuleLLM-driven GainFrameFollower: overweights gains-framed information."""
+    """RuleLLM-driven GainFrameFollower: overweights gains-framed information. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.FramingEffect.RuleLLM.prompts:RULELLM_GAIN_FRAME_FOLLOWER_SYS"
@@ -159,7 +167,7 @@ class RuleLLMGainFrameFollower(RuleLLMInvestor):
 
 
 class RuleLLMLossFrameReactor(RuleLLMInvestor):
-    """RuleLLM-driven LossFrameReactor: overweights loss-framed information."""
+    """RuleLLM-driven LossFrameReactor: overweights loss-framed information. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.FramingEffect.RuleLLM.prompts:RULELLM_LOSS_FRAME_REACTOR_SYS"
@@ -167,7 +175,7 @@ class RuleLLMLossFrameReactor(RuleLLMInvestor):
 
 
 class RuleLLMFrameInvariantTrader(RuleLLMInvestor):
-    """RuleLLM-driven FrameInvariantTrader: evaluates by substance regardless of framing."""
+    """RuleLLM-driven FrameInvariantTrader: evaluates by substance regardless of framing. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.FramingEffect.RuleLLM.prompts:RULELLM_FRAME_INVARIANT_TRADER_SYS"
@@ -175,7 +183,7 @@ class RuleLLMFrameInvariantTrader(RuleLLMInvestor):
 
 
 class RuleLLMArbitrageFramer(RuleLLMInvestor):
-    """RuleLLM-driven ArbitrageFramer: exploits framing-induced mispricing."""
+    """RuleLLM-driven ArbitrageFramer: exploits framing-induced mispricing. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.FramingEffect.RuleLLM.prompts:RULELLM_ARBITRAGE_FRAMER_SYS"
@@ -183,7 +191,7 @@ class RuleLLMArbitrageFramer(RuleLLMInvestor):
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """RuleLLM-driven NoiseTrader: random uninformed trader."""
+    """RuleLLM-driven NoiseTrader: random uninformed trader. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = (
         "examples.FramingEffect.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"

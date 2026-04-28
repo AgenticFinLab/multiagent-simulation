@@ -150,7 +150,7 @@ class RagLLMInvestor(GeneralPlayer):
                     self.state.custom_state["rag_store"] = rag_store
                     self.state.custom_state["rag_cfg"] = resolved_rag
                     return
-                except Exception as exc:  # pylint: disable=broad-except
+                except Exception as exc:
                     logger.warning(
                         "[%s] Local index load failed: %s", self.identity, exc
                     )
@@ -173,7 +173,7 @@ class RagLLMInvestor(GeneralPlayer):
                         self.state.custom_state["rag_store"] = rag_store
                         self.state.custom_state["rag_cfg"] = resolved_rag
                         return
-                    except Exception as exc:  # pylint: disable=broad-except
+                    except Exception as exc:
                         logger.warning(
                             "[%s] Shared copy failed: %s", self.identity, exc
                         )
@@ -195,7 +195,7 @@ class RagLLMInvestor(GeneralPlayer):
                     shutil.copytree(src, dst, dirs_exist_ok=True)
                 else:
                     shutil.copy2(src, dst)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             logger.warning("[%s] Copy to shared failed: %s", self.identity, exc)
         self.state.custom_state["rag_store"] = rag_store
         self.state.custom_state["rag_cfg"] = resolved_rag
@@ -249,7 +249,7 @@ class RagLLMInvestor(GeneralPlayer):
                 if os.path.isdir(local_rag_dir):
                     try:
                         rag_store.load(local_rag_dir)
-                    except Exception as exc:  # pylint: disable=broad-except
+                    except Exception as exc:
                         logger.warning("RAG store reload failed: %s", exc)
                 custom["rag_store"] = rag_store
 
@@ -318,7 +318,7 @@ class RagLLMInvestor(GeneralPlayer):
                 elif action_str == "sell":
                     quantity = min(quantity, max(position, 0))
                 break
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
                 if attempt == 2:
                     action_str, quantity = "hold", 0
@@ -342,13 +342,13 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMBeliefAnchor(RagLLMInvestor):
-    """RAG-augmented belief anchor trader."""
+    """RAG-augmented belief anchor — strong prior, selectively filters confirming signals. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = "examples.ConfirmationBias.Rag.prompts:RAG_BELIEF_ANCHOR_SYS"
 
 
 class RagLLMSelectiveScanner(RagLLMInvestor):
-    """RAG-augmented selective scanner."""
+    """RAG-augmented selective scanner — seeks confirming info, ignores contradictions. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.ConfirmationBias.Rag.prompts:RAG_SELECTIVE_SCANNER_SYS"
@@ -356,7 +356,7 @@ class RagLLMSelectiveScanner(RagLLMInvestor):
 
 
 class RagLLMBalancedAnalyst(RagLLMInvestor):
-    """RAG-augmented balanced analyst."""
+    """RAG-augmented balanced analyst — Bayesian rational updater, no cognitive bias. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.ConfirmationBias.Rag.prompts:RAG_BALANCED_ANALYST_SYS"
@@ -364,7 +364,7 @@ class RagLLMBalancedAnalyst(RagLLMInvestor):
 
 
 class RagLLMContrarianTrader(RagLLMInvestor):
-    """RAG-augmented contrarian trader."""
+    """RAG-augmented contrarian — exploits systematic bias errors of biased traders. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.ConfirmationBias.Rag.prompts:RAG_CONTRARIAN_TRADER_SYS"
@@ -372,7 +372,7 @@ class RagLLMContrarianTrader(RagLLMInvestor):
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented noise trader."""
+    """RAG-augmented noise trader — random uninformed liquidity provider. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.ConfirmationBias.Rag.prompts:RAG_NOISE_TRADER_SYS"
 

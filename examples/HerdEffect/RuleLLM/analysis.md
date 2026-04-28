@@ -1,94 +1,43 @@
-# HerdEffect RuleLLM Analysis Methodology
+# HerdEffect RuleLLM — Analysis Documentation
 
-## Overview
+## §1 Analysis Objectives
 
-This document describes the evaluation metrics for the **hybrid Rule+LLM herding behavior** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
+This variant tests whether the Rule+LLM hybrid preserves the emergent herding dynamics of the Rule baseline while adding narrative interpretability. Objectives:
+1. Confirm EMI and HVR remain within Rule baseline range (formula backbone preserved)
+2. Test if LLM overlay meaningfully affects REI (ContrarianInvestor qualitative judgment)
+3. Validate that RuleLLM provides explainable reasoning for each herding episode
+4. Measure residual variance from LLM component vs. pure Rule determinism
 
-For detailed metric definitions and financial theory, see: **`../HerdEffect/analysis.md`**
+## §2 Metric → Function Mapping
 
----
+| Metric                               | Function                                                           | analysis-bases.md ref |
+|--------------------------------------|--------------------------------------------------------------------|-----------------------|
+| Emergent Momentum Index (EMI)        | `emergent_momentum_index(price_history)`                           | §2.1                  |
+| Maximum Drawdown (MDD)               | `maximum_drawdown(price_history)`                                  | §2.2                  |
+| Agent Convergence Contribution (ACC) | `agent_convergence_contribution(agent_quantities, return_history)` | §2.3                  |
+| Risk-Averse Early Exit Index (REI)   | `risk_averse_early_exit_index(ra_position_history, price_history)` | §2.4                  |
+| Herding Volatility Ratio (HVR)       | `herding_volatility_ratio(return_history)`                         | §2.5                  |
+| Wealth Distribution Index (WDI)      | `wealth_distribution_index(agent_wealth)`                          | §2.6                  |
 
-## Hybrid Rule+LLM Observable Phenomena
+## §3 RuleLLM-Specific Notes
 
-### Emergent Behaviors Unique to Hybrid Agents
+- **Formula backbone**: RuleLLM formulas dominate → EMI should be close to Rule baseline (within ±20 %); deviations > 40 % indicate LLM override is too strong.
+- **ContrarianInvestor**: Reads `fundamental` from own `extras` (same as Rule) → REI should be similar; LLM narrative may slightly increase REI by adding qualitative overvaluation judgment.
+- **AggressiveInvestor**: Rule ±80 cap preserved → MDD bounded; no unbounded quantity risk as in pure LLM.
+- **Variance**: Lower run-to-run variance than LLM; higher than Rule; expect 3–7 seeds for convergence.
+- **Research use**: Compare RuleLLM reasoning traces against Rule behavior to identify where LLM adds value beyond formula.
 
-| Phenomenon                   | Hybrid Behavior                                            | Contrast with Pure Rule-Based       |
-|------------------------------|------------------------------------------------------------|-------------------------------------|
-| **Rule Grounding**           | LLM receives momentum/contrarian formulas in prompt        | Rule-based executes rules directly  |
-| **Interpretive Flexibility** | LLM may adjust position sizes ±20% based on market context | Rule-based applies fixed formulas   |
-| **Reasoning Transparency**   | Decision reasoning visible in `<analysis>` tags            | Rule-based has no reasoning trace   |
-| **Crowd Awareness**          | LLM "understands" herding dynamics through prompt context  | Rule-based follows mechanical rules |
+## §4 Expected Ranges
 
-### Expected Differences from Rule-Based
+| Metric            | RuleLLM Expected Range | vs. Rule Baseline | Interpretation                               |
+|-------------------|------------------------|-------------------|----------------------------------------------|
+| EMI               | 0.07 – 0.25            | Similar           | Formula backbone preserves momentum dynamics |
+| MDD               | 0.09 – 0.30            | Similar           | Rule ±80 cap bounds maximum drawdown         |
+| ACC (§4.1 + §4.5) | ≥ 48 % during momentum | Similar           | Formula drives momentum agent contribution   |
+| REI               | 0.38 – 0.72            | Slightly higher   | LLM may reinforce early exit narratively     |
+| HVR               | 1.4 – 4.0              | Similar           | Rule formula preserves volatility regime     |
+| WDI               | 0.05 – 0.25            | Similar           | Wealth distribution mirrors Rule arc         |
 
-1. **Herding Formation**: Similar timing, but with visible reasoning in agent decisions
-2. **Bid Convergence**: May show more nuanced convergence as LLMs interpret crowd signals
-3. **Cascade Dynamics**: LLM may break or strengthen cascades based on reasoning
-4. **Price Deviation**: Potentially more varied due to LLM interpretation flexibility
+## §5 References
 
----
-
-## Hybrid Agent Design
-
-Each agent's system prompt contains:
-- **PERSONA section**: Identity, style, risk attitude, emotional state
-- **DECISION RULES section**: Explicit quantitative formulas from HerdEffect counterpart
-
-Agent types with their theoretical foundations:
-- **RuleLLMMomentumInvestor**: Trend following formula (Jegadeesh & Titman 1993)
-- **RuleLLMContrarianInvestor**: Mean reversion formula (De Bondt & Thaler 1985)
-- **RuleLLMRiskAverseInvestor**: Variance-adjusted position sizing (Markowitz)
-- **RuleLLMAggressiveInvestor**: Acceleration-enhanced momentum
-- **RuleLLMNoiseTrader**: Random trading with mean reversion
-
----
-
-## Key Metrics (Summary)
-
-All metrics from `../HerdEffect/analysis.md` apply:
-
-| Metric                     | Purpose                              |
-|----------------------------|--------------------------------------|
-| Bid Convergence (CV)       | Measure bid dispersion across agents |
-| Directional Agreement (DA) | Detect behavioral alignment          |
-| Information Cascade (ICM)  | Measure signal ignoring              |
-| Cross-Sectional Std (CSSD) | LSV herding measure                  |
-| Price Deviation            | Bubble magnitude                     |
-
----
-
-## Validation Criteria
-
-| Criterion         | Target                  | Source                 |
-|-------------------|-------------------------|------------------------|
-| **CV decreasing** | Herding forming         | HerdEffect/analysis.md |
-| **DA > 0.8**      | Strong herding detected | HerdEffect/analysis.md |
-| **ICM rising**    | Cascade forming         | HerdEffect/analysis.md |
-
----
-
-## Using Centralized Evaluation Module
-
-```python
-from masim.evaluation.finance import (
-    calculate_bid_convergence,
-    calculate_directional_agreement,
-    calculate_information_cascade,
-    plot_herding_analysis,
-)
-
-# Same analysis as rule-based version
-bids = {...}  # Load from simulation records
-cv = calculate_bid_convergence(bids)
-da = calculate_directional_agreement(bids)
-```
-
----
-
-## References
-
-See `../HerdEffect/analysis.md` for complete academic references including:
-- Bikhchandani et al. (1992) Information Cascades
-- Chang et al. (2000) Herd Behavior
-- Jegadeesh & Titman (1993) Momentum Premium
-- De Bondt & Thaler (1985) Mean Reversion
+See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md §4` for agent parameter sources.

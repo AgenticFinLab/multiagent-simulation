@@ -153,31 +153,31 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class LLMLossAverseInvestor(RuleLLMInvestor):
-    """Hybrid: LossAverseInvestor rules + LLM reasoning."""
+    """Hybrid: LossAverseInvestor rules + LLM reasoning. Theory: simulation-bases.md §4.1"""
 
     _system_prompt = RULELLM_LOSS_AVERSE_PROMPT
 
 
 class LLMBreakEvenTrader(RuleLLMInvestor):
-    """Hybrid: BreakEvenTrader rules + LLM reasoning."""
+    """Hybrid: BreakEvenTrader rules + LLM reasoning. Theory: simulation-bases.md §4.2"""
 
     _system_prompt = RULELLM_BREAK_EVEN_PROMPT
 
 
 class LLMRationalTrader(RuleLLMInvestor):
-    """Hybrid: RationalTrader rules + LLM reasoning."""
+    """Hybrid: RationalTrader rules + LLM reasoning. Theory: simulation-bases.md §4.3"""
 
     _system_prompt = RULELLM_RATIONAL_PROMPT
 
 
 class LLMMomentumTrader(RuleLLMInvestor):
-    """Hybrid: MomentumTrader rules + LLM reasoning."""
+    """Hybrid: MomentumTrader rules + LLM reasoning. Theory: simulation-bases.md §4.4"""
 
     _system_prompt = RULELLM_MOMENTUM_PROMPT
 
 
 class LLMMarketMaker(RuleLLMInvestor):
-    """Hybrid: MarketMaker rules + LLM reasoning."""
+    """Hybrid: MarketMaker rules + LLM reasoning. Theory: simulation-bases.md §4.5"""
 
     _system_prompt = RULELLM_MARKET_MAKER_PROMPT
 

@@ -1,64 +1,113 @@
-# EchoChamber Simulation
+# EchoChamber Rule Variant — explain.md
 
-## Overview
+## §1 Overview
 
-| Item               | Description                                                                                        |
-|--------------------|----------------------------------------------------------------------------------------------------|
-| **Phenomenon**     | Polarization by homophily — like-minded reinforcement drives extremity                             |
-| **Model**          | Rule-based / LLM / RuleLLM / RAG                                                                   |
-| **Key Feature**    | EchoChamber simulation with Ideologue, Conformist, CriticalThinker, BridgeBuilder, PassiveFollower |
-| **Academic Value** | Understanding how homophilic interaction and selective exposure produce group polarization         |
+The Rule variant implements EchoChamber with deterministic mathematical formulas grounded in Sunstein (2001) echo chamber theory. Each agent type applies a fixed formula derived from its theoretical archetype — Ideologues amplify in-group consensus, Conformists adopt prevailing opinion, CriticalThinkers depolarize based on evidence, BridgeBuilders center toward neutral. This provides the mechanically exact baseline for polarization dynamics.
 
-## Theoretical Foundation
+| Aspect             | Detail                                                                                                                                                                           |
+|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Variant            | Rule                                                                                                                                                                             |
+| Simulation         | EchoChamber                                                                                                                                                                      |
+| Decision Mechanism | Threshold formulas on `polarization`, `mean_opinion`, `cluster_separation`                                                                                                       |
+| Theory Reference   | `simulation-bases.md §4.1–§4.5`                                                                                                                                                  |
+| Market Broadcast   | `polarization`, `prev_polarization`, `mean_opinion`, `cluster_separation`, `cross_cutting_exposure`, `num_polarizers`, `num_depolarizers`, `net_polarization_intensity`, `round` |
 
-- Sunstein (2001): Echo Chambers — deliberative enclaves drive polarization
-- Pariser (2011): Filter Bubble — algorithmic curation reinforces existing beliefs
-- Moscovici & Zavalloni (1969): Group polarization after discussion
-- Isenberg (1986): Persuasive arguments and social comparison drive extremity
+## §2 Theory → Implementation Mapping
 
-## Agent Descriptions
+### §2.1 Ideologue (simulation-bases.md §4.1)
 
-### Ideologue
-**Theoretical Basis**: Echo Chamber amplification (Sunstein, 2001)
-**Market Role**: destabilizing
-**Description**: Holds strong views, amplifies in-group consensus, rejects out-group information, and pushes opinions toward more extreme versions of their initial position
-**Parameters**: in_group_weight=0.6, extremity_boost=1.3, out_group_discount=0.05, spread_eagerness=0.9
+| Theory Component                        | Implementation                                                                         |
+|-----------------------------------------|----------------------------------------------------------------------------------------|
+| In-group amplification (Sunstein, 2001) | `opinion_update = in_group_weight * (mean_opinion * extremity_boost − my_opinion)`     |
+| Out-group rejection                     | `opinion_update = out_group_discount * (mean_opinion − my_opinion)` when opposite sign |
+| Polarizing action when opinion strong   | `if                                                                                    |
 
-### Conformist
-**Theoretical Basis**: Social conformity (Asch, 1951) + Group Polarization (Sunstein, 2001)
-**Market Role**: destabilizing
-**Description**: Adopts prevailing group opinion, reinforcing homophily by gravitating toward whichever cluster they are surrounded by
-**Parameters**: conformity=0.7, conformity_eagerness=0.6, group_proximity_threshold=0.3
+### §2.2 Conformist (simulation-bases.md §4.2)
 
-### CriticalThinker
-**Theoretical Basis**: Persuasive arguments vs social comparison (Isenberg, 1986)
-**Market Role**: stabilizing
-**Description**: Evaluates evidence independently, resists social proof, moves opinion slowly only when evidence is compelling, depolarizes by pulling toward moderate center
-**Parameters**: critical_weight=0.5, critical_eagerness=0.7, evidence_sensitivity=0.6
+| Theory Component                        | Implementation                                                          |
+|-----------------------------------------|-------------------------------------------------------------------------|
+| Social conformity (Asch, 1951)          | `opinion_update = conformity * (local_group_mean − my_opinion)`         |
+| Local group determination               | Adjusts `local_group_mean` based on sign alignment with current opinion |
+| Polarize when opinion exceeds threshold | `if                                                                     |
 
-### BridgeBuilder
-**Theoretical Basis**: Deliberative democracy (Sunstein, 2001) + Serendipity by design (Pariser, 2011)
-**Market Role**: stabilizing
-**Description**: Actively engages across groups, maintains moderate position, depolarizes by demonstrating common ground, more effective when cluster separation is large
-**Parameters**: bridge_weight=0.4, bridge_strength=0.8, centering_tendency=0.5
+### §2.3 CriticalThinker (simulation-bases.md §4.3)
 
-### PassiveFollower
-**Theoretical Basis**: Mass communication effects (Lazarsfeld & Merton, 1954)
-**Market Role**: neutral
-**Description**: Low engagement, occasional alignment with nearest group, small social influence, provides baseline mass
-**Parameters**: engagement_probability=0.3, drift_rate=0.1, alignment_strength=0.4
+| Theory Component                                | Implementation                                                                  |
+|-------------------------------------------------|---------------------------------------------------------------------------------|
+| Evidence-driven opinion update (Isenberg, 1986) | `evidence_signal = −my_opinion * evidence_sensitivity * polarization`           |
+| Slow opinion movement                           | `opinion_update = critical_weight * (evidence_signal − my_opinion * 0.1) * 0.3` |
+| Depolarize when polarization high               | `if polarization > 0.3: action = "depolarize"; intensity =                      |
 
-## Opinion Environment Dynamics
+### §2.4 BridgeBuilder (simulation-bases.md §4.4)
 
-Polarization follows: P(t+1) = P(t) + alpha * NetPolarization + beta * CentripetalForce + epsilon
+| Theory Component                                  | Implementation                                                                  |
+|---------------------------------------------------|---------------------------------------------------------------------------------|
+| Centering force (Sunstein deliberative democracy) | `opinion_update = bridge_weight * (0.0 − my_opinion) * centering_tendency`      |
+| Depolarize proportional to cluster separation     | `if cluster_separation > 0.5: intensity = bridge_strength * cluster_separation` |
 
-Mean opinion computed from submitted agent opinions each round.
+### §2.5 PassiveFollower (simulation-bases.md §4.5)
 
-Cluster separation = distance between left-cluster mean and right-cluster mean.
+| Theory Component                                     | Implementation                                             |
+|------------------------------------------------------|------------------------------------------------------------|
+| Mass communication drift (Lazarsfeld & Merton, 1954) | `drift = drift_rate * (mean_opinion − my_opinion)`         |
+| Random engagement                                    | `if random() < engagement_probability: act; else: neutral` |
 
-Key feedback loops:
-- Ideologue and Conformist amplify polarization (destabilizing)
-- CriticalThinker and BridgeBuilder reduce polarization (stabilizing)
-- PassiveFollower drifts toward whichever side is larger (neutral/slightly destabilizing)
-- Higher cluster separation makes BridgeBuilder more effective
-- Higher polarization makes CriticalThinker more motivated to depolarize
+## §3 Market Mechanism
+
+```
+P(t+1) = P(t) + alpha * NetPolarization(t) + beta * CentripetalForce(t) + epsilon(t)
+alpha = polarization_impact (e.g., 0.05)
+beta = centripetal_force (e.g., 0.02), target center = 0.3
+NetPolarization = Σ polarize_intensity − Σ depolarize_intensity
+```
+
+OpinionEnvironment broadcasts `env_data` dict to all agents every round. Agents read `polarization`, `mean_opinion`, `cluster_separation` to compute their opinion updates.
+
+## §4 Variant Architecture
+
+| Component     | Detail                                                                           |
+|---------------|----------------------------------------------------------------------------------|
+| Base class    | `BaseSocialAgent(GeneralPlayer)`                                                 |
+| Inference     | None (deterministic formulas)                                                    |
+| Context       | `env_data` from OpinionEnvironment broadcast                                     |
+| Output format | `{action_type, intensity, agent_role, agent_id, opinion}` in `outbound_messages` |
+| Retry logic   | N/A — deterministic                                                              |
+
+## §5 Config Reference
+
+Config file: `configs/EchoChamber/Rule/simulation.yml`
+
+Key extras per agent:
+- `OpinionEnvironment`: `initial_polarization`, `polarization_impact`, `centripetal_force`, `noise_std`, `record_path`, `custom_state_hot_limit`
+- `Ideologue`: `initial_opinion`, `in_group_weight`, `extremity_boost`, `out_group_discount`, `spread_eagerness`
+- `Conformist`: `initial_opinion`, `conformity`, `conformity_eagerness`, `group_proximity_threshold`
+- `CriticalThinker`: `initial_opinion`, `critical_weight`, `critical_eagerness`, `evidence_sensitivity`
+- `BridgeBuilder`: `initial_opinion`, `bridge_weight`, `bridge_strength`, `centering_tendency`
+- `PassiveFollower`: `initial_opinion`, `engagement_probability`, `drift_rate`, `alignment_strength`
+
+## §6 Running Instructions
+
+```bash
+python examples/EchoChamber/Rule/run_echo_chamber.py -c configs/EchoChamber/Rule/simulation.yml
+```
+
+## §7 Output Artifacts
+
+- `{record_path}/{identity}/polarization/` — HistoryBuffer: polarization per round
+- `{record_path}/{identity}/mean_opinion/` — HistoryBuffer: mean opinion per round
+- `{record_path}/{identity}/cluster_separation/` — HistoryBuffer: cluster separation per round
+- `{record_path}/{identity}/polarize_count/` — HistoryBuffer: polarizer count per round
+- `{record_path}/{identity}/depolarize_count/` — HistoryBuffer: depolarizer count per round
+- `{record_path}/{agent_identity}/opinion/` — per-agent opinion history
+
+## §8 Known Limitations
+
+- Deterministic formulas do not capture individual heterogeneity within agent types
+- `out_group_discount` is a fixed scalar — real ideological resistance is more complex
+- Passive followers have no memory of past rounds — drift is purely memoryless
+- Noise term in polarization dynamics can occasionally reverse strong polarization trends
+
+## §9 References
+
+See `simulation-bases.md §4` for agent parameter sources and theoretical derivations.
+See `analysis-bases.md §2` for metric definitions and Python function signatures.

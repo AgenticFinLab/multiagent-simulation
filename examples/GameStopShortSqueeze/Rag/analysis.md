@@ -1,27 +1,57 @@
-# GameStopShortSqueeze Analysis Guide
+# GameStopShortSqueeze — Rag Variant Analysis
 
-## Metrics
+## §1 Overview
 
-| Metric | Description | Expected Range |
-|--------|-------------|----------------|
-| Price deviation | Deviation from fundamental | Varies by scenario |
-| Max drawdown | Largest peak-to-trough decline | Varies by scenario |
-| Volatility | Annualized return volatility | Varies by scenario |
+| Aspect    | Detail                       |
+|-----------|------------------------------|
+| Variant   | Rag                          |
+| Metrics   | SQI, PAR, SCD, IEP, ACC, WTI |
+| Reference | `analysis-bases.md`          |
+| Baseline  | Rule variant                 |
 
-## Visualization Guide
+---
 
-1. **Price vs Fundamental**: Shows whether agents create mispricings
-2. **Deviation Plot**: Magnitude and persistence of mispricings
-3. **Return Distribution**: Should show fat tails for behavioral scenarios
+## §2 Metric → Function Mapping
 
-## Troubleshooting
+| Metric | Function Signature                                          | Key Args                                        |
+|--------|-------------------------------------------------------------|-------------------------------------------------|
+| SQI    | `squeeze_intensity_index(price_history, fundamental)`       | `price_history: list`, `fundamental: float`     |
+| PAR    | `price_acceleration_ratio(price_history)`                   | `price_history: list`                           |
+| SCD    | `short_covering_duration(position_history)`                 | `position_history: list`                        |
+| IEP    | `institutional_exit_point(position_history, price_history)` | `position_history: list`, `price_history: list` |
+| ACC    | `accuracy_metric(agent_decisions, outcomes)`                | `agent_decisions: list`, `outcomes: list`       |
+| WTI    | `wealth_transfer_index(final_wealth, initial_wealth)`       | `final_wealth: dict`, `initial_wealth: dict`    |
 
-- **No phenomenon observed**: Adjust agent parameters
-- **Too extreme**: Add more stabilizing agents or increase mean reversion
-- **Too stable**: Increase destabilizing agent parameters
+---
 
-## References
+## §3 Rag-Specific Notes
 
-- Gamma squeeze dynamics (Jarrow & Li, 2021)
-- Social media and retail coordination (Lyocsa et al., 2022)
-- Short sale constraints (Jones & Lamont, 2002)
+### §3.1 RagLLMRetailCoordinated
+- Retrieved GME squeeze cases reinforce buying conviction → SQI likely higher than Rule.
+- Excess enthusiasm: if retrieval corpus is GME-focused, PAR may reach upper range (> 1.0).
+
+### §3.2 RagLLMShortSellerHF
+- Retrieved squeeze postmortems (Melvin Capital, VW 2008) amplify covering urgency.
+- SCD may shorten (faster panic covering) vs. Rule baseline (3–8 rounds → 1–6 rounds).
+
+### §3.3 RagLLMMarketMakerGamma
+- Retrieved options flow data anchors gamma hedge behavior; less drift than pure LLM variant.
+
+### §3.4 RagLLMInstitutionalValue
+- Retrieved analyst reports reinforce fundamental anchoring → IEP may be earlier (rounds 2–8).
+
+### §3.5 RagLLMMomentumRetail
+- Retrieved social media buzz metrics amplify FOMO buying; WTI rises with greater retail participation.
+
+---
+
+## §4 Expected Ranges (Rag vs. Rule Baseline)
+
+| Metric | Rag Expected Range | vs. Rule | Basis                                             |
+|--------|--------------------|----------|---------------------------------------------------|
+| SQI    | 1.5–7.0            | Higher   | Retrieved squeeze cases reinforce §4.1 buying     |
+| PAR    | 0.3–1.5            | Higher   | Larger and longer squeeze amplitude               |
+| SCD    | 1–6 rounds         | Shorter  | Faster covering driven by retrieved fear evidence |
+| IEP    | Rounds 2–8         | Earlier  | Fundamental reports prompt earlier §4.4 exit      |
+| ACC    | 0.45–0.70          | Similar  | RAG improves contextual accuracy                  |
+| WTI    | 0.15–0.50          | Higher   | Greater wealth transfer in amplified squeeze      |

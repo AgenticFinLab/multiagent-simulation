@@ -1,100 +1,46 @@
-# FlashCrash2010 Analysis Guide
+# FlashCrash2010 LLM — Analysis
 
-## Metrics Interpretation
+## §1 Objectives
 
-### Price Metrics
+Evaluate whether the LLM-driven FlashCrash2010 simulation:
+1. Reproduces the order-book depth collapse and spread widening pattern
+2. Shows LLM-induced variability compared to Rule baseline
+3. Correctly outputs `provides_liquidity` and `agent_type` fields for market depth computation
+4. Demonstrates emergent qualitative judgment (e.g., "too volatile to provide liquidity")
 
-| Metric | Description | Expected Range | Interpretation |
-|--------|-------------|----------------|----------------|
-| Max Drawdown | Largest peak-to-trough decline | -5% to -15% | Crash severity |
-| Crash Magnitude | Price drop during crash phase | -5% to -10% | Speed of collapse |
-| Recovery | Price rebound after trough | +3% to +8% | Market resilience |
+## §2 Metric → Function Mapping
 
-### Market Structure Metrics
+| Metric                 | Function                                                  | Source               |
+|------------------------|-----------------------------------------------------------|----------------------|
+| Max drawdown           | `max_drawdown(price_history)`                             | analysis-bases.md §2 |
+| Depth collapse ratio   | `depth_collapse_ratio(depth_history, base_depth)`         | analysis-bases.md §2 |
+| Spread widening factor | `spread_widening_factor(spread_history, normal_spread)`   | analysis-bases.md §2 |
+| HFT withdrawal rounds  | `hft_withdrawal_rounds(hft_orders_by_round)`              | analysis-bases.md §2 |
+| Cascade trigger rounds | `cascade_trigger_rounds(stoploss_orders_by_round)`        | analysis-bases.md §2 |
+| Recovery time          | `recovery_time(price_history, trough_round, fundamental)` | analysis-bases.md §2 |
 
-| Metric | Description | Expected Range | Interpretation |
-|--------|-------------|----------------|----------------|
-| Max Spread | Widest bid-ask spread | 0.5% - 2.0% | Liquidity stress |
-| Min Depth | Lowest order book depth | 500 - 2000 | Liquidity evaporation |
-| Depth Collapse | % reduction in depth | 50% - 90% | Severity of withdrawal |
+## §3 Variant-Specific Notes (LLM)
 
-### HFT Metrics
+- `provides_liquidity` sourced from `decision["provides_liquidity"]` — must be boolean in LLM response
+- `agent_type` field from LLM response drives `hft_participation` in market depth formula
+- High stochasticity: run ≥5 seeds; report mean ± std for all metrics
+- LLM may fail to "crash" if it does not recognise stress signals → compare `max_drawdown` distribution
+- Check for prompt-induced bias: HFTMarketMaker system prompt must describe the stress-withdrawal behavior
 
-| Metric | Description | Expected Range | Interpretation |
-|--------|-------------|----------------|----------------|
-| Normal Participation | HFT % in calm periods | 60% - 70% | Normal liquidity provision |
-| Stress Participation | HFT % during crash | 10% - 30% | Withdrawal severity |
-| Participation Drop | Difference | 30% - 50% | Withdrawal magnitude |
+## §4 Expected Ranges (LLM)
 
-## Visualization Guide
+| Metric                   | Expected range | vs Rule                          |
+|--------------------------|----------------|----------------------------------|
+| `max_drawdown`           | 0.04–0.14      | Similar mean; higher variance    |
+| `depth_collapse_ratio`   | 0.05–0.30      | Similar mean; higher variance    |
+| `spread_widening_factor` | 3–50 ×         | Similar; depends on LLM judgment |
+| `hft_withdrawal_rounds`  | 3–25 rounds    | Variable                         |
+| Cascade wave count       | 1–5            | Variable                         |
+| `recovery_time`          | 8–30 rounds    | Variable                         |
 
-### Price vs Fundamental Plot
-- **Normal**: Price tracks fundamental closely
-- **Crash**: Sharp divergence with rapid decline
-- **Recovery**: Price returns toward fundamental
+## §5 References
 
-### Spread Evolution Plot
-- **Normal**: Tight spreads (~0.01%)
-- **Crash**: Dramatic widening (10-50x normal)
-- **Recovery**: Gradual tightening
-
-### Order Book Depth Plot
-- **Normal**: Deep book (5000-10000 shares)
-- **Crash**: Shallow book (10-20% of normal)
-- **Recovery**: Gradual restoration
-
-### HFT Participation Plot
-- **Normal**: High participation (60-70%)
-- **Crash**: Sharp drop (withdrawal)
-- **Recovery**: Partial return
-
-## Comparative Analysis
-
-### Rule vs LLM Variants
-
-| Aspect | Rule | LLM |
-|--------|------|-----|
-| Withdrawal Timing | Fixed thresholds | Adaptive, context-dependent |
-| Spread Setting | Deterministic | May vary based on interpretation |
-| Recovery Speed | Fixed | May be faster/slower |
-
-### Expected Differences
-
-1. **Rule**: Predictable, repeatable patterns
-2. **LLM**: More variation, potentially more realistic
-3. **RuleLLM**: Balance of consistency and adaptability
-4. **RAG**: Historical knowledge may improve response
-
-## Troubleshooting
-
-### No Crash Observed
-- Check withdrawal_threshold (lower = earlier withdrawal)
-- Increase momentum_chaser activity
-- Add more stop_loss_traders
-
-### Crash Too Severe
-- Increase fundamental_trader capital
-- Raise mean_reversion parameter
-- Add more HFT market makers
-
-### No Recovery
-- Check mean_reversion strength
-- Ensure fundamental_traders have sufficient capital
-- Verify stop-loss traders don't all trigger simultaneously
-
-## Statistical Validation
-
-Compare simulation results to historical May 6, 2010 data:
-
-| Metric | Historical | Simulation Target |
-|--------|------------|-------------------|
-| Max decline | ~9% (DJIA) | 5-10% |
-| Duration | ~15 minutes | 20-50 rounds |
-| Recovery | ~600 points | Partial to full |
-| Volume spike | 3-5x normal | 2-4x normal |
-
-## References
-
-1. Kirilenko et al. (2017) - Benchmark for HFT behavior
-2. CFTC-SEC Report (2010) - Official event analysis
-3. Biais et al. (2015) - Order book dynamics theory
+- simulation-bases.md §4 — investor taxonomy and parameter definitions
+- analysis-bases.md §2 — metric function signatures
+- Kirilenko et al. (2017) doi:10.1111/jofi.12498
+- CFTC-SEC Joint Report (2010)

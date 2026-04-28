@@ -398,7 +398,7 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMPortfolioInsurer(RagLLMInvestor):
-    """RAG-augmented portfolio insurer."""
+    """RAG-augmented portfolio insurer — dynamic hedging seller. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.BlackMonday1987.Rag.prompts:RAG_PORTFOLIO_INSURER_SYS"
@@ -406,7 +406,7 @@ class RagLLMPortfolioInsurer(RagLLMInvestor):
 
 
 class RagLLMIndexArbitrageur(RagLLMInvestor):
-    """RAG-augmented index arbitrageur."""
+    """RAG-augmented index arbitrageur — exploits futures/spot gaps. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.BlackMonday1987.Rag.prompts:RAG_INDEX_ARBITRAGEUR_SYS"
@@ -414,19 +414,19 @@ class RagLLMIndexArbitrageur(RagLLMInvestor):
 
 
 class RagLLMProgramTrader(RagLLMInvestor):
-    """RAG-augmented program trader."""
+    """RAG-augmented program trader — automated feedback amplifier. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = "examples.BlackMonday1987.Rag.prompts:RAG_PROGRAM_TRADER_SYS"
 
 
 class RagLLMValueInvestor(RagLLMInvestor):
-    """RAG-augmented value investor."""
+    """RAG-augmented value investor — buys at deep discount to fundamentals. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = "examples.BlackMonday1987.Rag.prompts:RAG_VALUE_INVESTOR_SYS"
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented noise trader."""
+    """RAG-augmented noise trader — random uninformed liquidity provider. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.BlackMonday1987.Rag.prompts:RAG_NOISE_TRADER_SYS"
 

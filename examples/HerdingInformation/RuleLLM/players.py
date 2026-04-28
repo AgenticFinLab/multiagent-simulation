@@ -7,9 +7,11 @@ Design:
 - Investors: Hybrid rule-embedded LLM with personas from prompts.py
 """
 
+import importlib
 import logging
 
-from lmbase.inference import LangChainAPIInference, InferInput
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 
 from masim.player.base import Action
 from masim.player.general import GeneralPlayer
@@ -18,6 +20,13 @@ from examples.HerdingInformation.Rule.players import Market  # noqa: F401
 from examples.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("HerdingInformation.RuleLLM")
+
+
+def load_prompt(prompt_path: str) -> str:
+    """Load a prompt constant from 'module:VAR' path."""
+    module_path, var_name = prompt_path.rsplit(":", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, var_name)
 
 
 class RuleLLMInvestor(GeneralPlayer):
@@ -66,7 +75,6 @@ class RuleLLMInvestor(GeneralPlayer):
 
     async def decide(self):
         from examples.HerdingInformation.RuleLLM.prompts import RULELLM_USER_TEMPLATE
-        from masim.utils.prompt_loader import load_prompt
 
         price = self.state.custom_state.get("price", 0.0)
         fundamental = self.state.custom_state.get("fundamental", 0.0)
@@ -123,7 +131,7 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMCascadeFollower(RuleLLMInvestor):
-    """RuleLLM-driven information cascade follower."""
+    """RuleLLM-driven information cascade follower. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.HerdingInformation.RuleLLM.prompts:RULELLM_CASCADE_FOLLOWER_SYS"
@@ -131,7 +139,7 @@ class RuleLLMCascadeFollower(RuleLLMInvestor):
 
 
 class RuleLLMReputationHerder(RuleLLMInvestor):
-    """RuleLLM-driven reputation-based herder."""
+    """RuleLLM-driven reputation-based herder. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.HerdingInformation.RuleLLM.prompts:RULELLM_REPUTATION_HERDER_SYS"
@@ -139,7 +147,7 @@ class RuleLLMReputationHerder(RuleLLMInvestor):
 
 
 class RuleLLMIndependentThinker(RuleLLMInvestor):
-    """RuleLLM-driven rational independent thinker."""
+    """RuleLLM-driven rational independent thinker. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.HerdingInformation.RuleLLM.prompts:RULELLM_INDEPENDENT_THINKER_SYS"
@@ -147,7 +155,7 @@ class RuleLLMIndependentThinker(RuleLLMInvestor):
 
 
 class RuleLLMContrarian(RuleLLMInvestor):
-    """RuleLLM-driven contrarian investor."""
+    """RuleLLM-driven contrarian investor. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.HerdingInformation.RuleLLM.prompts:RULELLM_CONTRARIAN_SYS"
@@ -155,7 +163,7 @@ class RuleLLMContrarian(RuleLLMInvestor):
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """RuleLLM-driven uninformed noise trader."""
+    """RuleLLM-driven uninformed noise trader. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = (
         "examples.HerdingInformation.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"

@@ -3,10 +3,12 @@
 Rule-embedded LLM-driven agents for the GFC2008 simulation.
 """
 
+import importlib
 import logging
 from typing import Any, Dict, Optional
 
-from lmbase.inference import InferInput, LangChainAPIInference
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
@@ -15,6 +17,13 @@ from examples.GFC2008.Rule.players import Market
 from examples.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("GFC2008.RuleLLM")
+
+
+def load_prompt(prompt_path: str) -> str:
+    """Load a prompt constant from 'module:VAR' path."""
+    module_path, var_name = prompt_path.rsplit(":", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, var_name)
 
 
 class RuleLLMInvestor(GeneralPlayer):
@@ -78,7 +87,6 @@ class RuleLLMInvestor(GeneralPlayer):
     async def decide(self) -> dict:
         """Call LLM with embedded rules; parse decision."""
         from examples.GFC2008.RuleLLM.prompts import RULELLM_USER_TEMPLATE
-        from masim.utils.prompt_loader import load_prompt
 
         system_msg = load_prompt(self._system_prompt_path)
         price = self.state.custom_state["price"]
@@ -151,19 +159,19 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMMBSOriginator(RuleLLMInvestor):
-    """RuleLLM-driven MBSOriginator: creates structured securities with lax screening."""
+    """RuleLLM-driven MBSOriginator: creates structured securities with lax screening. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = "examples.GFC2008.RuleLLM.prompts:RULELLM_MBS_ORIGINATOR_SYS"
 
 
 class RuleLLMRatingAgency(RuleLLMInvestor):
-    """RuleLLM-driven RatingAgency: overrates securities due to issuer-pays model."""
+    """RuleLLM-driven RatingAgency: overrates securities due to issuer-pays model. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = "examples.GFC2008.RuleLLM.prompts:RULELLM_RATING_AGENCY_SYS"
 
 
 class RuleLLMLeveragedInvestor(RuleLLMInvestor):
-    """RuleLLM-driven LeveragedInvestor: high leverage, forced to sell in downturn."""
+    """RuleLLM-driven LeveragedInvestor: high leverage, forced to sell in downturn. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.GFC2008.RuleLLM.prompts:RULELLM_LEVERAGED_INVESTOR_SYS"
@@ -171,7 +179,7 @@ class RuleLLMLeveragedInvestor(RuleLLMInvestor):
 
 
 class RuleLLMDistressedBuyer(RuleLLMInvestor):
-    """RuleLLM-driven DistressedBuyer: buys assets at deep discount during panic."""
+    """RuleLLM-driven DistressedBuyer: buys assets at deep discount during panic. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.GFC2008.RuleLLM.prompts:RULELLM_DISTRESSED_BUYER_SYS"
@@ -179,7 +187,7 @@ class RuleLLMDistressedBuyer(RuleLLMInvestor):
 
 
 class RuleLLMRegulator(RuleLLMInvestor):
-    """RuleLLM-driven Regulator: monitors systemic risk and may intervene."""
+    """RuleLLM-driven Regulator: monitors systemic risk and may intervene. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.GFC2008.RuleLLM.prompts:RULELLM_REGULATOR_SYS"
 

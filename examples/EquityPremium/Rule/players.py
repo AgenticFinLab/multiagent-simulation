@@ -43,10 +43,12 @@ class Market(GeneralPlayer):
 
             self.state.custom_state["stock_price"] = extras["initial_stock_price"]
             self.state.custom_state["stock_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "stock"), entry_limit=custom_state_hot_limit
+                folder=os.path.join(base_path, "stock"),
+                entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["volume_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "volume"), entry_limit=custom_state_hot_limit
+                folder=os.path.join(base_path, "volume"),
+                entry_limit=custom_state_hot_limit,
             )
 
         orders = []
@@ -87,7 +89,12 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
 
         logger.debug(
-            f"\n[Market] R{round_num} Stock: {current_price:.2f}→{new_price:.2f} ({stock_return*100:+.3f}%) Bond: {bond_return*100:.4f}%"
+            "\n[Market] R%s Stock: %.2f→%.2f (%+.3f%%) Bond: %.4f%%",
+            round_num,
+            current_price,
+            new_price,
+            stock_return * 100,
+            bond_return * 100,
         )
 
         market_data = {
@@ -162,11 +169,12 @@ class BaseInvestor(GeneralPlayer):
 
 
 class MyopicLossAverseInvestor(BaseInvestor):
-    """
-    Myopic Loss Averse Investor (Benartzi & Thaler, 1995)
+    """Myopic Loss Averse Investor — evaluates frequently, overweights recent losses.
 
-    Parameters from config extras:
-        - loss_aversion, evaluation_window, risk_aversion
+    Theory: simulation-bases.md §4.1 — MyopicLossAverseInvestor
+    Theoretical basis: Benartzi & Thaler (1995) myopic loss aversion; frequent
+    evaluation amplifies loss sensitivity, driving excessive equity risk premium.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -215,7 +223,10 @@ class MyopicLossAverseInvestor(BaseInvestor):
         self._execute_trade(stock_qty, stock_price)
 
         logger.debug(
-            f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f} target_pct={target_stock_pct:.1%}"
+            "[%-20s] stock_qty=%+6.2f target_pct=%.1f%%",
+            self.identity,
+            stock_qty,
+            target_stock_pct * 100,
         )
         return {
             "stock_qty": stock_qty,
@@ -230,11 +241,12 @@ class MyopicLossAverseInvestor(BaseInvestor):
 
 
 class LongHorizonInvestor(BaseInvestor):
-    """
-    Long-horizon investor - less myopic, accepts more risk.
+    """Long-horizon investor — less myopic, accepts more risk over extended evaluation windows.
 
-    Parameters from config extras:
-        - evaluation_window, target_stock_pct
+    Theory: simulation-bases.md §4.2 — LongHorizonInvestor
+    Theoretical basis: Samuelson (1969) horizon effect; longer evaluation intervals
+    reduce perceived volatility and allow higher equity allocation.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -256,7 +268,7 @@ class LongHorizonInvestor(BaseInvestor):
 
         self._execute_trade(stock_qty, stock_price)
 
-        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("[%-20s] stock_qty=%+6.2f", self.identity, stock_qty)
         return {
             "stock_qty": stock_qty,
             "strategy": strategy_name,
@@ -270,11 +282,12 @@ class LongHorizonInvestor(BaseInvestor):
 
 
 class RiskNeutralInvestor(BaseInvestor):
-    """
-    Risk-neutral investor - theoretically optimal.
+    """Risk-neutral investor — theoretically optimal allocation based on expected excess return.
 
-    Parameters from config extras:
-        - excess_return_multiplier
+    Theory: simulation-bases.md §4.3 — RiskNeutralInvestor
+    Theoretical basis: Mehra & Prescott (1985) equity premium puzzle baseline; standard
+    expected-utility maximizer cannot explain the observed equity premium.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -292,7 +305,7 @@ class RiskNeutralInvestor(BaseInvestor):
 
         self._execute_trade(stock_qty, stock_price)
 
-        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("[%-20s] stock_qty=%+6.2f", self.identity, stock_qty)
         return {
             "stock_qty": stock_qty,
             "strategy": strategy_name,
@@ -306,11 +319,12 @@ class RiskNeutralInvestor(BaseInvestor):
 
 
 class ConservativeInvestor(BaseInvestor):
-    """
-    Conservative investor - prefers bonds.
+    """Conservative investor — prefers bonds, demands high equity premium before switching.
 
-    Parameters from config extras:
-        - target_stock_pct
+    Theory: simulation-bases.md §4.4 — ConservativeInvestor
+    Theoretical basis: Kahneman & Tversky (1979) prospect theory; heightened loss
+    sensitivity drives persistent bond preference even at attractive equity returns.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -332,7 +346,7 @@ class ConservativeInvestor(BaseInvestor):
 
         self._execute_trade(stock_qty, stock_price)
 
-        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("[%-20s] stock_qty=%+6.2f", self.identity, stock_qty)
         return {
             "stock_qty": stock_qty,
             "strategy": strategy_name,
@@ -346,11 +360,12 @@ class ConservativeInvestor(BaseInvestor):
 
 
 class NoiseTrader(BaseInvestor):
-    """
-    Noise trader with random allocation changes.
+    """Noise trader — random allocation changes, provides baseline liquidity.
 
-    Parameters from config extras:
-        - noise_std
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+    Theoretical basis: Black (1986) noise trading; uninformed random rebalancing
+    creates excess volatility and distorts the observed equity premium.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def decide(self) -> Dict[str, Any]:
@@ -366,7 +381,7 @@ class NoiseTrader(BaseInvestor):
 
         self._execute_trade(stock_qty, stock_price)
 
-        logger.debug(f"[{self.identity:20s}] stock_qty={stock_qty:+6.2f}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug("[%-20s] stock_qty=%+6.2f", self.identity, stock_qty)
         return {
             "stock_qty": stock_qty,
             "strategy": strategy_name,

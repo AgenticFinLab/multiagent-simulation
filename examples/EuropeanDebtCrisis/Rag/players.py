@@ -149,7 +149,7 @@ class RagLLMInvestor(GeneralPlayer):
                     self.state.custom_state["rag_store"] = rag_store
                     self.state.custom_state["rag_cfg"] = resolved_rag
                     return
-                except Exception as exc:  # pylint: disable=broad-except
+                except Exception as exc:
                     logger.warning(
                         "[%s] Local index load failed: %s", self.identity, exc
                     )
@@ -172,7 +172,7 @@ class RagLLMInvestor(GeneralPlayer):
                         self.state.custom_state["rag_store"] = rag_store
                         self.state.custom_state["rag_cfg"] = resolved_rag
                         return
-                    except Exception as exc:  # pylint: disable=broad-except
+                    except Exception as exc:
                         logger.warning(
                             "[%s] Shared copy failed: %s", self.identity, exc
                         )
@@ -194,7 +194,7 @@ class RagLLMInvestor(GeneralPlayer):
                     shutil.copytree(src, dst, dirs_exist_ok=True)
                 else:
                     shutil.copy2(src, dst)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             logger.warning("[%s] Copy to shared failed: %s", self.identity, exc)
         self.state.custom_state["rag_store"] = rag_store
         self.state.custom_state["rag_cfg"] = resolved_rag
@@ -248,7 +248,7 @@ class RagLLMInvestor(GeneralPlayer):
                 if os.path.isdir(local_rag_dir):
                     try:
                         rag_store.load(local_rag_dir)
-                    except Exception as exc:  # pylint: disable=broad-except
+                    except Exception as exc:
                         logger.warning("RAG store reload failed: %s", exc)
                 custom["rag_store"] = rag_store
 
@@ -317,7 +317,7 @@ class RagLLMInvestor(GeneralPlayer):
                 elif action_str == "sell":
                     quantity = min(quantity, max(position, 0))
                 break
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
                 if attempt == 2:
                     action_str, quantity = "hold", 0
@@ -341,7 +341,7 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMPeripheryBondSeller(RagLLMInvestor):
-    """RAG-augmented periphery bond seller."""
+    """RAG-augmented periphery bond seller — speculative selling with sovereign crisis literature. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.EuropeanDebtCrisis.Rag.prompts:RAG_PERIPHERY_BOND_SELLER_SYS"
@@ -349,7 +349,7 @@ class RagLLMPeripheryBondSeller(RagLLMInvestor):
 
 
 class RagLLMCreditorPanicker(RagLLMInvestor):
-    """RAG-augmented creditor panicker."""
+    """RAG-augmented creditor panicker — funding withdrawal with contagion literature. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.EuropeanDebtCrisis.Rag.prompts:RAG_CREDITOR_PANICKER_SYS"
@@ -357,7 +357,7 @@ class RagLLMCreditorPanicker(RagLLMInvestor):
 
 
 class RagLLMCoreBondBuyer(RagLLMInvestor):
-    """RAG-augmented flight-to-quality core bond buyer."""
+    """RAG-augmented core bond buyer — flight-to-quality with safe-haven literature. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.EuropeanDebtCrisis.Rag.prompts:RAG_CORE_BOND_BUYER_SYS"
@@ -365,7 +365,7 @@ class RagLLMCoreBondBuyer(RagLLMInvestor):
 
 
 class RagLLMECBIntervenor(RagLLMInvestor):
-    """RAG-augmented ECB-style intervenor."""
+    """RAG-augmented ECB intervenor — backstop purchases with monetary policy literature. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.EuropeanDebtCrisis.Rag.prompts:RAG_ECB_INTERVENOR_SYS"
@@ -373,7 +373,7 @@ class RagLLMECBIntervenor(RagLLMInvestor):
 
 
 class RagLLMHedgedFund(RagLLMInvestor):
-    """RAG-augmented relative-value hedge fund."""
+    """RAG-augmented hedge fund — relative-value spread arbitrage with crisis literature. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.EuropeanDebtCrisis.Rag.prompts:RAG_HEDGED_FUND_SYS"
 

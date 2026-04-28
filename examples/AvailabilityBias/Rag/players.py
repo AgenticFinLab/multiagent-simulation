@@ -431,31 +431,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMRecentEventOverweighter(RagLLMInvestor):
-    """RAG-augmented — overweights recent dramatic market events."""
+    """RAG-augmented — overweights recent dramatic market events. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class RagLLMMediaInfluencedTrader(RagLLMInvestor):
-    """RAG-augmented — influenced by media coverage and social signals."""
+    """RAG-augmented — influenced by media coverage and social signals. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class RagLLMSystematicAnalyst(RagLLMInvestor):
-    """RAG-augmented systematic analyst — objective information weighting."""
+    """RAG-augmented systematic analyst — objective information weighting. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class RagLLMValueTrader(RagLLMInvestor):
-    """RAG-augmented value trader — fundamentals only."""
+    """RAG-augmented value trader — fundamentals only. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented noise trader — uninformed random participant."""
+    """RAG-augmented noise trader — uninformed random participant. Theory: simulation-bases.md §4.5."""
 
     pass
 

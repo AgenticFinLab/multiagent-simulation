@@ -180,7 +180,7 @@ class RagLLMInvestor(GeneralPlayer):
                     self.state.custom_state["rag_store"] = rag_store
                     self.state.custom_state["rag_cfg"] = resolved_rag
                     return
-                except Exception as exc:  # pylint: disable=broad-except
+                except Exception as exc:
                     logger.warning(
                         "[%s] Failed to load local index (%s); will try shared",
                         self.identity,
@@ -209,7 +209,7 @@ class RagLLMInvestor(GeneralPlayer):
                         self.state.custom_state["rag_store"] = rag_store
                         self.state.custom_state["rag_cfg"] = resolved_rag
                         return
-                    except Exception as exc:  # pylint: disable=broad-except
+                    except Exception as exc:
                         logger.warning(
                             "[%s] Failed to copy shared index (%s); will build",
                             self.identity,
@@ -235,7 +235,7 @@ class RagLLMInvestor(GeneralPlayer):
                         shutil.copytree(src, dst, dirs_exist_ok=True)
                     else:
                         shutil.copy2(src, dst)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             logger.warning(
                 "[%s] Failed to copy to shared location: %s", self.identity, exc
             )
@@ -290,7 +290,7 @@ class RagLLMInvestor(GeneralPlayer):
                     if os.path.isdir(local_rag_dir):
                         try:
                             rag_store.load(local_rag_dir)
-                        except Exception as exc:  # pylint: disable=broad-except
+                        except Exception as exc:
                             logger.warning("RAG store reload failed (%s)", exc)
                     custom["rag_store"] = rag_store
 
@@ -389,9 +389,9 @@ class RagLLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": str(decision.get("reasoning", ""))[:120],
-            "analysis": str(decision.get("analysis", "")),
-            "provides_liquidity": bool(decision.get("provides_liquidity", False)),
+            "reasoning": str(decision["reasoning"])[:120],
+            "analysis": str(decision["analysis"]),
+            "provides_liquidity": bool(decision["provides_liquidity"]),
         }
         return {
             **order,
@@ -407,23 +407,23 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMHFTMarketMaker(RagLLMInvestor):
-    """RAG-augmented: HFT liquidity withdrawal rules + LLM + retrieved knowledge."""
+    """RAG-augmented HFT market maker — liquidity withdrawal rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.1."""
 
 
 class RagLLMMomentumChaser(RagLLMInvestor):
-    """RAG-augmented: Trend-following momentum rules + LLM + retrieved knowledge."""
+    """RAG-augmented momentum chaser — trend-following rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.2."""
 
 
 class RagLLMFundamentalTrader(RagLLMInvestor):
-    """RAG-augmented: Value deviation rules + LLM + retrieved knowledge."""
+    """RAG-augmented fundamental trader — value deviation rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.3."""
 
 
 class RagLLMStopLossTrader(RagLLMInvestor):
-    """RAG-augmented: Stop-loss trigger rules + LLM + retrieved knowledge."""
+    """RAG-augmented stop-loss trader — trigger rules + LLM risk management + retrieved knowledge. Theory: simulation-bases.md §4.4."""
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented: Random trading rules + LLM + retrieved knowledge."""
+    """RAG-augmented noise trader — random trading rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.5."""
 
 
 __all__ = [

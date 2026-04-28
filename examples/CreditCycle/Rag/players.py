@@ -340,19 +340,19 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMProCyclicalLender(RagLLMInvestor):
-    """RAG-augmented pro-cyclical lender."""
+    """RAG-augmented pro-cyclical lender — expands credit in booms, tightens in busts. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = "examples.CreditCycle.Rag.prompts:RAG_PRO_CYCLICAL_LENDER_SYS"
 
 
 class RagLLMMinskyBorrower(RagLLMInvestor):
-    """RAG-augmented Minsky borrower."""
+    """RAG-augmented Minsky borrower — accumulates leverage during stability, Ponzi phase. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = "examples.CreditCycle.Rag.prompts:RAG_MINSKY_BORROWER_SYS"
 
 
 class RagLLMCounterCyclicalLender(RagLLMInvestor):
-    """RAG-augmented counter-cyclical lender."""
+    """RAG-augmented counter-cyclical lender — reserves in booms, liquidity in busts. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.CreditCycle.Rag.prompts:RAG_COUNTER_CYCLICAL_LENDER_SYS"
@@ -360,13 +360,13 @@ class RagLLMCounterCyclicalLender(RagLLMInvestor):
 
 
 class RagLLMValueInvestor(RagLLMInvestor):
-    """RAG-augmented value investor."""
+    """RAG-augmented value investor — fundamental-anchored credit buyer at deep discount. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = "examples.CreditCycle.Rag.prompts:RAG_VALUE_INVESTOR_SYS"
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented noise trader."""
+    """RAG-augmented noise trader — random uninformed liquidity provider. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.CreditCycle.Rag.prompts:RAG_NOISE_TRADER_SYS"
 

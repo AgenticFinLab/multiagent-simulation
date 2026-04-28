@@ -103,7 +103,10 @@ class Market(GeneralPlayer):
 class PortfolioInsurer(GeneralPlayer):
     """Dynamic hedging — sells as prices fall (destabilizing).
 
-    Theory: Leland & Rubinstein (1980) portfolio insurance.
+    Theory: simulation-bases.md §4.1 — PortfolioInsurer
+    Theoretical basis: Leland & Rubinstein (1980) portfolio insurance; sells equities
+    as prices fall to maintain a synthetic put, creating a positive feedback loop.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -178,7 +181,10 @@ class PortfolioInsurer(GeneralPlayer):
 class IndexArbitrageur(GeneralPlayer):
     """Exploits price gaps between index futures and spot (destabilizing).
 
-    Theory: Index arbitrage between futures and spot.
+    Theory: simulation-bases.md §4.2 — IndexArbitrageur
+    Theoretical basis: MacKinlay & Ramaswamy (1988) index arbitrage; mechanical
+    selling when futures fall below spot amplifies downward price pressure.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -249,7 +255,10 @@ class IndexArbitrageur(GeneralPlayer):
 class ProgramTrader(GeneralPlayer):
     """Automated trading that amplifies price moves (destabilizing).
 
-    Theory: Brady Commission (1988) program trading feedback loops.
+    Theory: simulation-bases.md §4.3 — ProgramTrader
+    Theoretical basis: Brady Commission (1988) program trading feedback loops;
+    automated sell triggers on price thresholds cascade into a self-reinforcing crash.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -321,7 +330,10 @@ class ProgramTrader(GeneralPlayer):
 class ValueInvestor(GeneralPlayer):
     """Buys when price falls below intrinsic value (stabilizing).
 
-    Theory: Graham (1949) value investing with margin of safety.
+    Theory: simulation-bases.md §4.4 — ValueInvestor
+    Theoretical basis: Graham (1949) value investing with margin of safety;
+    purchases equities at deep discount to fundamental value.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -391,7 +403,10 @@ class ValueInvestor(GeneralPlayer):
 class NoiseTrader(GeneralPlayer):
     """Random uninformed trader (neutral).
 
-    Theory: Black (1986) — noise makes markets possible.
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+    Theoretical basis: Black (1986) — noise makes markets possible; provides
+    liquidity and baseline price variance independent of fundamentals.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:

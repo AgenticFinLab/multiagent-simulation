@@ -130,7 +130,7 @@ class RuleLLMInvestor(GeneralPlayer):
                 elif action_str == "sell":
                     quantity = min(quantity, max(position, 0))
                 break
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
                 if attempt == 2:
                     action_str, quantity = "hold", 0
@@ -156,7 +156,7 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMCarryTrader(RuleLLMInvestor):
-    """RuleLLM-driven carry trader."""
+    """RuleLLM-driven carry trader — borrows low-yield, invests high-yield. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_CARRY_TRADER_SYS"
@@ -164,7 +164,7 @@ class RuleLLMCarryTrader(RuleLLMInvestor):
 
 
 class RuleLLMLeveragedCarryFund(RuleLLMInvestor):
-    """RuleLLM-driven leveraged carry fund."""
+    """RuleLLM-driven leveraged carry fund — forced rapid unwind on margin calls. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_LEVERAGED_CARRY_FUND_SYS"
@@ -172,7 +172,7 @@ class RuleLLMLeveragedCarryFund(RuleLLMInvestor):
 
 
 class RuleLLMFundingCurrencyBuyer(RuleLLMInvestor):
-    """RuleLLM-driven funding currency buyer."""
+    """RuleLLM-driven funding currency buyer — safe-haven counter-cyclical flow. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_FUNDING_CURRENCY_BUYER_SYS"
@@ -180,7 +180,7 @@ class RuleLLMFundingCurrencyBuyer(RuleLLMInvestor):
 
 
 class RuleLLMHedgedCarryTrader(RuleLLMInvestor):
-    """RuleLLM-driven hedged carry trader."""
+    """RuleLLM-driven hedged carry trader — volatility-adjusted carry positions. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_HEDGED_CARRY_TRADER_SYS"
@@ -188,7 +188,7 @@ class RuleLLMHedgedCarryTrader(RuleLLMInvestor):
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """RuleLLM-driven noise trader."""
+    """RuleLLM-driven noise trader — random uninformed liquidity provider. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = (
         "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"

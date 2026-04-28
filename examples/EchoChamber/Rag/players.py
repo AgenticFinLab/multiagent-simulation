@@ -28,7 +28,8 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
-from examples.EchoChamber.Rule.players import OpinionEnvironment  # noqa: F401
+# Re-exported for use by callers who import from this module
+from examples.EchoChamber.Rule.players import OpinionEnvironment
 
 logger = logging.getLogger(__name__)
 
@@ -152,7 +153,7 @@ class RagLLMSocialAgent(GeneralPlayer):
                     self.state.custom_state["rag_store"] = rag_store
                     self.state.custom_state["rag_cfg"] = resolved_rag
                     return
-                except Exception as exc:  # pylint: disable=broad-except
+                except Exception as exc:
                     logger.warning(
                         "[%s] Local index load failed: %s", self.identity, exc
                     )
@@ -175,7 +176,7 @@ class RagLLMSocialAgent(GeneralPlayer):
                         self.state.custom_state["rag_store"] = rag_store
                         self.state.custom_state["rag_cfg"] = resolved_rag
                         return
-                    except Exception as exc:  # pylint: disable=broad-except
+                    except Exception as exc:
                         logger.warning(
                             "[%s] Shared copy failed: %s", self.identity, exc
                         )
@@ -197,7 +198,7 @@ class RagLLMSocialAgent(GeneralPlayer):
                     shutil.copytree(src, dst, dirs_exist_ok=True)
                 else:
                     shutil.copy2(src, dst)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             logger.warning("[%s] Copy to shared failed: %s", self.identity, exc)
         self.state.custom_state["rag_store"] = rag_store
         self.state.custom_state["rag_cfg"] = resolved_rag
@@ -251,7 +252,7 @@ class RagLLMSocialAgent(GeneralPlayer):
                 if os.path.isdir(local_rag_dir):
                     try:
                         rag_store.load(local_rag_dir)
-                    except Exception as exc:  # pylint: disable=broad-except
+                    except Exception as exc:
                         logger.warning("RAG store reload failed: %s", exc)
                 custom["rag_store"] = rag_store
 
@@ -266,15 +267,15 @@ class RagLLMSocialAgent(GeneralPlayer):
     def _build_prompt(self, env_data: Dict[str, Any]) -> str:
         my_opinion = self.state.custom_state["my_opinion"]
         round_num = self.state.custom_state.get("round", 0)
-        polarization = env_data.get("polarization", 0.0)
-        prev_polarization = env_data.get("prev_polarization", 0.0)
-        polarization_change = env_data.get("polarization_change", 0.0)
-        mean_opinion = env_data.get("mean_opinion", 0.0)
-        cluster_separation = env_data.get("cluster_separation", 0.0)
-        cross_cutting_exposure = env_data.get("cross_cutting_exposure", 0.5)
-        num_polarizers = env_data.get("num_polarizers", 0)
-        num_depolarizers = env_data.get("num_depolarizers", 0)
-        net_polarization_intensity = env_data.get("net_polarization_intensity", 0.0)
+        polarization = env_data["polarization"]
+        prev_polarization = env_data["prev_polarization"]
+        polarization_change = env_data["polarization_change"]
+        mean_opinion = env_data["mean_opinion"]
+        cluster_separation = env_data["cluster_separation"]
+        cross_cutting_exposure = env_data["cross_cutting_exposure"]
+        num_polarizers = env_data["num_polarizers"]
+        num_depolarizers = env_data["num_depolarizers"]
+        net_polarization_intensity = env_data["net_polarization_intensity"]
         rag_store: Optional[KnowledgeStore] = self.state.custom_state.get("rag_store")
         rag_cfg: Dict[str, Any] = self.state.custom_state.get("rag_cfg", {})
         rag_context = ""
@@ -311,7 +312,7 @@ class RagLLMSocialAgent(GeneralPlayer):
 
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
-        env_data = self.state.custom_state.get("env_data", {})
+        env_data = self.state.custom_state["env_data"]
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
         strategy_name = self.__class__.__name__
         system_prompt = load_prompt(self._system_prompt_path)
@@ -325,7 +326,7 @@ class RagLLMSocialAgent(GeneralPlayer):
                     infer_output.outputs[0].response
                 )
                 break
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:
                 logger.warning(
                     "[%s] LLM attempt %d failed: %s", self.identity, attempt + 1, exc
                 )
@@ -347,8 +348,8 @@ class RagLLMSocialAgent(GeneralPlayer):
                     {"payload": action, "content_type": "social_action"}
                 ],
             }
-        action_type = decision.get("action_type", "neutral")
-        intensity = float(decision.get("intensity", 0.0))
+        action_type = decision["action_type"]
+        intensity = float(decision["intensity"])
         intensity = self._apply_intensity_constraints(intensity)
         my_opinion = self.state.custom_state["my_opinion"]
         if action_type == "polarize":
@@ -373,8 +374,8 @@ class RagLLMSocialAgent(GeneralPlayer):
             "agent_role": strategy_name,
             "agent_id": self.identity,
             "opinion": my_opinion,
-            "reasoning": str(decision.get("reasoning", ""))[:120],
-            "analysis": decision.get("analysis", ""),
+            "reasoning": str(decision["reasoning"])[:120],
+            "analysis": decision["analysis"],
         }
         return {
             **action,
@@ -390,31 +391,31 @@ class RagLLMSocialAgent(GeneralPlayer):
 
 
 class RagLLMIdeologue(RagLLMSocialAgent):
-    """RAG-augmented ideologue: strong opinion holder."""
+    """RAG-augmented ideologue — in-group amplification with literature context. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = "examples.EchoChamber.Rag.prompts:RAG_IDEOLOGUE_SYS"
 
 
 class RagLLMConformist(RagLLMSocialAgent):
-    """RAG-augmented conformist: social group aligner."""
+    """RAG-augmented conformist — group alignment with social conformity literature. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = "examples.EchoChamber.Rag.prompts:RAG_CONFORMIST_SYS"
 
 
 class RagLLMCriticalThinker(RagLLMSocialAgent):
-    """RAG-augmented critical thinker: evidence evaluator."""
+    """RAG-augmented critical thinker — evidence evaluation with persuasive-arguments literature. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = "examples.EchoChamber.Rag.prompts:RAG_CRITICAL_SYS"
 
 
 class RagLLMBridgeBuilder(RagLLMSocialAgent):
-    """RAG-augmented bridge builder: cross-group engager."""
+    """RAG-augmented bridge builder — cross-group engagement with deliberative democracy literature. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = "examples.EchoChamber.Rag.prompts:RAG_BRIDGE_SYS"
 
 
 class RagLLMPassiveFollower(RagLLMSocialAgent):
-    """RAG-augmented passive follower: low-engagement participant."""
+    """RAG-augmented passive follower — low-engagement drift with mass communication literature. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.EchoChamber.Rag.prompts:RAG_PASSIVE_SYS"
 

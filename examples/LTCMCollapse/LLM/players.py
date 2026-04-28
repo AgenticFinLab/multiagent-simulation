@@ -5,7 +5,8 @@ LLM-driven agents for the LTCMCollapse simulation using LangChainAPIInference.
 
 import logging
 
-from lmbase.inference import LangChainAPIInference, InferInput
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 
 from masim.player.base import Action
 from masim.player.general import GeneralPlayer
@@ -53,8 +54,8 @@ class LLMInvestor(GeneralPlayer):
     async def decide(self) -> dict:
         llm_cfg = self.config.extras.get("llm", {})
         llm = LangChainAPIInference(
-            lm_name=llm_cfg["model"],
-            generation_config={"temperature": llm_cfg.get("temperature", 0.3)},
+            lm_name=llm_cfg["lm_name"],
+            generation_config=llm_cfg.get("generation_config", {}),
         )
         price = self.state.custom_state.get("price", 0)
         fundamental = self.state.custom_state.get("fundamental", 0)

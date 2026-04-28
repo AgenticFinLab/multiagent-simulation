@@ -1,81 +1,84 @@
-# GameStopShortSqueeze Simulation
+# GameStopShortSqueeze — Rule Variant
 
-## Overview
+## §1 Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | January 2021 GameStop short squeeze - Reddit coordination drove 1,700% price increase |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | GameStop short squeeze simulation with retail coordination, gamma exposure, and social media-driven trading |
-| **Academic Value** | Understanding january 2021 gamestop short squeeze - reddit coordination drove 1,700% price increase through multi-agent simulation |
+The Rule variant implements the GameStop Short Squeeze simulation using deterministic threshold-based rules. The short squeeze emerges from three coordinated mechanics: retail coordinated buying (§4.1), short-seller forced covering (§4.2), and gamma hedging by market makers (§4.3), opposed by institutional value selling (§4.4) and weakly amplified by momentum retail (§4.5). All agents use rules derived directly from `Rule/players.py`.
 
-## Theoretical Foundation
+| Aspect             | Detail                                                             |
+|--------------------|--------------------------------------------------------------------|
+| Variant            | Rule                                                               |
+| Simulation         | GameStopShortSqueeze                                               |
+| Decision Mechanism | Threshold rules on deviation δ(t); initial short position for §4.2 |
+| Theory Reference   | `simulation-bases.md §4.1–§4.5`                                    |
+| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`                       |
+| Price Model        | P(t+1) = P(t) + λ × D(t) + γ × (F − P(t)) + ε(t)                   |
 
-- Gamma squeeze dynamics (Jarrow & Li, 2021)
-- Social media and retail coordination (Lyocsa et al., 2022)
-- Short sale constraints (Jones & Lamont, 2002)
+---
 
-## Agent Descriptions
+## §2 Theory → Implementation Mapping
 
-### RetailCoordinated
-**Theoretical Basis**: Social media coordination
-**Market Role**: destabilizing
-**Description**: Retail traders coordinating via social media to buy and hold
-**Parameters**: diamond_hands=True, buy_pressure=0.8, coordination_strength=0.6
+### §2.1 RetailCoordinated (`simulation-bases.md §4.1`)
 
-### ShortSellerHF
-**Theoretical Basis**: Short selling and squeeze dynamics
-**Market Role**: destabilizing
-**Description**: Heavily short hedge fund forced to cover at higher prices
-**Parameters**: short_interest=1.4, margin_requirement=0.5, cover_threshold=0.3
+| Theory Component                          | Implementation                                                                             |
+|-------------------------------------------|--------------------------------------------------------------------------------------------|
+| Social coordination (Barber et al., 2022) | `if cash > price * 50 and price > 0: buy_qty = min(int(cash * buy_pressure / price), 500)` |
+| Buy-pressure parameter                    | `buy_pressure` (default 0.3) controls fraction of cash deployed per round                  |
+| Cash threshold gate                       | `cash > price * 50` — requires minimum cash to trade; prevents exhausted buyers            |
+| Max 500 shares                            | Position cap; social-media retail investor buying constraint                               |
 
-### MarketMakerGamma
-**Theoretical Basis**: Delta hedging and gamma exposure
-**Market Role**: neutral
-**Description**: Market maker hedging options exposure creates buying pressure
-**Parameters**: gamma_exposure=0.3, hedge_frequency=continuous
+### §2.2 ShortSellerHF (`simulation-bases.md §4.2`)
 
-### InstitutionalValue
-**Theoretical Basis**: Fundamental analysis
-**Market Role**: stabilizing
-**Description**: Values company based on fundamentals, sees extreme overvaluation
-**Parameters**: fundamental_value=20.0, sell_threshold=3.0, patience=high
+| Theory Component                                    | Implementation                                                                                              |
+|-----------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| Short sale constraints (Diamond & Verrecchia, 1987) | `initial_position = -500` — starts fully short                                                              |
+| Forced covering on squeeze                          | `if position < 0 and deviation > cover_threshold: cover_qty = min(abs(position), int(abs(position) * 0.5))` |
+| Partial covering                                    | Covers 50% of remaining short position per round when deviation > `cover_threshold`                         |
+| Squeeze mechanics                                   | Covering creates buying pressure, amplifying price rise, forcing more covering                              |
 
-### MomentumRetail
-**Theoretical Basis**: FOMO trading
-**Market Role**: neutral
-**Description**: Retail momentum trader driven by fear of missing out
-**Parameters**: fomo_threshold=0.1, position_size=50, attention_span=short
+### §2.3 MarketMakerGamma (`simulation-bases.md §4.3`)
 
+| Theory Component                  | Implementation                                                                                     |
+|-----------------------------------|----------------------------------------------------------------------------------------------------|
+| Gamma squeeze (Jarrow & Li, 2021) | `hedge_qty = int(abs(deviation) * gamma_exposure * 5000)`                                          |
+| Delta hedging buy                 | `if deviation > 0 and hedge_qty > 0: buy_qty = min(hedge_qty, int(cash / price))`                  |
+| Gamma exposure parameter          | `gamma_exposure` (default 1.0) scales hedging response to deviation                                |
+| Mechanical hedging                | Market maker must hedge delta exposure as options go in-the-money; creates systematic buy pressure |
 
-## Usage
+### §2.4 InstitutionalValue (`simulation-bases.md §4.4`)
 
-### Rule Variant
-```bash
-python examples/GameStopShortSqueeze/Rule/run_gamestopshortsqueeze.py \
-    -c configs/GameStopShortSqueeze/Rule/simulation.yml
-```
+| Theory Component          | Implementation                                                                                             |
+|---------------------------|------------------------------------------------------------------------------------------------------------|
+| Fundamental value selling | `initial_position = 1000` — starts long at pre-squeeze price                                               |
+| Sell on overvaluation     | `if deviation > sell_threshold: sell_qty = min(1000, max(position, 0))`                                    |
+| IEP trigger               | Sells entire long position when deviation > `sell_threshold`; tracks first round of full exit (IEP metric) |
+| Countervailing force      | §4.4 provides selling pressure opposing the squeeze forces of §4.1, §4.2, §4.3                             |
 
-### LLM Variant
-```bash
-python examples/GameStopShortSqueeze/LLM/run_gamestopshortsqueeze_llm.py \
-    -c configs/GameStopShortSqueeze/LLM/simulation.yml
-```
+### §2.5 MomentumRetail (`simulation-bases.md §4.5`)
 
-### RuleLLM Variant
-```bash
-python examples/GameStopShortSqueeze/RuleLLM/run_gamestopshortsqueeze_rulellm.py \
-    -c configs/GameStopShortSqueeze/RuleLLM/simulation.yml
-```
+| Theory Component                    | Implementation                                                                  |
+|-------------------------------------|---------------------------------------------------------------------------------|
+| FOMO momentum (Lyocsa et al., 2022) | `if deviation > fomo_threshold: buy_qty = min(50, int(cash / price))`           |
+| Small position cap                  | 50 shares max — small retail investor; low individual impact but many instances |
+| FOMO activation                     | Only buys on positive deviation > `fomo_threshold`; does not short or sell      |
 
-### RAG Variant
-```bash
-python examples/GameStopShortSqueeze/Rag/run_gamestopshortsqueeze_rag.py \
-    -c configs/GameStopShortSqueeze/Rag/simulation.yml
-```
+---
 
-## References
+## §3 Rule-Specific Notes
 
-- Gamma squeeze dynamics (Jarrow & Li, 2021)
-- Social media and retail coordination (Lyocsa et al., 2022)
-- Short sale constraints (Jones & Lamont, 2002)
+- **Squeeze cascade**: §4.1 buys → price rises → deviation increases → §4.2 forced to cover → more buying → §4.3 gamma hedges → more buying → reinforcing squeeze.
+- **Three-phase dynamics**: Pre-squeeze (deviation < cover_threshold), squeeze (§4.2 covering, §4.3 hedging), exhaustion (§4.4 sells out, §4.1 runs out of cash).
+- **IEP as key diagnostic**: First round where §4.4 position = 0 marks the exhaustion of institutional supply — squeeze enters unconstrained phase.
+- **Market broadcast**: Standard `price`, `fundamental`, `deviation`, `round`; all agents use `deviation` directly.
+
+---
+
+## §4 Expected Ranges (Rule Variant)
+
+| Metric                               | Rule Expected Range                      | Interpretation                                                |
+|--------------------------------------|------------------------------------------|---------------------------------------------------------------|
+| SQI (Squeeze Intensity Index)        | 1.0–5.0                                  | Peak deviation; GME analog ≈24; simulation with 5 agents ≈1–5 |
+| PAR (Price-Area Ratio)               | 0.2–1.0                                  | Mean positive deviation over full simulation                  |
+| ACC (Agent Coalition)                | §4.1: 40–60%, §4.2: 20–40%, §4.3: 10–30% | Coalition volume shares during squeeze phase                  |
+| SCD (Squeeze Collapse Duration)      | 2–8 rounds                               | Rounds from peak deviation to 80% collapse                    |
+| IEP (Institutional Exhaustion Point) | Rounds 3–10                              | First round §4.4 exits fully; marks squeeze peak              |
+| WTI (Wealth Transfer Index)          | 0.10–0.40                                | Fraction of short-seller wealth transferred to retail/MM      |

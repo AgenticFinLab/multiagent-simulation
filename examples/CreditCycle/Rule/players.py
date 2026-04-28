@@ -104,9 +104,10 @@ class Market(GeneralPlayer):
 class ProCyclicalLender(GeneralPlayer):
     """Expands credit during booms, tightens during downturns — amplifies credit cycle.
 
-    Theory: Adrian & Shin (2010) pro-cyclical leverage. Lending standards loosen
-    when asset prices rise and tighten when prices fall.
-    Role: destabilizing.
+    Theory: simulation-bases.md §4.1 — ProCyclicalLender
+    Theoretical basis: Adrian & Shin (2010) pro-cyclical leverage; lending standards
+    loosen with rising asset prices and tighten when prices fall, amplifying the cycle.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -182,9 +183,10 @@ class ProCyclicalLender(GeneralPlayer):
 class MinskyBorrower(GeneralPlayer):
     """Increases leverage during stability, creating fragility that leads to crisis.
 
-    Theory: Minsky (1986) financial instability hypothesis. Periods of stability
-    breed instability as agents take on more debt.
-    Role: destabilizing.
+    Theory: simulation-bases.md §4.2 — MinskyBorrower
+    Theoretical basis: Minsky (1986) financial instability hypothesis; periods of
+    stability breed instability as agents accumulate debt through hedge→speculative→Ponzi.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -271,8 +273,10 @@ class MinskyBorrower(GeneralPlayer):
 class CounterCyclicalLender(GeneralPlayer):
     """Lends counter-cyclically — provides liquidity during crises when others withdraw.
 
-    Theory: Geanakoplos (2010) leverage cycle. Counter-cyclical capital buffers.
-    Role: stabilizing.
+    Theory: simulation-bases.md §4.3 — CounterCyclicalLender
+    Theoretical basis: Geanakoplos (2010) leverage cycle; counter-cyclical capital buffers
+    dampen boom-bust by accumulating reserves during booms and deploying in crises.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -345,8 +349,10 @@ class CounterCyclicalLender(GeneralPlayer):
 class ValueInvestor(GeneralPlayer):
     """Invests based on fundamental value — stabilizing force during credit expansions.
 
-    Theory: Graham (1949) value investing with margin of safety.
-    Role: stabilizing.
+    Theory: simulation-bases.md §4.4 — ValueInvestor
+    Theoretical basis: Graham (1949) value investing with margin of safety; buys
+    deeply discounted credit assets and sells overpriced, anchoring price to fundamentals.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
@@ -416,8 +422,10 @@ class ValueInvestor(GeneralPlayer):
 class NoiseTrader(GeneralPlayer):
     """Random uninformed trader providing baseline liquidity.
 
-    Theory: Black (1986) noise trader model.
-    Role: neutral.
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+    Theoretical basis: Black (1986) noise trader model; random orders provide
+    liquidity and stochastic price variance independent of the credit cycle state.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:

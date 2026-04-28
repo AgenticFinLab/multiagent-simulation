@@ -7,9 +7,11 @@ Design:
 - Investors: Hybrid rule-embedded LLM with personas from prompts.py
 """
 
+import importlib
 import logging
 
-from lmbase.inference import LangChainAPIInference, InferInput
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 
 from masim.player.base import Action
 from masim.player.general import GeneralPlayer
@@ -18,6 +20,13 @@ from examples.GameStopShortSqueeze.Rule.players import Market  # noqa: F401
 from examples.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("GameStopShortSqueeze.RuleLLM")
+
+
+def load_prompt(prompt_path: str) -> str:
+    """Load a prompt constant from 'module:VAR' path."""
+    module_path, var_name = prompt_path.rsplit(":", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, var_name)
 
 
 class RuleLLMInvestor(GeneralPlayer):
@@ -66,7 +75,6 @@ class RuleLLMInvestor(GeneralPlayer):
 
     async def decide(self):
         from examples.GameStopShortSqueeze.RuleLLM.prompts import RULELLM_USER_TEMPLATE
-        from masim.utils.prompt_loader import load_prompt
 
         price = self.state.custom_state.get("price", 0.0)
         fundamental = self.state.custom_state.get("fundamental", 0.0)
@@ -123,7 +131,7 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMRetailCoordinated(RuleLLMInvestor):
-    """RuleLLM-driven retail coordinated buyer."""
+    """RuleLLM-driven retail coordinated buyer. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.GameStopShortSqueeze.RuleLLM.prompts:RULELLM_RETAIL_COORDINATED_SYS"
@@ -131,7 +139,7 @@ class RuleLLMRetailCoordinated(RuleLLMInvestor):
 
 
 class RuleLLMShortSellerHF(RuleLLMInvestor):
-    """RuleLLM-driven short seller hedge fund."""
+    """RuleLLM-driven short seller hedge fund. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.GameStopShortSqueeze.RuleLLM.prompts:RULELLM_SHORT_SELLER_HF_SYS"
@@ -139,7 +147,7 @@ class RuleLLMShortSellerHF(RuleLLMInvestor):
 
 
 class RuleLLMMarketMakerGamma(RuleLLMInvestor):
-    """RuleLLM-driven gamma-hedging market maker."""
+    """RuleLLM-driven gamma-hedging market maker. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.GameStopShortSqueeze.RuleLLM.prompts:RULELLM_MARKET_MAKER_GAMMA_SYS"
@@ -147,7 +155,7 @@ class RuleLLMMarketMakerGamma(RuleLLMInvestor):
 
 
 class RuleLLMInstitutionalValue(RuleLLMInvestor):
-    """RuleLLM-driven institutional value investor."""
+    """RuleLLM-driven institutional value investor. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.GameStopShortSqueeze.RuleLLM.prompts:RULELLM_INSTITUTIONAL_VALUE_SYS"
@@ -155,7 +163,7 @@ class RuleLLMInstitutionalValue(RuleLLMInvestor):
 
 
 class RuleLLMMomentumRetail(RuleLLMInvestor):
-    """RuleLLM-driven FOMO momentum retail trader."""
+    """RuleLLM-driven FOMO momentum retail trader. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = (
         "examples.GameStopShortSqueeze.RuleLLM.prompts:RULELLM_MOMENTUM_RETAIL_SYS"

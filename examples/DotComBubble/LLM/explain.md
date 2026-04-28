@@ -1,81 +1,97 @@
-# DotComBubble Simulation
+# DotComBubble LLM Variant — explain.md
 
-## Overview
+## §1 Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | 1995-2001 Internet bubble - NASDAQ rose 400% then fell 78% |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Dot-com bubble simulation with new economy narrative, IPO frenzy, and valuation disconnect |
-| **Academic Value** | Understanding 1995-2001 internet bubble - nasdaq rose 400% then fell 78% through multi-agent simulation |
+The LLM variant implements DotComBubble with persona-driven LLM decision-making. Each investor receives a natural-language persona description and market state prompt; the LLM generates buy/sell/hold decisions without embedded rule code. Bubble dynamics emerge from the interaction of narrative-driven personas under genuine language model reasoning.
 
-## Theoretical Foundation
+| Aspect             | Detail                                                   |
+|--------------------|----------------------------------------------------------|
+| Variant            | LLM                                                      |
+| Simulation         | DotComBubble                                             |
+| Decision Mechanism | LLM persona reasoning on market state prompt             |
+| Theory Reference   | `simulation-bases.md §4.1–§4.5`                          |
+| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`, `momentum` |
 
-- Shiller (2000): Irrational Exuberance and narrative economics
-- Ofek & Richardson (2003): Internet bubble dynamics
-- Abreu & Brunnermeier (2003): Synchronization risk and bubble persistence
+## §2 Theory → Implementation Mapping
 
-## Agent Descriptions
+### §2.1 LLMNewEconomyEvangelist (simulation-bases.md §4.1)
 
-### NewEconomyEvangelist
-**Theoretical Basis**: Narrative economics (Shiller, 2019)
-**Market Role**: destabilizing
-**Description**: Believes in new paradigm, ignores traditional valuation
-**Parameters**: narrative_strength=0.8, valuation_multiplier=3.0, time_horizon=long
+| Theory Component                    | Implementation                                                                                                         |
+|-------------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| Narrative economics (Shiller, 2000) | System prompt: "You believe in the new internet economy paradigm and the irrelevance of traditional valuation metrics" |
+| Persistent buying                   | Persona instructs buying unless crash is extreme; maps to δ > −0.20 equivalent through language                        |
+| Crash capitulation                  | Prompt encodes reluctance to sell; only exits on deep negative deviation                                               |
 
-### IPOFlipper
-**Theoretical Basis**: IPO underpricing and flipping (Ritter, 1991)
-**Market Role**: destabilizing
-**Description**: Buys IPOs and quickly sells for short-term profit
-**Parameters**: flip_days=3, target_return=0.2, max_ipo_participation=500
+### §2.2 LLMIPOFlipper (simulation-bases.md §4.2)
 
-### MomentumFollower
-**Theoretical Basis**: Momentum trading (Jegadeesh & Titman, 1993)
-**Market Role**: destabilizing
-**Description**: Follows price trends and amplifies moves
-**Parameters**: lookback=20, entry_threshold=0.05, position_multiplier=2000
+| Theory Component                                | Implementation                                                                          |
+|-------------------------------------------------|-----------------------------------------------------------------------------------------|
+| IPO underpricing flip (Ofek & Richardson, 2003) | System prompt: "You buy at undervaluation and flip quickly once premium is established" |
+| Short-hold arbitrage                            | Persona targets δ > 0.05 as sell signal in language; buys on dip                        |
 
-### SkepticalValueInvestor
-**Theoretical Basis**: Value investing (Graham, 1949)
-**Market Role**: stabilizing
-**Description**: Avoids overvalued tech stocks, waits for correction
-**Parameters**: max_pe=30, patience=very_high, cash_reserve=0.5
+### §2.3 LLMMomentumFollower (simulation-bases.md §4.3)
 
-### ShortSeller
-**Theoretical Basis**: Short selling and price discovery
-**Market Role**: stabilizing
-**Description**: Bets against overvalued stocks but faces squeeze risk
-**Parameters**: short_threshold=2.0, max_short_position=2000, squeeze_tolerance=0.3
+| Theory Component                    | Implementation                                                                         |
+|-------------------------------------|----------------------------------------------------------------------------------------|
+| Momentum (Jegadeesh & Titman, 1993) | System prompt: "You follow price trends — buy when price is rising, sell when falling" |
+| 1-period signal                     | Prompt includes `price_change` field; persona uses this as primary decision input      |
 
+### §2.4 LLMSkepticalValueInvestor (simulation-bases.md §4.4)
 
-## Usage
+| Theory Component                     | Implementation                                                                    |
+|--------------------------------------|-----------------------------------------------------------------------------------|
+| Fundamental anchoring (Graham, 1949) | System prompt: "You only buy when price is significantly below fundamental value" |
+| Discipline against narrative         | Persona explicitly resists hype; sells on overvaluation above 20%                 |
 
-### Rule Variant
-```bash
-python examples/DotComBubble/Rule/run_dotcombubble.py \
-    -c configs/DotComBubble/Rule/simulation.yml
+### §2.5 LLMShortSeller (simulation-bases.md §4.5)
+
+| Theory Component                                  | Implementation                                                                     |
+|---------------------------------------------------|------------------------------------------------------------------------------------|
+| Synchronisation risk (Abreu & Brunnermeier, 2003) | System prompt: "You bet against overvalued assets but must survive short squeezes" |
+| Risk management                                   | Persona balances short entry at high deviation with cover at negative deviation    |
+
+## §3 Market Mechanism
+
+```
+P(t+1) = P(t) + λ·NetDemand(t) + γ·[F(t)−P(t)] + ε(t)
+λ = 0.01, γ = 0.005 (weak mean-reversion — bubble persistence design)
 ```
 
-### LLM Variant
+Prompt includes: `price`, `fundamental`, `deviation`, `cash`, `position`, `portfolio_value`, `price_change`.
+
+## §4 LLM Architecture
+
+| Component      | Detail                                                      |
+|----------------|-------------------------------------------------------------|
+| Base class     | `LLMInvestor` (extends `GeneralPlayer`)                     |
+| Inference      | `LangChainAPIInference`                                     |
+| Context        | `HistoryBuffer` (last 200 entries)                          |
+| Output parsing | `parse_llm_response_with_thinking()` → `{action, quantity}` |
+| Retry logic    | 3 attempts; fall back to hold on failure                    |
+
+## §5 Config Reference
+
+Config file: `DotComBubble/LLM/config.yaml`
+
+Key extras: `llm.lm_name`, `llm.generation_config`, `initial_cash`, `initial_position`, `order_size`; system prompt loaded from `prompts.py`.
+
+## §6 Running Instructions
+
 ```bash
-python examples/DotComBubble/LLM/run_dotcombubble_llm.py \
-    -c configs/DotComBubble/LLM/simulation.yml
+python -m examples.DotComBubble.LLM.run_dotcombubble_llm
 ```
 
-### RuleLLM Variant
-```bash
-python examples/DotComBubble/RuleLLM/run_dotcombubble_rulellm.py \
-    -c configs/DotComBubble/RuleLLM/simulation.yml
-```
+## §7 Expected Behavior
 
-### RAG Variant
-```bash
-python examples/DotComBubble/Rag/run_dotcombubble_rag.py \
-    -c configs/DotComBubble/Rag/simulation.yml
-```
+- LLM variant typically shows more volatile bubble trajectories than Rule — personas can over-commit to narrative or momentum.
+- LLMNewEconomyEvangelist may buy later into the bubble than Rule equivalent (language nuance delays exit decisions).
+- LLMShortSeller shows variable SSR — LLM occasionally exits shorts prematurely on language-level fear signals.
+- BAI and BD broadly similar to Rule but with higher round-to-round variance.
 
-## References
+## §8 References
 
-- Shiller (2000): Irrational Exuberance and narrative economics
-- Ofek & Richardson (2003): Internet bubble dynamics
-- Abreu & Brunnermeier (2003): Synchronization risk and bubble persistence
+See `simulation-bases.md §2` for full DOI citations.
+
+## §9 Variant Comparison
+
+See `simulation-bases.md §9` for Rule / LLM / RuleLLM / Rag comparison table.

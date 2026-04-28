@@ -210,6 +210,14 @@ class LossAverseInvestor(BaseInvestor):
     """Loss averse: values losses 2.25x more than gains (prospect theory).
 
     Sells winners too early and holds losers too long.
+
+    Theory: simulation-bases.md §4.1
+    Foundation: Kahneman & Tversky (1979) doi:10.2307/1914185;
+                Odean (1998) doi:10.1111/0022-1082.00072
+    Activation: pnl_pct > sell_gain_threshold (gain) or
+                pnl_pct < −sell_gain × loss_aversion_lambda (loss)
+    Formula (gain): sell_qty = min(position, int(position × 0.7))
+    Formula (loss): sell_qty = min(position, int(position × 0.2))
     """
 
     def _make_decision(
@@ -235,7 +243,14 @@ class LossAverseInvestor(BaseInvestor):
 
 
 class BreakEvenTrader(BaseInvestor):
-    """Break-even effect: takes excessive risk to recover losses."""
+    """Break-even effect: takes excessive risk to recover losses.
+
+    Theory: simulation-bases.md §4.2
+    Foundation: Tversky & Kahneman (1992) doi:10.1007/BF00122574;
+                Barberis & Xiong (2009) doi:10.1111/j.1540-6261.2009.01448.x
+    Activation: pnl_pct < −0.05
+    Formula: risky_qty = min(int(|pnl_pct| × risk_increase_factor × 5000), int(cash/price))
+    """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -258,7 +273,13 @@ class BreakEvenTrader(BaseInvestor):
 
 
 class RationalTrader(BaseInvestor):
-    """Rational: makes decisions based on expected utility, no bias."""
+    """Rational: makes decisions based on expected utility, no bias.
+
+    Theory: simulation-bases.md §4.3
+    Foundation: Glosten & Milgrom (1985) doi:10.1016/0304-405X(85)90044-3
+    Activation: |deviation| > 0.03
+    Formula: qty = min(500, int(|deviation| × risk_aversion × 3000))
+    """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -282,7 +303,13 @@ class RationalTrader(BaseInvestor):
 
 
 class MomentumTrader(BaseInvestor):
-    """Momentum: follows price trends."""
+    """Momentum: follows price trends.
+
+    Theory: simulation-bases.md §4.4
+    Foundation: Jegadeesh & Titman (1993) doi:10.1111/j.1540-6261.1993.tb04702.x
+    Activation: |deviation| > entry_threshold (0.02)
+    Formula: qty = min(500, int(|deviation| × 3000))
+    """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -306,7 +333,14 @@ class MomentumTrader(BaseInvestor):
 
 
 class MarketMaker(BaseInvestor):
-    """Market maker: provides liquidity and earns spread."""
+    """Market maker: provides liquidity and earns spread.
+
+    Theory: simulation-bases.md §4.5
+    Foundation: Glosten & Milgrom (1985) doi:10.1016/0304-405X(85)90044-3;
+                Ho & Stoll (1981) doi:10.1016/0304-405X(81)90020-9
+    Activation: |position| < inventory_limit
+    Formula: qty = 300 (fixed); contrarian to deviation direction
+    """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float

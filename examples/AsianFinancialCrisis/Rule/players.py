@@ -137,12 +137,14 @@ class HotMoneyFunder(GeneralPlayer):
     """
     Provides short-term foreign currency loans that reverse rapidly at first sign of trouble.
 
+    Theory: simulation-bases.md §4.1 — HotMoneyFunder
     Theoretical Basis: Hot money reversal (Radelet & Sachs, 1998)
     Market Role: destabilizing
 
     Strategy:
         - When deviation > reversal_threshold (market rising): deploy buy_ratio of cash
         - When deviation < -reversal_threshold (market falling): sell sell_ratio of position
+    See simulation-bases.md §4.1.4.3 for mathematical model.
     """
 
     async def perceive(
@@ -227,12 +229,14 @@ class ContagionTrader(GeneralPlayer):
     """
     Spreads crisis from one market to another through correlated selling across borders.
 
+    Theory: simulation-bases.md §4.2 — ContagionTrader
     Theoretical Basis: Financial contagion (Kaminsky & Reinhart, 1999)
     Market Role: destabilizing
 
     Strategy:
         - Signal = contagion_weight * deviation + cross_border_sensitivity * return
         - When signal < contagion_threshold: sell sell_ratio of position
+    See simulation-bases.md §4.2.4.3 for mathematical model.
     """
 
     async def perceive(
@@ -314,11 +318,13 @@ class IMFRescuer(GeneralPlayer):
     """
     Provides emergency liquidity packages conditional on structural reforms.
 
+    Theory: simulation-bases.md §4.3 — IMFRescuer
     Theoretical Basis: International lender of last resort (Corsetti et al., 1999)
     Market Role: stabilizing
 
     Strategy:
         - When deviation < rescue_threshold (severely oversold): buy buy_ratio of cash
+    See simulation-bases.md §4.3.4.3 for mathematical model.
     """
 
     async def perceive(
@@ -394,12 +400,14 @@ class ValueContrarian(GeneralPlayer):
     """
     Buys oversold regional assets when contagion pushes prices below fundamentals.
 
+    Theory: simulation-bases.md §4.4 — ValueContrarian
     Theoretical Basis: Contrarian crisis investing (Radelet & Sachs, 1998 baseline)
     Market Role: stabilizing
 
     Strategy:
         - When deviation < oversold_threshold: buy buy_ratio of cash
         - When deviation > overbought_threshold: sell sell_ratio of position
+    See simulation-bases.md §4.4.4.3 for mathematical model.
     """
 
     async def perceive(
@@ -485,11 +493,13 @@ class NoiseTrader(GeneralPlayer):
     """
     Random uninformed trader providing baseline liquidity.
 
+    Theory: simulation-bases.md §4.5 — NoiseTrader
     Theoretical Basis: Noise trader model (Black, 1986)
     Market Role: neutral
 
     Strategy:
         - With probability trade_probability: randomly buy or sell a random quantity
+    See simulation-bases.md §4.5.4.3 for mathematical model.
     """
 
     async def perceive(

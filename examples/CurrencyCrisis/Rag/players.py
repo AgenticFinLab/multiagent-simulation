@@ -340,7 +340,7 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMSpeculativeAttacker(RagLLMInvestor):
-    """RAG-augmented speculative attacker."""
+    """RAG-augmented speculative attacker — shorts vulnerable currency on reserve weakness. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = (
         "examples.CurrencyCrisis.Rag.prompts:RAG_SPECULATIVE_ATTACKER_SYS"
@@ -348,7 +348,7 @@ class RagLLMSpeculativeAttacker(RagLLMInvestor):
 
 
 class RagLLMSelfFulfillingTrader(RagLLMInvestor):
-    """RAG-augmented self-fulfilling trader."""
+    """RAG-augmented self-fulfilling trader — sells on expectation others will sell. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = (
         "examples.CurrencyCrisis.Rag.prompts:RAG_SELF_FULFILLING_TRADER_SYS"
@@ -356,7 +356,7 @@ class RagLLMSelfFulfillingTrader(RagLLMInvestor):
 
 
 class RagLLMCentralBankDefender(RagLLMInvestor):
-    """RAG-augmented central bank defender."""
+    """RAG-augmented central bank defender — buys domestic currency to defend peg. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.CurrencyCrisis.Rag.prompts:RAG_CENTRAL_BANK_DEFENDER_SYS"
@@ -364,7 +364,7 @@ class RagLLMCentralBankDefender(RagLLMInvestor):
 
 
 class RagLLMFundamentalHedger(RagLLMInvestor):
-    """RAG-augmented fundamental hedger."""
+    """RAG-augmented fundamental hedger — trades on fundamental value, not speculation. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = (
         "examples.CurrencyCrisis.Rag.prompts:RAG_FUNDAMENTAL_HEDGER_SYS"
@@ -372,7 +372,7 @@ class RagLLMFundamentalHedger(RagLLMInvestor):
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented noise trader."""
+    """RAG-augmented noise trader — random uninformed FX liquidity provider. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.CurrencyCrisis.Rag.prompts:RAG_NOISE_TRADER_SYS"
 

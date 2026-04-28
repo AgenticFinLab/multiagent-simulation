@@ -1,100 +1,46 @@
-# FlashCrash2010 Analysis Guide
+# FlashCrash2010 Rule — Analysis
 
-## Metrics Interpretation
+## §1 Objectives
 
-### Price Metrics
+Evaluate whether the rule-based FlashCrash2010 simulation reproduces:
+1. Order-book depth collapse consistent with May 6, 2010 event (~90 % depth reduction)
+2. Spread widening (10–50 × normal)
+3. Multi-wave stop-loss cascade
+4. Fundamental-trader-led price recovery
 
-| Metric          | Description                    | Expected Range | Interpretation    |
-|-----------------|--------------------------------|----------------|-------------------|
-| Max Drawdown    | Largest peak-to-trough decline | -5% to -15%    | Crash severity    |
-| Crash Magnitude | Price drop during crash phase  | -5% to -10%    | Speed of collapse |
-| Recovery        | Price rebound after trough     | +3% to +8%     | Market resilience |
+## §2 Metric → Function Mapping
 
-### Market Structure Metrics
+| Metric                 | Function                                                  | Source               |
+|------------------------|-----------------------------------------------------------|----------------------|
+| Max drawdown           | `max_drawdown(price_history)`                             | analysis-bases.md §2 |
+| Depth collapse ratio   | `depth_collapse_ratio(depth_history, base_depth)`         | analysis-bases.md §2 |
+| Spread widening factor | `spread_widening_factor(spread_history, normal_spread)`   | analysis-bases.md §2 |
+| HFT withdrawal rounds  | `hft_withdrawal_rounds(hft_orders_by_round)`              | analysis-bases.md §2 |
+| Cascade trigger rounds | `cascade_trigger_rounds(stoploss_orders_by_round)`        | analysis-bases.md §2 |
+| Recovery time          | `recovery_time(price_history, trough_round, fundamental)` | analysis-bases.md §2 |
 
-| Metric         | Description             | Expected Range | Interpretation         |
-|----------------|-------------------------|----------------|------------------------|
-| Max Spread     | Widest bid-ask spread   | 0.5% - 2.0%    | Liquidity stress       |
-| Min Depth      | Lowest order book depth | 500 - 2000     | Liquidity evaporation  |
-| Depth Collapse | % reduction in depth    | 50% - 90%      | Severity of withdrawal |
+## §3 Variant-Specific Notes (Rule)
 
-### HFT Metrics
+- All thresholds fixed → `max_drawdown` and `recovery_time` are reproducible given the same config
+- `depth_collapse_ratio` is determined by `stress_factor` formula (volatility + hft_participation)
+- `spread_widening_factor` can reach 50 × at peak stress if both `hft_participation < 0.30` and `volatility > 0.02`
+- `cascade_trigger_rounds` shows discrete waves: each StopLossTrader fires at its own `stop_percentage` level
+- HFTMarketMaker withdrawal is abrupt (quantity 500 → 0); no gradual retreat
 
-| Metric               | Description           | Expected Range | Interpretation             |
-|----------------------|-----------------------|----------------|----------------------------|
-| Normal Participation | HFT % in calm periods | 60% - 70%      | Normal liquidity provision |
-| Stress Participation | HFT % during crash    | 10% - 30%      | Withdrawal severity        |
-| Participation Drop   | Difference            | 30% - 50%      | Withdrawal magnitude       |
+## §4 Expected Ranges (Rule)
 
-## Visualization Guide
+| Metric                   | Expected range | Historical benchmark |
+|--------------------------|----------------|----------------------|
+| `max_drawdown`           | 0.05–0.12      | ~0.09 (DJIA May 6)   |
+| `depth_collapse_ratio`   | 0.05–0.20      | ~0.10                |
+| `spread_widening_factor` | 5–50 ×         | 10–50 ×              |
+| `hft_withdrawal_rounds`  | 5–20 rounds    | ~36 min              |
+| Cascade wave count       | 2–5            | Multi-wave           |
+| `recovery_time`          | 10–25 rounds   | ~20 min              |
 
-### Price vs Fundamental Plot
-- **Normal**: Price tracks fundamental closely
-- **Crash**: Sharp divergence with rapid decline
-- **Recovery**: Price returns toward fundamental
+## §5 References
 
-### Spread Evolution Plot
-- **Normal**: Tight spreads (~0.01%)
-- **Crash**: Dramatic widening (10-50x normal)
-- **Recovery**: Gradual tightening
-
-### Order Book Depth Plot
-- **Normal**: Deep book (5000-10000 shares)
-- **Crash**: Shallow book (10-20% of normal)
-- **Recovery**: Gradual restoration
-
-### HFT Participation Plot
-- **Normal**: High participation (60-70%)
-- **Crash**: Sharp drop (withdrawal)
-- **Recovery**: Partial return
-
-## Comparative Analysis
-
-### Rule vs LLM Variants
-
-| Aspect            | Rule             | LLM                              |
-|-------------------|------------------|----------------------------------|
-| Withdrawal Timing | Fixed thresholds | Adaptive, context-dependent      |
-| Spread Setting    | Deterministic    | May vary based on interpretation |
-| Recovery Speed    | Fixed            | May be faster/slower             |
-
-### Expected Differences
-
-1. **Rule**: Predictable, repeatable patterns
-2. **LLM**: More variation, potentially more realistic
-3. **RuleLLM**: Balance of consistency and adaptability
-4. **RAG**: Historical knowledge may improve response
-
-## Troubleshooting
-
-### No Crash Observed
-- Check withdrawal_threshold (lower = earlier withdrawal)
-- Increase momentum_chaser activity
-- Add more stop_loss_traders
-
-### Crash Too Severe
-- Increase fundamental_trader capital
-- Raise mean_reversion parameter
-- Add more HFT market makers
-
-### No Recovery
-- Check mean_reversion strength
-- Ensure fundamental_traders have sufficient capital
-- Verify stop-loss traders don't all trigger simultaneously
-
-## Statistical Validation
-
-Compare simulation results to historical May 6, 2010 data:
-
-| Metric       | Historical  | Simulation Target |
-|--------------|-------------|-------------------|
-| Max decline  | ~9% (DJIA)  | 5-10%             |
-| Duration     | ~15 minutes | 20-50 rounds      |
-| Recovery     | ~600 points | Partial to full   |
-| Volume spike | 3-5x normal | 2-4x normal       |
-
-## References
-
-1. Kirilenko et al. (2017) - Benchmark for HFT behavior
-2. CFTC-SEC Report (2010) - Official event analysis
-3. Biais et al. (2015) - Order book dynamics theory
+- simulation-bases.md §4 — investor taxonomy and parameter definitions
+- analysis-bases.md §2 — metric function signatures
+- Kirilenko et al. (2017) doi:10.1111/jofi.12498
+- Biais et al. (2015) doi:10.1016/j.jfineco.2015.03.004

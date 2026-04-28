@@ -155,19 +155,19 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMProCyclicalLender(LLMInvestor):
-    """LLM-driven pro-cyclical lender."""
+    """LLM-driven pro-cyclical lender — expands credit in booms, tightens in busts. Theory: simulation-bases.md §4.1."""
 
     _system_prompt_path = "examples.CreditCycle.LLM.prompts:LLM_PRO_CYCLICAL_LENDER_SYS"
 
 
 class LLMMinskyBorrower(LLMInvestor):
-    """LLM-driven Minsky borrower."""
+    """LLM-driven Minsky borrower — accumulates leverage during stability, Ponzi phase. Theory: simulation-bases.md §4.2."""
 
     _system_prompt_path = "examples.CreditCycle.LLM.prompts:LLM_MINSKY_BORROWER_SYS"
 
 
 class LLMCounterCyclicalLender(LLMInvestor):
-    """LLM-driven counter-cyclical lender."""
+    """LLM-driven counter-cyclical lender — reserves in booms, liquidity injection in busts. Theory: simulation-bases.md §4.3."""
 
     _system_prompt_path = (
         "examples.CreditCycle.LLM.prompts:LLM_COUNTER_CYCLICAL_LENDER_SYS"
@@ -175,13 +175,13 @@ class LLMCounterCyclicalLender(LLMInvestor):
 
 
 class LLMValueInvestor(LLMInvestor):
-    """LLM-driven value investor."""
+    """LLM-driven value investor — fundamental-anchored credit buyer at deep discount. Theory: simulation-bases.md §4.4."""
 
     _system_prompt_path = "examples.CreditCycle.LLM.prompts:LLM_VALUE_INVESTOR_SYS"
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven noise trader."""
+    """LLM-driven noise trader — random uninformed liquidity provider. Theory: simulation-bases.md §4.5."""
 
     _system_prompt_path = "examples.CreditCycle.LLM.prompts:LLM_NOISE_TRADER_SYS"
 
