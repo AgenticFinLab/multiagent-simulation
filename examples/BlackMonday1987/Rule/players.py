@@ -212,8 +212,8 @@ class IndexArbitrageur(GeneralPlayer):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        arb_threshold = float(extras["arbitrage_threshold"])
-        position_size = int(extras["position_size"])
+        arb_threshold = float(extras["arb_threshold"])
+        position_size = int(extras["base_size"])
 
         action, quantity = "hold", 0
         if abs(deviation) > arb_threshold:
@@ -287,7 +287,7 @@ class ProgramTrader(GeneralPlayer):
         position = self.state.custom_state["position"]
         extras = self.config.extras
         trigger_threshold = float(extras["trigger_threshold"])
-        sell_size = int(extras["sell_size"])
+        sell_size = int(extras["base_size"])
         feedback_strength = float(extras["feedback_strength"])
 
         action, quantity = "hold", 0
@@ -362,7 +362,7 @@ class ValueInvestor(GeneralPlayer):
         position = self.state.custom_state["position"]
         extras = self.config.extras
         value_discount = float(extras["value_discount"])
-        order_size = int(extras["order_size"])
+        order_size = int(extras["base_size"])
 
         action, quantity = "hold", 0
         if deviation < -value_discount:
