@@ -17,7 +17,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+import json as _json
+import re as _re
+
+from examples.llm_utils import (
+    parse_llm_response_with_thinking,
+)  # noqa: F401 (keep for reference)
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -32,6 +37,57 @@ from masim.utils.history import HistoryBuffer
 from examples.EchoChamber.Rule.players import OpinionEnvironment
 
 logger = logging.getLogger(__name__)
+
+
+def _parse_echo_chamber_response(response_text: str) -> Dict[str, Any]:
+    """Parse LLM response expecting EchoChamber fields.
+
+    Same tag/JSON extraction logic as ``parse_llm_response_with_thinking``
+    but validates for ``action_type``, ``intensity``, ``reasoning``.
+    """
+    analysis = ""
+    decision_json = None
+
+    analysis_match = _re.search(
+        r"<analysis>(.*?)</analysis>", response_text, _re.DOTALL
+    )
+    if not analysis_match:
+        analysis_match = _re.search(r"<think>(.*?)</think>", response_text, _re.DOTALL)
+    if analysis_match:
+        analysis = analysis_match.group(1).strip()
+
+    decision_match = _re.search(
+        r"<decision>(.*?)</decision>", response_text, _re.DOTALL
+    )
+    if decision_match:
+        decision_json = decision_match.group(1).strip()
+
+    if not decision_json:
+        code_match = _re.search(
+            r"```(?:json)?\s*(.*?)\s*```", response_text, _re.DOTALL
+        )
+        if code_match:
+            decision_json = code_match.group(1).strip()
+        else:
+            json_match = _re.search(r"\{[^{}]*\}", response_text, _re.DOTALL)
+            if json_match:
+                decision_json = json_match.group(0)
+
+    if not decision_json:
+        raise ValueError(f"No decision JSON found in response: {response_text[:100]}")
+
+    try:
+        parsed = _json.loads(decision_json)
+    except _json.JSONDecodeError:
+        raise ValueError(f"Failed to parse decision JSON: {decision_json[:100]}")
+
+    required_fields = ["action_type", "intensity", "reasoning"]
+    missing = [f for f in required_fields if f not in parsed or parsed[f] is None]
+    if missing:
+        raise ValueError(f"Fields missing or null in LLM response: {missing}")
+
+    parsed["analysis"] = analysis
+    return parsed
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -322,7 +378,7 @@ class RagLLMSocialAgent(GeneralPlayer):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 infer_output = llm_client.run([infer_input])
-                decision = parse_llm_response_with_thinking(
+                decision = _parse_echo_chamber_response(
                     infer_output.outputs[0].response
                 )
                 break

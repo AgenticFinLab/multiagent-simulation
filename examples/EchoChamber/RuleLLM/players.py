@@ -404,9 +404,61 @@ Respond with ONLY valid JSON:
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with analysis and decision sections.
 
-        Delegates to shared utility in examples/llm_utils.py
+        EchoChamber expects: {"action_type": ..., "intensity": ..., "reasoning": ...}
+        The shared ``parse_llm_response_with_thinking`` validates for financial
+        trading fields, so we do our own field validation here.
         """
-        return parse_llm_response_with_thinking(response_text)
+        import re as _re
+
+        analysis = ""
+        decision_json = None
+
+        analysis_match = _re.search(
+            r"<analysis>(.*?)</analysis>", response_text, _re.DOTALL
+        )
+        if not analysis_match:
+            analysis_match = _re.search(
+                r"<think>(.*?)</think>", response_text, _re.DOTALL
+            )
+        if analysis_match:
+            analysis = analysis_match.group(1).strip()
+
+        decision_match = _re.search(
+            r"<decision>(.*?)</decision>", response_text, _re.DOTALL
+        )
+        if decision_match:
+            decision_json = decision_match.group(1).strip()
+
+        if not decision_json:
+            code_match = _re.search(
+                r"```(?:json)?\s*(.*?)\s*```", response_text, _re.DOTALL
+            )
+            if code_match:
+                decision_json = code_match.group(1).strip()
+            else:
+                json_match = _re.search(r"\{[^{}]*\}", response_text, _re.DOTALL)
+                if json_match:
+                    decision_json = json_match.group(0)
+
+        if not decision_json:
+            raise ValueError(
+                f"No decision JSON found in response: {response_text[:100]}"
+            )
+
+        import json as _json
+
+        try:
+            parsed = _json.loads(decision_json)
+        except _json.JSONDecodeError:
+            raise ValueError(f"Failed to parse decision JSON: {decision_json[:100]}")
+
+        required_fields = ["action_type", "intensity", "reasoning"]
+        missing = [f for f in required_fields if f not in parsed or parsed[f] is None]
+        if missing:
+            raise ValueError(f"Fields missing or null in LLM response: {missing}")
+
+        parsed["analysis"] = analysis
+        return parsed
 
     def _clamp_opinion(self, opinion: float) -> float:
         """Clamp opinion to valid range [-1, 1]."""

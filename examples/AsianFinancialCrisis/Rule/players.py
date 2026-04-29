@@ -184,7 +184,7 @@ class HotMoneyFunder(GeneralPlayer):
         position = self.state.custom_state["position"]
         extras = self.config.extras
 
-        reversal_threshold = extras["reversal_speed"]
+        reversal_threshold = extras["reversal_threshold"]
         sell_ratio = extras["sell_ratio"]
         buy_ratio = extras["buy_ratio"]
 
