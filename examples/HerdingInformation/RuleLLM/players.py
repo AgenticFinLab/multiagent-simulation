@@ -48,8 +48,8 @@ class RuleLLMInvestor(GeneralPlayer):
     async def _initialize_agent(self) -> None:
         extras = self.config.extras
         self.state.custom_state["cash"] = extras["initial_cash"]
-        self.state.custom_state["position"] = extras.get("initial_position", 0)
-        llm_cfg = extras.get("llm", {})
+        self.state.custom_state["position"] = extras["initial_position"]
+        llm_cfg = extras["llm"]
         self._llm_params = {
             "lm_name": llm_cfg["lm_name"],
             "generation_config": llm_cfg["generation_config"],
@@ -76,9 +76,9 @@ class RuleLLMInvestor(GeneralPlayer):
     async def decide(self):
         from examples.HerdingInformation.RuleLLM.prompts import RULELLM_USER_TEMPLATE
 
-        price = self.state.custom_state.get("price", 0.0)
-        fundamental = self.state.custom_state.get("fundamental", 0.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         round_num = self.state.custom_state["round"]
@@ -95,11 +95,30 @@ class RuleLLMInvestor(GeneralPlayer):
             portfolio_value=portfolio_value,
         )
         infer_input = InferInput(system_msg=system_msg, user_msg=user_msg)
-        response = self._llm_client.run([infer_input]).outputs[0].response
-        raw = parse_llm_response_with_thinking(response)
 
-        action = raw.get("action", "hold")
-        quantity = int(raw.get("quantity", 0))
+        decision = None
+        last_error = None
+        for attempt in range(3):
+            try:
+                response = self._llm_client.run([infer_input]).outputs[0].response
+                decision = parse_llm_response_with_thinking(response)
+                break
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            )
+
+        action = decision["action"]
+        quantity = int(decision["quantity"])
         quantity = max(0, min(quantity, 5000))
 
         if action == "buy" and price > 0:
@@ -110,9 +129,9 @@ class RuleLLMInvestor(GeneralPlayer):
         return {"action": action, "quantity": quantity}
 
     async def act(self, decision_payload):
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity

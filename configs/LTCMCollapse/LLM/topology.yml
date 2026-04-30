@@ -11,7 +11,7 @@ connections:
     - leveragetrader
     - riskmanager
     - liquidityprovider
-    - noisetrader
+    - centralbank
 
   convergencearbitrageur:
     - market
@@ -25,5 +25,5 @@ connections:
   liquidityprovider:
     - market
 
-  noisetrader:
+  centralbank:
     - market

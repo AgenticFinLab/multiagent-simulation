@@ -371,33 +371,15 @@ Respond with ONLY valid JSON:
             try:
                 decision = self._parse_llm_response(infer_output.outputs[0].response)
                 break
-            except ValueError as e:
-                last_error = e
+            except Exception as exc:
+                last_error = exc
                 if attempt < max_retries - 1:
                     logger.debug(f"[{self.identity}] LLM parse failed, retrying...")
 
-        # If LLM failed after all retries, skip trading this round (hold)
         if decision is None:
-            logger.warning(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}. "
-                f"Skipping trade this round."
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             )
-            order = {
-                "bid_price": market_data["price"],
-                "quantity": 0.0,
-                "strategy": strategy_name,
-                "investor": self.identity,
-                "reasoning": f"LLM parse failed: held position",
-                "analysis": "",
-                "cash": self.state.custom_state["cash"],
-                "position": self.state.custom_state["position"],
-            }
-            return {
-                **order,
-                "outbound_messages": [
-                    {"payload": order, "content_type": "investor_bid"}
-                ],
-            }
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
@@ -451,30 +433,30 @@ Respond with ONLY valid JSON:
 
 
 class LLMGreaterFoolSpeculator(LLMInvestor):
-    """LLM Aggressive Momentum Trader."""
+    """LLM Aggressive Momentum Trader. Theory: simulation-bases.md §4 — MomentumSpeculator."""
 
     pass
 
 
 class LLMRationalArbitrageur(LLMInvestor):
-    """LLM Fundamental Analyst."""
+    """LLM Fundamental Analyst. Theory: simulation-bases.md §4 — RationalArbitrageur."""
 
     pass
 
 
 class LLMSentimentTrader(LLMInvestor):
-    """LLM Sentiment Trader."""
+    """LLM Sentiment Trader. Theory: simulation-bases.md §4 — NoiseTrader."""
 
     pass
 
 
 class LLMValueInvestor(LLMInvestor):
-    """LLM Value Investor."""
+    """LLM Value Investor. Theory: simulation-bases.md §4 — FundamentalInvestor."""
 
     pass
 
 
 class LLMLeveragedSpeculator(LLMInvestor):
-    """LLM Leveraged Trader."""
+    """LLM Leveraged Trader. Theory: simulation-bases.md §4 — LeveragedBuyer."""
 
     pass

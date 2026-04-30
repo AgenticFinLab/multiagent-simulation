@@ -42,8 +42,8 @@ class LLMInvestor(GeneralPlayer):
         if not getattr(self, "_llm", None):
             llm_cfg = self.config.extras["llm"]
             self._llm = LangChainAPIInference(
-                lm_name=llm_cfg["model"],
-                generation_config={"temperature": llm_cfg.get("temperature", 0.3)},
+                lm_name=llm_cfg["lm_name"],
+                generation_config=llm_cfg["generation_config"],
             )
         return self._llm
 
@@ -64,10 +64,10 @@ class LLMInvestor(GeneralPlayer):
 
     async def decide(self) -> Dict[str, Any]:
         price = self.state.custom_state.get(
-            "price", self.config.extras.get("initial_price", 100.0)
+            "price", self.config.extras["initial_price"]
         )
         fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras.get("fundamental_value", 100.0)
+            "fundamental", self.config.extras["fundamental_value"]
         )
         deviation = self.state.custom_state.get("deviation", 0.0)
         cash = self.state.custom_state["cash"]

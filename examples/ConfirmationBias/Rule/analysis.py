@@ -51,8 +51,12 @@ def _load_data(results) -> Dict[str, Any]:
         if "fundamental" in player.batch_store_names:
             fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
 
+    investor_bids: Dict[str, Dict[int, float]] = {}
     investor_payloads: Dict[str, Dict[int, dict]] = {}
     for pid, player in results.players_by_role("player").items():
+        bid = player.turns.field("bid_price")
+        if bid:
+            investor_bids[pid] = bid
         payloads = player.turns.payloads()
         if payloads:
             investor_payloads[pid] = payloads
@@ -60,6 +64,7 @@ def _load_data(results) -> Dict[str, Any]:
     return {
         "market_prices": market_prices,
         "fundamentals": fundamentals,
+        "investor_bids": investor_bids,
         "investor_payloads": investor_payloads,
     }
 
@@ -150,8 +155,8 @@ def _compute_agent_vwap(
         total_buy = 0.0
         total_sell = 0.0
         for rnd, payload in round_payloads.items():
-            qty = float(payload.get("quantity", 0))
-            price = market_prices.get(rnd, 0.0)
+            qty = float(payload["quantity"])
+            price = market_prices[rnd]
             abs_qty = abs(qty)
             price_volume_sum += abs_qty * price
             total_vol += abs_qty
@@ -441,21 +446,101 @@ def _build_interpretation(
 # ---------------------------------------------------------------------------
 
 
+_BID_COLORS = [
+    "#3a86ff",
+    "#ff006e",
+    "#8338ec",
+    "#06d6a0",
+    "#fb5607",
+    "#ff595e",
+    "#1982c4",
+    "#6a4c93",
+    "#ffca3a",
+    "#8ac926",
+    "#e07a5f",
+    "#3d405b",
+    "#81b29a",
+    "#f2cc8f",
+    "#264653",
+    "#e63946",
+    "#457b9d",
+    "#2a9d8f",
+    "#e9c46a",
+    "#f4a261",
+]
+
+
 def _create_visualizations(
     market_prices: Dict[int, float],
     fundamentals: Dict[int, float],
+    investor_bids: Dict[str, Dict[int, float]],
     investor_payloads: Dict[str, Dict[int, dict]],
     rolling_vols: List[float],
     output_dir: str,
 ) -> None:
-    """Create 3 analysis plots per analysis-bases.md §7."""
+    """Create 4 analysis plots per analysis-bases.md §7."""
     rounds_sorted = sorted(market_prices.keys())
     prices_list = [market_prices[r] for r in rounds_sorted]
-    fund_list = [fundamentals.get(r, 100.0) for r in rounds_sorted]
+    fund_list = [fundamentals[r] for r in rounds_sorted]
     rounds_arr = np.array(rounds_sorted)
     prices_arr = np.array(prices_list)
     fund_arr = np.array(fund_list)
     deviation = (prices_arr - fund_arr) / fund_arr * 100
+
+    # --- Plot 0: Investor Bid Curves (PRIMARY headline chart) ---
+    _fv = float(np.mean(fund_list))
+    fig0, ax0 = plt.subplots(figsize=(16, 8))
+    fig0.suptitle(
+        "ConfirmationBias Rule \u2014 Investor Bidding Curves",
+        fontsize=14,
+        fontweight="bold",
+    )
+    ax0.plot(
+        rounds_arr,
+        prices_arr,
+        color="#f0a500",
+        linewidth=2.5,
+        label="Market Price",
+        zorder=10,
+    )
+    ax0.axhline(
+        y=_fv,
+        color="darkgreen",
+        linestyle="--",
+        linewidth=1.2,
+        label=f"Fundamental (F={_fv:.2f})",
+        alpha=0.8,
+    )
+    for _i, (_pid, _bids) in enumerate(sorted(investor_bids.items())):
+        _br = sorted(_bids.keys())
+        _bv = [float(_bids[r]) for r in _br]
+        ax0.plot(
+            _br,
+            _bv,
+            marker="o",
+            markersize=2,
+            linewidth=0.9,
+            color=_BID_COLORS[_i % len(_BID_COLORS)],
+            alpha=0.8,
+            label=_pid.replace("_", " ").title(),
+        )
+    ax0.set_xlabel("Round", fontsize=12)
+    ax0.set_ylabel("Price", fontsize=12)
+    ax0.set_title("Market Price & Individual Investor Bids", fontsize=12)
+    ax0.grid(True, alpha=0.3)
+    ax0.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.06),
+        ncol=min(5, len(investor_bids) + 2),
+        fontsize=8,
+        frameon=True,
+        framealpha=0.7,
+    )
+    plt.tight_layout()
+    _p0 = os.path.join(output_dir, "00_investor_bids.png")
+    plt.savefig(_p0, dpi=150, bbox_inches="tight")
+    plt.close()
+    print(f"Saved: {_p0}")
 
     # ---- Plot 01: Price Dynamics ----
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
@@ -588,7 +673,9 @@ def analyze_confirmation_bias(
 
     rounds_sorted = sorted(market_prices.keys())
     prices_list = [market_prices[r] for r in rounds_sorted]
-    fund_value = float(np.mean(list(fundamentals.values()))) if fundamentals else 100.0
+    if not fundamentals:
+        raise ValueError("No fundamental data recorded - simulation data is incomplete")
+    fund_value = float(np.mean(list(fundamentals.values())))
     total_rounds = len(rounds_sorted)
 
     # Metrics
@@ -615,6 +702,7 @@ def analyze_confirmation_bias(
     _create_visualizations(
         market_prices=market_prices,
         fundamentals=fundamentals,
+        investor_bids=data["investor_bids"],
         investor_payloads=investor_payloads,
         rolling_vols=rolling_vols,
         output_dir=output_dir,
@@ -633,10 +721,10 @@ def analyze_confirmation_bias(
             "return_autocorr_lag1": round(autocorr, 4),
         },
         "price": {
-            "initial": round(prices_list[0], 4) if prices_list else None,
-            "final": round(prices_list[-1], 4) if prices_list else None,
-            "min": round(min(prices_list), 4) if prices_list else None,
-            "max": round(max(prices_list), 4) if prices_list else None,
+            "initial": round(prices_list[0], 4),
+            "final": round(prices_list[-1], 4),
+            "min": round(min(prices_list), 4),
+            "max": round(max(prices_list), 4),
         },
         "agent_vwap": {
             k: {sk: round(sv, 4) for sk, sv in v.items()} for k, v in vwap_data.items()

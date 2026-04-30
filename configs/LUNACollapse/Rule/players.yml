@@ -102,6 +102,7 @@ anchordepositor:
       exit_threshold: 0.03
       base_size: 350
       custom_state_hot_limit: 3
+      yield_threshold: 0.05
   persona: !include persona.yml
 
 valuebuyer:

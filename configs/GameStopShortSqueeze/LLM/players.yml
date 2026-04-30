@@ -129,12 +129,12 @@ institutionalvalue:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+momentumretail:
   name: "NoiseTrader"
-  class: "examples.GameStopShortSqueeze.LLM.players:LLMNoiseTrader"
+  class: "examples.GameStopShortSqueeze.LLM.players:LLMMomentumRetail"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "momentumretail"
     role: player
     steps_per_turn: 1
     group_tags:

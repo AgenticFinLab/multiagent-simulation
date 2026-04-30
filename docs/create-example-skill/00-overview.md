@@ -103,6 +103,27 @@ Every numeric value in `simulation-bases.md §6` must trace to an empirical stud
 - Each variant's `explain.md` is written **immediately after** that variant's `players.py` is completed
 - This discipline ensures the code reflects the design, not vice versa
 
+### 6. Strict no-default, no-defensive-programming policy
+All simulation code (`players.py` and `analysis.py` in every variant) must follow **fail-fast** principles. When required data is missing or an LLM fails to return a value, the code must raise an explicit exception — never silently substitute a default value or fall back to a safe action.
+
+**Prohibited patterns** (applies universally to all variants):
+
+| Pattern                                     | Why It Is Dangerous                                        |
+|---------------------------------------------|------------------------------------------------------------|
+| `dict.get("key", default)` on known dicts   | Silently uses wrong data if key is missing                 |
+| `if X else fallback` for required data      | Hides data pipeline failures                               |
+| `decision is None → hold` (silent recovery) | Masks LLM parse failures as valid trading decisions        |
+| `if rates else 0.0` for computed metrics    | Produces fake zero metrics instead of surfacing empty data |
+| `payload.get("field", None)` in analysis    | Silently drops records that should cause investigation     |
+
+**Required replacement**: Direct `dict["key"]` access (raises `KeyError`), `raise ValueError(...)`, or `raise RuntimeError(...)` when data is absent.
+
+**Legitimate exceptions** (these `.get()` patterns are allowed):
+- RAG config resolution: `resolved_rag.get("embed_model", ...)` — external library config with genuine optional fields
+- `__getstate__`/`__setstate__` serialization infrastructure
+- `config.extras.get("optional_feature", {})` — truly optional config sections like `private_knowledge`
+- Matplotlib styling defaults (colors, line widths)
+
 ---
 
 ## Reference: AssetBubble Implementation

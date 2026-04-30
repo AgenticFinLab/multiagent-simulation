@@ -107,12 +107,12 @@ institutionalvalue:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-noisetrader:
-  name: "NoiseTrader"
-  class: "examples.GameStopShortSqueeze.Rule.players:NoiseTrader"
+momentumretail:
+  name: "MomentumRetail"
+  class: "examples.GameStopShortSqueeze.Rule.players:MomentumRetail"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "momentumretail"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -124,6 +124,7 @@ noisetrader:
       initial_price: 20.0
       fundamental_value: 20.0
       trade_probability: 0.3
+      fomo_threshold: 0.05        # FOMO activation deviation threshold (§4.5)
       min_order: 50
       max_order: 300
       custom_state_hot_limit: 3

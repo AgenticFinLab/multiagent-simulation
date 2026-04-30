@@ -166,8 +166,8 @@ class HindsightOverconfident(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _ = extras.get("hindsight_inflation", 1.0)
-        __ = extras.get("prediction_overweight", 1.0)
+        _ = extras["hindsight_inflation"]
+        __ = extras["prediction_overweight"]
 
         if abs(deviation) > 0.02:
             qty = min(800, int(abs(deviation) * 5000))
@@ -241,8 +241,8 @@ class OutcomeLearner(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _ = extras.get("success_attribution", 1.0)
-        __ = extras.get("failure_discount", 1.0)
+        _ = extras["success_attribution"]
+        __ = extras["failure_discount"]
 
         if abs(deviation) > 0.02:
             qty = min(800, int(abs(deviation) * 5000))
@@ -316,8 +316,8 @@ class ProcessEvaluator(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _ = extras.get("process_weight", 1.0)
-        __ = extras.get("outcome_weight", 1.0)
+        _ = extras["process_weight"]
+        __ = extras["outcome_weight"]
 
         if abs(deviation) > 0.05:
             qty = min(500, int(abs(deviation) * 3000))
@@ -391,8 +391,8 @@ class ContrarianSkeptic(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _ = extras.get("skepticism_level", 1.0)
-        __ = extras.get("position_size", 100)
+        _ = extras["skepticism_level"]
+        __ = extras["position_size"]
 
         if abs(deviation) > 0.05:
             qty = min(500, int(abs(deviation) * 3000))
@@ -466,7 +466,7 @@ class NoiseTrader(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _ = extras.get("trade_probability", 0.3)
+        _ = extras["trade_probability"]
 
         if random.random() < 0.3:
             qty = random.randint(100, 500)

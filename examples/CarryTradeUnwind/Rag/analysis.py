@@ -49,7 +49,7 @@ def analyze_rag_knowledge_effect(
         total_rag_rounds = 0
 
         for payload in round_payloads.values():
-            rag_context = payload.get("rag_context", None)
+            rag_context = payload["rag_context"]
             if rag_context is None:
                 continue
             total_rag_rounds += 1
@@ -111,11 +111,11 @@ def main() -> None:
     with open(rag_stats_path, "w", encoding="utf-8") as fh:
         json.dump(rag_stats, fh, indent=2)
 
-    agg = rag_stats.get("aggregate", {})
+    agg = rag_stats["aggregate"]
     if agg:
         print(
             f"Mean RAG retrieval failure rate: "
-            f"{agg.get('mean_retrieval_failure_rate', 0):.1%}"
+            f"{agg['mean_retrieval_failure_rate']:.1%}"
         )
 
     return summary

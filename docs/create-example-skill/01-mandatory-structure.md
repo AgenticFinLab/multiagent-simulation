@@ -102,6 +102,19 @@ Each variant has a distinct construction approach, goal, and set of non-negotiab
 
 ## 5. Variant-Specific Non-Negotiable Constraints
 
+### Universal: No Defaults, No Defensive Programming
+
+This constraint applies to **ALL four variants** equally. Every `players.py` and `analysis.py` file must follow strict fail-fast principles:
+
+- **No `.get(key, default)`** on simulation data dicts (config extras, message payloads, LLM responses, coordinator data, analysis records). Use direct `dict["key"]` access.
+- **No `if X else fallback`** for required data fields (e.g., `if fundamentals else 1.0` is forbidden — use `if not fundamentals: raise ValueError(...)`).
+- **No silent error recovery** — when an LLM returns `None` or an unparseable response, code must `raise RuntimeError(...)`, never silently substitute `{"action": "hold", "quantity": 0}`.
+- **No `if rates else 0.0`** for computed metrics — if no data was collected, raise `ValueError`, do not fabricate a zero.
+
+Legitimate exceptions: RAG config resolution (`resolved_rag.get()`), `__getstate__`/`__setstate__` serialization, truly optional config sections (`extras.get("private_knowledge", {})`), and matplotlib styling defaults.
+
+See `docs/create-example-skill/00-overview.md` Principle #6 for the full policy.
+
 ### Rule Variant
 - **No hardcoded values.** Every numeric threshold, position size, or parameter must be read from `extras` in `players.yml`.
 - **Every parameter in `players.yml` must have a source citation comment.**

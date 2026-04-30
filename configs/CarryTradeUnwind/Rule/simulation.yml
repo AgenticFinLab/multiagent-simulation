@@ -27,7 +27,7 @@ ray:
   namespace: "carrytrade_rule"
   actor_prefix: null
   # Derived: 10 players (1 market + 2 carry_trader + 2 leveraged_carry + 2 funding_buyer
-  #          + 1 cb_intervener + 2 noise_trader)
+  #          + 1 hedged_carry_trader + 2 noise_trader)
   #   Star topology -> 18 msgs/round -> 38 Ray objects -> 128 MB floor
   num_cpus: null
   num_gpus: null

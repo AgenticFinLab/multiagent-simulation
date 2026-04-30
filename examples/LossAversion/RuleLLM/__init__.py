@@ -3,19 +3,19 @@
 from .players import (
     Market,
     RuleLLMInvestor,
-    LLMLossAverseInvestor,
-    LLMBreakEvenTrader,
-    LLMRationalTrader,
-    LLMMomentumTrader,
-    LLMMarketMaker,
+    RuleLLMLossAverseInvestor,
+    RuleLLMBreakEvenTrader,
+    RuleLLMRationalTrader,
+    RuleLLMMomentumTrader,
+    RuleLLMMarketMaker,
 )
 
 __all__ = [
     "Market",
     "RuleLLMInvestor",
-    "LLMLossAverseInvestor",
-    "LLMBreakEvenTrader",
-    "LLMRationalTrader",
-    "LLMMomentumTrader",
-    "LLMMarketMaker",
+    "RuleLLMLossAverseInvestor",
+    "RuleLLMBreakEvenTrader",
+    "RuleLLMRationalTrader",
+    "RuleLLMMomentumTrader",
+    "RuleLLMMarketMaker",
 ]

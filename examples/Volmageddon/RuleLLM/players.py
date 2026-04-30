@@ -68,7 +68,7 @@ class RuleLLMInvestor(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras.get(
                 "fundamental_value", 100.0
             )

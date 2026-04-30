@@ -61,11 +61,8 @@ class LLMInvestor(GeneralPlayer):
         llm_cfg = extras["llm"]
         self.state.custom_state["llm_params"] = llm_cfg
         self.state.custom_state["llm_client"] = LangChainAPIInference(
-            lm_name=llm_cfg["model"],
-            generation_config={
-                "temperature": llm_cfg["temperature"],
-                "max_tokens": llm_cfg["max_tokens"],
-            },
+            lm_name=llm_cfg["lm_name"],
+            generation_config=llm_cfg["generation_config"],
         )
 
     def __getstate__(self) -> Dict:
@@ -80,11 +77,8 @@ class LLMInvestor(GeneralPlayer):
         if "llm_params" in cs and "llm_client" not in cs:
             llm_cfg = cs["llm_params"]
             cs["llm_client"] = LangChainAPIInference(
-                lm_name=llm_cfg["model"],
-                generation_config={
-                    "temperature": llm_cfg["temperature"],
-                    "max_tokens": llm_cfg["max_tokens"],
-                },
+                lm_name=llm_cfg["lm_name"],
+                generation_config=llm_cfg["generation_config"],
             )
 
     async def decide(self) -> Dict:
@@ -112,7 +106,7 @@ class LLMInvestor(GeneralPlayer):
         )
 
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
-        action_str, quantity = "hold", 0
+        last_error = None
         for attempt in range(3):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
@@ -131,8 +125,11 @@ class LLMInvestor(GeneralPlayer):
                 break
             except Exception as exc:
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
+                last_error = exc
                 if attempt == 2:
-                    action_str, quantity = "hold", 0
+                    raise RuntimeError(
+                        f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+                    ) from last_error
 
         if action_str == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price

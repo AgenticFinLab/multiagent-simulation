@@ -49,6 +49,10 @@ market:
       mean_reversion: 0.02
       noise_std: 0.5
       custom_state_hot_limit: 3
+      base_liquidity: 50.0
+      base_price_impact: 0.08
+      high_impact_multiplier: 3.0
+      low_liquidity_threshold: 30.0
   persona: !include persona.yml
 
 # RuleLLM Momentum Investor (Trend Following)

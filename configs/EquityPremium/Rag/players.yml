@@ -43,8 +43,15 @@ market:
       bond_return: 0.0000397
       # ~15% annual vol / sqrt(252)
       stock_volatility: 0.00945
-      initial_stock_price: 100.0
+      initial_price: 100.0
       custom_state_hot_limit: 3
+      base_liquidity: 50.0
+      base_price_impact: 0.08
+      fundamental_value: 100.0
+      high_impact_multiplier: 3.0
+      low_liquidity_threshold: 30.0
+      mean_reversion: 0.02
+      noise_std: 0.4
   persona: !include persona.yml
 
 ragllm_myopic:

@@ -372,11 +372,13 @@ class BaseRagInvestor(GeneralPlayer):
         """
         from masim.knowledge import KnowledgeLoader
 
-        loader = KnowledgeLoader(fail_fast=False)  # Allow partial loading
+        # Allow partial loading
+        loader = KnowledgeLoader(fail_fast=False)
         docs = []
 
         # Source 1: Local directory
-        docs_dir = rag_config.get("docs_dir")  # Optional key — .get() allowed
+        # Optional key — .get() allowed
+        docs_dir = rag_config.get("docs_dir")
         if docs_dir and os.path.isdir(docs_dir):
             logger.info(
                 "[%s] Loading documents from local directory: %s",
@@ -451,8 +453,10 @@ class BaseRagInvestor(GeneralPlayer):
 
         # Source 4: Agent-autonomous selection
         if rag_config.get("agent_autonomous", False):
-            docs_save_dir = rag_config.get("docs_save_dir")  # Optional key
-            catalog_path = rag_config.get("catalog_path")  # Optional key
+            # Optional key
+            docs_save_dir = rag_config.get("docs_save_dir")
+            # Optional key
+            catalog_path = rag_config.get("catalog_path")
             logger.info(
                 "[%s] Using agent-autonomous document selection (save_dir=%s)",
                 self.config.identity,
@@ -481,8 +485,9 @@ class BaseRagInvestor(GeneralPlayer):
         # Source 5: LLM-suggested documents
         if rag_config.get("llm_suggested", False):
             n_urls = rag_config.get("llm_suggested_n_urls", 5)
-            docs_save_dir = rag_config.get("docs_save_dir")  # Optional key
-            persona_desc = self.config.extras.get("persona_description", "")
+            # Optional key
+            docs_save_dir = rag_config.get("docs_save_dir")
+            persona_desc = self.config.extras["persona_description"]
 
             logger.info(
                 "[%s] Using LLM-suggested document discovery (n_urls=%d)",
@@ -512,7 +517,8 @@ class BaseRagInvestor(GeneralPlayer):
                 )
 
         # Legacy: knowledge_sources list (for backward compatibility)
-        knowledge_sources = rag_config.get("knowledge_sources", [])  # Optional key
+        # Optional key
+        knowledge_sources = rag_config.get("knowledge_sources", [])
         if knowledge_sources:
             logger.info(
                 "[%s] Loading from legacy knowledge_sources: %s",
@@ -679,7 +685,7 @@ class BaseRagInvestor(GeneralPlayer):
             quantity = float(raw_decision["quantity"])
 
             if action not in ["buy", "sell", "hold"]:
-                action = "hold"
+                raise ValueError(f"Invalid action: {action}")
             if action == "buy":
                 quantity = min(quantity, int(cash / price))
             elif action == "sell":
@@ -693,15 +699,10 @@ class BaseRagInvestor(GeneralPlayer):
                 "strategy": strategy_name,
             }
 
-        except Exception as e:
-            logger.error("LLM error for %s: %s", self.config.identity, e)
-            decision = {
-                "action": "hold",
-                "bid_price": price,
-                "quantity": 0,
-                "reasoning": f"LLM error: {str(e)}",
-                "strategy": strategy_name,
-            }
+        except Exception as exc:
+            raise RuntimeError(
+                f"[{self.config.identity}] LLM inference failed: {exc}"
+            ) from exc
 
         return decision
 

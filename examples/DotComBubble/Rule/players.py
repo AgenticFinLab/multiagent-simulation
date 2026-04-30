@@ -17,6 +17,7 @@ Agents:
 """
 
 import logging
+import os
 import random
 from typing import Any, Dict, List, Optional
 
@@ -33,14 +34,21 @@ class Market(GeneralPlayer):
     async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "price" not in self.state.custom_state:
             extras = self.config.extras
+            record_path = extras["record_path"]
+            base_path = os.path.join(record_path, self.config.identity)
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
             self.state.custom_state["price"] = float(extras["initial_price"])
             self.state.custom_state["fundamental"] = float(extras["fundamental_value"])
             self.state.custom_state["price_impact"] = float(extras["price_impact"])
             self.state.custom_state["mean_reversion"] = float(extras["mean_reversion"])
             self.state.custom_state["noise_std"] = float(extras["noise_std"])
-            self.state.custom_state["price_history"] = []
-            self.state.custom_state["history_buffer"] = HistoryBuffer(
-                folder="DotComBubble/Market", entry_limit=200
+            self.state.custom_state["price_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "price"),
+                entry_limit=custom_state_hot_limit,
+            )
+            self.state.custom_state["fundamental_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "fundamental"),
+                entry_limit=custom_state_hot_limit,
             )
 
         self.state.custom_state["round"] = observation.round
@@ -65,6 +73,7 @@ class Market(GeneralPlayer):
         new_price = max(price + price_change + reversion + noise, 0.01)
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
+        self.state.custom_state["fundamental_history"].append(fundamental)
 
         deviation = (new_price - fundamental) / fundamental if fundamental > 0 else 0.0
         self.state.custom_state["deviation"] = deviation
@@ -134,7 +143,7 @@ class NewEconomyEvangelist(GeneralPlayer):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        order_size = int(extras.get("order_size", 600))
+        order_size = int(extras["order_size"])
 
         action, quantity = "hold", 0
         # Ignores overvaluation — keeps buying as long as price is rising
@@ -209,8 +218,8 @@ class IPOFlipper(GeneralPlayer):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        order_size = int(extras.get("order_size", 700))
-        flip_threshold = float(extras.get("flip_threshold", 0.05))
+        order_size = int(extras["order_size"])
+        flip_threshold = float(extras["flip_threshold"])
 
         action, quantity = "hold", 0
         if deviation > flip_threshold and position > 0:
@@ -284,8 +293,8 @@ class MomentumFollower(GeneralPlayer):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        order_size = int(extras.get("order_size", 500))
-        momentum_threshold = float(extras.get("momentum_threshold", 0.02))
+        order_size = int(extras["order_size"])
+        momentum_threshold = float(extras["momentum_threshold"])
 
         # Compute short-term momentum from price history
         price_history = self.state.custom_state["price_history"]
@@ -365,9 +374,9 @@ class SkepticalValueInvestor(GeneralPlayer):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        value_buy_threshold = float(extras.get("value_buy_threshold", -0.10))
-        value_sell_threshold = float(extras.get("value_sell_threshold", 0.20))
-        order_size = int(extras.get("order_size", 400))
+        value_buy_threshold = float(extras["value_buy_threshold"])
+        value_sell_threshold = float(extras["value_sell_threshold"])
+        order_size = int(extras["order_size"])
 
         action, quantity = "hold", 0
         if deviation < value_buy_threshold:
@@ -441,9 +450,9 @@ class ShortSeller(GeneralPlayer):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        short_threshold = float(extras.get("short_threshold", 0.15))
-        cover_threshold = float(extras.get("cover_threshold", -0.05))
-        order_size = int(extras.get("order_size", 400))
+        short_threshold = float(extras["short_threshold"])
+        cover_threshold = float(extras["cover_threshold"])
+        order_size = int(extras["order_size"])
 
         action, quantity = "hold", 0
         if deviation > short_threshold:

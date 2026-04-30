@@ -16,7 +16,7 @@ market:
 
 short_vol_trader_1:
   name: "ShortVolTrader 1"
-  class: "examples.Volmageddon.Rag.players:LLMShortVolTrader"
+  class: "examples.Volmageddon.Rag.players:RagLLMShortVolTrader"
   num_instances: 2
   config:
     identity: "short_vol_trader_1"
@@ -31,7 +31,7 @@ short_vol_trader_1:
 
 vol_e_t_n_manager_2:
   name: "VolETNManager 2"
-  class: "examples.Volmageddon.Rag.players:LLMVolETNManager"
+  class: "examples.Volmageddon.Rag.players:RagLLMVolETNManager"
   num_instances: 2
   config:
     identity: "vol_e_t_n_manager_2"
@@ -46,7 +46,7 @@ vol_e_t_n_manager_2:
 
 long_vol_hedger_3:
   name: "LongVolHedger 3"
-  class: "examples.Volmageddon.Rag.players:LLMLongVolHedger"
+  class: "examples.Volmageddon.Rag.players:RagLLMLongVolHedger"
   num_instances: 1
   config:
     identity: "long_vol_hedger_3"
@@ -61,7 +61,7 @@ long_vol_hedger_3:
 
 vol_arbitrageur_4:
   name: "VolArbitrageur 4"
-  class: "examples.Volmageddon.Rag.players:LLMVolArbitrageur"
+  class: "examples.Volmageddon.Rag.players:RagLLMVolArbitrageur"
   num_instances: 2
   config:
     identity: "vol_arbitrageur_4"
@@ -76,7 +76,7 @@ vol_arbitrageur_4:
 
 equity_trader_5:
   name: "EquityTrader 5"
-  class: "examples.Volmageddon.Rag.players:LLMEquityTrader"
+  class: "examples.Volmageddon.Rag.players:RagLLMEquityTrader"
   num_instances: 2
   config:
     identity: "equity_trader_5"

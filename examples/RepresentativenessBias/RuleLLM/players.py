@@ -62,10 +62,10 @@ class RuleLLMInvestor(GeneralPlayer):
 
     async def decide(self) -> Dict[str, Any]:
         price = self.state.custom_state.get(
-            "price", self.config.extras.get("initial_price", 100.0)
+            "price", self.config.extras["initial_price"]
         )
         fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras.get("fundamental_value", 100.0)
+            "fundamental", self.config.extras["fundamental_value"]
         )
         deviation = self.state.custom_state.get("deviation", 0.0)
         cash = self.state.custom_state["cash"]

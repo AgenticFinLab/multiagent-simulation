@@ -11,7 +11,7 @@ connections:
     - ragllm_carry_trader
     - ragllm_leveraged_carry_fund
     - ragllm_funding_currency_buyer
-    - ragllm_cb_intervener
+    - ragllm_hedged_carry_trader
     - ragllm_noise_trader
 
   ragllm_carry_trader:
@@ -23,7 +23,7 @@ connections:
   ragllm_funding_currency_buyer:
     - market
 
-  ragllm_cb_intervener:
+  ragllm_hedged_carry_trader:
     - market
 
   ragllm_noise_trader:

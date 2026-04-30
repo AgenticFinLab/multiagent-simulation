@@ -20,6 +20,7 @@ All parameters are configured via players.yml config file.
 """
 
 import logging
+import os
 import random
 from typing import Any, Dict, List, Optional
 

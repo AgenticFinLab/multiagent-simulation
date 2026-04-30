@@ -9,6 +9,8 @@ setting:
   log_level: "INFO"
   log_to_file: true
   log_path: "EXPERIMENT/CurrencyCrisis/Rule/logs"
+  round_history_limit: 3
+  save_diagram_interval: 50
 
 environment:
   dotenv_path: ".env"
@@ -26,5 +28,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/CurrencyCrisis/Rule/communication"
   record_messages: true
-  message_timeout_ms: 5000
-  max_retries: 3
+  message_block_size: 500

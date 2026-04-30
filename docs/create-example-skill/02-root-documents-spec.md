@@ -989,6 +989,7 @@ of metric change for each variant relative to the Rule baseline.
 
 **Minimum required plots** (every simulation must produce all of these):
 
+0. **Investor Bid Curves** (`00_investor_bids.png`) — X = round, Y = price; one coloured line per investor showing their bid price each round, plus the market clearing price as a thick gold line and the fundamental value as a dashed green horizontal line. This is the headline chart that provides an immediate visual summary of all agent behaviour.
 1. Price vs. Fundamental over time — shows phenomenon emergence
 2. Phenomenon intensity metric over time — shows severity and lifecycle
 3. Investor/portfolio performance comparison — agent-level analysis

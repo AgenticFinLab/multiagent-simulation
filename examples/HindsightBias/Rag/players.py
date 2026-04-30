@@ -56,11 +56,11 @@ class RagLLMInvestor(GeneralPlayer):
     async def _initialize_agent(self) -> None:
         extras = self.config.extras
         self.state.custom_state["cash"] = extras["initial_cash"]
-        self.state.custom_state["position"] = extras.get("initial_position", 0)
+        self.state.custom_state["position"] = extras["initial_position"]
 
         llm_cfg = extras["llm"]
         lm_name = llm_cfg["lm_name"]
-        generation_config = llm_cfg.get("generation_config", {})
+        generation_config = llm_cfg["generation_config"]
         self.state.custom_state["lm_name"] = lm_name
         self.state.custom_state["generation_config"] = generation_config
 
@@ -69,17 +69,17 @@ class RagLLMInvestor(GeneralPlayer):
         )
         self.state.custom_state["llm_client"] = llm_client
 
-        private_knowledge = extras.get("private_knowledge", {})
-        rag_cfg = private_knowledge.get("rag", extras.get("rag", {}))
+        private_knowledge = extras["private_knowledge"]
+        rag_cfg = private_knowledge["rag"]
         await self._initialize_rag(rag_cfg, llm_client, llm_cfg)
 
     async def _initialize_rag(
         self, rag_cfg: Dict[str, Any], llm_client: Any, llm_config: Dict[str, Any]
     ) -> None:
         extras = self.config.extras
-        record_path = extras.get("record_path", "EXPERIMENT")
+        record_path = extras["record_path"]
 
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
@@ -96,7 +96,7 @@ class RagLLMInvestor(GeneralPlayer):
             }
 
         resource_manager = ResourceManager(knowledge_config)
-        private_knowledge = extras.get("private_knowledge", {})
+        private_knowledge = extras["private_knowledge"]
         if not private_knowledge:
             private_knowledge = {
                 "from_global_resources": ["MinerU_processed"],
@@ -254,12 +254,12 @@ class RagLLMInvestor(GeneralPlayer):
 
     async def decide(self) -> dict:
         """Build RAG-augmented prompt and call LLM for trading decision."""
-        price = self.state.custom_state.get("price", 0.0)
-        fundamental = self.state.custom_state.get("fundamental", 0.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
-        cash = self.state.custom_state.get("cash", 0.0)
-        position = self.state.custom_state.get("position", 0)
-        round_num = self.state.custom_state.get("round", 0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
+        round_num = self.state.custom_state["round"]
         portfolio_value = cash + position * price
 
         rag_store: Optional[KnowledgeStore] = self.state.custom_state.get("rag_store")
@@ -295,18 +295,34 @@ class RagLLMInvestor(GeneralPlayer):
             "llm_client"
         )
         if llm_client is None:
-            return {"action": "hold", "quantity": 0}
+            raise RuntimeError(f"[{self.identity}] LLM client not initialized")
 
-        try:
-            infer_input = InferInput(system_msg=self._system_prompt, user_msg=user_msg)
-            response = llm_client.run([infer_input]).outputs[0].response
-            result = parse_llm_response_with_thinking(response)
-            decision = result.get("decision", result)
-        except Exception:
-            decision = {"action": "hold", "quantity": 0}
+        decision = None
+        last_error = None
+        for attempt in range(3):
+            try:
+                infer_input = InferInput(
+                    system_msg=self._system_prompt, user_msg=user_msg
+                )
+                response = llm_client.run([infer_input]).outputs[0].response
+                decision = parse_llm_response_with_thinking(response)
+                break
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
 
-        action = decision.get("action", "hold")
-        quantity = int(decision.get("quantity", 0))
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            )
+
+        action = decision["action"]
+        quantity = int(decision["quantity"])
 
         if action == "buy" and price > 0:
             quantity = min(quantity, int(cash / price))
@@ -320,11 +336,11 @@ class RagLLMInvestor(GeneralPlayer):
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order to market."""
-        action = decision_payload.get("action", "hold")
-        quantity = int(decision_payload.get("quantity", 0))
-        price = self.state.custom_state.get("price", 0.0)
-        cash = self.state.custom_state.get("cash", 0.0)
-        position = self.state.custom_state.get("position", 0)
+        action = decision_payload["action"]
+        quantity = int(decision_payload["quantity"])
+        price = self.state.custom_state["price"]
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
 
         if action == "buy" and quantity > 0 and price > 0:
             quantity = min(quantity, int(cash / price))

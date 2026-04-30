@@ -20,7 +20,6 @@ import numpy as np
 
 from masim.utils import load_config, load_results
 
-
 # ---------------------------------------------------------------------------
 # Data loading
 # ---------------------------------------------------------------------------
@@ -476,12 +475,22 @@ def _build_interpretation(
 def _create_visualizations(
     market_prices: Dict[int, float],
     fundamentals: Dict[int, float],
+    investor_bids: Dict[str, Dict[int, float]],
     investor_payloads: Dict[str, Dict[int, dict]],
     rolling_vols: List[float],
     half_life: float,
     output_dir: str,
 ) -> None:
-    """Generate 3 analysis plots saved to output_dir."""
+    """Generate analysis plots saved to output_dir.
+
+    Plots
+    -----
+    00_investor_bids.png   : Primary overview — market price + each investor's
+                             bid price over rounds (the "headline" chart).
+    01_price_dynamics.png  : Price vs Fundamental + Deviation %.
+    02_market_dynamics.png : Rolling Volatility + Return Distribution.
+    03_summary.png         : Agent Trading Volume + Anchoring Persistence.
+    """
     if not market_prices:
         return
 
@@ -495,6 +504,88 @@ def _create_visualizations(
     )
     deviation_pct = [(p - fund_value) / fund_value * 100 for p in prices_list]
     round_arr = np.array(rounds_sorted)
+
+    _BID_COLORS = [
+        "#3a86ff",
+        "#ff006e",
+        "#8338ec",
+        "#06d6a0",
+        "#fb5607",
+        "#ff595e",
+        "#1982c4",
+        "#6a4c93",
+        "#ffca3a",
+        "#8ac926",
+        "#e07a5f",
+        "#3d405b",
+        "#81b29a",
+        "#f2cc8f",
+        "#264653",
+        "#e63946",
+        "#457b9d",
+        "#2a9d8f",
+        "#e9c46a",
+        "#f4a261",
+    ]
+
+    # --- Plot 0: Investor Bid Curves (PRIMARY headline chart) ---
+    fig, ax = plt.subplots(figsize=(16, 8))
+    fig.suptitle(
+        "AnchoringEffect Rule \u2014 Investor Bidding Curves",
+        fontsize=14,
+        fontweight="bold",
+    )
+
+    ax.plot(
+        round_arr,
+        prices_list,
+        color="#f0a500",
+        linewidth=2.5,
+        label="Market Price",
+        zorder=10,
+    )
+    ax.axhline(
+        y=fund_value,
+        color="darkgreen",
+        linestyle="--",
+        linewidth=1.2,
+        label=f"Fundamental (F={fund_value:.2f})",
+        alpha=0.8,
+    )
+
+    for idx, (pid, bids_by_round) in enumerate(sorted(investor_bids.items())):
+        bid_rounds = sorted(bids_by_round.keys())
+        bid_vals = [float(bids_by_round[r]) for r in bid_rounds]
+        color = _BID_COLORS[idx % len(_BID_COLORS)]
+        ax.plot(
+            bid_rounds,
+            bid_vals,
+            marker="o",
+            markersize=2,
+            linewidth=0.9,
+            color=color,
+            alpha=0.8,
+            label=pid.replace("_", " ").title(),
+        )
+
+    ax.set_xlabel("Round", fontsize=12)
+    ax.set_ylabel("Price", fontsize=12)
+    ax.set_title("Market Price & Individual Investor Bids", fontsize=12)
+    ax.grid(True, alpha=0.3)
+    ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.06),
+        ncol=min(5, len(investor_bids) + 2),
+        fontsize=8,
+        frameon=True,
+        framealpha=0.7,
+    )
+
+    plt.tight_layout()
+    path0 = os.path.join(output_dir, "00_investor_bids.png")
+    plt.savefig(path0, dpi=150, bbox_inches="tight")
+    plt.close()
+    print(f"Saved: {path0}")
 
     # --- Plot 1: Price vs Fundamental + Deviation ---
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
@@ -589,14 +680,14 @@ def _create_visualizations(
         sell_vols = []
         for aid in agent_ids:
             buy = sum(
-                abs(float(p.get("quantity", 0)))
+                abs(float(p["quantity"]))
                 for p in investor_payloads[aid].values()
-                if float(p.get("quantity", 0)) > 0
+                if float(p["quantity"]) > 0
             )
             sell = sum(
-                abs(float(p.get("quantity", 0)))
+                abs(float(p["quantity"]))
                 for p in investor_payloads[aid].values()
-                if float(p.get("quantity", 0)) < 0
+                if float(p["quantity"]) < 0
             )
             buy_vols.append(buy)
             sell_vols.append(sell)
@@ -688,14 +779,14 @@ def analyze_anchoring(
     agent_volumes: Dict[str, Dict[str, float]] = {}
     for aid, round_payloads in investor_payloads.items():
         total_buy = sum(
-            float(p.get("quantity", 0))
+            float(p["quantity"])
             for p in round_payloads.values()
-            if float(p.get("quantity", 0)) > 0
+            if float(p["quantity"]) > 0
         )
         total_sell = sum(
-            abs(float(p.get("quantity", 0)))
+            abs(float(p["quantity"]))
             for p in round_payloads.values()
-            if float(p.get("quantity", 0)) < 0
+            if float(p["quantity"]) < 0
         )
         agent_volumes[aid] = {
             "total_buy": total_buy,
@@ -717,6 +808,7 @@ def analyze_anchoring(
     _create_visualizations(
         market_prices=market_prices,
         fundamentals=fundamentals,
+        investor_bids=data["investor_bids"],
         investor_payloads=investor_payloads,
         rolling_vols=rolling_vols,
         half_life=half_life,
@@ -735,9 +827,7 @@ def analyze_anchoring(
             "half_life_rounds": round(half_life, 1),
             "max_drawdown_pct": round(max_dd, 4),
             "return_autocorr_lag1": round(autocorr, 4),
-            "mean_rolling_vol_pct": round(
-                float(np.mean(rolling_vols)) if rolling_vols else 0.0, 4
-            ),
+            "mean_rolling_vol_pct": round(float(np.mean(rolling_vols)), 4),
             "bias_magnitude_pct": round(bias_magnitude * 100, 4),
         },
         "price": {

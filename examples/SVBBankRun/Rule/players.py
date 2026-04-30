@@ -234,7 +234,7 @@ class Depositor(BaseInvestor):
         extras = self.config.extras
         deviation = self.state.custom_state.get("deviation", 0.0)
         position = self.state.custom_state["position"]
-        withdrawal_threshold = extras.get("withdrawal_threshold", 0.05)
+        withdrawal_threshold = extras["withdrawal_threshold"]
 
         if deviation < -withdrawal_threshold:
             sell_qty = min(1000, max(int(position), 0))
@@ -255,7 +255,7 @@ class SocialMediaInfluencer(BaseInvestor):
         extras = self.config.extras
         deviation = self.state.custom_state.get("deviation", 0.0)
         position = self.state.custom_state["position"]
-        amplification = extras.get("amplification_factor", 2.0)
+        amplification = extras["amplification_factor"]
 
         if deviation < -0.05:
             sell_qty = min(
@@ -279,7 +279,7 @@ class BankManager(BaseInvestor):
         deviation = self.state.custom_state.get("deviation", 0.0)
         price = self.state.custom_state.get("price", 100.0)
         cash = self.state.custom_state["cash"]
-        extras.get("duration_gap", 2.0)
+        extras["duration_gap"]
 
         if deviation < -0.05:
             buy_qty = min(500, int(cash / price) if price > 0 else 0)
@@ -299,8 +299,8 @@ class Regulator(BaseInvestor):
     def _make_decision(self) -> Dict[str, Any]:
         extras = self.config.extras
         deviation = self.state.custom_state.get("deviation", 0.0)
-        intervention_threshold = extras.get("intervention_threshold", 0.10)
-        guarantee_prob = extras.get("guarantee_probability", 0.3)
+        intervention_threshold = extras["intervention_threshold"]
+        guarantee_prob = extras["guarantee_probability"]
 
         if deviation < -intervention_threshold and random.random() < guarantee_prob:
             return {"action": "buy", "quantity": 2000}

@@ -227,12 +227,12 @@ liquidityprovider:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+centralbank:
   name: "NoiseTrader"
-  class: "examples.LTCMCollapse.Rag.players:RagLLMNoiseTrader"
+  class: "examples.LTCMCollapse.Rag.players:RagLLMCentralBank"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "centralbank"
     role: player
     steps_per_turn: 1
     group_tags:

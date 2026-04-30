@@ -18,6 +18,7 @@ Agents:
 """
 
 import logging
+import os
 import random
 from typing import Any, Dict, List, Optional
 
@@ -32,19 +33,27 @@ class Market(GeneralPlayer):
     """Credit market — clears orders and broadcasts price each round."""
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
+        self.state.custom_state["round"] = observation.round
+
         if "price" not in self.state.custom_state:
             extras = self.config.extras
+            record_path = extras["record_path"]
+            base_path = os.path.join(record_path, self.config.identity)
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
+
             self.state.custom_state["price"] = float(extras["initial_price"])
             self.state.custom_state["fundamental"] = float(extras["fundamental_value"])
             self.state.custom_state["price_impact"] = float(extras["price_impact"])
             self.state.custom_state["mean_reversion"] = float(extras["mean_reversion"])
             self.state.custom_state["noise_std"] = float(extras["noise_std"])
-            self.state.custom_state["price_history"] = []
-            self.state.custom_state["history_buffer"] = HistoryBuffer(
-                folder="CreditCycle/Market", entry_limit=200
+            self.state.custom_state["price_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "price"),
+                entry_limit=custom_state_hot_limit,
             )
-
-        self.state.custom_state["round"] = observation.round
+            self.state.custom_state["fundamental_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "fundamental"),
+                entry_limit=custom_state_hot_limit,
+            )
         orders: List[Dict] = []
         if observation.inbounds:
             for inb in observation.inbounds:
@@ -54,10 +63,8 @@ class Market(GeneralPlayer):
 
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        buy_vol = sum(o.get("quantity", 0) for o in orders if o.get("action") == "buy")
-        sell_vol = sum(
-            o.get("quantity", 0) for o in orders if o.get("action") == "sell"
-        )
+        buy_vol = sum(o["quantity"] for o in orders if o["action"] == "buy")
+        sell_vol = sum(o["quantity"] for o in orders if o["action"] == "sell")
         net_demand = buy_vol - sell_vol
 
         price_change = self.state.custom_state["price_impact"] * net_demand
@@ -66,6 +73,7 @@ class Market(GeneralPlayer):
         new_price = max(price + price_change + reversion + noise, 0.01)
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
+        self.state.custom_state["fundamental_history"].append(fundamental)
 
         deviation = (new_price - fundamental) / fundamental if fundamental > 0 else 0.0
         self.state.custom_state["deviation"] = deviation
@@ -129,15 +137,15 @@ class ProCyclicalLender(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        expansion_threshold = float(extras.get("expansion_threshold", 0.03))
-        credit_multiplier = float(extras.get("credit_multiplier", 2.0))
-        order_size = int(extras.get("order_size", 600))
+        expansion_threshold = float(extras["expansion_threshold"])
+        credit_multiplier = float(extras["credit_multiplier"])
+        order_size = int(extras["order_size"])
 
         action, quantity = "hold", 0
         if deviation > expansion_threshold:
@@ -168,7 +176,7 @@ class ProCyclicalLender(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -194,9 +202,7 @@ class MinskyBorrower(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = float(extras["initial_cash"])
             self.state.custom_state["position"] = int(extras["initial_position"])
-            self.state.custom_state["leverage"] = float(
-                extras.get("initial_leverage", 1.0)
-            )
+            self.state.custom_state["leverage"] = float(extras["initial_leverage"])
             self.state.custom_state["stable_rounds"] = 0
             self.state.custom_state["price_history"] = []
             self.state.custom_state["history_buffer"] = HistoryBuffer(
@@ -212,25 +218,25 @@ class MinskyBorrower(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        max_leverage = float(extras.get("max_leverage", 5.0))
-        crisis_threshold = float(extras.get("crisis_threshold", -0.05))
-        order_size = int(extras.get("order_size", 500))
+        max_leverage = float(extras["max_leverage"])
+        crisis_threshold = float(extras["crisis_threshold"])
+        order_size = int(extras["order_size"])
 
         # Track stability
         if abs(deviation) < 0.02:
             self.state.custom_state["stable_rounds"] = (
-                self.state.custom_state.get("stable_rounds", 0) + 1
+                self.state.custom_state["stable_rounds"] + 1
             )
         else:
             self.state.custom_state["stable_rounds"] = 0
 
-        stable = self.state.custom_state.get("stable_rounds", 0)
+        stable = self.state.custom_state["stable_rounds"]
         action, quantity = "hold", 0
 
         if deviation < crisis_threshold:
@@ -258,7 +264,7 @@ class MinskyBorrower(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -298,15 +304,15 @@ class CounterCyclicalLender(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        crisis_buy_threshold = float(extras.get("crisis_buy_threshold", -0.05))
-        boom_sell_threshold = float(extras.get("boom_sell_threshold", 0.05))
-        order_size = int(extras.get("order_size", 500))
+        crisis_buy_threshold = float(extras["crisis_buy_threshold"])
+        boom_sell_threshold = float(extras["boom_sell_threshold"])
+        order_size = int(extras["order_size"])
 
         action, quantity = "hold", 0
         if deviation < crisis_buy_threshold:
@@ -334,7 +340,7 @@ class CounterCyclicalLender(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -374,14 +380,14 @@ class ValueInvestor(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        value_discount = float(extras.get("value_discount", 0.10))
-        order_size = int(extras.get("order_size", 400))
+        value_discount = float(extras["value_discount"])
+        order_size = int(extras["order_size"])
 
         action, quantity = "hold", 0
         if deviation < -value_discount:
@@ -407,7 +413,7 @@ class ValueInvestor(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -447,8 +453,8 @@ class NoiseTrader(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
@@ -479,7 +485,7 @@ class NoiseTrader(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity

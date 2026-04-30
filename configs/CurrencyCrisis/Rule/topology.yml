@@ -1,22 +1,24 @@
 # Topology configuration
+
+type: "star"
+
+sources:
+  - market
+
 connections:
-  - source: market
-    target: speculativeattacker
-  - source: speculativeattacker
-    target: market
-  - source: market
-    target: selffulfillingtrader
-  - source: selffulfillingtrader
-    target: market
-  - source: market
-    target: centralbankdefender
-  - source: centralbankdefender
-    target: market
-  - source: market
-    target: fundamentalhedger
-  - source: fundamentalhedger
-    target: market
-  - source: market
-    target: noisetrader
-  - source: noisetrader
-    target: market
+  market:
+    - speculativeattacker
+    - selffulfillingtrader
+    - centralbankdefender
+    - fundamentalhedger
+    - noisetrader
+  centralbankdefender:
+    - market
+  fundamentalhedger:
+    - market
+  noisetrader:
+    - market
+  selffulfillingtrader:
+    - market
+  speculativeattacker:
+    - market

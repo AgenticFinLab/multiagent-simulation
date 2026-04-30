@@ -61,11 +61,8 @@ class RuleLLMInvestor(GeneralPlayer):
         llm_cfg = extras["llm"]
         self.state.custom_state["llm_params"] = llm_cfg
         self.state.custom_state["llm_client"] = LangChainAPIInference(
-            lm_name=llm_cfg["model"],
-            generation_config={
-                "temperature": llm_cfg.get("temperature", 0.3),
-                "max_tokens": llm_cfg.get("max_tokens", 512),
-            },
+            lm_name=llm_cfg["lm_name"],
+            generation_config=llm_cfg["generation_config"],
         )
 
     def __getstate__(self) -> Dict:
@@ -80,22 +77,19 @@ class RuleLLMInvestor(GeneralPlayer):
         if "llm_params" in cs and "llm_client" not in cs:
             llm_cfg = cs["llm_params"]
             cs["llm_client"] = LangChainAPIInference(
-                lm_name=llm_cfg["model"],
-                generation_config={
-                    "temperature": llm_cfg.get("temperature", 0.3),
-                    "max_tokens": llm_cfg.get("max_tokens", 512),
-                },
+                lm_name=llm_cfg["lm_name"],
+                generation_config=llm_cfg["generation_config"],
             )
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        fundamental = market_data.get("fundamental", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        fundamental = market_data["fundamental"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         portfolio_value = cash + position * price
-        round_num = self.state.custom_state.get("round", 0)
+        round_num = self.state.custom_state["round"]
 
         system_prompt = load_prompt(self._system_prompt_path)
         user_template = load_prompt(
@@ -112,27 +106,37 @@ class RuleLLMInvestor(GeneralPlayer):
         )
 
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
-        action_str, quantity = "hold", 0
+        decision = None
+        last_error = None
         for attempt in range(3):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 result = llm_client.run([infer_input])
                 response = result.outputs[0].response
-                parsed = parse_llm_response_with_thinking(response)
-                action_str = parsed.get("action", "hold")
-                quantity = int(parsed.get("quantity", 0))
-                if action_str not in ("buy", "sell", "hold"):
-                    action_str = "hold"
-                quantity = max(0, quantity)
-                if action_str == "buy":
-                    quantity = min(quantity, int(cash / price) if price > 0 else 0)
-                elif action_str == "sell":
-                    quantity = min(quantity, max(position, 0))
+                decision = parse_llm_response_with_thinking(response)
+                if decision["action"] not in ("buy", "sell", "hold"):
+                    raise ValueError(f"Invalid action: {decision['action']}")
                 break
-            except Exception as exc:  # pylint: disable=broad-except
-                logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
-                if attempt == 2:
-                    action_str, quantity = "hold", 0
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            )
+
+        action_str = decision["action"]
+        quantity = max(0, int(decision["quantity"]))
+        if action_str == "buy":
+            quantity = min(quantity, int(cash / price) if price > 0 else 0)
+        elif action_str == "sell":
+            quantity = min(quantity, max(position, 0))
 
         if action_str == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price

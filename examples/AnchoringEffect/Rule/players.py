@@ -85,8 +85,8 @@ class Market(GeneralPlayer):
         mean_reversion = self.state.custom_state["mean_reversion"]
         noise_std = self.state.custom_state["noise_std"]
 
-        buy_qty = sum(o["quantity"] for o in orders if o.get("action") == "buy")
-        sell_qty = sum(o["quantity"] for o in orders if o.get("action") == "sell")
+        buy_qty = sum(o["quantity"] for o in orders if o["action"] == "buy")
+        sell_qty = sum(o["quantity"] for o in orders if o["action"] == "sell")
         net_demand = buy_qty - sell_qty
 
         noise = random.gauss(0, noise_std)

@@ -84,6 +84,7 @@ riskmanager:
       var_trigger: 0.06
       base_size: 300
       custom_state_hot_limit: 3
+      var_limit: 0.05
   persona: !include persona.yml
 
 liquidityprovider:
@@ -108,12 +109,12 @@ liquidityprovider:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-noisetrader:
-  name: "NoiseTrader"
-  class: "examples.LTCMCollapse.Rule.players:NoiseTrader"
+centralbank:
+  name: "CentralBank"
+  class: "examples.LTCMCollapse.Rule.players:CentralBank"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "centralbank"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -127,4 +128,6 @@ noisetrader:
       trade_probability: 0.3
       noise_size: 150
       custom_state_hot_limit: 3
+      intervention_threshold: 0.1
+      rescue_probability: 0.5
   persona: !include persona.yml

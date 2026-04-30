@@ -10,6 +10,8 @@ setting:
   name: "Volmageddon-RuleLLM"
   description: "Volmageddon simulation with VIX ETN blowup, short volatility crowd, and reverse feedback loop"
   total_rounds: 200
+  round_history_limit: 3
+  save_diagram_interval: 50
   
   record_path: "EXPERIMENT/Volmageddon/RuleLLM/records"
   storage_path: "EXPERIMENT/Volmageddon/RuleLLM/communication"
@@ -40,5 +42,4 @@ topology: !include topology.yml
 communication:
   storage_path: "EXPERIMENT/Volmageddon/RuleLLM/communication"
   record_messages: true
-  message_timeout_ms: 30000
-  max_retries: 3
+  message_block_size: 500

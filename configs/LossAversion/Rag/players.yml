@@ -178,12 +178,12 @@ rationaltrader:
           max_tokens: 600
   persona: !include persona.yml
 
-dispositiontrader:
+momentumtrader:
   name: "DispositionTrader"
-  class: "examples.LossAversion.Rag.players:RagLLMDispositionTrader"
+  class: "examples.LossAversion.Rag.players:RagLLMMomentumTrader"
   num_instances: 2
   config:
-    identity: "dispositiontrader"
+    identity: "momentumtrader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -224,12 +224,12 @@ dispositiontrader:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+marketmaker:
   name: "NoiseTrader"
-  class: "examples.LossAversion.Rag.players:RagLLMNoiseTrader"
+  class: "examples.LossAversion.Rag.players:RagLLMMarketMaker"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "marketmaker"
     role: player
     steps_per_turn: 1
     group_tags:

@@ -75,8 +75,8 @@ async def main():
     if not knowledge_config:
         for player_cfg in config.players.values():
             extras = player_cfg.get("config", {}).get("extras", {})
-            pk = extras.get("private_knowledge", {})
-            rag_cfg = pk.get("rag", extras.get("rag", {}))
+            pk = extras["private_knowledge"]
+            rag_cfg = pk["rag"]
             if rag_cfg:
                 knowledge_config = {
                     "backend": "local",

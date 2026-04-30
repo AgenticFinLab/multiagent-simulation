@@ -367,11 +367,13 @@ Must be the **first statement** in the file, before all imports.
 
 The following failures always require repair, regardless of task type:
 
-| Failure                                                         | Impact                                            | Fix Required                              |
-|-----------------------------------------------------------------|---------------------------------------------------|-------------------------------------------|
-| `simulation-bases.md §4` contains rule/LLM content              | Corrupts the variant-agnostic design principle    | Remove and relocate to variant explain.md |
-| `{Variant}/explain.md` has no `§2` Theory→Implementation tables | explain.md is useless without theory-code tracing | Rewrite §2 entirely                       |
-| `{Variant}/analysis.md` uses "Varies by scenario"               | Analysis guide provides no analytical value       | Replace all entries with numeric ranges   |
-| `players.py` investor classes have no docstrings                | Code has no theory traceability                   | Add docstrings per §5                     |
-| `players.py` docstrings lack `Theory: simulation-bases.md §4.N` | Citations are missing                             | Patch docstrings per §5                   |
-| `analysis.md` lacks `analysis-bases.md §2.X` references         | Metrics are disconnected from analysis framework  | Add references per §4.2                   |
+| Failure                                                                    | Impact                                                         | Fix Required                                                               |
+|----------------------------------------------------------------------------|----------------------------------------------------------------|----------------------------------------------------------------------------|
+| `simulation-bases.md §4` contains rule/LLM content                         | Corrupts the variant-agnostic design principle                 | Remove and relocate to variant explain.md                                  |
+| `{Variant}/explain.md` has no `§2` Theory→Implementation tables            | explain.md is useless without theory-code tracing              | Rewrite §2 entirely                                                        |
+| `{Variant}/analysis.md` uses "Varies by scenario"                          | Analysis guide provides no analytical value                    | Replace all entries with numeric ranges                                    |
+| `players.py` investor classes have no docstrings                           | Code has no theory traceability                                | Add docstrings per §5                                                      |
+| `players.py` docstrings lack `Theory: simulation-bases.md §4.N`            | Citations are missing                                          | Patch docstrings per §5                                                    |
+| `analysis.md` lacks `analysis-bases.md §2.X` references                    | Metrics are disconnected from analysis framework               | Add references per §4.2                                                    |
+| `players.py` or `analysis.py` uses `.get(key, default)` on simulation data | Silent failures mask missing data — breaks fail-fast principle | Replace with `dict["key"]` per `04-code-repair.md §12`                     |
+| `players.py` uses `if X else fallback` for required data                   | Hides data pipeline failures                                   | Replace with `if not X: raise ValueError(...)` per `04-code-repair.md §12` |

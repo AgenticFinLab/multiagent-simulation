@@ -133,23 +133,27 @@ class LLMInvestor(GeneralPlayer):
         )
 
         decision = None
-        for _ in range(3):
+        last_error = None
+        for attempt in range(3):
             try:
                 output = llm_client.run(
                     [InferInput(system_msg=system_prompt, user_msg=user_prompt)]
                 )
                 decision = parse_llm_response_with_thinking(output.outputs[0].response)
                 break
-            except Exception:
-                decision = None
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
 
         if decision is None:
-            decision = {
-                "bid_price": price,
-                "quantity": 0,
-                "reasoning": "parse error",
-                "analysis": "",
-            }
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            )
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])

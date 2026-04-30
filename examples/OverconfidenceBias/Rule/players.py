@@ -218,7 +218,7 @@ class OverconfidentTrader(BaseInvestor):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        precision_over = extras.get("precision_overestimate", 2.0)
+        precision_over = extras["precision_overestimate"]
 
         signal = deviation * precision_over
         if abs(signal) > 0.01:
@@ -247,7 +247,7 @@ class SelfAttributor(BaseInvestor):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        confidence_boost = extras.get("confidence_boost", 0.5)
+        confidence_boost = extras["confidence_boost"]
 
         if position > 0 and deviation > 0:
             boosted_qty = min(1000, int(800 * (1 + confidence_boost)))
@@ -274,8 +274,8 @@ class CalibratedTrader(BaseInvestor):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        signal_precision = extras.get("signal_precision", 1.0)
-        trade_threshold = extras.get("trade_threshold", 0.03)
+        signal_precision = extras["signal_precision"]
+        trade_threshold = extras["trade_threshold"]
 
         if abs(deviation) > trade_threshold:
             qty = min(500, int(abs(deviation) * signal_precision * 3000))
@@ -303,7 +303,7 @@ class ContrarianInvestor(BaseInvestor):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        contrarian_threshold = extras.get("contrarian_threshold", 0.05)
+        contrarian_threshold = extras["contrarian_threshold"]
 
         if abs(deviation) > contrarian_threshold:
             qty = min(400, int(abs(deviation) * 2000))
@@ -331,7 +331,7 @@ class NoiseTrader(BaseInvestor):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        prob = extras.get("trade_probability", 0.3)
+        prob = extras["trade_probability"]
 
         if random.random() < prob:
             qty = random.randint(100, 500)

@@ -39,10 +39,13 @@ market:
       record_path: "EXPERIMENT/ReversalEffectRag/records"
       fundamental_value: 100.0
       initial_price: 100.0
-      price_impact: 0.08
+      base_price_impact: 0.08
       mean_reversion: 0.01
       noise_std: 0.5
       custom_state_hot_limit: 3
+      base_liquidity: 50.0
+      high_impact_multiplier: 3.0
+      low_liquidity_threshold: 30.0
   persona: !include persona.yml
 
 ragllm_contrarian:

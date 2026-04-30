@@ -75,13 +75,6 @@ from masim.utils.history import HistoryBuffer
 logger = logging.getLogger("LiquidityDryupRag")
 
 
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt string from a module path (``module:VARIABLE``)."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
-
-
 # =============================================================================
 # Market — Rule-Based Coordinator (identical to LiquidityDryupRuleLLM.Market)
 # =============================================================================
@@ -319,7 +312,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         # RAG index
         private_knowledge = extras["private_knowledge"]
-        rag_cfg = private_knowledge.get("rag", extras.get("rag", {}))
+        rag_cfg = private_knowledge["rag"]
         await self._initialize_rag(rag_cfg, llm_client, extras["llm"])
 
     async def _initialize_rag(
@@ -692,23 +685,27 @@ class RagLLMInvestor(GeneralPlayer):
         system_prompt = self._system_prompt
 
         max_retries = 3
-        decision: Dict[str, Any] = {}
+        decision = None
+        last_error = None
         for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
+                infer_output = llm_client.run([infer_input])
                 decision = self._parse_llm_response(infer_output.outputs[0].response)
                 break
-            except ValueError as e:
-                if attempt == max_retries - 1:
-                    raise RuntimeError(
-                        f"[{self.identity}] LLM failed after {max_retries} attempts: {e}"
+            except Exception as exc:
+                last_error = exc
+                if attempt < max_retries - 1:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
                     )
-                logger.debug(
-                    "[%s] LLM parse failed (attempt %d), retrying…",
-                    self.identity,
-                    attempt + 1,
-                )
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM failed after {max_retries} retries: {last_error}"
+            )
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
@@ -738,8 +735,8 @@ class RagLLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": decision.get("reasoning", "")[:120],
-            "provides_liquidity": decision.get("provides_liquidity", False),
+            "reasoning": decision["reasoning"][:120],
+            "provides_liquidity": decision["provides_liquidity"],
         }
 
         return {

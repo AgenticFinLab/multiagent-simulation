@@ -84,12 +84,12 @@ rationaltrader:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-dispositiontrader:
-  name: "DispositionTrader"
-  class: "examples.LossAversion.Rule.players:DispositionTrader"
+momentumtrader:
+  name: "MomentumTrader"
+  class: "examples.LossAversion.Rule.players:MomentumTrader"
   num_instances: 2
   config:
-    identity: "dispositiontrader"
+    identity: "momentumtrader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -100,17 +100,17 @@ dispositiontrader:
       initial_position: 500
       initial_price: 100.0
       fundamental_value: 100.0
-      profit_trigger: 0.03
+      entry_threshold: 0.03       # Deviation threshold for momentum entry (§4.4)
       base_size: 300
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-noisetrader:
-  name: "NoiseTrader"
-  class: "examples.LossAversion.Rule.players:NoiseTrader"
+marketmaker:
+  name: "MarketMaker"
+  class: "examples.LossAversion.Rule.players:MarketMaker"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "marketmaker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -123,5 +123,6 @@ noisetrader:
       fundamental_value: 100.0
       trade_probability: 0.3
       noise_size: 150
+      inventory_limit: 2000       # Max position for market-making (§4.5)
       custom_state_hot_limit: 3
   persona: !include persona.yml

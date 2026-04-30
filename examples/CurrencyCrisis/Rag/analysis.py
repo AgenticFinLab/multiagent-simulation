@@ -27,7 +27,6 @@ from examples.CurrencyCrisis.Rule.analysis import (
     analyze_currency_crisis,
 )
 
-
 _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
@@ -53,7 +52,7 @@ def analyze_rag_knowledge_effect(
         total_rag_rounds = 0
 
         for payload in round_payloads.values():
-            rag_context = payload.get("rag_context", None)
+            rag_context = payload["rag_context"]
             if rag_context is None:
                 continue
             total_rag_rounds += 1

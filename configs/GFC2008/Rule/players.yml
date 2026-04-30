@@ -62,6 +62,7 @@ leveragedinvestor:
       buy_threshold: -0.03
       base_size: 350
       custom_state_hot_limit: 3
+      margin_call_trigger: 0.1
   persona: !include persona.yml
 
 ratingagency:

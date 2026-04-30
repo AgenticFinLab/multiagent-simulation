@@ -81,6 +81,7 @@ calibratedtrader:
       trade_threshold: 0.03
       base_size: 300
       custom_state_hot_limit: 3
+      signal_precision: 1.0
   persona: !include persona.yml
 
 contrarianinvestor:

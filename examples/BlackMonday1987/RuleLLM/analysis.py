@@ -55,8 +55,8 @@ def analyze_rule_adherence(
         llm_actions = []
 
         for payload in round_payloads.values():
-            rule_action = payload.get("rule_action", None)
-            llm_action = payload.get("action", None)
+            rule_action = payload["rule_action"]
+            llm_action = payload["action"]
             if rule_action is not None and llm_action is not None:
                 rule_actions.append(rule_action)
                 llm_actions.append(llm_action)
@@ -81,12 +81,14 @@ def analyze_rule_adherence(
         rates = [
             v["adherence_rate"]
             for v in adherence.values()
-            if v.get("adherence_rate") is not None
+            if v["adherence_rate"] is not None
         ]
+        if not rates:
+            raise ValueError("No adherence rates collected - all agents failed")
         adherence["aggregate"] = {
-            "mean_adherence_rate": float(np.mean(rates)) if rates else 0.0,
-            "min_adherence_rate": float(np.min(rates)) if rates else 0.0,
-            "target_80pct_met": all(r >= 0.80 for r in rates) if rates else False,
+            "mean_adherence_rate": float(np.mean(rates)),
+            "min_adherence_rate": float(np.min(rates)),
+            "target_80pct_met": all(r >= 0.80 for r in rates),
         }
 
     return adherence
@@ -130,9 +132,9 @@ def main() -> None:
     with open(adherence_path, "w", encoding="utf-8") as fh:
         json.dump(adherence, fh, indent=2)
 
-    agg = adherence.get("aggregate", {})
+    agg = adherence["aggregate"]
     if agg:
-        print(f"Mean rule-adherence rate: {agg.get('mean_adherence_rate', 0):.1%}")
+        print(f"Mean rule-adherence rate: {agg['mean_adherence_rate']:.1%}")
 
     return summary
 

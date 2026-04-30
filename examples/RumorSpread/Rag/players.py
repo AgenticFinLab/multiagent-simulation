@@ -280,7 +280,7 @@ class RagLLMSocialAgent(GeneralPlayer):
         llm_client = self._get_llm()
 
         private_knowledge = extras["private_knowledge"]
-        rag_cfg = private_knowledge.get("rag", extras.get("rag", {}))
+        rag_cfg = private_knowledge["rag"]
         await self._initialize_rag(rag_cfg, llm_client, extras["llm"])
 
     async def _initialize_rag(

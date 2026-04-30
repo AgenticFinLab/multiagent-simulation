@@ -153,6 +153,14 @@ connections:
 | Missing `type:` and `sources:` | Only `connections:` block                              | Add `type: "star"` and `sources:\n  - market`       |
 | Instance suffixes              | `momentum_follower_1:`                                 | `momentum_follower:` (no suffix)                    |
 | Mismatch with players.yml      | Agent key in topology not in players.yml               | Keys must be identical in both files                |
+| Class name mismatch with code  | `hedgedfundtrader:` but code class is `HedgedFund`     | Topology key must derive from actual class name     |
+
+> **Historical examples of topology/identity mismatches (fixed 2026-04-29):**
+> - CarryTradeUnwind: `cb_intervener` → `hedged_carry_trader` (config referenced non-existent `CentralBankIntervener`)
+> - EuropeanDebtCrisis: `hedgedfundtrader` → `hedgedfund` (extra "Trader" suffix)
+> - GameStopShortSqueeze: `noisetrader` → `momentumretail` (completely wrong agent name)
+> - LTCMCollapse: `noisetrader` → `centralbank` (completely wrong agent name)
+> - LossAversion: `dispositiontrader` → `momentumtrader`, `noisetrader` → `marketmaker`
 
 ---
 
@@ -291,7 +299,64 @@ Group tags: `[ragllm_investors]`
 
 ## §6 Cross-Consistency Check
 
-After repairing configs, verify cross-consistency:
+After repairing configs, verify cross-consistency across **all 4 variants** (Rule, LLM, RuleLLM, Rag):
+
+### §6.1 Automated triple-consistency audit
+
+For each `players.yml`, verify that every `class:` reference resolves to an actual class (defined or imported) in the target `players.py`:
+
+```python
+# Extract class: "module.path:ClassName" from players.yml
+# Import the module, verify getattr(module, ClassName) exists
+# If not: the config is WRONG — fix the class name to match code
+```
+
+### §6.2 Automated extras-key audit
+
+For each player in `players.yml`, extract the `extras:` keys. For the corresponding class in `players.py`, extract all `extras["key"]` accesses. Every key accessed in code **must** be present in that player's `extras:` section. Missing keys cause `KeyError` at runtime.
+
+**Per-player check** (not union): verify each player's extras independently. Player A accessing `key_x` is only valid if Player A's yml extras defines `key_x` — not if some other player defines it.
+
+> **Extras key mismatch inventory (fixed 2026-02-03):**
+>
+> **Category B — Rule investor parameter name mismatches (13 fixes):**
+> - CarryTradeUnwind/Rule: `CarryTrader` needed `leverage` (added); `FundingCurrencyBuyer` needed `position_size` (renamed from `risk_buy_size`)
+> - EndowmentEffect/Rule: `EndowedHolder` needed `sell_reluctance` (added); `StatusQuoSeller` needed `status_quo_threshold` (renamed from `status_quo_premium`)
+> - EuropeanDebtCrisis/Rule: 5 investors had wrong key names (`panic_threshold`→`sell_threshold`, `stress_threshold`→`panic_threshold`, `value_threshold`→`flight_threshold`, `ecb_threshold`→`intervention_threshold`, `spread_buy_threshold`→`entry_threshold`)
+> - FlashCrash2010/Rule: `MomentumChaser` needed `lookback_window` (added)
+> - GameStopShortSqueeze/Rule: `MomentumRetail` needed `fomo_threshold` (added)
+> - LossAversion/Rule: `MomentumTrader` `profit_trigger`→`entry_threshold`; `MarketMaker` needed `inventory_limit` (added)
+>
+> **Category A — Rag/RuleLLM Market liquidity-model config gaps (15 fixes):**
+> - 8 scenarios × Rag+RuleLLM: Market code used generic liquidity model keys (`base_liquidity`, `base_price_impact`, `high_impact_multiplier`, `low_liquidity_threshold`) but configs lacked them
+> - Affected: EquityPremium, HerdEffect, LiquidityDryup, MarketCrash, MomentumEffect, ReversalEffect, ShortSqueeze, VolatilityClustering
+> - Also fixed: `price_impact`→`base_price_impact`, `initial_fundamental`→`fundamental_value`, `initial_stock_price`→`initial_price` renames
+>
+> **Audit t3 — LLM sub-config key mismatches and forbidden `.get()` elimination (2026-04-29):**
+>
+> **LLM init pattern fix (46 code files):**
+> - All LLM/Rag/RuleLLM `players.py` using `llm_cfg["model"]` → fixed to `llm_cfg["lm_name"]`
+> - All manually-constructed `generation_config` dicts → fixed to `llm_cfg["generation_config"]`
+> - All `llm_cfg.get("generation_config", {})` → fixed to `llm_cfg["generation_config"]`
+> - All `extras.get("llm", {})` → fixed to `extras["llm"]`
+> - Affected: 46 `players.py` files + 11 `run_*.py` scripts across all LLM-bearing variants
+>
+> **Forbidden `.get()` elimination (73 code files, 295 occurrences):**
+> - All `extras.get("key", default)` → `extras["key"]` across 73 `players.py` files
+> - All `self.config.extras.get("key", default)` → `self.config.extras["key"]`
+> - Chained fallbacks `private_knowledge.get("rag", extras["rag"])` → `private_knowledge["rag"]`
+>
+> **Config YAML keys added (53 keys across 11 Rule variant configs):**
+> - ConfirmationBias/Rule: 4 investors needed `order_size`, plus `initial_belief`, `confirmation_strength`, `scan_threshold`, `analysis_threshold`
+> - CreditCycle/Rule: 4 investors needed `order_size`, plus `credit_multiplier`, `crisis_threshold`, `initial_leverage`, `max_leverage`, `boom_sell_threshold`, `crisis_buy_threshold`
+> - CurrencyCrisis/Rule: 4 investors needed `order_size`
+> - DotComBubble/Rule: 5 investors needed `order_size`, plus `flip_threshold`, `momentum_threshold`, `value_buy_threshold`, `value_sell_threshold`
+> - GFC2008/Rule: `margin_call_trigger`; HindsightBias/Rule: `prediction_overweight`, `failure_discount`, `outcome_weight`, `position_size`
+> - LTCMCollapse/Rule: `var_limit`, `intervention_threshold`, `rescue_probability`; LUNACollapse/Rule: `yield_threshold`
+> - OverconfidenceBias/Rule: `signal_precision`; RepresentativenessBias/Rule: `base_rate_ignore`, `pattern_sensitivity`, `category_weight`, `sample_bias`, `evidence_weight`, `position_size`
+> - Volmageddon/Rule: 5 investors needed `stop_loss`, `rebalance_size`, `rebalance_threshold`, `hedge_ratio`, `entry_threshold`, `risk_limit`
+
+### §6.3 Manual cross-file checks
 
 ```bash
 # 1. All agent keys in topology.yml match keys in players.yml
@@ -372,23 +437,32 @@ grep "record_path" configs/<Scenario>/Rule/simulation.yml
 
 ## §9 Common Config Errors — Quick Reference
 
-| Error                              | Wrong                                         | Correct                                     |
-|------------------------------------|-----------------------------------------------|---------------------------------------------|
-| Old topology format                | `connections: [{source: x, target: y}]`       | `connections: {x: [y], y: [x]}`             |
-| Missing topology header            | No `type:` or `sources:`                      | `type: "star"\nsources:\n  - market`        |
-| Old persona format                 | `personas: []`                                | Full `proxy:` block structure               |
-| Old simulation format              | `num_cpus: 4`, `log_level: INFO`              | Remove; use template structure              |
-| Wrong `communication:` fields      | `message_timeout_ms`, `max_retries`           | Use `message_block_size: 500`               |
-| Old LLM config format              | `llm: {'model': ..., 'api_key': ...}`         | `llm:\n  sys_message: ...\n  lm_name: ...`  |
-| Instance suffix in key             | `agent_type_1:` as YAML key                   | `agent_type:` (no suffix in players.yml)    |
-| `rag:` at wrong nesting            | `extras:\n  rag:`                             | `extras:\n  private_knowledge:\n    rag:`   |
-| Missing `num_instances`            | omitted                                       | Required for every player                   |
-| Wrong class path                   | `Rule.players:Market` in LLM config           | `LLM.players:Market`                        |
-| Wrong topology key                 | `momentum_follower_1` (with suffix)           | `momentum_follower` (no suffix)             |
-| Missing `steps_per_turn`           | omitted from any player block                 | `steps_per_turn: 1`                         |
-| Missing `group_tags`               | omitted from any player block                 | `group_tags:\n  - investors`                |
-| Missing `custom_state_hot_limit`   | omitted from extras                           | `custom_state_hot_limit: 50`                |
-| Old storage_path location          | `setting:\n  storage_path: ...`               | Move to `communication:` block              |
-| `object_store_memory: null`        | null                                          | Integer bytes per §2.2 table                |
-| Wrong prompt module path           | `RuleLLM.prompts:RULELLM_X_SYS` in Rag config | `Rag.prompts:RAG_X_SYS`                     |
-| Missing `LLM_USER_TEMPLATE` export | Not in `Rag/prompts.py`                       | Add `LLM_USER_TEMPLATE = RAG_USER_TEMPLATE` |
+| Error                               | Wrong                                                                      | Correct                                                            |
+|-------------------------------------|----------------------------------------------------------------------------|--------------------------------------------------------------------|
+| Old topology format                 | `connections: [{source: x, target: y}]`                                    | `connections: {x: [y], y: [x]}`                                    |
+| Missing topology header             | No `type:` or `sources:`                                                   | `type: "star"\nsources:\n  - market`                               |
+| Old persona format                  | `personas: []`                                                             | Full `proxy:` block structure                                      |
+| Old simulation format               | `num_cpus: 4`, `log_level: INFO`                                           | Remove; use template structure                                     |
+| Wrong `communication:` fields       | `message_timeout_ms`, `max_retries`                                        | Use `message_block_size: 500`                                      |
+| Old LLM config format               | `llm: {'model': ..., 'api_key': ...}`                                      | `llm:\n  sys_message: ...\n  lm_name: ...`                         |
+| Wrong llm sub-config key in code    | `llm_cfg["model"]` or manual `{"temperature": ...}`                        | `llm_cfg["lm_name"]` and `llm_cfg["generation_config"]`            |
+| Forbidden `.get()` on config extras | `extras.get("key", default)` masks missing config keys                     | `extras["key"]` — fail-fast, config MUST provide the key           |
+| Instance suffix in key              | `agent_type_1:` as YAML key                                                | `agent_type:` (no suffix in players.yml)                           |
+| `rag:` at wrong nesting             | `extras:\n  rag:`                                                          | `extras:\n  private_knowledge:\n    rag:`                          |
+| Missing `num_instances`             | omitted                                                                    | Required for every player                                          |
+| Wrong class path                    | `Rule.players:Market` in LLM config                                        | `LLM.players:Market`                                               |
+| Wrong topology key                  | `momentum_follower_1` (with suffix)                                        | `momentum_follower` (no suffix)                                    |
+| Class name mismatch with code       | `class: "...players:NoiseTrader"` but code has `MomentumRetail`            | `class: "...players:MomentumRetail"` — match `simulation-bases.md` |
+| Config extras key mismatch          | `extras: {sell_size: 60}` but code reads `extras["base_size"]`             | Key names must exactly match code accesses                         |
+| Extras key rename without updating  | `profit_trigger:` in yml but code reads `extras["entry_threshold"]`        | Rename yml key to match `simulation-bases.md` → code               |
+| Rag/RuleLLM Market missing keys     | Rag Market uses liquidity model but config has Rule-style keys             | Add `base_liquidity`, `low_liquidity_threshold` etc. to config     |
+| Wrong variant class prefix          | `LLMFoo` class in Rag config                                               | `RagLLMFoo` — Rag uses `RagLLM` prefix, RuleLLM uses `RuleLLM`     |
+| Identity/topology mismatch          | `identity: "cb_intervener"` but topology uses `hedged_carry_trader`        | Identical names in players.yml identity AND topology.yml           |
+| Stale comments after rename         | `# CentralBankIntervener parameters` after renaming to `HedgedCarryTrader` | Update ALL comments when renaming agents                           |
+| Missing `steps_per_turn`            | omitted from any player block                                              | `steps_per_turn: 1`                                                |
+| Missing `group_tags`                | omitted from any player block                                              | `group_tags:\n  - investors`                                       |
+| Missing `custom_state_hot_limit`    | omitted from extras                                                        | `custom_state_hot_limit: 50`                                       |
+| Old storage_path location           | `setting:\n  storage_path: ...`                                            | Move to `communication:` block                                     |
+| `object_store_memory: null`         | null                                                                       | Integer bytes per §2.2 table                                       |
+| Wrong prompt module path            | `RuleLLM.prompts:RULELLM_X_SYS` in Rag config                              | `Rag.prompts:RAG_X_SYS`                                            |
+| Missing `LLM_USER_TEMPLATE` export  | Not in `Rag/prompts.py`                                                    | Add `LLM_USER_TEMPLATE = RAG_USER_TEMPLATE`                        |

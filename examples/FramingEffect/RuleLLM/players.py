@@ -41,7 +41,7 @@ class RuleLLMInvestor(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras.get(
                 "fundamental_value", 100.0
             )
@@ -51,17 +51,13 @@ class RuleLLMInvestor(GeneralPlayer):
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get(
-                    "price", self.state.custom_state["price"]
-                )
-                self.state.custom_state["fundamental"] = payload.get(
-                    "fundamental", self.state.custom_state["fundamental"]
-                )
-                self.state.custom_state["deviation"] = payload.get("deviation", 0.0)
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
 
     async def _initialize_agent(self) -> None:
         """Initialize LangChainAPIInference client from config."""
-        llm_cfg = self.config.extras.get("llm", {})
+        llm_cfg = self.config.extras["llm"]
         self._llm_params = {
             "lm_name": llm_cfg["lm_name"],
             "generation_config": llm_cfg["generation_config"],
@@ -110,11 +106,13 @@ class RuleLLMInvestor(GeneralPlayer):
             infer_input = InferInput(system_msg=system_msg, user_msg=user_msg)
             response = self._llm_client.run([infer_input]).outputs[0].response
             decision = parse_llm_response_with_thinking(response)
-        except Exception:
-            decision = {"action": "hold", "quantity": 0}
+        except Exception as exc:
+            raise RuntimeError(
+                f"[{self.identity}] LLM inference failed: {exc}"
+            ) from exc
 
-        action = decision.get("action", "hold")
-        quantity = int(decision.get("quantity", 0))
+        action = decision["action"]
+        quantity = int(decision["quantity"])
         price_val = self.state.custom_state["price"]
 
         if action == "buy":
@@ -130,8 +128,8 @@ class RuleLLMInvestor(GeneralPlayer):
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order."""
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
         price = self.state.custom_state["price"]
 
         if action == "buy" and quantity > 0:

@@ -211,7 +211,7 @@ class BaseLLMInvestor(GeneralPlayer):
 
     def _get_llm_config(self) -> Dict[str, Any]:
         """Get LLM configuration from extras."""
-        return self.config.extras.get("llm", {})
+        return self.config.extras["llm"]
 
     async def perceive(
         self,
@@ -284,7 +284,7 @@ class BaseLLMInvestor(GeneralPlayer):
             return_pct=price_return * 100,
             volume=volume,
             net_demand=net_demand,
-            fundamental=extras.get("fundamental", 100.0),
+            fundamental=extras["fundamental"],
             recent_prices=recent_prices_str,
             cash=cash,
             position=position,
@@ -316,22 +316,17 @@ class BaseLLMInvestor(GeneralPlayer):
                         f"[{self.identity}] LLM parse failed, retrying..."
                     )  # pylint: disable=logging-fstring-interpolation
 
-        # If LLM failed after all retries, skip trading this round (hold)
         if decision is None:
-            logger.warning(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}. "
-                f"Skipping trade this round."
-            )
-            return self._hold_order(
-                round_num, strategy_name, reason=f"LLM failed: {last_error}"
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             )
 
         # Extract decision
-        action = decision.get("action", "hold")
-        bid_price = float(decision.get("bid_price", price))
-        quantity = float(decision.get("quantity", 0))
-        reasoning = decision.get("reasoning", "")
-        analysis = decision.get("analysis", "")
+        action = decision["action"]
+        bid_price = float(decision["bid_price"])
+        quantity = float(decision["quantity"])
+        reasoning = decision["reasoning"]
+        analysis = decision["analysis"]
 
         # Execute trade
         if quantity > 0:
@@ -390,8 +385,8 @@ class BaseLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": reason[:120] if reason else "hold",
             "analysis": "",
-            "cash": self.state.custom_state.get("cash", 0),
-            "position": self.state.custom_state.get("position", 0),
+            "cash": self.state.custom_state["cash"],
+            "position": self.state.custom_state["position"],
             "outbound_messages": [
                 {
                     "payload": {
@@ -401,8 +396,8 @@ class BaseLLMInvestor(GeneralPlayer):
                         "investor": self.identity,
                         "reasoning": reason[:100] if reason else "hold",
                         "analysis": "",
-                        "cash": self.state.custom_state.get("cash", 0),
-                        "position": self.state.custom_state.get("position", 0),
+                        "cash": self.state.custom_state["cash"],
+                        "position": self.state.custom_state["position"],
                     },
                     "content_type": "investor_bid",
                 }

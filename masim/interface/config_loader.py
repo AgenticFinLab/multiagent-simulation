@@ -2,7 +2,8 @@
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+import re
+from typing import Any, Dict, List, Optional
 import yaml
 
 
@@ -12,154 +13,141 @@ EXAMPLES_DIR = Path("examples")
 CONFIGS_DIR = Path("configs")
 EXPERIMENT_DIR = Path("EXPERIMENT")
 
-# Maps flat config-dir name → (parent_dir, sub_dir) in examples/ and EXPERIMENT/
-# Scenarios not in this map (e.g. "Demo") remain flat.
-SCENARIO_PATH_MAP: Dict[str, Tuple[str, str]] = {
-    "AssetBubble": ("AssetBubble", "Rule"),
-    "AssetBubbleLLM": ("AssetBubble", "LLM"),
-    "AssetBubbleRuleLLM": ("AssetBubble", "RuleLLM"),
-    "AssetBubbleRag": ("AssetBubble", "Rag"),
-    "DispositionEffect": ("DispositionEffect", "Rule"),
-    "DispositionEffectLLM": ("DispositionEffect", "LLM"),
-    "DispositionEffectRuleLLM": ("DispositionEffect", "RuleLLM"),
-    "DispositionEffectRag": ("DispositionEffect", "Rag"),
-    "HerdEffect": ("HerdEffect", "Rule"),
-    "HerdEffectLLM": ("HerdEffect", "LLM"),
-    "HerdEffectRuleLLM": ("HerdEffect", "RuleLLM"),
-    "EquityPremium": ("EquityPremium", "Rule"),
-    "EquityPremiumLLM": ("EquityPremium", "LLM"),
-    "FlashCrash": ("FlashCrash", "Rule"),
-    "FlashCrashLLM": ("FlashCrash", "LLM"),
-    "LiquidityDryup": ("LiquidityDryup", "Rule"),
-    "LiquidityDryupLLM": ("LiquidityDryup", "LLM"),
-    "MarketCrash": ("MarketCrash", "Rule"),
-    "MarketCrashLLM": ("MarketCrash", "LLM"),
-    "MomentumEffect": ("MomentumEffect", "Rule"),
-    "MomentumEffectLLM": ("MomentumEffect", "LLM"),
-    "ReversalEffect": ("ReversalEffect", "Rule"),
-    "ReversalEffectLLM": ("ReversalEffect", "LLM"),
-    "ShortSqueeze": ("ShortSqueeze", "Rule"),
-    "ShortSqueezeLLM": ("ShortSqueeze", "LLM"),
-    "VolatilityClustering": ("VolatilityClustering", "Rule"),
-    "VolatilityClusteringLLM": ("VolatilityClustering", "LLM"),
-}
+# Hidden variants — Rag temporarily disabled per user request
+_HIDDEN_VARIANTS = {"Rag"}
+
+# Directories excluded from scenario discovery
+_EXCLUDED_DIRS = {"TEMPLATES", "__pycache__", "Demo"}
 
 
-def _examples_path(scenario_name: str) -> Path:
-    """Return the examples/ subdirectory for a scenario (nested or flat)."""
-    mapping = SCENARIO_PATH_MAP.get(scenario_name)
-    if mapping:
-        parent, sub = mapping
-        return EXAMPLES_DIR / parent / sub
-    return EXAMPLES_DIR / scenario_name
+def _configs_path(scenario_key: str) -> Path:
+    """Return the configs/ subdirectory for a scenario key.
+
+    Args:
+        scenario_key: Slash-separated key (e.g. 'AssetBubble/Rule') or flat name
+    """
+    return CONFIGS_DIR / scenario_key
 
 
-def _experiment_path(scenario_name: str) -> Path:
-    """Return the EXPERIMENT/ subdirectory for a scenario (nested or flat)."""
-    mapping = SCENARIO_PATH_MAP.get(scenario_name)
-    if mapping:
-        parent, sub = mapping
-        return EXPERIMENT_DIR / parent / sub
-    return EXPERIMENT_DIR / scenario_name
+def _experiment_path(scenario_key: str) -> Path:
+    """Return the EXPERIMENT/ subdirectory for a scenario key."""
+    return EXPERIMENT_DIR / scenario_key
 
 
-def _configs_path(scenario_name: str) -> Path:
-    """Return the configs/ subdirectory for a scenario (nested or flat)."""
-    mapping = SCENARIO_PATH_MAP.get(scenario_name)
-    if mapping:
-        parent, sub = mapping
-        return CONFIGS_DIR / parent / sub
-    return CONFIGS_DIR / scenario_name
+def _examples_path(scenario_key: str) -> Path:
+    """Return the examples/ subdirectory for a scenario key."""
+    return EXAMPLES_DIR / scenario_key
 
 
-# Scenario name mapping for display
-SCENARIO_DISPLAY_NAMES = {
-    "AssetBubble": "Asset Bubble",
-    "AssetBubbleLLM": "Asset Bubble (LLM)",
-    "AssetBubbleRuleLLM": "Asset Bubble (RuleLLM)",
-    "AssetBubbleRag": "Asset Bubble (RAG)",
-    "MarketCrash": "Market Crash",
-    "MarketCrashLLM": "Market Crash (LLM)",
-    "HerdEffect": "Herd Effect",
-    "HerdEffectLLM": "Herd Effect (LLM)",
-    "HerdEffectRuleLLM": "Herd Effect (RuleLLM)",
-    "MomentumEffect": "Momentum Effect",
-    "MomentumEffectLLM": "Momentum Effect (LLM)",
-    "ReversalEffect": "Reversal Effect",
-    "ReversalEffectLLM": "Reversal Effect (LLM)",
-    "FlashCrash": "Flash Crash",
-    "FlashCrashLLM": "Flash Crash (LLM)",
-    "VolatilityClustering": "Volatility Clustering",
-    "VolatilityClusteringLLM": "Volatility Clustering (LLM)",
-    "EquityPremium": "Equity Premium",
-    "EquityPremiumLLM": "Equity Premium (LLM)",
-    "DispositionEffect": "Disposition Effect",
-    "DispositionEffectLLM": "Disposition Effect (LLM)",
-    "DispositionEffectRuleLLM": "Disposition Effect (RuleLLM)",
-    "DispositionEffectRag": "Disposition Effect (RAG)",
-    "LiquidityDryup": "Liquidity Dry-up",
-    "LiquidityDryupLLM": "Liquidity Dry-up (LLM)",
-    "ShortSqueeze": "Short Squeeze",
-    "ShortSqueezeLLM": "Short Squeeze (LLM)",
-    "Demo": "Demo",
-}
+def _flat_scenario_name(key: str) -> str:
+    """Convert a slash-separated key to the legacy flat name for dict lookups.
+
+    Examples:
+        'AssetBubble/Rule'    -> 'AssetBubble'
+        'AssetBubble/LLM'     -> 'AssetBubbleLLM'
+        'AssetBubble/RuleLLM' -> 'AssetBubbleRuleLLM'
+        'Demo'                -> 'Demo'
+    """
+    if "/" not in key:
+        return key
+    base, variant = key.split("/", 1)
+    if variant == "Rule":
+        return base
+    return base + variant
+
+
+def scenario_display_name(key: str) -> str:
+    """Auto-generate a display name from a scenario key by splitting CamelCase.
+
+    Examples:
+        'AssetBubble/Rule'      -> 'Asset Bubble (Rule)'
+        'FlashCrash2010/LLM'    -> 'Flash Crash 2010 (LLM)'
+        'Demo'                  -> 'Demo'
+    """
+    if "/" in key:
+        base, variant = key.split("/", 1)
+    else:
+        base, variant = key, ""
+
+    # Split CamelCase and letter-digit boundaries
+    display = re.sub(
+        r"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|(?<=[A-Za-z])(?=[0-9])",
+        " ",
+        base,
+    )
+
+    if variant:
+        return f"{display} ({variant})"
+    return display
 
 
 def discover_scenarios() -> List[str]:
     """Discover all available simulation scenarios from configs directory.
 
-    Supports both flat layout (configs/Demo/) and nested layout
-    (configs/AssetBubble/Rule/, configs/AssetBubble/LLM/, ...).
-
-    Returns:
-        List of logical scenario names keyed by SCENARIO_PATH_MAP
-        (e.g., ["AssetBubble", "AssetBubbleLLM", "Demo", ...])
+    Scans configs/ at depth-2 for simulation.yml files.  Returns a sorted
+    list of slash-separated keys like 'AssetBubble/Rule'.  Rag variants
+    and TEMPLATES are excluded.
     """
     if not CONFIGS_DIR.exists():
         return []
 
-    found = set()
-
-    # Walk up to depth-2 looking for simulation.yml
+    found: List[str] = []
     for item in sorted(CONFIGS_DIR.iterdir()):
-        if not item.is_dir() or item.name.startswith("_") or item.name == "TEMPLATES":
+        if (
+            not item.is_dir()
+            or item.name.startswith("_")
+            or item.name in _EXCLUDED_DIRS
+        ):
             continue
         # Depth-1: flat scenario (e.g. configs/Demo/simulation.yml)
         if (item / "simulation.yml").exists():
-            found.add(item.name)
-        else:
-            # Depth-2: nested scenario (e.g. configs/AssetBubble/Rule/simulation.yml)
-            for sub in sorted(item.iterdir()):
-                if sub.is_dir() and (sub / "simulation.yml").exists():
-                    # Reverse-lookup logical name from (parent, subdir)
-                    key = (item.name, sub.name)
-                    logical = next(
-                        (k for k, v in SCENARIO_PATH_MAP.items() if v == key), None
-                    )
-                    if logical:
-                        found.add(logical)
+            found.append(item.name)
+            continue
+        # Depth-2: nested (e.g. configs/AssetBubble/Rule/simulation.yml)
+        for sub in sorted(item.iterdir()):
+            if not sub.is_dir() or sub.name in _HIDDEN_VARIANTS:
+                continue
+            if (sub / "simulation.yml").exists():
+                found.append(f"{item.name}/{sub.name}")
+    return found
 
-    # Return in a stable display order matching SCENARIO_DISPLAY_NAMES
-    order = list(SCENARIO_DISPLAY_NAMES.keys())
-    return [s for s in order if s in found] + sorted(found - set(order))
+
+def discover_scenario_groups() -> Dict[str, List[str]]:
+    """Group discovered scenarios by their base scenario name.
+
+    Returns:
+        Ordered dict mapping base name (e.g. 'AssetBubble') to a list of
+        full keys (e.g. ['AssetBubble/Rule', 'AssetBubble/LLM', ...]).
+    """
+    from collections import OrderedDict
+
+    groups: Dict[str, List[str]] = OrderedDict()
+    for key in discover_scenarios():
+        if "/" in key:
+            base = key.split("/", 1)[0]
+        else:
+            base = key
+        groups.setdefault(base, []).append(key)
+    return groups
 
 
 def get_scenario_info(scenario_name: str) -> Dict[str, Any]:
     """Get basic information about a scenario.
 
     Args:
-        scenario_name: Name of the scenario directory
+        scenario_name: Slash-separated key (e.g. 'AssetBubble/Rule')
 
     Returns:
         Dict with name, display_name, description, is_llm, config_path
     """
     config_path = _configs_path(scenario_name) / "simulation.yml"
+    variant = scenario_name.split("/")[-1] if "/" in scenario_name else ""
 
     info = {
         "name": scenario_name,
-        "display_name": SCENARIO_DISPLAY_NAMES.get(scenario_name, scenario_name),
+        "display_name": scenario_display_name(scenario_name),
         "description": "",
-        "is_llm": scenario_name.endswith("LLM") or scenario_name.endswith("Rag"),
+        "is_llm": variant in ("LLM", "RuleLLM", "Rag"),
         "config_path": str(config_path),
         "exists": config_path.exists(),
     }
@@ -554,63 +542,6 @@ def get_agents_info(scenario_name: str) -> List[Dict[str, Any]]:
     return agents
 
 
-def get_scenario_pairs() -> List[Tuple[str, str]]:
-    """Get pairs of (rule_based, llm) scenario names.
-
-    Returns:
-        List of tuples (base_name, llm_name) for scenarios that have both variants
-        Special variants (RuleLLM, Rag) are paired with their base scenario.
-    """
-    scenarios = discover_scenarios()
-    pairs = []
-    seen = set()
-
-    for name in scenarios:
-        if name in seen:
-            continue
-
-        # Handle RuleLLM variants - pair with their base scenario
-        if name.endswith("RuleLLM"):
-            base = name[:-8]  # Remove "RuleLLM"
-            if base in scenarios and base not in seen:
-                pairs.append((base, name))
-                seen.add(base)
-            else:
-                pairs.append((None, name))
-            seen.add(name)
-        # Handle Rag variants
-        elif name.endswith("Rag"):
-            base = name[:-3]  # Remove "Rag"
-            if base in scenarios and base not in seen:
-                pairs.append((base, name))
-                seen.add(base)
-            else:
-                pairs.append((None, name))
-            seen.add(name)
-        # Standard LLM variant (not RuleLLM)
-        elif name.endswith("LLM"):
-            base = name[:-3]
-            if base in scenarios:
-                pairs.append((base, name))
-                seen.add(base)
-                seen.add(name)
-            else:
-                pairs.append((None, name))
-                seen.add(name)
-        # Base scenario (not LLM variant)
-        else:
-            llm_variant = name + "LLM"
-            if llm_variant in scenarios and llm_variant not in seen:
-                pairs.append((name, llm_variant))
-                seen.add(name)
-                seen.add(llm_variant)
-            elif name not in seen:
-                pairs.append((name, None))
-                seen.add(name)
-
-    return pairs
-
-
 def check_simulation_results(scenario_name: str) -> bool:
     """Check if simulation results exist for a scenario.
 
@@ -838,15 +769,16 @@ def get_market_description(scenario_name: str) -> str:
     """Return a short description of the market dynamics for a scenario.
 
     Args:
-        scenario_name: Name of the scenario directory
+        scenario_name: Slash-separated key or legacy flat name
 
     Returns:
         Human-readable market description string
     """
-    # Strip LLM suffix for fallback lookup
-    base = scenario_name[:-3] if scenario_name.endswith("LLM") else scenario_name
+    flat = _flat_scenario_name(scenario_name)
+    # Fallback: strip LLM/RuleLLM suffix
+    base = flat[:-3] if flat.endswith("LLM") else flat
     return _SCENARIO_MARKET_DESCRIPTIONS.get(
-        scenario_name,
+        flat,
         _SCENARIO_MARKET_DESCRIPTIONS.get(base, ""),
     )
 

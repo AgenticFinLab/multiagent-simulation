@@ -121,7 +121,7 @@ class CascadeFollower(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["cascade_count"] = 0
             self.state.custom_state["social_weight"] = extras["social_weight"]
             self.state.custom_state["cascade_trigger"] = extras["cascade_trigger"]
@@ -192,7 +192,7 @@ class ReputationHerder(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["reputation_concern"] = extras["reputation_concern"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
@@ -255,7 +255,7 @@ class IndependentThinker(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["signal_precision"] = extras["signal_precision"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
@@ -318,7 +318,7 @@ class Contrarian(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["contrarian_threshold"] = extras[
                 "contrarian_threshold"
             ]
@@ -383,7 +383,7 @@ class NoiseTrader(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["trade_probability"] = extras["trade_probability"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg

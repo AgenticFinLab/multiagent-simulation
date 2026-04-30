@@ -68,7 +68,6 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from examples.llm_utils import parse_llm_response_with_thinking
 
-
 logger = logging.getLogger("EquityPremiumLLM")
 
 
@@ -254,7 +253,7 @@ class LLMInvestor(GeneralPlayer):
         parsed = None
         try:
             parsed = json.loads(text)
-        except:
+        except Exception:
             match = re.search(r"\{.*\}", text, re.DOTALL)
             if match:
                 parsed = json.loads(match.group(0))
@@ -278,7 +277,9 @@ class LLMInvestor(GeneralPlayer):
         llm_config = self.config.extras["llm"]
         system_prompt = load_prompt(llm_config["sys_message"])
 
-        for _ in range(3):
+        decision = None
+        last_error = None
+        for attempt in range(3):
             try:
                 output = llm_client.run(
                     [
@@ -290,8 +291,19 @@ class LLMInvestor(GeneralPlayer):
                 )
                 decision = self._parse_response(output.outputs[0].response)
                 break
-            except:
-                decision = {"stock_qty": 0, "reasoning": "error"}
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            )
 
         stock_qty = float(decision["stock_qty"])
         cash, stocks = (

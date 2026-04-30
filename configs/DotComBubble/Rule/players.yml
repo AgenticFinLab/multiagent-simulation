@@ -38,6 +38,7 @@ neweconomyevangelist:
       base_buy_size: 400
       narrative_strength: 0.8
       custom_state_hot_limit: 3
+      order_size: 600
   persona: !include persona.yml
 
 ipoflipper:
@@ -58,6 +59,8 @@ ipoflipper:
       flip_return: 0.15
       base_size: 300
       custom_state_hot_limit: 3
+      flip_threshold: 0.05
+      order_size: 700
   persona: !include persona.yml
 
 momentumfollower:
@@ -77,6 +80,8 @@ momentumfollower:
       entry_threshold: 0.03
       base_size: 350
       custom_state_hot_limit: 3
+      momentum_threshold: 0.02
+      order_size: 500
   persona: !include persona.yml
 
 skepticalvalueinvestor:
@@ -97,6 +102,9 @@ skepticalvalueinvestor:
       max_pf: 3.0
       base_size: 300
       custom_state_hot_limit: 3
+      order_size: 400
+      value_buy_threshold: -0.10
+      value_sell_threshold: 0.20
   persona: !include persona.yml
 
 shortseller:
@@ -117,4 +125,5 @@ shortseller:
       cover_threshold: 2.5
       base_size: 300
       custom_state_hot_limit: 3
+      order_size: 400
   persona: !include persona.yml

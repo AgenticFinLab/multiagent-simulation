@@ -304,7 +304,7 @@ class RuleLLMInvestor(GeneralPlayer):
             list(price_history)[-5:] if len(price_history) >= 5 else list(price_history)
         )
 
-        llm_config = self.config.extras.get("llm", {})  # noqa: F841
+        llm_config = self.config.extras["llm"]  # noqa: F841
         return f"""
 Round: {round_num}
 Current Price: ${market_data['price']:.2f} | Prev: ${market_data['prev_price']:.2f} | Return: {market_data['return_pct']:+.2f}%

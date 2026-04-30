@@ -82,8 +82,8 @@ class RagLLMInvestor(GeneralPlayer):
         )
         self.state.custom_state["llm_client"] = llm_client
 
-        private_knowledge = extras.get("private_knowledge", {})
-        rag_cfg = private_knowledge.get("rag", extras.get("rag", {}))
+        private_knowledge = extras["private_knowledge"]
+        rag_cfg = private_knowledge["rag"]
         await self._initialize_rag(rag_cfg, llm_client, llm_config)
 
     async def _initialize_rag(
@@ -93,7 +93,7 @@ class RagLLMInvestor(GeneralPlayer):
         extras = self.config.extras
         record_path = extras["record_path"]
 
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
@@ -104,7 +104,7 @@ class RagLLMInvestor(GeneralPlayer):
             }
 
         resource_manager = ResourceManager(knowledge_config)
-        private_knowledge = extras.get("private_knowledge", {})
+        private_knowledge = extras["private_knowledge"]
         if not private_knowledge:
             private_knowledge = {
                 "from_global_resources": ["MinerU_processed"],

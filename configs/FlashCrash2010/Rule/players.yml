@@ -62,6 +62,7 @@ momentumchaser:
       initial_price: 40.0
       fundamental_value: 40.0
       entry_threshold: 0.001
+      lookback_window: 5          # Lookback window for velocity calc (§4.2)
       position_multiplier: 10000
       max_size: 1000
       custom_state_hot_limit: 3

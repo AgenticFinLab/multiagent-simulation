@@ -12,13 +12,13 @@ def render_docs_page(scenario_name: str):
       - Full explain.md content rendered as markdown
 
     Args:
-        scenario_name: Name of the selected scenario
+        scenario_name: Name of the seclected scenario
     """
     from ..config_loader import (
         get_docs_content,
         get_scenario_info,
         get_market_description,
-        SCENARIO_DISPLAY_NAMES,
+        scenario_display_name,
     )
 
     # ------------------------------------------------------------------
@@ -31,7 +31,7 @@ def render_docs_page(scenario_name: str):
             st.session_state.current_page = "Simulation"
             st.rerun()
     with col_title:
-        display_name = SCENARIO_DISPLAY_NAMES.get(scenario_name, scenario_name)
+        display_name = scenario_display_name(scenario_name)
         st.title(f"📚 {display_name}")
 
     # Sub-header: market description as a short context line

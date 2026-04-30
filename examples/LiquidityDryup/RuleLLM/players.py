@@ -360,8 +360,8 @@ class RuleLLMInvestor(GeneralPlayer):
             try:
                 decision = self._parse_llm_response(infer_output.outputs[0].response)
                 break
-            except ValueError as e:
-                last_error = e
+            except Exception as exc:
+                last_error = exc
                 if attempt < max_retries - 1:
                     logger.debug(
                         "[%s] LLM parse failed (attempt %d), retrying...",
@@ -369,28 +369,10 @@ class RuleLLMInvestor(GeneralPlayer):
                         attempt + 1,
                     )
 
-        # If LLM failed after all retries, skip trading this round (hold)
         if decision is None:
-            logger.warning(
-                "[%s] LLM failed after %d attempts: %s. Skipping trade this round.",
-                self.identity,
-                max_retries,
-                last_error,
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             )
-            order = {
-                "bid_price": market_data["price"],
-                "quantity": 0.0,
-                "strategy": strategy_name,
-                "investor": self.identity,
-                "reasoning": "LLM parse failed: held position",
-                "provides_liquidity": False,
-            }
-            return {
-                **order,
-                "outbound_messages": [
-                    {"payload": order, "content_type": "investor_bid"}
-                ],
-            }
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
@@ -422,8 +404,8 @@ class RuleLLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": decision.get("reasoning", "")[:120],
-            "provides_liquidity": decision.get("provides_liquidity", False),
+            "reasoning": decision["reasoning"][:120],
+            "provides_liquidity": decision["provides_liquidity"],
         }
 
         return {

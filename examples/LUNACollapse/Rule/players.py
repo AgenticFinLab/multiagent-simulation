@@ -112,7 +112,7 @@ class StablecoinHolder(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
@@ -124,7 +124,7 @@ class StablecoinHolder(GeneralPlayer):
         deviation = self.state.custom_state.get("deviation", 0)
         extras = self.config.extras
         position = self.state.custom_state["position"]
-        redemption_threshold = extras.get("redemption_threshold", 0.1)
+        redemption_threshold = extras["redemption_threshold"]
         if deviation < -(1 - redemption_threshold):
             sell_qty = min(int(abs(position) * 0.5), max(position, 0))
             if sell_qty > 0:
@@ -165,7 +165,7 @@ class Arbitrageur(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
@@ -179,7 +179,7 @@ class Arbitrageur(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        arb_threshold = extras.get("arb_threshold", 0.01)
+        arb_threshold = extras["arb_threshold"]
         if abs(deviation) > arb_threshold:
             qty = min(5000, int(abs(deviation) * 100000))
             if deviation > 0:
@@ -226,7 +226,7 @@ class DeFiLender(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
@@ -238,7 +238,7 @@ class DeFiLender(GeneralPlayer):
         deviation = self.state.custom_state.get("deviation", 0)
         extras = self.config.extras
         position = self.state.custom_state["position"]
-        liq_threshold = extras.get("liquidation_threshold", 0.15)
+        liq_threshold = extras["liquidation_threshold"]
         if deviation < -(1 - liq_threshold):
             sell_qty = min(int(abs(position) * 0.6), max(position, 0))
             if sell_qty > 0:
@@ -279,7 +279,7 @@ class AnchorDepositor(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
@@ -291,7 +291,7 @@ class AnchorDepositor(GeneralPlayer):
         deviation = self.state.custom_state.get("deviation", 0)
         extras = self.config.extras
         position = self.state.custom_state["position"]
-        _ = extras.get("yield_threshold", 0.05)
+        _ = extras["yield_threshold"]
         if deviation < -0.05:
             sell_qty = min(int(position * 0.4), max(position, 0))
             if sell_qty > 0:
@@ -332,7 +332,7 @@ class ValueBuyer(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
@@ -345,7 +345,7 @@ class ValueBuyer(GeneralPlayer):
         price = self.state.custom_state.get("price", 0)
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
-        discount_threshold = extras.get("discount_threshold", 0.3)
+        discount_threshold = extras["discount_threshold"]
         if deviation < -discount_threshold:
             buy_qty = min(1000, int(cash * 0.2 / price) if price > 0 else 0)
             if buy_qty > 0:

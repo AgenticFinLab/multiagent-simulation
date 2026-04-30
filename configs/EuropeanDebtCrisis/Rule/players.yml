@@ -35,7 +35,7 @@ peripherybondseller:
       record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"
       initial_cash: 1000000.0
       initial_position: 500
-      panic_threshold: 5.0
+      sell_threshold: -0.10       # Deviation threshold to sell (§4.1)
       base_size: 300
       custom_state_hot_limit: 3
   persona: !include persona.yml
@@ -54,7 +54,7 @@ creditorpanicker:
       record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"
       initial_cash: 1000000.0
       initial_position: 400
-      stress_threshold: 3.0
+      panic_threshold: -0.15      # Deviation threshold for panic (§4.2)
       base_size: 350
       custom_state_hot_limit: 3
   persona: !include persona.yml
@@ -73,7 +73,7 @@ corebondbuyer:
       record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"
       initial_cash: 1000000.0
       initial_position: 0
-      value_threshold: 0.05
+      flight_threshold: -0.08     # Deviation threshold for flight-to-quality (§4.3)
       base_size: 300
       custom_state_hot_limit: 3
   persona: !include persona.yml
@@ -92,17 +92,17 @@ ecbintervenor:
       record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"
       initial_cash: 5000000.0
       initial_position: 0
-      ecb_threshold: 8.0
+      intervention_threshold: -0.20  # Deviation threshold for ECB intervention (§4.4)
       intervention_size: 600
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-hedgedfundtrader:
-  name: "HedgedFundTrader"
-  class: "examples.EuropeanDebtCrisis.Rule.players:HedgedFundTrader"
+hedgedfund:
+  name: "HedgedFund"
+  class: "examples.EuropeanDebtCrisis.Rule.players:HedgedFund"
   num_instances: 1
   config:
-    identity: "hedgedfundtrader"
+    identity: "hedgedfund"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -111,8 +111,7 @@ hedgedfundtrader:
       record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"
       initial_cash: 1000000.0
       initial_position: 0
-      spread_buy_threshold: 7.0
-      spread_exit_threshold: 3.0
+      entry_threshold: 0.07       # Deviation threshold for entry (§4.5)
       base_size: 400
       custom_state_hot_limit: 3
   persona: !include persona.yml

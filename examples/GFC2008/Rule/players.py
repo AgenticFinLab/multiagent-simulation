@@ -16,6 +16,7 @@ Key Dynamics:
 """
 
 import logging
+import os
 import random
 from typing import Any, Dict, List, Optional
 
@@ -150,7 +151,7 @@ class MBSOriginator(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras.get(
                 "fundamental_value", 100.0
             )
@@ -171,7 +172,7 @@ class MBSOriginator(GeneralPlayer):
         """Originate-to-distribute: sell securities at a steady rate regardless of price."""
         extras = self.config.extras
         position = self.state.custom_state["position"]
-        origination_rate = extras.get("origination_rate", 0.1)
+        origination_rate = extras["origination_rate"]
 
         sell_qty = int(abs(position) * origination_rate)
         if sell_qty > 0 and position > 0:
@@ -226,7 +227,7 @@ class RatingAgency(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras.get(
                 "fundamental_value", 100.0
             )
@@ -249,7 +250,7 @@ class RatingAgency(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         cash = self.state.custom_state["cash"]
-        overrating_bias = extras.get("overrating_bias", 0.2)
+        overrating_bias = extras["overrating_bias"]
 
         perceived_fundamental = fundamental * (1 + overrating_bias)
         if price < perceived_fundamental * 0.95:
@@ -306,7 +307,7 @@ class LeveragedInvestor(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras.get(
                 "fundamental_value", 100.0
             )
@@ -328,7 +329,7 @@ class LeveragedInvestor(GeneralPlayer):
         extras = self.config.extras
         deviation = self.state.custom_state["deviation"]
         position = self.state.custom_state["position"]
-        margin_trigger = extras.get("margin_call_trigger", 0.1)
+        margin_trigger = extras["margin_call_trigger"]
 
         if deviation < -margin_trigger:
             fire_sale_qty = int(abs(position) * 0.5)
@@ -384,7 +385,7 @@ class DistressedBuyer(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras.get(
                 "fundamental_value", 100.0
             )
@@ -407,7 +408,7 @@ class DistressedBuyer(GeneralPlayer):
         deviation = self.state.custom_state["deviation"]
         price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
-        discount_threshold = extras.get("discount_threshold", 0.15)
+        discount_threshold = extras["discount_threshold"]
 
         if deviation < -discount_threshold:
             buy_qty = min(1000, int(cash * 0.3 / price) if price > 0 else 0)
@@ -461,9 +462,9 @@ class Regulator(GeneralPlayer):
         self.state.custom_state["round"] = observation.round
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
-            self.state.custom_state["cash"] = extras.get("initial_cash", 10000000.0)
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras.get(
                 "fundamental_value", 100.0
             )
@@ -484,8 +485,8 @@ class Regulator(GeneralPlayer):
         """Intervene with large buy when systemic stress exceeds threshold."""
         extras = self.config.extras
         deviation = self.state.custom_state["deviation"]
-        intervention_threshold = extras.get("intervention_threshold", 0.2)
-        rescue_probability = extras.get("rescue_probability", 0.3)
+        intervention_threshold = extras["intervention_threshold"]
+        rescue_probability = extras["rescue_probability"]
 
         if deviation < -intervention_threshold and random.random() < rescue_probability:
             return {"action": "buy", "quantity": 3000}

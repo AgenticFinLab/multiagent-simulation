@@ -60,7 +60,7 @@ class RagLLMInvestor(GeneralPlayer):
         self, price: float, fundamental: float, deviation: float
     ) -> str:
         """Retrieve relevant context for current market state."""
-        rag_cfg = self.config.extras.get("rag", {})
+        rag_cfg = self.config.extras["rag"]
         context_template = rag_cfg.get(
             "context_template",
             "Base rate for price deviations of this magnitude: ~30% revert within 5 rounds.",
@@ -82,10 +82,10 @@ class RagLLMInvestor(GeneralPlayer):
 
     async def decide(self) -> Dict[str, Any]:
         price = self.state.custom_state.get(
-            "price", self.config.extras.get("initial_price", 100.0)
+            "price", self.config.extras["initial_price"]
         )
         fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras.get("fundamental_value", 100.0)
+            "fundamental", self.config.extras["fundamental_value"]
         )
         deviation = self.state.custom_state.get("deviation", 0.0)
         cash = self.state.custom_state["cash"]

@@ -15,8 +15,8 @@
 #     Theory: Plantin & Shin (2018)
 #   - FundingCurrencyBuyer: Safe-haven demand amplifier (DESTABILIZING)
 #     Theory: Menkhoff et al. (2012)
-#   - CentralBankIntervener: FX stability seller (STABILIZING)
-#     Theory: BIS (2005), Menkhoff et al. (2012)
+#   - HedgedCarryTrader: Volatility-adjusted carry (STABILIZING)
+#     Theory: Menkhoff et al. (2012), Burnside et al. (2011)
 #   - NoiseTrader: Random background liquidity (NEUTRAL)
 #     Theory: Black (1986)
 # =============================================================================
@@ -68,6 +68,7 @@ carry_trader:
       # CarryTrader specific parameters (Brunnermeier et al., 2009)
       unwind_threshold: 0.02      # Unwind when return > 2%
       carry_size: 100.0           # Base carry units
+      leverage: 5.0               # Leverage multiplier (Brunnermeier et al., 2009)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -118,31 +119,32 @@ funding_currency_buyer:
       custom_state_hot_limit: 3
       # FundingCurrencyBuyer parameters (Menkhoff et al., 2012)
       risk_threshold: 0.015       # Flight-to-safety triggered at 1.5% return
-      risk_buy_size: 60.0         # Safe-haven purchase size
+      position_size: 60           # Fixed safe-haven buy units (Ranaldo & Söderlind, 2010)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# Central Bank Intervener (Stabilizer)
-# Theory: BIS (2005) — FX intervention effectiveness
+# Hedged Carry Trader (Volatility-Aware)
+# Theory: Menkhoff et al. (2012) — Volatility-adjusted carry
+#         Burnside et al. (2011) — Hedged carry trade strategies
 # -----------------------------------------------------------------------------
-cb_intervener:
-  name: "Central Bank Intervener"
-  class: "examples.CarryTradeUnwind.Rule.players:CentralBankIntervener"
+hedged_carry_trader:
+  name: "Hedged Carry Trader"
+  class: "examples.CarryTradeUnwind.Rule.players:HedgedCarryTrader"
   num_instances: 1
   config:
-    identity: "cb_intervener"
+    identity: "hedged_carry_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
       record_path: "EXPERIMENT/CarryTradeUnwind/Rule/records"
-      initial_cash: 2000000.0    # Large reserves
+      initial_cash: 2000000.0
       initial_position: 0.0
       custom_state_hot_limit: 3
-      # CentralBankIntervener parameters
-      intervention_threshold: 0.05  # Intervene when >5% above fundamental
-      intervention_size: 150.0      # Large intervention size
+      # HedgedCarryTrader parameters (Menkhoff et al., 2012; Burnside et al., 2011)
+      hedge_ratio: 0.30              # 30% of position hedged (reduces net exposure)
+      vol_threshold: 0.05            # FX volatility threshold for position adjustment
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------

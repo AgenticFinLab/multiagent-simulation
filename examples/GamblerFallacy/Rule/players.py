@@ -17,6 +17,7 @@ Key Dynamics:
 """
 
 import logging
+import os
 import random
 from typing import Any, Dict, List, Optional
 
@@ -151,7 +152,7 @@ class StreakReversalTrader(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras.get(
                 "fundamental_value", 100.0
             )
@@ -235,7 +236,7 @@ class HotHandTrader(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras.get(
                 "fundamental_value", 100.0
             )
@@ -319,7 +320,7 @@ class IndependentAssessor(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras.get(
                 "fundamental_value", 100.0
             )
@@ -403,7 +404,7 @@ class Arbitrageur(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras.get(
                 "fundamental_value", 100.0
             )
@@ -487,7 +488,7 @@ class NoiseTrader(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["deviation"] = 0.0
 
         for msg in observation.inbounds:
@@ -501,7 +502,7 @@ class NoiseTrader(GeneralPlayer):
     async def decide(self) -> dict:
         """Random 30% chance to trade 100-500 shares."""
         extras = self.config.extras
-        trade_probability = extras.get("trade_probability", 0.3)
+        trade_probability = extras["trade_probability"]
         price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]

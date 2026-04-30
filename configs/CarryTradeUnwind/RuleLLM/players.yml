@@ -119,15 +119,15 @@ rulellm_funding_currency_buyer:
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# Central Bank Intervener — RuleLLM with embedded intervention rules
-# Theory: BIS (2005)
+# Hedged Carry Trader — RuleLLM with embedded intervention rules
+# Theory: Menkhoff et al. (2012)
 # -----------------------------------------------------------------------------
-rulellm_cb_intervener:
-  name: "RuleLLM Central Bank Intervener"
-  class: "examples.CarryTradeUnwind.RuleLLM.players:RuleLLMCentralBankIntervener"
+rulellm_hedged_carry_trader:
+  name: "RuleLLM Hedged Carry Trader"
+  class: "examples.CarryTradeUnwind.RuleLLM.players:RuleLLMHedgedCarryTrader"
   num_instances: 1
   config:
-    identity: "rulellm_cb_intervener"
+    identity: "rulellm_hedged_carry_trader"
     role: player
     steps_per_turn: 1
     group_tags:

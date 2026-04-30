@@ -125,7 +125,7 @@ class RetailCoordinated(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["buy_pressure"] = extras["buy_pressure"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
@@ -176,7 +176,7 @@ class ShortSellerHF(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", -500)
+            self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["cover_threshold"] = extras["cover_threshold"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
@@ -227,7 +227,7 @@ class MarketMakerGamma(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["gamma_exposure"] = extras["gamma_exposure"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
@@ -280,7 +280,7 @@ class InstitutionalValue(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 1000)
+            self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["sell_threshold"] = extras["sell_threshold"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
@@ -331,7 +331,7 @@ class MomentumRetail(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["fomo_threshold"] = extras["fomo_threshold"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg

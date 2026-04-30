@@ -50,8 +50,8 @@ class LLMInvestor(GeneralPlayer):
         if self._llm is None:
             llm_cfg = self.config.extras["llm"]
             self._llm = LangChainAPIInference(
-                lm_name=llm_cfg["model"],
-                generation_config={"temperature": llm_cfg.get("temperature", 0.3)},
+                lm_name=llm_cfg["lm_name"],
+                generation_config=llm_cfg["generation_config"],
             )
         return self._llm
 
@@ -67,7 +67,7 @@ class LLMInvestor(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras.get(
                 "fundamental_value", 100.0
             )

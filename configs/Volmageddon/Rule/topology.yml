@@ -1,76 +1,8 @@
 # Volmageddon Rule Communication Topology
 
-graph:
-  type: star
-  center: market
+type: "star"
+
+sources:
+  - market
 
 connections:
-  - from: market
-    to:
-      - short_vol_trader_1_1
-      - short_vol_trader_1_2
-      - vol_e_t_n_manager_2_1
-      - vol_e_t_n_manager_2_2
-      - long_vol_hedger_3_1
-      - vol_arbitrageur_4_1
-      - vol_arbitrageur_4_2
-      - equity_trader_5_1
-      - equity_trader_5_2
-    bidirectional: false
-    message_type: market_update
-
-  - from: short_vol_trader_1_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: short_vol_trader_1_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: vol_e_t_n_manager_2_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: vol_e_t_n_manager_2_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: long_vol_hedger_3_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: vol_arbitrageur_4_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: vol_arbitrageur_4_2
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: equity_trader_5_1
-    to: market
-    bidirectional: false
-    message_type: order
-  - from: equity_trader_5_2
-    to: market
-    bidirectional: false
-    message_type: order
-
-broadcast:
-  enabled: true
-  from: market
-  to: all_players
-  message_type: market_update
-
-execution:
-  order:
-    - market
-    - short_vol_trader_1_1
-    - short_vol_trader_1_2
-    - vol_e_t_n_manager_2_1
-    - vol_e_t_n_manager_2_2
-    - long_vol_hedger_3_1
-    - vol_arbitrageur_4_1
-    - vol_arbitrageur_4_2
-    - equity_trader_5_1
-    - equity_trader_5_2

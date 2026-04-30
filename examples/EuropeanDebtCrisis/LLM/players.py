@@ -107,27 +107,37 @@ class LLMInvestor(GeneralPlayer):
             portfolio_value=portfolio_value,
         )
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
-        action_str, quantity = "hold", 0
+        decision = None
+        last_error = None
         for attempt in range(3):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 result = llm_client.run([infer_input])
                 response = result.outputs[0].response
-                parsed = parse_llm_response_with_thinking(response)
-                action_str = parsed["action"]
-                quantity = int(parsed["quantity"])
-                if action_str not in ("buy", "sell", "hold"):
-                    action_str = "hold"
-                quantity = max(0, quantity)
-                if action_str == "buy":
-                    quantity = min(quantity, int(cash / price) if price > 0 else 0)
-                elif action_str == "sell":
-                    quantity = min(quantity, max(position, 0))
+                decision = parse_llm_response_with_thinking(response)
+                if decision["action"] not in ("buy", "sell", "hold"):
+                    raise ValueError(f"Invalid action: {decision['action']}")
                 break
             except Exception as exc:
-                logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
-                if attempt == 2:
-                    action_str, quantity = "hold", 0
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            )
+
+        action_str = decision["action"]
+        quantity = max(0, int(decision["quantity"]))
+        if action_str == "buy":
+            quantity = min(quantity, int(cash / price) if price > 0 else 0)
+        elif action_str == "sell":
+            quantity = min(quantity, max(position, 0))
         if action_str == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity

@@ -255,8 +255,8 @@ class MentalAccountant(BaseInvestor):
         extras = self.config.extras
         position = self.state.custom_state["position"]
         cash = self.state.custom_state["cash"]
-        num_accounts = extras.get("num_accounts", 3)
-        loss_lambda = extras.get("loss_aversion_per_account", 2.0)
+        num_accounts = extras["num_accounts"]
+        loss_lambda = extras["loss_aversion_per_account"]
 
         per_account_position = position / num_accounts if num_accounts > 0 else position
         entry_price = self.state.custom_state.get("entry_price", price)
@@ -286,8 +286,8 @@ class HouseMoneyTrader(BaseInvestor):
     ) -> dict:
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
-        gain_risk = extras.get("gain_risk_multiplier", 1.5)
-        loss_risk = extras.get("loss_risk_multiplier", 0.5)
+        gain_risk = extras["gain_risk_multiplier"]
+        loss_risk = extras["loss_risk_multiplier"]
 
         entry_price = self.state.custom_state.get("entry_price", price)
         pnl = (price - entry_price) / entry_price if entry_price > 0 else 0
@@ -318,7 +318,7 @@ class RationalPortfolioManager(BaseInvestor):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        risk_aversion = extras.get("risk_aversion", 1.0)
+        risk_aversion = extras["risk_aversion"]
 
         if abs(deviation) > 0.02:
             qty = min(500, int(abs(deviation) * risk_aversion * 3000))
@@ -371,7 +371,7 @@ class NoiseTrader(BaseInvestor):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        prob = extras.get("trade_probability", 0.3)
+        prob = extras["trade_probability"]
 
         if random.random() < prob:
             qty = random.randint(100, 500)

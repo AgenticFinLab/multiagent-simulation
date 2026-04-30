@@ -122,14 +122,10 @@ def create_visualizations_llm(
         sell_vols = []
         for agent_id in agent_ids:
             total_buy = sum(
-                r.get("quantity", 0)
-                for r in agent_records[agent_id]
-                if r.get("action") == "buy"
+                r["quantity"] for r in agent_records[agent_id] if r["action"] == "buy"
             )
             total_sell = sum(
-                r.get("quantity", 0)
-                for r in agent_records[agent_id]
-                if r.get("action") == "sell"
+                r["quantity"] for r in agent_records[agent_id] if r["action"] == "sell"
             )
             buy_vols.append(total_buy)
             sell_vols.append(total_sell)

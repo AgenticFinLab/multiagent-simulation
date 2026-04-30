@@ -114,7 +114,7 @@ class ConvergenceArbitrageur(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
@@ -129,9 +129,9 @@ class ConvergenceArbitrageur(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        entry_spread = extras.get("entry_spread", 0.02)
-        leverage = extras.get("leverage", 10)
-        max_position = extras.get("max_position", 5000)
+        entry_spread = extras["entry_spread"]
+        leverage = extras["leverage"]
+        max_position = extras["max_position"]
         if abs(deviation) > entry_spread:
             leveraged_cash = cash * leverage
             if deviation < 0:
@@ -186,7 +186,7 @@ class LeverageTrader(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
@@ -200,8 +200,8 @@ class LeverageTrader(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        leverage_ratio = extras.get("leverage_ratio", 10)
-        margin_call = extras.get("margin_call_threshold", 0.05)
+        leverage_ratio = extras["leverage_ratio"]
+        margin_call = extras["margin_call_threshold"]
         portfolio_value = cash + position * price
         equity = portfolio_value - abs(position * price) / leverage_ratio
         if equity < abs(position * price) * margin_call:
@@ -250,7 +250,7 @@ class RiskManager(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
@@ -262,7 +262,7 @@ class RiskManager(GeneralPlayer):
         deviation = self.state.custom_state.get("deviation", 0)
         extras = self.config.extras
         position = self.state.custom_state["position"]
-        var_limit = extras.get("var_limit", 0.05)
+        var_limit = extras["var_limit"]
         if abs(deviation) > var_limit * 3:
             cut_qty = int(abs(position) * 0.5)
             if position > 0:
@@ -305,7 +305,7 @@ class LiquidityProvider(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
@@ -318,7 +318,7 @@ class LiquidityProvider(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        inventory_limit = extras.get("inventory_limit", 2000)
+        inventory_limit = extras["inventory_limit"]
         price = self.state.custom_state.get("price", 0)
         if abs(deviation) > 0.05:
             return {"action": "hold", "quantity": 0}
@@ -365,7 +365,7 @@ class CentralBank(GeneralPlayer):
         self.state.custom_state["round"] = observation.round
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
-            self.state.custom_state["cash"] = extras.get("initial_cash", 10000000)
+            self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = 0
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
@@ -377,8 +377,8 @@ class CentralBank(GeneralPlayer):
     async def decide(self) -> dict:
         deviation = self.state.custom_state.get("deviation", 0)
         extras = self.config.extras
-        intervention_threshold = extras.get("intervention_threshold", 0.1)
-        rescue_prob = extras.get("rescue_probability", 0.5)
+        intervention_threshold = extras["intervention_threshold"]
+        rescue_prob = extras["rescue_probability"]
         if deviation < -intervention_threshold and random.random() < rescue_prob:
             return {"action": "buy", "quantity": 2000}
         return {"action": "hold", "quantity": 0}

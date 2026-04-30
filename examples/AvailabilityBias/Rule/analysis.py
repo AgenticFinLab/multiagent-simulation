@@ -26,7 +26,6 @@ import numpy as np
 
 from masim.utils import load_config, load_results
 
-
 # ---------------------------------------------------------------------------
 # Data loading
 # ---------------------------------------------------------------------------
@@ -55,8 +54,12 @@ def _load_data(results) -> Dict[str, Any]:
         if "fundamental" in player.batch_store_names:
             fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
 
+    investor_bids: Dict[str, Dict[int, float]] = {}
     investor_payloads: Dict[str, Dict[int, dict]] = {}
     for pid, player in results.players_by_role("player").items():
+        bid = player.turns.field("bid_price")
+        if bid:
+            investor_bids[pid] = bid
         payloads = player.turns.payloads()
         if payloads:
             investor_payloads[pid] = payloads
@@ -64,6 +67,7 @@ def _load_data(results) -> Dict[str, Any]:
     return {
         "market_prices": market_prices,
         "fundamentals": fundamentals,
+        "investor_bids": investor_bids,
         "investor_payloads": investor_payloads,
     }
 
@@ -150,7 +154,7 @@ def _compute_stabilization_ratio(
             # Only count rounds in bias episode
             idx = rnd - 1
             if 0 <= idx < len(deviation_pct) and deviation_pct[idx] > threshold_pct:
-                qty = abs(payload.get("quantity", 0))
+                qty = abs(payload["quantity"])
                 if is_stabilizing:
                     stabilizing_vol += qty
                 elif is_biased:
@@ -388,16 +392,42 @@ def _build_interpretation(
 # ---------------------------------------------------------------------------
 
 
+_BID_COLORS = [
+    "#3a86ff",
+    "#ff006e",
+    "#8338ec",
+    "#06d6a0",
+    "#fb5607",
+    "#ff595e",
+    "#1982c4",
+    "#6a4c93",
+    "#ffca3a",
+    "#8ac926",
+    "#e07a5f",
+    "#3d405b",
+    "#81b29a",
+    "#f2cc8f",
+    "#264653",
+    "#e63946",
+    "#457b9d",
+    "#2a9d8f",
+    "#e9c46a",
+    "#f4a261",
+]
+
+
 def _create_visualizations(
     market_prices: Dict[int, float],
     fundamentals: Dict[int, float],
+    investor_bids: Dict[str, Dict[int, float]],
     investor_payloads: Dict[str, Dict[int, dict]],
     result: AvailabilityBiasValidationResult,
     output_dir: str,
 ) -> List[str]:
-    """Generate three analysis plots.
+    """Generate four analysis plots.
 
-    Plot 01: Price vs Fundamental + Deviation % with ±5%, ±10%, ±15% thresholds
+    Plot 00: Investor Bid Curves (headline chart)
+    Plot 01: Price vs Fundamental + Deviation % with \u00b15%, \u00b110%, \u00b115% thresholds
     Plot 02: Agent Volume by Type + Stabilization Ratio
     Plot 03: Rolling AC1 + Validation Criteria Summary
 
@@ -411,17 +441,66 @@ def _create_visualizations(
     prices = np.array([market_prices[r] for r in rounds_sorted])
     rounds = np.array(rounds_sorted)
 
-    fund0 = 100.0
-    if fundamentals:
-        fund_arr = np.array([fundamentals.get(r, fund0) for r in rounds_sorted])
-    else:
-        fund_arr = np.full_like(prices, fund0)
+    if not fundamentals:
+        raise ValueError("No fundamental data recorded - simulation data is incomplete")
+    fund_arr = np.array([fundamentals[r] for r in rounds_sorted])
 
     f_safe = np.where(fund_arr > 0, fund_arr, 1.0)
     deviation_pct = (prices - fund_arr) / f_safe * 100.0
     returns = np.diff(prices) / np.where(prices[:-1] > 0, prices[:-1], 1.0) * 100.0
 
     paths: List[str] = []
+
+    # --- Plot 0: Investor Bid Curves (PRIMARY headline chart) ---
+    _fv = float(np.mean(fund_arr))
+    fig0, ax0 = plt.subplots(figsize=(16, 8))
+    fig0.suptitle(
+        "AvailabilityBias Rule \u2014 Investor Bidding Curves",
+        fontsize=14,
+        fontweight="bold",
+    )
+    ax0.plot(
+        rounds, prices, color="#f0a500", linewidth=2.5, label="Market Price", zorder=10
+    )
+    ax0.axhline(
+        y=_fv,
+        color="darkgreen",
+        linestyle="--",
+        linewidth=1.2,
+        label=f"Fundamental (F={_fv:.2f})",
+        alpha=0.8,
+    )
+    for _i, (_pid, _bids) in enumerate(sorted(investor_bids.items())):
+        _br = sorted(_bids.keys())
+        _bv = [float(_bids[r]) for r in _br]
+        ax0.plot(
+            _br,
+            _bv,
+            marker="o",
+            markersize=2,
+            linewidth=0.9,
+            color=_BID_COLORS[_i % len(_BID_COLORS)],
+            alpha=0.8,
+            label=_pid.replace("_", " ").title(),
+        )
+    ax0.set_xlabel("Round", fontsize=12)
+    ax0.set_ylabel("Price", fontsize=12)
+    ax0.set_title("Market Price & Individual Investor Bids", fontsize=12)
+    ax0.grid(True, alpha=0.3)
+    ax0.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.06),
+        ncol=min(5, len(investor_bids) + 2),
+        fontsize=8,
+        frameon=True,
+        framealpha=0.7,
+    )
+    plt.tight_layout()
+    _p0 = os.path.join(output_dir, "00_investor_bids.png")
+    plt.savefig(_p0, dpi=150, bbox_inches="tight")
+    plt.close()
+    paths.append(_p0)
+    print(f"Saved: {_p0}")
 
     # --- Plot 01: Price Dynamics ---
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
@@ -472,14 +551,14 @@ def _create_visualizations(
         sell_vols = []
         for aid in agent_ids:
             b = sum(
-                p.get("quantity", 0)
+                p["quantity"]
                 for p in investor_payloads[aid].values()
-                if p.get("quantity", 0) > 0
+                if p["quantity"] > 0
             )
             s = sum(
-                abs(p.get("quantity", 0))
+                abs(p["quantity"])
                 for p in investor_payloads[aid].values()
-                if p.get("quantity", 0) < 0
+                if p["quantity"] < 0
             )
             buy_vols.append(b)
             sell_vols.append(s)
@@ -628,11 +707,9 @@ def analyze_availability_bias(
 
     rounds_sorted = sorted(market_prices.keys())
     prices = np.array([market_prices[r] for r in rounds_sorted])
-    fund0 = 100.0
-    if fundamentals_map:
-        fund_arr = np.array([fundamentals_map.get(r, fund0) for r in rounds_sorted])
-    else:
-        fund_arr = np.full_like(prices, fund0)
+    if not fundamentals_map:
+        raise ValueError("No fundamental data recorded - simulation data is incomplete")
+    fund_arr = np.array([fundamentals_map[r] for r in rounds_sorted])
 
     total_rounds = len(rounds_sorted)
 
@@ -666,6 +743,7 @@ def analyze_availability_bias(
     _create_visualizations(
         market_prices=market_prices,
         fundamentals=fundamentals_map,
+        investor_bids=data["investor_bids"],
         investor_payloads=investor_payloads,
         result=result,
         output_dir=output_dir,

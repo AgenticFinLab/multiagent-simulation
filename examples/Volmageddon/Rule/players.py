@@ -170,7 +170,7 @@ class BaseInvestor(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras.get(
                 "fundamental_value", 100.0
             )
@@ -240,7 +240,7 @@ class ShortVolTrader(BaseInvestor):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        stop_loss = extras.get("stop_loss", 0.15)
+        stop_loss = extras["stop_loss"]
 
         if deviation > stop_loss:
             buy_qty = min(abs(position), int(abs(position) * 0.8))
@@ -261,8 +261,8 @@ class VolETNManager(BaseInvestor):
     ) -> Dict[str, Any]:
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
-        rebalance_threshold = extras.get("rebalance_threshold", 0.05)
-        rebalance_size = extras.get("rebalance_size", 10000)
+        rebalance_threshold = extras["rebalance_threshold"]
+        rebalance_size = extras["rebalance_size"]
 
         if deviation > rebalance_threshold:
             buy_qty = min(
@@ -283,7 +283,7 @@ class LongVolHedger(BaseInvestor):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        hedge_ratio = extras.get("hedge_ratio", 0.1)
+        hedge_ratio = extras["hedge_ratio"]
 
         if deviation < -0.05:
             buy_qty = min(500, int(cash * hedge_ratio / price) if price > 0 else 0)
@@ -305,7 +305,7 @@ class VolArbitrageur(BaseInvestor):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        entry_threshold = extras.get("entry_threshold", 0.05)
+        entry_threshold = extras["entry_threshold"]
 
         if abs(deviation) > entry_threshold:
             qty = min(5000, int(abs(deviation) * 20000))
@@ -329,7 +329,7 @@ class EquityTrader(BaseInvestor):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        risk_limit = extras.get("risk_limit", 0.1)
+        risk_limit = extras["risk_limit"]
 
         if abs(deviation) > risk_limit * 2:
             qty = min(1000, int(abs(deviation) * 3000))

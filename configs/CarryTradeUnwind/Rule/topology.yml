@@ -6,7 +6,7 @@
 #    carry_trader         ──────────┐
 #    leveraged_carry_fund ──────────┤
 #    funding_currency_buyer ────────┼──▶ market ──▶ all investors
-#    cb_intervener        ──────────┤             (FX rate, return, deviation)
+#    hedged_carry_trader   ──────────┤             (FX rate, return, deviation)
 #    noise_trader         ──────────┘
 #
 # Execution flow per round:
@@ -24,7 +24,7 @@ connections:
     - carry_trader
     - leveraged_carry_fund
     - funding_currency_buyer
-    - cb_intervener
+    - hedged_carry_trader
     - noise_trader
 
   carry_trader:
@@ -36,7 +36,7 @@ connections:
   funding_currency_buyer:
     - market
 
-  cb_intervener:
+  hedged_carry_trader:
     - market
 
   noise_trader:

@@ -160,6 +160,9 @@ def render_simulation_page(scenario_name: str):
             rnd_num = rounds[viewed_idx].round_num if rounds else 0
             st.metric("Round", f"{rnd_num} / {n_rounds}")
 
+    # ── Price dynamics chart ───────────────────────────────────────────────
+    _render_price_chart(rounds, viewed_idx)
+
     # ── Investor Activity panel (single round, refreshes in place) ─────────
     st.markdown("---")
     _render_investor_activity(rounds[viewed_idx])
@@ -231,6 +234,198 @@ def _render_investor_activity(round_data):
     for i, act in enumerate(actions):
         with cols[i % 2]:
             _render_action_card(act)
+
+
+# ---------------------------------------------------------------------------
+# Price dynamics chart
+# ---------------------------------------------------------------------------
+
+
+def _render_price_chart(rounds: list, viewed_idx: int):
+    """Render a live price-dynamics chart that extends gradually during replay.
+
+    The chart covers ALL rounds from the start, but only populates data up to
+    *viewed_idx*.  This keeps the x-axis range and trace count stable across
+    reruns so plotly can update in-place (no flicker).  During rapid replay the
+    figure is cached and only rebuilt every few rounds for performance.
+
+    Args:
+        rounds: Full list of RoundData objects.
+        viewed_idx: 0-based index of the round being displayed.
+    """
+    if viewed_idx < 0 or not rounds:
+        return
+
+    n_rounds = len(rounds)
+
+    # ── Throttle during rapid replay ──────────────────────────────────
+    # Rebuilding a plotly figure 20 times/sec causes flicker; cache the
+    # figure in session_state and only rebuild every *step* rounds.
+    replay_active = st.session_state.get("replay_active", False)
+    step = max(1, n_rounds // 60)  # ~60 chart frames total
+    last_idx = st.session_state.get("_pc_last_idx", -1)
+
+    if replay_active and 0 <= last_idx < viewed_idx < n_rounds - 1:
+        if viewed_idx - last_idx < step:
+            cached = st.session_state.get("_pc_fig")
+            if cached is not None:
+                st.plotly_chart(
+                    cached,
+                    use_container_width=True,
+                    key="price_dynamics",
+                )
+                return
+
+    # ── Pre-scan ALL rounds for agent IDs (stable trace count) ────────
+    all_agent_ids: set = set()
+    for rd in rounds:
+        for act in rd.agent_actions:
+            if act.price is not None:
+                all_agent_ids.add(act.agent_id)
+
+    # ── Collect data: real values up to viewed_idx, None beyond ───────
+    round_nums: list = []
+    market_prices: list = []
+    agent_prices: dict = {aid: {} for aid in all_agent_ids}
+
+    for i, rd in enumerate(rounds):
+        rn = rd.round_num
+        round_nums.append(rn)
+        if i <= viewed_idx:
+            mp = None
+            if rd.market_broadcast and rd.market_broadcast.stock_price is not None:
+                mp = float(rd.market_broadcast.stock_price)
+            market_prices.append(mp)
+            for act in rd.agent_actions:
+                if act.price is not None:
+                    agent_prices[act.agent_id][rn] = float(act.price)
+        else:
+            market_prices.append(None)
+
+    if not any(p is not None for p in market_prices) and not all_agent_ids:
+        return
+
+    # ── Build plotly chart ────────────────────────────────────────────
+    try:
+        import plotly.graph_objects as go
+    except ImportError:
+        _render_price_chart_fallback(round_nums, market_prices, agent_prices)
+        return
+
+    fig = go.Figure()
+
+    # Market clearing price — thick gold reference line
+    fig.add_trace(
+        go.Scatter(
+            x=round_nums,
+            y=market_prices,
+            mode="lines",
+            name="Market Price",
+            line=dict(color="#f0a500", width=3),
+            connectgaps=False,
+            hovertemplate="Round %{x}<br>Price: %{y:.4f}<extra>Market</extra>",
+        )
+    )
+
+    # Investor bid curves
+    _PALETTE = [
+        "#3a86ff",
+        "#ff006e",
+        "#8338ec",
+        "#06d6a0",
+        "#fb5607",
+        "#ff595e",
+        "#1982c4",
+        "#6a4c93",
+        "#ffca3a",
+        "#8ac926",
+        "#e07a5f",
+        "#3d405b",
+        "#81b29a",
+        "#f2cc8f",
+        "#264653",
+        "#e63946",
+        "#457b9d",
+        "#2a9d8f",
+        "#e9c46a",
+        "#f4a261",
+    ]
+
+    for idx, agent_id in enumerate(sorted(all_agent_ids)):
+        prices_map = agent_prices[agent_id]
+        y_vals = [prices_map.get(rn) for rn in round_nums]
+        color = _PALETTE[idx % len(_PALETTE)]
+        label = agent_id.replace("_", " ").title()
+
+        fig.add_trace(
+            go.Scatter(
+                x=round_nums,
+                y=y_vals,
+                mode="lines+markers",
+                name=label,
+                line=dict(color=color, width=1.2),
+                marker=dict(size=3),
+                connectgaps=False,
+                hovertemplate=(
+                    f"Round %{{x}}<br>Bid: %{{y:.4f}}<extra>{label}</extra>"
+                ),
+            )
+        )
+
+    fig.update_layout(
+        title=dict(
+            text="\U0001f4c8 Price Dynamics",
+            font=dict(size=16, color="#e0e6f0"),
+        ),
+        xaxis_title="Round",
+        yaxis_title="Price",
+        template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(14,17,23,1)",
+        height=480,
+        margin=dict(l=60, r=20, t=50, b=80),
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.15,
+            xanchor="center",
+            x=0.5,
+            font=dict(size=10, color="#9ba8bb"),
+        ),
+        hovermode="x unified",
+        uirevision="price_dynamics",
+        xaxis=dict(
+            range=[0.5, round_nums[-1] + 0.5],
+            gridcolor="rgba(255,255,255,0.06)",
+            zeroline=False,
+            dtick=max(1, n_rounds // 10),
+        ),
+        yaxis=dict(
+            gridcolor="rgba(255,255,255,0.06)",
+            zeroline=False,
+            tickformat=".2f",
+        ),
+    )
+
+    # Cache for throttled replay
+    st.session_state["_pc_fig"] = fig
+    st.session_state["_pc_last_idx"] = viewed_idx
+
+    st.plotly_chart(fig, use_container_width=True, key="price_dynamics")
+
+
+def _render_price_chart_fallback(round_nums, market_prices, agent_prices):
+    """Minimal fallback chart using st.line_chart when plotly is unavailable."""
+    import pandas as pd
+
+    data = {"Market Price": market_prices}
+    for agent_id in sorted(agent_prices):
+        label = agent_id.replace("_", " ").title()
+        data[label] = [agent_prices[agent_id].get(rn) for rn in round_nums]
+
+    df = pd.DataFrame(data, index=round_nums)
+    df.index.name = "Round"
+    st.line_chart(df, height=480)
 
 
 def _render_action_card(act):

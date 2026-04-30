@@ -16,10 +16,12 @@ market:
       record_path: "EXPERIMENT/LiquidityDryup/RuleLLM/records"
       fundamental_value: 100.0
       initial_price: 100.0
-      price_impact: 0.08
+      base_price_impact: 0.08
       mean_reversion: 0.015
       noise_std: 0.4
       custom_state_hot_limit: 3
+      high_impact_multiplier: 3.0
+      low_liquidity_threshold: 30.0
       base_liquidity: 50.0
   persona: !include persona.yml
 

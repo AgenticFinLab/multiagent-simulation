@@ -230,7 +230,7 @@ conda run -n LMSim python examples/<Scenario>/Rule/analysis.py \
 
 # 2. Check output directory contents
 ls EXPERIMENT/<Scenario>/Rule/analysis/
-# Expected: 01_*.png  02_*.png  03_*.png  summary.json
+# Expected: 00_*.png  01_*.png  02_*.png  03_*.png  summary.json
 
 # 3. Check summary.json has validation block
 python3 -c "
@@ -255,9 +255,49 @@ for f in sorted(glob.glob('examples/<Scenario>/*/analysis.py')):
 - [ ] Console output contains `Overall Fit Score: XX.X% (threshold: 50%)`
 - [ ] Console output contains `[1]`, `[2]` criterion blocks with `Observed:`, `Expected:`, `Score:`, `Assessment:`
 - [ ] Console output contains `[SUMMARY]` block
-- [ ] `01_*.png`, `02_*.png`, `03_*.png` all present in `analysis/`
+- [ ] `00_*.png` (investor bid curves), `01_*.png`, `02_*.png`, `03_*.png` all present in `analysis/`
 - [ ] `summary.json` contains `validation.score`, `validation.is_valid`, `validation.criteria`
 - [ ] All four variant `analysis.py` files pass `py_compile`
+
+### §3.7 Strict No-Default Compliance
+
+Verify that no prohibited default-value or defensive-programming patterns remain in any `players.py` or `analysis.py` file. See `04-code-repair.md §12` for the full audit protocol.
+
+```bash
+# Detect .get(key, default) violations (excluding legitimate exceptions)
+python3 -c "
+import re, glob, os
+count = 0
+for f in sorted(glob.glob('examples/<Scenario>/**/*.py', recursive=True)):
+    bn = os.path.basename(f)
+    if bn.startswith('run_') or bn == '__init__.py' or bn == 'prompts.py':
+        continue
+    for i, line in enumerate(open(f).readlines(), 1):
+        if re.search(r'\.get\s*\(\s*[\"\''][^\"\']+[\"\'']\s*,', line):
+            stripped = line.strip()
+            if any(kw in stripped for kw in [
+                'resolved_rag', 'rag_cfg.get', 'embed_', 'chunk_',
+                'pop(', 'plt.', 'fig', 'color', 'linewidth',
+                'private_knowledge', 'knowledge',
+            ]):
+                continue
+            count += 1
+            print(f'{f}:{i}: {stripped}')
+print(f'Total violations: {count}')
+"
+
+# Detect if X else fallback patterns
+grep -rn 'if .* else [0-9]' examples/<Scenario>/*/players.py examples/<Scenario>/*/analysis.py \
+  | grep -v 'plt\.' | grep -v '#' | grep -v 'color' | wc -l
+
+# Detect silent hold on LLM failure
+grep -rn 'decision is None' examples/<Scenario>/*/players.py | grep -v 'raise' | wc -l
+```
+
+**Pass criteria**:
+- [ ] `.get(key, default)` violation count: `0`
+- [ ] `if X else fallback` count: `0`
+- [ ] Silent hold on LLM failure count: `0`
 
 ---
 
@@ -330,6 +370,7 @@ Use this table to track results:
 | Layer 3 | Output format tags            | PASS / FAIL |
 | Layer 3 | Ray serialization             | PASS / FAIL |
 | Layer 3 | analysis.py output standard   | PASS / FAIL |
+| Layer 3 | Strict no-default compliance  | PASS / FAIL |
 | Layer 4 | §4.N numbering consistency    | PASS / FAIL |
 | Layer 4 | Investor count consistency    | PASS / FAIL |
 | Layer 4 | Function name consistency     | PASS / FAIL |

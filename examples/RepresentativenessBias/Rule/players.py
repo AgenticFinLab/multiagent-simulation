@@ -154,10 +154,10 @@ class PatternMatcher(GeneralPlayer):
 
     async def decide(self) -> dict:
         price = self.state.custom_state.get(
-            "price", self.config.extras.get("initial_price", 100.0)
+            "price", self.config.extras["initial_price"]
         )
         fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras.get("fundamental_value", 100.0)
+            "fundamental", self.config.extras["fundamental_value"]
         )
         deviation = self.state.custom_state.get("deviation", 0.0)
         return self._make_decision(price, fundamental, deviation)
@@ -169,8 +169,8 @@ class PatternMatcher(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _pattern_sensitivity = extras.get("pattern_sensitivity", 1.0)
-        _base_rate_ignore = extras.get("base_rate_ignore", 0.8)
+        _pattern_sensitivity = extras["pattern_sensitivity"]
+        _base_rate_ignore = extras["base_rate_ignore"]
 
         if abs(deviation) > 0.02:
             qty = min(800, int(abs(deviation) * 5000))
@@ -232,10 +232,10 @@ class CategoryOvergeneralizer(GeneralPlayer):
 
     async def decide(self) -> dict:
         price = self.state.custom_state.get(
-            "price", self.config.extras.get("initial_price", 100.0)
+            "price", self.config.extras["initial_price"]
         )
         fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras.get("fundamental_value", 100.0)
+            "fundamental", self.config.extras["fundamental_value"]
         )
         deviation = self.state.custom_state.get("deviation", 0.0)
         return self._make_decision(price, fundamental, deviation)
@@ -247,8 +247,8 @@ class CategoryOvergeneralizer(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _category_weight = extras.get("category_weight", 1.2)
-        _sample_bias = extras.get("sample_bias", 0.7)
+        _category_weight = extras["category_weight"]
+        _sample_bias = extras["sample_bias"]
 
         if abs(deviation) > 0.02:
             qty = min(800, int(abs(deviation) * 5000))
@@ -310,10 +310,10 @@ class BayesianUpdater(GeneralPlayer):
 
     async def decide(self) -> dict:
         price = self.state.custom_state.get(
-            "price", self.config.extras.get("initial_price", 100.0)
+            "price", self.config.extras["initial_price"]
         )
         fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras.get("fundamental_value", 100.0)
+            "fundamental", self.config.extras["fundamental_value"]
         )
         deviation = self.state.custom_state.get("deviation", 0.0)
         return self._make_decision(price, fundamental, deviation)
@@ -325,8 +325,8 @@ class BayesianUpdater(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _base_rate_weight = extras.get("base_rate_weight", 0.6)
-        _evidence_weight = extras.get("evidence_weight", 0.4)
+        _base_rate_weight = extras["base_rate_weight"]
+        _evidence_weight = extras["evidence_weight"]
 
         if abs(deviation) > 0.05:
             qty = min(500, int(abs(deviation) * 3000))
@@ -388,10 +388,10 @@ class ContrarianStatistical(GeneralPlayer):
 
     async def decide(self) -> dict:
         price = self.state.custom_state.get(
-            "price", self.config.extras.get("initial_price", 100.0)
+            "price", self.config.extras["initial_price"]
         )
         fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras.get("fundamental_value", 100.0)
+            "fundamental", self.config.extras["fundamental_value"]
         )
         deviation = self.state.custom_state.get("deviation", 0.0)
         return self._make_decision(price, fundamental, deviation)
@@ -403,8 +403,8 @@ class ContrarianStatistical(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _contrarian_threshold = extras.get("contrarian_threshold", 0.05)
-        _position_size = extras.get("position_size", 500)
+        _contrarian_threshold = extras["contrarian_threshold"]
+        _position_size = extras["position_size"]
 
         if abs(deviation) > 0.05:
             qty = min(500, int(abs(deviation) * 3000))
@@ -466,10 +466,10 @@ class NoiseTrader(GeneralPlayer):
 
     async def decide(self) -> dict:
         price = self.state.custom_state.get(
-            "price", self.config.extras.get("initial_price", 100.0)
+            "price", self.config.extras["initial_price"]
         )
         fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras.get("fundamental_value", 100.0)
+            "fundamental", self.config.extras["fundamental_value"]
         )
         deviation = self.state.custom_state.get("deviation", 0.0)
         return self._make_decision(price, fundamental, deviation)
@@ -481,7 +481,7 @@ class NoiseTrader(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _trade_probability = extras.get("trade_probability", 0.3)
+        _trade_probability = extras["trade_probability"]
 
         if random.random() < 0.3:
             qty = random.randint(100, 500)

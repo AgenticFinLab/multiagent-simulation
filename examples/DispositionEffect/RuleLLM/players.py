@@ -342,16 +342,9 @@ class BaseLLMInvestor(GeneralPlayer):
                 if attempt < max_retries - 1:
                     logger.debug("[%s] LLM parse failed, retrying...", self.identity)
 
-        # If LLM failed after all retries, skip trading this round (hold)
         if decision is None:
-            logger.warning(
-                "[%s] LLM failed after %d attempts: %s. Skipping trade this round.",
-                self.identity,
-                max_retries,
-                last_error,
-            )
-            return self._hold_order(
-                round_num, strategy_name, reason=f"LLM failed: {last_error}"
+            raise RuntimeError(
+                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
             )
 
         # Extract decision

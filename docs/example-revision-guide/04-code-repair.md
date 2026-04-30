@@ -206,14 +206,14 @@ All parameters must come from `self.config.extras["key"]`.
 ```bash
 python3 -c "
 import re, glob
-for f in glob.glob('examples/<Scenario>/**/players.py', recursive=True):
+for f in glob.glob('examples/<Scenario>/**/*.py', recursive=True):
     for i, line in enumerate(open(f).readlines(), 1):
-        if re.search(r'\.get\s*\(\s*[\"\']+[^\"\']+[\"\']+\s*,', line):
+        if re.search(r'\.get\s*\(\s*[\"\'][^\"\']+[\"\']\s*,', line):
             print(f'{f}:{i}: {line.rstrip()}')
 "
 ```
 
-Direct dict access `dict["key"]` must be used.
+Direct dict access `dict["key"]` must be used. This applies to **both `players.py` and `analysis.py`** across all four variants — not just players.py. See §12 for the full no-default audit protocol.
 
 ### §2.9 No inline comments
 
@@ -553,19 +553,78 @@ The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": fl
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas."""
 ```
 
-### §7.13 No `.get()` with Default Values
+### §7.13 No `.get()` with Default Values — Comprehensive No-Default Policy
 
-Do not use `dict.get(key, default)` for any known dictionary key. Use direct `dict[key]` access and let `KeyError` surface immediately ("fail-fast" principle).
+Do not use `dict.get(key, default)` for any known dictionary key. Use direct `dict[key]` access and let `KeyError` surface immediately ("fail-fast" principle). This rule extends beyond `.get()` to cover **all forms of default values and defensive programming**.
+
+**Scope**: applies to ALL `players.py` and `analysis.py` files across all four variants.
+
+**The 8 prohibited pattern categories**:
 
 ```python
-# WRONG — silently uses wrong data if key is missing
-action = decision_payload.get("action", "hold")
+# PATTERN 1: LLM parse failure → silent hold
+# WRONG — masks LLM failures as valid trading decisions
+if decision is None:
+    action, quantity = "hold", 0
+# CORRECT — fails loudly
+if decision is None:
+    raise RuntimeError(f"LLM parse failed after {retries} retries")
 
-# CORRECT — fails loudly if key is unexpectedly absent
-action = decision_payload["action"]
+# PATTERN 2: .get() on LLM response dict
+# WRONG
+action = decision.get("action", "hold")
+# CORRECT
+action = decision["action"]
+
+# PATTERN 3: .get() on message payload dict
+# WRONG
+quantity = decision_payload.get("quantity", 0)
+# CORRECT
+quantity = decision_payload["quantity"]
+
+# PATTERN 4: .get() on coordinator data dict
+# WRONG
+fundamental = fundamentals.get(r, 100.0)
+# CORRECT
+fundamental = fundamentals[r]
+
+# PATTERN 5: Ternary fallback for required data
+# WRONG
+fundamental_value = fundamentals[rnd] if fundamentals else 1.0
+# CORRECT
+if not fundamentals:
+    raise ValueError("fundamentals dict is empty")
+fundamental_value = fundamentals[rnd]
+
+# PATTERN 6: .get() on analysis payload dict
+# WRONG
+rag_context = payload.get("rag_context", None)
+# CORRECT
+rag_context = payload["rag_context"]
+
+# PATTERN 7: Empty-collection fallback for computed metrics
+# WRONG
+"mean_adherence_rate": float(np.mean(rates)) if rates else 0.0,
+# CORRECT
+if not rates:
+    raise ValueError("No adherence rates collected — all agents failed")
+"mean_adherence_rate": float(np.mean(rates)),
+
+# PATTERN 8: Index fallback
+# WRONG
+price = prices_list[rnd-1] if rnd <= len(prices_list) else 0.0
+# CORRECT
+price = prices_list[rnd-1]  # let IndexError surface
 ```
 
-Applies to ALL dicts in `players.py`: config dicts, message payload dicts, LLM response dicts.
+**Legitimate exceptions** (these `.get()` patterns are allowed):
+- RAG config resolution: `resolved_rag.get("embed_model", "openai/hunyuan-embedding")` — external library config with genuine optional fields
+- `__getstate__`/`__setstate__` serialization: `state.get("state", {})`, `custom.pop(key, None)`
+- Truly optional config sections: `extras.get("private_knowledge", {})`, `extras.get("knowledge", {})`
+- Matplotlib styling defaults (colors, line widths, figure sizes)
+- `rag_store`/`rag_cfg` retrieval from custom_state: `self.state.custom_state.get("rag_store")`
+
+See §12 for the full detection-and-fix audit protocol.
 
 ---
 
@@ -1187,9 +1246,9 @@ A routine that matches lines starting with `from ` can incorrectly move docstrin
 
 A regex replacing `(?<!\w)system\s*=` with `system_msg=` will correctly fix `InferInput(system=...)` but may match other `*_system = ...` variable assignments if the lookbehind is too loose. Always verify with `py_compile` after any bulk regex pass.
 
-#### `analysis.py` and `run_*.py` exemption
+#### `analysis.py` scope update
 
-The `.get(key, default)` prohibition applies strictly to `players.py`. Analysis scripts and runner scripts work with potentially incomplete records and may legitimately use `.get()` for safe data extraction. Do not apply automated fixes to those files.
+The `.get(key, default)` prohibition applies to **both `players.py` and `analysis.py`** across all four variants. Analysis scripts that parse simulation records must use direct dict access for required fields (e.g., `payload["action"]`, `payload["rag_context"]`). If a record field is unexpectedly absent, `KeyError` must surface immediately — do not mask it with `.get(key, default)`. Runner scripts (`run_*.py`) are exempt from this rule as they handle user-facing argument parsing.
 
 ---
 
@@ -1245,3 +1304,144 @@ Every `Rule/analysis.py` must produce a structured validation report. When revie
 - [ ] Saves `agent_volumes.json` or equivalent investor breakdown if applicable
 - [ ] Generates exactly 3 PNG files: `01_*.png`, `02_*.png`, `03_*.png` in `{base_dir}/analysis/`
 - [ ] `base_dir` is `os.path.dirname(config["setting"]["record_path"])`, not `record_path` itself
+
+---
+
+## §12 Strict No-Default Audit Protocol
+
+This section defines the complete audit-and-fix workflow for eliminating all default values, fallback code, and silent error handling from simulation code. The prohibition covers **all `players.py` and `analysis.py` files** across all four variants.
+
+### §12.1 Scope
+
+| In Scope                                 | Out of Scope                                                 |
+|------------------------------------------|--------------------------------------------------------------|
+| `{Variant}/players.py` (all 4 variants)  | `run_*.py` runner scripts                                    |
+| `{Variant}/analysis.py` (all 4 variants) | `prompts.py` (string constants only)                         |
+| Coordinator (Market) code                | `__init__.py` (import-only)                                  |
+| Investor code                            | RAG config resolution (`resolved_rag.get()`)                 |
+| Analysis metric computation              | `__getstate__`/`__setstate__` serialization                  |
+| Analysis record parsing                  | Matplotlib styling defaults                                  |
+|                                          | Truly optional config: `extras.get("private_knowledge", {})` |
+
+### §12.2 The 8 Dangerous Pattern Categories
+
+See §7.13 for the full wrong/correct code examples for each pattern.
+
+| # | Pattern                         | Detection Regex                       | Typical Location                           |
+|---|---------------------------------|---------------------------------------|--------------------------------------------|
+| 1 | LLM parse failure → silent hold | `decision is None` followed by `hold` | LLM/RuleLLM/Rag `players.py` decide()      |
+| 2 | `.get()` on LLM response        | `decision\.get\(`                     | LLM/RuleLLM/Rag `players.py` decide()      |
+| 3 | `.get()` on message payload     | `decision_payload\.get\(`             | LLM/RuleLLM/Rag `players.py` decide()      |
+| 4 | `.get()` on coordinator data    | `fundamentals\.get\(`                 | Rule `players.py` coordinator, analysis.py |
+| 5 | Ternary fallback                | `if fundamentals else`                | Rule `analysis.py` metric computation      |
+| 6 | `.get()` on analysis payload    | `payload\.get\(`                      | RuleLLM/Rag `analysis.py`                  |
+| 7 | Empty-collection fallback       | `if rates else`                       | RuleLLM `analysis.py` adherence stats      |
+| 8 | Index fallback                  | `if .* <= len\(.*\) else`             | Rule `analysis.py` price lookups           |
+
+### §12.3 Automated Detection Scripts
+
+#### Detect all `.get(key, default)` in scope
+
+```bash
+python3 -c "
+import re, glob, os
+EXCLUDE = {'__getstate__', '__setstate__'}
+for f in sorted(glob.glob('examples/<Scenario>/**/*.py', recursive=True)):
+    bn = os.path.basename(f)
+    if bn.startswith('run_') or bn == '__init__.py' or bn == 'prompts.py':
+        continue
+    lines = open(f).readlines()
+    for i, line in enumerate(lines, 1):
+        if re.search(r'\.get\s*\(\s*[\"\''][^\"\']+[\"\'']\s*,', line):
+            # Check if inside a legitimate exception
+            stripped = line.strip()
+            if any(kw in stripped for kw in [
+                'resolved_rag', 'rag_cfg.get', 'embed_', 'chunk_',
+                'pop(', 'plt.', 'fig', 'color', 'linewidth',
+                'private_knowledge', 'knowledge',
+            ]):
+                continue
+            print(f'{f}:{i}: {stripped}')
+"
+```
+
+#### Detect `if X else fallback` patterns
+
+```bash
+grep -rn 'if .* else [0-9]' examples/<Scenario>/*/players.py examples/<Scenario>/*/analysis.py \
+  | grep -v 'plt\.' | grep -v '#' | grep -v 'color'
+```
+
+#### Detect silent hold on LLM failure
+
+```bash
+grep -rn 'decision is None' examples/<Scenario>/*/players.py \
+  | grep -v 'raise'
+```
+
+### §12.4 Fix Patterns
+
+| Pattern                    | Transformation                                                        |
+|----------------------------|-----------------------------------------------------------------------|
+| `dict.get("key", default)` | `dict["key"]`                                                         |
+| `if X else fallback`       | `if not X: raise ValueError(...)` then use `X` directly               |
+| `decision is None → hold`  | `raise RuntimeError(...)`                                             |
+| `if rates else 0.0`        | `if not rates: raise ValueError(...)` then compute without ternary    |
+| Chained `.get().get()`     | Replace outermost first: `d.get("a", {}).get("b", 0)` → `d["a"]["b"]` |
+
+**Important**: When replacing chained `.get()` calls (e.g., `self.state.custom_state.get("market_data", {}).get("price", 100.0)`), always replace the FULL chained expression first before replacing standalone `.get()` patterns, to avoid partial replacements.
+
+### §12.5 Verification
+
+After every batch of fixes:
+
+```bash
+# 1. Syntax check
+python3 -c "
+import glob, py_compile, sys
+ok = fail = 0
+for f in sorted(glob.glob('examples/<Scenario>/**/*.py', recursive=True)):
+    try:
+        py_compile.compile(f, doraise=True)
+        ok += 1
+    except py_compile.PyCompileError as e:
+        print('ERROR:', e)
+        fail += 1
+print(f'OK={ok} FAIL={fail}')
+if fail: sys.exit(1)
+"
+
+# 2. Re-run detection to confirm zero remaining violations
+python3 -c "
+import re, glob, os
+count = 0
+for f in sorted(glob.glob('examples/<Scenario>/**/*.py', recursive=True)):
+    bn = os.path.basename(f)
+    if bn.startswith('run_') or bn == '__init__.py' or bn == 'prompts.py':
+        continue
+    for line in open(f):
+        if re.search(r'\.get\s*\(\s*[\"\''][^\"\']+[\"\'']\s*,', line):
+            stripped = line.strip()
+            if any(kw in stripped for kw in [
+                'resolved_rag', 'rag_cfg.get', 'embed_', 'chunk_',
+                'pop(', 'plt.', 'fig', 'color', 'linewidth',
+                'private_knowledge', 'knowledge',
+            ]):
+                continue
+            count += 1
+print(f'Remaining violations: {count}')
+"
+```
+
+### §12.6 Audit Record Template
+
+After completing the audit for a scenario, record the results:
+
+```
+> **No-default audit** (<Scenario>, <date>):
+>   - Files scanned: N players.py + N analysis.py
+>   - Violations found: N
+>   - Violations fixed: N
+>   - Legitimate exceptions retained: N
+>   - py_compile: ALL OK (N files)
+```

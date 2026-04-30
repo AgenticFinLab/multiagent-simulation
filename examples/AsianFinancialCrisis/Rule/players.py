@@ -87,10 +87,10 @@ class Market(GeneralPlayer):
         mean_reversion_rate = self.state.custom_state["mean_reversion"]
         noise_std = self.state.custom_state["noise_std"]
 
-        buy_orders = [o for o in orders if o.get("action") == "buy"]
-        sell_orders = [o for o in orders if o.get("action") == "sell"]
-        total_buy = sum(o.get("quantity", 0) for o in buy_orders)
-        total_sell = sum(o.get("quantity", 0) for o in sell_orders)
+        buy_orders = [o for o in orders if o["action"] == "buy"]
+        sell_orders = [o for o in orders if o["action"] == "sell"]
+        total_buy = sum(o["quantity"] for o in buy_orders)
+        total_sell = sum(o["quantity"] for o in sell_orders)
         net_demand = total_buy - total_sell
 
         price_change = price_impact * net_demand

@@ -39,6 +39,8 @@ patternmatcher:
       streak_sensitivity: 2.0
       base_size: 400
       custom_state_hot_limit: 3
+      base_rate_ignore: 0.8
+      pattern_sensitivity: 1.0
   persona: !include persona.yml
 
 categoryovergeneralizer:
@@ -60,6 +62,8 @@ categoryovergeneralizer:
       sample_size: 2
       base_size: 350
       custom_state_hot_limit: 3
+      category_weight: 1.2
+      sample_bias: 0.7
   persona: !include persona.yml
 
 bayesianupdater:
@@ -81,6 +85,7 @@ bayesianupdater:
       base_rate_weight: 0.7
       base_size: 300
       custom_state_hot_limit: 3
+      evidence_weight: 0.4
   persona: !include persona.yml
 
 contrarianstatistical:
@@ -102,6 +107,7 @@ contrarianstatistical:
       contrarian_threshold: 0.04
       base_size: 350
       custom_state_hot_limit: 3
+      position_size: 500
   persona: !include persona.yml
 
 noisetrader:

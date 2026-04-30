@@ -488,8 +488,8 @@ Respond with ONLY valid JSON:
             try:
                 decision = self._parse_llm_response(infer_output.outputs[0].response)
                 break
-            except ValueError as e:
-                last_error = e
+            except Exception as exc:
+                last_error = exc
                 if attempt < max_retries - 1:
                     logger.debug(
                         "[%s] LLM parse failed (attempt %d), retrying...",
@@ -497,29 +497,10 @@ Respond with ONLY valid JSON:
                         attempt + 1,
                     )
 
-        # If LLM failed after all retries, skip action this round (neutral)
         if decision is None:
-            logger.warning(
-                "[%s] LLM failed after %d attempts: %s. Skipping action this round.",
-                self.identity,
-                max_retries,
-                last_error,
+            raise RuntimeError(
+                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
             )
-            action = {
-                "action_type": "neutral",
-                "intensity": 0.0,
-                "agent_role": strategy_name,
-                "agent_id": self.identity,
-                "opinion": self.state.custom_state["my_opinion"],
-                "reasoning": "LLM parse failed: stayed neutral",
-                "analysis": "",
-            }
-            return {
-                **action,
-                "outbound_messages": [
-                    {"payload": action, "content_type": "social_action"}
-                ],
-            }
 
         action_type = decision["action_type"]
         intensity = float(decision["intensity"])

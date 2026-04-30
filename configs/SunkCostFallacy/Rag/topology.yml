@@ -1,4 +1,7 @@
 type: "star"
+sources:
+  - market
+
 connections:
   market:
     - sunkcostholder

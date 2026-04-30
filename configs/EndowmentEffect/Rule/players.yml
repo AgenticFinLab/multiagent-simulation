@@ -35,6 +35,7 @@ endowedholder:
       initial_cash: 800000.0
       initial_position: 500
       endowment_premium: 0.15
+      sell_reluctance: 0.30       # Fraction of position sold per trade (§4.1.6)
       base_size: 300
       custom_state_hot_limit: 3
   persona: !include persona.yml
@@ -53,7 +54,7 @@ statusquoseller:
       record_path: "EXPERIMENT/EndowmentEffect/Rule/records"
       initial_cash: 800000.0
       initial_position: 500
-      status_quo_premium: 0.20
+      status_quo_threshold: 0.20  # Deviation threshold to sell (§4.2.4)
       base_size: 300
       custom_state_hot_limit: 3
   persona: !include persona.yml

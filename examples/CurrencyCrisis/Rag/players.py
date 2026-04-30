@@ -323,15 +323,15 @@ class RagLLMInvestor(GeneralPlayer):
         system_prompt = load_prompt(self._system_prompt_path)
         user_prompt = self._build_prompt(market_data)
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
-        action_str, quantity = "hold", 0
+        last_error = None
         for attempt in range(3):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 result = llm_client.run([infer_input])
                 response = result.outputs[0].response
                 parsed = parse_llm_response_with_thinking(response)
-                action_str = parsed["action"] if "action" in parsed else "hold"
-                quantity = int(parsed["quantity"] if "quantity" in parsed else 0)
+                action_str = parsed["action"]
+                quantity = int(parsed["quantity"])
                 if action_str not in ("buy", "sell", "hold"):
                     action_str = "hold"
                 quantity = max(0, quantity)
@@ -342,8 +342,11 @@ class RagLLMInvestor(GeneralPlayer):
                 break
             except Exception as exc:  # pylint: disable=broad-except
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
+                last_error = exc
                 if attempt == 2:
-                    action_str, quantity = "hold", 0
+                    raise RuntimeError(
+                        f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+                    ) from last_error
         if action_str == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity

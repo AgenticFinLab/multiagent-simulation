@@ -23,6 +23,9 @@ market:
       liquidity_recovery: 0.05
       min_liquidity: 0.1
       custom_state_hot_limit: 3
+      base_liquidity: 50.0
+      high_impact_multiplier: 3.0
+      low_liquidity_threshold: 30.0
   persona: !include persona.yml
 
 rulellm_panic_seller:

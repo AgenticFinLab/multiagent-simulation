@@ -75,17 +75,17 @@ class RagLLMInvestor(GeneralPlayer):
         )
         self.state.custom_state["llm_client"] = llm_client
 
-        private_knowledge = extras.get("private_knowledge", {})
-        rag_cfg = private_knowledge.get("rag", extras.get("rag", {}))
+        private_knowledge = extras["private_knowledge"]
+        rag_cfg = private_knowledge["rag"]
         await self._initialize_rag(rag_cfg, llm_client, llm_cfg)
 
     async def _initialize_rag(
         self, rag_cfg: Dict[str, Any], llm_client: Any, llm_config: Dict[str, Any]
     ) -> None:
         extras = self.config.extras
-        record_path = extras.get("record_path", "EXPERIMENT")
+        record_path = extras["record_path"]
 
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
@@ -102,7 +102,7 @@ class RagLLMInvestor(GeneralPlayer):
             }
 
         resource_manager = ResourceManager(knowledge_config)
-        private_knowledge = extras.get("private_knowledge", {})
+        private_knowledge = extras["private_knowledge"]
         if not private_knowledge:
             private_knowledge = {
                 "from_global_resources": ["MinerU_processed"],
@@ -261,9 +261,9 @@ class RagLLMInvestor(GeneralPlayer):
     def _build_prompt(self) -> str:
         from examples.FramingEffect.Rag.prompts import RAG_USER_TEMPLATE
 
-        price = self.state.custom_state.get("price", 0.0)
-        fundamental = self.state.custom_state.get("fundamental", 0.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         round_num = self.state.custom_state["round"]
@@ -304,7 +304,7 @@ class RagLLMInvestor(GeneralPlayer):
         system_prompt = load_prompt(self._system_prompt_path)
         user_prompt = self._build_prompt()
 
-        price = self.state.custom_state.get("price", 0.0)
+        price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
 
@@ -325,19 +325,12 @@ class RagLLMInvestor(GeneralPlayer):
                     decision = None
 
         if decision is None:
-            return {
-                "action": "hold",
-                "quantity": 0,
-                "outbound_messages": [
-                    {
-                        "payload": {"type": "order", "action": "hold", "quantity": 0},
-                        "content_type": "order",
-                    }
-                ],
-            }
+            raise RuntimeError(
+                f"[{self.identity}] LLM failed after 3 attempts — cannot proceed without a valid decision."
+            )
 
-        action = decision.get("action", "hold")
-        quantity = int(decision.get("quantity", 0))
+        action = decision["action"]
+        quantity = int(decision["quantity"])
 
         if action == "buy" and price > 0:
             quantity = min(quantity, int(cash / price), 1000)

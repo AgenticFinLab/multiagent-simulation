@@ -119,15 +119,15 @@ llm_funding_currency_buyer:
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# Central Bank Intervener — LLM with FX stability mandate persona
-# Theory: BIS (2005) — FX intervention effectiveness
+# Hedged Carry Trader — LLM with FX stability mandate persona
+# Theory: Menkhoff et al. (2012) — FX intervention effectiveness
 # -----------------------------------------------------------------------------
-llm_cb_intervener:
-  name: "LLM Central Bank Intervener"
-  class: "examples.CarryTradeUnwind.LLM.players:LLMCentralBankIntervener"
+llm_hedged_carry_trader:
+  name: "LLM Hedged Carry Trader"
+  class: "examples.CarryTradeUnwind.LLM.players:LLMHedgedCarryTrader"
   num_instances: 1
   config:
-    identity: "llm_cb_intervener"
+    identity: "llm_hedged_carry_trader"
     role: player
     steps_per_turn: 1
     group_tags:

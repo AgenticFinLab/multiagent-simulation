@@ -39,6 +39,7 @@ speculativeattacker:
       attack_threshold: 0.05
       position_size: 800
       custom_state_hot_limit: 3
+      order_size: 600
   persona: !include persona.yml
 
 selffulfillingtrader:
@@ -59,6 +60,7 @@ selffulfillingtrader:
       exit_threshold: 0.03
       position_size: 500
       custom_state_hot_limit: 3
+      order_size: 700
   persona: !include persona.yml
 
 centralbankdefender:
@@ -78,6 +80,7 @@ centralbankdefender:
       defense_size: 600
       defense_threshold: 0.02
       custom_state_hot_limit: 3
+      order_size: 500
   persona: !include persona.yml
 
 fundamentalhedger:
@@ -97,6 +100,7 @@ fundamentalhedger:
       hedge_ratio: 0.3
       position_size: 400
       custom_state_hot_limit: 3
+      order_size: 400
   persona: !include persona.yml
 
 noisetrader:

@@ -43,7 +43,7 @@ class LLMInvestor(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras.get("initial_position", 0)
+            self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload.get("type") == "market_update":
@@ -52,17 +52,17 @@ class LLMInvestor(GeneralPlayer):
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        llm_cfg = self.config.extras.get("llm", {})
+        llm_cfg = self.config.extras["llm"]
         llm = LangChainAPIInference(
             lm_name=llm_cfg["lm_name"],
-            generation_config=llm_cfg.get("generation_config", {}),
+            generation_config=llm_cfg["generation_config"],
         )
-        price = self.state.custom_state.get("price", 0)
-        fundamental = self.state.custom_state.get("fundamental", 0)
-        deviation = self.state.custom_state.get("deviation", 0)
-        cash = self.state.custom_state.get("cash", 0)
-        position = self.state.custom_state.get("position", 0)
-        round_num = self.state.custom_state.get("round", 0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
+        round_num = self.state.custom_state["round"]
         portfolio_value = cash + position * price
         user_msg = (
             f"Current Market State (Round {round_num}):\n"
@@ -76,20 +76,35 @@ class LLMInvestor(GeneralPlayer):
             "Provide your analysis and decision in the specified format."
         )
         infer_input = InferInput(system_msg=self._system_prompt, user_msg=user_msg)
-        try:
-            response = llm.run([infer_input]).outputs[0].response
-            result = parse_llm_response_with_thinking(response)
-            decision = result.get("decision", {})
-        except Exception:
-            decision = {"action": "hold", "quantity": 0}
+        decision = None
+        last_error = None
+        for attempt in range(3):
+            try:
+                response = llm.run([infer_input]).outputs[0].response
+                decision = parse_llm_response_with_thinking(response)
+                break
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            )
+
         return decision
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = int(decision_payload.get("quantity", 0))
-        price = self.state.custom_state.get("price", 0)
-        cash = self.state.custom_state.get("cash", 0)
-        position = self.state.custom_state.get("position", 0)
+        action = decision_payload["action"]
+        quantity = int(decision_payload["quantity"])
+        price = self.state.custom_state["price"]
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
         if action == "buy" and quantity > 0 and price > 0:
             quantity = min(quantity, int(cash / price))
             self.state.custom_state["cash"] -= quantity * price

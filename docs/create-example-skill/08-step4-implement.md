@@ -85,6 +85,7 @@ class {ClassName}(GeneralPlayer):
 3. `step()` calls `_make_decision()` and sends one order message
 4. `_make_decision()` implements the logic from `simulation-bases.md §4.{N}.4.3 Mathematical Model`
 5. No hardcoded numbers anywhere in the code — all come from config
+6. No `.get(key, default)`, no `if X else fallback`, no silent error recovery — all missing data must `raise` immediately (see `00-overview.md` Principle #6)
 
 ### 4.1.3 `run_{name}.py` Pattern
 
@@ -265,17 +266,27 @@ def _build_interpretation(
     return "\n".join(lines)
 ```
 
-#### Three mandatory plots
+#### Mandatory plots
 
-Every `Rule/analysis.py` must produce exactly three PNG files in `{base_dir}/analysis/`:
+Every `Rule/analysis.py` must produce the following PNG files in `{base_dir}/analysis/`:
 
-| Filename                     | Contents                                        | Primary metrics shown        |
-|------------------------------|-------------------------------------------------|------------------------------|
-| `01_{scenario}_dynamics.png` | Price vs. Fundamental time-series + Deviation % | Main phenomenon trajectory   |
-| `02_{scenario}_analysis.png` | Phenomenon-specific deep-dive                   | Scenario-specific metric(s)  |
-| `03_summary.png`             | Agent volume bar + Persistence/Residual chart   | Agent behavior + convergence |
+| Filename                     | Contents                                        | Primary metrics shown                       |
+|------------------------------|-------------------------------------------------|---------------------------------------------|
+| `00_investor_bids.png`       | Market price + each investor's bid price curves | Headline overview — agent vs market pricing |
+| `01_{scenario}_dynamics.png` | Price vs. Fundamental time-series + Deviation % | Main phenomenon trajectory                  |
+| `02_{scenario}_analysis.png` | Phenomenon-specific deep-dive                   | Scenario-specific metric(s)                 |
+| `03_summary.png`             | Agent volume bar + Persistence/Residual chart   | Agent behavior + convergence                |
 
-All three correspond directly to dimensions in `analysis-bases.md §3`.
+**Plot 0 specification** (`00_investor_bids.png`):
+- Layout: single-panel, `figsize=(16, 8)` — the "headline" chart.
+- **Market price**: thick gold line (`#f0a500`, linewidth 2.5, zorder=10).
+- **Fundamental value**: dashed green horizontal reference line.
+- **Investor bids**: one coloured line per `player_id` from `investor_bids = {pid: {round_num: bid_price}}` with small markers.
+- X-axis = Round, Y-axis = Price.
+- Legend at bottom-center, multi-column.
+- Data source: `player.turns.field("bid_price")` for each non-coordinator player.
+
+Plots 01–03 correspond directly to dimensions in `analysis-bases.md §3`.
 
 #### `main()` skeleton
 
@@ -508,7 +519,7 @@ def _initialize_rag(self) -> None:
 
 def _formulate_knowledge_query(self, market_data: dict) -> str:
     """Build retrieval query from current market state."""
-    deviation = market_data.get("deviation", 0)
+    deviation = market_data["deviation"]
     # Query strategy: use current market state language to retrieve relevant historical context
     if deviation < -0.10:
         return f"forced liquidation crisis deviation {deviation:.2f} market crash"
@@ -576,6 +587,15 @@ After implementing each variant:
 - [ ] LLM/RuleLLM/Rag `analysis.py` imports `_load_data` from `Rule/analysis.py`
 - [ ] Rag `analysis.py` defines `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"`
 - [ ] All `__init__.py` files present
+
+#### Strict no-default compliance checklist
+
+- [ ] No `.get(key, default)` on simulation data dicts (config extras, message payloads, LLM responses, coordinator data) — use `dict["key"]`
+- [ ] No `if X else fallback` for required data fields (e.g., `if fundamentals else 1.0` is forbidden)
+- [ ] No silent `hold` substitution when LLM parse fails — must `raise RuntimeError`
+- [ ] No `if rates else 0.0` for computed metrics — must `raise ValueError` if no data collected
+- [ ] No `payload.get("field", None)` in analysis scripts — use `payload["field"]`
+- [ ] Only legitimate `.get()` exceptions remain: RAG config resolution, `__getstate__`/`__setstate__`, truly optional config sections, matplotlib defaults
 
 #### `analysis.py` output standard checklist
 

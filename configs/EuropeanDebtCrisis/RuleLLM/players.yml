@@ -141,12 +141,12 @@ ecbintervenor:
           max_tokens: 512
   persona: !include persona.yml
 
-hedgedfundtrader:
-  name: "HedgedFundTrader"
-  class: "examples.EuropeanDebtCrisis.RuleLLM.players:RuleLLMHedgedFundTrader"
+hedgedfund:
+  name: "HedgedFund"
+  class: "examples.EuropeanDebtCrisis.RuleLLM.players:RuleLLMHedgedFund"
   num_instances: 1
   config:
-    identity: "hedgedfundtrader"
+    identity: "hedgedfund"
     role: player
     steps_per_turn: 1
     group_tags:

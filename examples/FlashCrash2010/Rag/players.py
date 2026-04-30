@@ -97,7 +97,7 @@ class RagLLMInvestor(GeneralPlayer):
         self.state.custom_state["llm_client"] = llm_client
 
         private_knowledge = extras["private_knowledge"]
-        rag_cfg = private_knowledge.get("rag", extras.get("rag", {}))
+        rag_cfg = private_knowledge["rag"]
         await self._initialize_rag(rag_cfg, llm_client, llm_cfg)
 
     async def _initialize_rag(
@@ -106,7 +106,7 @@ class RagLLMInvestor(GeneralPlayer):
         extras = self.config.extras
         record_path = extras["record_path"]
 
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
@@ -124,7 +124,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         resource_manager = ResourceManager(knowledge_config)
 
-        private_knowledge = extras.get("private_knowledge", {})
+        private_knowledge = extras["private_knowledge"]
         if not private_knowledge:
             private_knowledge = {
                 "from_global_resources": ["MinerU_processed"],
@@ -295,7 +295,7 @@ class RagLLMInvestor(GeneralPlayer):
                     custom["rag_store"] = rag_store
 
     async def decide(self) -> Dict[str, Any]:
-        market_data = self.state.custom_state.get("market_data", {})
+        market_data = self.state.custom_state["market_data"]
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
@@ -303,7 +303,7 @@ class RagLLMInvestor(GeneralPlayer):
         rag_store: KnowledgeStore = self.state.custom_state.get("rag_store")
         rag_cfg: Dict[str, Any] = self.state.custom_state.get("rag_cfg", {})
 
-        price = market_data.get("price", 0.0)
+        price = market_data["price"]
         price_hist = list(self.state.custom_state["price_history"])
         recent_prices = price_hist[-5:] if len(price_hist) >= 5 else price_hist
 
@@ -313,8 +313,8 @@ class RagLLMInvestor(GeneralPlayer):
             query = KnowledgeQuery(
                 text=(
                     f"trading strategy when: price={price:.2f}, "
-                    f"return={market_data.get('return_pct', 0):+.2f}%, "
-                    f"fundamental={market_data.get('fundamental', price):.2f}"
+                    f"return={market_data['return_pct']:+.2f}%, "
+                    f"fundamental={market_data['fundamental']:.2f}"
                 ),
                 top_k=top_k,
                 round_num=round_num,
@@ -333,13 +333,13 @@ class RagLLMInvestor(GeneralPlayer):
             round=round_num,
             rag_context=rag_context,
             price=price,
-            prev_price=market_data.get("prev_price", price),
-            return_pct=market_data.get("return_pct", 0.0),
-            fundamental=market_data.get("fundamental", price),
-            deviation=market_data.get("deviation", 0.0) * 100,
-            spread=market_data.get("spread", 0.0),
-            depth=market_data.get("depth", 0.0),
-            volatility=market_data.get("volatility", 0.0),
+            prev_price=market_data["prev_price"],
+            return_pct=market_data["return_pct"],
+            fundamental=market_data["fundamental"],
+            deviation=market_data["deviation"] * 100,
+            spread=market_data["spread"],
+            depth=market_data["depth"],
+            volatility=market_data["volatility"],
             recent_prices=recent_prices,
             cash=cash,
             position=position,
@@ -347,28 +347,32 @@ class RagLLMInvestor(GeneralPlayer):
         )
 
         max_retries = 3
-        decision: Dict[str, Any] = {}
+        decision = None
+        last_error = None
         for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
+                infer_output = llm_client.run([infer_input])
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
                 break
-            except ValueError as e:
-                if attempt == max_retries - 1:
-                    raise RuntimeError(
-                        f"[{self.identity}] LLM failed after {max_retries} attempts: {e}"
-                    ) from e
-                logger.debug(
-                    "[%s] Parse failed (attempt %d), retrying...",
-                    self.identity,
-                    attempt + 1,
-                )
+            except Exception as exc:
+                last_error = exc
+                if attempt < max_retries - 1:
+                    logger.debug(
+                        "[%s] Parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
 
-        bid_price = float(decision.get("bid_price", price))
-        quantity = float(decision.get("quantity", 0))
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM failed after {max_retries} retries: {last_error}"
+            )
+
+        bid_price = float(decision["bid_price"])
+        quantity = float(decision["quantity"])
 
         if quantity > 0:
             max_buy = cash / bid_price if bid_price > 0 else 0

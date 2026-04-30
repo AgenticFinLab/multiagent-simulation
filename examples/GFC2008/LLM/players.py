@@ -41,7 +41,7 @@ class LLMInvestor(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["price"] = extras.get("initial_price", 100.0)
+            self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras.get(
                 "fundamental_value", 100.0
             )
@@ -61,7 +61,7 @@ class LLMInvestor(GeneralPlayer):
 
     async def _initialize_agent(self) -> None:
         """Initialize LangChainAPIInference client from config."""
-        llm_cfg = self.config.extras.get("llm", {})
+        llm_cfg = self.config.extras["llm"]
         self._llm_params = {
             "lm_name": llm_cfg["lm_name"],
             "generation_config": llm_cfg["generation_config"],
@@ -106,15 +106,30 @@ class LLMInvestor(GeneralPlayer):
             portfolio_value=portfolio_value,
         )
 
-        try:
-            infer_input = InferInput(system_msg=system_msg, user_msg=user_msg)
-            response = self._llm_client.run([infer_input]).outputs[0].response
-            decision = parse_llm_response_with_thinking(response)
-        except Exception:
-            decision = {"action": "hold", "quantity": 0}
+        decision = None
+        last_error = None
+        for attempt in range(3):
+            try:
+                infer_input = InferInput(system_msg=system_msg, user_msg=user_msg)
+                response = self._llm_client.run([infer_input]).outputs[0].response
+                decision = parse_llm_response_with_thinking(response)
+                break
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
 
-        action = decision.get("action", "hold")
-        quantity = int(decision.get("quantity", 0))
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            )
+
+        action = decision["action"]
+        quantity = int(decision["quantity"])
         price_val = self.state.custom_state["price"]
 
         if action == "buy":
@@ -130,8 +145,8 @@ class LLMInvestor(GeneralPlayer):
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order."""
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
         price = self.state.custom_state["price"]
 
         if action == "buy" and quantity > 0:

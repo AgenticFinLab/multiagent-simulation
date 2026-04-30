@@ -12,6 +12,9 @@ import json
 import os
 from typing import Any, Dict
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 from masim.evaluation.finance import (
     calculate_returns,
     calculate_rolling_volatility,
@@ -82,6 +85,30 @@ def _load_data(results) -> Dict[str, Any]:
     }
 
 
+_BID_COLORS = [
+    "#3a86ff",
+    "#ff006e",
+    "#8338ec",
+    "#06d6a0",
+    "#fb5607",
+    "#ff595e",
+    "#1982c4",
+    "#6a4c93",
+    "#ffca3a",
+    "#8ac926",
+    "#e07a5f",
+    "#3d405b",
+    "#81b29a",
+    "#f2cc8f",
+    "#264653",
+    "#e63946",
+    "#457b9d",
+    "#2a9d8f",
+    "#e9c46a",
+    "#f4a261",
+]
+
+
 def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     """Perform bubble/crash analysis."""
     os.makedirs(output_dir, exist_ok=True)
@@ -89,7 +116,7 @@ def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     market_prices = data["market_prices"]
     fundamentals = data["fundamentals"]
     volumes = data["volumes"]
-    investor_quantities = data.get("investor_quantities", {})
+    investor_quantities = data["investor_quantities"]
 
     if not market_prices:
         print("No market price data found")
@@ -97,10 +124,9 @@ def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
 
     # Fundamental value must come from simulation data
     prices_list_tmp = [market_prices[r] for r in sorted(market_prices.keys())]
-    if fundamentals:
-        fundamental_value = sum(fundamentals.values()) / len(fundamentals)
-    else:
-        fundamental_value = prices_list_tmp[0]  # Use initial price as proxy
+    if not fundamentals:
+        raise ValueError("No fundamental data recorded - simulation data is incomplete")
+    fundamental_value = sum(fundamentals.values()) / len(fundamentals)
 
     # Calculate metrics
     returns = calculate_returns(market_prices)
@@ -118,8 +144,16 @@ def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     max_dd, peak_idx, trough_idx = calculate_max_drawdown(prices_list)
 
     # Bubble detection
-    max_deviation = max(deviation.values()) if deviation else 0
-    max_bubble = max(bubble.values()) if bubble else 0
+    if not deviation:
+        raise ValueError(
+            "No deviation data computed - price deviation calculation failed"
+        )
+    max_deviation = max(deviation.values())
+    if not bubble:
+        raise ValueError(
+            "No bubble magnitude data computed - bubble calculation failed"
+        )
+    max_bubble = max(bubble.values())
     bubble_detected = max_deviation > 20  # >20% deviation = bubble
 
     # Run validation
@@ -133,6 +167,64 @@ def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
 
     # Generate plots
     print(f"Generating analysis plots in {output_dir}/")
+
+    # --- Plot 0: Investor Bid Curves (PRIMARY headline chart) ---
+    investor_bids = data["investor_bids"]
+    rounds_sorted = sorted(market_prices.keys())
+    _rounds_arr = np.array(rounds_sorted)
+    _prices_arr = np.array([market_prices[r] for r in rounds_sorted])
+    fig0, ax0 = plt.subplots(figsize=(16, 8))
+    fig0.suptitle(
+        "AssetBubble Rule \u2014 Investor Bidding Curves",
+        fontsize=14,
+        fontweight="bold",
+    )
+    ax0.plot(
+        _rounds_arr,
+        _prices_arr,
+        color="#f0a500",
+        linewidth=2.5,
+        label="Market Price",
+        zorder=10,
+    )
+    ax0.axhline(
+        y=fundamental_value,
+        color="darkgreen",
+        linestyle="--",
+        linewidth=1.2,
+        label=f"Fundamental (F={fundamental_value:.2f})",
+        alpha=0.8,
+    )
+    for _i, (_pid, _bids) in enumerate(sorted(investor_bids.items())):
+        _br = sorted(_bids.keys())
+        _bv = [float(_bids[r]) for r in _br]
+        ax0.plot(
+            _br,
+            _bv,
+            marker="o",
+            markersize=2,
+            linewidth=0.9,
+            color=_BID_COLORS[_i % len(_BID_COLORS)],
+            alpha=0.8,
+            label=_pid.replace("_", " ").title(),
+        )
+    ax0.set_xlabel("Round", fontsize=12)
+    ax0.set_ylabel("Price", fontsize=12)
+    ax0.set_title("Market Price & Individual Investor Bids", fontsize=12)
+    ax0.grid(True, alpha=0.3)
+    ax0.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.06),
+        ncol=min(5, len(investor_bids) + 2),
+        fontsize=8,
+        frameon=True,
+        framealpha=0.7,
+    )
+    plt.tight_layout()
+    _p0 = os.path.join(output_dir, "00_investor_bids.png")
+    plt.savefig(_p0, dpi=150, bbox_inches="tight")
+    plt.close()
+    print(f"Saved: {_p0}")
 
     plot_price_dynamics(
         market_prices,
@@ -166,7 +258,7 @@ def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
             "peak_round": peak_idx,
             "trough_round": trough_idx,
             "crash_duration": trough_idx - peak_idx if trough_idx > peak_idx else 0,
-            "return_autocorr_lag1": round(autocorr[0], 4) if autocorr else None,
+            "return_autocorr_lag1": round(autocorr[0], 4),
         },
         "price": {
             "initial": round(prices_list[0], 4),
@@ -176,26 +268,22 @@ def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
             "mean": round(sum(prices_list) / len(prices_list), 4),
         },
         "returns": {
-            "mean": round(sum(returns.values()) / len(returns), 6) if returns else 0,
-            "std": (
-                round(
-                    (
-                        sum(
-                            (r - sum(returns.values()) / len(returns)) ** 2
-                            for r in returns.values()
-                        )
-                        / len(returns)
+            "mean": round(sum(returns.values()) / len(returns), 6),
+            "std": round(
+                (
+                    sum(
+                        (r - sum(returns.values()) / len(returns)) ** 2
+                        for r in returns.values()
                     )
-                    ** 0.5,
-                    6,
+                    / len(returns)
                 )
-                if returns
-                else 0
+                ** 0.5,
+                6,
             ),
         },
         "volume": {
-            "total": sum(volumes.values()) if volumes else 0,
-            "avg": round(sum(volumes.values()) / len(volumes), 4) if volumes else 0,
+            "total": sum(volumes.values()),
+            "avg": round(sum(volumes.values()) / len(volumes), 4),
         },
         "validation": validation.to_dict(),
     }

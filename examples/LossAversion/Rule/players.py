@@ -53,7 +53,7 @@ class Market(GeneralPlayer):
             extras = self.config.extras
             record_path = extras["record_path"]
             base_path = __import__("os").path.join(record_path, self.config.identity)
-            hot_limit = extras.get("custom_state_hot_limit", 100)
+            hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras["fundamental_value"]
@@ -148,9 +148,7 @@ class BaseInvestor(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["entry_price"] = extras.get(
-                "initial_price", extras.get("entry_price", 100.0)
-            )
+            self.state.custom_state["entry_price"] = extras["initial_price"]
 
         if observation.inbounds:
             for inb in observation.inbounds:

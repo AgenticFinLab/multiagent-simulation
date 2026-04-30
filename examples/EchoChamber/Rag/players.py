@@ -136,16 +136,16 @@ class RagLLMSocialAgent(GeneralPlayer):
             lm_name=lm_name, generation_config=generation_config
         )
         self.state.custom_state["llm_client"] = llm_client
-        private_knowledge = extras.get("private_knowledge", {})
-        rag_cfg = private_knowledge.get("rag", extras.get("rag", {}))
+        private_knowledge = extras["private_knowledge"]
+        rag_cfg = private_knowledge["rag"]
         await self._initialize_rag(rag_cfg, llm_client, llm_cfg)
 
     async def _initialize_rag(
         self, rag_cfg: Dict[str, Any], llm_client: Any, llm_config: Dict[str, Any]
     ) -> None:
         extras = self.config.extras
-        record_path = extras.get("record_path", "EXPERIMENT")
-        knowledge_config = extras.get("knowledge", {})
+        record_path = extras["record_path"]
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
@@ -161,7 +161,7 @@ class RagLLMSocialAgent(GeneralPlayer):
                 },
             }
         resource_manager = ResourceManager(knowledge_config)
-        private_knowledge = extras.get("private_knowledge", {})
+        private_knowledge = extras["private_knowledge"]
         if not private_knowledge:
             private_knowledge = {
                 "from_global_resources": ["MinerU_processed"],
@@ -322,7 +322,7 @@ class RagLLMSocialAgent(GeneralPlayer):
 
     def _build_prompt(self, env_data: Dict[str, Any]) -> str:
         my_opinion = self.state.custom_state["my_opinion"]
-        round_num = self.state.custom_state.get("round", 0)
+        round_num = self.state.custom_state["round"]
         polarization = env_data["polarization"]
         prev_polarization = env_data["prev_polarization"]
         polarization_change = env_data["polarization_change"]
@@ -389,21 +389,9 @@ class RagLLMSocialAgent(GeneralPlayer):
                 if attempt == 2:
                     decision = None
         if decision is None:
-            action = {
-                "action_type": "neutral",
-                "intensity": 0.0,
-                "agent_role": strategy_name,
-                "agent_id": self.identity,
-                "opinion": self.state.custom_state["my_opinion"],
-                "reasoning": "LLM failed: stayed neutral",
-                "analysis": "",
-            }
-            return {
-                **action,
-                "outbound_messages": [
-                    {"payload": action, "content_type": "social_action"}
-                ],
-            }
+            raise RuntimeError(
+                f"[{self.identity}] LLM failed after 3 attempts — cannot proceed without a valid decision."
+            )
         action_type = decision["action_type"]
         intensity = float(decision["intensity"])
         intensity = self._apply_intensity_constraints(intensity)

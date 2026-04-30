@@ -51,8 +51,8 @@ class LLMInvestor(GeneralPlayer):
         if self._llm is None:
             llm_cfg = self.config.extras["llm"]
             self._llm = LangChainAPIInference(
-                lm_name=llm_cfg["model"],
-                generation_config={"temperature": llm_cfg.get("temperature", 0.3)},
+                lm_name=llm_cfg["lm_name"],
+                generation_config=llm_cfg["generation_config"],
             )
         return self._llm
 

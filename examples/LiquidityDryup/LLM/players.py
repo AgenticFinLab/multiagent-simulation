@@ -46,7 +46,6 @@ from examples.LiquidityDryup.LLM.prompts import (
     LLM_USER_TEMPLATE,
 )
 
-
 logger = logging.getLogger("LiquidityDryupLLM")
 
 
@@ -198,10 +197,10 @@ class LLMInvestor(GeneralPlayer):
 
     async def decide(self) -> Dict[str, Any]:
         market_data = self.state.custom_state["market_data"]
-        llm_cfg = self.config.extras.get("llm", {})
+        llm_cfg = self.config.extras["llm"]
         llm = LangChainAPIInference(
-            lm_name=llm_cfg["model"],
-            generation_config={"temperature": llm_cfg.get("temperature", 0.3)},
+            lm_name=llm_cfg["lm_name"],
+            generation_config=llm_cfg["generation_config"],
         )
 
         user_msg = LLM_USER_TEMPLATE.format(
@@ -217,7 +216,8 @@ class LLMInvestor(GeneralPlayer):
             + self.state.custom_state["position"] * market_data["price"],
         )
 
-        decision: Dict[str, Any] = {}
+        decision = None
+        last_error = None
         for attempt in range(3):
             try:
                 output = llm.run(
@@ -225,23 +225,23 @@ class LLMInvestor(GeneralPlayer):
                 )
                 decision = parse_llm_response_with_thinking(output.outputs[0].response)
                 break
-            except (ValueError, RuntimeError) as exc:
-                logger.debug(
-                    "[%s] LLM parse failed (attempt %d): %s",
-                    self.identity,
-                    attempt + 1,
-                    exc,
-                )
-                decision = {
-                    "bid_price": market_data["price"],
-                    "quantity": 0.0,
-                    "provides_liquidity": 0.0,
-                    "reasoning": "parse error – hold",
-                }
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
 
-        bid_price = float(decision.get("bid_price", market_data["price"]))
-        quantity = float(decision.get("quantity", 0.0))
-        provides_liquidity = float(decision.get("provides_liquidity", 0.0))
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            )
+
+        bid_price = float(decision["bid_price"])
+        quantity = float(decision["quantity"])
+        provides_liquidity = float(decision["provides_liquidity"])
 
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
@@ -264,7 +264,7 @@ class LLMInvestor(GeneralPlayer):
             "strategy": strategy_name,
             "investor": self.identity,
             "provides_liquidity": provides_liquidity,
-            "reasoning": decision.get("reasoning", "")[:100],
+            "reasoning": decision["reasoning"][:100],
         }
         return {
             **order,

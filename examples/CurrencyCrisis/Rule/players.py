@@ -18,6 +18,7 @@ Agents:
 """
 
 import logging
+import os
 import random
 from typing import Any, Dict, List, Optional
 
@@ -34,14 +35,21 @@ class Market(GeneralPlayer):
     async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "price" not in self.state.custom_state:
             extras = self.config.extras
+            record_path = extras["record_path"]
+            base_path = os.path.join(record_path, self.config.identity)
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
             self.state.custom_state["price"] = float(extras["initial_price"])
             self.state.custom_state["fundamental"] = float(extras["fundamental_value"])
             self.state.custom_state["price_impact"] = float(extras["price_impact"])
             self.state.custom_state["mean_reversion"] = float(extras["mean_reversion"])
             self.state.custom_state["noise_std"] = float(extras["noise_std"])
-            self.state.custom_state["price_history"] = []
-            self.state.custom_state["history_buffer"] = HistoryBuffer(
-                folder="CurrencyCrisis/Market", entry_limit=200
+            self.state.custom_state["price_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "price"),
+                entry_limit=custom_state_hot_limit,
+            )
+            self.state.custom_state["fundamental_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "fundamental"),
+                entry_limit=custom_state_hot_limit,
             )
 
         self.state.custom_state["round"] = observation.round
@@ -54,10 +62,8 @@ class Market(GeneralPlayer):
 
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        buy_vol = sum(o.get("quantity", 0) for o in orders if o.get("action") == "buy")
-        sell_vol = sum(
-            o.get("quantity", 0) for o in orders if o.get("action") == "sell"
-        )
+        buy_vol = sum(o["quantity"] for o in orders if o["action"] == "buy")
+        sell_vol = sum(o["quantity"] for o in orders if o["action"] == "sell")
         net_demand = buy_vol - sell_vol
 
         price_change = self.state.custom_state["price_impact"] * net_demand
@@ -66,6 +72,7 @@ class Market(GeneralPlayer):
         new_price = max(price + price_change + reversion + noise, 0.01)
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
+        self.state.custom_state["fundamental_history"].append(fundamental)
 
         deviation = (new_price - fundamental) / fundamental if fundamental > 0 else 0.0
         self.state.custom_state["deviation"] = deviation
@@ -129,14 +136,14 @@ class SpeculativeAttacker(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 1.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        attack_threshold = float(extras.get("attack_threshold", 0.02))
-        order_size = int(extras.get("order_size", 600))
+        attack_threshold = float(extras["attack_threshold"])
+        order_size = int(extras["order_size"])
 
         action, quantity = "hold", 0
         if deviation < -attack_threshold:
@@ -164,7 +171,7 @@ class SpeculativeAttacker(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 1.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -204,14 +211,14 @@ class SelfFulfillingTrader(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 1.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        contagion_threshold = float(extras.get("contagion_sensitivity", 0.01))
-        order_size = int(extras.get("order_size", 700))
+        contagion_threshold = float(extras["contagion_sensitivity"])
+        order_size = int(extras["order_size"])
 
         action, quantity = "hold", 0
         # Self-fulfilling: any negative deviation triggers selling
@@ -238,7 +245,7 @@ class SelfFulfillingTrader(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 1.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -278,14 +285,14 @@ class CentralBankDefender(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 1.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        defense_threshold = float(extras.get("defense_threshold", 0.05))
-        order_size = int(extras.get("order_size", 500))
+        defense_threshold = float(extras["defense_threshold"])
+        order_size = int(extras["order_size"])
 
         action, quantity = "hold", 0
         if deviation < -defense_threshold:
@@ -313,7 +320,7 @@ class CentralBankDefender(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 1.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -353,14 +360,14 @@ class FundamentalHedger(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 1.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
-        hedge_threshold = float(extras.get("hedge_ratio", 0.05))
-        order_size = int(extras.get("order_size", 400))
+        hedge_threshold = float(extras["hedge_ratio"])
+        order_size = int(extras["order_size"])
 
         action, quantity = "hold", 0
         if deviation < -hedge_threshold:
@@ -386,7 +393,7 @@ class FundamentalHedger(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 1.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -426,8 +433,8 @@ class NoiseTrader(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 1.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
@@ -458,7 +465,7 @@ class NoiseTrader(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 1.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity

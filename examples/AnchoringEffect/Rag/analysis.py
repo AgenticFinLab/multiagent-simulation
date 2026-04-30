@@ -65,7 +65,7 @@ def analyze_rag_knowledge_effect(
         total_rag_rounds = 0
 
         for payload in round_payloads.values():
-            rag_context = payload.get("rag_context", None)
+            rag_context = payload["rag_context"]
             if rag_context is None:
                 continue
             total_rag_rounds += 1
@@ -167,7 +167,7 @@ def create_visualizations_rag(
     rag_agent_ids = [k for k in rag_stats if k != "aggregate"]
     if rag_agent_ids:
         success_rates = [
-            1.0 - rag_stats[k].get("retrieval_failure_rate", 0.0) for k in rag_agent_ids
+            1.0 - rag_stats[k]["retrieval_failure_rate"] for k in rag_agent_ids
         ]
         x_pos = np.arange(len(rag_agent_ids))
         colors = ["green" if r >= 0.80 else "orange" for r in success_rates]
@@ -188,14 +188,10 @@ def create_visualizations_rag(
         sell_vols = []
         for agent_id in vol_agent_ids:
             total_buy = sum(
-                r.get("quantity", 0)
-                for r in agent_records[agent_id]
-                if r.get("action") == "buy"
+                r["quantity"] for r in agent_records[agent_id] if r["action"] == "buy"
             )
             total_sell = sum(
-                r.get("quantity", 0)
-                for r in agent_records[agent_id]
-                if r.get("action") == "sell"
+                r["quantity"] for r in agent_records[agent_id] if r["action"] == "sell"
             )
             buy_vols.append(total_buy)
             sell_vols.append(total_sell)
@@ -278,11 +274,11 @@ def main() -> None:
     with open(rag_stats_path, "w", encoding="utf-8") as fh:
         json.dump(rag_stats, fh, indent=2)
 
-    agg = rag_stats.get("aggregate", {})
+    agg = rag_stats["aggregate"]
     if agg:
         print(
             f"Mean RAG retrieval failure rate: "
-            f"{agg.get('mean_retrieval_failure_rate', 0):.1%}"
+            f"{agg['mean_retrieval_failure_rate']:.1%}"
         )
 
     return summary

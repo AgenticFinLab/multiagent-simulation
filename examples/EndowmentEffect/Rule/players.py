@@ -17,6 +17,7 @@ Agents:
 """
 
 import logging
+import os
 import random
 from typing import Any, Dict, List, Optional
 
@@ -33,10 +34,18 @@ class Market(GeneralPlayer):
     async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "price" not in self.state.custom_state:
             extras = self.config.extras
+            record_path = extras["record_path"]
+            base_path = os.path.join(record_path, self.config.identity)
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
             self.state.custom_state["price"] = float(extras["initial_price"])
             self.state.custom_state["fundamental"] = float(extras["fundamental_value"])
-            self.state.custom_state["history_buffer"] = HistoryBuffer(
-                folder="EndowmentEffect/Rule/Market", entry_limit=200
+            self.state.custom_state["price_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "price"),
+                entry_limit=custom_state_hot_limit,
+            )
+            self.state.custom_state["fundamental_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "fundamental"),
+                entry_limit=custom_state_hot_limit,
             )
         self.state.custom_state["round"] = observation.round
         orders: List[Dict] = []

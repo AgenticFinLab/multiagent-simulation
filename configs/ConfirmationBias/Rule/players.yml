@@ -65,6 +65,9 @@ belief_anchor:
       confirm_weight: 2.5         # Amplify confirming signals by 2.5×
       disconfirm_weight: 0.3      # Dampen disconfirming signals to 0.3×
       base_size: 30.0
+      confirmation_strength: 0.7
+      initial_belief: 1.0
+      order_size: 500
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -90,6 +93,8 @@ selective_scanner:
       search_bias: 0.7            # Amplify confirming signals by 1.7×
       ignore_contradiction: 0.6  # Dampen contradicting signals to 0.4×
       base_size: 25.0
+      order_size: 600
+      scan_threshold: 0.02
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -113,6 +118,8 @@ balanced_analyst:
       custom_state_hot_limit: 3
       trade_threshold: 0.03      # Trade when |deviation| > 3%
       base_size: 30.0
+      analysis_threshold: 0.05
+      order_size: 400
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -135,6 +142,7 @@ contrarian_trader:
       custom_state_hot_limit: 3
       contrarian_threshold: 0.10  # Fade when |deviation| > 10%
       base_size: 40.0
+      order_size: 500
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------

@@ -61,9 +61,7 @@ class RuleLLMInvestor(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["entry_price"] = extras.get(
-                "initial_price", extras.get("entry_price", 100.0)
-            )
+            self.state.custom_state["entry_price"] = extras["initial_price"]
 
         if observation.inbounds:
             for inb in observation.inbounds:
@@ -74,14 +72,14 @@ class RuleLLMInvestor(GeneralPlayer):
                     self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> Dict[str, Any]:
-        price = self.state.custom_state.get("price", 100.0)
-        fundamental = self.state.custom_state.get("fundamental", 100.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         round_num = self.state.custom_state["round"]
 
-        llm_cfg = self.config.extras.get("llm", {})
+        llm_cfg = self.config.extras["llm"]
         llm = LangChainAPIInference(
             lm_name=llm_cfg["lm_name"],
             generation_config=llm_cfg["generation_config"],
@@ -97,7 +95,8 @@ class RuleLLMInvestor(GeneralPlayer):
             portfolio_value=cash + position * price,
         )
 
-        decision: Dict[str, Any] = {"action": "hold", "quantity": 0}
+        decision = None
+        last_error = None
         for attempt in range(3):
             try:
                 output = llm.run(
@@ -105,16 +104,22 @@ class RuleLLMInvestor(GeneralPlayer):
                 )
                 decision = parse_llm_response_with_thinking(output.outputs[0].response)
                 break
-            except (ValueError, RuntimeError) as exc:
-                logger.debug(
-                    "[%s] LLM parse failed (attempt %d): %s",
-                    self.identity,
-                    attempt + 1,
-                    exc,
-                )
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
 
-        action = decision.get("action", "hold")
-        quantity = int(decision.get("quantity", 0))
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            )
+
+        action = decision["action"]
+        quantity = int(decision["quantity"])
 
         if action == "buy":
             max_qty = int(cash / price) if price > 0 else 0
@@ -137,7 +142,7 @@ class RuleLLMInvestor(GeneralPlayer):
             "action": action,
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
-            "reasoning": decision.get("reasoning", "")[:120],
+            "reasoning": decision["reasoning"][:120],
         }
         return {
             **order,
@@ -152,31 +157,31 @@ class RuleLLMInvestor(GeneralPlayer):
         )
 
 
-class LLMLossAverseInvestor(RuleLLMInvestor):
+class RuleLLMLossAverseInvestor(RuleLLMInvestor):
     """Hybrid: LossAverseInvestor rules + LLM reasoning. Theory: simulation-bases.md §4.1"""
 
     _system_prompt = RULELLM_LOSS_AVERSE_PROMPT
 
 
-class LLMBreakEvenTrader(RuleLLMInvestor):
+class RuleLLMBreakEvenTrader(RuleLLMInvestor):
     """Hybrid: BreakEvenTrader rules + LLM reasoning. Theory: simulation-bases.md §4.2"""
 
     _system_prompt = RULELLM_BREAK_EVEN_PROMPT
 
 
-class LLMRationalTrader(RuleLLMInvestor):
+class RuleLLMRationalTrader(RuleLLMInvestor):
     """Hybrid: RationalTrader rules + LLM reasoning. Theory: simulation-bases.md §4.3"""
 
     _system_prompt = RULELLM_RATIONAL_PROMPT
 
 
-class LLMMomentumTrader(RuleLLMInvestor):
+class RuleLLMMomentumTrader(RuleLLMInvestor):
     """Hybrid: MomentumTrader rules + LLM reasoning. Theory: simulation-bases.md §4.4"""
 
     _system_prompt = RULELLM_MOMENTUM_PROMPT
 
 
-class LLMMarketMaker(RuleLLMInvestor):
+class RuleLLMMarketMaker(RuleLLMInvestor):
     """Hybrid: MarketMaker rules + LLM reasoning. Theory: simulation-bases.md §4.5"""
 
     _system_prompt = RULELLM_MARKET_MAKER_PROMPT
@@ -185,9 +190,9 @@ class LLMMarketMaker(RuleLLMInvestor):
 __all__ = [
     "Market",
     "RuleLLMInvestor",
-    "LLMLossAverseInvestor",
-    "LLMBreakEvenTrader",
-    "LLMRationalTrader",
-    "LLMMomentumTrader",
-    "LLMMarketMaker",
+    "RuleLLMLossAverseInvestor",
+    "RuleLLMBreakEvenTrader",
+    "RuleLLMRationalTrader",
+    "RuleLLMMomentumTrader",
+    "RuleLLMMarketMaker",
 ]

@@ -10,8 +10,8 @@ connections:
     - lossaverseinvestor
     - breakeventrader
     - rationaltrader
-    - dispositiontrader
-    - noisetrader
+    - momentumtrader
+    - marketmaker
 
   lossaverseinvestor:
     - market
@@ -22,8 +22,8 @@ connections:
   rationaltrader:
     - market
 
-  dispositiontrader:
+  momentumtrader:
     - market
 
-  noisetrader:
+  marketmaker:
     - market

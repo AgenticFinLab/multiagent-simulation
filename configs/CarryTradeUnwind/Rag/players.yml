@@ -191,15 +191,15 @@ ragllm_funding_currency_buyer:
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# RAG Central Bank Intervener — FX stability mandate + RAG
-# Theory: BIS (2005)
+# RAG Hedged Carry Trader — FX stability mandate + RAG
+# Theory: Menkhoff et al. (2012)
 # -----------------------------------------------------------------------------
-ragllm_cb_intervener:
-  name: "RAG Central Bank Intervener"
-  class: "examples.CarryTradeUnwind.Rag.players:RagLLMCentralBankIntervener"
+ragllm_hedged_carry_trader:
+  name: "RAG Hedged Carry Trader"
+  class: "examples.CarryTradeUnwind.Rag.players:RagLLMHedgedCarryTrader"
   num_instances: 1
   config:
-    identity: "ragllm_cb_intervener"
+    identity: "ragllm_hedged_carry_trader"
     role: player
     steps_per_turn: 1
     group_tags:
