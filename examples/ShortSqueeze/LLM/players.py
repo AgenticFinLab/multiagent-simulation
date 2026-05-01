@@ -28,7 +28,7 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import parse_llm_response_with_thinking
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -273,9 +273,14 @@ class LLMInvestor(GeneralPlayer):
             except Exception:
                 pass
 
-        bid_price = float(decision.get("bid_price", market_data["price"]))
-        quantity = float(decision.get("quantity", 0))
-        is_short_cover = decision.get("is_short_cover", False)
+        bid_price = float(decision["bid_price"])
+        quantity = float(decision["quantity"])
+
+        # Guard: LLMs sometimes output bid_price=0 for hold actions.
+        # Use the current market price so recorded bids stay meaningful.
+        if bid_price <= 0:
+            bid_price = market_data["price"]
+        is_short_cover = decision["is_short_cover"]
 
         cash, position = (
             self.state.custom_state["cash"],
@@ -301,7 +306,7 @@ class LLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "is_short_cover": is_short_cover,
             "reasoning": decision["reasoning"][:100],
-            "analysis": decision.get("analysis", ""),
+            "analysis": decision["analysis"],
         }
         return {
             **order,

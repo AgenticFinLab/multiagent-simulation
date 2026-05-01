@@ -71,13 +71,13 @@ class Market(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 msg = inb.payload
-                if msg.get("type") == "order":
+                if msg["type"] == "order":
                     orders.append(
                         {
-                            "agent_id": msg.get("from"),
-                            "action": msg.get("action"),
-                            "quantity": msg.get("quantity"),
-                            "agent_type": msg.get("agent_type"),
+                            "agent_id": msg["from"],
+                            "action": msg["action"],
+                            "quantity": msg["quantity"],
+                            "agent_type": msg["agent_type"],
                         }
                     )
         return orders
@@ -171,28 +171,24 @@ class BaseInvestor(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["price"] = extras["initial_price"]
-            self.state.custom_state["fundamental"] = extras.get(
-                "fundamental_value", 100.0
-            )
+            self.state.custom_state["fundamental"] = extras["fundamental_value"]
             self.state.custom_state["deviation"] = 0.0
 
         if observation.inbounds:
             for inb in observation.inbounds:
                 market_data = inb.payload
-                self.state.custom_state["price"] = market_data.get("price", 100.0)
-                self.state.custom_state["fundamental"] = market_data.get(
-                    "fundamental", 100.0
-                )
-                self.state.custom_state["deviation"] = market_data.get("deviation", 0.0)
+                self.state.custom_state["price"] = market_data["price"]
+                self.state.custom_state["fundamental"] = market_data["fundamental"]
+                self.state.custom_state["deviation"] = market_data["deviation"]
 
     async def decide(self) -> Dict[str, Any]:
-        price = self.state.custom_state.get("price", 100.0)
-        fundamental = self.state.custom_state.get("fundamental", 100.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
 
         decision = self._make_decision(price, fundamental, deviation)
-        action = decision.get("action", "hold")
-        quantity = decision.get("quantity", 0)
+        action = decision["action"]
+        quantity = decision["quantity"]
 
         if action == "buy" and quantity > 0:
             cost = quantity * price

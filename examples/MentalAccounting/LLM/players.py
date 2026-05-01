@@ -76,7 +76,7 @@ class LLMInvestor(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload
-                if payload.get("type") == "market_update":
+                if payload["type"] == "market_update":
                     self.state.custom_state["price"] = payload["price"]
                     self.state.custom_state["fundamental"] = payload["fundamental"]
                     self.state.custom_state["deviation"] = payload["deviation"]
@@ -93,12 +93,12 @@ class LLMInvestor(GeneralPlayer):
 
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
-        price = self.state.custom_state.get("price", 0.0)
-        fundamental = self.state.custom_state.get("fundamental", 0.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        entry_price = self.state.custom_state.get("entry_price", 0.0)
+        entry_price = self.state.custom_state["entry_price"]
         strategy_name = self.__class__.__name__
 
         pnl = (price - entry_price) / entry_price * 100 if entry_price > 0 else 0.0
@@ -154,8 +154,8 @@ class LLMInvestor(GeneralPlayer):
                 "outbound_messages": [{"payload": order, "content_type": "order"}],
             }
 
-        action = decision.get("action", "hold")
-        quantity = int(decision.get("quantity", 0))
+        action = decision["action"]
+        quantity = int(decision["quantity"])
         quantity = max(0, quantity)
 
         # Enforce constraints

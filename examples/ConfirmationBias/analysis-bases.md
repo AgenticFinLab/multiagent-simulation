@@ -339,7 +339,7 @@ Expected metric ordering across variants (from most to least bias-consistent):
 |---------|--------------------------------------------------------|----------------------------------------------|
 | Rule    | `confirmationbias_rule_analysis.png`                   | `metrics.json`                               |
 | LLM     | `confirmationbias_llm_analysis.png` + `_actions.png`   | `summary.json`                               |
-| RuleLLM | `confirmationbias_rulellm_analysis.png`                | `summary.json` + `rule_adherence.json`       |
+| RuleLLM | `confirmationbias_rulellm_analysis.png`                | `summary.json`                               |
 | Rag     | `confirmationbias_rag_analysis.png` + `_retrieval.png` | `summary.json` + `rag_knowledge_effect.json` |
 
 ### Visualization Catalogue
@@ -378,6 +378,6 @@ for variant, data in comparison.items():
 
 Key cross-variant hypotheses:
 1. **Rule vs. LLM bias reproduction**: Rule should show higher bias_amplitude because mechanical belief compounding (confirmation_strength = 0.7) is perfectly deterministic; LLM BeliefAnchor may not perfectly replicate the compounding formula
-2. **RuleLLM adherence**: Target rule_adherence ≥ 80% for the deviation-based trigger (|deviation| > 0.02 → buy if belief > 0); verify LLM component does not override the belief state logic
+2. **RuleLLM rule-informed behavior**: Embedded rules serve as deeper investor characterization; compare RuleLLM vs LLM dynamics to measure the effect of explicit quantitative guidance on LLM decision-making
 3. **Rag correction enhancement**: Rag variant's BalancedAnalyst and ContrarianTrader with access to confirmation bias literature should produce higher correction_ratio; target: correction_ratio_rag > correction_ratio_rule + 0.1
 4. **Belief flip count ordering**: Rule should show fewest flips (deterministic belief compounding); LLM may show more flips (stochastic persona-level reasoning); Rag intermediate

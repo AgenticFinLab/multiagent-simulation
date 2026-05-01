@@ -59,14 +59,14 @@ class Market(GeneralPlayer):
     def _extract_orders(self, observation) -> list:
         orders = []
         for msg in observation.inbounds:
-            payload = msg.get("payload", msg)
-            if payload.get("type") == "order":
+            payload = msg["payload"]
+            if payload["type"] == "order":
                 orders.append(
                     {
-                        "agent_id": payload.get("from"),
-                        "action": payload.get("action"),
-                        "quantity": payload.get("quantity"),
-                        "agent_type": payload.get("agent_type"),
+                        "agent_id": payload["from"],
+                        "action": payload["action"],
+                        "quantity": payload["quantity"],
+                        "agent_type": payload["agent_type"],
                     }
                 )
         return orders
@@ -146,20 +146,16 @@ class PatternMatcher(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg.get("payload", msg)
-            if payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get("price")
-                self.state.custom_state["fundamental"] = payload.get("fundamental")
-                self.state.custom_state["deviation"] = payload.get("deviation")
+            payload = msg["payload"]
+            if payload["type"] == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        price = self.state.custom_state.get(
-            "price", self.config.extras["initial_price"]
-        )
-        fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras["fundamental_value"]
-        )
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         return self._make_decision(price, fundamental, deviation)
 
     def _make_decision(
@@ -185,8 +181,8 @@ class PatternMatcher(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
 
         order = {
             "type": "order",
@@ -224,20 +220,16 @@ class CategoryOvergeneralizer(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg.get("payload", msg)
-            if payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get("price")
-                self.state.custom_state["fundamental"] = payload.get("fundamental")
-                self.state.custom_state["deviation"] = payload.get("deviation")
+            payload = msg["payload"]
+            if payload["type"] == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        price = self.state.custom_state.get(
-            "price", self.config.extras["initial_price"]
-        )
-        fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras["fundamental_value"]
-        )
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         return self._make_decision(price, fundamental, deviation)
 
     def _make_decision(
@@ -263,8 +255,8 @@ class CategoryOvergeneralizer(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
 
         order = {
             "type": "order",
@@ -302,20 +294,16 @@ class BayesianUpdater(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg.get("payload", msg)
-            if payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get("price")
-                self.state.custom_state["fundamental"] = payload.get("fundamental")
-                self.state.custom_state["deviation"] = payload.get("deviation")
+            payload = msg["payload"]
+            if payload["type"] == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        price = self.state.custom_state.get(
-            "price", self.config.extras["initial_price"]
-        )
-        fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras["fundamental_value"]
-        )
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         return self._make_decision(price, fundamental, deviation)
 
     def _make_decision(
@@ -341,8 +329,8 @@ class BayesianUpdater(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
 
         order = {
             "type": "order",
@@ -380,20 +368,16 @@ class ContrarianStatistical(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg.get("payload", msg)
-            if payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get("price")
-                self.state.custom_state["fundamental"] = payload.get("fundamental")
-                self.state.custom_state["deviation"] = payload.get("deviation")
+            payload = msg["payload"]
+            if payload["type"] == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        price = self.state.custom_state.get(
-            "price", self.config.extras["initial_price"]
-        )
-        fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras["fundamental_value"]
-        )
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         return self._make_decision(price, fundamental, deviation)
 
     def _make_decision(
@@ -419,8 +403,8 @@ class ContrarianStatistical(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
 
         order = {
             "type": "order",
@@ -458,20 +442,16 @@ class NoiseTrader(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg.get("payload", msg)
-            if payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get("price")
-                self.state.custom_state["fundamental"] = payload.get("fundamental")
-                self.state.custom_state["deviation"] = payload.get("deviation")
+            payload = msg["payload"]
+            if payload["type"] == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        price = self.state.custom_state.get(
-            "price", self.config.extras["initial_price"]
-        )
-        fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras["fundamental_value"]
-        )
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         return self._make_decision(price, fundamental, deviation)
 
     def _make_decision(
@@ -495,8 +475,8 @@ class NoiseTrader(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
 
         order = {
             "type": "order",

@@ -73,7 +73,7 @@ def parse_llm_response_with_thinking(response_text: str) -> Dict[str, Any]:
         raise ValueError(f"Failed to parse decision JSON: {decision_json[:100]}")
 
     # Validate required fields
-    required_fields = ["bid_price", "quantity", "reasoning"]
+    required_fields = ["action", "bid_price", "quantity", "reasoning"]
     missing_or_null = [
         f for f in required_fields if f not in parsed or parsed[f] is None
     ]

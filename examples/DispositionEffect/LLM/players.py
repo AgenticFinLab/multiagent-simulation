@@ -38,6 +38,7 @@ from dotenv import load_dotenv
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+from masim.format.order import validate_order
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -337,6 +338,11 @@ Respond with JSON: {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantit
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
+
+        # Guard: LLMs sometimes output bid_price=0 for hold actions.
+        # Use the current market price so recorded bids stay meaningful.
+        if bid_price <= 0:
+            bid_price = market_data["price"]
         quantity = self._apply_constraints(bid_price, quantity)
 
         # Update purchase price if buying

@@ -121,7 +121,7 @@ class Market(GeneralPlayer):
                         "price": order["bid_price"],
                         "quantity": order["quantity"],
                         "strategy": order["strategy"],
-                        "provides_liquidity": order.get("provides_liquidity", False),
+                        "provides_liquidity": order["provides_liquidity"],
                     }
                 )
         self.state.custom_state["orders"] = orders

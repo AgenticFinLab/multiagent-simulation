@@ -35,7 +35,7 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import parse_llm_response_with_thinking
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -375,6 +375,11 @@ class LLMInvestor(GeneralPlayer):
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
 
+        # Guard: LLMs sometimes output bid_price=0 for hold actions.
+        # Use the current market price so recorded bids stay meaningful.
+        if bid_price <= 0:
+            bid_price = market_data["price"]
+
         quantity = self._apply_constraints(bid_price, quantity, market_data["price"])
 
         if quantity > 0:
@@ -399,7 +404,7 @@ class LLMInvestor(GeneralPlayer):
             "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": decision["reasoning"][:100],
-            "analysis": decision.get("analysis", ""),
+            "analysis": decision["analysis"],
             "cash": self.state.custom_state["cash"],
             "position": self.state.custom_state["position"],
         }

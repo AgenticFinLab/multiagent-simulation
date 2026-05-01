@@ -43,6 +43,7 @@ from dotenv import load_dotenv
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+from masim.format.order import validate_order
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -381,25 +382,25 @@ Respond with ONLY valid JSON:
                 f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             )
 
+        action = decision["action"]
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
+
+        # Guard: LLMs sometimes output bid_price=0 for hold actions.
+        # Use the current market price so recorded bids stay meaningful.
+        if bid_price <= 0:
+            bid_price = market_data["price"]
         quantity = self._apply_constraints(bid_price, quantity, market_data["price"])
 
         # Execute trade
-        if quantity > 0:
+        if action == "buy" and quantity > 0:
             cost = quantity * bid_price
             self.state.custom_state["cash"] -= cost
             self.state.custom_state["position"] += quantity
-        elif quantity < 0:
-            proceeds = abs(quantity) * bid_price
+        elif action == "sell" and quantity > 0:
+            proceeds = quantity * bid_price
             self.state.custom_state["cash"] += proceeds
-            if abs(quantity) <= self.state.custom_state["position"]:
-                self.state.custom_state["position"] += quantity
-            else:
-                sold_long = self.state.custom_state["position"]
-                short_qty = abs(quantity) - sold_long
-                self.state.custom_state["position"] = 0
-                self.state.custom_state["short_position"] += short_qty
+            self.state.custom_state["position"] -= quantity
 
         logger.debug(
             f"[{self.identity:20s}] R{round_num} ({strategy_name:15s}): "
@@ -409,6 +410,7 @@ Respond with ONLY valid JSON:
         )
 
         order = {
+            "action": action,
             "bid_price": bid_price,
             "quantity": quantity,
             "strategy": strategy_name,
@@ -418,6 +420,9 @@ Respond with ONLY valid JSON:
             "cash": self.state.custom_state["cash"],
             "position": self.state.custom_state["position"],
         }
+
+
+        validate_order(order)
 
         return {
             **order,

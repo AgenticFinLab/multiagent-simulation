@@ -7,7 +7,7 @@ from lmbase import InferInput, LangChainAPIInference
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import parse_llm_response_with_thinking
 
 from .prompts import (
     RULELLM_BAYESIAN_UPDATER_SYS,
@@ -54,20 +54,16 @@ class RuleLLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
-            payload = msg.get("payload", msg)
-            if payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get("price")
-                self.state.custom_state["fundamental"] = payload.get("fundamental")
-                self.state.custom_state["deviation"] = payload.get("deviation")
+            payload = msg["payload"]
+            if payload["type"] == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> Dict[str, Any]:
-        price = self.state.custom_state.get(
-            "price", self.config.extras["initial_price"]
-        )
-        fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras["fundamental_value"]
-        )
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         portfolio_value = cash + position * price
@@ -89,8 +85,8 @@ class RuleLLMInvestor(GeneralPlayer):
         except Exception:
             decision = {"action": "hold", "quantity": 0}
 
-        action = decision.get("action", "hold")
-        quantity = int(decision.get("quantity", 0))
+        action = decision["action"]
+        quantity = int(decision["quantity"])
         if action == "buy":
             max_qty = int(cash / price) if price > 0 else 0
             quantity = min(quantity, max_qty)
@@ -100,9 +96,9 @@ class RuleLLMInvestor(GeneralPlayer):
         return {"action": action, "quantity": quantity}
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0.0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity

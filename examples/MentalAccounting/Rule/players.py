@@ -74,13 +74,13 @@ class Market(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload
-                if payload.get("type") == "order":
+                if payload["type"] == "order":
                     orders.append(
                         {
                             "agent_id": inb.sender_id,
-                            "action": payload.get("action"),
-                            "quantity": payload.get("quantity", 0),
-                            "agent_type": payload.get("agent_type", ""),
+                            "action": payload["action"],
+                            "quantity": payload["quantity"],
+                            "agent_type": payload["agent_type"],
                         }
                     )
         self.state.custom_state["orders"] = orders
@@ -180,7 +180,7 @@ class BaseInvestor(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload
-                if payload.get("type") == "market_update":
+                if payload["type"] == "market_update":
                     self.state.custom_state["price"] = payload["price"]
                     self.state.custom_state["fundamental"] = payload["fundamental"]
                     self.state.custom_state["deviation"] = payload["deviation"]
@@ -192,13 +192,13 @@ class BaseInvestor(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def decide(self) -> Dict[str, Any]:
-        price = self.state.custom_state.get("price", 0.0)
-        fundamental = self.state.custom_state.get("fundamental", 0.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
 
         decision = self._make_decision(price, fundamental, deviation)
-        action = decision.get("action", "hold")
-        quantity = decision.get("quantity", 0)
+        action = decision["action"]
+        quantity = decision["quantity"]
 
         # Execute trade
         if action == "buy" and quantity > 0:
@@ -259,7 +259,7 @@ class MentalAccountant(BaseInvestor):
         loss_lambda = extras["loss_aversion_per_account"]
 
         per_account_position = position / num_accounts if num_accounts > 0 else position
-        entry_price = self.state.custom_state.get("entry_price", price)
+        entry_price = self.state.custom_state["entry_price"]
         pnl = (price - entry_price) / entry_price if entry_price > 0 else 0
 
         if pnl > 0.05:
@@ -289,7 +289,7 @@ class HouseMoneyTrader(BaseInvestor):
         gain_risk = extras["gain_risk_multiplier"]
         loss_risk = extras["loss_risk_multiplier"]
 
-        entry_price = self.state.custom_state.get("entry_price", price)
+        entry_price = self.state.custom_state["entry_price"]
         pnl = (price - entry_price) / entry_price if entry_price > 0 else 0
 
         risk_factor = gain_risk if pnl > 0 else loss_risk
@@ -347,7 +347,7 @@ class SunkCostHolder(BaseInvestor):
         extras = self.config.extras
         position = self.state.custom_state["position"]
 
-        entry_price = self.state.custom_state.get("entry_price", price)
+        entry_price = self.state.custom_state["entry_price"]
         pnl = (price - entry_price) / entry_price if entry_price > 0 else 0
 
         if pnl > 0.1:

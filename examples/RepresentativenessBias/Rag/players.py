@@ -7,7 +7,7 @@ from lmbase import InferInput, LangChainAPIInference
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import parse_llm_response_with_thinking
 
 from .prompts import (
     RAG_USER_TEMPLATE,
@@ -61,10 +61,7 @@ class RagLLMInvestor(GeneralPlayer):
     ) -> str:
         """Retrieve relevant context for current market state."""
         rag_cfg = self.config.extras["rag"]
-        context_template = rag_cfg.get(
-            "context_template",
-            "Base rate for price deviations of this magnitude: ~30% revert within 5 rounds.",
-        )
+        context_template = rag_cfg["context_template"]
         return context_template
 
     async def perceive(
@@ -74,20 +71,16 @@ class RagLLMInvestor(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             self._initialize_agent()
         for msg in observation.inbounds:
-            payload = msg.get("payload", msg)
-            if payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get("price")
-                self.state.custom_state["fundamental"] = payload.get("fundamental")
-                self.state.custom_state["deviation"] = payload.get("deviation")
+            payload = msg["payload"]
+            if payload["type"] == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> Dict[str, Any]:
-        price = self.state.custom_state.get(
-            "price", self.config.extras["initial_price"]
-        )
-        fundamental = self.state.custom_state.get(
-            "fundamental", self.config.extras["fundamental_value"]
-        )
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         portfolio_value = cash + position * price
@@ -111,8 +104,8 @@ class RagLLMInvestor(GeneralPlayer):
         except Exception:
             decision = {"action": "hold", "quantity": 0}
 
-        action = decision.get("action", "hold")
-        quantity = int(decision.get("quantity", 0))
+        action = decision["action"]
+        quantity = int(decision["quantity"])
         if action == "buy":
             max_qty = int(cash / price) if price > 0 else 0
             quantity = min(quantity, max_qty)
@@ -122,9 +115,9 @@ class RagLLMInvestor(GeneralPlayer):
         return {"action": action, "quantity": quantity}
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0.0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity

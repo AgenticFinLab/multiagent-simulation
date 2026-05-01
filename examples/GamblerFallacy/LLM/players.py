@@ -15,6 +15,7 @@ from masim.player.general import GeneralPlayer
 
 from examples.GamblerFallacy.Rule.players import Market
 from examples.llm_utils import parse_llm_response_with_thinking
+from examples.GamblerFallacy.LLM.prompts import LLM_USER_TEMPLATE
 
 logger = logging.getLogger("GamblerFallacy.LLM")
 
@@ -42,22 +43,16 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["price"] = extras["initial_price"]
-            self.state.custom_state["fundamental"] = extras.get(
-                "fundamental_value", 100.0
-            )
+            self.state.custom_state["fundamental"] = extras["fundamental_value"]
             self.state.custom_state["deviation"] = 0.0
             await self._initialize_agent()
 
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
-                self.state.custom_state["price"] = payload.get(
-                    "price", self.state.custom_state["price"]
-                )
-                self.state.custom_state["fundamental"] = payload.get(
-                    "fundamental", self.state.custom_state["fundamental"]
-                )
-                self.state.custom_state["deviation"] = payload.get("deviation", 0.0)
+            if isinstance(payload, dict) and payload["type"] == "market_update":
+                self.state.custom_state["price"] = payload["price"]
+                self.state.custom_state["fundamental"] = payload["fundamental"]
+                self.state.custom_state["deviation"] = payload["deviation"]
 
     async def _initialize_agent(self) -> None:
         """Initialize LangChainAPIInference client from config."""
@@ -86,7 +81,6 @@ class LLMInvestor(GeneralPlayer):
 
     async def decide(self) -> dict:
         """Call LLM with market state; parse decision."""
-        from examples.GamblerFallacy.LLM.prompts import LLM_USER_TEMPLATE
 
         system_msg = load_prompt(self._system_prompt_path)
         price = self.state.custom_state["price"]

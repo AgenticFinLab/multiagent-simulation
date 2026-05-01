@@ -67,7 +67,7 @@ class LLMInvestor(GeneralPlayer):
 
     def __getstate__(self) -> Dict:
         state = self.__dict__.copy()
-        if "custom_state" in state.get("state", {}).__dict__:
+        if "custom_state" in state["state"].__dict__:
             state["state"].custom_state.pop("llm_client", None)
         return state
 

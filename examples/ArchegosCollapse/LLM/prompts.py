@@ -156,6 +156,6 @@ Based on your trading strategy and current market conditions, what action do you
 Respond with your reasoning in <analysis>...</analysis> tags, then your decision in
 <decision>...</decision> tags.
 The decision must be valid JSON:
-{"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+{{"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """

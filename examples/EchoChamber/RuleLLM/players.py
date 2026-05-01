@@ -147,7 +147,7 @@ class OpinionEnvironment(GeneralPlayer):
                         "intensity": action["intensity"],
                         "agent_role": action["agent_role"],
                         "opinion": action["opinion"],
-                        "reasoning": action.get("reasoning", ""),
+                        "reasoning": action["reasoning"],
                     }
                 )
         self.state.custom_state["actions"] = actions
@@ -250,7 +250,7 @@ class OpinionEnvironment(GeneralPlayer):
                     a["action_type"],
                     a["intensity"],
                 )
-                if a.get("reasoning"):
+                if a["reasoning"]:
                     logger.debug("      -> %s...", a["reasoning"][:80])
 
         env_data = {
@@ -408,7 +408,6 @@ Respond with ONLY valid JSON:
         The shared ``parse_llm_response_with_thinking`` validates for financial
         trading fields, so we do our own field validation here.
         """
-        import re as _re
 
         analysis = ""
         decision_json = None
@@ -445,7 +444,6 @@ Respond with ONLY valid JSON:
                 f"No decision JSON found in response: {response_text[:100]}"
             )
 
-        import json as _json
 
         try:
             parsed = _json.loads(decision_json)

@@ -48,16 +48,16 @@ class Market(GeneralPlayer):
         orders = []
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "order":
+            if isinstance(payload, dict) and payload["type"] == "order":
                 orders.append(payload)
 
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         total_buy = sum(
-            o.get("quantity", 0) for o in orders if o.get("action") == "buy"
+            o["quantity"] for o in orders if o["action"] == "buy"
         )
         total_sell = sum(
-            o.get("quantity", 0) for o in orders if o.get("action") == "sell"
+            o["quantity"] for o in orders if o["action"] == "sell"
         )
         net_demand = total_buy - total_sell
 
@@ -127,16 +127,16 @@ class CascadeFollower(GeneralPlayer):
             self.state.custom_state["cascade_trigger"] = extras["cascade_trigger"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self):
-        price = self.state.custom_state.get("price", 0)
+        price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        deviation = self.state.custom_state["deviation"]
         social_weight = self.state.custom_state["social_weight"]
         cascade_trigger = self.state.custom_state["cascade_trigger"]
 
@@ -158,9 +158,9 @@ class CascadeFollower(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload):
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -196,16 +196,16 @@ class ReputationHerder(GeneralPlayer):
             self.state.custom_state["reputation_concern"] = extras["reputation_concern"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self):
-        price = self.state.custom_state.get("price", 0)
+        price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        deviation = self.state.custom_state["deviation"]
         reputation_concern = self.state.custom_state["reputation_concern"]
 
         if abs(deviation) > 0.02:
@@ -221,9 +221,9 @@ class ReputationHerder(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload):
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -259,16 +259,16 @@ class IndependentThinker(GeneralPlayer):
             self.state.custom_state["signal_precision"] = extras["signal_precision"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self):
-        price = self.state.custom_state.get("price", 0)
+        price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        deviation = self.state.custom_state["deviation"]
         signal_precision = self.state.custom_state["signal_precision"]
 
         if abs(deviation) > 0.03:
@@ -284,9 +284,9 @@ class IndependentThinker(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload):
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -324,16 +324,16 @@ class Contrarian(GeneralPlayer):
             ]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self):
-        price = self.state.custom_state.get("price", 0)
+        price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        deviation = self.state.custom_state["deviation"]
         contrarian_threshold = self.state.custom_state["contrarian_threshold"]
 
         if abs(deviation) > contrarian_threshold * 0.05:
@@ -349,9 +349,9 @@ class Contrarian(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload):
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -387,13 +387,13 @@ class NoiseTrader(GeneralPlayer):
             self.state.custom_state["trade_probability"] = extras["trade_probability"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self):
-        price = self.state.custom_state.get("price", 0)
+        price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         prob = self.state.custom_state["trade_probability"]
@@ -410,9 +410,9 @@ class NoiseTrader(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload):
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity

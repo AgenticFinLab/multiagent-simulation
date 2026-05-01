@@ -46,7 +46,7 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import parse_llm_response_with_thinking
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -122,7 +122,7 @@ class Market(GeneralPlayer):
                         "price": order["bid_price"],
                         "quantity": order["quantity"],
                         "strategy": order["strategy"],
-                        "provides_liquidity": order.get("provides_liquidity", False),
+                        "provides_liquidity": order["provides_liquidity"],
                     }
                 )
         self.state.custom_state["orders"] = orders
@@ -286,7 +286,7 @@ class RuleLLMInvestor(GeneralPlayer):
             f"Round {round_num}\n"
             f"Price: ${market_data['price']:.2f}  prev=${market_data['prev_price']:.2f}"
             f"  ret={market_data['return_pct']:+.2f}%\n"
-            f"Liquidity: {market_data.get('liquidity', 1):.1f}  fundamental=${market_data['fundamental']:.2f}\n"
+            f"Liquidity: {market_data['liquidity']:.1f}  fundamental=${market_data['fundamental']:.2f}\n"
             f"Volume: {market_data['volume']:.2f}  net_demand={market_data['net_demand']:+.2f}\n"
             f"Recent prices: {recent_prices}\n"
             f"Portfolio: cash={cash:.2f}  position={position:.4f}"
@@ -392,8 +392,8 @@ class RuleLLMInvestor(GeneralPlayer):
             "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
-            "analysis": decision.get("analysis", ""),
-            "provides_liquidity": decision.get("provides_liquidity", False),
+            "analysis": decision["analysis"],
+            "provides_liquidity": decision["provides_liquidity"],
         }
 
         return {

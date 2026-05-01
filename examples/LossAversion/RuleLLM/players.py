@@ -66,7 +66,7 @@ class RuleLLMInvestor(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload if hasattr(inb, "payload") else inb
-                if isinstance(payload, dict) and payload.get("type") == "market_update":
+                if isinstance(payload, dict) and payload["type"] == "market_update":
                     self.state.custom_state["price"] = payload["price"]
                     self.state.custom_state["fundamental"] = payload["fundamental"]
                     self.state.custom_state["deviation"] = payload["deviation"]

@@ -2,12 +2,12 @@
 
 ## Overview
 
-| Item                            | Description                                                                                                                                                          |
-|---------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Implements                      | `../analysis-bases.md`                                                                                                                                               |
-| Analysis Script                 | `analysis.py` in this directory                                                                                                                                      |
-| Output Location                 | `EXPERIMENT/AnchoringEffect/RuleLLM/analysis/`                                                                                                                       |
-| Variant-Specific Considerations | Key additional dimension: rule-adherence analysis — measuring how often LLM follows DECISION RULES vs. departs; target ≥80% directional alignment with Rule baseline |
+| Item                            | Description                                                                                                                                           |
+|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Implements                      | `../analysis-bases.md`                                                                                                                                |
+| Analysis Script                 | `analysis.py` in this directory                                                                                                                       |
+| Output Location                 | `EXPERIMENT/AnchoringEffect/RuleLLM/analysis/`                                                                                                        |
+| Variant-Specific Considerations | Embedded DECISION RULES serve as deeper investor characterization — the LLM uses them as guidance alongside its persona to make intelligent decisions |
 
 ---
 
@@ -96,7 +96,7 @@ Implementation in analysis.py:
 Variant-Specific Interpretation:
 - The primary question: do embedded DECISION RULES successfully reproduce Rule-variant price dynamics?
 - Success: RuleLLM price path visually overlaps Rule price path; MAD within 2 percentage points.
-- Failure mode: price path drifts significantly from Rule → investigate rule-adherence rate and override events.
+- Failure mode: price path drifts significantly from Rule → review embedded DECISION RULES clarity and LLM reasoning traces.
 
 Expected Output Sample:
 ```

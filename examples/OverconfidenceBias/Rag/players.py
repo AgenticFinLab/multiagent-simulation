@@ -55,7 +55,7 @@ class RagLLMInvestor(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload
-                if payload.get("type") == "market_update":
+                if payload["type"] == "market_update":
                     self.state.custom_state["price"] = payload["price"]
                     self.state.custom_state["fundamental"] = payload["fundamental"]
                     self.state.custom_state["deviation"] = payload["deviation"]
@@ -97,9 +97,9 @@ class RagLLMInvestor(GeneralPlayer):
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
-                "global_uri": rag_cfg.get("docs_dir", "examples/document-sources"),
+                "global_uri": rag_cfg["docs_dir"],
                 "rag": {
-                    "output_position": rag_cfg.get("shared_rag_index_dir", "rag_index")
+                    "output_position": rag_cfg["shared_rag_index_dir"]
                 },
             }
 
@@ -127,12 +127,12 @@ class RagLLMInvestor(GeneralPlayer):
         os.makedirs(local_uri, exist_ok=True)
         os.makedirs(local_rag_dir, exist_ok=True)
 
-        embed_type = resolved_rag.get("embed_type", "litellm")
-        embed_model = resolved_rag.get("embed_model", "openai/hunyuan-embedding")
-        embed_api_base = resolved_rag.get("embed_api_base", "")
-        embed_api_key = resolved_rag.get("embed_api_key", "")
-        chunk_size = int(resolved_rag.get("chunk_size", 512))
-        chunk_overlap = int(resolved_rag.get("chunk_overlap", 64))
+        embed_type = resolved_rag["embed_type"]
+        embed_model = resolved_rag["embed_model"]
+        embed_api_base = resolved_rag["embed_api_base"]
+        embed_api_key = resolved_rag["embed_api_key"]
+        chunk_size = int(resolved_rag["chunk_size"])
+        chunk_overlap = int(resolved_rag["chunk_overlap"])
 
         if not embed_api_key:
             if embed_type == "litellm":
@@ -200,9 +200,9 @@ class RagLLMInvestor(GeneralPlayer):
 
     def _build_prompt(self, rag_context: str = "") -> str:
         round_num = self.state.custom_state["round"]
-        price = self.state.custom_state.get("price", 0.0)
-        fundamental = self.state.custom_state.get("fundamental", 0.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         return RAG_USER_TEMPLATE.format(
@@ -218,15 +218,15 @@ class RagLLMInvestor(GeneralPlayer):
 
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
-        price = self.state.custom_state.get("price", 0.0)
+        price = self.state.custom_state["price"]
         strategy_name = self.__class__.__name__
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
 
-        rag_store: KnowledgeStore = self.state.custom_state.get("rag_store")
-        rag_cfg: Dict[str, Any] = self.state.custom_state.get("rag_cfg", {})
+        rag_store: KnowledgeStore = self.state.custom_state["rag_store"]
+        rag_cfg: Dict[str, Any] = self.state.custom_state["rag_cfg"]
         rag_context = ""
         if rag_store and rag_store.is_built():
-            top_k = rag_cfg.get("top_k", 3)
+            top_k = rag_cfg["top_k"]
             query = KnowledgeQuery(
                 text=f"overconfidence trading strategy price={price:.2f}",
                 top_k=top_k,
@@ -278,8 +278,8 @@ class RagLLMInvestor(GeneralPlayer):
                 "outbound_messages": [{"payload": order, "content_type": "order"}],
             }
 
-        action = decision.get("action", "hold")
-        quantity = int(decision.get("quantity", 0))
+        action = decision["action"]
+        quantity = int(decision["quantity"])
 
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]

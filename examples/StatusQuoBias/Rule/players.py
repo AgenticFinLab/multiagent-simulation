@@ -67,9 +67,9 @@ class Market(GeneralPlayer):
                 orders.append(
                     {
                         "agent_id": inb.sender_id,
-                        "action": order.get("action", "hold"),
-                        "quantity": order.get("quantity", 0),
-                        "agent_type": order.get("agent_type", ""),
+                        "action": order["action"],
+                        "quantity": order["quantity"],
+                        "agent_type": order["agent_type"],
                     }
                 )
         self.state.custom_state["orders"] = orders
@@ -79,7 +79,7 @@ class Market(GeneralPlayer):
         round_num = self.state.custom_state["round"]
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        orders = self.state.custom_state.get("orders", [])
+        orders = self.state.custom_state["orders"]
 
         buy_orders = [o for o in orders if o["action"] == "buy"]
         sell_orders = [o for o in orders if o["action"] == "sell"]
@@ -160,24 +160,22 @@ class BaseInvestor(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 market_data = inb.payload
-                self.state.custom_state["price"] = market_data.get("price", 100.0)
-                self.state.custom_state["fundamental"] = market_data.get(
-                    "fundamental", 100.0
-                )
-                self.state.custom_state["deviation"] = market_data.get("deviation", 0.0)
+                self.state.custom_state["price"] = market_data["price"]
+                self.state.custom_state["fundamental"] = market_data["fundamental"]
+                self.state.custom_state["deviation"] = market_data["deviation"]
 
     def _make_decision(self) -> Dict[str, Any]:
         return {"action": "hold", "quantity": 0}
 
     async def decide(self) -> Dict[str, Any]:
-        price = self.state.custom_state.get("price", 100.0)
+        price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         strategy_name = self.__class__.__name__
 
         decision = self._make_decision()
-        action = decision.get("action", "hold")
-        quantity = decision.get("quantity", 0)
+        action = decision["action"]
+        quantity = decision["quantity"]
 
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
@@ -232,8 +230,8 @@ class InertialHolder(BaseInvestor):
     """
 
     def _make_decision(self) -> Dict[str, Any]:
-        price = self.state.custom_state.get("price", 100.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
 
@@ -262,8 +260,8 @@ class DefaultFollower(BaseInvestor):
     """
 
     def _make_decision(self) -> Dict[str, Any]:
-        price = self.state.custom_state.get("price", 100.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
 
@@ -292,8 +290,8 @@ class ActiveRebalancer(BaseInvestor):
     """
 
     def _make_decision(self) -> Dict[str, Any]:
-        price = self.state.custom_state.get("price", 100.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
 
@@ -322,7 +320,7 @@ class MomentumTrader(BaseInvestor):
     """
 
     def _make_decision(self) -> Dict[str, Any]:
-        price = self.state.custom_state.get("price", 100.0)
+        price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
 
@@ -350,7 +348,7 @@ class NoiseTrader(BaseInvestor):
     """
 
     def _make_decision(self) -> Dict[str, Any]:
-        price = self.state.custom_state.get("price", 100.0)
+        price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
 

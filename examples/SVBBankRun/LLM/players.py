@@ -19,7 +19,7 @@ from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import parse_llm_response_with_thinking
 from .prompts import (
     LLM_DEPOSITOR_SYS,
     LLM_SOCIAL_MEDIA_INFLUENCER_SYS,
@@ -73,17 +73,15 @@ class LLMInvestor(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 market_data = inb.payload
-                self.state.custom_state["price"] = market_data.get("price", 100.0)
-                self.state.custom_state["fundamental"] = market_data.get(
-                    "fundamental", 100.0
-                )
-                self.state.custom_state["deviation"] = market_data.get("deviation", 0.0)
+                self.state.custom_state["price"] = market_data["price"]
+                self.state.custom_state["fundamental"] = market_data["fundamental"]
+                self.state.custom_state["deviation"] = market_data["deviation"]
 
     def _build_prompt(self) -> str:
         """Build user prompt from current market state."""
-        price = self.state.custom_state.get("price", 100.0)
-        fundamental = self.state.custom_state.get("fundamental", 100.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         round_num = self.state.custom_state["round"]
@@ -101,7 +99,7 @@ class LLMInvestor(GeneralPlayer):
 
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
-        price = self.state.custom_state.get("price", 100.0)
+        price = self.state.custom_state["price"]
         strategy_name = self.__class__.__name__
         llm_client = self._get_llm()
 
@@ -127,8 +125,8 @@ class LLMInvestor(GeneralPlayer):
                     )
                     decision = {"action": "hold", "quantity": 0}
 
-        action = decision.get("action", "hold")
-        quantity = int(decision.get("quantity", 0))
+        action = decision["action"]
+        quantity = int(decision["quantity"])
 
         # Validate and constrain
         valid_actions = ["buy", "sell", "hold"]
@@ -168,7 +166,7 @@ class LLMInvestor(GeneralPlayer):
             "action": action,
             "quantity": quantity,
             "agent_type": strategy_name,
-            "reasoning": decision.get("reasoning", "")[:120],
+            "reasoning": decision["reasoning"][:120],
         }
         return {
             **order,

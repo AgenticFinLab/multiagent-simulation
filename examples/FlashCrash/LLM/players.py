@@ -39,6 +39,7 @@ from dotenv import load_dotenv
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+from masim.format.order import validate_order
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -311,6 +312,11 @@ class LLMInvestor(GeneralPlayer):
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
+
+        # Guard: LLMs sometimes output bid_price=0 for hold actions.
+        # Use the current market price so recorded bids stay meaningful.
+        if bid_price <= 0:
+            bid_price = market_data["price"]
         cash, position = (
             self.state.custom_state["cash"],
             self.state.custom_state["position"],

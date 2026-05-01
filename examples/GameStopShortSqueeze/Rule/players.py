@@ -48,7 +48,7 @@ class Market(GeneralPlayer):
         orders = []
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "order":
+            if isinstance(payload, dict) and payload["type"] == "order":
                 orders.append(payload)
 
         price = self.state.custom_state["price"]
@@ -58,10 +58,10 @@ class Market(GeneralPlayer):
         noise_std = self.state.custom_state["noise_std"]
 
         total_buy = sum(
-            o.get("quantity", 0) for o in orders if o.get("action") == "buy"
+            o["quantity"] for o in orders if o["action"] == "buy"
         )
         total_sell = sum(
-            o.get("quantity", 0) for o in orders if o.get("action") == "sell"
+            o["quantity"] for o in orders if o["action"] == "sell"
         )
         net_demand = total_buy - total_sell
 
@@ -129,13 +129,13 @@ class RetailCoordinated(GeneralPlayer):
             self.state.custom_state["buy_pressure"] = extras["buy_pressure"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self):
-        price = self.state.custom_state.get("price", 0)
+        price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
         buy_pressure = self.state.custom_state["buy_pressure"]
         if cash > price * 50 and price > 0:
@@ -145,9 +145,9 @@ class RetailCoordinated(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload):
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -180,14 +180,14 @@ class ShortSellerHF(GeneralPlayer):
             self.state.custom_state["cover_threshold"] = extras["cover_threshold"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self):
         position = self.state.custom_state["position"]
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        deviation = self.state.custom_state["deviation"]
         cover_threshold = self.state.custom_state["cover_threshold"]
         if position < 0 and deviation > cover_threshold:
             cover_qty = min(abs(position), int(abs(position) * 0.5))
@@ -196,9 +196,9 @@ class ShortSellerHF(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload):
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -231,15 +231,15 @@ class MarketMakerGamma(GeneralPlayer):
             self.state.custom_state["gamma_exposure"] = extras["gamma_exposure"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self):
-        price = self.state.custom_state.get("price", 0)
+        price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        deviation = self.state.custom_state["deviation"]
         gamma = self.state.custom_state["gamma_exposure"]
         hedge_qty = int(abs(deviation) * gamma * 5000)
         if deviation > 0 and hedge_qty > 0 and price > 0:
@@ -249,9 +249,9 @@ class MarketMakerGamma(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload):
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -284,14 +284,14 @@ class InstitutionalValue(GeneralPlayer):
             self.state.custom_state["sell_threshold"] = extras["sell_threshold"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self):
         position = self.state.custom_state["position"]
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        deviation = self.state.custom_state["deviation"]
         sell_threshold = self.state.custom_state["sell_threshold"]
         if deviation > sell_threshold:
             sell_qty = min(1000, max(position, 0))
@@ -300,9 +300,9 @@ class InstitutionalValue(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload):
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
@@ -335,15 +335,15 @@ class MomentumRetail(GeneralPlayer):
             self.state.custom_state["fomo_threshold"] = extras["fomo_threshold"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self):
-        price = self.state.custom_state.get("price", 0)
+        price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        deviation = self.state.custom_state["deviation"]
         fomo_threshold = self.state.custom_state["fomo_threshold"]
         if deviation > fomo_threshold and price > 0:
             buy_qty = min(50, int(cash / price))
@@ -352,9 +352,9 @@ class MomentumRetail(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload):
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity

@@ -2,13 +2,7 @@
 """AnchoringEffect RuleLLM Simulation Analysis
 
 Implements analysis-bases.md for the RuleLLM variant.
-Reuses all 8 metric functions from Rule/analysis.py and adds
-Rule-Adherence Analysis (analysis-bases.md §3 Dimension 2).
-
-RuleLLM-variant note (analysis-bases.md §4):
-    Rule override events occur when LLM deviates from formula direction.
-    Target: >= 80% directional alignment between LLM and Rule decisions.
-    Quantity deviation ratio should cluster in [0.8, 1.2].
+Reuses all 8 metric functions from Rule/analysis.py.
 
 Usage:
     python examples/AnchoringEffect/RuleLLM/analysis.py \\
@@ -16,7 +10,6 @@ Usage:
 """
 
 import argparse
-import json
 import os
 from typing import Any, Dict, List
 
@@ -39,87 +32,21 @@ from examples.AnchoringEffect.Rule.analysis import (
 )
 
 
-def analyze_rule_adherence(
-    investor_payloads: Dict[str, Dict[int, Dict[str, Any]]],
-) -> Dict[str, Any]:
-    """Compute rule-adherence rate for RuleLLM agents — analysis-bases.md §3 Dimension 2.
-
-    Measures the fraction of rounds where the LLM's action direction matches
-    what the embedded rule would prescribe (as recorded in the decision trace).
-
-    A round is adherent if:
-        - Both Rule and LLM output the same action (buy/sell/hold)
-
-    Target: adherence_rate >= 0.80 (analysis-bases.md §3)
-
-    Args:
-        investor_payloads: Dict mapping agent_id to {round_num: payload_dict}.
-
-    Returns:
-        Dict with adherence stats per agent and aggregate.
-    """
-    adherence: Dict[str, Any] = {}
-
-    for agent_id, round_payloads in investor_payloads.items():
-        rule_actions = []
-        llm_actions = []
-
-        for payload in round_payloads.values():
-            rule_action = payload["rule_action"]
-            llm_action = payload["action"]
-            if rule_action is not None and llm_action is not None:
-                rule_actions.append(rule_action)
-                llm_actions.append(llm_action)
-
-        if not rule_actions:
-            adherence[agent_id] = {
-                "adherence_rate": None,
-                "note": "no rule_action field",
-            }
-            continue
-
-        matching = sum(r == l for r, l in zip(rule_actions, llm_actions))
-        total = len(rule_actions)
-        adherence[agent_id] = {
-            "adherence_rate": float(matching / total) if total > 0 else 0.0,
-            "matching_rounds": matching,
-            "total_rounds": total,
-            "meets_target": (matching / total >= 0.80) if total > 0 else False,
-        }
-
-    if adherence:
-        rates = [
-            v["adherence_rate"]
-            for v in adherence.values()
-            if v["adherence_rate"] is not None
-        ]
-        if not rates:
-            raise ValueError("No adherence rates collected - all agents failed")
-        adherence["aggregate"] = {
-            "mean_adherence_rate": float(np.mean(rates)),
-            "min_adherence_rate": float(np.min(rates)),
-            "target_80pct_met": all(r >= 0.80 for r in rates),
-        }
-
-    return adherence
-
-
 def create_visualizations_rulellm(
     prices: List[float],
     fundamentals: List[float],
     agent_records: Dict[str, List[Dict[str, Any]]],
-    adherence: Dict[str, Any],
     output_path: str,
 ) -> None:
     """Generate RuleLLM-variant analysis visualizations — analysis-bases.md §7.
 
-    Produces 6 plots including a rule-adherence panel unique to RuleLLM.
+    Produces 5 plots: price dynamics, deviation, volatility, trading volume,
+    and anchoring persistence.
 
     Args:
         prices: Market price time series.
         fundamentals: Fundamental value time series.
         agent_records: Per-agent decision records.
-        adherence: Rule-adherence analysis results.
         output_path: Directory to write PNG files.
     """
     if not prices:
@@ -171,23 +98,7 @@ def create_visualizations_rulellm(
         axes[0, 2].set_ylabel("Std Dev of Returns (%)")
         axes[0, 2].grid(True, alpha=0.3)
 
-    # Plot 4: Rule-Adherence Rates (RuleLLM-specific)
-    agent_ids = [k for k in adherence if k != "aggregate"]
-    rates = [adherence[k]["adherence_rate"] or 0.0 for k in agent_ids]
-    if agent_ids:
-        x_pos = np.arange(len(agent_ids))
-        colors = ["green" if r >= 0.80 else "red" for r in rates]
-        axes[1, 0].bar(x_pos, rates, color=colors, alpha=0.7)
-        axes[1, 0].axhline(y=0.80, color="black", linestyle="--", label="80% target")
-        axes[1, 0].set_xticks(x_pos)
-        axes[1, 0].set_xticklabels(agent_ids, rotation=30, ha="right", fontsize=8)
-        axes[1, 0].set_title("Rule-Adherence Rate by Agent")
-        axes[1, 0].set_ylabel("Adherence Rate")
-        axes[1, 0].set_ylim(0, 1.05)
-        axes[1, 0].legend()
-        axes[1, 0].grid(True, alpha=0.3)
-
-    # Plot 5: Agent-Type Trading Volume
+    # Plot 4: Agent-Type Trading Volume
     if agent_records:
         vol_agent_ids = list(agent_records.keys())
         buy_vols = []
@@ -203,36 +114,36 @@ def create_visualizations_rulellm(
             sell_vols.append(total_sell)
 
         x_pos = np.arange(len(vol_agent_ids))
-        axes[1, 1].bar(
+        axes[1, 0].bar(
             x_pos - 0.2, buy_vols, 0.4, label="Buy", color="green", alpha=0.7
         )
-        axes[1, 1].bar(
+        axes[1, 0].bar(
             x_pos + 0.2, sell_vols, 0.4, label="Sell", color="red", alpha=0.7
         )
-        axes[1, 1].set_xticks(x_pos)
-        axes[1, 1].set_xticklabels(vol_agent_ids, rotation=30, ha="right", fontsize=8)
-        axes[1, 1].set_title("Agent-Type Trading Volume")
-        axes[1, 1].set_ylabel("Total Quantity")
-        axes[1, 1].legend()
-        axes[1, 1].grid(True, alpha=0.3)
+        axes[1, 0].set_xticks(x_pos)
+        axes[1, 0].set_xticklabels(vol_agent_ids, rotation=30, ha="right", fontsize=8)
+        axes[1, 0].set_title("Agent-Type Trading Volume")
+        axes[1, 0].set_ylabel("Total Quantity")
+        axes[1, 0].legend()
+        axes[1, 0].grid(True, alpha=0.3)
 
-    # Plot 6: Absolute Deviation — anchoring persistence
+    # Plot 5: Absolute Deviation — anchoring persistence
     abs_deviation = np.abs(deviation)
-    axes[1, 2].plot(rounds, abs_deviation, color="darkorange", label="|Deviation|")
+    axes[1, 1].plot(rounds, abs_deviation, color="darkorange", label="|Deviation|")
     if len(abs_deviation) > 0:
         half_target = abs_deviation[0] / 2.0
-        axes[1, 2].axhline(
+        axes[1, 1].axhline(
             y=half_target,
             color="grey",
             linestyle=":",
             alpha=0.7,
             label="Half-life target",
         )
-    axes[1, 2].set_title("Anchoring Persistence (|Deviation| Decay)")
-    axes[1, 2].set_xlabel("Round")
-    axes[1, 2].set_ylabel("|Deviation| (%)")
-    axes[1, 2].legend()
-    axes[1, 2].grid(True, alpha=0.3)
+    axes[1, 1].set_title("Anchoring Persistence (|Deviation| Decay)")
+    axes[1, 1].set_xlabel("Round")
+    axes[1, 1].set_ylabel("|Deviation| (%)")
+    axes[1, 1].legend()
+    axes[1, 1].grid(True, alpha=0.3)
 
     plt.tight_layout()
     plt.savefig(
@@ -247,8 +158,6 @@ def main() -> None:
     """Run full AnchoringEffect RuleLLM analysis pipeline.
 
     Reuses all metrics from Rule/analysis.py via analyze_anchoring().
-    Adds Rule-Adherence Analysis (analysis-bases.md §3 Dimension 2).
-    Rule-adherence target: >= 80% directional alignment (analysis-bases.md §3).
     """
     parser = argparse.ArgumentParser(
         description="Analyze AnchoringEffect RuleLLM simulation results"
@@ -270,20 +179,7 @@ def main() -> None:
     results = load_results(config)
     data = _load_data(results)
 
-    # Core analysis via Rule/analysis.py
     summary = analyze_anchoring(data, config, output_dir)
-
-    # RuleLLM-specific: rule-adherence analysis
-    adherence = analyze_rule_adherence(data["investor_payloads"])
-    summary["rule_adherence"] = adherence
-
-    adherence_path = os.path.join(output_dir, "rule_adherence.json")
-    with open(adherence_path, "w", encoding="utf-8") as fh:
-        json.dump(adherence, fh, indent=2)
-
-    agg = adherence["aggregate"]
-    if agg:
-        print(f"Mean rule-adherence rate: {agg['mean_adherence_rate']:.1%}")
 
     return summary
 

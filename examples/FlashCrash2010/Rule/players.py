@@ -49,7 +49,6 @@ class Market(GeneralPlayer):
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
-        import os
 
         round_num = observation.round
         self.state.custom_state["round"] = round_num
@@ -81,7 +80,6 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
-        import os
 
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
@@ -101,7 +99,7 @@ class Market(GeneralPlayer):
         net_flow = total_buy - total_sell
         volume = total_buy + total_sell
 
-        hft_orders = [o for o in orders if o.get("agent_type") == "hft"]
+        hft_orders = [o for o in orders if o["agent_type"] == "hft"]
         hft_participation = len(hft_orders) / max(len(orders), 1)
 
         price_hist = list(self.state.custom_state["price_history"])
@@ -203,7 +201,6 @@ class HFTMarketMaker(GeneralPlayer):
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
-        import os
 
         round_num = observation.round
         self.state.custom_state["round"] = round_num
@@ -317,7 +314,6 @@ class MomentumChaser(GeneralPlayer):
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
-        import os
 
         round_num = observation.round
         self.state.custom_state["round"] = round_num
@@ -427,7 +423,6 @@ class FundamentalTrader(GeneralPlayer):
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
-        import os
 
         round_num = observation.round
         self.state.custom_state["round"] = round_num
@@ -529,7 +524,6 @@ class StopLossTrader(GeneralPlayer):
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
-        import os
 
         round_num = observation.round
         self.state.custom_state["round"] = round_num
@@ -626,7 +620,6 @@ class NoiseTrader(GeneralPlayer):
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
-        import os
 
         round_num = observation.round
         self.state.custom_state["round"] = round_num

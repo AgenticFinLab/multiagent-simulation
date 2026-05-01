@@ -13,6 +13,15 @@ Output format required for all agents:
     JSON fields: action ("buy"|"sell"|"hold"), bid_price (float), quantity (float), reasoning (string)
 """
 
+from masim.format.base_prompts import (
+    ANALYSIS_DECISION_TAG,
+    RAG_APPLY_RULES_WITH_KNOWLEDGE,
+)
+from masim.format.order_prompts import (
+    DECISION_FORMAT_INSTRUCTION,
+    DECISION_FORMAT_INSTRUCTION_TPL,
+)
+
 from examples.AnchoringEffect.RuleLLM.prompts import (
     RULELLM_ANCHORED_TRADER_SYS,
     RULELLM_HISTORICAL_ANCHOR_SYS,
@@ -29,25 +38,22 @@ RAG_RATIONAL_UPDATER_SYS = RULELLM_RATIONAL_UPDATER_SYS
 RAG_MOMENTUM_TRADER_SYS = RULELLM_MOMENTUM_TRADER_SYS
 RAG_NOISE_TRADER_SYS = RULELLM_NOISE_TRADER_SYS
 
-RAG_USER_TEMPLATE = """Current Market State (Round {round}):
-- Current Price: ${price:.2f}
-- Previous Price: ${prev_price:.2f}
-- Fundamental Value: ${fundamental:.2f}
-- Price Change: {price_change:+.2%}
-- Price Deviation from Fundamental: {deviation:+.2%}
-- Your Cash: ${cash:.2f}
-- Your Position: {position:.2f} shares
-- Portfolio Value: ${portfolio_value:.2f}
-
-Relevant Domain Knowledge:
-{rag_context}
-
-Apply your DECISION RULES to this market state, incorporating the domain knowledge above.
-Show your step-by-step calculations in the analysis section, then provide your decision.
-
-Respond with your thinking in <analysis>...</analysis> tags followed by your decision in
-<decision>...</decision> tags.
-The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float, numeric value),
-quantity (float, positive numeric value), and reasoning (string).
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
-"""
+RAG_USER_TEMPLATE = (
+    "Current Market State (Round {round}):\n"
+    "- Current Price: ${price:.2f}\n"
+    "- Previous Price: ${prev_price:.2f}\n"
+    "- Fundamental Value: ${fundamental:.2f}\n"
+    "- Price Change: {price_change:+.2%}\n"
+    "- Price Deviation from Fundamental: {deviation:+.2%}\n"
+    "- Your Cash: ${cash:.2f}\n"
+    "- Your Position: {position:.2f} shares\n"
+    "- Portfolio Value: ${portfolio_value:.2f}\n\n"
+    "Relevant Domain Knowledge:\n"
+    "{rag_context}\n\n"
+    + RAG_APPLY_RULES_WITH_KNOWLEDGE
+    + "\n\n"
+    + ANALYSIS_DECISION_TAG
+    + "\n"
+    + DECISION_FORMAT_INSTRUCTION_TPL
+    + "\n"
+)

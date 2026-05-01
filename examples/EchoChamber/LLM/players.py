@@ -122,7 +122,7 @@ class OpinionEnvironment(GeneralPlayer):
                         "intensity": action["intensity"],
                         "agent_role": action["agent_role"],
                         "opinion": action["opinion"],
-                        "reasoning": action.get("reasoning", ""),
+                        "reasoning": action["reasoning"],
                     }
                 )
         self.state.custom_state["actions"] = actions
@@ -208,7 +208,7 @@ class OpinionEnvironment(GeneralPlayer):
                     a["action_type"],
                     a["intensity"],
                 )
-                if a.get("reasoning"):
+                if a["reasoning"]:
                     logger.debug("      -> %s...", a["reasoning"][:80])
 
         env_data = {

@@ -268,8 +268,8 @@ class RagLLMInvestor(GeneralPlayer):
         fundamental = market_data["fundamental"]
         deviation = market_data["deviation"]
         portfolio_value = cash + position * price
-        rag_store: Optional[KnowledgeStore] = self.state.custom_state.get("rag_store")
-        rag_cfg: Dict[str, Any] = self.state.custom_state.get("rag_cfg") or {}
+        rag_store: Optional[KnowledgeStore] = self.state.custom_state["rag_store"]
+        rag_cfg: Dict[str, Any] = self.state.custom_state["rag_cfg"] or {}
         rag_context = ""
         if rag_store and rag_store.is_built():
             top_k = rag_cfg["top_k"] if "top_k" in rag_cfg else 3

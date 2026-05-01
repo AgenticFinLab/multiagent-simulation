@@ -57,8 +57,8 @@ class Market(GeneralPlayer):
         extras = self.config.extras
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        buy_volume = sum(o["quantity"] for o in orders if o.get("action") == "buy")
-        sell_volume = sum(o["quantity"] for o in orders if o.get("action") == "sell")
+        buy_volume = sum(o["quantity"] for o in orders if o["action"] == "buy")
+        sell_volume = sum(o["quantity"] for o in orders if o["action"] == "sell")
         net_demand = buy_volume - sell_volume
         price_impact = float(extras["price_impact"])
         mean_reversion = float(extras["mean_reversion"])

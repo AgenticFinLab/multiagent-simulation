@@ -66,7 +66,7 @@ class RagLLMInvestor(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload
-                if payload.get("type") == "market_update":
+                if payload["type"] == "market_update":
                     self.state.custom_state["price"] = payload["price"]
                     self.state.custom_state["fundamental"] = payload["fundamental"]
                     self.state.custom_state["deviation"] = payload["deviation"]
@@ -115,15 +115,13 @@ class RagLLMInvestor(GeneralPlayer):
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
-                "global_uri": rag_cfg.get("docs_dir", "examples/document-sources"),
+                "global_uri": rag_cfg["docs_dir"],
                 "preprocessing": {
                     "parser": "mineru",
-                    "output_position": rag_cfg.get(
-                        "mineru_output_dir", "MinerU_processed"
-                    ),
+                    "output_position": rag_cfg["mineru_output_dir"],
                 },
                 "rag": {
-                    "output_position": rag_cfg.get("shared_rag_index_dir", "rag_index"),
+                    "output_position": rag_cfg["shared_rag_index_dir"],
                 },
             }
 
@@ -152,12 +150,12 @@ class RagLLMInvestor(GeneralPlayer):
         os.makedirs(local_uri, exist_ok=True)
         os.makedirs(local_rag_dir, exist_ok=True)
 
-        embed_type = resolved_rag.get("embed_type", "litellm")
-        embed_model = resolved_rag.get("embed_model", "openai/hunyuan-embedding")
-        embed_api_base = resolved_rag.get("embed_api_base", "")
-        embed_api_key = resolved_rag.get("embed_api_key", "")
-        chunk_size = int(resolved_rag.get("chunk_size", 512))
-        chunk_overlap = int(resolved_rag.get("chunk_overlap", 64))
+        embed_type = resolved_rag["embed_type"]
+        embed_model = resolved_rag["embed_model"]
+        embed_api_base = resolved_rag["embed_api_base"]
+        embed_api_key = resolved_rag["embed_api_key"]
+        chunk_size = int(resolved_rag["chunk_size"])
+        chunk_overlap = int(resolved_rag["chunk_overlap"])
 
         if not embed_api_key:
             if embed_type == "litellm":
@@ -190,7 +188,7 @@ class RagLLMInvestor(GeneralPlayer):
                         "[%s] Failed to load local index (%s)", self.identity, exc
                     )
 
-        shared_rag_dirs = resolved_rag.get("shared_rag_index_dirs", [])
+        shared_rag_dirs = resolved_rag["shared_rag_index_dirs"]
         if not shared_rag_dirs and os.path.isdir(shared_rag_dir):
             shared_rag_dirs = [shared_rag_dir]
 
@@ -265,29 +263,27 @@ class RagLLMInvestor(GeneralPlayer):
                 )
             if "rag_cfg" in custom and "rag_store" not in custom:
                 rag_cfg = custom["rag_cfg"]
-                local_rag_dir = rag_cfg.get("local_index_dir", "")
+                local_rag_dir = rag_cfg["local_index_dir"]
                 if not local_rag_dir:
-                    local_workspace_dir = rag_cfg.get("local_workspace_dir", "")
+                    local_workspace_dir = rag_cfg["local_workspace_dir"]
                     if local_workspace_dir:
                         local_rag_dir = os.path.join(local_workspace_dir, "rag_index")
                 if local_rag_dir:
-                    embed_type = rag_cfg.get("embed_type", "litellm")
-                    embed_api_key = rag_cfg.get("embed_api_key", "")
+                    embed_type = rag_cfg["embed_type"]
+                    embed_api_key = rag_cfg["embed_api_key"]
                     if not embed_api_key:
                         if embed_type == "litellm":
                             embed_api_key = os.getenv("HUNYUAN_API_KEY", "")
                         elif embed_type == "openai":
                             embed_api_key = os.getenv("ARK_API_KEY", "")
                     rag_store = KnowledgeStore(
-                        embed_model_name=rag_cfg.get(
-                            "embed_model", "openai/hunyuan-embedding"
-                        ),
+                        embed_model_name=rag_cfg["embed_model"],
                         embed_api_key=embed_api_key,
-                        embed_api_base=rag_cfg.get("embed_api_base", ""),
+                        embed_api_base=rag_cfg["embed_api_base"],
                         embed_type=embed_type,
                         persist_dir=local_rag_dir,
-                        chunk_size=int(rag_cfg.get("chunk_size", 512)),
-                        chunk_overlap=int(rag_cfg.get("chunk_overlap", 64)),
+                        chunk_size=int(rag_cfg["chunk_size"]),
+                        chunk_overlap=int(rag_cfg["chunk_overlap"]),
                     )
                     if os.path.isdir(local_rag_dir):
                         try:
@@ -298,21 +294,21 @@ class RagLLMInvestor(GeneralPlayer):
 
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
-        price = self.state.custom_state.get("price", 0.0)
-        fundamental = self.state.custom_state.get("fundamental", 0.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        entry_price = self.state.custom_state.get("entry_price", 0.0)
+        entry_price = self.state.custom_state["entry_price"]
         strategy_name = self.__class__.__name__
 
         pnl = (price - entry_price) / entry_price * 100 if entry_price > 0 else 0.0
 
-        rag_store: KnowledgeStore = self.state.custom_state.get("rag_store")
-        rag_cfg: Dict[str, Any] = self.state.custom_state.get("rag_cfg", {})
+        rag_store: KnowledgeStore = self.state.custom_state["rag_store"]
+        rag_cfg: Dict[str, Any] = self.state.custom_state["rag_cfg"]
         rag_context = ""
         if rag_store and rag_store.is_built():
-            top_k = rag_cfg.get("top_k", 3)
+            top_k = rag_cfg["top_k"]
             query = KnowledgeQuery(
                 text=(
                     f"mental accounting trading decision when: "
@@ -364,8 +360,8 @@ class RagLLMInvestor(GeneralPlayer):
                     attempt + 1,
                 )
 
-        action = decision.get("action", "hold")
-        quantity = int(decision.get("quantity", 0))
+        action = decision["action"]
+        quantity = int(decision["quantity"])
         quantity = max(0, quantity)
 
         if action == "buy" and quantity > 0:

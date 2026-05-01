@@ -541,6 +541,41 @@ All system prompts (LLM, RuleLLM, Rag variants) must instruct the LLM to produce
 </decision>
 ```
 
+### §7.14 No Field Derivation from LLM Output
+
+The `decide()` method in LLM/RuleLLM/Rag variants MUST read all fields (`action`, `bid_price`, `quantity`, `reasoning`) directly from the LLM response via `decision["key"]`. NEVER derive or infer a missing field from another field (e.g., deriving `action` from the sign of `quantity`). If any field is missing, it must fail-fast via `KeyError`.
+
+**WRONG** — deriving action from quantity sign and normalizing:
+```python
+if quantity > 0:
+    action = "buy"
+elif quantity < 0:
+    action = "sell"
+else:
+    action = "hold"
+quantity = abs(quantity)
+```
+
+**CORRECT** — reading action directly and branching on action value:
+```python
+action = decision["action"]
+# Constraint logic branches on action
+if action == "buy":
+    # apply buy constraints
+elif action == "sell":
+    # apply sell constraints
+
+# Execution logic branches on action
+if action == "buy" and quantity > 0:
+    # execute buy trade
+elif action == "sell" and quantity > 0:
+    # execute sell trade
+```
+
+**Why**: Deriving fields silently masks missing fields and introduces incorrect values. The principle is that `decide()` should be a pure function that derives outputs from inputs without inferring missing data.
+
+**Note**: Rule variants are exempt from this rule since they compute quantity algorithmically (no LLM output), so signed-quantity branching is legitimate internal computation.
+
 - Use `<analysis>` not `<think>` — `<think>` is a deprecated legacy tag (parser accepts it as fallback only)
 - The `<decision>` block must contain valid JSON with: `action`, `bid_price`, `quantity`, `reasoning`
 - `bid_price` and `quantity` must be **numeric literals** — not expressions, not strings, not formulas

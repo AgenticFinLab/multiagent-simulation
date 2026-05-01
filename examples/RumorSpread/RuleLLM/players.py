@@ -25,7 +25,7 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import parse_llm_response_with_thinking
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -161,8 +161,8 @@ class RuleLLMSocialAgent(GeneralPlayer):
                 ],
             }
 
-        action_type = decision.get("action_type", "ignore")
-        intensity = float(decision.get("intensity", 0.0))
+        action_type = decision["action_type"]
+        intensity = float(decision["intensity"])
         intensity = max(0.0, min(1.0, intensity))
 
         my_belief = self.state.custom_state["my_belief"]
@@ -183,8 +183,8 @@ class RuleLLMSocialAgent(GeneralPlayer):
             "intensity": intensity,
             "agent_role": strategy_name,
             "agent_id": self.identity,
-            "reasoning": decision.get("reasoning", "")[:120],
-            "analysis": decision.get("analysis", ""),
+            "reasoning": decision["reasoning"][:120],
+            "analysis": decision["analysis"],
         }
 
         return {

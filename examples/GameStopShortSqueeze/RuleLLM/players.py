@@ -18,6 +18,7 @@ from masim.player.general import GeneralPlayer
 
 from examples.GameStopShortSqueeze.Rule.players import Market  # noqa: F401
 from examples.llm_utils import parse_llm_response_with_thinking
+from examples.GameStopShortSqueeze.RuleLLM.prompts import RULELLM_USER_TEMPLATE
 
 logger = logging.getLogger("GameStopShortSqueeze.RuleLLM")
 
@@ -40,7 +41,7 @@ class RuleLLMInvestor(GeneralPlayer):
             await self._initialize_agent()
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -66,7 +67,7 @@ class RuleLLMInvestor(GeneralPlayer):
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        params = self.__dict__.get("_llm_params", {})
+        params = self.__dict__["_llm_params"]
         if params:
             self._llm_client = LangChainAPIInference(
                 lm_name=params["lm_name"],
@@ -74,7 +75,6 @@ class RuleLLMInvestor(GeneralPlayer):
             )
 
     async def decide(self):
-        from examples.GameStopShortSqueeze.RuleLLM.prompts import RULELLM_USER_TEMPLATE
 
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]

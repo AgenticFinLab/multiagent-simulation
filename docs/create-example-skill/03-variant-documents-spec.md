@@ -164,7 +164,7 @@ Every system prompt has:
 |-------------|------------------------------|------------------------------------------|
 | [ClassName] | [Formula]                    | [How it is phrased in the prompt]        |
 
-**Adherence target**: LLM directional alignment ≥ 80% (measured by `analyze_rule_adherence()`).
+**Adherence target**: N/A — the embedded rules serve as deeper investor characterization (knowledge, habits, decision-making framework), not as executable mandates. The LLM uses them as guidance alongside its persona.
 ```
 
 **For Rag variant**:
@@ -354,7 +354,7 @@ and why (based on sim-bases §9 and this variant's design choices).]
 | Analysis Script                 | `analysis.py` in this directory                                                                                                                   |
 | Output Location                 | `EXPERIMENT/{SimulationName}/{Variant}/analysis/`                                                                                                 |
 | Imports From                    | [Rule: "authoritative" / LLM/RuleLLM/Rag: "imports `load_simulation_data`, `calculate_metrics`, `create_visualizations` from `Rule/analysis.py`"] |
-| Variant-Specific Functions      | [None / `analyze_rule_adherence()` / `analyze_rag_knowledge_effect()`]                                                                            |
+| Variant-Specific Functions      | [None / `analyze_rag_knowledge_effect()`]                                                                                                         |
 | Variant-Specific Considerations | [Key differences that affect how to interpret results for this variant]                                                                           |
 ```
 
@@ -377,7 +377,7 @@ For EACH metric from `analysis-bases.md §2`:
 - **Variant-specific notes**: [Any differences in how this metric behaves for this variant.
   Examples:
   - "LLM variant shows higher variance due to stochastic LLM decisions"
-  - "RuleLLM variant: also reported per-agent in `analyze_rule_adherence()` output"
+  - "RuleLLM variant: same core metrics as Rule; embedded rules deepen investor characterization"
   - "Rag variant: retrieval success rate from `analyze_rag_knowledge_effect()` is an additional metric"]
 - **Expected range for this variant**: [Min, Max based on calibration — may differ from analysis-bases §6 range]
 ```
@@ -426,7 +426,7 @@ Document phenomena that are **unique to this variant** and not visible in others
 **By variant type**:
 - **Rule**: Exact formula-driven thresholds; deterministic phase transitions; no randomness beyond ε(t)
 - **LLM**: Reasoning variability across runs; emergent caution after observed price drops; narrative framing effects; inconsistent threshold adherence
-- **RuleLLM**: Rule override events (rounds where LLM departs from formula recommendation); `analyze_rule_adherence()` output shows adherence rate per agent
+- **RuleLLM**: Embedded rules as deeper investor characterization; comparison of LLM reasoning quality with and without explicit quantitative guidance
 - **Rag**: Effect of knowledge retrieval on decisions; `analyze_rag_knowledge_effect()` output; comparison of decisions with vs. without retrieved context
 
 ---

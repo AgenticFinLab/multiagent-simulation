@@ -117,8 +117,8 @@ LLM variant:
   □ analyze_action_distribution(agent_records) implemented
 
 RuleLLM variant:
-  □ analyze_rule_adherence(agent_records) implemented
-  □ Returns adherence_rate per agent; meets_target (≥0.80) per agent
+  □ analysis.py reuses core metrics from Rule/analysis.py
+  □ No additional variant-specific analysis function required
 
 Rag variant:
   □ _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)" defined

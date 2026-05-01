@@ -20,6 +20,7 @@ from lmbase.inference.base import InferInput
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
+from masim.format.order import validate_order
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -139,17 +140,18 @@ class RuleLLMInvestor(GeneralPlayer):
                 f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             )
 
+        action = decision["action"]
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
 
-        if quantity > 0:
+        if action == "buy":
             max_affordable = cash / bid_price if bid_price > 0 else 0
             quantity = min(quantity, max_affordable)
             self.state.custom_state["cash"] -= quantity * bid_price
             self.state.custom_state["position"] += quantity
-        elif quantity < 0:
+        elif action == "sell":
             quantity = max(-position, quantity)
-            self.state.custom_state["cash"] += abs(quantity) * bid_price
+            self.state.custom_state["cash"] += quantity * bid_price
             self.state.custom_state["position"] += quantity
 
         logger.info(
@@ -157,7 +159,9 @@ class RuleLLMInvestor(GeneralPlayer):
         )
 
         order = {
+            "action": action,
             "bid_price": bid_price,
+            "action": action,
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
@@ -165,6 +169,7 @@ class RuleLLMInvestor(GeneralPlayer):
             "analysis": decision["analysis"],
         }
 
+        validate_order(order)
         return {
             **order,
             "outbound_messages": [{"payload": order, "content_type": "investor_bid"}],

@@ -26,6 +26,7 @@ from examples.llm_utils import parse_llm_response_with_thinking
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
+from masim.format.order import validate_order
 from examples.FlashCrash2010.Rule.players import Market  # noqa: F401
 
 logger = logging.getLogger("FlashCrash2010.RuleLLM")
@@ -160,20 +161,21 @@ class RuleLLMInvestor(GeneralPlayer):
                 f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
             )
 
+        action = decision["action"]
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
 
-        if quantity > 0:
+        if action == "buy":
             max_buy = cash / bid_price if bid_price > 0 else 0
             quantity = min(quantity, max_buy)
-        elif quantity < 0:
+        elif action == "sell":
             quantity = max(quantity, -position)
 
-        if quantity > 0:
+        if action == "buy":
             self.state.custom_state["cash"] -= quantity * bid_price
             self.state.custom_state["position"] += quantity
-        elif quantity < 0:
-            self.state.custom_state["cash"] += abs(quantity) * bid_price
+        elif action == "sell":
+            self.state.custom_state["cash"] += quantity * bid_price
             self.state.custom_state["position"] += quantity
 
         strategy_name = self.__class__.__name__
@@ -187,7 +189,9 @@ class RuleLLMInvestor(GeneralPlayer):
         )
 
         order = {
+            "action": action,
             "bid_price": bid_price,
+            "action": action,
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
@@ -195,6 +199,7 @@ class RuleLLMInvestor(GeneralPlayer):
             "analysis": str(decision["analysis"]),
             "provides_liquidity": bool(decision["provides_liquidity"]),
         }
+        validate_order(order)
         return {
             **order,
             "outbound_messages": [{"payload": order, "content_type": "investor_order"}],

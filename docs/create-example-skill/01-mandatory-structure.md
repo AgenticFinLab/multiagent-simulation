@@ -36,7 +36,7 @@ examples/{SimulationName}/
 │   ├── players.py                 # Market (copy from Rule) + hybrid LLM investor classes
 │   ├── prompts.py                 # == PERSONA == + == DECISION RULES == dual-section prompts
 │   ├── run_{name}_rulellm.py      # Simulation entry point
-│   ├── analysis.py                # Imports from Rule/analysis.py, adds analyze_rule_adherence()
+│   ├── analysis.py                # Imports from Rule/analysis.py
 │   ├── explain.md                 # How RuleLLM variant implements simulation-bases.md
 │   └── analysis.md                # How RuleLLM variant implements analysis-bases.md
 │
@@ -130,9 +130,9 @@ See `docs/create-example-skill/00-overview.md` Principle #6 for the full policy.
 ### RuleLLM Variant
 - **`== PERSONA ==` and `== DECISION RULES ==` are mandatory labeled sections** in every system prompt.
 - **DECISION RULES must reproduce the exact formulas** from the Rule variant, expressed step-by-step in plain text.
-- **LLM follows the rule sign (buy/sell/hold) strictly**, with at most ±20% quantity adjustment.
+- The embedded rules serve as **deeper investor characterization** — they define the investor's knowledge, habits, and decision-making framework. The LLM uses these rules as guidance alongside its persona to make intelligent decisions.
 - **If Rule parameters change, the embedded prompt rules must be updated.**
-- **Validation**: LLM decisions align directionally with Rule-variant decisions in ≥80% of rounds.
+- **Validation**: Phenomenon still emerges with LLM-driven decisions informed by embedded rules.
 
 ### Rag Variant
 - **Knowledge retrieval is per-agent** (each agent has its own `KnowledgeStore`, not shared).
@@ -155,14 +155,14 @@ Rule/analysis.py
         │ imports from
         │
 LLM/analysis.py
-RuleLLM/analysis.py    # adds analyze_rule_adherence()
+RuleLLM/analysis.py
 Rag/analysis.py        # adds analyze_rag_knowledge_effect() + _RAG_FALLBACK constant
 ```
 
 - `Rule/analysis.py` is the single authoritative source for `load_simulation_data`, `calculate_metrics`, `create_visualizations`.
 - All other variants import these three functions from `Rule/analysis.py` — they do not re-implement them.
 - LLM variant adds action distribution analysis.
-- RuleLLM variant adds `analyze_rule_adherence()` — target ≥80% directional alignment.
+- RuleLLM variant reuses core metrics from Rule — no additional variant-specific analysis function.
 - Rag variant adds `analyze_rag_knowledge_effect()` and defines `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"`.
 
 ---

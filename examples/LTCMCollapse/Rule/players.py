@@ -48,11 +48,11 @@ class Market(GeneralPlayer):
         orders = []
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "order":
+            if isinstance(payload, dict) and payload["type"] == "order":
                 orders.append(
                     {
-                        "action": payload.get("action"),
-                        "quantity": payload.get("quantity", 0),
+                        "action": payload["action"],
+                        "quantity": payload["quantity"],
                     }
                 )
         price = self.state.custom_state["price"]
@@ -117,15 +117,15 @@ class ConvergenceArbitrageur(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        price = self.state.custom_state.get("price", 0)
-        fundamental = self.state.custom_state.get("fundamental", 0)
-        deviation = self.state.custom_state.get("deviation", 0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
@@ -153,9 +153,9 @@ class ConvergenceArbitrageur(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -189,14 +189,14 @@ class LeverageTrader(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        price = self.state.custom_state.get("price", 0)
-        deviation = self.state.custom_state.get("deviation", 0)
+        price = self.state.custom_state["price"]
+        deviation = self.state.custom_state["deviation"]
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
@@ -217,9 +217,9 @@ class LeverageTrader(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -253,13 +253,13 @@ class RiskManager(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        deviation = self.state.custom_state.get("deviation", 0)
+        deviation = self.state.custom_state["deviation"]
         extras = self.config.extras
         position = self.state.custom_state["position"]
         var_limit = extras["var_limit"]
@@ -272,9 +272,9 @@ class RiskManager(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -308,18 +308,18 @@ class LiquidityProvider(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        deviation = self.state.custom_state.get("deviation", 0)
+        deviation = self.state.custom_state["deviation"]
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         inventory_limit = extras["inventory_limit"]
-        price = self.state.custom_state.get("price", 0)
+        price = self.state.custom_state["price"]
         if abs(deviation) > 0.05:
             return {"action": "hold", "quantity": 0}
         if abs(position) < inventory_limit:
@@ -333,9 +333,9 @@ class LiquidityProvider(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -369,13 +369,13 @@ class CentralBank(GeneralPlayer):
             self.state.custom_state["position"] = 0
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
 
     async def decide(self) -> dict:
-        deviation = self.state.custom_state.get("deviation", 0)
+        deviation = self.state.custom_state["deviation"]
         extras = self.config.extras
         intervention_threshold = extras["intervention_threshold"]
         rescue_prob = extras["rescue_probability"]
@@ -384,9 +384,9 @@ class CentralBank(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload.get("action", "hold")
-        quantity = decision_payload.get("quantity", 0)
-        price = self.state.custom_state.get("price", 0)
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity

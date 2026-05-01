@@ -45,7 +45,7 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import parse_llm_response_with_thinking
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -121,7 +121,7 @@ class Market(GeneralPlayer):
                         "price": order["bid_price"],
                         "quantity": order["quantity"],
                         "strategy": order["strategy"],
-                        "provides_liquidity": order.get("provides_liquidity", False),
+                        "provides_liquidity": order["provides_liquidity"],
                     }
                 )
         self.state.custom_state["orders"] = orders
@@ -415,8 +415,8 @@ Respond with ONLY valid JSON:
             "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
-            "analysis": decision.get("analysis", ""),
-            "provides_liquidity": decision.get("provides_liquidity", False),
+            "analysis": decision["analysis"],
+            "provides_liquidity": decision["provides_liquidity"],
         }
 
         return {

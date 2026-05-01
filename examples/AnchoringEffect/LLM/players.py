@@ -26,6 +26,7 @@ from lmbase.inference.base import InferInput
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
+from masim.format.order import validate_order
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -160,31 +161,45 @@ class LLMInvestor(GeneralPlayer):
                 f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             )
 
+        action = decision["action"]
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
 
-        if quantity > 0:
+        # Guard: LLMs sometimes output bid_price=0 for hold actions.
+        # Use the current market price so recorded bids stay meaningful.
+        if bid_price <= 0:
+            bid_price = market_data["price"]
+
+        if action == "buy":
             max_affordable = cash / bid_price if bid_price > 0 else 0
             quantity = min(quantity, max_affordable)
             self.state.custom_state["cash"] -= quantity * bid_price
             self.state.custom_state["position"] += quantity
-        elif quantity < 0:
-            quantity = max(-position, quantity)
-            self.state.custom_state["cash"] += abs(quantity) * bid_price
-            self.state.custom_state["position"] += quantity
+        elif action == "sell":
+            quantity = min(quantity, position)
+            self.state.custom_state["cash"] += quantity * bid_price
+            self.state.custom_state["position"] -= quantity
 
         logger.info(
-            "[%s] R%d (%s): Q=%+.2f", self.identity, round_num, strategy_name, quantity
+            "[%s] R%d (%s %s): Q=%.2f",
+            self.identity,
+            round_num,
+            strategy_name,
+            action,
+            quantity,
         )
 
         order = {
-            "bid_price": bid_price,
+            "action": action,
             "quantity": quantity,
+            "bid_price": bid_price,
             "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": decision["reasoning"][:100],
             "analysis": decision["analysis"],
         }
+
+        validate_order(order)
 
         return {
             **order,

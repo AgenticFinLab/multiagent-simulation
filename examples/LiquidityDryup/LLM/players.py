@@ -241,6 +241,11 @@ class LLMInvestor(GeneralPlayer):
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
+
+        # Guard: LLMs sometimes output bid_price=0 for hold actions.
+        # Use the current market price so recorded bids stay meaningful.
+        if bid_price <= 0:
+            bid_price = market_data["price"]
         provides_liquidity = float(decision["provides_liquidity"])
 
         cash = self.state.custom_state["cash"]

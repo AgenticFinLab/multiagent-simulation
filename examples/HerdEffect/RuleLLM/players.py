@@ -106,8 +106,8 @@ class Market(GeneralPlayer):
                         "price": order["bid_price"],
                         "quantity": order["quantity"],
                         "strategy": order["strategy"],
-                        "cash": order.get("cash", 0),
-                        "position": order.get("position", 0),
+                        "cash": order["cash"],
+                        "position": order["position"],
                     }
                 )
         self.state.custom_state["orders"] = orders
@@ -248,7 +248,7 @@ class BaseLLMInvestor(GeneralPlayer):
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        market_data = self.state.custom_state.get("market_data")
+        market_data = self.state.custom_state["market_data"]
 
         strategy_name = self.__class__.__name__
 
@@ -270,8 +270,8 @@ class BaseLLMInvestor(GeneralPlayer):
         )
 
         # Build prompt - resolve module paths to actual prompt content
-        sys_msg_path = llm_config.get("sys_message", "")
-        user_msg_path = llm_config.get("user_message", "")
+        sys_msg_path = llm_config["sys_message"]
+        user_msg_path = llm_config["user_message"]
 
         sys_msg = load_prompt(sys_msg_path) if sys_msg_path else ""
         user_template = load_prompt(user_msg_path) if user_msg_path else ""
@@ -301,9 +301,9 @@ class BaseLLMInvestor(GeneralPlayer):
             try:
                 infer_output = await call_llm(
                     messages=messages,
-                    lm_type=llm_config.get("lm_type", "api"),
-                    lm_name=llm_config.get("lm_name", ""),
-                    generation_config=llm_config.get("generation_config", {}),
+                    lm_type=llm_config["lm_type"],
+                    lm_name=llm_config["lm_name"],
+                    generation_config=llm_config["generation_config"],
                 )
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response

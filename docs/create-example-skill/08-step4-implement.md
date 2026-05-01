@@ -392,6 +392,17 @@ What is your trading decision for this round?"""
 - The output format block is mandatory — copy it exactly as shown above
 - Always `<analysis>` not `<think>`
 
+
+### §4.2.3 LLM Decision Field Access Rule
+
+The `decide()` method in LLM/RuleLLM/Rag variants MUST read ALL four decision fields (`action`, `bid_price`, `quantity`, `reasoning`) directly from the LLM response via `decision["key"]`. NEVER derive or infer a missing field from another field (e.g., deriving `action` from the sign of `quantity`). If any field is missing, it must fail-fast via `KeyError`.
+
+Constraint and execution logic MUST branch on the `action` string value, not on quantity sign:
+- `if action == "buy"` / `elif action == "sell"` instead of `if quantity > 0` / `elif quantity < 0`
+- `quantity` is always positive per format specification
+
+**Why**: Deriving fields silently masks missing fields and introduces incorrect values. The principle is that `decide()` should be a pure function that derives outputs from inputs without inferring missing data.
+
 ### 4.2.3 `analysis.py` Structure (LLM Variant)
 
 ```python
@@ -428,7 +439,9 @@ def main():
 
 - Only difference is `prompts.py`: every system prompt has TWO mandatory sections: `== PERSONA ==` and `== DECISION RULES ==`
 - Players.py is identical to LLM variant structure
-- `analysis.py` adds `analyze_rule_adherence()`
+- `analysis.py` reuses core metrics from Rule/analysis.py — no additional variant-specific analysis function
+
+**Design principle**: The embedded rules are **deeper investor characterization**, not executable mandates. They define what the investor knows, how they habitually think, and what quantitative frameworks they follow. The LLM uses these rules as guidance alongside its persona to make intelligent, context-aware decisions. This is a simulation of an informed investor, not a rule executor.
 
 ### 4.3.2 RuleLLM Prompt Structure
 
@@ -472,25 +485,6 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 ```
 
 **Critical**: The `== DECISION RULES ==` section must reproduce the EXACT formulas from `Rule/players.py → _make_decision()`. If Rule parameters change, update this section immediately.
-
-### 4.3.3 `analyze_rule_adherence()` in `analysis.py`
-
-```python
-def analyze_rule_adherence(agent_records):
-    """
-    Measure how often LLM decisions match Rule-variant decisions.
-
-    Args:
-        agent_records: Dict[agent_id, List[Dict]] — each record has 'rule_action' and 'action'
-
-    Returns:
-        Dict[agent_id, Dict]:
-            adherence_rate: float (target ≥ 0.80)
-            matching_rounds: int
-            total_rounds: int
-            meets_target: bool
-    """
-```
 
 ---
 
@@ -587,6 +581,10 @@ After implementing each variant:
 - [ ] LLM/RuleLLM/Rag `analysis.py` imports `_load_data` from `Rule/analysis.py`
 - [ ] Rag `analysis.py` defines `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"`
 - [ ] All `__init__.py` files present
+
+- [ ] LLM/RuleLLM/Rag decide() reads action = decision["action"] directly — no derivation from quantity sign
+- [ ] Constraint/execution logic branches on action string, not quantity sign
+- [ ] validate_order() called before returning order dict
 
 #### Strict no-default compliance checklist
 

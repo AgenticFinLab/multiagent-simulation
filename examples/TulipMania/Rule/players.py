@@ -60,10 +60,10 @@ class Market(GeneralPlayer):
 
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        buy_orders = [o for o in orders if o.get("action") == "buy"]
-        sell_orders = [o for o in orders if o.get("action") == "sell"]
-        total_buy = sum(o.get("quantity", 0) for o in buy_orders)
-        total_sell = sum(o.get("quantity", 0) for o in sell_orders)
+        buy_orders = [o for o in orders if o["action"] == "buy"]
+        sell_orders = [o for o in orders if o["action"] == "sell"]
+        total_buy = sum(o["quantity"] for o in buy_orders)
+        total_sell = sum(o["quantity"] for o in sell_orders)
         net_demand = total_buy - total_sell
 
         price_impact = self.state.custom_state["price_impact"]
@@ -131,22 +131,18 @@ class BaseInvestor(GeneralPlayer):
             for inb in observation.inbounds:
                 market_data = inb.payload
                 if isinstance(market_data, dict):
-                    self.state.custom_state["price"] = market_data.get("price", 100.0)
-                    self.state.custom_state["fundamental"] = market_data.get(
-                        "fundamental", 100.0
-                    )
-                    self.state.custom_state["deviation"] = market_data.get(
-                        "deviation", 0.0
-                    )
+                    self.state.custom_state["price"] = market_data["price"]
+                    self.state.custom_state["fundamental"] = market_data["fundamental"]
+                    self.state.custom_state["deviation"] = market_data["deviation"]
 
     async def decide(self) -> Dict[str, Any]:
-        price = self.state.custom_state.get("price", 100.0)
-        fundamental = self.state.custom_state.get("fundamental", 100.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         order = self._make_decision(price, fundamental, deviation)
 
-        action = order.get("action", "hold")
-        quantity = order.get("quantity", 0)
+        action = order["action"]
+        quantity = order["quantity"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         if action == "buy" and quantity > 0:

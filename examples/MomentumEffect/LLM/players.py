@@ -297,6 +297,11 @@ class LLMInvestor(GeneralPlayer):
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
 
+        # Guard: LLMs sometimes output bid_price=0 for hold actions.
+        # Use the current market price so recorded bids stay meaningful.
+        if bid_price <= 0:
+            bid_price = market_data["price"]
+
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         if quantity > 0:
@@ -324,7 +329,7 @@ class LLMInvestor(GeneralPlayer):
             "bid_price": bid_price,
             "quantity": quantity,
             "strategy": strategy_name,
-            "reasoning": decision.get("reasoning", "")[:120],
+            "reasoning": decision["reasoning"][:120],
         }
 
         return {

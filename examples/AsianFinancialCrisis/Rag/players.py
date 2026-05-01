@@ -49,6 +49,7 @@ from masim.knowledge import (
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
+from masim.format.order import validate_order
 
 from examples.AsianFinancialCrisis.Rule.players import Market
 
@@ -437,8 +438,8 @@ class RagLLMInvestor(GeneralPlayer):
         position = self.state.custom_state["position"]
         price_history = self.state.custom_state["price_history"]
         round_num = self.state.custom_state["round"]
-        rag_store: KnowledgeStore = self.state.custom_state.get("rag_store")
-        rag_cfg: Dict[str, Any] = self.state.custom_state.get("rag_cfg") or {}
+        rag_store: KnowledgeStore = self.state.custom_state["rag_store"]
+        rag_cfg: Dict[str, Any] = self.state.custom_state["rag_cfg"] or {}
 
         rag_context = ""
         if rag_store and rag_store.is_built():
@@ -506,17 +507,18 @@ class RagLLMInvestor(GeneralPlayer):
                 f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             )
 
+        action = decision["action"]
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
 
-        if quantity > 0:
+        if action == "buy":
             max_affordable = cash / bid_price if bid_price > 0 else 0
             quantity = min(quantity, max_affordable)
             self.state.custom_state["cash"] -= quantity * bid_price
             self.state.custom_state["position"] += quantity
-        elif quantity < 0:
+        elif action == "sell":
             quantity = max(-position, quantity)
-            self.state.custom_state["cash"] += abs(quantity) * bid_price
+            self.state.custom_state["cash"] += quantity * bid_price
             self.state.custom_state["position"] += quantity
 
         logger.info(
@@ -528,7 +530,9 @@ class RagLLMInvestor(GeneralPlayer):
         )
 
         order = {
+            "action": action,
             "bid_price": bid_price,
+            "action": action,
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
@@ -536,6 +540,7 @@ class RagLLMInvestor(GeneralPlayer):
             "analysis": decision["analysis"],
         }
 
+        validate_order(order)
         return {
             **order,
             "outbound_messages": [{"payload": order, "content_type": "investor_bid"}],

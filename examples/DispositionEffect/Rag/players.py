@@ -71,6 +71,7 @@ from masim.knowledge import KnowledgeLoader, KnowledgeQuery, KnowledgeStore
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
+from masim.knowledge import KnowledgeLoader
 
 logger = logging.getLogger("DispositionEffectRag")
 
@@ -279,20 +280,17 @@ class BaseRagInvestor(GeneralPlayer):
         - embed_api_base: API base URL for OpenAI-compatible endpoints
         """
         rag_config = self.config.extras["rag"]
-        persist_dir = rag_config.get(
-            "persist_dir",
-            f"EXPERIMENT/DispositionEffect/Rag/rag_index/{self.config.identity}",
-        )
+        persist_dir = rag_config["persist_dir"]
 
         # Embedding configuration
-        embed_type = rag_config.get("embed_type", "huggingface")
-        embed_model = rag_config.get("embed_model", "BAAI/bge-small-en-v1.5")
-        embed_api_base = rag_config.get("embed_api_base", "")
+        embed_type = rag_config["embed_type"]
+        embed_model = rag_config["embed_model"]
+        embed_api_base = rag_config["embed_api_base"]
         embed_api_key = os.getenv("ARK_API_KEY", "") if embed_type == "openai" else ""
 
         # Chunking configuration
-        chunk_size = rag_config.get("chunk_size", 512)
-        chunk_overlap = rag_config.get("chunk_overlap", 64)
+        chunk_size = rag_config["chunk_size"]
+        chunk_overlap = rag_config["chunk_overlap"]
 
         logger.info(
             "[%s] Initializing KnowledgeStore: embed_type=%s, model=%s, persist_dir=%s",
@@ -370,15 +368,13 @@ class BaseRagInvestor(GeneralPlayer):
         Returns:
             List of KnowledgeDocument objects
         """
-        from masim.knowledge import KnowledgeLoader
 
         # Allow partial loading
         loader = KnowledgeLoader(fail_fast=False)
         docs = []
 
         # Source 1: Local directory
-        # Optional key — .get() allowed
-        docs_dir = rag_config.get("docs_dir")
+        docs_dir = rag_config["docs_dir"]
         if docs_dir and os.path.isdir(docs_dir):
             logger.info(
                 "[%s] Loading documents from local directory: %s",
@@ -403,7 +399,7 @@ class BaseRagInvestor(GeneralPlayer):
                 )
 
         # Source 2: URL CSV file
-        url_csv = rag_config.get("url_csv")
+        url_csv = rag_config["url_csv"]
         if url_csv and os.path.isfile(url_csv):
             logger.info(
                 "[%s] Loading documents from URL CSV: %s",
@@ -428,7 +424,7 @@ class BaseRagInvestor(GeneralPlayer):
                 )
 
         # Source 3: Explicit URLs list
-        urls = rag_config.get("urls", [])
+        urls = rag_config["urls"]
         if urls:
             logger.info(
                 "[%s] Loading documents from %d explicit URL(s)",
@@ -452,11 +448,11 @@ class BaseRagInvestor(GeneralPlayer):
                 )
 
         # Source 4: Agent-autonomous selection
-        if rag_config.get("agent_autonomous", False):
+        if rag_config["agent_autonomous"]:
             # Optional key
-            docs_save_dir = rag_config.get("docs_save_dir")
+            docs_save_dir = rag_config["docs_save_dir"]
             # Optional key
-            catalog_path = rag_config.get("catalog_path")
+            catalog_path = rag_config["catalog_path"]
             logger.info(
                 "[%s] Using agent-autonomous document selection (save_dir=%s)",
                 self.config.identity,
@@ -483,10 +479,10 @@ class BaseRagInvestor(GeneralPlayer):
                 )
 
         # Source 5: LLM-suggested documents
-        if rag_config.get("llm_suggested", False):
-            n_urls = rag_config.get("llm_suggested_n_urls", 5)
+        if rag_config["llm_suggested"]:
+            n_urls = rag_config["llm_suggested_n_urls"]
             # Optional key
-            docs_save_dir = rag_config.get("docs_save_dir")
+            docs_save_dir = rag_config["docs_save_dir"]
             persona_desc = self.config.extras["persona_description"]
 
             logger.info(
@@ -518,7 +514,7 @@ class BaseRagInvestor(GeneralPlayer):
 
         # Legacy: knowledge_sources list (for backward compatibility)
         # Optional key
-        knowledge_sources = rag_config.get("knowledge_sources", [])
+        knowledge_sources = rag_config["knowledge_sources"]
         if knowledge_sources:
             logger.info(
                 "[%s] Loading from legacy knowledge_sources: %s",
@@ -600,7 +596,7 @@ class BaseRagInvestor(GeneralPlayer):
         """Retrieve relevant context from RAG knowledge store."""
         try:
             rag_config = self.config.extras["rag"]
-            top_k = rag_config.get("top_k", 3)
+            top_k = rag_config["top_k"]
             round_num = self.state.custom_state["round"]
 
             query = KnowledgeQuery(

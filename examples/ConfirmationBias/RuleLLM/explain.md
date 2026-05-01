@@ -57,17 +57,14 @@ The `== DECISION RULES ==` section provides the LLM with explicit
 numerical thresholds, bridging the gap between LLM reasoning and
 deterministic Rule behavior.
 
-### 4.2 Rule Adherence Measurement
+### 4.2 Embedded Rules as Investor Characterization
 
-`analyze_rule_adherence()` compares `record["action"]` (LLM decision)
-against `record["rule_action"]` (expected Rule decision per same deviation).
+The `== DECISION RULES ==` section provides the LLM with explicit
+numerical thresholds that define the investor's knowledge and habitual
+decision-making framework. The LLM uses these rules as guidance
+alongside its persona to make intelligent, context-aware decisions.
 
-```python
-adherence_rate = matching_rounds / total_rounds
-meets_target = adherence_rate >= 0.80
-```
-
-Low adherence for a specific agent → review that agent's `== DECISION RULES ==` section
+Low-quality reasoning for a specific agent → review that agent's `== DECISION RULES ==` section
 in `RuleLLM/prompts.py`.
 
 ### 4.3 Key Difference: BeliefAnchor

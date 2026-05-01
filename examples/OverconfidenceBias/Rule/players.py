@@ -71,13 +71,13 @@ class Market(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload
-                if payload.get("type") == "order":
+                if payload["type"] == "order":
                     orders.append(
                         {
                             "agent_id": inb.sender_id,
-                            "action": payload.get("action"),
-                            "quantity": payload.get("quantity", 0),
-                            "agent_type": payload.get("agent_type", ""),
+                            "action": payload["action"],
+                            "quantity": payload["quantity"],
+                            "agent_type": payload["agent_type"],
                         }
                     )
         self.state.custom_state["orders"] = orders
@@ -167,7 +167,7 @@ class BaseInvestor(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload
-                if payload.get("type") == "market_update":
+                if payload["type"] == "market_update":
                     self.state.custom_state["price"] = payload["price"]
                     self.state.custom_state["fundamental"] = payload["fundamental"]
                     self.state.custom_state["deviation"] = payload["deviation"]
@@ -178,9 +178,9 @@ class BaseInvestor(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def decide(self) -> Dict[str, Any]:
-        price = self.state.custom_state.get("price", 0.0)
-        fundamental = self.state.custom_state.get("fundamental", 0.0)
-        deviation = self.state.custom_state.get("deviation", 0.0)
+        price = self.state.custom_state["price"]
+        fundamental = self.state.custom_state["fundamental"]
+        deviation = self.state.custom_state["deviation"]
         agent_type = self.__class__.__name__
 
         decision = self._make_decision(price, fundamental, deviation)

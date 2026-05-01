@@ -11,7 +11,7 @@
 | **Output**          | `EXPERIMENT/CarryTradeUnwind/RuleLLM/records/analysis/` |
 | **Methodology Ref** | `../analysis-bases.md`                                  |
 
-The RuleLLM variant adds rule-adherence analysis on top of the standard market metrics. The key question: does embedding explicit carry trade rules in the LLM prompt enforce ≥ 80% directional alignment with the Rule baseline?
+The RuleLLM variant embeds explicit carry trade rules in the LLM prompt as deeper investor characterization. The key question: do embedded rules help the LLM produce more structured, carry-trade-informed decisions?
 
 ---
 
@@ -19,16 +19,8 @@ The RuleLLM variant adds rule-adherence analysis on top of the standard market m
 
 Standard metrics: imported from `Rule/analysis.py` via `calculate_metrics()`.
 
-RuleLLM-specific metric: `analyze_rule_adherence()` defined in `RuleLLM/analysis.py`.
-
-### Rule Adherence Metric
-
-```
-adherence_rate(agent) = count(llm_action == rule_action) / total_rounds
-meets_target = adherence_rate >= 0.80
-```
-
-Data source: `records/[agent_folder]/*.json` — each record may contain `rule_action` field set by the agent when it logs its decision.
+No additional variant-specific analysis function — the embedded rules serve as
+deeper investor characterization, not executable mandates to be measured against.
 
 ---
 
@@ -38,65 +30,34 @@ Data source: `records/[agent_folder]/*.json` — each record may contain `rule_a
 
 Same as Rule and LLM variants. Compare `summary.json → unwind_metrics`.
 
-Expected: RuleLLM dynamics very close to Rule baseline (within ±10% on max_drawdown, ±3 rounds on crisis_onset).
+Expected: RuleLLM dynamics informed by explicit rules; compare against Rule baseline.
 
-### Dimension 2: Rule Adherence Analysis
-
-**Primary RuleLLM metric** — read `rule_adherence.json`:
-
-```json
-{
-  "rulellm_carry_trader": {
-    "adherence_rate": 0.87,
-    "matching_rounds": 87,
-    "total_rounds": 100,
-    "meets_target": true
-  },
-  "rulellm_leveraged_carry_fund": {
-    "adherence_rate": 0.91,
-    "matching_rounds": 91,
-    "total_rounds": 100,
-    "meets_target": true
-  }
-}
-```
-
-**Interpreting adherence rates**:
-- ≥ 0.80 (green bar in chart): Rule embedding effective — LLM follows rule sign
-- 0.60–0.79 (red bar): Partial compliance — LLM sometimes overrides rules
-- < 0.60: Rule embedding failing — review `== DECISION RULES ==` prompt section
-
-**Agent-specific expectations**:
-- `LeveragedCarryFund`: Should have highest adherence (forced sell is explicit and strong)
-- `CarryTrader`: High adherence (threshold is clear and actionable)
-- `FundingCurrencyBuyer`: Moderate adherence (counter-cyclical timing may vary)
-- `HedgedCarryTrader`: Moderate adherence (vol threshold may be interpreted differently)
-
-### Dimension 3: Cascade Mechanics Comparison
+### Dimension 2: Cascade Mechanics Comparison
 
 Compare RuleLLM vs Rule vs LLM:
-- `crisis_onset_round`: RuleLLM expected within ±2 rounds of Rule
-- `max_drawdown_pct`: RuleLLM expected within ±10% of Rule value
-- If adherence is high but cascade timing differs: LLM using ±20% quantity adjustment
+- `crisis_onset_round`: Compare timing across variants
+- `max_drawdown_pct`: Compare severity across variants
+- Differences reveal where LLM reasoning diverges from deterministic formulas
 
-### Dimension 4: Rule-Judgment Divergence
+### Dimension 3: LLM Reasoning Quality
 
-Look for rounds where LLM departs from rule:
-- Low-adherence rounds often cluster around ambiguous deviation values (near 0.02 threshold)
-- High-divergence agents: check if prompt `== DECISION RULES ==` section needs clarification
+Examine agent reasoning traces in `<analysis>` tags:
+- Agents with explicit carry trade rules should produce more structured reasoning
+- Look for agents referencing the embedded rules in their reasoning
+- Compare reasoning quality between LLM and RuleLLM variants
 
 ---
 
 ## 4. Variant-Specific Phenomena
 
-### Rule Override Events
+### LLM Reasoning with Embedded Rules
 
-When `llm_action ≠ rule_action`, examine agent reasoning text:
-- Common override triggers: "deviation is very close to threshold", "market context suggests holding"
-- LeveragedCarryFund override: "the drop appears temporary" → holding instead of forced sell
-- These are the most analytically valuable events — they reveal where LLM judgment departs from rule
+Examine agent reasoning traces for evidence of rule-informed decisions:
+- Common patterns: "Based on my carry trade rules, deviation exceeds threshold"
+- LeveragedCarryFund: forced sell rule should be prominent in reasoning
+- These reasoning traces are the most analytically valuable — they reveal how LLM integrates quantitative rules with qualitative judgment
 
-### Quantity Adjustment Distribution
+### Quantity Variation
 
 Within-rule decisions (correct sign) may have different quantities than Rule:
 - Expected: LLM quantities vary ±20% around Rule baseline
@@ -107,21 +68,19 @@ Within-rule decisions (correct sign) may have different quantities than Rule:
 
 ## 5. Output Files
 
-| File                                             | Content                                                        |
-|--------------------------------------------------|----------------------------------------------------------------|
-| `analysis/carrytradeunwind_rulellm_analysis.png` | 4-panel: FX rate, deviation, returns, rule-adherence bar chart |
-| `analysis/summary.json`                          | Market metrics + rule_adherence dict                           |
-| `analysis/rule_adherence.json`                   | Per-agent adherence rates, meets_target flags                  |
+| File                                             | Content                                                  |
+|--------------------------------------------------|----------------------------------------------------------|
+| `analysis/carrytradeunwind_rulellm_analysis.png` | Multi-panel: FX rate, deviation, returns, trading volume |
+| `analysis/summary.json`                          | Market metrics                                           |
 
 ---
 
 ## 6. Cross-Variant Comparison Notes
 
-| Metric             | Rule (baseline) | LLM               | RuleLLM (this)    |
-|--------------------|-----------------|-------------------|-------------------|
-| Crisis onset round | Earliest        | 2–10 rounds later | Within ±2 of Rule |
-| Max drawdown       | Deepest         | Variable          | Near-Rule         |
-| Recovery ratio     | Moderate        | Variable          | Near-Rule         |
-| Adherence rate     | N/A (perfect)   | N/A               | Target ≥ 80%      |
+| Metric             | Rule (baseline) | LLM               | RuleLLM (this)        |
+|--------------------|-----------------|-------------------|-----------------------|
+| Crisis onset round | Earliest        | 2–10 rounds later | Informed by rule text |
+| Max drawdown       | Deepest         | Variable          | Informed by rule text |
+| Recovery ratio     | Moderate        | Variable          | Informed by rule text |
 
-**Primary finding to report**: If adherence ≥ 80% AND cascade dynamics ≈ Rule baseline, then rule embedding successfully constrains LLM behavior. If adherence is high but dynamics differ, investigate quantity adjustment magnitude.
+**Primary finding to report**: Compare dynamics across variants to understand how embedded rules influence LLM decision-making. If RuleLLM dynamics ≈ Rule baseline, then rule embedding successfully characterizes investor behavior.

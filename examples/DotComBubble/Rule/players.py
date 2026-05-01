@@ -61,9 +61,9 @@ class Market(GeneralPlayer):
 
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        buy_vol = sum(o.get("quantity", 0) for o in orders if o.get("action") == "buy")
+        buy_vol = sum(o["quantity"] for o in orders if o["action"] == "buy")
         sell_vol = sum(
-            o.get("quantity", 0) for o in orders if o.get("action") == "sell"
+            o["quantity"] for o in orders if o["action"] == "sell"
         )
         net_demand = buy_vol - sell_vol
 
@@ -137,9 +137,9 @@ class NewEconomyEvangelist(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
@@ -172,7 +172,7 @@ class NewEconomyEvangelist(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -212,9 +212,9 @@ class IPOFlipper(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
@@ -247,7 +247,7 @@ class IPOFlipper(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -287,9 +287,9 @@ class MomentumFollower(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
@@ -328,7 +328,7 @@ class MomentumFollower(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -368,9 +368,9 @@ class SkepticalValueInvestor(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
@@ -404,7 +404,7 @@ class SkepticalValueInvestor(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -444,9 +444,9 @@ class ShortSeller(GeneralPlayer):
                     self.state.custom_state["price_history"].append(data["price"])
 
     async def decide(self) -> Dict:
-        market_data = self.state.custom_state.get("market_data", {})
-        price = market_data.get("price", 100.0)
-        deviation = market_data.get("deviation", 0.0)
+        market_data = self.state.custom_state["market_data"]
+        price = market_data["price"]
+        deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
@@ -480,7 +480,7 @@ class ShortSeller(GeneralPlayer):
     async def act(self, decision_payload: Dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
-        price = self.state.custom_state.get("market_data", {}).get("price", 100.0)
+        price = self.state.custom_state["market_data"]["price"]
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
