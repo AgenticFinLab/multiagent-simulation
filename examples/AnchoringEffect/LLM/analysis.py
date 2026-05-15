@@ -10,8 +10,7 @@ LLM-variant note (analysis-bases.md §4):
     Persona Consistency Drift and Narrative Framing Effects are LLM-specific observables.
 
 Usage:
-    python examples/AnchoringEffect/LLM/analysis.py \\
-        -c configs/AnchoringEffect/LLM/simulation.yml
+    python examples/AnchoringEffect/LLM/analysis.py  -c configs/AnchoringEffect/LLM/simulation.yml
 """
 
 import argparse
