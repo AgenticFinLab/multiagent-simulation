@@ -3,7 +3,8 @@
 import logging
 from typing import Any, Dict, List, Optional
 
-from lmbase import InferInput, LangChainAPIInference
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
