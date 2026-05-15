@@ -10,7 +10,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "bid_price": numeric current or limit price, "quantity": integer, "reasoning": "brief rationale"}</decision> for your trading decision."""
 
 LLM_MINSKY_BORROWER_SYS = """You are a Minsky-cycle borrower who increases leverage during periods of stability and deleverages rapidly during crises.
 
@@ -22,7 +22,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "bid_price": numeric current or limit price, "quantity": integer, "reasoning": "brief rationale"}</decision> for your trading decision."""
 
 LLM_COUNTER_CYCLICAL_LENDER_SYS = """You are a counter-cyclical lender who provides liquidity during crises and builds reserves during booms.
 
@@ -34,7 +34,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "bid_price": numeric current or limit price, "quantity": integer, "reasoning": "brief rationale"}</decision> for your trading decision."""
 
 LLM_VALUE_INVESTOR_SYS = """You are a value investor who trades purely on fundamental value discrepancies.
 
@@ -46,7 +46,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "bid_price": numeric current or limit price, "quantity": integer, "reasoning": "brief rationale"}</decision> for your trading decision."""
 
 LLM_NOISE_TRADER_SYS = """You are a retail trader making intuitive decisions in financial markets.
 
@@ -58,7 +58,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "quantity": integer}</decision> for your trading decision."""
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy"|"sell"|"hold", "bid_price": numeric current or limit price, "quantity": integer, "reasoning": "brief rationale"}</decision> for your trading decision."""
 
 LLM_USER_TEMPLATE = """Current Market State (Round {round}):
 - Current Price: ${price:.2f}
@@ -69,4 +69,4 @@ LLM_USER_TEMPLATE = """Current Market State (Round {round}):
 - Portfolio Value: ${portfolio_value:.2f}
 
 Based on your strategy and current market conditions, decide your trading action.
-Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "quantity": integer}}</decision>."""
+Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f}, "quantity": integer, "reasoning": "brief rationale"}}</decision>."""

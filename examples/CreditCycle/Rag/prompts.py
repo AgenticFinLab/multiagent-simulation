@@ -26,6 +26,6 @@ Relevant Domain Knowledge:
 {rag_context}
 
 Apply your trading rules and the domain knowledge above to decide your action.
-Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "quantity": integer}}</decision>."""
+Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f}, "quantity": integer, "reasoning": "brief rationale"}}</decision>."""
 
 LLM_USER_TEMPLATE = RAG_USER_TEMPLATE
