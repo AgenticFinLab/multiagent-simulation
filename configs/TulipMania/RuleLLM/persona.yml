@@ -1,0 +1,9 @@
+auto_checkpoint: false
+
+proxy:
+  record_path: "EXPERIMENT/TulipMania/RuleLLM/records"
+  communication:
+    store_path: "EXPERIMENT/TulipMania/RuleLLM/communication"
+  monitoring:
+    metrics_path: "EXPERIMENT/TulipMania/RuleLLM/monitoring/metrics"
+    events_path: "EXPERIMENT/TulipMania/RuleLLM/monitoring/events"

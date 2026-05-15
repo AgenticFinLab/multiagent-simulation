@@ -1,0 +1,119 @@
+market:
+  name: "Market"
+  class: "examples.SVBBankRun.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: market
+    steps_per_turn: 1
+    group_tags: [market]
+    record_path: "EXPERIMENT/SVBBankRun/Rule/records/market"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.025
+      mean_reversion: 0.01
+      noise_std: 0.015
+
+depositor:
+  name: "Depositor"
+  class: "examples.SVBBankRun.Rule.players:Depositor"
+  num_instances: 4
+  config:
+    identity: "depositor"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SVBBankRun/Rule/records/depositor"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 600
+      initial_price: 100.0
+      fundamental_value: 100.0
+      withdrawal_threshold: 0.1
+      social_influence: 0.5
+      base_size: 300
+      custom_state_hot_limit: 3
+
+socialmediainfluencer:
+  name: "SocialMediaInfluencer"
+  class: "examples.SVBBankRun.Rule.players:SocialMediaInfluencer"
+  num_instances: 2
+  config:
+    identity: "socialmediainfluencer"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SVBBankRun/Rule/records/socialmediainfluencer"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 800000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      amplification_factor: 2.0
+      base_size: 500
+      custom_state_hot_limit: 3
+
+bankmanager:
+  name: "BankManager"
+  class: "examples.SVBBankRun.Rule.players:BankManager"
+  num_instances: 2
+  config:
+    identity: "bankmanager"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SVBBankRun/Rule/records/bankmanager"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 3000000.0
+      initial_position: 800
+      initial_price: 100.0
+      fundamental_value: 100.0
+      duration_gap: 0.5
+      stabilize_size: 400
+      custom_state_hot_limit: 3
+
+regulator:
+  name: "Regulator"
+  class: "examples.SVBBankRun.Rule.players:Regulator"
+  num_instances: 1
+  config:
+    identity: "regulator"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SVBBankRun/Rule/records/regulator"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 10000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      intervention_threshold: 0.5
+      guarantee_probability: 0.4
+      intervention_size: 2000
+      custom_state_hot_limit: 3
+
+bondtrader:
+  name: "BondTrader"
+  class: "examples.SVBBankRun.Rule.players:BondTrader"
+  num_instances: 2
+  config:
+    identity: "bondtrader"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SVBBankRun/Rule/records/bondtrader"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 2000000.0
+      initial_position: 400
+      initial_price: 100.0
+      fundamental_value: 100.0
+      yield_sensitivity: 0.5
+      position_size: 350
+      custom_state_hot_limit: 3

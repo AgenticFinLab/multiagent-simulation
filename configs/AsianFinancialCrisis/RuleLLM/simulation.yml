@@ -1,0 +1,52 @@
+# =============================================================================
+# AsianFinancialCrisis RuleLLM Simulation Configuration
+# =============================================================================
+# Hybrid Rule+LLM simulation of the 1997 Asian Financial Crisis.
+# System prompts embed explicit quantitative rules alongside persona.
+#
+# Usage:
+#   python examples/AsianFinancialCrisis/RuleLLM/run_asianfinancialcrisis_rulellm.py \
+#       -c configs/AsianFinancialCrisis/RuleLLM/simulation.yml
+# =============================================================================
+
+setting:
+  name: "asianfinancialcrisis_rulellm_simulation"
+  description: "1997 Asian Financial Crisis: LLM agents with explicit rule-embedded prompts"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "EXPERIMENT/AsianFinancialCrisis/RuleLLM/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "asianfinancialcrisis_rulellm"
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 268435456
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/AsianFinancialCrisis/RuleLLM/communication"
+  record_messages: true
+  message_block_size: 500

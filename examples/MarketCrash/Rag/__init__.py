@@ -5,3 +5,23 @@ Three-way comparison:
     MarketCrashRuleLLM — rule-embedded LLM (persona + quantitative rules in prompt)
     MarketCrashRag     — rule-embedded LLM + personal RAG library (retrieved context per decision)
 """
+
+from .players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMPanicSeller,
+    RagLLMRiskParityFund,
+    RagLLMLeveragedFund,
+    RagLLMMarketMaker,
+    RagLLMBottomFisher,
+)
+
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMPanicSeller",
+    "RagLLMRiskParityFund",
+    "RagLLMLeveragedFund",
+    "RagLLMMarketMaker",
+    "RagLLMBottomFisher",
+]

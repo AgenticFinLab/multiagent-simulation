@@ -1,0 +1,51 @@
+# =============================================================================
+# AvailabilityBias Rule Simulation Configuration
+# =============================================================================
+# Demonstrates availability bias causing price distortions through
+# heterogeneous agents with different information processing styles.
+#
+# Usage:
+#   python -m examples.AvailabilityBias.Rule.run -c configs/AvailabilityBias/Rule/simulation.yml
+# =============================================================================
+
+setting:
+  name: "availability_bias_rule_simulation"
+  description: "Availability bias price distortions through recent event overweighting and media narratives"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "EXPERIMENT/AvailabilityBias/Rule/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "availability_bias_rule"
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/AvailabilityBias/Rule/communication"
+  record_messages: true
+  message_block_size: 500

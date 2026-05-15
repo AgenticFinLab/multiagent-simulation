@@ -1,0 +1,190 @@
+# =============================================================================
+# AsianFinancialCrisis LLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based coordinator) + 5 LLM-driven agent types
+#
+# Each LLM agent uses a rich persona prompt matching their 1997 crisis role.
+# Market dynamics are rule-based (same as Rule variant).
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based, identical to Rule variant
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.AsianFinancialCrisis.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.04
+      mean_reversion: 0.02
+      noise_std: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM HotMoneyFunder — short-term capital reversal
+# Theory: Radelet & Sachs (1998): hot money reversal mechanics
+# -----------------------------------------------------------------------------
+hot_money_funder:
+  name: "Hot Money Funder"
+  class: "examples.AsianFinancialCrisis.LLM.players:LLMHotMoneyFunder"
+  # Expander → hot_money_funder_1, hot_money_funder_2
+  num_instances: 2
+  config:
+    identity: "hot_money_funder"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"
+      initial_cash: 800000.0
+      initial_position: 3000.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_HOT_MONEY_FUNDER_SYS"
+        user_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM ContagionTrader — cross-border correlated seller
+# Theory: Kaminsky & Reinhart (1999): contagion mechanics
+# -----------------------------------------------------------------------------
+contagion_trader:
+  name: "Contagion Trader"
+  class: "examples.AsianFinancialCrisis.LLM.players:LLMContagionTrader"
+  # Expander → contagion_trader_1, contagion_trader_2
+  num_instances: 2
+  config:
+    identity: "contagion_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"
+      initial_cash: 600000.0
+      initial_position: 4000.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_CONTAGION_TRADER_SYS"
+        user_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.6
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM IMFRescuer — conditional emergency liquidity provider
+# Theory: Corsetti, Pesenti & Roubini (1999): IMF conditionality
+# -----------------------------------------------------------------------------
+imf_rescuer:
+  name: "IMF Rescuer"
+  class: "examples.AsianFinancialCrisis.LLM.players:LLMIMFRescuer"
+  num_instances: 1
+  config:
+    identity: "imf_rescuer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"
+      initial_cash: 5000000.0
+      initial_position: 0.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_IMF_RESCUER_SYS"
+        user_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM ValueContrarian — fundamental value crisis buyer
+# Theory: Fundamental value investing; long-run mean reversion
+# -----------------------------------------------------------------------------
+value_contrarian:
+  name: "Value Contrarian"
+  class: "examples.AsianFinancialCrisis.LLM.players:LLMValueContrarian"
+  # Expander → value_contrarian_1, value_contrarian_2
+  num_instances: 2
+  config:
+    identity: "value_contrarian"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"
+      initial_cash: 1000000.0
+      initial_position: 500.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_VALUE_CONTRARIAN_SYS"
+        user_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM NoiseTrader — background liquidity provider
+# Theory: Noise trader model (Black, 1986)
+# -----------------------------------------------------------------------------
+noise_trader:
+  name: "Noise Trader"
+  class: "examples.AsianFinancialCrisis.LLM.players:LLMNoiseTrader"
+  # Expander → noise_trader_1, noise_trader_2, noise_trader_3
+  num_instances: 3
+  config:
+    identity: "noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"
+      initial_cash: 200000.0
+      initial_position: 1000.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        user_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml

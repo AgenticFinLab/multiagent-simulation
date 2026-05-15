@@ -15,13 +15,16 @@ market:
     extras:
       record_path: "EXPERIMENT/MomentumEffect/RuleLLM/records"
       initial_price: 100.0
-      initial_fundamental: 100.0
-      price_impact: 0.08
+      fundamental_value: 100.0
+      base_price_impact: 0.08
       mean_reversion: 0.01
       noise_std: 0.3
       drift_persistence: 0.95
       drift_volatility: 0.5
       custom_state_hot_limit: 3
+      base_liquidity: 50.0
+      high_impact_multiplier: 3.0
+      low_liquidity_threshold: 30.0
   persona: !include persona.yml
 
 rulellm_momentum_trader:
@@ -44,7 +47,7 @@ rulellm_momentum_trader:
         sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_MOMENTUM_TRADER_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -70,7 +73,7 @@ rulellm_contrarian:
         sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_CONTRARIAN_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -96,7 +99,7 @@ rulellm_technical:
         sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_TECHNICAL_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -122,7 +125,7 @@ rulellm_trend_follower:
         sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_TREND_FOLLOWER_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_new_tokens: 500
@@ -148,7 +151,7 @@ rulellm_fundamental:
         sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_FUNDAMENTAL_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500

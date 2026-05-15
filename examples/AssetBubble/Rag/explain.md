@@ -1,5 +1,53 @@
 # AssetBubble Rag — RAG-Augmented Hybrid Agent Implementation
 
+## Overview
+
+| Item                       | Description                                                                                                                                                                        |
+|----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Variant**                | Rag (RAG-augmented hybrid)                                                                                                                                                         |
+| **Implements**             | `../simulation-bases.md`                                                                                                                                                           |
+| **Players**                | `players.py` — `RagLLMInvestor` base + 5 investor subclasses                                                                                                                       |
+| **Prompts**                | `prompts.py` — `== PERSONA ==` + `== DECISION RULES ==` + `{rag_context}`                                                                                                          |
+| **Config**                 | `configs/AssetBubble/Rag/`                                                                                                                                                         |
+| **Core construction rule** | System prompts define personality and quantitative rules; RAG context is injected dynamically each round from each agent's personal knowledge index — must NOT name the phenomenon |
+
+---
+
+## Theory → Implementation Mapping
+
+> All theoretical foundations are defined in `../simulation-bases.md`. This section records how each agent's RAG persona and rules map to those sections.
+
+### Agent-Level Mapping
+
+| Agent Class              | PERSONA Source                | DECISION RULES Source         | RAG Knowledge Source             | sim-bases Reference        |
+|--------------------------|-------------------------------|-------------------------------|----------------------------------|----------------------------|
+| `MomentumRagInvestor`    | Overconfident momentum trader | MA5 momentum ≥ 1%: buy        | Momentum crash literature        | `§4 — MomentumSpeculator`  |
+| `ArbitrageRagInvestor`   | Rigorous quant analyst        | (P−F)/F ≥ 5%: short with cost | Limits to arbitrage papers       | `§4 — RationalArbitrageur` |
+| `NoiseRagInvestor`       | Emotional retail investor     | Sentiment + herding weight    | Behavioral finance overreaction  | `§4 — NoiseTrader`         |
+| `FundamentalRagInvestor` | Patient value investor        | Every N rounds: F−P deviation | Value investing & DCF theory     | `§4 — FundamentalInvestor` |
+| `LeveragedRagInvestor`   | Aggressive hedge fund manager | Leverage ratio + margin call  | Leverage & deleveraging dynamics | `§4 — LeveragedBuyer`      |
+
+### Market Mechanism Mapping
+
+| Formula Component    | Code Key                                | sim-bases Reference |
+|----------------------|-----------------------------------------|---------------------|
+| `λ` (price impact)   | `extras["price_impact"]`                | `§3.1`              |
+| `γ` (mean reversion) | `extras["mean_reversion"]`              | `§3.1`              |
+| `F(t)` (fundamental) | `extras["fundamental_value"]`           | `§3.2`              |
+| `ε(t)` (noise)       | `random.gauss(0, noise_std)`            | `§3.3`              |
+| RAG top-k chunks     | `rag_store.query(query).formatted_text` | `§7 (variant)`      |
+
+### RAG Pipeline Mapping
+
+| Pipeline Stage       | Code Method                              | sim-bases Reference    |
+|----------------------|------------------------------------------|------------------------|
+| Index initialization | `_initialize_rag()`                      | `§8 (communication)`   |
+| Per-round query      | `_build_prompt(market_data)`             | `§3` (market dynamics) |
+| Context injection    | `{rag_context}` in user template         | `§7` (variant)         |
+| Document acquisition | `KnowledgeLoader.suggest_and_download()` | `§4` (investor types)  |
+
+---
+
 ## Table of Contents
 
 1. [Design Motivation and Core Idea](#1-design-motivation-and-core-idea)
@@ -21,9 +69,9 @@
 
 Prior variants each have inherent limitations:
 
-| Variant                         | Strengths                                                | Weaknesses                                                        |
-|---------------------------------|----------------------------------------------------------|-------------------------------------------------------------------|
-| **AssetBubble** (rule-based)    | Fully interpretable, deterministic, grounded in formulas | No language reasoning, no adaptability, rigid behavior            |
+| Variant                          | Strengths                                                | Weaknesses                                                        |
+|----------------------------------|----------------------------------------------------------|-------------------------------------------------------------------|
+| **AssetBubble** (rule-based)     | Fully interpretable, deterministic, grounded in formulas | No language reasoning, no adaptability, rigid behavior            |
 | **AssetBubble LLM** (pure LLM)   | Natural language reasoning, contextual understanding     | No quantitative constraints, decision drift, ungrounded in theory |
 | **AssetBubble RuleLLM** (hybrid) | Persona + explicit rules = constrained reasoning         | Knowledge limited to prompt; no external reference material       |
 
@@ -804,3 +852,20 @@ AssetBubble Rag demonstrates how to integrate the `masim/knowledge` module into 
 3. **On resume**: Persisted index reloaded from disk; no re-indexing or re-fetching
 
 The three-layer grounding (persona + rules + retrieved knowledge) creates agents that are behaviorally consistent, mathematically constrained, and contextually informed.
+
+---
+
+## References
+
+| Topic                                             | Source                                                                        |
+|---------------------------------------------------|-------------------------------------------------------------------------------|
+| Phenomenon definition + 4 theories                | `../simulation-bases.md §1–§2`                                                |
+| Price formula (P(t+1) = P(t) + λ×D + γ×[F−P] + ε) | `../simulation-bases.md §3.1`                                                 |
+| All 5 investor type specifications                | `../simulation-bases.md §4`                                                   |
+| Full parameter table (24 params)                  | `../simulation-bases.md §6`                                                   |
+| Communication structure (star topology)           | `../simulation-bases.md §8`                                                   |
+| Cross-variant comparison                          | `../simulation-bases.md §9`                                                   |
+| Analysis methodology                              | `../analysis-bases.md`                                                        |
+| Limits to Arbitrage theory                        | Shleifer, A. & Vishny, R.W. (1997) *JF* 52(1) — `../simulation-bases.md §2.2` |
+| Noise Trader Risk theory                          | De Long et al. (1990) *JPE* 98(4) — `../simulation-bases.md §2.3`             |
+| Synchronization Risk theory                       | Abreu & Brunnermeier (2003) *Econometrica* 71 — `../simulation-bases.md §2.4` |

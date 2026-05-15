@@ -22,8 +22,8 @@ def render_analysis_page(scenario_name: str):
         check_simulation_results,
         get_analysis_path,
         get_scenario_info,
+        scenario_display_name,
     )
-    from ..config_loader import SCENARIO_DISPLAY_NAMES
 
     # Header row: back button + title
     col_back, col_title = st.columns([1, 5])
@@ -33,7 +33,7 @@ def render_analysis_page(scenario_name: str):
             st.session_state.current_page = "Simulation"
             st.rerun()
     with col_title:
-        display_name = SCENARIO_DISPLAY_NAMES.get(scenario_name, scenario_name)
+        display_name = scenario_display_name(scenario_name)
         st.title(f"Analysis — {display_name}")
 
     st.markdown("---")

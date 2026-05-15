@@ -13,15 +13,14 @@ from typing import Callable, Optional
 matplotlib.use("Agg")
 
 from ..config_loader import (
-    discover_scenarios,
+    discover_scenario_groups,
     get_scenario_info,
     get_agents_info,
-    get_scenario_pairs,
     get_topology_info,
     get_market_type,
     get_market_description,
     get_diagram_path,
-    SCENARIO_DISPLAY_NAMES,
+    scenario_display_name,
     CONFIGS_DIR,
     EXPERIMENT_DIR,
     _configs_path,
@@ -47,46 +46,61 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
         # ------------------------------------------------------------------
         st.header("Select Scenario")
 
-        scenario_pairs = get_scenario_pairs()
+        groups = discover_scenario_groups()
+        group_names = list(groups.keys())
 
-        scenario_options = []
-        for base, llm in scenario_pairs:
-            if base == "Demo" or llm == "Demo":
-                continue
-            if base and llm:
-                scenario_options.append(
-                    (base, f"{SCENARIO_DISPLAY_NAMES.get(base, base)} (Rule-based)")
-                )
-                scenario_options.append(
-                    (llm, f"{SCENARIO_DISPLAY_NAMES.get(llm, llm)}")
-                )
-            elif base:
-                scenario_options.append((base, SCENARIO_DISPLAY_NAMES.get(base, base)))
-            elif llm:
-                scenario_options.append((llm, SCENARIO_DISPLAY_NAMES.get(llm, llm)))
+        if not group_names:
+            st.warning("No scenarios found in configs/")
+            st.session_state.selected_scenario = ""
+            return ""
 
-        default_idx = 0
+        # --- Scenario Group selector ---
+        # Auto-generate display names for groups
+        group_display = [scenario_display_name(g) for g in group_names]
+
+        default_group_idx = 0
         if "selected_scenario" in st.session_state:
-            for i, (name, _) in enumerate(scenario_options):
-                if name == st.session_state.selected_scenario:
-                    default_idx = i
-                    break
+            cur = st.session_state.selected_scenario
+            cur_group = cur.split("/")[0] if "/" in cur else cur
+            if cur_group in group_names:
+                default_group_idx = group_names.index(cur_group)
 
-        selected_display = st.selectbox(
-            "Financial Market Scenario",
-            options=[opt[1] for opt in scenario_options],
-            index=default_idx,
-            key="scenario_select",
+        selected_group_display = st.selectbox(
+            "Scenario Group",
+            options=group_display,
+            index=default_group_idx,
+            key="scenario_group_select",
         )
+        selected_group = group_names[group_display.index(selected_group_display)]
 
-        selected_scenario = None
-        for name, display in scenario_options:
-            if display == selected_display:
-                selected_scenario = name
-                break
+        # --- Variant selector ---
+        variant_keys = groups[selected_group]
+        variant_labels = []
+        for vk in variant_keys:
+            if "/" in vk:
+                variant_labels.append(vk.split("/", 1)[1])
+            else:
+                variant_labels.append(vk)
 
-        if selected_scenario is None:
-            selected_scenario = scenario_options[0][0] if scenario_options else ""
+        default_variant_idx = 0
+        if "selected_scenario" in st.session_state:
+            cur = st.session_state.selected_scenario
+            if cur in variant_keys:
+                default_variant_idx = variant_keys.index(cur)
+
+        if len(variant_keys) > 1:
+            selected_variant_label = st.selectbox(
+                "Variant",
+                options=variant_labels,
+                index=default_variant_idx,
+                key="variant_select",
+            )
+            selected_scenario = variant_keys[
+                variant_labels.index(selected_variant_label)
+            ]
+        else:
+            selected_scenario = variant_keys[0]
+            st.caption(f"Variant: {variant_labels[0]}")
 
         # Reset simulation state when scenario changes
         if st.session_state.get("selected_scenario") != selected_scenario:
@@ -578,7 +592,7 @@ def render_analysis_sidebar(scenario_name: str):
 
         st.header("Current Scenario")
         info = get_scenario_info(scenario_name)
-        st.write(SCENARIO_DISPLAY_NAMES.get(scenario_name, scenario_name))
+        st.write(scenario_display_name(scenario_name))
 
         if info.get("description"):
             st.caption(info["description"])

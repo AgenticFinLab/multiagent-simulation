@@ -1,0 +1,9 @@
+auto_checkpoint: false
+
+proxy:
+  record_path: "EXPERIMENT/SunkCostFallacy/LLM/records"
+  communication:
+    store_path: "EXPERIMENT/SunkCostFallacy/LLM/communication"
+  monitoring:
+    metrics_path: "EXPERIMENT/SunkCostFallacy/LLM/monitoring/metrics"
+    events_path: "EXPERIMENT/SunkCostFallacy/LLM/monitoring/events"

@@ -1,0 +1,175 @@
+# =============================================================================
+# ConfirmationBias LLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 LLM Investor types with confirmation-bias personas.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based, identical to Rule variant
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.ConfirmationBias.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/ConfirmationBias/LLM/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.02
+      mean_reversion: 0.02
+      noise_std: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Belief Anchors — conviction-driven persona
+# Theory: Nickerson (1998)
+# -----------------------------------------------------------------------------
+llm_belief_anchor:
+  name: "LLM Belief Anchor"
+  class: "examples.ConfirmationBias.LLM.players:LLMBeliefAnchor"
+  # Expander → llm_belief_anchor_1, llm_belief_anchor_2
+  num_instances: 2
+  config:
+    identity: "llm_belief_anchor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ConfirmationBias/LLM/records"
+      initial_cash: 50000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.LLM.prompts:LLM_BELIEF_ANCHOR_SYS"
+        user_message: "examples.ConfirmationBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Selective Scanners — directional momentum persona
+# Theory: Lord, Ross & Lepper (1979)
+# -----------------------------------------------------------------------------
+llm_selective_scanner:
+  name: "LLM Selective Scanner"
+  class: "examples.ConfirmationBias.LLM.players:LLMSelectiveScanner"
+  # Expander → llm_selective_scanner_1, llm_selective_scanner_2
+  num_instances: 2
+  config:
+    identity: "llm_selective_scanner"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ConfirmationBias/LLM/records"
+      initial_cash: 50000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.LLM.prompts:LLM_SELECTIVE_SCANNER_SYS"
+        user_message: "examples.ConfirmationBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Balanced Analyst — rational baseline persona
+# Theory: Rabin & Schrag (1999)
+# -----------------------------------------------------------------------------
+llm_balanced_analyst:
+  name: "LLM Balanced Analyst"
+  class: "examples.ConfirmationBias.LLM.players:LLMBalancedAnalyst"
+  num_instances: 1
+  config:
+    identity: "llm_balanced_analyst"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ConfirmationBias/LLM/records"
+      initial_cash: 50000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.LLM.prompts:LLM_BALANCED_ANALYST_SYS"
+        user_message: "examples.ConfirmationBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Contrarian Trader — contrarian persona
+# -----------------------------------------------------------------------------
+llm_contrarian_trader:
+  name: "LLM Contrarian Trader"
+  class: "examples.ConfirmationBias.LLM.players:LLMContrarianTrader"
+  num_instances: 1
+  config:
+    identity: "llm_contrarian_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ConfirmationBias/LLM/records"
+      initial_cash: 50000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.LLM.prompts:LLM_CONTRARIAN_SYS"
+        user_message: "examples.ConfirmationBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Noise Traders — random trader persona
+# Theory: Black (1986)
+# -----------------------------------------------------------------------------
+llm_noise_trader:
+  name: "LLM Noise Trader"
+  class: "examples.ConfirmationBias.LLM.players:LLMNoiseTrader"
+  # Expander → llm_noise_trader_1, llm_noise_trader_2
+  num_instances: 2
+  config:
+    identity: "llm_noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ConfirmationBias/LLM/records"
+      initial_cash: 20000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        user_message: "examples.ConfirmationBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml

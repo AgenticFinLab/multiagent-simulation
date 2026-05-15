@@ -43,7 +43,7 @@ llm_market_maker:
         sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_MARKET_MAKER_SYS"
         user_message: "examples.LiquidityDryup.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -69,7 +69,7 @@ llm_liquidity_demander:
         sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_LIQUIDITY_DEMANDER_SYS"
         user_message: "examples.LiquidityDryup.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -95,7 +95,7 @@ llm_arbitrageur:
         sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_ARBITRAGEUR_SYS"
         user_message: "examples.LiquidityDryup.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -121,7 +121,7 @@ llm_value:
         sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_VALUE_SYS"
         user_message: "examples.LiquidityDryup.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -147,7 +147,7 @@ llm_forced_seller:
         sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_FORCED_SELLER_SYS"
         user_message: "examples.LiquidityDryup.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.2
           max_new_tokens: 500

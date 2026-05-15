@@ -52,7 +52,7 @@ market:
       record_path: "EXPERIMENT/VolatilityClustering/Rag/records"
       fundamental_value: 100.0
       initial_price: 100.0
-      price_impact: 0.05
+      base_price_impact: 0.05
       mean_reversion: 0.02
       garch_omega: 0.0001
       garch_alpha: 0.15
@@ -60,6 +60,10 @@ market:
       min_volatility: 0.5
       max_volatility: 10.0
       custom_state_hot_limit: 3
+      base_liquidity: 50.0
+      high_impact_multiplier: 3.0
+      low_liquidity_threshold: 30.0
+      noise_std: 0.4
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -102,7 +106,7 @@ ragllm_fundamentalist:
         sys_message: "examples.VolatilityClustering.Rag.prompts:RAGLLM_FUNDAMENTALIST_SYS"
         user_message: "examples.VolatilityClustering.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -148,7 +152,7 @@ ragllm_trend_follower:
         sys_message: "examples.VolatilityClustering.Rag.prompts:RAGLLM_TREND_FOLLOWER_SYS"
         user_message: "examples.VolatilityClustering.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_new_tokens: 600
@@ -194,7 +198,7 @@ ragllm_noise_trader:
         sys_message: "examples.VolatilityClustering.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
         user_message: "examples.VolatilityClustering.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_new_tokens: 600
@@ -239,7 +243,7 @@ ragllm_slow_adapter:
         sys_message: "examples.VolatilityClustering.Rag.prompts:RAGLLM_SLOW_ADAPTER_SYS"
         user_message: "examples.VolatilityClustering.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.2
           max_new_tokens: 600
@@ -284,7 +288,7 @@ ragllm_volatility_trader:
         sys_message: "examples.VolatilityClustering.Rag.prompts:RAGLLM_VOLATILITY_TRADER_SYS"
         user_message: "examples.VolatilityClustering.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600

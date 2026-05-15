@@ -41,27 +41,18 @@ Environment Variables:
 
 from __future__ import annotations
 
-import importlib
 import json
 import logging
 import os
 import random
 import re
 import shutil
-import sys
 import time
-from pathlib import Path
 from typing import Any, Dict, List, Optional
-
-from dotenv import load_dotenv
-
-# Add examples directory to path for shared utilities
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -72,15 +63,17 @@ from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
+from examples.llm_utils import parse_llm_response_with_thinking
 
-logger = logging.getLogger("ReversalEffectRag")
+from .prompts import (
+    RAGLLM_CONTRARIAN_INVESTOR_SYS,
+    RAGLLM_MOMENTUM_INVESTOR_SYS as RAGLLM_MOMENTUM_CHASER_SYS,
+    RAGLLM_NOISE_TRADER_SYS,
+    RAGLLM_OVERCONFIDENT_TRADER_SYS,
+    RAGLLM_VALUE_INVESTOR_SYS,
+)
 
-
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt string from a module path (``module:VARIABLE``)."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
+logger = logging.getLogger("ReversalEffect.Rag")
 
 
 # =============================================================================
@@ -145,14 +138,14 @@ class Market(GeneralPlayer):
                         "price": order["bid_price"],
                         "quantity": order["quantity"],
                         "strategy": order["strategy"],
-                        "provides_liquidity": order.get("provides_liquidity", False),
+                        "provides_liquidity": order["provides_liquidity"],
                     }
                 )
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
         extras = self.config.extras
-        rng = self.state.custom_state.get("_random", random)
+        rng = self.state.custom_state["_random"]
 
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
@@ -240,24 +233,13 @@ class Market(GeneralPlayer):
 
 
 class RagLLMInvestor(GeneralPlayer):
+    """Base class for RAG-augmented reversal-effect investors.
+
+    Each subclass assigns _system_prompt with persona + rules.
+    RAG retrieval augments the user prompt at each decision round.
     """
-    Base class for RAG-augmented Rule+LLM reversal effect investors.
 
-    Each subclass uses a system prompt that encodes BOTH persona and rules
-    (identical to RuleLLMInvestor). In addition, at initialization:
-
-        1. Documents are loaded from shared/global or agent-local sources.
-        2. A LlamaIndex VectorStoreIndex is built over those documents.
-        3. At every decision round, a query is formulated from the current
-           market state and the top-k most relevant chunks are retrieved and
-           injected into the user prompt via the {rag_context} placeholder.
-
-    Parameters from config extras:
-        - initial_cash, initial_position, custom_state_hot_limit, record_path
-        - rag: docs_dir, url_csv, docs_save_dir, rag_persist_dir, top_k,
-               embed_model, embed_api_base
-        - llm: sys_message, user_message, lm_name, generation_config
-    """
+    _system_prompt: str = ""
 
     # ------------------------------------------------------------------
     # perceive
@@ -280,8 +262,26 @@ class RagLLMInvestor(GeneralPlayer):
                 self.state.custom_state["market_data"] = market_data
                 self.state.custom_state["price_history"].append(market_data["price"])
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state.pop("_llm", None)
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._llm = None
+
+    def _get_llm(self) -> LangChainAPIInference:
+        """Lazy-initialize LLM client."""
+        llm_cfg = self.config.extras["llm"]
+        self._llm = LangChainAPIInference(
+            lm_name=llm_cfg["lm_name"],
+            generation_config=llm_cfg["generation_config"],
+        )
+        return self._llm
+
     async def _initialize_agent(self) -> None:
-        """One-time initialization: LLM client + RAG index."""
+        """One-time initialization: portfolio state + RAG index."""
         extras = self.config.extras
         record_path = extras["record_path"]
         base_path = os.path.join(record_path, self.config.identity)
@@ -297,30 +297,12 @@ class RagLLMInvestor(GeneralPlayer):
             entry_limit=hot_limit,
         )
 
-        # LLM client
-        project_root = Path(__file__).parent.parent.parent
-        load_dotenv(project_root / ".env")
-        if not os.getenv("ARK_API_KEY"):
-            raise RuntimeError(
-                "ARK_API_KEY not found after loading .env. "
-                f"Ensure .env file exists at {project_root / '.env'} and contains ARK_API_KEY."
-            )
-        llm_config = extras["llm"]
-        lm_name = llm_config["lm_name"]
-        generation_config = llm_config["generation_config"]
-
-        self.state.custom_state["lm_name"] = lm_name
-        self.state.custom_state["generation_config"] = generation_config
-
-        llm_client = LangChainAPIInference(
-            lm_name=lm_name,
-            generation_config=generation_config,
-        )
-        self.state.custom_state["llm_client"] = llm_client
+        # LLM client for RAG initialization
+        llm_client = self._get_llm()
 
         # RAG index
-        private_knowledge = extras.get("private_knowledge", {})
-        rag_cfg = private_knowledge.get("rag", extras.get("rag", {}))
+        private_knowledge = extras["private_knowledge"]
+        rag_cfg = private_knowledge["rag"]
         await self._initialize_rag(rag_cfg, llm_client, extras["llm"])
 
     async def _initialize_rag(
@@ -328,28 +310,26 @@ class RagLLMInvestor(GeneralPlayer):
     ) -> None:
         """Build or load the agent's RAG index using the unified knowledge architecture."""
         extras = self.config.extras
-        record_path = extras.get("record_path", "EXPERIMENT")
+        record_path = extras["record_path"]
 
         # STEP 1: Resolve knowledge config via ResourceManager
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
-                "global_uri": rag_cfg.get("docs_dir", "examples/document-sources"),
+                "global_uri": rag_cfg["docs_dir"],
                 "preprocessing": {
                     "parser": "mineru",
-                    "output_position": rag_cfg.get(
-                        "mineru_output_dir", "MinerU_processed"
-                    ),
+                    "output_position": rag_cfg["mineru_output_dir"],
                 },
                 "rag": {
-                    "output_position": rag_cfg.get("shared_rag_index_dir", "rag_index"),
+                    "output_position": rag_cfg["shared_rag_index_dir"],
                 },
             }
 
         resource_manager = ResourceManager(knowledge_config)
 
-        private_knowledge = extras.get("private_knowledge", {})
+        private_knowledge = extras["private_knowledge"]
         if not private_knowledge:
             private_knowledge = {
                 "from_global_resources": ["MinerU_processed"],
@@ -388,12 +368,12 @@ class RagLLMInvestor(GeneralPlayer):
         )
 
         # STEP 2: Build KnowledgeStore with resolved RAG config
-        embed_type = resolved_rag.get("embed_type", "litellm")
-        embed_model = resolved_rag.get("embed_model", "openai/hunyuan-embedding")
-        embed_api_base = resolved_rag.get("embed_api_base", "")
-        embed_api_key = resolved_rag.get("embed_api_key", "")
-        chunk_size = int(resolved_rag.get("chunk_size", 512))
-        chunk_overlap = int(resolved_rag.get("chunk_overlap", 64))
+        embed_type = resolved_rag["embed_type"]
+        embed_model = resolved_rag["embed_model"]
+        embed_api_base = resolved_rag["embed_api_base"]
+        embed_api_key = resolved_rag["embed_api_key"]
+        chunk_size = int(resolved_rag["chunk_size"])
+        chunk_overlap = int(resolved_rag["chunk_overlap"])
 
         if not embed_api_key:
             if embed_type == "litellm":
@@ -438,7 +418,7 @@ class RagLLMInvestor(GeneralPlayer):
                     )
 
         # STEP 4: Try copying shared RAG index to local
-        shared_rag_dirs = resolved_rag.get("shared_rag_index_dirs", [])
+        shared_rag_dirs = resolved_rag["shared_rag_index_dirs"]
         if not shared_rag_dirs and os.path.isdir(shared_rag_dir):
             shared_rag_dirs = [shared_rag_dir]
 
@@ -556,9 +536,9 @@ class RagLLMInvestor(GeneralPlayer):
                 )
             if "rag_cfg" in custom and "rag_store" not in custom:
                 rag_cfg = custom["rag_cfg"]
-                local_rag_dir = rag_cfg.get("local_index_dir", "")
+                local_rag_dir = rag_cfg["local_index_dir"]
                 if not local_rag_dir:
-                    local_workspace_dir = rag_cfg.get("local_workspace_dir", "")
+                    local_workspace_dir = rag_cfg["local_workspace_dir"]
                     if local_workspace_dir:
                         local_rag_dir = os.path.join(local_workspace_dir, "rag_index")
 
@@ -568,8 +548,8 @@ class RagLLMInvestor(GeneralPlayer):
                     )
                     return
 
-                embed_type = rag_cfg.get("embed_type", "litellm")
-                embed_api_key = rag_cfg.get("embed_api_key", "")
+                embed_type = rag_cfg["embed_type"]
+                embed_api_key = rag_cfg["embed_api_key"]
                 if not embed_api_key:
                     if embed_type == "litellm":
                         embed_api_key = os.getenv("HUNYUAN_API_KEY", "")
@@ -577,15 +557,13 @@ class RagLLMInvestor(GeneralPlayer):
                         embed_api_key = os.getenv("ARK_API_KEY", "")
 
                 rag_store = KnowledgeStore(
-                    embed_model_name=rag_cfg.get(
-                        "embed_model", "openai/hunyuan-embedding"
-                    ),
+                    embed_model_name=rag_cfg["embed_model"],
                     embed_api_key=embed_api_key,
-                    embed_api_base=rag_cfg.get("embed_api_base", ""),
+                    embed_api_base=rag_cfg["embed_api_base"],
                     embed_type=embed_type,
                     persist_dir=local_rag_dir,
-                    chunk_size=int(rag_cfg.get("chunk_size", 512)),
-                    chunk_overlap=int(rag_cfg.get("chunk_overlap", 64)),
+                    chunk_size=int(rag_cfg["chunk_size"]),
+                    chunk_overlap=int(rag_cfg["chunk_overlap"]),
                 )
                 if os.path.isdir(local_rag_dir):
                     try:
@@ -607,8 +585,8 @@ class RagLLMInvestor(GeneralPlayer):
         position = self.state.custom_state["position"]
         price_history = self.state.custom_state["price_history"]
         round_num = self.state.custom_state["round"]
-        rag_store: KnowledgeStore = self.state.custom_state.get("rag_store")
-        rag_cfg: Dict[str, Any] = self.state.custom_state.get("rag_cfg", {})
+        rag_store: KnowledgeStore = self.state.custom_state["rag_store"]
+        rag_cfg: Dict[str, Any] = self.state.custom_state["rag_cfg"]
 
         recent_prices = (
             list(price_history)[-5:] if len(price_history) >= 5 else list(price_history)
@@ -617,7 +595,7 @@ class RagLLMInvestor(GeneralPlayer):
         # Retrieve relevant context from RAG library
         rag_context = ""
         if rag_store and rag_store.is_built():
-            top_k = rag_cfg.get("top_k", 3)
+            top_k = rag_cfg["top_k"]
             query = KnowledgeQuery(
                 text=(
                     f"trading strategy when: "
@@ -636,22 +614,18 @@ class RagLLMInvestor(GeneralPlayer):
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
 
-        llm_config = self.config.extras["llm"]
-        template = load_prompt(llm_config["user_message"])
-        return template.format(
-            round=round_num,
-            rag_context=rag_context,
-            price=market_data["price"],
-            prev_price=market_data["prev_price"],
-            return_pct=market_data["return_pct"],
-            liquidity=market_data["liquidity"],
-            fundamental=market_data["fundamental"],
-            volume=market_data["volume"],
-            net_demand=market_data["net_demand"],
-            recent_prices=recent_prices,
-            cash=cash,
-            position=position,
-            portfolio_value=cash + position * market_data["price"],
+        return (
+            f"Round {round_num}\n"
+            f"RAG Context:\n{rag_context}\n\n"
+            f"Market: price={market_data['price']:.2f}  prev={market_data['prev_price']:.2f}"
+            f"  ret={market_data['return_pct']:.2f}%  liq={market_data['liquidity']:.0f}"
+            f"  fund={market_data['fundamental']:.2f}  vol={market_data['volume']:.0f}"
+            f"  net_demand={market_data['net_demand']:.0f}\n"
+            f"Recent prices: {recent_prices}\n"
+            f"Portfolio: cash={cash:.2f}  position={position:.4f}"
+            f"  value={cash + position * market_data['price']:.2f}\n"
+            "Respond with <analysis>...</analysis> then "
+            '<decision>{"bid_price":...,"quantity":...,"reasoning":"...","provides_liquidity":false}</decision>'
         )
 
     # ------------------------------------------------------------------
@@ -687,11 +661,11 @@ class RagLLMInvestor(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
-        llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
         strategy_name = self.__class__.__name__
 
         user_prompt = self._build_prompt(market_data)
-        system_prompt = load_prompt(self.config.extras["llm"]["sys_message"])
+        system_prompt = self._system_prompt
+        llm_client = self._get_llm()
 
         max_retries = 3
         decision: Dict[str, Any] = {}
@@ -742,7 +716,7 @@ class RagLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
-            "provides_liquidity": decision.get("provides_liquidity", False),
+            "provides_liquidity": decision["provides_liquidity"],
         }
 
         return {
@@ -766,28 +740,39 @@ class RagLLMInvestor(GeneralPlayer):
 class RagLLMContrarianInvestor(RagLLMInvestor):
     """RAG-augmented: ContrarianInvestor rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RAGLLM_CONTRARIAN_INVESTOR_SYS
 
 
 class RagLLMOverconfidentTrader(RagLLMInvestor):
     """RAG-augmented: OverconfidentTrader rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RAGLLM_OVERCONFIDENT_TRADER_SYS
 
 
 class RagLLMValueInvestor(RagLLMInvestor):
     """RAG-augmented: ValueInvestor rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RAGLLM_VALUE_INVESTOR_SYS
 
 
 class RagLLMMomentumChaser(RagLLMInvestor):
     """RAG-augmented: MomentumChaser rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RAGLLM_MOMENTUM_CHASER_SYS
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
     """RAG-augmented: NoiseTrader rules + LLM + retrieved knowledge."""
 
-    pass
+    _system_prompt = RAGLLM_NOISE_TRADER_SYS
+
+
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMContrarianInvestor",
+    "RagLLMOverconfidentTrader",
+    "RagLLMValueInvestor",
+    "RagLLMMomentumChaser",
+    "RagLLMNoiseTrader",
+]

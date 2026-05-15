@@ -14,21 +14,22 @@ from lmbase.inference.base import InferInput, InferOutput
 
 
 def parse_llm_response_with_thinking(response_text: str) -> Dict[str, Any]:
-    """Parse LLM response with analysis and decision sections.
+    """Parse LLM response with canonical analysis and decision sections.
 
-    Expected format:
+    Canonical output format (all LLM/RuleLLM/Rag agents must produce this):
+
         <analysis>
-        ... analysis content ...
+        ... reasoning about current market conditions ...
         </analysis>
 
         <decision>
-        {"action": "buy", "bid_price": 100.0, "quantity": 10.0, "reasoning": "..."}
+        {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
         </decision>
 
-    Also handles legacy formats:
-        - Raw JSON
+    Fallback formats accepted for robustness:
+        - <think>...</think> tags (legacy — treated as <analysis>)
+        - Raw JSON without surrounding tags
         - JSON in code blocks
-        - JSON without analysis tags
 
     Returns dict with keys: analysis, action, bid_price, quantity, reasoning
     Raises ValueError on parse failure.
@@ -36,8 +37,11 @@ def parse_llm_response_with_thinking(response_text: str) -> Dict[str, Any]:
     analysis = ""
     decision_json = None
 
-    # Extract analysis from <analysis>...</analysis> tags
+    # Primary: extract analysis from <analysis>...</analysis> tags
     analysis_match = re.search(r"<analysis>(.*?)</analysis>", response_text, re.DOTALL)
+    if not analysis_match:
+        # Legacy fallback: accept <think>...</think>
+        analysis_match = re.search(r"<think>(.*?)</think>", response_text, re.DOTALL)
     if analysis_match:
         analysis = analysis_match.group(1).strip()
 
@@ -69,7 +73,7 @@ def parse_llm_response_with_thinking(response_text: str) -> Dict[str, Any]:
         raise ValueError(f"Failed to parse decision JSON: {decision_json[:100]}")
 
     # Validate required fields
-    required_fields = ["bid_price", "quantity", "reasoning"]
+    required_fields = ["action", "bid_price", "quantity", "reasoning"]
     missing_or_null = [
         f for f in required_fields if f not in parsed or parsed[f] is None
     ]

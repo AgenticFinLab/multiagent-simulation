@@ -49,6 +49,7 @@ from dotenv import load_dotenv
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+from masim.format.order import validate_order
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -128,7 +129,7 @@ class Market(GeneralPlayer):
                         "price": order["bid_price"],
                         "quantity": order["quantity"],
                         "strategy": order["strategy"],
-                        "provides_liquidity": order.get("provides_liquidity", False),
+                        "provides_liquidity": order["provides_liquidity"],
                     }
                 )
         self.state.custom_state["orders"] = orders
@@ -177,15 +178,20 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
         self.state.custom_state["liquidity_history"].append(total_liquidity)
 
-        logger.debug(f"\n{'='*70}")
-        logger.debug(f"[Market] Round {round_num}")
+        logger.debug("\n%s", "=" * 70)
+        logger.debug("[Market] Round %s", round_num)
         logger.debug(
-            f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
+            "  Price: %.2f → %.2f (%+.2f%%)",
+            current_price,
+            new_price,
+            price_return * 100,
         )
         logger.debug(
-            f"  Liquidity: {total_liquidity:.1f}, Impact Factor: {liquidity_factor:.2f}"
+            "  Liquidity: %.1f, Impact Factor: %.2f",
+            total_liquidity,
+            liquidity_factor,
         )
-        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug("  Net Demand: %+.2f, Volume: %.2f", net_demand, total_volume)
 
         market_data = {
             "price": new_price,
@@ -380,34 +386,19 @@ Respond with ONLY valid JSON:
             try:
                 decision = self._parse_llm_response(infer_output.outputs[0].response)
                 break
-            except ValueError as e:
-                last_error = e
+            except Exception as exc:
+                last_error = exc
                 if attempt < max_retries - 1:
                     logger.debug(
-                        f"[{self.identity}] LLM parse failed (attempt {attempt+1}), retrying..."
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
                     )
 
-        # If LLM failed after all retries, skip trading this round (hold)
         if decision is None:
-            logger.warning(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}. "
-                f"Skipping trade this round."
+            raise RuntimeError(
+                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
             )
-            order = {
-                "bid_price": market_data["price"],
-                "quantity": 0.0,
-                "strategy": strategy_name,
-                "investor": self.identity,
-                "reasoning": f"LLM parse failed: held position",
-                "analysis": "",
-                "provides_liquidity": False,
-            }
-            return {
-                **order,
-                "outbound_messages": [
-                    {"payload": order, "content_type": "investor_bid"}
-                ],
-            }
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
@@ -424,10 +415,14 @@ Respond with ONLY valid JSON:
             self.state.custom_state["position"] += quantity
 
         logger.debug(
-            f"[{self.identity:25s}] R{round_num} ({strategy_name:25s}): "
-            f"P={bid_price:7.2f}, Q={quantity:+7.2f} | "
-            f"Cash={self.state.custom_state['cash']:8.2f}, "
-            f"Pos={self.state.custom_state['position']:+7.2f}"
+            "[%-25s] R%s (%-25s): P=%7.2f, Q=%+7.2f | Cash=%8.2f, Pos=%+7.2f",
+            self.identity,
+            round_num,
+            strategy_name,
+            bid_price,
+            quantity,
+            self.state.custom_state["cash"],
+            self.state.custom_state["position"],
         )
 
         order = {
@@ -437,7 +432,7 @@ Respond with ONLY valid JSON:
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
-            "provides_liquidity": decision.get("provides_liquidity", False),
+            "provides_liquidity": decision["provides_liquidity"],
         }
 
         return {
@@ -459,30 +454,41 @@ Respond with ONLY valid JSON:
 
 
 class RuleLLMMyopicLossAverse(RuleLLMInvestor):
-    """Hybrid: MyopicLossAverseInvestor rules + LLM reasoning."""
+    """RuleLLM myopic loss averse — explicit loss aversion rules + LLM reasoning. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class RuleLLMLongTermInvestor(RuleLLMInvestor):
-    """Hybrid: LongHorizonInvestor rules + LLM reasoning."""
+    """RuleLLM long-horizon investor — explicit horizon rules + LLM reasoning. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class RuleLLMInstitutionalInvestor(RuleLLMInvestor):
-    """Hybrid: RiskNeutralInvestor rules + LLM reasoning."""
+    """RuleLLM institutional investor — risk-neutral allocation rules + LLM reasoning. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class RuleLLMRiskAverseSaver(RuleLLMInvestor):
-    """Hybrid: ConservativeInvestor rules + LLM reasoning."""
+    """RuleLLM risk-averse saver — conservative bond-preference rules + LLM reasoning. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class RuleLLMRationalOptimizer(RuleLLMInvestor):
-    """Hybrid: NoiseTrader rules + LLM reasoning."""
+    """RuleLLM rational optimizer — noise trader rules + LLM expected-utility reasoning. Theory: simulation-bases.md §4.5."""
 
     pass
+
+
+__all__ = [
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMMyopicLossAverse",
+    "RuleLLMLongTermInvestor",
+    "RuleLLMInstitutionalInvestor",
+    "RuleLLMRiskAverseSaver",
+    "RuleLLMRationalOptimizer",
+]

@@ -1,0 +1,178 @@
+# =============================================================================
+# CarryTradeUnwind RuleLLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 RuleLLM Investor types with rule-embedded prompts.
+# Each agent has quantitative rules embedded in its system prompt.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based, identical to Rule variant
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.CarryTradeUnwind.RuleLLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/CarryTradeUnwind/RuleLLM/records"
+      fundamental_value: 1.0
+      initial_price: 1.0
+      price_impact: 0.003
+      mean_reversion: 0.02
+      noise_std: 0.005
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Carry Traders — RuleLLM with embedded unwind rules
+# Theory: Brunnermeier, Nagel & Pedersen (2009)
+# -----------------------------------------------------------------------------
+rulellm_carry_trader:
+  name: "RuleLLM Carry Trader"
+  class: "examples.CarryTradeUnwind.RuleLLM.players:RuleLLMCarryTrader"
+  # Expander → rulellm_carry_trader_1, rulellm_carry_trader_2
+  num_instances: 2
+  config:
+    identity: "rulellm_carry_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CarryTradeUnwind/RuleLLM/records"
+      initial_cash: 500000.0
+      initial_position: 500.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_CARRY_TRADER_SYS"
+        user_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Leveraged Carry Funds — RuleLLM with embedded stop-loss rules
+# Theory: Plantin & Shin (2018)
+# -----------------------------------------------------------------------------
+rulellm_leveraged_carry_fund:
+  name: "RuleLLM Leveraged Carry Fund"
+  class: "examples.CarryTradeUnwind.RuleLLM.players:RuleLLMLeveragedCarryFund"
+  # Expander → rulellm_leveraged_carry_fund_1, rulellm_leveraged_carry_fund_2
+  num_instances: 2
+  config:
+    identity: "rulellm_leveraged_carry_fund"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CarryTradeUnwind/RuleLLM/records"
+      initial_cash: 500000.0
+      initial_position: 800.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_LEVERAGED_CARRY_FUND_SYS"
+        user_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Funding Currency Buyers — RuleLLM with embedded safe-haven rules
+# Theory: Menkhoff et al. (2012)
+# -----------------------------------------------------------------------------
+rulellm_funding_currency_buyer:
+  name: "RuleLLM Funding Currency Buyer"
+  class: "examples.CarryTradeUnwind.RuleLLM.players:RuleLLMFundingCurrencyBuyer"
+  # Expander → rulellm_funding_currency_buyer_1, rulellm_funding_currency_buyer_2
+  num_instances: 2
+  config:
+    identity: "rulellm_funding_currency_buyer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CarryTradeUnwind/RuleLLM/records"
+      initial_cash: 300000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_FUNDING_CURRENCY_BUYER_SYS"
+        user_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Hedged Carry Trader — RuleLLM with embedded intervention rules
+# Theory: Menkhoff et al. (2012)
+# -----------------------------------------------------------------------------
+rulellm_hedged_carry_trader:
+  name: "RuleLLM Hedged Carry Trader"
+  class: "examples.CarryTradeUnwind.RuleLLM.players:RuleLLMHedgedCarryTrader"
+  num_instances: 1
+  config:
+    identity: "rulellm_hedged_carry_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CarryTradeUnwind/RuleLLM/records"
+      initial_cash: 2000000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_CENTRAL_BANK_INTERVENER_SYS"
+        user_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.2
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Noise Traders — RuleLLM with random-trader persona
+# Theory: Black (1986)
+# -----------------------------------------------------------------------------
+rulellm_noise_trader:
+  name: "RuleLLM Noise Trader"
+  class: "examples.CarryTradeUnwind.RuleLLM.players:RuleLLMNoiseTrader"
+  # Expander → rulellm_noise_trader_1, rulellm_noise_trader_2
+  num_instances: 2
+  config:
+    identity: "rulellm_noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CarryTradeUnwind/RuleLLM/records"
+      initial_cash: 100000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
+        user_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml

@@ -1,0 +1,260 @@
+# FramingEffect Rag Agent Configuration
+
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+    top_k: 5
+
+market:
+  name: "Market"
+  class: "examples.FramingEffect.Rag.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/FramingEffect/Rag/records"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.01
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+gainframefollower:
+  name: "GainFrameFollower"
+  class: "examples.FramingEffect.Rag.players:RagLLMGainFrameFollower"
+  num_instances: 2
+  config:
+    identity: "gainframefollower"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/FramingEffect/Rag/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FramingEffect.Rag.prompts:RAG_GAIN_FRAME_FOLLOWER_SYS"
+        user_message: "examples.FramingEffect.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
+
+lossframereactor:
+  name: "LossFrameReactor"
+  class: "examples.FramingEffect.Rag.players:RagLLMLossFrameReactor"
+  num_instances: 2
+  config:
+    identity: "lossframereactor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/FramingEffect/Rag/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FramingEffect.Rag.prompts:RAG_LOSS_FRAME_REACTOR_SYS"
+        user_message: "examples.FramingEffect.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
+
+frameinvarianttrader:
+  name: "FrameInvariantTrader"
+  class: "examples.FramingEffect.Rag.players:RagLLMFrameInvariantTrader"
+  num_instances: 1
+  config:
+    identity: "frameinvarianttrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/FramingEffect/Rag/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FramingEffect.Rag.prompts:RAG_FRAME_INVARIANT_TRADER_SYS"
+        user_message: "examples.FramingEffect.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
+
+arbitrageframer:
+  name: "ArbitrageFramer"
+  class: "examples.FramingEffect.Rag.players:RagLLMArbitrageFramer"
+  num_instances: 1
+  config:
+    identity: "arbitrageframer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/FramingEffect/Rag/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FramingEffect.Rag.prompts:RAG_ARBITRAGE_FRAMER_SYS"
+        user_message: "examples.FramingEffect.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.FramingEffect.Rag.players:RagLLMNoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/FramingEffect/Rag/records"
+      initial_cash: 500000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.FramingEffect.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        user_message: "examples.FramingEffect.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml

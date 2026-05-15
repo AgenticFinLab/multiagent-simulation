@@ -1,0 +1,128 @@
+# LossAversion Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.LossAversion.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/LossAversion/Rule/records"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.03
+      mean_reversion: 0.01
+      noise_std: 0.015
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+lossaverseinvestor:
+  name: "LossAverseInvestor"
+  class: "examples.LossAversion.Rule.players:LossAverseInvestor"
+  num_instances: 3
+  config:
+    identity: "lossaverseinvestor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LossAversion/Rule/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      loss_aversion_lambda: 2.25
+      sell_gain_threshold: 0.05
+      base_size: 400
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+breakeventrader:
+  name: "BreakEvenTrader"
+  class: "examples.LossAversion.Rule.players:BreakEvenTrader"
+  num_instances: 2
+  config:
+    identity: "breakeventrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LossAversion/Rule/records"
+      initial_cash: 1200000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      risk_increase_factor: 2.0
+      base_size: 350
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+rationaltrader:
+  name: "RationalTrader"
+  class: "examples.LossAversion.Rule.players:RationalTrader"
+  num_instances: 2
+  config:
+    identity: "rationaltrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LossAversion/Rule/records"
+      initial_cash: 1500000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      risk_aversion: 0.7
+      base_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+momentumtrader:
+  name: "MomentumTrader"
+  class: "examples.LossAversion.Rule.players:MomentumTrader"
+  num_instances: 2
+  config:
+    identity: "momentumtrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LossAversion/Rule/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      entry_threshold: 0.03       # Deviation threshold for momentum entry (§4.4)
+      base_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+marketmaker:
+  name: "MarketMaker"
+  class: "examples.LossAversion.Rule.players:MarketMaker"
+  num_instances: 2
+  config:
+    identity: "marketmaker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LossAversion/Rule/records"
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 150
+      inventory_limit: 2000       # Max position for market-making (§4.5)
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

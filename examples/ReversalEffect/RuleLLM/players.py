@@ -40,32 +40,25 @@ import logging
 import os
 import json
 import random
-import re
-import sys
-import importlib
 from typing import Any, Dict, Optional
-from dotenv import load_dotenv
 
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+from examples.llm_utils import parse_llm_response_with_thinking
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-# Add examples directory to path for shared utilities
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from .prompts import (
+    RULELLM_CONTRARIAN_INVESTOR_SYS,
+    RULELLM_MOMENTUM_INVESTOR_SYS,
+    RULELLM_NOISE_TRADER_SYS,
+    RULELLM_OVERCONFIDENT_TRADER_SYS,
+    RULELLM_VALUE_INVESTOR_SYS,
+)
 
-from examples.llm_utils import parse_llm_response_with_thinking
-
-logger = logging.getLogger("ReversalEffectRuleLLM")
-
-
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt string from module path."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
+logger = logging.getLogger("ReversalEffect.RuleLLM")
 
 
 # =============================================================================
@@ -128,7 +121,7 @@ class Market(GeneralPlayer):
                         "price": order["bid_price"],
                         "quantity": order["quantity"],
                         "strategy": order["strategy"],
-                        "provides_liquidity": order.get("provides_liquidity", False),
+                        "provides_liquidity": order["provides_liquidity"],
                     }
                 )
         self.state.custom_state["orders"] = orders
@@ -177,15 +170,19 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
         self.state.custom_state["liquidity_history"].append(total_liquidity)
 
-        logger.debug(f"\n{'='*70}")
-        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(f"\n{'='*70}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"[Market] Round {round_num}"
+        )  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
         logger.debug(
             f"  Liquidity: {total_liquidity:.1f}, Impact Factor: {liquidity_factor:.2f}"
         )
-        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug(
+            f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}"
+        )  # pylint: disable=logging-fstring-interpolation
 
         market_data = {
             "price": new_price,
@@ -232,6 +229,8 @@ class RuleLLMInvestor(GeneralPlayer):
         - llm: sys_message, user_message, lm_name, generation_config
     """
 
+    _system_prompt: str = ""
+
     async def perceive(
         self,
         observation: Observation,
@@ -249,7 +248,6 @@ class RuleLLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
 
-            load_dotenv()
             llm_config = extras["llm"]
             lm_name = llm_config["lm_name"]
             generation_config = llm_config["generation_config"]
@@ -306,25 +304,7 @@ class RuleLLMInvestor(GeneralPlayer):
             list(price_history)[-5:] if len(price_history) >= 5 else list(price_history)
         )
 
-        llm_config = self.config.extras["llm"]
-        if "user_message" in llm_config:
-            template = load_prompt(llm_config["user_message"])
-            return template.format(
-                round=round_num,
-                price=market_data["price"],
-                prev_price=market_data["prev_price"],
-                return_pct=market_data["return_pct"],
-                liquidity=market_data["liquidity"],
-                fundamental=market_data["fundamental"],
-                volume=market_data["volume"],
-                net_demand=market_data["net_demand"],
-                recent_prices=recent_prices,
-                cash=cash,
-                position=position,
-                portfolio_value=cash + position * market_data["price"],
-            )
-
-        # Fallback inline template
+        llm_config = self.config.extras["llm"]  # noqa: F841
         return f"""
 Round: {round_num}
 Current Price: ${market_data['price']:.2f} | Prev: ${market_data['prev_price']:.2f} | Return: {market_data['return_pct']:+.2f}%
@@ -368,8 +348,7 @@ Respond with ONLY valid JSON:
 
         user_prompt = self._build_prompt(market_data)
 
-        llm_config = self.config.extras["llm"]
-        system_prompt = load_prompt(llm_config["sys_message"])
+        system_prompt = self._system_prompt
 
         max_retries = 3
         decision = None
@@ -437,7 +416,7 @@ Respond with ONLY valid JSON:
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
-            "provides_liquidity": decision.get("provides_liquidity", False),
+            "provides_liquidity": decision["provides_liquidity"],
         }
 
         return {
@@ -461,28 +440,39 @@ Respond with ONLY valid JSON:
 class RuleLLMContrarianInvestor(RuleLLMInvestor):
     """Hybrid: ContrarianInvestor rules + LLM reasoning."""
 
-    pass
+    _system_prompt = RULELLM_CONTRARIAN_INVESTOR_SYS
 
 
 class RuleLLMOverconfidentTrader(RuleLLMInvestor):
-    """Hybrid: MomentumInvestor rules + LLM reasoning."""
+    """Hybrid: OverconfidentTrader rules + LLM reasoning."""
 
-    pass
+    _system_prompt = RULELLM_OVERCONFIDENT_TRADER_SYS
 
 
 class RuleLLMValueInvestor(RuleLLMInvestor):
-    """Hybrid: OverconfidentTrader rules + LLM reasoning."""
+    """Hybrid: ValueInvestor rules + LLM reasoning."""
 
-    pass
+    _system_prompt = RULELLM_VALUE_INVESTOR_SYS
 
 
 class RuleLLMMomentumChaser(RuleLLMInvestor):
-    """Hybrid: NoiseTrader rules + LLM reasoning."""
+    """Hybrid: MomentumInvestor rules + LLM reasoning."""
 
-    pass
+    _system_prompt = RULELLM_MOMENTUM_INVESTOR_SYS
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """Hybrid: ValueInvestor rules + LLM reasoning."""
+    """Hybrid: NoiseTrader rules + LLM reasoning."""
 
-    pass
+    _system_prompt = RULELLM_NOISE_TRADER_SYS
+
+
+__all__ = [
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMContrarianInvestor",
+    "RuleLLMOverconfidentTrader",
+    "RuleLLMValueInvestor",
+    "RuleLLMMomentumChaser",
+    "RuleLLMNoiseTrader",
+]

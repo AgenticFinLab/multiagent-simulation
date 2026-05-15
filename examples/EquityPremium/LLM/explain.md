@@ -1,145 +1,106 @@
-# EquityPremium LLM - LLM-Powered Equity Premium Puzzle Simulation
+# EquityPremium LLM — Implementation Explanation
 
-## What is This?
+## §1 Overview
 
-| Item               | Description                                                            |
-|--------------------|------------------------------------------------------------------------|
-| **Phenomenon**     | 股权溢价之谜 (Equity Premium Puzzle) - LLM-driven myopic loss aversion |
-| **Model**          | LLM-based investors with psychological biases + Rule-based market      |
-| **Key Feature**    | LLMs exhibit loss aversion and myopic evaluation like real investors   |
-| **Academic Value** | Tests whether LLMs can reproduce Benartzi & Thaler (1995) MLA theory   |
+The LLM variant replaces deterministic allocation formulas with persona-driven LLM reasoning. Each investor class encodes behavioral biases (loss aversion, horizon preference, risk attitude) in a system prompt. The LLM observes market data and reasons freely within the persona to determine stock allocation adjustments.
 
-## Rule-Based vs LLM Comparison
+| Aspect             | Detail                                                                    |
+|--------------------|---------------------------------------------------------------------------|
+| Variant            | LLM (language-model persona)                                              |
+| Simulation         | EquityPremium                                                             |
+| Decision Mechanism | LLM persona system prompts — no hardcoded allocation formulas             |
+| Theory Reference   | `simulation-bases.md §4.1–§4.5`                                           |
+| Market Broadcast   | `stock_price`, `prev_stock_price`, `stock_return`, `bond_return`, `round` |
 
-| Aspect             | Rule-Based (EquityPremium) | LLM Version                      |
-|--------------------|----------------------------|----------------------------------|
-| Loss Aversion      | Formula-based λ=2.25       | LLM "losses hurt 2.25x more"     |
-| Evaluation Horizon | Fixed frequency            | LLM chooses evaluation frequency |
-| Rebalancing        | Deterministic rules        | LLM reasons about allocation     |
-| Emergence          | Predictable premium        | Emergent risk aversion           |
+## §2 Theory → Implementation Mapping
 
-## LLM Provider
+### §2.1 LLMMyopicLossAverse (simulation-bases.md §4.1)
 
-- **Provider**: ByteDance Doubao (豆包) via `lmbase.LangChainAPIInference`
-- **Model**: `doubao-pro-256k`
+| Theory Component                               | Implementation                                                                                                |
+|------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| Myopic loss aversion (Benartzi & Thaler, 1995) | System prompt: "You evaluate your portfolio every single round; losses hurt 2.25x more than equivalent gains" |
+| Loss aversion drives under-allocation          | Persona resists buying after negative returns; LLM reasons about emotional pain of loss                       |
+| Short evaluation horizon                       | Prompt instructs: focus on current and recent returns, not long-term trends                                   |
 
-## 5 LLM Investor Types
+### §2.2 LLMLongTermInvestor (simulation-bases.md §4.2)
 
-| Type               | Count | Role           | Stock Target |
-|--------------------|-------|----------------|--------------|
-| Myopic Loss-Averse | 3     | Premium Driver | 30-50%       |
-| Long-Term Investor | 2     | Stabilizer     | 60-80%       |
-| Institutional      | 1     | Benchmark      | 60%          |
-| Risk-Averse Saver  | 1     | Extreme MLA    | 20-30%       |
-| Rational Optimizer | 1     | Theoretical    | 50-70%       |
+| Theory Component                          | Implementation                                                                        |
+|-------------------------------------------|---------------------------------------------------------------------------------------|
+| Long evaluation horizon (Samuelson, 1969) | System prompt: "You ignore short-term volatility; focus on long-term expected return" |
+| Stable high allocation                    | Persona maintains 60–80% stock target; LLM reasons about long-term compounding        |
+| Counter-cyclical buying                   | Prompt instructs buying on dips that short-term investors are selling                 |
 
-### Myopic Loss-Averse Investor (Key Type)
+### §2.3 LLMInstitutionalInvestor (simulation-bases.md §4.3)
 
-```
-PSYCHOLOGY:
-- Evaluate EVERY round (myopic)
-- Losses hurt 2.25x more than gains (λ=2.25)
-- Stocks look VERY risky
-- Target: 30-50% stocks
+| Theory Component                                | Implementation                                                                   |
+|-------------------------------------------------|----------------------------------------------------------------------------------|
+| Risk-neutral benchmark (Mehra & Prescott, 1985) | System prompt: "You maximize expected return; you are indifferent to volatility" |
+| Excess return signal                            | LLM reasons about excess return between stock and bond; allocates proportionally |
+| No behavioral bias                              | Persona explicitly lacks loss aversion or inertia                                |
 
-After negative return: Reduce stocks
-```
+### §2.4 LLMRiskAverseSaver (simulation-bases.md §4.4)
 
-### Long-Term Investor (Counter-Type)
+| Theory Component                                           | Implementation                                                                      |
+|------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| Prospect theory bond preference (Kahneman & Tversky, 1979) | System prompt: "You strongly prefer capital preservation; any loss is unacceptable" |
+| Persistent under-allocation                                | Persona demands very high premium before buying stocks; defaults to bonds           |
+| Extreme loss aversion                                      | Prompt encodes: "Even a 1% drop triggers reduction in stock position"               |
 
-```
-PSYCHOLOGY:
-- Daily volatility = noise
-- Focus on long-term returns
-- Maintain HIGH stock allocation (60-80%)
-- Buy when others panic
-```
+### §2.5 LLMRationalOptimizer (simulation-bases.md §4.5)
 
-### Risk-Averse Saver (Extreme MLA)
+| Theory Component                                | Implementation                                                            |
+|-------------------------------------------------|---------------------------------------------------------------------------|
+| Noise trading / rational baseline (Black, 1986) | System prompt: "You optimize expected utility; use all available signals" |
+| Adaptive allocation                             | LLM reasons about full market context; adjusts allocation dynamically     |
+| Behavioral awareness                            | Persona acknowledges other investors' biases and exploits mispricings     |
 
-```
-- HATE volatility
-- Target: 20-30% stocks maximum
-- Any drop → reduce stocks
-```
+## §3 Market Mechanism
 
-## Key Mechanism: Myopic Loss Aversion
+*Formula source: simulation-bases.md §3.1*
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                 MLA EVALUATION CYCLE                     │
-│                                                          │
-│    Frequent Evaluation    +    Loss Aversion (λ=2.25)   │
-│           │                         │                    │
-│           ▼                         ▼                    │
-│   ┌───────────────┐         ┌───────────────┐           │
-│   │ More Loss     │         │ Losses Hurt   │           │
-│   │ Observations  │         │ More Than     │           │
-│   │               │         │ Gains Feel    │           │
-│   └───────┬───────┘         └───────┬───────┘           │
-│           │                         │                    │
-│           └──────────┬──────────────┘                    │
-│                      │                                   │
-│                      ▼                                   │
-│           ┌─────────────────────┐                        │
-│           │  Stocks Appear      │                        │
-│           │  TOO RISKY          │                        │
-│           │  (even though       │                        │
-│           │   they're not)      │                        │
-│           └──────────┬──────────┘                        │
-│                      │                                   │
-│                      ▼                                   │
-│           ┌─────────────────────┐                        │
-│           │  Demand Higher      │                        │
-│           │  Risk Premium       │                        │
-│           │  (~6% vs 1% bonds)  │                        │
-│           └─────────────────────┘                        │
-└─────────────────────────────────────────────────────────┘
+P(t+1) = P(t) × (1 + μ_stock + demand_impact + ε(t))
+demand_impact = 0.001 × sum(stock_qty_i)
 ```
 
-## Theoretical Basis: Benartzi & Thaler (1995)
+Market class is imported from or shared with Rule/players.py. All LLM investors send `stock_qty` orders.
 
-**Myopic Loss Aversion (MLA)**:
-- Combines two behavioral factors:
-  1. **Loss Aversion** (Kahneman & Tversky): Losses weigh ~2.25x more than equivalent gains
-  2. **Myopic Evaluation**: Frequent portfolio checking makes volatility salient
-- Result: Investors perceive stocks as riskier than rational analysis suggests
-- Explains why equity premium (~6%) is "too high" relative to bond returns (~1%)
-- LLMs model this by explicitly stating psychological evaluation patterns
+## §4 Variant Architecture
 
-## Files
+| Component      | Detail                                                                                     |
+|----------------|--------------------------------------------------------------------------------------------|
+| Base class     | `LLMInvestor` → `GeneralPlayer`                                                            |
+| Inference      | `LangChainAPIInference` (3-attempt retry)                                                  |
+| Context        | `stock_price`, `prev_stock_price`, `stock_return`, `bond_return`, `cash`, `stock`, `round` |
+| Output parsing | `parse_llm_response_with_thinking()` → `{"stock_qty": ..., "strategy": ...}`               |
+| Retry logic    | 3 attempts; falls back to hold (stock_qty = 0) on failure                                  |
 
-| File          | Purpose                                          |
-|---------------|--------------------------------------------------|
-| `players.py`  | LLM investor implementations with MLA psychology |
-| `prompts.py`  | 5 system prompts defining loss aversion patterns |
-| `run_llm.py`  | LLM simulation runner                            |
-| `analysis.py` | Premium and allocation metrics                   |
+## §5 Config Reference
 
-## Running
+Config file: `configs/EquityPremium/LLM/simulation.yml`
+
+LLM config under `extras.llm`:
+- `lm_name`: model identifier
+- `generation_config`: temperature, max_tokens etc.
+
+## §6 Running Instructions
 
 ```bash
-cd examples/EquityPremium/LLM
-python run_llm.py
+python -m examples.EquityPremium.LLM.run_equity_premium_llm \
+    -c configs/EquityPremium/LLM/simulation.yml
 ```
 
-## Expected LLM Behavior Patterns
+## §7 Expected Behavior
 
-1. **Myopic Evaluation**: MLA investors check portfolio every round
-2. **Loss Over-Reaction**: Stock drops trigger immediate selling
-3. **Under-Allocation**: MLA investors hold <50% stocks despite higher returns
-4. **Long-Term Stability**: Long-horizon investors maintain high allocation
-5. **Premium Emergence**: Market-clearing requires higher expected returns for stocks
+- **Premium emergence**: LLM loss-averse personas produce 3–9% annualized premium; higher variance than Rule
+- **Allocation variability**: LLMMyopicLossAverse may hold 15–55% stocks (wider range than Rule's 20–40%)
+- **Horizon effect**: LLMLongTermInvestor maintains 55–75% allocation (similar to Rule)
+- **SEP range**: 0.03–0.09 (wider than Rule due to LLM stochasticity)
 
-## Research Questions
+## §8 References
 
-1. Do LLMs exhibit genuine loss aversion in their reasoning?
-2. Can LLMs reproduce the ~6% equity premium through behavioral biases?
-3. How do LLM evaluation frequencies compare to human investor behavior?
-4. Does the mix of MLA and long-term investors produce realistic allocations?
+See `simulation-bases.md §2` for full DOI citations for all theoretical foundations.
 
-## References
+## §9 Variant Comparison
 
-- Benartzi, S., & Thaler, R. H. (1995). Myopic Loss Aversion and the Equity Premium Puzzle. QJE.
-- Kahneman, D., & Tversky, A. (1979). Prospect Theory. Econometrica.
-- Mehra, R., & Prescott, E. C. (1985). The Equity Premium: A Puzzle. JME.
+See `simulation-bases.md §9` for Rule / LLM / RuleLLM / Rag comparison table.

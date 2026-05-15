@@ -1,159 +1,105 @@
-# DispositionEffect LLM - LLM-Powered Disposition Effect Simulation
+# DispositionEffect LLM Variant — explain.md
 
-## What is This?
+## §1 Overview
 
-| Item               | Description                                                                                             |
-|--------------------|---------------------------------------------------------------------------------------------------------|
-| **Phenomenon**     | **Disposition Effect (处置效应)** - LLM-driven tendency to sell winners too early, hold losers too long |
-| **Model**          | LLM-based investors with Prospect Theory personalities + Rule-based market clearing                     |
-| **Key Feature**    | Investors use LLM reasoning to exhibit asymmetric gain/loss psychology                                  |
-| **Academic Value** | Tests whether LLMs can simulate Kahneman & Tversky's Prospect Theory biases                             |
+The LLM variant replaces rule-based decisions with LLM inference. Each investor receives a persona system prompt describing their disposition-effect archetype and responds to market broadcasts with a structured buy/sell/hold decision. This tests whether LLMs can simulate Kahneman & Tversky's Prospect Theory biases through persona alone.
 
-## Rule-Based vs LLM-Based Comparison
+| Aspect             | Detail                                                                        |
+|--------------------|-------------------------------------------------------------------------------|
+| Variant            | LLM                                                                           |
+| Simulation         | DispositionEffect                                                             |
+| Decision Mechanism | LLM persona prompt + market broadcast                                         |
+| Theory Reference   | `simulation-bases.md §4.1–§4.5`                                               |
+| Market Broadcast   | `price`, `purchase_price`, `gain_loss`, `cash`, `position`, `portfolio_value` |
+| Prompt Location    | `DispositionEffect/LLM/prompts.py`                                            |
 
-| Aspect             | DispositionEffect (Rule-Based)         | DispositionEffect LLM (LLM-Based)           |
-|--------------------|----------------------------------------|--------------------------------------------|
-| **Decision Logic** | Fixed utility function formulas        | LLM reasons about gains/losses via prompts |
-| **Investor Types** | 5 types with hardcoded strategies      | 5 types with personality-defining prompts  |
-| **Behavior**       | Deterministic reference point tracking | Stochastic emotional responses             |
-| **Market**         | Rule-based order clearing              | **Same** rule-based order clearing         |
-| **Psychology**     | From mathematical λ=2.25 formula       | From LLM "fear of loss" reasoning          |
-| **Research Value** | Mechanism validation                   | LLM emotional realism + emergent biases    |
+## §2 Theory → Implementation Mapping
 
-## 5 LLM Investor Types
+### §2.1 LLMDispositionBiased (simulation-bases.md §4.1)
 
-### Investor Type Summary
+| Theory Component                           | LLM Implementation                                                             |
+|--------------------------------------------|--------------------------------------------------------------------------------|
+| Prospect Theory (Kahneman & Tversky, 1979) | Persona: "You feel losses 2.25× more painfully than equivalent gains"          |
+| Gain domain sell eagerness                 | Persona instructs selling quickly when gain exceeds ~5%; "lock in profit"      |
+| Loss domain reluctance                     | Persona instructs holding losers: "you can't bring yourself to lock in a loss" |
+| Reference point anchoring                  | `{purchase_price}` and `{gain_loss}` provided in prompt                        |
 
-| Type                     | Strategy            | Market Effect         | System Prompt Focus                 |
-|--------------------------|---------------------|-----------------------|-------------------------------------|
-| **LLMDispositionBiased** | Prospect Theory     | ⭐ DISPOSITION EFFECT  | "Losses hurt 2.25x more than gains" |
-| **LLMRational**          | Expected utility    | STABILIZING           | "Past prices are irrelevant"        |
-| **LLMTaxAware**          | Tax-loss harvesting | ANTI-DISPOSITION      | "Sell losers for tax benefits"      |
-| **LLMInstitutional**     | Process-driven      | NEUTRAL               | "Emotion has no place"              |
-| **LLMLossAverse**        | Extreme risk averse | ⭐ EXTREME DISPOSITION | "I cannot afford to lose money"     |
+### §2.2 LLMRationalInvestor (simulation-bases.md §4.2)
 
-### 1. LLMDispositionBiased (⭐ Primary Effect Driver)
+| Theory Component        | LLM Implementation                                                                 |
+|-------------------------|------------------------------------------------------------------------------------|
+| Expected Utility Theory | Persona: "Past prices are irrelevant; you only care about future expected returns" |
+| Fundamental trading     | `{price}` and fundamental context in prompt; LLM rebalances toward fundamental     |
+| No reference point      | Persona explicitly ignores purchase price                                          |
 
-**Theory**: Kahneman & Tversky (1979) Prospect Theory - λ = 2.25
+### §2.3 LLMTaxAwareInvestor (simulation-bases.md §4.3)
 
-| Aspect         | Description                                    |
-|----------------|------------------------------------------------|
-| **Effect**     | DISPOSITION EFFECT - sell winners, hold losers |
-| **Psychology** | Losses hurt 2.25x more than gains              |
-| **Behavior**   | Gain > 5% → Sell; Loss < -5% → Hold            |
+| Theory Component                           | LLM Implementation                                                                                 |
+|--------------------------------------------|----------------------------------------------------------------------------------------------------|
+| Tax-loss harvesting (Constantinides, 1983) | Persona: "You sell losers specifically to harvest tax losses; hold winners to defer capital gains" |
+| Anti-disposition framing                   | Persona explicitly reverses psychological bias via economic rationale                              |
 
-### 2. LLMRational (Stabilizing)
+### §2.4 LLMInstitutionalInvestor (simulation-bases.md §4.5)
 
-**Theory**: Rational expectations - past prices don't matter for decisions.
+| Theory Component                                  | LLM Implementation                                                           |
+|---------------------------------------------------|------------------------------------------------------------------------------|
+| Professional discipline (Shapira & Venezia, 2001) | Persona: "Emotion has no place in your decisions; you apply symmetric rules" |
+| Symmetric thresholds                              | Persona conveys equal treatment of gains and losses                          |
 
-| Aspect         | Description                          |
-|----------------|--------------------------------------|
-| **Effect**     | STABILIZING - trades on fundamentals |
-| **Behavior**   | Buy undervalued, sell overvalued     |
-| **Psychology** | No reference point dependence        |
+### §2.5 LLMLossAverse (simulation-bases.md §4.1)
 
-### 3. LLMTaxAware (Anti-Disposition)
+| Theory Component      | LLM Implementation                                                           |
+|-----------------------|------------------------------------------------------------------------------|
+| Extreme loss aversion | Persona: "I absolutely cannot afford to lose money; losses are catastrophic" |
+| Amplified reluctance  | More extreme version of LLMDispositionBiased persona                         |
 
-**Theory**: Tax-loss harvesting - sell losers for tax benefits.
+## §3 Prompt Variables
 
-| Aspect       | Description                             |
-|--------------|-----------------------------------------|
-| **Effect**   | ANTI-DISPOSITION - opposite behavior    |
-| **Behavior** | Sell losers (tax benefit), hold winners |
-| **Logic**    | Tax optimization, not emotion           |
+| Variable            | Source           | Example Value         |
+|---------------------|------------------|-----------------------|
+| `{price}`           | Market broadcast | `103.5`               |
+| `{purchase_price}`  | Agent state      | `100.0`               |
+| `{gain_loss}`       | Computed         | `+3.5%`               |
+| `{cash}`            | Agent state      | `80000.0`             |
+| `{position}`        | Agent state      | `500`                 |
+| `{portfolio_value}` | Computed         | `131750.0`            |
+| `{history}`         | `HistoryBuffer`  | Last 5 rounds summary |
 
-### 4. LLMInstitutional (Process-Driven)
+## §4 Variant-Specific Features
 
-**Theory**: Professional portfolio management - systematic rebalancing.
+- **Emotional language**: LLM agents may exhibit "fear of loss" or "excitement of profit" in reasoning traces — testable against Rule's mechanical threshold.
+- **Threshold drift**: LLM may sell winners at varying gain levels (not fixed 3%) — produces wider PGR/PLR variance.
+- **Loss anchoring**: LLM may reference `{purchase_price}` explicitly in reasoning; may express reluctance more strongly than Rule variant.
+- **LLMLossAverse vs. LLMDispositionBiased**: Two disposition-biased LLM archetypes allow testing intensity gradient.
+- **Response parsing**: `parse_llm_response_with_thinking()` extracts `action` and `quantity` from LLM output.
 
-| Aspect         | Description                          |
-|----------------|--------------------------------------|
-| **Effect**     | NEUTRAL - process over emotion       |
-| **Behavior**   | Rebalance based on portfolio weights |
-| **Psychology** | Disciplined, emotionless             |
-
-### 5. LLMLossAverse (⭐ Extreme)
-
-**Theory**: Extreme loss aversion - λ = 3.0
-
-| Aspect         | Description                                |
-|----------------|--------------------------------------------|
-| **Effect**     | EXTREME DISPOSITION - paralyzed by loss    |
-| **Psychology** | Losses feel 3x worse, cannot act           |
-| **Behavior**   | At loss → NEVER sell; At gain → Sell quick |
-
-## Market Clearing (Rule-Based)
+## §5 Architecture
 
 ```
-Price Model:
-
-  P(t+1) = P(t) + λ×D(t) + γ×[F - P(t)] + ε
-  
-  Where:
-    λ = 0.1   (price impact)
-    γ = 0.02  (mean reversion)
-    F = 100.0 (fundamental value)
-
-Disposition Effect creates asymmetric selling:
-  Winners → Quick selling → Price resistance at highs
-  Losers → No selling → Price support at lows (artificial)
+Market.decide() → broadcast market_data
+LLMInvestor.perceive() → store market_data, purchase_price
+LLMInvestor.decide() → LangChainAPIInference.infer(system_prompt, user_prompt)
+                     → parse_llm_response_with_thinking() → {action, quantity}
+LLMInvestor.act() → update cash/position, submit bid order
 ```
 
-## Topology (Star Network)
+## §6 Config Reference
 
-```
-                         ┌───────────────────┐
-                         │      market       │ ◄── Level 0
-                         └─────────┬─────────┘
-                                   │
-         ┌───────────┬─────────────┼─────────────┬───────────┐
-         ▼           ▼             ▼             ▼           ▼
-   llm_disposition llm_rational  llm_tax_aware llm_inst    llm_loss_averse
-   (⭐ disposition) (stabilize)  (anti-disp)   (neutral)   (⭐ extreme)
-```
+Same `config.yaml` as Rule variant; LLM extras: `model_name`, `temperature`, `max_tokens`.
 
-## Files
-
-| File                                                   | Purpose                          |
-|--------------------------------------------------------|----------------------------------|
-| `examples/DispositionEffect/LLM/players.py`             | Market + 5 LLM investor classes  |
-| `examples/DispositionEffect/LLM/prompts.py`             | System and user prompt templates |
-| `examples/DispositionEffect/LLM/run_disposition_llm.py` | Entry point                      |
-| `configs/DispositionEffect/LLM/simulation.yml`          | Main config                      |
-| `configs/DispositionEffect/LLM/players.yml`             | Player definitions + LLM config  |
-| `configs/DispositionEffect/LLM/topology.yml`            | Star topology                    |
-
-## Running
+## §7 Running Instructions
 
 ```bash
-export ARK_API_KEY='your-bytedance-doubao-api-key'
-python examples/DispositionEffect/LLM/run_disposition_llm.py -c configs/DispositionEffect/LLM/simulation.yml
+python -m examples.DispositionEffect.LLM.run_disposition_llm
 ```
 
-## Expected LLM Behavior Patterns
+## §8 Expected Behavior
 
-| Phase       | Rounds | LLM Behavior                                              |
-|-------------|--------|-----------------------------------------------------------|
-| Initial     | 1-3    | LLMs establish reference points at purchase price         |
-| Gains       | 4-7    | Price rises → DispositionBiased sells, LossAverse nervous |
-| Losses      | 8-12   | Price falls → DispositionBiased holds, paralyzed          |
-| Recovery    | 13-16  | Price recovers → Relief selling ("finally break even")    |
-| Equilibrium | 17-20  | Tax-aware + Rational provide correcting trades            |
+- PGR/PLR variance higher than Rule (threshold drift from LLM reasoning)
+- LLMDispositionBiased may exhibit stronger loss reluctance verbally but may capitulate earlier under extreme losses
+- LLMLossAverse should produce lowest PLR (extreme reluctance to realize losses)
+- LLMRationalInvestor may still exhibit mild disposition effect (emergent from LLM training data)
 
-## Research Questions
+## §9 References
 
-| Question                                               | How to Test                                            |
-|--------------------------------------------------------|--------------------------------------------------------|
-| Can LLMs exhibit Prospect Theory loss aversion?        | Track selling decisions relative to reference point    |
-| Does the disposition effect emerge from LLM reasoning? | Measure asymmetric holding periods (winners vs losers) |
-| Can LLM tax-aware investors offset disposition bias?   | Compare portfolios with/without tax-aware agents       |
-| Is LLM disposition more realistic than rule-based?     | Compare with Odean (1998) empirical findings           |
-
-## References
-
-| Theory                  | Application in DispositionEffect LLM         | Reference                 |
-|-------------------------|---------------------------------------------|---------------------------|
-| **Prospect Theory**     | LLMDispositionBiased loss aversion (λ=2.25) | Kahneman & Tversky (1979) |
-| **Disposition Effect**  | Sell winners early, hold losers long        | Shefrin & Statman (1985)  |
-| **Tax-Loss Harvesting** | LLMTaxAware sells losers for tax benefit    | (Tax Strategy)            |
-| **Empirical Evidence**  | Documented in retail investor data          | Odean (1998)              |
+See `simulation-bases.md §2` for full DOI citations.

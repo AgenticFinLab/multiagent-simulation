@@ -49,7 +49,7 @@ rulellm_momentum:
         sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_MOMENTUM_SYS"
         user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -76,7 +76,7 @@ rulellm_contrarian:
         sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_CONTRARIAN_SYS"
         user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -103,7 +103,7 @@ rulellm_risk_averse:
         sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_RISK_AVERSE_SYS"
         user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -130,7 +130,7 @@ rulellm_aggressive:
         sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_AGGRESSIVE_SYS"
         user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -157,7 +157,7 @@ rulellm_noise:
         sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_NOISE_SYS"
         user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_new_tokens: 500

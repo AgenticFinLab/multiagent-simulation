@@ -1,0 +1,117 @@
+market:
+  name: "Market"
+  class: "examples.TulipMania.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: market
+    steps_per_turn: 1
+    group_tags: [market]
+    record_path: "EXPERIMENT/TulipMania/Rule/records/market"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.02
+      mean_reversion: 0.008
+      noise_std: 0.015
+
+trendchaser:
+  name: "TrendChaser"
+  class: "examples.TulipMania.Rule.players:TrendChaser"
+  num_instances: 4
+  config:
+    identity: "trendchaser"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/Rule/records/trendchaser"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 300
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trend_threshold: 0.01
+      chase_size: 400
+      custom_state_hot_limit: 3
+
+socialprooffollower:
+  name: "SocialProofFollower"
+  class: "examples.TulipMania.Rule.players:SocialProofFollower"
+  num_instances: 3
+  config:
+    identity: "socialprooffollower"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/Rule/records/socialprooffollower"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 800000.0
+      initial_position: 400
+      initial_price: 100.0
+      fundamental_value: 100.0
+      crowd_threshold: 0.3
+      follow_size: 350
+      custom_state_hot_limit: 3
+
+intrinsicvaluetrader:
+  name: "IntrinsicValueTrader"
+  class: "examples.TulipMania.Rule.players:IntrinsicValueTrader"
+  num_instances: 2
+  config:
+    identity: "intrinsicvaluetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/Rule/records/intrinsicvaluetrader"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 1500000.0
+      initial_position: 600
+      initial_price: 100.0
+      fundamental_value: 100.0
+      overvalue_threshold: 0.2
+      position_size: 350
+      custom_state_hot_limit: 3
+
+earlyexittrader:
+  name: "EarlyExitTrader"
+  class: "examples.TulipMania.Rule.players:EarlyExitTrader"
+  num_instances: 2
+  config:
+    identity: "earlyexittrader"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/Rule/records/earlyexittrader"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 1200000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      exit_threshold: 0.4
+      exit_size: 400
+      custom_state_hot_limit: 3
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.TulipMania.Rule.players:NoiseTrader"
+  num_instances: 2
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/Rule/records/noisetrader"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 100
+      custom_state_hot_limit: 3

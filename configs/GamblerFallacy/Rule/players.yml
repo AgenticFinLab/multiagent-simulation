@@ -1,0 +1,128 @@
+# GamblerFallacy Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.GamblerFallacy.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/GamblerFallacy/Rule/records"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.01
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+streakreversaltrader:
+  name: "StreakReversalTrader"
+  class: "examples.GamblerFallacy.Rule.players:StreakReversalTrader"
+  num_instances: 2
+  config:
+    identity: "streakreversaltrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/GamblerFallacy/Rule/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      streak_threshold: 3
+      base_size: 400
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+hothandtrader:
+  name: "HotHandTrader"
+  class: "examples.GamblerFallacy.Rule.players:HotHandTrader"
+  num_instances: 2
+  config:
+    identity: "hothandtrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/GamblerFallacy/Rule/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      hot_threshold: 2
+      base_size: 350
+      continuation_multiplier: 1.5
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+independentassessor:
+  name: "IndependentAssessor"
+  class: "examples.GamblerFallacy.Rule.players:IndependentAssessor"
+  num_instances: 1
+  config:
+    identity: "independentassessor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/GamblerFallacy/Rule/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      value_trigger: 0.04
+      base_size: 400
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+arbitrageur:
+  name: "Arbitrageur"
+  class: "examples.GamblerFallacy.Rule.players:Arbitrageur"
+  num_instances: 1
+  config:
+    identity: "arbitrageur"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/GamblerFallacy/Rule/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      arbitrage_threshold: 0.05
+      position_size: 500
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.GamblerFallacy.Rule.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/GamblerFallacy/Rule/records"
+      initial_cash: 500000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      min_order: 100
+      max_order: 500
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

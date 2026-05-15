@@ -1,133 +1,160 @@
-# LiquidityDryup LLM - LLM-Powered Liquidity Dry-up Simulation
+# LiquidityDryup — LLM Variant Explanation
 
-## What is This?
+## §1 Overview
 
-| Item               | Description                                                                       |
-|--------------------|-----------------------------------------------------------------------------------|
-| **Phenomenon**     | 流动性枯竭 (Liquidity Dry-up) - LLM-driven market maker withdrawal cascade        |
-| **Model**          | LLM-based investors with withdrawal psychology + Rule-based market                |
-| **Key Feature**    | LLM market makers decide when to withdraw liquidity based on perceived risk       |
-| **Academic Value** | Tests whether LLMs can reproduce Brunnermeier & Pedersen (2009) liquidity spirals |
+| Item               | Description                                                                                                               |
+|--------------------|---------------------------------------------------------------------------------------------------------------------------|
+| **Phenomenon**     | Liquidity dry-up with LLM-driven market maker withdrawal — agents reason about stress signals and decide when to withdraw |
+| **Variant**        | LLM-based: all 5 investor classes use language model reasoning with persona-specific system prompts                       |
+| **Investor Count** | 5 LLM classes: LLMMarketMaker, LLMLiquiditySeeker, LLMValueTrader, LLMMomentumTrader, LLMNoiseTrader (approx.)            |
+| **Key Feature**    | Emergent market maker withdrawal coordination — LLMs observe liquidity levels and may follow others' withdrawal           |
+| **Academic Value** | Tests whether LLM agents reproduce Brunnermeier–Pedersen liquidity spirals through narrative reasoning                    |
 
-## Rule-Based vs LLM Comparison
+---
 
-| Aspect          | Rule-Based (LiquidityDryup)   | LLM Version                        |
-|-----------------|-------------------------------|------------------------------------|
-| MM Withdrawal   | Formula-based inventory model | LLM reasons about risk conditions  |
-| Cascade Trigger | Liquidity < threshold         | LLM observes "others withdrawing"  |
-| Arbitrageur     | Deterministic entry           | LLM decides if "prime opportunity" |
-| Emergence       | Predictable cascades          | Emergent withdrawal behavior       |
+## §2 Theory → Implementation Mapping
 
-## LLM Provider
+### §2.1 LLM MarketMaker (simulation-bases.md §4.1)
 
-- **Provider**: ByteDance Doubao (豆包) via `lmbase.LangChainAPIInference`
-- **Model**: `doubao-pro-256k`
+| Theory Element           | LLM Implementation                                                                   |
+|--------------------------|--------------------------------------------------------------------------------------|
+| Inventory risk threshold | System prompt describes withdrawal conditions: "liquidity < 50" or "volatility > 2%" |
+| Emergent coordination    | LLM observes total liquidity in user message — may follow peers' withdrawal signal   |
+| Social observation       | Prompt: "others are withdrawing" context provided when liquidity falls               |
+| Quantity                 | LLM determines inventory adjustment; hard constraints enforced post-LLM              |
 
-## 5 LLM Investor Types
+### §2.2 LLM LiquiditySeeker (simulation-bases.md §4.2)
 
-| Type               | Count | Role               | Key Behavior                        |
-|--------------------|-------|--------------------|-------------------------------------|
-| Market Maker       | 2     | Liquidity Provider | Withdraws when stressed             |
-| Liquidity Demander | 2     | Liquidity Consumer | Adjusts trade size by liquidity     |
-| Arbitrageur        | 1     | Crisis Opportunist | Provides liquidity when others flee |
-| Value Investor     | 1     | Fundamental Anchor | Patient, ignores liquidity          |
-| Forced Seller      | 1     | Cascade Trigger    | Must sell regardless of conditions  |
+| Theory Element       | LLM Implementation                                                      |
+|----------------------|-------------------------------------------------------------------------|
+| Random trade need    | LLM reasons about urgency of trade given liquidity conditions           |
+| Execution constraint | Prompt frames liquidity as a cost — LLM may reduce quantity voluntarily |
+| Narrative framing    | "You must trade, but liquidity is low — adjust accordingly"             |
 
-### Market Maker (Withdrawal Decision)
+### §2.3 LLM ValueTrader (simulation-bases.md §4.3)
 
-```
-WITHDRAWAL CONDITIONS (provides_liquidity = 0):
-- Liquidity < 50: Others withdrawing
-- Liquidity factor > 1.5: Stressed
-- Return > 3%: Too volatile
+| Theory Element                 | LLM Implementation                                                                 |
+|--------------------------------|------------------------------------------------------------------------------------|
+| Crisis opportunity recognition | Prompt frames low-liquidity, high-deviation periods as buying opportunities        |
+| Fundamental anchoring          | LLM receives `{price, fundamental, deviation%}` and decides if "prime opportunity" |
+| Liquidity provision            | Prompt instructs: "provide liquidity when others flee"                             |
 
-When ACTIVE: provides_liquidity = 20-40
-```
+### §2.4 LLM MomentumTrader (simulation-bases.md §4.4)
 
-### Arbitrageur (Crisis Opportunity)
+| Theory Element        | LLM Implementation                                                  |
+|-----------------------|---------------------------------------------------------------------|
+| Trend following       | Prompt describes momentum strategy: follow return direction         |
+| Cascade amplification | LLM may amplify momentum when liquidity is low (higher price moves) |
 
-```
-STRATEGY:
-- Liquidity < 40: Prime opportunity
-- Price deviation > 5%: Trade opportunity
-- PROVIDE liquidity when others withdraw
-```
+### §2.5 LLM NoiseTrader (simulation-bases.md §4.5)
 
-### Forced Seller (Cascade Trigger)
+| Theory Element    | LLM Implementation                                       |
+|-------------------|----------------------------------------------------------|
+| Random order flow | Prompt produces uncertain, context-aware random trading  |
+| Low coherence     | LLM may occasionally deviate from expected noise pattern |
 
-```
-- Sell 10-20 shares per round regardless
-- Accept price impact as cost
-```
+---
 
-## Key Mechanism: Liquidity Spiral
+## §3 Market Mechanism
+
+Same rule-based `Market` as Rule variant. Price formation:
 
 ```
-                    Forced Selling
-                         │
-                         ▼
-              ┌─────────────────────┐
-              │   Price Impact      │
-              │   (Low Liquidity)   │
-              └──────────┬──────────┘
-                         │
-          ┌──────────────┼──────────────┐
-          │              │              │
-          ▼              ▼              ▼
-   ┌──────────┐   ┌──────────┐   ┌──────────┐
-   │ Volatility│   │   MM     │   │  Margin  │
-   │   Spike   │   │ Withdraw │   │  Calls   │
-   └────┬─────┘   └────┬─────┘   └────┬─────┘
-        │              │              │
-        └──────────────┼──────────────┘
-                       │
-                       ▼
-              ┌─────────────────────┐
-              │  Liquidity Dry-up   │
-              │  (Self-Reinforcing) │
-              └─────────────────────┘
+P(t+1) = P(t) + (λ × NetDemand × liquidity_factor) + γ × (F − P(t)) + ε(t)
+liquidity_factor = 100 / max(total_liquidity, 10)
 ```
 
-## Theoretical Basis: Brunnermeier & Pedersen (2009)
+LLM agent flow per round:
+1. Market broadcasts `{price, return, liquidity, fundamental}`.
+2. Each LLM agent constructs user message with full market context.
+3. LLM called; response parsed for `{quantity, provides_liquidity, reasoning}`.
+4. Hard constraints enforced (cash/position limits).
+5. `provides_liquidity` from LLM directly influences `total_liquidity`.
 
-**Market Liquidity and Funding Liquidity**:
-- Market liquidity (ability to trade) and funding liquidity (ability to borrow) are mutually reinforcing
-- Loss spiral: Asset losses → margin calls → forced selling → more losses
-- Margin spiral: Volatility → higher margins → deleveraging → lower prices
-- LLMs model market makers' rational withdrawal under funding constraints
+Key LLM dynamic: if MarketMaker LLMs observe `liquidity < threshold` in user message, they may coordinate withdrawal even without an explicit formula trigger.
 
-## Files
+---
 
-| File          | Purpose                                            |
-|---------------|----------------------------------------------------|
-| `players.py`  | LLM investor implementations with withdrawal logic |
-| `prompts.py`  | 5 system prompts defining withdrawal psychology    |
-| `run_llm.py`  | LLM simulation runner                              |
-| `analysis.py` | Liquidity and cascade metrics                      |
+## §4 Variant Architecture
 
-## Running
+```
+LLM Variant Architecture
+─────────────────────────
+Market (rule-based, liquidity-dependent pricing)
+  │  broadcast {price, return%, liquidity, fundamental}
+  ├─ LLM MarketMaker     │ [withdrawal system prompt] → LLM → provides_liquidity
+  ├─ LLM LiquiditySeeker │ [execution prompt] → LLM → quantity
+  ├─ LLM ValueTrader     │ [crisis-opportunity prompt] → LLM → value buy
+  ├─ LLM MomentumTrader  │ [momentum prompt] → LLM → trend quantity
+  └─ LLM NoiseTrader     │ [noise prompt] → LLM → random-ish quantity
+```
+
+Prompts defined in `examples/LiquidityDryup/LLM/prompts.py`.
+
+---
+
+## §5 Config Reference
+
+| Parameter           | Agent         | Default      | Description               |
+|---------------------|---------------|--------------|---------------------------|
+| `llm.model`         | All LLM       | (configured) | LLM model identifier      |
+| `llm.temperature`   | All LLM       | 0.3          | Sampling temperature      |
+| `base_liquidity`    | Market        | 30           | Reference liquidity level |
+| `fundamental_value` | Market        | 100          | Fundamental anchor        |
+| `price_impact`      | Market        | 0.001        | Base λ                    |
+| `mean_reversion`    | Market        | 0.05         | γ                         |
+| `initial_cash`      | All investors | 100000       | Starting cash             |
+
+---
+
+## §6 Running Instructions
 
 ```bash
-cd examples/LiquidityDryup/LLM
-python run_llm.py
+# Run LLM variant
+python examples/LiquidityDryup/LLM/run_llm.py \
+    -c configs/LiquidityDryup/LLM/simulation.yml
+
+# Run with lower temperature for consistency
+python examples/LiquidityDryup/LLM/run_llm.py \
+    -c configs/LiquidityDryup/LLM/simulation.yml \
+    --extras llm.temperature=0.1
 ```
 
-## Expected LLM Behavior Patterns
+Output written to `records/LiquidityDryup/LLM/`.
 
-1. **Coordinated Withdrawal**: LLM market makers observe others withdrawing and follow
-2. **Liquidity Vacuum**: All MMs withdraw simultaneously → no bid-ask quotes
-3. **Opportunistic Entry**: LLM arbitrageurs provide liquidity during panic
-4. **Cascade Dynamics**: Forced selling triggers MM withdrawal triggers more selling
-5. **Recovery**: Arbitrageurs' liquidity provision enables price recovery
+---
 
-## Research Questions
+## §7 Expected Behavior
 
-1. Do LLMs correctly perceive liquidity risk from market conditions?
-2. Can LLMs reproduce the "liquidity spiral" without explicit programming?
-3. Do LLM arbitrageurs time their entry correctly during dry-ups?
-4. How does LLM market maker coordination compare to rule-based withdrawal?
+| Metric            | Expected Range | Rationale                                                                 |
+|-------------------|----------------|---------------------------------------------------------------------------|
+| LRI minimum       | 0.05–0.30      | LLM coordination may be slower or faster than rule threshold              |
+| MWF maximum       | 0.5–1.0        | Emergent LLM withdrawal — may not be simultaneous                         |
+| PAD               | 0.08–0.20      | Slightly lower dislocation — LLM may provide more nuanced crisis response |
+| LPD               | 8–20 rounds    | LLM may recover faster if ValueTrader prompt is opportunistic             |
+| WDI               | 0.20–0.40      | Moderate redistribution                                                   |
+| LPI (MarketMaker) | 0.30–0.70      | LLM MMs may partially withdraw (not binary)                               |
 
-## References
+LLM variant introduces variance — some runs may show no dry-up (LLM resists withdrawal), others may show faster cascades (LLM coordinates).
 
-- Brunnermeier, M. K., & Pedersen, L. H. (2009). Market liquidity and funding liquidity. RFS.
-- Kyle, A. S. (1985). Continuous Auctions and Insider Trading. Econometrica.
+---
+
+## §8 References
+
+- Brunnermeier, M. K., & Pedersen, L. H. (2009). doi:[10.1093/rfs/hhn098](https://doi.org/10.1093/rfs/hhn098)
+- Grossman, S. J., & Miller, M. H. (1988). doi:[10.1111/j.1540-6261.1988.tb04594.x](https://doi.org/10.1111/j.1540-6261.1988.tb04594.x)
+- Kyle, A. S. (1985). doi:[10.2307/1913210](https://doi.org/10.2307/1913210)
+- simulation-bases.md §4.1–§4.5 (Investor Taxonomy)
+- examples/LiquidityDryup/LLM/prompts.py (System prompt definitions)
+
+---
+
+## §9 Variant Comparison
+
+| Dimension        | Rule               | LLM                    | RuleLLM           | Rag                   |
+|------------------|--------------------|------------------------|-------------------|-----------------------|
+| MM withdrawal    | Volatility formula | LLM social observation | Rule + LLM timing | Rule + KB crisis data |
+| Cascade speed    | Deterministic      | Variable               | Rule-anchored     | RAG may slow onset    |
+| Expected LRI min | 0.05–0.20          | 0.05–0.30              | 0.05–0.25         | 0.10–0.30             |
+| Expected LPD     | 10–25              | 8–20                   | 9–22              | 6–15 (shortest)       |
+| Run variance     | Low                | High                   | Moderate          | Moderate              |

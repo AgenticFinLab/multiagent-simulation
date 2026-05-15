@@ -1,0 +1,156 @@
+# EndowmentEffect LLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.EndowmentEffect.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/EndowmentEffect/LLM/records"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.02
+      mean_reversion: 0.05
+      noise_std: 0.01
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+endowedholder:
+  name: "EndowedHolder"
+  class: "examples.EndowmentEffect.LLM.players:LLMEndowedHolder"
+  num_instances: 2
+  config:
+    identity: "endowedholder"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/EndowmentEffect/LLM/records"
+      initial_cash: 800000.0
+      initial_position: 500
+      endowment_premium: 0.15
+      base_size: 300
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EndowmentEffect.LLM.prompts:LLM_ENDOWED_HOLDER_SYS"
+        user_message: "examples.EndowmentEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.6
+          max_tokens: 512
+  persona: !include persona.yml
+
+statusquoseller:
+  name: "StatusQuoSeller"
+  class: "examples.EndowmentEffect.LLM.players:LLMStatusQuoSeller"
+  num_instances: 2
+  config:
+    identity: "statusquoseller"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/EndowmentEffect/LLM/records"
+      initial_cash: 800000.0
+      initial_position: 500
+      status_quo_premium: 0.20
+      base_size: 300
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EndowmentEffect.LLM.prompts:LLM_STATUS_QUO_SELLER_SYS"
+        user_message: "examples.EndowmentEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
+
+rationalarbitrageur:
+  name: "RationalArbitrageur"
+  class: "examples.EndowmentEffect.LLM.players:LLMRationalArbitrageur"
+  num_instances: 2
+  config:
+    identity: "rationalarbitrageur"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/EndowmentEffect/LLM/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      arb_threshold: 0.05
+      base_size: 400
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EndowmentEffect.LLM.prompts:LLM_RATIONAL_ARBITRAGEUR_SYS"
+        user_message: "examples.EndowmentEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+  persona: !include persona.yml
+
+newbuyer:
+  name: "NewBuyer"
+  class: "examples.EndowmentEffect.LLM.players:LLMNewBuyer"
+  num_instances: 2
+  config:
+    identity: "newbuyer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/EndowmentEffect/LLM/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      buy_threshold: 0.03
+      base_size: 300
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EndowmentEffect.LLM.prompts:LLM_NEW_BUYER_SYS"
+        user_message: "examples.EndowmentEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+  persona: !include persona.yml
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.EndowmentEffect.LLM.players:LLMNoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/EndowmentEffect/LLM/records"
+      initial_cash: 500000.0
+      initial_position: 0
+      trade_probability: 0.3
+      noise_size: 150
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EndowmentEffect.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        user_message: "examples.EndowmentEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml

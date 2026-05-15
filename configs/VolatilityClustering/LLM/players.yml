@@ -62,7 +62,7 @@ llm_fundamentalist:
         sys_message: "examples.VolatilityClustering.LLM.prompts:LLM_FUNDAMENTALIST_SYS"
         user_message: "examples.VolatilityClustering.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -91,7 +91,7 @@ llm_trend_follower:
         sys_message: "examples.VolatilityClustering.LLM.prompts:LLM_TREND_FOLLOWER_SYS"
         user_message: "examples.VolatilityClustering.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_new_tokens: 500
@@ -120,7 +120,7 @@ llm_noise_trader:
         sys_message: "examples.VolatilityClustering.LLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.VolatilityClustering.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_new_tokens: 500
@@ -148,7 +148,7 @@ llm_slow_adapter:
         sys_message: "examples.VolatilityClustering.LLM.prompts:LLM_SLOW_ADAPTER_SYS"
         user_message: "examples.VolatilityClustering.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.2
           max_new_tokens: 500
@@ -176,7 +176,7 @@ llm_volatility_trader:
         sys_message: "examples.VolatilityClustering.LLM.prompts:LLM_VOLATILITY_TRADER_SYS"
         user_message: "examples.VolatilityClustering.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500

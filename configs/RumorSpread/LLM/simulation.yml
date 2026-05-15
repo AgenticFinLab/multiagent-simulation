@@ -1,0 +1,54 @@
+# =============================================================================
+# RumorSpreadLLM Simulation Configuration
+# =============================================================================
+# LLM-based Rumor Spread simulation
+# Tests: Allport & Postman leveling/sharpening, Bordia & Rosnow critical
+#        evaluation, DiFonzo & Bordia fact-checking, Shibutani bystander
+#
+# Usage:
+#   python examples/RumorSpread/LLM/run_rumor_llm.py -c configs/RumorSpread/LLM/simulation.yml
+# =============================================================================
+
+setting:
+  name: "rumor_spread_llm_simulation"
+  description: "LLM-based rumor propagation with heterogeneous social agents"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "EXPERIMENT/RumorSpread/LLM/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "rumor_spread_llm"
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  # 17 players, star topology
+  # LLM simulations need more memory for prompt+response strings
+  object_store_memory: 536870912
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/RumorSpread/LLM/communication"
+  record_messages: true
+  message_block_size: 500

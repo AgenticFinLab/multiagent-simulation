@@ -1,0 +1,91 @@
+# Volmageddon Rag Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.Volmageddon.Rag.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    extras:
+      initial_price: 15.0
+      fundamental_value: 15.0
+      price_impact: 0.04
+      mean_reversion: 0.03
+      noise_std: 0.05
+
+short_vol_trader_1:
+  name: "ShortVolTrader 1"
+  class: "examples.Volmageddon.Rag.players:RagLLMShortVolTrader"
+  num_instances: 2
+  config:
+    identity: "short_vol_trader_1"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "short_vol_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+
+vol_e_t_n_manager_2:
+  name: "VolETNManager 2"
+  class: "examples.Volmageddon.Rag.players:RagLLMVolETNManager"
+  num_instances: 2
+  config:
+    identity: "vol_e_t_n_manager_2"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "vol_e_t_n_manager"
+      llm:
+        model: "doubao-pro-32k"
+
+
+long_vol_hedger_3:
+  name: "LongVolHedger 3"
+  class: "examples.Volmageddon.Rag.players:RagLLMLongVolHedger"
+  num_instances: 1
+  config:
+    identity: "long_vol_hedger_3"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "long_vol_hedger"
+      llm:
+        model: "doubao-pro-32k"
+
+
+vol_arbitrageur_4:
+  name: "VolArbitrageur 4"
+  class: "examples.Volmageddon.Rag.players:RagLLMVolArbitrageur"
+  num_instances: 2
+  config:
+    identity: "vol_arbitrageur_4"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "vol_arbitrageur"
+      llm:
+        model: "doubao-pro-32k"
+
+
+equity_trader_5:
+  name: "EquityTrader 5"
+  class: "examples.Volmageddon.Rag.players:RagLLMEquityTrader"
+  num_instances: 2
+  config:
+    identity: "equity_trader_5"
+    role: player
+    extras:
+      initial_cash: 1000000.00
+      initial_position: 0
+      agent_type: "equity_trader"
+      llm:
+        model: "doubao-pro-32k"
+
+

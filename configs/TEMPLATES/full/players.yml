@@ -298,7 +298,7 @@ investor_1:
       # lm_type: "api" = remote API call (vs. "local" for on-device models).
       #
       # lm_name: LLM model identifier in LiteLLM format.
-      #   "ark/doubao-seed-1-6-lite-251015" = ByteDance Doubao (via ARK API)
+      #   "ark/doubao-seed-1-6-251015" = ByteDance Doubao (via ARK API)
       #   Requires ARK_API_KEY in .env
       #
       # generation_config: LLM generation parameters.
@@ -312,7 +312,7 @@ investor_1:
       #   sys_message: "examples.[SCENARIO_NAME].[Variant].prompts:LLM_TYPE1_SYS"
       #   user_message: "examples.[SCENARIO_NAME].[Variant].prompts:LLM_USER_TEMPLATE"
       #   lm_type: "api"
-      #   lm_name: "ark/doubao-seed-1-6-lite-251015"
+      #   lm_name: "ark/doubao-seed-1-6-251015"
       #   generation_config:
       #     temperature: 0.3
       #     max_new_tokens: 500

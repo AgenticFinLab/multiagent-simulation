@@ -39,16 +39,14 @@ from dotenv import load_dotenv
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+from masim.format.order import validate_order
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
 # Shared utility for parsing LLM responses with analysis/decision format
-import sys
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from examples.llm_utils import parse_llm_response_with_thinking
-
 
 logger = logging.getLogger("FlashCrashLLM")
 
@@ -147,12 +145,19 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
 
         status = "HIGH VOLATILITY" if in_high_vol else "Normal"
-        logger.debug(f"\n{'='*60}")
+        logger.debug("\n%s", "=" * 60)
         logger.debug(
-            f"[Market] Round {round_num}: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%) [{status}]"
+            "[Market] Round %s: %.2f → %.2f (%+.2f%%) [%s]",
+            round_num,
+            current_price,
+            new_price,
+            price_return * 100,
+            status,
         )
         logger.debug(
-            f"  Liquidity: {liquidity:.1f}, Impact Mult: {impact_multiplier:.1f}x"
+            "  Liquidity: %.1f, Impact Mult: %.1fx",
+            liquidity,
+            impact_multiplier,
         )
 
         market_data = {
@@ -253,7 +258,7 @@ class LLMInvestor(GeneralPlayer):
         parsed = None
         try:
             parsed = json.loads(text)
-        except:
+        except Exception:
             match = re.search(r"\{.*\}", text, re.DOTALL)
             if match:
                 parsed = json.loads(match.group(0))
@@ -277,7 +282,9 @@ class LLMInvestor(GeneralPlayer):
         llm_config = self.config.extras["llm"]
         system_prompt = load_prompt(llm_config["sys_message"])
 
-        for _ in range(3):
+        decision = None
+        last_error = None
+        for attempt in range(3):
             try:
                 output = llm_client.run(
                     [
@@ -289,16 +296,27 @@ class LLMInvestor(GeneralPlayer):
                 )
                 decision = self._parse_response(output.outputs[0].response)
                 break
-            except:
-                decision = {
-                    "action": "hold",
-                    "bid_price": market_data["price"],
-                    "quantity": 0,
-                    "reasoning": "error",
-                }
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            )
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
+
+        # Guard: LLMs sometimes output bid_price=0 for hold actions.
+        # Use the current market price so recorded bids stay meaningful.
+        if bid_price <= 0:
+            bid_price = market_data["price"]
         cash, position = (
             self.state.custom_state["cash"],
             self.state.custom_state["position"],
@@ -338,30 +356,41 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMHighFrequencyTrader(LLMInvestor):
-    """High-Frequency Trader - fast momentum trading."""
+    """LLM-driven high-frequency trader — momentum detection and rapid bets via LLM reasoning. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class LLMFlashMarketMaker(LLMInvestor):
-    """Market Maker - provides liquidity, manages risk."""
+    """LLM-driven market maker — liquidity provision and stress withdrawal via LLM risk reasoning. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class LLMStopLossTrader(LLMInvestor):
-    """Stop-Loss Trader - rule-based position management."""
+    """LLM-driven stop-loss trader — cascade selling triggers via LLM position management. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class LLMFundamentalTrader(LLMInvestor):
-    """Fundamental Trader - value-focused."""
+    """LLM-driven fundamental trader — value-based recovery buying via LLM analytical reasoning. Theory: simulation-bases.md §4.5."""
 
     pass
 
 
 class LLMAlgorithmicTrader(LLMInvestor):
-    """Algorithmic Trader - systematic trading."""
+    """LLM-driven algorithmic trader — trend-following momentum via LLM systematic reasoning. Theory: simulation-bases.md §4.3."""
 
     pass
+
+
+__all__ = [
+    "Market",
+    "LLMInvestor",
+    "LLMHighFrequencyTrader",
+    "LLMFlashMarketMaker",
+    "LLMStopLossTrader",
+    "LLMFundamentalTrader",
+    "LLMAlgorithmicTrader",
+]

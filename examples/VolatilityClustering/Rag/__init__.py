@@ -5,3 +5,23 @@ Three-way comparison:
     VolatilityClusteringRuleLLM — rule-embedded LLM (persona + quantitative rules in prompt)
     VolatilityClusteringRag     — rule-embedded LLM + personal RAG library (retrieved context per decision)
 """
+
+from .players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMFundamentalist,
+    RagLLMTrendFollower,
+    RagLLMNoiseTrader,
+    RagLLMSlowAdapter,
+    RagLLMVolatilityTrader,
+)
+
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMFundamentalist",
+    "RagLLMTrendFollower",
+    "RagLLMNoiseTrader",
+    "RagLLMSlowAdapter",
+    "RagLLMVolatilityTrader",
+]

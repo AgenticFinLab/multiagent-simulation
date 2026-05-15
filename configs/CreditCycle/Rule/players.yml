@@ -1,0 +1,164 @@
+# =============================================================================
+# CreditCycle Rule Agent Configuration
+# =============================================================================
+# 1 Market (coordinator) + 5 rule-based investor types.
+# Theory: Minsky (1986) credit cycle, Adrian & Shin (2010) pro-cyclical leverage,
+#         Geanakoplos (2010) leverage cycle, Graham (1949) value investing.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based price mechanism
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.CreditCycle.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/CreditCycle/Rule/records"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05         # Moderate: credit cycle amplifies moves
+      mean_reversion: 0.02       # Slow: credit cycles are persistent
+      noise_std: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Pro-Cyclical Lenders — amplify credit expansion and contraction
+# Theory: Adrian & Shin (2010) — VaR-based pro-cyclical leverage
+# -----------------------------------------------------------------------------
+procyclicallender:
+  name: "ProCyclicalLender"
+  class: "examples.CreditCycle.Rule.players:ProCyclicalLender"
+  num_instances: 2
+  config:
+    identity: "procyclicallender"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CreditCycle/Rule/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      leverage_expansion_rate: 0.3    # Buy aggressively when credit is easy
+      leverage_contraction_rate: 0.4  # Sell aggressively when conditions tighten
+      expansion_threshold: 0.01       # 1% price rise triggers expansion
+      contraction_threshold: -0.015   # 1.5% fall triggers contraction
+      base_size: 500
+      custom_state_hot_limit: 3
+      credit_multiplier: 2.0
+      order_size: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Minsky Borrowers — cycle through hedge→speculative→Ponzi financing
+# Theory: Minsky (1986) — Financial Instability Hypothesis
+# -----------------------------------------------------------------------------
+minskyborrower:
+  name: "MinskyBorrower"
+  class: "examples.CreditCycle.Rule.players:MinskyBorrower"
+  num_instances: 2
+  config:
+    identity: "minskyborrower"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CreditCycle/Rule/records"
+      initial_cash: 500000.0
+      initial_position: 0
+      hedge_rounds: 20            # First 20 rounds: conservative (hedge finance)
+      speculative_rounds: 40      # Rounds 21-60: moderate leverage (speculative)
+      ponzi_rounds: 80            # Rounds 61-140: maximal leverage (Ponzi)
+      hedge_size: 100
+      speculative_size: 300
+      ponzi_size: 600
+      custom_state_hot_limit: 3
+      crisis_threshold: -0.05
+      initial_leverage: 1.0
+      max_leverage: 5.0
+      order_size: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Counter-Cyclical Lenders — provide stabilizing credit in downturns
+# Theory: Geanakoplos (2010) — Leverage Cycle / counter-cyclical capital
+# -----------------------------------------------------------------------------
+countercyclicallender:
+  name: "CounterCyclicalLender"
+  class: "examples.CreditCycle.Rule.players:CounterCyclicalLender"
+  num_instances: 1
+  config:
+    identity: "countercyclicallender"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CreditCycle/Rule/records"
+      initial_cash: 2000000.0
+      initial_position: 0
+      buy_threshold: -0.05        # Buy when price drops 5% below fundamental
+      sell_threshold: 0.10        # Sell when price rises 10% above fundamental
+      counter_cycle_size: 400
+      custom_state_hot_limit: 3
+      boom_sell_threshold: 0.05
+      crisis_buy_threshold: -0.05
+      order_size: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Value Investors — fundamental anchors
+# Theory: Graham (1949) — The Intelligent Investor
+# -----------------------------------------------------------------------------
+valueinvestor:
+  name: "ValueInvestor"
+  class: "examples.CreditCycle.Rule.players:ValueInvestor"
+  num_instances: 1
+  config:
+    identity: "valueinvestor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CreditCycle/Rule/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      value_discount: 0.10        # Buy below 90% of fundamental
+      value_premium: 0.10         # Sell above 110% of fundamental
+      value_size: 300
+      custom_state_hot_limit: 3
+      order_size: 400
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Noise Traders — random background liquidity
+# Theory: Black (1986) — Noise
+# -----------------------------------------------------------------------------
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.CreditCycle.Rule.players:NoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CreditCycle/Rule/records"
+      initial_cash: 500000.0
+      initial_position: 0
+      trade_probability: 0.3
+      noise_size: 100
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

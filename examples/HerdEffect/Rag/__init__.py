@@ -1,7 +1,21 @@
-"""HerdEffectRag — RAG-augmented hybrid Rule+LLM HerdEffect simulation.
+"""HerdEffect Rag Variant"""
 
-Three-way comparison:
-    HerdEffect        — pure rule-based
-    HerdEffectRuleLLM — rule-embedded LLM (persona + quantitative rules in prompt)
-    HerdEffectRag     — rule-embedded LLM + personal RAG library (retrieved context per decision)
-"""
+from examples.HerdEffect.Rag.players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMMomentumInvestor,
+    RagLLMContrarianInvestor,
+    RagLLMRiskAverseInvestor,
+    RagLLMAggressiveInvestor,
+    RagLLMNoiseTrader,
+)
+
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMMomentumInvestor",
+    "RagLLMContrarianInvestor",
+    "RagLLMRiskAverseInvestor",
+    "RagLLMAggressiveInvestor",
+    "RagLLMNoiseTrader",
+]

@@ -1,0 +1,9 @@
+auto_checkpoint: false
+
+proxy:
+  record_path: "EXPERIMENT/SVBBankRun/LLM/records"
+  communication:
+    store_path: "EXPERIMENT/SVBBankRun/LLM/communication"
+  monitoring:
+    metrics_path: "EXPERIMENT/SVBBankRun/LLM/monitoring/metrics"
+    events_path: "EXPERIMENT/SVBBankRun/LLM/monitoring/events"

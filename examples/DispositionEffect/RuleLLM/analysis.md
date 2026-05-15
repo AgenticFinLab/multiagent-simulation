@@ -1,91 +1,42 @@
-# DispositionEffect RuleLLM Analysis Methodology
+# DispositionEffect RuleLLM Variant — analysis.md
 
-## Overview
+## §1 Metrics and Functions
 
-This document describes the evaluation metrics for the **hybrid Rule+LLM disposition effect** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
+| Metric                              | Function                                                                  | analysis-bases.md Ref |
+|-------------------------------------|---------------------------------------------------------------------------|-----------------------|
+| Proportion of Gains Realized (PGR)  | `proportion_of_gains_realized(trades, price_history, purchase_prices)`    | §2.1                  |
+| Proportion of Losses Realized (PLR) | `proportion_of_losses_realized(trades, price_history, purchase_prices)`   | §2.2                  |
+| Disposition Coefficient (DC)        | `disposition_coefficient(pgr, plr)`                                       | §2.3                  |
+| PGR/PLR Ratio                       | `pgr_plr_ratio(pgr, plr)`                                                 | §2.4                  |
+| Holding Period Asymmetry (HPA)      | `holding_period_asymmetry(sell_events)`                                   | §2.5                  |
+| Performance Drag Index (PDI)        | `performance_drag_index(disposition_final_wealth, rational_final_wealth)` | §2.6                  |
+| Tax Reversal Index (TRI)            | `tax_reversal_index(tax_plr, disposition_plr)`                            | §2.7                  |
 
-For detailed metric definitions and financial theory, see: **`../DispositionEffect/analysis.md`**
+## §2 RuleLLM Variant Notes
 
----
+**Analysis script**: `DispositionEffect/RuleLLM/analysis.py`
 
-## Hybrid Rule+LLM Observable Phenomena
+Key RuleLLM-variant-specific analysis notes:
 
-### Emergent Behaviors Unique to Hybrid Agents
+- **Rule compliance check**: Compute PGR/PLR for RuleLLM vs. Rule; differences > 5% indicate LLM is overriding embedded thresholds.
+- **DC boundary analysis**: RuleLLM DC should bracket Rule (mechanical) and LLM (narrative); examine sells near threshold (gain_loss = 0.028–0.032) for soft-threshold behavior.
+- **Reasoning transparency**: `<analysis>` tag content per trade event records LLM's explicit Prospect Theory reasoning — qualitative analysis opportunity.
+- **RuleLLMLossAverse PDI**: Should show highest performance drag among RuleLLM agents (lowest PLR = maximum loser-holding).
+- **HPA rule fidelity**: HPA(RuleLLM) vs. HPA(Rule) gap measures how much LLM boundary reasoning extends holding durations.
 
-| Phenomenon                   | Hybrid Behavior                                            | Contrast with Pure Rule-Based           |
-|------------------------------|------------------------------------------------------------|-----------------------------------------|
-| **Rule Grounding**           | LLM receives Prospect Theory formulas in prompt            | Rule-based executes thresholds directly |
-| **Interpretive Flexibility** | LLM may adjust sell fractions ±20% based on market context | Rule-based applies fixed fractions      |
-| **Reasoning Transparency**   | Decision reasoning visible in `<analysis>` tags            | Rule-based has no reasoning trace       |
-| **Rule Compliance**          | LLM should follow rule sign (sell/hold/buy)                | Rule-based guaranteed compliance        |
+## §3 Output Files
 
-### Expected Differences from Rule-Based
+RuleLLM variant produces the following output files in `outputs/DispositionEffect/RuleLLM/`:
 
-1. **PGR/PLR Ratio**: Similar directional pattern, may show variation in magnitude
-2. **Sell Timing**: LLM may delay sells based on qualitative market assessment
-3. **Loss Aversion**: May show stronger/weaker loss aversion based on LLM personality
-4. **Reference Point Behavior**: LLM "understands" psychological anchoring
+| File                   | Content                                                 |
+|------------------------|---------------------------------------------------------|
+| `price_history.csv`    | Round-by-round price, return, news shock                |
+| `agent_orders.csv`     | Per-agent action, quantity, strategy, round             |
+| `agent_wealth.csv`     | Per-agent cash, position, wealth by round               |
+| `metrics_summary.json` | PGR, PLR, DC, PGR/PLR ratio, HPA, PDI, TRI              |
+| `llm_responses.jsonl`  | Raw LLM outputs with embedded rule compliance reasoning |
 
----
+## §4 References
 
-## Hybrid Agent Design
-
-Each agent's system prompt contains:
-- **PERSONA section**: Identity, style, risk attitude, behavioral traits
-- **DECISION RULES section**: Explicit quantitative rules from DispositionEffect counterpart
-
-Agent types with their theoretical foundations:
-- **RuleLLMDispositionBiased**: Prospect Theory gain/loss asymmetry rules
-- **RuleLLMRationalInvestor**: Expected utility rebalancing rules
-- **RuleLLMTaxAwareInvestor**: Tax-loss harvesting optimization rules
-- **RuleLLMInstitutionalInvestor**: Professional symmetric rules
-- **RuleLLMLossAverse**: Extreme loss aversion (λ ≈ 2.25) rules
-
----
-
-## Key Metrics (Summary)
-
-All metrics from `../DispositionEffect/analysis.md` apply:
-
-| Metric                  | Purpose                                     |
-|-------------------------|---------------------------------------------|
-| PGR (Proportion Gains)  | Realized gains / (realized + paper gains)   |
-| PLR (Proportion Losses) | Realized losses / (realized + paper losses) |
-| Disposition Coefficient | DC = PGR - PLR                              |
-| Sell Event Distribution | Gain/loss % at each sell event              |
-
----
-
-## Validation Criteria
-
-| Criterion            | Target                         | Source                        |
-|----------------------|--------------------------------|-------------------------------|
-| **PGR > PLR**        | Required for DispositionBiased | DispositionEffect/analysis.md |
-| **DC = PGR - PLR**   | > 0.10 for DispositionBiased   | DispositionEffect/analysis.md |
-| **Sell cluster >0%** | Median sell in gain domain     | DispositionEffect/analysis.md |
-
----
-
-## Using Centralized Evaluation Module
-
-```python
-from masim.evaluation.finance import (
-    calculate_pgr_plr,
-    calculate_disposition_coefficient,
-    plot_disposition_analysis,
-)
-
-# Same analysis as rule-based version
-trades = {...}  # Load from simulation records
-pgr, plr = calculate_pgr_plr(trades)
-dc = calculate_disposition_coefficient(pgr, plr)
-```
-
----
-
-## References
-
-See `../DispositionEffect/analysis.md` for complete academic references including:
-- Kahneman & Tversky (1979) Prospect Theory
-- Shefrin & Statman (1985) Disposition Effect
-- Odean (1998) PGR/PLR Methodology
+All metric definitions with DOI citations: `analysis-bases.md §2`.  
+Investor theory references: `simulation-bases.md §4.1–§4.5`.

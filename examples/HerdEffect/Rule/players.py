@@ -173,15 +173,29 @@ class Market(GeneralPlayer):
         self.state.custom_state["return_history"].append(price_return)
 
         # Log
-        logger.debug(f"\n{'='*60}")
-        logger.debug(f"[Market] Round {round_num}")
-        logger.debug(f"  Price: {prev_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)")
-        logger.debug(f"  Net Demand: {net_demand:+.2f}")
-        logger.debug(f"  Total Volume: {total_volume:.2f}")
-        logger.debug(f"  Price Impact: {price_impact:+.4f}")
-        logger.debug(f"  Mean Reversion: {mean_reversion:+.4f}")
+        logger.debug(f"\n{'='*60}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"[Market] Round {round_num}"
+        )  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Price: {prev_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
+        )  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Net Demand: {net_demand:+.2f}"
+        )  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Total Volume: {total_volume:.2f}"
+        )  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Price Impact: {price_impact:+.4f}"
+        )  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Mean Reversion: {mean_reversion:+.4f}"
+        )  # pylint: disable=logging-fstring-interpolation
         if orders:
-            logger.debug(f"  Orders ({len(orders)}):")
+            logger.debug(
+                f"  Orders ({len(orders)}):"
+            )  # pylint: disable=logging-fstring-interpolation
             for o in orders:
                 logger.debug(
                     f"    {o['investor']:20s} [{o['strategy']:12s}]: "
@@ -337,23 +351,11 @@ class BaseInvestor(GeneralPlayer):
 
 class MomentumInvestor(BaseInvestor):
     """
-    Momentum Strategy (Trend Following)
-    Reference: Jegadeesh & Titman (1993)
+    Theory: simulation-bases.md §4.1 — MomentumInvestor
 
-    Formula:
-        P = P_last × (1 + λ × r)
-        Q = β × r × cash / P
-
-    Where:
-        r = last period return
-        λ = price aggressiveness (lambda_price)
-        β = capital allocation ratio (beta)
-
-    Behavior: Buys when price rises, sells when price falls.
-    Effect: DESTABILIZING - amplifies trends, creates momentum bubbles.
-
-    Parameters from config extras:
-        - lambda_price, beta
+    Theoretical basis: Momentum strategy / trend following (Jegadeesh & Titman, 1993).
+    Formula: P = P_last × (1 + λ × r); Q = β × r × cash / P.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     def calculate_bid(self) -> tuple:
@@ -381,22 +383,11 @@ class MomentumInvestor(BaseInvestor):
 
 class ContrarianInvestor(BaseInvestor):
     """
-    Contrarian/Value Strategy
-    Reference: De Bondt & Thaler (1985)
+    Theory: simulation-bases.md §4.2 — ContrarianInvestor
 
-    Formula:
-        P = F + ε  (bid around fundamental value)
-        Q = β × (F - P_last) / P_last × cash / P
-
-    Where:
-        F = fundamental value
-        β = value sensitivity (beta)
-
-    Behavior: Buys when price < fundamental, sells when price > fundamental.
-    Effect: STABILIZING - dampens trends, provides mean reversion.
-
-    Parameters from config extras:
-        - fundamental, beta, noise_std
+    Theoretical basis: Contrarian / value strategy (De Bondt & Thaler, 1985).
+    Formula: P = F + ε; Q = β × (F − P) / P × cash / P.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     def calculate_bid(self) -> tuple:
@@ -432,22 +423,11 @@ class ContrarianInvestor(BaseInvestor):
 
 class RiskAverseInvestor(BaseInvestor):
     """
-    Risk-Averse Strategy (Mean-Variance Optimization)
-    Reference: Markowitz (1952)
+    Theory: simulation-bases.md §4.3 — RiskAverseInvestor
 
-    Formula:
-        P = P_last (accepts market price)
-        Q = k / σ² × cash / P
-
-    Where:
-        σ² = recent price variance
-        k = risk tolerance coefficient
-
-    Behavior: Reduces position when volatility is high.
-    Effect: Can trigger early exit from bubble (sell before crash).
-
-    Parameters from config extras:
-        - k, lookback
+    Theoretical basis: Mean-variance optimization (Markowitz, 1952).
+    Formula: Q = k / σ² × cash / P; position adjusted toward target gradually.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     def calculate_bid(self) -> tuple:
@@ -488,24 +468,11 @@ class RiskAverseInvestor(BaseInvestor):
 
 class NoiseTrader(BaseInvestor):
     """
-    Noise Trader (Random/Uninformed Trading)
-    Reference: De Long et al. (1990)
+    Theory: simulation-bases.md §4.4 — NoiseTrader
 
-    Formula:
-        P ~ N(P_last, σ_price²)
-        Q ~ N(0, σ_qty²) - position × mean_reversion
-
-    Where:
-        σ_price = price noise
-        σ_qty = quantity noise
-        mean_reversion = position mean reversion
-
-    Behavior: Random trading, provides liquidity.
-    Effect: Can accidentally trigger herd behavior when momentum traders
-            misinterpret random noise as signal.
-
-    Parameters from config extras:
-        - price_noise_std, qty_noise_std, position_mean_reversion
+    Theoretical basis: Noise trader model (De Long et al., 1990).
+    Formula: P ~ N(P_last, σ²); Q ~ N(0, σ_qty²) − position × mean_reversion.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     def calculate_bid(self) -> tuple:
@@ -537,22 +504,11 @@ class NoiseTrader(BaseInvestor):
 
 class AggressiveInvestor(BaseInvestor):
     """
-    Aggressive/Leveraged Momentum Strategy
+    Theory: simulation-bases.md §4.5 — AggressiveInvestor
 
-    Formula:
-        P = P_last × (1 + κ × r)  where κ > λ
-        Q = β × r × cash / P + acceleration_bonus
-
-    Where:
-        κ = aggressive price factor (kappa)
-        β = aggressive allocation (beta)
-        acceleration = second derivative of price
-
-    Behavior: Amplified momentum with acceleration bonus.
-    Effect: EXTREMELY DESTABILIZING - can create rapid bubbles.
-
-    Parameters from config extras:
-        - kappa, beta, accel_bonus
+    Theoretical basis: Aggressive leveraged momentum strategy (amplified trend following).
+    Formula: P = P_last × (1 + κ × r); Q = β × r × cash / P + accel_bonus × acceleration.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     def calculate_bid(self) -> tuple:

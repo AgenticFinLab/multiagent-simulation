@@ -1,0 +1,8 @@
+# Volmageddon Rag Communication Topology
+
+type: "star"
+
+sources:
+  - market
+
+connections:

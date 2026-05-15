@@ -37,7 +37,6 @@ import os
 import json
 import random
 import re
-import sys
 import importlib
 from typing import Any, Dict, Optional
 from dotenv import load_dotenv
@@ -50,11 +49,7 @@ from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
 # Shared utility for parsing LLM responses with analysis/decision format
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from examples.llm_utils import parse_llm_response_with_thinking
-
 
 logger = logging.getLogger("HerdEffectLLM")
 
@@ -152,21 +147,29 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
 
         # Log
-        logger.debug(f"\n{'='*60}")
-        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(f"\n{'='*60}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"[Market] Round {round_num}"
+        )  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"  Price: {prev_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug(
+            f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}"
+        )  # pylint: disable=logging-fstring-interpolation
         if orders:
-            logger.debug(f"  LLM Orders ({len(orders)}):")
+            logger.debug(
+                f"  LLM Orders ({len(orders)}):"
+            )  # pylint: disable=logging-fstring-interpolation
             for o in orders:
                 logger.debug(
                     f"    {o['investor']:20s} [{o['strategy']:12s}]: "
                     f"P={o['price']:7.2f}, Q={o['quantity']:+7.2f}"
                 )
                 if o["reasoning"]:
-                    logger.debug(f"      → {o['reasoning'][:80]}...")
+                    logger.debug(
+                        f"      → {o['reasoning'][:80]}..."
+                    )  # pylint: disable=logging-fstring-interpolation
 
         market_data = {
             "price": new_price,
@@ -351,38 +354,25 @@ Respond with ONLY valid JSON:
             try:
                 decision = self._parse_llm_response(infer_output.outputs[0].response)
                 break
-            except ValueError as e:
-                last_error = e
+            except Exception as exc:
+                last_error = exc
                 if attempt < max_retries - 1:
-                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")
+                    logger.debug(
+                        f"[{self.identity}] LLM parse failed, retrying..."
+                    )  # pylint: disable=logging-fstring-interpolation
 
-        strategy_name = self.__class__.__name__
-
-        # If LLM failed after all retries, skip trading this round (hold)
         if decision is None:
-            logger.warning(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}. "
-                f"Skipping trade this round."
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             )
-            order = {
-                "bid_price": market_data["price"],
-                "quantity": 0.0,
-                "strategy": strategy_name,
-                "investor": self.identity,
-                "reasoning": f"LLM parse failed: held position",
-                "analysis": "",
-                "cash": self.state.custom_state["cash"],
-                "position": self.state.custom_state["position"],
-            }
-            return {
-                **order,
-                "outbound_messages": [
-                    {"payload": order, "content_type": "investor_bid"}
-                ],
-            }
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
+
+        # Guard: LLMs sometimes output bid_price=0 for hold actions.
+        # Use the current market price so recorded bids stay meaningful.
+        if bid_price <= 0:
+            bid_price = market_data["price"]
         quantity = self._apply_constraints(bid_price, quantity, market_data["price"])
 
         if quantity > 0:
@@ -426,30 +416,30 @@ Respond with ONLY valid JSON:
 
 
 class LLMMomentumInvestor(LLMInvestor):
-    """LLM-powered Momentum Investor - Trend Following."""
+    """LLM-powered MomentumInvestor: trend following strategy. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class LLMContrarianInvestor(LLMInvestor):
-    """LLM-powered Contrarian Investor - Value Investing."""
+    """LLM-powered ContrarianInvestor: value investing against the crowd. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class LLMRiskAverseInvestor(LLMInvestor):
-    """LLM-powered Risk-Averse Investor - Volatility Sensitive."""
+    """LLM-powered RiskAverseInvestor: volatility-sensitive mean-variance strategy. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class LLMAggressiveInvestor(LLMInvestor):
-    """LLM-powered Aggressive Investor - Leveraged Momentum."""
+    """LLM-powered AggressiveInvestor: leveraged momentum with acceleration bonus. Theory: simulation-bases.md §4.5."""
 
     pass
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-powered Noise Trader - Random/Uninformed."""
+    """LLM-powered NoiseTrader: random uninformed trading. Theory: simulation-bases.md §4.4."""
 
     pass

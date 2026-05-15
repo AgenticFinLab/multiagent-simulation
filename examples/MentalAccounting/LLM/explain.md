@@ -1,0 +1,81 @@
+# MentalAccounting Simulation
+
+## Overview
+
+| Item | Description |
+|------|-------------|
+| **Phenomenon** | Mental accounting causes investors to treat money differently based on its source or intended use |
+| **Model** | Rule-based / LLM / RuleLLM / RAG |
+| **Key Feature** | Mental accounting simulation showing how portfolio segregation leads to suboptimal decisions |
+| **Academic Value** | Understanding mental accounting causes investors to treat money differently based on its source or intended use through multi-agent simulation |
+
+## Theoretical Foundation
+
+- Thaler (1999): Mental Accounting Matters
+- Thaler (1985): Mental accounting and consumer choice
+- Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
+
+## Agent Descriptions
+
+### MentalAccountant
+**Theoretical Basis**: Mental accounting (Thaler, 1999)
+**Market Role**: destabilizing
+**Description**: Segregates portfolio into separate accounts, doesn't net gains/losses
+**Parameters**: num_accounts=3, loss_aversion_per_account=2.25, no_cross_subsidy=True
+
+### HouseMoneyTrader
+**Theoretical Basis**: House money effect (Thaler & Johnson, 1990)
+**Market Role**: destabilizing
+**Description**: Takes more risk with recent gains
+**Parameters**: gain_risk_multiplier=1.5, loss_risk_multiplier=0.5, reset_period=20
+
+### RationalPortfolioManager
+**Theoretical Basis**: Mean-variance optimization (Markowitz, 1952)
+**Market Role**: stabilizing
+**Description**: Optimizes entire portfolio without mental accounting
+**Parameters**: risk_aversion=0.5, correlation_aware=True
+
+### SunkCostHolder
+**Theoretical Basis**: Sunk cost fallacy (Arkes & Blumer, 1985)
+**Market Role**: destabilizing
+**Description**: Holds losing positions due to already invested capital
+**Parameters**: sunk_cost_weight=0.6, aversion_to_realize=high
+
+### NoiseTrader
+**Theoretical Basis**: Black (1986)
+**Market Role**: neutral
+**Description**: Random uninformed trader
+**Parameters**: trade_probability=0.05, min_order=100, max_order=500
+
+
+## Usage
+
+### Rule Variant
+```bash
+python examples/MentalAccounting/Rule/run_mentalaccounting.py \
+    -c configs/MentalAccounting/Rule/simulation.yml
+```
+
+### LLM Variant
+```bash
+python examples/MentalAccounting/LLM/run_mentalaccounting_llm.py \
+    -c configs/MentalAccounting/LLM/simulation.yml
+```
+
+### RuleLLM Variant
+```bash
+python examples/MentalAccounting/RuleLLM/run_mentalaccounting_rulellm.py \
+    -c configs/MentalAccounting/RuleLLM/simulation.yml
+```
+
+### RAG Variant
+```bash
+python examples/MentalAccounting/Rag/run_mentalaccounting_rag.py \
+    -c configs/MentalAccounting/Rag/simulation.yml
+```
+
+## References
+
+- Thaler (1999): Mental Accounting Matters
+- Thaler (1985): Mental accounting and consumer choice
+- Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns

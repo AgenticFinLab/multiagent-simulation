@@ -43,7 +43,8 @@ class Market(GeneralPlayer):
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["total_liquidity"] = 100.0
             self.state.custom_state["price_history"] = HistoryBuffer(
-                folder=os.path.join(base_path, "price"), entry_limit=custom_state_hot_limit
+                folder=os.path.join(base_path, "price"),
+                entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["liquidity_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "liquidity"),
@@ -184,6 +185,12 @@ class MarketMaker(BaseInvestor):
     """
     Market maker who provides liquidity but withdraws in stress.
 
+    Theory: simulation-bases.md §4.1
+    Foundation: Grossman & Miller (1988) doi:10.1111/j.1540-6261.1988.tb04594.x;
+                Brunnermeier & Pedersen (2009) doi:10.1093/rfs/hhn098
+    Activation: |return| > volatility_threshold → withdraw (provides_liquidity = 0)
+    Formula: quantity = −position × withdraw_rebalance (stress); −position × normal_rebalance (normal)
+
     Parameters from config extras:
         - volatility_threshold, base_liquidity, withdraw_rebalance, normal_rebalance
     """
@@ -241,6 +248,10 @@ class LiquiditySeeker(BaseInvestor):
     """
     Investor who needs liquidity - struggles during dry-up.
 
+    Theory: simulation-bases.md §4.2
+    Foundation: Brunnermeier & Pedersen (2009) doi:10.1093/rfs/hhn098
+    Formula: quantity = N(0, target_volatility) × min(1.0, liquidity / liquidity_base)
+
     Parameters from config extras:
         - target_volatility, liquidity_base
     """
@@ -268,7 +279,9 @@ class LiquiditySeeker(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")
+        logger.debug(
+            f"[{self.identity:20s}] Q={quantity:+6.1f}"
+        )  # pylint: disable=logging-fstring-interpolation
         return {
             "bid_price": bid_price,
             "quantity": quantity,
@@ -291,6 +304,11 @@ class LiquiditySeeker(BaseInvestor):
 class ValueTrader(BaseInvestor):
     """
     Value trader who provides liquidity to the market.
+
+    Theory: simulation-bases.md §4.3
+    Foundation: Shleifer & Vishny (1997) doi:10.1111/j.1540-6261.1997.tb03807.x
+    Activation: |deviation| > trade_threshold
+    Formula: quantity = deviation × value_multiplier; provides base_liquidity_provision
 
     Parameters from config extras:
         - liquidity_threshold, trade_threshold, base_liquidity_provision, value_multiplier
@@ -322,7 +340,9 @@ class ValueTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")
+        logger.debug(
+            f"[{self.identity:20s}] Q={quantity:+6.1f}"
+        )  # pylint: disable=logging-fstring-interpolation
         return {
             "bid_price": bid_price,
             "quantity": quantity,
@@ -346,6 +366,11 @@ class MomentumTrader(BaseInvestor):
     """
     Momentum trader - can trigger liquidity crises.
 
+    Theory: simulation-bases.md §4.4
+    Foundation: De Long et al. (1990) doi:10.1111/j.1540-6261.1990.tb03695.x
+    Activation: |return| > momentum_threshold
+    Formula: quantity = return × momentum_multiplier; max(−35, min(35, qty))
+
     Parameters from config extras:
         - momentum_threshold, momentum_multiplier
     """
@@ -368,7 +393,9 @@ class MomentumTrader(BaseInvestor):
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
 
-        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")
+        logger.debug(
+            f"[{self.identity:20s}] Q={quantity:+6.1f}"
+        )  # pylint: disable=logging-fstring-interpolation
         return {
             "bid_price": bid_price,
             "quantity": quantity,
@@ -392,6 +419,10 @@ class NoiseTrader(BaseInvestor):
     """
     Noise trader providing random trades.
 
+    Theory: simulation-bases.md §4.5
+    Foundation: Black (1986) doi:10.1111/j.1540-6261.1986.tb04513.x
+    Formula: quantity = N(0, noise_volatility); max(−15, min(15, qty))
+
     Parameters from config extras:
         - noise_volatility
     """
@@ -410,7 +441,9 @@ class NoiseTrader(BaseInvestor):
         quantity = self._apply_constraints(bid_price, quantity)
         if quantity != 0:
             self._execute_trade(bid_price, quantity)
-        logger.debug(f"[{self.identity:20s}] Q={quantity:+6.1f}")
+        logger.debug(
+            f"[{self.identity:20s}] Q={quantity:+6.1f}"
+        )  # pylint: disable=logging-fstring-interpolation
         return {
             "bid_price": bid_price,
             "quantity": quantity,
@@ -428,3 +461,14 @@ class NoiseTrader(BaseInvestor):
                 }
             ],
         }
+
+
+__all__ = [
+    "Market",
+    "BaseInvestor",
+    "MarketMaker",
+    "LiquiditySeeker",
+    "ValueTrader",
+    "MomentumTrader",
+    "NoiseTrader",
+]

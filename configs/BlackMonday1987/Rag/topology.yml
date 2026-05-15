@@ -1,0 +1,31 @@
+# =============================================================================
+# BlackMonday1987 Rag Topology - Star Pattern
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - portfolio_insurer
+    - index_arbitrageur
+    - program_trader
+    - value_investor
+    - noise_trader
+
+  portfolio_insurer:
+    - market
+
+  index_arbitrageur:
+    - market
+
+  program_trader:
+    - market
+
+  value_investor:
+    - market
+
+  noise_trader:
+    - market

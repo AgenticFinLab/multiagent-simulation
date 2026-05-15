@@ -1,0 +1,117 @@
+market:
+  name: "Market"
+  class: "examples.SunkCostFallacy.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: market
+    steps_per_turn: 1
+    group_tags: [market]
+    record_path: "EXPERIMENT/SunkCostFallacy/Rule/records/market"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.02
+      mean_reversion: 0.015
+      noise_std: 0.01
+
+sunkcostholder:
+  name: "SunkCostHolder"
+  class: "examples.SunkCostFallacy.Rule.players:SunkCostHolder"
+  num_instances: 3
+  config:
+    identity: "sunkcostholder"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SunkCostFallacy/Rule/records/sunkcostholder"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      hold_threshold: 0.1
+      base_size: 200
+      custom_state_hot_limit: 3
+
+commitmentescalator:
+  name: "CommitmentEscalator"
+  class: "examples.SunkCostFallacy.Rule.players:CommitmentEscalator"
+  num_instances: 3
+  config:
+    identity: "commitmentescalator"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SunkCostFallacy/Rule/records/commitmentescalator"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 1200000.0
+      initial_position: 400
+      initial_price: 100.0
+      fundamental_value: 100.0
+      escalation_threshold: 0.05
+      escalation_size: 400
+      custom_state_hot_limit: 3
+
+rationalcutter:
+  name: "RationalCutter"
+  class: "examples.SunkCostFallacy.Rule.players:RationalCutter"
+  num_instances: 2
+  config:
+    identity: "rationalcutter"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SunkCostFallacy/Rule/records/rationalcutter"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 1500000.0
+      initial_position: 600
+      initial_price: 100.0
+      fundamental_value: 100.0
+      cut_threshold: 0.05
+      position_size: 350
+      custom_state_hot_limit: 3
+
+opportunitycosttrader:
+  name: "OpportunityCostTrader"
+  class: "examples.SunkCostFallacy.Rule.players:OpportunityCostTrader"
+  num_instances: 2
+  config:
+    identity: "opportunitycosttrader"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SunkCostFallacy/Rule/records/opportunitycosttrader"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 1300000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      realloc_threshold: 0.08
+      position_size: 300
+      custom_state_hot_limit: 3
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.SunkCostFallacy.Rule.players:NoiseTrader"
+  num_instances: 2
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/SunkCostFallacy/Rule/records/noisetrader"
+    persona: !include ../Rule/persona.yml
+    extras:
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 100
+      custom_state_hot_limit: 3

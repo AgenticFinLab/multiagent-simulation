@@ -1,92 +1,49 @@
-"""MomentumEffectRuleLLM - Hybrid Rule+LLM MomentumEffect Simulation
+"""MomentumEffect RuleLLM Players - Hybrid Rule+LLM momentum simulation.
 
 Design:
-    - Market coordinator: identical rule-based price dynamics as MomentumEffect
-    - Investors: LLM-powered, but each agent's system prompt embeds the explicit
-      quantitative rules (formulas, thresholds) from the rule-based counterpart,
-      alongside a rich persona/profile description.
-
-This hybrid lets LLM agents exercise natural language reasoning while remaining
-grounded in the same financial principles as the rule-based simulation, enabling
-meaningful comparison across three variants:
-    MomentumEffect        - pure rule-based
-    MomentumEffectLLM     - pure LLM (persona only)
-    MomentumEffectRuleLLM - hybrid (persona + explicit rules in prompt)
+    - Market coordinator: identical rule-based price dynamics as MomentumEffect.
+    - Investors: LLM-powered with system prompts embedding explicit quantitative
+      rules (formulas, thresholds) from the rule-based counterpart, alongside
+      rich persona descriptions.
 
 All parameters are configured via players.yml config file.
-
-Usage
------
-1. **Via Streamlit Web UI (Recommended):**
-
-   ```bash
-   cd /path/to/multiagent-simulation
-   streamlit run masim/interface/app.py
-   ```
-   Then select "MomentumEffectRuleLLM" from the scenario dropdown.
-
-2. **Command Line:**
-
-   ```bash
-   python examples/MomentumEffect/RuleLLM/run_momentum_effect_rulellm.py \
-       -c configs/MomentumEffect/RuleLLM/simulation.yml
-   ```
-
-Environment Variables:
-    ARK_API_KEY: ByteDance Doubao API key (required for LLM calls)
 """
 
 import logging
 import os
-import json
 import random
-import re
-import sys
-import importlib
 from typing import Any, Dict, Optional
-from dotenv import load_dotenv
-
-from masim.player.general import GeneralPlayer
-from masim.player.base import Action, Observation, StepResult
-from masim.utils.history import HistoryBuffer
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
+from masim.player.base import Action, Observation, StepResult
+from masim.player.general import GeneralPlayer
+from masim.utils.history import HistoryBuffer
 
-# Add examples directory to path for shared utilities
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+from .prompts import (
+    RULELLM_MOMENTUM_TRADER_SYS,
+    RULELLM_CONTRARIAN_TRADER_SYS,
+    RULELLM_INDEX_FUND_SYS,
+    RULELLM_MARKET_MAKER_SYS,
+    RULELLM_TECHNICAL_TRADER_SYS,
+    RULELLM_USER_TEMPLATE,
+)
 from examples.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("MomentumEffectRuleLLM")
 
 
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt string from module path."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
-
-
 # =============================================================================
-# Market - Rule-Based Coordinator (identical to MomentumEffect.Market)
+# Market - Rule-Based Coordinator
 # =============================================================================
 
 
 class Market(GeneralPlayer):
-    """
-    Central market with liquidity-sensitive pricing.
+    """Central market with liquidity-sensitive pricing.
 
-    Price model (rule-based, unchanged from MomentumEffect):
-        Price impact increases when liquidity is low (momentum amplification mechanism).
+    Price model:
         P(t+1) = P(t) + price_impact * liquidity_factor * NetDemand
                  + mean_reversion * (F - P(t)) + epsilon
-
-    Parameters from config extras:
-        - fundamental_value, initial_price
-        - base_price_impact, mean_reversion, noise_std
-        - low_liquidity_threshold, high_impact_multiplier, base_liquidity
-        - custom_state_hot_limit, record_path
     """
 
     async def perceive(
@@ -128,7 +85,7 @@ class Market(GeneralPlayer):
                         "price": order["bid_price"],
                         "quantity": order["quantity"],
                         "strategy": order["strategy"],
-                        "provides_liquidity": order.get("provides_liquidity", False),
+                        "provides_liquidity": order["provides_liquidity"],
                     }
                 )
         self.state.custom_state["orders"] = orders
@@ -177,15 +134,16 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
         self.state.custom_state["liquidity_history"].append(total_liquidity)
 
-        logger.debug(f"\n{'='*70}")
-        logger.debug(f"[Market] Round {round_num}")
         logger.debug(
-            f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
+            "[Market] R%d  P=%.2f→%.2f (%+.2f%%)  Liq=%.1f  IF=%.2f  ND=%+.2f",
+            round_num,
+            current_price,
+            new_price,
+            price_return * 100,
+            total_liquidity,
+            liquidity_factor,
+            net_demand,
         )
-        logger.debug(
-            f"  Liquidity: {total_liquidity:.1f}, Impact Factor: {liquidity_factor:.2f}"
-        )
-        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
 
         market_data = {
             "price": new_price,
@@ -215,22 +173,32 @@ class Market(GeneralPlayer):
 
 
 # =============================================================================
-# Base RuleLLM Investor
+# RuleLLMInvestor - Base
 # =============================================================================
 
 
 class RuleLLMInvestor(GeneralPlayer):
-    """
-    Base class for hybrid Rule+LLM momentum effect investors.
+    """Base class for hybrid Rule+LLM momentum effect investors."""
 
-    Each subclass uses a system prompt that encodes BOTH:
-    - Persona description (who the agent is, behavioral traits)
-    - Quantitative decision rules in text form (the exact formula from rule-based)
+    _system_prompt: str = ""
 
-    Parameters from config extras:
-        - initial_cash, initial_position, custom_state_hot_limit, record_path
-        - llm: sys_message, user_message, lm_name, generation_config
-    """
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state.pop("_llm", None)
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._llm = None
+
+    def _get_llm(self) -> LangChainAPIInference:
+        if not getattr(self, "_llm", None):
+            llm_cfg = self.config.extras["llm"]
+            self._llm = LangChainAPIInference(
+                lm_name=llm_cfg["lm_name"],
+                generation_config=llm_cfg["generation_config"],
+            )
+        return self._llm
 
     async def perceive(
         self,
@@ -248,21 +216,6 @@ class RuleLLMInvestor(GeneralPlayer):
 
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-
-            load_dotenv()
-            llm_config = extras["llm"]
-            lm_name = llm_config["lm_name"]
-            generation_config = llm_config["generation_config"]
-
-            self.state.custom_state["lm_name"] = lm_name
-            self.state.custom_state["generation_config"] = generation_config
-
-            llm_client = LangChainAPIInference(
-                lm_name=lm_name,
-                generation_config=generation_config,
-            )
-            self.state.custom_state["llm_client"] = llm_client
-
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
                 entry_limit=custom_state_hot_limit,
@@ -274,132 +227,70 @@ class RuleLLMInvestor(GeneralPlayer):
                 self.state.custom_state["market_data"] = market_data
                 self.state.custom_state["price_history"].append(market_data["price"])
 
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        if "state" in state and hasattr(state["state"], "custom_state"):
-            custom = state["state"].custom_state
-            if "llm_client" in custom:
-                custom = dict(custom)
-                del custom["llm_client"]
-                state["state"].custom_state = custom
-        return state
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-        if hasattr(self, "state") and hasattr(self.state, "custom_state"):
-            custom = self.state.custom_state
-            if "lm_name" in custom and "llm_client" not in custom:
-                llm_client = LangChainAPIInference(
-                    lm_name=custom["lm_name"],
-                    generation_config=custom["generation_config"],
-                )
-                custom["llm_client"] = llm_client
-
     def _build_prompt(self, market_data: Dict[str, Any]) -> str:
-        """Build user prompt with current market state."""
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         price_history = self.state.custom_state["price_history"]
         round_num = self.state.custom_state["round"]
-
         recent_prices = (
             list(price_history)[-5:] if len(price_history) >= 5 else list(price_history)
         )
-
-        llm_config = self.config.extras["llm"]
-        if "user_message" in llm_config:
-            template = load_prompt(llm_config["user_message"])
-            return template.format(
-                round=round_num,
-                price=market_data["price"],
-                prev_price=market_data["prev_price"],
-                return_pct=market_data["return_pct"],
-                liquidity=market_data["liquidity"],
-                fundamental=market_data["fundamental"],
-                volume=market_data["volume"],
-                net_demand=market_data["net_demand"],
-                recent_prices=recent_prices,
-                cash=cash,
-                position=position,
-                portfolio_value=cash + position * market_data["price"],
-            )
-
-        # Fallback inline template
-        return f"""
-Round: {round_num}
-Current Price: ${market_data['price']:.2f} | Prev: ${market_data['prev_price']:.2f} | Return: {market_data['return_pct']:+.2f}%
-Liquidity: {market_data['liquidity']:.1f} | Fundamental: ${market_data['fundamental']:.2f}
-Volume: {market_data['volume']:.2f} | Net Demand: {market_data['net_demand']:+.2f}
-Recent Prices: {recent_prices}
-Portfolio → Cash: ${cash:.2f} | Position: {position:.2f} | Value: ${cash + position * market_data['price']:.2f}
-
-Respond with ONLY valid JSON:
-{{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float, +buy/-sell>, "reasoning": "<brief>"}}
-"""
-
-    def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
-        """Parse LLM response with analysis and decision sections.
-
-        Delegates to shared utility in examples/llm_utils.py
-        """
-        return parse_llm_response_with_thinking(response_text)
-
-    def _apply_constraints(
-        self, bid_price: float, quantity: float, current_price: float
-    ) -> float:
-        """Enforce cash/position limits."""
-        cash = self.state.custom_state["cash"]
-        position = self.state.custom_state["position"]
-
-        if quantity > 0:
-            max_affordable = cash / bid_price if bid_price > 0 else 0
-            quantity = min(quantity, max_affordable)
-        elif quantity < 0:
-            max_sellable = position
-            quantity = max(-max_sellable, quantity)
-
-        return quantity
+        return RULELLM_USER_TEMPLATE.format(
+            round=round_num,
+            price=market_data["price"],
+            prev_price=market_data["prev_price"],
+            return_pct=market_data["return_pct"],
+            liquidity=market_data["liquidity"],
+            fundamental=market_data["fundamental"],
+            volume=market_data["volume"],
+            net_demand=market_data["net_demand"],
+            recent_prices=recent_prices,
+            cash=cash,
+            position=position,
+            portfolio_value=cash + position * market_data["price"],
+        )
 
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
-        llm_client = self.state.custom_state["llm_client"]
         strategy_name = self.__class__.__name__
+        llm = self._get_llm()
 
         user_prompt = self._build_prompt(market_data)
-
-        llm_config = self.config.extras["llm"]
-        system_prompt = load_prompt(llm_config["sys_message"])
 
         max_retries = 3
         decision = None
         last_error = None
         for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
+            infer_input = InferInput(
+                system_msg=self._system_prompt, user_msg=user_prompt
+            )
+            infer_output = llm.run([infer_input])
             try:
-                decision = self._parse_llm_response(infer_output.outputs[0].response)
+                decision = parse_llm_response_with_thinking(
+                    infer_output.outputs[0].response
+                )
                 break
             except ValueError as e:
                 last_error = e
                 if attempt < max_retries - 1:
                     logger.debug(
-                        f"[{self.identity}] LLM parse failed (attempt {attempt+1}), retrying..."
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
                     )
 
-        # If LLM failed after all retries, skip trading this round (hold)
         if decision is None:
             logger.warning(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}. "
-                f"Skipping trade this round."
+                "[%s] LLM failed after %d attempts: %s. Holding.",
+                self.identity,
+                max_retries,
+                last_error,
             )
             order = {
                 "bid_price": market_data["price"],
                 "quantity": 0.0,
                 "strategy": strategy_name,
-                "investor": self.identity,
-                "reasoning": f"LLM parse failed: held position",
-                "analysis": "",
                 "provides_liquidity": False,
             }
             return {
@@ -411,33 +302,39 @@ Respond with ONLY valid JSON:
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
-        quantity = self._apply_constraints(bid_price, quantity, market_data["price"])
 
-        # Execute trade and update portfolio
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
         if quantity > 0:
-            cost = quantity * bid_price
-            self.state.custom_state["cash"] -= cost
+            max_affordable = cash / bid_price if bid_price > 0 else 0
+            quantity = min(quantity, max_affordable)
+        elif quantity < 0:
+            quantity = max(-position, quantity)
+
+        if quantity > 0:
+            self.state.custom_state["cash"] -= quantity * bid_price
             self.state.custom_state["position"] += quantity
         elif quantity < 0:
-            proceeds = abs(quantity) * bid_price
-            self.state.custom_state["cash"] += proceeds
+            self.state.custom_state["cash"] += abs(quantity) * bid_price
             self.state.custom_state["position"] += quantity
 
         logger.debug(
-            f"[{self.identity:25s}] R{round_num} ({strategy_name:25s}): "
-            f"P={bid_price:7.2f}, Q={quantity:+7.2f} | "
-            f"Cash={self.state.custom_state['cash']:8.2f}, "
-            f"Pos={self.state.custom_state['position']:+7.2f}"
+            "[%-25s] R%d (%-25s): P=%7.2f  Q=%+7.2f | Cash=%8.2f  Pos=%+7.2f",
+            self.identity,
+            round_num,
+            strategy_name,
+            bid_price,
+            quantity,
+            self.state.custom_state["cash"],
+            self.state.custom_state["position"],
         )
 
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
             "strategy": strategy_name,
-            "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
-            "analysis": decision["analysis"],
-            "provides_liquidity": decision.get("provides_liquidity", False),
+            "provides_liquidity": decision["provides_liquidity"],
         }
 
         return {
@@ -461,28 +358,39 @@ Respond with ONLY valid JSON:
 class RuleLLMMomentumTrader(RuleLLMInvestor):
     """Hybrid: MomentumTrader rules + LLM reasoning."""
 
-    pass
+    _system_prompt = RULELLM_MOMENTUM_TRADER_SYS
 
 
 class RuleLLMContrarianTrader(RuleLLMInvestor):
     """Hybrid: ContrarianTrader rules + LLM reasoning."""
 
-    pass
+    _system_prompt = RULELLM_CONTRARIAN_TRADER_SYS
 
 
 class RuleLLMTechnicalTrader(RuleLLMInvestor):
     """Hybrid: IndexFund rules + LLM reasoning."""
 
-    pass
+    _system_prompt = RULELLM_INDEX_FUND_SYS
 
 
 class RuleLLMTrendFollower(RuleLLMInvestor):
     """Hybrid: MarketMaker rules + LLM reasoning."""
 
-    pass
+    _system_prompt = RULELLM_MARKET_MAKER_SYS
 
 
 class RuleLLMFundamentalAnchor(RuleLLMInvestor):
     """Hybrid: TechnicalTrader rules + LLM reasoning."""
 
-    pass
+    _system_prompt = RULELLM_TECHNICAL_TRADER_SYS
+
+
+__all__ = [
+    "Market",
+    "RuleLLMInvestor",
+    "RuleLLMMomentumTrader",
+    "RuleLLMContrarianTrader",
+    "RuleLLMTechnicalTrader",
+    "RuleLLMTrendFollower",
+    "RuleLLMFundamentalAnchor",
+]

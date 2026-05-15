@@ -18,7 +18,7 @@ Investor Types:
     - BottomFisher: Contrarian buyer in crashes
 """
 
-from examples.MarketCrash.Rule.players import (
+from .players import (
     Market,
     RiskParityFund,
     LeveragedHedgeFund,

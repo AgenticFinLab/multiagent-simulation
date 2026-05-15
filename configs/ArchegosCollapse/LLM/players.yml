@@ -1,0 +1,178 @@
+# =============================================================================
+# ArchegosCollapse LLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based coordinator) + 5 LLM-driven agent types
+#
+# Each LLM agent uses a rich persona prompt matching their Archegos collapse role.
+# Market dynamics are rule-based (same as Rule variant).
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based, identical to Rule variant
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.ArchegosCollapse.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/ArchegosCollapse/LLM/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.03
+      mean_reversion: 0.01
+      noise_std: 0.015
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM ConcentratedFund — TRS-leveraged position holder
+# Theory: Total Return Swap Leverage (Becketti, 2021)
+# -----------------------------------------------------------------------------
+concentrated_fund:
+  name: "Concentrated Fund"
+  class: "examples.ArchegosCollapse.LLM.players:LLMConcentratedFund"
+  # Expander → concentrated_fund_1, concentrated_fund_2
+  num_instances: 2
+  config:
+    identity: "concentrated_fund"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ArchegosCollapse/LLM/records"
+      initial_cash: 500000.0
+      initial_position: 5000.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ArchegosCollapse.LLM.prompts:LLM_CONCENTRATED_FUND_SYS"
+        user_message: "examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM PrimeBroker1 — First-mover liquidator (creates cascade)
+# Theory: Prime broker liquidation race
+# -----------------------------------------------------------------------------
+prime_broker1:
+  name: "Prime Broker 1"
+  class: "examples.ArchegosCollapse.LLM.players:LLMPrimeBroker1"
+  num_instances: 1
+  config:
+    identity: "prime_broker1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ArchegosCollapse/LLM/records"
+      initial_cash: 200000.0
+      initial_position: 4000.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ArchegosCollapse.LLM.prompts:LLM_PRIME_BROKER1_SYS"
+        user_message: "examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM PrimeBroker2 — Second-mover liquidator (delayed, worse prices)
+# Theory: Prime broker competition; cascade amplification
+# -----------------------------------------------------------------------------
+prime_broker2:
+  name: "Prime Broker 2"
+  class: "examples.ArchegosCollapse.LLM.players:LLMPrimeBroker2"
+  num_instances: 1
+  config:
+    identity: "prime_broker2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ArchegosCollapse/LLM/records"
+      initial_cash: 200000.0
+      initial_position: 3500.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ArchegosCollapse.LLM.prompts:LLM_PRIME_BROKER2_SYS"
+        user_message: "examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM BlockTradeBuyer — Opportunistic discount buyer
+# Theory: Opportunistic block trading; stabilizing force
+# -----------------------------------------------------------------------------
+block_trade_buyer:
+  name: "Block Trade Buyer"
+  class: "examples.ArchegosCollapse.LLM.players:LLMBlockTradeBuyer"
+  num_instances: 1
+  config:
+    identity: "block_trade_buyer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ArchegosCollapse/LLM/records"
+      initial_cash: 1000000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ArchegosCollapse.LLM.prompts:LLM_BLOCK_TRADE_BUYER_SYS"
+        user_message: "examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM InformationTrader — Front-runner detecting liquidation signals
+# Theory: Information-based trading; detection of order flow
+# -----------------------------------------------------------------------------
+information_trader:
+  name: "Information Trader"
+  class: "examples.ArchegosCollapse.LLM.players:LLMInformationTrader"
+  # Expander → information_trader_1, information_trader_2
+  num_instances: 2
+  config:
+    identity: "information_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ArchegosCollapse/LLM/records"
+      initial_cash: 300000.0
+      initial_position: 1000.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ArchegosCollapse.LLM.prompts:LLM_INFORMATION_TRADER_SYS"
+        user_message: "examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.6
+          max_tokens: 512
+  persona: !include persona.yml

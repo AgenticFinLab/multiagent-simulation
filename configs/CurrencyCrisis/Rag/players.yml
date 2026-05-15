@@ -1,0 +1,263 @@
+# CurrencyCrisis Rag Agent Configuration
+
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+    top_k: 5
+
+market:
+  name: "Market"
+  class: "examples.CurrencyCrisis.Rag.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"
+      initial_price: 100.0
+      peg_rate: 100.0
+      fundamental_value: 95.0
+      reserve_level: 500000.0
+      price_impact: 0.04
+      mean_reversion: 0.01
+      noise_std: 0.015
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+speculativeattacker:
+  name: "SpeculativeAttacker"
+  class: "examples.CurrencyCrisis.Rag.players:RagLLMSpeculativeAttacker"
+  num_instances: 2
+  config:
+    identity: "speculativeattacker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      attack_threshold: 0.05
+      position_size: 800
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CurrencyCrisis.Rag.prompts:RAG_SPECULATIVE_ATTACKER_SYS"
+        user_message: "examples.CurrencyCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 600
+  persona: !include persona.yml
+
+selffulfillingtrader:
+  name: "SelfFulfillingTrader"
+  class: "examples.CurrencyCrisis.Rag.players:RagLLMSelfFulfillingTrader"
+  num_instances: 2
+  config:
+    identity: "selffulfillingtrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"
+      initial_cash: 800000.0
+      initial_position: 0
+      contagion_sensitivity: 0.7
+      exit_threshold: 0.03
+      position_size: 500
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CurrencyCrisis.Rag.prompts:RAG_SELF_FULFILLING_TRADER_SYS"
+        user_message: "examples.CurrencyCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 600
+  persona: !include persona.yml
+
+centralbankdefender:
+  name: "CentralBankDefender"
+  class: "examples.CurrencyCrisis.Rag.players:RagLLMCentralBankDefender"
+  num_instances: 1
+  config:
+    identity: "centralbankdefender"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"
+      initial_cash: 5000000.0
+      initial_position: 0
+      defense_size: 600
+      defense_threshold: 0.02
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CurrencyCrisis.Rag.prompts:RAG_CENTRAL_BANK_DEFENDER_SYS"
+        user_message: "examples.CurrencyCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 600
+  persona: !include persona.yml
+
+fundamentalhedger:
+  name: "FundamentalHedger"
+  class: "examples.CurrencyCrisis.Rag.players:RagLLMFundamentalHedger"
+  num_instances: 1
+  config:
+    identity: "fundamentalhedger"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      hedge_ratio: 0.3
+      position_size: 400
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CurrencyCrisis.Rag.prompts:RAG_FUNDAMENTAL_HEDGER_SYS"
+        user_message: "examples.CurrencyCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 600
+  persona: !include persona.yml
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.CurrencyCrisis.Rag.players:RagLLMNoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"
+      initial_cash: 500000.0
+      initial_position: 0
+      trade_probability: 0.3
+      noise_size: 100
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CurrencyCrisis.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        user_message: "examples.CurrencyCrisis.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 600
+  persona: !include persona.yml

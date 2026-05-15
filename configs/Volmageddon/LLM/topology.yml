@@ -1,0 +1,8 @@
+# Volmageddon LLM Communication Topology
+
+type: "star"
+
+sources:
+  - market
+
+connections:

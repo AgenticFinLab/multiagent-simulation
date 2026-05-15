@@ -1,0 +1,170 @@
+# =============================================================================
+# EchoChamberLLM Players Configuration
+# =============================================================================
+# 1 OpinionEnvironment (rule-based) + 5 LLM Social Agent Types
+#
+# Agent Types:
+#   - OpinionEnvironment: Rule-based coordinator (polarization dynamics)
+#   - LLMIdeologue: Strong opinion holder (DESTABILIZING)
+#   - LLMConformist: Group opinion adopter (DESTABILIZING)
+#   - LLMCriticalThinker: Evidence evaluator (STABILIZING)
+#   - LLMBridgeBuilder: Cross-group engager (STRONGLY STABILIZING)
+#   - LLMPassiveBystander: Low-engagement participant (NEUTRAL)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# OpinionEnvironment (Coordinator) — identical to Rule variant
+# -----------------------------------------------------------------------------
+environment:
+  name: "OpinionEnvironment"
+  class: "examples.EchoChamber.LLM.players:OpinionEnvironment"
+  num_instances: 1
+  config:
+    identity: "environment"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - environment
+    extras:
+      record_path: "EXPERIMENT/EchoChamber/LLM/records"
+      initial_polarization: 0.15
+      polarization_impact: 0.12
+      centripetal_force: 0.01
+      noise_std: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Ideologues
+# -----------------------------------------------------------------------------
+llm_ideologue:
+  name: "LLM Ideologue"
+  class: "examples.EchoChamber.LLM.players:LLMIdeologue"
+  num_instances: 6
+  config:
+    identity: "llm_ideologue"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_agents
+    extras:
+      record_path: "EXPERIMENT/EchoChamber/LLM/records"
+      initial_opinion: 0.4
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EchoChamber.LLM.prompts:LLM_IDEOLOGUE_SYS"
+        user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Conformists
+# -----------------------------------------------------------------------------
+llm_conformist:
+  name: "LLM Conformist"
+  class: "examples.EchoChamber.LLM.players:LLMConformist"
+  num_instances: 5
+  config:
+    identity: "llm_conformist"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_agents
+    extras:
+      record_path: "EXPERIMENT/EchoChamber/LLM/records"
+      initial_opinion: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EchoChamber.LLM.prompts:LLM_CONFORMIST_SYS"
+        user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Critical Thinkers
+# -----------------------------------------------------------------------------
+llm_critical_thinker:
+  name: "LLM Critical Thinker"
+  class: "examples.EchoChamber.LLM.players:LLMCriticalThinker"
+  num_instances: 3
+  config:
+    identity: "llm_critical_thinker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_agents
+    extras:
+      record_path: "EXPERIMENT/EchoChamber/LLM/records"
+      initial_opinion: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EchoChamber.LLM.prompts:LLM_CRITICAL_SYS"
+        user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Bridge Builders
+# -----------------------------------------------------------------------------
+llm_bridge_builder:
+  name: "LLM Bridge Builder"
+  class: "examples.EchoChamber.LLM.players:LLMBridgeBuilder"
+  num_instances: 2
+  config:
+    identity: "llm_bridge_builder"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_agents
+    extras:
+      record_path: "EXPERIMENT/EchoChamber/LLM/records"
+      initial_opinion: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EchoChamber.LLM.prompts:LLM_BRIDGE_SYS"
+        user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Passive Bystanders
+# -----------------------------------------------------------------------------
+llm_passive_bystander:
+  name: "LLM Passive Bystander"
+  class: "examples.EchoChamber.LLM.players:LLMPassiveBystander"
+  num_instances: 4
+  config:
+    identity: "llm_passive_bystander"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_agents
+    extras:
+      record_path: "EXPERIMENT/EchoChamber/LLM/records"
+      initial_opinion: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.EchoChamber.LLM.prompts:LLM_BYSTANDER_SYS"
+        user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml

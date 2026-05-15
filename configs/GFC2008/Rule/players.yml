@@ -1,0 +1,130 @@
+# GFC2008 Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.GFC2008.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/GFC2008/Rule/records"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.04
+      mean_reversion: 0.005
+      noise_std: 0.015
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+mbsoriginator:
+  name: "MBSOriginator"
+  class: "examples.GFC2008.Rule.players:MBSOriginator"
+  num_instances: 2
+  config:
+    identity: "mbsoriginator"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/GFC2008/Rule/records"
+      initial_cash: 500000.0
+      initial_position: 3000
+      initial_price: 100.0
+      fundamental_value: 100.0
+      origination_rate: 0.08
+      base_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+leveragedinvestor:
+  name: "LeveragedInvestor"
+  class: "examples.GFC2008.Rule.players:LeveragedInvestor"
+  num_instances: 2
+  config:
+    identity: "leveragedinvestor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/GFC2008/Rule/records"
+      initial_cash: 2000000.0
+      initial_position: 1500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      margin_trigger: 0.30
+      fire_sale_fraction: 0.25
+      buy_threshold: -0.03
+      base_size: 350
+      custom_state_hot_limit: 3
+      margin_call_trigger: 0.1
+  persona: !include persona.yml
+
+ratingagency:
+  name: "RatingAgency"
+  class: "examples.GFC2008.Rule.players:RatingAgency"
+  num_instances: 2
+  config:
+    identity: "ratingagency"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/GFC2008/Rule/records"
+      initial_cash: 1500000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      overrating_bias: 0.20
+      base_size: 250
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+distressedbuyer:
+  name: "DistressedBuyer"
+  class: "examples.GFC2008.Rule.players:DistressedBuyer"
+  num_instances: 1
+  config:
+    identity: "distressedbuyer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/GFC2008/Rule/records"
+      initial_cash: 5000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      discount_threshold: 0.20
+      base_size: 400
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+regulator:
+  name: "Regulator"
+  class: "examples.GFC2008.Rule.players:Regulator"
+  num_instances: 1
+  config:
+    identity: "regulator"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/GFC2008/Rule/records"
+      initial_cash: 10000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      intervention_threshold: 0.50
+      rescue_size: 500
+      rescue_probability: 0.6
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

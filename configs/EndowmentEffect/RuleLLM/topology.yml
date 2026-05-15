@@ -1,0 +1,29 @@
+# EndowmentEffect RuleLLM Topology - Star Pattern
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - endowedholder
+    - statusquoseller
+    - rationalarbitrageur
+    - newbuyer
+    - noisetrader
+
+  endowedholder:
+    - market
+
+  statusquoseller:
+    - market
+
+  rationalarbitrageur:
+    - market
+
+  newbuyer:
+    - market
+
+  noisetrader:
+    - market

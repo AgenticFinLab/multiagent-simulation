@@ -1,71 +1,43 @@
-# EquityPremium LLM Analysis Methodology
+# EquityPremium LLM — Analysis Documentation
 
-## Overview
+## §1 Analysis Objectives
 
-This document describes the evaluation metrics for the **LLM-based equity premium puzzle** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
+Measure whether LLM personas reproduce myopic loss aversion and the equity premium puzzle relative to the Rule baseline. Key questions:
+- Do LLM personas generate comparable equity premiums to Rule-encoded loss aversion?
+- Does LLM stochasticity amplify or compress the premium variance?
+- How does LLM reasoning compare to deterministic formulas in producing allocation biases?
 
-For detailed metric definitions and financial theory, see: **`../EquityPremium/analysis.md`**
+## §2 Metric → Function Mapping
 
----
+| Metric                                 | Function                                                                                    | analysis-bases.md ref |
+|----------------------------------------|---------------------------------------------------------------------------------------------|-----------------------|
+| Simulated Equity Premium (SEP)         | `simulated_equity_premium(stock_returns, bond_return, rounds_per_year=12)`                  | §2.1                  |
+| Equity Allocation Deviation (EAD)      | `equity_allocation_deviation(agent_stock_values, agent_portfolio_values, neutral_pct=0.50)` | §2.2                  |
+| Evaluation Frequency Sensitivity (EFS) | `evaluation_frequency_sensitivity(window_sizes, mean_equity_allocations)`                   | §2.3                  |
+| Stock Return Volatility Ratio (SRVR)   | `stock_return_volatility_ratio(stock_returns, bond_return)`                                 | §2.4                  |
+| Loss Probability Index (LPI)           | `loss_probability_index(stock_returns, evaluation_window=5)`                                | §2.5                  |
+| Portfolio Wealth Efficiency (PWE)      | `portfolio_wealth_efficiency(agent_terminal_wealth, buy_and_hold_terminal_wealth)`          | §2.6                  |
 
-## Key Metrics (Summary)
+## §3 LLM-Specific Notes
 
-| Metric             | Purpose                        |
-|--------------------|--------------------------------|
-| Equity Premium     | E[R_stock] - R_f               |
-| Loss Frequency     | P(R < 0) at evaluation horizon |
-| Stock Allocation   | W_stock / W_total              |
-| Evaluation Horizon | Frequency of checking          |
+- **LLMMyopicLossAverse (§4.1)**: LLM may overreact to single bad rounds more dramatically than Rule formula; EAD higher variance; occasional abandonment of equity position
+- **LLMLongTermInvestor (§4.2)**: Persona is strong but LLM may drift under persistent negative returns — DPHL shorter than Rule's stable 60% allocation
+- **LLMInstitutionalInvestor (§4.3)**: LLM rational optimizer may not consistently apply excess-return formula; EAD varies more than Rule's RiskNeutralInvestor
+- **LLMRiskAverseSaver (§4.4)**: Very strong persona effect — may refuse equities entirely in bad periods; EAD can reach 0.40+ (extreme under-allocation)
+- **LLMRationalOptimizer (§4.5)**: Adaptive reasoning means this investor is more responsive to context than Rule's NoiseTrader; less pure noise, more signal exploitation
+- **vs. Rule**: SEP range is 20–50% wider in LLM due to persona inconsistency; PWE lower on average
 
----
+## §4 Expected Ranges
 
-## LLM-Specific Observable Phenomena
+| Metric         | LLM Expected Range | vs. Rule Baseline                            |
+|----------------|--------------------|----------------------------------------------|
+| SEP            | 0.03–0.09          | Wider range, similar central tendency        |
+| EAD (MyopicLA) | 0.12–0.40          | Higher upper bound                           |
+| LPI            | 0.38–0.58          | Similar                                      |
+| SRVR           | 3–9                | Slightly higher due to LLM-driven volatility |
+| PWE (MyopicLA) | 0.80–1.00          | Lower floor (more extreme under-allocation)  |
 
-### Emergent Behaviors
+## §5 References
 
-| Phenomenon               | LLM Behavior                                      | Contrast with Rule-Based                |
-|--------------------------|---------------------------------------------------|-----------------------------------------|
-| **Horizon Sensitivity**  | LLM reasons differently at short vs long horizons | Rule-based uses fixed formula           |
-| **Loss Count Awareness** | LLM mentions "seeing losses" in reasoning         | Rule-based computes probability         |
-| **Allocation Reasoning** | LLM explains stock/bond allocation decisions      | Rule-based follows utility maximization |
-
-### Round and Agent Scaling
-
-| Scale          | LLM-Specific Observation                             |
-|----------------|------------------------------------------------------|
-| **50 rounds**  | Premium estimate noisy; horizon effect visible       |
-| **100 rounds** | Clear premium difference; allocation patterns stable |
-| **5 agents**   | Individual LLM loss aversion varies widely           |
-| **10 agents**  | Equilibrium premium emerges from diverse myopia      |
-
----
-
-## LLM-Specific Considerations
-
-1. **Loss Aversion Prompting**: LLM prompted with prospect theory framing
-2. **Evaluation Horizon**: Different agents check at different frequencies
-3. **Natural Myopia**: LLM may exhibit myopic behavior naturally
-
----
-
-## Using Centralized Evaluation Module
-
-```python
-from masim.evaluation.finance import (
-    calculate_returns,
-    calculate_sharpe_ratio,
-    plot_returns_analysis,
-)
-
-# Same analysis as rule-based version
-stock_prices = {...}
-bond_prices = {...}
-stock_returns = calculate_returns(stock_prices)
-bond_returns = calculate_returns(bond_prices)
-```
-
----
-
-## References
-
-See `../EquityPremium/analysis.md` for complete academic references.
+See `analysis-bases.md §2` for full metric derivations and Python function signatures.
+See `simulation-bases.md §2` for theoretical foundations.

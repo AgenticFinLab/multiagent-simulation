@@ -1,0 +1,31 @@
+"""CarryTradeUnwind Rag Prompts — reuses RuleLLM system prompts + RAG context template."""
+
+from examples.CarryTradeUnwind.RuleLLM.prompts import (  # noqa: F401
+    RULELLM_CARRY_TRADER_SYS,
+    RULELLM_LEVERAGED_CARRY_FUND_SYS,
+    RULELLM_FUNDING_CURRENCY_BUYER_SYS,
+    RULELLM_HEDGED_CARRY_TRADER_SYS,
+    RULELLM_NOISE_TRADER_SYS,
+)
+
+RAG_CARRY_TRADER_SYS = RULELLM_CARRY_TRADER_SYS
+RAG_LEVERAGED_CARRY_FUND_SYS = RULELLM_LEVERAGED_CARRY_FUND_SYS
+RAG_FUNDING_CURRENCY_BUYER_SYS = RULELLM_FUNDING_CURRENCY_BUYER_SYS
+RAG_HEDGED_CARRY_TRADER_SYS = RULELLM_HEDGED_CARRY_TRADER_SYS
+RAG_NOISE_TRADER_SYS = RULELLM_NOISE_TRADER_SYS
+
+RAG_USER_TEMPLATE = """Current FX Market State (Round {round}):
+- Current Exchange Rate: {price:.4f}
+- Fundamental Value: {fundamental:.4f}
+- Rate Deviation from Fundamental: {deviation:+.2%}
+- Your Cash: ${cash:.2f}
+- Your Position: {position} units
+- Portfolio Value: ${portfolio_value:.2f}
+
+Relevant Domain Knowledge:
+{rag_context}
+
+Apply your trading rules and the domain knowledge above to decide your action.
+Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "quantity": integer}}</decision>."""
+
+LLM_USER_TEMPLATE = RAG_USER_TEMPLATE

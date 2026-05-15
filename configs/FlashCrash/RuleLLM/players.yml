@@ -55,7 +55,7 @@ rulellm_hft:
         sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_HFT_SYS"
         user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -84,7 +84,7 @@ rulellm_market_maker:
         sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_MARKET_MAKER_SYS"
         user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -114,7 +114,7 @@ rulellm_algo:
         sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_ALGO_SYS"
         user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.2
           max_new_tokens: 500
@@ -142,7 +142,7 @@ rulellm_stop_loss:
         sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_STOP_LOSS_SYS"
         user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.2
           max_new_tokens: 500
@@ -172,7 +172,7 @@ rulellm_fundamental:
         sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_FUNDAMENTAL_SYS"
         user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500

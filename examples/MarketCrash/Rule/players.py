@@ -166,16 +166,30 @@ class Market(GeneralPlayer):
         self.state.custom_state["volatility_history"].append(new_volatility)
 
         # Log
-        logger.debug(f"\n{'='*70}")
-        logger.debug(f"[Market] Round {round_num}")
-        logger.debug(f"  Price: {current_price:.2f} → {new_price:.2f} ({return_pct:+.2f}%)")
-        logger.debug(f"  Liquidity: {current_liquidity:.2f} → {new_liquidity:.2f}")
-        logger.debug(f"  Volatility: {new_volatility:.2f}")
+        logger.debug(f"\n{'='*70}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"[Market] Round {round_num}"
+        )  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Price: {current_price:.2f} → {new_price:.2f} ({return_pct:+.2f}%)"
+        )  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Liquidity: {current_liquidity:.2f} → {new_liquidity:.2f}"
+        )  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Volatility: {new_volatility:.2f}"
+        )  # pylint: disable=logging-fstring-interpolation
         if is_crash:
-            logger.debug(f"  *** CRASH CONDITIONS DETECTED ***")
-        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+            logger.debug(
+                f"  *** CRASH CONDITIONS DETECTED ***"
+            )  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}"
+        )  # pylint: disable=logging-fstring-interpolation
         if orders:
-            logger.debug(f"  Orders ({len(orders)}):")
+            logger.debug(
+                f"  Orders ({len(orders)}):"
+            )  # pylint: disable=logging-fstring-interpolation
             for o in orders:
                 mm_flag = " [MM]" if o["is_market_maker"] else ""
                 logger.debug(
@@ -325,7 +339,9 @@ class RiskParityFund(BaseInvestor):
         if current_vol > target_volatility * 2:
             if position > target_position:
                 quantity = min(quantity, -position * 0.3)  # Force sell at least 30%
-                logger.debug(f"    [FORCED DELEVERAGE] Vol={current_vol:.1f}, selling!")
+                logger.debug(
+                    f"    [FORCED DELEVERAGE] Vol={current_vol:.1f}, selling!"
+                )  # pylint: disable=logging-fstring-interpolation
 
         quantity = max(-50, min(30, quantity))
         bid_price = price if quantity != 0 else 0.0
@@ -395,11 +411,15 @@ class LeveragedHedgeFund(BaseInvestor):
         if margin_ratio < liquidation_level and position > 0:
             # FORCED FULL LIQUIDATION
             quantity = -position
-            logger.debug(f"    [FORCED LIQUIDATION] Margin={margin_ratio:.2%}!")
+            logger.debug(
+                f"    [FORCED LIQUIDATION] Margin={margin_ratio:.2%}!"
+            )  # pylint: disable=logging-fstring-interpolation
         elif margin_ratio < margin_call_level and position > 0:
             # Partial deleverage
             quantity = -position * 0.5
-            logger.debug(f"    [MARGIN CALL] Margin={margin_ratio:.2%}, reducing!")
+            logger.debug(
+                f"    [MARGIN CALL] Margin={margin_ratio:.2%}, reducing!"
+            )  # pylint: disable=logging-fstring-interpolation
         else:
             # Normal trading - momentum based
             if price_return > 0.01:
@@ -465,7 +485,9 @@ class MarketMaker(BaseInvestor):
         if is_withdrawn:
             # Market maker withdraws - no quotes
             quantity = 0.0
-            logger.debug(f"    [MM WITHDRAWN] Vol={volatility:.1f} too high!")
+            logger.debug(
+                f"    [MM WITHDRAWN] Vol={volatility:.1f} too high!"
+            )  # pylint: disable=logging-fstring-interpolation
         else:
             # Provide liquidity - mean revert inventory
             inventory_signal = -position / inventory_limit
@@ -586,11 +608,15 @@ class PanicSeller(BaseInvestor):
         if pnl_pct < -loss_threshold and position > 0:
             # Full panic - sell everything
             quantity = -position
-            logger.debug(f"    [FULL PANIC] Loss={pnl_pct:.1%}!")
+            logger.debug(
+                f"    [FULL PANIC] Loss={pnl_pct:.1%}!"
+            )  # pylint: disable=logging-fstring-interpolation
         elif price_return < crash_trigger and position > 0:
             # Partial panic - sell some
             quantity = -position * panic_sell_fraction
-            logger.debug(f"    [PANIC SELLING] Daily drop={price_return:.1%}")
+            logger.debug(
+                f"    [PANIC SELLING] Daily drop={price_return:.1%}"
+            )  # pylint: disable=logging-fstring-interpolation
         else:
             quantity = 0.0
 
@@ -655,7 +681,9 @@ class BottomFisher(BaseInvestor):
             # Crash detected - buy the dip
             quantity = buy_size * abs(price_return) * 10
             quantity = min(quantity, 25)
-            logger.debug(f"    [BOTTOM FISHING] Discount={discount:.1%}")
+            logger.debug(
+                f"    [BOTTOM FISHING] Discount={discount:.1%}"
+            )  # pylint: disable=logging-fstring-interpolation
         elif discount < -discount_threshold * 1.5:
             # Deep value buy
             quantity = buy_size * 0.5
@@ -687,3 +715,15 @@ class BottomFisher(BaseInvestor):
             **order,
             "outbound_messages": [{"payload": order, "content_type": "investor_bid"}],
         }
+
+
+__all__ = [
+    "Market",
+    "BaseInvestor",
+    "RiskParityFund",
+    "LeveragedHedgeFund",
+    "MarketMaker",
+    "PassiveInvestor",
+    "PanicSeller",
+    "BottomFisher",
+]

@@ -1,7 +1,21 @@
-"""MomentumEffectRag — RAG-augmented hybrid Rule+LLM MomentumEffect simulation.
+"""MomentumEffect Rag - RAG-augmented Rule+LLM momentum simulation."""
 
-Three-way comparison:
-    MomentumEffect        — pure rule-based
-    MomentumEffectRuleLLM — rule-embedded LLM (persona + quantitative rules in prompt)
-    MomentumEffectRag     — rule-embedded LLM + personal RAG library (retrieved context per decision)
-"""
+from .players import (
+    Market,
+    RagLLMInvestor,
+    RagLLMMomentumTrader,
+    RagLLMContrarianTrader,
+    RagLLMTechnicalTrader,
+    RagLLMTrendFollower,
+    RagLLMFundamentalAnchor,
+)
+
+__all__ = [
+    "Market",
+    "RagLLMInvestor",
+    "RagLLMMomentumTrader",
+    "RagLLMContrarianTrader",
+    "RagLLMTechnicalTrader",
+    "RagLLMTrendFollower",
+    "RagLLMFundamentalAnchor",
+]

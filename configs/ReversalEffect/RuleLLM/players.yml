@@ -16,10 +16,13 @@ market:
       record_path: "EXPERIMENT/ReversalEffectRuleLLM/records"
       fundamental_value: 100.0
       initial_price: 100.0
-      price_impact: 0.08
+      base_price_impact: 0.08
       mean_reversion: 0.01
       noise_std: 0.5
       custom_state_hot_limit: 3
+      base_liquidity: 50.0
+      high_impact_multiplier: 3.0
+      low_liquidity_threshold: 30.0
   persona: !include persona.yml
 
 rulellm_contrarian:
@@ -42,7 +45,7 @@ rulellm_contrarian:
         sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_CONTRARIAN_SYS"
         user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -68,7 +71,7 @@ rulellm_overconfident:
         sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_OVERCONFIDENT_SYS"
         user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.5
           max_new_tokens: 500
@@ -94,7 +97,7 @@ rulellm_value:
         sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_VALUE_SYS"
         user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -120,7 +123,7 @@ rulellm_momentum_chaser:
         sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_MOMENTUM_CHASER_SYS"
         user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.4
           max_new_tokens: 500
@@ -146,7 +149,7 @@ rulellm_noise:
         sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_NOISE_SYS"
         user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           temperature: 0.7
           max_new_tokens: 500

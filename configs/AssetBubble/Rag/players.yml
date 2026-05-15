@@ -212,7 +212,7 @@ ragllm_momentum:
         # Language model type: "api" = remote API call
         lm_type: "api"
         # Model identifier for Doubao via ARK (VolcEngine)
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           # Sampling temperature; lower = more deterministic
           temperature: 0.3
@@ -305,7 +305,7 @@ ragllm_arbitrageur:
         # Language model type: "api" = remote API call
         lm_type: "api"
         # Model identifier for Doubao via ARK
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           # Sampling temperature; lower = more deterministic
           temperature: 0.3
@@ -396,7 +396,7 @@ ragllm_noise:
         # Language model type: "api" = remote API call
         lm_type: "api"
         # Model identifier for Doubao via ARK
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           # Sampling temperature; slightly higher for noisier, more varied output
           temperature: 0.5
@@ -487,7 +487,7 @@ ragllm_value:
         # Language model type: "api" = remote API call
         lm_type: "api"
         # Model identifier for Doubao via ARK
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           # Sampling temperature; lower = more deterministic, disciplined output
           temperature: 0.3
@@ -580,7 +580,7 @@ ragllm_leveraged:
         # Language model type: "api" = remote API call
         lm_type: "api"
         # Model identifier for Doubao via ARK
-        lm_name: "ark/doubao-seed-1-6-lite-251015"
+        lm_name: "ark/doubao-seed-1-6-251015"
         generation_config:
           # Sampling temperature; lower = more deterministic
           temperature: 0.3

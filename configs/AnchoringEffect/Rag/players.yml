@@ -1,0 +1,386 @@
+# =============================================================================
+# AnchoringEffectRag Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 RAG-augmented LLM Investor types
+#
+# Knowledge Architecture:
+#   The shared knowledge: block is defined at the TOP of this file, before the
+#   market definition. The config loader (expand_player_instances in
+#   masim/utils/config.py) automatically detects "knowledge" inside the players
+#   dict and promotes it to config top-level, making it accessible as
+#   config["knowledge"] / SimulationConfig.knowledge.
+#
+#   This co-location keeps all player-related config discoverable in one file
+#   while maintaining clean code access patterns.
+#
+#   Each agent has private_knowledge for agent-specific resources:
+#     - from_global_resources: List of global resource sub-dirs to inherit
+#     - local_resources:
+#         local_uri:       Per-agent local directory
+#                          Auto-generated if empty: EXPERIMENT/<scenario>/agents/<agent_id>/
+#         local_resources: Agent-specific local resource paths
+#     - rag: Per-agent RAG configuration (MUST be nested inside private_knowledge)
+#         from_global_index_dir: Shared index directories to reference/copy from
+#                                 Paths relative to global_uri/
+#         local_index_dir: Per-agent local index directory
+#                          Auto-generated if empty: <local_uri>/rag_index/
+#         Inherits knowledge.rag defaults; overrides specified here take precedence
+# =============================================================================
+
+# =============================================================================
+# Shared Knowledge Configuration (processed once, accessible by all agents)
+# =============================================================================
+# This block is co-located with players for discoverability. The config loader
+# automatically promotes it to config top-level. It is NOT a player definition.
+# =============================================================================
+knowledge:
+  # Backend type: "local" = local filesystem, "shared" = network mount, "remote" = cloud
+  backend: "local"
+  # Base directory for all shared documents (PDFs, MinerU output, RAG index, etc.)
+  global_uri: "examples/document-sources"
+  # List of resource descriptors shared globally across all agents
+  resource_csv:
+    # CSV file listing books/URLs per agent_type
+    - "examples/document-sources/books.csv"
+    # Directory containing raw PDF files to be processed by MinerU
+    - "examples/document-sources/source"
+  preprocessing:
+    # Document parser: "mineru" = MinerU OCR/layout parser
+    parser: "mineru"
+    # Output sub-directory for parsed Markdown (relative to global_uri)
+    output_position: "MinerU_processed"
+  rag:
+    # Shared RAG index sub-directory (relative to global_uri)
+    output_position: "rag_index"
+    # Embedding provider: "litellm" for LiteLLM-based embedding
+    embed_type: "litellm"
+    # Embedding model (Hunyuan via OpenAI-compatible API)
+    embed_model: "openai/hunyuan-embedding"
+    # API key for embedding service; resolved from environment variable
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    # API base URL for Hunyuan embedding
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    # Chunk size in tokens for document splitting
+    chunk_size: 512
+    # Overlap in tokens between consecutive chunks
+    chunk_overlap: 64
+    # Number of top-k chunks to retrieve per query
+    top_k: 5
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based, identical to Rule variant
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.AnchoringEffect.Rag.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
+      # Market dynamics parameters (identical to Rule variant)
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.04        # Low: anchoring effect slows price discovery
+      mean_reversion: 0.02      # Moderate: reasonable reversion
+      noise_std: 0.02           # Low noise: anchoring effect is clearer
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Anchored Traders — rules + persona + RAG knowledge retrieval
+# Theory: Tversky & Kahneman (1974) — Anchoring and Insufficient Adjustment
+# -----------------------------------------------------------------------------
+ragllm_anchored:
+  name: "RAG Anchored Trader"
+  class: "examples.AnchoringEffect.Rag.players:RagLLMAnchoredTrader"
+  # Expander → ragllm_anchored_1, ragllm_anchored_2
+  num_instances: 2
+  config:
+    identity: "ragllm_anchored"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # ------------------------------------------------------------------
+      # Rule parameters (from AnchoringEffect AnchoredTrader)
+      # ------------------------------------------------------------------
+      anchor_adjustment_factor: 0.3     # 30% adjustment from anchor to fundamental
+      trade_threshold: 0.03             # |deviation| > 3% triggers trade
+      base_position_size: 20.0          # Base shares per trade
+      # ------------------------------------------------------------------
+      # Private Knowledge: agent-specific resources and RAG configuration
+      # ------------------------------------------------------------------
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      # ------------------------------------------------------------------
+      # LLM Configuration
+      # ------------------------------------------------------------------
+      llm:
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_ANCHORED_TRADER_SYS"
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Historical Anchors — historical-price fixation + RAG
+# Theory: Northcraft & Neale (1987) — Experts anchor to listing prices
+# -----------------------------------------------------------------------------
+ragllm_historical:
+  name: "RAG Historical Anchor"
+  class: "examples.AnchoringEffect.Rag.players:RagLLMHistoricalAnchor"
+  # Expander → ragllm_historical_1, ragllm_historical_2
+  num_instances: 2
+  config:
+    identity: "ragllm_historical"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # ------------------------------------------------------------------
+      # Rule parameters (from AnchoringEffect HistoricalAnchor)
+      # ------------------------------------------------------------------
+      history_window: 5                 # Rolling average window for historical anchor
+      history_weight: 0.6               # 60% weight to historical average price
+      current_weight: 0.4               # 40% weight to current fundamental
+      trade_threshold: 0.04             # |deviation| > 4% triggers trade
+      base_position_size: 15.0
+      # ------------------------------------------------------------------
+      # Private Knowledge
+      # ------------------------------------------------------------------
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      # ------------------------------------------------------------------
+      # LLM Configuration
+      # ------------------------------------------------------------------
+      llm:
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_HISTORICAL_ANCHOR_SYS"
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Rational Updater — Bayesian updating benchmark + RAG
+# Theory: Rational expectations (Muth, 1961)
+# -----------------------------------------------------------------------------
+ragllm_rational:
+  name: "RAG Rational Updater"
+  class: "examples.AnchoringEffect.Rag.players:RagLLMRationalUpdater"
+  num_instances: 1
+  config:
+    identity: "ragllm_rational"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # ------------------------------------------------------------------
+      # Rule parameters (from AnchoringEffect RationalUpdater)
+      # ------------------------------------------------------------------
+      trade_threshold: 0.02             # |deviation| > 2% triggers trade
+      base_position_size: 25.0
+      # ------------------------------------------------------------------
+      # Private Knowledge
+      # ------------------------------------------------------------------
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      # ------------------------------------------------------------------
+      # LLM Configuration
+      # ------------------------------------------------------------------
+      llm:
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_RATIONAL_UPDATER_SYS"
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Momentum Traders — trend following + RAG
+# Theory: Jegadeesh & Titman (1993) — Momentum effect
+# -----------------------------------------------------------------------------
+ragllm_momentum:
+  name: "RAG Momentum Trader"
+  class: "examples.AnchoringEffect.Rag.players:RagLLMMomentumTrader"
+  # Expander → ragllm_momentum_1, ragllm_momentum_2
+  num_instances: 2
+  config:
+    identity: "ragllm_momentum"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # ------------------------------------------------------------------
+      # Rule parameters (from AnchoringEffect MomentumTrader)
+      # ------------------------------------------------------------------
+      momentum_threshold: 0.02          # |return| > 2% triggers momentum trade
+      base_position_size: 20.0
+      # ------------------------------------------------------------------
+      # Private Knowledge
+      # ------------------------------------------------------------------
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      # ------------------------------------------------------------------
+      # LLM Configuration
+      # ------------------------------------------------------------------
+      llm:
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_MOMENTUM_TRADER_SYS"
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Noise Traders — random background trading + RAG (mostly ignored)
+# Theory: Black (1986) — Noise traders provide background liquidity
+# -----------------------------------------------------------------------------
+ragllm_noise:
+  name: "RAG Noise Trader"
+  class: "examples.AnchoringEffect.Rag.players:RagLLMNoiseTrader"
+  # Expander → ragllm_noise_1, ragllm_noise_2
+  num_instances: 2
+  config:
+    identity: "ragllm_noise"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # ------------------------------------------------------------------
+      # Rule parameters (from AnchoringEffect NoiseTrader)
+      # ------------------------------------------------------------------
+      trade_probability: 0.05           # 5% chance of random trade per round
+      min_quantity: 100.0               # Min random trade size
+      max_quantity: 500.0               # Max random trade size
+      # ------------------------------------------------------------------
+      # Private Knowledge
+      # ------------------------------------------------------------------
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      # ------------------------------------------------------------------
+      # LLM Configuration
+      # ------------------------------------------------------------------
+      llm:
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.9
+          max_new_tokens: 600
+  persona: !include persona.yml

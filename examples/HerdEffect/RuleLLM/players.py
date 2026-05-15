@@ -106,8 +106,8 @@ class Market(GeneralPlayer):
                         "price": order["bid_price"],
                         "quantity": order["quantity"],
                         "strategy": order["strategy"],
-                        "cash": order.get("cash", 0),
-                        "position": order.get("position", 0),
+                        "cash": order["cash"],
+                        "position": order["position"],
                     }
                 )
         self.state.custom_state["orders"] = orders
@@ -147,15 +147,23 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["volume_history"].append(total_volume)
 
-        logger.debug(f"\n{'='*60}")
-        logger.debug(f"[Market] Round {round_num}")
+        logger.debug(f"\n{'='*60}")  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"[Market] Round {round_num}"
+        )  # pylint: disable=logging-fstring-interpolation
         logger.debug(
             f"  Price: {prev_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
         )
-        logger.debug(f"  Net Demand: {net_demand:+.2f}")
-        logger.debug(f"  Total Volume: {total_volume:.2f}")
+        logger.debug(
+            f"  Net Demand: {net_demand:+.2f}"
+        )  # pylint: disable=logging-fstring-interpolation
+        logger.debug(
+            f"  Total Volume: {total_volume:.2f}"
+        )  # pylint: disable=logging-fstring-interpolation
         if orders:
-            logger.debug(f"  Orders ({len(orders)}):")
+            logger.debug(
+                f"  Orders ({len(orders)}):"
+            )  # pylint: disable=logging-fstring-interpolation
             for o in orders:
                 logger.debug(
                     f"    {o['investor']:20s} [{o['strategy']:12s}]: "
@@ -203,7 +211,7 @@ class BaseLLMInvestor(GeneralPlayer):
 
     def _get_llm_config(self) -> Dict[str, Any]:
         """Get LLM configuration from extras."""
-        return self.config.extras.get("llm", {})
+        return self.config.extras["llm"]
 
     async def perceive(
         self,
@@ -240,7 +248,7 @@ class BaseLLMInvestor(GeneralPlayer):
         round_num = self.state.custom_state["round"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        market_data = self.state.custom_state.get("market_data")
+        market_data = self.state.custom_state["market_data"]
 
         strategy_name = self.__class__.__name__
 
@@ -262,8 +270,8 @@ class BaseLLMInvestor(GeneralPlayer):
         )
 
         # Build prompt - resolve module paths to actual prompt content
-        sys_msg_path = llm_config.get("sys_message", "")
-        user_msg_path = llm_config.get("user_message", "")
+        sys_msg_path = llm_config["sys_message"]
+        user_msg_path = llm_config["user_message"]
 
         sys_msg = load_prompt(sys_msg_path) if sys_msg_path else ""
         user_template = load_prompt(user_msg_path) if user_msg_path else ""
@@ -276,7 +284,7 @@ class BaseLLMInvestor(GeneralPlayer):
             return_pct=price_return * 100,
             volume=volume,
             net_demand=net_demand,
-            fundamental=extras.get("fundamental", 100.0),
+            fundamental=extras["fundamental"],
             recent_prices=recent_prices_str,
             cash=cash,
             position=position,
@@ -293,9 +301,9 @@ class BaseLLMInvestor(GeneralPlayer):
             try:
                 infer_output = await call_llm(
                     messages=messages,
-                    lm_type=llm_config.get("lm_type", "api"),
-                    lm_name=llm_config.get("lm_name", ""),
-                    generation_config=llm_config.get("generation_config", {}),
+                    lm_type=llm_config["lm_type"],
+                    lm_name=llm_config["lm_name"],
+                    generation_config=llm_config["generation_config"],
                 )
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
@@ -304,24 +312,21 @@ class BaseLLMInvestor(GeneralPlayer):
             except (json.JSONDecodeError, ValueError, KeyError) as e:
                 last_error = e
                 if attempt < max_retries - 1:
-                    logger.debug(f"[{self.identity}] LLM parse failed, retrying...")
+                    logger.debug(
+                        f"[{self.identity}] LLM parse failed, retrying..."
+                    )  # pylint: disable=logging-fstring-interpolation
 
-        # If LLM failed after all retries, skip trading this round (hold)
         if decision is None:
-            logger.warning(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}. "
-                f"Skipping trade this round."
-            )
-            return self._hold_order(
-                round_num, strategy_name, reason=f"LLM failed: {last_error}"
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             )
 
         # Extract decision
-        action = decision.get("action", "hold")
-        bid_price = float(decision.get("bid_price", price))
-        quantity = float(decision.get("quantity", 0))
-        reasoning = decision.get("reasoning", "")
-        analysis = decision.get("analysis", "")
+        action = decision["action"]
+        bid_price = float(decision["bid_price"])
+        quantity = float(decision["quantity"])
+        reasoning = decision["reasoning"]
+        analysis = decision["analysis"]
 
         # Execute trade
         if quantity > 0:
@@ -380,8 +385,8 @@ class BaseLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": reason[:120] if reason else "hold",
             "analysis": "",
-            "cash": self.state.custom_state.get("cash", 0),
-            "position": self.state.custom_state.get("position", 0),
+            "cash": self.state.custom_state["cash"],
+            "position": self.state.custom_state["position"],
             "outbound_messages": [
                 {
                     "payload": {
@@ -391,8 +396,8 @@ class BaseLLMInvestor(GeneralPlayer):
                         "investor": self.identity,
                         "reasoning": reason[:100] if reason else "hold",
                         "analysis": "",
-                        "cash": self.state.custom_state.get("cash", 0),
-                        "position": self.state.custom_state.get("position", 0),
+                        "cash": self.state.custom_state["cash"],
+                        "position": self.state.custom_state["position"],
                     },
                     "content_type": "investor_bid",
                 }
@@ -413,30 +418,30 @@ class BaseLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMMomentumInvestor(BaseLLMInvestor):
-    """Hybrid rule+LLM momentum investor following trend signals."""
+    """Hybrid rule+LLM MomentumInvestor: following trend signals. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class RuleLLMContrarianInvestor(BaseLLMInvestor):
-    """Hybrid rule+LLM contrarian investor betting against the crowd."""
+    """Hybrid rule+LLM ContrarianInvestor: betting against the crowd. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class RuleLLMRiskAverseInvestor(BaseLLMInvestor):
-    """Hybrid rule+LLM risk-averse investor managing volatility."""
+    """Hybrid rule+LLM RiskAverseInvestor: managing volatility. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class RuleLLMAggressiveInvestor(BaseLLMInvestor):
-    """Hybrid rule+LLM aggressive investor with acceleration bonus."""
+    """Hybrid rule+LLM AggressiveInvestor: acceleration bonus momentum. Theory: simulation-bases.md §4.5."""
 
     pass
 
 
 class RuleLLMNoiseTrader(BaseLLMInvestor):
-    """Hybrid rule+LLM noise trader making random decisions."""
+    """Hybrid rule+LLM NoiseTrader: random uninformed decisions. Theory: simulation-bases.md §4.4."""
 
     pass

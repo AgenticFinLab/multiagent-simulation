@@ -73,6 +73,7 @@ from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
+from masim.format.order import validate_order
 
 logger = logging.getLogger("AssetBubbleRag")
 
@@ -157,7 +158,7 @@ class Market(GeneralPlayer):
 
     async def decide(self) -> Dict[str, Any]:
         extras = self.config.extras
-        rng = self.state.custom_state.get("_random", random)
+        rng = self.state.custom_state["_random"]
 
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
@@ -336,8 +337,8 @@ class RagLLMInvestor(GeneralPlayer):
         self.state.custom_state["llm_client"] = llm_client
 
         # RAG index — get rag config from private_knowledge.rag (YAML structure)
-        private_knowledge = extras.get("private_knowledge", {})
-        rag_cfg = private_knowledge.get("rag", extras.get("rag", {}))
+        private_knowledge = extras["private_knowledge"]
+        rag_cfg = private_knowledge["rag"]
         await self._initialize_rag(rag_cfg, llm_client, extras["llm"])
 
     async def _initialize_rag(
@@ -364,34 +365,32 @@ class RagLLMInvestor(GeneralPlayer):
             4. Fallback: load processed docs and build local index from scratch
         """
         extras = self.config.extras
-        record_path = extras.get("record_path", "EXPERIMENT")
+        record_path = extras["record_path"]
 
         # ------------------------------------------------------------------
         # STEP 1: Resolve knowledge config via ResourceManager
         # ------------------------------------------------------------------
         # Obtain the knowledge_config from the top-level YAML (or from rag_cfg
         # for backward compat with older runners)
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             # Fallback: construct from legacy rag_cfg fields
             knowledge_config = {
                 "backend": "local",
-                "global_uri": rag_cfg.get("docs_dir", "examples/document-sources"),
+                "global_uri": rag_cfg["docs_dir"],
                 "preprocessing": {
                     "parser": "mineru",
-                    "output_position": rag_cfg.get(
-                        "mineru_output_dir", "MinerU_processed"
-                    ),
+                    "output_position": rag_cfg["mineru_output_dir"],
                 },
                 "rag": {
-                    "output_position": rag_cfg.get("shared_rag_index_dir", "rag_index"),
+                    "output_position": rag_cfg["shared_rag_index_dir"],
                 },
             }
 
         resource_manager = ResourceManager(knowledge_config)
 
         # Resolve per-agent knowledge config (merges global + private)
-        private_knowledge = extras.get("private_knowledge", {})
+        private_knowledge = extras["private_knowledge"]
         if not private_knowledge:
             # Fallback: construct from legacy rag_cfg fields
             private_knowledge = {
@@ -435,12 +434,12 @@ class RagLLMInvestor(GeneralPlayer):
         # ------------------------------------------------------------------
         # STEP 2: Build KnowledgeStore with resolved RAG config
         # ------------------------------------------------------------------
-        embed_type = resolved_rag.get("embed_type", "litellm")
-        embed_model = resolved_rag.get("embed_model", "openai/hunyuan-embedding")
-        embed_api_base = resolved_rag.get("embed_api_base", "")
-        embed_api_key = resolved_rag.get("embed_api_key", "")
-        chunk_size = int(resolved_rag.get("chunk_size", 512))
-        chunk_overlap = int(resolved_rag.get("chunk_overlap", 64))
+        embed_type = resolved_rag["embed_type"]
+        embed_model = resolved_rag["embed_model"]
+        embed_api_base = resolved_rag["embed_api_base"]
+        embed_api_key = resolved_rag["embed_api_key"]
+        chunk_size = int(resolved_rag["chunk_size"])
+        chunk_overlap = int(resolved_rag["chunk_overlap"])
 
         # Resolve API key from env if not already resolved
         if not embed_api_key:
@@ -492,7 +491,7 @@ class RagLLMInvestor(GeneralPlayer):
         # ------------------------------------------------------------------
         # STEP 4: Try copying shared RAG index to local
         # ------------------------------------------------------------------
-        shared_rag_dirs = resolved_rag.get("shared_rag_index_dirs", [])
+        shared_rag_dirs = resolved_rag["shared_rag_index_dirs"]
         if not shared_rag_dirs and os.path.isdir(shared_rag_dir):
             shared_rag_dirs = [shared_rag_dir]
 
@@ -623,9 +622,9 @@ class RagLLMInvestor(GeneralPlayer):
             if "rag_cfg" in custom and "rag_store" not in custom:
                 rag_cfg = custom["rag_cfg"]
                 # New resolved config uses local_index_dir; legacy uses local_workspace_dir
-                local_rag_dir = rag_cfg.get("local_index_dir", "")
+                local_rag_dir = rag_cfg["local_index_dir"]
                 if not local_rag_dir:
-                    local_workspace_dir = rag_cfg.get("local_workspace_dir", "")
+                    local_workspace_dir = rag_cfg["local_workspace_dir"]
                     if local_workspace_dir:
                         local_rag_dir = os.path.join(local_workspace_dir, "rag_index")
 
@@ -635,8 +634,8 @@ class RagLLMInvestor(GeneralPlayer):
                     )
                     return
 
-                embed_type = rag_cfg.get("embed_type", "litellm")
-                embed_api_key = rag_cfg.get("embed_api_key", "")
+                embed_type = rag_cfg["embed_type"]
+                embed_api_key = rag_cfg["embed_api_key"]
                 if not embed_api_key:
                     if embed_type == "litellm":
                         embed_api_key = os.getenv("HUNYUAN_API_KEY", "")
@@ -644,15 +643,13 @@ class RagLLMInvestor(GeneralPlayer):
                         embed_api_key = os.getenv("ARK_API_KEY", "")
 
                 rag_store = KnowledgeStore(
-                    embed_model_name=rag_cfg.get(
-                        "embed_model", "openai/hunyuan-embedding"
-                    ),
+                    embed_model_name=rag_cfg["embed_model"],
                     embed_api_key=embed_api_key,
-                    embed_api_base=rag_cfg.get("embed_api_base", ""),
+                    embed_api_base=rag_cfg["embed_api_base"],
                     embed_type=embed_type,
                     persist_dir=local_rag_dir,
-                    chunk_size=int(rag_cfg.get("chunk_size", 512)),
-                    chunk_overlap=int(rag_cfg.get("chunk_overlap", 64)),
+                    chunk_size=int(rag_cfg["chunk_size"]),
+                    chunk_overlap=int(rag_cfg["chunk_overlap"]),
                 )
                 if os.path.isdir(local_rag_dir):
                     try:
@@ -675,8 +672,8 @@ class RagLLMInvestor(GeneralPlayer):
         short_pos = self.state.custom_state["short_position"]
         price_history = self.state.custom_state["price_history"]
         round_num = self.state.custom_state["round"]
-        rag_store: KnowledgeStore = self.state.custom_state.get("rag_store")
-        rag_cfg: Dict[str, Any] = self.state.custom_state.get("rag_cfg", {})
+        rag_store: KnowledgeStore = self.state.custom_state["rag_store"]
+        rag_cfg: Dict[str, Any] = self.state.custom_state["rag_cfg"]
 
         recent_prices = (
             list(price_history)[-5:] if len(price_history) >= 5 else list(price_history)
@@ -685,7 +682,7 @@ class RagLLMInvestor(GeneralPlayer):
         # Retrieve relevant context from RAG library
         rag_context = ""
         if rag_store and rag_store.is_built():
-            top_k = rag_cfg.get("top_k", 3)
+            top_k = rag_cfg["top_k"]
             query = KnowledgeQuery(
                 text=(
                     f"investment strategy when: "
@@ -768,23 +765,27 @@ class RagLLMInvestor(GeneralPlayer):
         system_prompt = load_prompt(self.config.extras["llm"]["sys_message"])
 
         max_retries = 3
-        decision: Dict[str, Any] = {}
+        decision = None
+        last_error = None
         for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
+                infer_output = llm_client.run([infer_input])
                 decision = self._parse_llm_response(infer_output.outputs[0].response)
                 break
-            except ValueError as e:
-                if attempt == max_retries - 1:
-                    raise RuntimeError(
-                        f"[{self.identity}] LLM failed after {max_retries} attempts: {e}"
+            except Exception as exc:
+                last_error = exc
+                if attempt < max_retries - 1:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying\u2026",
+                        self.identity,
+                        attempt + 1,
                     )
-                logger.debug(
-                    "[%s] LLM parse failed (attempt %d), retrying…",
-                    self.identity,
-                    attempt + 1,
-                )
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM failed after {max_retries} retries: {last_error}"
+            )
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
@@ -845,30 +846,30 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMMomentumSpeculator(RagLLMInvestor):
-    """RAG-augmented: Greater Fool Theory momentum rules + LLM + retrieved knowledge."""
+    """RAG-augmented: Greater Fool Theory momentum rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4 — MomentumSpeculator."""
 
     pass
 
 
 class RagLLMRationalArbitrageur(RagLLMInvestor):
-    """RAG-augmented: Limits to Arbitrage deviation formula + LLM + retrieved knowledge."""
+    """RAG-augmented: Limits to Arbitrage deviation formula + LLM + retrieved knowledge. Theory: simulation-bases.md §4 — RationalArbitrageur."""
 
     pass
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented: Noise Trader Risk sentiment formula + LLM + retrieved knowledge."""
+    """RAG-augmented: Noise Trader Risk sentiment formula + LLM + retrieved knowledge. Theory: simulation-bases.md §4 — NoiseTrader."""
 
     pass
 
 
 class RagLLMValueInvestor(RagLLMInvestor):
-    """RAG-augmented: Value investing frequency + deviation rules + LLM + retrieved knowledge."""
+    """RAG-augmented: Value investing frequency + deviation rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4 — FundamentalInvestor."""
 
     pass
 
 
 class RagLLMLeveragedBuyer(RagLLMInvestor):
-    """RAG-augmented: Leverage amplification + margin call rules + LLM + retrieved knowledge."""
+    """RAG-augmented: Leverage amplification + margin call rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4 — LeveragedBuyer."""
 
     pass

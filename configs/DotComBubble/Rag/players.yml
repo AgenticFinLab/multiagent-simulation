@@ -1,0 +1,264 @@
+# DotComBubble Rag Agent Configuration
+
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+    top_k: 5
+
+market:
+  name: "Market"
+  class: "examples.DotComBubble.Rag.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/DotComBubble/Rag/records"
+      initial_price: 50.0
+      fundamental_value: 50.0
+      price_impact: 0.03
+      mean_reversion: 0.01
+      noise_std: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+neweconomyevangelist:
+  name: "NewEconomyEvangelist"
+  class: "examples.DotComBubble.Rag.players:RagLLMNewEconomyEvangelist"
+  num_instances: 2
+  config:
+    identity: "neweconomyevangelist"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/DotComBubble/Rag/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      max_pf_ratio: 10.0
+      base_buy_size: 400
+      narrative_strength: 0.8
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.DotComBubble.Rag.prompts:RAG_NEW_ECONOMY_EVANGELIST_SYS"
+        user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.8
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
+
+ipoflipper:
+  name: "IPOFlipper"
+  class: "examples.DotComBubble.Rag.players:RagLLMIPOFlipper"
+  num_instances: 2
+  config:
+    identity: "ipoflipper"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/DotComBubble/Rag/records"
+      initial_cash: 800000.0
+      initial_position: 0
+      entry_threshold: 0.05
+      flip_return: 0.15
+      base_size: 300
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.DotComBubble.Rag.prompts:RAG_IPO_FLIPPER_SYS"
+        user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
+
+momentumfollower:
+  name: "MomentumFollower"
+  class: "examples.DotComBubble.Rag.players:RagLLMMomentumFollower"
+  num_instances: 2
+  config:
+    identity: "momentumfollower"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/DotComBubble/Rag/records"
+      initial_cash: 800000.0
+      initial_position: 0
+      entry_threshold: 0.03
+      base_size: 350
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.DotComBubble.Rag.prompts:RAG_MOMENTUM_FOLLOWER_SYS"
+        user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
+
+skepticalvalueinvestor:
+  name: "SkepticalValueInvestor"
+  class: "examples.DotComBubble.Rag.players:RagLLMSkepticalValueInvestor"
+  num_instances: 1
+  config:
+    identity: "skepticalvalueinvestor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/DotComBubble/Rag/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      buy_pf: 1.2
+      max_pf: 3.0
+      base_size: 300
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.DotComBubble.Rag.prompts:RAG_SKEPTICAL_VALUE_SYS"
+        user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml
+
+shortseller:
+  name: "ShortSeller"
+  class: "examples.DotComBubble.Rag.players:RagLLMShortSeller"
+  num_instances: 1
+  config:
+    identity: "shortseller"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/DotComBubble/Rag/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      short_threshold: 5.0
+      cover_threshold: 2.5
+      base_size: 300
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.DotComBubble.Rag.prompts:RAG_SHORT_SELLER_SYS"
+        user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+  persona: !include persona.yml

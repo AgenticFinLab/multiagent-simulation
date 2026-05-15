@@ -1,6 +1,6 @@
 """VolatilityClusteringLLM - LLM-based Multi-Agent Market Simulation"""
 
-from examples.VolatilityClustering.LLM.players import (
+from .players import (
     Market,
     LLMInvestor,
     LLMFundamentalist,

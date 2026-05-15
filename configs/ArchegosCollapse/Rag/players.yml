@@ -1,0 +1,296 @@
+# =============================================================================
+# ArchegosCollapse Rag Players Configuration
+# =============================================================================
+# 1 Market (rule-based coordinator) + 5 RAG-augmented LLM agent types
+#
+# Knowledge Architecture:
+#   The shared knowledge: block is promoted to config top-level by the loader.
+#   Each agent has private_knowledge for agent-specific RAG configuration.
+# =============================================================================
+
+# =============================================================================
+# Shared Knowledge Configuration
+# =============================================================================
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+    top_k: 5
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based, identical to Rule variant
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.ArchegosCollapse.Rag.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.03
+      mean_reversion: 0.01
+      noise_std: 0.015
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG ConcentratedFund — TRS leveraged position holder + domain knowledge
+# Theory: Total Return Swap Leverage (Becketti, 2021)
+# -----------------------------------------------------------------------------
+ragllm_concentrated_fund:
+  name: "RAG Concentrated Fund"
+  class: "examples.ArchegosCollapse.Rag.players:RagLLMConcentratedFund"
+  # Expander → ragllm_concentrated_fund_1, ragllm_concentrated_fund_2
+  num_instances: 2
+  config:
+    identity: "ragllm_concentrated_fund"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"
+      initial_cash: 500000.0
+      initial_position: 5000.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_CONCENTRATED_FUND_SYS"
+        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG PrimeBroker1 — first-mover liquidator + domain knowledge
+# Theory: Prime broker liquidation race
+# -----------------------------------------------------------------------------
+ragllm_prime_broker1:
+  name: "RAG Prime Broker 1"
+  class: "examples.ArchegosCollapse.Rag.players:RagLLMPrimeBroker1"
+  num_instances: 1
+  config:
+    identity: "ragllm_prime_broker1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"
+      initial_cash: 200000.0
+      initial_position: 4000.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_PRIME_BROKER1_SYS"
+        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG PrimeBroker2 — delayed liquidator + domain knowledge
+# Theory: Prime broker competition; cascade amplification
+# -----------------------------------------------------------------------------
+ragllm_prime_broker2:
+  name: "RAG Prime Broker 2"
+  class: "examples.ArchegosCollapse.Rag.players:RagLLMPrimeBroker2"
+  num_instances: 1
+  config:
+    identity: "ragllm_prime_broker2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"
+      initial_cash: 200000.0
+      initial_position: 3500.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_PRIME_BROKER2_SYS"
+        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG BlockTradeBuyer — opportunistic discount buyer + domain knowledge
+# Theory: Opportunistic block trading; stabilizing force
+# -----------------------------------------------------------------------------
+ragllm_block_trade_buyer:
+  name: "RAG Block Trade Buyer"
+  class: "examples.ArchegosCollapse.Rag.players:RagLLMBlockTradeBuyer"
+  num_instances: 1
+  config:
+    identity: "ragllm_block_trade_buyer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"
+      initial_cash: 1000000.0
+      initial_position: 0.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_BLOCK_TRADE_BUYER_SYS"
+        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG InformationTrader — front-runner detecting liquidation + domain knowledge
+# Theory: Information-based trading; detection of order flow
+# -----------------------------------------------------------------------------
+ragllm_information_trader:
+  name: "RAG Information Trader"
+  class: "examples.ArchegosCollapse.Rag.players:RagLLMInformationTrader"
+  # Expander → ragllm_information_trader_1, ragllm_information_trader_2
+  num_instances: 2
+  config:
+    identity: "ragllm_information_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"
+      initial_cash: 300000.0
+      initial_position: 1000.0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_INFORMATION_TRADER_SYS"
+        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 600
+  persona: !include persona.yml

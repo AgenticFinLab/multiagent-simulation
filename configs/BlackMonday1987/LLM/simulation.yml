@@ -1,0 +1,56 @@
+# =============================================================================
+# BlackMonday1987 LLM Simulation Configuration
+# =============================================================================
+# LLM agents with Black Monday 1987 personas make trading decisions via
+# language model reasoning. Market dynamics are rule-based (same as Rule variant).
+#
+# Usage:
+#   python examples/BlackMonday1987/LLM/run_blackmonday1987_llm.py \
+#       -c configs/BlackMonday1987/LLM/simulation.yml
+# =============================================================================
+
+setting:
+  name: "blackmonday1987_llm_simulation"
+  description: "Black Monday 1987 with LLM-driven agents: portfolio insurance and program trading feedback loops"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "EXPERIMENT/BlackMonday1987/LLM/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "blackmonday1987_llm"
+  actor_prefix: null
+  # LLM simulations need more memory for prompt/response strings
+  # Derived: 10 players, star topology -> 18 msgs/round
+  #   LLM TurnResult also carries prompt+response strings (~4-8 KB each)
+  #   Minimum 512 MB floor for LLM simulations -> 536870912 bytes
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 536870912
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/BlackMonday1987/LLM/communication"
+  record_messages: true
+  message_block_size: 500

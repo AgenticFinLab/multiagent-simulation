@@ -71,6 +71,7 @@ from masim.knowledge import KnowledgeLoader, KnowledgeQuery, KnowledgeStore
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
+from masim.knowledge import KnowledgeLoader
 
 logger = logging.getLogger("DispositionEffectRag")
 
@@ -235,22 +236,33 @@ class BaseRagInvestor(GeneralPlayer):
         self._init_llm_client()
         self._init_knowledge_store()
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state.pop("llm_client", None)
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        if not hasattr(self, "llm_client"):
+            llm_config = self.config.extras["llm"]
+            self.llm_client = LangChainAPIInference(
+                lm_name=llm_config["lm_name"],
+                generation_config=llm_config["generation_config"],
+            )
+
     def _init_llm_client(self) -> None:
         """Initialize LLM inference client from config."""
         load_dotenv()
 
-        llm_config = self.config.extras.get("llm", {})
-        self.sys_message_path = llm_config.get("sys_message")
-        self.user_message_path = llm_config.get("user_message")
+        llm_config = self.config.extras["llm"]
+        self.sys_message_path = llm_config["sys_message"]
+        self.user_message_path = llm_config["user_message"]
 
         self.llm_client = LangChainAPIInference(
-            model=llm_config.get("lm_name", "ark/doubao-seed-1-6-lite-251015"),
-            api_key=os.getenv("ARK_API_KEY"),
-            generation_config=llm_config.get(
-                "generation_config", {"temperature": 0.3, "max_new_tokens": 500}
-            ),
+            lm_name=llm_config["lm_name"],
+            generation_config=llm_config["generation_config"],
         )
-        logger.info(f"Initialized LLM client for {self.config.identity}")
+        logger.info("Initialized LLM client for %s", self.config.identity)
 
     def _init_knowledge_store(self) -> None:
         """Initialize RAG knowledge store for this investor.
@@ -267,21 +279,18 @@ class BaseRagInvestor(GeneralPlayer):
         - embed_model: Model name (e.g., "BAAI/bge-small-en-v1.5")
         - embed_api_base: API base URL for OpenAI-compatible endpoints
         """
-        rag_config = self.config.extras.get("rag", {})
-        persist_dir = rag_config.get(
-            "persist_dir",
-            f"EXPERIMENT/DispositionEffect/Rag/rag_index/{self.config.identity}",
-        )
+        rag_config = self.config.extras["rag"]
+        persist_dir = rag_config["persist_dir"]
 
         # Embedding configuration
-        embed_type = rag_config.get("embed_type", "huggingface")
-        embed_model = rag_config.get("embed_model", "BAAI/bge-small-en-v1.5")
-        embed_api_base = rag_config.get("embed_api_base", "")
+        embed_type = rag_config["embed_type"]
+        embed_model = rag_config["embed_model"]
+        embed_api_base = rag_config["embed_api_base"]
         embed_api_key = os.getenv("ARK_API_KEY", "") if embed_type == "openai" else ""
 
         # Chunking configuration
-        chunk_size = rag_config.get("chunk_size", 512)
-        chunk_overlap = rag_config.get("chunk_overlap", 64)
+        chunk_size = rag_config["chunk_size"]
+        chunk_overlap = rag_config["chunk_overlap"]
 
         logger.info(
             "[%s] Initializing KnowledgeStore: embed_type=%s, model=%s, persist_dir=%s",
@@ -359,13 +368,13 @@ class BaseRagInvestor(GeneralPlayer):
         Returns:
             List of KnowledgeDocument objects
         """
-        from masim.knowledge import KnowledgeLoader
 
-        loader = KnowledgeLoader(fail_fast=False)  # Allow partial loading
+        # Allow partial loading
+        loader = KnowledgeLoader(fail_fast=False)
         docs = []
 
         # Source 1: Local directory
-        docs_dir = rag_config.get("docs_dir")
+        docs_dir = rag_config["docs_dir"]
         if docs_dir and os.path.isdir(docs_dir):
             logger.info(
                 "[%s] Loading documents from local directory: %s",
@@ -390,7 +399,7 @@ class BaseRagInvestor(GeneralPlayer):
                 )
 
         # Source 2: URL CSV file
-        url_csv = rag_config.get("url_csv")
+        url_csv = rag_config["url_csv"]
         if url_csv and os.path.isfile(url_csv):
             logger.info(
                 "[%s] Loading documents from URL CSV: %s",
@@ -415,7 +424,7 @@ class BaseRagInvestor(GeneralPlayer):
                 )
 
         # Source 3: Explicit URLs list
-        urls = rag_config.get("urls", [])
+        urls = rag_config["urls"]
         if urls:
             logger.info(
                 "[%s] Loading documents from %d explicit URL(s)",
@@ -439,9 +448,11 @@ class BaseRagInvestor(GeneralPlayer):
                 )
 
         # Source 4: Agent-autonomous selection
-        if rag_config.get("agent_autonomous", False):
-            docs_save_dir = rag_config.get("docs_save_dir")
-            catalog_path = rag_config.get("catalog_path")
+        if rag_config["agent_autonomous"]:
+            # Optional key
+            docs_save_dir = rag_config["docs_save_dir"]
+            # Optional key
+            catalog_path = rag_config["catalog_path"]
             logger.info(
                 "[%s] Using agent-autonomous document selection (save_dir=%s)",
                 self.config.identity,
@@ -468,10 +479,11 @@ class BaseRagInvestor(GeneralPlayer):
                 )
 
         # Source 5: LLM-suggested documents
-        if rag_config.get("llm_suggested", False):
-            n_urls = rag_config.get("llm_suggested_n_urls", 5)
-            docs_save_dir = rag_config.get("docs_save_dir")
-            persona_desc = self.config.extras.get("persona_description", "")
+        if rag_config["llm_suggested"]:
+            n_urls = rag_config["llm_suggested_n_urls"]
+            # Optional key
+            docs_save_dir = rag_config["docs_save_dir"]
+            persona_desc = self.config.extras["persona_description"]
 
             logger.info(
                 "[%s] Using LLM-suggested document discovery (n_urls=%d)",
@@ -501,7 +513,8 @@ class BaseRagInvestor(GeneralPlayer):
                 )
 
         # Legacy: knowledge_sources list (for backward compatibility)
-        knowledge_sources = rag_config.get("knowledge_sources", [])
+        # Optional key
+        knowledge_sources = rag_config["knowledge_sources"]
         if knowledge_sources:
             logger.info(
                 "[%s] Loading from legacy knowledge_sources: %s",
@@ -566,8 +579,8 @@ class BaseRagInvestor(GeneralPlayer):
         if not market_data:
             return "investment decision strategy"
 
-        price = market_data.get("price", 100)
-        purchase_price = self.state.custom_state.get("purchase_price", 100)
+        price = market_data["price"]
+        purchase_price = self.state.custom_state["purchase_price"]
         gain_loss = (
             (price - purchase_price) / purchase_price if purchase_price > 0 else 0
         )
@@ -582,9 +595,9 @@ class BaseRagInvestor(GeneralPlayer):
     def _retrieve_context(self, query_text: str) -> str:
         """Retrieve relevant context from RAG knowledge store."""
         try:
-            rag_config = self.config.extras.get("rag", {})
-            top_k = rag_config.get("top_k", 3)
-            round_num = self.state.custom_state.get("round", 0)
+            rag_config = self.config.extras["rag"]
+            top_k = rag_config["top_k"]
+            round_num = self.state.custom_state["round"]
 
             query = KnowledgeQuery(
                 text=query_text,
@@ -600,7 +613,7 @@ class BaseRagInvestor(GeneralPlayer):
                     for i, chunk in enumerate(result.chunks)
                 )
         except Exception as e:
-            logger.warning(f"RAG query failed: {e}")
+            logger.warning("RAG query failed: %s", e)
         return ""
 
     async def decide(self) -> Dict[str, Any]:
@@ -629,34 +642,46 @@ class BaseRagInvestor(GeneralPlayer):
         sys_prompt = load_prompt(self.sys_message_path)
         user_template = load_prompt(self.user_message_path)
 
-        # Format user prompt with market data and RAG context
-        user_prompt = user_template.format(
-            price=f"{price:.2f}",
-            purchase_price=f"{purchase_price:.2f}",
-            gain_loss=f"{gain_loss*100:+.2f}%",
-            cash=f"{cash:.2f}",
-            position=f"{position:.2f}",
-            portfolio_value=f"{cash + position * price:.2f}",
-        )
+        prev_price = market_data["prev_price"]
+        price_return = market_data["return"]
+        volume = market_data["volume"]
+        net_demand = market_data["net_demand"]
+        news_shock = market_data["news_shock"]
 
-        # Add RAG context if available
-        if rag_context:
-            user_prompt += f"\\n\\nRELEVANT KNOWLEDGE:\\n{rag_context}"
+        # Format user prompt — {rag_context} placeholder filled here per §8.4 spec
+        user_prompt = user_template.format(
+            round=round_num,
+            price=price,
+            prev_price=prev_price,
+            return_pct=price_return * 100,
+            volume=volume,
+            net_demand=net_demand,
+            news_event=f"Shock: {news_shock:+.2f}" if news_shock != 0 else "None",
+            cash=cash,
+            position=position,
+            purchase_price=purchase_price,
+            gain_loss_pct=gain_loss * 100,
+            portfolio_value=cash + position * price,
+            rag_context=(
+                rag_context if rag_context else "(no relevant knowledge retrieved)"
+            ),
+        )
 
         # Call LLM
         try:
             llm_input = InferInput(system_msg=sys_prompt, user_msg=user_prompt)
-            response = await self.llm_client.async_generate(llm_input)
+            result = self.llm_client.run([llm_input])
+            response_text = result.outputs[0].response
 
-            parsed = parse_llm_response_with_thinking(response.text)
-            decision = json.loads(parsed["decision"])
+            parsed = parse_llm_response_with_thinking(response_text)
+            raw_decision = json.loads(parsed["decision"])
 
             # Validate decision
-            action = decision.get("action", "hold")
-            quantity = float(decision.get("quantity", 0))
+            action = raw_decision["action"]
+            quantity = float(raw_decision["quantity"])
 
             if action not in ["buy", "sell", "hold"]:
-                action = "hold"
+                raise ValueError(f"Invalid action: {action}")
             if action == "buy":
                 quantity = min(quantity, int(cash / price))
             elif action == "sell":
@@ -666,19 +691,14 @@ class BaseRagInvestor(GeneralPlayer):
                 "action": action,
                 "bid_price": price,
                 "quantity": quantity if action != "hold" else 0,
-                "reasoning": decision.get("reasoning", ""),
+                "reasoning": raw_decision["reasoning"],
                 "strategy": strategy_name,
             }
 
-        except Exception as e:
-            logger.error(f"LLM error for {self.config.identity}: {e}")
-            decision = {
-                "action": "hold",
-                "bid_price": price,
-                "quantity": 0,
-                "reasoning": f"LLM error: {str(e)}",
-                "strategy": strategy_name,
-            }
+        except Exception as exc:
+            raise RuntimeError(
+                f"[{self.config.identity}] LLM inference failed: {exc}"
+            ) from exc
 
         return decision
 
@@ -711,6 +731,10 @@ class RagDispositionInvestor(BaseRagInvestor):
     Has access to Prospect Theory and behavioral finance literature
     through RAG, but still exhibits disposition effect tendencies
     in decision-making.
+
+    Theory: simulation-bases.md §4.1 — DispositionInvestor
+    Theoretical basis: Kahneman & Tversky (1979) Prospect Theory; RAG retrieves disposition effect studies.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
 
@@ -720,6 +744,10 @@ class RagRationalInvestor(BaseRagInvestor):
 
     Uses academic research to make informed decisions,
     potentially overcoming disposition biases.
+
+    Theory: simulation-bases.md §4.2 — RationalInvestor
+    Theoretical basis: Expected Utility Theory; RAG retrieves rational portfolio management research.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
 
@@ -729,4 +757,17 @@ class RagTaxAwareInvestor(BaseRagInvestor):
 
     Has access to tax-loss harvesting strategies and
     related academic literature.
+
+    Theory: simulation-bases.md §4.3 — TaxAwareInvestor
+    Theoretical basis: Constantinides (1983) tax-loss harvesting; RAG retrieves tax strategy literature.
+    See simulation-bases.md §4.3 for mathematical model.
     """
+
+
+__all__ = [
+    "Market",
+    "BaseRagInvestor",
+    "RagDispositionInvestor",
+    "RagRationalInvestor",
+    "RagTaxAwareInvestor",
+]

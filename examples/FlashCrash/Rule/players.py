@@ -130,15 +130,20 @@ class Market(GeneralPlayer):
         self.state.custom_state["volume_history"].append(total_volume)
         self.state.custom_state["liquidity_history"].append(total_liquidity)
 
-        logger.debug(f"\n{'='*70}")
-        logger.debug(f"[Market] Round {round_num}")
+        logger.debug("\n%s", "=" * 70)
+        logger.debug("[Market] Round %s", round_num)
         logger.debug(
-            f"  Price: {current_price:.2f} → {new_price:.2f} ({price_return*100:+.2f}%)"
+            "  Price: %.2f → %.2f (%+.2f%%)",
+            current_price,
+            new_price,
+            price_return * 100,
         )
         logger.debug(
-            f"  Liquidity: {total_liquidity:.1f}, Impact Factor: {liquidity_factor:.2f}"
+            "  Liquidity: %.1f, Impact Factor: %.2f",
+            total_liquidity,
+            liquidity_factor,
         )
-        logger.debug(f"  Net Demand: {net_demand:+.2f}, Volume: {total_volume:.2f}")
+        logger.debug("  Net Demand: %+.2f, Volume: %.2f", net_demand, total_volume)
 
         market_data = {
             "price": new_price,
@@ -237,6 +242,11 @@ class HighFrequencyTrader(BaseInvestor):
     """
     High-frequency trader with rapid momentum detection.
 
+    Theory: simulation-bases.md §4.1 — HighFrequencyTrader
+    Theoretical basis: Kirilenko et al. (2017) HFT flash crash role; momentum
+    detection triggers rapid directional bets, amplifying price moves.
+    See simulation-bases.md §4.1 for mathematical model.
+
     Parameters from config extras:
         - lookback, momentum_sensitivity, base_position_size, speed_advantage
     """
@@ -274,8 +284,12 @@ class HighFrequencyTrader(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         logger.debug(
-            f"[{self.identity:25s}] R{round_num} ({strategy_name:10s}): "
-            f"Q={quantity:+8.2f} mom={short_momentum*100:+.2f}%"
+            "[%-25s] R%s (%-10s): Q=%+8.2f mom=%+.2f%%",
+            self.identity,
+            round_num,
+            strategy_name,
+            quantity,
+            short_momentum * 100,
         )
 
         order = {
@@ -295,6 +309,11 @@ class HighFrequencyTrader(BaseInvestor):
 class MarketMaker(BaseInvestor):
     """
     Market maker providing liquidity, withdraws in stress.
+
+    Theory: simulation-bases.md §4.2 — MarketMaker
+    Theoretical basis: Grossman & Miller (1988) liquidity provider model;
+    stress-induced withdrawal creates a liquidity vacuum amplifying the crash.
+    See simulation-bases.md §4.2 for mathematical model.
 
     Parameters from config extras:
         - volatility_threshold, base_liquidity, spread_sensitivity
@@ -317,7 +336,9 @@ class MarketMaker(BaseInvestor):
             quantity = -position * 0.3 if position > 0 else 0
             quantity = max(-20, min(20, quantity))
             bid_price = price if quantity != 0 else 0.0
-            logger.debug(f"  [MM] WITHDRAWING - volatility too high ({price_return*100:.1f}%)")
+            logger.debug(
+                "  [MM] WITHDRAWING - volatility too high (%.1f%%)", price_return * 100
+            )
         else:
             provides_liquidity = True
             quantity = -position * 0.2
@@ -330,8 +351,12 @@ class MarketMaker(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         logger.debug(
-            f"[{self.identity:25s}] R{round_num} ({strategy_name:10s}): "
-            f"Q={quantity:+8.2f} liq={'YES' if provides_liquidity else 'NO'}"
+            "[%-25s] R%s (%-10s): Q=%+8.2f liq=%s",
+            self.identity,
+            round_num,
+            strategy_name,
+            quantity,
+            "YES" if provides_liquidity else "NO",
         )
 
         order = {
@@ -351,6 +376,11 @@ class MarketMaker(BaseInvestor):
 class AlgorithmicTrader(BaseInvestor):
     """
     Algorithmic trend-following trader.
+
+    Theory: simulation-bases.md §4.3 — AlgorithmicTrader
+    Theoretical basis: Trend-following algorithm as positive-feedback mechanism;
+    amplifies price moves during crash by following momentum signals.
+    See simulation-bases.md §4.3 for mathematical model.
 
     Parameters from config extras:
         - lookback, trend_sensitivity, base_position_size, trend_multiplier
@@ -385,8 +415,12 @@ class AlgorithmicTrader(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         logger.debug(
-            f"[{self.identity:25s}] R{round_num} ({strategy_name:10s}): "
-            f"Q={quantity:+8.2f} trend={trend*100:+.2f}%"
+            "[%-25s] R%s (%-10s): Q=%+8.2f trend=%+.2f%%",
+            self.identity,
+            round_num,
+            strategy_name,
+            quantity,
+            trend * 100,
         )
 
         order = {
@@ -406,6 +440,11 @@ class AlgorithmicTrader(BaseInvestor):
 class StopLossTrader(BaseInvestor):
     """
     Trader with stop-loss orders - creates cascade selling.
+
+    Theory: simulation-bases.md §4.4 — StopLossTrader
+    Theoretical basis: Stop-loss cascade mechanism; pre-set exit triggers create
+    correlated sell orders that amplify the price decline in a feedback loop.
+    See simulation-bases.md §4.4 for mathematical model.
 
     Parameters from config extras:
         - stop_loss_percent, initial_buy_price
@@ -447,7 +486,9 @@ class StopLossTrader(BaseInvestor):
         if price < stop_price and position > 0:
             quantity = -position
             bid_price = price
-            logger.debug(f"  [STOP-LOSS TRIGGERED] Price {price:.2f} < Stop {stop_price:.2f}")
+            logger.debug(
+                "  [STOP-LOSS TRIGGERED] Price %.2f < Stop %.2f", price, stop_price
+            )
         else:
             quantity = 0.0
             bid_price = 0.0
@@ -458,8 +499,12 @@ class StopLossTrader(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         logger.debug(
-            f"[{self.identity:25s}] R{round_num} ({strategy_name:10s}): "
-            f"Q={quantity:+8.2f} pos={self.state.custom_state['position']:.1f}"
+            "[%-25s] R%s (%-10s): Q=%+8.2f pos=%.1f",
+            self.identity,
+            round_num,
+            strategy_name,
+            quantity,
+            self.state.custom_state["position"],
         )
 
         order = {
@@ -479,6 +524,11 @@ class StopLossTrader(BaseInvestor):
 class FundamentalTrader(BaseInvestor):
     """
     Fundamental value trader - provides recovery force.
+
+    Theory: simulation-bases.md §4.5 — FundamentalTrader
+    Theoretical basis: Value investing contrarianism; aggressive buying when price
+    deviates below fundamental provides the stabilizing recovery force.
+    See simulation-bases.md §4.5 for mathematical model.
 
     Parameters from config extras:
         - value_threshold, base_position_size, value_sensitivity, value_multiplier
@@ -505,7 +555,9 @@ class FundamentalTrader(BaseInvestor):
             )
             quantity = max(0, min(50, quantity))
             bid_price = price
-            logger.debug(f"  [FUNDAMENTAL BUY] Price {deviation*100:.1f}% below fundamental")
+            logger.debug(
+                "  [FUNDAMENTAL BUY] Price %.1f%% below fundamental", deviation * 100
+            )
         elif deviation < -value_threshold:
             quantity = (
                 deviation * base_position_size * value_sensitivity * value_multiplier
@@ -522,8 +574,12 @@ class FundamentalTrader(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         logger.debug(
-            f"[{self.identity:25s}] R{round_num} ({strategy_name:10s}): "
-            f"Q={quantity:+8.2f} dev={deviation*100:+.1f}%"
+            "[%-25s] R%s (%-10s): Q=%+8.2f dev=%+.1f%%",
+            self.identity,
+            round_num,
+            strategy_name,
+            quantity,
+            deviation * 100,
         )
 
         order = {
@@ -543,6 +599,11 @@ class FundamentalTrader(BaseInvestor):
 class RetailTrader(BaseInvestor):
     """
     Retail trader with slow reaction time.
+
+    Theory: simulation-bases.md §4.6 — RetailTrader
+    Theoretical basis: Uninformed noise trading; slow reaction and infrequent
+    trading provides background volume without directional crash contribution.
+    See simulation-bases.md §4.6 for mathematical model.
 
     Parameters from config extras:
         - trade_frequency, noise_std, position_mean_reversion
@@ -576,8 +637,11 @@ class RetailTrader(BaseInvestor):
             self._execute_trade(bid_price, quantity)
 
         logger.debug(
-            f"[{self.identity:25s}] R{round_num} ({strategy_name:10s}): "
-            f"Q={quantity:+8.2f}"
+            "[%-25s] R%s (%-10s): Q=%+8.2f",
+            self.identity,
+            round_num,
+            strategy_name,
+            quantity,
         )
 
         order = {
@@ -592,3 +656,14 @@ class RetailTrader(BaseInvestor):
             **order,
             "outbound_messages": [{"payload": order, "content_type": "investor_bid"}],
         }
+
+
+__all__ = [
+    "Market",
+    "HighFrequencyTrader",
+    "MarketMaker",
+    "AlgorithmicTrader",
+    "StopLossTrader",
+    "FundamentalTrader",
+    "RetailTrader",
+]

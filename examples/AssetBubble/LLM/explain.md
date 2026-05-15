@@ -1,17 +1,46 @@
-# AssetBubble LLM - LLM-Powered Asset Bubble Simulation
+# AssetBubble LLM — Implementation Explanation
 
-## What is This?
+## Overview
 
-| Item               | Description                                                                               |
-|--------------------|-------------------------------------------------------------------------------------------|
-| **Phenomenon**     | **Asset Bubbles (资产泡沫)** - LLM-driven speculation and positive feedback dynamics      |
-| **Model**          | LLM-based investors with prompt-defined bubble personalities + Rule-based market clearing |
-| **Key Feature**    | Investors use LLM reasoning to exhibit bubble behaviors (FOMO, limits to arbitrage, etc.) |
-| **Academic Value** | Tests whether LLMs can simulate realistic bubble psychology and emergent speculation      |
+| Item                                   | Description                                                                                                                                                                         |
+|----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Variant**                            | LLM                                                                                                                                                                                 |
+| **Implements**                         | `../simulation-bases.md`                                                                                                                                                            |
+| **Phenomenon**                         | Asset Bubbles (资产泡沫) — LLM-driven speculation and positive feedback dynamics                                                                                                    |
+| **Decision Logic**                     | LLM prompts (persona only) — market data in user prompt; LLM reasons to JSON decision                                                                                               |
+| **Key Difference from Other Variants** | Investor decision logic replaced by LLM reasoning; market mechanism identical to Rule variant                                                                                       |
+| **Primary Research Contribution**      | Tests whether LLM agents, guided only by personality and market data, can reproduce realistic investor psychology and emergent bubble phenomena without explicit quantitative rules |
+
+## Theory → Implementation Mapping
+
+### Market: Theory → Implementation
+*(Theory defined in `../simulation-bases.md §3`)*
+
+| Theoretical Design Element                                                       | Implementation                                                                   |
+|----------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| Price formation model → `simulation-bases.md §3.1`                               | Identical to Rule variant — `Market.decide()` in `players.py`; unchanged formula |
+| Bubble-prone parameters (high λ, low γ) → `simulation-bases.md §3.1`             | Same config values: `price_impact = 0.15`, `mean_reversion = 0.005`              |
+| Information broadcast design → `simulation-bases.md §3.3`                        | `market_data` dict with all fields; same payload as Rule                         |
+| Price floor, margin call, short-selling constraints → `simulation-bases.md §3.2` | All mechanisms identical to Rule variant                                         |
+
+### LLM Investors: Theory → Implementation
+*(Theory per investor defined in `../simulation-bases.md §4`)*
+
+| Investor               | Theory → `simulation-bases.md §4`                | Prompt Constant                      | LLM Persona Source                     |
+|------------------------|--------------------------------------------------|--------------------------------------|----------------------------------------|
+| LLMGreaterFoolSpec     | Greater Fool Theory → `§4 — MomentumSpeculator`  | `LLMGREATERFOOL_SYS` in `prompts.py` | `simulation-bases.md §4 — LLM Persona` |
+| LLMRationalArbitrageur | Limits to Arbitrage → `§4 — RationalArbitrageur` | `LLMARBITRAGEUR_SYS` in `prompts.py` | `simulation-bases.md §4 — LLM Persona` |
+| LLMSentimentTrader     | Noise Trader Risk → `§4 — NoiseTrader`           | `LLMSENTIMENT_SYS` in `prompts.py`   | `simulation-bases.md §4 — LLM Persona` |
+| LLMValueInvestor       | Value Investing → `§4 — FundamentalInvestor`     | `LLMVALUE_SYS` in `prompts.py`       | `simulation-bases.md §4 — LLM Persona` |
+| LLMLeveragedSpec       | Leverage amplification → `§4 — LeveragedBuyer`   | `LLMLEVERAGED_SYS` in `prompts.py`   | `simulation-bases.md §4 — LLM Persona` |
+
+**Core construction rule**: System prompts define **personality only** — they must NOT name the phenomenon ("asset bubble"), mention the price formula, or hint at the market event. The LLM discovers market dynamics from user prompt data alone. Output format: `<analysis>...</analysis><decision>...</decision>` with JSON `{action, bid_price, quantity, reasoning}`.
+
+---
 
 ## Rule-Based vs LLM-Based Comparison
 
-| Aspect               | AssetBubble (Rule-Based)                 | AssetBubble LLM (LLM-Based)                   |
+| Aspect               | AssetBubble (Rule-Based)                 | AssetBubble LLM (LLM-Based)                  |
 |----------------------|------------------------------------------|----------------------------------------------|
 | **Decision Logic**   | Fixed mathematical formulas              | LLM interprets market data via prompts       |
 | **Investor Types**   | 6 types with hardcoded strategies        | 5 types with personality-defining prompts    |
@@ -164,8 +193,8 @@ Key: High λ + Low γ = Bubble-prone dynamics
 
 ## Files
 
-| File                                        | Purpose                          |
-|---------------------------------------------|----------------------------------|
+| File                                         | Purpose                          |
+|----------------------------------------------|----------------------------------|
 | `examples/AssetBubble/LLM/players.py`        | Market + 5 LLM investor classes  |
 | `examples/AssetBubble/LLM/prompts.py`        | System and user prompt templates |
 | `examples/AssetBubble/LLM/run_bubble_llm.py` | Entry point                      |
@@ -202,11 +231,27 @@ python examples/AssetBubble/LLM/run_bubble_llm.py -c configs/AssetBubble/LLM/sim
 | Can LLM leverage traders trigger crashes?               | Monitor forced selling dynamics                   |
 | Is LLM bubble more realistic than rule-based?           | Compare price dynamics with historical bubbles    |
 
+## Configuration Reference
+
+Key parameters from `configs/AssetBubble/LLM/players.yml`:
+
+| Parameter        | Config Path                                              | Value                                      | Design Justification                              |
+|------------------|----------------------------------------------------------|--------------------------------------------|---------------------------------------------------|
+| `lm_name`        | `{investor}.extras.llm.lm_name`                          | `ark/doubao-seed-1-6-lite-251015`          | ByteDance Doubao API; low cost, fast response     |
+| `temperature`    | `{investor}.extras.llm.generation_config.temperature`    | 0.3                                        | Low stochasticity for consistent persona behavior |
+| `max_new_tokens` | `{investor}.extras.llm.generation_config.max_new_tokens` | 500                                        | Sufficient for `<analysis>` + `<decision>` JSON   |
+| `sys_message`    | `{investor}.extras.llm.sys_message`                      | `examples.AssetBubble.LLM.prompts:{CONST}` | Dynamic prompt loading via `importlib`            |
+| Market config    | Same as Rule variant                                     | See `simulation-bases.md §6`               | Market mechanism unchanged                        |
+
+---
+
 ## References
 
-| Theory                   | Application in AssetBubble LLM                 | Reference                   |
-|--------------------------|-----------------------------------------------|-----------------------------|
-| **Greater Fool Theory**  | LLMGreaterFoolSpeculator ignores fundamentals | (Classical)                 |
-| **Limits to Arbitrage**  | LLMRationalArbitrageur constrained shorting   | Shleifer & Vishny (1997)    |
-| **Noise Trader Risk**    | LLMSentimentTrader follows crowd              | De Long et al. (1990)       |
-| **Synchronization Risk** | Timing uncertainty in bubble collapse         | Abreu & Brunnermeier (2003) |
+> Do NOT re-read full citations — these theories are fully documented in `../simulation-bases.md §2`.
+
+- Greater Fool Theory → `simulation-bases.md §2`, `§4 — MomentumSpeculator / LLMGreaterFoolSpec`
+- Limits to Arbitrage → `simulation-bases.md §2`, `§4 — RationalArbitrageur / LLMRationalArbitrageur`
+- Noise Trader Risk → `simulation-bases.md §2`, `§4 — NoiseTrader / LLMSentimentTrader`
+- Synchronization Risk → `simulation-bases.md §2`, `§4 — LeveragedBuyer / LLMLeveragedSpec`
+- Historical calibration → `simulation-bases.md §8`
+- Parameter values → `simulation-bases.md §6`

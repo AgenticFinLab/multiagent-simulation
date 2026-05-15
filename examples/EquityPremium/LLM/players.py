@@ -68,7 +68,6 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from examples.llm_utils import parse_llm_response_with_thinking
 
-
 logger = logging.getLogger("EquityPremiumLLM")
 
 
@@ -136,11 +135,15 @@ class Market(GeneralPlayer):
         self.state.custom_state["stock_price"] = new_price
         self.state.custom_state["stock_history"].append(new_price)
 
-        logger.debug(f"\n{'='*60}")
+        logger.debug("\n%s", "=" * 60)
         logger.debug(
-            f"[Market] Round {round_num}: Stock ${current_price:.2f} → ${new_price:.2f} ({stock_return*100:+.2f}%)"
+            "[Market] Round %s: Stock $%.2f → $%.2f (%+.2f%%)",
+            round_num,
+            current_price,
+            new_price,
+            stock_return * 100,
         )
-        logger.debug(f"  Bond Return: {bond_return*100*252:.2f}% annual")
+        logger.debug("  Bond Return: %.2f%% annual", bond_return * 100 * 252)
 
         market_data = {
             "stock_price": new_price,
@@ -250,7 +253,7 @@ class LLMInvestor(GeneralPlayer):
         parsed = None
         try:
             parsed = json.loads(text)
-        except:
+        except Exception:
             match = re.search(r"\{.*\}", text, re.DOTALL)
             if match:
                 parsed = json.loads(match.group(0))
@@ -274,7 +277,9 @@ class LLMInvestor(GeneralPlayer):
         llm_config = self.config.extras["llm"]
         system_prompt = load_prompt(llm_config["sys_message"])
 
-        for _ in range(3):
+        decision = None
+        last_error = None
+        for attempt in range(3):
             try:
                 output = llm_client.run(
                     [
@@ -286,8 +291,19 @@ class LLMInvestor(GeneralPlayer):
                 )
                 decision = self._parse_response(output.outputs[0].response)
                 break
-            except:
-                decision = {"stock_qty": 0, "reasoning": "error"}
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            )
 
         stock_qty = float(decision["stock_qty"])
         cash, stocks = (
@@ -330,30 +346,41 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMMyopicLossAverse(LLMInvestor):
-    """Myopic loss averse - evaluates frequently, demands high premium."""
+    """LLM-driven myopic loss averse — frequent evaluation with high loss sensitivity via LLM. Theory: simulation-bases.md §4.1."""
 
     pass
 
 
 class LLMLongTermInvestor(LLMInvestor):
-    """Long-term investor - evaluates infrequently, more stocks."""
+    """LLM-driven long-horizon investor — accepts more equity risk via extended evaluation window. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
 class LLMInstitutionalInvestor(LLMInvestor):
-    """Institutional investor - balanced allocation."""
+    """LLM-driven institutional investor — balanced allocation using risk-neutral framework. Theory: simulation-bases.md §4.3."""
 
     pass
 
 
 class LLMRiskAverseSaver(LLMInvestor):
-    """Risk-averse saver - prefers bonds."""
+    """LLM-driven risk-averse saver — strong bond preference with prospect theory reasoning. Theory: simulation-bases.md §4.4."""
 
     pass
 
 
 class LLMRationalOptimizer(LLMInvestor):
-    """Rational optimizer - expected utility maximizer."""
+    """LLM-driven rational optimizer — expected utility maximizer modeling benchmark behavior. Theory: simulation-bases.md §4.5."""
 
     pass
+
+
+__all__ = [
+    "Market",
+    "LLMInvestor",
+    "LLMMyopicLossAverse",
+    "LLMLongTermInvestor",
+    "LLMInstitutionalInvestor",
+    "LLMRiskAverseSaver",
+    "LLMRationalOptimizer",
+]

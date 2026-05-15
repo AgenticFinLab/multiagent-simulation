@@ -1,0 +1,127 @@
+# LUNACollapse Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.LUNACollapse.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/LUNACollapse/Rule/records"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.04
+      mean_reversion: 0.005
+      noise_std: 0.015
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+stablecoinholder:
+  name: "StablecoinHolder"
+  class: "examples.LUNACollapse.Rule.players:StablecoinHolder"
+  num_instances: 3
+  config:
+    identity: "stablecoinholder"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LUNACollapse/Rule/records"
+      initial_cash: 1000000.0
+      initial_position: 1000
+      initial_price: 100.0
+      fundamental_value: 100.0
+      redemption_threshold: 0.05
+      base_size: 500
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+arbitrageur:
+  name: "Arbitrageur"
+  class: "examples.LUNACollapse.Rule.players:Arbitrageur"
+  num_instances: 2
+  config:
+    identity: "arbitrageur"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LUNACollapse/Rule/records"
+      initial_cash: 1500000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      arb_threshold: 0.02
+      base_size: 600
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+defilender:
+  name: "DeFiLender"
+  class: "examples.LUNACollapse.Rule.players:DeFiLender"
+  num_instances: 2
+  config:
+    identity: "defilender"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LUNACollapse/Rule/records"
+      initial_cash: 2000000.0
+      initial_position: 800
+      initial_price: 100.0
+      fundamental_value: 100.0
+      liquidation_threshold: 0.15
+      base_size: 400
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+anchordepositor:
+  name: "AnchorDepositor"
+  class: "examples.LUNACollapse.Rule.players:AnchorDepositor"
+  num_instances: 2
+  config:
+    identity: "anchordepositor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LUNACollapse/Rule/records"
+      initial_cash: 800000.0
+      initial_position: 600
+      initial_price: 100.0
+      fundamental_value: 100.0
+      exit_threshold: 0.03
+      base_size: 350
+      custom_state_hot_limit: 3
+      yield_threshold: 0.05
+  persona: !include persona.yml
+
+valuebuyer:
+  name: "ValueBuyer"
+  class: "examples.LUNACollapse.Rule.players:ValueBuyer"
+  num_instances: 1
+  config:
+    identity: "valuebuyer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/LUNACollapse/Rule/records"
+      initial_cash: 3000000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      discount_threshold: 0.30
+      base_size: 200
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

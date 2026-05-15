@@ -1,0 +1,153 @@
+market:
+  name: "Market"
+  class: "examples.TulipMania.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: market
+    steps_per_turn: 1
+    group_tags: [market]
+    record_path: "EXPERIMENT/TulipMania/RuleLLM/records/market"
+    persona: !include ../RuleLLM/persona.yml
+    extras:
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.02
+      mean_reversion: 0.008
+      noise_std: 0.015
+
+trendchaser:
+  name: "TrendChaser"
+  class: "examples.TulipMania.RuleLLM.players:RuleLLMTrendChaser"
+  num_instances: 4
+  config:
+    identity: "trendchaser"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/RuleLLM/records/trendchaser"
+    persona: !include ../RuleLLM/persona.yml
+    extras:
+      initial_cash: 1000000.0
+      initial_position: 300
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trend_threshold: 0.01
+      chase_size: 400
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.TulipMania.RuleLLM.prompts:RULELLM_TREND_CHASER_SYS"
+        user_message: "examples.TulipMania.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+
+socialprooffollower:
+  name: "SocialProofFollower"
+  class: "examples.TulipMania.RuleLLM.players:RuleLLMSocialProofFollower"
+  num_instances: 3
+  config:
+    identity: "socialprooffollower"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/RuleLLM/records/socialprooffollower"
+    persona: !include ../RuleLLM/persona.yml
+    extras:
+      initial_cash: 800000.0
+      initial_position: 400
+      initial_price: 100.0
+      fundamental_value: 100.0
+      crowd_threshold: 0.3
+      follow_size: 350
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.TulipMania.RuleLLM.prompts:RULELLM_SOCIAL_PROOF_FOLLOWER_SYS"
+        user_message: "examples.TulipMania.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+
+intrinsicvaluetrader:
+  name: "IntrinsicValueTrader"
+  class: "examples.TulipMania.RuleLLM.players:RuleLLMIntrinsicValueTrader"
+  num_instances: 2
+  config:
+    identity: "intrinsicvaluetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/RuleLLM/records/intrinsicvaluetrader"
+    persona: !include ../RuleLLM/persona.yml
+    extras:
+      initial_cash: 1500000.0
+      initial_position: 600
+      initial_price: 100.0
+      fundamental_value: 100.0
+      overvalue_threshold: 0.2
+      position_size: 350
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.TulipMania.RuleLLM.prompts:RULELLM_INTRINSIC_VALUE_TRADER_SYS"
+        user_message: "examples.TulipMania.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+
+earlyexittrader:
+  name: "EarlyExitTrader"
+  class: "examples.TulipMania.RuleLLM.players:RuleLLMEarlyExitTrader"
+  num_instances: 2
+  config:
+    identity: "earlyexittrader"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/RuleLLM/records/earlyexittrader"
+    persona: !include ../RuleLLM/persona.yml
+    extras:
+      initial_cash: 1200000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      exit_threshold: 0.4
+      exit_size: 400
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.TulipMania.RuleLLM.prompts:RULELLM_EARLY_EXIT_TRADER_SYS"
+        user_message: "examples.TulipMania.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.TulipMania.RuleLLM.players:RuleLLMNoiseTrader"
+  num_instances: 2
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    record_path: "EXPERIMENT/TulipMania/RuleLLM/records/noisetrader"
+    persona: !include ../RuleLLM/persona.yml
+    extras:
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 100
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.TulipMania.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
+        user_message: "examples.TulipMania.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+

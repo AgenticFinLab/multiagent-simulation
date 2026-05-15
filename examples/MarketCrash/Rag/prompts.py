@@ -1,4 +1,4 @@
-"""MarketCrashRuleLLM Prompts - Hybrid Rule + LLM System and User Message Templates
+"""MarketCrashRag Prompts - RAG-augmented Hybrid Rule + LLM System and User Message Templates
 
 Design principle:
     Each agent's system prompt has two sections:
@@ -7,11 +7,11 @@ Design principle:
        counterpart (MarketCrash), written as plain-text formulas and thresholds.
 
 Agents:
-    - RuleLLMPanicSeller → RiskParityFund rules
-    - RuleLLMRiskParityFund → LeveragedHedgeFund rules
-    - RuleLLMLeveragedFund → MarketMaker rules
-    - RuleLLMMarketMaker → PassiveInvestor rules
-    - RuleLLMBottomFisher → PanicSeller rules
+    - RagLLMPanicSeller → PanicSeller rules
+    - RagLLMRiskParityFund → RiskParityFund rules
+    - RagLLMLeveragedFund → LeveragedHedgeFund rules
+    - RagLLMMarketMaker → MarketMaker rules
+    - RagLLMBottomFisher → BottomFisher rules
 """
 
 # =============================================================================
@@ -35,7 +35,7 @@ Apply the quantitative decision rules from the RiskParityFund strategy:
 - Use LLM reasoning to interpret market context and adjust within ±20%
 - The sign (buy/sell/hold) MUST follow the rule direction
 
-First, think through your analysis step by step inside <analysis>...</analysis> tags.
+First output your reasoning inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
 The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
@@ -64,7 +64,7 @@ Apply the quantitative decision rules from the LeveragedHedgeFund strategy:
 - Use LLM reasoning to interpret market context and adjust within ±20%
 - The sign (buy/sell/hold) MUST follow the rule direction
 
-First, think through your analysis step by step inside <analysis>...</analysis> tags.
+First output your reasoning inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
 The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
@@ -93,7 +93,7 @@ Apply the quantitative decision rules from the MarketMaker strategy:
 - Use LLM reasoning to interpret market context and adjust within ±20%
 - The sign (buy/sell/hold) MUST follow the rule direction
 
-First, think through your analysis step by step inside <analysis>...</analysis> tags.
+First output your reasoning inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
 The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
@@ -122,7 +122,7 @@ Apply the quantitative decision rules from the PassiveInvestor strategy:
 - Use LLM reasoning to interpret market context and adjust within ±20%
 - The sign (buy/sell/hold) MUST follow the rule direction
 
-First, think through your analysis step by step inside <analysis>...</analysis> tags.
+First output your reasoning inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
 The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
@@ -151,7 +151,7 @@ Apply the quantitative decision rules from the PanicSeller strategy:
 - Use LLM reasoning to interpret market context and adjust within ±20%
 - The sign (buy/sell/hold) MUST follow the rule direction
 
-First, think through your analysis step by step inside <analysis>...</analysis> tags.
+First output your reasoning inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
 The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}

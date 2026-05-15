@@ -1,0 +1,25 @@
+# =============================================================================
+# AnchoringEffectRuleLLM Persona Configuration
+# =============================================================================
+
+auto_checkpoint: false
+debug_mode: true
+
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/AnchoringEffect/RuleLLM/checkpoints"
+    record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
+    record_rounds: true
+    turn_block_size: 3
+
+  monitoring:
+    record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/monitoring"
+    monitor_hot_limit: 3
+
+  communication:
+    message_timeout_ms: 30000
+    enable_compression: true
+
+  resource:
+    mcp_servers: []
+    enable_caching: false

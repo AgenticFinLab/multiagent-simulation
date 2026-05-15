@@ -1,4 +1,43 @@
-# AssetBubble RuleLLM — Implementation Deep-Dive
+# AssetBubble RuleLLM — Implementation Explanation
+
+## Overview
+
+| Item                                   | Description                                                                                                                                                                                 |
+|----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Variant**                            | RuleLLM                                                                                                                                                                                     |
+| **Implements**                         | `../simulation-bases.md`                                                                                                                                                                    |
+| **Decision Logic**                     | Hybrid: LLM reasoning anchored to explicit quantitative rules (PERSONA + DECISION RULES dual-section prompts)                                                                               |
+| **Key Difference from Other Variants** | Every system prompt embeds exact Rule-variant formulas (from `simulation-bases.md §4`) in plain text; LLM may adjust quantity ±20% but must follow rule sign and scale                      |
+| **Primary Research Contribution**      | Isolates the effect of language reasoning: with identical quantitative constraints embedded in the prompt, does LLM reasoning alter phenomenon dynamics compared to the pure Rule baseline? |
+
+---
+
+## Theory → Implementation Mapping
+
+### Market: Theory → Implementation
+*(Theory defined in `../simulation-bases.md §3`)*
+
+| Theoretical Design Element                                 | Implementation                                                                             |
+|------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| Price formation model → `simulation-bases.md §3.1`         | Identical to Rule variant; `Market` class copied from Rule `players.py`; formula unchanged |
+| Bubble-prone parameter choice → `simulation-bases.md §3.1` | Same config values: `price_impact = 0.15`, `mean_reversion = 0.005`                        |
+| Information broadcast design → `simulation-bases.md §3.3`  | Same `market_data` payload; adds `round` field for value investor frequency control        |
+| All market mechanisms → `simulation-bases.md §3.2`         | Identical: price floor, short constraints, margin call all unchanged                       |
+
+### Hybrid Investors: Theory → Implementation
+*(Theory per investor defined in `../simulation-bases.md §4`)*
+
+| Investor                 | Theory → `simulation-bases.md §4`                | PERSONA Source                         | DECISION RULES Source                                                          |
+|--------------------------|--------------------------------------------------|----------------------------------------|--------------------------------------------------------------------------------|
+| RuleLLMMomentumSpec (×5) | Greater Fool Theory → `§4 — MomentumSpeculator`  | `simulation-bases.md §4 — LLM Persona` | Exact momentum formula from `§4 — Rule-Based Behavior` + `§6` params           |
+| RuleLLMRationalArb (×3)  | Limits to Arbitrage → `§4 — RationalArbitrageur` | `simulation-bases.md §4 — LLM Persona` | Deviation + cost_penalty formula from `§4` + max_short cap from `§6`           |
+| RuleLLMNoiseTr (×2)      | Noise Trader Risk → `§4 — NoiseTrader`           | `simulation-bases.md §4 — LLM Persona` | Herding formula from `§4`; note: random_sentiment replaced by net_demand proxy |
+| RuleLLMValueInv (×4)     | Value Investing → `§4 — FundamentalInvestor`     | `simulation-bases.md §4 — LLM Persona` | Frequency gate (every 5 rounds) + value deviation formula from `§4`            |
+| RuleLLMLeveraged (×3)    | Leverage amplification → `§4 — LeveragedBuyer`   | `simulation-bases.md §4 — LLM Persona` | Margin call rule (highest priority) + leveraged buy formula from `§4`          |
+
+**Core construction rule** (from Variant Construction Principles): The DECISION RULES section in every prompt reproduces the exact formulas from `simulation-bases.md §4 — Rule-Based Behavior`, expressed step-by-step in plain text. The LLM is instructed to follow the rule sign (buy/sell/hold) strictly, with at most ±20% quantity adjustment. If Rule parameters change in `simulation-bases.md §6`, the embedded prompt rules must be updated accordingly.
+
+---
 
 ## Table of Contents
 
@@ -24,7 +63,7 @@ Pure rule-based agents (AssetBubble) and pure LLM agents (AssetBubble LLM) each 
 | Approach                      | Strengths                                                         | Weaknesses                                                                            |
 |-------------------------------|-------------------------------------------------------------------|---------------------------------------------------------------------------------------|
 | Pure rule-based (AssetBubble) | Interpretable, reproducible, fully grounded in financial formulas | No language reasoning, no contextual adaptability, mechanically rigid behavior        |
-| Pure LLM (AssetBubble LLM)     | Natural language reasoning, strong contextual understanding       | No quantitative constraints, decision drift, difficult to align with financial theory |
+| Pure LLM (AssetBubble LLM)    | Natural language reasoning, strong contextual understanding       | No quantitative constraints, decision drift, difficult to align with financial theory |
 
 ### Solution: Hybrid Design
 
@@ -598,11 +637,25 @@ EXPERIMENT/AssetBubble/RuleLLM/
 
 After running all three variants with identical market parameters, the following metrics can be compared:
 
-| Metric                   | AssetBubble | AssetBubble LLM | AssetBubble RuleLLM     |
-|--------------------------|-------------|----------------|------------------------|
-| Peak bubble P/F ratio    | —           | —              | —                      |
-| Bubble duration (rounds) | —           | —              | —                      |
-| Price volatility         | —           | —              | —                      |
-| Rule adherence           | 100%        | N/A            | Partial (±20% freedom) |
+| Metric                   | AssetBubble | AssetBubble LLM | AssetBubble RuleLLM    |
+|--------------------------|-------------|-----------------|------------------------|
+| Peak bubble P/F ratio    | —           | —               | —                      |
+| Bubble duration (rounds) | —           | —               | —                      |
+| Price volatility         | —           | —               | —                      |
+| Rule adherence           | 100%        | N/A             | Partial (±20% freedom) |
 
 > **Research questions**: Given identical rule constraints embedded in the prompt, does LLM reasoning change the pattern of bubble formation compared to the pure rule-based baseline? Does the LLM's ±20% discretion systematically amplify or dampen bubble dynamics? And how does access to explicit financial theory (RuleLLM) versus no theory (pure LLM) affect the emergence and severity of the bubble?
+
+---
+
+## References
+
+> Do NOT re-state full citations — all core theories are documented in `../simulation-bases.md §2`.
+
+- Greater Fool Theory → `simulation-bases.md §2`, `§4 — MomentumSpeculator`; DECISION RULES in `RuleLLM/prompts.py:RULELLM_MOMENTUM_SYS`
+- Limits to Arbitrage → `simulation-bases.md §2`, `§4 — RationalArbitrageur`; DECISION RULES in `RuleLLM/prompts.py:RULELLM_ARBITRAGEUR_SYS`
+- Noise Trader Risk → `simulation-bases.md §2`, `§4 — NoiseTrader`; DECISION RULES in `RuleLLM/prompts.py:RULELLM_NOISE_SYS`
+- Value Investing → `simulation-bases.md §4 — FundamentalInvestor`; frequency gate documented in `§4 — Rule-Based Behavior`
+- Leverage amplification → `simulation-bases.md §2`, `§4 — LeveragedBuyer`; margin call rule in `§3.2`
+- Parameter values for all embedded DECISION RULES → `simulation-bases.md §6`
+- Historical calibration targets → `simulation-bases.md §8`

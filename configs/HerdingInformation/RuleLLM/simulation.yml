@@ -1,0 +1,43 @@
+# HerdingInformation RuleLLM Simulation Configuration
+
+setting:
+  name: "herdinginformation_rulellm_simulation"
+  description: "Information cascade and herding: cascade followers, reputation herders, independent thinkers, contrarians (RuleLLM)"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "herdinginformation_rulellm"
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/HerdingInformation/RuleLLM/communication"
+  record_messages: true
+  message_block_size: 500

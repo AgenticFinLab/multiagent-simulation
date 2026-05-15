@@ -1,0 +1,9 @@
+auto_checkpoint: false
+
+proxy:
+  record_path: "EXPERIMENT/SVBBankRun/Rule/records"
+  communication:
+    store_path: "EXPERIMENT/SVBBankRun/Rule/communication"
+  monitoring:
+    metrics_path: "EXPERIMENT/SVBBankRun/Rule/monitoring/metrics"
+    events_path: "EXPERIMENT/SVBBankRun/Rule/monitoring/events"
