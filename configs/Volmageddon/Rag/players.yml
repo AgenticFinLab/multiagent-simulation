@@ -1,5 +1,26 @@
 # Volmageddon Rag Agent Configuration
 
+knowledge: &volmageddon_knowledge
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    timeout_per_page: 30
+    max_pages: 250
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+    top_k: 5
+
 market:
   name: "Market"
   class: "examples.Volmageddon.Rag.players:Market"
@@ -22,11 +43,36 @@ short_vol_trader_1:
     identity: "short_vol_trader_1"
     role: player
     extras:
+      record_path: "EXPERIMENT/Volmageddon/Rag/records"
       initial_cash: 1000000.00
       initial_position: 0
+      initial_price: 15.0
+      fundamental_value: 15.0
       agent_type: "short_vol_trader"
-      llm:
-        model: "doubao-pro-32k"
+      knowledge: *volmageddon_knowledge
+      private_knowledge: &volmageddon_private_knowledge
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm: &volmageddon_rag_llm_config
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-1-6-251015"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
 
 
 vol_e_t_n_manager_2:
@@ -37,11 +83,15 @@ vol_e_t_n_manager_2:
     identity: "vol_e_t_n_manager_2"
     role: player
     extras:
+      record_path: "EXPERIMENT/Volmageddon/Rag/records"
       initial_cash: 1000000.00
       initial_position: 0
+      initial_price: 15.0
+      fundamental_value: 15.0
       agent_type: "vol_e_t_n_manager"
-      llm:
-        model: "doubao-pro-32k"
+      knowledge: *volmageddon_knowledge
+      private_knowledge: *volmageddon_private_knowledge
+      llm: *volmageddon_rag_llm_config
 
 
 long_vol_hedger_3:
@@ -52,11 +102,15 @@ long_vol_hedger_3:
     identity: "long_vol_hedger_3"
     role: player
     extras:
+      record_path: "EXPERIMENT/Volmageddon/Rag/records"
       initial_cash: 1000000.00
       initial_position: 0
+      initial_price: 15.0
+      fundamental_value: 15.0
       agent_type: "long_vol_hedger"
-      llm:
-        model: "doubao-pro-32k"
+      knowledge: *volmageddon_knowledge
+      private_knowledge: *volmageddon_private_knowledge
+      llm: *volmageddon_rag_llm_config
 
 
 vol_arbitrageur_4:
@@ -67,11 +121,15 @@ vol_arbitrageur_4:
     identity: "vol_arbitrageur_4"
     role: player
     extras:
+      record_path: "EXPERIMENT/Volmageddon/Rag/records"
       initial_cash: 1000000.00
       initial_position: 0
+      initial_price: 15.0
+      fundamental_value: 15.0
       agent_type: "vol_arbitrageur"
-      llm:
-        model: "doubao-pro-32k"
+      knowledge: *volmageddon_knowledge
+      private_knowledge: *volmageddon_private_knowledge
+      llm: *volmageddon_rag_llm_config
 
 
 equity_trader_5:
@@ -82,10 +140,13 @@ equity_trader_5:
     identity: "equity_trader_5"
     role: player
     extras:
+      record_path: "EXPERIMENT/Volmageddon/Rag/records"
       initial_cash: 1000000.00
       initial_position: 0
+      initial_price: 15.0
+      fundamental_value: 15.0
       agent_type: "equity_trader"
-      llm:
-        model: "doubao-pro-32k"
-
+      knowledge: *volmageddon_knowledge
+      private_knowledge: *volmageddon_private_knowledge
+      llm: *volmageddon_rag_llm_config
 

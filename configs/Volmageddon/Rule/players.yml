@@ -24,6 +24,8 @@ short_vol_trader_1:
     extras:
       initial_cash: 1000000.00
       initial_position: 0
+      initial_price: 15.0
+      fundamental_value: 15.0
 
       stop_loss: 0.15
 vol_e_t_n_manager_2:
@@ -36,6 +38,8 @@ vol_e_t_n_manager_2:
     extras:
       initial_cash: 1000000.00
       initial_position: 0
+      initial_price: 15.0
+      fundamental_value: 15.0
 
       rebalance_size: 10000
       rebalance_threshold: 0.05
@@ -49,6 +53,8 @@ long_vol_hedger_3:
     extras:
       initial_cash: 1000000.00
       initial_position: 0
+      initial_price: 15.0
+      fundamental_value: 15.0
 
       hedge_ratio: 0.1
 vol_arbitrageur_4:
@@ -61,6 +67,8 @@ vol_arbitrageur_4:
     extras:
       initial_cash: 1000000.00
       initial_position: 0
+      initial_price: 15.0
+      fundamental_value: 15.0
 
       entry_threshold: 0.05
 equity_trader_5:
@@ -73,5 +81,7 @@ equity_trader_5:
     extras:
       initial_cash: 1000000.00
       initial_position: 0
+      initial_price: 15.0
+      fundamental_value: 15.0
 
       risk_limit: 0.1
