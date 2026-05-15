@@ -96,9 +96,9 @@ rag_disposition:
         # Embedding Configuration
         # -------------------------------------------------------------------
         # Using Doubao embedding via ARK API
-        embed_type: "openai"
-        embed_model: "doubao-embedding-text-24071"
-        embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
+        embed_type: "litellm"
+        embed_model: "openai/hunyuan-embedding"
+        embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
         
         # Chunking parameters
         chunk_size: 512
@@ -150,9 +150,9 @@ rag_rational:
         llm_suggested_n_urls: 5
         docs_save_dir: *docs_dir_rational
         top_k: 5
-        embed_type: "openai"
-        embed_model: "doubao-embedding-text-24071"
-        embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
+        embed_type: "litellm"
+        embed_model: "openai/hunyuan-embedding"
+        embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
         chunk_size: 512
         chunk_overlap: 64
         knowledge_sources: []
@@ -200,9 +200,9 @@ rag_tax_aware:
         llm_suggested_n_urls: 5
         docs_save_dir: *docs_dir_tax
         top_k: 5
-        embed_type: "openai"
-        embed_model: "doubao-embedding-text-24071"
-        embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
+        embed_type: "litellm"
+        embed_model: "openai/hunyuan-embedding"
+        embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
         chunk_size: 512
         chunk_overlap: 64
         knowledge_sources: []

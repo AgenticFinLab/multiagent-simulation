@@ -48,7 +48,8 @@ trendchaser:
         rag:
           from_global_index_dir: ["rag_index"]
           embed_type: "litellm"
-          embed_model: "hunyuan/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAG_TREND_CHASER_SYS"
@@ -82,7 +83,8 @@ socialprooffollower:
         rag:
           from_global_index_dir: ["rag_index"]
           embed_type: "litellm"
-          embed_model: "hunyuan/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAG_SOCIAL_PROOF_FOLLOWER_SYS"
@@ -116,7 +118,8 @@ intrinsicvaluetrader:
         rag:
           from_global_index_dir: ["rag_index"]
           embed_type: "litellm"
-          embed_model: "hunyuan/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAG_INTRINSIC_VALUE_TRADER_SYS"
@@ -150,7 +153,8 @@ earlyexittrader:
         rag:
           from_global_index_dir: ["rag_index"]
           embed_type: "litellm"
-          embed_model: "hunyuan/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAG_EARLY_EXIT_TRADER_SYS"
@@ -184,7 +188,8 @@ noisetrader:
         rag:
           from_global_index_dir: ["rag_index"]
           embed_type: "litellm"
-          embed_model: "hunyuan/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAG_NOISE_TRADER_SYS"
