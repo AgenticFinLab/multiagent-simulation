@@ -52,7 +52,7 @@ rulellm_disposition_biased:
         sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_DISPOSITION_BIASED_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -79,7 +79,7 @@ rulellm_rational:
         sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_RATIONAL_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -106,7 +106,7 @@ rulellm_tax_aware:
         sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_TAX_AWARE_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -133,7 +133,7 @@ rulellm_institutional:
         sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_INSTITUTIONAL_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -160,7 +160,7 @@ rulellm_loss_averse:
         sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_LOSS_AVERSE_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500

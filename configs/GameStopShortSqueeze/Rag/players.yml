@@ -61,7 +61,7 @@ retailcoordinated:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_RETAIL_COORDINATED_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -105,7 +105,7 @@ shortsellerhf:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_SHORT_SELLER_HF_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_tokens: 512
@@ -149,7 +149,7 @@ marketmakergamma:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_MARKET_MAKER_GAMMA_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -193,7 +193,7 @@ institutionalvalue:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_INSTITUTIONAL_VALUE_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -237,7 +237,7 @@ momentumretail:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
           max_tokens: 512

@@ -38,7 +38,7 @@ sunkcostholder:
       llm:
         sys_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_SUNK_COST_HOLDER_SYS"
         user_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -65,7 +65,7 @@ commitmentescalator:
       llm:
         sys_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_COMMITMENT_ESCALATOR_SYS"
         user_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -92,7 +92,7 @@ rationalcutter:
       llm:
         sys_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_RATIONAL_CUTTER_SYS"
         user_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -119,7 +119,7 @@ opportunitycosttrader:
       llm:
         sys_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_OPPORTUNITY_COST_TRADER_SYS"
         user_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -146,7 +146,7 @@ noisetrader:
       llm:
         sys_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512

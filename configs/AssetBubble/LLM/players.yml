@@ -49,7 +49,7 @@ llm_greater_fool:
         sys_message: "examples.AssetBubble.LLM.prompts:LLM_GREATER_FOOL_SYS"
         user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -76,7 +76,7 @@ llm_arbitrageur:
         sys_message: "examples.AssetBubble.LLM.prompts:LLM_ARBITRAGEUR_SYS"
         user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -103,7 +103,7 @@ llm_sentiment:
         sys_message: "examples.AssetBubble.LLM.prompts:LLM_SENTIMENT_SYS"
         user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_new_tokens: 500
@@ -130,7 +130,7 @@ llm_value:
         sys_message: "examples.AssetBubble.LLM.prompts:LLM_VALUE_SYS"
         user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -157,7 +157,7 @@ llm_leveraged:
         sys_message: "examples.AssetBubble.LLM.prompts:LLM_LEVERAGED_SYS"
         user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500

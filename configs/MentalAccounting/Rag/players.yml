@@ -80,7 +80,7 @@ mentalaccountant:
         sys_message: "examples.MentalAccounting.Rag.prompts:RAG_MENTAL_ACCOUNTANT_SYS"
         user_message: "examples.MentalAccounting.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_tokens: 600
@@ -127,7 +127,7 @@ housemoneytrader:
         sys_message: "examples.MentalAccounting.Rag.prompts:RAG_HOUSE_MONEY_TRADER_SYS"
         user_message: "examples.MentalAccounting.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -173,7 +173,7 @@ rationalportfoliomanager:
         sys_message: "examples.MentalAccounting.Rag.prompts:RAG_RATIONAL_PORTFOLIO_MANAGER_SYS"
         user_message: "examples.MentalAccounting.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -219,7 +219,7 @@ sunkcostholder:
         sys_message: "examples.MentalAccounting.Rag.prompts:RAG_SUNK_COST_HOLDER_SYS"
         user_message: "examples.MentalAccounting.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 600
@@ -265,7 +265,7 @@ noisetrader:
         sys_message: "examples.MentalAccounting.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.MentalAccounting.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.95
           max_tokens: 600

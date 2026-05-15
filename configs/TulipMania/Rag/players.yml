@@ -54,7 +54,7 @@ trendchaser:
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAG_TREND_CHASER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -89,7 +89,7 @@ socialprooffollower:
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAG_SOCIAL_PROOF_FOLLOWER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -124,7 +124,7 @@ intrinsicvaluetrader:
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAG_INTRINSIC_VALUE_TRADER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -159,7 +159,7 @@ earlyexittrader:
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAG_EARLY_EXIT_TRADER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -194,7 +194,7 @@ noisetrader:
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600

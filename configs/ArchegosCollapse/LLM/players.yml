@@ -54,7 +54,7 @@ concentrated_fund:
         sys_message: "examples.ArchegosCollapse.LLM.prompts:LLM_CONCENTRATED_FUND_SYS"
         user_message: "examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -83,7 +83,7 @@ prime_broker1:
         sys_message: "examples.ArchegosCollapse.LLM.prompts:LLM_PRIME_BROKER1_SYS"
         user_message: "examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_tokens: 512
@@ -112,7 +112,7 @@ prime_broker2:
         sys_message: "examples.ArchegosCollapse.LLM.prompts:LLM_PRIME_BROKER2_SYS"
         user_message: "examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_tokens: 512
@@ -141,7 +141,7 @@ block_trade_buyer:
         sys_message: "examples.ArchegosCollapse.LLM.prompts:LLM_BLOCK_TRADE_BUYER_SYS"
         user_message: "examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -171,7 +171,7 @@ information_trader:
         sys_message: "examples.ArchegosCollapse.LLM.prompts:LLM_INFORMATION_TRADER_SYS"
         user_message: "examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.6
           max_tokens: 512

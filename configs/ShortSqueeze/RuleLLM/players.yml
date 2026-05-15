@@ -46,7 +46,7 @@ rulellm_short_seller:
         sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_SHORT_SELLER_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -72,7 +72,7 @@ rulellm_retail_coord:
         sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_RETAIL_COORD_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_new_tokens: 500
@@ -98,7 +98,7 @@ rulellm_momentum:
         sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_MOMENTUM_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -124,7 +124,7 @@ rulellm_value:
         sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_VALUE_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -149,7 +149,7 @@ rulellm_institutional:
         sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_INSTITUTIONAL_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500

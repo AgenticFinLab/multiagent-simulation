@@ -84,7 +84,7 @@ ragllm_ideologue:
         sys_message: "examples.EchoChamber.Rag.prompts:RAG_IDEOLOGUE_SYS"
         user_message: "examples.EchoChamber.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -129,7 +129,7 @@ ragllm_conformist:
         sys_message: "examples.EchoChamber.Rag.prompts:RAG_CONFORMIST_SYS"
         user_message: "examples.EchoChamber.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -174,7 +174,7 @@ ragllm_critical_thinker:
         sys_message: "examples.EchoChamber.Rag.prompts:RAG_CRITICAL_SYS"
         user_message: "examples.EchoChamber.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -219,7 +219,7 @@ ragllm_bridge_builder:
         sys_message: "examples.EchoChamber.Rag.prompts:RAG_BRIDGE_SYS"
         user_message: "examples.EchoChamber.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -264,7 +264,7 @@ ragllm_passive_follower:
         sys_message: "examples.EchoChamber.Rag.prompts:RAG_PASSIVE_SYS"
         user_message: "examples.EchoChamber.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_new_tokens: 500

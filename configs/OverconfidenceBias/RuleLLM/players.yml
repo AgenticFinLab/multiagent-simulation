@@ -43,7 +43,7 @@ overconfidenttrader:
         sys_message: "examples.OverconfidenceBias.RuleLLM.prompts:RULELLM_OVERCONFIDENT_TRADER_SYS"
         user_message: "examples.OverconfidenceBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.8
           max_tokens: 512
@@ -72,7 +72,7 @@ selfattributor:
         sys_message: "examples.OverconfidenceBias.RuleLLM.prompts:RULELLM_SELF_ATTRIBUTOR_SYS"
         user_message: "examples.OverconfidenceBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -101,7 +101,7 @@ calibratedtrader:
         sys_message: "examples.OverconfidenceBias.RuleLLM.prompts:RULELLM_CALIBRATED_TRADER_SYS"
         user_message: "examples.OverconfidenceBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -130,7 +130,7 @@ contrarianinvestor:
         sys_message: "examples.OverconfidenceBias.RuleLLM.prompts:RULELLM_CONTRARIAN_INVESTOR_SYS"
         user_message: "examples.OverconfidenceBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -159,7 +159,7 @@ noisetrader:
         sys_message: "examples.OverconfidenceBias.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.OverconfidenceBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
           max_tokens: 512

@@ -53,7 +53,7 @@ rulellm_recent_event_overweighter:
         sys_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_RECENT_EVENT_OVERWEIGHTER_SYS"
         user_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -84,7 +84,7 @@ rulellm_media_influenced_trader:
         sys_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_MEDIA_INFLUENCED_TRADER_SYS"
         user_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -115,7 +115,7 @@ rulellm_systematic_analyst:
         sys_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_SYSTEMATIC_ANALYST_SYS"
         user_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -146,7 +146,7 @@ rulellm_value_trader:
         sys_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_VALUE_TRADER_SYS"
         user_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -176,7 +176,7 @@ rulellm_noise_trader:
         sys_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_new_tokens: 500

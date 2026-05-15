@@ -49,7 +49,7 @@ llm_recent_event_overweighter:
         sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_RECENT_EVENT_OVERWEIGHTER_SYS"
         user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_new_tokens: 500
@@ -77,7 +77,7 @@ llm_media_influenced_trader:
         sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_MEDIA_INFLUENCED_TRADER_SYS"
         user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_new_tokens: 500
@@ -105,7 +105,7 @@ llm_systematic_analyst:
         sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_SYSTEMATIC_ANALYST_SYS"
         user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -133,7 +133,7 @@ llm_value_trader:
         sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_VALUE_TRADER_SYS"
         user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -161,7 +161,7 @@ llm_noise_trader:
         sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_new_tokens: 500

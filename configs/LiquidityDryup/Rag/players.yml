@@ -85,7 +85,7 @@ ragllm_market_maker:
         sys_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_MARKET_MAKER_SYS"
         user_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -128,7 +128,7 @@ ragllm_liquidity_demander:
         sys_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_LIQUIDITY_DEMANDER_SYS"
         user_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -171,7 +171,7 @@ ragllm_arbitrageur:
         sys_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_ARBITRAGEUR_SYS"
         user_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -214,7 +214,7 @@ ragllm_value:
         sys_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_VALUE_SYS"
         user_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -257,7 +257,7 @@ ragllm_forced_seller:
         sys_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_FORCED_SELLER_SYS"
         user_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.2
           max_new_tokens: 600

@@ -90,7 +90,7 @@ ragllm_carry_trader:
         sys_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_CARRY_TRADER_SYS"
         user_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -137,7 +137,7 @@ ragllm_leveraged_carry_fund:
         sys_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_LEVERAGED_CARRY_FUND_SYS"
         user_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -184,7 +184,7 @@ ragllm_funding_currency_buyer:
         sys_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_FUNDING_CURRENCY_BUYER_SYS"
         user_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -230,7 +230,7 @@ ragllm_hedged_carry_trader:
         sys_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_CENTRAL_BANK_INTERVENER_SYS"
         user_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.2
           max_new_tokens: 600
@@ -277,7 +277,7 @@ ragllm_noise_trader:
         sys_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
           max_new_tokens: 600

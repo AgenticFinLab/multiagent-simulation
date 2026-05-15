@@ -29,7 +29,7 @@ short_vol_trader_1:
       agent_type: "short_vol_trader"
       llm: &volmageddon_rulellm_config
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600

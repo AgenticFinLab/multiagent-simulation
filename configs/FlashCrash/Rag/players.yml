@@ -101,7 +101,7 @@ ragllm_hft:
         sys_message: "examples.FlashCrash.Rag.prompts:RAGLLM_HFT_SYS"
         user_message: "examples.FlashCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -149,7 +149,7 @@ ragllm_market_maker:
         sys_message: "examples.FlashCrash.Rag.prompts:RAGLLM_MARKET_MAKER_SYS"
         user_message: "examples.FlashCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -198,7 +198,7 @@ ragllm_algo:
         sys_message: "examples.FlashCrash.Rag.prompts:RAGLLM_ALGO_SYS"
         user_message: "examples.FlashCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.2
           max_new_tokens: 600
@@ -245,7 +245,7 @@ ragllm_stop_loss:
         sys_message: "examples.FlashCrash.Rag.prompts:RAGLLM_STOP_LOSS_SYS"
         user_message: "examples.FlashCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.2
           max_new_tokens: 600
@@ -294,7 +294,7 @@ ragllm_fundamental:
         sys_message: "examples.FlashCrash.Rag.prompts:RAGLLM_FUNDAMENTAL_SYS"
         user_message: "examples.FlashCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600

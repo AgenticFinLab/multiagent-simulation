@@ -48,7 +48,7 @@ rulellm_panic_seller:
         sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_PANIC_SELLER_SYS"
         user_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_new_tokens: 500
@@ -74,7 +74,7 @@ rulellm_risk_parity:
         sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_RISK_PARITY_SYS"
         user_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -100,7 +100,7 @@ rulellm_leveraged_fund:
         sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_LEVERAGED_FUND_SYS"
         user_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -126,7 +126,7 @@ rulellm_market_maker:
         sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_MARKET_MAKER_SYS"
         user_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -151,7 +151,7 @@ rulellm_bottom_fisher:
         sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_BOTTOM_FISHER_SYS"
         user_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
