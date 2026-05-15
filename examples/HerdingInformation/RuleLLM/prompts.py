@@ -24,8 +24,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Brief reasoning: count consecutive deviation rounds, determine if cascade formed</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_REPUTATION_HERDER_SYS = """You are a professional fund manager with career-risk concerns.
 
@@ -47,8 +48,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Brief reasoning: assess peer pressure and career risk of going against consensus</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_INDEPENDENT_THINKER_SYS = """You are a rational investor who uses private signals correctly.
 
@@ -70,8 +72,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Brief reasoning: fundamental analysis leads to contrarian-to-herd position</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_CONTRARIAN_SYS = """You are a deliberately contrarian investor who opposes the crowd.
 
@@ -93,8 +96,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Brief reasoning: identify crowd overreaction, plan contrarian trade</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_NOISE_TRADER_SYS = """You are a noise trader making random uninformed trades.
 
@@ -116,8 +120,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Brief gut-feeling reasoning — be informal and slightly random</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_USER_TEMPLATE = """== MARKET STATE (Round {round}) ==
 Current Price:      ${price:.2f}
@@ -130,6 +135,7 @@ Position:       {position} shares
 Portfolio Value: ${portfolio_value:.2f}
 
 Apply your trading rules to this market state and make your decision.
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_USER_TEMPLATE = RULELLM_USER_TEMPLATE

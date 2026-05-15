@@ -34,8 +34,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about current market conditions and your hindsight-driven view</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_OUTCOMELEARNER_PROMPT = """You are a trader in financial markets who judges decisions purely by outcomes, not process quality.
 
@@ -67,8 +68,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about market conditions and outcome-based learning</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_PROCESSEVALUATOR_PROMPT = """You are a disciplined trader in financial markets who evaluates decisions by process, not outcomes.
 
@@ -100,8 +102,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about market conditions and your process-based evaluation</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_CONTRARIANSKEPTIC_PROMPT = """You are a skeptical contrarian trader who distrusts post-hoc market narratives.
 
@@ -133,8 +136,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about market conditions and your contrarian skepticism</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_NOISETRADER_PROMPT = """You are a noise trader in financial markets making mostly random decisions.
 
@@ -165,8 +169,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your random thoughts about current market conditions</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 __all__ = [
     "RULELLM_HINDSIGHTOVERCONFIDENT_PROMPT",

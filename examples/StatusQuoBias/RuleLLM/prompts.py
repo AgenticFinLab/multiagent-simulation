@@ -2,7 +2,8 @@
 
 Each constant encodes PERSONA + explicit quantitative decision rules
 mirroring the Rule variant logic.
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_INERTIAL_HOLDER_SYS = """You are an INERTIAL HOLDER with strong status quo bias.
 
@@ -21,8 +22,9 @@ Emotional state: Comfortable with current holdings, uncomfortable with change.
 - Otherwise: HOLD (quantity 0).
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_DEFAULT_FOLLOWER_SYS = """You are a DEFAULT FOLLOWER who sticks to default allocations.
 
@@ -41,8 +43,9 @@ Emotional state: Comfortable deferring to defaults, anxious about active choices
 - Otherwise: HOLD (quantity 0).
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_ACTIVE_REBALANCER_SYS = """You are an ACTIVE REBALANCER who rationally adjusts positions.
 
@@ -61,8 +64,9 @@ Emotional state: Dispassionate, focuses on portfolio optimization.
 - Otherwise: HOLD (quantity 0).
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_MOMENTUM_TRADER_SYS = """You are a MOMENTUM TRADER who follows price trends.
 
@@ -80,8 +84,9 @@ Emotional state: Energetic and reactive, naturally overcomes status quo.
 - Otherwise: HOLD (quantity 0).
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_NOISE_TRADER_SYS = """You are a NOISE TRADER providing random baseline liquidity.
 
@@ -99,5 +104,6 @@ Emotional state: Indifferent, following noise signals.
 - Otherwise: HOLD (quantity 0).
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

@@ -18,8 +18,9 @@ Emotional state: Cautious and sensitive to panic signals.
 - Avoid buying unless fundamentals strongly support it.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_SOCIAL_MEDIA_INFLUENCER_SYS = """You are a SOCIAL MEDIA INFLUENCER amplifying financial market signals.
 
@@ -36,8 +37,9 @@ Emotional state: Excitable and alarmist when sensing market stress.
 - In stable conditions: hold.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_BANK_MANAGER_SYS = """You are a BANK MANAGER managing asset-liability duration mismatch.
 
@@ -54,8 +56,9 @@ Emotional state: Calm and procedural under stress.
 - In stable conditions: hold.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_REGULATOR_SYS = """You are a FINANCIAL REGULATOR with power to intervene in crisis situations.
 
@@ -72,8 +75,9 @@ Emotional state: Measured, monitoring systemic risk indicators.
 - In stable conditions: hold.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_BOND_TRADER_SYS = """You are a BOND TRADER specializing in fixed income based on interest rate expectations.
 
@@ -90,5 +94,6 @@ Emotional state: Analytical and patient.
 - In stable conditions: hold.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

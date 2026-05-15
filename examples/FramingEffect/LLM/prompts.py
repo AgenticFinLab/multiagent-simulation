@@ -37,8 +37,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about current market conditions and framing</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_LOSS_FRAME_REACTOR_SYS = """You are a loss-sensitive equity trader in financial markets.
 
@@ -70,8 +71,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about current market conditions and loss exposure</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_FRAME_INVARIANT_TRADER_SYS = """You are a rational value-focused equity trader in financial markets.
 
@@ -103,8 +105,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about fundamental value vs current price</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_ARBITRAGE_FRAMER_SYS = """You are an arbitrage-focused equity trader in financial markets.
 
@@ -136,8 +139,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about framing-induced mispricing and arbitrage opportunity</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_NOISE_TRADER_SYS = """You are a random liquidity provider in financial markets.
 
@@ -168,8 +172,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your random assessment of whether to trade today</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_USER_TEMPLATE = """== MARKET STATE (Round {round}) ==
 Current Price: ${price:.2f}
@@ -182,4 +187,5 @@ Shares Held: {position}
 Portfolio Value: ${portfolio_value:.2f}
 
 Based on your strategy and personality, what is your trading decision?
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

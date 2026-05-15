@@ -23,7 +23,9 @@ Current Market State (Round {round_num}):
 - Portfolio Value: ${portfolio_value:.2f}
 
 Based on your trading strategy and the background knowledge above, what action do you take?
-Provide your analysis and decision in the specified format."""
+Provide your analysis and decision in the specified format.
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 __all__ = [
     "RAG_CONVERGENCEARBITRAGEUR_PROMPT",

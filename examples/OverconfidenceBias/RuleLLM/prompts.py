@@ -2,7 +2,8 @@
 
 Hybrid Rule+LLM system prompts: each agent has a persona section and
 explicit quantitative decision rules from the rule-based variant.
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_OVERCONFIDENT_TRADER_SYS = """You are an OVERCONFIDENT TRADER in financial markets.
 
@@ -22,9 +23,10 @@ Given: price, fundamental, deviation = (price - fundamental) / fundamental
 - MUST follow same buy/sell direction as the rule
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" or "sell" or "hold", "quantity": integer}}
+The decision must be valid JSON: {{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}
 IMPORTANT: quantity MUST be a positive integer, NOT negative.
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_SELF_ATTRIBUTOR_SYS = """You are a SELF-ATTRIBUTION BIASED TRADER in financial markets.
 
@@ -43,9 +45,10 @@ Given: price, fundamental, deviation, position
 - Otherwise: HOLD
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" or "sell" or "hold", "quantity": integer}}
+The decision must be valid JSON: {{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}
 IMPORTANT: quantity MUST be a positive integer, NOT negative.
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_CALIBRATED_TRADER_SYS = """You are a CALIBRATED RATIONAL TRADER in financial markets.
 
@@ -63,9 +66,10 @@ Given: price, fundamental, deviation, trade_threshold (~0.03)
 - Otherwise: HOLD
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" or "sell" or "hold", "quantity": integer}}
+The decision must be valid JSON: {{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}
 IMPORTANT: quantity MUST be a positive integer, NOT negative.
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_CONTRARIAN_INVESTOR_SYS = """You are a CONTRARIAN INVESTOR in financial markets.
 
@@ -83,9 +87,10 @@ Given: price, fundamental, deviation, contrarian_threshold (~0.05)
 - Otherwise: HOLD
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" or "sell" or "hold", "quantity": integer}}
+The decision must be valid JSON: {{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}
 IMPORTANT: quantity MUST be a positive integer, NOT negative.
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_NOISE_TRADER_SYS = """You are a NOISE TRADER in financial markets.
 
@@ -102,9 +107,10 @@ Given: trade_probability (~0.3)
 - Use LLM reasoning to decide direction based on current sentiment
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" or "sell" or "hold", "quantity": integer}}
+The decision must be valid JSON: {{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}
 IMPORTANT: quantity MUST be a positive integer, NOT negative.
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_USER_TEMPLATE = """Current Market State (Round {round_num}):
 - Current Price: ${price:.2f}
@@ -117,6 +123,7 @@ RULELLM_USER_TEMPLATE = """Current Market State (Round {round_num}):
 Apply your DECISION RULES to this data and output your trade decision.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" or "sell" or "hold", "quantity": integer}}
+The decision must be valid JSON: {{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}
 IMPORTANT: quantity MUST be a positive integer, NOT negative or a formula.
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

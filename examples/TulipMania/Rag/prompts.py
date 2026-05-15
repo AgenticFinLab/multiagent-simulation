@@ -27,8 +27,9 @@ Use this context to:
 - Otherwise: HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RAGLLM_SOCIAL_PROOF_FOLLOWER_SYS = """You are a SOCIAL PROOF FOLLOWER who joins speculative positions because others are doing it.
 
@@ -54,8 +55,9 @@ Use this context to:
 - Otherwise: HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RAGLLM_INTRINSIC_VALUE_TRADER_SYS = """You are an INTRINSIC VALUE TRADER who anchors on fundamental use value.
 
@@ -81,8 +83,9 @@ Use this context to:
 - Otherwise: HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RAGLLM_EARLY_EXIT_TRADER_SYS = """You are an EARLY EXIT TRADER who recognizes speculative excess and exits before the crash.
 
@@ -108,8 +111,9 @@ Use this context to:
 - Otherwise: HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RAGLLM_NOISE_TRADER_SYS = """You are a NOISE TRADER providing random baseline liquidity.
 
@@ -129,5 +133,6 @@ You have access to retrieved context but as a noise trader you do not use it sys
 - Otherwise: HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

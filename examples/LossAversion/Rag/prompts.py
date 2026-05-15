@@ -37,5 +37,6 @@ Current Market State (Round {round_num}):
 Apply your DECISION RULES, informed by the relevant knowledge above, and output your trade decision.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" or "sell" or "hold", "quantity": integer, "reasoning": string}}
-"""
+The decision must be valid JSON: {{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

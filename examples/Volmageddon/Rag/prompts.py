@@ -38,8 +38,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning integrating retrieved knowledge and current market conditions</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RAGLLM_VOL_ETN_MANAGER_SYS = """You are an inverse VIX ETN manager operating in financial markets.
 
@@ -73,8 +74,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning integrating retrieved knowledge about rebalancing obligations</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RAGLLM_LONG_VOL_HEDGER_SYS = """You are a long volatility hedger operating in financial markets.
 
@@ -107,8 +109,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning integrating retrieved knowledge about portfolio insurance</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RAGLLM_VOL_ARBITRAGEUR_SYS = """You are a volatility arbitrageur operating in financial markets.
 
@@ -142,8 +145,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning integrating retrieved knowledge about term structure dislocations</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RAGLLM_EQUITY_TRADER_SYS = """You are an equity trader operating in financial markets.
 
@@ -177,5 +181,6 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning integrating retrieved knowledge about equity valuation</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

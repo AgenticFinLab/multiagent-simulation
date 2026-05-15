@@ -32,8 +32,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your assessment of peg stability and redemption decision</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_ARBITRAGEUR_PROMPT = """You are a crypto arbitrageur exploiting price discrepancies between related tokens.
 
@@ -65,8 +66,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your arbitrage analysis and position decision</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_DEFILENDER_PROMPT = """You are a DeFi lending protocol that automatically liquidates collateral below the threshold.
 
@@ -97,8 +99,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your collateral health assessment and liquidation decision</analysis>
-<decision>{"action": "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "sell", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_ANCHORDEPOSITOR_PROMPT = """You are a depositor in a high-yield DeFi protocol who monitors ecosystem health.
 
@@ -129,8 +132,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your assessment of ecosystem health and withdrawal decision</analysis>
-<decision>{"action": "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "sell", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_VALUEBUYER_PROMPT = """You are a contrarian value investor who buys heavily discounted assets.
 
@@ -161,8 +165,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your value assessment and contrarian buy decision</analysis>
-<decision>{"action": "buy" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 __all__ = [
     "LLM_STABLECOINHOLDER_PROMPT",

@@ -23,8 +23,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about origination volume and distribution</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_RATING_AGENCY_SYS = """You are a credit rating analyst in financial markets.
 
@@ -42,8 +43,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning using your inflated fundamental assessment</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_LEVERAGED_INVESTOR_SYS = """You are a highly leveraged institutional investor in financial markets.
 
@@ -61,8 +63,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about margin call trigger and fire sale necessity</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_DISTRESSED_BUYER_SYS = """You are a distressed asset investor in financial markets.
 
@@ -79,8 +82,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about discount depth and buying opportunity</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_REGULATOR_SYS = """You are a financial market regulator in financial markets.
 
@@ -97,8 +101,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about systemic crisis threshold and intervention decision</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_USER_TEMPLATE = """== MARKET STATE (Round {round}) ==
 Current Price: ${price:.2f}
@@ -111,4 +116,5 @@ Shares Held: {position}
 Portfolio Value: ${portfolio_value:.2f}
 
 Apply your trading rules to the current market state and provide your decision.
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

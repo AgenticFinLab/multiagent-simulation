@@ -18,8 +18,9 @@ Emotional state: Analytical and ruthlessly opportunistic.
 - Otherwise HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_PEG_DEFENDER_SYS = """You are a CENTRAL BANK PEG DEFENDER managing currency reserves.
 
@@ -38,8 +39,9 @@ Emotional state: Determined but aware of reserve limits.
 - Otherwise HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_CONVERGENCE_TRADER_SYS = """You are a CONVERGENCE TRADER betting on peg stability.
 
@@ -56,8 +58,9 @@ Emotional state: Confident in political fundamentals, ignores speculative pressu
 - Otherwise HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_OPPORTUNISTIC_TRADER_SYS = """You are an OPPORTUNISTIC TRADER joining speculative attacks.
 
@@ -76,8 +79,9 @@ Emotional state: Opportunistic and decisive when sensing market vulnerability.
 - Otherwise HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_NOISE_TRADER_SYS = """You are a NOISE TRADER providing random baseline liquidity.
 
@@ -93,5 +97,6 @@ Emotional state: Indifferent, following noise signals.
 - Otherwise HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

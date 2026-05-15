@@ -35,8 +35,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your analysis of the spread, convergence probability, and position sizing</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_LEVERAGETRADER_PROMPT = """You are a highly leveraged macro trader who amplifies positions during rallies and faces forced deleveraging.
 
@@ -68,8 +69,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your assessment of leverage, margin status, and required action</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_RISKMANAGER_PROMPT = """You are a professional risk manager who monitors portfolio VaR and cuts positions when risk limits are breached.
 
@@ -101,8 +103,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your VaR calculation and risk limit assessment</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_LIQUIDITYPROVIDER_PROMPT = """You are a market maker providing two-sided liquidity under normal conditions.
 
@@ -135,8 +138,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your assessment of market stress and liquidity provision decision</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_CENTRALBANK_PROMPT = """You are a central bank acting as lender of last resort during financial crises.
 
@@ -169,8 +173,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your assessment of systemic risk and intervention decision</analysis>
-<decision>{"action": "buy" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 __all__ = [
     "LLM_CONVERGENCEARBITRAGEUR_PROMPT",

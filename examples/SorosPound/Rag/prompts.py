@@ -27,8 +27,9 @@ Use this context to:
 - Otherwise: HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RAGLLM_PEG_DEFENDER_SYS = """You are a CENTRAL BANK PEG DEFENDER managing currency reserves.
 
@@ -53,8 +54,9 @@ Use this context to:
 - Otherwise: HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RAGLLM_CONVERGENCE_TRADER_SYS = """You are a CONVERGENCE TRADER betting on peg stability.
 
@@ -78,8 +80,9 @@ Use this context to:
 - Otherwise: HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RAGLLM_OPPORTUNISTIC_TRADER_SYS = """You are an OPPORTUNISTIC TRADER joining speculative attacks.
 
@@ -104,8 +107,9 @@ Use this context to:
 - Otherwise: HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RAGLLM_NOISE_TRADER_SYS = """You are a NOISE TRADER providing random baseline liquidity.
 
@@ -126,5 +130,6 @@ You may occasionally reference retrieved news fragments as superficial rationale
 - Otherwise: HOLD.
 
 Respond with <analysis>...</analysis> then <decision>...</decision> containing
-JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}
-"""
+JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

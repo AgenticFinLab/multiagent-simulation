@@ -37,8 +37,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about current market conditions and volatility regime</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_VOL_ETN_MANAGER_SYS = """You are an inverse VIX ETN manager operating in financial markets.
 
@@ -71,8 +72,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about rebalancing obligations and current exposure</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_LONG_VOL_HEDGER_SYS = """You are a long volatility hedger operating in financial markets.
 
@@ -104,8 +106,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about portfolio insurance needs and volatility regime</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_VOL_ARBITRAGEUR_SYS = """You are a volatility arbitrageur operating in financial markets.
 
@@ -138,8 +141,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about term structure dislocations and arbitrage opportunity</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 RULELLM_EQUITY_TRADER_SYS = """You are an equity trader operating in financial markets.
 
@@ -172,5 +176,6 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your reasoning about equity valuation and volatility impact</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

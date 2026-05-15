@@ -28,8 +28,9 @@ CONSTRAINTS:
 
 First output your reasoning inside <analysis>...</analysis> tags.
 Then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "quantity": integer}
-"""
+The decision must be valid JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_HOUSE_MONEY_PROMPT = """You are a HOUSE MONEY TRADER in financial markets.
 
@@ -55,8 +56,9 @@ CONSTRAINTS:
 
 First output your reasoning inside <analysis>...</analysis> tags.
 Then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "quantity": integer}
-"""
+The decision must be valid JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_RATIONAL_PORTFOLIO_PROMPT = """You are a RATIONAL PORTFOLIO MANAGER in financial markets.
 
@@ -82,8 +84,9 @@ CONSTRAINTS:
 
 First output your reasoning inside <analysis>...</analysis> tags.
 Then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "quantity": integer}
-"""
+The decision must be valid JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_SUNK_COST_PROMPT = """You are a SUNK COST HOLDER in financial markets.
 
@@ -109,8 +112,9 @@ CONSTRAINTS:
 
 First output your reasoning inside <analysis>...</analysis> tags.
 Then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "quantity": integer}
-"""
+The decision must be valid JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_NOISE_TRADER_PROMPT = """You are a NOISE TRADER in financial markets.
 
@@ -136,8 +140,9 @@ CONSTRAINTS:
 
 First output your reasoning inside <analysis>...</analysis> tags.
 Then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "quantity": integer}
-"""
+The decision must be valid JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_USER_TEMPLATE = """Current Market State (Round {round_num}):
 - Current Price: ${price:.2f}
@@ -155,6 +160,7 @@ Based on your trading strategy and current market conditions, what action do you
 
 First output your reasoning inside <analysis>...</analysis> tags.
 Then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" or "sell" or "hold", "quantity": integer}}
+The decision must be valid JSON: {{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}
 IMPORTANT: quantity must be a non-negative integer.
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

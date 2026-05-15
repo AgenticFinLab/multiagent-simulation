@@ -40,7 +40,7 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.RumorSpread.llm_parser import parse_rumor_response
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -249,7 +249,7 @@ class LLMSocialAgent(GeneralPlayer):
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with thinking and decision sections."""
-        return parse_llm_response_with_thinking(response_text)
+        return parse_rumor_response(response_text)
 
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
