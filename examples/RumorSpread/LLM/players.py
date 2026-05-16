@@ -53,6 +53,8 @@ from .prompts import (
     LLM_BYSTANDER_SYS,
 )
 
+logger = logging.getLogger("RumorSpread.LLM")
+
 
 class InformationEnvironment(GeneralPlayer):
     """

@@ -36,7 +36,7 @@ STRATEGY:
 - Liquidity < 50: Trade only if necessary, accept worse prices
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "provides_liquidity": float, "reasoning": string}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
 
@@ -67,7 +67,7 @@ STRATEGY:
 - Be PATIENT
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "provides_liquidity": float, "reasoning": string}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
 
@@ -81,7 +81,7 @@ LLM_FORCED_SELLER_SYS = """You are a FORCED SELLER who MUST sell.
 - Accept price impact as cost of execution
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "sell", "bid_price": float, "quantity": float, "reasoning": string}
+The decision must be valid JSON: {"action": "sell", "bid_price": float, "quantity": float, "provides_liquidity": float, "reasoning": string}
 Note: quantity should be NEGATIVE
 """
 
@@ -105,6 +105,6 @@ Your Portfolio:
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON:
-{{"action": "buy" | "sell" | "hold", "bid_price": <price as NUMBER>, "quantity": <+buy/-sell as NUMBER>, "reasoning": "<brief>"}}
+{{"action": "buy" | "sell" | "hold", "bid_price": <price as NUMBER>, "quantity": <+buy/-sell as NUMBER>, "provides_liquidity": <NUMBER>, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """

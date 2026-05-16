@@ -38,7 +38,7 @@ Apply the quantitative decision rules from the MarketMaker strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -67,7 +67,7 @@ Apply the quantitative decision rules from the LiquiditySeeker strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -96,7 +96,7 @@ Apply the quantitative decision rules from the ValueTrader strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -125,7 +125,7 @@ Apply the quantitative decision rules from the MomentumTrader strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -154,7 +154,7 @@ Apply the quantitative decision rules from the NoiseTrader strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -181,6 +181,6 @@ RULELLM_USER_TEMPLATE = """
 Apply your DECISION RULES above to this data and output your trade decision.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <NUMBER>, "quantity": <NUMBER, +buy/-sell>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <NUMBER>, "quantity": <NUMBER, +buy/-sell>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
