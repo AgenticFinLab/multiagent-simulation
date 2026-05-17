@@ -68,6 +68,7 @@ ragllm_myopic:
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
       initial_cash: 10000.0
+      initial_position: 50.0
       # 50% cash
       initial_cash_ratio: 0.5
       initial_stock_shares: 50.0
@@ -92,7 +93,7 @@ ragllm_myopic:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_MYOPIC_LOSS_AVERSE_SYS"
+        sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_MYOPIC_LOSS_AVERSE_INVESTOR_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -115,6 +116,7 @@ ragllm_long_term:
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
       initial_cash: 10000.0
+      initial_position: 50.0
       initial_cash_ratio: 0.5
       initial_stock_shares: 50.0
       initial_bond_ratio: 0.25
@@ -137,7 +139,7 @@ ragllm_long_term:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_LONG_TERM_SYS"
+        sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_LONG_HORIZON_INVESTOR_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -159,6 +161,7 @@ ragllm_institutional:
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
       initial_cash: 10000.0
+      initial_position: 50.0
       initial_cash_ratio: 0.5
       initial_stock_shares: 50.0
       initial_bond_ratio: 0.25
@@ -181,7 +184,7 @@ ragllm_institutional:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_INSTITUTIONAL_SYS"
+        sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_RISK_NEUTRAL_INVESTOR_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -204,6 +207,7 @@ ragllm_risk_averse:
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
       initial_cash: 10000.0
+      initial_position: 50.0
       initial_cash_ratio: 0.5
       initial_stock_shares: 50.0
       initial_bond_ratio: 0.25
@@ -226,7 +230,7 @@ ragllm_risk_averse:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_RISK_AVERSE_SYS"
+        sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_CONSERVATIVE_INVESTOR_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -249,6 +253,7 @@ ragllm_rational:
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
       initial_cash: 10000.0
+      initial_position: 50.0
       initial_cash_ratio: 0.5
       initial_stock_shares: 50.0
       initial_bond_ratio: 0.25
@@ -271,7 +276,7 @@ ragllm_rational:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_RATIONAL_SYS"
+        sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

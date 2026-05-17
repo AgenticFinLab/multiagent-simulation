@@ -657,7 +657,10 @@ class RagLLMInvestor(GeneralPlayer):
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with analysis and decision sections."""
-        return parse_llm_response_with_thinking(response_text)
+        decision = parse_llm_response_with_thinking(response_text)
+        if "provides_liquidity" not in decision or decision["provides_liquidity"] is None:
+            raise ValueError("Fields missing or null in LLM response: ['provides_liquidity']")
+        return decision
 
     # ------------------------------------------------------------------
     # Portfolio constraints
