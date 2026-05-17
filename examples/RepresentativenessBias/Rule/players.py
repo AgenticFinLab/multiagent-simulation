@@ -28,6 +28,30 @@ from masim.utils.history import HistoryBuffer
 logger = logging.getLogger("RepresentativenessBias")
 
 
+def _info_payload(message: Any) -> Any:
+    if hasattr(message, "payload"):
+        return message.payload
+    if isinstance(message, dict):
+        return message.get("payload", message)
+    return message
+
+
+def _with_order_message(
+    identity: str, agent_type: str, decision: Dict[str, Any]
+) -> Dict[str, Any]:
+    order = {
+        "type": "order",
+        "from": identity,
+        "action": decision["action"],
+        "quantity": decision["quantity"],
+        "agent_type": agent_type,
+    }
+    return {
+        **decision,
+        "outbound_messages": [{"payload": order, "content_type": "order"}],
+    }
+
+
 class Market(GeneralPlayer):
     """
     Market agent for RepresentativenessBias simulation.
@@ -59,11 +83,11 @@ class Market(GeneralPlayer):
     def _extract_orders(self, observation) -> list:
         orders = []
         for msg in observation.inbounds:
-            payload = msg["payload"]
-            if payload["type"] == "order":
+            payload = _info_payload(msg)
+            if isinstance(payload, dict) and payload.get("type") == "order":
                 orders.append(
                     {
-                        "agent_id": payload["from"],
+                        "agent_id": payload.get("from", getattr(msg, "sender_id", None)),
                         "action": payload["action"],
                         "quantity": payload["quantity"],
                         "agent_type": payload["agent_type"],
@@ -106,7 +130,19 @@ class Market(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = (price - fundamental) / fundamental if fundamental > 0 else 0
-        return {"price": price, "fundamental": fundamental, "deviation": deviation}
+        market_update = {
+            "type": "market_update",
+            "price": price,
+            "fundamental": fundamental,
+            "deviation": deviation,
+            "round": self.state.custom_state["round"],
+        }
+        return {
+            **market_update,
+            "outbound_messages": [
+                {"payload": market_update, "content_type": "market_update"}
+            ],
+        }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
         market_update = {
@@ -146,8 +182,8 @@ class PatternMatcher(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg["payload"]
-            if payload["type"] == "market_update":
+            payload = _info_payload(msg)
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -156,7 +192,8 @@ class PatternMatcher(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = self.state.custom_state["deviation"]
-        return self._make_decision(price, fundamental, deviation)
+        decision = self._make_decision(price, fundamental, deviation)
+        return _with_order_message(self.identity, self.__class__.__name__, decision)
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -220,8 +257,8 @@ class CategoryOvergeneralizer(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg["payload"]
-            if payload["type"] == "market_update":
+            payload = _info_payload(msg)
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -230,7 +267,8 @@ class CategoryOvergeneralizer(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = self.state.custom_state["deviation"]
-        return self._make_decision(price, fundamental, deviation)
+        decision = self._make_decision(price, fundamental, deviation)
+        return _with_order_message(self.identity, self.__class__.__name__, decision)
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -294,8 +332,8 @@ class BayesianUpdater(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg["payload"]
-            if payload["type"] == "market_update":
+            payload = _info_payload(msg)
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -304,7 +342,8 @@ class BayesianUpdater(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = self.state.custom_state["deviation"]
-        return self._make_decision(price, fundamental, deviation)
+        decision = self._make_decision(price, fundamental, deviation)
+        return _with_order_message(self.identity, self.__class__.__name__, decision)
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -368,8 +407,8 @@ class ContrarianStatistical(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg["payload"]
-            if payload["type"] == "market_update":
+            payload = _info_payload(msg)
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -378,7 +417,8 @@ class ContrarianStatistical(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = self.state.custom_state["deviation"]
-        return self._make_decision(price, fundamental, deviation)
+        decision = self._make_decision(price, fundamental, deviation)
+        return _with_order_message(self.identity, self.__class__.__name__, decision)
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -442,8 +482,8 @@ class NoiseTrader(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg["payload"]
-            if payload["type"] == "market_update":
+            payload = _info_payload(msg)
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -452,7 +492,8 @@ class NoiseTrader(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = self.state.custom_state["deviation"]
-        return self._make_decision(price, fundamental, deviation)
+        decision = self._make_decision(price, fundamental, deviation)
+        return _with_order_message(self.identity, self.__class__.__name__, decision)
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float

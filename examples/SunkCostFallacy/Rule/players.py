@@ -53,13 +53,16 @@ class Market(GeneralPlayer):
         orders = []
         if observation.inbounds:
             for inb in observation.inbounds:
-                payload = inb.payload
+                payload = inb.payload if hasattr(inb, "payload") else inb
+                content_type = getattr(inb, "content_type", None)
                 if (
                     isinstance(payload, dict)
-                    and payload["content_type"] == "investor_order"
+                    and (
+                        content_type == "investor_order"
+                        or payload.get("type") == "order"
+                        or "action" in payload
+                    )
                 ):
-                    orders.append(payload)
-                elif isinstance(payload, dict) and "action" in payload:
                     orders.append(payload)
 
         price = self.state.custom_state["price"]
@@ -133,8 +136,8 @@ class BaseInvestor(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         if observation.inbounds:
             for inb in observation.inbounds:
-                market_data = inb.payload
-                if isinstance(market_data, dict):
+                market_data = inb.payload if hasattr(inb, "payload") else inb
+                if isinstance(market_data, dict) and "price" in market_data:
                     self.state.custom_state["price"] = market_data["price"]
                     self.state.custom_state["fundamental"] = market_data["fundamental"]
                     self.state.custom_state["deviation"] = market_data["deviation"]
@@ -143,10 +146,10 @@ class BaseInvestor(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = self.state.custom_state["deviation"]
-        order = self._make_decision(price, fundamental, deviation)
+        decision = self._make_decision(price, fundamental, deviation)
 
-        action = order["action"]
-        quantity = order["quantity"]
+        action = decision["action"]
+        quantity = decision["quantity"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         if action == "buy" and quantity > 0:
@@ -156,9 +159,15 @@ class BaseInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
+        order = {
+            "type": "order",
+            "from": self.identity,
+            "action": action,
+            "quantity": quantity,
+            "agent_type": self.__class__.__name__,
+        }
         return {
             **order,
-            "agent_type": self.__class__.__name__,
             "outbound_messages": [{"payload": order, "content_type": "investor_order"}],
         }
 
