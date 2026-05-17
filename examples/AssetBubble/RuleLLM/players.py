@@ -61,12 +61,39 @@ from examples.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("AssetBubbleRuleLLM")
 
+NON_RETRYABLE_API_MARKERS = (
+    "AccountOverdue",
+    "Authentication",
+    "Unauthorized",
+    "PermissionDenied",
+    "invalid api key",
+    "insufficient quota",
+)
+RETRYABLE_API_MARKERS = (
+    "timeout",
+    "timed out",
+    "connection",
+    "temporarily",
+    "rate limit",
+    "ratelimit",
+    "too many requests",
+    "429",
+)
+
 
 def load_prompt(prompt_path: str) -> str:
     """Load a prompt string from module path."""
     module_path, var_name = prompt_path.rsplit(":", 1)
     module = importlib.import_module(module_path)
     return getattr(module, var_name)
+
+
+def is_retryable_llm_error(exc: BaseException) -> bool:
+    """Return True for transient provider errors that should not abort a run."""
+    message = f"{exc.__class__.__name__}: {exc}".lower()
+    if any(marker.lower() in message for marker in NON_RETRYABLE_API_MARKERS):
+        return False
+    return any(marker in message for marker in RETRYABLE_API_MARKERS)
 
 
 # =============================================================================
@@ -395,22 +422,39 @@ Respond with ONLY valid JSON:
         decision = None
         last_error = None
         for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
+                infer_output = llm_client.run([infer_input])
                 decision = self._parse_llm_response(infer_output.outputs[0].response)
                 break
             except Exception as exc:
                 last_error = exc
                 if attempt < max_retries - 1:
-                    logger.debug(
-                        f"[{self.identity}] LLM parse failed (attempt {attempt+1}), retrying..."
+                    logger.warning(
+                        "[%s] LLM call/parse failed (attempt %d/%d), retrying: %s",
+                        self.identity,
+                        attempt + 1,
+                        max_retries,
+                        exc,
                     )
 
         if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
-            )
+            if last_error is not None and is_retryable_llm_error(last_error):
+                counts = self.state.custom_state.setdefault("llm_fallback_counts", {})
+                counts["retryable_api_error"] = (
+                    int(counts.get("retryable_api_error", 0)) + 1
+                )
+                decision = {
+                    "action": "hold",
+                    "bid_price": market_data["price"],
+                    "quantity": 0.0,
+                    "reasoning": "LLM unavailable after retries; holding.",
+                    "analysis": f"Fallback after retryable LLM error: {last_error}",
+                }
+            else:
+                raise RuntimeError(
+                    f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
+                )
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
