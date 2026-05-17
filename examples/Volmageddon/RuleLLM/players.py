@@ -96,7 +96,8 @@ class RuleLLMInvestor(GeneralPlayer):
             f"Value: ${portfolio_value:.2f}\n\n"
             "Based on your strategy and the current market conditions, decide your action.\n"
             "Respond with <analysis>...</analysis> then <decision>...</decision> containing "
-            'JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}'
+            'JSON: {"action": "buy" or "sell" or "hold", "quantity": integer, '
+            '"reasoning": "brief rationale"}'
         )
 
     async def decide(self) -> Dict[str, Any]:
@@ -108,7 +109,11 @@ class RuleLLMInvestor(GeneralPlayer):
         user_prompt = self._build_prompt()
         system_prompt = self._system_prompt
 
-        decision: Dict[str, Any] = {"action": "hold", "quantity": 0}
+        decision: Dict[str, Any] = {
+            "action": "hold",
+            "quantity": 0,
+            "reasoning": "fallback hold before LLM decision",
+        }
         max_retries = 3
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
@@ -125,10 +130,15 @@ class RuleLLMInvestor(GeneralPlayer):
                         self.identity,
                         max_retries,
                     )
-                    decision = {"action": "hold", "quantity": 0}
+                    decision = {
+                        "action": "hold",
+                        "quantity": 0,
+                        "reasoning": "fallback hold after LLM parse failure",
+                    }
 
-        action = decision["action"]
-        quantity = int(decision["quantity"])
+        action = decision.get("action", "hold")
+        quantity = int(decision.get("quantity", 0) or 0)
+        reasoning = str(decision.get("reasoning", "No reasoning provided."))[:120]
 
         valid_actions = ["buy", "sell", "hold"]
         if action not in valid_actions:
@@ -166,7 +176,7 @@ class RuleLLMInvestor(GeneralPlayer):
             "action": action,
             "quantity": quantity,
             "agent_type": strategy_name,
-            "reasoning": decision["reasoning"][:120],
+            "reasoning": reasoning,
         }
         return {
             **order,
