@@ -304,6 +304,6 @@ RAGLLM_USER_TEMPLATE = """
 Apply your DECISION RULES, informed by the relevant knowledge above and output your trade decision.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <your price as NUMBER>, "quantity": <shares as NUMBER, +buy/-sell>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <your price as NUMBER>, "quantity": <shares as NUMBER, +buy/-sell>, "reasoning": "<brief>", "provides_liquidity": true|false}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
