@@ -1,72 +1,23 @@
 # Volmageddon Rule Persona Configuration
 
-market:
-  type: proxy
-  checkpoint_dir: "EXPERIMENT/Volmageddon/Rule/records/market/checkpoints"
-  record_path: "EXPERIMENT/Volmageddon/Rule/records/market"
-  monitoring:
-    record_path: "EXPERIMENT/Volmageddon/Rule/monitoring/market"
+auto_checkpoint: false
+debug_mode: true
 
-short_vol_trader_1_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/Volmageddon/Rule/records/short_vol_trader_1_1/checkpoints"
-  record_path: "EXPERIMENT/Volmageddon/Rule/records/short_vol_trader_1_1"
-  monitoring:
-    record_path: "EXPERIMENT/Volmageddon/Rule/monitoring/short_vol_trader_1_1"
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/Volmageddon/Rule/checkpoints"
+    record_path: "EXPERIMENT/Volmageddon/Rule/records"
+    record_rounds: true
+    turn_block_size: 3
 
-short_vol_trader_1_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/Volmageddon/Rule/records/short_vol_trader_1_2/checkpoints"
-  record_path: "EXPERIMENT/Volmageddon/Rule/records/short_vol_trader_1_2"
   monitoring:
-    record_path: "EXPERIMENT/Volmageddon/Rule/monitoring/short_vol_trader_1_2"
+    record_path: "EXPERIMENT/Volmageddon/Rule/monitoring"
+    monitor_hot_limit: 3
 
-vol_e_t_n_manager_2_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/Volmageddon/Rule/records/vol_e_t_n_manager_2_1/checkpoints"
-  record_path: "EXPERIMENT/Volmageddon/Rule/records/vol_e_t_n_manager_2_1"
-  monitoring:
-    record_path: "EXPERIMENT/Volmageddon/Rule/monitoring/vol_e_t_n_manager_2_1"
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
 
-vol_e_t_n_manager_2_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/Volmageddon/Rule/records/vol_e_t_n_manager_2_2/checkpoints"
-  record_path: "EXPERIMENT/Volmageddon/Rule/records/vol_e_t_n_manager_2_2"
-  monitoring:
-    record_path: "EXPERIMENT/Volmageddon/Rule/monitoring/vol_e_t_n_manager_2_2"
-
-long_vol_hedger_3_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/Volmageddon/Rule/records/long_vol_hedger_3_1/checkpoints"
-  record_path: "EXPERIMENT/Volmageddon/Rule/records/long_vol_hedger_3_1"
-  monitoring:
-    record_path: "EXPERIMENT/Volmageddon/Rule/monitoring/long_vol_hedger_3_1"
-
-vol_arbitrageur_4_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/Volmageddon/Rule/records/vol_arbitrageur_4_1/checkpoints"
-  record_path: "EXPERIMENT/Volmageddon/Rule/records/vol_arbitrageur_4_1"
-  monitoring:
-    record_path: "EXPERIMENT/Volmageddon/Rule/monitoring/vol_arbitrageur_4_1"
-
-vol_arbitrageur_4_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/Volmageddon/Rule/records/vol_arbitrageur_4_2/checkpoints"
-  record_path: "EXPERIMENT/Volmageddon/Rule/records/vol_arbitrageur_4_2"
-  monitoring:
-    record_path: "EXPERIMENT/Volmageddon/Rule/monitoring/vol_arbitrageur_4_2"
-
-equity_trader_5_1:
-  type: player
-  checkpoint_dir: "EXPERIMENT/Volmageddon/Rule/records/equity_trader_5_1/checkpoints"
-  record_path: "EXPERIMENT/Volmageddon/Rule/records/equity_trader_5_1"
-  monitoring:
-    record_path: "EXPERIMENT/Volmageddon/Rule/monitoring/equity_trader_5_1"
-
-equity_trader_5_2:
-  type: player
-  checkpoint_dir: "EXPERIMENT/Volmageddon/Rule/records/equity_trader_5_2/checkpoints"
-  record_path: "EXPERIMENT/Volmageddon/Rule/records/equity_trader_5_2"
-  monitoring:
-    record_path: "EXPERIMENT/Volmageddon/Rule/monitoring/equity_trader_5_2"
-
+  resource:
+    mcp_servers: []
+    enable_caching: false

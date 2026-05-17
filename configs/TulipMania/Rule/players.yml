@@ -2,13 +2,12 @@ market:
   name: "Market"
   class: "examples.TulipMania.Rule.players:Market"
   num_instances: 1
+  persona: !include persona.yml
   config:
     identity: "market"
     role: market
     steps_per_turn: 1
     group_tags: [market]
-    record_path: "EXPERIMENT/TulipMania/Rule/records/market"
-    persona: !include ../Rule/persona.yml
     extras:
       initial_price: 100.0
       fundamental_value: 100.0
@@ -20,13 +19,12 @@ trendchaser:
   name: "TrendChaser"
   class: "examples.TulipMania.Rule.players:TrendChaser"
   num_instances: 4
+  persona: !include persona.yml
   config:
     identity: "trendchaser"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/TulipMania/Rule/records/trendchaser"
-    persona: !include ../Rule/persona.yml
     extras:
       initial_cash: 1000000.0
       initial_position: 300
@@ -40,13 +38,12 @@ socialprooffollower:
   name: "SocialProofFollower"
   class: "examples.TulipMania.Rule.players:SocialProofFollower"
   num_instances: 3
+  persona: !include persona.yml
   config:
     identity: "socialprooffollower"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/TulipMania/Rule/records/socialprooffollower"
-    persona: !include ../Rule/persona.yml
     extras:
       initial_cash: 800000.0
       initial_position: 400
@@ -60,13 +57,12 @@ intrinsicvaluetrader:
   name: "IntrinsicValueTrader"
   class: "examples.TulipMania.Rule.players:IntrinsicValueTrader"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "intrinsicvaluetrader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/TulipMania/Rule/records/intrinsicvaluetrader"
-    persona: !include ../Rule/persona.yml
     extras:
       initial_cash: 1500000.0
       initial_position: 600
@@ -80,13 +76,12 @@ earlyexittrader:
   name: "EarlyExitTrader"
   class: "examples.TulipMania.Rule.players:EarlyExitTrader"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "earlyexittrader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/TulipMania/Rule/records/earlyexittrader"
-    persona: !include ../Rule/persona.yml
     extras:
       initial_cash: 1200000.0
       initial_position: 500
@@ -100,13 +95,12 @@ noisetrader:
   name: "NoiseTrader"
   class: "examples.TulipMania.Rule.players:NoiseTrader"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "noisetrader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/TulipMania/Rule/records/noisetrader"
-    persona: !include ../Rule/persona.yml
     extras:
       initial_cash: 500000.0
       initial_position: 200

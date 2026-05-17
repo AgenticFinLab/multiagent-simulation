@@ -76,7 +76,19 @@ class Market(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = (price - fundamental) / fundamental if fundamental > 0 else 0
-        return {"price": price, "fundamental": fundamental, "deviation": deviation}
+        market_update = {
+            "type": "market_update",
+            "price": price,
+            "fundamental": fundamental,
+            "deviation": deviation,
+            "round": self.state.custom_state["round"],
+        }
+        return {
+            **market_update,
+            "outbound_messages": [
+                {"payload": market_update, "content_type": "market_update"}
+            ],
+        }
 
     async def act(self, decision_payload: dict) -> Action:
         price = decision_payload["price"]

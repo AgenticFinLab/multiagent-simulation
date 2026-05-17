@@ -1,9 +1,23 @@
+# TulipMania Rule Persona Configuration
+
 auto_checkpoint: false
+debug_mode: true
 
 proxy:
-  record_path: "EXPERIMENT/TulipMania/Rule/records"
-  communication:
-    store_path: "EXPERIMENT/TulipMania/Rule/communication"
+  storage:
+    checkpoint_dir: "EXPERIMENT/TulipMania/Rule/checkpoints"
+    record_path: "EXPERIMENT/TulipMania/Rule/records"
+    record_rounds: true
+    turn_block_size: 3
+
   monitoring:
-    metrics_path: "EXPERIMENT/TulipMania/Rule/monitoring/metrics"
-    events_path: "EXPERIMENT/TulipMania/Rule/monitoring/events"
+    record_path: "EXPERIMENT/TulipMania/Rule/monitoring"
+    monitor_hot_limit: 3
+
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
+
+  resource:
+    mcp_servers: []
+    enable_caching: false

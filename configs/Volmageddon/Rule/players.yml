@@ -4,9 +4,12 @@ market:
   name: "Market"
   class: "examples.Volmageddon.Rule.players:Market"
   num_instances: 1
+  persona: !include persona.yml
   config:
     identity: "market"
     role: coordinator
+    steps_per_turn: 1
+    group_tags: [market]
     extras:
       initial_price: 15.0
       fundamental_value: 15.0
@@ -18,9 +21,12 @@ short_vol_trader_1:
   name: "ShortVolTrader 1"
   class: "examples.Volmageddon.Rule.players:ShortVolTrader"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "short_vol_trader_1"
     role: player
+    steps_per_turn: 1
+    group_tags: [investors]
     extras:
       initial_cash: 1000000.00
       initial_position: 0
@@ -32,9 +38,12 @@ vol_e_t_n_manager_2:
   name: "VolETNManager 2"
   class: "examples.Volmageddon.Rule.players:VolETNManager"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "vol_e_t_n_manager_2"
     role: player
+    steps_per_turn: 1
+    group_tags: [investors]
     extras:
       initial_cash: 1000000.00
       initial_position: 0
@@ -47,9 +56,12 @@ long_vol_hedger_3:
   name: "LongVolHedger 3"
   class: "examples.Volmageddon.Rule.players:LongVolHedger"
   num_instances: 1
+  persona: !include persona.yml
   config:
     identity: "long_vol_hedger_3"
     role: player
+    steps_per_turn: 1
+    group_tags: [investors]
     extras:
       initial_cash: 1000000.00
       initial_position: 0
@@ -61,9 +73,12 @@ vol_arbitrageur_4:
   name: "VolArbitrageur 4"
   class: "examples.Volmageddon.Rule.players:VolArbitrageur"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "vol_arbitrageur_4"
     role: player
+    steps_per_turn: 1
+    group_tags: [investors]
     extras:
       initial_cash: 1000000.00
       initial_position: 0
@@ -75,9 +90,12 @@ equity_trader_5:
   name: "EquityTrader 5"
   class: "examples.Volmageddon.Rule.players:EquityTrader"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "equity_trader_5"
     role: player
+    steps_per_turn: 1
+    group_tags: [investors]
     extras:
       initial_cash: 1000000.00
       initial_position: 0

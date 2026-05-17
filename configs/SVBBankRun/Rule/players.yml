@@ -2,13 +2,12 @@ market:
   name: "Market"
   class: "examples.SVBBankRun.Rule.players:Market"
   num_instances: 1
+  persona: !include persona.yml
   config:
     identity: "market"
     role: market
     steps_per_turn: 1
     group_tags: [market]
-    record_path: "EXPERIMENT/SVBBankRun/Rule/records/market"
-    persona: !include ../Rule/persona.yml
     extras:
       initial_price: 100.0
       fundamental_value: 100.0
@@ -20,13 +19,12 @@ depositor:
   name: "Depositor"
   class: "examples.SVBBankRun.Rule.players:Depositor"
   num_instances: 4
+  persona: !include persona.yml
   config:
     identity: "depositor"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/Rule/records/depositor"
-    persona: !include ../Rule/persona.yml
     extras:
       initial_cash: 1000000.0
       initial_position: 600
@@ -41,13 +39,12 @@ socialmediainfluencer:
   name: "SocialMediaInfluencer"
   class: "examples.SVBBankRun.Rule.players:SocialMediaInfluencer"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "socialmediainfluencer"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/Rule/records/socialmediainfluencer"
-    persona: !include ../Rule/persona.yml
     extras:
       initial_cash: 800000.0
       initial_position: 500
@@ -61,13 +58,12 @@ bankmanager:
   name: "BankManager"
   class: "examples.SVBBankRun.Rule.players:BankManager"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "bankmanager"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/Rule/records/bankmanager"
-    persona: !include ../Rule/persona.yml
     extras:
       initial_cash: 3000000.0
       initial_position: 800
@@ -81,13 +77,12 @@ regulator:
   name: "Regulator"
   class: "examples.SVBBankRun.Rule.players:Regulator"
   num_instances: 1
+  persona: !include persona.yml
   config:
     identity: "regulator"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/Rule/records/regulator"
-    persona: !include ../Rule/persona.yml
     extras:
       initial_cash: 10000000.0
       initial_position: 0
@@ -102,13 +97,12 @@ bondtrader:
   name: "BondTrader"
   class: "examples.SVBBankRun.Rule.players:BondTrader"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "bondtrader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/Rule/records/bondtrader"
-    persona: !include ../Rule/persona.yml
     extras:
       initial_cash: 2000000.0
       initial_position: 400

@@ -72,7 +72,7 @@ class Market(GeneralPlayer):
         )
         new_price = max(new_price, 0.01)
         self.state.custom_state["price"] = new_price
-        self.state.custom_state["history_buffer"].append(new_price)
+        self.state.custom_state["price_history"].append(new_price)
 
     async def decide(self) -> Dict:
         price = self.state.custom_state["price"]
