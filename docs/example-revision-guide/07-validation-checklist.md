@@ -6,6 +6,9 @@ This file defines the **final verification gates** that must all pass before a s
 
 The checklist is organized in four layers — from structure down to cross-consistency. Each layer must pass completely before moving to the next.
 
+For full-round batch execution readiness, also apply
+`docs/experiment-preflight-skill/SKILL.md` after this checklist passes.
+
 ---
 
 ## Layer 1 — File Existence
