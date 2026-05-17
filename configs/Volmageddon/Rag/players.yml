@@ -25,6 +25,7 @@ market:
   name: "Market"
   class: "examples.Volmageddon.Rag.players:Market"
   num_instances: 1
+  persona: !include persona.yml
   config:
     identity: "market"
     role: coordinator
@@ -39,6 +40,7 @@ short_vol_trader_1:
   name: "ShortVolTrader 1"
   class: "examples.Volmageddon.Rag.players:RagLLMShortVolTrader"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "short_vol_trader_1"
     role: player
@@ -79,6 +81,7 @@ vol_e_t_n_manager_2:
   name: "VolETNManager 2"
   class: "examples.Volmageddon.Rag.players:RagLLMVolETNManager"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "vol_e_t_n_manager_2"
     role: player
@@ -98,6 +101,7 @@ long_vol_hedger_3:
   name: "LongVolHedger 3"
   class: "examples.Volmageddon.Rag.players:RagLLMLongVolHedger"
   num_instances: 1
+  persona: !include persona.yml
   config:
     identity: "long_vol_hedger_3"
     role: player
@@ -117,6 +121,7 @@ vol_arbitrageur_4:
   name: "VolArbitrageur 4"
   class: "examples.Volmageddon.Rag.players:RagLLMVolArbitrageur"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "vol_arbitrageur_4"
     role: player
@@ -136,6 +141,7 @@ equity_trader_5:
   name: "EquityTrader 5"
   class: "examples.Volmageddon.Rag.players:RagLLMEquityTrader"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "equity_trader_5"
     role: player
@@ -149,4 +155,3 @@ equity_trader_5:
       knowledge: *volmageddon_knowledge
       private_knowledge: *volmageddon_private_knowledge
       llm: *volmageddon_rag_llm_config
-

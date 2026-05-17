@@ -4,6 +4,7 @@ market:
   name: "Market"
   class: "examples.Volmageddon.RuleLLM.players:Market"
   num_instances: 1
+  persona: !include persona.yml
   config:
     identity: "market"
     role: coordinator
@@ -18,6 +19,7 @@ short_vol_trader_1:
   name: "ShortVolTrader 1"
   class: "examples.Volmageddon.RuleLLM.players:RuleLLMShortVolTrader"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "short_vol_trader_1"
     role: player
@@ -39,6 +41,7 @@ vol_e_t_n_manager_2:
   name: "VolETNManager 2"
   class: "examples.Volmageddon.RuleLLM.players:RuleLLMVolETNManager"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "vol_e_t_n_manager_2"
     role: player
@@ -55,6 +58,7 @@ long_vol_hedger_3:
   name: "LongVolHedger 3"
   class: "examples.Volmageddon.RuleLLM.players:RuleLLMLongVolHedger"
   num_instances: 1
+  persona: !include persona.yml
   config:
     identity: "long_vol_hedger_3"
     role: player
@@ -71,6 +75,7 @@ vol_arbitrageur_4:
   name: "VolArbitrageur 4"
   class: "examples.Volmageddon.RuleLLM.players:RuleLLMVolArbitrageur"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "vol_arbitrageur_4"
     role: player
@@ -87,6 +92,7 @@ equity_trader_5:
   name: "EquityTrader 5"
   class: "examples.Volmageddon.RuleLLM.players:RuleLLMEquityTrader"
   num_instances: 2
+  persona: !include persona.yml
   config:
     identity: "equity_trader_5"
     role: player
@@ -97,4 +103,3 @@ equity_trader_5:
       fundamental_value: 15.0
       agent_type: "equity_trader"
       llm: *volmageddon_rulellm_config
-
