@@ -219,11 +219,23 @@ Respond with ONLY valid JSON:
 
     def _parse_response(self, text: str) -> Dict[str, Any]:
         """Parse LLM response and validate required fields are present and non-null."""
+        analysis = ""
+        analysis_match = re.search(r"<analysis>(.*?)</analysis>", text, re.DOTALL)
+        if not analysis_match:
+            analysis_match = re.search(r"<think>(.*?)</think>", text, re.DOTALL)
+        if analysis_match:
+            analysis = analysis_match.group(1).strip()
+
+        decision_text = text
+        decision_match = re.search(r"<decision>(.*?)</decision>", text, re.DOTALL)
+        if decision_match:
+            decision_text = decision_match.group(1).strip()
+
         parsed = None
         try:
-            parsed = json.loads(text)
+            parsed = json.loads(decision_text)
         except Exception:
-            match = re.search(r"\{.*\}", text, re.DOTALL)
+            match = re.search(r"\{.*\}", decision_text, re.DOTALL)
             if match:
                 try:
                     parsed = json.loads(match.group(0))
@@ -240,6 +252,7 @@ Respond with ONLY valid JSON:
         if missing_or_null:
             raise ValueError(f"Fields missing or null: {missing_or_null}")
 
+        parsed["analysis"] = analysis
         return parsed
 
     async def decide(self) -> Dict[str, Any]:

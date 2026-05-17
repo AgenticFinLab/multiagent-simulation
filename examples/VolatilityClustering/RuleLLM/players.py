@@ -300,7 +300,10 @@ class RuleLLMInvestor(GeneralPlayer):
 
         Delegates to shared utility in examples/llm_utils.py
         """
-        return parse_llm_response_with_thinking(response_text)
+        decision = parse_llm_response_with_thinking(response_text)
+        if "provides_liquidity" not in decision or decision["provides_liquidity"] is None:
+            raise ValueError("Fields missing or null in LLM response: ['provides_liquidity']")
+        return decision
 
     def _apply_constraints(
         self, bid_price: float, quantity: float, current_price: float

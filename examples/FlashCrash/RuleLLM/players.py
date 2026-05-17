@@ -340,7 +340,7 @@ Recent Prices: {recent_prices}
 Portfolio → Cash: ${cash:.2f} | Position: {position:.2f} | Value: ${cash + position * market_data['price']:.2f}
 
 Respond with ONLY valid JSON:
-{{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float, +buy/-sell>, "reasoning": "<brief>"}}
+{{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float, +buy/-sell>, "reasoning": "<brief>", "provides_liquidity": true|false}}
 """
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
@@ -348,7 +348,10 @@ Respond with ONLY valid JSON:
 
         Delegates to shared utility in examples/llm_utils.py
         """
-        return parse_llm_response_with_thinking(response_text)
+        decision = parse_llm_response_with_thinking(response_text)
+        if "provides_liquidity" not in decision or decision["provides_liquidity"] is None:
+            raise ValueError("Fields missing or null in LLM response: ['provides_liquidity']")
+        return decision
 
     def _apply_constraints(
         self, bid_price: float, quantity: float, current_price: float

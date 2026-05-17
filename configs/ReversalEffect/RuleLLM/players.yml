@@ -42,7 +42,7 @@ rulellm_contrarian:
       initial_position: 50.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_CONTRARIAN_SYS"
+        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_CONTRARIAN_INVESTOR_SYS"
         user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -68,7 +68,7 @@ rulellm_overconfident:
       initial_position: 50.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_OVERCONFIDENT_SYS"
+        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_OVERCONFIDENT_TRADER_SYS"
         user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -94,7 +94,7 @@ rulellm_value:
       initial_position: 50.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_VALUE_SYS"
+        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_VALUE_INVESTOR_SYS"
         user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -120,7 +120,7 @@ rulellm_momentum_chaser:
       initial_position: 50.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_MOMENTUM_CHASER_SYS"
+        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_MOMENTUM_INVESTOR_SYS"
         user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -146,7 +146,7 @@ rulellm_noise:
       initial_position: 50.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_NOISE_SYS"
+        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
