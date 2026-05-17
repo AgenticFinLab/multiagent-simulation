@@ -71,7 +71,7 @@ rulellm_risk_parity:
       initial_position: 50.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_RISK_PARITY_SYS"
+        sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_RISK_PARITY_FUND_SYS"
         user_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -97,7 +97,7 @@ rulellm_leveraged_fund:
       initial_position: 80.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_LEVERAGED_FUND_SYS"
+        sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_LEVERAGED_HEDGE_FUND_SYS"
         user_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -148,7 +148,7 @@ rulellm_bottom_fisher:
       initial_position: 10.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_BOTTOM_FISHER_SYS"
+        sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_PASSIVE_INVESTOR_SYS"
         user_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

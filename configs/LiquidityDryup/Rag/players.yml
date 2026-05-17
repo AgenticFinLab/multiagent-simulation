@@ -125,7 +125,7 @@ ragllm_liquidity_demander:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_LIQUIDITY_DEMANDER_SYS"
+        sys_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_LIQUIDITY_SEEKER_SYS"
         user_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -168,7 +168,7 @@ ragllm_arbitrageur:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_ARBITRAGEUR_SYS"
+        sys_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_VALUE_TRADER_SYS"
         user_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -211,7 +211,7 @@ ragllm_value:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_VALUE_SYS"
+        sys_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_MOMENTUM_TRADER_SYS"
         user_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -254,7 +254,7 @@ ragllm_forced_seller:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_FORCED_SELLER_SYS"
+        sys_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
         user_message: "examples.LiquidityDryup.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

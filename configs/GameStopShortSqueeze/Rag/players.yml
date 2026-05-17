@@ -58,7 +58,7 @@ retailcoordinated:
       fundamental_value: 20.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_RETAIL_COORDINATED_SYS"
+        sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_RETAIL_COORDINATED_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -102,7 +102,7 @@ shortsellerhf:
       fundamental_value: 20.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_SHORT_SELLER_HF_SYS"
+        sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_SHORT_SELLER_HF_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -146,7 +146,7 @@ marketmakergamma:
       fundamental_value: 20.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_MARKET_MAKER_GAMMA_SYS"
+        sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_MARKET_MAKER_GAMMA_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -190,7 +190,7 @@ institutionalvalue:
       fundamental_value: 20.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_INSTITUTIONAL_VALUE_SYS"
+        sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_INSTITUTIONAL_VALUE_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -234,7 +234,7 @@ momentumretail:
       fundamental_value: 20.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_MOMENTUM_RETAIL_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

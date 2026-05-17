@@ -40,7 +40,7 @@ stablecoinholder:
       base_size: 500
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LUNACollapse.LLM.prompts:LLM_STABLECOIN_HOLDER_SYS"
+        sys_message: "examples.LUNACollapse.LLM.prompts:LLM_STABLECOINHOLDER_PROMPT"
         user_message: "examples.LUNACollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -69,7 +69,7 @@ arbitrageur:
       base_size: 600
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LUNACollapse.LLM.prompts:LLM_ARBITRAGEUR_SYS"
+        sys_message: "examples.LUNACollapse.LLM.prompts:LLM_ARBITRAGEUR_PROMPT"
         user_message: "examples.LUNACollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -98,7 +98,7 @@ defilender:
       base_size: 400
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LUNACollapse.LLM.prompts:LLM_DEFI_LENDER_SYS"
+        sys_message: "examples.LUNACollapse.LLM.prompts:LLM_DEFILENDER_PROMPT"
         user_message: "examples.LUNACollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -127,7 +127,7 @@ anchordepositor:
       base_size: 350
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LUNACollapse.LLM.prompts:LLM_ANCHOR_DEPOSITOR_SYS"
+        sys_message: "examples.LUNACollapse.LLM.prompts:LLM_ANCHORDEPOSITOR_PROMPT"
         user_message: "examples.LUNACollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -156,7 +156,7 @@ valuebuyer:
       base_size: 200
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LUNACollapse.LLM.prompts:LLM_VALUE_BUYER_SYS"
+        sys_message: "examples.LUNACollapse.LLM.prompts:LLM_VALUEBUYER_PROMPT"
         user_message: "examples.LUNACollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

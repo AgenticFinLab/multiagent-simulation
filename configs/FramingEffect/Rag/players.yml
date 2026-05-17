@@ -57,7 +57,7 @@ gainframefollower:
       fundamental_value: 100.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.FramingEffect.Rag.prompts:RAG_GAIN_FRAME_FOLLOWER_SYS"
+        sys_message: "examples.FramingEffect.Rag.prompts:RAGLLM_GAIN_FRAME_FOLLOWER_SYS"
         user_message: "examples.FramingEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -101,7 +101,7 @@ lossframereactor:
       fundamental_value: 100.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.FramingEffect.Rag.prompts:RAG_LOSS_FRAME_REACTOR_SYS"
+        sys_message: "examples.FramingEffect.Rag.prompts:RAGLLM_LOSS_FRAME_REACTOR_SYS"
         user_message: "examples.FramingEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -145,7 +145,7 @@ frameinvarianttrader:
       fundamental_value: 100.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.FramingEffect.Rag.prompts:RAG_FRAME_INVARIANT_TRADER_SYS"
+        sys_message: "examples.FramingEffect.Rag.prompts:RAGLLM_FRAME_INVARIANT_TRADER_SYS"
         user_message: "examples.FramingEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -189,7 +189,7 @@ arbitrageframer:
       fundamental_value: 100.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.FramingEffect.Rag.prompts:RAG_ARBITRAGE_FRAMER_SYS"
+        sys_message: "examples.FramingEffect.Rag.prompts:RAGLLM_ARBITRAGE_FRAMER_SYS"
         user_message: "examples.FramingEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -233,7 +233,7 @@ noisetrader:
       fundamental_value: 100.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.FramingEffect.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.FramingEffect.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
         user_message: "examples.FramingEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

@@ -42,7 +42,7 @@ convergencearbitrageur:
       base_size: 400
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_CONVERGENCE_ARBITRAGEUR_SYS"
+        sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_CONVERGENCEARBITRAGEUR_PROMPT"
         user_message: "examples.LTCMCollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -72,7 +72,7 @@ leveragetrader:
       base_size: 500
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_LEVERAGE_TRADER_SYS"
+        sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_LEVERAGETRADER_PROMPT"
         user_message: "examples.LTCMCollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -101,7 +101,7 @@ riskmanager:
       base_size: 300
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_RISK_MANAGER_SYS"
+        sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_RISKMANAGER_PROMPT"
         user_message: "examples.LTCMCollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -131,7 +131,7 @@ liquidityprovider:
       base_size: 400
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_LIQUIDITY_PROVIDER_SYS"
+        sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_LIQUIDITYPROVIDER_PROMPT"
         user_message: "examples.LTCMCollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -160,7 +160,7 @@ centralbank:
       noise_size: 150
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_CENTRALBANK_PROMPT"
         user_message: "examples.LTCMCollapse.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

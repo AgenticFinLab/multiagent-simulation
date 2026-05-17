@@ -77,7 +77,7 @@ mentalaccountant:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.MentalAccounting.Rag.prompts:RAG_MENTAL_ACCOUNTANT_SYS"
+        sys_message: "examples.MentalAccounting.Rag.prompts:RULELLM_MENTAL_ACCOUNTANT_SYS"
         user_message: "examples.MentalAccounting.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -124,7 +124,7 @@ housemoneytrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.MentalAccounting.Rag.prompts:RAG_HOUSE_MONEY_TRADER_SYS"
+        sys_message: "examples.MentalAccounting.Rag.prompts:RULELLM_HOUSE_MONEY_SYS"
         user_message: "examples.MentalAccounting.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -170,7 +170,7 @@ rationalportfoliomanager:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.MentalAccounting.Rag.prompts:RAG_RATIONAL_PORTFOLIO_MANAGER_SYS"
+        sys_message: "examples.MentalAccounting.Rag.prompts:RULELLM_RATIONAL_PORTFOLIO_SYS"
         user_message: "examples.MentalAccounting.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -216,7 +216,7 @@ sunkcostholder:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.MentalAccounting.Rag.prompts:RAG_SUNK_COST_HOLDER_SYS"
+        sys_message: "examples.MentalAccounting.Rag.prompts:RULELLM_SUNK_COST_SYS"
         user_message: "examples.MentalAccounting.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -262,7 +262,7 @@ noisetrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.MentalAccounting.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.MentalAccounting.Rag.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.MentalAccounting.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

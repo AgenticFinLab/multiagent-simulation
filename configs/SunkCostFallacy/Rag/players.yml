@@ -52,7 +52,7 @@ sunkcostholder:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAG_SUNK_COST_HOLDER_SYS"
+        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_SUNK_COST_HOLDER_SYS"
         user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
@@ -87,7 +87,7 @@ commitmentescalator:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAG_COMMITMENT_ESCALATOR_SYS"
+        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_COMMITMENT_ESCALATOR_SYS"
         user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
@@ -122,7 +122,7 @@ rationalcutter:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAG_RATIONAL_CUTTER_SYS"
+        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_RATIONAL_CUTTER_SYS"
         user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
@@ -157,7 +157,7 @@ opportunitycosttrader:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAG_OPPORTUNITY_COST_TRADER_SYS"
+        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_OPPORTUNITY_COST_TRADER_SYS"
         user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
@@ -192,7 +192,7 @@ noisetrader:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
         user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:

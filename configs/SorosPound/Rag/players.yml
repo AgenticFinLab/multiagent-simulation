@@ -77,7 +77,7 @@ macrohedgefund:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.SorosPound.Rag.prompts:RAG_MACRO_HEDGE_FUND_SYS"
+        sys_message: "examples.SorosPound.Rag.prompts:RAGLLM_MACRO_HEDGE_FUND_SYS"
         user_message: "examples.SorosPound.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -123,7 +123,7 @@ pegdefender:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.SorosPound.Rag.prompts:RAG_PEG_DEFENDER_SYS"
+        sys_message: "examples.SorosPound.Rag.prompts:RAGLLM_PEG_DEFENDER_SYS"
         user_message: "examples.SorosPound.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -169,7 +169,7 @@ convergencetrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.SorosPound.Rag.prompts:RAG_CONVERGENCE_TRADER_SYS"
+        sys_message: "examples.SorosPound.Rag.prompts:RAGLLM_CONVERGENCE_TRADER_SYS"
         user_message: "examples.SorosPound.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -215,7 +215,7 @@ opportunistictrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.SorosPound.Rag.prompts:RAG_OPPORTUNISTIC_TRADER_SYS"
+        sys_message: "examples.SorosPound.Rag.prompts:RAGLLM_OPPORTUNISTIC_TRADER_SYS"
         user_message: "examples.SorosPound.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -261,7 +261,7 @@ noisetrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.SorosPound.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.SorosPound.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
         user_message: "examples.SorosPound.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

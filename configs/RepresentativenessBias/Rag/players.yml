@@ -76,7 +76,7 @@ patternmatcher:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_PATTERN_MATCHER_SYS"
+        sys_message: "examples.RepresentativenessBias.Rag.prompts:RULELLM_PATTERN_MATCHER_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -122,7 +122,7 @@ categoryovergeneralizer:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_CATEGORY_OVERGENERALIZER_SYS"
+        sys_message: "examples.RepresentativenessBias.Rag.prompts:RULELLM_CATEGORY_OVERGENERALIZER_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -168,7 +168,7 @@ bayesianupdater:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_BAYESIAN_UPDATER_SYS"
+        sys_message: "examples.RepresentativenessBias.Rag.prompts:RULELLM_BAYESIAN_UPDATER_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -214,7 +214,7 @@ contrarianstatistical:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_CONTRARIAN_STATISTICAL_SYS"
+        sys_message: "examples.RepresentativenessBias.Rag.prompts:RULELLM_CONTRARIAN_STATISTICAL_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -260,7 +260,7 @@ noisetrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.RepresentativenessBias.Rag.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

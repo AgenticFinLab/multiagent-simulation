@@ -41,7 +41,7 @@ mentalaccountant:
       base_size: 400
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_MENTAL_ACCOUNTANT_SYS"
+        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_MENTAL_ACCOUNTANT_PROMPT"
         user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -71,7 +71,7 @@ housemoneytrader:
       base_size: 400
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_HOUSE_MONEY_TRADER_SYS"
+        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_HOUSE_MONEY_PROMPT"
         user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -100,7 +100,7 @@ rationalportfoliomanager:
       base_size: 300
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_RATIONAL_PORTFOLIO_MANAGER_SYS"
+        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_RATIONAL_PORTFOLIO_PROMPT"
         user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -129,7 +129,7 @@ sunkcostholder:
       base_size: 350
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_SUNK_COST_HOLDER_SYS"
+        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_SUNK_COST_PROMPT"
         user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -158,7 +158,7 @@ noisetrader:
       noise_size: 150
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        sys_message: "examples.MentalAccounting.LLM.prompts:LLM_NOISE_TRADER_PROMPT"
         user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

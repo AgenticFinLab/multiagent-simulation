@@ -63,7 +63,7 @@ hftmarketmaker:
       mm_qty: 500
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.FlashCrash2010.Rag.prompts:RAG_HFT_MARKET_MAKER_SYS"
+        sys_message: "examples.FlashCrash2010.Rag.prompts:RAGLLM_HFT_MARKET_MAKER_SYS"
         user_message: "examples.FlashCrash2010.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -110,7 +110,7 @@ momentumchaser:
       max_size: 1000
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.FlashCrash2010.Rag.prompts:RAG_MOMENTUM_CHASER_SYS"
+        sys_message: "examples.FlashCrash2010.Rag.prompts:RAGLLM_MOMENTUM_CHASER_SYS"
         user_message: "examples.FlashCrash2010.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -156,7 +156,7 @@ fundamentaltrader:
       order_size: 500
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.FlashCrash2010.Rag.prompts:RAG_FUNDAMENTAL_TRADER_SYS"
+        sys_message: "examples.FlashCrash2010.Rag.prompts:RAGLLM_FUNDAMENTAL_SYS"
         user_message: "examples.FlashCrash2010.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -203,7 +203,7 @@ stoplosstrader:
       position_size: 1000
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.FlashCrash2010.Rag.prompts:RAG_STOP_LOSS_TRADER_SYS"
+        sys_message: "examples.FlashCrash2010.Rag.prompts:RAGLLM_STOP_LOSS_SYS"
         user_message: "examples.FlashCrash2010.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -250,7 +250,7 @@ noisetrader:
       max_order: 500
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.FlashCrash2010.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.FlashCrash2010.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
         user_message: "examples.FlashCrash2010.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

@@ -78,7 +78,7 @@ convergencearbitrageur:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_CONVERGENCE_ARBITRAGEUR_SYS"
+        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_CONVERGENCEARBITRAGEUR_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -125,7 +125,7 @@ leveragetrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_LEVERAGE_TRADER_SYS"
+        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_LEVERAGETRADER_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -171,7 +171,7 @@ riskmanager:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_RISK_MANAGER_SYS"
+        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_RISKMANAGER_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -218,7 +218,7 @@ liquidityprovider:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_LIQUIDITY_PROVIDER_SYS"
+        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_LIQUIDITYPROVIDER_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -264,7 +264,7 @@ centralbank:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_CENTRALBANK_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

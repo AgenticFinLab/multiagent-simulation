@@ -40,7 +40,7 @@ hindsightoverconfident:
       base_size: 400
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.HindsightBias.LLM.prompts:LLM_HINDSIGHT_OVERCONFIDENT_SYS"
+        sys_message: "examples.HindsightBias.LLM.prompts:LLM_HINDSIGHTOVERCONFIDENT_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -69,7 +69,7 @@ outcomelearner:
       base_size: 350
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.HindsightBias.LLM.prompts:LLM_OUTCOME_LEARNER_SYS"
+        sys_message: "examples.HindsightBias.LLM.prompts:LLM_OUTCOMELEARNER_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -98,7 +98,7 @@ processevaluator:
       base_size: 300
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.HindsightBias.LLM.prompts:LLM_PROCESS_EVALUATOR_SYS"
+        sys_message: "examples.HindsightBias.LLM.prompts:LLM_PROCESSEVALUATOR_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -127,7 +127,7 @@ contrarianskeptic:
       base_size: 250
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.HindsightBias.LLM.prompts:LLM_CONTRARIAN_SKEPTIC_SYS"
+        sys_message: "examples.HindsightBias.LLM.prompts:LLM_CONTRARIANSKEPTIC_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -156,7 +156,7 @@ noisetrader:
       noise_size: 150
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.HindsightBias.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        sys_message: "examples.HindsightBias.LLM.prompts:LLM_NOISETRADER_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

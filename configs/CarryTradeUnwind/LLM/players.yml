@@ -138,7 +138,7 @@ llm_hedged_carry_trader:
       initial_position: 0.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_CENTRAL_BANK_INTERVENER_SYS"
+        sys_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_HEDGED_CARRY_TRADER_SYS"
         user_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

@@ -52,7 +52,7 @@ trendchaser:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.TulipMania.Rag.prompts:RAG_TREND_CHASER_SYS"
+        sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_TREND_CHASER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
@@ -87,7 +87,7 @@ socialprooffollower:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.TulipMania.Rag.prompts:RAG_SOCIAL_PROOF_FOLLOWER_SYS"
+        sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_SOCIAL_PROOF_FOLLOWER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
@@ -122,7 +122,7 @@ intrinsicvaluetrader:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.TulipMania.Rag.prompts:RAG_INTRINSIC_VALUE_TRADER_SYS"
+        sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_INTRINSIC_VALUE_TRADER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
@@ -157,7 +157,7 @@ earlyexittrader:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.TulipMania.Rag.prompts:RAG_EARLY_EXIT_TRADER_SYS"
+        sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_EARLY_EXIT_TRADER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
@@ -192,7 +192,7 @@ noisetrader:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.TulipMania.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:

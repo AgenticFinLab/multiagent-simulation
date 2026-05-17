@@ -53,7 +53,7 @@ depositor:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_DEPOSITOR_SYS"
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_DEPOSITOR_SYS"
         user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
@@ -88,7 +88,7 @@ socialmediainfluencer:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_SOCIAL_MEDIA_INFLUENCER_SYS"
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_SOCIAL_MEDIA_INFLUENCER_SYS"
         user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
@@ -123,7 +123,7 @@ bankmanager:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_BANK_MANAGER_SYS"
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_BANK_MANAGER_SYS"
         user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
@@ -159,7 +159,7 @@ regulator:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_REGULATOR_SYS"
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_REGULATOR_SYS"
         user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
@@ -194,7 +194,7 @@ bondtrader:
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           top_k: 3
       llm:
-        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_BOND_TRADER_SYS"
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_BOND_TRADER_SYS"
         user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:

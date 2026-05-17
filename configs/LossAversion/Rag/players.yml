@@ -77,7 +77,7 @@ lossaverseinvestor:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LossAversion.Rag.prompts:RAG_LOSS_AVERSE_INVESTOR_SYS"
+        sys_message: "examples.LossAversion.Rag.prompts:RULELLM_LOSS_AVERSE_PROMPT"
         user_message: "examples.LossAversion.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -123,7 +123,7 @@ breakeventrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LossAversion.Rag.prompts:RAG_BREAK_EVEN_TRADER_SYS"
+        sys_message: "examples.LossAversion.Rag.prompts:RULELLM_BREAK_EVEN_PROMPT"
         user_message: "examples.LossAversion.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -169,7 +169,7 @@ rationaltrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LossAversion.Rag.prompts:RAG_RATIONAL_TRADER_SYS"
+        sys_message: "examples.LossAversion.Rag.prompts:RULELLM_RATIONAL_PROMPT"
         user_message: "examples.LossAversion.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -215,7 +215,7 @@ momentumtrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LossAversion.Rag.prompts:RAG_DISPOSITION_TRADER_SYS"
+        sys_message: "examples.LossAversion.Rag.prompts:RULELLM_MOMENTUM_PROMPT"
         user_message: "examples.LossAversion.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -261,7 +261,7 @@ marketmaker:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LossAversion.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.LossAversion.Rag.prompts:RULELLM_MARKET_MAKER_PROMPT"
         user_message: "examples.LossAversion.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

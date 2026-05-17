@@ -135,7 +135,7 @@ llm_contrarian_trader:
       initial_position: 0.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.ConfirmationBias.LLM.prompts:LLM_CONTRARIAN_SYS"
+        sys_message: "examples.ConfirmationBias.LLM.prompts:LLM_CONTRARIAN_TRADER_SYS"
         user_message: "examples.ConfirmationBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

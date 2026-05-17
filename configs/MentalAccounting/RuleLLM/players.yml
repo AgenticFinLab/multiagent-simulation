@@ -71,7 +71,7 @@ housemoneytrader:
       base_size: 400
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_HOUSE_MONEY_TRADER_SYS"
+        sys_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_HOUSE_MONEY_SYS"
         user_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -100,7 +100,7 @@ rationalportfoliomanager:
       base_size: 300
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_RATIONAL_PORTFOLIO_MANAGER_SYS"
+        sys_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_RATIONAL_PORTFOLIO_SYS"
         user_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -129,7 +129,7 @@ sunkcostholder:
       base_size: 350
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_SUNK_COST_HOLDER_SYS"
+        sys_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_SUNK_COST_SYS"
         user_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

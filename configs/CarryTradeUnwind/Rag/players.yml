@@ -227,7 +227,7 @@ ragllm_hedged_carry_trader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_CENTRAL_BANK_INTERVENER_SYS"
+        sys_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_HEDGED_CARRY_TRADER_SYS"
         user_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

@@ -76,7 +76,7 @@ stablecoinholder:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_STABLECOIN_HOLDER_SYS"
+        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_STABLECOINHOLDER_PROMPT"
         user_message: "examples.LUNACollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -122,7 +122,7 @@ arbitrageur:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_ARBITRAGEUR_SYS"
+        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_ARBITRAGEUR_PROMPT"
         user_message: "examples.LUNACollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -168,7 +168,7 @@ defilender:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_DEFI_LENDER_SYS"
+        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_DEFILENDER_PROMPT"
         user_message: "examples.LUNACollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -214,7 +214,7 @@ anchordepositor:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_ANCHOR_DEPOSITOR_SYS"
+        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_ANCHORDEPOSITOR_PROMPT"
         user_message: "examples.LUNACollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -260,7 +260,7 @@ valuebuyer:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_VALUE_BUYER_SYS"
+        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_VALUEBUYER_PROMPT"
         user_message: "examples.LUNACollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

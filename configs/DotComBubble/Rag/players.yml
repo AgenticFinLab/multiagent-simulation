@@ -192,7 +192,7 @@ skepticalvalueinvestor:
       base_size: 300
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.DotComBubble.Rag.prompts:RAG_SKEPTICAL_VALUE_SYS"
+        sys_message: "examples.DotComBubble.Rag.prompts:RAG_SKEPTICAL_VALUE_INVESTOR_SYS"
         user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

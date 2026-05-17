@@ -103,7 +103,7 @@ fundamentaltrader:
       order_size: 500
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.FlashCrash2010.RuleLLM.prompts:RULELLM_FUNDAMENTAL_TRADER_SYS"
+        sys_message: "examples.FlashCrash2010.RuleLLM.prompts:RULELLM_FUNDAMENTAL_SYS"
         user_message: "examples.FlashCrash2010.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -133,7 +133,7 @@ stoplosstrader:
       position_size: 1000
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.FlashCrash2010.RuleLLM.prompts:RULELLM_STOP_LOSS_TRADER_SYS"
+        sys_message: "examples.FlashCrash2010.RuleLLM.prompts:RULELLM_STOP_LOSS_SYS"
         user_message: "examples.FlashCrash2010.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

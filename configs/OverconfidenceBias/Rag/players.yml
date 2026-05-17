@@ -76,7 +76,7 @@ overconfidenttrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_OVERCONFIDENT_TRADER_SYS"
+        sys_message: "examples.OverconfidenceBias.Rag.prompts:RULELLM_OVERCONFIDENT_TRADER_SYS"
         user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -122,7 +122,7 @@ selfattributor:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_SELF_ATTRIBUTOR_SYS"
+        sys_message: "examples.OverconfidenceBias.Rag.prompts:RULELLM_SELF_ATTRIBUTOR_SYS"
         user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -168,7 +168,7 @@ calibratedtrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_CALIBRATED_TRADER_SYS"
+        sys_message: "examples.OverconfidenceBias.Rag.prompts:RULELLM_CALIBRATED_TRADER_SYS"
         user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -214,7 +214,7 @@ contrarianinvestor:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_CONTRARIAN_INVESTOR_SYS"
+        sys_message: "examples.OverconfidenceBias.Rag.prompts:RULELLM_CONTRARIAN_INVESTOR_SYS"
         user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -260,7 +260,7 @@ noisetrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.OverconfidenceBias.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.OverconfidenceBias.Rag.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.OverconfidenceBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

@@ -133,7 +133,7 @@ rulellm_contrarian_trader:
       initial_position: 0.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_CONTRARIAN_SYS"
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_CONTRARIAN_TRADER_SYS"
         user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

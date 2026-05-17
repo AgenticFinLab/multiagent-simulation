@@ -76,7 +76,7 @@ mbsoriginator:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.GFC2008.Rag.prompts:RAG_MBS_ORIGINATOR_SYS"
+        sys_message: "examples.GFC2008.Rag.prompts:RAGLLM_MBS_ORIGINATOR_SYS"
         user_message: "examples.GFC2008.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -124,7 +124,7 @@ leveragedinvestor:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.GFC2008.Rag.prompts:RAG_LEVERAGED_INVESTOR_SYS"
+        sys_message: "examples.GFC2008.Rag.prompts:RAGLLM_LEVERAGED_INVESTOR_SYS"
         user_message: "examples.GFC2008.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -170,7 +170,7 @@ ratingagency:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.GFC2008.Rag.prompts:RAG_RATING_AGENCY_SYS"
+        sys_message: "examples.GFC2008.Rag.prompts:RAGLLM_RATING_AGENCY_SYS"
         user_message: "examples.GFC2008.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -216,7 +216,7 @@ distressedbuyer:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.GFC2008.Rag.prompts:RAG_DISTRESSED_BUYER_SYS"
+        sys_message: "examples.GFC2008.Rag.prompts:RAGLLM_DISTRESSED_BUYER_SYS"
         user_message: "examples.GFC2008.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -263,7 +263,7 @@ regulator:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.GFC2008.Rag.prompts:RAG_REGULATOR_SYS"
+        sys_message: "examples.GFC2008.Rag.prompts:RAGLLM_REGULATOR_SYS"
         user_message: "examples.GFC2008.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

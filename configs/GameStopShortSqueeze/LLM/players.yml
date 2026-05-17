@@ -147,7 +147,7 @@ momentumretail:
       fundamental_value: 20.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.GameStopShortSqueeze.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        sys_message: "examples.GameStopShortSqueeze.LLM.prompts:LLM_MOMENTUM_RETAIL_SYS"
         user_message: "examples.GameStopShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

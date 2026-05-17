@@ -41,7 +41,7 @@ lossaverseinvestor:
       base_size: 400
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LossAversion.LLM.prompts:LLM_LOSS_AVERSE_INVESTOR_SYS"
+        sys_message: "examples.LossAversion.LLM.prompts:LLM_LOSS_AVERSE_PROMPT"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -70,7 +70,7 @@ breakeventrader:
       base_size: 350
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LossAversion.LLM.prompts:LLM_BREAK_EVEN_TRADER_SYS"
+        sys_message: "examples.LossAversion.LLM.prompts:LLM_BREAK_EVEN_PROMPT"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -99,7 +99,7 @@ rationaltrader:
       base_size: 300
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LossAversion.LLM.prompts:LLM_RATIONAL_TRADER_SYS"
+        sys_message: "examples.LossAversion.LLM.prompts:LLM_RATIONAL_PROMPT"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -128,7 +128,7 @@ momentumtrader:
       base_size: 300
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LossAversion.LLM.prompts:LLM_DISPOSITION_TRADER_SYS"
+        sys_message: "examples.LossAversion.LLM.prompts:LLM_MOMENTUM_PROMPT"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -157,7 +157,7 @@ marketmaker:
       noise_size: 150
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LossAversion.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        sys_message: "examples.LossAversion.LLM.prompts:LLM_MARKET_MAKER_PROMPT"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
