@@ -12,6 +12,33 @@ from typing import Any, Dict, List, Optional
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput, InferOutput
 
+NON_RETRYABLE_API_MARKERS = (
+    "authentication",
+    "unauthorized",
+    "permissiondenied",
+    "invalid api key",
+    "insufficient quota",
+)
+
+RETRYABLE_API_MARKERS = (
+    "timeout",
+    "timed out",
+    "connection",
+    "temporarily",
+    "rate limit",
+    "ratelimit",
+    "too many requests",
+    "429",
+)
+
+
+def is_retryable_llm_error(exc: BaseException) -> bool:
+    """Return True for transient provider failures that should not kill a row."""
+    message = f"{exc.__class__.__name__}: {exc}".lower()
+    if any(marker in message for marker in NON_RETRYABLE_API_MARKERS):
+        return False
+    return any(marker in message for marker in RETRYABLE_API_MARKERS)
+
 
 def parse_llm_response_with_thinking(response_text: str) -> Dict[str, Any]:
     """Parse LLM response with canonical analysis and decision sections.

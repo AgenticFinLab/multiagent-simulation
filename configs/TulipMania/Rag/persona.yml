@@ -1,9 +1,21 @@
 auto_checkpoint: false
+debug_mode: true
 
 proxy:
-  record_path: "EXPERIMENT/TulipMania/Rag/records"
-  communication:
-    store_path: "EXPERIMENT/TulipMania/Rag/communication"
+  storage:
+    checkpoint_dir: "EXPERIMENT/TulipMania/Rag/checkpoints"
+    record_path: "EXPERIMENT/TulipMania/Rag/records"
+    record_rounds: true
+    turn_block_size: 3
+
   monitoring:
-    metrics_path: "EXPERIMENT/TulipMania/Rag/monitoring/metrics"
-    events_path: "EXPERIMENT/TulipMania/Rag/monitoring/events"
+    record_path: "EXPERIMENT/TulipMania/Rag/monitoring"
+    monitor_hot_limit: 3
+
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
+
+  resource:
+    mcp_servers: []
+    enable_caching: false

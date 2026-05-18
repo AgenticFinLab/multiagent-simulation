@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
@@ -141,25 +141,42 @@ class RuleLLMInvestor(GeneralPlayer):
         last_error = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_output = llm_client.run([infer_input])
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
                 break
             except Exception as exc:
                 last_error = exc
-                if attempt < max_retries - 1:
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if attempt < max_retries - 1 and (parse_error or retryable_api_error):
                     logger.debug(
-                        "[%s] Parse failed (attempt %d), retrying...",
+                        "[%s] LLM call/parse failed (attempt %d), retrying: %s",
                         self.identity,
                         attempt + 1,
+                        exc,
                     )
+                    continue
+                if not parse_error and not retryable_api_error:
+                    raise
 
         if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
+            logger.warning(
+                "[%s] LLM failed after %d attempts: %s. Holding.",
+                self.identity,
+                max_retries,
+                last_error,
             )
+            decision = {
+                "action": "hold",
+                "bid_price": price,
+                "quantity": 0.0,
+                "reasoning": f"LLM fallback hold after retries: {last_error}",
+                "analysis": "",
+                "provides_liquidity": False,
+            }
 
         action = decision["action"]
         bid_price = float(decision["bid_price"])
@@ -198,8 +215,8 @@ class RuleLLMInvestor(GeneralPlayer):
             "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": str(decision["reasoning"])[:120],
-            "analysis": str(decision["analysis"]),
-            "provides_liquidity": bool(decision["provides_liquidity"]),
+            "analysis": str(decision.get("analysis", "")),
+            "provides_liquidity": bool(decision.get("provides_liquidity", False)),
         }
         validate_order(order)
         return {

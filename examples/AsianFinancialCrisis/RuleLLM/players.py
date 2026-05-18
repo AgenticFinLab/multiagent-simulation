@@ -31,7 +31,7 @@ from masim.format.order import validate_order
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from examples.AsianFinancialCrisis.Rule.players import Market
 
 logger = logging.getLogger("AsianFinancialCrisis.RuleLLM")
@@ -138,21 +138,40 @@ class RuleLLMInvestor(GeneralPlayer):
         last_error = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_output = llm_client.run([infer_input])
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
                 break
             except Exception as exc:
                 last_error = exc
-                if attempt < max_retries - 1:
-                    logger.debug("[%s] LLM parse failed, retrying...", self.identity)
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if attempt < max_retries - 1 and (parse_error or retryable_api_error):
+                    logger.debug(
+                        "[%s] LLM call/parse failed, retrying: %s",
+                        self.identity,
+                        exc,
+                    )
+                    continue
+                if not parse_error and not retryable_api_error:
+                    raise
 
         if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
+            logger.warning(
+                "[%s] LLM failed after %d retries: %s. Holding.",
+                self.identity,
+                max_retries,
+                last_error,
             )
+            decision = {
+                "action": "hold",
+                "bid_price": market_data["price"],
+                "quantity": 0.0,
+                "reasoning": f"LLM fallback hold after retries: {last_error}",
+                "analysis": "",
+            }
 
         action = decision["action"]
         bid_price = float(decision["bid_price"])
