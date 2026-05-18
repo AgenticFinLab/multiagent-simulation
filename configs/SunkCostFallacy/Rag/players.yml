@@ -10,14 +10,14 @@ market:
   name: "Market"
   class: "examples.SunkCostFallacy.Rule.players:Market"
   num_instances: 1
+  persona: !include ../Rag/persona.yml
   config:
     identity: "market"
     role: market
     steps_per_turn: 1
     group_tags: [market]
-    record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/market"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/market"
       initial_price: 100.0
       fundamental_value: 100.0
       price_impact: 0.02
@@ -28,14 +28,14 @@ sunkcostholder:
   name: "SunkCostHolder"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMSunkCostHolder"
   num_instances: 3
+  persona: !include ../Rag/persona.yml
   config:
     identity: "sunkcostholder"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/sunkcostholder"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/sunkcostholder"
       initial_cash: 1000000.0
       initial_position: 500
       initial_price: 100.0
@@ -63,14 +63,14 @@ commitmentescalator:
   name: "CommitmentEscalator"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMCommitmentEscalator"
   num_instances: 3
+  persona: !include ../Rag/persona.yml
   config:
     identity: "commitmentescalator"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/commitmentescalator"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/commitmentescalator"
       initial_cash: 1200000.0
       initial_position: 400
       initial_price: 100.0
@@ -98,14 +98,14 @@ rationalcutter:
   name: "RationalCutter"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMRationalCutter"
   num_instances: 2
+  persona: !include ../Rag/persona.yml
   config:
     identity: "rationalcutter"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/rationalcutter"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/rationalcutter"
       initial_cash: 1500000.0
       initial_position: 600
       initial_price: 100.0
@@ -133,14 +133,14 @@ opportunitycosttrader:
   name: "OpportunityCostTrader"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMOpportunityCostTrader"
   num_instances: 2
+  persona: !include ../Rag/persona.yml
   config:
     identity: "opportunitycosttrader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/opportunitycosttrader"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/opportunitycosttrader"
       initial_cash: 1300000.0
       initial_position: 500
       initial_price: 100.0
@@ -168,14 +168,14 @@ noisetrader:
   name: "NoiseTrader"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMNoiseTrader"
   num_instances: 2
+  persona: !include ../Rag/persona.yml
   config:
     identity: "noisetrader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/noisetrader"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/noisetrader"
       initial_cash: 500000.0
       initial_position: 200
       initial_price: 100.0

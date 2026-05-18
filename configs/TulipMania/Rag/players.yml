@@ -10,14 +10,14 @@ market:
   name: "Market"
   class: "examples.TulipMania.Rule.players:Market"
   num_instances: 1
+  persona: !include ../Rag/persona.yml
   config:
     identity: "market"
     role: market
     steps_per_turn: 1
     group_tags: [market]
-    record_path: "EXPERIMENT/TulipMania/Rag/records/market"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/TulipMania/Rag/records/market"
       initial_price: 100.0
       fundamental_value: 100.0
       price_impact: 0.02
@@ -28,14 +28,14 @@ trendchaser:
   name: "TrendChaser"
   class: "examples.TulipMania.Rag.players:RagLLMTrendChaser"
   num_instances: 4
+  persona: !include ../Rag/persona.yml
   config:
     identity: "trendchaser"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/TulipMania/Rag/records/trendchaser"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/TulipMania/Rag/records/trendchaser"
       initial_cash: 1000000.0
       initial_position: 300
       initial_price: 100.0
@@ -63,14 +63,14 @@ socialprooffollower:
   name: "SocialProofFollower"
   class: "examples.TulipMania.Rag.players:RagLLMSocialProofFollower"
   num_instances: 3
+  persona: !include ../Rag/persona.yml
   config:
     identity: "socialprooffollower"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/TulipMania/Rag/records/socialprooffollower"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/TulipMania/Rag/records/socialprooffollower"
       initial_cash: 800000.0
       initial_position: 400
       initial_price: 100.0
@@ -98,14 +98,14 @@ intrinsicvaluetrader:
   name: "IntrinsicValueTrader"
   class: "examples.TulipMania.Rag.players:RagLLMIntrinsicValueTrader"
   num_instances: 2
+  persona: !include ../Rag/persona.yml
   config:
     identity: "intrinsicvaluetrader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/TulipMania/Rag/records/intrinsicvaluetrader"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/TulipMania/Rag/records/intrinsicvaluetrader"
       initial_cash: 1500000.0
       initial_position: 600
       initial_price: 100.0
@@ -133,14 +133,14 @@ earlyexittrader:
   name: "EarlyExitTrader"
   class: "examples.TulipMania.Rag.players:RagLLMEarlyExitTrader"
   num_instances: 2
+  persona: !include ../Rag/persona.yml
   config:
     identity: "earlyexittrader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/TulipMania/Rag/records/earlyexittrader"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/TulipMania/Rag/records/earlyexittrader"
       initial_cash: 1200000.0
       initial_position: 500
       initial_price: 100.0
@@ -168,14 +168,14 @@ noisetrader:
   name: "NoiseTrader"
   class: "examples.TulipMania.Rag.players:RagLLMNoiseTrader"
   num_instances: 2
+  persona: !include ../Rag/persona.yml
   config:
     identity: "noisetrader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/TulipMania/Rag/records/noisetrader"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/TulipMania/Rag/records/noisetrader"
       initial_cash: 500000.0
       initial_position: 200
       initial_price: 100.0

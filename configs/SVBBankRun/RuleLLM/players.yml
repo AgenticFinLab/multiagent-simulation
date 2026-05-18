@@ -2,14 +2,14 @@ market:
   name: "Market"
   class: "examples.SVBBankRun.Rule.players:Market"
   num_instances: 1
+  persona: !include ../RuleLLM/persona.yml
   config:
     identity: "market"
     role: market
     steps_per_turn: 1
     group_tags: [market]
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/market"
-    persona: !include ../RuleLLM/persona.yml
     extras:
+      record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/market"
       initial_price: 100.0
       fundamental_value: 100.0
       price_impact: 0.025
@@ -20,14 +20,14 @@ depositor:
   name: "Depositor"
   class: "examples.SVBBankRun.RuleLLM.players:RuleLLMDepositor"
   num_instances: 4
+  persona: !include ../RuleLLM/persona.yml
   config:
     identity: "depositor"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/depositor"
-    persona: !include ../RuleLLM/persona.yml
     extras:
+      record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/depositor"
       initial_cash: 1000000.0
       initial_position: 600
       initial_price: 100.0
@@ -48,14 +48,14 @@ socialmediainfluencer:
   name: "SocialMediaInfluencer"
   class: "examples.SVBBankRun.RuleLLM.players:RuleLLMSocialMediaInfluencer"
   num_instances: 2
+  persona: !include ../RuleLLM/persona.yml
   config:
     identity: "socialmediainfluencer"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/socialmediainfluencer"
-    persona: !include ../RuleLLM/persona.yml
     extras:
+      record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/socialmediainfluencer"
       initial_cash: 800000.0
       initial_position: 500
       initial_price: 100.0
@@ -75,14 +75,14 @@ bankmanager:
   name: "BankManager"
   class: "examples.SVBBankRun.RuleLLM.players:RuleLLMBankManager"
   num_instances: 2
+  persona: !include ../RuleLLM/persona.yml
   config:
     identity: "bankmanager"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/bankmanager"
-    persona: !include ../RuleLLM/persona.yml
     extras:
+      record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/bankmanager"
       initial_cash: 3000000.0
       initial_position: 800
       initial_price: 100.0
@@ -102,14 +102,14 @@ regulator:
   name: "Regulator"
   class: "examples.SVBBankRun.RuleLLM.players:RuleLLMRegulator"
   num_instances: 1
+  persona: !include ../RuleLLM/persona.yml
   config:
     identity: "regulator"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/regulator"
-    persona: !include ../RuleLLM/persona.yml
     extras:
+      record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/regulator"
       initial_cash: 10000000.0
       initial_position: 0
       initial_price: 100.0
@@ -130,14 +130,14 @@ bondtrader:
   name: "BondTrader"
   class: "examples.SVBBankRun.RuleLLM.players:RuleLLMBondTrader"
   num_instances: 2
+  persona: !include ../RuleLLM/persona.yml
   config:
     identity: "bondtrader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/bondtrader"
-    persona: !include ../RuleLLM/persona.yml
     extras:
+      record_path: "EXPERIMENT/SVBBankRun/RuleLLM/records/bondtrader"
       initial_cash: 2000000.0
       initial_position: 400
       initial_price: 100.0
