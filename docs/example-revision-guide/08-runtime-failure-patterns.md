@@ -37,11 +37,18 @@ parser must require or produce that field.
 Examples discovered during execution:
 - `provides_liquidity` was required by liquidity-sensitive markets.
 - `reasoning` was read by Volmageddon API players.
+- `reasoning` was also missed when SouthSeaBubble/SorosPound dynamic user
+  prompts requested only `action` and `quantity` even though system prompts had
+  the canonical schema.
 - CreditCycle API modes required `action`, `bid_price`, `quantity`, and
   `reasoning` with bounded quantities.
 
 Do not add fields mechanically. Add only fields consumed by code or required by
 the scenario's parser.
+
+When a player builds the final user prompt dynamically in `players.py`, audit
+that dynamic JSON instruction as the effective contract. A correct
+`prompts.py` system prompt is not enough if the user prompt narrows the schema.
 
 ### §2.2 Special Schemas
 
@@ -60,6 +67,8 @@ Malformed LLM output is different from missing config data. A scenario-local
 fallback is acceptable only when:
 - prompt and parser contracts are already explicit;
 - fallback applies to malformed stochastic output, not missing source fields;
+- fallback returns every field later read by `players.py` or written into the
+  order record;
 - transport errors retry separately from parse-contract errors;
 - fatal provider errors such as auth/quota still fail loudly;
 - fallback count/reason is visible for later quality review.

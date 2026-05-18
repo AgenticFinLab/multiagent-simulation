@@ -1,0 +1,207 @@
+#!/usr/bin/env python
+"""Regression checks for scenario-specific example contracts."""
+
+from __future__ import annotations
+
+import ast
+import sys
+import unittest
+from pathlib import Path
+
+import yaml
+
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from masim.utils.config import load_config  # noqa: E402
+
+
+def prompt_constants(path: Path) -> dict[str, str]:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    constants: dict[str, str] = {}
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and isinstance(node.value, ast.Constant):
+            if not isinstance(node.value.value, str):
+                continue
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    constants[target.id] = node.value.value
+    return constants
+
+
+class ScenarioContractTest(unittest.TestCase):
+    def test_pending_api_personas_use_framework_proxy_storage_schema(self):
+        rows = [
+            ("SVBBankRun", "LLM"),
+            ("SVBBankRun", "RuleLLM"),
+            ("SVBBankRun", "Rag"),
+            ("SunkCostFallacy", "LLM"),
+            ("SunkCostFallacy", "RuleLLM"),
+            ("SunkCostFallacy", "Rag"),
+            ("TulipMania", "LLM"),
+            ("TulipMania", "RuleLLM"),
+            ("TulipMania", "Rag"),
+        ]
+
+        missing = []
+        for scenario, mechanism in rows:
+            cfg = load_config(str(ROOT / "configs" / scenario / mechanism / "simulation.yml"))
+            for player_key, player in cfg["players"].items():
+                storage = player.get("persona", {}).get("proxy", {}).get("storage", {})
+                if not storage.get("record_path"):
+                    missing.append(f"{scenario}__{mechanism}:{player_key}")
+
+        self.assertEqual(
+            missing,
+            [],
+            "PlayerPersona requires persona.proxy.storage.record_path; old "
+            "proxy.record_path-only persona.yml files fail during setup.",
+        )
+
+    def test_dynamic_trading_prompts_request_fields_read_by_players(self):
+        player_files = [
+            ROOT / "examples" / "SorosPound" / "LLM" / "players.py",
+            ROOT / "examples" / "SorosPound" / "RuleLLM" / "players.py",
+            ROOT / "examples" / "SorosPound" / "Rag" / "players.py",
+            ROOT / "examples" / "SouthSeaBubble" / "LLM" / "players.py",
+            ROOT / "examples" / "SouthSeaBubble" / "RuleLLM" / "players.py",
+            ROOT / "examples" / "SouthSeaBubble" / "Rag" / "players.py",
+        ]
+
+        missing = []
+        for path in player_files:
+            text = path.read_text(encoding="utf-8")
+            if "decision[\"reasoning\"]" in text or "decision.get(\"reasoning\"" in text:
+                if '"reasoning"' not in text and "'reasoning'" not in text:
+                    missing.append(f"{path.relative_to(ROOT)}:reasoning")
+            if "parse_llm_response_with_thinking" in text and "bid_price" not in text:
+                missing.append(f"{path.relative_to(ROOT)}:bid_price")
+
+        self.assertEqual(
+            missing,
+            [],
+            "Dynamic user prompts that contain the final JSON instruction must "
+            "not narrow the schema below fields consumed by the player.",
+        )
+
+    def test_api_fallback_orders_keep_reasoning_field_when_player_records_it(self):
+        player_files = [
+            ROOT / "examples" / "SorosPound" / "LLM" / "players.py",
+            ROOT / "examples" / "SorosPound" / "RuleLLM" / "players.py",
+            ROOT / "examples" / "SorosPound" / "Rag" / "players.py",
+            ROOT / "examples" / "SouthSeaBubble" / "LLM" / "players.py",
+            ROOT / "examples" / "SouthSeaBubble" / "RuleLLM" / "players.py",
+            ROOT / "examples" / "SouthSeaBubble" / "Rag" / "players.py",
+        ]
+
+        missing = []
+        for path in player_files:
+            text = path.read_text(encoding="utf-8")
+            if "decision[\"reasoning\"]" in text:
+                missing.append(f"{path.relative_to(ROOT)}:uses direct reasoning read")
+            if "fallback hold after retries" not in text:
+                missing.append(f"{path.relative_to(ROOT)}:fallback reasoning")
+
+        self.assertEqual(
+            missing,
+            [],
+            "Fallback decisions must carry the same fields later recorded into "
+            "orders; otherwise parse-failure fallback becomes a KeyError.",
+        )
+
+    def test_liquidity_sensitive_prompts_request_provides_liquidity(self):
+        prompt_files = [
+            ROOT / "examples" / "LiquidityDryup" / "LLM" / "prompts.py",
+            ROOT / "examples" / "LiquidityDryup" / "RuleLLM" / "prompts.py",
+            ROOT / "examples" / "LiquidityDryup" / "Rag" / "prompts.py",
+            ROOT / "examples" / "MarketCrash" / "RuleLLM" / "prompts.py",
+            ROOT / "examples" / "MarketCrash" / "Rag" / "prompts.py",
+            ROOT / "examples" / "MomentumEffect" / "RuleLLM" / "prompts.py",
+            ROOT / "examples" / "MomentumEffect" / "Rag" / "prompts.py",
+        ]
+
+        missing = []
+        for path in prompt_files:
+            for name, value in prompt_constants(path).items():
+                if "decision must be valid JSON" not in value:
+                    continue
+                if "provides_liquidity" not in value:
+                    missing.append(f"{path.relative_to(ROOT)}:{name}")
+
+        self.assertEqual(
+            missing,
+            [],
+            "Prompts for players that emit liquidity-sensitive orders must "
+            "request the provides_liquidity field.",
+        )
+
+    def test_rumorspread_llm_players_defines_logger(self):
+        path = ROOT / "examples" / "RumorSpread" / "LLM" / "players.py"
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        has_logger = False
+        for node in tree.body:
+            if not isinstance(node, ast.Assign):
+                continue
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id == "logger":
+                    has_logger = True
+
+        self.assertTrue(has_logger)
+
+    def test_creditcycle_api_modes_fall_back_to_hold_on_parse_failure(self):
+        helper = ROOT / "examples" / "CreditCycle" / "llm_decision.py"
+        player_files = [
+            ROOT / "examples" / "CreditCycle" / "LLM" / "players.py",
+            ROOT / "examples" / "CreditCycle" / "Rag" / "players.py",
+        ]
+
+        missing = []
+        helper_text = helper.read_text(encoding="utf-8")
+        if "is_parse_contract_error(exc)" not in helper_text or '"parse_contract"' not in helper_text:
+            missing.append(str(helper.relative_to(ROOT)))
+        for path in player_files:
+            text = path.read_text(encoding="utf-8")
+            if "decide_with_llm_contract(" not in text or "record_fallback(" not in text:
+                missing.append(str(path.relative_to(ROOT)))
+
+        self.assertEqual(
+            missing,
+            [],
+            "CreditCycle API modes should hold after repeated malformed LLM output "
+            "instead of aborting the whole simulation.",
+        )
+
+    def test_disposition_rag_persona_uses_framework_proxy_schema(self):
+        path = ROOT / "configs" / "DispositionEffect" / "Rag" / "persona.yml"
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+
+        self.assertIn("proxy", data)
+        self.assertIn("storage", data["proxy"])
+        self.assertIn("monitoring", data["proxy"])
+        self.assertIn("communication", data["proxy"])
+        self.assertIn("resource", data["proxy"])
+
+    def test_volmageddon_api_simulation_configs_have_no_top_level_llm(self):
+        files = [
+            ROOT / "configs" / "Volmageddon" / "LLM" / "simulation.yml",
+            ROOT / "configs" / "Volmageddon" / "RuleLLM" / "simulation.yml",
+            ROOT / "configs" / "Volmageddon" / "Rag" / "simulation.yml",
+        ]
+
+        offenders = []
+        for path in files:
+            data = load_config(str(path))
+            if "llm" in data:
+                offenders.append(str(path.relative_to(ROOT)))
+
+        self.assertEqual(
+            offenders,
+            [],
+            "SimulationConfig does not accept a top-level llm field; provider config "
+            "belongs under players.yml extras.",
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()
