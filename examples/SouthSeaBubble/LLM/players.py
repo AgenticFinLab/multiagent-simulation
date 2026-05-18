@@ -18,7 +18,7 @@ from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from .prompts import (
     LLM_INSIDER_ADVANTAGED_SYS,
     LLM_NARRATIVE_BELIEVER_SYS,
@@ -93,7 +93,8 @@ class LLMInvestor(GeneralPlayer):
             f"Value: ${portfolio_value:.2f}\n\n"
             "Based on your strategy and current conditions, decide your action.\n"
             "Respond with <analysis>...</analysis> then <decision>...</decision> containing "
-            'JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}'
+            'JSON: {"action": "buy" or "sell" or "hold", "bid_price": current price, '
+            '"quantity": integer, "reasoning": "brief rationale"}'
         )
 
     async def decide(self) -> Dict[str, Any]:
@@ -107,22 +108,33 @@ class LLMInvestor(GeneralPlayer):
 
         decision: Dict[str, Any] = {"action": "hold", "quantity": 0}
         max_retries = 3
+        last_error: BaseException | None = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_output = llm_client.run([infer_input])
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
                 break
-            except (ValueError, KeyError):
+            except Exception as exc:  # pylint: disable=broad-except
+                last_error = exc
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if not parse_error and not retryable_api_error:
+                    raise
                 if attempt == max_retries - 1:
                     logger.warning(
-                        "[%s] LLM parse failed after %d attempts; holding.",
+                        "[%s] LLM failed after %d attempts: %s. Holding.",
                         self.identity,
                         max_retries,
+                        exc,
                     )
-                    decision = {"action": "hold", "quantity": 0}
+                    decision = {
+                        "action": "hold",
+                        "quantity": 0,
+                        "reasoning": f"LLM fallback hold after retries: {last_error}",
+                    }
 
         action = decision["action"]
         quantity = int(decision["quantity"])
@@ -163,7 +175,7 @@ class LLMInvestor(GeneralPlayer):
             "action": action,
             "quantity": quantity,
             "agent_type": strategy_name,
-            "reasoning": decision["reasoning"][:120],
+            "reasoning": str(decision.get("reasoning", "fallback hold"))[:120],
         }
         return {
             **order,
