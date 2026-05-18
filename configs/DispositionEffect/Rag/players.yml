@@ -193,7 +193,6 @@ rag_tax_aware:
         urls:
           - "https://en.wikipedia.org/wiki/Tax_loss_harvesting"
           - "https://en.wikipedia.org/wiki/Capital_gains_tax"
-          - "https://www.investopedia.com/terms/t/taxgainlossharvesting.asp"
         agent_autonomous: false
         catalog_path: "examples/document-sources/finance_books.csv"
         llm_suggested: false
