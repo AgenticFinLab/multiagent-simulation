@@ -98,6 +98,10 @@ class Market(GeneralPlayer):
             custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price"] = extras["initial_price"]
+            self.state.custom_state["short_interest"] = extras.get(
+                "initial_short_interest", 0.0
+            )
+            self.state.custom_state["buying_pressure"] = 0.0
             self.state.custom_state["liquidity"] = 100.0
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
@@ -131,6 +135,7 @@ class Market(GeneralPlayer):
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
+        short_interest = self.state.custom_state["short_interest"]
         orders = self.state.custom_state["orders"]
 
         base_liquidity = extras["base_liquidity"]
@@ -148,6 +153,11 @@ class Market(GeneralPlayer):
 
         total_buy_qty = sum(o["quantity"] for o in orders if o["quantity"] > 0)
         total_sell_qty = abs(sum(o["quantity"] for o in orders if o["quantity"] < 0))
+        cover_buying = sum(
+            o["quantity"]
+            for o in orders
+            if o["quantity"] > 0 and "ShortSeller" in o["strategy"]
+        )
         net_demand = total_buy_qty - total_sell_qty
         total_volume = total_buy_qty + total_sell_qty
 
@@ -164,8 +174,12 @@ class Market(GeneralPlayer):
 
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
         price_return = (new_price - current_price) / current_price
+        short_interest = max(0.0, short_interest - cover_buying * 0.5)
+        squeeze_pressure = max(0.0, (new_price / extras["initial_price"] - 1) * 100)
 
         self.state.custom_state["price"] = new_price
+        self.state.custom_state["short_interest"] = short_interest
+        self.state.custom_state["buying_pressure"] = squeeze_pressure
         self.state.custom_state["liquidity"] = total_liquidity
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["volume_history"].append(total_volume)
@@ -193,6 +207,8 @@ class Market(GeneralPlayer):
             "volume": total_volume,
             "net_demand": net_demand,
             "liquidity": total_liquidity,
+            "short_interest": short_interest,
+            "squeeze_pressure": squeeze_pressure,
             "round": round_num,
             "fundamental": fundamental_value,
         }

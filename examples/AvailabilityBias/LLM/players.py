@@ -137,9 +137,19 @@ class LLMInvestor(GeneralPlayer):
                     logger.debug("[%s] LLM parse failed, retrying...", self.identity)
 
         if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
+            logger.warning(
+                "[%s] LLM parse failed after %d retries: %s. Holding.",
+                self.identity,
+                max_retries,
+                last_error,
             )
+            decision = {
+                "action": "hold",
+                "bid_price": market_data["price"],
+                "quantity": 0.0,
+                "reasoning": f"LLM parse failed: {last_error}",
+                "analysis": "",
+            }
 
         action = decision["action"]
         bid_price = float(decision["bid_price"])

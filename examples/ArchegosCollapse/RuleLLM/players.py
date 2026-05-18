@@ -143,6 +143,8 @@ class RuleLLMInvestor(GeneralPlayer):
         action = decision["action"]
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
+        if bid_price <= 0:
+            bid_price = market_data["price"]
 
         if action == "buy":
             max_affordable = cash / bid_price if bid_price > 0 else 0
