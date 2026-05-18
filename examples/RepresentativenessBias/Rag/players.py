@@ -18,7 +18,7 @@ from .prompts import (
     RULELLM_NOISE_TRADER_SYS,
     RULELLM_PATTERN_MATCHER_SYS,
 )
-from examples.RepresentativenessBias.Rule.players import Market
+from examples.RepresentativenessBias.Rule.players import Market, _info_payload
 
 logger = logging.getLogger("RepresentativenessBias.Rag")
 
@@ -72,8 +72,8 @@ class RagLLMInvestor(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             self._initialize_agent()
         for msg in observation.inbounds:
-            payload = msg["payload"]
-            if payload["type"] == "market_update":
+            payload = _info_payload(msg)
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
