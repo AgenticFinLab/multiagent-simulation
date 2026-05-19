@@ -308,6 +308,32 @@ class ScenarioContractTest(unittest.TestCase):
             "private_knowledge.rag config shape.",
         )
 
+    def test_framing_gambler_rag_initialize_market_state(self):
+        player_files = [
+            ROOT / "examples" / "FramingEffect" / "Rag" / "players.py",
+            ROOT / "examples" / "GamblerFallacy" / "Rag" / "players.py",
+        ]
+        required = [
+            'self.state.custom_state["price"] = extras["initial_price"]',
+            'self.state.custom_state["fundamental"] = extras["fundamental_value"]',
+            'self.state.custom_state["deviation"] = 0.0',
+        ]
+
+        missing = []
+        for path in player_files:
+            text = path.read_text(encoding="utf-8")
+            for needle in required:
+                if needle not in text:
+                    missing.append(f"{path.relative_to(ROOT)}:{needle}")
+
+        self.assertEqual(
+            missing,
+            [],
+            "FramingEffect/GamblerFallacy RAG players can be scheduled before "
+            "receiving the first market broadcast; they must initialize market "
+            "state from config before building prompts.",
+        )
+
     def test_short_squeeze_rag_market_exports_squeeze_state(self):
         path = ROOT / "examples" / "ShortSqueeze" / "Rag" / "players.py"
         text = path.read_text(encoding="utf-8")

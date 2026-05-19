@@ -71,6 +71,9 @@ class RagLLMInvestor(GeneralPlayer):
         extras = self.config.extras
         self.state.custom_state["cash"] = extras["initial_cash"]
         self.state.custom_state["position"] = extras["initial_position"]
+        self.state.custom_state["price"] = extras["initial_price"]
+        self.state.custom_state["fundamental"] = extras["fundamental_value"]
+        self.state.custom_state["deviation"] = 0.0
 
         project_root = Path(__file__).parent.parent.parent
         load_dotenv(project_root / ".env")
