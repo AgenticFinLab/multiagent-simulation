@@ -67,6 +67,9 @@ class ScenarioContractTest(unittest.TestCase):
             ROOT / "examples" / "SouthSeaBubble" / "LLM" / "players.py",
             ROOT / "examples" / "SouthSeaBubble" / "RuleLLM" / "players.py",
             ROOT / "examples" / "SouthSeaBubble" / "Rag" / "players.py",
+            ROOT / "examples" / "StatusQuoBias" / "LLM" / "players.py",
+            ROOT / "examples" / "StatusQuoBias" / "RuleLLM" / "players.py",
+            ROOT / "examples" / "StatusQuoBias" / "Rag" / "players.py",
         ]
 
         missing = []
@@ -75,7 +78,8 @@ class ScenarioContractTest(unittest.TestCase):
             if "decision[\"reasoning\"]" in text or "decision.get(\"reasoning\"" in text:
                 if '"reasoning"' not in text and "'reasoning'" not in text:
                     missing.append(f"{path.relative_to(ROOT)}:reasoning")
-            if "parse_llm_response_with_thinking" in text and "bid_price" not in text:
+            consumes_bid_price = 'decision["bid_price"]' in text or "decision['bid_price']" in text
+            if consumes_bid_price and "bid_price" not in text:
                 missing.append(f"{path.relative_to(ROOT)}:bid_price")
 
         self.assertEqual(
@@ -93,6 +97,9 @@ class ScenarioContractTest(unittest.TestCase):
             ROOT / "examples" / "SouthSeaBubble" / "LLM" / "players.py",
             ROOT / "examples" / "SouthSeaBubble" / "RuleLLM" / "players.py",
             ROOT / "examples" / "SouthSeaBubble" / "Rag" / "players.py",
+            ROOT / "examples" / "StatusQuoBias" / "LLM" / "players.py",
+            ROOT / "examples" / "StatusQuoBias" / "RuleLLM" / "players.py",
+            ROOT / "examples" / "StatusQuoBias" / "Rag" / "players.py",
         ]
 
         missing = []
@@ -200,6 +207,122 @@ class ScenarioContractTest(unittest.TestCase):
             [],
             "SimulationConfig does not accept a top-level llm field; provider config "
             "belongs under players.yml extras.",
+        )
+
+    def test_non_positive_bid_guard_for_rows_that_hit_validate_order(self):
+        player_files = [
+            ROOT / "examples" / "AvailabilityBias" / "RuleLLM" / "players.py",
+            ROOT / "examples" / "AvailabilityBias" / "Rag" / "players.py",
+            ROOT / "examples" / "FlashCrash2010" / "Rag" / "players.py",
+        ]
+
+        missing = []
+        for path in player_files:
+            text = path.read_text(encoding="utf-8")
+            if "if bid_price <= 0:" not in text:
+                missing.append(str(path.relative_to(ROOT)))
+
+        self.assertEqual(
+            missing,
+            [],
+            "Rows that validate orders must normalize LLM bid_price=0 before "
+            "calling validate_order.",
+        )
+
+    def test_flashcrash2010_api_orders_preserve_market_agent_type(self):
+        player_files = [
+            ROOT / "examples" / "FlashCrash2010" / "RuleLLM" / "players.py",
+            ROOT / "examples" / "FlashCrash2010" / "Rag" / "players.py",
+        ]
+
+        missing = []
+        for path in player_files:
+            text = path.read_text(encoding="utf-8")
+            if "def agent_type_for_strategy" not in text:
+                missing.append(f"{path.relative_to(ROOT)}:helper")
+            if '"agent_type": agent_type_for_strategy(strategy_name)' not in text:
+                missing.append(f"{path.relative_to(ROOT)}:order")
+
+        self.assertEqual(
+            missing,
+            [],
+            "FlashCrash2010 market computes depth from order['agent_type']; "
+            "API modes must preserve rule-equivalent agent types.",
+        )
+
+    def test_rag_payload_and_config_shape_normalizers_exist(self):
+        checks = [
+            (
+                ROOT / "examples" / "FramingEffect" / "Rag" / "players.py",
+                ["def market_update_payload", 'payload.get("type")'],
+            ),
+            (
+                ROOT / "examples" / "GamblerFallacy" / "Rag" / "players.py",
+                ["def market_update_payload", 'payload.get("type")'],
+            ),
+            (
+                ROOT / "examples" / "RepresentativenessBias" / "Rag" / "players.py",
+                ['extras.get("rag")', 'extras.get("private_knowledge", {})'],
+            ),
+            (
+                ROOT / "examples" / "LTCMCollapse" / "Rag" / "players.py",
+                ['extras.get("rag")', 'extras.get("private_knowledge", {})'],
+            ),
+        ]
+
+        missing = []
+        for path, needles in checks:
+            text = path.read_text(encoding="utf-8")
+            for needle in needles:
+                if needle not in text:
+                    missing.append(f"{path.relative_to(ROOT)}:{needle}")
+
+        self.assertEqual(
+            missing,
+            [],
+            "RAG rows should tolerate routed market payloads and the current "
+            "private_knowledge.rag config shape.",
+        )
+
+    def test_short_squeeze_rag_market_exports_squeeze_state(self):
+        path = ROOT / "examples" / "ShortSqueeze" / "Rag" / "players.py"
+        text = path.read_text(encoding="utf-8")
+        required = [
+            '"short_interest": short_interest',
+            '"squeeze_pressure": squeeze_pressure',
+            'self.state.custom_state["short_interest"]',
+        ]
+
+        missing = [needle for needle in required if needle not in text]
+        self.assertEqual(
+            missing,
+            [],
+            "ShortSqueeze RAG prompts read short_interest/squeeze_pressure from "
+            "market_data, so the RAG market must publish the same fields as RuleLLM.",
+        )
+
+    def test_remaining_api_fallbacks_classify_transport_errors(self):
+        player_files = [
+            ROOT / "examples" / "AsianFinancialCrisis" / "Rag" / "players.py",
+            ROOT / "examples" / "AvailabilityBias" / "LLM" / "players.py",
+            ROOT / "examples" / "AvailabilityBias" / "RuleLLM" / "players.py",
+            ROOT / "examples" / "AvailabilityBias" / "Rag" / "players.py",
+            ROOT / "examples" / "LTCMCollapse" / "Rag" / "players.py",
+        ]
+
+        missing = []
+        for path in player_files:
+            text = path.read_text(encoding="utf-8")
+            if "is_retryable_llm_error" not in text:
+                missing.append(f"{path.relative_to(ROOT)}:retryable")
+            if "LLM fallback hold after retries" not in text and "LLM parse failed" not in text:
+                missing.append(f"{path.relative_to(ROOT)}:fallback")
+
+        self.assertEqual(
+            missing,
+            [],
+            "Observed APITimeout/parse rows should classify transient transport "
+            "errors separately from deterministic contract failures.",
         )
 
 

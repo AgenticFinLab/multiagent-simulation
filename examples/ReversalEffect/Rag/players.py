@@ -714,9 +714,9 @@ class RagLLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": decision["reasoning"][:120],
-            "analysis": decision["analysis"],
-            "provides_liquidity": decision["provides_liquidity"],
+            "reasoning": str(decision.get("reasoning", "fallback hold"))[:120],
+            "analysis": str(decision.get("analysis", "")),
+            "provides_liquidity": bool(decision.get("provides_liquidity", False)),
         }
 
         return {

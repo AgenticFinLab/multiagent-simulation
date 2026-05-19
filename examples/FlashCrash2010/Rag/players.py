@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -43,6 +43,20 @@ def load_prompt(prompt_path: str) -> str:
     module_path, var_name = prompt_path.rsplit(":", 1)
     module = importlib.import_module(module_path)
     return getattr(module, var_name)
+
+
+def agent_type_for_strategy(strategy_name: str) -> str:
+    """Map RAG class names to the market agent types used by Rule mode."""
+    lowered = strategy_name.lower()
+    if "hft" in lowered or "momentum" in lowered:
+        return "hft"
+    if "fundamental" in lowered:
+        return "fundamental"
+    if "stoploss" in lowered or "stop_loss" in lowered:
+        return "stoploss"
+    if "noise" in lowered:
+        return "noise"
+    return "llm"
 
 
 class RagLLMInvestor(GeneralPlayer):
@@ -356,21 +370,40 @@ class RagLLMInvestor(GeneralPlayer):
                 break
             except Exception as exc:
                 last_error = exc
-                if attempt < max_retries - 1:
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if attempt < max_retries - 1 and (parse_error or retryable_api_error):
                     logger.debug(
-                        "[%s] Parse failed (attempt %d), retrying...",
+                        "[%s] LLM call/parse failed (attempt %d), retrying: %s",
                         self.identity,
                         attempt + 1,
+                        exc,
                     )
+                    continue
+                if not parse_error and not retryable_api_error:
+                    raise
 
         if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM failed after {max_retries} retries: {last_error}"
+            logger.warning(
+                "[%s] LLM failed after %d attempts: %s. Holding.",
+                self.identity,
+                max_retries,
+                last_error,
             )
+            decision = {
+                "action": "hold",
+                "bid_price": price,
+                "quantity": 0.0,
+                "reasoning": f"LLM fallback hold after retries: {last_error}",
+                "analysis": "",
+                "provides_liquidity": False,
+            }
 
         action = decision["action"]
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
+        if bid_price <= 0:
+            bid_price = market_data["price"]
 
         if action == "buy":
             max_buy = cash / bid_price if bid_price > 0 else 0
@@ -393,9 +426,10 @@ class RagLLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": str(decision["reasoning"])[:120],
-            "analysis": str(decision["analysis"]),
-            "provides_liquidity": bool(decision["provides_liquidity"]),
+            "reasoning": str(decision.get("reasoning", "fallback hold"))[:120],
+            "analysis": str(decision.get("analysis", "")),
+            "agent_type": agent_type_for_strategy(strategy_name),
+            "provides_liquidity": bool(decision.get("provides_liquidity", False)),
         }
         validate_order(order)
         return {

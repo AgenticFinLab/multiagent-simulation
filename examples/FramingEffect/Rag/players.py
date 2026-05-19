@@ -40,6 +40,16 @@ def load_prompt(prompt_path: str) -> str:
     return getattr(module, var_name)
 
 
+def market_update_payload(message: Any) -> Optional[Dict[str, Any]]:
+    """Normalize MASim direct and routed market update payloads."""
+    payload = message.payload if hasattr(message, "payload") else message
+    if isinstance(payload, dict) and isinstance(payload.get("market_data"), dict):
+        payload = payload["market_data"]
+    if isinstance(payload, dict) and payload.get("type") == "market_update":
+        return payload
+    return None
+
+
 class RagLLMInvestor(GeneralPlayer):
     """Base RAG-augmented LLM investor for FramingEffect."""
 
@@ -51,8 +61,8 @@ class RagLLMInvestor(GeneralPlayer):
 
         self.state.custom_state["round"] = observation.round
         for msg in observation.inbounds:
-            payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload["type"] == "market_update":
+            payload = market_update_payload(msg)
+            if payload is not None:
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]

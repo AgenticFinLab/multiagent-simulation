@@ -38,6 +38,20 @@ def load_prompt(prompt_path: str) -> str:
     return getattr(module, var_name)
 
 
+def agent_type_for_strategy(strategy_name: str) -> str:
+    """Map hybrid class names to the market agent types used by Rule mode."""
+    lowered = strategy_name.lower()
+    if "hft" in lowered or "momentum" in lowered:
+        return "hft"
+    if "fundamental" in lowered:
+        return "fundamental"
+    if "stoploss" in lowered or "stop_loss" in lowered:
+        return "stoploss"
+    if "noise" in lowered:
+        return "noise"
+    return "llm"
+
+
 class RuleLLMInvestor(GeneralPlayer):
     """Base class for hybrid Rule+LLM FlashCrash2010 investors."""
 
@@ -214,8 +228,9 @@ class RuleLLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": str(decision["reasoning"])[:120],
+            "reasoning": str(decision.get("reasoning", "fallback hold"))[:120],
             "analysis": str(decision.get("analysis", "")),
+            "agent_type": agent_type_for_strategy(strategy_name),
             "provides_liquidity": bool(decision.get("provides_liquidity", False)),
         }
         validate_order(order)

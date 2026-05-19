@@ -61,9 +61,16 @@ class RagLLMInvestor(GeneralPlayer):
         self, price: float, fundamental: float, deviation: float
     ) -> str:
         """Retrieve relevant context for current market state."""
-        rag_cfg = self.config.extras["rag"]
-        context_template = rag_cfg["context_template"]
-        return context_template
+        extras = self.config.extras
+        rag_cfg = extras.get("rag") or extras.get("private_knowledge", {}).get("rag", {})
+        context_template = rag_cfg.get("context_template")
+        if context_template:
+            return context_template.format(
+                price=price,
+                fundamental=fundamental,
+                deviation=deviation,
+            )
+        return "(No scenario-specific RAG context template configured.)"
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
