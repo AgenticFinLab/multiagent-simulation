@@ -143,6 +143,26 @@ class ScenarioContractTest(unittest.TestCase):
             "request the provides_liquidity field.",
         )
 
+    def test_liquidity_sensitive_rag_players_default_optional_liquidity_flag(self):
+        player_files = [
+            ROOT / "examples" / "FlashCrash" / "Rag" / "players.py",
+            ROOT / "examples" / "ReversalEffect" / "Rag" / "players.py",
+            ROOT / "examples" / "VolatilityClustering" / "Rag" / "players.py",
+        ]
+
+        missing = []
+        for path in player_files:
+            text = path.read_text(encoding="utf-8")
+            if 'decision.get("provides_liquidity", False)' not in text:
+                missing.append(f"{path.relative_to(ROOT)}:provides_liquidity_default")
+
+        self.assertEqual(
+            missing,
+            [],
+            "RAG liquidity rows should not abort if an LLM omits the optional "
+            "provides_liquidity flag; default false preserves conservative depth.",
+        )
+
     def test_rumorspread_llm_players_defines_logger(self):
         path = ROOT / "examples" / "RumorSpread" / "LLM" / "players.py"
         tree = ast.parse(path.read_text(encoding="utf-8"))

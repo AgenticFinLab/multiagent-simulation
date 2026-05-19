@@ -628,7 +628,8 @@ class RagLLMInvestor(GeneralPlayer):
             f"Portfolio — Cash: {cash:.2f}  Position: {position:.2f}  "
             f"Value: {portfolio_value:.2f}\n\n"
             "Respond with <analysis>...</analysis> then <decision>...</decision> containing "
-            'JSON: {"bid_price": float, "quantity": float, "reasoning": str}'
+            'JSON: {"bid_price": float, "quantity": float, "reasoning": str, '
+            '"provides_liquidity": false}'
         )
 
     # ------------------------------------------------------------------
@@ -719,7 +720,7 @@ class RagLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
-            "provides_liquidity": decision["provides_liquidity"],
+            "provides_liquidity": bool(decision.get("provides_liquidity", False)),
         }
 
         return {
