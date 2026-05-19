@@ -20,7 +20,7 @@ from examples.LUNACollapse.Rag.prompts import (
     RAG_USER_TEMPLATE,
 )
 from examples.LUNACollapse.Rule.players import Market
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 
 logger = logging.getLogger("LUNACollapse.Rag")
 
@@ -41,7 +41,13 @@ class RagLLMInvestor(GeneralPlayer):
 
     def _initialize_rag(self):
         """Initialize RAG context from config extras."""
-        return self.config.extras["rag_context"]
+        extras = self.config.extras
+        if extras.get("rag_context"):
+            return extras["rag_context"]
+        rag_cfg = extras.get("rag") or extras.get("private_knowledge", {}).get("rag", {})
+        if rag_cfg.get("context_template"):
+            return rag_cfg["context_template"]
+        return "(No scenario-specific RAG context template configured.)"
 
     async def perceive(self, observation, prev_result=None) -> None:
         self.state.custom_state["round"] = observation.round
@@ -51,7 +57,7 @@ class RagLLMInvestor(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload["type"] == "market_update":
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -92,17 +98,31 @@ class RagLLMInvestor(GeneralPlayer):
                 break
             except Exception as exc:
                 last_error = exc
-                if attempt < 2:
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if attempt < 2 and (parse_error or retryable_api_error):
                     logger.debug(
-                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        "[%s] LLM call/parse failed (attempt %d), retrying: %s",
                         self.identity,
                         attempt + 1,
+                        exc,
                     )
+                    continue
+                if not parse_error and not retryable_api_error:
+                    raise
 
         if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            logger.warning(
+                "[%s] LLM failed after 3 retries: %s. Holding.",
+                self.identity,
+                last_error,
             )
+            decision = {
+                "action": "hold",
+                "bid_price": self.state.custom_state["price"],
+                "quantity": 0,
+                "reasoning": f"LLM fallback hold after retries: {last_error}",
+            }
 
         return decision
 

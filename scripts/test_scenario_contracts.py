@@ -268,6 +268,10 @@ class ScenarioContractTest(unittest.TestCase):
                 ROOT / "examples" / "LTCMCollapse" / "Rag" / "players.py",
                 ['extras.get("rag")', 'extras.get("private_knowledge", {})'],
             ),
+            (
+                ROOT / "examples" / "LUNACollapse" / "Rag" / "players.py",
+                ['extras.get("rag")', 'extras.get("private_knowledge", {})'],
+            ),
         ]
 
         missing = []
@@ -308,6 +312,7 @@ class ScenarioContractTest(unittest.TestCase):
             ROOT / "examples" / "AvailabilityBias" / "RuleLLM" / "players.py",
             ROOT / "examples" / "AvailabilityBias" / "Rag" / "players.py",
             ROOT / "examples" / "LTCMCollapse" / "Rag" / "players.py",
+            ROOT / "examples" / "LUNACollapse" / "Rag" / "players.py",
         ]
 
         missing = []
