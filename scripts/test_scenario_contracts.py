@@ -334,6 +334,50 @@ class ScenarioContractTest(unittest.TestCase):
             "state from config before building prompts.",
         )
 
+    def test_framing_gambler_rag_orders_match_rule_market_contract(self):
+        player_files = [
+            ROOT / "examples" / "FramingEffect" / "Rag" / "players.py",
+            ROOT / "examples" / "GamblerFallacy" / "Rag" / "players.py",
+        ]
+        required = [
+            '"from": self.identity',
+            '"agent_type": self.__class__.__name__',
+        ]
+
+        missing = []
+        for path in player_files:
+            text = path.read_text(encoding="utf-8")
+            for needle in required:
+                if text.count(needle) < 2:
+                    missing.append(f"{path.relative_to(ROOT)}:{needle}")
+
+        self.assertEqual(
+            missing,
+            [],
+            "FramingEffect/GamblerFallacy RAG players reuse Rule markets that "
+            "read order['from'] and order['agent_type']; both decide() and "
+            "act() order payloads must preserve those fields.",
+        )
+
+    def test_framing_gambler_rag_object_store_budget(self):
+        config_files = [
+            ROOT / "configs" / "FramingEffect" / "Rag" / "simulation.yml",
+            ROOT / "configs" / "GamblerFallacy" / "Rag" / "simulation.yml",
+        ]
+
+        too_small = []
+        for path in config_files:
+            text = path.read_text(encoding="utf-8")
+            if "object_store_memory: 536870912" not in text:
+                too_small.append(str(path.relative_to(ROOT)))
+
+        self.assertEqual(
+            too_small,
+            [],
+            "These RAG rows should use at least 512MB Ray object store budget "
+            "before full-round reruns.",
+        )
+
     def test_short_squeeze_rag_market_exports_squeeze_state(self):
         path = ROOT / "examples" / "ShortSqueeze" / "Rag" / "players.py"
         text = path.read_text(encoding="utf-8")
