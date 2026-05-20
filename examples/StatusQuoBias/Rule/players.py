@@ -222,8 +222,9 @@ class InertialHolder(BaseInvestor):
     """
     Strongly prefers maintaining current portfolio; requires overwhelming evidence to change.
 
-    Theoretical Basis: Decision inertia (Samuelson & Zeckhauser, 1988)
-    Market Role: destabilizing
+    Theory: simulation-bases.md §4.1 — InertialHolder
+    Theoretical basis: decision inertia (Samuelson & Zeckhauser, 1988).
+    See simulation-bases.md §4.1 for mathematical model.
 
     Parameters from config extras:
         - inertia_strength, change_threshold
@@ -252,8 +253,9 @@ class DefaultFollower(BaseInvestor):
     """
     Follows default allocation suggestions, avoids active decisions.
 
-    Theoretical Basis: Default bias and decision avoidance (Kahneman et al., 1991)
-    Market Role: destabilizing
+    Theory: simulation-bases.md §4.2 — DefaultFollower
+    Theoretical basis: default bias and decision avoidance.
+    See simulation-bases.md §4.2 for mathematical model.
 
     Parameters from config extras:
         - default_weight, active_deviation
@@ -282,8 +284,9 @@ class ActiveRebalancer(BaseInvestor):
     """
     Proactively adjusts positions based on new information regardless of current holdings.
 
-    Theoretical Basis: Rational portfolio management (Fernandez & Rodrik, 1991 baseline)
-    Market Role: stabilizing
+    Theory: simulation-bases.md §4.3 — ActiveRebalancer
+    Theoretical basis: rational portfolio rebalancing benchmark.
+    See simulation-bases.md §4.3 for mathematical model.
 
     Parameters from config extras:
         - rebalance_threshold, position_size
@@ -312,8 +315,9 @@ class MomentumTrader(BaseInvestor):
     """
     Trades on price trends, naturally overcoming status quo inertia.
 
-    Theoretical Basis: Momentum-based trading (Jegadeesh & Titman, 1993)
-    Market Role: neutral
+    Theory: simulation-bases.md §4.4 — MomentumTrader
+    Theoretical basis: momentum-based trading.
+    See simulation-bases.md §4.4 for mathematical model.
 
     Parameters from config extras:
         - lookback, entry_threshold
@@ -340,8 +344,9 @@ class NoiseTrader(BaseInvestor):
     """
     Random uninformed trader providing baseline liquidity.
 
-    Theoretical Basis: Noise trader model (Black, 1986)
-    Market Role: neutral
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+    Theoretical basis: noise-trader model.
+    See simulation-bases.md §4.5 for mathematical model.
 
     Parameters from config extras:
         - trade_probability

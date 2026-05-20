@@ -71,7 +71,7 @@
 
 Market mechanism is **identical** to Rule variant — only investor decision logic changes.
 
-*(Full formula: simulation-bases.md §3.1 — P(t+1) = P(t) + 0.01·D + 0.02·(F−P) + ε)*
+*(Full formula: simulation-bases.md §3.1 — P(t+1) = P(t) + 0.02·D + 0.03·(F−P) + ε)*
 
 ### LLM User Prompt Variables
 
@@ -112,7 +112,7 @@ Parsed by `parse_llm_response_with_thinking()` from `examples/llm_utils.py`.
 Round t:
   ┌─────────────────────────────────────────────────────┐
   │  Market (Rule — identical to Rule)                  │
-  │  P(t+1) = P(t) + 0.01·D + 0.02·(F−P) + ε          │
+  │  P(t+1) = P(t) + 0.02·D + 0.03·(F−P) + ε          │
   │  Broadcasts: {price, prev_price, fundamental,       │
   │               deviation, return_pct, round}         │
   └─────────────────┬───────────────────────────────────┘

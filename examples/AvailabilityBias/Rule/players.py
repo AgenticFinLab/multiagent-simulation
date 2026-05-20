@@ -362,6 +362,9 @@ class SystematicAnalyst(GeneralPlayer):
 
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["evidence_threshold"] = extras[
+                "evidence_threshold"
+            ]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(record_path, self.config.identity, "price"),
                 entry_limit=hot_limit,
@@ -377,6 +380,7 @@ class SystematicAnalyst(GeneralPlayer):
         market_data = self.state.custom_state["market_data"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
+        evidence_threshold = self.state.custom_state["evidence_threshold"]
 
         price = market_data["price"]
         deviation = market_data["deviation"]
@@ -384,7 +388,7 @@ class SystematicAnalyst(GeneralPlayer):
         action = "hold"
         quantity = 0.0
 
-        if abs(deviation) > 0.03:
+        if abs(deviation) > evidence_threshold:
             quantity = min(300.0, abs(deviation) * 5000)
             if deviation < 0:
                 affordable = cash / price if price > 0 else 0

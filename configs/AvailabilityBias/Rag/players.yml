@@ -170,7 +170,7 @@ ragllm_systematic_analyst:
       initial_position: 0.0
       custom_state_hot_limit: 3
       weight_decay: 0.80
-      evidence_threshold: 0.05
+      evidence_threshold: 0.03
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

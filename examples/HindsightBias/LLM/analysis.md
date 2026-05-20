@@ -68,3 +68,11 @@ All functions defined in `LLM/analysis.py`. Inputs sourced from simulation outpu
 - `analysis-bases.md §5` — Cross-variant comparison table
 - Fischhoff (1975) `doi:10.1037/0096-1523.1.3.288` — HBI empirical basis
 - Daniel et al. (1998) `doi:10.1111/0022-1082.00077` — overconfidence and momentum
+
+## §6 Expected Results and Validation
+
+The accepted LLM sample should complete 200 rounds with parseable decision JSON and no fallback holds. Level-2 quality review should confirm clean parse quality and then compare HBI, OBI, NCE, VAF, OWP, and WDI against the Rule baseline.
+
+## §7 Visualization Catalogue
+
+`LLM/analysis.py` reuses the core price-dynamics visualization from Rule. LLM reports may add action-distribution, parse-quality, and narrative-resistance summaries.

@@ -80,11 +80,25 @@ class RuleLLMInvestor(GeneralPlayer):
         )
         llm = self._get_llm()
         infer_input = InferInput(system_msg=self._system_prompt, user_msg=user_prompt)
-        try:
-            response = llm.run([infer_input]).outputs[0].response
-            decision = parse_llm_response_with_thinking(response)
-        except Exception:
-            decision = {"action": "hold", "quantity": 0}
+        decision = None
+        last_error = None
+        for attempt in range(3):
+            try:
+                response = llm.run([infer_input]).outputs[0].response
+                decision = parse_llm_response_with_thinking(response)
+                break
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] RuleLLM parse failed on attempt %d; retrying",
+                        self.identity,
+                        attempt + 1,
+                    )
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] RuleLLM parse failed after 3 attempts: {last_error}"
+            )
 
         action = decision["action"]
         quantity = int(decision["quantity"])
@@ -124,31 +138,31 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMPatternMatcher(RuleLLMInvestor):
-    """RuleLLM PatternMatcher — rule-guided pattern matching investor."""
+    """RuleLLM pattern matcher — rule-guided prototype trading. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RULELLM_PATTERN_MATCHER_SYS
 
 
 class RuleLLMCategoryOvergeneralizer(RuleLLMInvestor):
-    """RuleLLM CategoryOvergeneralizer — rule-guided category overgeneralizer."""
+    """RuleLLM category generalizer — rule-guided extrapolation. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RULELLM_CATEGORY_OVERGENERALIZER_SYS
 
 
 class RuleLLMBayesianUpdater(RuleLLMInvestor):
-    """RuleLLM BayesianUpdater — rule-guided Bayesian rational investor."""
+    """RuleLLM Bayesian updater — rule-guided base-rate benchmark. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RULELLM_BAYESIAN_UPDATER_SYS
 
 
 class RuleLLMContrarianStatistical(RuleLLMInvestor):
-    """RuleLLM ContrarianStatistical — rule-guided contrarian arbitrageur."""
+    """RuleLLM contrarian arbitrageur — rule-guided correction. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RULELLM_CONTRARIAN_STATISTICAL_SYS
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """RuleLLM NoiseTrader — rule-guided noise/liquidity trader."""
+    """RuleLLM noise trader — rule-guided liquidity baseline. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RULELLM_NOISE_TRADER_SYS
 

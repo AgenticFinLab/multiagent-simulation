@@ -34,3 +34,15 @@ to retrieved context rather than invalid output or missing fields.
 
 Metrics derive from `../analysis-bases.md §2`; Rag mechanism derives from
 `../simulation-bases.md §9`.
+
+## §6 Quality Checks
+
+- Confirm the run completed the configured round count.
+- Audit retrieval context availability, parse failures, and retry counts.
+- Confirm any RAG fallback context is explicitly recorded for Level-2 review.
+
+## §7 Reporting Notes
+
+Report RAG outcomes together with retrieval diagnostics. A row with missing or
+placeholder retrieval context should be marked for quality review even if the
+simulator exits successfully.

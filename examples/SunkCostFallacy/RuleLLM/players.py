@@ -17,7 +17,7 @@ from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from .prompts import (
     RULELLM_SUNK_COST_HOLDER_SYS,
     RULELLM_COMMITMENT_ESCALATOR_SYS,
@@ -90,7 +90,8 @@ class RuleLLMInvestor(GeneralPlayer):
             f"Value: ${portfolio_value:.2f}\n\n"
             "Apply your decision rules to the data above, then output your decision.\n"
             "Respond with <analysis>...</analysis> then <decision>...</decision> containing "
-            'JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}'
+            'JSON: {"action": "buy" or "sell" or "hold", "bid_price": current price, '
+            '"quantity": integer, "reasoning": "brief rationale"}'
         )
 
     async def decide(self) -> Dict[str, Any]:
@@ -102,24 +103,38 @@ class RuleLLMInvestor(GeneralPlayer):
         user_prompt = self._build_prompt()
         system_prompt = self._system_prompt
 
-        decision: Dict[str, Any] = {"action": "hold", "quantity": 0}
+        decision = None
         max_retries = 3
+        last_error: Optional[Exception] = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_output = llm_client.run([infer_input])
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
                 break
-            except (ValueError, KeyError):
-                if attempt == max_retries - 1:
-                    logger.warning(
-                        "[%s] LLM parse failed after %d attempts; holding.",
+            except Exception as exc:
+                last_error = exc
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if attempt < max_retries - 1 and (parse_error or retryable_api_error):
+                    logger.debug(
+                        "[%s] RuleLLM call/parse failed, retrying: %s",
                         self.identity,
-                        max_retries,
+                        exc,
                     )
-                    decision = {"action": "hold", "quantity": 0}
+                    continue
+                if not parse_error and not retryable_api_error:
+                    raise
+                raise RuntimeError(
+                    f"[{self.identity}] RuleLLM failed after {max_retries} attempts: {last_error}"
+                )
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] RuleLLM produced no decision after {max_retries} attempts"
+            )
 
         action = decision["action"]
         quantity = int(decision["quantity"])
@@ -176,31 +191,31 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMSunkCostHolder(RuleLLMInvestor):
-    """Rule+LLM sunk cost holder refusing to cut losing positions."""
+    """RuleLLM sunk cost holder refusing to cut losing positions. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RULELLM_SUNK_COST_HOLDER_SYS
 
 
 class RuleLLMCommitmentEscalator(RuleLLMInvestor):
-    """Rule+LLM commitment escalator doubling down on losing positions."""
+    """RuleLLM commitment escalator doubling down on losing positions. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RULELLM_COMMITMENT_ESCALATOR_SYS
 
 
 class RuleLLMRationalCutter(RuleLLMInvestor):
-    """Rule+LLM rational cutter ignoring sunk costs and cutting losses."""
+    """RuleLLM rational cutter ignoring sunk costs and cutting losses. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RULELLM_RATIONAL_CUTTER_SYS
 
 
 class RuleLLMOpportunityCostTrader(RuleLLMInvestor):
-    """Rule+LLM opportunity cost trader reallocating from underperformers."""
+    """RuleLLM opportunity cost trader reallocating from underperformers. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RULELLM_OPPORTUNITY_COST_TRADER_SYS
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """Rule+LLM noise trader providing random baseline liquidity."""
+    """RuleLLM noise trader providing random baseline liquidity. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RULELLM_NOISE_TRADER_SYS
 

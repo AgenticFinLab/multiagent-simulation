@@ -15,6 +15,25 @@
 - Thaler (1985): Mental accounting and consumer choice
 - Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
 
+## §6 Configuration Reference
+
+The RAG variant uses `configs/MentalAccounting/Rag/simulation.yml`, `players.yml`, `topology.yml`, and `persona.yml`. It adds knowledge and embedding configuration to the LLM-style investor setup while preserving the same market topology.
+
+## §7 Runtime Outputs
+
+A full RAG run should produce 200 rounds, valid order payloads, parseable LLM decisions, and retrieval context sufficient for quality review of knowledge-augmented decisions.
+
+## §8 Validation Checklist
+
+- `players.py`, `prompts.py`, and `analysis.py` compile.
+- RAG embedding config resolves and prompt templates inject `{rag_context}`.
+- Dry-run discovers `MentalAccounting__Rag`.
+- Existing full sample can be inherited because this pass does not change runtime files.
+
+## §9 Cross-Variant Comparison Notes
+
+RAG is compared primarily against RuleLLM to isolate whether retrieved financial-behavioral knowledge changes mental-accounting intensity, house-money risk taking, or sunk-cost persistence.
+
 ## §3 Agent Descriptions
 
 ### MentalAccountant

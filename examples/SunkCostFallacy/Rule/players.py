@@ -182,8 +182,9 @@ class BaseInvestor(GeneralPlayer):
 class SunkCostHolder(BaseInvestor):
     """Holds losing positions because of prior investment, refuses to cut losses.
 
-    Theoretical Basis: Sunk cost escalation (Arkes & Blumer, 1985)
-    Market Role: destabilizing
+    Theory: simulation-bases.md §4.1 — SunkCostHolder
+    Theoretical basis: sunk cost escalation (Arkes & Blumer, 1985).
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     def _make_decision(
@@ -207,8 +208,9 @@ class SunkCostHolder(BaseInvestor):
 class CommitmentEscalator(BaseInvestor):
     """Doubles down on losing positions, increasing exposure to justify prior commitment.
 
-    Theoretical Basis: Escalation of commitment (Staw, 1976)
-    Market Role: destabilizing
+    Theory: simulation-bases.md §4.2 — CommitmentEscalator
+    Theoretical basis: escalation of commitment (Staw, 1976).
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     def _make_decision(
@@ -232,8 +234,9 @@ class CommitmentEscalator(BaseInvestor):
 class RationalCutter(BaseInvestor):
     """Cuts losses based on forward-looking assessment, ignores past investment.
 
-    Theoretical Basis: Forward-looking rationality (Dawes, 1998 baseline)
-    Market Role: stabilizing
+    Theory: simulation-bases.md §4.3 — RationalCutter
+    Theoretical basis: forward-looking rationality.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     def _make_decision(
@@ -257,8 +260,9 @@ class RationalCutter(BaseInvestor):
 class OpportunityCostTrader(BaseInvestor):
     """Evaluates positions by opportunity cost, reallocates capital from underperformers.
 
-    Theoretical Basis: Opportunity cost analysis (Thaler, 1980 baseline)
-    Market Role: stabilizing
+    Theory: simulation-bases.md §4.4 — OpportunityCostTrader
+    Theoretical basis: opportunity cost analysis.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     def _make_decision(
@@ -282,8 +286,9 @@ class OpportunityCostTrader(BaseInvestor):
 class NoiseTrader(BaseInvestor):
     """Random uninformed trader providing baseline liquidity.
 
-    Theoretical Basis: Noise trader model (Black, 1986)
-    Market Role: neutral
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+    Theoretical basis: noise-trader model.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     def _make_decision(

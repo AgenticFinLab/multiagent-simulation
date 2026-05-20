@@ -272,6 +272,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
         template = load_prompt("examples.EndowmentEffect.Rag.prompts:RAG_USER_TEMPLATE")
         return template.format(
             round=round_num,
@@ -329,10 +330,24 @@ class RagLLMInvestor(GeneralPlayer):
         elif action_str == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"action": action_str, "quantity": quantity}
+        rag_context = self.state.custom_state["last_rag_context"]
+        order = {
+            "action": action_str,
+            "bid_price": price,
+            "quantity": quantity,
+            "reasoning": decision["reasoning"],
+            "analysis": decision["analysis"],
+            "strategy": self.__class__.__name__,
+            "rag_context": rag_context,
+        }
         return {
             "action": action_str,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": decision["reasoning"],
+            "analysis": decision["analysis"],
+            "strategy": self.__class__.__name__,
+            "rag_context": rag_context,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 

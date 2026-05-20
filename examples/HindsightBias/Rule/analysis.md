@@ -67,3 +67,11 @@ All functions defined in `Rule/analysis.py`. Inputs sourced from simulation outp
 - `simulation-bases.md §4.1–§4.5` — Investor parameter definitions
 - Fischhoff (1975) `doi:10.1037/0096-1523.1.3.288` — HBI empirical basis
 - Barber & Odean (2000) `doi:10.1111/0022-1082.00226` — OWP calibration
+
+## §6 Expected Results and Validation
+
+The Rule sample is expected to show nonzero HBI, OBI close to the configured hindsight/asymmetry calibration, partial NCE, and moderate WDI. A valid full sample must have 200 rounds, non-empty price history, valid order records, and no missing market broadcast fields.
+
+## §7 Visualization Catalogue
+
+`Rule/analysis.py → create_visualizations(data, output_dir)` creates `hindsightbias_price_dynamics.png`, plotting price against fundamental value. Additional reports may add OBI phase decomposition, NCE event tables, and wealth-distribution plots.

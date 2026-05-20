@@ -1,8 +1,6 @@
 """RepresentativenessBias LLM-Driven Simulation Players."""
 
-import json
 import logging
-import re
 from typing import Any, Dict, Optional
 
 from lmbase.inference.api_call import LangChainAPIInference
@@ -82,11 +80,25 @@ class LLMInvestor(GeneralPlayer):
         )
         llm = self._get_llm()
         infer_input = InferInput(system_msg=self._system_prompt, user_msg=user_prompt)
-        try:
-            response = llm.run([infer_input]).outputs[0].response
-            decision = parse_llm_response_with_thinking(response)
-        except Exception:
-            decision = {"action": "hold", "quantity": 0}
+        decision = None
+        last_error = None
+        for attempt in range(3):
+            try:
+                response = llm.run([infer_input]).outputs[0].response
+                decision = parse_llm_response_with_thinking(response)
+                break
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] LLM parse failed on attempt %d; retrying",
+                        self.identity,
+                        attempt + 1,
+                    )
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after 3 attempts: {last_error}"
+            )
 
         action = decision["action"]
         quantity = int(decision["quantity"])
@@ -126,31 +138,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMPatternMatcher(LLMInvestor):
-    """LLM-driven PatternMatcher — matches price patterns to historical prototypes."""
+    """LLM-driven pattern matcher — prototype-based trading. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = LLM_PATTERN_MATCHER_PROMPT
 
 
 class LLMCategoryOvergeneralizer(LLMInvestor):
-    """LLM-driven CategoryOvergeneralizer — overgeneralizes from small samples."""
+    """LLM-driven category generalizer — small-sample extrapolation. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = LLM_CATEGORY_OVERGENERALIZER_PROMPT
 
 
 class LLMBayesianUpdater(LLMInvestor):
-    """LLM-driven BayesianUpdater — correctly updates beliefs using Bayes rule."""
+    """LLM-driven Bayesian updater — base-rate disciplined benchmark. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = LLM_BAYESIAN_UPDATER_PROMPT
 
 
 class LLMContrarianStatistical(LLMInvestor):
-    """LLM-driven ContrarianStatistical — exploits base rate mispricing."""
+    """LLM-driven contrarian arbitrageur — exploits biased mispricing. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = LLM_CONTRARIAN_STATISTICAL_PROMPT
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven NoiseTrader — random uninformed trader providing liquidity."""
+    """LLM-driven noise trader — uninformed liquidity baseline. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = LLM_NOISE_TRADER_PROMPT
 

@@ -110,7 +110,7 @@ rulellm_systematic_analyst:
       custom_state_hot_limit: 3
       # Rule parameters embedded in prompt
       weight_decay: 0.80
-      evidence_threshold: 0.05
+      evidence_threshold: 0.03
       llm:
         sys_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_SYSTEMATIC_ANALYST_SYS"
         user_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"

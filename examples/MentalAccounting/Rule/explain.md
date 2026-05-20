@@ -15,6 +15,25 @@
 - Thaler (1985): Mental accounting and consumer choice
 - Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
 
+## §6 Configuration Reference
+
+The Rule variant uses `configs/MentalAccounting/Rule/simulation.yml`, `players.yml`, `topology.yml`, and `persona.yml`. Market and investor parameters are loaded from `players.yml`; topology routes market broadcasts to investors and investor orders back to the market.
+
+## §7 Runtime Outputs
+
+A full Rule run should produce 200 rounds of market records, valid order payloads, and price/fundamental histories suitable for account-level turnover, price impact, and volatility analysis.
+
+## §8 Validation Checklist
+
+- `players.py` and `analysis.py` compile.
+- Dry-run discovers `MentalAccounting__Rule`.
+- Preflight validates config, runner, topology, class refs, and 200 rounds.
+- Existing full sample can be inherited because this standardization pass does not change runtime logic.
+
+## §9 Cross-Variant Comparison Notes
+
+Rule is the deterministic baseline for comparing whether LLM, RuleLLM, and RAG agents reduce mental-accounting distortions or change house-money and sunk-cost behavior.
+
 ## §3 Agent Descriptions
 
 ### MentalAccountant

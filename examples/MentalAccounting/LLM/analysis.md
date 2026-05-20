@@ -25,3 +25,15 @@
 - Thaler (1999): Mental Accounting Matters
 - Thaler (1985): Mental accounting and consumer choice
 - Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
+
+## §5 Cross-Variant Comparison
+
+LLM results are compared against Rule to measure whether persona-only reasoning changes mental-accounting behavior and market impact while using the same market structure.
+
+## §6 Expected Results and Validation
+
+The accepted LLM sample should complete 200 rounds with clean parse quality. Existing output can be inherited because this pass only updates documentation.
+
+## §7 Visualization Catalogue
+
+`LLM/analysis.py` reuses the Rule analysis pipeline and creates `mentalaccounting_analysis.png`. Reports may add LLM action-distribution and parse-quality summaries.

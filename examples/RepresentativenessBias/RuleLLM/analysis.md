@@ -34,3 +34,15 @@ be traced to LLM reasoning or output quality.
 
 Metrics derive from `../analysis-bases.md §2`; RuleLLM mechanism derives from
 `../simulation-bases.md §9`.
+
+## §6 Quality Checks
+
+- Confirm the run completed the configured round count.
+- Audit parse failures, retry counts, and fallback behavior before acceptance.
+- Compare action direction with the prompt-embedded decision rules.
+
+## §7 Reporting Notes
+
+Report RuleLLM as a formula-anchored language condition. If output parsing fails
+after retries, the row should fail and be repaired instead of substituting a
+silent hold.

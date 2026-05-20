@@ -309,6 +309,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         return (
             f"Round {round_num} — Market Update\n"
@@ -319,8 +320,8 @@ class RagLLMInvestor(GeneralPlayer):
             f"Value: ${portfolio_value:.2f}\n\n"
             "Apply your decision rules, informed by retrieved knowledge, to determine action.\n"
             "Respond with <analysis>...</analysis> then <decision>...</decision> containing "
-            'JSON: {"action": "buy" or "sell" or "hold", "quantity": integer, '
-            '"reasoning": "brief rationale"}'
+            'JSON: {"action": "buy" or "sell" or "hold", "bid_price": current price, '
+            '"quantity": integer, "reasoning": "brief rationale"}'
         )
 
     async def decide(self) -> Dict[str, Any]:
@@ -332,11 +333,7 @@ class RagLLMInvestor(GeneralPlayer):
         user_prompt = self._build_prompt()
         system_prompt = self._system_prompt
 
-        decision: Dict[str, Any] = {
-            "action": "hold",
-            "quantity": 0,
-            "reasoning": "fallback hold before LLM response",
-        }
+        decision = None
         max_retries = 3
         last_error: Optional[Exception] = None
         for attempt in range(max_retries):
@@ -356,17 +353,14 @@ class RagLLMInvestor(GeneralPlayer):
                     continue
                 if not parse_error and not retryable_api_error:
                     raise
-                logger.warning(
-                    "[%s] LLM failed after %d attempts; holding: %s",
-                    self.identity,
-                    max_retries,
-                    last_error,
+                raise RuntimeError(
+                    f"[{self.identity}] RAG LLM failed after {max_retries} attempts: {last_error}"
                 )
-                decision = {
-                    "action": "hold",
-                    "quantity": 0,
-                    "reasoning": f"fallback hold after retries: {last_error}",
-                }
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] RAG LLM produced no decision after {max_retries} attempts"
+            )
 
         action = decision["action"]
         quantity = int(decision["quantity"])
@@ -407,7 +401,8 @@ class RagLLMInvestor(GeneralPlayer):
             "action": action,
             "quantity": quantity,
             "agent_type": strategy_name,
-            "reasoning": str(decision.get("reasoning", "fallback hold"))[:120],
+            "reasoning": str(decision["reasoning"])[:120],
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
         return {
             **order,
@@ -423,31 +418,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMInertialHolder(RagLLMInvestor):
-    """RAG-augmented inertial holder with strong status quo bias."""
+    """RagLLM inertial holder with strong status quo bias. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RAGLLM_INERTIAL_HOLDER_SYS
 
 
 class RagLLMDefaultFollower(RagLLMInvestor):
-    """RAG-augmented default follower avoiding active portfolio decisions."""
+    """RagLLM default follower avoiding active decisions. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RAGLLM_DEFAULT_FOLLOWER_SYS
 
 
 class RagLLMActiveRebalancer(RagLLMInvestor):
-    """RAG-augmented active rebalancer adjusting on new information."""
+    """RagLLM active rebalancer adjusting on new information. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RAGLLM_ACTIVE_REBALANCER_SYS
 
 
 class RagLLMMomentumTrader(RagLLMInvestor):
-    """RAG-augmented momentum trader naturally overcoming status quo."""
+    """RagLLM momentum trader naturally overcoming status quo. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RAGLLM_MOMENTUM_TRADER_SYS
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented noise trader providing random baseline liquidity."""
+    """RagLLM noise trader providing random baseline liquidity. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RAGLLM_NOISE_TRADER_SYS
 

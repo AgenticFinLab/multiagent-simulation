@@ -25,3 +25,15 @@
 - Thaler (1999): Mental Accounting Matters
 - Thaler (1985): Mental accounting and consumer choice
 - Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
+
+## §5 Cross-Variant Comparison
+
+RuleLLM results are compared against Rule and LLM to identify whether rule guidance preserves baseline behavior while allowing LLM reasoning to modulate quantity and timing.
+
+## §6 Expected Results and Validation
+
+The accepted RuleLLM sample should complete 200 rounds with clean parse quality. Existing output can be inherited because this pass only updates documentation.
+
+## §7 Visualization Catalogue
+
+`RuleLLM/analysis.py` reuses the Rule analysis pipeline and creates `mentalaccounting_analysis.png`. Reports may add rule-adherence and action-distribution summaries.

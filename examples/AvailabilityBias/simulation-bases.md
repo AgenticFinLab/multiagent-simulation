@@ -17,16 +17,16 @@
 
 - **Citation**: Tversky, A., & Kahneman, D. (1973). "Availability: A heuristic for judging frequency and probability." *Cognitive Psychology*, 5(2), 207–232. DOI: 10.1016/0010-0285(73)90033-9
 - **Core Insight**: People estimate the probability of an event by how easily examples come to mind — "availability" as a mental shortcut. In markets, events that are recent, emotionally charged, or heavily covered become cognitively salient, leading investors to overestimate their recurrence probability. A dramatic market decline last round is weighted more heavily than its long-run base rate would justify.
-- **Mathematical Formulation**: The availability heuristic can be represented as a biased probability weighting function: P̃(event) = w(P_true) where w is a probability weighting function with w(p) > p for salient, recent events and w(p) ≈ p for routine events. In operational form: perceived_signal = recency_weight × recent_return + (1 − recency_weight) × deviation. With recency_weight > 1 (or the true base weight of 1/N for N rounds of history), recent returns are systematically overweighted.
-- **Empirical Evidence**: Tversky & Kahneman (1973) document that subjects overestimate event frequencies for salient, easily recalled examples across domains. In financial contexts: De Bondt & Thaler (1985) show that stocks with dramatic recent returns (large positive or negative) are subsequently overpriced or underpriced, consistent with availability-driven overreaction. Magnitude of overweighting: recency_weight = 2.5–4.0 consistent with behavioral finance literature.
-- **Relevance to Investor Taxonomy**: The RecentEventOverweighter agent directly operationalizes this: it computes `perceived_signal = recency_weight × return_pct + (1 − recency_weight) × deviation` and trades when this exceeds salience_threshold. The elevated recency_weight (3.0) represents a tripling of the last-round return's weight relative to rational Bayesian processing.
+- **Mathematical Formulation**: The availability heuristic can be represented as a biased signal-weighting function. In operational form: perceived_signal = recency_weight × recent_return + (1 − recency_weight) × deviation. With recency_weight = 0.70, the most recent return receives most of the signal weight while the objective deviation receives only 30%.
+- **Empirical Evidence**: Tversky & Kahneman (1973) document that subjects overestimate event frequencies for salient, easily recalled examples across domains. In financial contexts: De Bondt & Thaler (1985) show that stocks with dramatic recent returns (large positive or negative) are subsequently overpriced or underpriced, consistent with availability-driven overreaction.
+- **Relevance to Investor Taxonomy**: The RecentEventOverweighter agent directly operationalizes this: it computes `perceived_signal = 0.70 × return_pct + 0.30 × deviation` and trades when this exceeds `salience_threshold = 0.02`. The 70% recent-return weight makes the most available event dominate the objective price-fundamental signal.
 
 ### 2.2 Ease of Retrieval and Media Salience (Schwarz et al.)
 
 - **Citation**: Schwarz, N., Bless, H., Strack, F., Klumpp, G., Rittenauer-Schatka, H., & Simons, A. (1991). "Ease of retrieval as information: Another look at the availability heuristic." *Journal of Personality and Social Psychology*, 61(2), 195–202. DOI: 10.1037/0022-3514.61.2.195. Also: Tetlock, P. C. (2007). "Giving content to investor sentiment: The role of media in the stock market." *Journal of Finance*, 62(3), 1139–1168. DOI: 10.1111/j.1540-6261.2007.01232.x
 - **Core Insight**: Schwarz et al. (1991) demonstrate that the *ease* of retrieving information — not just its frequency — drives judgment. Information that is widely publicized (high media saturation) is retrieved easily and thus perceived as more probable or important than less-covered information. Tetlock (2007) provides direct financial evidence: high media coverage of a stock predicts subsequent return reversal, consistent with media-driven overreaction followed by correction.
-- **Mathematical Formulation**: Media-amplified signal: amplified_signal = media_weight × deviation × social_amplification. With media_weight = 2.0 and social_amplification = 1.5: amplified_signal = 3.0 × deviation. This means a 1% fundamental deviation is perceived as a 3% signal by media-influenced traders — a 3× amplification of the raw deviation.
-- **Empirical Evidence**: Tetlock (2007) documents that abnormal media coverage predicts return reversals within 2–3 weeks, with initial price response 2–3× larger than the fundamental news would justify. Consistent with social_amplification = 1.5 (net amplification of 3.0× in the simulation).
+- **Mathematical Formulation**: Media-amplified signal: amplified_signal = media_weight × deviation × social_amplification. With media_weight = 0.80 and social_amplification = 1.50: amplified_signal = 1.20 × deviation. This means a deviation must be salient enough to cross the 3% amplified-signal threshold before the media-influenced trader acts.
+- **Empirical Evidence**: Tetlock (2007) documents that abnormal media coverage predicts return reversals within 2–3 weeks, with initial price response larger than fundamentals alone would justify. The current calibration uses social_amplification = 1.50 with a conservative 0.80 media weight.
 - **Relevance to Investor Taxonomy**: The MediaInfluencedTrader operationalizes media-driven availability: its `amplified_signal = media_weight × deviation × social_amplification` captures how media framing multiplies the perceived importance of fundamental signals beyond their informational content.
 
 ### 2.3 Memory-Based Bounded Rationality (Mullainathan)
@@ -41,7 +41,7 @@
 - **Citation**: Baker, M., & Wurgler, J. (2007). "Investor sentiment in the stock market." *Journal of Economic Perspectives*, 21(2), 129–151. DOI: 10.1257/jep.21.2.129. Also: Graham, B. (1949). *The Intelligent Investor*. Harper & Brothers.
 - **Core Insight**: Baker & Wurgler (2007) document systematic return predictability from investor sentiment proxies, consistent with availability-biased investors collectively driving prices away from fundamentals. Sentiment episodes persist long enough to create measurable mispricing. The stabilizing counterforce is fundamental anchoring — investors who ignore sentiment and trade on price-to-fundamental ratios.
 - **Empirical Evidence**: Baker & Wurgler (2007) find that high-sentiment periods predict low subsequent returns for difficult-to-value stocks, consistent with availability bias driving speculative overreaction. Effect size: overvaluation of 5–15% during peak sentiment episodes.
-- **Relevance to Investor Taxonomy**: ValueTrader embodies Graham's fundamental anchoring principle — deviation_threshold = 0.10 means it ignores all price movements within 10% of fundamental and trades only at clear mispricing, immune to availability-biased sentiment.
+- **Relevance to Investor Taxonomy**: ValueTrader embodies Graham's fundamental anchoring principle — deviation_threshold = 0.05 means it ignores smaller price movements and trades only when the price-fundamental gap is clearly large enough for a value response, immune to availability-biased sentiment.
 
 
 ## §3 Market Design Principles
@@ -55,13 +55,13 @@ Formula: **P(t+1) = P(t) + λ·D(t) + γ·[F − P(t)] + ε(t)**
 | P(t)       | Current market price       | starts at 100.0 | Normalized; scale-neutral                                                                                                                    | —                                                                 |
 | D(t)       | Net demand (buy − sell)    | computed        | Aggregate order imbalance from all agents each round                                                                                         | —                                                                 |
 | F          | Fundamental value          | 100.0           | Constant — isolates cognitive bias from fundamental news. Availability bias is a perceptual distortion, not an information advantage         | Normalization                                                     |
-| λ (lambda) | Price impact coefficient   | 0.01            | MODERATE — reflects a liquid market where bias causes meaningful but not extreme price movements; enough for measurable overreaction         | Calibrated to behavioral overreaction magnitude in Tetlock (2007) |
-| γ (gamma)  | Mean-reversion coefficient | 0.02            | Moderate — fundamental gravity gradually corrects availability-biased mispricing; not too fast (which would prevent observable bias effects) | Baker & Wurgler (2007) sentiment persistence                      |
+| λ (lambda) | Price impact coefficient   | 0.02            | MODERATE — reflects a liquid market where bias causes meaningful but not extreme price movements; enough for measurable overreaction         | Calibrated to behavioral overreaction magnitude in Tetlock (2007) |
+| γ (gamma)  | Mean-reversion coefficient | 0.03            | Moderate — fundamental gravity gradually corrects availability-biased mispricing; not too fast (which would prevent observable bias effects) | Baker & Wurgler (2007) sentiment persistence                      |
 | ε(t)       | Gaussian noise ~ N(0, σ²)  | σ = 0.5         | Moderate noise — less noisy than crash simulations; bias effects should be distinguishable from random fluctuations                          | Standard calibration                                              |
 
 **Design Rationale**:
-- λ = 0.01 is moderate: availability bias creates measurable (5–15%) mispricings but not catastrophic cascades. This is appropriate for a cognitive bias simulation where the phenomenon is persistent overreaction, not acute crash dynamics.
-- γ = 0.02 creates a mean-reversion force that competes with the bias: the simulation's key question is whether biased agents' collective selling/buying dominates γ-mean-reversion, producing persistent mispricing, or whether mean reversion quickly corrects the bias.
+- λ = 0.02 is moderate: availability bias creates measurable mispricings but not catastrophic cascades. This is appropriate for a cognitive bias simulation where the phenomenon is persistent overreaction, not acute crash dynamics.
+- γ = 0.03 creates a mean-reversion force that competes with the bias: the simulation's key question is whether biased agents' collective selling/buying dominates γ-mean-reversion, producing persistent mispricing, or whether mean reversion quickly corrects the bias.
 - Constant F = 100.0 is essential: availability bias is a *perceptual* distortion of the same publicly available information. If F changed, we could not isolate the bias from rational responses to genuine news.
 - Market also broadcasts `prev_price` and `return_pct` because availability-biased agents (particularly RecentEventOverweighter) require the most recent return as their salience signal.
 
@@ -98,25 +98,25 @@ The RecentEventOverweighter is a retail or semi-institutional investor who gives
 - Theory / Study: Availability heuristic in probability estimation
 - Citation: Tversky, A., & Kahneman, D. (1973). "Availability: A heuristic for judging frequency and probability." *Cognitive Psychology*, 5(2), 207–232. DOI: 10.1016/0010-0285(73)90033-9
 - Core Insight: Recent, dramatic events are retrieved from memory more easily than routine events, creating the illusion that they are more probable. Applied to markets: a large price move last round creates a salient mental template that is overweighted in forming the next trading decision.
-- Mathematical Formulation: Biased probability weighting: P̃(signal_relevant) = recency_weight × P(signal_recent) + (1 − recency_weight) × P(signal_objective). With recency_weight = 3.0: the most recent return is given 3× the rational Bayesian weight. Perceived signal: perceived_signal = recency_weight × return_pct + (1 − recency_weight) × deviation.
-- Empirical Evidence: De Bondt & Thaler (1985) document a 3-year reversal following extreme past returns — consistent with availability-driven overreaction creating mispricing that mean-reverts. Recency weights of 2.5–4.0 are consistent with experimental evidence (Tversky & Kahneman, 1973; Kahneman, 2011). recency_weight = 3.0 is in the empirically documented range.
-- Relevance to This Investor: `perceived_signal = 3.0 × return_pct + (1 − 3.0) × deviation = 3.0 × return_pct − 2.0 × deviation`. This creates a situation where a large recent return (even driven by noise) dominates the deviation signal — the core availability distortion.
+- Mathematical Formulation: Biased signal weighting: perceived_signal = recency_weight × return_pct + (1 − recency_weight) × deviation. With recency_weight = 0.70, the most recent return receives 70% of the perceived signal and the objective deviation receives 30%.
+- Empirical Evidence: De Bondt & Thaler (1985) document a 3-year reversal following extreme past returns — consistent with availability-driven overreaction creating mispricing that mean-reverts. The simulation calibrates this channel as a high, but bounded, 70% weight on the most recent return.
+- Relevance to This Investor: `perceived_signal = 0.70 × return_pct + 0.30 × deviation`. This creates a situation where a large recent return dominates the objective deviation signal — the core availability distortion.
 
 **Theory 2: Overreaction and Return Reversal (De Bondt & Thaler)**
 - Theory / Study: Mean reversion following extreme past returns — availability-driven overreaction
 - Citation: De Bondt, W. F. M., & Thaler, R. H. (1985). "Does the stock market overreact?" *Journal of Finance*, 40(3), 793–805. DOI: 10.2307/2327804
 - Core Insight: Investors systematically overreact to dramatic recent news, pushing prices beyond fundamentals; subsequent return reversal is the correction. De Bondt & Thaler (1985) find that portfolios of "extreme loser" stocks over 3–5 years outperform "extreme winner" stocks by 24.6% over the subsequent 3 years — the reversal confirming prior overreaction.
-- Empirical Evidence: The 24.6% three-year reversal documented by De Bondt & Thaler (1985) implies an initial overreaction of ~8% per year, or ~0.65% per month. In simulation terms, with recency_weight = 3.0 and typical return_pct of ±2%, the overreaction per round would be ~2% × (3.0 − 1) = 4% above rational sizing — consistent with the scale of documented overreaction.
-- Relevance to This Investor: salience_threshold = 0.05 (5%) calibrated so that RecentEventOverweighter activates on signals that exceed normal noise, creating the directional overreaction documented by De Bondt & Thaler; the simulation tests whether this overreaction is self-correcting (if stabilizing agents are strong enough) or persistent.
+- Empirical Evidence: The 24.6% three-year reversal documented by De Bondt & Thaler (1985) implies a meaningful initial overreaction before later correction. In simulation terms, a 70% recent-return weight makes short-run returns dominate the signal while keeping the response bounded.
+- Relevance to This Investor: salience_threshold = 0.02 (2%) is calibrated so that RecentEventOverweighter activates on meaningful recent moves, creating the directional overreaction documented by De Bondt & Thaler; the simulation tests whether this overreaction is self-correcting or persistent.
 
 #### 4.1.3  Design Purpose and Activation Scenarios
 
 **Purpose**: Model the availability-heuristic channel by which recent dramatic price moves are amplified into continued overreaction. Without RecentEventOverweighter, the simulation cannot generate the self-reinforcing overreaction dynamic where a salient price move triggers further over-trading in the same direction.
 
 **Activation Scenarios**:
-- Scenario A (Large positive recent return, return_pct > 0.017): perceived_signal > salience_threshold → buy. Chases recent positive momentum, driving prices further above fundamental. Models the "recent winners attract more buying" phenomenon.
-- Scenario B (Large negative recent return, return_pct < −0.017): perceived_signal < −salience_threshold → sell. Panic sells following a dramatic decline, amplifying the decline beyond what fundamentals warrant.
-- Scenario C (Small return, |return_pct| < 0.017): |perceived_signal| ≤ salience_threshold → hold. Most rounds are holds — activation requires a salient event.
+- Scenario A (Positive perceived signal > 0.02): buy. Chases recent positive momentum, driving prices further above fundamental.
+- Scenario B (Negative perceived signal < -0.02): sell. Panic sells following a salient decline, amplifying the decline beyond what fundamentals warrant.
+- Scenario C (Small perceived signal): hold. Most rounds are holds — activation requires a salient event.
 
 **Market Contribution**: Destabilizing — amplifies recent directional moves. Creates momentum (positive autocorrelation in returns during salient-event episodes). The key question is whether this overreaction is large enough to produce measurable persistent mispricing.
 
@@ -125,33 +125,33 @@ The RecentEventOverweighter is a retail or semi-institutional investor who gives
 #### 4.1.4  Behavioral Framework
 
 **4.1.4.1  Decision Information Set**
-- `return_pct`: The primary "available" signal — the most recent price return. This is the cognitively salient input that the availability heuristic overweights. recency_weight = 3.0 gives this signal 3× its rational Bayesian weight.
-- `deviation`: Secondary objective signal — the objective price-to-fundamental gap. Present in the perceived_signal formula but diluted by the negative (1 − recency_weight) = −2.0 coefficient, meaning deviation actually *subtracts* from perceived_signal when recency_weight > 1.
+- `return_pct`: The primary "available" signal — the most recent price return. This is the cognitively salient input that the availability heuristic overweights. recency_weight = 0.70 gives this signal most of the perceived-signal weight.
+- `deviation`: Secondary objective signal — the objective price-to-fundamental gap. Present in the perceived_signal formula with weight 0.30.
 - Does NOT separately maintain a history buffer of returns for multi-period weighting — uses only the single most recent return_pct, consistent with availability heuristic's emphasis on the *most* recently available event.
 
 **4.1.4.2  Core Behavioral Mechanism**
 1. Each round, observe `return_pct` and `deviation` from market broadcast.
-2. Compute: perceived_signal = recency_weight × return_pct + (1 − recency_weight) × deviation = 3.0 × return_pct − 2.0 × deviation.
-3. If |perceived_signal| > salience_threshold (0.05): trade.
+2. Compute: perceived_signal = recency_weight × return_pct + (1 − recency_weight) × deviation = 0.70 × return_pct + 0.30 × deviation.
+3. If |perceived_signal| > salience_threshold (0.02): trade.
 4. If perceived_signal > 0 (net positive signal): buy. Quantity = min(300, |perceived_signal| × 5000). Cash-constrained.
 5. If perceived_signal < 0 (net negative signal): sell. Quantity = min(300, |perceived_signal| × 5000). Position-constrained.
-6. Hold if |perceived_signal| ≤ 0.05.
+6. Hold if |perceived_signal| ≤ 0.02.
 7. The sizing formula (|perceived_signal| × 5000) means a perceived_signal of 0.06 produces quantity = 300 shares — maximum; a signal of 0.02 would produce 100 shares.
 
 **4.1.4.3  Mathematical Model**
 - Decision variable: Q*(t) in shares
-- Perceived signal: s̃(t) = ρ × r(t) + (1 − ρ) × δ(t), where ρ = recency_weight = 3.0, r = return_pct, δ = deviation
-- Trigger function: trade if |s̃(t)| > θ (θ = salience_threshold = 0.05)
+- Perceived signal: s̃(t) = ρ × r(t) + (1 − ρ) × δ(t), where ρ = recency_weight = 0.70, r = return_pct, δ = deviation
+- Trigger function: trade if |s̃(t)| > θ (θ = salience_threshold = 0.02)
 - Sizing: Q*(t) = min(Q_max, |s̃(t)| × 5000), where Q_max = 300
 - Direction: buy if s̃(t) > 0; sell if s̃(t) < 0
 - State variables: cash, position (updated each trade)
 
 | Parameter          | Value | Meaning                                     | Config Path                                                     | Source                                              |
 |--------------------|-------|---------------------------------------------|-----------------------------------------------------------------|-----------------------------------------------------|
-| recency_weight     | 3.0   | Overweighting factor for most recent return | `AvailabilityBias/Rule/config.yaml → recent_event_overweighter` | Tversky & Kahneman (1973); De Bondt & Thaler (1985) |
-| salience_threshold | 0.05  | Perceived signal threshold for trading      | `AvailabilityBias/Rule/config.yaml → recent_event_overweighter` | Calibrated to 5% salience filter                    |
-| initial_cash       | 50000 | Starting cash reserves                      | `AvailabilityBias/Rule/config.yaml → recent_event_overweighter` | Normalization                                       |
-| initial_position   | 1000  | Starting share position                     | `AvailabilityBias/Rule/config.yaml → recent_event_overweighter` | Normalization                                       |
+| recency_weight     | 0.70  | Weight on most recent return                | `AvailabilityBias/Rule/config.yaml → recent_event_overweighter` | Tversky & Kahneman (1973); De Bondt & Thaler (1985) |
+| salience_threshold | 0.02  | Perceived signal threshold for trading      | `AvailabilityBias/Rule/config.yaml → recent_event_overweighter` | Calibrated to 2% salience filter                    |
+| initial_cash       | 10000 | Starting cash reserves                      | `AvailabilityBias/Rule/config.yaml → recent_event_overweighter` | Normalization                                       |
+| initial_position   | 0     | Starting share position                     | `AvailabilityBias/Rule/config.yaml → recent_event_overweighter` | Normalization                                       |
 
 **4.1.4.4  Behavioral Properties**
 - Time horizon: Short-term — reacts to each round's most recent return; no multi-period horizon
@@ -161,35 +161,35 @@ The RecentEventOverweighter is a retail or semi-institutional investor who gives
 
 #### 4.1.5  Decision Process Walkthrough
 
-Given: price = 103.0, fundamental = 100.0, deviation = +0.03, prev_price = 100.0, return_pct = +0.03, recency_weight = 3.0, salience_threshold = 0.05, cash = 50000, position = 1000
+Given: price = 103.0, fundamental = 100.0, deviation = +0.03, prev_price = 100.0, return_pct = +0.03, recency_weight = 0.70, salience_threshold = 0.02, cash = 10000, position = 0
 
-Step 1: Compute perceived_signal = 3.0 × 0.03 + (1 − 3.0) × 0.03 = 0.09 − 0.06 = 0.03.
-Step 2: Is |0.03| > 0.05? NO → hold. (The 3% return is not salient enough to trigger.)
+Step 1: Compute perceived_signal = 0.70 × 0.03 + 0.30 × 0.03 = 0.03.
+Step 2: Is |0.03| > 0.02? YES → buy.
 
 Revised example with larger return:
 Given: return_pct = +0.025, deviation = +0.03
 
-Step 1: perceived_signal = 3.0 × 0.025 + (−2.0) × 0.03 = 0.075 − 0.06 = 0.015. Not salient enough.
+Step 1: perceived_signal = 0.70 × 0.025 + 0.30 × 0.03 = 0.0265. Salient enough to trade.
 
 Example with salient return:
 Given: return_pct = +0.04, deviation = +0.03
 
-Step 1: perceived_signal = 3.0 × 0.04 + (−2.0) × 0.03 = 0.12 − 0.06 = 0.06.
-Step 2: |0.06| > 0.05? YES → trade (buy, since signal > 0).
-Step 3: Quantity = min(300, 0.06 × 5000) = min(300, 300) = 300 shares.
-Step 4: Cost check: 300 × 103 = 30900 ≤ 50000 → valid.
-Step 5: Send order: action=buy, quantity=300, bid_price=103.
-Result: +300 to D(t); upward price pressure of λ × 300 = 0.01 × 300 = 3 price units. Overreaction to a 4% recent return creates additional buying that drives price further above fundamental.
+Step 1: perceived_signal = 0.70 × 0.04 + 0.30 × 0.03 = 0.037.
+Step 2: |0.037| > 0.02? YES → trade (buy, since signal > 0).
+Step 3: Quantity = min(300, 0.037 × 5000) = min(300, 185) = 185 shares.
+Step 4: Cost check: 185 × 103 = 19055, so cash-constrained quantity is 97.09 shares when starting cash is 10000.
+Step 5: Send order: action=buy, quantity≈97.09, bid_price=103.
+Result: upward price pressure of λ × 97.09 ≈ 1.94 price units. Overreaction to a 4% recent return creates additional buying that drives price further above fundamental.
 
 #### 4.1.6  Worked Numerical Example
 
-Market state: price = 98.0, fundamental = 100.0, deviation = −0.02, prev_price = 102.0, return_pct = −0.039 (−3.9% decline last round), recency_weight = 3.0, salience_threshold = 0.05
+Market state: price = 98.0, fundamental = 100.0, deviation = −0.02, prev_price = 102.0, return_pct = −0.039 (−3.9% decline last round), recency_weight = 0.70, salience_threshold = 0.02
 
-Perceived signal: s̃ = 3.0 × (−0.039) + (−2.0) × (−0.02) = −0.117 + 0.04 = −0.077.
-|−0.077| > 0.05 → sell.
-Quantity: min(300, 0.077 × 5000) = min(300, 385) = 300 shares.
-Order: action=sell, quantity=300, bid_price=98.
-Rationale: The dramatic −3.9% decline last round is cognitively "available" — the investor perceives this as a strong negative signal (recency_weight = 3.0 triples its weight). Despite the objective deviation being only −2% (a mild undervaluation that a rational investor would buy), the availability-biased investor sells, amplifying the decline. This is De Bondt & Thaler's overreaction mechanism in action.
+Perceived signal: s̃ = 0.70 × (−0.039) + 0.30 × (−0.02) = −0.0333.
+|−0.0333| > 0.02 → sell.
+Quantity: min(300, 0.0333 × 5000) = 166.5 shares, then constrained by current position.
+Order: action=sell, quantity=166.5 if the investor has sufficient position, bid_price=98.
+Rationale: The dramatic -3.9% decline last round is cognitively "available" — the investor perceives this as a strong negative signal because recent return receives 70% of the perceived-signal weight. Despite the objective deviation being only -2% (a mild undervaluation that a rational investor would buy), the availability-biased investor sells if it has inventory, amplifying the decline. This is De Bondt & Thaler's overreaction mechanism in action.
 
 #### 4.1.7  Academic References
 
@@ -206,7 +206,7 @@ Rationale: The dramatic −3.9% decline last round is cognitively "available" �
 
 #### 4.2.1  Summary
 
-The MediaInfluencedTrader is an investor whose perceptions of market conditions are shaped by media framing and social signal amplification rather than direct observation of price-fundamental relationships. When the media covers a market event intensively (proxied by the deviation signal being amplified by media_weight × social_amplification), this investor perceives the event as more significant than it is. This investor does not overweight recent returns (unlike RecentEventOverweighter) but instead overweights the magnitude of any current deviation — treating a 1% fundamental deviation as a 3% signal when it is extensively covered. This creates a distinct channel: availability through media salience rather than temporal recency.
+The MediaInfluencedTrader is an investor whose perceptions of market conditions are shaped by media framing and social signal amplification rather than direct observation of price-fundamental relationships. When the media covers a market event intensively (proxied by the deviation signal being amplified by media_weight × social_amplification), this investor perceives the event as more significant than it is. This investor does not overweight recent returns (unlike RecentEventOverweighter) but instead overweights the magnitude of any current deviation — treating deviation as a media-salient signal with 1.2× perceived intensity. This creates a distinct channel: availability through media salience rather than temporal recency.
 
 #### 4.2.2  Theoretical and Empirical Foundation
 
@@ -214,25 +214,25 @@ The MediaInfluencedTrader is an investor whose perceptions of market conditions 
 - Theory / Study: Media coverage as a driver of investor sentiment and return predictability
 - Citation: Tetlock, P. C. (2007). "Giving content to investor sentiment: The role of media in the stock market." *Journal of Finance*, 62(3), 1139–1168. DOI: 10.1111/j.1540-6261.2007.01232.x
 - Core Insight: Tetlock (2007) finds that media pessimism (negative language in Wall Street Journal columns) predicts downward pressure on Dow Jones next day and subsequent reversal within 1–2 weeks. The initial price impact is driven by sentiment-influenced retail investors (the MediaInfluencedTrader archetype); the subsequent reversal reflects rational correction. The effect is linear in media intensity.
-- Mathematical Formulation: Tetlock (2007) estimates a 1 standard deviation increase in media pessimism predicts a −0.5% market return, with reversal within 3–5 days. Extrapolated to simulation: media_weight × deviation × social_amplification = 2.0 × deviation × 1.5 = 3.0 × deviation. A 1% deviation appears as a 3% signal to the MediaInfluencedTrader. This 3× amplification is consistent with Tetlock's documented 2.5–4× media multiplier for retail sentiment response.
+- Mathematical Formulation: Tetlock (2007) estimates a 1 standard deviation increase in media pessimism predicts a −0.5% market return, with reversal within 3–5 days. Extrapolated to simulation: media_weight × deviation × social_amplification = 0.80 × deviation × 1.50 = 1.20 × deviation.
 - Empirical Evidence: Tetlock (2007) Table 2 shows that media pessimism explains 11–18% of next-day return variance for high-coverage stocks. Amplification consistent with social_amplification = 1.5 (50% additional amplification from social/network effects beyond direct media).
-- Relevance to This Investor: amplified_signal = 2.0 × deviation × 1.5 = 3.0 × deviation. The signal threshold of 0.03 (implicitly, when |amplified_signal| > 0.03) means the MediaInfluencedTrader activates at |deviation| > 0.01 (1% deviation with 3× amplification). This is an appropriately low activation threshold for a media-driven agent.
+- Relevance to This Investor: amplified_signal = 0.80 × deviation × 1.50 = 1.20 × deviation. The signal threshold of 0.03 means the MediaInfluencedTrader activates at |deviation| > 0.025.
 
 **Theory 2: Social Amplification of Risk (Schwarz et al.; Kasperson et al.)**
 - Theory / Study: Social amplification creating cascade effects in perceived risk
 - Citation: Schwarz, N., et al. (1991). "Ease of retrieval as information." *Journal of Personality and Social Psychology*, 61(2), 195–202. DOI: 10.1037/0022-3514.61.2.195. Also: Kasperson, R. E., et al. (1988). "The social amplification of risk: A conceptual framework." *Risk Analysis*, 8(2), 177–187. DOI: 10.1111/j.1539-6924.1988.tb01168.x
 - Core Insight: Schwarz et al. (1991) show that information delivered through high-profile channels (more "available" due to broadcast intensity) is perceived as more important even when the underlying content is identical to less-publicized information. Kasperson et al. (1988) develop the Social Amplification of Risk Framework (SARF) showing how social networks multiply the perceived importance of risk signals. Applied to markets: social_amplification captures the multiplicative effect of network-based information spread.
 - Empirical Evidence: Kasperson et al.'s SARF documents amplification factors of 1.5–3.0 across different risk domains; social_amplification = 1.5 is at the conservative end of this range, consistent with mature financial markets with professional investor participation.
-- Relevance to This Investor: social_amplification = 1.5 is the network amplification factor applied on top of the direct media weight; the two combined (media_weight × social_amplification = 3.0) represent the total perceived signal inflation from media coverage.
+- Relevance to This Investor: social_amplification = 1.5 is the network amplification factor applied on top of the direct media weight; the two combined (media_weight × social_amplification = 1.20) represent the total perceived signal inflation from media coverage.
 
 #### 4.2.3  Design Purpose and Activation Scenarios
 
 **Purpose**: Model the media-salience channel of availability bias — where the *intensity of coverage* (not the recency of an event) amplifies the perceived importance of fundamental signals. Creates overreaction to current fundamental deviations that are heavily covered.
 
 **Activation Scenarios**:
-- Scenario A (Small deviation, |deviation| < 0.01): |amplified_signal| < 0.03 → hold. Even media amplification insufficient to trigger trading; consistent with routine market fluctuations generating little coverage or reaction.
-- Scenario B (Moderate deviation, 0.01 < |deviation| < 0.05): |amplified_signal| = 0.03–0.15 → trade proportionally. Media is covering the deviation intensively; investor reacts more strongly than objective analysis would justify.
-- Scenario C (Large deviation, |deviation| > 0.05): |amplified_signal| > 0.15 → trade at maximum (300 shares). Intensive media coverage of a significant fundamental gap triggers maximum activation; investor treats the deviation as a major crisis/opportunity.
+- Scenario A (Small deviation, |deviation| < 0.025): |amplified_signal| < 0.03 → hold. Even media amplification is insufficient to trigger trading.
+- Scenario B (Moderate deviation, 0.025 < |deviation| < 0.05): |amplified_signal| = 0.03–0.06 → trade proportionally. Media is covering the deviation intensively; investor reacts more strongly than objective analysis alone would justify.
+- Scenario C (Large deviation, |deviation| > 0.05): |amplified_signal| > 0.06 → trade with larger proportional size. Intensive media coverage of a significant fundamental gap triggers stronger activation.
 
 **Market Contribution**: Destabilizing — amplifies fundamental deviations into larger price moves than rational analysis would produce. Unlike RecentEventOverweighter (which amplifies momentum), MediaInfluencedTrader amplifies level-based deviations — a different and potentially complementary destabilizing mechanism.
 
@@ -247,27 +247,27 @@ The MediaInfluencedTrader is an investor whose perceptions of market conditions 
 
 **4.2.4.2  Core Behavioral Mechanism**
 1. Each round, observe `deviation` from market broadcast.
-2. Compute: amplified_signal = media_weight × deviation × social_amplification = 2.0 × deviation × 1.5 = 3.0 × deviation.
-3. If |amplified_signal| > 0.03: trade. (Equivalent to |deviation| > 0.01.)
-4. If amplified_signal > 0 (market above fundamental; media covering overvaluation): sell. Quantity = min(300, amplified_signal × 5000). Position-constrained.
-5. If amplified_signal < 0 (market below fundamental; media covering undervaluation): buy. Quantity = min(300, |amplified_signal| × 5000). Cash-constrained.
+2. Compute: amplified_signal = media_weight × deviation × social_amplification = 0.80 × deviation × 1.50 = 1.20 × deviation.
+3. If |amplified_signal| > 0.03: trade. (Equivalent to |deviation| > 0.025.)
+4. If amplified_signal > 0 (market above fundamental; media narrative amplifies optimism): buy. Quantity = min(300, amplified_signal × 5000). Cash-constrained.
+5. If amplified_signal < 0 (market below fundamental; media narrative amplifies pessimism): sell. Quantity = min(300, |amplified_signal| × 5000). Position-constrained.
 6. Hold if |amplified_signal| ≤ 0.03.
-7. The media-amplified signal is contrarian with respect to deviation (buys when price is below fundamental, sells when above) — but with amplified magnitude, the reaction is disproportionate.
+7. The media-amplified signal is directional with respect to deviation: it buys into positive media salience and sells into negative media salience, making the reaction destabilizing when media framing reinforces the current mispricing.
 
 **4.2.4.3  Mathematical Model**
 - Decision variable: Q*(t) in shares
-- Amplified signal: ã(t) = m_w × δ(t) × s_a, where m_w = media_weight = 2.0, s_a = social_amplification = 1.5, δ = deviation
-- Trigger: trade if |ã(t)| > 0.03 (implicitly, |δ| > 0.01)
+- Amplified signal: ã(t) = m_w × δ(t) × s_a, where m_w = media_weight = 0.80, s_a = social_amplification = 1.50, δ = deviation
+- Trigger: trade if |ã(t)| > 0.03 (implicitly, |δ| > 0.025)
 - Sizing: Q*(t) = min(Q_max, |ã(t)| × 5000), where Q_max = 300
-- Direction: sell if ã(t) > 0; buy if ã(t) < 0 (contrarian to deviation, but with amplified size)
+- Direction: buy if ã(t) > 0; sell if ã(t) < 0
 - State variables: cash, position
 
 | Parameter            | Value | Meaning                                           | Config Path                                                   | Source                  |
 |----------------------|-------|---------------------------------------------------|---------------------------------------------------------------|-------------------------|
-| media_weight         | 2.0   | Media intensity amplification of deviation signal | `AvailabilityBias/Rule/config.yaml → media_influenced_trader` | Tetlock (2007)          |
+| media_weight         | 0.80  | Media intensity amplification of deviation signal | `AvailabilityBias/Rule/config.yaml → media_influenced_trader` | Tetlock (2007)          |
 | social_amplification | 1.5   | Social network additional amplification factor    | `AvailabilityBias/Rule/config.yaml → media_influenced_trader` | Kasperson et al. (1988) |
-| initial_cash         | 50000 | Starting cash reserves                            | `AvailabilityBias/Rule/config.yaml → media_influenced_trader` | Normalization           |
-| initial_position     | 1000  | Starting share position                           | `AvailabilityBias/Rule/config.yaml → media_influenced_trader` | Normalization           |
+| initial_cash         | 10000 | Starting cash reserves                            | `AvailabilityBias/Rule/config.yaml → media_influenced_trader` | Normalization           |
+| initial_position     | 0     | Starting share position                           | `AvailabilityBias/Rule/config.yaml → media_influenced_trader` | Normalization           |
 
 **4.2.4.4  Behavioral Properties**
 - Time horizon: Short-to-medium term — responds to current deviation level; position held until deviation corrects
@@ -277,25 +277,23 @@ The MediaInfluencedTrader is an investor whose perceptions of market conditions 
 
 #### 4.2.5  Decision Process Walkthrough
 
-Given: price = 103.0, fundamental = 100.0, deviation = +0.03, media_weight = 2.0, social_amplification = 1.5, position = 1000
+Given: price = 103.0, fundamental = 100.0, deviation = +0.03, media_weight = 0.80, social_amplification = 1.50, cash = 10000
 
-Step 1: Compute amplified_signal = 2.0 × 0.03 × 1.5 = 0.09.
-Step 2: |0.09| > 0.03? YES → trade (sell, since signal > 0 means market overvalued per media framing).
-Step 3: Quantity = min(300, 0.09 × 5000) = min(300, 450) = 300 shares.
-Step 4: Position check: min(300, 1000) = 300 → valid.
-Step 5: Send order: action=sell, quantity=300, bid_price=103.
-Result: −300 shares in D(t); media-driven selling of overvalued market at 3% deviation; net effect is partially stabilizing (selling into overvaluation) but with 3× amplified size vs. rational 1× sizing.
+Step 1: Compute amplified_signal = 0.80 × 0.03 × 1.50 = 0.036.
+Step 2: |0.036| > 0.03? YES → trade (buy, since positive media salience reinforces optimism).
+Step 3: Quantity = min(300, 0.036 × 5000) = 180 shares, then cash-constrained to 97.09 shares at price 103.
+Step 4: Send order: action=buy, quantity≈97.09, bid_price=103.
+Result: media-driven buying amplifies a positive deviation and pushes price further above fundamental.
 
 #### 4.2.6  Worked Numerical Example
 
-Market state: price = 97.0, fundamental = 100.0, deviation = −0.03, media_weight = 2.0, social_amplification = 1.5, cash = 48500
+Market state: price = 97.0, fundamental = 100.0, deviation = −0.03, media_weight = 0.80, social_amplification = 1.50, position = 200
 
-Amplified signal: ã = 2.0 × (−0.03) × 1.5 = −0.09.
-|−0.09| > 0.03 → buy (market undervalued; media covering discount).
-Quantity: min(300, 0.09 × 5000) = min(300, 450) = 300 shares.
-Cost: 300 × 97 = 29100 ≤ 48500 → valid.
-Order: action=buy, quantity=300, bid_price=97.
-Rationale: The media is amplifying the 3% undervaluation into a 9% perceived signal — the investor overreacts by buying 300 shares where a rational agent (SystematicAnalyst) would buy ~150 shares (3% × 5000 = 150). This over-buying partially overcorrects the undervaluation, consistent with Tetlock (2007)'s documented media-driven return reversals.
+Amplified signal: ã = 0.80 × (−0.03) × 1.50 = −0.036.
+|−0.036| > 0.03 → sell (negative media salience reinforces pessimism).
+Quantity: min(300, 0.036 × 5000) = 180 shares, then position-constrained to 180.
+Order: action=sell, quantity=180, bid_price=97.
+Rationale: The media is amplifying the negative deviation into a salient pessimistic signal. The investor overreacts by selling into an already undervalued market, creating the destabilizing media-availability channel.
 
 #### 4.2.7  Academic References
 
@@ -341,7 +339,7 @@ The SystematicAnalyst is the rational benchmark — an institutional investor wh
 
 **Market Contribution**: Stabilizing — directly counters availability-biased overreaction by trading in the opposite direction. The balance between SystematicAnalyst's stabilizing volume and biased agents' destabilizing volume determines the equilibrium mispricing magnitude.
 
-**Interaction with other agents**: Directly opposes RecentEventOverweighter and MediaInfluencedTrader (trades in the opposite direction from their availability-driven moves); aligns with ValueTrader (both stabilizing but at different thresholds — SystematicAnalyst at 3%, ValueTrader at 10%).
+**Interaction with other agents**: Directly opposes RecentEventOverweighter and MediaInfluencedTrader when they push price away from fundamental; aligns with ValueTrader (both stabilizing but at different thresholds — SystematicAnalyst at 3%, ValueTrader at 5%).
 
 #### 4.3.4  Behavioral Framework
 
@@ -366,9 +364,9 @@ The SystematicAnalyst is the rational benchmark — an institutional investor wh
 | Parameter          | Value | Meaning                                           | Config Path                                              | Source                       |
 |--------------------|-------|---------------------------------------------------|----------------------------------------------------------|------------------------------|
 | evidence_threshold | 0.03  | Minimum deviation to trigger rational trading     | `AvailabilityBias/Rule/config.yaml → systematic_analyst` | Mullainathan (2002)          |
-| weight_decay       | 0.95  | Historical signal weight decay (for multi-period) | `AvailabilityBias/Rule/config.yaml → systematic_analyst` | Bayesian updating convention |
-| initial_cash       | 50000 | Starting cash                                     | `AvailabilityBias/Rule/config.yaml → systematic_analyst` | Normalization                |
-| initial_position   | 1000  | Starting position                                 | `AvailabilityBias/Rule/config.yaml → systematic_analyst` | Normalization                |
+| weight_decay       | 0.80  | Historical signal weight decay (reserved for multi-period variants) | `AvailabilityBias/Rule/config.yaml → systematic_analyst` | Bayesian updating convention |
+| initial_cash       | 10000 | Starting cash                                     | `AvailabilityBias/Rule/config.yaml → systematic_analyst` | Normalization                |
+| initial_position   | 0     | Starting position                                 | `AvailabilityBias/Rule/config.yaml → systematic_analyst` | Normalization                |
 
 **4.3.4.4  Behavioral Properties**
 - Time horizon: Medium-term — responds to current deviation without momentum consideration
@@ -378,23 +376,23 @@ The SystematicAnalyst is the rational benchmark — an institutional investor wh
 
 #### 4.3.5  Decision Process Walkthrough
 
-Given: price = 103.5, fundamental = 100.0, deviation = +0.035, cash = 50000, position = 1000
+Given: price = 103.5, fundamental = 100.0, deviation = +0.035, cash = 10000, position = 200
 
 Step 1: deviation = +0.035. Is |0.035| > 0.03? YES → sell (price above fundamental).
 Step 2: Quantity = min(300, 0.035 × 5000) = min(300, 175) = 175 shares.
-Step 3: Position check: min(175, 1000) = 175 → valid.
+Step 3: Position check: min(175, 200) = 175 → valid.
 Step 4: Send order: action=sell, quantity=175, bid_price=103.5.
-Result: −175 shares in D(t); systematic correction of 3.5% overvaluation. Contrast: MediaInfluencedTrader would sell 300 shares (max) at this deviation (amplified signal = 3 × 3.5% = 10.5%), demonstrating the 1.7× overreaction of the biased agent.
+Result: -175 shares in D(t); systematic correction of 3.5% overvaluation. Contrast: MediaInfluencedTrader would buy into the positive media-salient deviation, showing the destabilizing direction of that bias channel.
 
 #### 4.3.6  Worked Numerical Example
 
-Market state: price = 96.5, fundamental = 100.0, deviation = −0.035, cash = 50000, position = 800
+Market state: price = 96.5, fundamental = 100.0, deviation = -0.035, cash = 10000, position = 0
 
 Trigger: |−0.035| > 0.03 → buy.
 Quantity: min(300, 0.035 × 5000) = min(300, 175) = 175 shares.
-Cost: 175 × 96.5 = 16887.5 ≤ 50000 → valid.
-Order: action=buy, quantity=175, bid_price=96.5.
-Rationale: 3.5% undervaluation triggers a rational proportional buy of 175 shares — the systematically correct response. RecentEventOverweighter at the same deviation with a recent −3% return would compute perceived_signal = 3 × (−0.03) + (−2) × (−0.035) = −0.09 + 0.07 = −0.02, which is BELOW the salience threshold (0.05). So the RecentEventOverweighter might hold while SystematicAnalyst buys — demonstrating how availability bias can cause under-reaction to slow-developing fundamental undervaluation.
+Cost: 175 × 96.5 = 16887.5, so cash-constrained quantity is 103.63 shares with starting cash 10000.
+Order: action=buy, quantity≈103.63, bid_price=96.5.
+Rationale: 3.5% undervaluation triggers a rational proportional buy — the systematically correct response. RecentEventOverweighter at the same deviation with a recent -3% return would compute perceived_signal = 0.70 × (-0.03) + 0.30 × (-0.035) = -0.0315, producing availability-driven selling instead of rational buying if it has inventory.
 
 #### 4.3.7  Academic References
 
@@ -411,16 +409,16 @@ Rationale: 3.5% undervaluation triggers a rational proportional buy of 175 share
 
 #### 4.4.1  Summary
 
-The ValueTrader is a patient, fundamental-focused investor who trades only when the price-fundamental gap is large enough to represent a clear margin of safety. Unlike the SystematicAnalyst (who responds to 3% deviations), the ValueTrader requires a 10% deviation before acting — a higher bar that ensures it is not distracted by the noise-level mispricings that availability-biased agents create constantly. The ValueTrader embodies Graham's value investing discipline applied to a market distorted by cognitive bias: it waits patiently for bias-driven overreaction to create genuine bargains (deviation < −10%) or clear overvaluation (deviation > +10%) and then acts with fixed position sizing. This is the deepest stabilizing force in the simulation.
+The ValueTrader is a patient, fundamental-focused investor who trades only when the price-fundamental gap is large enough to represent a clear margin of safety. Unlike the SystematicAnalyst (who responds to 3% deviations), the ValueTrader requires a 5% deviation before acting — a higher bar that ensures it is not distracted by the smallest noise-level mispricings. The ValueTrader embodies Graham's value investing discipline applied to a market distorted by cognitive bias: it waits for bias-driven overreaction to create meaningful bargains (deviation < -5%) or clear overvaluation (deviation > +5%) and then acts with fixed position sizing.
 
 #### 4.4.2  Theoretical and Empirical Foundation
 
 **Theory 1: Value Investing and Margin of Safety (Graham)**
 - Theory / Study: Margin of safety as the core principle of value investing
 - Citation: Graham, B. (1949). *The Intelligent Investor*. Harper & Brothers. Also: Graham, B., & Dodd, D. (1934). *Security Analysis*. McGraw-Hill.
-- Core Insight: Graham's margin of safety principle requires buying at a substantial discount to intrinsic value to guard against error and uncertainty. In an availability-biased market, media-driven and recency-biased agents create transient mispricings of 5–15% that are NOT genuine fundamental changes. The ValueTrader sets deviation_threshold = 0.10 to distinguish genuine mispricing (> 10%) from noise-level availability-bias fluctuations.
-- Empirical Evidence: Graham recommended 20–33% discount for common stocks; in the simulation context of a low-noise market with 5–15% typical availability bias episodes, 10% represents approximately one standard deviation of bias-driven mispricing — a meaningful margin of safety. Fixed order sizing (position_size = 500 shares) reflects Graham's predetermined discipline.
-- Relevance to This Investor: deviation_threshold = 0.10 calibrated to activate only on genuine availability-bias-driven deep mispricings; position_size = 500 is fixed and not deviation-scaled, reflecting Graham's non-speculative position sizing discipline.
+- Core Insight: Graham's margin of safety principle requires buying at a substantial discount to intrinsic value to guard against error and uncertainty. In an availability-biased market, media-driven and recency-biased agents create transient mispricings that are not genuine fundamental changes. The ValueTrader sets deviation_threshold = 0.05 to distinguish meaningful mispricing from routine fluctuations.
+- Empirical Evidence: Graham recommended a large margin of safety for common stocks; in the simulation context of a normalized single-asset market, 5% is a meaningful margin that lets value trading appear within 200 rounds without dominating every small fluctuation. Fixed order sizing (position_size = 300 shares) reflects Graham's predetermined discipline.
+- Relevance to This Investor: deviation_threshold = 0.05 calibrated to activate only on meaningful availability-bias-driven mispricings; position_size = 300 is fixed and not deviation-scaled, reflecting Graham's non-speculative position sizing discipline.
 
 **Theory 2: Long-Horizon Return Predictability and Value Premium**
 - Theory / Study: Value factor — long-run return predictability from price-to-book ratios
@@ -431,41 +429,41 @@ The ValueTrader is a patient, fundamental-focused investor who trades only when 
 
 #### 4.4.3  Design Purpose and Activation Scenarios
 
-**Purpose**: Provide the deepest and most reliable stabilizing force — activating only when availability-biased agents have created a genuine ≥10% mispricing. ValueTrader is the ultimate price floor (for undervaluation) and ceiling (for overvaluation) in the simulation.
+**Purpose**: Provide a patient stabilizing force — activating only when availability-biased agents have created a meaningful >=5% mispricing. ValueTrader is the price floor for undervaluation and ceiling for overvaluation in the simulation.
 
 **Activation Scenarios**:
-- Scenario A (Bias creates moderate mispricing, |deviation| < 10%): Hold. Availability bias fluctuations are insufficient to meet ValueTrader's margin of safety threshold. Most rounds are holds.
-- Scenario B (Deep undervaluation, deviation < −10%): Buy 500 shares. This happens when both biased agents have been selling simultaneously for multiple rounds. ValueTrader's buying begins arresting the decline.
-- Scenario C (Deep overvaluation, deviation > +10%): Sell 500 shares. Availability-biased momentum buying has pushed prices to a 10%+ premium; ValueTrader takes profit and provides corrective selling.
+- Scenario A (Bias creates moderate mispricing, |deviation| < 5%): Hold. Availability bias fluctuations are insufficient to meet ValueTrader's margin of safety threshold.
+- Scenario B (Undervaluation, deviation < -5%): Buy 300 shares, cash-constrained. ValueTrader's buying begins arresting the decline.
+- Scenario C (Overvaluation, deviation > +5%): Sell 300 shares, position-constrained. Availability-biased momentum buying has pushed prices to a premium; ValueTrader takes profit and provides corrective selling.
 
-**Market Contribution**: Strongly stabilizing — the deepest floor/ceiling mechanism. When active, adds 500 shares to buy or sell side regardless of deviation magnitude, providing a discrete stabilizing shock.
+**Market Contribution**: Stabilizing floor/ceiling mechanism. When active, adds up to 300 shares to buy or sell side regardless of deviation magnitude, providing a discrete stabilizing shock.
 
-**Interaction with other agents**: Counters both RecentEventOverweighter and MediaInfluencedTrader when they collectively drive deviation > 10%; aligns with SystematicAnalyst (both stabilizing, different thresholds); provides the price floor that prevents cascading declines beyond −10%.
+**Interaction with other agents**: Counters both RecentEventOverweighter and MediaInfluencedTrader when they collectively drive deviation beyond 5%; aligns with SystematicAnalyst (both stabilizing, different thresholds); provides a price floor/ceiling against availability-driven extremes.
 
 #### 4.4.4  Behavioral Framework
 
 **4.4.4.1  Decision Information Set**
-- `deviation`: Sole decision signal — the objective price-fundamental gap. Higher threshold (0.10) than SystematicAnalyst (0.03) means ValueTrader filters out noise-level bias episodes.
+- `deviation`: Sole decision signal — the objective price-fundamental gap. Higher threshold (0.05) than SystematicAnalyst (0.03) means ValueTrader filters out smaller bias episodes.
 - `cash`, `position`: Constraint variables; cash must cover position_size × price for buying.
 
 **4.4.4.2  Core Behavioral Mechanism**
 1. Observe `deviation`.
-2. If deviation < −deviation_threshold (−0.10): buy position_size = 500 shares (cash-constrained).
-3. If deviation > +deviation_threshold (+0.10): sell position_size = 500 shares (position-constrained).
-4. Hold if |deviation| ≤ 0.10.
+2. If deviation < -deviation_threshold (-0.05): buy position_size = 300 shares (cash-constrained).
+3. If deviation > +deviation_threshold (+0.05): sell position_size = 300 shares (position-constrained).
+4. Hold if |deviation| ≤ 0.05.
 
 **4.4.4.3  Mathematical Model**
-- Trigger function: buy if δ < −m; sell if δ > +m; where m = deviation_threshold = 0.10
+- Trigger function: buy if δ < -m; sell if δ > +m; where m = deviation_threshold = 0.05
 - Sizing: Q*(t) = min(position_size, floor(cash / price)) for buys; min(position_size, position) for sells
-- Fixed size: position_size = 500 (no deviation-proportional scaling)
+- Fixed size: position_size = 300 (no deviation-proportional scaling)
 - State variables: cash, position
 
 | Parameter           | Value | Meaning                                    | Config Path                                        | Source                                                     |
 |---------------------|-------|--------------------------------------------|----------------------------------------------------|------------------------------------------------------------|
-| deviation_threshold | 0.10  | Minimum deviation to trigger value trading | `AvailabilityBias/Rule/config.yaml → value_trader` | Graham (1949); calibrated to ~1σ availability-bias episode |
-| position_size       | 500   | Fixed shares per value trade               | `AvailabilityBias/Rule/config.yaml → value_trader` | Graham (1949) fixed sizing discipline                      |
-| initial_cash        | 50000 | Starting cash                              | `AvailabilityBias/Rule/config.yaml → value_trader` | Normalization                                              |
-| initial_position    | 1000  | Starting position                          | `AvailabilityBias/Rule/config.yaml → value_trader` | Normalization                                              |
+| deviation_threshold | 0.05  | Minimum deviation to trigger value trading | `AvailabilityBias/Rule/config.yaml → value_trader` | Graham (1949); calibrated to availability-bias episodes |
+| position_size       | 300   | Fixed shares per value trade               | `AvailabilityBias/Rule/config.yaml → value_trader` | Graham (1949) fixed sizing discipline                   |
+| initial_cash        | 10000 | Starting cash                              | `AvailabilityBias/Rule/config.yaml → value_trader` | Normalization                                           |
+| initial_position    | 0     | Starting position                          | `AvailabilityBias/Rule/config.yaml → value_trader` | Normalization                                           |
 
 **4.4.4.4  Behavioral Properties**
 - Time horizon: Long-term — activates only at deep mispricings; patient between activations
@@ -475,22 +473,21 @@ The ValueTrader is a patient, fundamental-focused investor who trades only when 
 
 #### 4.4.5  Decision Process Walkthrough
 
-Given: price = 89.0, fundamental = 100.0, deviation = −0.11, deviation_threshold = 0.10, position_size = 500, cash = 50000
+Given: price = 95.0, fundamental = 100.0, deviation = -0.05, deviation_threshold = 0.05, position_size = 300, cash = 10000
 
-Step 1: deviation = −0.11. Is −0.11 < −0.10? YES → buy.
-Step 2: Cost check: 500 × 89 = 44500 ≤ 50000 → valid.
-Step 3: Buy quantity = 500 shares.
-Step 4: Send order: action=buy, quantity=500, bid_price=89.
-Result: +500 shares in D(t); strong stabilizing buying at 11% undervaluation.
+Step 1: deviation = -0.05. The rule activates when deviation is below -0.05; at exactly -0.05 it holds.
+Step 2: If price falls to 94.0 (deviation = -0.06), buy quantity = min(300, 10000 / 94.0) = 106.38 shares.
+Step 3: Send order: action=buy, quantity≈106.38, bid_price=94.
+Result: stabilizing buying appears only after the gap exceeds the 5% threshold.
 
 #### 4.4.6  Worked Numerical Example
 
-Market state: price = 112.0, fundamental = 100.0, deviation = +0.12, position = 1200
+Market state: price = 106.0, fundamental = 100.0, deviation = +0.06, position = 300
 
-Trigger: +0.12 > +0.10 → sell.
-Quantity: min(500, 1200) = 500.
-Order: action=sell, quantity=500, bid_price=112.
-Rationale: Availability-biased agents have driven price to 12% above fundamental through recency and media overreaction. ValueTrader sells 500 shares — the fixed-size Graham discipline prevents speculative over-selling; the 10% threshold ensures ValueTrader is capturing a genuine bias-driven premium, not noise.
+Trigger: +0.06 > +0.05 → sell.
+Quantity: min(300, 300) = 300.
+Order: action=sell, quantity=300, bid_price=106.
+Rationale: Availability-biased agents have driven price above fundamental through recency and media overreaction. ValueTrader sells 300 shares — the fixed-size Graham discipline prevents speculative over-selling while correcting a meaningful bias-driven premium.
 
 #### 4.4.7  Academic References
 
@@ -577,7 +574,7 @@ Diversity Check:
 - Different bias channels: RecentEventOverweighter (recency/temporal availability); MediaInfluencedTrader (media/social availability); SystematicAnalyst (rational baseline); ValueTrader (deep value, high threshold); NoiseTrader (random)
 - Different signals: RecentEventOverweighter uses `return_pct` + `deviation`; MediaInfluencedTrader uses `deviation` × amplification; SystematicAnalyst uses `deviation` alone; ValueTrader uses `deviation` with higher threshold; NoiseTrader uses nothing
 - Conflicting incentives: Both biased agents can overreact in the same or opposite direction; SystematicAnalyst and ValueTrader counter both; genuine tension between availability amplification and systematic correction
-- Different activation thresholds: NoiseTrader (30% probability); MediaInfluencedTrader (|deviation| > 1%); SystematicAnalyst (|deviation| > 3%); RecentEventOverweighter (|perceived_signal| > 5%); ValueTrader (|deviation| > 10%)
+- Different activation thresholds: NoiseTrader (30% probability); MediaInfluencedTrader (|deviation| > 2.5%); SystematicAnalyst (|deviation| > 3%); RecentEventOverweighter (|perceived_signal| > 2%); ValueTrader (|deviation| > 5%)
 - Two distinct availability channels: temporal recency (RecentEventOverweighter) vs. media salience (MediaInfluencedTrader) — enables isolation of channel effects across variants
 
 
@@ -587,16 +584,16 @@ Diversity Check:
 |----------------------|-------|-----------------------------------------------------|----------------------------------------------------------------|--------------------------------------------------------|
 | initial_price        | 100.0 | Normalization                                       | Starting market price                                          | Low — scale only                                       |
 | fundamental_value    | 100.0 | Normalization                                       | Constant intrinsic value; isolates bias from fundamental news  | Medium — sets deviation magnitude                      |
-| price_impact (λ)     | 0.01  | Tetlock (2007) calibrated                           | Price response per unit net demand                             | High — controls bias-to-price-move translation         |
-| mean_reversion (γ)   | 0.02  | Baker & Wurgler (2007)                              | Fundamental gravity; limits bias-driven persistent deviation   | Medium — decrease → more persistent mispricing         |
+| price_impact (λ)     | 0.02  | Tetlock (2007) calibrated                           | Price response per unit net demand                             | High — controls bias-to-price-move translation         |
+| mean_reversion (γ)   | 0.03  | Baker & Wurgler (2007)                              | Fundamental gravity; limits bias-driven persistent deviation   | Medium — decrease → more persistent mispricing         |
 | noise_std (σ)        | 0.5   | Standard calibration                                | Background order flow noise                                    | Medium — increase → harder to distinguish bias effects |
-| recency_weight       | 3.0   | Tversky & Kahneman (1973); De Bondt & Thaler (1985) | RecentEventOverweighter: recency amplification factor          | High — controls overreaction magnitude                 |
-| salience_threshold   | 0.05  | Calibrated to 5% salience filter                    | RecentEventOverweighter: perceived signal activation level     | Medium — decrease → more frequent activation           |
-| media_weight         | 2.0   | Tetlock (2007)                                      | MediaInfluencedTrader: media intensity multiplier              | High — controls media-driven overreaction              |
+| recency_weight       | 0.70  | Tversky & Kahneman (1973); De Bondt & Thaler (1985) | RecentEventOverweighter: recent-return weight in perceived signal | High — controls overreaction magnitude                 |
+| salience_threshold   | 0.02  | Calibrated to 2% salience filter                    | RecentEventOverweighter: perceived signal activation level     | Medium — decrease → more frequent activation           |
+| media_weight         | 0.80  | Tetlock (2007)                                      | MediaInfluencedTrader: media intensity multiplier              | High — controls media-driven overreaction              |
 | social_amplification | 1.5   | Kasperson et al. (1988)                             | MediaInfluencedTrader: social network multiplier               | Medium — combined with media_weight = 3× total         |
 | evidence_threshold   | 0.03  | Mullainathan (2002)                                 | SystematicAnalyst: minimum deviation to trigger rational trade | Medium — decrease → more corrective activity           |
-| deviation_threshold  | 0.10  | Graham (1949); Baker & Wurgler (2007)               | ValueTrader: margin of safety threshold                        | Medium — increase → deeper floor/ceiling               |
-| position_size        | 500   | Graham (1949) discipline                            | ValueTrader: fixed trade size                                  | Medium — increase → stronger floor/ceiling             |
+| deviation_threshold  | 0.05  | Graham (1949); Baker & Wurgler (2007)               | ValueTrader: margin of safety threshold                        | Medium — increase → deeper floor/ceiling               |
+| position_size        | 300   | Graham (1949) discipline                            | ValueTrader: fixed trade size                                  | Medium — increase → stronger floor/ceiling             |
 | trade_probability    | 0.30  | Black (1986)                                        | NoiseTrader: per-round trade probability                       | Low — adds stochastic variation                        |
 
 
@@ -626,13 +623,13 @@ Key difference from other simulations: the Market broadcasts `prev_price` and `r
 
 **Documented Pattern**: Bernard, V. L., & Thomas, J. K. (1989). "Post-earnings-announcement drift: Delayed price response or risk premium?" *Journal of Accounting Research*, 27 (Supplement), 1–36. DOI: 10.2307/2491062
 **Core Dynamic**: Companies announcing large positive (negative) earnings surprises show initial price overreaction followed by drift in the original direction — consistent with availability-biased investors overweighting the recent earnings "event" as a trend signal. Post-announcement returns continue in the same direction for approximately 60 trading days, suggesting the initial overreaction is gradually corrected.
-**Availability Mechanism**: Dramatic earnings announcements are cognitively salient (available) events; investors overweight their forward-looking implications (consistent with recency_weight > 1), creating initial overreaction.
-**Agent Mapping**: RecentEventOverweighter → overreacts to the "event" of the announcement; SystematicAnalyst → corrects gradually; ValueTrader → may activate if overreaction exceeds 10%.
+**Availability Mechanism**: Dramatic earnings announcements are cognitively salient (available) events; investors overweight their forward-looking implications through the 70% recent-return weight, creating initial overreaction.
+**Agent Mapping**: RecentEventOverweighter → overreacts to the "event" of the announcement; SystematicAnalyst → corrects gradually; ValueTrader → may activate if overreaction exceeds 5%.
 
 ### Event 2: Market Impact of 9/11 and Subsequent Recovery (2001)
 
 **Documented Pattern**: After September 11, 2001, the US stock market closed for 4 trading days and fell 14.3% on reopening. The market recovered most losses within 30 trading days — consistent with initial availability-bias-driven panic (the salient catastrophic event was overweighted as a permanent economic shock) followed by rational correction.
-**Availability Mechanism**: The 9/11 attack was maximally salient (vivid, emotionally charged, heavily covered) — exactly the kind of event the availability heuristic would overweight. Media coverage was 24/7 for weeks, consistent with media_weight > 1.
+**Availability Mechanism**: The 9/11 attack was maximally salient (vivid, emotionally charged, heavily covered) — exactly the kind of event the availability heuristic would overweight. Media coverage was 24/7 for weeks, consistent with positive media salience and social amplification.
 **Agent Mapping**: RecentEventOverweighter → panic sells on highly available catastrophic event; MediaInfluencedTrader → amplifies media coverage of crisis; ValueTrader → activates at deep undervaluation during the initial panic; SystematicAnalyst → recognizes fundamental overreaction and gradually corrects.
 
 ### Event 3: COVID-19 Market Crash and Recovery (February–April 2020)

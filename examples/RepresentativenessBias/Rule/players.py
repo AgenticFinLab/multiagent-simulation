@@ -166,10 +166,12 @@ class Market(GeneralPlayer):
 
 class PatternMatcher(GeneralPlayer):
     """
-    Matches current price patterns to historical prototypes, ignoring base rates
+    Matches current price patterns to historical prototypes, ignoring base rates.
 
-    Theoretical Basis: Representativeness heuristic (Kahneman & Tversky, 1972)
-    Market Role: destabilizing
+    Theory: simulation-bases.md §4.1 — PatternMatcher
+    Theoretical basis: representativeness heuristic; salient prototypes
+    dominate base-rate reasoning.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -241,10 +243,11 @@ class PatternMatcher(GeneralPlayer):
 
 class CategoryOvergeneralizer(GeneralPlayer):
     """
-    Overgeneralizes from small samples, treating stocks as belonging to dramatic categories
+    Overgeneralizes from small samples into dramatic stock categories.
 
-    Theoretical Basis: Base rate neglect (Grether, 1980)
-    Market Role: destabilizing
+    Theory: simulation-bases.md §4.2 — CategoryOvergeneralizer
+    Theoretical basis: base-rate neglect and small-sample extrapolation.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -316,10 +319,11 @@ class CategoryOvergeneralizer(GeneralPlayer):
 
 class BayesianUpdater(GeneralPlayer):
     """
-    Correctly updates beliefs using Bayes rule, weighing base rates and new evidence
+    Correctly updates beliefs using base rates and new evidence.
 
-    Theoretical Basis: Bayesian rationality (Grether, 1980 baseline)
-    Market Role: stabilizing
+    Theory: simulation-bases.md §4.3 — BayesianUpdater
+    Theoretical basis: Bayesian rationality as a stabilizing benchmark.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -391,10 +395,11 @@ class BayesianUpdater(GeneralPlayer):
 
 class ContrarianStatistical(GeneralPlayer):
     """
-    Trades against pattern-matching mispricing by exploiting base rate deviations
+    Trades against pattern-matching mispricing and base-rate deviations.
 
-    Theoretical Basis: Contrarian strategy (Barberis et al., 1998)
-    Market Role: stabilizing
+    Theory: simulation-bases.md §4.4 — ContrarianStatistical
+    Theoretical basis: statistical arbitrage against biased beliefs.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -466,10 +471,11 @@ class ContrarianStatistical(GeneralPlayer):
 
 class NoiseTrader(GeneralPlayer):
     """
-    Random uninformed trader providing baseline liquidity
+    Random uninformed trader providing baseline liquidity.
 
-    Theoretical Basis: Noise trader model (Black, 1986)
-    Market Role: neutral
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+    Theoretical basis: noise-trader models of uninformed order flow.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:

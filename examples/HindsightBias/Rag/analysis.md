@@ -69,3 +69,11 @@ All functions defined in `Rag/analysis.py`. Inputs sourced from simulation outpu
 - `analysis-bases.md §5` — Cross-variant comparison table
 - Fischhoff (1975) `doi:10.1037/0096-1523.1.3.288` — self-correction baseline
 - Roese & Vohs (2012) `doi:10.1177/1745691612454303` — bias meta-analysis retrieved
+
+## §6 Expected Results and Validation
+
+The accepted RAG sample should complete 200 rounds with clean parse quality and usable retrieval context. Retrieval review should report success rate, fallback rate, and whether retrieved hindsight-bias literature moderates biased-agent behavior.
+
+## §7 Visualization Catalogue
+
+`Rag/analysis.py` reuses the core price-dynamics visualization and adds `analyze_rag_knowledge_effect(records)` for retrieval-quality tables.

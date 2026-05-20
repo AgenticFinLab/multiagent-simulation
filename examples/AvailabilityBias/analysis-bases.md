@@ -107,7 +107,7 @@
     - SystematicAnalyst + ValueTrader: combined ≥ 30% of total volume (sufficient for correction)
     - NoiseTrader: 20–40% (30% trade probability × random direction)
 - **Normal Range**: RecentEventOverweighter: 15–25%; MediaInfluencedTrader: 15–25%; SystematicAnalyst: 10–20%; ValueTrader: 5–15% (activates less frequently); NoiseTrader: 20–40%
-- **Red Flag**: ValueTrader volume = 0 → deviation never reached 10%; bias effects moderate. RecentEventOverweighter or MediaInfluencedTrader volume = 0 → salience threshold or amplification misconfigured; agent not activating.
+- **Red Flag**: ValueTrader volume = 0 → deviation never reached 5%; bias effects moderate. RecentEventOverweighter or MediaInfluencedTrader volume = 0 → salience threshold or amplification misconfigured; agent not activating.
 
 ---
 
@@ -176,7 +176,7 @@
 **Purpose**: Measure how effectively rational agents (SystematicAnalyst, ValueTrader) limit the magnitude and duration of availability-bias-driven mispricings
 **Metrics Used**: Stabilization ratio (Metric 6), ValueTrader activation count
 **Visualization**: Net demand decomposition (biased vs. rational agent contributions) during bias episodes; stabilization ratio over time; ValueTrader activation rounds annotated on price chart
-**Expected Pattern**: Stabilization ratio = 0.4–0.8 (partial correction, consistent with limits-of-arbitrage); ValueTrader activates when |deviation| > 10%; combined stabilization limits max persistent deviation to ≤15%
+**Expected Pattern**: Stabilization ratio = 0.4–0.8 (partial correction, consistent with limits-of-arbitrage); ValueTrader activates when |deviation| > 5%; combined stabilization limits max persistent deviation to ≤15%
 
 ### Dimension 5: Cross-Variant Comparison
 
@@ -215,7 +215,7 @@
 | Equilibrium    | Inactive                                           | Inactive                          | Occasionally active                    | Inactive                                  | ≈ 0          |
 | Bias Onset     | Active (moderate perceived_signal)                 | Active (small deviation triggers) | Active (countering)                    | Inactive                                  | +0.1 to +0.2 |
 | Active Episode | Active (large perceived_signal from recent return) | Active (sustained amplification)  | Active (insufficient to fully correct) | Possibly active                           | +0.2 to +0.4 |
-| Correction     | Reducing (recent returns normalizing)              | Reducing                          | Active (increasing)                    | Active (buying/selling at 10%+ threshold) | 0 to −0.2    |
+| Correction     | Reducing (recent returns normalizing)              | Reducing                          | Active (increasing)                    | Active (buying/selling at 5%+ threshold) | 0 to −0.2    |
 | Equilibrium    | Inactive                                           | Inactive                          | Occasional small trades                | Inactive                                  | ≈ 0          |
 
 
@@ -238,7 +238,7 @@
 | RecentEventOverweighter activation  | Mechanical at                 | perceived_signal                                                                  | > 0.05                      | LLM may show stronger narrative-driven overreaction ("that was a dramatic move!") or deliberate restraint |
 | MediaInfluencedTrader amplification | Exact 3× deviation scaling    | LLM may interpret "heavy media coverage" differently each call; varying intensity | Near-3× with ±20% variation | May retrieve examples of media-driven reversal and reduce amplification                                   |
 | SystematicAnalyst rationality       | Perfect — uses deviation only | May inadvertently reference recent returns in reasoning; slight contamination     | Near-perfect rational       | May over-emphasize rational behavior based on retrieved efficient-market evidence                         |
-| ValueTrader activation              | Exact at                      | deviation                                                                         | > 10%                       | May activate at 8–12% range due to narrative judgment                                                     |
+| ValueTrader activation              | Exact at                      | deviation                                                                         | > 5%                        | May activate around the 5% margin-of-safety threshold due to narrative judgment                            |
 
 
 ## §6 Expected Results and Validation
@@ -269,7 +269,7 @@
 | No bias effect                 | Deviation always < ±3%                    | recency_weight too low or noise_std too high         | Increase recency_weight to 3.5; reduce noise_std to 0.3                                        |
 | No persistence                 | All bias episodes < 3 rounds              | γ too high (corrects too fast)                       | Reduce γ to 0.01; check stabilizing agent volumes                                              |
 | No reversal                    | Post-episode returns same sign as episode | Biased agents maintain activation; γ too low         | Ensure salience_threshold creates natural deactivation; increase γ to 0.03                     |
-| No ValueTrader activation      | Absorption ratio = 0                      | Deviation never crosses 10%                          | Verify biased agents generating sufficient combined signal; reduce deviation_threshold to 0.08 |
+| No ValueTrader activation      | Absorption ratio = 0                      | Deviation never crosses 5%                           | Verify biased agents generating sufficient combined signal; review deviation_threshold calibration |
 | MediaInfluencedTrader dominant | Media channel >> recency channel          | amplified_signal = 3× deviation activates too easily | Raise implicit threshold from 0.03 to 0.05; reduce social_amplification                        |
 
 

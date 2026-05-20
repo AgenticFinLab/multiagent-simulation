@@ -34,3 +34,14 @@ base-rate-consistent value, followed by Bayesian and contrarian correction.
 
 Metrics derive from `../analysis-bases.md §2`; mechanisms derive from
 `../simulation-bases.md §4`.
+
+## §6 Quality Checks
+
+- Confirm the run completed the configured round count.
+- Confirm market records contain price history and valid order messages.
+- Confirm biased-agent volume and correction-agent volume can be attributed.
+
+## §7 Reporting Notes
+
+Report this variant as the deterministic baseline. API variants should be
+compared against it after their parser and output-quality audits pass.

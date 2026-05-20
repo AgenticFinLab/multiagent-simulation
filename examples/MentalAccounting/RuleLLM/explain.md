@@ -15,6 +15,25 @@
 - Thaler (1985): Mental accounting and consumer choice
 - Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
 
+## §6 Configuration Reference
+
+The RuleLLM variant uses `configs/MentalAccounting/RuleLLM/simulation.yml`, `players.yml`, `topology.yml`, and `persona.yml`. System prompts provide persona and rule guidance while model settings are loaded from `players.yml`.
+
+## §7 Runtime Outputs
+
+A full RuleLLM run should produce 200 rounds, valid order payloads, and model reasoning traces that remain compatible with the rule-guided decision contract.
+
+## §8 Validation Checklist
+
+- `players.py`, `prompts.py`, and `analysis.py` compile.
+- Prompt refs load and preserve the canonical decision schema.
+- Dry-run discovers `MentalAccounting__RuleLLM`.
+- Existing full sample can be inherited because this pass does not change prompt or player runtime semantics.
+
+## §9 Cross-Variant Comparison Notes
+
+RuleLLM is compared against Rule to isolate language-reasoning effects when rule guidance is present, and against LLM to assess whether explicit rules reduce behavioral drift.
+
 ## §3 Agent Descriptions
 
 ### MentalAccountant

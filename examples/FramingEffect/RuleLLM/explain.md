@@ -1,86 +1,126 @@
-# FramingEffect — RuleLLM Variant
+# FramingEffect RuleLLM — Implementation Explanation
 
-## §1 Overview
+## §1 Variant Overview
 
-The RuleLLM variant implements the Framing Effect simulation using LLM reasoning with embedded rule constraints. Each investor inherits from `RuleLLMInvestor` and receives a system prompt that explicitly encodes the quantitative thresholds from `Rule/players.py` alongside the behavioral persona from `simulation-bases.md §4`. The LLM contextualises and reasons about market state, but its decision space is anchored by the embedded rules — it cannot fully override the thresholds.
-
-| Aspect             | Detail                                                        |
-|--------------------|---------------------------------------------------------------|
-| Variant            | RuleLLM                                                       |
-| Simulation         | FramingEffect                                                 |
-| Decision Mechanism | Rule-embedded LLM: system prompt encodes thresholds + persona |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                               |
-| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`                  |
-| Price Model        | P(t+1) = P(t) + λ × D(t) + γ × (F − P(t)) + ε(t)              |
-
----
+| Item | Description |
+|---|---|
+| Variant | RuleLLM |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | LLM reasoning with persona text plus explicit decision-rule text |
+| Key Difference from Other Variants | Preserves Rule-style thresholds in prompt form while still using LLM reasoning. |
+| Primary Research Contribution | Isolates the effect of LLM reasoning when the quantitative behavioral frame is supplied. |
+| Files | `players.py`, `prompts.py`, `run_framingeffect_rulellm.py`, `analysis.py`, `explain.md`, `analysis.md` |
 
 ## §2 Theory → Implementation Mapping
 
-### §2.1 RuleLLMGainFrameFollower (`simulation-bases.md §4.1`)
+### RuleLLMGainFrameFollower: Theory → Implementation Mapping
 
-| Theory Component                                        | Implementation                                                                                     |
-|---------------------------------------------------------|----------------------------------------------------------------------------------------------------|
-| Prospect theory gain framing (Tversky & Kahneman, 1981) | System prompt embeds: "when abs(deviation) > 0.02, you are compelled to act based on gain framing" |
-| Momentum following on gain frame                        | Embedded rule: "buy when deviation > 0.02; sell when deviation < -0.02; otherwise hold"            |
-| LLM contextualisation                                   | LLM reasons about why the gain frame compels action; may adjust quantity within allowed range      |
+> Theory defined in `simulation-bases.md §4.1`.
 
-### §2.2 RuleLLMLossFrameReactor (`simulation-bases.md §4.2`)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.1.2 | Class: `RuleLLMGainFrameFollower`; docstring cites `simulation-bases.md §4.1`. |
+| Behavioral mechanism → sim-bases §4.1.4.2 | `RULELLM_GAIN_FRAME_FOLLOWER_SYS` uses `== PERSONA ==` and `== DECISION RULES ==`. |
+| Mathematical model → sim-bases §4.1.4.3 | Prompt states the 2% activation logic and deviation-proportional sizing as decision guidance. |
+| State variables → sim-bases §4.1.4.3 | Current market and portfolio fields are injected through `RULELLM_USER_TEMPLATE`. |
+| Parameters → sim-bases §6 | LLM settings and portfolio calibration are loaded from `players.yml`. |
+| LLM persona → sim-bases §4.1.4.4 | Persona describes gain-frame-sensitive momentum behavior. |
 
-| Theory Component                                        | Implementation                                                                                        |
-|---------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| Prospect theory loss framing (Tversky & Kahneman, 1981) | System prompt embeds: "react strongly to loss-framed information; threshold is abs(deviation) > 0.02" |
-| Differentiation from §4.1                               | RuleLLM can express loss_weight vs. gain_weight asymmetry through LLM reasoning about magnitude       |
-| LLM override constraint                                 | LLM cannot override direction (buy/sell) but may modulate quantity based on narrative reasoning       |
+### RuleLLMLossFrameReactor: Theory → Implementation Mapping
 
-### §2.3 RuleLLMFrameInvariantTrader (`simulation-bases.md §4.3`)
+> Theory defined in `simulation-bases.md §4.2`.
 
-| Theory Component                                 | Implementation                                                                                |
-|--------------------------------------------------|-----------------------------------------------------------------------------------------------|
-| Frame-invariant rationality (Levin et al., 1998) | System prompt embeds: "activate contrarian trade when abs(deviation) > 0.05"                  |
-| Contrarian reasoning                             | Embedded: "buy when deviation < -0.05 (undervalued); sell when deviation > 0.05 (overvalued)" |
-| LLM contextualisation                            | LLM can explain the rational basis for the contrarian trade; adds reasoning transparency      |
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.2.2 | Class: `RuleLLMLossFrameReactor`; docstring cites `simulation-bases.md §4.2`. |
+| Behavioral mechanism → sim-bases §4.2.4.2 | System prompt embeds loss-frame reaction rules and persona. |
+| Mathematical model → sim-bases §4.2.4.3 | Decision rules describe the same thresholded response as the Rule baseline. |
+| State variables → sim-bases §4.2.4.3 | Uses price, fundamental, deviation, cash, position, and portfolio value. |
+| Parameters → sim-bases §6 | Model and portfolio values come from config. |
+| LLM persona → sim-bases §4.2.4.4 | Persona highlights loss sensitivity and urgency. |
 
-### §2.4 RuleLLMArbitrageFramer (`simulation-bases.md §4.4`)
+### RuleLLMFrameInvariantTrader: Theory → Implementation Mapping
 
-| Theory Component                    | Implementation                                                                                |
-|-------------------------------------|-----------------------------------------------------------------------------------------------|
-| Framing arbitrage (Kuhberger, 1998) | System prompt embeds: "exploit framing mispricing when abs(deviation) > 0.05"                 |
-| Arbitrage logic                     | Embedded rule identical to §4.3; LLM contextualises as framing arbitrage opportunity          |
-| LLM advantage                       | Can explain the framing mechanism in output; enables qualitative audit of arbitrage reasoning |
+> Theory defined in `simulation-bases.md §4.3`.
 
-### §2.5 RuleLLMNoiseTrader (`simulation-bases.md §4.5`)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.3.2 | Class: `RuleLLMFrameInvariantTrader`; docstring cites `simulation-bases.md §4.3`. |
+| Behavioral mechanism → sim-bases §4.3.4.2 | Prompt embeds frame-invariant value reasoning. |
+| Mathematical model → sim-bases §4.3.4.3 | Decision rules describe contrarian trading once deviation is materially large. |
+| State variables → sim-bases §4.3.4.3 | Market broadcast and portfolio state are passed into the user prompt. |
+| Parameters → sim-bases §6 | Config supplies LLM and portfolio settings. |
+| LLM persona → sim-bases §4.3.4.4 | Persona stresses substance over presentation. |
 
-| Theory Component                 | Implementation                                                                     |
-|----------------------------------|------------------------------------------------------------------------------------|
-| Noise trader model (Black, 1986) | System prompt: uninformed persona; no embedded thresholds                          |
-| Stochastic behavior              | LLM may exhibit less pure randomness than Rule variant; slight narrative coherence |
+### RuleLLMArbitrageFramer: Theory → Implementation Mapping
 
----
+> Theory defined in `simulation-bases.md §4.4`.
 
-## §3 RuleLLM-Specific Notes
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.4.2 | Class: `RuleLLMArbitrageFramer`; docstring cites `simulation-bases.md §4.4`. |
+| Behavioral mechanism → sim-bases §4.4.4.2 | Prompt describes framing-induced mispricing and arbitrage. |
+| Mathematical model → sim-bases §4.4.4.3 | Prompt rules mirror the contrarian correction logic. |
+| State variables → sim-bases §4.4.4.3 | Same fields as other RuleLLM investors. |
+| Parameters → sim-bases §6 | Runtime values are config supplied. |
+| LLM persona → sim-bases §4.4.4.4 | Persona is an arbitrage-focused trader. |
 
-- **Rule anchoring**: Embedded thresholds prevent extreme LLM deviation — RuleLLM should produce FDI and FPI closer to Rule baseline than pure LLM variant.
-- **Quantity flexibility**: LLM may choose quantity within `[0, cap]` range; the size formula `int(|δ| × 5000)` is embedded as guidance but not a hard constraint.
-- **Reasoning output**: Each decision includes LLM reasoning trace; enables qualitative analysis of how agents articulate framing logic.
-- **Cross-run consistency**: More consistent than LLM variant due to embedded rules; less consistent than Rule due to LLM stochasticity.
+### RuleLLMNoiseTrader: Theory → Implementation Mapping
 
----
+> Theory defined in `simulation-bases.md §4.5`.
 
-## §4 Expected Ranges (RuleLLM Variant vs. Rule Baseline)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.5.2 | Class: `RuleLLMNoiseTrader`; docstring cites `simulation-bases.md §4.5`. |
+| Behavioral mechanism → sim-bases §4.5.4.2 | Prompt keeps uninformed liquidity-provider behavior. |
+| Mathematical model → sim-bases §4.5.4.3 | Parsed action is capped by portfolio constraints and max order size. |
+| State variables → sim-bases §4.5.4.3 | Uses injected market and portfolio fields. |
+| Parameters → sim-bases §6 | Higher temperature can preserve noisier behavior. |
+| LLM persona → sim-bases §4.5.4.4 | Persona avoids systematic framing arbitrage. |
 
-| Metric          | RuleLLM Expected Range | Rule Baseline | Direction | Basis                                                           |
-|-----------------|------------------------|---------------|-----------|-----------------------------------------------------------------|
-| FDI             | 0.02–0.08              | 0.02–0.08     | ≈ Similar | Embedded thresholds anchor activation to Rule levels            |
-| FPI             | 3–11 rounds            | 3–12          | ≈ Similar | Embedded rules maintain cascade duration; slight LLM shortening |
-| ACC (§4.1+§4.2) | 48–68%                 | 50–70%        | ≈ Similar | Rule anchoring maintains biased agent volume share              |
-| VAF             | 1.4–3.3                | 1.5–3.5       | ≈ Similar | Slight reduction from LLM quantity modulation                   |
-| OWP             | 0.04–0.19              | 0.05–0.20     | ≈ Similar | Rule anchoring maintains systematic wealth penalty              |
-| WDI             | 0.09–0.28              | 0.10–0.30     | ≈ Similar | Near-Rule inequality distribution                               |
+## §3 Market Mechanism Implementation
 
-## §5 References and Quality Review
+RuleLLM imports the Rule `Market`; therefore price formation, order collection, and broadcasts remain identical to Rule. Any difference in results comes from prompt-guided LLM order generation.
 
-This variant traces to `../simulation-bases.md §4` for investor design and
-`../analysis-bases.md §2` for metric definitions. Post-run review should verify
-full round count, order schema completeness, price and portfolio sanity, LLM
-parse/fallback rates, and rule-adherence patterns before accepting a sample.
+## §4 RuleLLM Variant-Specific Features
+
+- System prompts must contain `== PERSONA ==` and `== DECISION RULES ==`.
+- Decision JSON uses `action`, `bid_price`, `quantity`, and `reasoning`.
+- Parsed decisions are bounded by cash, holdings, and maximum quantity before orders are emitted.
+- Runtime does not silently substitute fallback holds on parse failure.
+
+## §5 Architecture Diagram
+
+```text
+Market broadcast -> RuleLLMInvestor
+        |
+        v
+persona + decision-rules prompt + market state
+        |
+        v
+LLM response -> parser -> capped order -> Market
+```
+
+## §6 Configuration Reference
+
+| Config File | Runtime Role |
+|---|---|
+| `configs/FramingEffect/RuleLLM/simulation.yml` | Full-run settings |
+| `configs/FramingEffect/RuleLLM/players.yml` | LLM model, prompt refs, and portfolio settings |
+| `configs/FramingEffect/RuleLLM/topology.yml` | Star topology |
+| `configs/FramingEffect/RuleLLM/persona.yml` | Shared proxy/storage settings |
+
+## §7 Expected Runtime Outputs
+
+Accepted runs should produce complete 200-round market records, valid order messages, and model reasoning that is consistent with the embedded decision rules.
+
+## §8 Validation Checklist
+
+- Prompt constants load for all five investor classes.
+- `== PERSONA ==` and `== DECISION RULES ==` are present.
+- API audit reports zero parser-contract mismatches.
+- Existing sample can be inherited if only docs and analysis files change.
+
+## §9 Cross-Variant Comparison Notes
+
+RuleLLM is compared against Rule to quantify language-reasoning effects under aligned behavioral rules, and against LLM to measure the stabilizing effect of explicit decision-rule guidance.

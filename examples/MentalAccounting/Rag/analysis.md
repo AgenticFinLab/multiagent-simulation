@@ -25,3 +25,15 @@
 - Thaler (1999): Mental Accounting Matters
 - Thaler (1985): Mental accounting and consumer choice
 - Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
+
+## §5 Cross-Variant Comparison
+
+RAG results are compared primarily against RuleLLM to isolate the effect of retrieved behavioral-finance knowledge on mental-accounting behavior.
+
+## §6 Expected Results and Validation
+
+The accepted RAG sample should complete 200 rounds with clean parse quality and usable retrieval context. Existing output can be inherited because this pass only updates documentation.
+
+## §7 Visualization Catalogue
+
+`Rag/analysis.py` reuses the Rule analysis pipeline and creates `mentalaccounting_analysis.png`. Reports may add retrieval-quality notes and compare RAG behavior against RuleLLM.

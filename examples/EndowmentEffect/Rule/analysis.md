@@ -43,3 +43,16 @@ This variant analysis establishes the deterministic baseline for the EndowmentEf
 ## §5 References
 
 See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md §4` for agent parameter sources.
+
+## §6 Output Artifacts
+
+`Rule/analysis.py` writes `summary.json`, `price_path.png`, and
+`strategy_volume.png` into the analysis output directory. These artifacts provide
+the deterministic baseline for comparing LLM, RuleLLM, and Rag variants.
+
+## §7 Validation Criteria
+
+A valid Rule analysis run must load 200 rounds of prices, parse all order payloads
+with `action`, `bid_price`, `quantity`, `reasoning`, and `strategy`, and produce
+MAD and EPCR inside the ranges in §4 unless the run is explicitly being used as a
+stress test.

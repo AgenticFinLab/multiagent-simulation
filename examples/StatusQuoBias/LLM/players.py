@@ -93,8 +93,8 @@ class LLMInvestor(GeneralPlayer):
             f"Value: ${portfolio_value:.2f}\n\n"
             "Based on your strategy and current conditions, decide your action.\n"
             "Respond with <analysis>...</analysis> then <decision>...</decision> containing "
-            'JSON: {"action": "buy" or "sell" or "hold", "quantity": integer, '
-            '"reasoning": "brief rationale"}'
+            'JSON: {"action": "buy" or "sell" or "hold", "bid_price": current price, '
+            '"quantity": integer, "reasoning": "brief rationale"}'
         )
 
     async def decide(self) -> Dict[str, Any]:
@@ -106,11 +106,7 @@ class LLMInvestor(GeneralPlayer):
         user_prompt = self._build_prompt()
         system_prompt = self._system_prompt
 
-        decision: Dict[str, Any] = {
-            "action": "hold",
-            "quantity": 0,
-            "reasoning": "fallback hold before LLM response",
-        }
+        decision = None
         max_retries = 3
         last_error: Optional[Exception] = None
         for attempt in range(max_retries):
@@ -130,17 +126,14 @@ class LLMInvestor(GeneralPlayer):
                     continue
                 if not parse_error and not retryable_api_error:
                     raise
-                logger.warning(
-                    "[%s] LLM failed after %d attempts; holding: %s",
-                    self.identity,
-                    max_retries,
-                    last_error,
+                raise RuntimeError(
+                    f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
                 )
-                decision = {
-                    "action": "hold",
-                    "quantity": 0,
-                    "reasoning": f"fallback hold after retries: {last_error}",
-                }
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM produced no decision after {max_retries} attempts"
+            )
 
         action = decision["action"]
         quantity = int(decision["quantity"])
@@ -181,7 +174,7 @@ class LLMInvestor(GeneralPlayer):
             "action": action,
             "quantity": quantity,
             "agent_type": strategy_name,
-            "reasoning": str(decision.get("reasoning", "fallback hold"))[:120],
+            "reasoning": str(decision["reasoning"])[:120],
         }
         return {
             **order,
@@ -197,31 +190,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMInertialHolder(LLMInvestor):
-    """LLM-driven inertial holder with strong status quo bias."""
+    """LLM-driven inertial holder with strong status quo bias. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = LLM_INERTIAL_HOLDER_SYS
 
 
 class LLMDefaultFollower(LLMInvestor):
-    """LLM-driven default follower avoiding active portfolio decisions."""
+    """LLM-driven default follower avoiding active decisions. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = LLM_DEFAULT_FOLLOWER_SYS
 
 
 class LLMActiveRebalancer(LLMInvestor):
-    """LLM-driven active rebalancer adjusting on new information."""
+    """LLM-driven active rebalancer adjusting on new information. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = LLM_ACTIVE_REBALANCER_SYS
 
 
 class LLMMomentumTrader(LLMInvestor):
-    """LLM-driven momentum trader naturally overcoming status quo."""
+    """LLM-driven momentum trader naturally overcoming status quo. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = LLM_MOMENTUM_TRADER_SYS
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven noise trader providing random baseline liquidity."""
+    """LLM-driven noise trader providing random baseline liquidity. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = LLM_NOISE_TRADER_SYS
 

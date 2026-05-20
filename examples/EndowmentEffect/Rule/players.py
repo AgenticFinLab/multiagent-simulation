@@ -152,10 +152,19 @@ class EndowedHolder(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"action": action, "quantity": quantity}
+        order = {
+            "action": action,
+            "bid_price": price,
+            "quantity": quantity,
+            "reasoning": "endowment premium threshold rule",
+            "strategy": self.__class__.__name__,
+        }
         return {
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": order["reasoning"],
+            "strategy": order["strategy"],
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
@@ -215,10 +224,19 @@ class StatusQuoSeller(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"action": action, "quantity": quantity}
+        order = {
+            "action": action,
+            "bid_price": price,
+            "quantity": quantity,
+            "reasoning": "status quo threshold rule",
+            "strategy": self.__class__.__name__,
+        }
         return {
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": order["reasoning"],
+            "strategy": order["strategy"],
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
@@ -277,10 +295,19 @@ class RationalArbitrageur(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"action": action, "quantity": quantity}
+        order = {
+            "action": action,
+            "bid_price": price,
+            "quantity": quantity,
+            "reasoning": "rational arbitrage deviation rule",
+            "strategy": self.__class__.__name__,
+        }
         return {
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": order["reasoning"],
+            "strategy": order["strategy"],
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
@@ -339,10 +366,19 @@ class NewBuyer(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"action": action, "quantity": quantity}
+        order = {
+            "action": action,
+            "bid_price": price,
+            "quantity": quantity,
+            "reasoning": "new buyer valuation rule",
+            "strategy": self.__class__.__name__,
+        }
         return {
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": order["reasoning"],
+            "strategy": order["strategy"],
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
@@ -402,10 +438,19 @@ class NoiseTrader(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"action": action, "quantity": quantity}
+        order = {
+            "action": action,
+            "bid_price": price,
+            "quantity": quantity,
+            "reasoning": "noise trader random activity rule",
+            "strategy": self.__class__.__name__,
+        }
         return {
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": order["reasoning"],
+            "strategy": order["strategy"],
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 

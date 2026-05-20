@@ -35,3 +35,13 @@ instructions on inertia and default adherence.
 Metrics derive from `../analysis-bases.md §2`; RuleLLM design derives from
 `../simulation-bases.md §9`.
 
+## §6 Quality Checks
+
+- Confirm the run completed the configured round count.
+- Audit parse failures, retry counts, and fallback behavior before acceptance.
+- Compare action direction and quantity scale with prompt-embedded rules.
+
+## §7 Reporting Notes
+
+Report RuleLLM as a formula-anchored language condition. Prior samples with
+parse warnings should be rerun after parser-contract repair.

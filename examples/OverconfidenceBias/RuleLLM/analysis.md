@@ -25,3 +25,25 @@
 - Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
 - Odean (1998): Volume, volatility, price, and profit when all traders are above average
 - Barber & Odean (2001): Boys will be boys: Gender, overconfidence, and common stock investment
+
+## §5 Interpretation Checklist
+
+- Compare RuleLLM trading frequency and order size with the Rule and LLM
+  variants.
+- Check whether rule constraints keep agent behavior within the intended
+  overconfidence profile.
+- Confirm that LLM reasoning does not override the stabilizing role assignments.
+
+## §6 Quality Checks
+
+- Confirm the run completed the configured round count.
+- Audit parse failures, retry counts, and fallback holds before accepting the
+  sample as clean.
+- Review price deviation, volatility, and trading volume for implausible
+  numerical spikes.
+
+## §7 Reporting Notes
+
+Report RuleLLM as a hybrid condition: rule parameters define the behavioral
+mechanism, while LLM output quality determines whether that mechanism was
+faithfully executed in each round.

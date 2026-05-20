@@ -21,7 +21,7 @@ The Rule variant implements DispositionEffect with deterministic threshold rules
 | Prospect Theory gain domain (Kahneman & Tversky, 1979) | `if gain_loss >= 0.03: sell position × 0.50`             |
 | Prospect Theory loss domain                            | `if gain_loss <= -0.10: sell position × 0.15`            |
 | Reference point anchoring                              | `purchase_price` tracked per investor; updated on trades |
-| Buy at reference point                                 | `if                                                      |
+| Buy at reference point                                 | `if abs(gain_loss) < 0.01: buy position × 0.10`          |
 | Loss aversion λ = 2.25                                 | Asymmetric sell fractions (50% gain, 15% loss)           |
 
 ### §2.2 RationalInvestor (simulation-bases.md §4.2)
@@ -67,19 +67,35 @@ NewsShock: probability 0.15, magnitude ~ Uniform(−4, +4)
 - **News shocks**: Random shocks create gain/loss states that trigger investor decisions; essential for observing disposition behavior.
 - **move_reference=False**: DispositionInvestor preserves original purchase price on buys — maintains psychological anchor.
 
-## §5 Config Reference
+## §5 Architecture Diagram
+
+```
+Market(coordinator)
+  ├─ broadcasts price, return, volume, net_demand, news_shock
+  ├─ receives order payloads with action, bid_price, quantity, strategy
+  └─ clears price using price impact, mean reversion, noise, and news shocks
+
+Investors
+  ├─ perceive market broadcast
+  ├─ update reference-point and portfolio state
+  ├─ decide with deterministic disposition, rational, tax, passive, or
+  │  institutional rules
+  └─ act by sending one order payload to the market
+```
+
+## §6 Config Reference
 
 Config file: `DispositionEffect/Rule/config.yaml`
 
 Key extras: `initial_price`, `fundamental_value`, `price_impact`, `mean_reversion`, `noise_std`, `news_probability`, `news_impact_range`, `gain_threshold`, `loss_threshold`, `loss_aversion`, `sell_fraction_gain`, `sell_fraction_loss`, `target_allocation`, `tax_loss_threshold`.
 
-## §6 Running Instructions
+## §7 Running Instructions
 
 ```bash
 python -m examples.DispositionEffect.Rule.run_disposition
 ```
 
-## §7 Expected Behavior
+## §8 Expected Behavior
 
 - PGR ≈ 0.10–0.20 (calibrated to Odean 1998 benchmark of 14.8%)
 - PLR ≈ 0.06–0.12 (calibrated to Odean benchmark of 9.8%)
@@ -87,6 +103,6 @@ python -m examples.DispositionEffect.Rule.run_disposition
 - DispositionInvestor wealth < RationalInvestor wealth (3–5% annual drag)
 - TaxAwareInvestor PLR > DispositionInvestor PLR (anti-disposition via tax incentive)
 
-## §8 References
+## §9 References
 
 See `simulation-bases.md §2` for full DOI citations.

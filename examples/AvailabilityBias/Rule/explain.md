@@ -22,7 +22,7 @@
 | Availability heuristic recency channel → simulation-bases.md §2.1           | Class docstring cites Tversky & Kahneman (1973); `players.py RecentEventOverweighter`                                                |
 | Uses `return_pct` from broadcast → sim-bases §3.3                           | `return_pct = market_data["return_pct"]` — unique to AvailabilityBias broadcast                                                      |
 | perceived_signal = recency_weight × return_pct + (1 − recency_weight) × dev | `perceived_signal = recency_weight * return_pct + (1 - recency_weight) * deviation`                                                  |
-| recency_weight = 3.0, salience_threshold = 0.05 → sim-bases §6              | `recency_weight = float(extras["recency_weight"])` and `salience_threshold = float(extras["salience_threshold"])` from `players.yml` |
+| recency_weight = 0.70, salience_threshold = 0.02 → sim-bases §6             | `recency_weight = float(extras["recency_weight"])` and `salience_threshold = float(extras["salience_threshold"])` from `players.yml` |
 | Buy when perceived_signal > threshold → sim-bases §4                        | `if perceived_signal > salience_threshold: buy order_size`                                                                           |
 | Sell when perceived_signal < −threshold → sim-bases §4                      | `elif perceived_signal < -salience_threshold: sell order_size`                                                                       |
 
@@ -33,7 +33,7 @@
 |-------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
 | Media-driven availability channel → simulation-bases.md §2.2            | Class docstring cites Schwarz et al. (1991); Tetlock (2007); `players.py MediaInfluencedTrader`  |
 | amplified_signal = media_weight × deviation × social_amplification → §4 | `amplified_signal = media_weight * deviation * social_amplification`                             |
-| media_weight = 2.0, social_amplification = 1.5 → sim-bases §6           | Both loaded via `extras["media_weight"]` and `extras["social_amplification"]` from `players.yml` |
+| media_weight = 0.80, social_amplification = 1.50 → sim-bases §6         | Both loaded via `extras["media_weight"]` and `extras["social_amplification"]` from `players.yml` |
 | Trade when                                                              | amplified_signal                                                                                 |
 
 ### SystematicAnalyst: Theory → Implementation Mapping
@@ -52,7 +52,7 @@
 | Theoretical Design Element                                     | Implementation                                                                           |
 |----------------------------------------------------------------|------------------------------------------------------------------------------------------|
 | Value investing discipline → simulation-bases.md §2.4          | Class docstring cites Graham (1949); Baker & Wurgler (2007); `players.py ValueTrader`    |
-| Trade at significant deviation threshold = 0.10 → sim-bases §6 | `deviation_threshold = float(extras["deviation_threshold"])` (= 0.10) from `players.yml` |
+| Trade at significant deviation threshold = 0.05 → sim-bases §6 | `deviation_threshold = float(extras["deviation_threshold"])` (= 0.05) from `players.yml` |
 | Buy when deeply undervalued → sim-bases §4                     | `if deviation < -deviation_threshold: buy min(position_size, cash / price)`              |
 | Sell when significantly overvalued → sim-bases §4              | `elif deviation > deviation_threshold: sell min(position_size, position)`                |
 
@@ -82,8 +82,8 @@ Code translation:
 
 | sim-bases variable   | Python variable                      | Config path                        | Value |
 |----------------------|--------------------------------------|------------------------------------|-------|
-| `λ` (price_impact)   | `price_impact`                       | `extras["price_impact"]`           | 0.01  |
-| `γ` (mean_reversion) | `mean_reversion`                     | `extras["mean_reversion"]`         | 0.02  |
+| `λ` (price_impact)   | `price_impact`                       | `extras["price_impact"]`           | 0.02  |
+| `γ` (mean_reversion) | `mean_reversion`                     | `extras["mean_reversion"]`         | 0.03  |
 | `F` (fundamental)    | `fundamental`                        | `extras["fundamental_value"]`      | 100.0 |
 | `D(t)` (net demand)  | `net_demand = buy_qty − sell_qty`    | computed from orders               | —     |
 | `ε(t)` (noise)       | `noise = random.gauss(0, noise_std)` | `extras["noise_std"]`              | 0.5   |
@@ -102,8 +102,8 @@ Deviations from simulation-bases.md design: None.
 *(Reference: simulation-bases.md §9 — Rule variant entry)*
 
 **Two availability channels**: The Rule variant encodes both availability channels as exact algebraic formulas:
-1. **Recency channel** (RecentEventOverweighter): `perceived_signal = 3.0 × return_pct − 2.0 × deviation`
-2. **Media channel** (MediaInfluencedTrader): `amplified_signal = 2.0 × deviation × 1.5 = 3.0 × deviation`
+1. **Recency channel** (RecentEventOverweighter): `perceived_signal = 0.70 × return_pct + 0.30 × deviation`
+2. **Media channel** (MediaInfluencedTrader): `amplified_signal = 0.80 × deviation × 1.50 = 1.20 × deviation`
 
 **Fully deterministic channels**: Given the same noise seed, both availability distortions are exactly reproducible, establishing the baseline for how much distortion the LLM and Rag variants reproduce.
 
@@ -119,20 +119,20 @@ Deviations from simulation-bases.md design: None.
 ╠══════════════════════════════════════════════════════════════════════╣
 ║  Market.perceive()                                                    ║
 ║    ├── buy_qty = Σ buy orders; sell_qty = Σ sell orders              ║
-║    ├── P(t+1) = P(t) + 0.01×D + 0.02×(100−P) + N(0, 0.5²)         ║
+║    ├── P(t+1) = P(t) + 0.02×D + 0.03×(100−P) + N(0, 0.5²)         ║
 ║    ├── return_pct = (P(t+1) − P(t)) / P(t)                          ║
 ║    └── deviation = (P(t+1) − 100) / 100                              ║
 ║                                                                       ║
 ║  Market.decide() → broadcast {price, prev_price, fundamental,        ║
 ║                               deviation, return_pct, round}          ║
 ║                                                                       ║
-║  RecentEventOverweighter: perceived_signal = 3.0×return_pct − 2.0×dev║
-║    → buy if perceived_signal > 0.05; sell if < −0.05                 ║
-║  MediaInfluencedTrader:   amplified_signal = 3.0 × deviation          ║
+║  RecentEventOverweighter: perceived_signal = 0.70×return_pct+0.30×dev║
+║    → buy if perceived_signal > 0.02; sell if < −0.02                 ║
+║  MediaInfluencedTrader:   amplified_signal = 1.20 × deviation         ║
 ║    → buy if amplified_signal > threshold; sell if < −threshold       ║
 ║  SystematicAnalyst:       evidence = deviation (no recency)           ║
 ║    → sell if deviation > 0.03; buy if deviation < −0.03              ║
-║  ValueTrader:             trade if |deviation| > 0.10                 ║
+║  ValueTrader:             trade if |deviation| > 0.05                 ║
 ║  NoiseTrader:             p=0.30 → random 100–500 buy/sell           ║
 ║         │                                                             ║
 ║         └──── send orders → Market.perceive() [next round]           ║
@@ -147,15 +147,15 @@ Key Configuration Parameters (`configs/AvailabilityBias/Rule/players.yml`):
 
 | Parameter              | Config Path                   | Value | Design Justification                                                        |
 |------------------------|-------------------------------|-------|-----------------------------------------------------------------------------|
-| `price_impact`         | `extras.price_impact`         | 0.01  | Moderate λ — availability bias creates overreaction, not leverage cascade   |
-| `mean_reversion`       | `extras.mean_reversion`       | 0.02  | Moderate γ — allows bias to persist briefly but not permanently             |
+| `price_impact`         | `extras.price_impact`         | 0.02  | Moderate λ — availability bias creates overreaction, not leverage cascade   |
+| `mean_reversion`       | `extras.mean_reversion`       | 0.03  | Moderate γ — allows bias to persist briefly but not permanently             |
 | `noise_std`            | `extras.noise_std`            | 0.5   | Higher σ — availability events are stochastic surprises; see sim-bases §3.1 |
-| `recency_weight`       | `extras.recency_weight`       | 3.0   | Tversky & Kahneman (1973) recency amplification; see sim-bases §6           |
-| `salience_threshold`   | `extras.salience_threshold`   | 0.05  | Salient event threshold; see sim-bases §6                                   |
-| `media_weight`         | `extras.media_weight`         | 2.0   | Tetlock (2007) media amplification; see sim-bases §6                        |
+| `recency_weight`       | `extras.recency_weight`       | 0.70  | Tversky & Kahneman (1973) recency weighting; see sim-bases §6               |
+| `salience_threshold`   | `extras.salience_threshold`   | 0.02  | Salient event threshold; see sim-bases §6                                   |
+| `media_weight`         | `extras.media_weight`         | 0.80  | Tetlock (2007) media amplification; see sim-bases §6                        |
 | `social_amplification` | `extras.social_amplification` | 1.5   | Kasperson et al. (1988) social amplification; see sim-bases §6              |
 | `evidence_threshold`   | `extras.evidence_threshold`   | 0.03  | Mullainathan (2002) systematic processing threshold; see sim-bases §6       |
-| `deviation_threshold`  | `extras.deviation_threshold`  | 0.10  | Graham (1949) value investing threshold; see sim-bases §6                   |
+| `deviation_threshold`  | `extras.deviation_threshold`  | 0.05  | Graham (1949) value investing threshold; see sim-bases §6                   |
 
 ---
 

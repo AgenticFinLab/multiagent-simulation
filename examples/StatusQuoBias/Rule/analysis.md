@@ -35,3 +35,13 @@ underreaction.
 Metrics derive from `../analysis-bases.md §2`; deterministic behavior derives
 from `../simulation-bases.md §4` and `§9`.
 
+## §6 Quality Checks
+
+- Confirm the run completed the configured round count.
+- Confirm investor orders contain valid action, quantity, and agent type fields.
+- Confirm hold rates and active-rebalancing volume can be attributed by agent.
+
+## §7 Reporting Notes
+
+Report this variant as the deterministic baseline for status quo inertia.
+Compare API variants only after parser and output-quality checks pass.

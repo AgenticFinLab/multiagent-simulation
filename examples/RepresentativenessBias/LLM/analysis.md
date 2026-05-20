@@ -34,3 +34,15 @@ discipline, or delayed correction.
 
 Metrics derive from `../analysis-bases.md §2`; LLM mechanism derives from
 `../simulation-bases.md §9`.
+
+## §6 Quality Checks
+
+- Confirm the run completed the configured round count.
+- Audit parse failures, retry counts, and fallback behavior before acceptance.
+- Confirm LLM orders preserve valid action and quantity fields.
+
+## §7 Reporting Notes
+
+Report market outcomes together with LLM output-quality diagnostics. Any parse
+failure after retries should fail the sample rather than silently entering a
+hold action.

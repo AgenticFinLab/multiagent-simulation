@@ -35,3 +35,14 @@ underreaction magnitude or timing.
 Metrics derive from `../analysis-bases.md §2`; LLM mechanism derives from
 `../simulation-bases.md §9`.
 
+## §6 Quality Checks
+
+- Confirm the run completed the configured round count.
+- Audit parse failures, retry counts, and fallback behavior before acceptance.
+- Confirm output reasoning explains inaction, default adherence, or active
+  rebalancing without invalid JSON.
+
+## §7 Reporting Notes
+
+Report LLM outcomes together with output-quality diagnostics. Parse failure
+after retries should fail the sample rather than entering a silent hold.

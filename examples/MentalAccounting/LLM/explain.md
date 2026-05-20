@@ -15,6 +15,25 @@
 - Thaler (1985): Mental accounting and consumer choice
 - Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
 
+## §6 Configuration Reference
+
+The LLM variant uses `configs/MentalAccounting/LLM/simulation.yml`, `players.yml`, `topology.yml`, and `persona.yml`. Investor prompts and model settings are configured per LLM investor while the market mechanism remains aligned with the Rule baseline.
+
+## §7 Runtime Outputs
+
+A full LLM run should produce 200 rounds, valid order payloads, and parseable LLM decision traces. Level-2 review should confirm clean JSON parsing and no fallback-hold distortion before sample acceptance.
+
+## §8 Validation Checklist
+
+- `players.py`, `prompts.py`, and `analysis.py` compile.
+- Prompt refs load and use the canonical `<analysis>` / `<decision>` decision contract.
+- Dry-run discovers `MentalAccounting__LLM`.
+- Existing full sample can be inherited because this pass does not change prompt or player runtime semantics.
+
+## §9 Cross-Variant Comparison Notes
+
+LLM is compared against Rule to measure whether persona-only reasoning moderates mental accounting, house-money risk taking, and sunk-cost holding without explicit executable formulas.
+
 ## §3 Agent Descriptions
 
 ### MentalAccountant

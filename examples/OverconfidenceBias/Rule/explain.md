@@ -79,3 +79,31 @@ python examples/OverconfidenceBias/Rag/run_overconfidencebias_rag.py \
 - Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
 - Odean (1998): Volume, volatility, price, and profit when all traders are above average
 - Barber & Odean (2001): Boys will be boys: Gender, overconfidence, and common stock investment
+
+## §6 Expected Mechanism
+
+The simulation is expected to show how overconfident agents overreact to
+private signals, trade larger quantities, and amplify price deviations from
+fundamental value. Calibrated and contrarian agents provide stabilizing
+pressure, while noise traders maintain baseline order-flow uncertainty.
+
+## §7 Experimental Controls
+
+- Overconfident agents should retain higher trade intensity and larger position
+  adjustments than calibrated agents.
+- Stabilizing agents should not be removed, because they define the benchmark
+  against which excess confidence is measured.
+- The fundamental value process and initial endowments should remain comparable
+  across variants.
+
+## §8 Success Criteria
+
+- The run completes the configured number of rounds without runtime errors.
+- Trading records contain valid action, price, and quantity fields.
+- Price deviations, volatility, and trading volume can be compared across agent
+  types to identify overconfidence-driven amplification.
+
+## §9 Notes
+
+This variant uses deterministic rule logic. Its outputs are the baseline for
+interpreting LLM, RuleLLM, and RAG variants under the same scenario design.

@@ -58,3 +58,28 @@ This variant traces to `../simulation-bases.md §4` for investor design and
 full round count, order schema completeness, price and portfolio sanity,
 representativeness pressure, and rational-correction patterns before accepting a
 sample.
+
+## §6 Configuration Reference
+
+Primary config: `configs/RepresentativenessBias/Rule/players.yml`.
+Market parameters are loaded by `Market._initialize_market_state()`. Investor
+cash, position, and behavioral parameters are loaded from each agent's
+`extras` block.
+
+## §7 Running Instructions
+
+```bash
+python examples/RepresentativenessBias/Rule/run_representativenessbias.py \
+  -c configs/RepresentativenessBias/Rule/simulation.yml
+```
+
+## §8 Expected Behavior Patterns
+
+PatternMatcher and CategoryOvergeneralizer should create directional pressure
+from salient price patterns. BayesianUpdater and ContrarianStatistical should
+offset deviations when price moves materially away from fundamental value.
+
+## §9 References
+
+See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
+`../analysis-bases.md §2`.

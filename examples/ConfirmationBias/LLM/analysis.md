@@ -87,3 +87,12 @@ they see the "right answer" in the prompt (fundamental = 100.0).
 | `annualized_vol_pct`      | Similar or slightly higher                   |
 
 Use `summary.json` from each variant to build comparison table.
+
+---
+
+## §7 References
+
+- Base metric definitions: `analysis-bases.md §2`.
+- Phase interpretation and expected calibration ranges: `analysis-bases.md §3` and `analysis-bases.md §6`.
+- Shared implementation: `examples/ConfirmationBias/Rule/analysis.py`.
+- LLM-specific observable behavior: `examples/ConfirmationBias/LLM/players.py` and `examples/ConfirmationBias/LLM/prompts.py`.

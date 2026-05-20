@@ -1,58 +1,63 @@
 # DispositionEffect Rule Variant — analysis.md
 
-## §1 Metrics and Functions
+## §1 Overview
 
-| Metric                              | Function                                                                  | analysis-bases.md Ref |
-|-------------------------------------|---------------------------------------------------------------------------|-----------------------|
-| Proportion of Gains Realized (PGR)  | `proportion_of_gains_realized(trades, price_history, purchase_prices)`    | §2.1                  |
-| Proportion of Losses Realized (PLR) | `proportion_of_losses_realized(trades, price_history, purchase_prices)`   | §2.2                  |
-| Disposition Coefficient (DC)        | `disposition_coefficient(pgr, plr)`                                       | §2.3                  |
-| PGR/PLR Ratio                       | `pgr_plr_ratio(pgr, plr)`                                                 | §2.4                  |
-| Holding Period Asymmetry (HPA)      | `holding_period_asymmetry(sell_events)`                                   | §2.5                  |
-| Performance Drag Index (PDI)        | `performance_drag_index(disposition_final_wealth, rational_final_wealth)` | §2.6                  |
-| Tax Reversal Index (TRI)            | `tax_reversal_index(tax_plr, disposition_plr)`                            | §2.7                  |
+The Rule variant uses `Rule/analysis.py` as the authoritative analysis module
+for all DispositionEffect variants. It loads market prices and per-player order
+payloads, computes PGR/PLR-style disposition metrics, writes `summary.json`, and
+generates seven diagnostic figures. This file maps the concrete implementation
+back to `analysis-bases.md`.
 
-## §2 Rule Variant Notes
+## §2 Metrics and Functions
 
-**Analysis script**: `DispositionEffect/Rule/analysis.py`
+| Metric | Function | analysis-bases.md Ref |
+|---|---|---|
+| Proportion of Gains Realized (PGR) | `calculate_pgr_plr()` | §2.1 |
+| Proportion of Losses Realized (PLR) | `calculate_pgr_plr()` | §2.2 |
+| Disposition Coefficient (DC) | `generate_summary()` | §2.3 |
+| PGR/PLR Ratio | `calculate_pgr_plr()` | §2.4 |
+| Holding and sell asymmetry proxy | `plot_fig7_sell_gain_loss()` | §2.5 |
+| Performance drag proxy | `plot_fig6_portfolio_evolution()` | §2.6 |
+| Tax reversal comparison | `analyze_by_strategy()` and `generate_summary()` | §2.7 |
 
-The Rule variant produces fully deterministic outputs for a given random seed. Key variant-specific analysis notes:
+## §3 Data Loading Contract
 
-- **PGR/PLR determinism**: PGR and PLR are determined exactly by `gain_threshold` and `loss_threshold` parameters; minimal variance across runs (news shock randomness only).
-- **DC calibration**: Rule variant DC ≈ 0.05 is the calibration target for all other variants to compare against.
-- **HPA precision**: `rounds_held` tracked per position; Rule HPA is the cleanest measurement for Prospect Theory asymmetry validation.
-- **PDI benchmark**: Rule variant PDI (3–5%) establishes the performance drag benchmark.
-- **TRI anti-disposition**: TaxAwareInvestor PLR should be 2–4× DispositionInvestor PLR due to deliberate tax-loss harvesting.
+`load_simulation_data(config)` reads the coordinator `price` batch and every
+player turn payload. Each trade record must contain `bid_price`, `quantity`,
+`strategy`, and an injected `round`. Missing required fields raise errors rather
+than being silently replaced.
 
-## §3 Output Files
+## §4 Rule Variant Notes
 
-Rule variant produces the following output files in `outputs/DispositionEffect/Rule/`:
+- PGR/PLR are derived from the deterministic threshold behavior implemented in
+  `Rule/players.py`.
+- The fixed initial purchase price of 100.0 is retained for the
+  DispositionInvestor anchor, matching `move_reference=False` behavior in the
+  player implementation.
+- The Rule output is the comparison baseline for LLM, RuleLLM, and Rag.
+- Market stochasticity comes from news and noise; investor rules remain
+  deterministic for a given observed state.
 
-| File                   | Content                                                   |
-|------------------------|-----------------------------------------------------------|
-| `price_history.csv`    | Round-by-round price, return, news shock                  |
-| `agent_orders.csv`     | Per-agent strategy, quantity, bid_price, round            |
-| `agent_wealth.csv`     | Per-agent cash, position, purchase_price, wealth by round |
-| `metrics_summary.json` | PGR, PLR, DC, PGR/PLR ratio, HPA, PDI, TRI                |
+## §5 Output Files
 
-## §4 Phase Attribution
+| File | Content |
+|---|---|
+| `summary.json` | Price statistics, PGR, PLR, DC, PGR/PLR ratio, validation score |
+| `fig1_price_dynamics.png` | Price path, fundamental level, returns, rolling volatility |
+| `fig2_pgr_plr_comparison.png` | PGR/PLR and DC by strategy |
+| `fig3_trading_activity.png` | Buy/sell counts and traded volume |
+| `fig4_return_distribution.png` | Return distribution and summary statistics |
+| `fig5_disposition_ratio.png` | PGR/PLR ratio and realized/paper gain-loss pools |
+| `fig6_portfolio_evolution.png` | Position and equity value trajectory |
+| `fig7_sell_gain_loss.png` | Sell events by gain/loss territory |
 
-For each sell event, record:
+## §6 Validation Criteria
 
-```python
-sell_event = {
-    "investor_type": "DispositionInvestor",
-    "round": t,
-    "gain_loss_at_sale": gain_loss,  # positive = winner sold, negative = loser sold
-    "rounds_held": t - purchase_round,
-    "quantity": abs(quantity),
-}
-```
+`generate_summary()` calls `validate_disposition_effect()` with the
+DispositionInvestor PGR, PLR, and DC. A valid Rule run should show PGR > PLR and
+roughly match the Odean-inspired calibration bands in `analysis-bases.md §6`.
 
-PGR/PLR computed by aggregating across all sell events and open positions per round.  
-HPA computed from `sell_events` (analysis-bases.md §2.5).
+## §7 References
 
-## §5 References
-
-All metric definitions with DOI citations: `analysis-bases.md §2`.  
-Investor theory references: `simulation-bases.md §4.1–§4.5`.
+Metric definitions and DOI references are centralized in `analysis-bases.md §2`.
+Investor theory references are centralized in `simulation-bases.md §4.1–§4.5`.

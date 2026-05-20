@@ -1,42 +1,53 @@
 # DispositionEffect LLM Variant — analysis.md
 
-## §1 Metrics and Functions
+## §1 Overview
 
-| Metric                              | Function                                                                  | analysis-bases.md Ref |
-|-------------------------------------|---------------------------------------------------------------------------|-----------------------|
-| Proportion of Gains Realized (PGR)  | `proportion_of_gains_realized(trades, price_history, purchase_prices)`    | §2.1                  |
-| Proportion of Losses Realized (PLR) | `proportion_of_losses_realized(trades, price_history, purchase_prices)`   | §2.2                  |
-| Disposition Coefficient (DC)        | `disposition_coefficient(pgr, plr)`                                       | §2.3                  |
-| PGR/PLR Ratio                       | `pgr_plr_ratio(pgr, plr)`                                                 | §2.4                  |
-| Holding Period Asymmetry (HPA)      | `holding_period_asymmetry(sell_events)`                                   | §2.5                  |
-| Performance Drag Index (PDI)        | `performance_drag_index(disposition_final_wealth, rational_final_wealth)` | §2.6                  |
-| Tax Reversal Index (TRI)            | `tax_reversal_index(tax_plr, disposition_plr)`                            | §2.7                  |
+The LLM variant reuses the shared DispositionEffect analysis functions from
+`Rule/analysis.py`. The analysis asks whether persona-only LLM investors exhibit
+the same PGR > PLR tendency as the deterministic Rule baseline.
 
-## §2 LLM Variant Notes
+## §2 Metrics and Functions
 
-**Analysis script**: `DispositionEffect/LLM/analysis.py`
+| Metric | Function | analysis-bases.md Ref |
+|---|---|---|
+| Proportion of Gains Realized (PGR) | `Rule.analysis.calculate_pgr_plr()` | §2.1 |
+| Proportion of Losses Realized (PLR) | `Rule.analysis.calculate_pgr_plr()` | §2.2 |
+| Disposition Coefficient (DC) | `Rule.analysis.generate_summary()` | §2.3 |
+| PGR/PLR Ratio | `Rule.analysis.calculate_pgr_plr()` | §2.4 |
+| Reasoning-trace proxy | LLM response artifacts and order `reasoning` payloads | §3 |
+| Performance comparison | `Rule.analysis.plot_fig6_portfolio_evolution()` | §2.6 |
+| Cross-variant comparison | `summary.json` against Rule baseline | §5 |
 
-Key LLM-variant-specific analysis notes:
+## §3 Data Loading Contract
 
-- **PGR/PLR variance**: LLM threshold drift produces higher variance; report mean ± std across multiple runs.
-- **DC emergent strength**: LLM DC may exceed Rule DC (emotional "can't sell" reasoning) or be weaker (LLM capitulates under pressure). Compare to Rule DC ≈ 0.05.
-- **Reasoning trace analysis**: Extract `<analysis>` tags from LLM outputs; count mentions of "purchase price", "loss", "pain" as proxy for anchoring strength.
-- **LLMLossAverse vs. LLMDispositionBiased**: Compare PLR between these two agents; LLMLossAverse should have lower PLR.
-- **Emergent rationality**: Check if LLMRationalInvestor shows non-zero DC (emergent disposition from LLM training data).
+`LLM/analysis.py` calls `load_simulation_data(config)` from the Rule analysis
+module. LLM order payloads must contain the same required trading fields as Rule:
+`bid_price`, `quantity`, `strategy`, and `reasoning`. Missing required fields are
+analysis failures, not zero-valued observations.
 
-## §3 Output Files
+## §4 LLM Variant Notes
 
-LLM variant produces the following output files in `outputs/DispositionEffect/LLM/`:
+- LLM reasoning variance is evaluated through PGR, PLR, DC, and order reasoning
+  traces.
+- Persona-only prompts may produce stronger or weaker disposition behavior than
+  Rule; the analysis does not impose a rule-compliance target.
+- `LLMLossAverse` and `LLMDispositionBiased` should be compared for loss-sale
+  reluctance.
 
-| File                   | Content                                            |
-|------------------------|----------------------------------------------------|
-| `price_history.csv`    | Round-by-round price, return, news shock           |
-| `agent_orders.csv`     | Per-agent action, quantity, strategy, round        |
-| `agent_wealth.csv`     | Per-agent cash, position, wealth by round          |
-| `metrics_summary.json` | PGR, PLR, DC, PGR/PLR ratio, HPA, PDI, TRI         |
-| `llm_responses.jsonl`  | Raw LLM outputs with thinking and parsed decisions |
+## §5 Output Files
 
-## §4 References
+The LLM variant writes the same `summary.json` and seven figures as the Rule
+variant. LLM-specific interpretation should additionally inspect raw LLM response
+artifacts and the `reasoning` strings preserved in order payloads.
 
-All metric definitions with DOI citations: `analysis-bases.md §2`.  
-Investor theory references: `simulation-bases.md §4.1–§4.5`.
+## §6 Validation Criteria
+
+A valid LLM run completes with 200 rounds, parseable order payloads, and no
+analysis field substitution. Scenario validity is assessed by whether PGR > PLR
+for disposition-biased investors and by how closely the aggregate behavior
+matches the bands in `analysis-bases.md §6`.
+
+## §7 References
+
+Metric definitions and DOI references are centralized in `analysis-bases.md §2`.
+Investor theory references are centralized in `simulation-bases.md §4.1–§4.5`.

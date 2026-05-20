@@ -25,3 +25,15 @@
 - Thaler (1999): Mental Accounting Matters
 - Thaler (1985): Mental accounting and consumer choice
 - Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
+
+## §5 Cross-Variant Comparison
+
+Rule results provide the baseline for account-level turnover, house-money risk shift, sunk-cost holding, rational benchmark deviation, price impact, trading concentration, and volatility.
+
+## §6 Expected Results and Validation
+
+The accepted Rule sample should complete 200 rounds with non-empty market price records and no malformed order payloads. Existing output can be inherited because this pass only updates documentation.
+
+## §7 Visualization Catalogue
+
+`Rule/analysis.py → create_visualizations(data, output_path)` creates `mentalaccounting_analysis.png`, including price, fundamental, deviation, return, and return-distribution panels.

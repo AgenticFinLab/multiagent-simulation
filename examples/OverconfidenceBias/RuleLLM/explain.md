@@ -79,3 +79,31 @@ python examples/OverconfidenceBias/Rag/run_overconfidencebias_rag.py \
 - Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
 - Odean (1998): Volume, volatility, price, and profit when all traders are above average
 - Barber & Odean (2001): Boys will be boys: Gender, overconfidence, and common stock investment
+
+## §6 Expected Mechanism
+
+The simulation is expected to show how rule constraints and LLM interpretation
+combine to produce overconfidence-driven order flow. Rule logic anchors each
+agent's behavioral parameters, while LLM reasoning explains and formats the
+action taken under current market conditions.
+
+## §7 Experimental Controls
+
+- Rule-derived thresholds and position limits should remain aligned with the
+  scenario design.
+- LLM output must preserve the trading action schema consumed by the market.
+- Stabilizing and noise agents should remain present to separate bias effects
+  from general market fluctuations.
+
+## §8 Success Criteria
+
+- The run completes the configured number of rounds without runtime errors.
+- RuleLLM actions remain parseable and consistent with the configured role.
+- Trading volume, volatility, and price deviations can be compared against Rule
+  and LLM variants.
+
+## §9 Notes
+
+This variant is intended to preserve rule semantics while adding LLM-mediated
+reasoning. Prompt changes should not alter the underlying overconfidence
+parameters unless the mode is rerun.

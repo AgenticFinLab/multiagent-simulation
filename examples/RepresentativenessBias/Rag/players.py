@@ -106,11 +106,25 @@ class RagLLMInvestor(GeneralPlayer):
         )
         llm = self._get_llm()
         infer_input = InferInput(system_msg=self._system_prompt, user_msg=user_prompt)
-        try:
-            response = llm.run([infer_input]).outputs[0].response
-            decision = parse_llm_response_with_thinking(response)
-        except Exception:
-            decision = {"action": "hold", "quantity": 0}
+        decision = None
+        last_error = None
+        for attempt in range(3):
+            try:
+                response = llm.run([infer_input]).outputs[0].response
+                decision = parse_llm_response_with_thinking(response)
+                break
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] RAG LLM parse failed on attempt %d; retrying",
+                        self.identity,
+                        attempt + 1,
+                    )
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] RAG LLM parse failed after 3 attempts: {last_error}"
+            )
 
         action = decision["action"]
         quantity = int(decision["quantity"])
@@ -120,7 +134,7 @@ class RagLLMInvestor(GeneralPlayer):
         elif action == "sell":
             quantity = min(quantity, max(position, 0))
         quantity = max(0, min(quantity, 1000))
-        return {"action": action, "quantity": quantity}
+        return {"action": action, "quantity": quantity, "rag_context": rag_context}
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
         action = decision_payload["action"]
@@ -138,6 +152,7 @@ class RagLLMInvestor(GeneralPlayer):
             "action": action,
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
+            "rag_context": decision_payload["rag_context"],
         }
         return Action(
             action_type="order",
@@ -150,31 +165,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMPatternMatcher(RagLLMInvestor):
-    """Rag-augmented PatternMatcher — pattern-based investor with retrieved knowledge."""
+    """RagLLM pattern matcher — prototype trading with retrieved context. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RULELLM_PATTERN_MATCHER_SYS
 
 
 class RagLLMCategoryOvergeneralizer(RagLLMInvestor):
-    """Rag-augmented CategoryOvergeneralizer — category-based investor with retrieved knowledge."""
+    """RagLLM category generalizer — small-sample extrapolation with retrieval. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RULELLM_CATEGORY_OVERGENERALIZER_SYS
 
 
 class RagLLMBayesianUpdater(RagLLMInvestor):
-    """Rag-augmented BayesianUpdater — Bayesian investor with retrieved knowledge."""
+    """RagLLM Bayesian updater — base-rate benchmark with retrieval. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RULELLM_BAYESIAN_UPDATER_SYS
 
 
 class RagLLMContrarianStatistical(RagLLMInvestor):
-    """Rag-augmented ContrarianStatistical — contrarian investor with retrieved knowledge."""
+    """RagLLM contrarian arbitrageur — correction with retrieved context. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RULELLM_CONTRARIAN_STATISTICAL_SYS
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """Rag-augmented NoiseTrader — noise trader with retrieved knowledge."""
+    """RagLLM noise trader — liquidity baseline with retrieval. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RULELLM_NOISE_TRADER_SYS
 

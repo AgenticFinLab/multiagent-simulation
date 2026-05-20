@@ -102,7 +102,7 @@ systematic_analyst:
       custom_state_hot_limit: 3
       # Bayesian evidence weighting
       weight_decay: 0.80         # Recency decay factor (not used in base version)
-      evidence_threshold: 0.05   # 5% deviation required before acting
+      evidence_threshold: 0.03   # 3% deviation required before acting
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------

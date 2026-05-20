@@ -71,7 +71,7 @@ Market class is imported from `Rule/players.py` (shared). All Rag investors subm
 | Base class     | `RagLLMInvestor` → `GeneralPlayer`                                                      |
 | Inference      | `LangChainAPIInference` + RAG knowledge retrieval                                       |
 | Context        | `price`, `fundamental`, `deviation`, `cash`, `position`, `round` + retrieved documents  |
-| Output parsing | JSON response with `action`, `quantity`, `reasoning`, `analysis`, `provides_liquidity`  |
+| Output parsing | JSON response with `action`, `bid_price`, `quantity`, `reasoning`, `analysis`; payload also records `rag_context` |
 | RAG retrieval  | Query built from market state; documents retrieved from endowment effect knowledge base |
 
 ## §5 Config Reference

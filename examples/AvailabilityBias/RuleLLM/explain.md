@@ -19,9 +19,9 @@
 
 | Theoretical Design Element    | Implementation                                                                                                         |
 |-------------------------------|------------------------------------------------------------------------------------------------------------------------|
-| Recency amplification formula | System prompt: "Compute perceived_signal = 3.0 × return_pct + (1 − 3.0) × deviation; if > 0.05: buy; if < −0.05: sell" |
-| Overweights return_pct        | Rule embedded: "recency_weight = 3.0 — recent returns are 3x more salient than current deviation"                      |
-| Threshold-anchored response   | Prompt: "The salience_threshold is 0.05 — only act when perceived_signal crosses this boundary"                        |
+| Recency amplification formula | System prompt: "Compute perceived_signal = 0.70 × return_pct + 0.30 × deviation; if > 0.02: buy; if < -0.02: sell" |
+| Overweights return_pct        | Rule embedded: recent returns receive 70% of the perceived signal while deviation receives 30%                    |
+| Threshold-anchored response   | Prompt: "The salience_threshold is 0.02 — only act when perceived_signal crosses this boundary"                   |
 | LLM may modulate quantity     | Formula specifies direction and threshold; LLM determines quantity within reasonable bounds                            |
 
 ### RuleLLMMediaInfluencedTrader: Theory → Implementation Mapping
@@ -30,8 +30,8 @@
 
 | Theoretical Design Element     | Implementation                                                                                         |
 |--------------------------------|--------------------------------------------------------------------------------------------------------|
-| Media amplification formula    | System prompt: "Compute amplified_signal = 2.0 × deviation × 1.5 = 3.0 × deviation"                    |
-| Threshold triggers             | Prompt: "Trade when                                                                                    |
+| Media amplification formula    | System prompt: "Compute amplified_signal = 0.80 × deviation × 1.50 = 1.20 × deviation"                 |
+| Threshold triggers             | Prompt: "Trade when |amplified_signal| > 0.03"                                                        |
 | Social amplification grounding | Rule embedded: "social_amplification = 1.5 — social media magnifies the raw fundamental signal by 50%" |
 
 ### RuleLLMSystematicAnalyst: Theory → Implementation Mapping
@@ -41,7 +41,7 @@
 | Theoretical Design Element | Implementation                                                                          |
 |----------------------------|-----------------------------------------------------------------------------------------|
 | No recency signal use      | System prompt: "You must NOT use return_pct — only deviation matters for your analysis" |
-| Evidence threshold         | Prompt: "Trade only when                                                                |
+| Evidence threshold         | Prompt: "Trade only when |deviation| > 0.03"                                           |
 | Counter-trading direction  | Prompt: "If deviation > 0.03: sell. If deviation < −0.03: buy. No exceptions."          |
 
 ### RuleLLMValueTrader: Theory → Implementation Mapping
@@ -50,8 +50,8 @@
 
 | Theoretical Design Element | Implementation                                                                                        |
 |----------------------------|-------------------------------------------------------------------------------------------------------|
-| Fundamental threshold      | System prompt: "Trade only when                                                                       |
-| Direction                  | Prompt: "deviation < −0.10: buy (deep value). deviation > +0.10: sell (overbought). Otherwise: hold." |
+| Fundamental threshold      | System prompt: "Trade only when |deviation| > 0.05"                                                   |
+| Direction                  | Prompt: "deviation < -0.05: buy (deep value). deviation > +0.05: sell (overbought). Otherwise: hold." |
 
 ### RuleLLMNoiseTrader: Theory → Implementation Mapping
 
@@ -66,7 +66,7 @@
 
 Market mechanism is **identical** to Rule variant — only investor decision logic changes.
 
-*(Full formula: simulation-bases.md §3.1 — P(t+1) = P(t) + 0.01·D + 0.02·(F−P) + ε)*
+*(Full formula: simulation-bases.md §3.1 — P(t+1) = P(t) + 0.02·D + 0.03·(F−P) + ε)*
 
 ### RuleLLM User Prompt Variables
 
@@ -112,7 +112,7 @@ Round t:
   ┌────────────────┐ ┌──────────────────┐ ┌────────────────┐ ┌────────────────┐
   │RuleLLMRecent   │ │RuleLLMMedia      │ │RuleLLMSystem   │ │RuleLLMValue    │
   │EventOverweight │ │InfluencedTrader  │ │aticAnalyst     │ │Trader          │
-  │(formula        │ │(formula          │ │(no return_pct  │ │(|dev|>0.10)    │
+  │(formula        │ │(formula          │ │(no return_pct  │ │(|dev|>0.05)    │
   │ embedded)      │ │ embedded)        │ │ rule enforced) │ │                │
   └────────────────┘ └──────────────────┘ └────────────────┘ └────────────────┘
 ```
@@ -143,7 +143,7 @@ Output: `EXPERIMENT/AvailabilityBias/RuleLLM/records/`
 | Phase             | Deviation Range  | RuleLLM-Specific Behavior                                                                       |
 |-------------------|------------------|-------------------------------------------------------------------------------------------------|
 | **Pre-Event**     | [−2%, +2%]       | Agents hold; rule thresholds prevent spurious trading                                           |
-| **Event Trigger** | First large move | RecencyOverweighter computes formula explicitly; activates at or near ±0.05 perceived_signal    |
+| **Event Trigger** | First large move | RecencyOverweighter computes formula explicitly; activates at or near ±0.02 perceived_signal    |
 | **Bias Peak**     | [3%–10%]         | Tighter range than LLM; formula anchoring prevents extreme amplification                        |
 | **Correction**    | Declining        | SystematicAnalyst cites "deviation > 0.03 threshold" in reasoning; correction is formula-guided |
 | **Stabilization** | Near 0%          | More predictable than LLM; lower variance across runs                                           |

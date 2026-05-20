@@ -1,48 +1,36 @@
-# GamblerFallacy — LLM Variant Analysis
+# GamblerFallacy LLM — Analysis Guide
 
-## §1 Overview
+## §1 Analysis Objectives
 
-Analysis methodology for the **LLM variant** of the GamblerFallacy simulation. Metric definitions from `../analysis-bases.md §2`. The key LLM-specific finding: SAR should diverge from 1.0 as LLM agents express genuinely opposing gambler's fallacy vs. hot hand biases.
-
-| Aspect             | Detail                 |
-|--------------------|------------------------|
-| Variant            | LLM                    |
-| Simulation         | GamblerFallacy         |
-| Analysis basis     | `../analysis-bases.md` |
-| Decision mechanism | LLM persona reasoning  |
-
----
+LLM analysis reuses `../analysis-bases.md §1` and adds quality review of parse success, reasoning coherence, and whether persona-only prompts produce gambler's-fallacy or hot-hand behavior.
 
 ## §2 Metric → Function Mapping
 
-| Metric                                | Function                                                                           | analysis-bases.md ref |
-|---------------------------------------|------------------------------------------------------------------------------------|-----------------------|
-| GFI (Gambler's Fallacy Index)         | `gambler_fallacy_index(price_history, fundamental)`                                | §2.1                  |
-| SAR (Streak Asymmetry Ratio)          | `streak_asymmetry_ratio(price_history, fundamental)`                               | §2.2                  |
-| HHM (Hot Hand Momentum)               | `hot_hand_momentum(trade_history, price_history, fundamental, threshold=0.02)`     | §2.3                  |
-| ACI (Arbitrage Correction Index)      | `arbitrage_correction_index(price_history, fundamental, threshold=0.05, window=5)` | §2.4                  |
-| VAF (Volatility Amplification Factor) | `volatility_amplification_factor(price_history, fundamental, threshold=0.02)`      | §2.5                  |
-| WDI (Wealth Distribution Index)       | `wealth_distribution_index(agent_states, final_price)`                             | §2.6                  |
+| Metric | Function | analysis-bases.md Reference |
+|---|---|---|
+| Gambler's Fallacy Index | `gambler_fallacy_index(price_history, fundamental)` | §2.1 |
+| Streak Asymmetry Ratio | `streak_asymmetry_ratio(price_history, fundamental)` | §2.2 |
+| Hot Hand Momentum | `hot_hand_momentum(net_demand_history, dev_history, threshold=0.02)` | §2.3 |
+| Arbitrage Correction Index | `arbitrage_correction_index(dev_history, lookahead=5, threshold=0.05)` | §2.4 |
+| Volatility Amplification Factor | `volatility_amplification_factor(price_history, dev_history, threshold=0.02)` | §2.5 |
+| Wealth Distribution Index | `wealth_distribution_index(agent_wealth)` | §2.6 |
 
----
+## §3 Data Loading and Structural Checks
 
-## §3 LLM-Specific Notes
+`LLM/analysis.py` imports the Rule analysis functions. Quality review should additionally inspect model responses for malformed JSON, missing decisions, retry loops, and fallback holds.
 
-- **LLMStreakReversalTrader (§4.1)**: Prompt-encoded reversal bias may produce SAR < 1.0 (positive deviations smaller than negative) when the reversal belief is strong enough to dampen upward momentum.
-- **LLMHotHandTrader (§4.2)**: Momentum-continuation persona may produce SAR > 1.0 (positive deviations larger). The interplay between §4.1 (SAR↓) and §4.2 (SAR↑) is the core LLM research finding.
-- **SAR diagnostic**: If SAR ≈ 1.0 in LLM variant, the LLM personas are not successfully differentiating the two biases — examine system prompts for sufficient asymmetry.
-- **HHM in LLM**: When §4.1 and §4.2 trade in opposite directions, net demand (HHM numerator) is reduced vs. Rule baseline where both agents trade in the same direction.
-- **Multi-run**: Run ≥10 seeds; SAR is highly variable across runs due to LLM stochasticity.
+## §4 Phase Analysis
 
----
+Interpret the run in streak emergence, biased demand amplification, rational correction, and wealth redistribution phases. LLM-specific notes should distinguish reversal reasoning from hot-hand continuation reasoning.
 
-## §4 Expected Ranges (LLM Variant)
+## §5 Cross-Variant Comparison
 
-| Metric | LLM Expected Range | vs. Rule Baseline            | Interpretation                                                         |
-|--------|--------------------|------------------------------|------------------------------------------------------------------------|
-| GFI    | 0.015–0.07         | Lower                        | Opposing biases partially cancel net deviation                         |
-| SAR    | 0.5–1.8            | More variable than Rule ≈1.0 | Key LLM differentiation: §4.1 reversal vs. §4.2 continuation expressed |
-| HHM    | 100–400 shares     | Lower                        | Partial cancellation of biased agent demands                           |
-| ACI    | 0.35–0.70          | Similar/slightly higher      | LLM rational agents reason explicitly about correction                 |
-| VAF    | 1.2–3.0            | Lower                        | Dampened by opposing bias cancellation                                 |
-| WDI    | 0.08–0.28          | Lower                        | Less systematic exploitation when biases oppose each other             |
+LLM results are compared against Rule and RuleLLM. Differences from Rule represent persona-only model effects under the same market.
+
+## §6 Expected Results and Validation
+
+Valid LLM samples complete 200 rounds with clean parse quality. Existing accepted LLM sample is inheritable because this pass only adds documentation and analysis files.
+
+## §7 Visualization Catalogue
+
+The inherited price-dynamics figure is primary. Reports may add LLM action distribution and parse-quality summaries.

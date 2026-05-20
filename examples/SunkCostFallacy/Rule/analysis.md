@@ -36,3 +36,14 @@ and performance drag.
 Metrics derive from `../analysis-bases.md §2`; deterministic behavior derives
 from `../simulation-bases.md §4` and `§9`.
 
+## §6 Quality Checks
+
+- Confirm the run completed the configured round count.
+- Confirm investor orders contain valid action, quantity, and agent type fields.
+- Confirm escalation, rational cutting, and opportunity-cost activity can be
+  attributed by agent.
+
+## §7 Reporting Notes
+
+Report this variant as the deterministic baseline for sunk-cost persistence.
+Compare API variants only after parser and output-quality checks pass.

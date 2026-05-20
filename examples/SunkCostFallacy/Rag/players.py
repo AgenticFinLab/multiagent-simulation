@@ -30,7 +30,7 @@ from masim.knowledge import (
 from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from .prompts import (
     RAGLLM_SUNK_COST_HOLDER_SYS,
     RAGLLM_COMMITMENT_ESCALATOR_SYS,
@@ -304,6 +304,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         return (
             f"Round {round_num} — Market Update\n"
@@ -314,7 +315,8 @@ class RagLLMInvestor(GeneralPlayer):
             f"Value: ${portfolio_value:.2f}\n\n"
             "Apply your decision rules, informed by retrieved knowledge, to determine action.\n"
             "Respond with <analysis>...</analysis> then <decision>...</decision> containing "
-            'JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}'
+            'JSON: {"action": "buy" or "sell" or "hold", "bid_price": current price, '
+            '"quantity": integer, "reasoning": "brief rationale"}'
         )
 
     async def decide(self) -> Dict[str, Any]:
@@ -326,24 +328,38 @@ class RagLLMInvestor(GeneralPlayer):
         user_prompt = self._build_prompt()
         system_prompt = self._system_prompt
 
-        decision: Dict[str, Any] = {"action": "hold", "quantity": 0}
+        decision = None
         max_retries = 3
+        last_error: Optional[Exception] = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_output = llm_client.run([infer_input])
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
                 break
-            except (ValueError, KeyError):
-                if attempt == max_retries - 1:
-                    logger.warning(
-                        "[%s] LLM parse failed after %d attempts; holding.",
+            except Exception as exc:
+                last_error = exc
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if attempt < max_retries - 1 and (parse_error or retryable_api_error):
+                    logger.debug(
+                        "[%s] RAG LLM call/parse failed, retrying: %s",
                         self.identity,
-                        max_retries,
+                        exc,
                     )
-                    decision = {"action": "hold", "quantity": 0}
+                    continue
+                if not parse_error and not retryable_api_error:
+                    raise
+                raise RuntimeError(
+                    f"[{self.identity}] RAG LLM failed after {max_retries} attempts: {last_error}"
+                )
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] RAG LLM produced no decision after {max_retries} attempts"
+            )
 
         action = decision["action"]
         quantity = int(decision["quantity"])
@@ -385,6 +401,7 @@ class RagLLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "agent_type": strategy_name,
             "reasoning": decision["reasoning"][:120],
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
         return {
             **order,
@@ -400,31 +417,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMSunkCostHolder(RagLLMInvestor):
-    """RAG-augmented sunk cost holder refusing to cut losing positions."""
+    """RagLLM sunk cost holder refusing to cut losing positions. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RAGLLM_SUNK_COST_HOLDER_SYS
 
 
 class RagLLMCommitmentEscalator(RagLLMInvestor):
-    """RAG-augmented commitment escalator doubling down on losing positions."""
+    """RagLLM commitment escalator doubling down on losing positions. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RAGLLM_COMMITMENT_ESCALATOR_SYS
 
 
 class RagLLMRationalCutter(RagLLMInvestor):
-    """RAG-augmented rational cutter ignoring sunk costs and cutting losses."""
+    """RagLLM rational cutter ignoring sunk costs and cutting losses. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RAGLLM_RATIONAL_CUTTER_SYS
 
 
 class RagLLMOpportunityCostTrader(RagLLMInvestor):
-    """RAG-augmented opportunity cost trader reallocating from underperformers."""
+    """RagLLM opportunity cost trader reallocating from underperformers. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RAGLLM_OPPORTUNITY_COST_TRADER_SYS
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented noise trader providing random baseline liquidity."""
+    """RagLLM noise trader providing random baseline liquidity. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RAGLLM_NOISE_TRADER_SYS
 

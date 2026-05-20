@@ -77,3 +77,12 @@ Examine agent reasoning traces in `<analysis>` tags:
 
 Compare `summary.json` across variants to identify where embedded rules
 most effectively characterize investor behavior.
+
+---
+
+## §7 References
+
+- Base metric definitions: `analysis-bases.md §2`.
+- Phase interpretation and expected calibration ranges: `analysis-bases.md §3` and `analysis-bases.md §6`.
+- Shared implementation: `examples/ConfirmationBias/Rule/analysis.py`.
+- RuleLLM-specific behavior: `examples/ConfirmationBias/RuleLLM/players.py` and `examples/ConfirmationBias/RuleLLM/prompts.py`.

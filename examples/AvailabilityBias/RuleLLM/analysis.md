@@ -32,7 +32,7 @@
 **Implementation:** `load_simulation_data()` → `availabilitybias_rulellm_analysis.png`
 
 **Variant-Specific Interpretation:**
-RuleLLM bias trajectory should follow Rule's shape with 1–2 round timing variation. If bias amplitude > 10%, check whether RecencyOverweighter is computing formula correctly (its reasoning should show "perceived_signal = 3.0 × return_pct...").
+RuleLLM bias trajectory should follow Rule's shape with 1–2 round timing variation. If bias amplitude > 10%, check whether RecencyOverweighter is computing formula correctly (its reasoning should show "perceived_signal = 0.70 × return_pct + 0.30 × deviation...").
 
 ---
 

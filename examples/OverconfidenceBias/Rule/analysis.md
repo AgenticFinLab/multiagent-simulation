@@ -25,3 +25,23 @@
 - Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
 - Odean (1998): Volume, volatility, price, and profit when all traders are above average
 - Barber & Odean (2001): Boys will be boys: Gender, overconfidence, and common stock investment
+
+## §5 Interpretation Checklist
+
+- Compare overconfident and calibrated agents' average order size and trading
+  frequency.
+- Check whether large overconfident trades coincide with wider price deviations
+  from fundamental value.
+- Confirm that stabilizing agents reduce, rather than amplify, deviations.
+
+## §6 Quality Checks
+
+- Confirm the run completed the configured round count.
+- Confirm trade records include valid action, price, and quantity fields.
+- Review volatility and drawdown metrics for implausible numerical spikes.
+
+## §7 Reporting Notes
+
+Report the Rule variant as the deterministic baseline. When comparing with API
+variants, separate overconfidence-driven trading intensity from model-output
+quality issues such as parse failures or fallback actions.

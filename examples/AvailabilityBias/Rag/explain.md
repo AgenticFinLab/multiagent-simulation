@@ -62,7 +62,7 @@
 
 ## §3 Market Mechanism Implementation
 
-*(Full formula: simulation-bases.md §3.1 — P(t+1) = P(t) + 0.01·D + 0.02·(F−P) + ε)*
+*(Full formula: simulation-bases.md §3.1 — P(t+1) = P(t) + 0.02·D + 0.03·(F−P) + ε)*
 
 ### RAG System Architecture
 

@@ -57,3 +57,11 @@ Rag variant should produce the lowest LAI, BER, VAF and highest NCE, WPI across 
 - Odean, T. (1998). doi:[10.1111/0022-1082.00072](https://doi.org/10.1111/0022-1082.00072)
 - Barberis, N., & Xiong, W. (2009). doi:[10.1111/j.1540-6261.2009.01448.x](https://doi.org/10.1111/j.1540-6261.2009.01448.x)
 - Shefrin, H., & Statman, M. (1985). doi:[10.1111/j.1540-6261.1985.tb05002.x](https://doi.org/10.1111/j.1540-6261.1985.tb05002.x)
+
+## §6 Expected Results and Validation
+
+The accepted RAG sample should complete 200 rounds with clean parse quality and usable retrieval context. It should show the strongest narrative correction among API modes, but not erase the phenomenon entirely. Existing accepted RAG output can be inherited because this pass only updates analysis documentation.
+
+## §7 Visualization Catalogue
+
+`Rag/analysis.py` reuses the Rule analysis pipeline and writes `lossaversion_analysis.png`. RAG reports should add retrieval-quality notes and compare LAI/DEI/BER against RuleLLM.

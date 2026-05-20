@@ -74,6 +74,7 @@ from masim.utils.history import HistoryBuffer
 from masim.knowledge import KnowledgeLoader
 
 logger = logging.getLogger("DispositionEffectRag")
+RAG_FALLBACK_CONTEXT = "(No relevant knowledge retrieved this round.)"
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -649,6 +650,7 @@ class BaseRagInvestor(GeneralPlayer):
         news_shock = market_data["news_shock"]
 
         # Format user prompt — {rag_context} placeholder filled here per §8.4 spec
+        injected_rag_context = rag_context if rag_context else RAG_FALLBACK_CONTEXT
         user_prompt = user_template.format(
             round=round_num,
             price=price,
@@ -662,9 +664,7 @@ class BaseRagInvestor(GeneralPlayer):
             purchase_price=purchase_price,
             gain_loss_pct=gain_loss * 100,
             portfolio_value=cash + position * price,
-            rag_context=(
-                rag_context if rag_context else "(no relevant knowledge retrieved)"
-            ),
+            rag_context=injected_rag_context,
         )
 
         # Call LLM
@@ -693,6 +693,7 @@ class BaseRagInvestor(GeneralPlayer):
                 "quantity": quantity if action != "hold" else 0,
                 "reasoning": raw_decision["reasoning"],
                 "strategy": strategy_name,
+                "rag_context": injected_rag_context,
             }
 
         except Exception as exc:

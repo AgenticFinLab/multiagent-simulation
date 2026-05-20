@@ -79,3 +79,30 @@ python examples/OverconfidenceBias/Rag/run_overconfidencebias_rag.py \
 - Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
 - Odean (1998): Volume, volatility, price, and profit when all traders are above average
 - Barber & Odean (2001): Boys will be boys: Gender, overconfidence, and common stock investment
+
+## §6 Expected Mechanism
+
+The simulation is expected to show whether retrieved behavioral-finance context
+reinforces or moderates overconfident trading. Agents still operate under the
+same market roles, but RAG context may affect how they justify signal precision,
+trade frequency, and position size.
+
+## §7 Experimental Controls
+
+- Retrieval context should supplement, not replace, the scenario's agent roles.
+- RAG responses must preserve the trading action schema consumed by the market.
+- The same fundamental value process, initial endowments, and topology should be
+  retained across variants.
+
+## §8 Success Criteria
+
+- The run completes the configured number of rounds without runtime errors.
+- RAG responses produce valid trading actions without excessive fallback holds.
+- Retrieved context is available while price deviations, volatility, and trading
+  volume remain comparable to the other variants.
+
+## §9 Notes
+
+This variant keeps the overconfidence mechanism fixed and adds retrieval as an
+information layer. Changes to retrieval configuration or prompt schema affect the
+runtime contract and should be rerun before replacing an accepted sample.

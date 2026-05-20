@@ -35,3 +35,13 @@ inertia or rebalancing behavior.
 Metrics derive from `../analysis-bases.md §2`; Rag design derives from
 `../simulation-bases.md §9`.
 
+## §6 Quality Checks
+
+- Confirm the run completed the configured round count.
+- Audit retrieval context availability, parse failures, and retry counts.
+- Confirm `rag_context` appears in accepted output artifacts for Level-2 review.
+
+## §7 Reporting Notes
+
+Report RAG outcomes with retrieval diagnostics. Missing or fallback retrieval
+context should be explicitly noted even if simulator execution succeeds.

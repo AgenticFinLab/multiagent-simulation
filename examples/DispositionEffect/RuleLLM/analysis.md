@@ -1,42 +1,53 @@
 # DispositionEffect RuleLLM Variant — analysis.md
 
-## §1 Metrics and Functions
+## §1 Overview
 
-| Metric                              | Function                                                                  | analysis-bases.md Ref |
-|-------------------------------------|---------------------------------------------------------------------------|-----------------------|
-| Proportion of Gains Realized (PGR)  | `proportion_of_gains_realized(trades, price_history, purchase_prices)`    | §2.1                  |
-| Proportion of Losses Realized (PLR) | `proportion_of_losses_realized(trades, price_history, purchase_prices)`   | §2.2                  |
-| Disposition Coefficient (DC)        | `disposition_coefficient(pgr, plr)`                                       | §2.3                  |
-| PGR/PLR Ratio                       | `pgr_plr_ratio(pgr, plr)`                                                 | §2.4                  |
-| Holding Period Asymmetry (HPA)      | `holding_period_asymmetry(sell_events)`                                   | §2.5                  |
-| Performance Drag Index (PDI)        | `performance_drag_index(disposition_final_wealth, rational_final_wealth)` | §2.6                  |
-| Tax Reversal Index (TRI)            | `tax_reversal_index(tax_plr, disposition_plr)`                            | §2.7                  |
+The RuleLLM variant reuses the shared DispositionEffect analysis functions from
+`Rule/analysis.py`. The analysis compares formula-anchored LLM decisions against
+the deterministic Rule baseline.
 
-## §2 RuleLLM Variant Notes
+## §2 Metrics and Functions
 
-**Analysis script**: `DispositionEffect/RuleLLM/analysis.py`
+| Metric | Function | analysis-bases.md Ref |
+|---|---|---|
+| Proportion of Gains Realized (PGR) | `Rule.analysis.calculate_pgr_plr()` | §2.1 |
+| Proportion of Losses Realized (PLR) | `Rule.analysis.calculate_pgr_plr()` | §2.2 |
+| Disposition Coefficient (DC) | `Rule.analysis.generate_summary()` | §2.3 |
+| PGR/PLR Ratio | `Rule.analysis.calculate_pgr_plr()` | §2.4 |
+| Boundary-behavior proxy | `Rule.analysis.plot_fig7_sell_gain_loss()` | §2.5 |
+| Performance comparison | `Rule.analysis.plot_fig6_portfolio_evolution()` | §2.6 |
+| Rule-guidance comparison | `summary.json` against Rule baseline | §5 |
 
-Key RuleLLM-variant-specific analysis notes:
+## §3 Data Loading Contract
 
-- **Rule compliance check**: Compute PGR/PLR for RuleLLM vs. Rule; differences > 5% indicate LLM is overriding embedded thresholds.
-- **DC boundary analysis**: RuleLLM DC should bracket Rule (mechanical) and LLM (narrative); examine sells near threshold (gain_loss = 0.028–0.032) for soft-threshold behavior.
-- **Reasoning transparency**: `<analysis>` tag content per trade event records LLM's explicit Prospect Theory reasoning — qualitative analysis opportunity.
-- **RuleLLMLossAverse PDI**: Should show highest performance drag among RuleLLM agents (lowest PLR = maximum loser-holding).
-- **HPA rule fidelity**: HPA(RuleLLM) vs. HPA(Rule) gap measures how much LLM boundary reasoning extends holding durations.
+`RuleLLM/analysis.py` calls `load_simulation_data(config)` from the Rule
+analysis module. RuleLLM order payloads must contain `bid_price`, `quantity`,
+`strategy`, `reasoning`, and parser-provided `analysis` content where recorded by
+the player implementation.
 
-## §3 Output Files
+## §4 RuleLLM Variant Notes
 
-RuleLLM variant produces the following output files in `outputs/DispositionEffect/RuleLLM/`:
+- RuleLLM analysis checks whether prompt-embedded rules keep PGR/PLR close to
+  the deterministic Rule baseline.
+- Boundary sells near the configured gain/loss thresholds are especially
+  informative for detecting LLM soft-threshold behavior.
+- Reasoning traces should explain the Prospect Theory rule being applied rather
+  than silently overriding it.
 
-| File                   | Content                                                 |
-|------------------------|---------------------------------------------------------|
-| `price_history.csv`    | Round-by-round price, return, news shock                |
-| `agent_orders.csv`     | Per-agent action, quantity, strategy, round             |
-| `agent_wealth.csv`     | Per-agent cash, position, wealth by round               |
-| `metrics_summary.json` | PGR, PLR, DC, PGR/PLR ratio, HPA, PDI, TRI              |
-| `llm_responses.jsonl`  | Raw LLM outputs with embedded rule compliance reasoning |
+## §5 Output Files
 
-## §4 References
+The RuleLLM variant writes the same `summary.json` and seven figures as the Rule
+variant. LLM response artifacts provide the additional trace needed for
+rule-guidance interpretation.
 
-All metric definitions with DOI citations: `analysis-bases.md §2`.  
-Investor theory references: `simulation-bases.md §4.1–§4.5`.
+## §6 Validation Criteria
+
+A valid RuleLLM run completes 200 rounds, preserves required parser fields, and
+produces PGR/PLR behavior close enough to Rule to support comparison. Large
+departures from Rule are reported as scenario findings, not hidden by analysis
+defaults.
+
+## §7 References
+
+Metric definitions and DOI references are centralized in `analysis-bases.md §2`.
+Investor theory references are centralized in `simulation-bases.md §4.1–§4.5`.
