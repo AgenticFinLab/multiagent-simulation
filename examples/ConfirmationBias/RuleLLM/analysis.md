@@ -1,6 +1,6 @@
 # ConfirmationBias RuleLLM Variant — Analysis Guide
 
-## 1. Analysis Overview
+## §1 Analysis Overview
 
 This guide covers interpretation of results from the **ConfirmationBias RuleLLM** variant.
 Key question: *Do LLM agents with explicit decision rules produce more structured
@@ -8,7 +8,7 @@ and consistent behavior? Does rule-guided behavior reproduce the Rule variant's 
 
 ---
 
-## 2. Metric Implementation (`RuleLLM/analysis.py`)
+## §2 Metric Implementation (`RuleLLM/analysis.py`)
 
 Imports `calculate_metrics`, `load_simulation_data` from `Rule/analysis.py` (DRY pattern).
 No additional variant-specific analysis function — the embedded rules serve as deeper
@@ -16,7 +16,7 @@ investor characterization, not executable mandates to be measured against.
 
 ---
 
-## 3. RuleLLM-Specific Output Files
+## §3 RuleLLM-Specific Output Files
 
 Running `RuleLLM/analysis.py` writes to `EXPERIMENT/ConfirmationBias/RuleLLM/records/analysis/`:
 
@@ -27,7 +27,7 @@ Running `RuleLLM/analysis.py` writes to `EXPERIMENT/ConfirmationBias/RuleLLM/rec
 
 ---
 
-## 4. Dimension-by-Dimension Interpretation
+## §4 Dimension-by-Dimension Interpretation
 
 ### 4.1 Price vs Fundamental
 
@@ -42,7 +42,7 @@ Running `RuleLLM/analysis.py` writes to `EXPERIMENT/ConfirmationBias/RuleLLM/rec
 
 ---
 
-## 5. Variant-Specific Phenomena
+## §5 Variant-Specific Phenomena
 
 ### 5.1 BeliefAnchor Simplification Gap
 
@@ -67,7 +67,7 @@ Examine agent reasoning traces in `<analysis>` tags:
 
 ---
 
-## 6. Cross-Variant Comparison
+## §6 Cross-Variant Comparison
 
 | Metric                    | Expected Position          |
 |---------------------------|----------------------------|

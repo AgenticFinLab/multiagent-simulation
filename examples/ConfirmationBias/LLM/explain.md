@@ -1,6 +1,6 @@
 # ConfirmationBias LLM Variant — Design Specification
 
-## 1. Overview
+## §1 Overview
 
 | Item                     | Detail                                                                                       |
 |--------------------------|----------------------------------------------------------------------------------------------|
@@ -13,7 +13,7 @@
 
 ---
 
-## 2. Theory → Implementation Mapping
+## §2 Theory → Implementation Mapping
 
 | Theoretical Concept          | Agent / Mechanism                                                        | Code Location                               |
 |------------------------------|--------------------------------------------------------------------------|---------------------------------------------|
@@ -26,7 +26,7 @@
 
 ---
 
-## 3. Market Mechanism
+## §3 Market Mechanism
 
 Identical to Rule variant. Market broadcasts per round:
 
@@ -43,7 +43,7 @@ LLM agents also receive portfolio state `{cash, position, portfolio_value}`.
 
 ---
 
-## 4. Variant-Specific Features
+## §4 Variant-Specific Features
 
 ### 4.1 Emergent Bias Without State Variable
 
@@ -75,7 +75,7 @@ for each trader agent each round:
 
 ---
 
-## 5. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -107,7 +107,7 @@ for each trader agent each round:
 
 ---
 
-## 6. Configuration Reference
+## §6 Configuration Reference
 
 Config: `configs/ConfirmationBias/LLM/simulation.yml`
 
@@ -123,7 +123,7 @@ Market parameters: identical to Rule variant (see Rule/explain.md §6).
 
 ---
 
-## 7. Running Instructions
+## §7 Running Instructions
 
 ```bash
 # Requires LLM API key in .env
@@ -137,7 +137,7 @@ python examples/ConfirmationBias/LLM/analysis.py \
 
 ---
 
-## 8. Expected Behavior
+## §8 Expected Behavior
 
 - `LLMBeliefAnchor` may produce weaker bias than Rule (no compounding belief variable)
 - `LLMSelectiveScanner` may ignore disconfirming signals depending on prompt engineering
@@ -147,7 +147,7 @@ python examples/ConfirmationBias/LLM/analysis.py \
 
 ---
 
-## 9. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

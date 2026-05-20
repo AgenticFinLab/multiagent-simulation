@@ -1,6 +1,6 @@
 # ConfirmationBias Rag Variant — Design Specification
 
-## 1. Overview
+## §1 Overview
 
 | Item            | Detail                                                                                                      |
 |-----------------|-------------------------------------------------------------------------------------------------------------|
@@ -13,7 +13,7 @@
 
 ---
 
-## 2. Theory → Implementation Mapping
+## §2 Theory → Implementation Mapping
 
 | Theoretical Concept            | Agent / Mechanism                                             | Code Location                               |
 |--------------------------------|---------------------------------------------------------------|---------------------------------------------|
@@ -26,7 +26,7 @@
 
 ---
 
-## 3. Market Mechanism
+## §3 Market Mechanism
 
 Identical to Rule variant. Market broadcasts per round:
 
@@ -36,7 +36,7 @@ Identical to Rule variant. Market broadcasts per round:
 
 ---
 
-## 4. Variant-Specific Features
+## §4 Variant-Specific Features
 
 ### 4.1 RAG Pipeline
 
@@ -77,7 +77,7 @@ but this time the evidence really is confirming"). Track BeliefAnchor's
 
 ---
 
-## 5. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -107,7 +107,7 @@ but this time the evidence really is confirming"). Track BeliefAnchor's
 
 ---
 
-## 6. Configuration Reference
+## §6 Configuration Reference
 
 Config: `configs/ConfirmationBias/Rag/simulation.yml`
 
@@ -121,7 +121,7 @@ Config: `configs/ConfirmationBias/Rag/simulation.yml`
 
 ---
 
-## 7. Running Instructions
+## §7 Running Instructions
 
 ```bash
 # Ensure knowledge documents exist in configs/ConfirmationBias/Rag/knowledge/
@@ -135,7 +135,7 @@ python examples/ConfirmationBias/Rag/analysis.py \
 
 ---
 
-## 8. Expected Behavior
+## §8 Expected Behavior
 
 - `retrieval_success_rate` ≥ 70% requires KnowledgeStore populated with
   documents about confirmation bias, cognitive biases, and market behavior
@@ -147,7 +147,7 @@ python examples/ConfirmationBias/Rag/analysis.py \
 
 ---
 
-## 9. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

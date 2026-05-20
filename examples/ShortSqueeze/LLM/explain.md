@@ -1,6 +1,6 @@
 # ShortSqueeze LLM - LLM-Powered Short Squeeze Simulation
 
-## What is This?
+## §1 What is This?
 
 | Item               | Description                                                                               |
 |--------------------|-------------------------------------------------------------------------------------------|
@@ -9,7 +9,7 @@
 | **Key Feature**    | Investors use LLM reasoning to exhibit coordinated buying and forced short covering       |
 | **Academic Value** | Tests whether LLMs can simulate GameStop-style squeeze dynamics                           |
 
-## 5 LLM Investor Types
+## §2 5 LLM Investor Types
 
 ### Investor Type Summary
 
@@ -32,7 +32,7 @@ Short Squeeze Cascade:
   5. LLMInstitutional profit-taking eventually slows squeeze
 ```
 
-## Files
+## §3 Files
 
 | File                                                | Purpose                          |
 |-----------------------------------------------------|----------------------------------|
@@ -43,14 +43,14 @@ Short Squeeze Cascade:
 | `configs/ShortSqueeze/LLM/players.yml`               | Player definitions + LLM config  |
 | `configs/ShortSqueeze/LLM/topology.yml`              | Star topology                    |
 
-## Running
+## §4 Running
 
 ```bash
 export ARK_API_KEY='your-bytedance-doubao-api-key'
 python examples/ShortSqueeze/LLM/run_short_squeeze_llm.py -c configs/ShortSqueeze/LLM/simulation.yml
 ```
 
-## Expected Behavior Patterns
+## §5 Expected Behavior Patterns
 
 | Phase    | Rounds | LLM Behavior                                           |
 |----------|--------|--------------------------------------------------------|
@@ -60,7 +60,7 @@ python examples/ShortSqueeze/LLM/run_short_squeeze_llm.py -c configs/ShortSqueez
 | Squeeze  | 11-14  | LLMShortSeller forced to cover, price spikes           |
 | Unwind   | 15-20  | LLMInstitutional takes profits, price stabilizes       |
 
-## References
+## §6 References
 
 | Theory                  | Application in ShortSqueeze LLM           | Reference        |
 |-------------------------|------------------------------------------|------------------|

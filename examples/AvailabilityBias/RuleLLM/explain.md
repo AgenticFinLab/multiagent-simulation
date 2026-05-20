@@ -1,6 +1,6 @@
 # AvailabilityBias RuleLLM — Simulation Documentation
 
-## Overview
+## §1 Overview
 
 | Item                      | Description                                                                                                                                                         |
 |---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 | **Research Contribution** | Tests whether embedding availability bias formulas into LLM prompts constrains bias variance while preserving behavioral richness                                   |
 
 
-## 1. How Theoretical Design Is Implemented
+## §2 How Theoretical Design Is Implemented
 
 ### RuleLLMRecentEventOverweighter: Theory → Implementation Mapping
 
@@ -62,7 +62,7 @@
 | Random trade probability   | System prompt: "With 30% probability, you trade randomly — buy or sell 100–500 shares" |
 
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 Market mechanism is **identical** to Rule variant — only investor decision logic changes.
 
@@ -90,14 +90,14 @@ Same as LLM variant, with `{return_pct}` included:
 ```
 
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 - **Formula-embedded availability channels**: Both availability channels (recency and media) have their exact formulas embedded as directives — agents compute them explicitly in reasoning
 - **SystematicAnalyst isolation**: Prompt explicitly prohibits return_pct use — tests whether rule embedding prevents availability contamination in the rational benchmark agent
 - **Intermediate bias amplitude**: Rule constraints prevent extreme overreaction; LLM behavioral framing preserves some variance
 
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 Round t:
@@ -118,7 +118,7 @@ Round t:
 ```
 
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 | Config Path                 | Key Parameter | Value                   | Notes                                         |
 |-----------------------------|---------------|-------------------------|-----------------------------------------------|
@@ -128,7 +128,7 @@ Round t:
 Full config: `configs/AvailabilityBias/RuleLLM/players.yml`
 
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 python examples/AvailabilityBias/RuleLLM/run_availabilitybias_rulellm.py \
@@ -138,7 +138,7 @@ python examples/AvailabilityBias/RuleLLM/run_availabilitybias_rulellm.py \
 Output: `EXPERIMENT/AvailabilityBias/RuleLLM/records/`
 
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase             | Deviation Range  | RuleLLM-Specific Behavior                                                                       |
 |-------------------|------------------|-------------------------------------------------------------------------------------------------|
@@ -149,7 +149,7 @@ Output: `EXPERIMENT/AvailabilityBias/RuleLLM/records/`
 | **Stabilization** | Near 0%          | More predictable than LLM; lower variance across runs                                           |
 
 
-## 8. References
+## §9 References
 
 - `../simulation-bases.md §4.1–§4.5` — Investor archetype specifications
 - `../simulation-bases.md §5` — RuleLLM variant description

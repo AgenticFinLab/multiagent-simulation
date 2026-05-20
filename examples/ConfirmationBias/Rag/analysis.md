@@ -1,6 +1,6 @@
 # ConfirmationBias Rag Variant — Analysis Guide
 
-## 1. Analysis Overview
+## §1 Analysis Overview
 
 This guide covers interpretation of results from the **ConfirmationBias Rag** variant.
 Key questions:
@@ -10,7 +10,7 @@ Key questions:
 
 ---
 
-## 2. Metric Implementation (`Rag/analysis.py`)
+## §2 Metric Implementation (`Rag/analysis.py`)
 
 Imports `calculate_metrics`, `load_simulation_data` from `Rule/analysis.py` (DRY pattern).
 Adds `analyze_rag_knowledge_effect()` — the primary Rag-specific metric.
@@ -36,7 +36,7 @@ def analyze_rag_knowledge_effect(agent_records):
 
 ---
 
-## 3. Rag-Specific Output Files
+## §3 Rag-Specific Output Files
 
 Running `Rag/analysis.py` writes to `EXPERIMENT/ConfirmationBias/Rag/records/analysis/`:
 
@@ -48,7 +48,7 @@ Running `Rag/analysis.py` writes to `EXPERIMENT/ConfirmationBias/Rag/records/ana
 
 ---
 
-## 4. Dimension-by-Dimension Interpretation
+## §4 Dimension-by-Dimension Interpretation
 
 ### 4.1 Price vs Fundamental
 
@@ -73,7 +73,7 @@ Running `Rag/analysis.py` writes to `EXPERIMENT/ConfirmationBias/Rag/records/ana
 
 ---
 
-## 5. Variant-Specific Phenomena
+## §5 Variant-Specific Phenomena
 
 ### 5.1 Knowledge Quality vs Quantity
 
@@ -100,7 +100,7 @@ In this case, focus improvements on KnowledgeStore content, not agent prompts.
 
 ---
 
-## 6. Knowledge Store Requirements
+## §6 Knowledge Store Requirements
 
 For `retrieval_success_rate ≥ 70%`, add documents to `configs/ConfirmationBias/Rag/knowledge/`:
 
@@ -115,7 +115,7 @@ For `retrieval_success_rate ≥ 70%`, add documents to `configs/ConfirmationBias
 
 ---
 
-## 7. Cross-Variant Comparison
+## §7 Cross-Variant Comparison
 
 | Metric                    | Expected vs LLM                       |
 |---------------------------|---------------------------------------|

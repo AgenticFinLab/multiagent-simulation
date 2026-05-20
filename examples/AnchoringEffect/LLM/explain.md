@@ -1,6 +1,6 @@
 # AnchoringEffect LLM — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                                   | Description                                                                                                                                                                                                    |
 |----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -13,7 +13,7 @@
 
 ---
 
-## 1. How Theoretical Design Is Implemented
+## §2 How Theoretical Design Is Implemented
 
 ### LLMAnchoredTrader: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4 — AnchoredTrader / LLM Persona)*
@@ -62,7 +62,7 @@
 
 ---
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 *Formula source: simulation-bases.md §3.1*
 
@@ -75,7 +75,7 @@ All price dynamics, parameters, and broadcast fields are identical to the Rule v
 
 ---
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 *(Reference: simulation-bases.md §9 — LLM variant entry)*
 
@@ -102,7 +102,7 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 
 ---
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
@@ -128,7 +128,7 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 
 ---
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 Key Configuration Parameters (`configs/AnchoringEffect/LLM/players.yml`):
 
@@ -143,7 +143,7 @@ All market parameters identical to Rule variant. See `simulation-bases.md §6` f
 
 ---
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 python examples/AnchoringEffect/LLM/run_anchoringeffect_llm.py \
@@ -159,7 +159,7 @@ Output location: `EXPERIMENT/AnchoringEffect/LLM/`
 
 ---
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase           | Rounds | Expected LLM Agent Behavior                                                                   | Expected Price Dynamics                                                     |
 |-----------------|--------|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
@@ -170,7 +170,7 @@ Output location: `EXPERIMENT/AnchoringEffect/LLM/`
 
 ---
 
-## 8. References
+## §9 References
 
 *Cross-references only — see simulation-bases.md for full citations:*
 

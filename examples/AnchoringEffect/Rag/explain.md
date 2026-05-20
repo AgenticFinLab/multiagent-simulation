@@ -1,6 +1,6 @@
 # AnchoringEffect Rag — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                               | Description                                                                                                                                                            |
 |------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,7 +12,7 @@
 
 ---
 
-## 2. How Theoretical Design Is Implemented
+## §2 How Theoretical Design Is Implemented
 
 Theory for each investor type is defined in `simulation-bases.md §4`. Below: how each theory is encoded in the Rag variant via RAG-augmented dual-section prompts.
 
@@ -70,7 +70,7 @@ Theory for each investor type is defined in `simulation-bases.md §4`. Below: ho
 
 ---
 
-## 3. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 Formula source: `simulation-bases.md §3.1`
 
@@ -98,7 +98,7 @@ Deviations from simulation-bases.md design: None — market implementation is id
 
 ---
 
-## 4. Variant-Specific Features
+## §4 Variant-Specific Features
 
 What is unique to Rag versus other variants — motivated by `simulation-bases.md §8` (Historical Case Studies) and `simulation-bases.md §9`:
 
@@ -137,7 +137,7 @@ rag:
 
 ---
 
-## 5. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 Rag Simulation Flow
@@ -188,7 +188,7 @@ Round N:
 
 ---
 
-## 6. Configuration Reference
+## §6 Configuration Reference
 
 Key Configuration Parameters (`configs/AnchoringEffect/Rag/players.yml`):
 
@@ -207,7 +207,7 @@ Key Configuration Parameters (`configs/AnchoringEffect/Rag/players.yml`):
 
 ---
 
-## 7. Running Instructions
+## §7 Running Instructions
 
 ```
 Execution:
@@ -226,7 +226,7 @@ Output location:  EXPERIMENT/AnchoringEffect/Rag/
 
 ---
 
-## 8. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase                         | Rounds      | Expected Agent Behavior                                                                                                                                     | Expected Price Dynamics                                                          |
 |-------------------------------|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
@@ -237,7 +237,7 @@ Output location:  EXPERIMENT/AnchoringEffect/Rag/
 
 ---
 
-## 9. References
+## §9 References
 
 No new theories are introduced in this variant. All theoretical foundations are defined in `simulation-bases.md §2`.
 

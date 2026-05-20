@@ -1,6 +1,6 @@
 # CarryTradeUnwind Rag — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                              | Description                                                                                                                                         |
 |-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,7 +12,7 @@
 
 ---
 
-## 1. How Theoretical Design Is Implemented
+## §2 How Theoretical Design Is Implemented
 
 ### Shared Architecture with RuleLLM
 *(All agent formulas and rule embedding identical to RuleLLM variant — see `RuleLLM/explain.md §1`)*
@@ -37,7 +37,7 @@ Each agent's knowledge store contains documents relevant to its role:
 
 ---
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 *Identical to Rule and RuleLLM variants — see `Rule/explain.md §2`.*
 
@@ -45,7 +45,7 @@ Broadcast: `{price, fundamental, deviation, round}` — no `return_pct`.
 
 ---
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 *(Reference: simulation-bases.md §9 — Rag variant entry)*
 
@@ -73,7 +73,7 @@ Based on the above market conditions and relevant knowledge, make your decision.
 
 ---
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
@@ -102,7 +102,7 @@ Based on the above market conditions and relevant knowledge, make your decision.
 
 ---
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 Key Rag-specific parameters (`configs/CarryTradeUnwind/Rag/players.yml`):
 
@@ -117,7 +117,7 @@ Key Rag-specific parameters (`configs/CarryTradeUnwind/Rag/players.yml`):
 
 ---
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 # First run: builds RAG index (may take a few minutes)
@@ -141,7 +141,7 @@ Output location: `EXPERIMENT/CarryTradeUnwind/Rag/records/`
 
 ---
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase        | Rounds | Expected Rag Agent Behavior                                               | Expected Price Dynamics                                  |
 |--------------|--------|---------------------------------------------------------------------------|----------------------------------------------------------|
@@ -154,7 +154,7 @@ Output location: `EXPERIMENT/CarryTradeUnwind/Rag/records/`
 
 ---
 
-## 8. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

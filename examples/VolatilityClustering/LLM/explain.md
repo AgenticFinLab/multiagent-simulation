@@ -1,6 +1,6 @@
 # VolatilityClustering LLM - LLM-Powered Volatility Clustering Simulation
 
-## What is This?
+## §1 What is This?
 
 | Item               | Description                                                                  |
 |--------------------|------------------------------------------------------------------------------|
@@ -9,7 +9,7 @@
 | **Key Feature**    | LLMs adjust trading behavior based on perceived volatility regime            |
 | **Academic Value** | Tests whether LLMs can reproduce Mandelbrot (1963) / Engle (1982) clustering |
 
-## Rule-Based vs LLM Comparison
+## §2 Rule-Based vs LLM Comparison
 
 | Aspect              | Rule-Based (VolatilityClustering) | LLM Version                        |
 |---------------------|-----------------------------------|------------------------------------|
@@ -18,12 +18,12 @@
 | Position Sizing     | Deterministic                     | LLM reasons about risk/reward      |
 | Emergence           | GARCH-like autocorrelation        | Emergent clustering patterns       |
 
-## LLM Provider
+## §3 LLM Provider
 
 - **Provider**: ByteDance Doubao (豆包) via `lmbase.LangChainAPIInference`
 - **Model**: `doubao-pro-256k`
 
-## 5 LLM Investor Types
+## §4 5 LLM Investor Types
 
 | Type              | Count | Role                 | Volatility Response       |
 |-------------------|-------|----------------------|---------------------------|
@@ -68,7 +68,7 @@ VOLATILITY RESPONSE:
 - You help DAMPEN extreme volatility spikes
 ```
 
-## Key Mechanism: Volatility Clustering
+## §5 Key Mechanism: Volatility Clustering
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -100,7 +100,7 @@ VOLATILITY RESPONSE:
 └─────────────────────────────────────────────────────────┘
 ```
 
-## Theoretical Basis: GARCH / Mandelbrot
+## §6 Theoretical Basis: GARCH / Mandelbrot
 
 **Volatility Clustering** (Mandelbrot 1963, Engle 1982):
 - "Large changes tend to be followed by large changes, of either sign"
@@ -111,7 +111,7 @@ VOLATILITY RESPONSE:
   - Slow traders (fundamentalists) react gradually → provide delayed stabilization
   - Speed difference creates the clustering pattern
 
-## Files
+## §7 Files
 
 | File          | Purpose                                                  |
 |---------------|----------------------------------------------------------|
@@ -120,14 +120,14 @@ VOLATILITY RESPONSE:
 | `run_llm.py`  | LLM simulation runner                                    |
 | `analysis.py` | Volatility autocorrelation metrics                       |
 
-## Running
+## §8 Running
 
 ```bash
 cd examples/VolatilityClustering/LLM
 python run_llm.py
 ```
 
-## Expected LLM Behavior Patterns
+## §9 Expected LLM Behavior Patterns
 
 1. **Amplification Phase**: Trend followers increase position sizes during high volatility
 2. **Persistence**: Volatility remains elevated for multiple rounds
@@ -135,14 +135,14 @@ python run_llm.py
 4. **Regime Switching**: Clear distinction between high-vol and low-vol periods
 5. **Autocorrelation**: |r_t| correlated with |r_{t-1}| through |r_{t-5}|
 
-## Research Questions
+## §10 Research Questions
 
 1. Do LLMs correctly perceive volatility regimes from price history?
 2. Can LLM trading produce GARCH-like autocorrelation without explicit programming?
 3. How do LLM reaction speeds compare to rule-based investor parameters?
 4. Does the fundamentalist "anchor" successfully mean-revert prices?
 
-## References
+## §11 References
 
 - Mandelbrot, B. (1963). The Variation of Certain Speculative Prices. Journal of Business.
 - Engle, R. F. (1982). Autoregressive Conditional Heteroscedasticity. Econometrica.

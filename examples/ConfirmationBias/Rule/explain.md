@@ -1,6 +1,6 @@
 # ConfirmationBias Rule Variant — Design Specification
 
-## 1. Overview
+## §1 Overview
 
 | Item               | Detail                                                                                                                              |
 |--------------------|-------------------------------------------------------------------------------------------------------------------------------------|
@@ -13,7 +13,7 @@
 
 ---
 
-## 2. Theory → Implementation Mapping
+## §2 Theory → Implementation Mapping
 
 | Theoretical Concept                               | Agent / Mechanism                                                      | Code Location                                |
 |---------------------------------------------------|------------------------------------------------------------------------|----------------------------------------------|
@@ -26,7 +26,7 @@
 
 ---
 
-## 3. Market Mechanism
+## §3 Market Mechanism
 
 ### 3.1 Price Update Formula
 
@@ -68,7 +68,7 @@ deviation = (price − fundamental) / fundamental
 
 ---
 
-## 4. Variant-Specific Features
+## §4 Variant-Specific Features
 
 ### 4.1 BeliefAnchor Internal State
 
@@ -120,7 +120,7 @@ elif deviation < -0.02 and position >= 0:
 
 ---
 
-## 5. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -148,7 +148,7 @@ elif deviation < -0.02 and position >= 0:
 
 ---
 
-## 6. Configuration Reference
+## §6 Configuration Reference
 
 From `configs/ConfirmationBias/Rule/players.yml`:
 
@@ -199,7 +199,7 @@ From `configs/ConfirmationBias/Rule/players.yml`:
 
 ---
 
-## 7. Running Instructions
+## §7 Running Instructions
 
 ```bash
 # Run simulation
@@ -215,7 +215,7 @@ Output: `EXPERIMENT/ConfirmationBias/Rule/records/`
 
 ---
 
-## 8. Expected Behavior
+## §8 Expected Behavior
 
 ### Phase 1: Bias Establishment (rounds 1–~30)
 
@@ -241,7 +241,7 @@ Output: `EXPERIMENT/ConfirmationBias/Rule/records/`
 
 ---
 
-## 9. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

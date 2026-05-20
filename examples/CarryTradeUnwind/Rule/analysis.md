@@ -1,6 +1,6 @@
 # CarryTradeUnwind Rule Variant — Analysis Guide
 
-## 1. Analysis Overview
+## §1 Analysis Overview
 
 This guide covers how to interpret results from the **CarryTradeUnwind Rule** simulation.
 The Rule variant uses fully deterministic algorithmic agents — no LLM calls —
@@ -11,7 +11,7 @@ stabilizing agents reproduce the empirical carry-crash pattern?*
 
 ---
 
-## 2. Metric Implementation (`Rule/analysis.py`)
+## §2 Metric Implementation (`Rule/analysis.py`)
 
 `analysis.py` exports three public functions via `__all__`:
 
@@ -35,7 +35,7 @@ stabilizing agents reproduce the empirical carry-crash pattern?*
 
 ---
 
-## 3. Dimension-by-Dimension Interpretation
+## §3 Dimension-by-Dimension Interpretation
 
 ### 3.1 Price vs Fundamental Plot
 
@@ -63,7 +63,7 @@ stabilizing agents reproduce the empirical carry-crash pattern?*
 
 ---
 
-## 4. Variant-Specific Phenomena
+## §4 Variant-Specific Phenomena
 
 ### 4.1 CarryTrader Trigger
 
@@ -108,7 +108,7 @@ circuit breaker. Observe reduced unwind_velocity in runs with this agent active.
 
 ---
 
-## 5. Scaling and Sensitivity
+## §5 Scaling and Sensitivity
 
 | Parameter               | Effect                                                   |
 |-------------------------|----------------------------------------------------------|
@@ -120,7 +120,7 @@ circuit breaker. Observe reduced unwind_velocity in runs with this agent active.
 
 ---
 
-## 6. Output Files
+## §6 Output Files
 
 Running `Rule/analysis.py` writes to `EXPERIMENT/CarryTradeUnwind/Rule/records/analysis/`:
 
@@ -131,7 +131,7 @@ Running `Rule/analysis.py` writes to `EXPERIMENT/CarryTradeUnwind/Rule/records/a
 
 ---
 
-## 7. Cross-Variant Comparison
+## §7 Cross-Variant Comparison
 
 | Dimension              | Rule            | LLM                         | RuleLLM            | Rag               |
 |------------------------|-----------------|-----------------------------|--------------------|-------------------|

@@ -1,6 +1,6 @@
 # CarryTradeUnwind LLM Variant — Analysis Guide
 
-## 1. Analysis Overview
+## §1 Analysis Overview
 
 This guide covers interpretation of results from the **CarryTradeUnwind LLM** variant.
 Key question: *Do LLM carry-trade personas reproduce the empirical crash pattern?
@@ -8,7 +8,7 @@ How does stochastic LLM reasoning alter crisis severity versus the Rule baseline
 
 ---
 
-## 2. Metric Implementation (`LLM/analysis.py`)
+## §2 Metric Implementation (`LLM/analysis.py`)
 
 Imports `calculate_metrics`, `load_simulation_data`, `create_visualizations` from
 `Rule/analysis.py` (DRY pattern). Adds LLM-specific action-distribution plot.
@@ -18,7 +18,7 @@ See `Rule/analysis.md §2` for metric formulas.
 
 ---
 
-## 3. LLM-Specific Output Files
+## §3 LLM-Specific Output Files
 
 Running `LLM/analysis.py` writes to `EXPERIMENT/CarryTradeUnwind/LLM/records/analysis/`:
 
@@ -30,7 +30,7 @@ Running `LLM/analysis.py` writes to `EXPERIMENT/CarryTradeUnwind/LLM/records/ana
 
 ---
 
-## 4. Dimension-by-Dimension Interpretation
+## §4 Dimension-by-Dimension Interpretation
 
 ### 4.1 Price vs Fundamental
 
@@ -52,7 +52,7 @@ Running `LLM/analysis.py` writes to `EXPERIMENT/CarryTradeUnwind/LLM/records/ana
 
 ---
 
-## 5. Variant-Specific Phenomena
+## §5 Variant-Specific Phenomena
 
 ### 5.1 Temperature Effect
 
@@ -71,7 +71,7 @@ market signals are borderline. This reduces crisis severity compared to Rule.
 
 ---
 
-## 6. Cross-Variant Comparison
+## §6 Cross-Variant Comparison
 
 | Metric               | Expected vs Rule         |
 |----------------------|--------------------------|

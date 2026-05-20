@@ -1,6 +1,6 @@
 # AssetBubble LLM — Analysis Documentation
 
-## Overview
+## §1 Overview
 
 | Item                                | Description                                                                                                                                       |
 |-------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 
 ---
 
-## 1. Metric Implementation
+## §2 Metric Implementation
 
 All metrics are defined in `../analysis-bases.md §2`. This variant's `analysis.py` delegates to `examples.AssetBubble.Rule.analysis.analyze_bubble()` via:
 
@@ -91,7 +91,7 @@ The same metric definitions apply; variant-specific differences are documented p
 
 ---
 
-## 2. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Price Dynamics and Bubble Formation
 *(Defined in `../analysis-bases.md §3`)*
@@ -161,7 +161,7 @@ The same metric definitions apply; variant-specific differences are documented p
 
 ---
 
-## 3. LLM-Specific Observable Phenomena
+## §4 LLM-Specific Observable Phenomena
 
 | Phenomenon                | Description                                                                           | How to Observe                                                                           | Contrast with Rule-Based                  |
 |---------------------------|---------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|-------------------------------------------|
@@ -173,7 +173,7 @@ The same metric definitions apply; variant-specific differences are documented p
 
 ---
 
-## 4. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
@@ -201,7 +201,7 @@ The same metric definitions apply; variant-specific differences are documented p
 
 ---
 
-## 5. Output Files Reference
+## §6 Output Files Reference
 
 All outputs written to: `EXPERIMENT/AssetBubble/LLM/analysis/`
 
@@ -214,7 +214,7 @@ All outputs written to: `EXPERIMENT/AssetBubble/LLM/analysis/`
 
 ---
 
-## 6. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 **LLM variant's expected position** (per `../analysis-bases.md §5`):
 

@@ -1,6 +1,6 @@
 # AnchoringEffect Rule — Analysis Documentation
 
-## Overview
+## §1 Overview
 
 | Item                                | Description                                                                                                                                       |
 |-------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 
 ---
 
-## 1. Metric Implementation
+## §2 Metric Implementation
 
 All metrics are defined in `../analysis-bases.md §2`. This variant's `analysis.py` implements them as standalone functions (no delegation — Rule is the authoritative implementation).
 
@@ -28,7 +28,7 @@ All metrics are defined in `../analysis-bases.md §2`. This variant's `analysis.
 
 ---
 
-## 2. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Price Dynamics Analysis
 *(Objective from analysis-bases.md §3.1)*
@@ -80,7 +80,7 @@ Rule variant shows stable, low-moderate volatility (0.5%–2%). No sudden volati
 
 ---
 
-## 3. Variant-Specific Observable Phenomena
+## §4 Variant-Specific Observable Phenomena
 
 | Phenomenon                          | Description                                                      | How to Observe                            | Contrast with LLM/RuleLLM              |
 |-------------------------------------|------------------------------------------------------------------|-------------------------------------------|----------------------------------------|
@@ -91,7 +91,7 @@ Rule variant shows stable, low-moderate volatility (0.5%–2%). No sudden volati
 
 ---
 
-## 4. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
@@ -120,7 +120,7 @@ Rule variant shows stable, low-moderate volatility (0.5%–2%). No sudden volati
 
 ---
 
-## 5. Output Files Reference
+## §6 Output Files Reference
 
 All outputs written to `EXPERIMENT/AnchoringEffect/Rule/analysis/`.
 
@@ -137,7 +137,7 @@ All outputs written to `EXPERIMENT/AnchoringEffect/Rule/analysis/`.
 
 ---
 
-## 6. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 This variant is the **ground truth baseline** for all cross-variant comparisons.
 
@@ -150,7 +150,7 @@ Cross-variant comparison protocol: `../analysis-bases.md §5`.
 
 ---
 
-## References
+## §8 References
 
 - `../analysis-bases.md` — master analysis specification (all metrics, dimensions, validation targets)
 - `../simulation-bases.md §3.1` — price formula implementation

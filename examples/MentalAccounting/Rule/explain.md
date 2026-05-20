@@ -1,6 +1,6 @@
 # MentalAccounting Simulation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
 |------|-------------|
@@ -9,13 +9,13 @@
 | **Key Feature** | Mental accounting simulation showing how portfolio segregation leads to suboptimal decisions |
 | **Academic Value** | Understanding mental accounting causes investors to treat money differently based on its source or intended use through multi-agent simulation |
 
-## Theoretical Foundation
+## §2 Theoretical Foundation
 
 - Thaler (1999): Mental Accounting Matters
 - Thaler (1985): Mental accounting and consumer choice
 - Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
 
-## Agent Descriptions
+## §3 Agent Descriptions
 
 ### MentalAccountant
 **Theoretical Basis**: Mental accounting (Thaler, 1999)
@@ -48,7 +48,7 @@
 **Parameters**: trade_probability=0.05, min_order=100, max_order=500
 
 
-## Usage
+## §4 Usage
 
 ### Rule Variant
 ```bash
@@ -74,7 +74,7 @@ python examples/MentalAccounting/Rag/run_mentalaccounting_rag.py \
     -c configs/MentalAccounting/Rag/simulation.yml
 ```
 
-## References
+## §5 References
 
 - Thaler (1999): Mental Accounting Matters
 - Thaler (1985): Mental accounting and consumer choice

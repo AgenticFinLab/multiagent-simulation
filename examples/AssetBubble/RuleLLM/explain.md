@@ -1,6 +1,6 @@
 # AssetBubble RuleLLM — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                                   | Description                                                                                                                                                                                 |
 |----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,7 +12,7 @@
 
 ---
 
-## Theory → Implementation Mapping
+## §2 Theory → Implementation Mapping
 
 ### Market: Theory → Implementation
 *(Theory defined in `../simulation-bases.md §3`)*
@@ -39,7 +39,7 @@
 
 ---
 
-## Table of Contents
+## §3 Table of Contents
 
 1. [Design Motivation and Core Idea](#1-design-motivation-and-core-idea)
 2. [Three-Variant Comparison Framework](#2-three-variant-comparison-framework)
@@ -54,7 +54,7 @@
 
 ---
 
-## 1. Design Motivation and Core Idea
+## §4 Design Motivation and Core Idea
 
 ### Background
 
@@ -87,7 +87,7 @@ Hybrid:     Persona + quantitative rules → LLM reasoning → constrained outpu
 
 ---
 
-## 2. Three-Variant Comparison Framework
+## §5 Three-Variant Comparison Framework
 
 The project defines four variants in a progressive series, enabling systematic comparative research:
 
@@ -111,7 +111,7 @@ This ensures fair cross-variant comparison.
 
 ---
 
-## 3. Directory Structure
+## §6 Directory Structure
 
 ```
 examples/AssetBubble/RuleLLM/
@@ -131,7 +131,7 @@ configs/AssetBubble/RuleLLM/
 
 ---
 
-## 4. System Architecture and Data Flow
+## §7 System Architecture and Data Flow
 
 ### Per-Round Data Flow
 
@@ -168,7 +168,7 @@ configs/AssetBubble/RuleLLM/
 
 ---
 
-## 5. Market Coordinator
+## §8 Market Coordinator
 
 The Market is a pure rule-based component, identical to AssetBubble. It does not use an LLM.
 
@@ -203,7 +203,7 @@ bubble_ratio = new_price / new_fundamental
 
 ---
 
-## 6. Five Hybrid Investor Agents
+## §9 Five Hybrid Investor Agents
 
 ### 6.1 RuleLLM Momentum Speculator — ×5
 
@@ -325,7 +325,7 @@ ELSE: hold
 
 ---
 
-## 7. Prompt Design: PERSONA + DECISION RULES Dual-Section Structure
+## §10 Prompt Design: PERSONA + DECISION RULES Dual-Section Structure
 
 This is the core innovation of AssetBubble RuleLLM. Every agent's system prompt is structured in two mandatory sections.
 
@@ -419,7 +419,7 @@ Respond with ONLY valid JSON:
 
 ---
 
-## 8. RuleLLMInvestor Base Class — Implementation Details
+## §11 RuleLLMInvestor Base Class — Implementation Details
 
 ### perceive() — Initialization and State Update
 
@@ -524,7 +524,7 @@ elif quantity < 0:  # selling
 
 ---
 
-## 9. Configuration System (players.yml)
+## §12 Configuration System (players.yml)
 
 ### Configuration Structure Design
 
@@ -587,7 +587,7 @@ This design allows prompts to be swapped by changing only the YAML config, witho
 
 ---
 
-## 10. Running and Output
+## §13 Running and Output
 
 ### Running the Simulation
 
@@ -648,7 +648,7 @@ After running all three variants with identical market parameters, the following
 
 ---
 
-## References
+## §14 References
 
 > Do NOT re-state full citations — all core theories are documented in `../simulation-bases.md §2`.
 

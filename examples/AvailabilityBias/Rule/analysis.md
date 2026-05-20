@@ -1,6 +1,6 @@
 # AvailabilityBias Rule — Analysis Documentation
 
-## Overview
+## §1 Overview
 
 | Item                                | Description                                                                                                                      |
 |-------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 
 ---
 
-## 1. Metric Implementation
+## §2 Metric Implementation
 
 All metrics defined in `../analysis-bases.md §2`. Rule `analysis.py` is the reference implementation — all other variants import from it.
 
@@ -26,7 +26,7 @@ All metrics defined in `../analysis-bases.md §2`. Rule `analysis.py` is the ref
 
 ---
 
-## 2. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Bias Dynamics
 *(Objective from analysis-bases.md §3.1)*
@@ -71,7 +71,7 @@ Rule is the deterministic reference. Key question: do LLM availability personas 
 
 ---
 
-## 3. Variant-Specific Observable Phenomena
+## §4 Variant-Specific Observable Phenomena
 
 | Phenomenon                          | Description                                                                     | How to Observe                                       | Contrast with LLM                           |
 |-------------------------------------|---------------------------------------------------------------------------------|------------------------------------------------------|---------------------------------------------|
@@ -82,7 +82,7 @@ Rule is the deterministic reference. Key question: do LLM availability personas 
 
 ---
 
-## 4. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
@@ -102,7 +102,7 @@ Rule is the deterministic reference. Key question: do LLM availability personas 
 
 ---
 
-## 5. Output Files Reference
+## §6 Output Files Reference
 
 All outputs written to `EXPERIMENT/AvailabilityBias/Rule/records/analysis/`.
 
@@ -113,7 +113,7 @@ All outputs written to `EXPERIMENT/AvailabilityBias/Rule/records/analysis/`.
 
 ---
 
-## 6. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 - **Bias amplitude**: Rule is calibration reference (3–10%); LLM expected higher; Rag expected lower
 - **Correction speed**: Rule fastest and most predictable; LLM slowest (behavioral denial possible)
@@ -124,7 +124,7 @@ Cross-variant comparison protocol: `../analysis-bases.md §5`.
 
 ---
 
-## References
+## §8 References
 
 - `../analysis-bases.md` — master analysis specification
 - `../simulation-bases.md §3.1, §3.3` — Price formula and broadcast variables (return_pct)

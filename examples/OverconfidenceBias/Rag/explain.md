@@ -1,6 +1,6 @@
 # OverconfidenceBias Simulation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
 |------|-------------|
@@ -9,13 +9,13 @@
 | **Key Feature** | Overconfidence bias simulation showing how excessive self-confidence leads to excessive trading and market instability |
 | **Academic Value** | Understanding overconfidence bias causes traders to overestimate their precision, trade too much, and increase volatility through multi-agent simulation |
 
-## Theoretical Foundation
+## §2 Theoretical Foundation
 
 - Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
 - Odean (1998): Volume, volatility, price, and profit when all traders are above average
 - Barber & Odean (2001): Boys will be boys: Gender, overconfidence, and common stock investment
 
-## Agent Descriptions
+## §3 Agent Descriptions
 
 ### OverconfidentTrader
 **Theoretical Basis**: Overconfidence bias (Daniel et al., 1998)
@@ -48,7 +48,7 @@
 **Parameters**: trade_probability=0.05, min_order=100, max_order=500
 
 
-## Usage
+## §4 Usage
 
 ### Rule Variant
 ```bash
@@ -74,7 +74,7 @@ python examples/OverconfidenceBias/Rag/run_overconfidencebias_rag.py \
     -c configs/OverconfidenceBias/Rag/simulation.yml
 ```
 
-## References
+## §5 References
 
 - Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
 - Odean (1998): Volume, volatility, price, and profit when all traders are above average

@@ -1,6 +1,6 @@
 # ReversalEffect LLM Analysis Methodology
 
-## Overview
+## §1 Overview
 
 This document describes the evaluation metrics for the **LLM-based reversal effect** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
 
@@ -8,7 +8,7 @@ For detailed metric definitions and financial theory, see: **`../ReversalEffect/
 
 ---
 
-## Key Metrics (Summary)
+## §2 Key Metrics (Summary)
 
 | Metric                   | Purpose                              |
 |--------------------------|--------------------------------------|
@@ -19,7 +19,7 @@ For detailed metric definitions and financial theory, see: **`../ReversalEffect/
 
 ---
 
-## LLM-Specific Observable Phenomena
+## §3 LLM-Specific Observable Phenomena
 
 ### Emergent Behaviors
 
@@ -40,7 +40,7 @@ For detailed metric definitions and financial theory, see: **`../ReversalEffect/
 
 ---
 
-## LLM-Specific Considerations
+## §4 LLM-Specific Considerations
 
 1. **Overreaction Modeling**: LLM may naturally overreact to news
 2. **Representativeness Heuristic**: LLM responses may overweight recent data
@@ -48,7 +48,7 @@ For detailed metric definitions and financial theory, see: **`../ReversalEffect/
 
 ---
 
-## Using Centralized Evaluation Module
+## §5 Using Centralized Evaluation Module
 
 ```python
 from masim.evaluation.finance import (
@@ -66,6 +66,6 @@ ac_long = calculate_autocorrelation(returns, lag=20)  # Negative = reversal
 
 ---
 
-## References
+## §6 References
 
 See `../ReversalEffect/analysis.md` for complete academic references.

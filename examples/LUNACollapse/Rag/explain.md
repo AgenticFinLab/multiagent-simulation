@@ -1,6 +1,6 @@
 # LUNACollapse Simulation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
 |------|-------------|
@@ -9,13 +9,13 @@
 | **Key Feature** | Terra/LUNA collapse simulation with algorithmic stablecoin death spiral and DeFi contagion |
 | **Academic Value** | Understanding may 2022 terra/luna crash - $40b wiped out in algorithmic stablecoin death spiral through multi-agent simulation |
 
-## Theoretical Foundation
+## §2 Theoretical Foundation
 
 - Algorithmic stablecoin mechanism design (Klages-Mundt et al., 2020)
 - Death spiral dynamics (Levy, 2022)
 - DeFi contagion (Werner et al., 2022)
 
-## Agent Descriptions
+## §3 Agent Descriptions
 
 ### StablecoinHolder
 **Theoretical Basis**: Stablecoin redemption pressure
@@ -48,7 +48,7 @@
 **Parameters**: discount_threshold=0.5, position_limit=100000
 
 
-## Usage
+## §4 Usage
 
 ### Rule Variant
 ```bash
@@ -74,7 +74,7 @@ python examples/LUNACollapse/Rag/run_lunacollapse_rag.py \
     -c configs/LUNACollapse/Rag/simulation.yml
 ```
 
-## References
+## §5 References
 
 - Algorithmic stablecoin mechanism design (Klages-Mundt et al., 2020)
 - Death spiral dynamics (Levy, 2022)

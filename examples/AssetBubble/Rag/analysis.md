@@ -1,6 +1,6 @@
 # AssetBubble Rag — Analysis Documentation
 
-## Overview
+## §1 Overview
 
 | Item                                | Description                                                                                                                                                                                                                     |
 |-------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 
 ---
 
-## 1. Metric Implementation
+## §2 Metric Implementation
 
 All metrics are defined in `../analysis-bases.md §2`. This variant's `analysis.py` delegates to `examples.AssetBubble.Rule.analysis.analyze_bubble()` via:
 
@@ -32,7 +32,7 @@ from examples.AssetBubble.Rule.analysis import analyze_bubble, _load_data
 
 ---
 
-## 2. Analysis Dimensions
+## §3 Analysis Dimensions
 
 All dimensions are defined in `../analysis-bases.md §3`. Implementation for this variant:
 
@@ -46,7 +46,7 @@ All dimensions are defined in `../analysis-bases.md §3`. Implementation for thi
 
 ---
 
-## 3. RAG-Specific Observable Phenomena
+## §4 RAG-Specific Observable Phenomena
 
 These phenomena are unique to the Rag variant and require dedicated analysis beyond the standard metrics:
 
@@ -72,7 +72,7 @@ These phenomena are unique to the Rag variant and require dedicated analysis bey
 
 ---
 
-## 4. Scaling and Sensitivity
+## §5 Scaling and Sensitivity
 
 ### Round Scaling
 
@@ -101,7 +101,7 @@ These phenomena are unique to the Rag variant and require dedicated analysis bey
 
 ---
 
-## 5. Output Files
+## §6 Output Files
 
 All output files are written to `EXPERIMENT/AssetBubble/Rag/analysis/`.
 
@@ -117,7 +117,7 @@ Output files follow the same naming convention as `Rule/analysis.py`; see `../an
 
 ---
 
-## 6. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 This variant should be compared against all three baselines to isolate the RAG effect:
 
@@ -138,7 +138,7 @@ Cross-variant comparison protocol is defined in `../analysis-bases.md §4`.
 
 ---
 
-## References
+## §8 References
 
 - `../analysis-bases.md` — master analysis specification (metrics, dimensions, validation)
 - `../simulation-bases.md §4` — all investor type specifications

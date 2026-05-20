@@ -1,6 +1,6 @@
 # FlashCrash LLM - LLM-Powered Flash Crash Simulation
 
-## What is This?
+## §1 What is This?
 
 | Item               | Description                                                                        |
 |--------------------|------------------------------------------------------------------------------------|
@@ -9,7 +9,7 @@
 | **Key Feature**    | Investors use LLM reasoning to exhibit stop-loss cascades and liquidity withdrawal |
 | **Academic Value** | Tests whether LLMs can simulate 2010 Flash Crash market microstructure dynamics    |
 
-## 5 LLM Investor Types
+## §2 5 LLM Investor Types
 
 ### Investor Type Summary
 
@@ -32,7 +32,7 @@ Flash Crash Cascade:
   5. LLMFundamental provides eventual floor
 ```
 
-## Files
+## §3 Files
 
 | File                                            | Purpose                          |
 |-------------------------------------------------|----------------------------------|
@@ -43,14 +43,14 @@ Flash Crash Cascade:
 | `configs/FlashCrash/LLM/players.yml`             | Player definitions + LLM config  |
 | `configs/FlashCrash/LLM/topology.yml`            | Star topology                    |
 
-## Running
+## §4 Running
 
 ```bash
 export ARK_API_KEY='your-bytedance-doubao-api-key'
 python examples/FlashCrash/LLM/run_flash_crash_llm.py -c configs/FlashCrash/LLM/simulation.yml
 ```
 
-## Expected Behavior Patterns
+## §5 Expected Behavior Patterns
 
 | Phase    | Rounds | LLM Behavior                                   |
 |----------|--------|------------------------------------------------|
@@ -60,7 +60,7 @@ python examples/FlashCrash/LLM/run_flash_crash_llm.py -c configs/FlashCrash/LLM/
 | Crash    | 8-9    | Maximum selling pressure, minimum liquidity    |
 | Recovery | 10-12  | LLMFundamental buys, price rebounds            |
 
-## References
+## §6 References
 
 | Theory                   | Application in FlashCrash LLM     | Reference               |
 |--------------------------|----------------------------------|-------------------------|

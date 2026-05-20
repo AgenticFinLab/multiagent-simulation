@@ -1,6 +1,6 @@
 # MarketCrash LLM - LLM-Powered Market Crash Simulation
 
-## What is This?
+## §1 What is This?
 
 | Item               | Description                                                                          |
 |--------------------|--------------------------------------------------------------------------------------|
@@ -9,7 +9,7 @@
 | **Key Feature**    | Investors use LLM reasoning to exhibit panic, margin calls, and liquidity withdrawal |
 | **Academic Value** | Tests whether LLMs can simulate realistic crash psychology and cascade dynamics      |
 
-## Rule-Based vs LLM-Based Comparison
+## §2 Rule-Based vs LLM-Based Comparison
 
 | Aspect              | MarketCrash (Rule-Based)           | MarketCrash LLM (LLM-Based)                 |
 |---------------------|------------------------------------|--------------------------------------------|
@@ -22,7 +22,7 @@
 
 > **核心差异**：MarketCrash 用公式触发崩盘，MarketCrash LLM 用大模型通过 prompt 定义的"恐慌心理"来推理决策。
 
-## Architecture
+## §3 Architecture
 
 ```
                     ┌──────────────────────────────────────────┐
@@ -59,7 +59,7 @@
    └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## 5 LLM Investor Types
+## §4 5 LLM Investor Types
 
 ### Investor Type Summary
 
@@ -121,7 +121,7 @@
 | **Behavior**   | Buy when price < 0.8 × fundamental  |
 | **Psychology** | "Be greedy when others are fearful" |
 
-## Market Clearing (Rule-Based)
+## §5 Market Clearing (Rule-Based)
 
 ```
 Crash-Prone Price Model:
@@ -138,7 +138,7 @@ Liquidity Spiral:
   Low liquidity → Higher L(t) → Bigger price impact → More selling → Lower liquidity
 ```
 
-## Topology (Star Network)
+## §6 Topology (Star Network)
 
 ```
                          ┌───────────────────┐
@@ -151,7 +151,7 @@ Liquidity Spiral:
    (⭐ cascade)  (vol trigger)   (⭐ margin)   (withdraw) (stabilize)
 ```
 
-## Files
+## §7 Files
 
 | File                                       | Purpose                          |
 |--------------------------------------------|----------------------------------|
@@ -162,7 +162,7 @@ Liquidity Spiral:
 | `configs/MarketCrash/LLM/players.yml`       | Player definitions + LLM config  |
 | `configs/MarketCrash/LLM/topology.yml`      | Star topology                    |
 
-## Running
+## §8 Running
 
 ```bash
 # Set API key
@@ -172,7 +172,7 @@ export ARK_API_KEY='your-bytedance-doubao-api-key'
 python examples/MarketCrash/LLM/run_crash_llm.py -c configs/MarketCrash/LLM/simulation.yml
 ```
 
-## Expected LLM Behavior Patterns
+## §9 Expected LLM Behavior Patterns
 
 | Phase        | Rounds | LLM Behavior                                      |
 |--------------|--------|---------------------------------------------------|
@@ -183,7 +183,7 @@ python examples/MarketCrash/LLM/run_crash_llm.py -c configs/MarketCrash/LLM/simu
 | Capitulation | 13-15  | Maximum selling pressure, minimum liquidity       |
 | Recovery     | 16-20  | BottomFisher buying provides floor                |
 
-## Research Questions
+## §10 Research Questions
 
 | Question                                            | How to Test                                        |
 |-----------------------------------------------------|----------------------------------------------------|
@@ -192,7 +192,7 @@ python examples/MarketCrash/LLM/run_crash_llm.py -c configs/MarketCrash/LLM/simu
 | Does liquidity withdrawal amplify crashes?          | Track MarketMaker's ACTIVE/WITHDRAWN state changes |
 | Can LLM bottom fishers stabilize crashes?           | Measure price floor formation timing               |
 
-## References
+## §11 References
 
 | Theory               | Application in MarketCrash LLM             | Reference                      |
 |----------------------|-------------------------------------------|--------------------------------|

@@ -1,6 +1,6 @@
 # ReversalEffect LLM - LLM-Powered Reversal Effect Simulation
 
-## What is This?
+## §1 What is This?
 
 | Item               | Description                                                                        |
 |--------------------|------------------------------------------------------------------------------------|
@@ -9,7 +9,7 @@
 | **Key Feature**    | Investors use LLM reasoning to detect overreaction and trade reversals             |
 | **Academic Value** | Tests whether LLMs can simulate De Bondt & Thaler's overreaction hypothesis        |
 
-## Rule-Based vs LLM-Based Comparison
+## §2 Rule-Based vs LLM-Based Comparison
 
 | Aspect             | ReversalEffect (Rule-Based)       | ReversalEffect LLM (LLM-Based)               |
 |--------------------|-----------------------------------|---------------------------------------------|
@@ -20,7 +20,7 @@
 | **Overreaction**   | From mathematical thresholds      | From LLM "market overreacted" reasoning     |
 | **Research Value** | Mechanism validation              | LLM contrarian realism + emergent reversals |
 
-## 5 LLM Investor Types
+## §3 5 LLM Investor Types
 
 ### Investor Type Summary
 
@@ -82,7 +82,7 @@
 | **Behavior** | Somewhat random "gut feeling" trades |
 | **Focus**    | Small positions, no conviction       |
 
-## Market Clearing (Rule-Based)
+## §4 Market Clearing (Rule-Based)
 
 ```
 Price Model:
@@ -95,7 +95,7 @@ Price Model:
     3. Price eventually reverts toward fundamental
 ```
 
-## Topology (Star Network)
+## §5 Topology (Star Network)
 
 ```
                          ┌───────────────────┐
@@ -108,7 +108,7 @@ Price Model:
    (⭐ reversal)  (⭐ overreact) (stabilize)  (destabilize) (liquidity)
 ```
 
-## Files
+## §6 Files
 
 | File                                             | Purpose                          |
 |--------------------------------------------------|----------------------------------|
@@ -119,14 +119,14 @@ Price Model:
 | `configs/ReversalEffect/LLM/players.yml`          | Player definitions + LLM config  |
 | `configs/ReversalEffect/LLM/topology.yml`         | Star topology                    |
 
-## Running
+## §7 Running
 
 ```bash
 export ARK_API_KEY='your-bytedance-doubao-api-key'
 python examples/ReversalEffect/LLM/run_reversal_llm.py -c configs/ReversalEffect/LLM/simulation.yml
 ```
 
-## Expected LLM Behavior Patterns
+## §8 Expected LLM Behavior Patterns
 
 | Phase          | Rounds | LLM Behavior                                               |
 |----------------|--------|------------------------------------------------------------|
@@ -136,7 +136,7 @@ python examples/ReversalEffect/LLM/run_reversal_llm.py -c configs/ReversalEffect
 | Reversal       | 14-17  | LLMContrarian detects overreaction, bets against trend     |
 | Mean Reversion | 18-20  | Price reverts toward fundamental value                     |
 
-## Research Questions
+## §9 Research Questions
 
 | Question                                           | How to Test                                           |
 |----------------------------------------------------|-------------------------------------------------------|
@@ -145,7 +145,7 @@ python examples/ReversalEffect/LLM/run_reversal_llm.py -c configs/ReversalEffect
 | Is LLM reversal timing realistic?                  | Compare reversal patterns with De Bondt & Thaler      |
 | Can LLM contrarians profit from reversal strategy? | Track contrarian portfolio returns                    |
 
-## References
+## §10 References
 
 | Theory                      | Application in ReversalEffect LLM              | Reference                |
 |-----------------------------|-----------------------------------------------|--------------------------|

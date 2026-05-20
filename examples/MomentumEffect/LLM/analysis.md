@@ -1,6 +1,6 @@
 # MomentumEffect LLM Analysis Methodology
 
-## Overview
+## §1 Overview
 
 This document describes the evaluation metrics for the **LLM-based momentum effect** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
 
@@ -8,7 +8,7 @@ For detailed metric definitions and financial theory, see: **`../MomentumEffect/
 
 ---
 
-## Key Metrics (Summary)
+## §2 Key Metrics (Summary)
 
 | Metric                 | Purpose                            |
 |------------------------|------------------------------------|
@@ -19,7 +19,7 @@ For detailed metric definitions and financial theory, see: **`../MomentumEffect/
 
 ---
 
-## LLM-Specific Observable Phenomena
+## §3 LLM-Specific Observable Phenomena
 
 ### Emergent Behaviors
 
@@ -40,7 +40,7 @@ For detailed metric definitions and financial theory, see: **`../MomentumEffect/
 
 ---
 
-## LLM-Specific Considerations
+## §4 LLM-Specific Considerations
 
 1. **Trend Recognition**: LLM may naturally recognize price trends
 2. **Recency Bias**: LLM responses may weight recent information heavily
@@ -48,7 +48,7 @@ For detailed metric definitions and financial theory, see: **`../MomentumEffect/
 
 ---
 
-## Using Centralized Evaluation Module
+## §5 Using Centralized Evaluation Module
 
 ```python
 from masim.evaluation.finance import (
@@ -66,6 +66,6 @@ ac = calculate_autocorrelation(returns, lag=5)  # Positive = momentum
 
 ---
 
-## References
+## §6 References
 
 See `../MomentumEffect/analysis.md` for complete academic references.

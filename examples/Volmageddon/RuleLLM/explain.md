@@ -1,6 +1,6 @@
 # Volmageddon Simulation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
 |------|-------------|
@@ -9,13 +9,13 @@
 | **Key Feature** | Volmageddon simulation with VIX ETN blowup, short volatility crowd, and reverse feedback loop |
 | **Academic Value** | Understanding february 5, 2018 - vix spiked 115%, xiv etn lost 90%+ in after-hours trading through multi-agent simulation |
 
-## Theoretical Foundation
+## §2 Theoretical Foundation
 
 - Volatility product feedback (Bergsma & Jiang, 2022)
 - Short volatility crowding (Culp et al., 2018)
 - Inverse VIX ETN dynamics
 
-## Agent Descriptions
+## §3 Agent Descriptions
 
 ### ShortVolTrader
 **Theoretical Basis**: Short volatility strategy
@@ -48,7 +48,7 @@
 **Parameters**: position_size=1000, risk_limit=0.02
 
 
-## Usage
+## §4 Usage
 
 ### Rule Variant
 ```bash
@@ -74,7 +74,7 @@ python examples/Volmageddon/Rag/run_volmageddon_rag.py \
     -c configs/Volmageddon/Rag/simulation.yml
 ```
 
-## References
+## §5 References
 
 - Volatility product feedback (Bergsma & Jiang, 2022)
 - Short volatility crowding (Culp et al., 2018)

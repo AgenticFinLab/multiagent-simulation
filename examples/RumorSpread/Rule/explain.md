@@ -1,6 +1,6 @@
 # RumorSpread Simulation
 
-## Overview
+## §1 Overview
 
 | Item               | Description                                                                                     |
 |--------------------|-------------------------------------------------------------------------------------------------|
@@ -9,14 +9,14 @@
 | **Key Feature**    | RumorSpread simulation with GullibleSpreader, DistortingRelayer, SkepticalEvaluator             |
 | **Academic Value** | Understanding how unverified information spreads and distorts through social networks           |
 
-## Theoretical Foundation
+## §2 Theoretical Foundation
 
 - Allport & Postman (1947): Psychology of Rumor — leveling, sharpening, assimilation
 - Bordia & Rosnow (1998): Rumor as communication — content analysis approach
 - DiFonzo & Bordia (2007): Rumor psychology — how rumors help make sense of ambiguity
 - Shibutani (1966): Improvised news — rumor as collective problem-solving
 
-## Agent Descriptions
+## §3 Agent Descriptions
 
 ### GullibleSpreader
 **Theoretical Basis**: Uncritical transmission — Leveling (Allport & Postman, 1947)
@@ -48,7 +48,7 @@
 **Description**: Random, low-engagement participant providing baseline activity level
 **Parameters**: engagement_probability=0.3, spread_probability=0.4
 
-## Information Environment Dynamics
+## §4 Information Environment Dynamics
 
 Belief follows: B(t+1) = B(t) + alpha * NetSpread + beta * (Truth - B(t)) + epsilon
 

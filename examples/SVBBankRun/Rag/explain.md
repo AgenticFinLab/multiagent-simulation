@@ -1,6 +1,6 @@
 # SVBBankRun Simulation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
 |------|-------------|
@@ -9,13 +9,13 @@
 | **Key Feature** | Silicon Valley Bank run simulation with social media-accelerated deposit flight and duration risk |
 | **Academic Value** | Understanding march 2023 svb collapse - $42b deposit outflow in one day triggered by social media panic through multi-agent simulation |
 
-## Theoretical Foundation
+## §2 Theoretical Foundation
 
 - Diamond & Dybvig (1983): Bank runs, deposit insurance, and liquidity
 - Iyer & Puri (2012): Social networks in bank runs
 - Duffie et al. (2023): SVB failure analysis
 
-## Agent Descriptions
+## §3 Agent Descriptions
 
 ### Depositor
 **Theoretical Basis**: Diamond-Dybvig bank run model
@@ -48,7 +48,7 @@
 **Parameters**: duration_target=5.0, position_size=10000
 
 
-## Usage
+## §4 Usage
 
 ### Rule Variant
 ```bash
@@ -74,7 +74,7 @@ python examples/SVBBankRun/Rag/run_svbbankrun_rag.py \
     -c configs/SVBBankRun/Rag/simulation.yml
 ```
 
-## References
+## §5 References
 
 - Diamond & Dybvig (1983): Bank runs, deposit insurance, and liquidity
 - Iyer & Puri (2012): Social networks in bank runs

@@ -1,6 +1,6 @@
 # RepresentativenessBias Simulation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
 |------|-------------|
@@ -9,12 +9,12 @@
 | **Key Feature** | RepresentativenessBias simulation with PatternMatcher, CategoryOvergeneralizer, BayesianUpdater |
 | **Academic Value** | Understanding representativenessbias through multi-agent simulation |
 
-## Theoretical Foundation
+## §2 Theoretical Foundation
 
 - Kahneman & Tversky (1972): Subjective probability - A judgment of representativeness
 - Grether (1980): Bayes rule as a descriptive model
 - Barberis, Shleifer & Vishny (1998): A model of investor sentiment
-## Agent Descriptions
+## §3 Agent Descriptions
 
 ### PatternMatcher
 **Theoretical Basis**: Representativeness heuristic (Kahneman & Tversky, 1972)
@@ -47,6 +47,6 @@
 **Parameters**: trade_probability=0.3
 
 
-## Market Dynamics
+## §4 Market Dynamics
 
 Price follows: P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon

@@ -1,6 +1,6 @@
 # ConfirmationBias Rule Variant — Analysis Guide
 
-## 1. Analysis Overview
+## §1 Analysis Overview
 
 This guide covers interpretation of results from the **ConfirmationBias Rule** variant.
 Key question: *Does the interaction of belief-anchored and selective agents produce
@@ -8,7 +8,7 @@ persistent price mispricing? Do rational/contrarian agents correct the bias?*
 
 ---
 
-## 2. Metric Implementation (`Rule/analysis.py`)
+## §2 Metric Implementation (`Rule/analysis.py`)
 
 `analysis.py` exports three public functions via `__all__`:
 
@@ -32,7 +32,7 @@ persistent price mispricing? Do rational/contrarian agents correct the bias?*
 
 ---
 
-## 3. Dimension-by-Dimension Interpretation
+## §3 Dimension-by-Dimension Interpretation
 
 ### 3.1 Price vs Fundamental Plot
 
@@ -61,7 +61,7 @@ persistent price mispricing? Do rational/contrarian agents correct the bias?*
 
 ---
 
-## 4. Variant-Specific Phenomena
+## §4 Variant-Specific Phenomena
 
 ### 4.1 BeliefAnchor Compounding
 
@@ -92,7 +92,7 @@ decreases when stabilizer order_size is increased.
 
 ---
 
-## 5. Scaling and Sensitivity
+## §5 Scaling and Sensitivity
 
 | Parameter                       | Effect                                                            |
 |---------------------------------|-------------------------------------------------------------------|
@@ -104,7 +104,7 @@ decreases when stabilizer order_size is increased.
 
 ---
 
-## 6. Output Files
+## §6 Output Files
 
 Running `Rule/analysis.py` writes to `EXPERIMENT/ConfirmationBias/Rule/records/analysis/`:
 
@@ -115,7 +115,7 @@ Running `Rule/analysis.py` writes to `EXPERIMENT/ConfirmationBias/Rule/records/a
 
 ---
 
-## 7. Cross-Variant Comparison
+## §7 Cross-Variant Comparison
 
 | Dimension                 | Rule            | LLM                  | RuleLLM            | Rag               |
 |---------------------------|-----------------|----------------------|--------------------|-------------------|

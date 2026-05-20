@@ -1,6 +1,6 @@
 # AssetBubble LLM — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                                   | Description                                                                                                                                                                         |
 |----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 | **Key Difference from Other Variants** | Investor decision logic replaced by LLM reasoning; market mechanism identical to Rule variant                                                                                       |
 | **Primary Research Contribution**      | Tests whether LLM agents, guided only by personality and market data, can reproduce realistic investor psychology and emergent bubble phenomena without explicit quantitative rules |
 
-## Theory → Implementation Mapping
+## §2 Theory → Implementation Mapping
 
 ### Market: Theory → Implementation
 *(Theory defined in `../simulation-bases.md §3`)*
@@ -38,7 +38,7 @@
 
 ---
 
-## Rule-Based vs LLM-Based Comparison
+## §3 Rule-Based vs LLM-Based Comparison
 
 | Aspect               | AssetBubble (Rule-Based)                 | AssetBubble LLM (LLM-Based)                  |
 |----------------------|------------------------------------------|----------------------------------------------|
@@ -51,7 +51,7 @@
 
 > **核心差异**：AssetBubble 用公式模拟投资者行为，AssetBubble LLM 用大模型通过 prompt 定义的"投机心理"来推理决策。
 
-## Architecture
+## §4 Architecture
 
 ```
                     ┌──────────────────────────────────────────┐
@@ -91,7 +91,7 @@
    └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## LLM Provider: ByteDance Doubao via lmbase
+## §5 LLM Provider: ByteDance Doubao via lmbase
 
 | Configuration         | Value                                             |
 |-----------------------|---------------------------------------------------|
@@ -100,7 +100,7 @@
 | **Auth**              | `ARK_API_KEY` environment variable                |
 | **Generation Config** | `temperature: 0.3`, `max_new_tokens: 500`         |
 
-## 5 LLM Investor Types
+## §6 5 LLM Investor Types
 
 ### Investor Type Summary
 
@@ -162,7 +162,7 @@
 | **Behavior** | Large positions, forced selling on drops |
 | **Risk**     | Extreme - can cause market dislocations  |
 
-## Market Clearing (Rule-Based)
+## §7 Market Clearing (Rule-Based)
 
 ```
 Bubble-Prone Price Model:
@@ -178,7 +178,7 @@ Bubble-Prone Price Model:
 Key: High λ + Low γ = Bubble-prone dynamics
 ```
 
-## Topology (Star Network)
+## §8 Topology (Star Network)
 
 ```
                          ┌───────────────────┐
@@ -191,7 +191,7 @@ Key: High λ + Low γ = Bubble-prone dynamics
   (⭐ driver)      (weak anchor)   (⭐ amplify)  (anchor)   (⭐ extreme)
 ```
 
-## Files
+## §9 Files
 
 | File                                         | Purpose                          |
 |----------------------------------------------|----------------------------------|
@@ -202,7 +202,7 @@ Key: High λ + Low γ = Bubble-prone dynamics
 | `configs/AssetBubble/LLM/players.yml`        | Player definitions + LLM config  |
 | `configs/AssetBubble/LLM/topology.yml`       | Star topology                    |
 
-## Running
+## §10 Running
 
 ```bash
 # Set API key
@@ -212,7 +212,7 @@ export ARK_API_KEY='your-bytedance-doubao-api-key'
 python examples/AssetBubble/LLM/run_bubble_llm.py -c configs/AssetBubble/LLM/simulation.yml
 ```
 
-## Expected LLM Behavior Patterns
+## §11 Expected LLM Behavior Patterns
 
 | Phase    | Rounds | LLM Behavior                                              |
 |----------|--------|-----------------------------------------------------------|
@@ -222,7 +222,7 @@ python examples/AssetBubble/LLM/run_bubble_llm.py -c configs/AssetBubble/LLM/sim
 | Peak     | 13-15  | Arbitrageur shorts cautiously, Value sells                |
 | Collapse | 16-20  | Leveraged forced selling triggers cascade                 |
 
-## Research Questions
+## §12 Research Questions
 
 | Question                                                | How to Test                                       |
 |---------------------------------------------------------|---------------------------------------------------|
@@ -231,7 +231,7 @@ python examples/AssetBubble/LLM/run_bubble_llm.py -c configs/AssetBubble/LLM/sim
 | Can LLM leverage traders trigger crashes?               | Monitor forced selling dynamics                   |
 | Is LLM bubble more realistic than rule-based?           | Compare price dynamics with historical bubbles    |
 
-## Configuration Reference
+## §13 Configuration Reference
 
 Key parameters from `configs/AssetBubble/LLM/players.yml`:
 
@@ -245,7 +245,7 @@ Key parameters from `configs/AssetBubble/LLM/players.yml`:
 
 ---
 
-## References
+## §14 References
 
 > Do NOT re-read full citations — these theories are fully documented in `../simulation-bases.md §2`.
 

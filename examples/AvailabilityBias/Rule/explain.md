@@ -1,6 +1,6 @@
 # AvailabilityBias Rule — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                                   | Description                                                                                                                                                |
 |----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,7 +12,7 @@
 
 ---
 
-## 1. How Theoretical Design Is Implemented
+## §2 How Theoretical Design Is Implemented
 
 ### RecentEventOverweighter: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4 — RecentEventOverweighter)*
@@ -68,7 +68,7 @@
 
 ---
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 *Formula source: simulation-bases.md §3.1*
 
@@ -97,7 +97,7 @@ Deviations from simulation-bases.md design: None.
 
 ---
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 *(Reference: simulation-bases.md §9 — Rule variant entry)*
 
@@ -111,7 +111,7 @@ Deviations from simulation-bases.md design: None.
 
 ---
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
@@ -141,7 +141,7 @@ Deviations from simulation-bases.md design: None.
 
 ---
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 Key Configuration Parameters (`configs/AvailabilityBias/Rule/players.yml`):
 
@@ -159,7 +159,7 @@ Key Configuration Parameters (`configs/AvailabilityBias/Rule/players.yml`):
 
 ---
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 python examples/AvailabilityBias/Rule/run_availabilitybias.py \
@@ -174,7 +174,7 @@ Output location: `EXPERIMENT/AvailabilityBias/Rule/`
 
 ---
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase              | Rounds | Expected Agent Behavior                                                                                         | Expected Price Dynamics                                              |
 |--------------------|--------|-----------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
@@ -186,7 +186,7 @@ Output location: `EXPERIMENT/AvailabilityBias/Rule/`
 
 ---
 
-## 8. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

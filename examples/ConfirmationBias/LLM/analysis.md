@@ -1,6 +1,6 @@
 # ConfirmationBias LLM Variant — Analysis Guide
 
-## 1. Analysis Overview
+## §1 Analysis Overview
 
 This guide covers interpretation of results from the **ConfirmationBias LLM** variant.
 Key question: *Do LLM agents with confirmation bias personas spontaneously produce
@@ -8,7 +8,7 @@ bias-like behavior without an explicit belief state variable?*
 
 ---
 
-## 2. Metric Implementation (`LLM/analysis.py`)
+## §2 Metric Implementation (`LLM/analysis.py`)
 
 Imports `calculate_metrics`, `load_simulation_data`, `create_visualizations` from
 `Rule/analysis.py` (DRY pattern). Adds LLM-specific action-distribution plot.
@@ -18,7 +18,7 @@ See `Rule/analysis.md §2` for metric formulas.
 
 ---
 
-## 3. LLM-Specific Output Files
+## §3 LLM-Specific Output Files
 
 Running `LLM/analysis.py` writes to `EXPERIMENT/ConfirmationBias/LLM/records/analysis/`:
 
@@ -30,7 +30,7 @@ Running `LLM/analysis.py` writes to `EXPERIMENT/ConfirmationBias/LLM/records/ana
 
 ---
 
-## 4. Dimension-by-Dimension Interpretation
+## §4 Dimension-by-Dimension Interpretation
 
 ### 4.1 Price vs Fundamental
 
@@ -52,7 +52,7 @@ Running `LLM/analysis.py` writes to `EXPERIMENT/ConfirmationBias/LLM/records/ana
 
 ---
 
-## 5. Variant-Specific Phenomena
+## §5 Variant-Specific Phenomena
 
 ### 5.1 Temperature Effect
 
@@ -76,7 +76,7 @@ they see the "right answer" in the prompt (fundamental = 100.0).
 
 ---
 
-## 6. Cross-Variant Comparison
+## §6 Cross-Variant Comparison
 
 | Metric                    | Expected vs Rule                             |
 |---------------------------|----------------------------------------------|

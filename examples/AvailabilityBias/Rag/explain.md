@@ -1,6 +1,6 @@
 # AvailabilityBias Rag — Simulation Documentation
 
-## Overview
+## §1 Overview
 
 | Item                      | Description                                                                                                                                                                            |
 |---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 | **Research Contribution** | Tests whether access to behavioral finance literature on cognitive biases improves or degrades agent decision quality — does knowing about availability bias reduce its manifestation? |
 
 
-## 1. How Theoretical Design Is Implemented
+## §2 How Theoretical Design Is Implemented
 
 ### RagLLMRecentEventOverweighter: Theory → Implementation Mapping
 
@@ -60,7 +60,7 @@
 | Random with knowledge      | RAG retrieved but noise trader remains random; knowledge has minimal effect |
 
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 *(Full formula: simulation-bases.md §3.1 — P(t+1) = P(t) + 0.01·D + 0.02·(F−P) + ε)*
 
@@ -83,7 +83,7 @@ Same as LLM variant with addition of `{rag_context}`:
 | *(other standard variables)* | —                      | Same as Rule/LLM variants                                    |
 
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 - **Knowledge may reduce bias**: If retrieved papers describe availability bias as a cognitive error, SystematicAnalyst may use this to resist bias influence; RecencyOverweighter may paradoxically apply bias more accurately
 - **Unique research question**: Does meta-knowledge about availability bias (retrieved from papers) reduce its expression in agent behavior?
@@ -91,7 +91,7 @@ Same as LLM variant with addition of `{rag_context}`:
 - **Document source dependency**: Rag advantage contingent on availability bias literature quality in document sources
 
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 Round t:
@@ -112,7 +112,7 @@ Round t:
 ```
 
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 | Config Path                            | Key Parameter   | Notes                                       |
 |----------------------------------------|-----------------|---------------------------------------------|
@@ -124,7 +124,7 @@ Round t:
 Full config: `configs/AvailabilityBias/Rag/players.yml`
 
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 # From project root (requires HUNYUAN_API_KEY or ARK_API_KEY):
@@ -135,7 +135,7 @@ python examples/AvailabilityBias/Rag/run_availabilitybias_rag.py \
 Output: `EXPERIMENT/AvailabilityBias/Rag/records/`
 
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase             | Deviation Range  | Rag-Specific Behavior                                                                                |
 |-------------------|------------------|------------------------------------------------------------------------------------------------------|
@@ -146,7 +146,7 @@ Output: `EXPERIMENT/AvailabilityBias/Rag/records/`
 | **Stabilization** | Near 0%          | Variable; knowledge quality determines outcome                                                       |
 
 
-## 8. References
+## §9 References
 
 - `../simulation-bases.md §4.1–§4.5` — Investor archetype specifications
 - `../simulation-bases.md §5` — Rag variant description

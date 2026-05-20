@@ -1,6 +1,6 @@
 # AssetBubble Rule — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                               | Description                                                                                                                                                               |
 |------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,7 +12,7 @@
 
 ---
 
-## 1. Design Motivation and Baseline Role
+## §2 Design Motivation and Baseline Role
 
 The Rule variant is the **deterministic foundation** of the four-variant research design (see `simulation-bases.md §9`). Its purpose is not just to produce a bubble, but to establish a reproducible quantitative baseline against which LLM, RuleLLM, and Rag variants can be directly compared.
 
@@ -23,7 +23,7 @@ Every design decision in this variant is traceable:
 
 ---
 
-## 2. Theory → Implementation Mapping
+## §3 Theory → Implementation Mapping
 
 ### Market: Theory → Implementation
 *(Theory defined in `simulation-bases.md §3`)*
@@ -121,7 +121,7 @@ Every design decision in this variant is traceable:
 
 ---
 
-## 3. Market Mechanism Implementation
+## §4 Market Mechanism Implementation
 
 > Formula source: `simulation-bases.md §3.1`
 
@@ -151,7 +151,7 @@ P(t+1) = P(t) + λ × D(t) + γ × [F(t) - P(t)] + ε(t)
 
 ---
 
-## 4. Variant-Specific Features
+## §5 Variant-Specific Features
 
 The Rule variant is the **baseline** — it has no LLM, no RAG, no hybrid logic. Its distinguishing features are (per `simulation-bases.md §9`):
 
@@ -167,7 +167,7 @@ The Rule variant is the **baseline** — it has no LLM, no RAG, no hybrid logic.
 
 ---
 
-## 5. Architecture Diagram
+## §6 Architecture Diagram
 
 ```
                     ┌──────────────────────────────────────────────────┐
@@ -208,7 +208,7 @@ The Rule variant is the **baseline** — it has no LLM, no RAG, no hybrid logic.
 
 ---
 
-## 6. Configuration Reference
+## §7 Configuration Reference
 
 Key parameters from `configs/AssetBubble/Rule/players.yml`:
 
@@ -232,7 +232,7 @@ Key parameters from `configs/AssetBubble/Rule/players.yml`:
 
 ---
 
-## 7. Running Instructions
+## §8 Running Instructions
 
 ```
 Execution:
@@ -247,7 +247,7 @@ Output location:  EXPERIMENT/AssetBubble/Rule/
 
 ---
 
-## 8. Expected Behavior Patterns
+## §9 Expected Behavior Patterns
 
 | Phase        | Rounds | Expected Agent Behavior                                                                                                                                     | Expected Price Dynamics                                                  |
 |--------------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
@@ -258,7 +258,7 @@ Output location:  EXPERIMENT/AssetBubble/Rule/
 
 ---
 
-## 9. References
+## §10 References
 
 > This variant uses only theories defined in `simulation-bases.md §2`. No variant-specific references.
 

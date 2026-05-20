@@ -1,6 +1,6 @@
 # CarryTradeUnwind Rag Variant — Analysis Guide
 
-## 1. Analysis Overview
+## §1 Analysis Overview
 
 This guide covers interpretation of results from the **CarryTradeUnwind Rag** variant.
 Key question: *Does retrieved carry-trade knowledge improve agent crisis response
@@ -8,7 +8,7 @@ compared to the plain LLM baseline? Does the RAG pipeline retrieve relevant cont
 
 ---
 
-## 2. Metric Implementation (`Rag/analysis.py`)
+## §2 Metric Implementation (`Rag/analysis.py`)
 
 Imports `calculate_metrics`, `load_simulation_data`, `create_visualizations` from
 `Rule/analysis.py` (DRY pattern). Adds `analyze_rag_knowledge_effect()`.
@@ -36,7 +36,7 @@ def analyze_rag_knowledge_effect(agent_records):
 
 ---
 
-## 3. Rag-Specific Output Files
+## §3 Rag-Specific Output Files
 
 Running `Rag/analysis.py` writes to `EXPERIMENT/CarryTradeUnwind/Rag/records/analysis/`:
 
@@ -49,7 +49,7 @@ Running `Rag/analysis.py` writes to `EXPERIMENT/CarryTradeUnwind/Rag/records/ana
 
 ---
 
-## 4. Dimension-by-Dimension Interpretation
+## §4 Dimension-by-Dimension Interpretation
 
 ### 4.1 Price vs Fundamental
 
@@ -70,7 +70,7 @@ Running `Rag/analysis.py` writes to `EXPERIMENT/CarryTradeUnwind/Rag/records/ana
 
 ---
 
-## 5. Variant-Specific Phenomena
+## §5 Variant-Specific Phenomena
 
 ### 5.1 Knowledge Quality Effect
 
@@ -92,7 +92,7 @@ For optimal retrieval (≥70%), the KnowledgeStore should contain documents cove
 
 ---
 
-## 6. Cross-Variant Comparison
+## §6 Cross-Variant Comparison
 
 | Metric                   | Expected vs LLM                      |
 |--------------------------|--------------------------------------|
@@ -106,7 +106,7 @@ most from carry-trade knowledge retrieval.
 
 ---
 
-## 7. Knowledge Improvement Recommendations
+## §7 Knowledge Improvement Recommendations
 
 If `retrieval_success_rate < 0.70` for any agent:
 

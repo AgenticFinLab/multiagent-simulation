@@ -1,6 +1,6 @@
 # CarryTradeUnwind RuleLLM — Analysis Guide
 
-## 1. Analysis Overview
+## §1 Analysis Overview
 
 | Item                | Description                                             |
 |---------------------|---------------------------------------------------------|
@@ -15,7 +15,7 @@ The RuleLLM variant embeds explicit carry trade rules in the LLM prompt as deepe
 
 ---
 
-## 2. Metric Implementation
+## §2 Metric Implementation
 
 Standard metrics: imported from `Rule/analysis.py` via `calculate_metrics()`.
 
@@ -24,7 +24,7 @@ deeper investor characterization, not executable mandates to be measured against
 
 ---
 
-## 3. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Market Price Dynamics
 
@@ -48,7 +48,7 @@ Examine agent reasoning traces in `<analysis>` tags:
 
 ---
 
-## 4. Variant-Specific Phenomena
+## §4 Variant-Specific Phenomena
 
 ### LLM Reasoning with Embedded Rules
 
@@ -66,7 +66,7 @@ Within-rule decisions (correct sign) may have different quantities than Rule:
 
 ---
 
-## 5. Output Files
+## §5 Output Files
 
 | File                                             | Content                                                  |
 |--------------------------------------------------|----------------------------------------------------------|
@@ -75,7 +75,7 @@ Within-rule decisions (correct sign) may have different quantities than Rule:
 
 ---
 
-## 6. Cross-Variant Comparison Notes
+## §6 Cross-Variant Comparison Notes
 
 | Metric             | Rule (baseline) | LLM               | RuleLLM (this)        |
 |--------------------|-----------------|-------------------|-----------------------|

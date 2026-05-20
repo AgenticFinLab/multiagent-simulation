@@ -1,6 +1,6 @@
 # MarketCrash LLM Analysis Methodology
 
-## Overview
+## §1 Overview
 
 This document describes the evaluation metrics for the **LLM-based market crash** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
 
@@ -8,7 +8,7 @@ For detailed metric definitions and financial theory, see: **`../MarketCrash/ana
 
 ---
 
-## Key Metrics (Summary)
+## §2 Key Metrics (Summary)
 
 | Metric           | Purpose                         |
 |------------------|---------------------------------|
@@ -19,7 +19,7 @@ For detailed metric definitions and financial theory, see: **`../MarketCrash/ana
 
 ---
 
-## LLM-Specific Observable Phenomena
+## §3 LLM-Specific Observable Phenomena
 
 ### Emergent Behaviors
 
@@ -40,7 +40,7 @@ For detailed metric definitions and financial theory, see: **`../MarketCrash/ana
 
 ---
 
-## LLM-Specific Considerations
+## §4 LLM-Specific Considerations
 
 1. **Panic Modeling**: LLM prompts can include fear/panic sentiment
 2. **Social Contagion**: LLM may respond to other agents' selling
@@ -48,7 +48,7 @@ For detailed metric definitions and financial theory, see: **`../MarketCrash/ana
 
 ---
 
-## Using Centralized Evaluation Module
+## §5 Using Centralized Evaluation Module
 
 ```python
 from masim.evaluation.finance import (
@@ -66,6 +66,6 @@ volatility = calculate_rolling_volatility(prices, window=5)
 
 ---
 
-## References
+## §6 References
 
 See `../MarketCrash/analysis.md` for complete academic references.

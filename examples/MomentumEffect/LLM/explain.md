@@ -1,6 +1,6 @@
 # MomentumEffect LLM - LLM-Powered Momentum Effect Simulation
 
-## What is This?
+## §1 What is This?
 
 | Item               | Description                                                                         |
 |--------------------|-------------------------------------------------------------------------------------|
@@ -9,7 +9,7 @@
 | **Key Feature**    | Investors use LLM reasoning to detect and trade momentum signals                    |
 | **Academic Value** | Tests whether LLMs can replicate Jegadeesh & Titman's momentum findings             |
 
-## Rule-Based vs LLM-Based Comparison
+## §2 Rule-Based vs LLM-Based Comparison
 
 | Aspect                 | MomentumEffect (Rule-Based)         | MomentumEffect LLM (LLM-Based)               |
 |------------------------|-------------------------------------|---------------------------------------------|
@@ -20,7 +20,7 @@
 | **Momentum Detection** | From mathematical lookback formulas | From LLM "chart reading" reasoning          |
 | **Research Value**     | Mechanism validation                | LLM pattern recognition + emergent momentum |
 
-## 5 LLM Investor Types
+## §3 5 LLM Investor Types
 
 ### Investor Type Summary
 
@@ -82,7 +82,7 @@
 | **Behavior** | Buy below fundamental, sell above |
 | **Focus**    | Value, not price trends           |
 
-## Market Clearing (Rule-Based)
+## §4 Market Clearing (Rule-Based)
 
 ```
 Price Model:
@@ -98,7 +98,7 @@ Momentum enables price continuation through positive feedback:
   Price rises → LLMMomentum buys → More price rise → More buying
 ```
 
-## Topology (Star Network)
+## §5 Topology (Star Network)
 
 ```
                          ┌───────────────────┐
@@ -111,7 +111,7 @@ Momentum enables price continuation through positive feedback:
    (⭐ amplify)  (stabilize)     (follow)      (⭐ amplify) (anchor)
 ```
 
-## Files
+## §6 Files
 
 | File                                             | Purpose                          |
 |--------------------------------------------------|----------------------------------|
@@ -122,14 +122,14 @@ Momentum enables price continuation through positive feedback:
 | `configs/MomentumEffect/LLM/players.yml`          | Player definitions + LLM config  |
 | `configs/MomentumEffect/LLM/topology.yml`         | Star topology                    |
 
-## Running
+## §7 Running
 
 ```bash
 export ARK_API_KEY='your-bytedance-doubao-api-key'
 python examples/MomentumEffect/LLM/run_momentum_llm.py -c configs/MomentumEffect/LLM/simulation.yml
 ```
 
-## Expected LLM Behavior Patterns
+## §8 Expected LLM Behavior Patterns
 
 | Phase         | Rounds | LLM Behavior                                           |
 |---------------|--------|--------------------------------------------------------|
@@ -139,7 +139,7 @@ python examples/MomentumEffect/LLM/run_momentum_llm.py -c configs/MomentumEffect
 | Peak          | 13-15  | LLMContrarian sells, momentum slows                    |
 | Reversal      | 16-20  | Mean reversion begins, LLMFundamental buys dips        |
 
-## Research Questions
+## §9 Research Questions
 
 | Question                                                | How to Test                                        |
 |---------------------------------------------------------|----------------------------------------------------|
@@ -148,7 +148,7 @@ python examples/MomentumEffect/LLM/run_momentum_llm.py -c configs/MomentumEffect
 | Can LLM contrarians dampen momentum?                    | Track contrarian effect on trend reversal          |
 | Is LLM momentum more realistic than rule-based?         | Compare autocorrelation patterns with real markets |
 
-## References
+## §10 References
 
 | Theory                 | Application in MomentumEffect LLM        | Reference                 |
 |------------------------|-----------------------------------------|---------------------------|

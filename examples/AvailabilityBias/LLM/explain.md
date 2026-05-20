@@ -1,6 +1,6 @@
 # AvailabilityBias LLM — Simulation Documentation
 
-## Overview
+## §1 Overview
 
 | Item                      | Description                                                                                                                                   |
 |---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 | **Research Contribution** | Tests whether pure behavioral personas reproduce availability bias dynamics (overreaction, partial correction) through emergent LLM reasoning |
 
 
-## 1. How Theoretical Design Is Implemented
+## §2 How Theoretical Design Is Implemented
 
 ### LLMRecentEventOverweighter: Theory → Implementation Mapping
 
@@ -67,7 +67,7 @@
 | No systematic signal       | Prompt: "Sometimes you buy into rising markets, sometimes into falling ones — randomly" |
 
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 Market mechanism is **identical** to Rule variant — only investor decision logic changes.
 
@@ -97,7 +97,7 @@ LLM must output canonical JSON inside `<decision>` tags:
 Parsed by `parse_llm_response_with_thinking()` from `examples/llm_utils.py`.
 
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 - **Availability bias through persona**: `LLM_*_SYS` prompts encode the cognitive distortion directly — RecencyOverweighter's persona overweights `return_pct` without numerical formula; effect emerges from persona interpretation
 - **return_pct prominently featured**: Unlike other simulations, prompt includes `{return_pct}` as a key signal; RecencyOverweighter's persona naturally gravitates to it
@@ -106,7 +106,7 @@ Parsed by `parse_llm_response_with_thinking()` from `examples/llm_utils.py`.
 - **Denial risk**: LLMSystematicAnalyst may be contaminated by availability framing in prompt context; its "rationality" can waver
 
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 Round t:
@@ -134,7 +134,7 @@ Round t:
 ```
 
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 | Config Path                 | Key Parameter  | Value               | Notes                                                     |
 |-----------------------------|----------------|---------------------|-----------------------------------------------------------|
@@ -145,7 +145,7 @@ Round t:
 Full config: `configs/AvailabilityBias/LLM/players.yml`
 
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 # From project root:
@@ -160,7 +160,7 @@ python examples/AvailabilityBias/Rule/analysis.py \
 Output: `EXPERIMENT/AvailabilityBias/LLM/records/`
 
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase             | Deviation Range  | LLM-Specific Behavior                                                                            |
 |-------------------|------------------|--------------------------------------------------------------------------------------------------|
@@ -171,7 +171,7 @@ Output: `EXPERIMENT/AvailabilityBias/LLM/records/`
 | **Stabilization** | Near 0%          | High variance; some runs may not fully correct within 100 rounds                                 |
 
 
-## 8. References
+## §9 References
 
 *(Theory sections from simulation-bases.md — cross-reference only)*
 

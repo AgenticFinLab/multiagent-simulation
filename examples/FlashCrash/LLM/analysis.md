@@ -1,6 +1,6 @@
 # FlashCrash LLM Analysis Methodology
 
-## Overview
+## §1 Overview
 
 This document describes the evaluation metrics for the **LLM-based flash crash** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
 
@@ -8,7 +8,7 @@ For detailed metric definitions and financial theory, see: **`../FlashCrash/anal
 
 ---
 
-## LLM-Specific Observable Phenomena
+## §2 LLM-Specific Observable Phenomena
 
 ### Emergent Behaviors Unique to LLM Agents
 
@@ -28,7 +28,7 @@ For detailed metric definitions and financial theory, see: **`../FlashCrash/anal
 
 ---
 
-## Round and Agent Scaling (LLM-Specific)
+## §3 Round and Agent Scaling (LLM-Specific)
 
 ### Round Scaling
 
@@ -48,7 +48,7 @@ For detailed metric definitions and financial theory, see: **`../FlashCrash/anal
 
 ---
 
-## Key Metrics (Summary)
+## §4 Key Metrics (Summary)
 
 | Metric           | Purpose                      |
 |------------------|------------------------------|
@@ -59,7 +59,7 @@ For detailed metric definitions and financial theory, see: **`../FlashCrash/anal
 
 ---
 
-## LLM-Specific Considerations
+## §5 LLM-Specific Considerations
 
 1. **Speed Simulation**: LLM represents algorithmic trading logic
 2. **Stop-Loss Reasoning**: LLM can be prompted with loss thresholds
@@ -67,7 +67,7 @@ For detailed metric definitions and financial theory, see: **`../FlashCrash/anal
 
 ---
 
-## Using Centralized Evaluation Module
+## §6 Using Centralized Evaluation Module
 
 ```python
 from masim.evaluation.finance import (
@@ -84,6 +84,6 @@ drawdown = calculate_max_drawdown(prices)
 
 ---
 
-## References
+## §7 References
 
 See `../FlashCrash/analysis.md` for complete academic references.

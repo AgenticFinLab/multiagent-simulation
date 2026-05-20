@@ -1,6 +1,6 @@
 # AvailabilityBias LLM — Analysis Documentation
 
-## Overview
+## §1 Overview
 
 | Item                                | Description                                                                                                                                    |
 |-------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 
 ---
 
-## 1. Metric Implementation
+## §2 Metric Implementation
 
 LLM variant shares all metric functions with `Rule/analysis.py`.
 
@@ -26,7 +26,7 @@ LLM variant shares all metric functions with `Rule/analysis.py`.
 
 ---
 
-## 2. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Bias Dynamics
 *(Objective from analysis-bases.md §3.1)*
@@ -71,7 +71,7 @@ LLM is the high-bias behavioral reference. RuleLLM and Rag should show lower bia
 
 ---
 
-## 3. Variant-Specific Observable Phenomena
+## §4 Variant-Specific Observable Phenomena
 
 | Phenomenon                          | Description                                                                      | How to Observe                                              | Contrast with Rule                                |
 |-------------------------------------|----------------------------------------------------------------------------------|-------------------------------------------------------------|---------------------------------------------------|
@@ -82,7 +82,7 @@ LLM is the high-bias behavioral reference. RuleLLM and Rag should show lower bia
 
 ---
 
-## 4. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
@@ -101,7 +101,7 @@ LLM is the high-bias behavioral reference. RuleLLM and Rag should show lower bia
 
 ---
 
-## 5. Output Files Reference
+## §6 Output Files Reference
 
 All outputs written to `EXPERIMENT/AvailabilityBias/LLM/records/analysis/`.
 
@@ -112,7 +112,7 @@ All outputs written to `EXPERIMENT/AvailabilityBias/LLM/records/analysis/`.
 
 ---
 
-## 6. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 - **Bias amplitude**: Highest; LLM persona amplification produces deeper overreaction than formula
 - **Correction ratio**: Lowest; behavioral denial slows or prevents full correction
@@ -123,7 +123,7 @@ Cross-variant comparison protocol: `../analysis-bases.md §5`.
 
 ---
 
-## References
+## §8 References
 
 - `../analysis-bases.md` — master analysis specification
 - `../simulation-bases.md §4.1, §4.2` — Availability bias archetype specifications

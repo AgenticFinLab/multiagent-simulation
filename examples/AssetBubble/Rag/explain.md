@@ -1,6 +1,6 @@
 # AssetBubble Rag — RAG-Augmented Hybrid Agent Implementation
 
-## Overview
+## §1 Overview
 
 | Item                       | Description                                                                                                                                                                        |
 |----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -13,7 +13,7 @@
 
 ---
 
-## Theory → Implementation Mapping
+## §2 Theory → Implementation Mapping
 
 > All theoretical foundations are defined in `../simulation-bases.md`. This section records how each agent's RAG persona and rules map to those sections.
 
@@ -48,7 +48,7 @@
 
 ---
 
-## Table of Contents
+## §3 Table of Contents
 
 1. [Design Motivation and Core Idea](#1-design-motivation-and-core-idea)
 2. [Four-Variant Comparison Framework](#2-four-variant-comparison-framework)
@@ -63,7 +63,7 @@
 
 ---
 
-## 1. Design Motivation and Core Idea
+## §4 Design Motivation and Core Idea
 
 ### Background: The Three-Layer Problem
 
@@ -99,7 +99,7 @@ RagLLM:    Persona + Rules + Retrieved Knowledge → LLM → decision
 
 ---
 
-## 2. Four-Variant Comparison Framework
+## §5 Four-Variant Comparison Framework
 
 ```
 AssetBubble          ─── pure rule-based (baseline)
@@ -127,7 +127,7 @@ This enables systematic cross-variant comparison:
 
 ---
 
-## 3. Directory Structure
+## §6 Directory Structure
 
 ```
 examples/AssetBubble/Rag/
@@ -153,7 +153,7 @@ masim/knowledge/              # Shared knowledge infrastructure module
 
 ---
 
-## 4. System Architecture and Data Flow
+## §7 System Architecture and Data Flow
 
 ### Initialization Phase (Round 1 only)
 
@@ -214,7 +214,7 @@ masim/knowledge/              # Shared knowledge infrastructure module
 
 ---
 
-## 5. masim/knowledge Module — Integration Deep-Dive
+## §8 masim/knowledge Module — Integration Deep-Dive
 
 This section details how AssetBubble Rag agents use the `masim/knowledge` module.
 
@@ -399,7 +399,7 @@ KnowledgeResult.chunks (ordered by relevance)
 
 ---
 
-## 6. RagLLMInvestor Base Class — RAG Pipeline
+## §9 RagLLMInvestor Base Class — RAG Pipeline
 
 ### perceive() — Initialization Hook
 
@@ -601,7 +601,7 @@ def __setstate__(self, state):
 
 ---
 
-## 7. Prompt Design: Three-Section Structure
+## §10 Prompt Design: Three-Section Structure
 
 ### System Prompt — PERSONA + DECISION RULES
 
@@ -687,7 +687,7 @@ well in the recent past will continue to perform well...
 
 ---
 
-## 8. Configuration System
+## §11 Configuration System
 
 ### RAG Configuration Block
 
@@ -752,7 +752,7 @@ llm:
 
 ---
 
-## 9. Running and Output
+## §12 Running and Output
 
 ### Running the Simulation
 
@@ -813,7 +813,7 @@ On subsequent runs:
 
 ---
 
-## 10. Research Questions and Extensions
+## §13 Research Questions and Extensions
 
 ### Cross-Variant Comparison Questions
 
@@ -843,7 +843,7 @@ To add a new source type (e.g., Bloomberg API, financial database):
 
 ---
 
-## Summary
+## §14 Summary
 
 AssetBubble Rag demonstrates how to integrate the `masim/knowledge` module into agent-based simulations:
 
@@ -855,7 +855,7 @@ The three-layer grounding (persona + rules + retrieved knowledge) creates agents
 
 ---
 
-## References
+## §15 References
 
 | Topic                                             | Source                                                                        |
 |---------------------------------------------------|-------------------------------------------------------------------------------|

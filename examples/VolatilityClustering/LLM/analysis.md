@@ -1,6 +1,6 @@
 # VolatilityClustering LLM Analysis Methodology
 
-## Overview
+## §1 Overview
 
 This document describes the evaluation metrics for the **LLM-based volatility clustering** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
 
@@ -8,7 +8,7 @@ For detailed metric definitions and financial theory, see: **`../VolatilityClust
 
 ---
 
-## Key Metrics (Summary)
+## §2 Key Metrics (Summary)
 
 | Metric                           | Purpose                                  |
 |----------------------------------|------------------------------------------|
@@ -19,7 +19,7 @@ For detailed metric definitions and financial theory, see: **`../VolatilityClust
 
 ---
 
-## LLM-Specific Observable Phenomena
+## §3 LLM-Specific Observable Phenomena
 
 ### Emergent Behaviors
 
@@ -40,7 +40,7 @@ For detailed metric definitions and financial theory, see: **`../VolatilityClust
 
 ---
 
-## LLM-Specific Considerations
+## §4 LLM-Specific Considerations
 
 1. **LLM Response Variability**: LLM-generated investor decisions may introduce additional noise
 2. **Prompt Engineering**: Investor prompts should reference recent volatility
@@ -48,7 +48,7 @@ For detailed metric definitions and financial theory, see: **`../VolatilityClust
 
 ---
 
-## Using Centralized Evaluation Module
+## §5 Using Centralized Evaluation Module
 
 ```python
 from masim.evaluation.finance import (
@@ -67,6 +67,6 @@ signature = calculate_garch_signature(prices)
 
 ---
 
-## References
+## §6 References
 
 See `../VolatilityClustering/analysis.md` for complete academic references.

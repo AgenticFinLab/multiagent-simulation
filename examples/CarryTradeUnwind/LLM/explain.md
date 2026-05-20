@@ -1,6 +1,6 @@
 # CarryTradeUnwind LLM Variant — Design Specification
 
-## 1. Overview
+## §1 Overview
 
 | Item                     | Detail                                                                                               |
 |--------------------------|------------------------------------------------------------------------------------------------------|
@@ -13,7 +13,7 @@
 
 ---
 
-## 2. Theory → Implementation Mapping
+## §2 Theory → Implementation Mapping
 
 | Theoretical Concept      | Agent / Mechanism                                                | Code Location                           |
 |--------------------------|------------------------------------------------------------------|-----------------------------------------|
@@ -26,7 +26,7 @@
 
 ---
 
-## 3. Market Mechanism
+## §3 Market Mechanism
 
 Identical to Rule variant. Market broadcasts per round:
 
@@ -43,7 +43,7 @@ LLM agents receive this plus portfolio state `{cash, position, portfolio_value}`
 
 ---
 
-## 4. Variant-Specific Features
+## §4 Variant-Specific Features
 
 ### 4.1 LLM Decision Loop
 
@@ -72,7 +72,7 @@ Each LLM trader is parameterized by a **system prompt** that encodes:
 
 ---
 
-## 5. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -105,7 +105,7 @@ Each LLM trader is parameterized by a **system prompt** that encodes:
 
 ---
 
-## 6. Configuration Reference
+## §6 Configuration Reference
 
 Config file: `configs/CarryTradeUnwind/LLM/simulation.yml`
 
@@ -123,7 +123,7 @@ Market parameters: identical to Rule variant (see Rule/explain.md §6).
 
 ---
 
-## 7. Running Instructions
+## §7 Running Instructions
 
 ```bash
 # Requires LLM API key in .env (OPENAI_API_KEY or equivalent)
@@ -137,7 +137,7 @@ python examples/CarryTradeUnwind/LLM/analysis.py \
 
 ---
 
-## 8. Expected Behavior
+## §8 Expected Behavior
 
 - LLM carry trader personas tend to follow the same direction as Rule agents
 - Stochastic temperature introduces round-to-round quantity variation
@@ -147,7 +147,7 @@ python examples/CarryTradeUnwind/LLM/analysis.py \
 
 ---
 
-## 9. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

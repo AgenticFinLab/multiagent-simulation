@@ -1,6 +1,6 @@
 # AssetBubble Rule — Analysis Documentation
 
-## Overview
+## §1 Overview
 
 | Item                            | Description                                                                                                                                        |
 |---------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 
 ---
 
-## 1. Analysis Overview Detail
+## §2 Analysis Overview Detail
 
 The Rule variant's `analysis.py` implements the **complete analysis pipeline** defined in `../analysis-bases.md`. All other variant `analysis.py` files (`LLM/analysis.py`, `RuleLLM/analysis.py`, `Rag/analysis.py`) delegate directly to this implementation via:
 
@@ -23,7 +23,7 @@ This ensures all variants use identical metric definitions and produce comparabl
 
 ---
 
-## 2. Metric Implementation
+## §3 Metric Implementation
 
 ### Metric: Price Deviation from Fundamental
 
@@ -95,7 +95,7 @@ This ensures all variants use identical metric definitions and produce comparabl
 
 ---
 
-## 3. Dimension-by-Dimension Analysis
+## §4 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Price Dynamics and Bubble Formation
 *(Defined in `../analysis-bases.md §3 — Dimension 1`)*
@@ -177,7 +177,7 @@ This ensures all variants use identical metric definitions and produce comparabl
 
 ---
 
-## 4. Variant-Specific Observable Phenomena
+## §5 Variant-Specific Observable Phenomena
 
 | Phenomenon                          | Description                                                                                          | How to Observe                                                                | Contrast with LLM Variants                                                     |
 |-------------------------------------|------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
@@ -188,7 +188,7 @@ This ensures all variants use identical metric definitions and produce comparabl
 
 ---
 
-## 5. Scaling and Sensitivity Analysis
+## §6 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
@@ -218,7 +218,7 @@ This ensures all variants use identical metric definitions and produce comparabl
 
 ---
 
-## 6. Output Files Reference
+## §7 Output Files Reference
 
 All outputs written to: `EXPERIMENT/AssetBubble/Rule/analysis/`
 
@@ -231,7 +231,7 @@ All outputs written to: `EXPERIMENT/AssetBubble/Rule/analysis/`
 
 ---
 
-## 7. Cross-Variant Comparison Notes
+## §8 Cross-Variant Comparison Notes
 
 **Rule variant's expected position in cross-variant comparison** (per `../analysis-bases.md §5`):
 
