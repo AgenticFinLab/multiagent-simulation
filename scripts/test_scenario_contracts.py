@@ -89,7 +89,7 @@ class ScenarioContractTest(unittest.TestCase):
             "not narrow the schema below fields consumed by the player.",
         )
 
-    def test_api_fallback_orders_keep_reasoning_field_when_player_records_it(self):
+    def test_api_parse_failure_paths_are_contract_safe(self):
         player_files = [
             ROOT / "examples" / "SorosPound" / "LLM" / "players.py",
             ROOT / "examples" / "SorosPound" / "RuleLLM" / "players.py",
@@ -105,16 +105,23 @@ class ScenarioContractTest(unittest.TestCase):
         missing = []
         for path in player_files:
             text = path.read_text(encoding="utf-8")
-            if "decision[\"reasoning\"]" in text:
-                missing.append(f"{path.relative_to(ROOT)}:uses direct reasoning read")
-            if "fallback hold after retries" not in text:
-                missing.append(f"{path.relative_to(ROOT)}:fallback reasoning")
+            has_fallback = "fallback hold after retries" in text
+            has_fail_fast = "failed after {max_retries} attempts" in text
+            if has_fallback:
+                if "decision[\"reasoning\"]" in text:
+                    missing.append(f"{path.relative_to(ROOT)}:uses direct reasoning read")
+                continue
+            if has_fail_fast:
+                if "fallback hold after retries" in text:
+                    missing.append(f"{path.relative_to(ROOT)}:mixed fallback and fail-fast")
+                continue
+            missing.append(f"{path.relative_to(ROOT)}:no safe parse-failure path")
 
         self.assertEqual(
             missing,
             [],
-            "Fallback decisions must carry the same fields later recorded into "
-            "orders; otherwise parse-failure fallback becomes a KeyError.",
+            "Parse-failure handling must be contract-safe: either fallback orders "
+            "carry all recorded fields, or the player fails fast after retries.",
         )
 
     def test_liquidity_sensitive_prompts_request_provides_liquidity(self):
