@@ -388,9 +388,9 @@ class RagLLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] -= quantity * bid_price
             self.state.custom_state["position"] += quantity
         elif action == "sell":
-            quantity = max(-position, quantity)
+            quantity = min(quantity, max(position, 0.0))
             self.state.custom_state["cash"] += quantity * bid_price
-            self.state.custom_state["position"] += quantity
+            self.state.custom_state["position"] -= quantity
 
         logger.info(
             "[%s] R%d (%s): Q=%+.2f", self.identity, round_num, strategy_name, quantity
@@ -399,7 +399,6 @@ class RagLLMInvestor(GeneralPlayer):
         order = {
             "action": action,
             "bid_price": bid_price,
-            "action": action,
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,

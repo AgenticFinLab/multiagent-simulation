@@ -23,7 +23,7 @@
 | Denial response to margin pressure → sim-bases §4 LLM Persona | Prompt: "you are slow to react to margin pressure — denial is your first response"      |
 | Large abrupt selling when unavoidable → sim-bases §4          | Prompt: "when margin calls become unavoidable, your forced selling is large and abrupt" |
 | Position size range 40%–60% → sim-bases §4 LLM Persona        | No hardcoded rule; LLM must infer sell size from context and persona framing            |
-| Prompt constant → `prompts.py`                                | `LLM_CONCENTRATED_FUND_SYS` loaded via `extras.sys_prompt_path` in `players.yml`        |
+| Prompt constant → `prompts.py`                                | `LLM_CONCENTRATED_FUND_SYS` loaded via `extras.llm.sys_message` in `players.yml`        |
 
 ### PrimeBroker1: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.2 — PrimeBroker1)*
@@ -105,7 +105,10 @@ Deviations from simulation-bases.md design: None in market mechanics. Investor d
 
 **Stochastic cascade timing**: Each LLM call is independent; the ConcentratedFund persona may "hold" several rounds after margin pressure appears (denial phase) before finally selling. This makes cascade onset variable across runs.
 
-**JSON parsing failure handling**: If LLM response fails JSON parse, `parse_llm_response_with_thinking()` returns a default hold action to prevent simulation crash.
+**JSON parsing failure handling**: `LLMInvestor.decide()` retries malformed or
+transient failures up to three times. If no valid canonical decision is
+available after retries, the row fails loudly with `RuntimeError`; it does not
+silently substitute a hold action.
 
 **API key**: `ARK_API_KEY` (ByteDance Doubao) must be set as environment variable; loaded via `load_dotenv()` in `perceive()`.
 
@@ -141,7 +144,7 @@ Deviations from simulation-bases.md design: None in market mechanics. Investor d
 
 LLM API Call Flow:
   LLMInvestor.decide()
-    ├── sys_prompt = load_prompt(extras["sys_prompt_path"])
+    ├── sys_prompt = load_prompt(extras["llm"]["sys_message"])
     ├── user_msg  = LLM_USER_TEMPLATE.format(**state)
     └── InferInput(sys=sys_prompt, user=user_msg)
           → LangChainAPIInference → API → response
@@ -155,13 +158,14 @@ LLM API Call Flow:
 
 Key Configuration Parameters (`configs/ArchegosCollapse/LLM/players.yml`):
 
-| Parameter         | Config Path              | Value                                             | Design Justification                                    |
-|-------------------|--------------------------|---------------------------------------------------|---------------------------------------------------------|
-| `price_impact`    | `extras.price_impact`    | 0.03                                              | Same as Rule — comparable cascade mechanics             |
-| `mean_reversion`  | `extras.mean_reversion`  | 0.01                                              | Same as Rule — enables cascade persistence              |
-| `sys_prompt_path` | `extras.sys_prompt_path` | `examples.ArchegosCollapse.LLM.prompts:LLM_*_SYS` | Module path for LLM persona; loaded by `load_prompt()`  |
-| `llm.model`       | `extras.llm.model`       | `ep-*` (Doubao model endpoint)                    | ByteDance Doubao LLM endpoint                           |
-| `llm.temperature` | `extras.llm.temperature` | 0.7                                               | Moderate stochasticity — reproduces persona variability |
+| Parameter | Config Path | Value | Design Justification |
+|---|---|---|---|
+| `price_impact` | `extras.price_impact` | 0.03 | Same as Rule — comparable cascade mechanics |
+| `mean_reversion` | `extras.mean_reversion` | 0.01 | Same as Rule — enables cascade persistence |
+| `sys_message` | `extras.llm.sys_message` | `examples.ArchegosCollapse.LLM.prompts:LLM_*_SYS` | Module path for LLM persona; loaded by `load_prompt()` |
+| `user_message` | `extras.llm.user_message` | `examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE` | Module path for market-state user template |
+| `lm_name` | `extras.llm.lm_name` | `ark/doubao-seed-2-0-mini-260428` | ByteDance Ark Doubao model |
+| `temperature` | `extras.llm.generation_config.temperature` | 0.4-0.7 | Agent-specific stochasticity — reproduces persona variability |
 
 ---
 

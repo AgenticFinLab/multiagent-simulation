@@ -133,12 +133,14 @@ Prompt Structure:
 
 Key Configuration Parameters (`configs/ArchegosCollapse/RuleLLM/players.yml`):
 
-| Parameter         | Config Path              | Value                                                 | Design Justification                                     |
-|-------------------|--------------------------|-------------------------------------------------------|----------------------------------------------------------|
-| `price_impact`    | `extras.price_impact`    | 0.03                                                  | Identical to Rule — comparable market dynamics           |
-| `mean_reversion`  | `extras.mean_reversion`  | 0.01                                                  | Same low γ — cascade persistence                         |
-| `sys_prompt_path` | `extras.sys_prompt_path` | `examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_*` | Module path for dual-section prompts                     |
-| `llm.temperature` | `extras.llm.temperature` | 0.3                                                   | Low temperature — closer to deterministic rule-following |
+| Parameter | Config Path | Value | Design Justification |
+|---|---|---|---|
+| `price_impact` | `extras.price_impact` | 0.03 | Identical to Rule — comparable market dynamics |
+| `mean_reversion` | `extras.mean_reversion` | 0.01 | Same low gamma — cascade persistence |
+| `sys_message` | `extras.llm.sys_message` | `examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_*_SYS` | Module path for dual-section prompts |
+| `user_message` | `extras.llm.user_message` | `examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE` | Module path for market-state user template |
+| `lm_name` | `extras.llm.lm_name` | `ark/doubao-seed-2-0-mini-260428` | ByteDance Ark Doubao model |
+| `temperature` | `extras.llm.generation_config.temperature` | 0.4-0.5 | Low temperature — closer to deterministic rule-following |
 
 ---
 

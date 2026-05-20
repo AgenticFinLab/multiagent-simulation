@@ -138,14 +138,15 @@ Deviations from simulation-bases.md design: None in market mechanics.
 
 Key Configuration Parameters (`configs/ArchegosCollapse/Rag/players.yml`):
 
-| Parameter            | Config Path                 | Value                                             | Design Justification                                            |
-|----------------------|-----------------------------|---------------------------------------------------|-----------------------------------------------------------------|
-| `price_impact`       | `extras.price_impact`       | 0.03                                              | Identical to Rule/RuleLLM                                       |
-| `mean_reversion`     | `extras.mean_reversion`     | 0.01                                              | Identical to Rule/RuleLLM                                       |
-| `sys_prompt_path`    | `extras.sys_prompt_path`    | `examples.ArchegosCollapse.Rag.prompts:RAG_*_SYS` | Module path for RAG system prompts (aliases to RuleLLM prompts) |
-| `rag.knowledge_base` | `extras.rag.knowledge_base` | Path to Archegos/LTCM vector store                | Source of historical crisis knowledge for retrieval             |
-| `rag.top_k`          | `extras.rag.top_k`          | 3                                                 | Number of chunks retrieved per round                            |
-| `llm.temperature`    | `extras.llm.temperature`    | 0.3                                               | Low temperature — rules + knowledge → near-deterministic        |
+| Parameter | Config Path | Value | Design Justification |
+|---|---|---|---|
+| `price_impact` | `extras.price_impact` | 0.03 | Identical to Rule/RuleLLM |
+| `mean_reversion` | `extras.mean_reversion` | 0.01 | Identical to Rule/RuleLLM |
+| `sys_message` | `extras.llm.sys_message` | `examples.ArchegosCollapse.Rag.prompts:RAG_*_SYS` | Module path for RAG system prompts (aliases to RuleLLM prompts) |
+| `user_message` | `extras.llm.user_message` | `examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE` | Module path for RAG user template |
+| `private_knowledge.rag.top_k` | `extras.private_knowledge.rag.top_k` | 5 | Number of chunks retrieved per round |
+| `embed_model` | `extras.private_knowledge.rag.embed_model` | `openai/hunyuan-embedding` | Embedding model for RAG retrieval |
+| `temperature` | `extras.llm.generation_config.temperature` | 0.4-0.5 | Low temperature — rules + knowledge |
 
 ---
 

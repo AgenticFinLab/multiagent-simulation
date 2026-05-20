@@ -145,19 +145,9 @@ class RuleLLMInvestor(GeneralPlayer):
                     raise
 
         if decision is None:
-            logger.warning(
-                "[%s] LLM failed after %d retries: %s. Holding.",
-                self.identity,
-                max_retries,
-                last_error,
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             )
-            decision = {
-                "action": "hold",
-                "bid_price": market_data["price"],
-                "quantity": 0.0,
-                "reasoning": f"LLM fallback hold after retries: {last_error}",
-                "analysis": "",
-            }
 
         action = decision["action"]
         bid_price = float(decision["bid_price"])
@@ -171,9 +161,9 @@ class RuleLLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] -= quantity * bid_price
             self.state.custom_state["position"] += quantity
         elif action == "sell":
-            quantity = max(-position, quantity)
+            quantity = min(quantity, max(position, 0.0))
             self.state.custom_state["cash"] += quantity * bid_price
-            self.state.custom_state["position"] += quantity
+            self.state.custom_state["position"] -= quantity
 
         logger.info(
             "[%s] R%d (%s): Q=%+.2f", self.identity, round_num, strategy_name, quantity
@@ -182,7 +172,6 @@ class RuleLLMInvestor(GeneralPlayer):
         order = {
             "action": action,
             "bid_price": bid_price,
-            "action": action,
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
