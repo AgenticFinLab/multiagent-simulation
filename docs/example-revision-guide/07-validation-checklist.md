@@ -9,6 +9,10 @@ The checklist is organized in four layers — from structure down to cross-consi
 For full-round batch execution readiness, also apply
 `docs/experiment-preflight-skill/SKILL.md` after this checklist passes.
 
+After validation, apply the runtime drift and rerun decision in
+`06-execution-order.md §2 Phase 7` before deciding whether previous experiment
+samples can be inherited.
+
 ---
 
 ## Layer 1 — File Existence
@@ -347,6 +351,38 @@ grep "`[a-z_]*(" examples/<Scenario>/Rule/analysis.md
 
 ---
 
+## Layer 5 — Rerun Decision
+
+Complete this layer before marking a revised simulation ready for experiment
+consolidation.
+
+```bash
+git diff --name-only -- examples/<Scenario> configs/<Scenario>
+```
+
+Classify changed files:
+
+- `docs-inherited`: only docs changed (`simulation-bases.md`,
+  `analysis-bases.md`, `{Variant}/explain.md`, `{Variant}/analysis.md`).
+- `rerun-required-runtime-change`: any runtime input changed (`players.py`,
+  `prompts.py`, `configs/`, parser/fallback logic, market/order construction,
+  topology, model id, RAG embedding/index config, or player counts).
+- `legacy-clean`: previous sample is clean but belongs to an older runtime
+  input set.
+
+**Checklist**:
+- [ ] Every changed file is classified as docs-only or runtime-input.
+- [ ] Existing clean samples are not marked failed solely because of branch
+      drift.
+- [ ] Docs-only repairs inherit existing clean samples with a `docs-inherited`
+      note.
+- [ ] Runtime-input repairs mark only affected modes for rerun.
+- [ ] RuleLLM prompt-rule changes also mark Rag for rerun if Rag aliases
+      RuleLLM prompts.
+- [ ] The decision is recorded in the experiment ledger before rerun launch.
+
+---
+
 ## §5 Validation Pass/Fail Summary
 
 Use this table to track results:
@@ -377,6 +413,7 @@ Use this table to track results:
 | Layer 4 | §4.N numbering consistency    | PASS / FAIL |
 | Layer 4 | Investor count consistency    | PASS / FAIL |
 | Layer 4 | Function name consistency     | PASS / FAIL |
+| Layer 5 | Rerun decision                | PASS / FAIL |
 
 Overall: COMPLETE / INCOMPLETE
 ```

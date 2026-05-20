@@ -1,6 +1,6 @@
 # BlackMonday1987 Rag — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                                   | Description                                                                                                                                                                                               |
 |----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,9 +12,14 @@
 
 ---
 
-## 1. How Theoretical Design Is Implemented
+## §2 Theory → Implementation Mapping
 
-### All Agents: Theory → Implementation Mapping
+### PortfolioInsurer / IndexArbitrageur / ProgramTrader / ValueInvestor / NoiseTrader: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4.1 — PortfolioInsurer)*
+*(Theory defined in simulation-bases.md §4.2 — IndexArbitrageur)*
+*(Theory defined in simulation-bases.md §4.3 — ProgramTrader)*
+*(Theory defined in simulation-bases.md §4.4 — ValueInvestor)*
+*(Theory defined in simulation-bases.md §4.5 — NoiseTrader)*
 
 | Theoretical Design Element                                             | Implementation                                                                                          |
 |------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
@@ -27,7 +32,7 @@ Note: `RAG_USER_TEMPLATE` (BlackMonday1987) instructs "Apply your DECISION RULES
 
 ---
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 *Formula source: simulation-bases.md §3.1*
 
@@ -41,7 +46,7 @@ RAG user template note: `{rag_context}` is placed between the market state block
 
 ---
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 *(Reference: simulation-bases.md §9 — Rag variant entry)*
 
@@ -59,11 +64,11 @@ RAG user template note: `{rag_context}` is placed between the market state block
 
 Both outcomes are scientifically interesting research findings.
 
-**No-retrieval fallback**: Same `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"` as ArchegosCollapse. Agent defaults to pure RuleLLM behavior.
+**No-retrieval fallback**: Uses `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"`; when no documents are retrieved, the prompt receives the explicit fallback string and behavior degrades toward RuleLLM.
 
 ---
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
@@ -84,13 +89,13 @@ Both outcomes are scientifically interesting research findings.
 
 ---
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 Key Configuration Parameters (`configs/BlackMonday1987/Rag/players.yml`):
 
 | Parameter            | Config Path                 | Value                                            | Design Justification                              |
 |----------------------|-----------------------------|--------------------------------------------------|---------------------------------------------------|
-| `price_impact`       | `extras.price_impact`       | 0.002                                            | Identical to Rule/RuleLLM                         |
+| `price_impact`       | `extras.price_impact`       | 0.05                                             | Identical to Rule/RuleLLM                         |
 | `sys_prompt_path`    | `extras.sys_prompt_path`    | `examples.BlackMonday1987.Rag.prompts:RAG_*_SYS` | Aliases to RuleLLM prompts                        |
 | `rag.knowledge_base` | `extras.rag.knowledge_base` | Path to 1987 Black Monday vector store           | Historical crash knowledge corpus                 |
 | `rag.top_k`          | `extras.rag.top_k`          | 3                                                | 3 most relevant knowledge chunks per round        |
@@ -98,7 +103,7 @@ Key Configuration Parameters (`configs/BlackMonday1987/Rag/players.yml`):
 
 ---
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 export ARK_API_KEY="your-bytedance-ark-api-key"
@@ -108,13 +113,13 @@ python examples/BlackMonday1987/Rag/run_blackmonday1987_rag.py \
 
 Required environment variables: `ARK_API_KEY`
 
-Expected runtime: ~5–20 minutes for 100 rounds
+Expected runtime: ~10–40 minutes for 200 rounds
 
 Output location: `EXPERIMENT/BlackMonday1987/Rag/`
 
 ---
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase            | Rounds | Expected Agent Behavior                                                                       | Expected Price Dynamics                                                  |
 |------------------|--------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
@@ -125,7 +130,7 @@ Output location: `EXPERIMENT/BlackMonday1987/Rag/`
 
 ---
 
-## 8. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

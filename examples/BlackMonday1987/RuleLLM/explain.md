@@ -1,6 +1,6 @@
 # BlackMonday1987 RuleLLM — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                                   | Description                                                                                                                                                                            |
 |----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,55 +12,55 @@
 
 ---
 
-## 1. How Theoretical Design Is Implemented
+## §2 Theory → Implementation Mapping
 
 ### PortfolioInsurer: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — PortfolioInsurer)*
+*(Theory defined in simulation-bases.md §4.1 — PortfolioInsurer)*
 
 | Theoretical Design Element                                   | Implementation                                                                                    |
 |--------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
 | Dynamic hedging formula → sim-bases §4 Rule-Based Behavior   | `RULELLM_PORTFOLIO_INSURER_SYS` `== DECISION RULES ==`: Step 2 sell proportional to hedge_ratio × |
 | rebalance_threshold = ±0.02 → sim-bases §6                   | Hard-coded in prompt: "IF deviation < -0.02 → SELL"; "IF deviation > +0.02 → BUY"                 |
-| Cap at 1500 sell, 500 buy → sim-bases §4 Rule-Based Behavior | Rule: "Cap at 1500 shares. Never sell more than position"; "Cap at 500 shares"                    |
+| Sell capped by position, buy capped at 500 → sim-bases §4 Rule-Based Behavior | Rule: sell is capped by current position; buy is capped at 500 shares                    |
 | PERSONA: protection discipline → sim-bases §4 LLM Persona    | `== PERSONA ==`: "mechanical and disciplined — capital protection overrides all concerns"         |
 | ±20% quantity range → sim-bases §4 RuleLLM Hybrid Notes      | Step 3 in prompt: "PERSONA may adjust quantity ±20%"                                              |
 
 ### IndexArbitrageur: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — IndexArbitrageur)*
+*(Theory defined in simulation-bases.md §4.2 — IndexArbitrageur)*
 
 | Theoretical Design Element                                | Implementation                                                                                         |
 |-----------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
-| Fixed position_size rule → sim-bases §4                   | `RULELLM_INDEX_ARBITRAGEUR_SYS`: "IF deviation > +0.005 → SELL ≈500; IF deviation < -0.005 → BUY ≈500" |
-| ±20% → 400–600 shares range → sim-bases §4 RuleLLM Hybrid | Step 3: "PERSONA (speed urgency) may adjust quantity ±20% (400–600 shares)"                            |
+| Fixed position_size rule → sim-bases §4                   | `RULELLM_INDEX_ARBITRAGEUR_SYS`: "IF deviation > +0.01 → SELL ≈80; IF deviation < -0.01 → BUY ≈80" |
+| ±20% → 64–96 shares range → sim-bases §4 RuleLLM Hybrid | Step 3: "PERSONA (speed urgency) may adjust quantity ±20% (64–96 shares)"                            |
 
 ### ProgramTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — ProgramTrader)*
+*(Theory defined in simulation-bases.md §4.3 — ProgramTrader)*
 
 | Theoretical Design Element                                | Implementation                                                                 |
 |-----------------------------------------------------------|--------------------------------------------------------------------------------|
-| Feedback amplification formula → sim-bases §4 Rule-Based  | `RULELLM_PROGRAM_TRADER_SYS`: "sell_qty = sell_size × (1 + feedback_strength × |
+| Feedback amplification formula → sim-bases §4 Rule-Based  | `RULELLM_PROGRAM_TRADER_SYS`: "sell_qty = base_size × (1 + feedback_strength × |
 | trigger_threshold = 0.01 → sim-bases §6                   | Hard-coded: "IF deviation < -0.01 → SELL [amplified formula]"                  |
 | PERSONA: no emotional override → sim-bases §4 LLM Persona | `== PERSONA ==`: "no emotional override; systematic; momentum-following"       |
 
 ### ValueInvestor: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — ValueInvestor)*
+*(Theory defined in simulation-bases.md §4.4 — ValueInvestor)*
 
 | Theoretical Design Element                                | Implementation                                                         |
 |-----------------------------------------------------------|------------------------------------------------------------------------|
-| value_discount = 0.15, order_size = 800 → sim-bases §6    | `RULELLM_VALUE_INVESTOR_SYS`: "IF deviation < -0.15 → BUY ≈800 shares" |
-| ±20% → 640–960 shares range → sim-bases §4 RuleLLM Hybrid | Step 3: "PERSONA (contrarian conviction) may adjust ±20% (640–960)"    |
+| value_discount = 0.15, base_size = 40 → sim-bases §6    | `RULELLM_VALUE_INVESTOR_SYS`: "IF deviation < -0.15 → BUY ≈40 shares" |
+| ±20% → 32–48 shares range → sim-bases §4 RuleLLM Hybrid | Step 3: "PERSONA (contrarian conviction) may adjust ±20% (32–48)"    |
 
 ### NoiseTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — NoiseTrader)*
+*(Theory defined in simulation-bases.md §4.5 — NoiseTrader)*
 
 | Theoretical Design Element                        | Implementation                                                          |
 |---------------------------------------------------|-------------------------------------------------------------------------|
 | 5% trade probability rule → sim-bases §4          | `RULELLM_NOISE_TRADER_SYS`: "IF random draw < 5% → trade; ELSE → HOLD"  |
-| Random direction, 100–500 quantity → sim-bases §6 | Step 2: "quantity = random.randint(100, 500); direction = random 50/50" |
+| Random direction, 50–200 quantity → sim-bases §6 | Step 2: "quantity = random.randint(50, 200); direction = random 50/50" |
 
 ---
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 *Formula source: simulation-bases.md §3.1*
 
@@ -74,7 +74,7 @@ Market class identical to Rule variant (imported). See Rule `explain.md §2` for
 
 ---
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 *(Reference: simulation-bases.md §9 — RuleLLM variant entry)*
 
@@ -86,7 +86,7 @@ Market class identical to Rule variant (imported). See Rule `explain.md §2` for
 
 ---
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
@@ -104,19 +104,19 @@ Market class identical to Rule variant (imported). See Rule `explain.md §2` for
 
 ---
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 Key Configuration Parameters (`configs/BlackMonday1987/RuleLLM/players.yml`):
 
 | Parameter         | Config Path              | Value                                                    | Design Justification                       |
 |-------------------|--------------------------|----------------------------------------------------------|--------------------------------------------|
-| `price_impact`    | `extras.price_impact`    | 0.002                                                    | Identical to Rule                          |
+| `price_impact`    | `extras.price_impact`    | 0.05                                                     | Identical to Rule                          |
 | `sys_prompt_path` | `extras.sys_prompt_path` | `examples.BlackMonday1987.RuleLLM.prompts:RULELLM_*_SYS` | Dual-section prompt module path            |
 | `llm.temperature` | `extras.llm.temperature` | 0.3                                                      | Low temperature — closer to rule-following |
 
 ---
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 export ARK_API_KEY="your-bytedance-ark-api-key"
@@ -126,24 +126,24 @@ python examples/BlackMonday1987/RuleLLM/run_blackmonday1987_rulellm.py \
 
 Required environment variables: `ARK_API_KEY`
 
-Expected runtime: ~5–20 minutes for 100 rounds
+Expected runtime: ~10–40 minutes for 200 rounds
 
 Output location: `EXPERIMENT/BlackMonday1987/RuleLLM/`
 
 ---
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase            | Rounds | Expected Agent Behavior                                                        | Expected Price Dynamics                                   |
 |------------------|--------|--------------------------------------------------------------------------------|-----------------------------------------------------------|
-| Pre-Crash        | 1–10   | All agents hold per rules; LLM confirms with Step 1-2 calculation visible      | Price near 100; identical to Rule baseline                |
+| Pre-Crash        | 1–10   | All agents hold per rules; LLM confirms with Step 1-2 calculation visible      | Price near 250; identical to Rule baseline                |
 | Feedback Onset   | 5–15   | PortfolioInsurer triggers at −2% per rule; ProgramTrader at −1%; ±20% quantity | Near-Rule crash onset; slight cascade magnitude variation |
 | Crash Escalation | 10–25  | ProgramTrader feedback amplification executed in reasoning; ±20% range active  | Crash depth within ±20% of Rule; pattern similar          |
 | Recovery         | 35–100 | ValueInvestor BUYs at −15% per rule; mean reversion; recovery near-Rule        | Recovery trajectory near-Rule                             |
 
 ---
 
-## 8. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 
