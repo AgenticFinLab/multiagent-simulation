@@ -1,71 +1,36 @@
-# ShortSqueeze LLM Analysis Methodology
+# Short Squeeze LLM Analysis Plan
 
-## §1 Overview
+## §1 Objectives
 
-This document describes the evaluation metrics for the **LLM-based short squeeze** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
+This analysis checks whether the LLM variant produces a complete, analyzable Short Squeeze trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-For detailed metric definitions and financial theory, see: **`../ShortSqueeze/analysis.md`**
+## §2 Core Metrics
 
----
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_shortsqueeze_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §2 Key Metrics (Summary)
+## §3 Analysis Dimensions
 
-| Metric          | Purpose                               |
-|-----------------|---------------------------------------|
-| Short Interest  | Squeeze vulnerability                 |
-| Price Spike     | Squeeze magnitude                     |
-| Forced Covering | Short sellers buy to close            |
-| Feedback Loop   | Covering → price rise → more covering |
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether LLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
----
+## §4 Phase Analysis
 
-## §3 LLM-Specific Observable Phenomena
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-### Emergent Behaviors
+## §5 Cross-Variant Comparison
 
-| Phenomenon               | LLM Behavior                                 | Contrast with Rule-Based             |
-|--------------------------|----------------------------------------------|--------------------------------------|
-| **Margin Panic**         | LLM expresses urgency when losses mount      | Rule-based triggers at threshold     |
-| **Covering Reasoning**   | LLM explains "must cover before margin call" | Rule-based follows formula           |
-| **Momentum Recognition** | LLM buyer identifies "squeeze in progress"   | Rule-based uses momentum coefficient |
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
 
-### Round and Agent Scaling
+## §6 Expected Results and Validation Criteria
 
-| Scale          | LLM-Specific Observation                         |
-|----------------|--------------------------------------------------|
-| **50 rounds**  | Squeeze begins; forced covering visible          |
-| **100 rounds** | Full squeeze cycle with normalization            |
-| **5 agents**   | Individual LLM short positions dominate          |
-| **10 agents**  | Diverse short/long LLMs create realistic squeeze |
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
 
----
+## §7 Visualization Catalogue
 
-## §4 LLM-Specific Considerations
-
-1. **Margin Pressure**: LLM prompted with P&L and margin requirements
-2. **Forced Action**: LLM must cover when losses exceed threshold
-3. **Momentum Buying**: LLM buyers react to rising prices
-
----
-
-## §5 Using Centralized Evaluation Module
-
-```python
-from masim.evaluation.finance import (
-    calculate_returns,
-    calculate_net_demand,
-    calculate_strategy_contribution,
-    plot_strategy_contribution,
-)
-
-# Same analysis as rule-based version
-prices = {...}
-returns = calculate_returns(prices)
-max_spike = max(returns)
-```
-
----
-
-## §6 References
-
-See `../ShortSqueeze/analysis.md` for complete academic references.
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_shortsqueeze_dynamics.png`, `02_shortsqueeze_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

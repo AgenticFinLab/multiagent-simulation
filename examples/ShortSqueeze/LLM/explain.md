@@ -1,69 +1,95 @@
-# ShortSqueeze LLM - LLM-Powered Short Squeeze Simulation
+# Short Squeeze LLM Variant Explanation
 
-## §1 What is This?
+## §1 Overview
 
-| Item               | Description                                                                               |
-|--------------------|-------------------------------------------------------------------------------------------|
-| **Phenomenon**     | **Short Squeeze (空头挤压)** - LLM-driven supply-demand imbalance forcing shorts to cover |
-| **Model**          | LLM-based traders with short/retail/institutional personalities + Rule-based market       |
-| **Key Feature**    | Investors use LLM reasoning to exhibit coordinated buying and forced short covering       |
-| **Academic Value** | Tests whether LLMs can simulate GameStop-style squeeze dynamics                           |
+| Field | Value |
+|---|---|
+| Variant | LLM |
+| Simulation | Short Squeeze |
+| Decision Mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning |
+| Theory Reference | `examples/ShortSqueeze/simulation-bases.md` |
+| Market Broadcast | `configs/ShortSqueeze/LLM/topology.yml` |
 
-## §2 5 LLM Investor Types
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-### Investor Type Summary
+## §2 Theory -> Implementation Mapping
 
-| Type                 | Strategy              | Market Effect    | System Prompt Focus               |
-|----------------------|-----------------------|------------------|-----------------------------------|
-| **LLMShortSeller**   | Short position holder | ⭐ SQUEEZE TARGET | "If price > $50, MUST cover"      |
-| **LLMRetailCoord**   | Coordinated buying    | ⭐ SQUEEZE DRIVER | "BUY aggressively, diamond hands" |
-| **LLMMomentum**      | Ride the squeeze      | AMPLIFYING       | "Positive returns: BUY"           |
-| **LLMValue**         | Skeptical value       | STABILIZING      | "Squeeze is temporary"            |
-| **LLMInstitutional** | Large holder          | PROFIT-TAKING    | "Price up: Take profits"          |
+### §2.1 ShortSeller (simulation-bases.md §4.1)
 
-### Key Mechanism
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `LLMShortSeller` in `examples/ShortSqueeze/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.2 MomentumBuyer (simulation-bases.md §4.2)
 
-```
-Short Squeeze Cascade:
-  1. LLMRetailCoord buys aggressively ("diamond hands")
-  2. Price rises → Short interest pressure increases
-  3. LLMShortSeller hits covering threshold
-  4. Forced buying → More price rise → More covering
-  5. LLMInstitutional profit-taking eventually slows squeeze
-```
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `LLMMomentumBuyer` in `examples/ShortSqueeze/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.3 RetailTrader (simulation-bases.md §4.3)
 
-## §3 Files
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `configured player class family` in `examples/ShortSqueeze/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.4 ValueInvestor (simulation-bases.md §4.4)
 
-| File                                                | Purpose                          |
-|-----------------------------------------------------|----------------------------------|
-| `examples/ShortSqueeze/LLM/players.py`               | Market + 5 LLM investor classes  |
-| `examples/ShortSqueeze/LLM/prompts.py`               | System and user prompt templates |
-| `examples/ShortSqueeze/LLM/run_short_squeeze_llm.py` | Entry point                      |
-| `configs/ShortSqueeze/LLM/simulation.yml`            | Main config                      |
-| `configs/ShortSqueeze/LLM/players.yml`               | Player definitions + LLM config  |
-| `configs/ShortSqueeze/LLM/topology.yml`              | Star topology                    |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `LLMValueInvestor` in `examples/ShortSqueeze/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.5 InstitutionalHolder (simulation-bases.md §4.5)
 
-## §4 Running
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `LLMInstitutionalHolder` in `examples/ShortSqueeze/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+
+## §3 Market Mechanism
+
+The coordinator mechanism is the final implementation in `examples/ShortSqueeze/LLM/players.py` and its configured counterpart in `configs/ShortSqueeze/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+
+## §4 Variant Architecture
+
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/ShortSqueeze/LLM/players.py` |
+| Prompt module | `examples/ShortSqueeze/LLM/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+
+## §5 Config Reference
+
+| Config | Purpose |
+|---|---|
+| `configs/ShortSqueeze/LLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/ShortSqueeze/LLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/ShortSqueeze/LLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/ShortSqueeze/LLM/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
-export ARK_API_KEY='your-bytedance-doubao-api-key'
 python examples/ShortSqueeze/LLM/run_short_squeeze_llm.py -c configs/ShortSqueeze/LLM/simulation.yml
 ```
 
-## §5 Expected Behavior Patterns
+## §7 Expected Behavior
 
-| Phase    | Rounds | LLM Behavior                                           |
-|----------|--------|--------------------------------------------------------|
-| Setup    | 1-3    | LLMShortSeller establishes short, retail starts buying |
-| Build-up | 4-7    | LLMRetailCoord coordinates buying, price rises         |
-| Pressure | 8-10   | Short interest > 50%, squeeze pressure builds          |
-| Squeeze  | 11-14  | LLMShortSeller forced to cover, price spikes           |
-| Unwind   | 15-20  | LLMInstitutional takes profits, price stabilizes       |
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §6 References
+## §8 References
 
-| Theory                  | Application in ShortSqueeze LLM           | Reference        |
-|-------------------------|------------------------------------------|------------------|
-| **Short Squeeze**       | GameStop 2021 dynamics simulation        | (Market Event)   |
-| **Coordinated Trading** | LLMRetailCoord Reddit-style coordination | SEC (2021)       |
-| **Short Interest**      | LLMShortSeller covering triggers         | Market Mechanics |
+See `examples/ShortSqueeze/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/ShortSqueeze/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

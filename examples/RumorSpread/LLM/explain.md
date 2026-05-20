@@ -1,85 +1,95 @@
-# RumorSpread LLM — Implementation Explanation
+# Rumor Spread LLM Variant Explanation
 
 ## §1 Overview
 
-| Item | Description |
+| Field | Value |
 |---|---|
 | Variant | LLM |
-| Mechanism | Persona-driven rumor spread, distortion, skepticism, and correction |
-| Environment | InformationEnvironment, not a trading market |
-| Schema | Scenario-specific information-action schema |
-| Runtime Change | Documentation-only backfill; no code/config change |
+| Simulation | Rumor Spread |
+| Decision Mechanism | LLM social-action decisions parsed as {"action": "spread"|"correct"|"verify"|"hold", "intensity": number, "target_group": string, "reasoning": string} |
+| Theory Reference | `examples/RumorSpread/simulation-bases.md` |
+| Market Broadcast | `configs/RumorSpread/LLM/topology.yml` |
 
-## §2 Theory → Implementation Mapping
+This is a documented special-schema scenario. Decisions operate on belief through communication_action, not bid_price-based trading orders.
 
-### §2.1 LLM Gullible Spreader
+## §2 Theory -> Implementation Mapping
 
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.2` | Persona prompt favors belief and spreading |
-| Runtime path | LLM emits rumor action schema, not trading order schema |
-
-### §2.2 LLM Distorting Relayer
+### §2.1 GullibleSpreader (simulation-bases.md §4.1)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.3` | Persona prompt introduces leveling/sharpening |
-| Runtime path | Structured action records intensity and reasoning |
-
-### §2.3 LLM Skeptical Evaluator
-
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.4` | Persona prompt evaluates evidence before acceptance |
-| Runtime path | May spread, correct, evaluate, or ignore |
-
-### §2.4 LLM Fact Checker
+| Investor role and activation rule from simulation-bases.md §4.1 | `LLMGullibleSpreader` in `examples/RumorSpread/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/RumorSpread/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM social-action decisions parsed as {"action": "spread"|"correct"|"verify"|"hold", "intensity": number, "target_group": string, "reasoning": string}. |
+### §2.2 DistortingRelayer (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.5` | Persona prompt investigates and corrects false claims |
-| Runtime path | Correction actions update environment belief |
-
-### §2.5 LLM Uninformed Bystander
+| Investor role and activation rule from simulation-bases.md §4.2 | `LLMDistortingRelayer` in `examples/RumorSpread/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/RumorSpread/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM social-action decisions parsed as {"action": "spread"|"correct"|"verify"|"hold", "intensity": number, "target_group": string, "reasoning": string}. |
+### §2.3 SkepticalEvaluator (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.6` | Persona prompt represents low engagement |
-| Runtime path | Usually ignore or weakly spread |
+| Investor role and activation rule from simulation-bases.md §4.3 | `LLMSkepticalEvaluator` in `examples/RumorSpread/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/RumorSpread/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM social-action decisions parsed as {"action": "spread"|"correct"|"verify"|"hold", "intensity": number, "target_group": string, "reasoning": string}. |
+### §2.4 FactChecker (simulation-bases.md §4.4)
 
-## §3 Market Mechanism Implementation
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `LLMFactChecker` in `examples/RumorSpread/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/RumorSpread/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM social-action decisions parsed as {"action": "spread"|"correct"|"verify"|"hold", "intensity": number, "target_group": string, "reasoning": string}. |
+### §2.5 UninformedBystander (simulation-bases.md §4.5)
 
-RumorSpread has no buy/sell market. The InformationEnvironment aggregates
-information actions and updates belief/distortion state.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `LLMUninformedBystander` in `examples/RumorSpread/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/RumorSpread/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM social-action decisions parsed as {"action": "spread"|"correct"|"verify"|"hold", "intensity": number, "target_group": string, "reasoning": string}. |
 
-## §4 Variant-Specific Features
+## §3 Market Mechanism
 
-LLM tests whether rumor dynamics emerge from personas. This scenario must keep
-its special parser contract and must not be forced into canonical trading JSON.
+The coordinator mechanism is the final implementation in `examples/RumorSpread/LLM/players.py` and its configured counterpart in `configs/RumorSpread/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-## §5 Architecture Diagram
+## §4 Variant Architecture
 
-```text
-Rumor state -> persona prompt -> information action -> environment update
-```
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/RumorSpread/LLM/players.py` |
+| Prompt module | `examples/RumorSpread/LLM/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-## §6 Configuration Reference
+## §5 Config Reference
 
-Primary config: `configs/RumorSpread/LLM/players.yml`.
+| Config | Purpose |
+|---|---|
+| `configs/RumorSpread/LLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/RumorSpread/LLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/RumorSpread/LLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/RumorSpread/LLM/persona.yml` | Turn recording and persona metadata. |
 
-## §7 Running Instructions
+## §6 Running Instructions
 
 ```bash
-python examples/RumorSpread/LLM/run_rumorspread_llm.py \
-  -c configs/RumorSpread/LLM/simulation.yml
+python examples/RumorSpread/LLM/run_rumor_llm.py -c configs/RumorSpread/LLM/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-Gullible and distorting agents should raise belief and distortion. Skeptical and
-fact-checking agents should reduce belief or slow spread.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
-`../analysis-bases.md §2`.
+See `examples/RumorSpread/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/RumorSpread/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

@@ -1,44 +1,36 @@
-# EchoChamber RuleLLM Variant — analysis.md
+# Echo Chamber RuleLLM Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-1. Assess whether embedded formula prompts constrain LLM behavior to be closer to Rule variant than pure LLM.
-2. Measure consistency of intensity outputs: RuleLLM should have narrower variance than LLM variant.
-3. Evaluate whether formula-constrained reasoning improves depolarizer effectiveness (BridgeBuilder, CriticalThinker).
-4. Compare RuleLLM polarization dynamics to Rule baseline to quantify LLM deviation from deterministic formula.
+This analysis checks whether the RuleLLM variant produces a complete, analyzable Echo Chamber trajectory. It maps recorded opinion series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric                         | Function                                                        | analysis-bases.md ref |
-|--------------------------------|-----------------------------------------------------------------|-----------------------|
-| Polarization Index (PI)        | `polarization_index(polarization_history)`                      | §2.1                  |
-| Cluster Separation (CS)        | `cluster_separation(opinion_list)`                              | §2.2                  |
-| Mean Opinion Drift (MOD)       | `mean_opinion_drift(mean_opinion_history)`                      | §2.3                  |
-| Cross-Cutting Exposure (CCE)   | `cross_cutting_exposure(opinion_list, center_threshold=0.3)`    | §2.4                  |
-| Polarization Velocity (PV)     | `polarization_velocity(polarization_history)`                   | §2.5                  |
-| Depolarizer Effectiveness (DE) | `depolarizer_effectiveness(depolarize_counts, polarize_counts)` | §2.6                  |
-| Opinion Variance (OV)          | `opinion_variance(opinion_list)`                                | §2.7                  |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_echochamber_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §3 Variant-Specific Notes
+## §3 Analysis Dimensions
 
-- RuleLLM reasoning text is more formula-explicit than LLM — enables audit of whether agent applied the correct threshold rule.
-- Embedded formula prompts tend to constrain intensity outputs closer to Rule values; variance is lower than pure LLM.
-- RuleLLMBridgeBuilder tends to apply cluster-separation-based depolarization more consistently than LLMBridgeBuilder.
-- RuleLLMPassiveFollower rarely deviates from neutral/low-intensity actions due to explicit engagement-probability instruction.
-- Occasional prompt overflow (long system + user prompt) may cause truncation in low-context-window models.
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether RuleLLM preserves opinion dynamics and influence_action activity while changing the distribution of influence_action relative to the deterministic baseline.
 
-## §4 Expected Ranges
+## §4 Phase Analysis
 
-| Metric | Expected Range | Interpretation                                                           |
-|--------|----------------|--------------------------------------------------------------------------|
-| PI     | 0.2 – 0.75     | Closer to Rule baseline than LLM variant; less overshoot                 |
-| CS     | 0.4 – 1.8      | Closer to Rule; lower ceiling than pure LLM                              |
-| MOD    | 0.0 – 0.3      | Similar to Rule baseline                                                 |
-| CCE    | 0.1 – 0.5      | Closely tracks Rule; formula constraints limit deviation                 |
-| PV     | 0.005 – 0.06   | Slightly higher than Rule but lower than LLM                             |
-| DE     | 0.25 – 0.55    | Higher DE than LLM variant due to formula-driven depolarizer consistency |
-| OV     | 0.1 – 0.35     | Close to Rule; narrower than LLM variant                                 |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-See `analysis-bases.md §2` for full metric derivations and simulation-bases.md §4 for agent parameter sources.
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_echochamber_dynamics.png`, `02_echochamber_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

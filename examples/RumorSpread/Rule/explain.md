@@ -1,68 +1,95 @@
-# RumorSpread Simulation
+# Rumor Spread Rule Variant Explanation
 
 ## §1 Overview
 
-| Item               | Description                                                                                     |
-|--------------------|-------------------------------------------------------------------------------------------------|
-| **Phenomenon**     | Rumor propagation through populations via serial transmission with distortion and amplification |
-| **Model**          | Rule-based / LLM / RuleLLM / RAG                                                                |
-| **Key Feature**    | RumorSpread simulation with GullibleSpreader, DistortingRelayer, SkepticalEvaluator             |
-| **Academic Value** | Understanding how unverified information spreads and distorts through social networks           |
+| Field | Value |
+|---|---|
+| Variant | Rule |
+| Simulation | Rumor Spread |
+| Decision Mechanism | deterministic social-action decisions using the documented special schema |
+| Theory Reference | `examples/RumorSpread/simulation-bases.md` |
+| Market Broadcast | `configs/RumorSpread/Rule/topology.yml` |
 
-## §2 Theoretical Foundation
+This is a documented special-schema scenario. Decisions operate on belief through communication_action, not bid_price-based trading orders.
 
-- Allport & Postman (1947): Psychology of Rumor — leveling, sharpening, assimilation
-- Bordia & Rosnow (1998): Rumor as communication — content analysis approach
-- DiFonzo & Bordia (2007): Rumor psychology — how rumors help make sense of ambiguity
-- Shibutani (1966): Improvised news — rumor as collective problem-solving
+## §2 Theory -> Implementation Mapping
 
-## §3 Agent Descriptions
+### §2.1 GullibleSpreader (simulation-bases.md §4.1)
 
-### GullibleSpreader
-**Theoretical Basis**: Uncritical transmission — Leveling (Allport & Postman, 1947)
-**Market Role**: destabilizing
-**Description**: Easily believes and actively spreads rumors with high intensity, amplifying distortion through uncritical retransmission
-**Parameters**: credulity=0.8, spread_eagerness=0.9, distortion_amplification=0.3
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `GullibleSpreader` in `examples/RumorSpread/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/RumorSpread/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic social-action decisions using the documented special schema. |
+### §2.2 DistortingRelayer (simulation-bases.md §4.2)
 
-### DistortingRelayer
-**Theoretical Basis**: Serial distortion — Sharpening & Assimilation (Allport & Postman, 1947)
-**Market Role**: destabilizing
-**Description**: Introduces systematic errors during relay — exaggerates dramatic elements (sharpening), drops nuance (leveling), adapts to biases (assimilation)
-**Parameters**: credulity=0.5, relay_eagerness=0.7, sharpening_factor=0.4, leveling_factor=0.2
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `DistortingRelayer` in `examples/RumorSpread/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/RumorSpread/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic social-action decisions using the documented special schema. |
+### §2.3 SkepticalEvaluator (simulation-bases.md §4.3)
 
-### SkepticalEvaluator
-**Theoretical Basis**: Critical evaluation (Bordia & Rosnow, 1998)
-**Market Role**: stabilizing
-**Description**: Critically assesses information before accepting, demands evidence, resists social proof
-**Parameters**: skepticism=0.7, correction_eagerness=0.6, belief_threshold=0.4
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `SkepticalEvaluator` in `examples/RumorSpread/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/RumorSpread/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic social-action decisions using the documented special schema. |
+### §2.4 FactChecker (simulation-bases.md §4.4)
 
-### FactChecker
-**Theoretical Basis**: Active rumor denial (DiFonzo & Bordia, 2007)
-**Market Role**: stabilizing
-**Description**: Actively investigates and debunks false claims with verified counter-information, though corrections spread slower than rumors
-**Parameters**: fact_check_strength=0.8, credibility_discount=0.6, distortion_sensitivity=0.5
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `FactChecker` in `examples/RumorSpread/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/RumorSpread/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic social-action decisions using the documented special schema. |
+### §2.5 UninformedBystander (simulation-bases.md §4.5)
 
-### UninformedBystander
-**Theoretical Basis**: Minimal engagement (Shibutani, 1966)
-**Market Role**: neutral
-**Description**: Random, low-engagement participant providing baseline activity level
-**Parameters**: engagement_probability=0.3, spread_probability=0.4
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `UninformedBystander` in `examples/RumorSpread/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/RumorSpread/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic social-action decisions using the documented special schema. |
 
-## §4 Information Environment Dynamics
+## §3 Market Mechanism
 
-Belief follows: B(t+1) = B(t) + alpha * NetSpread + beta * (Truth - B(t)) + epsilon
+The coordinator mechanism is the final implementation in `examples/RumorSpread/Rule/players.py` and its configured counterpart in `configs/RumorSpread/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-Distortion dynamics: D(t+1) = D(t) - leveling_rate * D(t) + sharpening_rate * num_spreaders * (1 - truth)
+## §4 Variant Architecture
 
-Key feedback loops:
-- GullibleSpreader and DistortingRelayer amplify belief and distortion (destabilizing)
-- SkepticalEvaluator and FactChecker correct belief toward truth (stabilizing)
-- Corrections travel slower than rumors (credibility_discount < 1.0)
-- Higher distortion makes fact-checking more effective (easier to debunk)
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/RumorSpread/Rule/players.py` |
+| Prompt module | Not applicable for Rule baseline |
+| Inference | No remote model call is used in the Rule baseline. |
+| Output parsing | Direct deterministic decision construction |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-## §5 References and Quality Review
+## §5 Config Reference
 
-This variant traces to `../simulation-bases.md §4` for role design and
-`../analysis-bases.md §2` for metric definitions. Post-run review should verify
-full round count, action schema completeness, rumor/correction state sanity, and
-information-flow patterns before accepting a sample.
+| Config | Purpose |
+|---|---|
+| `configs/RumorSpread/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/RumorSpread/Rule/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/RumorSpread/Rule/topology.yml` | Message routing between coordinator and agents. |
+| `configs/RumorSpread/Rule/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
+
+```bash
+python examples/RumorSpread/Rule/run_rumor.py -c configs/RumorSpread/Rule/simulation.yml
+```
+
+## §7 Expected Behavior
+
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+
+## §8 References
+
+See `examples/RumorSpread/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/RumorSpread/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

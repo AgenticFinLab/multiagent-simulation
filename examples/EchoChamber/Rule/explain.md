@@ -1,89 +1,77 @@
-# EchoChamber Rule Variant — explain.md
+# Echo Chamber Rule Variant Explanation
 
 ## §1 Overview
 
-The Rule variant implements EchoChamber with deterministic mathematical formulas grounded in Sunstein (2001) echo chamber theory. Each agent type applies a fixed formula derived from its theoretical archetype — Ideologues amplify in-group consensus, Conformists adopt prevailing opinion, CriticalThinkers depolarize based on evidence, BridgeBuilders center toward neutral. This provides the mechanically exact baseline for polarization dynamics.
+| Field | Value |
+|---|---|
+| Variant | Rule |
+| Simulation | Echo Chamber |
+| Decision Mechanism | deterministic social-action decisions using the documented special schema |
+| Theory Reference | `examples/EchoChamber/simulation-bases.md` |
+| Market Broadcast | `configs/EchoChamber/Rule/topology.yml` |
 
-| Aspect             | Detail                                                                                                                                                                           |
-|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Variant            | Rule                                                                                                                                                                             |
-| Simulation         | EchoChamber                                                                                                                                                                      |
-| Decision Mechanism | Threshold formulas on `polarization`, `mean_opinion`, `cluster_separation`                                                                                                       |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                                                                                                                                                  |
-| Market Broadcast   | `polarization`, `prev_polarization`, `mean_opinion`, `cluster_separation`, `cross_cutting_exposure`, `num_polarizers`, `num_depolarizers`, `net_polarization_intensity`, `round` |
+This is a documented special-schema scenario. Decisions operate on opinion through influence_action, not bid_price-based trading orders.
 
-## §2 Theory → Implementation Mapping
+## §2 Theory -> Implementation Mapping
 
 ### §2.1 Ideologue (simulation-bases.md §4.1)
 
-| Theory Component                        | Implementation                                                                         |
-|-----------------------------------------|----------------------------------------------------------------------------------------|
-| In-group amplification (Sunstein, 2001) | `opinion_update = in_group_weight * (mean_opinion * extremity_boost − my_opinion)`     |
-| Out-group rejection                     | `opinion_update = out_group_discount * (mean_opinion − my_opinion)` when opposite sign |
-| Polarizing action when opinion strong   | `if                                                                                    |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `Ideologue` in `examples/EchoChamber/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic social-action decisions using the documented special schema. |
 ### §2.2 Conformist (simulation-bases.md §4.2)
 
-| Theory Component                        | Implementation                                                          |
-|-----------------------------------------|-------------------------------------------------------------------------|
-| Social conformity (Asch, 1951)          | `opinion_update = conformity * (local_group_mean − my_opinion)`         |
-| Local group determination               | Adjusts `local_group_mean` based on sign alignment with current opinion |
-| Polarize when opinion exceeds threshold | `if                                                                     |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `Conformist` in `examples/EchoChamber/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic social-action decisions using the documented special schema. |
 ### §2.3 CriticalThinker (simulation-bases.md §4.3)
 
-| Theory Component                                | Implementation                                                                  |
-|-------------------------------------------------|---------------------------------------------------------------------------------|
-| Evidence-driven opinion update (Isenberg, 1986) | `evidence_signal = −my_opinion * evidence_sensitivity * polarization`           |
-| Slow opinion movement                           | `opinion_update = critical_weight * (evidence_signal − my_opinion * 0.1) * 0.3` |
-| Depolarize when polarization high               | `if polarization > 0.3: action = "depolarize"; intensity =                      |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `CriticalThinker` in `examples/EchoChamber/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic social-action decisions using the documented special schema. |
 ### §2.4 BridgeBuilder (simulation-bases.md §4.4)
 
-| Theory Component                                  | Implementation                                                                  |
-|---------------------------------------------------|---------------------------------------------------------------------------------|
-| Centering force (Sunstein deliberative democracy) | `opinion_update = bridge_weight * (0.0 − my_opinion) * centering_tendency`      |
-| Depolarize proportional to cluster separation     | `if cluster_separation > 0.5: intensity = bridge_strength * cluster_separation` |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `BridgeBuilder` in `examples/EchoChamber/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic social-action decisions using the documented special schema. |
 ### §2.5 PassiveFollower (simulation-bases.md §4.5)
 
-| Theory Component                                     | Implementation                                             |
-|------------------------------------------------------|------------------------------------------------------------|
-| Mass communication drift (Lazarsfeld & Merton, 1954) | `drift = drift_rate * (mean_opinion − my_opinion)`         |
-| Random engagement                                    | `if random() < engagement_probability: act; else: neutral` |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `PassiveFollower` in `examples/EchoChamber/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic social-action decisions using the documented special schema. |
 
 ## §3 Market Mechanism
 
-```
-P(t+1) = P(t) + alpha * NetPolarization(t) + beta * CentripetalForce(t) + epsilon(t)
-alpha = polarization_impact (e.g., 0.05)
-beta = centripetal_force (e.g., 0.02), target center = 0.3
-NetPolarization = Σ polarize_intensity − Σ depolarize_intensity
-```
-
-OpinionEnvironment broadcasts `env_data` dict to all agents every round. Agents read `polarization`, `mean_opinion`, `cluster_separation` to compute their opinion updates.
+The coordinator mechanism is the final implementation in `examples/EchoChamber/Rule/players.py` and its configured counterpart in `configs/EchoChamber/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
 ## §4 Variant Architecture
 
-| Component     | Detail                                                                           |
-|---------------|----------------------------------------------------------------------------------|
-| Base class    | `BaseSocialAgent(GeneralPlayer)`                                                 |
-| Inference     | None (deterministic formulas)                                                    |
-| Context       | `env_data` from OpinionEnvironment broadcast                                     |
-| Output format | `{action_type, intensity, agent_role, agent_id, opinion}` in `outbound_messages` |
-| Retry logic   | N/A — deterministic                                                              |
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/EchoChamber/Rule/players.py` |
+| Prompt module | Not applicable for Rule baseline |
+| Inference | No remote model call is used in the Rule baseline. |
+| Output parsing | Direct deterministic decision construction |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
 ## §5 Config Reference
 
-Config file: `configs/EchoChamber/Rule/simulation.yml`
-
-Key extras per agent:
-- `OpinionEnvironment`: `initial_polarization`, `polarization_impact`, `centripetal_force`, `noise_std`, `record_path`, `custom_state_hot_limit`
-- `Ideologue`: `initial_opinion`, `in_group_weight`, `extremity_boost`, `out_group_discount`, `spread_eagerness`
-- `Conformist`: `initial_opinion`, `conformity`, `conformity_eagerness`, `group_proximity_threshold`
-- `CriticalThinker`: `initial_opinion`, `critical_weight`, `critical_eagerness`, `evidence_sensitivity`
-- `BridgeBuilder`: `initial_opinion`, `bridge_weight`, `bridge_strength`, `centering_tendency`
-- `PassiveFollower`: `initial_opinion`, `engagement_probability`, `drift_rate`, `alignment_strength`
+| Config | Purpose |
+|---|---|
+| `configs/EchoChamber/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/EchoChamber/Rule/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/EchoChamber/Rule/topology.yml` | Message routing between coordinator and agents. |
+| `configs/EchoChamber/Rule/persona.yml` | Turn recording and persona metadata. |
 
 ## §6 Running Instructions
 
@@ -91,23 +79,17 @@ Key extras per agent:
 python examples/EchoChamber/Rule/run_echo_chamber.py -c configs/EchoChamber/Rule/simulation.yml
 ```
 
-## §7 Output Artifacts
+## §7 Expected Behavior
 
-- `{record_path}/{identity}/polarization/` — HistoryBuffer: polarization per round
-- `{record_path}/{identity}/mean_opinion/` — HistoryBuffer: mean opinion per round
-- `{record_path}/{identity}/cluster_separation/` — HistoryBuffer: cluster separation per round
-- `{record_path}/{identity}/polarize_count/` — HistoryBuffer: polarizer count per round
-- `{record_path}/{identity}/depolarize_count/` — HistoryBuffer: depolarizer count per round
-- `{record_path}/{agent_identity}/opinion/` — per-agent opinion history
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §8 Known Limitations
+## §8 References
 
-- Deterministic formulas do not capture individual heterogeneity within agent types
-- `out_group_discount` is a fixed scalar — real ideological resistance is more complex
-- Passive followers have no memory of past rounds — drift is purely memoryless
-- Noise term in polarization dynamics can occasionally reverse strong polarization trends
+See `examples/EchoChamber/simulation-bases.md §2` for full DOI citations and mechanism references.
 
-## §9 References
+## §9 Variant Comparison
 
-See `simulation-bases.md §4` for agent parameter sources and theoretical derivations.
-See `analysis-bases.md §2` for metric definitions and Python function signatures.
+See `examples/EchoChamber/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

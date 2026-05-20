@@ -1,71 +1,36 @@
-# MomentumEffect LLM Analysis Methodology
+# Momentum Effect LLM Analysis Plan
 
-## §1 Overview
+## §1 Objectives
 
-This document describes the evaluation metrics for the **LLM-based momentum effect** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
+This analysis checks whether the LLM variant produces a complete, analyzable Momentum Effect trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-For detailed metric definitions and financial theory, see: **`../MomentumEffect/analysis.md`**
+## §2 Core Metrics
 
----
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_momentumeffect_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §2 Key Metrics (Summary)
+## §3 Analysis Dimensions
 
-| Metric                 | Purpose                            |
-|------------------------|------------------------------------|
-| Return Autocorrelation | corr(r_t, r_{t-k}) for short lags  |
-| Winner-Loser Spread    | Winners outperform losers          |
-| Momentum Profitability | Momentum strategy returns          |
-| Underreaction          | Price continues in trend direction |
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether LLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
----
+## §4 Phase Analysis
 
-## §3 LLM-Specific Observable Phenomena
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-### Emergent Behaviors
+## §5 Cross-Variant Comparison
 
-| Phenomenon             | LLM Behavior                                   | Contrast with Rule-Based                   |
-|------------------------|------------------------------------------------|--------------------------------------------|
-| **Trend Narrative**    | LLM explicitly discusses "trend" in reasoning  | Rule-based uses fixed momentum coefficient |
-| **Recency Weighting**  | LLM may naturally overweight recent prices     | Rule-based uses fixed lookback window      |
-| **Gradual Adjustment** | LLM reasoning shows incremental belief updates | Rule-based jumps to new estimate           |
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
 
-### Round and Agent Scaling
+## §6 Expected Results and Validation Criteria
 
-| Scale          | LLM-Specific Observation                      |
-|----------------|-----------------------------------------------|
-| **50 rounds**  | 1-2 trends; LLM reasoning evolution visible   |
-| **100 rounds** | Multiple trends; ACF patterns emerge          |
-| **5 agents**   | Individual LLM trend recognition dominates    |
-| **10 agents**  | Diverse trend interpretations create momentum |
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
 
----
+## §7 Visualization Catalogue
 
-## §4 LLM-Specific Considerations
-
-1. **Trend Recognition**: LLM may naturally recognize price trends
-2. **Recency Bias**: LLM responses may weight recent information heavily
-3. **Underreaction**: LLM may exhibit gradual adjustment to news
-
----
-
-## §5 Using Centralized Evaluation Module
-
-```python
-from masim.evaluation.finance import (
-    calculate_returns,
-    calculate_autocorrelation,
-    calculate_rolling_autocorrelation,
-    plot_returns_analysis,
-)
-
-# Same analysis as rule-based version
-prices = {...}
-returns = calculate_returns(prices)
-ac = calculate_autocorrelation(returns, lag=5)  # Positive = momentum
-```
-
----
-
-## §6 References
-
-See `../MomentumEffect/analysis.md` for complete academic references.
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_momentumeffect_dynamics.png`, `02_momentumeffect_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

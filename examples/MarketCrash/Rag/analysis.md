@@ -1,36 +1,36 @@
-# MarketCrash Rag — Analysis Documentation
+# Market Crash Rag Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-Evaluate the crash dynamics and whether retrieved knowledge changes the
-RuleLLM-like behavior in observable ways.
+This analysis checks whether the Rag variant produces a complete, analyzable Market Crash trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric | Function | analysis-bases.md Ref | Rag Notes |
-|---|---|---|---|
-| Maximum Drawdown | `compute_max_drawdown()` | `analysis-bases.md §2.1` | Compare with Rule and RuleLLM |
-| Crash Velocity | `compute_crash_velocity()` | `analysis-bases.md §2.2` | Knowledge may alter onset speed |
-| Volatility Spike | `compute_volatility_spike()` | `analysis-bases.md §2.3` | Stress-regime validation |
-| Forced-Selling Share | `compute_forced_selling_share()` | `analysis-bases.md §2.4` | Deleveraging attribution |
-| Liquidity Withdrawal | `compute_liquidity_withdrawal()` | `analysis-bases.md §2.5` | RAG market-maker behavior |
-| Panic-Selling Volume | `compute_panic_selling_volume()` | `analysis-bases.md §2.6` | Panic narrative effect |
-| Stabilization Ratio | `compute_stabilization_ratio()` | `analysis-bases.md §2.7` | Bottom-fisher knowledge effect |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_marketcrash_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §3 Dimension-by-Dimension Analysis
+## §3 Analysis Dimensions
 
-Compare Rag to RuleLLM. A useful Rag effect should appear as changed reasoning,
-timing, or quantity while preserving valid order schema and crash mechanism.
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rag preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-## §4 Variant-Specific Observable Phenomena
+## §4 Phase Analysis
 
-| Phenomenon | Expected Observation |
-|---|---|
-| Retrieval-informed deleveraging | Forced sellers reference crisis/leverage context |
-| Retrieval-informed liquidity | Market maker may withdraw earlier or explain caution |
-| Knowledge moderation | BottomFisher may be more selective under limits-of-arbitrage context |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-Metrics derive from `../analysis-bases.md §2`; RAG mechanism derives from
-`../simulation-bases.md §9`.
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_marketcrash_dynamics.png`, `02_marketcrash_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

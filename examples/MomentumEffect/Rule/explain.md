@@ -1,94 +1,102 @@
-# MomentumEffect Rule — Implementation Explanation
+# Momentum Effect Rule Variant Explanation
 
 ## §1 Overview
 
-| Item | Description |
+| Field | Value |
 |---|---|
 | Variant | Rule |
-| Mechanism | Deterministic momentum, contrarian, technical, passive, market-making, and fundamental rules |
-| Market | Net-demand price impact with fundamental reference and price history |
-| Agents | MomentumTrader, ContrarianTrader, IndexFund, MarketMaker, TechnicalTrader, FundamentalTrader |
-| Runtime Change | Documentation-only backfill; no code/config change |
+| Simulation | Momentum Effect |
+| Decision Mechanism | deterministic rule-based trading orders |
+| Theory Reference | `examples/MomentumEffect/simulation-bases.md` |
+| Market Broadcast | `configs/MomentumEffect/Rule/topology.yml` |
 
-## §2 Theory → Implementation Mapping
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-### §2.1 MomentumTrader
+## §2 Theory -> Implementation Mapping
 
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.1` price momentum | `MomentumTrader` reads `momentum_threshold`, `scale`, `max_position` |
-| Positive feedback | Trades in direction of recent return when threshold is crossed |
-
-### §2.2 ContrarianTrader
+### §2.1 MomentumTrader (simulation-bases.md §4.1)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.2` reversion pressure | `ContrarianTrader` reads `reversion_threshold`, `scale`, `max_position` |
-| Anti-momentum | Trades against excessive moves |
-
-### §2.3 IndexFund
-
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.3` passive rebalancing | `IndexFund` reads `target_allocation`, `rebalance_threshold` |
-| Stabilization | Rebalances toward target allocation |
-
-### §2.4 MarketMaker
+| Investor role and activation rule from simulation-bases.md §4.1 | `MomentumTrader` in `examples/MomentumEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.2 ContrarianTrader (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.4` inventory liquidity | `MarketMaker` reads `inventory_target`, `reversion_speed` |
-| Mean-reverting liquidity | Trades toward inventory target |
-
-### §2.5 TechnicalTrader
-
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.5` moving-average trend | `TechnicalTrader` reads `short_window`, `long_window`, `scale`, `max_position` |
-| Technical signal | Buys when short trend exceeds long trend, sells in reverse |
-
-### §2.6 FundamentalTrader
+| Investor role and activation rule from simulation-bases.md §4.2 | `ContrarianTrader` in `examples/MomentumEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.3 IndexFund (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.6` fundamental anchoring | `FundamentalTrader` reads `value_threshold`, `scale`, `max_position` |
-| Long-run anchor | Buys undervaluation and sells overvaluation |
+| Investor role and activation rule from simulation-bases.md §4.3 | `IndexFund` in `examples/MomentumEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.4 MarketMaker (simulation-bases.md §4.4)
 
-## §3 Market Mechanism Implementation
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `MarketMaker` in `examples/MomentumEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.5 TechnicalTrader (simulation-bases.md §4.5)
 
-The Rule market broadcasts price, fundamental value, deviation, and price
-history. Investors compute deterministic signals and send structured orders.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `TechnicalTrader` in `examples/MomentumEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.6 FundamentalTrader (simulation-bases.md §4.6)
 
-## §4 Variant-Specific Features
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.6 | `FundamentalTrader` in `examples/MomentumEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
 
-Rule is the deterministic baseline for measuring return continuation and later
-reversal.
+## §3 Market Mechanism
 
-## §5 Architecture Diagram
+The coordinator mechanism is the final implementation in `examples/MomentumEffect/Rule/players.py` and its configured counterpart in `configs/MomentumEffect/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-```text
-Market state -> rule signal calculation -> order -> net demand -> next price
-```
+## §4 Variant Architecture
 
-## §6 Configuration Reference
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/MomentumEffect/Rule/players.py` |
+| Prompt module | Not applicable for Rule baseline |
+| Inference | No remote model call is used in the Rule baseline. |
+| Output parsing | Direct deterministic decision construction |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-Primary config: `configs/MomentumEffect/Rule/players.yml`. All thresholds,
-windows, scales, and caps are loaded through player `extras`.
+## §5 Config Reference
 
-## §7 Running Instructions
+| Config | Purpose |
+|---|---|
+| `configs/MomentumEffect/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/MomentumEffect/Rule/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/MomentumEffect/Rule/topology.yml` | Message routing between coordinator and agents. |
+| `configs/MomentumEffect/Rule/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
-python examples/MomentumEffect/Rule/run_momentumeffect.py \
-  -c configs/MomentumEffect/Rule/simulation.yml
+python examples/MomentumEffect/Rule/run_momentum.py -c configs/MomentumEffect/Rule/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-MomentumTrader and TechnicalTrader should reinforce trends. ContrarianTrader and
-FundamentalTrader should reduce overshoot. IndexFund and MarketMaker should add
-slower stabilizing flow.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
-`../analysis-bases.md §2`.
+See `examples/MomentumEffect/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/MomentumEffect/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

@@ -1,104 +1,95 @@
-# EchoChamber Rag Variant — explain.md
+# Echo Chamber Rag Variant Explanation
 
 ## §1 Overview
 
-The Rag variant implements EchoChamber with RAG-augmented LLM agents. Each agent retrieves relevant academic literature about echo chambers, polarization, and group dynamics before making opinion decisions. This grounds LLM reasoning in empirical research rather than persona alone, potentially producing more moderating behavior through literature-informed awareness.
+| Field | Value |
+|---|---|
+| Variant | Rag |
+| Simulation | Echo Chamber |
+| Decision Mechanism | RAG-augmented social-action decisions parsed as {"action": "polarize"|"depolarize"|"hold", "influence_strength": number, "target_group": string, "reasoning": string} |
+| Theory Reference | `examples/EchoChamber/simulation-bases.md` |
+| Market Broadcast | `configs/EchoChamber/Rag/topology.yml` |
 
-| Aspect             | Detail                                                                                                                                                                           |
-|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Variant            | Rag                                                                                                                                                                              |
-| Simulation         | EchoChamber                                                                                                                                                                      |
-| Decision Mechanism | RAG context retrieval + LLM reasoning; outputs `{action_type, intensity, reasoning, analysis}`                                                                                   |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                                                                                                                                                  |
-| Market Broadcast   | `polarization`, `prev_polarization`, `mean_opinion`, `cluster_separation`, `cross_cutting_exposure`, `num_polarizers`, `num_depolarizers`, `net_polarization_intensity`, `round` |
+This is a documented special-schema scenario. Decisions operate on opinion through influence_action, not bid_price-based trading orders.
 
-## §2 Theory → Implementation Mapping
+## §2 Theory -> Implementation Mapping
 
-### §2.1 RagLLMIdeologue (simulation-bases.md §4.1)
+### §2.1 Ideologue (simulation-bases.md §4.1)
 
-| Theory Component                        | Implementation                                                                      |
-|-----------------------------------------|-------------------------------------------------------------------------------------|
-| In-group amplification (Sunstein, 2001) | RAG retrieves echo chamber literature; may reinforce or moderate ideological stance |
-| Out-group rejection                     | LLM reasons with RAG context about group dynamics; rejection may be nuanced         |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMIdeologue` in `examples/EchoChamber/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented social-action decisions parsed as {"action": "polarize"|"depolarize"|"hold", "influence_strength": number, "target_group": string, "reasoning": string}. |
+### §2.2 Conformist (simulation-bases.md §4.2)
 
-### §2.2 RagLLMConformist (simulation-bases.md §4.2)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMConformist` in `examples/EchoChamber/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented social-action decisions parsed as {"action": "polarize"|"depolarize"|"hold", "influence_strength": number, "target_group": string, "reasoning": string}. |
+### §2.3 CriticalThinker (simulation-bases.md §4.3)
 
-| Theory Component               | Implementation                                                        |
-|--------------------------------|-----------------------------------------------------------------------|
-| Social conformity (Asch, 1951) | RAG retrieves conformity research; LLM applies to current group state |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMCriticalThinker` in `examples/EchoChamber/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented social-action decisions parsed as {"action": "polarize"|"depolarize"|"hold", "influence_strength": number, "target_group": string, "reasoning": string}. |
+### §2.4 BridgeBuilder (simulation-bases.md §4.4)
 
-### §2.3 RagLLMCriticalThinker (simulation-bases.md §4.3)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMBridgeBuilder` in `examples/EchoChamber/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented social-action decisions parsed as {"action": "polarize"|"depolarize"|"hold", "influence_strength": number, "target_group": string, "reasoning": string}. |
+### §2.5 PassiveFollower (simulation-bases.md §4.5)
 
-| Theory Component                      | Implementation                                                                       |
-|---------------------------------------|--------------------------------------------------------------------------------------|
-| Persuasive arguments (Isenberg, 1986) | RAG retrieves counter-polarization literature; CriticalThinker may be more effective |
-
-### §2.4 RagLLMBridgeBuilder (simulation-bases.md §4.4)
-
-| Theory Component                        | Implementation                                                                        |
-|-----------------------------------------|---------------------------------------------------------------------------------------|
-| Deliberative democracy (Sunstein, 2001) | RAG retrieves bridge-building research; may produce stronger depolarization reasoning |
-
-### §2.5 RagLLMPassiveFollower (simulation-bases.md §4.5)
-
-| Theory Component                            | Implementation                                                                 |
-|---------------------------------------------|--------------------------------------------------------------------------------|
-| Mass communication drift (Lazarsfeld, 1954) | RAG context about passive audiences; reasoning reflects low-agency perspective |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMPassiveFollower` in `examples/EchoChamber/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented social-action decisions parsed as {"action": "polarize"|"depolarize"|"hold", "influence_strength": number, "target_group": string, "reasoning": string}. |
 
 ## §3 Market Mechanism
 
-Same as Rule variant. `OpinionEnvironment` is re-exported from `examples.EchoChamber.Rule.players`:
-
-```
-P(t+1) = P(t) + alpha * NetPolarization(t) + beta * CentripetalForce(t) + epsilon(t)
-```
+The coordinator mechanism is the final implementation in `examples/EchoChamber/Rag/players.py` and its configured counterpart in `configs/EchoChamber/Rag/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
 ## §4 Variant Architecture
 
-| Component      | Detail                                                                                         |
-|----------------|------------------------------------------------------------------------------------------------|
-| Base class     | `RagLLMSocialAgent(GeneralPlayer)`                                                             |
-| Inference      | `LangChainAPIInference(lm_name=..., generation_config=...)`                                    |
-| Context        | `env_data` + RAG-retrieved academic context via `_get_rag_context()`                           |
-| RAG injection  | `{rag_context}` placeholder in `RAG_USER_TEMPLATE`; filled via `.format(rag_context=...)`      |
-| Output parsing | `parse_llm_response_with_thinking(response)` → `{action_type, intensity, reasoning, analysis}` |
-| Retry logic    | Up to 3 attempts; on failure → neutral action with `reasoning="LLM failed: stayed neutral"`    |
-| Ray support    | `__getstate__`/`__setstate__` in `RagLLMSocialAgent` excludes `llm_client` from pickle         |
-| KnowledgeStore | `build()` auto-persists; shared RAG index dirs optionally configured                           |
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/EchoChamber/Rag/players.py` |
+| Prompt module | `examples/EchoChamber/Rag/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
 ## §5 Config Reference
 
-Config file: `configs/EchoChamber/Rag/simulation.yml`
-
-Key RAG extras per agent:
-- `private_knowledge.rag.docs_dir`: Source documents directory for RAG index
-- `private_knowledge.rag.embed_type`: Embedding model type (e.g., `litellm`)
-- `private_knowledge.rag.embed_api_key`: API key for embedding model
-- `private_knowledge.rag.top_k`: Number of retrieved documents per query
-- `private_knowledge.rag.chunk_size`, `chunk_overlap`: RAG index build parameters
-- `llm.lm_name`, `llm.generation_config`: LLM inference settings
-- `llm.sys_message`: System prompt (e.g., `examples.EchoChamber.Rag.prompts:RAG_IDEOLOGUE_SYS`)
-- `llm.user_message`: User template (e.g., `examples.EchoChamber.Rag.prompts:LLM_USER_TEMPLATE`)
+| Config | Purpose |
+|---|---|
+| `configs/EchoChamber/Rag/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/EchoChamber/Rag/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/EchoChamber/Rag/topology.yml` | Message routing between coordinator and agents. |
+| `configs/EchoChamber/Rag/persona.yml` | Turn recording and persona metadata. |
 
 ## §6 Running Instructions
 
 ```bash
-export ARK_API_KEY=<your_key>
-python examples/EchoChamber/Rag/run_echo_chamber_rag.py -c configs/EchoChamber/Rag/simulation.yml
+python examples/EchoChamber/Rag/run_echochamber_rag.py -c configs/EchoChamber/Rag/simulation.yml
 ```
 
-## §7 Output Artifacts
+## §7 Expected Behavior
 
-Same as LLM variant. RAG context strings are included in reasoning when RAG retrieval succeeds.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §8 Known Limitations
+## §8 References
 
-- RAG retrieval may return irrelevant passages if document sources lack on-topic content
-- First-round RAG index build adds latency; shared indexes reduce this on subsequent runs
-- Opinion update formulas are hardcoded — RAG context only influences `action_type` and `intensity`
-- Embedding cost adds to total API expenditure per run
+See `examples/EchoChamber/simulation-bases.md §2` for full DOI citations and mechanism references.
 
-## §9 References
+## §9 Variant Comparison
 
-See `simulation-bases.md §4` for agent parameter sources and theoretical derivations.
-See `analysis-bases.md §2` for metric definitions and Python function signatures.
+See `examples/EchoChamber/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

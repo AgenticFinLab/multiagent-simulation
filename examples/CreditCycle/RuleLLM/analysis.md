@@ -1,37 +1,36 @@
-# CreditCycle RuleLLM Variant — analysis.md
+# Credit Cycle RuleLLM Analysis Plan
 
-## §1 Metrics and Functions
+## §1 Objectives
 
-| Metric                               | Function                                                       | analysis-bases.md Ref |
-|--------------------------------------|----------------------------------------------------------------|-----------------------|
-| Leverage Amplitude Index (LAI)       | `leverage_amplitude_index(price_history, fundamental)`         | §2.1                  |
-| Minsky Fragility Score (MFS)         | `minsky_fragility_score(stable_rounds_history, crisis_events)` | §2.2                  |
-| Credit Contraction Speed (CCS)       | `credit_contraction_speed(price_history)`                      | §2.3                  |
-| Counter-Cyclical Offset Ratio (CCOR) | `counter_cyclical_offset_ratio(agent_volume_by_type)`          | §2.4                  |
-| Phase Duration Ratio (PDR)           | `phase_duration_ratio(price_history, fundamental)`             | §2.5                  |
-| Noise Trader Contamination (NTC)     | `noise_trader_contamination(noise_orders, deviations)`         | §2.6                  |
-| Wealth Redistribution Index (WRI)    | `wealth_redistribution_index(agent_final_states)`              | §2.7                  |
+This analysis checks whether the RuleLLM variant produces a complete, analyzable Credit Cycle trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 RuleLLM Variant Notes
+## §2 Core Metrics
 
-**Analysis script**: Uses same `analysis.py` as Rule variant — no separate analysis.py needed.
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_creditcycle_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-Key RuleLLM-specific notes:
+## §3 Analysis Dimensions
 
-- **Rule-anchored MFS**: `stable_rounds` is tracked in rule logic embedded in prompt; MFS is available via rule-side state tracking.
-- **LAI close to Rule**: Expect LAI ≈ Rule baseline (rule anchoring prevents extreme LLM drift).
-- **CCOR stability**: Counter-cyclical behavior rule-constrained; CCOR expected close to Rule baseline.
-- **Qualitative MFS analysis**: LLM logs during stable phases reveal Minsky narrative richness — analyze textual reasoning for pattern detection.
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether RuleLLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-## §3 References
+## §4 Phase Analysis
 
-All metric definitions with DOI citations: `analysis-bases.md §2`.  
-Investor theory references: `simulation-bases.md §4.1–§4.5`.
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §4 Quality Review Notes
+## §5 Cross-Variant Comparison
 
-Post-run review should verify full configured rounds, order schema completeness,
-price/portfolio sanity, and LLM parse/fallback rates. Because RuleLLM embeds
-credit-cycle rules in prompts, accepted samples should also be checked for
-rule-adherence patterns around leverage expansion, fragility buildup, and credit
-contraction.
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_creditcycle_dynamics.png`, `02_creditcycle_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

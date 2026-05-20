@@ -1,36 +1,36 @@
-# VolatilityClustering Rag — Analysis Documentation
+# Volatility Clustering Rag Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-Evaluate whether retrieved volatility-context changes regime persistence,
-trend amplification, or volatility-trader responses.
+This analysis checks whether the Rag variant produces a complete, analyzable Volatility Clustering trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric | Function | analysis-bases.md Ref | Rag Notes |
-|---|---|---|---|
-| Rolling Volatility | `compute_rolling_volatility()` | `analysis-bases.md §2.1` | Knowledge-informed regimes |
-| Volatility Autocorrelation | `compute_volatility_autocorrelation()` | `analysis-bases.md §2.2` | Clustering under RAG |
-| High-Volatility Duration | `compute_high_vol_duration()` | `analysis-bases.md §2.3` | Compare with RuleLLM |
-| Trend-Follower Contribution | `compute_trend_follower_contribution()` | `analysis-bases.md §2.4` | Retrieved trend context |
-| Slow-Adapter Lag | `compute_slow_adapter_lag()` | `analysis-bases.md §2.5` | Persistence from lagged beliefs |
-| Volatility-Trader Regime Response | `compute_volatility_trader_response()` | `analysis-bases.md §2.6` | Dynamic liquidity contract relevance |
-| Fundamental Stabilization | `compute_fundamental_stabilization()` | `analysis-bases.md §2.7` | Valuation context |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_volatilityclustering_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §3 Dimension-by-Dimension Analysis
+## §3 Analysis Dimensions
 
-Compare Rag against RuleLLM and inspect whether retrieved context changes
-high-volatility duration or threshold response.
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rag preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-## §4 Variant-Specific Observable Phenomena
+## §4 Phase Analysis
 
-| Phenomenon | Expected Observation |
-|---|---|
-| Knowledge-informed volatility response | VolatilityTrader decisions reflect retrieved volatility context |
-| Persistence change | High-volatility duration differs from RuleLLM |
-| Retrieval quality | Low retrieval or fallback is marked in post-run retrieval review |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-Metrics derive from `../analysis-bases.md §2`; Rag mechanism derives from
-`../simulation-bases.md §9`.
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_volatilityclustering_dynamics.png`, `02_volatilityclustering_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

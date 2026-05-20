@@ -1,69 +1,36 @@
-# HerdingInformation Rule — Analysis Guide
+# Herding Information Cascade Rule Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-The Rule variant analysis measures the **deterministic baseline** of HerdingInformation cascade dynamics. Because all five investors apply fixed threshold formulas with no stochastic reasoning, the Rule variant provides:
+This analysis checks whether the Rule variant produces a complete, analyzable Herding Information Cascade trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-1. The cleanest signal for cascade formation timing and intensity
-2. The reference CCI/CPD/RHI values against which LLM/RuleLLM/Rag variants are compared
-3. The tightest expected metric bands (lowest variance across seeds)
+## §2 Core Metrics
 
-Analysis objectives:
-- Confirm CCI rises into the 0.40–0.70 target range during cascade episodes
-- Verify CPD of 3–10 rounds per cascade episode
-- Validate RHI in 0.50–1.20 (balanced dual mechanism)
-- Confirm ICE in 0.15–0.40 (moderate information destruction)
-- Verify VAF in 1.5–3.5 (cascade amplifies volatility)
-- Confirm WDI in 0.10–0.30 (rational agents profit from cascade)
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_herdinginformation_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
----
+## §3 Analysis Dimensions
 
-## §2 Metric → Function Mapping
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rule preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-| Metric | Full Name                       | analysis-bases.md | Python Function                     | Primary Input                             |
-|--------|---------------------------------|-------------------|-------------------------------------|-------------------------------------------|
-| CCI    | Cascade Concentration Index     | §2.1              | `cascade_concentration_index()`     | trade_history, price_history, fundamental |
-| CPD    | Cascade Persistence Duration    | §2.2              | `cascade_persistence_duration()`    | price_history, fundamental                |
-| RHI    | Reputation Herding Index        | §2.3              | `reputation_herding_index()`        | trade_history, price_history, fundamental |
-| ICE    | Information Cascade Efficiency  | §2.4              | `information_cascade_efficiency()`  | trade_history, price_history, fundamental |
-| VAF    | Volatility Amplification Factor | §2.5              | `volatility_amplification_factor()` | price_history, fundamental                |
-| WDI    | Wealth Distribution Index       | §2.6              | `wealth_distribution_index()`       | agent_states, final_price                 |
+## §4 Phase Analysis
 
-All functions defined in `Rule/analysis.py`. Inputs sourced from simulation output JSON.
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
----
+## §5 Cross-Variant Comparison
 
-## §3 Rule-Specific Notes
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
 
-- **Cascade timing is deterministic**: Given the same random seed, CascadeFollower activates at exactly the same round — cascade_count reaches `cascade_trigger` (default: 3) at a predictable point. This makes Rule the most reproducible variant.
-- **No LLM stochasticity**: Metric variance across seeds is driven entirely by the `noise_std` term in the price model and NoiseTrader's random trades. Expected inter-seed variance: ±0.03 for CCI, ±1.2 rounds for CPD.
-- **Cascade threshold hierarchy**: ReputationHerder activates at |deviation| > 0.02, CascadeFollower at cascade_count ≥ cascade_trigger. In early rounds, RHI may be high (ReputationHerder active, CascadeFollower not yet activated). After cascade activation, RHI converges to 0.50–1.20.
-- **IndependentThinker and Contrarian**: Both trade against deviation. Combined correction capacity ≈ 900 shares < herding capacity ≈ 1,400 shares. Cascades are not immediately broken.
-- **No fundamental deviation in HerdEffect comparison**: Unlike HerdEffect which uses momentum, HerdingInformation uses a `deviation` signal (P−F)/F — MAD (Mean Absolute Deviation) is not the appropriate measure here; use CPD and ICE instead.
+## §6 Expected Results and Validation Criteria
 
----
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
 
-## §4 Expected Ranges
+## §7 Visualization Catalogue
 
-| Metric | Rule Baseline | Notes                                                        |
-|--------|---------------|--------------------------------------------------------------|
-| CCI    | 0.40–0.70     | Higher end when cascade_trigger = 2 (earlier activation)     |
-| CPD    | 3–10 rounds   | Tighter band vs. LLM (no reasoning variability)              |
-| RHI    | 0.50–1.20     | Early rounds: RHI > 1.0 (reputation fires first)             |
-| ICE    | 0.15–0.40     | Deterministic cascade = consistent information destruction   |
-| VAF    | 1.5–3.5       | Rule produces tightest volatility band                       |
-| WDI    | 0.10–0.30     | Moderate wealth transfer from cascade followers to rationals |
-
----
-
-## §5 References
-
-- `analysis-bases.md §2.1` — CCI definition, formula, interpretation
-- `analysis-bases.md §2.2` — CPD definition, formula, interpretation
-- `analysis-bases.md §2.3` — RHI definition, formula, interpretation
-- `analysis-bases.md §2.4` — ICE definition, formula, interpretation
-- `analysis-bases.md §2.5` — VAF definition, formula, interpretation
-- `analysis-bases.md §2.6` — WDI definition, formula, interpretation
-- `simulation-bases.md §4.1–§4.5` — Investor parameter definitions
-- Banerjee (1992) `doi:10.2307/2118364` — Cascade formation baseline
-- Bikhchandani, Hirshleifer & Welch (1992) `doi:10.1086/261849` — Cascade fragility and persistence
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_herdinginformation_dynamics.png`, `02_herdinginformation_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

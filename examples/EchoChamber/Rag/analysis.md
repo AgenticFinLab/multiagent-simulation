@@ -1,44 +1,36 @@
-# EchoChamber Rag Variant — analysis.md
+# Echo Chamber Rag Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-1. Assess whether RAG-retrieved academic literature moderates agent behavior relative to LLM and Rule baselines.
-2. Evaluate whether RagLLMCriticalThinker produces stronger depolarization than LLMCriticalThinker.
-3. Measure RAG effectiveness: does retrieved context change action type distribution or merely the reasoning text?
-4. Compare Rag variant DE and PI to LLM and Rule variants to quantify literature-grounded moderation effect.
+This analysis checks whether the Rag variant produces a complete, analyzable Echo Chamber trajectory. It maps recorded opinion series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric                         | Function                                                        | analysis-bases.md ref |
-|--------------------------------|-----------------------------------------------------------------|-----------------------|
-| Polarization Index (PI)        | `polarization_index(polarization_history)`                      | §2.1                  |
-| Cluster Separation (CS)        | `cluster_separation(opinion_list)`                              | §2.2                  |
-| Mean Opinion Drift (MOD)       | `mean_opinion_drift(mean_opinion_history)`                      | §2.3                  |
-| Cross-Cutting Exposure (CCE)   | `cross_cutting_exposure(opinion_list, center_threshold=0.3)`    | §2.4                  |
-| Polarization Velocity (PV)     | `polarization_velocity(polarization_history)`                   | §2.5                  |
-| Depolarizer Effectiveness (DE) | `depolarizer_effectiveness(depolarize_counts, polarize_counts)` | §2.6                  |
-| Opinion Variance (OV)          | `opinion_variance(opinion_list)`                                | §2.7                  |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_echochamber_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §3 Variant-Specific Notes
+## §3 Analysis Dimensions
 
-- RAG retrieval quality depends entirely on the document corpus — if sources are biased, polarization dynamics may be skewed.
-- RagLLMCriticalThinker is expected to show the largest improvement over LLMCriticalThinker; academic counter-polarization evidence may increase depolarization intensity.
-- RagLLMIdeologue may exhibit moderate reduction in extremity compared to LLMIdeologue if retrieved literature highlights polarization harms.
-- RAG context injection uses `{rag_context}` in `RAG_USER_TEMPLATE` — empty string when RAG retrieval fails, degrading to LLM-only behavior.
-- Shared RAG index configurations (if used) result in all agents retrieving from the same corpus; per-agent indexes allow agent-type-specific document sources.
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rag preserves opinion dynamics and influence_action activity while changing the distribution of influence_action relative to the deterministic baseline.
 
-## §4 Expected Ranges
+## §4 Phase Analysis
 
-| Metric | Expected Range | Interpretation                                                              |
-|--------|----------------|-----------------------------------------------------------------------------|
-| PI     | 0.15 – 0.70    | Lower ceiling than LLM if literature moderates Ideologue/Conformist         |
-| CS     | 0.3 – 1.7      | Moderate to lower than LLM; RAG depolarization research may reduce CS       |
-| MOD    | 0.0 – 0.25     | Literature-grounded moderation may reduce directional drift                 |
-| CCE    | 0.15 – 0.55    | Higher CCE than LLM if RAG literature emphasizes cross-cutting exposure     |
-| PV     | 0.004 – 0.07   | Variable; depends on RAG corpus quality and retrieval relevance             |
-| DE     | 0.25 – 0.60    | Higher DE than LLM if CriticalThinker/BridgeBuilder benefit from literature |
-| OV     | 0.08 – 0.35    | Potentially lower upper bound than LLM due to RAG moderation                |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-See `analysis-bases.md §2` for full metric derivations and simulation-bases.md §4 for agent parameter sources.
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_echochamber_dynamics.png`, `02_echochamber_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

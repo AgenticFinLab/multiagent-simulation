@@ -1,36 +1,36 @@
-# RumorSpread LLM — Analysis Documentation
+# Rumor Spread LLM Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-Evaluate whether persona-only LLM agents create plausible rumor spread,
-distortion, and correction dynamics under the special information-action schema.
+This analysis checks whether the LLM variant produces a complete, analyzable Rumor Spread trajectory. It maps recorded belief series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric | Function | analysis-bases.md Ref | LLM Notes |
-|---|---|---|---|
-| Belief Level | `compute_belief_level()` | `analysis-bases.md §2.1` | Persona-driven belief path |
-| Spread Velocity | `compute_spread_velocity()` | `analysis-bases.md §2.2` | LLM spread intensity |
-| Distortion Index | `compute_distortion_index()` | `analysis-bases.md §2.3` | Narrative mutation |
-| Correction Lag | `compute_correction_lag()` | `analysis-bases.md §2.4` | Delayed correction |
-| Skepticism Effect | `compute_skepticism_effect()` | `analysis-bases.md §2.5` | Skeptical persona effect |
-| Fact-Check Strength | `compute_fact_check_strength()` | `analysis-bases.md §2.6` | Correction strength |
-| Agent Action Share | `compute_agent_action_share()` | `analysis-bases.md §2.7` | Action attribution |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_rumorspread_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §3 Dimension-by-Dimension Analysis
+## §3 Analysis Dimensions
 
-Review whether LLM-generated actions remain valid special-schema actions and
-whether narratives produce plausible spread/correction behavior.
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether LLM preserves belief dynamics and communication_action activity while changing the distribution of communication_action relative to the deterministic baseline.
 
-## §4 Variant-Specific Observable Phenomena
+## §4 Phase Analysis
 
-| Phenomenon | Expected Observation |
-|---|---|
-| Narrative amplification | Spreaders produce high-intensity spread actions |
-| Distortion language | Relayers increase mutation |
-| Special parser quality | No trading-schema assumptions appear |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-Metrics derive from `../analysis-bases.md §2`; LLM mechanism derives from
-`../simulation-bases.md §9`.
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_rumorspread_dynamics.png`, `02_rumorspread_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

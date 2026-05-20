@@ -1,84 +1,102 @@
-# ReversalEffect RuleLLM — Implementation Explanation
+# Reversal Effect RuleLLM Variant Explanation
 
 ## §1 Overview
 
-| Item | Description |
+| Field | Value |
 |---|---|
 | Variant | RuleLLM |
-| Mechanism | Explicit reversal and overreaction rules embedded in LLM prompts |
-| Market | Same rule-based market as Rule |
-| Agents | RuleLLM contrarian, overconfident, value, momentum, and noise agents |
-| Runtime Change | Documentation-only backfill; no code/config change |
+| Simulation | Reversal Effect |
+| Decision Mechanism | LLM-generated trading orders constrained by explicit scenario rules |
+| Theory Reference | `examples/ReversalEffect/simulation-bases.md` |
+| Market Broadcast | `configs/ReversalEffect/RuleLLM/topology.yml` |
 
-## §2 Theory → Implementation Mapping
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-### §2.1 RuleLLMContrarianInvestor
+## §2 Theory -> Implementation Mapping
 
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.1` | Prompt states contrarian reversal rule |
-| Runtime path | LLM decision is parsed and constrained before order |
-
-### §2.2 RuleLLMOverconfidentTrader
+### §2.1 ContrarianInvestor (simulation-bases.md §4.1)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.3` | Prompt states overreaction behavior |
-| Runtime path | LLM emits structured decision and reasoning |
-
-### §2.3 RuleLLMValueInvestor
-
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.5` | Prompt states fundamental-value correction |
-| Runtime path | Cash/position constraints cap trades |
-
-### §2.4 RuleLLMMomentumChaser
+| Investor role and activation rule from simulation-bases.md §4.1 | `RuleLLMContrarianInvestor` in `examples/ReversalEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.2 MomentumInvestor (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.2` | Prompt states continuation behavior |
-| Runtime path | Direction should follow recent trend until reversal |
-
-### §2.5 RuleLLMNoiseTrader
+| Investor role and activation rule from simulation-bases.md §4.2 | `configured player class family` in `examples/ReversalEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.3 OverconfidentTrader (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.4` | Prompt expresses random/noisy participation |
-| Runtime path | Random-like LLM decisions still use canonical order schema |
+| Investor role and activation rule from simulation-bases.md §4.3 | `RuleLLMOverconfidentTrader` in `examples/ReversalEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.4 NoiseTrader (simulation-bases.md §4.4)
 
-## §3 Market Mechanism Implementation
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `RuleLLMNoiseTrader` in `examples/ReversalEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.5 ValueInvestor (simulation-bases.md §4.5)
 
-Market mechanics are unchanged from Rule. RuleLLM changes only decision
-generation.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMValueInvestor` in `examples/ReversalEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.6 IndexTracker (simulation-bases.md §4.6)
 
-## §4 Variant-Specific Features
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.6 | `configured player class family` in `examples/ReversalEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
 
-RuleLLM tests whether LLM reasoning preserves explicit reversal, value, and
-overconfidence rules.
+## §3 Market Mechanism
 
-## §5 Architecture Diagram
+The coordinator mechanism is the final implementation in `examples/ReversalEffect/RuleLLM/players.py` and its configured counterpart in `configs/ReversalEffect/RuleLLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-```text
-Market update -> rule prompt + context -> LLM JSON decision -> order -> Market
-```
+## §4 Variant Architecture
 
-## §6 Configuration Reference
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/ReversalEffect/RuleLLM/players.py` |
+| Prompt module | `examples/ReversalEffect/RuleLLM/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-Primary config: `configs/ReversalEffect/RuleLLM/players.yml`.
+## §5 Config Reference
 
-## §7 Running Instructions
+| Config | Purpose |
+|---|---|
+| `configs/ReversalEffect/RuleLLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/ReversalEffect/RuleLLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/ReversalEffect/RuleLLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/ReversalEffect/RuleLLM/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
-python examples/ReversalEffect/RuleLLM/run_reversaleffect_rulellm.py \
-  -c configs/ReversalEffect/RuleLLM/simulation.yml
+python examples/ReversalEffect/RuleLLM/run_reversal_effect_rulellm.py -c configs/ReversalEffect/RuleLLM/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-RuleLLM should show the same overshoot/correction pattern as Rule with some
-variation in timing and quantity.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §4` and `../analysis-bases.md §2`.
+See `examples/ReversalEffect/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/ReversalEffect/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

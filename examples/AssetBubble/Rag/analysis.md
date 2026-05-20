@@ -1,147 +1,36 @@
-# AssetBubble Rag — Analysis Documentation
+# Asset Bubble Rag Analysis Plan
 
-## §1 Overview
+## §1 Objectives
 
-| Item                                | Description                                                                                                                                                                                                                     |
-|-------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Implements**                      | `../analysis-bases.md`                                                                                                                                                                                                          |
-| **Analysis Script**                 | `analysis.py` in this directory                                                                                                                                                                                                 |
-| **Output Location**                 | `EXPERIMENT/AssetBubble/Rag/analysis/`                                                                                                                                                                                          |
-| **Variant-Specific Considerations** | RAG-augmented variant — agents retrieve domain knowledge each round; expect bubble dynamics influenced by quality and relevance of retrieved passages; run multiple trials (≥5) for reliable estimates due to LLM stochasticity |
+This analysis checks whether the Rag variant produces a complete, analyzable Asset Bubble trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
----
+## §2 Core Metrics
 
-## §2 Metric Implementation
-
-All metrics are defined in `../analysis-bases.md §2`. This variant's `analysis.py` delegates to `examples.AssetBubble.Rule.analysis.analyze_bubble()` via:
-
-```python
-from examples.AssetBubble.Rule.analysis import analyze_bubble, _load_data
-```
-
-| Metric                      | Function                         | analysis-bases.md Ref | Rag-Specific Notes                                                        |
-|-----------------------------|----------------------------------|-----------------------|---------------------------------------------------------------------------|
-| **Price Deviation**         | `calculate_price_deviation()`    | `§2.1`                | RAG may moderate extremes if agents retrieve bubble-warning docs          |
-| **Bubble Ratio**            | derived in `analyze_bubble()`    | `§2.2`                | Compare to Rule baseline; expect narrower peak if knowledge helps         |
-| **Bubble Magnitude**        | `calculate_bubble_magnitude()`   | `§2.3`                | Cumulative area; RAG effect most visible here                             |
-| **Rolling Volatility**      | `calculate_rolling_volatility()` | `§2.4`                | window=10; volatility profile shaped by RAG retrieval quality             |
-| **Return Autocorrelation**  | `calculate_autocorrelation()`    | `§2.5`                | lag-1 autocorr; RAG may break momentum if agents retrieve contrarian docs |
-| **Max Drawdown**            | `calculate_max_drawdown()`       | `§2.6`                | Crash severity; informed agents may exit earlier                          |
-| **Trading Volume**          | derived from order aggregation   | `§2.7`                | Volume spike pattern indicates bubble phase transitions                   |
-| **Positive Feedback Index** | correlation of Δprice vs Δvolume | `§2.8`                | Measures RAG's moderating effect on herding behavior                      |
-
----
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_assetbubble_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
 ## §3 Analysis Dimensions
 
-All dimensions are defined in `../analysis-bases.md §3`. Implementation for this variant:
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rag preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-| Dimension                  | analysis-bases.md Ref | Key Observation in Rag Variant                                                |
-|----------------------------|-----------------------|-------------------------------------------------------------------------------|
-| **Price Dynamics**         | `§3.1`                | Compare price trajectory to Rule/LLM/RuleLLM; RAG may show slower buildup     |
-| **Bubble Lifecycle**       | `§3.2`                | Phase detection (latent/growth/peak/crash/recovery) using same thresholds     |
-| **Investor Heterogeneity** | `§3.3`                | Each agent type retrieves different knowledge; creates more diverse behavior  |
-| **Stability Analysis**     | `§3.4`                | Autocorrelation + volatility profiles per agent type                          |
-| **RAG Knowledge Effect**   | `§3.5`                | Unique to Rag: measure whether retrieved passages materially change decisions |
+## §4 Phase Analysis
 
----
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §4 RAG-Specific Observable Phenomena
+## §5 Cross-Variant Comparison
 
-These phenomena are unique to the Rag variant and require dedicated analysis beyond the standard metrics:
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
 
-| Phenomenon                       | Description                                                                                    | Measurement                                           |
-|----------------------------------|------------------------------------------------------------------------------------------------|-------------------------------------------------------|
-| **Knowledge Retrieval Quality**  | Top-k chunks may or may not be relevant to current market state                                | Log retrieval relevance scores per round              |
-| **Context-Aware Decision Shift** | Agents citing bubble-warning knowledge should trade more conservatively                        | Compare quantity distributions with/without retrieval |
-| **Adaptive Herding Reduction**   | If NoiseTrader retrieves contrarian behavioral finance, herding should weaken                  | Positive feedback index vs RuleLLM baseline           |
-| **Arbitrageur Empowerment**      | Arbitrageur retrieving limits-to-arbitrage literature may increase short pressure              | Track arbitrageur quantity and timing                 |
-| **Knowledge Persistence Effect** | Indexed knowledge is static; stale docs may lead to miscalibrated decisions late in simulation | Compare early vs late round decision quality          |
-| **Index Load vs Build**          | Resumed simulations (loaded index) vs fresh builds may show different retrieval patterns       | Flag and compare across runs                          |
+## §6 Expected Results and Validation Criteria
 
-### Expected Differences from Rule Baseline
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
 
-| Metric                | Rule Baseline | Rag Expected                             | Hypothesis                                         |
-|-----------------------|---------------|------------------------------------------|----------------------------------------------------|
-| Peak bubble_ratio     | [1.3, 1.8]×   | [1.1, 1.6]× (potentially lower)          | Informed agents exit earlier                       |
-| Max drawdown          | [20%, 60%]    | [15%, 50%] (potentially smaller)         | Agents recognize warning signs from retrieved docs |
-| Return autocorr lag-1 | [0.2, 0.6]    | [0.1, 0.4] (potentially weaker momentum) | Contrarian knowledge breaks positive feedback      |
-| Bubble magnitude      | High          | Medium-to-high (high variance)           | Effect depends heavily on retrieval quality        |
+## §7 Visualization Catalogue
 
-> Note: These are research hypotheses to be tested. Actual results depend on document sources, embedding quality, and top-k retrieval accuracy.
-
----
-
-## §5 Scaling and Sensitivity
-
-### Round Scaling
-
-| Total Rounds    | Rag-Specific Observation                                              |
-|-----------------|-----------------------------------------------------------------------|
-| **50 rounds**   | Agents rely on initial knowledge; RAG effect most pronounced early on |
-| **100 rounds**  | Full bubble-crash cycle; RAG effect visible in peak and crash timing  |
-| **200+ rounds** | Knowledge staleness effect becomes apparent; late-run divergence      |
-
-### Agent Scaling
-
-| Agent Count     | Rag-Specific Observation                                                     |
-|-----------------|------------------------------------------------------------------------------|
-| **3–5 agents**  | High variance in retrieved context; agent-level divergence dominates         |
-| **8–10 agents** | Balanced dynamics; shared vs personal knowledge base effects visible         |
-| **20+ agents**  | Emergent consensus from theoretical grounding; risk of correlated retrievals |
-
-### RAG Configuration Sensitivity
-
-| Parameter           | Effect on Bubble Dynamics                                                     |
-|---------------------|-------------------------------------------------------------------------------|
-| `top_k` (retrieval) | Higher k = more context but more noise; optimal k depends on document quality |
-| `embed_model`       | Better embeddings → more relevant chunks → stronger RAG effect                |
-| `persist_dir`       | Loaded index: fast but static; fresh build: slower but current                |
-| Document sources    | Theory-heavy docs reduce bubble; narrative docs may amplify                   |
-
----
-
-## §6 Output Files
-
-All output files are written to `EXPERIMENT/AssetBubble/Rag/analysis/`.
-
-| File                     | Content                                                                  |
-|--------------------------|--------------------------------------------------------------------------|
-| `01_price_dynamics.png`  | Price vs fundamental time series                                         |
-| `02_bubble_analysis.png` | Bubble ratio, rolling volatility, return autocorrelation                 |
-| `03_summary.png`         | Multi-panel: all 8 metrics + RAG-specific panels                         |
-| `summary.json`           | Structured metrics: all scalar outputs                                   |
-| `retrieval_log.json`     | (if enabled) Per-round retrieval queries, top-k chunks, relevance scores |
-
-Output files follow the same naming convention as `Rule/analysis.py`; see `../analysis-bases.md §6`.
-
----
-
-## §7 Cross-Variant Comparison Notes
-
-This variant should be compared against all three baselines to isolate the RAG effect:
-
-| Comparison Pair | What It Tests                                                         |
-|-----------------|-----------------------------------------------------------------------|
-| Rag vs Rule     | Full effect of LLM reasoning + RAG knowledge vs deterministic rules   |
-| Rag vs LLM      | Effect of adding RAG context to a pure-LLM variant (same personas)    |
-| Rag vs RuleLLM  | Marginal effect of external knowledge retrieval beyond embedded rules |
-
-Cross-variant comparison protocol is defined in `../analysis-bases.md §4`.
-
-**Key research question**: Does per-agent personal RAG knowledge reduce bubble severity relative to RuleLLM, and by how much?
-
-**Calibration targets** (from `../analysis-bases.md §5`):
-- Peak `bubble_ratio`: [1.3, 1.8]× (if no RAG moderation) or [1.1, 1.6]× (if RAG effective)
-- Max drawdown: [20%, 60%]
-- Return autocorr lag-1: [0.2, 0.6] in Rule; expect lower in Rag
-
----
-
-## §8 References
-
-- `../analysis-bases.md` — master analysis specification (metrics, dimensions, validation)
-- `../simulation-bases.md §4` — all investor type specifications
-- `../simulation-bases.md §3.1` — price dynamics formula
-- `Rule/analysis.py` — shared analysis implementation (delegate target)
-- `Rag/players.py` — `_initialize_rag()`, `_build_prompt()`, `KnowledgeStore` usage
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_assetbubble_dynamics.png`, `02_assetbubble_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

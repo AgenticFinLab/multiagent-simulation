@@ -1,19 +1,18 @@
 #!/usr/bin/env python
-"""HerdingInformation LLM Simulation Analysis
+"""Herding Information Cascade LLM Simulation Analysis.
 
-Usage:
-    python examples/HerdingInformation/LLM/analysis.py \
-        -c configs/HerdingInformation/LLM/simulation.yml
+Produces the standardized output set required by create-example-skill:
+summary.json, 00_investor_bids.png, 01_herdinginformation_dynamics.png,
+02_herdinginformation_analysis.png, and 03_summary.png.
 """
 
-from examples.HerdingInformation.Rule.analysis import (
-    calculate_metrics,
-    create_visualizations,
-    load_simulation_data,
-    main,
-)
+from examples.standard_rule_analysis import run_standard_analysis
 
-__all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations", "main"]
+
+def main():
+    """Run the standard analysis output contract for this variant."""
+    return run_standard_analysis("HerdingInformation", "configs/HerdingInformation/LLM/simulation.yml")
+
 
 if __name__ == "__main__":
     main()

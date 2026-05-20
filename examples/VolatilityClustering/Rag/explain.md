@@ -1,71 +1,95 @@
-# VolatilityClustering Rag — Implementation Explanation
+# Volatility Clustering Rag Variant Explanation
 
 ## §1 Overview
 
-| Item | Description |
+| Field | Value |
 |---|---|
 | Variant | Rag |
-| Mechanism | RuleLLM-style volatility-regime decisions with retrieved domain knowledge |
-| Market | Same market mechanics as Rule and RuleLLM |
-| Knowledge Sources | Shared document corpus and RAG index |
-| Runtime Change | Documentation-only backfill; no code/config change |
+| Simulation | Volatility Clustering |
+| Decision Mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema |
+| Theory Reference | `examples/VolatilityClustering/simulation-bases.md` |
+| Market Broadcast | `configs/VolatilityClustering/Rag/topology.yml` |
 
-## §2 Theory → Implementation Mapping
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-### §2.1 Rag Fundamentalist
+## §2 Theory -> Implementation Mapping
 
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.1` | Retrieved valuation context informs stabilizing decisions |
-| Effect | May moderate volatility-driven mispricing |
-
-### §2.2 Rag Trend / Volatility Agents
+### §2.1 Fundamentalist (simulation-bases.md §4.1)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.2` and `§4.5` | Retrieved volatility-clustering context informs trend/regime decisions |
-| Effect | May alter high-volatility response |
-
-### §2.3 Rag Noise / Slow-Adapter Agents
+| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMFundamentalist` in `examples/VolatilityClustering/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.2 TrendFollower (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.3` and `§4.4` | Retrieved context is added while preserving stochastic/adaptive roles |
-| Effect | Should not break order schema |
+| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMTrendFollower` in `examples/VolatilityClustering/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.3 NoiseTrader (simulation-bases.md §4.3)
 
-## §3 Market Mechanism Implementation
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMNoiseTrader` in `examples/VolatilityClustering/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.4 SlowAdapter (simulation-bases.md §4.4)
 
-Rag keeps market and order schema aligned with RuleLLM. Retrieval changes only
-the prompt context for LLM decisions.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMSlowAdapter` in `examples/VolatilityClustering/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.5 VolatilityTrader (simulation-bases.md §4.5)
 
-## §4 Variant-Specific Features
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMVolatilityTrader` in `examples/VolatilityClustering/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
 
-Rag adds retrieval quality and embedding/index setup to execution and quality
-review.
+## §3 Market Mechanism
 
-## §5 Architecture Diagram
+The coordinator mechanism is the final implementation in `examples/VolatilityClustering/Rag/players.py` and its configured counterpart in `configs/VolatilityClustering/Rag/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-```text
-Market volatility state -> retrieve context -> LLM decision -> order -> Market
-```
+## §4 Variant Architecture
 
-## §6 Configuration Reference
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/VolatilityClustering/Rag/players.py` |
+| Prompt module | `examples/VolatilityClustering/Rag/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-Primary config: `configs/VolatilityClustering/Rag/players.yml`.
+## §5 Config Reference
 
-## §7 Running Instructions
+| Config | Purpose |
+|---|---|
+| `configs/VolatilityClustering/Rag/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/VolatilityClustering/Rag/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/VolatilityClustering/Rag/topology.yml` | Message routing between coordinator and agents. |
+| `configs/VolatilityClustering/Rag/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
-python examples/VolatilityClustering/Rag/run_volatilityclustering_rag.py \
-  -c configs/VolatilityClustering/Rag/simulation.yml
+python examples/VolatilityClustering/Rag/run_volatility_clustering_ragllm.py -c configs/VolatilityClustering/Rag/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-Rag should preserve volatility clustering while retrieved volatility-model
-context may affect regime interpretation.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
-`../analysis-bases.md §2`.
+See `examples/VolatilityClustering/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/VolatilityClustering/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

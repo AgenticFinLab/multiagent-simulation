@@ -1,46 +1,36 @@
-# FlashCrash Rag — Analysis
+# Flash Crash Rag Analysis Plan
 
 ## §1 Objectives
 
-Evaluate whether the RAG-augmented flash crash simulation:
-1. Reproduces the crash-cascade-recovery profile with historically grounded decisions
-2. Shows reduced crash severity or faster recovery compared to Rule/RuleLLM (historical learning effect)
-3. Correctly sources `provides_liquidity` from LLM response
-4. Demonstrates RAG-specific differentiation: earlier recovery entry, moderated cascade
+This analysis checks whether the Rag variant produces a complete, analyzable Flash Crash trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric                    | Function                                                                      | Source               |
-|---------------------------|-------------------------------------------------------------------------------|----------------------|
-| Crash depth               | `crash_depth(price_history, fundamental)`                                     | analysis-bases.md §2 |
-| Liquidity vacuum duration | `liquidity_vacuum_duration(liquidity_history, low_threshold=2)`               | analysis-bases.md §2 |
-| Stop-loss cascade volume  | `stop_loss_cascade_volume(orders_history)`                                    | analysis-bases.md §2 |
-| Recovery speed            | `recovery_speed(price_history, trough_round, fundamental)`                    | analysis-bases.md §2 |
-| HFT withdrawal fraction   | `hft_withdrawal_fraction(provides_liquidity_history, crash_start, crash_end)` | analysis-bases.md §2 |
-| Price amplification ratio | `price_amplification_ratio(observed_max_drop, baseline_max_drop)`             | analysis-bases.md §2 |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_flashcrash_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §3 Variant-Specific Notes (Rag)
+## §3 Analysis Dimensions
 
-- RAG-retrieved cases should lead FundamentalTrader to recognise undervaluation earlier → shorter `recovery_speed`
-- `provides_liquidity` field must come from `decision["provides_liquidity"]` in LLM response
-- Historical cases of cascades may lead StopLossTrader to cut losses earlier (smaller `stop_loss_cascade_volume`) or later (if history suggests holding)
-- `price_amplification_ratio` expected lowest among variants if RAG mitigates withdrawal timing
-- Compare `liquidity_vacuum_duration` against RuleLLM to test RAG incremental value
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rag preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-## §4 Expected Ranges (Rag)
+## §4 Phase Analysis
 
-| Metric                      | Expected range        | vs Rule  | vs RuleLLM         |
-|-----------------------------|-----------------------|----------|--------------------|
-| `crash_depth`               | 0.04–0.09             | Smaller  | Similar or smaller |
-| `liquidity_vacuum_duration` | 3–12 rounds           | Shorter  | Similar            |
-| `stop_loss_cascade_volume`  | 200–2000 shares       | Smaller  | Similar            |
-| `recovery_speed`            | 6–20 rounds           | Faster   | Slightly faster    |
-| `hft_withdrawal_fraction`   | 0.4–0.85 during crash | Lower    | Lower              |
-| `price_amplification_ratio` | 1.1–3.0 ×             | Smallest | Lower              |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-- simulation-bases.md §4 — investor taxonomy and parameter definitions
-- analysis-bases.md §2 — metric function signatures
-- Kirilenko et al. (2017) doi:10.1111/jofi.12498
-- CFTC-SEC Joint Report (2010)
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_flashcrash_dynamics.png`, `02_flashcrash_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

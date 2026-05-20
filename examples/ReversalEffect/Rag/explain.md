@@ -1,71 +1,102 @@
-# ReversalEffect Rag — Implementation Explanation
+# Reversal Effect Rag Variant Explanation
 
 ## §1 Overview
 
-| Item | Description |
+| Field | Value |
 |---|---|
 | Variant | Rag |
-| Mechanism | RuleLLM-style reversal decisions with retrieved domain knowledge |
-| Market | Same market mechanics as Rule and RuleLLM |
-| Knowledge Sources | Shared document corpus and RAG index |
-| Runtime Change | Documentation-only backfill; no code/config change |
+| Simulation | Reversal Effect |
+| Decision Mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema |
+| Theory Reference | `examples/ReversalEffect/simulation-bases.md` |
+| Market Broadcast | `configs/ReversalEffect/Rag/topology.yml` |
 
-## §2 Theory → Implementation Mapping
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-### §2.1 Rag Contrarian / Value Agents
+## §2 Theory -> Implementation Mapping
 
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.1` and `§4.5` | Retrieved overreaction/value context is included in prompt |
-| Effect | May change reversal conviction or timing |
-
-### §2.2 Rag Momentum / Overconfidence Agents
+### §2.1 ContrarianInvestor (simulation-bases.md §4.1)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.2` and `§4.3` | Retrieved behavioral context informs continuation pressure |
-| Effect | May extend or moderate overshoot |
-
-### §2.3 Rag Noise Agent
+| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMInvestor` in `examples/ReversalEffect/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.2 MomentumInvestor (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.4` | Retains noisy participation under canonical schema |
-| Effect | Adds baseline stochastic pressure |
+| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMInvestor` in `examples/ReversalEffect/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.3 OverconfidentTrader (simulation-bases.md §4.3)
 
-## §3 Market Mechanism Implementation
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMOverconfidentTrader` in `examples/ReversalEffect/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.4 NoiseTrader (simulation-bases.md §4.4)
 
-Rag keeps the same market and order schema. Retrieval affects only the LLM
-context used to generate investor decisions.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMNoiseTrader` in `examples/ReversalEffect/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.5 ValueInvestor (simulation-bases.md §4.5)
 
-## §4 Variant-Specific Features
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMInvestor` in `examples/ReversalEffect/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.6 IndexTracker (simulation-bases.md §4.6)
 
-Rag requires knowledge configuration and should be reviewed for retrieval
-quality in addition to execution success.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.6 | `configured player class family` in `examples/ReversalEffect/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
 
-## §5 Architecture Diagram
+## §3 Market Mechanism
 
-```text
-Market update -> retrieve context -> LLM decision -> order -> Market
-```
+The coordinator mechanism is the final implementation in `examples/ReversalEffect/Rag/players.py` and its configured counterpart in `configs/ReversalEffect/Rag/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-## §6 Configuration Reference
+## §4 Variant Architecture
 
-Primary config: `configs/ReversalEffect/Rag/players.yml`.
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/ReversalEffect/Rag/players.py` |
+| Prompt module | `examples/ReversalEffect/Rag/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-## §7 Running Instructions
+## §5 Config Reference
+
+| Config | Purpose |
+|---|---|
+| `configs/ReversalEffect/Rag/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/ReversalEffect/Rag/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/ReversalEffect/Rag/topology.yml` | Message routing between coordinator and agents. |
+| `configs/ReversalEffect/Rag/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
-python examples/ReversalEffect/Rag/run_reversaleffect_rag.py \
-  -c configs/ReversalEffect/Rag/simulation.yml
+python examples/ReversalEffect/Rag/run_reversal_effect_ragllm.py -c configs/ReversalEffect/Rag/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-Rag should preserve overshoot/reversal mechanics while retrieved context changes
-reasoning or confidence.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
-`../analysis-bases.md §2`.
+See `examples/ReversalEffect/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/ReversalEffect/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

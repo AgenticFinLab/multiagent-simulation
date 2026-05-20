@@ -1,35 +1,36 @@
-# ReversalEffect RuleLLM — Analysis Documentation
+# Reversal Effect RuleLLM Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-Evaluate RuleLLM rule adherence during overshoot and reversal.
+This analysis checks whether the RuleLLM variant produces a complete, analyzable Reversal Effect trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric | Function | analysis-bases.md Ref | RuleLLM Notes |
-|---|---|---|---|
-| Overshoot Magnitude | `compute_overshoot_magnitude()` | `analysis-bases.md §2.1` | Compare with Rule |
-| Reversal Return | `compute_reversal_return()` | `analysis-bases.md §2.2` | LLM-mediated correction |
-| Contrarian Volume | `compute_contrarian_volume()` | `analysis-bases.md §2.3` | Prompt-rule fidelity |
-| Momentum Delay | `compute_momentum_delay()` | `analysis-bases.md §2.4` | Continuation before correction |
-| Value Anchor Strength | `compute_value_anchor_strength()` | `analysis-bases.md §2.5` | Fundamental prompt effect |
-| Reversal Onset | `compute_reversal_onset()` | `analysis-bases.md §2.6` | Timing vs Rule |
-| Agent Attribution | `compute_agent_attribution()` | `analysis-bases.md §2.7` | Strategy pressure |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_reversaleffect_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §3 Dimension-by-Dimension Analysis
+## §3 Analysis Dimensions
 
-Compare RuleLLM to Rule for direction, timing, and quantity. Large differences
-should be checked against prompt adherence and parser quality.
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether RuleLLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-## §4 Variant-Specific Observable Phenomena
+## §4 Phase Analysis
 
-| Phenomenon | Expected Observation |
-|---|---|
-| Prompt-rule adherence | LLM follows contrarian/value/momentum direction |
-| Bounded discretion | Quantity varies without reversing intended rule |
-| Clean structure | Low parse/fallback counts in post-run quality review |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-Metrics derive from `../analysis-bases.md §2`; RuleLLM mechanism derives from
-`../simulation-bases.md §9`.
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_reversaleffect_dynamics.png`, `02_reversaleffect_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

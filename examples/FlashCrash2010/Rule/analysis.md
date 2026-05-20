@@ -1,46 +1,36 @@
-# FlashCrash2010 Rule — Analysis
+# 2010 Flash Crash Rule Analysis Plan
 
 ## §1 Objectives
 
-Evaluate whether the rule-based FlashCrash2010 simulation reproduces:
-1. Order-book depth collapse consistent with May 6, 2010 event (~90 % depth reduction)
-2. Spread widening (10–50 × normal)
-3. Multi-wave stop-loss cascade
-4. Fundamental-trader-led price recovery
+This analysis checks whether the Rule variant produces a complete, analyzable 2010 Flash Crash trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric                 | Function                                                  | Source               |
-|------------------------|-----------------------------------------------------------|----------------------|
-| Max drawdown           | `max_drawdown(price_history)`                             | analysis-bases.md §2 |
-| Depth collapse ratio   | `depth_collapse_ratio(depth_history, base_depth)`         | analysis-bases.md §2 |
-| Spread widening factor | `spread_widening_factor(spread_history, normal_spread)`   | analysis-bases.md §2 |
-| HFT withdrawal rounds  | `hft_withdrawal_rounds(hft_orders_by_round)`              | analysis-bases.md §2 |
-| Cascade trigger rounds | `cascade_trigger_rounds(stoploss_orders_by_round)`        | analysis-bases.md §2 |
-| Recovery time          | `recovery_time(price_history, trough_round, fundamental)` | analysis-bases.md §2 |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_flashcrash2010_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §3 Variant-Specific Notes (Rule)
+## §3 Analysis Dimensions
 
-- All thresholds fixed → `max_drawdown` and `recovery_time` are reproducible given the same config
-- `depth_collapse_ratio` is determined by `stress_factor` formula (volatility + hft_participation)
-- `spread_widening_factor` can reach 50 × at peak stress if both `hft_participation < 0.30` and `volatility > 0.02`
-- `cascade_trigger_rounds` shows discrete waves: each StopLossTrader fires at its own `stop_percentage` level
-- HFTMarketMaker withdrawal is abrupt (quantity 500 → 0); no gradual retreat
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rule preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-## §4 Expected Ranges (Rule)
+## §4 Phase Analysis
 
-| Metric                   | Expected range | Historical benchmark |
-|--------------------------|----------------|----------------------|
-| `max_drawdown`           | 0.05–0.12      | ~0.09 (DJIA May 6)   |
-| `depth_collapse_ratio`   | 0.05–0.20      | ~0.10                |
-| `spread_widening_factor` | 5–50 ×         | 10–50 ×              |
-| `hft_withdrawal_rounds`  | 5–20 rounds    | ~36 min              |
-| Cascade wave count       | 2–5            | Multi-wave           |
-| `recovery_time`          | 10–25 rounds   | ~20 min              |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-- simulation-bases.md §4 — investor taxonomy and parameter definitions
-- analysis-bases.md §2 — metric function signatures
-- Kirilenko et al. (2017) doi:10.1111/jofi.12498
-- Biais et al. (2015) doi:10.1016/j.jfineco.2015.03.004
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_flashcrash2010_dynamics.png`, `02_flashcrash2010_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

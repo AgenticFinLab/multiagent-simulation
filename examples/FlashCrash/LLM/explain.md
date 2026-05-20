@@ -1,69 +1,102 @@
-# FlashCrash LLM - LLM-Powered Flash Crash Simulation
+# Flash Crash LLM Variant Explanation
 
-## §1 What is This?
+## §1 Overview
 
-| Item               | Description                                                                        |
-|--------------------|------------------------------------------------------------------------------------|
-| **Phenomenon**     | **Flash Crash (闪崩)** - LLM-driven rapid price collapse and recovery in minutes   |
-| **Model**          | LLM-based traders with HFT/algorithmic personalities + Rule-based market clearing  |
-| **Key Feature**    | Investors use LLM reasoning to exhibit stop-loss cascades and liquidity withdrawal |
-| **Academic Value** | Tests whether LLMs can simulate 2010 Flash Crash market microstructure dynamics    |
+| Field | Value |
+|---|---|
+| Variant | LLM |
+| Simulation | Flash Crash |
+| Decision Mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning |
+| Theory Reference | `examples/FlashCrash/simulation-bases.md` |
+| Market Broadcast | `configs/FlashCrash/LLM/topology.yml` |
 
-## §2 5 LLM Investor Types
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-### Investor Type Summary
+## §2 Theory -> Implementation Mapping
 
-| Type               | Strategy           | Market Effect         | System Prompt Focus                    |
-|--------------------|--------------------|-----------------------|----------------------------------------|
-| **LLMHFT**         | High-frequency     | ⭐ FLASH CRASH TRIGGER | "Execute rapidly on price moves"       |
-| **LLMMarketMaker** | Liquidity provider | WITHDRAWAL → AMPLIFY  | "Won't catch falling knives"           |
-| **LLMStopLoss**    | Automatic stops    | ⭐ CASCADE MECHANISM   | "Price < $95: Sell 20%"                |
-| **LLMFundamental** | Value buyer        | STABILIZING           | "Flash crashes = buying opportunities" |
-| **LLMAlgo**        | Algorithmic        | TREND FOLLOWING       | "Return > 1%: Buy; < -1%: Sell"        |
+### §2.1 HighFrequencyTrader (simulation-bases.md §4.1)
 
-### Key Mechanism
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `LLMHighFrequencyTrader` in `examples/FlashCrash/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.2 MarketMaker (simulation-bases.md §4.2)
 
-```
-Flash Crash Cascade:
-  1. LLMHFT sells on small price drop
-  2. LLMStopLoss triggers at -5% threshold
-  3. LLMMarketMaker withdraws liquidity
-  4. More stop-losses trigger → Cascade
-  5. LLMFundamental provides eventual floor
-```
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `LLMFlashMarketMaker` in `examples/FlashCrash/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.3 AlgorithmicTrader (simulation-bases.md §4.3)
 
-## §3 Files
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `LLMAlgorithmicTrader` in `examples/FlashCrash/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.4 StopLossTrader (simulation-bases.md §4.4)
 
-| File                                            | Purpose                          |
-|-------------------------------------------------|----------------------------------|
-| `examples/FlashCrash/LLM/players.py`             | Market + 5 LLM investor classes  |
-| `examples/FlashCrash/LLM/prompts.py`             | System and user prompt templates |
-| `examples/FlashCrash/LLM/run_flash_crash_llm.py` | Entry point                      |
-| `configs/FlashCrash/LLM/simulation.yml`          | Main config                      |
-| `configs/FlashCrash/LLM/players.yml`             | Player definitions + LLM config  |
-| `configs/FlashCrash/LLM/topology.yml`            | Star topology                    |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `LLMStopLossTrader` in `examples/FlashCrash/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.5 FundamentalTrader (simulation-bases.md §4.5)
 
-## §4 Running
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `LLMFundamentalTrader` in `examples/FlashCrash/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.6 RetailTrader (simulation-bases.md §4.6)
+
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.6 | `configured player class family` in `examples/FlashCrash/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+
+## §3 Market Mechanism
+
+The coordinator mechanism is the final implementation in `examples/FlashCrash/LLM/players.py` and its configured counterpart in `configs/FlashCrash/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+
+## §4 Variant Architecture
+
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/FlashCrash/LLM/players.py` |
+| Prompt module | `examples/FlashCrash/LLM/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+
+## §5 Config Reference
+
+| Config | Purpose |
+|---|---|
+| `configs/FlashCrash/LLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/FlashCrash/LLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/FlashCrash/LLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/FlashCrash/LLM/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
-export ARK_API_KEY='your-bytedance-doubao-api-key'
 python examples/FlashCrash/LLM/run_flash_crash_llm.py -c configs/FlashCrash/LLM/simulation.yml
 ```
 
-## §5 Expected Behavior Patterns
+## §7 Expected Behavior
 
-| Phase    | Rounds | LLM Behavior                                   |
-|----------|--------|------------------------------------------------|
-| Normal   | 1-3    | Normal trading, mixed decisions                |
-| Trigger  | 4-5    | LLMHFT sells rapidly on initial drop           |
-| Cascade  | 6-7    | LLMStopLoss triggers, LLMMarketMaker withdraws |
-| Crash    | 8-9    | Maximum selling pressure, minimum liquidity    |
-| Recovery | 10-12  | LLMFundamental buys, price rebounds            |
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §6 References
+## §8 References
 
-| Theory                   | Application in FlashCrash LLM     | Reference               |
-|--------------------------|----------------------------------|-------------------------|
-| **Flash Crash**          | May 6, 2010 dynamics simulation  | CFTC-SEC (2010)         |
-| **Stop-Loss Cascades**   | LLMStopLoss automatic selling    | Market Microstructure   |
-| **Liquidity Withdrawal** | LLMMarketMaker "WITHDRAWN" state | Kirilenko et al. (2017) |
+See `examples/FlashCrash/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/FlashCrash/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

@@ -1,46 +1,36 @@
-# FlashCrash2010 LLM — Analysis
+# 2010 Flash Crash LLM Analysis Plan
 
 ## §1 Objectives
 
-Evaluate whether the LLM-driven FlashCrash2010 simulation:
-1. Reproduces the order-book depth collapse and spread widening pattern
-2. Shows LLM-induced variability compared to Rule baseline
-3. Correctly outputs `provides_liquidity` and `agent_type` fields for market depth computation
-4. Demonstrates emergent qualitative judgment (e.g., "too volatile to provide liquidity")
+This analysis checks whether the LLM variant produces a complete, analyzable 2010 Flash Crash trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric                 | Function                                                  | Source               |
-|------------------------|-----------------------------------------------------------|----------------------|
-| Max drawdown           | `max_drawdown(price_history)`                             | analysis-bases.md §2 |
-| Depth collapse ratio   | `depth_collapse_ratio(depth_history, base_depth)`         | analysis-bases.md §2 |
-| Spread widening factor | `spread_widening_factor(spread_history, normal_spread)`   | analysis-bases.md §2 |
-| HFT withdrawal rounds  | `hft_withdrawal_rounds(hft_orders_by_round)`              | analysis-bases.md §2 |
-| Cascade trigger rounds | `cascade_trigger_rounds(stoploss_orders_by_round)`        | analysis-bases.md §2 |
-| Recovery time          | `recovery_time(price_history, trough_round, fundamental)` | analysis-bases.md §2 |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_flashcrash2010_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §3 Variant-Specific Notes (LLM)
+## §3 Analysis Dimensions
 
-- `provides_liquidity` sourced from `decision["provides_liquidity"]` — must be boolean in LLM response
-- `agent_type` field from LLM response drives `hft_participation` in market depth formula
-- High stochasticity: run ≥5 seeds; report mean ± std for all metrics
-- LLM may fail to "crash" if it does not recognise stress signals → compare `max_drawdown` distribution
-- Check for prompt-induced bias: HFTMarketMaker system prompt must describe the stress-withdrawal behavior
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether LLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-## §4 Expected Ranges (LLM)
+## §4 Phase Analysis
 
-| Metric                   | Expected range | vs Rule                          |
-|--------------------------|----------------|----------------------------------|
-| `max_drawdown`           | 0.04–0.14      | Similar mean; higher variance    |
-| `depth_collapse_ratio`   | 0.05–0.30      | Similar mean; higher variance    |
-| `spread_widening_factor` | 3–50 ×         | Similar; depends on LLM judgment |
-| `hft_withdrawal_rounds`  | 3–25 rounds    | Variable                         |
-| Cascade wave count       | 1–5            | Variable                         |
-| `recovery_time`          | 8–30 rounds    | Variable                         |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-- simulation-bases.md §4 — investor taxonomy and parameter definitions
-- analysis-bases.md §2 — metric function signatures
-- Kirilenko et al. (2017) doi:10.1111/jofi.12498
-- CFTC-SEC Joint Report (2010)
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_flashcrash2010_dynamics.png`, `02_flashcrash2010_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

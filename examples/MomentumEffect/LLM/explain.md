@@ -1,158 +1,102 @@
-# MomentumEffect LLM - LLM-Powered Momentum Effect Simulation
+# Momentum Effect LLM Variant Explanation
 
-## §1 What is This?
+## §1 Overview
 
-| Item               | Description                                                                         |
-|--------------------|-------------------------------------------------------------------------------------|
-| **Phenomenon**     | **Momentum Effect (动量效应)** - LLM-driven price continuation patterns             |
-| **Model**          | LLM-based investors with trend-following personalities + Rule-based market clearing |
-| **Key Feature**    | Investors use LLM reasoning to detect and trade momentum signals                    |
-| **Academic Value** | Tests whether LLMs can replicate Jegadeesh & Titman's momentum findings             |
+| Field | Value |
+|---|---|
+| Variant | LLM |
+| Simulation | Momentum Effect |
+| Decision Mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning |
+| Theory Reference | `examples/MomentumEffect/simulation-bases.md` |
+| Market Broadcast | `configs/MomentumEffect/LLM/topology.yml` |
 
-## §2 Rule-Based vs LLM-Based Comparison
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-| Aspect                 | MomentumEffect (Rule-Based)         | MomentumEffect LLM (LLM-Based)               |
-|------------------------|-------------------------------------|---------------------------------------------|
-| **Decision Logic**     | Fixed momentum calculation formulas | LLM interprets price patterns via prompts   |
-| **Investor Types**     | 5 types with hardcoded strategies   | 5 types with personality-defining prompts   |
-| **Behavior**           | Deterministic momentum signals      | Stochastic trend interpretation             |
-| **Market**             | Rule-based order clearing           | **Same** rule-based order clearing          |
-| **Momentum Detection** | From mathematical lookback formulas | From LLM "chart reading" reasoning          |
-| **Research Value**     | Mechanism validation                | LLM pattern recognition + emergent momentum |
+## §2 Theory -> Implementation Mapping
 
-## §3 5 LLM Investor Types
+### §2.1 MomentumTrader (simulation-bases.md §4.1)
 
-### Investor Type Summary
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `LLMMomentumTrader` in `examples/MomentumEffect/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.2 ContrarianTrader (simulation-bases.md §4.2)
 
-| Type                  | Strategy            | Market Effect      | System Prompt Focus                |
-|-----------------------|---------------------|--------------------|------------------------------------|
-| **LLMMomentumTrader** | Jegadeesh-Titman    | ⭐ TREND AMPLIFIER  | "Winners keep winning"             |
-| **LLMContrarian**     | Mean reversion      | STABILIZING        | "What goes up must come down"      |
-| **LLMTechnical**      | Price patterns      | TREND FOLLOWING    | "Price patterns predict future"    |
-| **LLMTrendFollower**  | Aggressive momentum | ⭐ STRONG AMPLIFIER | "The trend is your friend"         |
-| **LLMFundamental**    | Value anchor        | STABILIZING        | "Price should reflect fundamental" |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `LLMContrarianTrader` in `examples/MomentumEffect/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.3 IndexFund (simulation-bases.md §4.3)
 
-### 1. LLMMomentumTrader (⭐ Primary Driver)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `configured player class family` in `examples/MomentumEffect/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.4 MarketMaker (simulation-bases.md §4.4)
 
-**Theory**: Jegadeesh & Titman (1993) - Winners continue winning for 3-12 months.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `configured player class family` in `examples/MomentumEffect/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.5 TechnicalTrader (simulation-bases.md §4.5)
 
-| Aspect       | Description                              |
-|--------------|------------------------------------------|
-| **Effect**   | TREND AMPLIFIER - buys winners           |
-| **Signals**  | Momentum_5 > 3% → Buy; < -3% → Sell      |
-| **Behavior** | Classic momentum strategy implementation |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `LLMTechnicalTrader` in `examples/MomentumEffect/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.6 FundamentalTrader (simulation-bases.md §4.6)
 
-### 2. LLMContrarian (Stabilizing)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.6 | `configured player class family` in `examples/MomentumEffect/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
 
-**Theory**: De Bondt & Thaler (1985) - Markets overreact, mean reversion follows.
+## §3 Market Mechanism
 
-| Aspect       | Description                                    |
-|--------------|------------------------------------------------|
-| **Effect**   | STABILIZING - fades trends                     |
-| **Behavior** | Sell overbought, buy oversold                  |
-| **Signals**  | Momentum_5 > 5% → Overbought; < -5% → Oversold |
+The coordinator mechanism is the final implementation in `examples/MomentumEffect/LLM/players.py` and its configured counterpart in `configs/MomentumEffect/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-### 3. LLMTechnicalTrader (Pattern-Based)
+## §4 Variant Architecture
 
-**Theory**: Technical analysis - price patterns contain predictive information.
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/MomentumEffect/LLM/players.py` |
+| Prompt module | `examples/MomentumEffect/LLM/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-| Aspect       | Description                            |
-|--------------|----------------------------------------|
-| **Effect**   | TREND FOLLOWING (moderate)             |
-| **Behavior** | Golden cross → Buy; Death cross → Sell |
-| **Focus**    | Short-term vs long-term price averages |
+## §5 Config Reference
 
-### 4. LLMTrendFollower (⭐ Aggressive)
+| Config | Purpose |
+|---|---|
+| `configs/MomentumEffect/LLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/MomentumEffect/LLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/MomentumEffect/LLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/MomentumEffect/LLM/persona.yml` | Turn recording and persona metadata. |
 
-**Theory**: Trend following - ride the trend until it ends.
-
-| Aspect       | Description                              |
-|--------------|------------------------------------------|
-| **Effect**   | STRONG AMPLIFIER - large positions       |
-| **Behavior** | momentum_10 > 0 → BULLISH; < 0 → BEARISH |
-| **Risk**     | High - aggressive position sizing        |
-
-### 5. LLMFundamentalInvestor (Anchor)
-
-**Theory**: Fundamental analysis - price should reflect intrinsic value.
-
-| Aspect       | Description                       |
-|--------------|-----------------------------------|
-| **Effect**   | STABILIZING - ignores momentum    |
-| **Behavior** | Buy below fundamental, sell above |
-| **Focus**    | Value, not price trends           |
-
-## §4 Market Clearing (Rule-Based)
-
-```
-Price Model:
-
-  P(t+1) = P(t) + λ×D(t) + γ×[F - P(t)] + ε
-  
-  Where:
-    λ = 0.1   (price impact)
-    γ = 0.02  (mean reversion)
-    F = 100.0 (fundamental value)
-
-Momentum enables price continuation through positive feedback:
-  Price rises → LLMMomentum buys → More price rise → More buying
-```
-
-## §5 Topology (Star Network)
-
-```
-                         ┌───────────────────┐
-                         │      market       │ ◄── Level 0
-                         └─────────┬─────────┘
-                                   │
-         ┌───────────┬─────────────┼─────────────┬───────────┐
-         ▼           ▼             ▼             ▼           ▼
-   llm_momentum  llm_contrarian  llm_technical llm_trend   llm_fund
-   (⭐ amplify)  (stabilize)     (follow)      (⭐ amplify) (anchor)
-```
-
-## §6 Files
-
-| File                                             | Purpose                          |
-|--------------------------------------------------|----------------------------------|
-| `examples/MomentumEffect/LLM/players.py`          | Market + 5 LLM investor classes  |
-| `examples/MomentumEffect/LLM/prompts.py`          | System and user prompt templates |
-| `examples/MomentumEffect/LLM/run_momentum_llm.py` | Entry point                      |
-| `configs/MomentumEffect/LLM/simulation.yml`       | Main config                      |
-| `configs/MomentumEffect/LLM/players.yml`          | Player definitions + LLM config  |
-| `configs/MomentumEffect/LLM/topology.yml`         | Star topology                    |
-
-## §7 Running
+## §6 Running Instructions
 
 ```bash
-export ARK_API_KEY='your-bytedance-doubao-api-key'
 python examples/MomentumEffect/LLM/run_momentum_llm.py -c configs/MomentumEffect/LLM/simulation.yml
 ```
 
-## §8 Expected LLM Behavior Patterns
+## §7 Expected Behavior
 
-| Phase         | Rounds | LLM Behavior                                           |
-|---------------|--------|--------------------------------------------------------|
-| Build-up      | 1-5    | Random shocks start small trends                       |
-| Detection     | 6-8    | LLMMomentum detects positive momentum_5, starts buying |
-| Amplification | 9-12   | LLMTrendFollower joins, trend strengthens              |
-| Peak          | 13-15  | LLMContrarian sells, momentum slows                    |
-| Reversal      | 16-20  | Mean reversion begins, LLMFundamental buys dips        |
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 Research Questions
+## §8 References
 
-| Question                                                | How to Test                                        |
-|---------------------------------------------------------|----------------------------------------------------|
-| Can LLMs detect momentum patterns like academics found? | Compare LLM momentum signals with rule-based       |
-| Does LLM trend following amplify momentum?              | Measure price continuation after LLM buying        |
-| Can LLM contrarians dampen momentum?                    | Track contrarian effect on trend reversal          |
-| Is LLM momentum more realistic than rule-based?         | Compare autocorrelation patterns with real markets |
+See `examples/MomentumEffect/simulation-bases.md §2` for full DOI citations and mechanism references.
 
-## §10 References
+## §9 Variant Comparison
 
-| Theory                 | Application in MomentumEffect LLM        | Reference                 |
-|------------------------|-----------------------------------------|---------------------------|
-| **Momentum Effect**    | LLMMomentumTrader follows winners       | Jegadeesh & Titman (1993) |
-| **Overreaction**       | LLMContrarian fades extreme moves       | De Bondt & Thaler (1985)  |
-| **Technical Analysis** | LLMTechnicalTrader reads price patterns | (Classical)               |
-| **Trend Following**    | LLMTrendFollower rides momentum         | (Practitioner Strategy)   |
+See `examples/MomentumEffect/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

@@ -1,91 +1,102 @@
-# ReversalEffect Rule — Implementation Explanation
+# Reversal Effect Rule Variant Explanation
 
 ## §1 Overview
 
-| Item | Description |
+| Field | Value |
 |---|---|
 | Variant | Rule |
-| Mechanism | Deterministic overreaction and reversal rules |
-| Market | Net-demand price impact with fundamental reference and recent history |
-| Agents | ContrarianInvestor, MomentumInvestor, OverconfidentTrader, NoiseTrader, ValueInvestor, IndexTracker |
-| Runtime Change | Documentation-only backfill; no code/config change |
+| Simulation | Reversal Effect |
+| Decision Mechanism | deterministic rule-based trading orders |
+| Theory Reference | `examples/ReversalEffect/simulation-bases.md` |
+| Market Broadcast | `configs/ReversalEffect/Rule/topology.yml` |
 
-## §2 Theory → Implementation Mapping
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-### §2.1 ContrarianInvestor
+## §2 Theory -> Implementation Mapping
 
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.1` reversal pressure | Reads `lookback_window`, `reversal_threshold`, `value_sensitivity`, `base_position_size` |
-| Corrective flow | Buys after excessive declines and sells after excessive rises |
-
-### §2.2 MomentumInvestor
+### §2.1 ContrarianInvestor (simulation-bases.md §4.1)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.2` delayed reversal | Reads `momentum_threshold`, `momentum_multiplier`, `base_position_size` |
-| Continuation pressure | Trades with recent trend |
-
-### §2.3 OverconfidentTrader
-
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.3` signal overreaction | Reads `reaction_threshold`, `overconfidence_factor`, `overconfidence_multiplier` |
-| Overreaction | Inflates perceived signal and order size |
-
-### §2.4 NoiseTrader
+| Investor role and activation rule from simulation-bases.md §4.1 | `ContrarianInvestor` in `examples/ReversalEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.2 MomentumInvestor (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.4` random liquidity | Reads `position_volatility`, `mean_reversion` |
-| Noise | Adds stochastic pressure |
-
-### §2.5 ValueInvestor
-
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.5` fundamental anchor | Reads `value_threshold`, `value_sensitivity`, `value_noise`, `base_position_size` |
-| Reversal support | Trades against fundamental mispricing |
-
-### §2.6 IndexTracker
+| Investor role and activation rule from simulation-bases.md §4.2 | `MomentumInvestor` in `examples/ReversalEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.3 OverconfidentTrader (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.6` passive rebalancing | Reads `target_position`, `rebalance_threshold` |
-| Stabilization | Rebalances toward benchmark position |
+| Investor role and activation rule from simulation-bases.md §4.3 | `OverconfidentTrader` in `examples/ReversalEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.4 NoiseTrader (simulation-bases.md §4.4)
 
-## §3 Market Mechanism Implementation
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `NoiseTrader` in `examples/ReversalEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.5 ValueInvestor (simulation-bases.md §4.5)
 
-The market broadcasts price, fundamental value, deviation, and recent history.
-Rule investors compute deterministic trend, reversal, value, and noise signals.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `ValueInvestor` in `examples/ReversalEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.6 IndexTracker (simulation-bases.md §4.6)
 
-## §4 Variant-Specific Features
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.6 | `IndexTracker` in `examples/ReversalEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
 
-Rule is the baseline for measuring overshoot followed by reversal.
+## §3 Market Mechanism
 
-## §5 Architecture Diagram
+The coordinator mechanism is the final implementation in `examples/ReversalEffect/Rule/players.py` and its configured counterpart in `configs/ReversalEffect/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-```text
-Market state -> rule investor decisions -> orders -> net demand -> reversal path
-```
+## §4 Variant Architecture
 
-## §6 Configuration Reference
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/ReversalEffect/Rule/players.py` |
+| Prompt module | Not applicable for Rule baseline |
+| Inference | No remote model call is used in the Rule baseline. |
+| Output parsing | Direct deterministic decision construction |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-Primary config: `configs/ReversalEffect/Rule/players.yml`.
+## §5 Config Reference
 
-## §7 Running Instructions
+| Config | Purpose |
+|---|---|
+| `configs/ReversalEffect/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/ReversalEffect/Rule/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/ReversalEffect/Rule/topology.yml` | Message routing between coordinator and agents. |
+| `configs/ReversalEffect/Rule/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
-python examples/ReversalEffect/Rule/run_reversaleffect.py \
-  -c configs/ReversalEffect/Rule/simulation.yml
+python examples/ReversalEffect/Rule/run_reversal.py -c configs/ReversalEffect/Rule/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-Overconfident and momentum agents should extend overshoot; contrarian and value
-agents should create reversal pressure.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
-`../analysis-bases.md §2`.
+See `examples/ReversalEffect/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/ReversalEffect/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

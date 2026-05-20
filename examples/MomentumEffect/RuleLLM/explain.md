@@ -1,86 +1,102 @@
-# MomentumEffect RuleLLM — Implementation Explanation
+# Momentum Effect RuleLLM Variant Explanation
 
 ## §1 Overview
 
-| Item | Description |
+| Field | Value |
 |---|---|
 | Variant | RuleLLM |
-| Mechanism | Momentum and reversion rules embedded in LLM system prompts |
-| Market | Same rule-based market as Rule |
-| Agents | RuleLLM momentum, contrarian, technical, trend-following, and fundamental agents |
-| Runtime Change | Documentation-only backfill; no code/config change |
+| Simulation | Momentum Effect |
+| Decision Mechanism | LLM-generated trading orders constrained by explicit scenario rules |
+| Theory Reference | `examples/MomentumEffect/simulation-bases.md` |
+| Market Broadcast | `configs/MomentumEffect/RuleLLM/topology.yml` |
 
-## §2 Theory → Implementation Mapping
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-### §2.1 RuleLLMMomentumTrader
+## §2 Theory -> Implementation Mapping
 
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.1` | Prompt states momentum-threshold behavior |
-| Runtime path | `RuleLLMInvestor` sends market context to LLM and parses structured decision |
-
-### §2.2 RuleLLMContrarianTrader
+### §2.1 MomentumTrader (simulation-bases.md §4.1)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.2` | Prompt states reversion rule |
-| Runtime path | Parsed action is constrained before order submission |
-
-### §2.3 RuleLLMTechnicalTrader
-
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.5` | Prompt describes technical moving-average signal |
-| Runtime path | LLM returns action, bid price, quantity, and reasoning |
-
-### §2.4 RuleLLMTrendFollower
+| Investor role and activation rule from simulation-bases.md §4.1 | `RuleLLMMomentumTrader` in `examples/MomentumEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.2 ContrarianTrader (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.1` | Prompt expresses trend-following continuation |
-| Runtime path | Decision should preserve trend direction under constraints |
-
-### §2.5 RuleLLMFundamentalAnchor
+| Investor role and activation rule from simulation-bases.md §4.2 | `RuleLLMContrarianTrader` in `examples/MomentumEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.3 IndexFund (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.6` | Prompt states fundamental-value anchor |
-| Runtime path | LLM can explain valuation but must emit valid order schema |
+| Investor role and activation rule from simulation-bases.md §4.3 | `configured player class family` in `examples/MomentumEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.4 MarketMaker (simulation-bases.md §4.4)
 
-## §3 Market Mechanism Implementation
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `configured player class family` in `examples/MomentumEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.5 TechnicalTrader (simulation-bases.md §4.5)
 
-Market mechanics are unchanged from Rule. RuleLLM changes only investor decision
-generation.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMTechnicalTrader` in `examples/MomentumEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.6 FundamentalTrader (simulation-bases.md §4.6)
 
-## §4 Variant-Specific Features
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.6 | `configured player class family` in `examples/MomentumEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
 
-RuleLLM tests whether explicit signal rules remain stable when mediated through
-LLM reasoning.
+## §3 Market Mechanism
 
-## §5 Architecture Diagram
+The coordinator mechanism is the final implementation in `examples/MomentumEffect/RuleLLM/players.py` and its configured counterpart in `configs/MomentumEffect/RuleLLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-```text
-Market update -> rule prompt + context -> LLM decision JSON -> order -> Market
-```
+## §4 Variant Architecture
 
-## §6 Configuration Reference
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/MomentumEffect/RuleLLM/players.py` |
+| Prompt module | `examples/MomentumEffect/RuleLLM/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-Primary config: `configs/MomentumEffect/RuleLLM/players.yml`, especially
-`extras.llm.sys_message`, `extras.llm.user_message`, `lm_name`, and
-`generation_config`.
+## §5 Config Reference
 
-## §7 Running Instructions
+| Config | Purpose |
+|---|---|
+| `configs/MomentumEffect/RuleLLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/MomentumEffect/RuleLLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/MomentumEffect/RuleLLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/MomentumEffect/RuleLLM/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
-python examples/MomentumEffect/RuleLLM/run_momentumeffect_rulellm.py \
-  -c configs/MomentumEffect/RuleLLM/simulation.yml
+python examples/MomentumEffect/RuleLLM/run_momentum_effect_rulellm.py -c configs/MomentumEffect/RuleLLM/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-RuleLLM should preserve trend-following direction and fundamental anchoring
-while allowing modest variation in quantity and explanation.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §4` and `../analysis-bases.md §2`.
+See `examples/MomentumEffect/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/MomentumEffect/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

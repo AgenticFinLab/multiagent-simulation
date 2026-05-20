@@ -1,60 +1,95 @@
-# SouthSeaBubble Rule — Implementation Explanation
+# South Sea Bubble Rule Variant Explanation
 
 ## §1 Overview
 
-| Item | Description |
+| Field | Value |
 |---|---|
 | Variant | Rule |
-| Mechanism | Deterministic narrative bubble, insider timing, skepticism, and arbitrage rules |
-| Market | Price/fundamental market with narrative-driven demand |
-| Agents | InsiderAdvantaged, NarrativeBeliever, SkepticalAnalyst, Arbitrageur, NoiseTrader |
-| Runtime Change | Documentation-only rewrite of existing Rule guide; no code/config change |
+| Simulation | South Sea Bubble |
+| Decision Mechanism | deterministic rule-based trading orders |
+| Theory Reference | `examples/SouthSeaBubble/simulation-bases.md` |
+| Market Broadcast | `configs/SouthSeaBubble/Rule/topology.yml` |
 
-## §2 Theory → Implementation Mapping
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-| Agent | Root Section | Runtime Implementation |
-|---|---|---|
-| InsiderAdvantaged | `simulation-bases.md §4.1` | Rule class models privileged timing and early exit |
-| NarrativeBeliever | `simulation-bases.md §4.2` | Rule class converts promotional narrative into demand |
-| SkepticalAnalyst | `simulation-bases.md §4.3` | Rule class resists overpricing using fundamentals |
-| Arbitrageur | `simulation-bases.md §4.4` | Rule class trades against large mispricing |
-| NoiseTrader | `simulation-bases.md §4.5` | Rule class supplies stochastic background liquidity |
+## §2 Theory -> Implementation Mapping
 
-## §3 Market Mechanism Implementation
+### §2.1 InsiderAdvantaged (simulation-bases.md §4.1)
 
-The Rule variant implements the shared market in `players.py`. Orders from
-narrative, insider, skeptical, and arbitrage agents are cleared by the market
-player and update price relative to fundamental value.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `InsiderAdvantaged` in `examples/SouthSeaBubble/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.2 NarrativeBeliever (simulation-bases.md §4.2)
 
-## §4 Rule Variant-Specific Features
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `NarrativeBeliever` in `examples/SouthSeaBubble/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.3 SkepticalAnalyst (simulation-bases.md §4.3)
 
-All investor decisions are encoded in Python thresholds and sizing rules. This
-variant provides the deterministic baseline for comparing LLM, RuleLLM, and Rag
-behavior.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `SkepticalAnalyst` in `examples/SouthSeaBubble/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.4 Arbitrageur (simulation-bases.md §4.4)
 
-## §5 Architecture Diagram
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `Arbitrageur` in `examples/SouthSeaBubble/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-```text
-Market broadcast -> rule investor decide() -> order dict -> Market clearing
-```
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `NoiseTrader` in `examples/SouthSeaBubble/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
 
-## §6 Configuration Reference
+## §3 Market Mechanism
 
-Primary config: `configs/SouthSeaBubble/Rule/players.yml`.
+The coordinator mechanism is the final implementation in `examples/SouthSeaBubble/Rule/players.py` and its configured counterpart in `configs/SouthSeaBubble/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-## §7 Running Instructions
+## §4 Variant Architecture
+
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/SouthSeaBubble/Rule/players.py` |
+| Prompt module | Not applicable for Rule baseline |
+| Inference | No remote model call is used in the Rule baseline. |
+| Output parsing | Direct deterministic decision construction |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+
+## §5 Config Reference
+
+| Config | Purpose |
+|---|---|
+| `configs/SouthSeaBubble/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/SouthSeaBubble/Rule/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/SouthSeaBubble/Rule/topology.yml` | Message routing between coordinator and agents. |
+| `configs/SouthSeaBubble/Rule/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
-python examples/SouthSeaBubble/Rule/run_southseabubble.py \
-  -c configs/SouthSeaBubble/Rule/simulation.yml
+python examples/SouthSeaBubble/Rule/run_southseabubble.py -c configs/SouthSeaBubble/Rule/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-Narrative and insider agents should push prices away from fundamentals while
-skeptical and arbitrage agents create correction pressure.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
-`../analysis-bases.md §2`.
+See `examples/SouthSeaBubble/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/SouthSeaBubble/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

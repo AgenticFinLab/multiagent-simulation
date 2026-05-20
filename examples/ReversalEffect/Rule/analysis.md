@@ -1,36 +1,36 @@
-# ReversalEffect Rule — Analysis Documentation
+# Reversal Effect Rule Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-Measure deterministic overshoot, momentum delay, contrarian/value correction,
-and reversal timing.
+This analysis checks whether the Rule variant produces a complete, analyzable Reversal Effect trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric | Function | analysis-bases.md Ref | Rule Notes |
-|---|---|---|---|
-| Overshoot Magnitude | `compute_overshoot_magnitude()` | `analysis-bases.md §2.1` | Maximum mispricing before correction |
-| Reversal Return | `compute_reversal_return()` | `analysis-bases.md §2.2` | Correction after overshoot |
-| Contrarian Volume | `compute_contrarian_volume()` | `analysis-bases.md §2.3` | Direct reversal pressure |
-| Momentum Delay | `compute_momentum_delay()` | `analysis-bases.md §2.4` | Continuation before reversal |
-| Value Anchor Strength | `compute_value_anchor_strength()` | `analysis-bases.md §2.5` | Fundamental correction |
-| Reversal Onset | `compute_reversal_onset()` | `analysis-bases.md §2.6` | First sustained correction round |
-| Agent Attribution | `compute_agent_attribution()` | `analysis-bases.md §2.7` | Continuation vs reversal pressure |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_reversaleffect_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §3 Dimension-by-Dimension Analysis
+## §3 Analysis Dimensions
 
-Rule output should show an initial overshoot, trend extension from
-momentum/overconfidence, and then contrarian/value-driven correction.
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rule preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-## §4 Variant-Specific Observable Phenomena
+## §4 Phase Analysis
 
-| Phenomenon | Expected Observation |
-|---|---|
-| Overshoot | Price deviates from fundamental |
-| Momentum delay | Momentum agents trade with the move before correction |
-| Reversal | Contrarian and value agents dominate later pressure |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-Metrics derive from `../analysis-bases.md §2`; mechanisms derive from
-`../simulation-bases.md §4`.
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_reversaleffect_dynamics.png`, `02_reversaleffect_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

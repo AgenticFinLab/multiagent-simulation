@@ -1,202 +1,102 @@
-# MarketCrash LLM - LLM-Powered Market Crash Simulation
+# Market Crash LLM Variant Explanation
 
-## §1 What is This?
+## §1 Overview
 
-| Item               | Description                                                                          |
-|--------------------|--------------------------------------------------------------------------------------|
-| **Phenomenon**     | **Market Crash (市场崩盘)** - LLM-driven panic selling and liquidity spiral dynamics |
-| **Model**          | LLM-based investors with crash-prone personalities + Rule-based market clearing      |
-| **Key Feature**    | Investors use LLM reasoning to exhibit panic, margin calls, and liquidity withdrawal |
-| **Academic Value** | Tests whether LLMs can simulate realistic crash psychology and cascade dynamics      |
+| Field | Value |
+|---|---|
+| Variant | LLM |
+| Simulation | Market Crash |
+| Decision Mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning |
+| Theory Reference | `examples/MarketCrash/simulation-bases.md` |
+| Market Broadcast | `configs/MarketCrash/LLM/topology.yml` |
 
-## §2 Rule-Based vs LLM-Based Comparison
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-| Aspect              | MarketCrash (Rule-Based)           | MarketCrash LLM (LLM-Based)                 |
-|---------------------|------------------------------------|--------------------------------------------|
-| **Decision Logic**  | Fixed mathematical formulas        | LLM interprets market stress via prompts   |
-| **Investor Types**  | 5 types with hardcoded strategies  | 5 types with personality-defining prompts  |
-| **Behavior**        | Deterministic crash triggers       | Stochastic panic responses                 |
-| **Market**          | Rule-based with liquidity dynamics | **Same** rule-based clearing               |
-| **Crash Mechanism** | From margin call formulas          | From LLM "fear" and "forced selling" logic |
-| **Research Value**  | Mechanism validation               | LLM panic realism + emergent crashes       |
+## §2 Theory -> Implementation Mapping
 
-> **核心差异**：MarketCrash 用公式触发崩盘，MarketCrash LLM 用大模型通过 prompt 定义的"恐慌心理"来推理决策。
+### §2.1 RiskParityFund (simulation-bases.md §4.1)
 
-## §3 Architecture
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `LLMRiskParityFund` in `examples/MarketCrash/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.2 LeveragedHedgeFund (simulation-bases.md §4.2)
 
-```
-                    ┌──────────────────────────────────────────┐
-                    │        MarketCrash LLM Architecture       │
-                    └──────────────────────────────────────────┘
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `configured player class family` in `examples/MarketCrash/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.3 MarketMaker (simulation-bases.md §4.3)
 
-   ┌─────────────────────────────────────────────────────────────────────┐
-   │                         Market (Rule-Based)                         │
-   │   - Crash-prone dynamics with liquidity feedback                    │
-   │   - P(t+1) = P(t) + λ×D(t) + γ×[F - P(t)] + ε                       │
-   │   - Liquidity factor amplifies price impact during stress           │
-   └─────────────────────────────────────────────────────────────────────┘
-                                     │
-                                     │ Broadcast: {price, liquidity, volatility}
-                                     ▼
-   ┌─────────────────────────────────────────────────────────────────────┐
-   │                    LLM Investors (5 Types)                          │
-   │                                                                     │
-   │   ┌───────────────┐ ┌───────────────┐ ┌───────────────┐            │
-   │   │PanicSeller    │ │RiskParity     │ │LeveragedFund  │            │
-   │   │(⭐ cascade    │ │(vol targeting)│ │(⭐ margin     │            │
-   │   │  trigger)     │ │               │ │   calls)      │            │
-   │   └───────┬───────┘ └───────┬───────┘ └───────┬───────┘            │
-   │           │                 │                 │                     │
-   │   ┌───────────────┐ ┌───────────────┐                              │
-   │   │MarketMaker    │ │BottomFisher   │                              │
-   │   │(withdraws in  │ │(stabilizing)  │                              │
-   │   │ stress)       │ │               │                              │
-   │   └───────┬───────┘ └───────┬───────┘                              │
-   │           ▼                 ▼                                       │
-   │   ┌─────────────────────────────────────────────────────────────┐  │
-   │   │               ByteDance Doubao API (via lmbase)             │  │
-   │   └─────────────────────────────────────────────────────────────┘  │
-   └─────────────────────────────────────────────────────────────────────┘
-```
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `LLMMarketMaker` in `examples/MarketCrash/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.4 PassiveInvestor (simulation-bases.md §4.4)
 
-## §4 5 LLM Investor Types
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `LLMInvestor` in `examples/MarketCrash/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.5 PanicSeller (simulation-bases.md §4.5)
 
-### Investor Type Summary
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `LLMPanicSeller` in `examples/MarketCrash/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.6 BottomFisher (simulation-bases.md §4.6)
 
-| Type                  | Strategy             | Market Effect        | System Prompt Focus                       |
-|-----------------------|----------------------|----------------------|-------------------------------------------|
-| **LLMPanicSeller**    | Fear-driven exit     | ⭐ CASCADE TRIGGER    | "I can't afford to lose any more!"        |
-| **LLMRiskParityFund** | Volatility targeting | FORCED DELEVERAGING  | "Maintain constant portfolio risk"        |
-| **LLMLeveragedFund**  | Margin-constrained   | ⭐ FORCED LIQUIDATION | "Leverage amplifies returns...and losses" |
-| **LLMMarketMaker**    | Liquidity provider   | WITHDRAWAL → CRISIS  | "Won't catch falling knives"              |
-| **LLMBottomFisher**   | Value buying         | STABILIZING          | "Be greedy when others are fearful"       |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.6 | `LLMBottomFisher` in `examples/MarketCrash/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
 
-### 1. LLMPanicSeller (⭐ Cascade Trigger)
+## §3 Market Mechanism
 
-**Theory**: Loss aversion + Herding under stress
+The coordinator mechanism is the final implementation in `examples/MarketCrash/LLM/players.py` and its configured counterpart in `configs/MarketCrash/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-| Aspect         | Description                             |
-|----------------|-----------------------------------------|
-| **Effect**     | CASCADE TRIGGER - starts selling domino |
-| **Behavior**   | Panic on price drops, sell at any price |
-| **Psychology** | Losses hurt 3x more than gains          |
+## §4 Variant Architecture
 
-### 2. LLMRiskParityFund (Volatility-Triggered)
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/MarketCrash/LLM/players.py` |
+| Prompt module | `examples/MarketCrash/LLM/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-**Theory**: Risk parity funds must sell when volatility rises to maintain target risk.
+## §5 Config Reference
 
-| Aspect       | Description                          |
-|--------------|--------------------------------------|
-| **Effect**   | FORCED DELEVERAGING                  |
-| **Behavior** | Mechanical selling when vol > target |
-| **Rules**    | Vol > 2.0 → reduce; Vol > 3.0 → sell |
+| Config | Purpose |
+|---|---|
+| `configs/MarketCrash/LLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/MarketCrash/LLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/MarketCrash/LLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/MarketCrash/LLM/persona.yml` | Turn recording and persona metadata. |
 
-### 3. LLMLeveragedFund (⭐ Margin Calls)
-
-**Theory**: Leverage amplifies losses, triggers forced liquidation.
-
-| Aspect         | Description                           |
-|----------------|---------------------------------------|
-| **Effect**     | FORCED LIQUIDATION                    |
-| **Behavior**   | Must sell when portfolio < thresholds |
-| **Thresholds** | <$7500 → 50% sell; <$5000 → sell all  |
-
-### 4. LLMMarketMaker (Liquidity Withdrawal)
-
-**Theory**: Market makers withdraw during extreme stress, worsening crisis.
-
-| Aspect       | Description                              |
-|--------------|------------------------------------------|
-| **Effect**   | LIQUIDITY WITHDRAWAL → AMPLIFICATION     |
-| **Behavior** | Withdraw when liquidity < 0.5 or vol > 3 |
-| **State**    | ACTIVE (stabilizing) or WITHDRAWN        |
-
-### 5. LLMBottomFisher (Stabilizing)
-
-**Theory**: Value investors buy during panic, providing stabilizing demand.
-
-| Aspect         | Description                         |
-|----------------|-------------------------------------|
-| **Effect**     | STABILIZING - eventual price floor  |
-| **Behavior**   | Buy when price < 0.8 × fundamental  |
-| **Psychology** | "Be greedy when others are fearful" |
-
-## §5 Market Clearing (Rule-Based)
-
-```
-Crash-Prone Price Model:
-
-  P(t+1) = P(t) + λ×L(t)×D(t) + γ×[F - P(t)] + ε
-  
-  Where:
-    λ = 0.1   (base price impact)
-    L(t) = liquidity factor (>1 in stress)
-    γ = 0.02  (mean reversion)
-    F = 100.0 (fundamental value)
-
-Liquidity Spiral:
-  Low liquidity → Higher L(t) → Bigger price impact → More selling → Lower liquidity
-```
-
-## §6 Topology (Star Network)
-
-```
-                         ┌───────────────────┐
-                         │      market       │ ◄── Level 0 (crash-prone clearing)
-                         └─────────┬─────────┘
-                                   │
-         ┌───────────┬─────────────┼─────────────┬───────────┐
-         ▼           ▼             ▼             ▼           ▼
-   llm_panic     llm_risk_parity llm_leveraged llm_mm    llm_bottom
-   (⭐ cascade)  (vol trigger)   (⭐ margin)   (withdraw) (stabilize)
-```
-
-## §7 Files
-
-| File                                       | Purpose                          |
-|--------------------------------------------|----------------------------------|
-| `examples/MarketCrash/LLM/players.py`       | Market + 5 LLM investor classes  |
-| `examples/MarketCrash/LLM/prompts.py`       | System and user prompt templates |
-| `examples/MarketCrash/LLM/run_crash_llm.py` | Entry point                      |
-| `configs/MarketCrash/LLM/simulation.yml`    | Main config (rounds, paths)      |
-| `configs/MarketCrash/LLM/players.yml`       | Player definitions + LLM config  |
-| `configs/MarketCrash/LLM/topology.yml`      | Star topology                    |
-
-## §8 Running
+## §6 Running Instructions
 
 ```bash
-# Set API key
-export ARK_API_KEY='your-bytedance-doubao-api-key'
-
-# Run simulation
 python examples/MarketCrash/LLM/run_crash_llm.py -c configs/MarketCrash/LLM/simulation.yml
 ```
 
-## §9 Expected LLM Behavior Patterns
+## §7 Expected Behavior
 
-| Phase        | Rounds | LLM Behavior                                      |
-|--------------|--------|---------------------------------------------------|
-| Stable       | 1-3    | Normal trading, mixed decisions                   |
-| Stress Build | 4-6    | Volatility rises, RiskParity starts reducing      |
-| Trigger      | 7-8    | PanicSeller detects drop, starts cascade          |
-| Cascade      | 9-12   | LeveragedFund margin calls, MarketMaker withdraws |
-| Capitulation | 13-15  | Maximum selling pressure, minimum liquidity       |
-| Recovery     | 16-20  | BottomFisher buying provides floor                |
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §10 Research Questions
+## §8 References
 
-| Question                                            | How to Test                                        |
-|-----------------------------------------------------|----------------------------------------------------|
-| Can LLMs exhibit realistic panic behavior?          | Track reasoning during price drops                 |
-| Do margin call dynamics emerge naturally from LLMs? | Monitor LeveragedFund's portfolio calculations     |
-| Does liquidity withdrawal amplify crashes?          | Track MarketMaker's ACTIVE/WITHDRAWN state changes |
-| Can LLM bottom fishers stabilize crashes?           | Measure price floor formation timing               |
+See `examples/MarketCrash/simulation-bases.md §2` for full DOI citations and mechanism references.
 
-## §11 References
+## §9 Variant Comparison
 
-| Theory               | Application in MarketCrash LLM             | Reference                      |
-|----------------------|-------------------------------------------|--------------------------------|
-| **Minsky Moment**    | Transition from stability to instability  | Minsky (1986)                  |
-| **Liquidity Spiral** | LLMMarketMaker withdrawal amplifies crash | Brunnermeier & Pedersen (2009) |
-| **Fire Sales**       | LLMLeveragedFund forced liquidation       | Shleifer & Vishny (2011)       |
-| **Loss Aversion**    | LLMPanicSeller's extreme fear response    | Kahneman & Tversky (1979)      |
+See `examples/MarketCrash/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

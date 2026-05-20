@@ -1,103 +1,95 @@
-# CreditCycle LLM Variant — explain.md
+# Credit Cycle LLM Variant Explanation
 
 ## §1 Overview
 
-The LLM variant replaces rule-based decisions with LLM inference. Each investor receives a persona system prompt describing their credit-cycle archetype and responds to market broadcasts with a structured buy/sell/hold decision. This tests whether LLMs exhibit plausible credit-cycle behavior through persona alone.
+| Field | Value |
+|---|---|
+| Variant | LLM |
+| Simulation | Credit Cycle |
+| Decision Mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning |
+| Theory Reference | `examples/CreditCycle/simulation-bases.md` |
+| Market Broadcast | `configs/CreditCycle/LLM/topology.yml` |
 
-| Aspect             | Detail                                       |
-|--------------------|----------------------------------------------|
-| Variant            | LLM                                          |
-| Simulation         | CreditCycle                                  |
-| Decision Mechanism | LLM persona prompt + market broadcast        |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`              |
-| Market Broadcast   | `price`, `fundamental`, `deviation`, `round` |
-| Prompt Location    | `CreditCycle/LLM/prompts.py`                 |
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-## §2 Theory → Implementation Mapping
+## §2 Theory -> Implementation Mapping
 
-### §2.1 LLMProCyclicalLender (simulation-bases.md §4.1)
+### §2.1 ProCyclicalLender (simulation-bases.md §4.1)
 
-| Theory Component                            | LLM Implementation                                                                |
-|---------------------------------------------|-----------------------------------------------------------------------------------|
-| Pro-cyclical leverage (Adrian & Shin, 2010) | Persona: "You are a bank that expands lending in booms and tightens in downturns" |
-| Deviation signal                            | `{deviation}` in user prompt triggers boom/bust reasoning                         |
-| Credit multiplier concept                   | Persona narrative; no hard multiplier enforced                                    |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `LLMProCyclicalLender` in `examples/CreditCycle/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.2 MinskyBorrower (simulation-bases.md §4.2)
 
-### §2.2 LLMMinskyBorrower (simulation-bases.md §4.2)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `LLMMinskyBorrower` in `examples/CreditCycle/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.3 CounterCyclicalLender (simulation-bases.md §4.3)
 
-| Theory Component                          | LLM Implementation                                                                    |
-|-------------------------------------------|---------------------------------------------------------------------------------------|
-| Stability breeds fragility (Minsky, 1986) | Persona: "You increase leverage during calm markets; you are caught in Ponzi finance" |
-| Forced deleveraging                       | LLM triggered by large negative deviation in user prompt                              |
-| `stable_rounds` concept                   | Conveyed via `{round}` context; LLM infers calm duration                              |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `LLMCounterCyclicalLender` in `examples/CreditCycle/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.4 ValueInvestor (simulation-bases.md §4.4)
 
-### §2.3 LLMCounterCyclicalLender (simulation-bases.md §4.3)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `LLMValueInvestor` in `examples/CreditCycle/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-| Theory Component                | LLM Implementation                                                             |
-|---------------------------------|--------------------------------------------------------------------------------|
-| Counter-cyclical capital buffer | Persona: "You accumulate reserves during booms and deploy liquidity in crises" |
-| Crisis detection                | `{deviation}` < −0.05 in prompt signals crisis                                 |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `LLMNoiseTrader` in `examples/CreditCycle/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
 
-### §2.4 LLMValueInvestor (simulation-bases.md §4.4)
+## §3 Market Mechanism
 
-| Theory Component                | LLM Implementation                                                   |
-|---------------------------------|----------------------------------------------------------------------|
-| Margin of safety (Graham, 1949) | Persona: "You buy only at significant discount to fundamental value" |
-| Fundamental reference           | `{fundamental}` and `{price}` provided in broadcast                  |
+The coordinator mechanism is the final implementation in `examples/CreditCycle/LLM/players.py` and its configured counterpart in `configs/CreditCycle/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-### §2.5 LLMNoiseTrader (simulation-bases.md §4.5)
+## §4 Variant Architecture
 
-| Theory Component                       | LLM Implementation                                         |
-|----------------------------------------|------------------------------------------------------------|
-| Random uninformed trader (Black, 1986) | Persona: "You trade randomly without fundamental analysis" |
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/CreditCycle/LLM/players.py` |
+| Prompt module | `examples/CreditCycle/LLM/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-## §3 Prompt Variables
+## §5 Config Reference
 
-| Variable        | Source           | Example Value         |
-|-----------------|------------------|-----------------------|
-| `{price}`       | Market broadcast | `102.5`               |
-| `{fundamental}` | Market broadcast | `100.0`               |
-| `{deviation}`   | Market broadcast | `0.025`               |
-| `{round}`       | Market broadcast | `15`                  |
-| `{cash}`        | Agent state      | `85000.0`             |
-| `{position}`    | Agent state      | `500`                 |
-| `{history}`     | `HistoryBuffer`  | Last 5 rounds summary |
+| Config | Purpose |
+|---|---|
+| `configs/CreditCycle/LLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/CreditCycle/LLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/CreditCycle/LLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/CreditCycle/LLM/persona.yml` | Turn recording and persona metadata. |
 
-## §4 Variant-Specific Features
-
-- **No `stable_rounds` counter**: LLM infers leverage accumulation from round number and market context; may not exhibit Minsky cycle as precisely as Rule.
-- **Narrative boom-bust**: LLM agents may exhibit richer crisis language and anticipate turning points through reasoning.
-- **Consistency risk**: LLM agents may randomly switch behavior; lower consistency than Rule variant.
-- **Response parsing**: `parse_llm_response_with_thinking()` extracts `action` and `quantity` from LLM output.
-
-## §5 Architecture
-
-```
-Market.decide() → broadcast market_data
-LLMInvestor.perceive() → store market_data
-LLMInvestor.decide() → LangChainAPIInference.infer(system_prompt, user_prompt)
-                     → parse_llm_response_with_thinking() → {action, quantity}
-LLMInvestor.act() → update cash/position, submit order
-```
-
-## §6 Config Reference
-
-Same `config.yaml` as Rule variant; LLM extras: `model_name`, `temperature`, `max_tokens`.
-
-## §7 Running Instructions
+## §6 Running Instructions
 
 ```bash
-cd multiagent-simulation
-python -m examples.CreditCycle.LLM.run
+python examples/CreditCycle/LLM/run_creditcycle_llm.py -c configs/CreditCycle/LLM/simulation.yml
 ```
 
-## §8 Expected Behavior
+## §7 Expected Behavior
 
-- LLM boom-bust may be more variable in timing
-- MinskyBorrower LLM may recognize fragility earlier and reduce leverage
-- CounterCyclicalLender LLM may provide more nuanced crisis deployment
-- Larger standard deviation in LAI and CCS compared to Rule variant
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 References
+## §8 References
 
-See `simulation-bases.md §2` for full DOI citations.
+See `examples/CreditCycle/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/CreditCycle/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

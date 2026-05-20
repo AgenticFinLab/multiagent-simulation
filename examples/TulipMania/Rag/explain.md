@@ -1,59 +1,95 @@
-# TulipMania Rag — Implementation Explanation
+# Tulip Mania Rag Variant Explanation
 
 ## §1 Overview
 
-| Item | Description |
+| Field | Value |
 |---|---|
 | Variant | Rag |
-| Mechanism | Retrieved mania/bubble context plus LLM trading reasoning |
-| Market | Same price/fundamental market as Rule |
-| Agents | Rag trend chaser, social-proof follower, intrinsic-value trader, early-exit trader, noise trader |
-| Runtime Change | Documentation-only backfill; no code/config change |
+| Simulation | Tulip Mania |
+| Decision Mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema |
+| Theory Reference | `examples/TulipMania/simulation-bases.md` |
+| Market Broadcast | `configs/TulipMania/Rag/topology.yml` |
 
-## §2 Theory → Implementation Mapping
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-| Agent | Root Section | Runtime Implementation |
-|---|---|---|
-| RagLLMTrendChaser | `simulation-bases.md §4.1` | Retrieval may reinforce positive-feedback logic |
-| RagLLMSocialProofFollower | `simulation-bases.md §4.2` | Retrieval may contextualize herding |
-| RagLLMIntrinsicValueTrader | `simulation-bases.md §4.3` | Retrieval may support valuation resistance |
-| RagLLMEarlyExitTrader | `simulation-bases.md §4.4` | Retrieval may support timing logic |
-| RagLLMNoiseTrader | `simulation-bases.md §4.5` | Baseline liquidity remains low-information |
+## §2 Theory -> Implementation Mapping
 
-## §3 Market Mechanism Implementation
+### §2.1 TrendChaser (simulation-bases.md §4.1)
 
-Rag leaves market clearing unchanged. Retrieved context is inserted into the
-LLM decision prompt before canonical order parsing.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMTrendChaser` in `examples/TulipMania/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.2 SocialProofFollower (simulation-bases.md §4.2)
 
-## §4 Variant-Specific Features
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMSocialProofFollower` in `examples/TulipMania/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.3 IntrinsicValueTrader (simulation-bases.md §4.3)
 
-Rag tests whether historical mania context changes trend chasing, social proof,
-fundamental resistance, or early-exit timing.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMIntrinsicValueTrader` in `examples/TulipMania/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.4 EarlyExitTrader (simulation-bases.md §4.4)
 
-## §5 Architecture Diagram
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMEarlyExitTrader` in `examples/TulipMania/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-```text
-Market state -> retrieve context -> LLM decision JSON -> order -> Market
-```
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMNoiseTrader` in `examples/TulipMania/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
 
-## §6 Configuration Reference
+## §3 Market Mechanism
 
-Primary config: `configs/TulipMania/Rag/players.yml`.
+The coordinator mechanism is the final implementation in `examples/TulipMania/Rag/players.py` and its configured counterpart in `configs/TulipMania/Rag/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-## §7 Running Instructions
+## §4 Variant Architecture
+
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/TulipMania/Rag/players.py` |
+| Prompt module | `examples/TulipMania/Rag/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+
+## §5 Config Reference
+
+| Config | Purpose |
+|---|---|
+| `configs/TulipMania/Rag/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/TulipMania/Rag/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/TulipMania/Rag/topology.yml` | Message routing between coordinator and agents. |
+| `configs/TulipMania/Rag/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
-python examples/TulipMania/Rag/run_tulipmania_rag.py \
-  -c configs/TulipMania/Rag/simulation.yml
+python examples/TulipMania/Rag/run_tulipmania_rag.py -c configs/TulipMania/Rag/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-Rag may make mania reasoning more historically grounded and alter exit timing
-or valuation resistance.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
-`../analysis-bases.md §2`.
+See `examples/TulipMania/simulation-bases.md §2` for full DOI citations and mechanism references.
 
+## §9 Variant Comparison
+
+See `examples/TulipMania/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

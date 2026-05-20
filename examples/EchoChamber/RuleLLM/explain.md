@@ -1,102 +1,95 @@
-# EchoChamber RuleLLM Variant — explain.md
+# Echo Chamber RuleLLM Variant Explanation
 
 ## §1 Overview
 
-The RuleLLM variant implements EchoChamber with hybrid Rule+LLM agents. Each agent's system prompt embeds BOTH the behavioral persona description AND the exact quantitative formulas from the Rule variant. The LLM reasons about how to apply these rules given the current opinion environment context, maintaining rule compliance while adding qualitative judgment.
+| Field | Value |
+|---|---|
+| Variant | RuleLLM |
+| Simulation | Echo Chamber |
+| Decision Mechanism | LLM social-action decisions constrained by explicit rules and parsed as {"action": "polarize"|"depolarize"|"hold", "influence_strength": number, "target_group": string, "reasoning": string} |
+| Theory Reference | `examples/EchoChamber/simulation-bases.md` |
+| Market Broadcast | `configs/EchoChamber/RuleLLM/topology.yml` |
 
-| Aspect             | Detail                                                                                                                                                                           |
-|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Variant            | RuleLLM                                                                                                                                                                          |
-| Simulation         | EchoChamber                                                                                                                                                                      |
-| Decision Mechanism | LLM applies embedded formulas + persona reasoning; outputs `{action_type, intensity, reasoning, analysis}`                                                                       |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                                                                                                                                                  |
-| Market Broadcast   | `polarization`, `prev_polarization`, `mean_opinion`, `cluster_separation`, `cross_cutting_exposure`, `num_polarizers`, `num_depolarizers`, `net_polarization_intensity`, `round` |
+This is a documented special-schema scenario. Decisions operate on opinion through influence_action, not bid_price-based trading orders.
 
-## §2 Theory → Implementation Mapping
+## §2 Theory -> Implementation Mapping
 
-### §2.1 RuleLLMIdeologue (simulation-bases.md §4.1)
+### §2.1 Ideologue (simulation-bases.md §4.1)
 
-| Theory Component                        | Implementation                                                                                                                                  |
-|-----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
-| In-group amplification (Sunstein, 2001) | System prompt states: "When mean_opinion is same sign as your opinion, apply `in_group_weight * (mean_opinion * extremity_boost − my_opinion)`" |
-| Out-group rejection formula             | System prompt states: "For opposing signals, apply `out_group_discount * (mean_opinion − my_opinion)`"                                          |
-| Polarizing intensity rule               | System prompt states: "Polarize when `                                                                                                          |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `RuleLLMIdeologue` in `examples/EchoChamber/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM social-action decisions constrained by explicit rules and parsed as {"action": "polarize"|"depolarize"|"hold", "influence_strength": number, "target_group": string, "reasoning": string}. |
+### §2.2 Conformist (simulation-bases.md §4.2)
 
-### §2.2 RuleLLMConformist (simulation-bases.md §4.2)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `RuleLLMConformist` in `examples/EchoChamber/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM social-action decisions constrained by explicit rules and parsed as {"action": "polarize"|"depolarize"|"hold", "influence_strength": number, "target_group": string, "reasoning": string}. |
+### §2.3 CriticalThinker (simulation-bases.md §4.3)
 
-| Theory Component                | Implementation                                                                        |
-|---------------------------------|---------------------------------------------------------------------------------------|
-| Conformity formula (Asch, 1951) | System prompt embeds: `opinion_update = conformity * (local_group_mean − my_opinion)` |
-| Polarize threshold              | System prompt: "Polarize when `                                                       |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `RuleLLMCriticalThinker` in `examples/EchoChamber/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM social-action decisions constrained by explicit rules and parsed as {"action": "polarize"|"depolarize"|"hold", "influence_strength": number, "target_group": string, "reasoning": string}. |
+### §2.4 BridgeBuilder (simulation-bases.md §4.4)
 
-### §2.3 RuleLLMCriticalThinker (simulation-bases.md §4.3)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `RuleLLMBridgeBuilder` in `examples/EchoChamber/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM social-action decisions constrained by explicit rules and parsed as {"action": "polarize"|"depolarize"|"hold", "influence_strength": number, "target_group": string, "reasoning": string}. |
+### §2.5 PassiveFollower (simulation-bases.md §4.5)
 
-| Theory Component                  | Implementation                                                                              |
-|-----------------------------------|---------------------------------------------------------------------------------------------|
-| Evidence formula (Isenberg, 1986) | System prompt embeds: `evidence_signal = −my_opinion * evidence_sensitivity * polarization` |
-| Depolarize threshold              | System prompt: "Depolarize when `polarization > 0.3`"                                       |
-
-### §2.4 RuleLLMBridgeBuilder (simulation-bases.md §4.4)
-
-| Theory Component             | Implementation                                                                                                  |
-|------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| Centering formula            | System prompt embeds: `opinion_update = bridge_weight * (0 − my_opinion) * centering_tendency`                  |
-| Cluster-based depolarization | System prompt: "Depolarize when `cluster_separation > 0.5`; intensity = `bridge_strength * cluster_separation`" |
-
-### §2.5 RuleLLMPassiveFollower (simulation-bases.md §4.5)
-
-| Theory Component                 | Implementation                                                             |
-|----------------------------------|----------------------------------------------------------------------------|
-| Drift formula (Lazarsfeld, 1954) | System prompt embeds: `drift = drift_rate * (mean_opinion − my_opinion)`   |
-| Engagement probability           | System prompt: "Engage randomly with probability `engagement_probability`" |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMPassiveFollower` in `examples/EchoChamber/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/EchoChamber/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM social-action decisions constrained by explicit rules and parsed as {"action": "polarize"|"depolarize"|"hold", "influence_strength": number, "target_group": string, "reasoning": string}. |
 
 ## §3 Market Mechanism
 
-Same as Rule variant. OpinionEnvironment is shared from `examples.EchoChamber.Rule.players`:
-
-```
-P(t+1) = P(t) + alpha * NetPolarization(t) + beta * CentripetalForce(t) + epsilon(t)
-```
+The coordinator mechanism is the final implementation in `examples/EchoChamber/RuleLLM/players.py` and its configured counterpart in `configs/EchoChamber/RuleLLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
 ## §4 Variant Architecture
 
-| Component      | Detail                                                                                                       |
-|----------------|--------------------------------------------------------------------------------------------------------------|
-| Base class     | `RuleLLMSocialAgent(GeneralPlayer)`                                                                          |
-| Inference      | `LangChainAPIInference(lm_name=..., generation_config=...)`                                                  |
-| Context        | `env_data`; system prompt with embedded formulas + persona                                                   |
-| Output parsing | `parse_llm_response_with_thinking(response)` → `{action_type, intensity, reasoning, analysis}`               |
-| Retry logic    | Up to 3 attempts; on persistent failure → neutral action with `reasoning="LLM parse failed: stayed neutral"` |
-| Ray support    | `__getstate__`/`__setstate__` in `RuleLLMSocialAgent` excludes `llm_client` from pickle                      |
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/EchoChamber/RuleLLM/players.py` |
+| Prompt module | `examples/EchoChamber/RuleLLM/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
 ## §5 Config Reference
 
-Config file: `configs/EchoChamber/RuleLLM/simulation.yml`
-
-Key LLM extras per agent:
-- `llm.lm_name`: LLM model identifier
-- `llm.generation_config`: `{temperature, max_new_tokens}`
-- `llm.sys_message`: Module path to system prompt (e.g., `examples.EchoChamber.RuleLLM.prompts:RULELLM_IDEOLOGUE_SYS`)
-- `llm.user_message`: Module path to user template (e.g., `examples.EchoChamber.RuleLLM.prompts:RULELLM_USER_TEMPLATE`)
+| Config | Purpose |
+|---|---|
+| `configs/EchoChamber/RuleLLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/EchoChamber/RuleLLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/EchoChamber/RuleLLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/EchoChamber/RuleLLM/persona.yml` | Turn recording and persona metadata. |
 
 ## §6 Running Instructions
 
 ```bash
-export ARK_API_KEY=<your_key>
 python examples/EchoChamber/RuleLLM/run_echo_chamber_rulellm.py -c configs/EchoChamber/RuleLLM/simulation.yml
 ```
 
-## §7 Output Artifacts
+## §7 Expected Behavior
 
-Same as LLM variant. Reasoning field includes explicit formula application descriptions.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §8 Known Limitations
+## §8 References
 
-- System prompts with embedded formulas are longer — higher token cost per round
-- LLM may interpret formula thresholds loosely under ambiguous environmental conditions
-- Opinion update is hardcoded in code: LLM controls only `action_type` and `intensity`
+See `examples/EchoChamber/simulation-bases.md §2` for full DOI citations and mechanism references.
 
-## §9 References
+## §9 Variant Comparison
 
-See `simulation-bases.md §4` for agent parameter sources and theoretical derivations.
-See `analysis-bases.md §2` for metric definitions and Python function signatures.
+See `examples/EchoChamber/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

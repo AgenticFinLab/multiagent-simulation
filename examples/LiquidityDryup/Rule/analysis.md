@@ -1,60 +1,36 @@
-# LiquidityDryup — Rule Variant Analysis Guide
+# Liquidity Dry-up Rule Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-The Rule variant provides the most mechanically deterministic dry-up cascade — withdrawal is triggered precisely at `|return| > volatility_threshold`. Analysis goals:
+This analysis checks whether the Rule variant produces a complete, analyzable Liquidity Dry-up trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-1. Confirm the spiral mechanics: verify that MWF drives LRI down, which drives MPI up.
-2. Measure PAD — how far prices deviate from fundamental during dry-up.
-3. Establish baseline LPD (dry-up duration) for cross-variant comparison.
-4. Quantify wealth redistribution (WDI): ValueTrader and early MarketMaker exits gain; LiquiditySeeker loses.
-5. Validate the liquidity amplification formula: MPI should be proportional to `1/LRI`.
+## §2 Core Metrics
 
----
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_liquiditydryup_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §2 Metric → Function Mapping
+## §3 Analysis Dimensions
 
-| Metric | Full Name                        | analysis-bases.md Ref | Python Function                      | Key Inputs                                         |
-|--------|----------------------------------|-----------------------|--------------------------------------|----------------------------------------------------|
-| LRI    | Liquidity Ratio Index            | §2.1                  | `liquidity_ratio_index()`            | liquidity_history, base_liquidity, n_market_makers |
-| MWF    | Market Maker Withdrawal Fraction | §2.2                  | `market_maker_withdrawal_fraction()` | agent_states, round_num                            |
-| MPI    | Market Price Impact              | §2.3                  | `market_price_impact()`              | price_history, trade_history                       |
-| PAD    | Price-Amplitude Dislocation      | §2.4                  | `price_amplitude_dislocation()`      | price_history, fundamental, lri_history            |
-| LPD    | Liquidity Persistence Duration   | §2.5                  | `liquidity_persistence_duration()`   | lri_history                                        |
-| WDI    | Wealth Distribution Index        | §2.6                  | `wealth_distribution_index()`        | agent_states, final_price                          |
-| LPI    | Liquidity Provider Index         | §2.7                  | `liquidity_provider_index()`         | trade_history                                      |
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rule preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
----
+## §4 Phase Analysis
 
-## §3 Variant-Specific Notes
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-- **Deterministic cascade**: Given the same random seed and noise, the Rule spiral is fully reproducible. Run 5 times with different seeds for distribution estimates.
-- **Spiral validation**: Plot MWF, LRI, and MPI on the same time axis. MWF should lead LRI by 1 round; LRI should lead MPI by 0 rounds (same round).
-- **ValueTrader recovery**: Identify the round when ValueTrader first provides liquidity (`|deviation| > trade_threshold`). This is the recovery trigger. Measure LPD from onset to this round.
-- **MPI amplification check**: Verify `MPI_dryup / MPI_normal ≈ liquidity_factor_max / 1.0 ≈ (100 / min_liquidity)`.
-- **LiquiditySeeker execution**: Track how `liquidity_adjustment` shrinks LiquiditySeeker orders during dry-up. This is the "missing demand" that prevents price recovery.
+## §5 Cross-Variant Comparison
 
----
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
 
-## §4 Expected Ranges
+## §6 Expected Results and Validation Criteria
 
-| Metric         | Expected Range | Red Flag                                        |
-|----------------|----------------|-------------------------------------------------|
-| LRI minimum    | 0.05–0.20      | > 0.60 (no dry-up — check volatility_threshold) |
-| MWF maximum    | 0.7–1.0        | < 0.3 (weak withdrawal)                         |
-| PAD            | 0.10–0.25      | < 0.03 (no dislocation)                         |
-| LPD            | 10–25 rounds   | 0 (no dry-up) or > 60 (permanent)               |
-| WDI            | 0.25–0.45      | < 0.05 (no redistribution)                      |
-| MPI multiplier | 3–8×           | < 1.5× (weak amplification)                     |
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
 
-Rule variant provides the baseline. All other variants should show higher LRI, shorter LPD, smaller PAD.
+## §7 Visualization Catalogue
 
----
-
-## §5 References
-
-- analysis-bases.md §2.1 (LRI); §2.2 (MWF); §2.3 (MPI); §2.4 (PAD); §2.5 (LPD); §2.6 (WDI); §2.7 (LPI)
-- Grossman & Miller (1988). doi:[10.1111/j.1540-6261.1988.tb04594.x](https://doi.org/10.1111/j.1540-6261.1988.tb04594.x)
-- Brunnermeier & Pedersen (2009). doi:[10.1093/rfs/hhn098](https://doi.org/10.1093/rfs/hhn098)
-- Kyle (1985). doi:[10.2307/1913210](https://doi.org/10.2307/1913210)
-- Amihud (2002). doi:[10.1016/S1386-4181(01)00024-6](https://doi.org/10.1016/S1386-4181(01)00024-6)
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_liquiditydryup_dynamics.png`, `02_liquiditydryup_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

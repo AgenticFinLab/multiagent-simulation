@@ -1,86 +1,102 @@
-# MarketCrash RuleLLM — Implementation Explanation
+# Market Crash RuleLLM Variant Explanation
 
 ## §1 Overview
 
-| Item | Description |
+| Field | Value |
 |---|---|
 | Variant | RuleLLM |
-| Mechanism | Explicit crash rules embedded in LLM prompts |
-| Market | Same rule-based market as Rule |
-| Agents | RuleLLM versions of panic, risk parity, leverage, liquidity, and bottom-fishing agents |
-| Runtime Change | Documentation-only backfill in this commit |
+| Simulation | Market Crash |
+| Decision Mechanism | LLM-generated trading orders constrained by explicit scenario rules |
+| Theory Reference | `examples/MarketCrash/simulation-bases.md` |
+| Market Broadcast | `configs/MarketCrash/RuleLLM/topology.yml` |
 
-## §2 Theory → Implementation Mapping
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-### §2.1 RuleLLMRiskParityFund
+## §2 Theory -> Implementation Mapping
 
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.1` | System prompt states volatility-targeting rule |
-| Runtime path | `RuleLLMInvestor` builds market context and parses JSON decision |
-
-### §2.2 RuleLLMLeveragedFund
+### §2.1 RiskParityFund (simulation-bases.md §4.1)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.2` | System prompt states margin/liquidation logic |
-| Runtime path | Parsed action is constrained by cash/position before order |
-
-### §2.3 RuleLLMMarketMaker
-
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.3` | Prompt describes volatility-sensitive liquidity provision |
-| Runtime path | Order includes liquidity-relevant fields consumed by market logic |
-
-### §2.4 RuleLLMPanicSeller
+| Investor role and activation rule from simulation-bases.md §4.1 | `RuleLLMRiskParityFund` in `examples/MarketCrash/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.2 LeveragedHedgeFund (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.5` | Prompt states panic trigger and sell behavior |
-| Runtime path | LLM may vary explanation but must return structured decision |
-
-### §2.5 RuleLLMBottomFisher
+| Investor role and activation rule from simulation-bases.md §4.2 | `configured player class family` in `examples/MarketCrash/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.3 MarketMaker (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.6` | Prompt states discount/crash buying rule |
-| Runtime path | Cash constraints cap buy quantity |
+| Investor role and activation rule from simulation-bases.md §4.3 | `RuleLLMMarketMaker` in `examples/MarketCrash/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.4 PassiveInvestor (simulation-bases.md §4.4)
 
-## §3 Market Mechanism Implementation
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `configured player class family` in `examples/MarketCrash/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.5 PanicSeller (simulation-bases.md §4.5)
 
-Market mechanics remain rule-based and comparable to Rule. Only investor
-decision generation is LLM-mediated.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMPanicSeller` in `examples/MarketCrash/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.6 BottomFisher (simulation-bases.md §4.6)
 
-## §4 Variant-Specific Features
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.6 | `RuleLLMBottomFisher` in `examples/MarketCrash/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
 
-RuleLLM tests whether explicit numerical crash rules remain stable when the
-final decision is emitted by an LLM.
+## §3 Market Mechanism
 
-## §5 Architecture Diagram
+The coordinator mechanism is the final implementation in `examples/MarketCrash/RuleLLM/players.py` and its configured counterpart in `configs/MarketCrash/RuleLLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-```text
-Market update -> Rule prompt + market context -> LLM decision JSON -> order -> Market
-```
+## §4 Variant Architecture
 
-## §6 Configuration Reference
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/MarketCrash/RuleLLM/players.py` |
+| Prompt module | `examples/MarketCrash/RuleLLM/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-Primary config: `configs/MarketCrash/RuleLLM/players.yml`. Each LLM agent uses
-`extras.llm.sys_message`, `extras.llm.user_message`, `lm_name`, and
-`generation_config`.
+## §5 Config Reference
 
-## §7 Running Instructions
+| Config | Purpose |
+|---|---|
+| `configs/MarketCrash/RuleLLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/MarketCrash/RuleLLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/MarketCrash/RuleLLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/MarketCrash/RuleLLM/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
-python examples/MarketCrash/RuleLLM/run_marketcrash_rulellm.py \
-  -c configs/MarketCrash/RuleLLM/simulation.yml
+python examples/MarketCrash/RuleLLM/run_market_crash_rulellm.py -c configs/MarketCrash/RuleLLM/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-Expected market phases match Rule, but order timing and quantities may vary
-because the LLM interprets rules and market state.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §4` and `../analysis-bases.md §2`.
+See `examples/MarketCrash/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/MarketCrash/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

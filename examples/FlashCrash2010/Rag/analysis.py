@@ -1,28 +1,18 @@
 #!/usr/bin/env python
-"""FlashCrash2010 LLM Simulation Analysis
+"""2010 Flash Crash Rag Simulation Analysis.
 
-Analyze the 2010 Flash Crash LLM simulation results.
-
-Usage:
-    python examples.FlashCrash2010.Rag.analysis.py \
-        -c configs/FlashCrash2010/LLM/simulation.yml
+Produces the standardized output set required by create-example-skill:
+summary.json, 00_investor_bids.png, 01_flashcrash2010_dynamics.png,
+02_flashcrash2010_analysis.png, and 03_summary.png.
 """
 
-from examples.FlashCrash2010.Rule.analysis import (
-    calculate_metrics,
-    create_visualizations,
-    generate_summary_report,
-    load_simulation_data,
-    main,
-)
+from examples.standard_rule_analysis import run_standard_analysis
 
-__all__ = [
-    "load_simulation_data",
-    "calculate_metrics",
-    "create_visualizations",
-    "generate_summary_report",
-    "main",
-]
+
+def main():
+    """Run the standard analysis output contract for this variant."""
+    return run_standard_analysis("FlashCrash2010", "configs/FlashCrash2010/Rag/simulation.yml")
+
 
 if __name__ == "__main__":
     main()

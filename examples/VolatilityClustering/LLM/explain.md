@@ -1,149 +1,95 @@
-# VolatilityClustering LLM - LLM-Powered Volatility Clustering Simulation
+# Volatility Clustering LLM Variant Explanation
 
-## §1 What is This?
+## §1 Overview
 
-| Item               | Description                                                                  |
-|--------------------|------------------------------------------------------------------------------|
-| **Phenomenon**     | 波动率聚集 (Volatility Clustering) - LLM-driven GARCH-like dynamics          |
-| **Model**          | LLM-based investors with volatility sensitivity + Rule-based market          |
-| **Key Feature**    | LLMs adjust trading behavior based on perceived volatility regime            |
-| **Academic Value** | Tests whether LLMs can reproduce Mandelbrot (1963) / Engle (1982) clustering |
+| Field | Value |
+|---|---|
+| Variant | LLM |
+| Simulation | Volatility Clustering |
+| Decision Mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning |
+| Theory Reference | `examples/VolatilityClustering/simulation-bases.md` |
+| Market Broadcast | `configs/VolatilityClustering/LLM/topology.yml` |
 
-## §2 Rule-Based vs LLM Comparison
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-| Aspect              | Rule-Based (VolatilityClustering) | LLM Version                        |
-|---------------------|-----------------------------------|------------------------------------|
-| Volatility Response | Formula-based scaling             | LLM "volatility means opportunity" |
-| Adaptation Speed    | Fixed parameters                  | LLM chooses reaction speed         |
-| Position Sizing     | Deterministic                     | LLM reasons about risk/reward      |
-| Emergence           | GARCH-like autocorrelation        | Emergent clustering patterns       |
+## §2 Theory -> Implementation Mapping
 
-## §3 LLM Provider
+### §2.1 Fundamentalist (simulation-bases.md §4.1)
 
-- **Provider**: ByteDance Doubao (豆包) via `lmbase.LangChainAPIInference`
-- **Model**: `doubao-pro-256k`
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `LLMFundamentalist` in `examples/VolatilityClustering/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.2 TrendFollower (simulation-bases.md §4.2)
 
-## §4 5 LLM Investor Types
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `LLMTrendFollower` in `examples/VolatilityClustering/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.3 NoiseTrader (simulation-bases.md §4.3)
 
-| Type              | Count | Role                 | Volatility Response       |
-|-------------------|-------|----------------------|---------------------------|
-| Fundamentalist    | 2     | Stabilizer (Slow)    | Ignores volatility        |
-| Trend Follower    | 2     | Amplifier (Fast)     | High vol → larger trades  |
-| Noise Trader      | 2     | Shock Provider       | Random                    |
-| Slow Adapter      | 1     | Stabilizer (Delayed) | High vol → more cautious  |
-| Volatility Trader | 1     | Stabilizer           | Mean-reverts vol exposure |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `LLMNoiseTrader` in `examples/VolatilityClustering/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.4 SlowAdapter (simulation-bases.md §4.4)
 
-### Trend Follower (Volatility Amplifier)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `LLMSlowAdapter` in `examples/VolatilityClustering/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.5 VolatilityTrader (simulation-bases.md §4.5)
 
-```
-CORE BELIEF: "The trend is your friend - momentum drives markets."
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `LLMVolatilityTrader` in `examples/VolatilityClustering/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
 
-VOLATILITY RESPONSE:
-- When volatility is HIGH: INCREASE position sizes (more opportunity)
-- When volatility is LOW: DECREASE position sizes (boring market)
-- You AMPLIFY volatility through your trading
+## §3 Market Mechanism
 
-RISK PROFILE: High - you amplify market moves
-```
+The coordinator mechanism is the final implementation in `examples/VolatilityClustering/LLM/players.py` and its configured counterpart in `configs/VolatilityClustering/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-### Fundamentalist (Slow Stabilizer)
+## §4 Variant Architecture
 
-```
-CORE BELIEF: "Price always returns to fundamental value (100) - be patient."
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/VolatilityClustering/LLM/players.py` |
+| Prompt module | `examples/VolatilityClustering/LLM/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-VOLATILITY RESPONSE:
-- You do NOT react to volatility spikes - they are temporary
-- High volatility might create buying opportunities
-- You are the "anchor" that eventually pulls price back to fundamentals
-```
+## §5 Config Reference
 
-### Volatility Trader (Vol Mean-Reversion)
+| Config | Purpose |
+|---|---|
+| `configs/VolatilityClustering/LLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/VolatilityClustering/LLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/VolatilityClustering/LLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/VolatilityClustering/LLM/persona.yml` | Turn recording and persona metadata. |
 
-```
-CORE BELIEF: "Volatility mean reverts - sell high vol, buy low vol."
-
-VOLATILITY RESPONSE:
-- High volatility → SELL (expecting vol to decrease, price to stabilize)
-- Low volatility → BUY (expecting calm to continue, prices to rise)
-- You help DAMPEN extreme volatility spikes
-```
-
-## §5 Key Mechanism: Volatility Clustering
-
-```
-┌─────────────────────────────────────────────────────────┐
-│              VOLATILITY CLUSTERING DYNAMICS              │
-│                                                          │
-│   ┌─────────────┐          ┌─────────────┐              │
-│   │  FAST       │          │  SLOW       │              │
-│   │  AMPLIFIERS │          │  STABILIZERS│              │
-│   │  (Trend     │          │  (Value     │              │
-│   │   Followers)│          │   Investors)│              │
-│   └──────┬──────┘          └──────┬──────┘              │
-│          │                        │                      │
-│          │ React QUICKLY          │ React SLOWLY         │
-│          │ to volatility          │ to volatility        │
-│          │                        │                      │
-│          ▼                        ▼                      │
-│   ┌─────────────────────────────────────────┐           │
-│   │                                         │           │
-│   │   Short-term: AMPLIFIERS dominate       │           │
-│   │   → Volatility PERSISTS (clustering)    │           │
-│   │                                         │           │
-│   │   Long-term: STABILIZERS catch up       │           │
-│   │   → Volatility eventually DECAYS        │           │
-│   │                                         │           │
-│   └─────────────────────────────────────────┘           │
-│                                                          │
-│   Result: GARCH(1,1)-like autocorrelation in volatility │
-│   σ²(t) = ω + α·ε²(t-1) + β·σ²(t-1)                    │
-└─────────────────────────────────────────────────────────┘
-```
-
-## §6 Theoretical Basis: GARCH / Mandelbrot
-
-**Volatility Clustering** (Mandelbrot 1963, Engle 1982):
-- "Large changes tend to be followed by large changes, of either sign"
-- Key empirical fact: |r_t| and |r_{t-1}| are positively correlated
-- GARCH model captures this through conditional variance autoregression
-- **Mechanism in this simulation**:
-  - Fast traders (trend followers) react immediately → amplify initial shock
-  - Slow traders (fundamentalists) react gradually → provide delayed stabilization
-  - Speed difference creates the clustering pattern
-
-## §7 Files
-
-| File          | Purpose                                                  |
-|---------------|----------------------------------------------------------|
-| `players.py`  | LLM investor implementations with volatility sensitivity |
-| `prompts.py`  | 5 system prompts defining volatility response patterns   |
-| `run_llm.py`  | LLM simulation runner                                    |
-| `analysis.py` | Volatility autocorrelation metrics                       |
-
-## §8 Running
+## §6 Running Instructions
 
 ```bash
-cd examples/VolatilityClustering/LLM
-python run_llm.py
+python examples/VolatilityClustering/LLM/run_volatility_llm.py -c configs/VolatilityClustering/LLM/simulation.yml
 ```
 
-## §9 Expected LLM Behavior Patterns
+## §7 Expected Behavior
 
-1. **Amplification Phase**: Trend followers increase position sizes during high volatility
-2. **Persistence**: Volatility remains elevated for multiple rounds
-3. **Gradual Decay**: Fundamentalists slowly pull price back to fundamentals
-4. **Regime Switching**: Clear distinction between high-vol and low-vol periods
-5. **Autocorrelation**: |r_t| correlated with |r_{t-1}| through |r_{t-5}|
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §10 Research Questions
+## §8 References
 
-1. Do LLMs correctly perceive volatility regimes from price history?
-2. Can LLM trading produce GARCH-like autocorrelation without explicit programming?
-3. How do LLM reaction speeds compare to rule-based investor parameters?
-4. Does the fundamentalist "anchor" successfully mean-revert prices?
+See `examples/VolatilityClustering/simulation-bases.md §2` for full DOI citations and mechanism references.
 
-## §11 References
+## §9 Variant Comparison
 
-- Mandelbrot, B. (1963). The Variation of Certain Speculative Prices. Journal of Business.
-- Engle, R. F. (1982). Autoregressive Conditional Heteroscedasticity. Econometrica.
-- Bollerslev, T. (1986). Generalized Autoregressive Conditional Heteroskedasticity. JoE.
+See `examples/VolatilityClustering/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

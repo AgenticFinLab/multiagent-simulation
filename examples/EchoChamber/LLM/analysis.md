@@ -1,44 +1,36 @@
-# EchoChamber LLM Variant — analysis.md
+# Echo Chamber LLM Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-1. Assess whether LLM persona reasoning produces higher or lower polarization than the Rule baseline.
-2. Evaluate cross-agent heterogeneity in LLM variant: do agents deviate from their assigned persona over rounds?
-3. Compare LLM-generated `reasoning` text across agent types to detect persona consistency.
-4. Measure whether LLM Ideologue overshoots Rule Ideologue in polarization contribution.
+This analysis checks whether the LLM variant produces a complete, analyzable Echo Chamber trajectory. It maps recorded opinion series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric                         | Function                                                        | analysis-bases.md ref |
-|--------------------------------|-----------------------------------------------------------------|-----------------------|
-| Polarization Index (PI)        | `polarization_index(polarization_history)`                      | §2.1                  |
-| Cluster Separation (CS)        | `cluster_separation(opinion_list)`                              | §2.2                  |
-| Mean Opinion Drift (MOD)       | `mean_opinion_drift(mean_opinion_history)`                      | §2.3                  |
-| Cross-Cutting Exposure (CCE)   | `cross_cutting_exposure(opinion_list, center_threshold=0.3)`    | §2.4                  |
-| Polarization Velocity (PV)     | `polarization_velocity(polarization_history)`                   | §2.5                  |
-| Depolarizer Effectiveness (DE) | `depolarizer_effectiveness(depolarize_counts, polarize_counts)` | §2.6                  |
-| Opinion Variance (OV)          | `opinion_variance(opinion_list)`                                | §2.7                  |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_echochamber_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §3 Variant-Specific Notes
+## §3 Analysis Dimensions
 
-- LLM action decisions are stochastic across runs even with identical initial conditions; multiple runs needed for statistical comparison with Rule variant.
-- LLMPassiveBystander tends to produce more "neutral" actions than Rule PassiveFollower, reducing stochastic polarization noise.
-- LLMCriticalThinker may produce more nuanced depolarization reasoning, but the quantitative intensity output may not differ significantly from Rule.
-- LLMBridgeBuilder effectiveness is limited by the fact that opinion update formulas are hardcoded — LLM only controls `action_type` and `intensity`.
-- Failed LLM parses (all 3 retries) default to neutral action, introducing a floor on stochastic depolarization.
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether LLM preserves opinion dynamics and influence_action activity while changing the distribution of influence_action relative to the deterministic baseline.
 
-## §4 Expected Ranges
+## §4 Phase Analysis
 
-| Metric | Expected Range | Interpretation                                                           |
-|--------|----------------|--------------------------------------------------------------------------|
-| PI     | 0.2 – 0.9      | Wider than Rule due to LLM stochasticity; may overshoot in some runs     |
-| CS     | 0.4 – 2.0      | Can exceed Rule CS if Ideologue persona produces stronger extremity      |
-| MOD    | 0.0 – 0.4      | Wider range than Rule; persona asymmetries may produce directional drift |
-| CCE    | 0.05 – 0.5     | May decline faster than Rule if LLM Conformist follows majority strongly |
-| PV     | 0.005 – 0.08   | Higher than Rule in some runs due to LLM reasoning variability           |
-| DE     | 0.15 – 0.55    | Slightly lower DE if LLM Bystander defaults to neutral more often        |
-| OV     | 0.1 – 0.40     | Higher upper bound than Rule due to persona-induced extremity            |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-See `analysis-bases.md §2` for full metric derivations and simulation-bases.md §4 for agent parameter sources.
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_echochamber_dynamics.png`, `02_echochamber_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

@@ -1,57 +1,36 @@
-# LiquidityDryup — RuleLLM Variant Analysis Guide
+# Liquidity Dry-up RuleLLM Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-The RuleLLM variant tests whether rule-anchored LLM agents produce a more consistent liquidity spiral than pure LLM while adding contextual modulation. Analysis goals:
+This analysis checks whether the RuleLLM variant produces a complete, analyzable Liquidity Dry-up trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-1. Confirm that LRI falls below 0.5 in most runs (rule anchor ensures withdrawal triggers).
-2. Compare LPD with Rule — rule-anchoring should maintain similar cascade onset but LLM may speed recovery.
-3. Measure whether LLM quantity modulation changes PAD relative to Rule.
-4. Assess variance reduction vs. LLM variant — RuleLLM should show narrower metric distributions.
-5. Compare LPI_MarketMaker: RuleLLM may show more binary withdrawal (rule-triggered) vs. LLM (partial).
+## §2 Core Metrics
 
----
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_liquiditydryup_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §2 Metric → Function Mapping
+## §3 Analysis Dimensions
 
-| Metric | Full Name                        | analysis-bases.md Ref | Python Function                      | Key Inputs                                         |
-|--------|----------------------------------|-----------------------|--------------------------------------|----------------------------------------------------|
-| LRI    | Liquidity Ratio Index            | §2.1                  | `liquidity_ratio_index()`            | liquidity_history, base_liquidity, n_market_makers |
-| MWF    | Market Maker Withdrawal Fraction | §2.2                  | `market_maker_withdrawal_fraction()` | agent_states, round_num                            |
-| MPI    | Market Price Impact              | §2.3                  | `market_price_impact()`              | price_history, trade_history                       |
-| PAD    | Price-Amplitude Dislocation      | §2.4                  | `price_amplitude_dislocation()`      | price_history, fundamental, lri_history            |
-| LPD    | Liquidity Persistence Duration   | §2.5                  | `liquidity_persistence_duration()`   | lri_history                                        |
-| WDI    | Wealth Distribution Index        | §2.6                  | `wealth_distribution_index()`        | agent_states, final_price                          |
-| LPI    | Liquidity Provider Index         | §2.7                  | `liquidity_provider_index()`         | trade_history                                      |
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether RuleLLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
----
+## §4 Phase Analysis
 
-## §3 Variant-Specific Notes
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-- **Rule anchor effect**: LRI should fall below 0.5 in the majority of runs (unlike pure LLM where some runs may show no dry-up).
-- **LPD comparison**: If LPD(RuleLLM) < LPD(Rule), the LLM is accelerating recovery (LLM ValueTrader more aggressive). If LPD(RuleLLM) > LPD(Rule), the LLM is slowing recovery.
-- **MWF pattern**: Expect more binary MWF (0 or 1 per agent) than LLM variant due to rule threshold.
-- **LPI stability**: LPI_MarketMaker variance should be smaller than LLM variant.
-- **Cross-validate with Rule**: If PAD(RuleLLM) ≈ PAD(Rule), LLM modulation has negligible effect. If significantly lower, LLM ValueTrader is providing more crisis liquidity.
+## §5 Cross-Variant Comparison
 
----
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
 
-## §4 Expected Ranges
+## §6 Expected Results and Validation Criteria
 
-| Metric      | Expected Range | Red Flag                               |
-|-------------|----------------|----------------------------------------|
-| LRI minimum | 0.05–0.25      | > 0.60 in most runs (rule not working) |
-| MWF maximum | 0.6–1.0        | < 0.3                                  |
-| PAD         | 0.09–0.22      | < 0.03                                 |
-| LPD         | 9–22 rounds    | 0 (rule should ensure dry-up)          |
-| WDI         | 0.22–0.42      | < 0.05                                 |
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
 
-RuleLLM should show narrower confidence intervals than LLM but slightly wider than Rule.
+## §7 Visualization Catalogue
 
----
-
-## §5 References
-
-- analysis-bases.md §2.1 (LRI); §2.2 (MWF); §2.3 (MPI); §2.4 (PAD); §2.5 (LPD); §2.6 (WDI); §2.7 (LPI)
-- Brunnermeier & Pedersen (2009). doi:[10.1093/rfs/hhn098](https://doi.org/10.1093/rfs/hhn098)
-- Grossman & Miller (1988). doi:[10.1111/j.1540-6261.1988.tb04594.x](https://doi.org/10.1111/j.1540-6261.1988.tb04594.x)
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_liquiditydryup_dynamics.png`, `02_liquiditydryup_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

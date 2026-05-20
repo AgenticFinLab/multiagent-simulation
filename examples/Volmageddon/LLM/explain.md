@@ -1,81 +1,95 @@
-# Volmageddon Simulation
+# Volmageddon LLM Variant Explanation
 
 ## §1 Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | February 5, 2018 - VIX spiked 115%, XIV ETN lost 90%+ in after-hours trading |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Volmageddon simulation with VIX ETN blowup, short volatility crowd, and reverse feedback loop |
-| **Academic Value** | Understanding february 5, 2018 - vix spiked 115%, xiv etn lost 90%+ in after-hours trading through multi-agent simulation |
+| Field | Value |
+|---|---|
+| Variant | LLM |
+| Simulation | Volmageddon |
+| Decision Mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning |
+| Theory Reference | `examples/Volmageddon/simulation-bases.md` |
+| Market Broadcast | `configs/Volmageddon/LLM/topology.yml` |
 
-## §2 Theoretical Foundation
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-- Volatility product feedback (Bergsma & Jiang, 2022)
-- Short volatility crowding (Culp et al., 2018)
-- Inverse VIX ETN dynamics
+## §2 Theory -> Implementation Mapping
 
-## §3 Agent Descriptions
+### §2.1 ShortVolTrader (simulation-bases.md §4.1)
 
-### ShortVolTrader
-**Theoretical Basis**: Short volatility strategy
-**Market Role**: destabilizing
-**Description**: Sells VIX futures/ETNs, profits from contango but faces tail risk
-**Parameters**: short_size=10000, stop_loss=0.5, rebalance_frequency=daily
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `LLMShortVolTrader` in `examples/Volmageddon/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/Volmageddon/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.2 VolETNManager (simulation-bases.md §4.2)
 
-### VolETNManager
-**Theoretical Basis**: Inverse ETN rebalancing mechanics
-**Market Role**: destabilizing
-**Description**: Must buy VIX futures when VIX rises, creating positive feedback
-**Parameters**: leverage=-1.0, rebalance_threshold=0.05, rebalance_size=50000
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `LLMVolETNManager` in `examples/Volmageddon/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/Volmageddon/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.3 LongVolHedger (simulation-bases.md §4.3)
 
-### LongVolHedger
-**Theoretical Basis**: Portfolio insurance via volatility
-**Market Role**: stabilizing
-**Description**: Holds long VIX positions as portfolio hedge
-**Parameters**: hedge_ratio=0.1, target_vol=0.15
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `LLMLongVolHedger` in `examples/Volmageddon/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/Volmageddon/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.4 VolArbitrageur (simulation-bases.md §4.4)
 
-### VolArbitrageur
-**Theoretical Basis**: VIX futures term structure arbitrage
-**Market Role**: neutral
-**Description**: Trades VIX term structure dislocations
-**Parameters**: entry_threshold=0.02, position_size=5000
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `LLMVolArbitrageur` in `examples/Volmageddon/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/Volmageddon/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+### §2.5 EquityTrader (simulation-bases.md §4.5)
 
-### EquityTrader
-**Theoretical Basis**: Equity market participant
-**Market Role**: neutral
-**Description**: Trades equities, affected by volatility spike
-**Parameters**: position_size=1000, risk_limit=0.02
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `LLMEquityTrader` in `examples/Volmageddon/LLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/Volmageddon/LLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
 
+## §3 Market Mechanism
 
-## §4 Usage
+The coordinator mechanism is the final implementation in `examples/Volmageddon/LLM/players.py` and its configured counterpart in `configs/Volmageddon/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-### Rule Variant
+## §4 Variant Architecture
+
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/Volmageddon/LLM/players.py` |
+| Prompt module | `examples/Volmageddon/LLM/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+
+## §5 Config Reference
+
+| Config | Purpose |
+|---|---|
+| `configs/Volmageddon/LLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/Volmageddon/LLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/Volmageddon/LLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/Volmageddon/LLM/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
+
 ```bash
-python examples/Volmageddon/Rule/run_volmageddon.py \
-    -c configs/Volmageddon/Rule/simulation.yml
+python examples/Volmageddon/LLM/run_volmageddon_llm.py -c configs/Volmageddon/LLM/simulation.yml
 ```
 
-### LLM Variant
-```bash
-python examples/Volmageddon/LLM/run_volmageddon_llm.py \
-    -c configs/Volmageddon/LLM/simulation.yml
-```
+## §7 Expected Behavior
 
-### RuleLLM Variant
-```bash
-python examples/Volmageddon/RuleLLM/run_volmageddon_rulellm.py \
-    -c configs/Volmageddon/RuleLLM/simulation.yml
-```
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-### RAG Variant
-```bash
-python examples/Volmageddon/Rag/run_volmageddon_rag.py \
-    -c configs/Volmageddon/Rag/simulation.yml
-```
+## §8 References
 
-## §5 References
+See `examples/Volmageddon/simulation-bases.md §2` for full DOI citations and mechanism references.
 
-- Volatility product feedback (Bergsma & Jiang, 2022)
-- Short volatility crowding (Culp et al., 2018)
-- Inverse VIX ETN dynamics
+## §9 Variant Comparison
+
+See `examples/Volmageddon/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

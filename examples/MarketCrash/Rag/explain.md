@@ -1,87 +1,102 @@
-# MarketCrash Rag — Implementation Explanation
+# Market Crash Rag Variant Explanation
 
 ## §1 Overview
 
-| Item | Description |
+| Field | Value |
 |---|---|
 | Variant | Rag |
-| Mechanism | RuleLLM-style decision making augmented with retrieved crisis knowledge |
-| Market | Same rule-based market as Rule/RuleLLM |
-| Knowledge Sources | Shared `examples/document-sources` corpus and scenario RAG index |
-| Runtime Change | Documentation-only backfill in this commit |
+| Simulation | Market Crash |
+| Decision Mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema |
+| Theory Reference | `examples/MarketCrash/simulation-bases.md` |
+| Market Broadcast | `configs/MarketCrash/Rag/topology.yml` |
 
-## §2 Theory → Implementation Mapping
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-### §2.1 Rag Risk-Parity / Volatility Targeting
+## §2 Theory -> Implementation Mapping
 
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.1` | RAG prompt combines market state with retrieved risk-parity/crash context |
-| Effect | Retrieved context may strengthen or moderate deleveraging reasoning |
-
-### §2.2 Rag Leveraged Fund
+### §2.1 RiskParityFund (simulation-bases.md §4.1)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.2` | Retrieved leverage-cycle knowledge informs margin spiral reasoning |
-| Effect | May change urgency or explanation, not market schema |
-
-### §2.3 Rag Market Maker
-
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.3` | Retrieved liquidity-crisis context informs quote withdrawal |
-| Effect | Liquidity behavior should remain schema-compatible |
-
-### §2.4 Rag Panic Seller
+| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMRiskParityFund` in `examples/MarketCrash/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.2 LeveragedHedgeFund (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.5` | Retrieved crisis narratives may amplify panic reasoning |
-| Effect | Panic timing/quantity may differ from RuleLLM |
-
-### §2.5 Rag Bottom Fisher
+| Investor role and activation rule from simulation-bases.md §4.2 | `configured player class family` in `examples/MarketCrash/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.3 MarketMaker (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.6` | Retrieved value/limits-of-arbitrage context informs contrarian buying |
-| Effect | Stabilizing response may be earlier or more cautious |
+| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMMarketMaker` in `examples/MarketCrash/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.4 PassiveInvestor (simulation-bases.md §4.4)
 
-## §3 Market Mechanism Implementation
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMInvestor` in `examples/MarketCrash/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.5 PanicSeller (simulation-bases.md §4.5)
 
-The market remains rule-based. RAG changes only the context supplied to LLM
-investors before structured decisions are parsed.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMPanicSeller` in `examples/MarketCrash/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+### §2.6 BottomFisher (simulation-bases.md §4.6)
 
-## §4 Variant-Specific Features
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.6 | `RagLLMBottomFisher` in `examples/MarketCrash/Rag/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/Rag/players.yml` through `extras`. |
+| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
 
-Rag adds retrieval setup, embedding/index configuration, and per-agent
-`private_knowledge.rag` settings. If retrieval fails, behavior should be
-reviewed as a quality issue.
+## §3 Market Mechanism
 
-## §5 Architecture Diagram
+The coordinator mechanism is the final implementation in `examples/MarketCrash/Rag/players.py` and its configured counterpart in `configs/MarketCrash/Rag/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-```text
-Market update -> retrieve context -> LLM prompt -> decision JSON -> order -> Market
-```
+## §4 Variant Architecture
 
-## §6 Configuration Reference
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/MarketCrash/Rag/players.py` |
+| Prompt module | `examples/MarketCrash/Rag/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-Primary config: `configs/MarketCrash/Rag/players.yml`, including top-level
-`knowledge` and per-agent `private_knowledge.rag`.
+## §5 Config Reference
 
-## §7 Running Instructions
+| Config | Purpose |
+|---|---|
+| `configs/MarketCrash/Rag/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/MarketCrash/Rag/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/MarketCrash/Rag/topology.yml` | Message routing between coordinator and agents. |
+| `configs/MarketCrash/Rag/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
-python examples/MarketCrash/Rag/run_marketcrash_rag.py \
-  -c configs/MarketCrash/Rag/simulation.yml
+python examples/MarketCrash/Rag/run_market_crash_ragllm.py -c configs/MarketCrash/Rag/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-Rag should preserve crash mechanics while retrieved crisis knowledge changes
-reasoning, urgency, or stabilization interpretation.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
-`../analysis-bases.md §2`.
+See `examples/MarketCrash/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/MarketCrash/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

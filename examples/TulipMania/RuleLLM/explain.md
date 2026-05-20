@@ -1,59 +1,95 @@
-# TulipMania RuleLLM — Implementation Explanation
+# Tulip Mania RuleLLM Variant Explanation
 
 ## §1 Overview
 
-| Item | Description |
+| Field | Value |
 |---|---|
 | Variant | RuleLLM |
-| Mechanism | Persona reasoning anchored by mania, social-proof, valuation, and exit rules |
-| Market | Same price/fundamental market as Rule |
-| Agents | RuleLLM trend chaser, social-proof follower, intrinsic-value trader, early-exit trader, noise trader |
-| Runtime Change | Documentation-only backfill; no code/config change |
+| Simulation | Tulip Mania |
+| Decision Mechanism | LLM-generated trading orders constrained by explicit scenario rules |
+| Theory Reference | `examples/TulipMania/simulation-bases.md` |
+| Market Broadcast | `configs/TulipMania/RuleLLM/topology.yml` |
 
-## §2 Theory → Implementation Mapping
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-| Agent | Root Section | Runtime Implementation |
-|---|---|---|
-| RuleLLMTrendChaser | `simulation-bases.md §4.1` | Prompt encodes positive-feedback demand |
-| RuleLLMSocialProofFollower | `simulation-bases.md §4.2` | Prompt encodes crowd-following behavior |
-| RuleLLMIntrinsicValueTrader | `simulation-bases.md §4.3` | Prompt encodes value anchor |
-| RuleLLMEarlyExitTrader | `simulation-bases.md §4.4` | Prompt encodes early-exit behavior |
-| RuleLLMNoiseTrader | `simulation-bases.md §4.5` | Prompt encodes random baseline behavior |
+## §2 Theory -> Implementation Mapping
 
-## §3 Market Mechanism Implementation
+### §2.1 TrendChaser (simulation-bases.md §4.1)
 
-Market clearing remains unchanged. RuleLLM supplies persona and quantitative
-rule instructions to the LLM before canonical order parsing.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `RuleLLMTrendChaser` in `examples/TulipMania/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.2 SocialProofFollower (simulation-bases.md §4.2)
 
-## §4 Variant-Specific Features
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `RuleLLMSocialProofFollower` in `examples/TulipMania/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.3 IntrinsicValueTrader (simulation-bases.md §4.3)
 
-This variant tests whether explicit rule text constrains LLM mania narratives
-toward the Rule baseline.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `RuleLLMIntrinsicValueTrader` in `examples/TulipMania/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.4 EarlyExitTrader (simulation-bases.md §4.4)
 
-## §5 Architecture Diagram
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `RuleLLMEarlyExitTrader` in `examples/TulipMania/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-```text
-Market state -> persona + rule prompt -> LLM decision JSON -> order -> Market
-```
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMNoiseTrader` in `examples/TulipMania/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
 
-## §6 Configuration Reference
+## §3 Market Mechanism
 
-Primary config: `configs/TulipMania/RuleLLM/players.yml`.
+The coordinator mechanism is the final implementation in `examples/TulipMania/RuleLLM/players.py` and its configured counterpart in `configs/TulipMania/RuleLLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-## §7 Running Instructions
+## §4 Variant Architecture
+
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/TulipMania/RuleLLM/players.py` |
+| Prompt module | `examples/TulipMania/RuleLLM/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+
+## §5 Config Reference
+
+| Config | Purpose |
+|---|---|
+| `configs/TulipMania/RuleLLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/TulipMania/RuleLLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/TulipMania/RuleLLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/TulipMania/RuleLLM/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
-python examples/TulipMania/RuleLLM/run_tulipmania_rulellm.py \
-  -c configs/TulipMania/RuleLLM/simulation.yml
+python examples/TulipMania/RuleLLM/run_tulipmania_rulellm.py -c configs/TulipMania/RuleLLM/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-RuleLLM should preserve mania amplification and correction pressure while
-reducing unstructured prompt drift.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §4`, `../simulation-bases.md §9`, and
-`../analysis-bases.md §2`.
+See `examples/TulipMania/simulation-bases.md §2` for full DOI citations and mechanism references.
 
+## §9 Variant Comparison
+
+See `examples/TulipMania/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

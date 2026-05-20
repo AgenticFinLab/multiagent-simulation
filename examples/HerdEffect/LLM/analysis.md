@@ -1,44 +1,36 @@
-# HerdEffect LLM — Analysis Documentation
+# Herd Effect LLM Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-This variant compares LLM-driven emergent herding against the deterministic Rule baseline. Objectives:
-1. Measure how LLM narrative reasoning changes EMI magnitude and variance vs. Rule
-2. Determine whether LLM ContrarianInvestor corrects overvaluation more or less effectively (REI)
-3. Test if LLM AggressiveInvestor produces wider MDD range due to unbounded quantity generation
-4. Validate that all four variants exhibit the fundamental emergent herding signature (EMI ≥ 0.05)
+This analysis checks whether the LLM variant produces a complete, analyzable Herd Effect trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric                               | Function                                                           | analysis-bases.md ref |
-|--------------------------------------|--------------------------------------------------------------------|-----------------------|
-| Emergent Momentum Index (EMI)        | `emergent_momentum_index(price_history)`                           | §2.1                  |
-| Maximum Drawdown (MDD)               | `maximum_drawdown(price_history)`                                  | §2.2                  |
-| Agent Convergence Contribution (ACC) | `agent_convergence_contribution(agent_quantities, return_history)` | §2.3                  |
-| Risk-Averse Early Exit Index (REI)   | `risk_averse_early_exit_index(ra_position_history, price_history)` | §2.4                  |
-| Herding Volatility Ratio (HVR)       | `herding_volatility_ratio(return_history)`                         | §2.5                  |
-| Wealth Distribution Index (WDI)      | `wealth_distribution_index(agent_wealth)`                          | §2.6                  |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_herdeffect_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §3 LLM-Specific Notes
+## §3 Analysis Dimensions
 
-- **LLMMomentumInvestor**: EMI may be wider than Rule — LLM generates both stronger and weaker momentum signals; if EMI < 0.05 consistently, review system prompt phrasing for momentum persona.
-- **LLMContrarianInvestor**: REI variability higher; LLM must infer overvaluation from `price` + `return_pct` trend — no broadcast `deviation`; if REI < 0.20, strengthen contrarian persona prompt.
-- **LLMRiskAverseInvestor**: MDD potentially lower than Rule as LLM exits earlier via qualitative risk assessment; MDD < 0.03 indicates over-cautious LLM preventing bubble formation entirely.
-- **LLMNoiseTrader**: HVR run-to-run variance higher than Rule due to LLM non-Gaussian noise patterns.
-- **LLMAggressiveInvestor**: Quantities not bounded by Rule's ±80 — LLM may express extreme bullishness; MDD and HVR can exceed Rule bounds.
-- **Run count**: Minimum 10 seeds required for reliable LLM metric estimates due to stochasticity.
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether LLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-## §4 Expected Ranges
+## §4 Phase Analysis
 
-| Metric            | LLM Expected Range | vs. Rule Baseline | Theoretical Basis                        |
-|-------------------|--------------------|-------------------|------------------------------------------|
-| EMI               | 0.05 – 0.30        | Wider variance    | LLM momentum conviction varies by run    |
-| MDD               | 0.03 – 0.35        | Wider             | LLM aggressive may exceed Rule ±80 cap   |
-| ACC (§4.1 + §4.5) | 40 – 80 %          | Variable          | Prompt quality and temperature dependent |
-| REI               | 0.20 – 0.75        | Variable          | Inferred deviation vs. Rule formula      |
-| HVR               | 1.2 – 5.0          | Wider             | Temperature-driven herding variance      |
-| WDI               | 0.05 – 0.30        | Similar           | Wealth distribution follows crisis arc   |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md §4` for agent parameter sources.
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_herdeffect_dynamics.png`, `02_herdeffect_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

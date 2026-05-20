@@ -1,44 +1,36 @@
-# EchoChamber Rule Variant — analysis.md
+# Echo Chamber Rule Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-1. Measure baseline polarization dynamics under deterministic rule-based agents.
-2. Confirm Sunstein (2001) group polarization: PI increases when destabilizing agents dominate.
-3. Quantify BridgeBuilder effectiveness as a function of cluster separation.
-4. Establish Rule variant as the parameter-sweep baseline for comparison with LLM/RuleLLM/Rag.
+This analysis checks whether the Rule variant produces a complete, analyzable Echo Chamber trajectory. It maps recorded opinion series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric                         | Function                                                        | analysis-bases.md ref |
-|--------------------------------|-----------------------------------------------------------------|-----------------------|
-| Polarization Index (PI)        | `polarization_index(polarization_history)`                      | §2.1                  |
-| Cluster Separation (CS)        | `cluster_separation(opinion_list)`                              | §2.2                  |
-| Mean Opinion Drift (MOD)       | `mean_opinion_drift(mean_opinion_history)`                      | §2.3                  |
-| Cross-Cutting Exposure (CCE)   | `cross_cutting_exposure(opinion_list, center_threshold=0.3)`    | §2.4                  |
-| Polarization Velocity (PV)     | `polarization_velocity(polarization_history)`                   | §2.5                  |
-| Depolarizer Effectiveness (DE) | `depolarizer_effectiveness(depolarize_counts, polarize_counts)` | §2.6                  |
-| Opinion Variance (OV)          | `opinion_variance(opinion_list)`                                | §2.7                  |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_echochamber_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §3 Variant-Specific Notes
+## §3 Analysis Dimensions
 
-- Rule variant produces fully deterministic results given fixed random seed — ideal for parameter sweep experiments.
-- Ideologue opinion converges to ±1 within ~20–30 rounds due to extremity boost; Conformist tracks cluster mean.
-- BridgeBuilder depolarization intensity scales linearly with cluster separation — most effective after clusters form.
-- CriticalThinker depolarization activates only when PI > 0.3 — passive in low-polarization environments.
-- PassiveFollower introduces stochastic variability via `random.random() < engagement_probability` check; all other agents are deterministic.
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rule preserves opinion dynamics and influence_action activity while changing the distribution of influence_action relative to the deterministic baseline.
 
-## §4 Expected Ranges
+## §4 Phase Analysis
 
-| Metric | Expected Range | Interpretation                                               |
-|--------|----------------|--------------------------------------------------------------|
-| PI     | 0.2 – 0.8      | Rises from initial_polarization toward equilibrium           |
-| CS     | 0.5 – 1.8      | Moderate (0.5) to strong bifurcation (>1.5) by end of run    |
-| MOD    | 0.0 – 0.3      | Near 0 if symmetric composition; higher if asymmetric        |
-| CCE    | 0.1 – 0.5      | Declines from initial moderate distribution                  |
-| PV     | 0.005 – 0.05   | Slow stable dynamics; high only during transition phases     |
-| DE     | 0.2 – 0.5      | Below 0.5 if Ideologues + Conformists outnumber stabilizers  |
-| OV     | 0.1 – 0.35     | Rises as bimodal distribution forms; max near uniform spread |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-See `analysis-bases.md §2` for full metric derivations and simulation-bases.md §4 for agent parameter sources.
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_echochamber_dynamics.png`, `02_echochamber_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

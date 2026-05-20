@@ -1,94 +1,102 @@
-# MarketCrash Rule — Implementation Explanation
+# Market Crash Rule Variant Explanation
 
 ## §1 Overview
 
-| Item | Description |
+| Field | Value |
 |---|---|
 | Variant | Rule |
-| Mechanism | Deterministic crash-feedback rules |
-| Market | Net-demand price impact with mean reversion and volatility state |
-| Agents | RiskParityFund, LeveragedHedgeFund, MarketMaker, PassiveInvestor, PanicSeller, BottomFisher |
-| Runtime Change | Documentation-only backfill; no code/config change |
+| Simulation | Market Crash |
+| Decision Mechanism | deterministic rule-based trading orders |
+| Theory Reference | `examples/MarketCrash/simulation-bases.md` |
+| Market Broadcast | `configs/MarketCrash/Rule/topology.yml` |
 
-## §2 Theory → Implementation Mapping
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-### §2.1 RiskParityFund
+## §2 Theory -> Implementation Mapping
 
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.1` volatility targeting | `RiskParityFund` reads `target_volatility`, `rebalance_speed`, `base_position` |
-| Mechanical deleveraging | Sells exposure when volatility exceeds target |
-
-### §2.2 LeveragedHedgeFund
+### §2.1 RiskParityFund (simulation-bases.md §4.1)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.2` margin spiral | `LeveragedHedgeFund` reads `margin_call_level`, `liquidation_level`, `momentum_sensitivity` |
-| Forced selling | Larger sell pressure as losses approach liquidation |
-
-### §2.3 MarketMaker
-
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.3` liquidity withdrawal | `MarketMaker` reads `inventory_limit`, `normal_quote_size`, `volatility_withdraw_threshold` |
-| Endogenous liquidity | Quote size falls in high volatility |
-
-### §2.4 PassiveInvestor
+| Investor role and activation rule from simulation-bases.md §4.1 | `RiskParityFund` in `examples/MarketCrash/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.2 LeveragedHedgeFund (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.4` slow rebalancing | `PassiveInvestor` reads `target_position`, `rebalance_frequency` |
-| Stabilizing demand | Periodically trades toward target |
-
-### §2.5 PanicSeller
-
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.5` behavioral selling | `PanicSeller` reads `loss_threshold`, `crash_trigger`, `panic_sell_fraction` |
-| Panic flow | Sells fraction of holdings after trigger |
-
-### §2.6 BottomFisher
+| Investor role and activation rule from simulation-bases.md §4.2 | `LeveragedHedgeFund` in `examples/MarketCrash/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.3 MarketMaker (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.6` contrarian value buying | `BottomFisher` reads `discount_threshold`, `crash_buy_threshold`, `buy_size`, `lookback` |
-| Stabilization | Buys after deep discount/crash condition |
+| Investor role and activation rule from simulation-bases.md §4.3 | `MarketMaker` in `examples/MarketCrash/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.4 PassiveInvestor (simulation-bases.md §4.4)
 
-## §3 Market Mechanism Implementation
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `PassiveInvestor` in `examples/MarketCrash/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.5 PanicSeller (simulation-bases.md §4.5)
 
-The market aggregates buy and sell volume, computes net demand, updates price,
-and broadcasts market state to all investors. The Rule variant uses no LLM or
-RAG calls.
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `PanicSeller` in `examples/MarketCrash/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+### §2.6 BottomFisher (simulation-bases.md §4.6)
 
-## §4 Variant-Specific Features
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.6 | `BottomFisher` in `examples/MarketCrash/Rule/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MarketCrash/Rule/players.yml` through `extras`. |
+| Variant-specific decision mechanism | deterministic rule-based trading orders. |
 
-Rule is the deterministic baseline. All actions come from thresholds and
-formulas loaded from config.
+## §3 Market Mechanism
 
-## §5 Architecture Diagram
+The coordinator mechanism is the final implementation in `examples/MarketCrash/Rule/players.py` and its configured counterpart in `configs/MarketCrash/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
-```text
-Market update -> Rule investors -> order messages -> Market aggregation -> next price
-```
+## §4 Variant Architecture
 
-## §6 Configuration Reference
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/MarketCrash/Rule/players.py` |
+| Prompt module | Not applicable for Rule baseline |
+| Inference | No remote model call is used in the Rule baseline. |
+| Output parsing | Direct deterministic decision construction |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
-Primary config: `configs/MarketCrash/Rule/players.yml`. The market and all
-investor parameters are loaded from `extras`.
+## §5 Config Reference
 
-## §7 Running Instructions
+| Config | Purpose |
+|---|---|
+| `configs/MarketCrash/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/MarketCrash/Rule/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/MarketCrash/Rule/topology.yml` | Message routing between coordinator and agents. |
+| `configs/MarketCrash/Rule/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
-python examples/MarketCrash/Rule/run_marketcrash.py \
-  -c configs/MarketCrash/Rule/simulation.yml
+python examples/MarketCrash/Rule/run_crash.py -c configs/MarketCrash/Rule/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-RiskParityFund and LeveragedHedgeFund should increase sell pressure during
-stress. MarketMaker should withdraw liquidity. BottomFisher and PassiveInvestor
-should provide delayed stabilization.
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §2` and `../simulation-bases.md §4`.
+See `examples/MarketCrash/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/MarketCrash/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

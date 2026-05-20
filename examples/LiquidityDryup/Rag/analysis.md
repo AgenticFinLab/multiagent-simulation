@@ -1,59 +1,36 @@
-# LiquidityDryup — Rag Variant Analysis Guide
+# Liquidity Dry-up Rag Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-The Rag variant tests whether historical crisis knowledge moderates the liquidity spiral. It should produce the highest minimum LRI, shortest LPD, and smallest PAD across all variants. Analysis goals:
+This analysis checks whether the Rag variant produces a complete, analyzable Liquidity Dry-up trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-1. Confirm LRI minimum is higher than all other variants (KB moderates MarketMaker withdrawal).
-2. Measure LPD — expected shortest due to KB-informed ValueTrader early entry.
-3. Assess KB retrieval quality: are the right historical episodes retrieved for current conditions?
-4. Check whether MarketMaker partial withdrawal (non-zero `provides_liquidity` during stress) is observed.
-5. Measure WDI — expected lowest redistribution due to shorter, shallower spiral.
+## §2 Core Metrics
 
----
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_liquiditydryup_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §2 Metric → Function Mapping
+## §3 Analysis Dimensions
 
-| Metric | Full Name                        | analysis-bases.md Ref | Python Function                      | Key Inputs                                         |
-|--------|----------------------------------|-----------------------|--------------------------------------|----------------------------------------------------|
-| LRI    | Liquidity Ratio Index            | §2.1                  | `liquidity_ratio_index()`            | liquidity_history, base_liquidity, n_market_makers |
-| MWF    | Market Maker Withdrawal Fraction | §2.2                  | `market_maker_withdrawal_fraction()` | agent_states, round_num                            |
-| MPI    | Market Price Impact              | §2.3                  | `market_price_impact()`              | price_history, trade_history                       |
-| PAD    | Price-Amplitude Dislocation      | §2.4                  | `price_amplitude_dislocation()`      | price_history, fundamental, lri_history            |
-| LPD    | Liquidity Persistence Duration   | §2.5                  | `liquidity_persistence_duration()`   | lri_history                                        |
-| WDI    | Wealth Distribution Index        | §2.6                  | `wealth_distribution_index()`        | agent_states, final_price                          |
-| LPI    | Liquidity Provider Index         | §2.7                  | `liquidity_provider_index()`         | trade_history                                      |
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rag preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
----
+## §4 Phase Analysis
 
-## §3 Variant-Specific Notes
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-- **KB composition is critical**: The knowledge base must include episodes with documented recovery timelines. Without post-crisis recovery data, the Rag variant cannot demonstrate faster LPD than Rule.
-- **ValueTrader KB effect**: Manually inspect reasoning traces — does ValueTrader cite historical recovery evidence when entering? If yes, KB is functioning as designed.
-- **Partial MarketMaker withdrawal**: Inspect `provides_liquidity` values for MarketMaker during stress rounds. Rag variant should show more cases of partial provision (e.g., `provides_liquidity = 10` instead of 0) when KB shows rapid reversal precedents.
-- **LPD comparison**: If LPD(Rag) ≈ LPD(Rule), the KB is not enabling faster recovery. Check that historical episodes with LPD < 10 are in the KB.
-- **LRI minimum check**: If LRI(Rag) minimum ≈ LRI(Rule), KB is not moderating withdrawal. Check MarketMaker prompt KB injection.
+## §5 Cross-Variant Comparison
 
----
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
 
-## §4 Expected Ranges
+## §6 Expected Results and Validation Criteria
 
-| Metric      | Expected Range | Red Flag                                                    |
-|-------------|----------------|-------------------------------------------------------------|
-| LRI minimum | 0.10–0.30      | < 0.05 (KB not moderating withdrawal) or > 0.70 (no dry-up) |
-| MWF maximum | 0.4–0.8        | = 1.0 in all runs (KB not partially moderating)             |
-| PAD         | 0.07–0.18      | > 0.25 (Rag not improving on Rule)                          |
-| LPD         | 6–15 rounds    | > 20 (KB not accelerating recovery)                         |
-| WDI         | 0.18–0.35      | > 0.45 (Rag not reducing redistribution)                    |
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
 
-Rag variant should be the best performer across all metrics — highest LRI, shortest LPD, lowest PAD, lowest WDI.
+## §7 Visualization Catalogue
 
----
-
-## §5 References
-
-- analysis-bases.md §2.1 (LRI); §2.2 (MWF); §2.3 (MPI); §2.4 (PAD); §2.5 (LPD); §2.6 (WDI); §2.7 (LPI)
-- Brunnermeier & Pedersen (2009). doi:[10.1093/rfs/hhn098](https://doi.org/10.1093/rfs/hhn098)
-- Grossman & Miller (1988). doi:[10.1111/j.1540-6261.1988.tb04594.x](https://doi.org/10.1111/j.1540-6261.1988.tb04594.x)
-- Amihud (2002). doi:[10.1016/S1386-4181(01)00024-6](https://doi.org/10.1016/S1386-4181(01)00024-6)
-- simulation-bases.md §8 (Historical Case Studies — source material for KB)
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_liquiditydryup_dynamics.png`, `02_liquiditydryup_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

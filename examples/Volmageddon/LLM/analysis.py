@@ -1,19 +1,18 @@
 #!/usr/bin/env python
-"""Volmageddon LLM Simulation Analysis
+"""Volmageddon LLM Simulation Analysis.
 
-Usage:
-    python examples/Volmageddon/LLM/analysis.py \
-        -c configs/Volmageddon/LLM/simulation.yml
+Produces the standardized output set required by create-example-skill:
+summary.json, 00_investor_bids.png, 01_volmageddon_dynamics.png,
+02_volmageddon_analysis.png, and 03_summary.png.
 """
 
-from examples.Volmageddon.Rule.analysis import (
-    calculate_metrics,
-    create_visualizations,
-    load_simulation_data,
-    main,
-)
+from examples.standard_rule_analysis import run_standard_analysis
 
-__all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations", "main"]
+
+def main():
+    """Run the standard analysis output contract for this variant."""
+    return run_standard_analysis("Volmageddon", "configs/Volmageddon/LLM/simulation.yml")
+
 
 if __name__ == "__main__":
     main()

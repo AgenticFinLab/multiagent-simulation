@@ -1,71 +1,36 @@
-# MarketCrash LLM Analysis Methodology
+# Market Crash LLM Analysis Plan
 
-## §1 Overview
+## §1 Objectives
 
-This document describes the evaluation metrics for the **LLM-based market crash** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
+This analysis checks whether the LLM variant produces a complete, analyzable Market Crash trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-For detailed metric definitions and financial theory, see: **`../MarketCrash/analysis.md`**
+## §2 Core Metrics
 
----
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_marketcrash_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §2 Key Metrics (Summary)
+## §3 Analysis Dimensions
 
-| Metric           | Purpose                         |
-|------------------|---------------------------------|
-| Crash Depth      | Maximum price decline from peak |
-| Crash Speed      | Rate of decline (ΔP / Δt)       |
-| Panic Cascade    | Sequential selling by agents    |
-| Recovery Pattern | Post-crash price behavior       |
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether LLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
----
+## §4 Phase Analysis
 
-## §3 LLM-Specific Observable Phenomena
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-### Emergent Behaviors
+## §5 Cross-Variant Comparison
 
-| Phenomenon            | LLM Behavior                               | Contrast with Rule-Based             |
-|-----------------------|--------------------------------------------|--------------------------------------|
-| **Panic Narrative**   | LLM expresses fear/urgency in reasoning    | Rule-based has no emotional modeling |
-| **Contagion Effect**  | LLM responds to observed selling by others | Rule-based ignores other agents      |
-| **Risk Reassessment** | LLM dynamically updates risk perception    | Rule-based uses fixed parameters     |
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
 
-### Round and Agent Scaling
+## §6 Expected Results and Validation Criteria
 
-| Scale          | LLM-Specific Observation                       |
-|----------------|------------------------------------------------|
-| **50 rounds**  | Crash develops; LLM panic reasoning visible    |
-| **100 rounds** | Full crash cycle with stabilization            |
-| **5 agents**   | Individual LLM panic dominates                 |
-| **10 agents**  | Realistic panic cascade with diverse reasoning |
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
 
----
+## §7 Visualization Catalogue
 
-## §4 LLM-Specific Considerations
-
-1. **Panic Modeling**: LLM prompts can include fear/panic sentiment
-2. **Social Contagion**: LLM may respond to other agents' selling
-3. **Risk Perception**: Dynamic risk assessment in prompts
-
----
-
-## §5 Using Centralized Evaluation Module
-
-```python
-from masim.evaluation.finance import (
-    calculate_max_drawdown,
-    calculate_returns,
-    calculate_rolling_volatility,
-    plot_price_dynamics,
-)
-
-# Same analysis as rule-based version
-prices = {...}
-drawdown = calculate_max_drawdown(prices)
-volatility = calculate_rolling_volatility(prices, window=5)
-```
-
----
-
-## §6 References
-
-See `../MarketCrash/analysis.md` for complete academic references.
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_marketcrash_dynamics.png`, `02_marketcrash_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

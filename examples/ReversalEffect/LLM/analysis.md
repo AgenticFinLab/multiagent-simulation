@@ -1,71 +1,36 @@
-# ReversalEffect LLM Analysis Methodology
+# Reversal Effect LLM Analysis Plan
 
-## §1 Overview
+## §1 Objectives
 
-This document describes the evaluation metrics for the **LLM-based reversal effect** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
+This analysis checks whether the LLM variant produces a complete, analyzable Reversal Effect trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-For detailed metric definitions and financial theory, see: **`../ReversalEffect/analysis.md`**
+## §2 Core Metrics
 
----
+| Metric | Function Contract | Source |
+|---|---|---|
+| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
+| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
+| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
+| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
+| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
+| Scenario-specific diagnostic | `def compute_reversaleffect_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
 
-## §2 Key Metrics (Summary)
+## §3 Analysis Dimensions
 
-| Metric                   | Purpose                              |
-|--------------------------|--------------------------------------|
-| Long-lag Autocorrelation | AC < 0 for lag > 15 (mean reversion) |
-| Winner-Loser Spread      | Losers outperform winners long-term  |
-| Overreaction Index       | σ(P) / σ(F) excess volatility        |
-| Contrarian Profit        | Buying losers profitable             |
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether LLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
----
+## §4 Phase Analysis
 
-## §3 LLM-Specific Observable Phenomena
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-### Emergent Behaviors
+## §5 Cross-Variant Comparison
 
-| Phenomenon               | LLM Behavior                                   | Contrast with Rule-Based                   |
-|--------------------------|------------------------------------------------|--------------------------------------------|
-| **Overreaction**         | LLM may extrapolate too far from recent news   | Rule-based uses fixed response coefficient |
-| **Value Recognition**    | LLM reasons about "overvalued/undervalued"     | Rule-based uses price-fundamental ratio    |
-| **Contrarian Reasoning** | LLM explicitly discusses betting against trend | Rule-based follows formula                 |
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
 
-### Round and Agent Scaling
+## §6 Expected Results and Validation Criteria
 
-| Scale          | LLM-Specific Observation                         |
-|----------------|--------------------------------------------------|
-| **50 rounds**  | Overreaction visible; reversion may begin        |
-| **100 rounds** | Full cycle; LLM contrarian reasoning visible     |
-| **5 agents**   | Individual LLM overreaction dominates            |
-| **10 agents**  | Mix of momentum/contrarian LLMs creates reversal |
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
 
----
+## §7 Visualization Catalogue
 
-## §4 LLM-Specific Considerations
-
-1. **Overreaction Modeling**: LLM may naturally overreact to news
-2. **Representativeness Heuristic**: LLM responses may overweight recent data
-3. **Contrarian Reasoning**: LLM can be prompted for value-based thinking
-
----
-
-## §5 Using Centralized Evaluation Module
-
-```python
-from masim.evaluation.finance import (
-    calculate_returns,
-    calculate_autocorrelation,
-    calculate_price_deviation,
-    plot_returns_analysis,
-)
-
-# Same analysis as rule-based version
-prices = {...}
-returns = calculate_returns(prices)
-ac_long = calculate_autocorrelation(returns, lag=20)  # Negative = reversal
-```
-
----
-
-## §6 References
-
-See `../ReversalEffect/analysis.md` for complete academic references.
+Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_reversaleffect_dynamics.png`, `02_reversaleffect_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.

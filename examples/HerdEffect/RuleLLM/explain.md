@@ -1,112 +1,95 @@
-# HerdEffect RuleLLM — Implementation Explanation
+# Herd Effect RuleLLM Variant Explanation
 
 ## §1 Overview
 
-| Aspect             | Detail                                                                         |
-|--------------------|--------------------------------------------------------------------------------|
-| Variant            | RuleLLM                                                                        |
-| Simulation         | HerdEffect                                                                     |
-| Decision Mechanism | Rule `calculate_bid()` + LLM narrative reasoning overlay                       |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                                                |
-| Market Broadcast   | `price`, `prev_price`, `return`, `return_pct`, `volume`, `net_demand`, `round` |
-| Price Model        | Same order-book clearing as Rule — Market agent unchanged                      |
+| Field | Value |
+|---|---|
+| Variant | RuleLLM |
+| Simulation | Herd Effect |
+| Decision Mechanism | LLM-generated trading orders constrained by explicit scenario rules |
+| Theory Reference | `examples/HerdEffect/simulation-bases.md` |
+| Market Broadcast | `configs/HerdEffect/RuleLLM/topology.yml` |
 
-The RuleLLM variant uses the deterministic `calculate_bid()` formulas as the primary decision engine, with an LLM narrative layer that provides explanatory context and optional override capacity. Rule formulas dominate; LLM adds nuance without replacing the mathematical backbone.
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-## §2 Theory → Implementation Mapping
+## §2 Theory -> Implementation Mapping
 
-### §2.1 RuleLLMMomentumInvestor (simulation-bases.md §4.1)
+### §2.1 MomentumInvestor (simulation-bases.md §4.1)
 
-| Theory Component                 | Implementation                                                                  |
-|----------------------------------|---------------------------------------------------------------------------------|
-| Shiller (1984) positive feedback | Rule formula: `bid_price = price × (1 + lambda_price × ret)` (primary)          |
-| LLM narrative layer              | LLM explains momentum reasoning; may suggest small adjustments to quantity      |
-| Behavioral authenticity          | Rule backbone ensures consistent positive feedback; LLM adds graduated language |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `RuleLLMMomentumInvestor` in `examples/HerdEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.2 ContrarianInvestor (simulation-bases.md §4.2)
 
-### §2.2 RuleLLMContrarianInvestor (simulation-bases.md §4.2)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `RuleLLMContrarianInvestor` in `examples/HerdEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.3 RiskAverseInvestor (simulation-bases.md §4.3)
 
-| Theory Component                        | Implementation                                                       |
-|-----------------------------------------|----------------------------------------------------------------------|
-| De Bondt & Thaler (1985) mean reversion | Rule formula: `bid_price = fundamental + N(0, noise_std)` (primary)  |
-| Fundamental source                      | Reads from own `extras` (not broadcast) — same as Rule               |
-| LLM narrative                           | LLM articulates value reasoning; contrarian signal from Rule formula |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `RuleLLMRiskAverseInvestor` in `examples/HerdEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.4 NoiseTrader (simulation-bases.md §4.4)
 
-### §2.3 RuleLLMRiskAverseInvestor (simulation-bases.md §4.3)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `RuleLLMNoiseTrader` in `examples/HerdEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+### §2.5 AggressiveInvestor (simulation-bases.md §4.5)
 
-| Theory Component               | Implementation                                                                            |
-|--------------------------------|-------------------------------------------------------------------------------------------|
-| Markowitz (1952) mean-variance | Rule variance calculation: `k / variance × cash / P` (primary)                            |
-| LLM overlay                    | LLM describes risk context; may reinforce early exit when volatility narrative is salient |
-
-### §2.4 RuleLLMNoiseTrader (simulation-bases.md §4.4)
-
-| Theory Component                    | Implementation                            |
-|-------------------------------------|-------------------------------------------|
-| De Long et al. (1990) noise trading | Rule random bid/quantity (primary)        |
-| LLM narrative                       | Adds qualitative context to random trades |
-
-### §2.5 RuleLLMAggressiveInvestor (simulation-bases.md §4.5)
-
-| Theory Component                  | Implementation                                                     |
-|-----------------------------------|--------------------------------------------------------------------|
-| Leveraged momentum + acceleration | Rule formula: `kappa × ret + accel_bonus × acceleration` (primary) |
-| LLM narrative                     | Articulates aggressive conviction; bounded by Rule's ±80 cap       |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMAggressiveInvestor` in `examples/HerdEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
+| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdEffect/RuleLLM/players.yml` through `extras`. |
+| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
 
 ## §3 Market Mechanism
 
-*Formula source: simulation-bases.md §3*
-
-```
-P(t+1) = P(t) + α × NetDemand(t) + γ × (F − P(t)) + ε(t)
-```
-
-Identical to Rule variant. RuleLLM formulas produce the same mathematical bid structure — LLM narrative does not alter the clearing mechanism.
+The coordinator mechanism is the final implementation in `examples/HerdEffect/RuleLLM/players.py` and its configured counterpart in `configs/HerdEffect/RuleLLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
 
 ## §4 Variant Architecture
 
-| Component      | Detail                                                         |
-|----------------|----------------------------------------------------------------|
-| Base class     | `BaseInvestor` (RuleLLM subclass)                              |
-| Primary engine | `calculate_bid()` rule formulas                                |
-| LLM role       | Narrative and minor override layer                             |
-| Inference      | `LangChainAPIInference` (called after rule calculation)        |
-| Output         | Same `{bid_price, quantity, strategy, cash, position}` as Rule |
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/HerdEffect/RuleLLM/players.py` |
+| Prompt module | `examples/HerdEffect/RuleLLM/prompts.py` |
+| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
+| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
 ## §5 Config Reference
 
-Config file: `configs/HerdEffect/RuleLLM/simulation.yml`
-
-Key extras:
-- All Rule parameters (lambda_price, beta, kappa, accel_bonus, etc.)
-- `lm_name`: LLM model identifier
-- `system_prompt`: persona for LLM narrative layer
-- Market config unchanged from Rule variant
+| Config | Purpose |
+|---|---|
+| `configs/HerdEffect/RuleLLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/HerdEffect/RuleLLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/HerdEffect/RuleLLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/HerdEffect/RuleLLM/persona.yml` | Turn recording and persona metadata. |
 
 ## §6 Running Instructions
 
 ```bash
-python -m examples.HerdEffect.RuleLLM.run_herd_effect \
-    -c configs/HerdEffect/RuleLLM/simulation.yml
+python examples/HerdEffect/RuleLLM/run_herd_rulellm.py -c configs/HerdEffect/RuleLLM/simulation.yml
 ```
-
-Or via Streamlit UI: select "HerdEffect" → "RuleLLM" variant.
 
 ## §7 Expected Behavior
 
-- **Near-Rule dynamics**: Rule formulas dominate; EMI, MDD, HVR close to Rule baseline
-- **Moderate LLM influence**: Small deviations from Rule when LLM narrative overrides at margin
-- **Consistent early exit**: RiskAverseInvestor rule formula unchanged → REI similar to Rule
-- **Explainability**: LLM narrative provides human-readable explanation of each agent's decision
-- **Lower variance than LLM**: More reproducible than pure LLM due to formula backbone
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
 ## §8 References
 
-See `simulation-bases.md §2` for full DOI citations.
-
-- Shiller (1984) `doi:10.2307/2534436` — RuleLLMMomentumInvestor
-- De Bondt & Thaler (1985) `doi:10.1111/j.1540-6261.1985.tb05004.x` — RuleLLMContrarianInvestor
-- Markowitz (1952) `doi:10.1111/j.1540-6261.1952.tb01525.x` — RuleLLMRiskAverseInvestor
+See `examples/HerdEffect/simulation-bases.md §2` for full DOI citations and mechanism references.
 
 ## §9 Variant Comparison
 
-See `simulation-bases.md §9` for Rule / LLM / RuleLLM / Rag comparison table.
+See `examples/HerdEffect/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
