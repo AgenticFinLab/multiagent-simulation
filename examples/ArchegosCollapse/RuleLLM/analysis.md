@@ -1,6 +1,6 @@
 # ArchegosCollapse RuleLLM — Analysis Documentation
 
-## Overview
+## §1 Analysis Objectives
 
 | Item                                | Description                                                                                                                                              |
 |-------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 
 ---
 
-## 1. Metric Implementation
+## §2 Metric → Function Mapping
 
 All metrics are defined in `../analysis-bases.md §2`. RuleLLM `analysis.py` imports core functions from `Rule/analysis.py` and adds `analyze_rule_adherence()`.
 
@@ -24,17 +24,18 @@ from examples.ArchegosCollapse.Rule.analysis import (
 
 | Metric                     | Function                   | analysis-bases.md Ref   | RuleLLM-Specific Notes                                                              |
 |----------------------------|----------------------------|-------------------------|-------------------------------------------------------------------------------------|
-| **Price Deviation**        | `calculate_metrics()`      | `§2.1`                  | Expected near-Rule; ±20% quantity variation causes slight deviation difference      |
-| **Maximum Drawdown**       | `calculate_metrics()`      | `§2.2`                  | Expected 15%–50%; near-Rule with small variance from quantity adjustments           |
-| **Cascade Volatility**     | `calculate_metrics()`      | `§2.3`                  | Slightly higher than Rule due to ±20% quantity variation                            |
-| **Return Autocorrelation** | `calculate_metrics()`      | `§2.4`                  | Near-Rule pattern; LLM sign-compliance ensures cascade self-reinforcement preserved |
-| **Agent-Type Volume**      | `calculate_metrics()`      | `§2.5`                  | Within ±20% of Rule volumes per agent type                                          |
-| **Cascade Onset Round**    | `calculate_metrics()`      | `§2.6`                  | Expected near-Rule; rules force sell when threshold breached                        |
+| **Price Deviation**        | `calculate_metrics()`      | `analysis-bases.md §2.1` | Expected near-Rule; ±20% quantity variation causes slight deviation difference      |
+| **Maximum Drawdown**       | `calculate_metrics()`      | `analysis-bases.md §2.2` | Expected 15%–50%; near-Rule with small variance from quantity adjustments           |
+| **Cascade Volatility**     | `calculate_metrics()`      | `analysis-bases.md §2.3` | Slightly higher than Rule due to ±20% quantity variation                            |
+| **Return Autocorrelation** | `calculate_metrics()`      | `analysis-bases.md §2.4` | Near-Rule pattern; LLM sign-compliance ensures cascade self-reinforcement preserved |
+| **Agent-Type Volume**      | `calculate_metrics()`      | `analysis-bases.md §2.5` | Within ±20% of Rule volumes per agent type                                          |
+| **Cascade Onset Round**    | `calculate_metrics()`      | `analysis-bases.md §2.6` | Expected near-Rule; rules force sell when threshold breached                        |
+| **Recovery Half-Life**     | `calculate_metrics()`      | `analysis-bases.md §2.7` | Near-Rule recovery timing with quantity variation effects                           |
 | **Rule Adherence Rate**    | `analyze_rule_adherence()` | `§2` (variant-specific) | **RuleLLM-only**: directional alignment with Rule formula; target ≥80% per agent    |
 
 ---
 
-## 2. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Price Cascade Dynamics
 *(Objective from analysis-bases.md §3.1)*
@@ -86,7 +87,7 @@ Cascade lifecycle expected near-Rule. Monitor for "adherence failures" — round
 
 ---
 
-## 3. Variant-Specific Observable Phenomena
+## §4 Variant-Specific Observable Phenomena
 
 | Phenomenon                    | Description                                                    | How to Observe                                          | Contrast with Rule Baseline       |
 |-------------------------------|----------------------------------------------------------------|---------------------------------------------------------|-----------------------------------|
@@ -97,7 +98,7 @@ Cascade lifecycle expected near-Rule. Monitor for "adherence failures" — round
 
 ---
 
-## 4. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
@@ -124,7 +125,7 @@ Cascade lifecycle expected near-Rule. Monitor for "adherence failures" — round
 
 ---
 
-## 5. Output Files Reference
+## §6 Output Files Reference
 
 All outputs written to `EXPERIMENT/ArchegosCollapse/RuleLLM/records/analysis/`.
 
@@ -136,7 +137,7 @@ All outputs written to `EXPERIMENT/ArchegosCollapse/RuleLLM/records/analysis/`.
 
 ---
 
-## 6. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 - **Phenomenon emergence speed**: Near-Rule — formula in prompt ensures sell when threshold breached
 - **Phenomenon intensity**: Within ±20% of Rule max drawdown; quantity adjustment has limited market impact
@@ -147,7 +148,7 @@ Cross-variant comparison protocol: `../analysis-bases.md §5`.
 
 ---
 
-## References
+### References
 
 - `../analysis-bases.md` — master analysis specification
 - `../simulation-bases.md §4 RuleLLM Hybrid Notes` — ±20% quantity adjustment specs per investor type

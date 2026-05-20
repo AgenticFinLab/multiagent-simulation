@@ -1,6 +1,6 @@
 # ArchegosCollapse Rag — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                                   | Description                                                                                                                                                               |
 |----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,12 +12,12 @@
 
 ---
 
-## 1. How Theoretical Design Is Implemented
+## §2 Theory → Implementation Mapping
 
 ### ConcentratedFund: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — ConcentratedFund)*
+*(Theory defined in simulation-bases.md §4.1 — ConcentratedFund)*
 
-| Theoretical Design Element                                         | Implementation                                                                                          |
+| Theory Component                                                   | Implementation                                                                                          |
 |--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
 | TRS leverage rules → sim-bases §4 Rule-Based Behavior              | System prompt = `RAG_CONCENTRATED_FUND_SYS` = `RULELLM_CONCENTRATED_FUND_SYS` (identical rules/persona) |
 | Historical case knowledge → sim-bases §8 (Historical Case Studies) | RAG knowledge base sources from Archegos collapse (March 2021) described in sim-bases §8                |
@@ -25,41 +25,41 @@
 | No-retrieval fallback                                              | When retrieval fails: `"(No relevant knowledge retrieved this round.)"` replaces `{rag_context}`        |
 
 ### PrimeBroker1: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — PrimeBroker1)*
+*(Theory defined in simulation-bases.md §4.2 — PrimeBroker1)*
 
-| Theoretical Design Element                          | Implementation                                                                       |
+| Theory Component                                    | Implementation                                                                       |
 |-----------------------------------------------------|--------------------------------------------------------------------------------------|
 | First-mover rules → sim-bases §4                    | `RAG_PRIME_BROKER1_SYS` = `RULELLM_PRIME_BROKER1_SYS` (deviation < −0.10 → SELL 40%) |
 | Historical precedent of broker races → sim-bases §8 | RAG may retrieve LTCM/Archegos prime broker behavior examples                        |
 | RAG augmentation modifying urgency                  | Retrieved "first-mover precedents" may reinforce faster/larger liquidation decisions |
 
 ### PrimeBroker2: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — PrimeBroker2)*
+*(Theory defined in simulation-bases.md §4.3 — PrimeBroker2)*
 
-| Theoretical Design Element                                  | Implementation                                                                       |
+| Theory Component                                            | Implementation                                                                       |
 |-------------------------------------------------------------|--------------------------------------------------------------------------------------|
 | Second-mover rules → sim-bases §4                           | `RAG_PRIME_BROKER2_SYS` = `RULELLM_PRIME_BROKER2_SYS` (deviation < −0.15 → SELL 35%) |
 | Learning from historical second-mover losses → sim-bases §8 | RAG may retrieve Credit Suisse/Nomura late-liquidation loss examples                 |
 
 ### BlockTradeBuyer: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — BlockTradeBuyer)*
+*(Theory defined in simulation-bases.md §4.4 — BlockTradeBuyer)*
 
-| Theoretical Design Element                              | Implementation                                                                            |
+| Theory Component                                        | Implementation                                                                            |
 |---------------------------------------------------------|-------------------------------------------------------------------------------------------|
 | Block trading rules → sim-bases §4                      | `RAG_BLOCK_TRADE_BUYER_SYS` = `RULELLM_BLOCK_TRADE_BUYER_SYS` (deviation < −0.10 → BUY)   |
 | Historical block trade recovery examples → sim-bases §8 | RAG may retrieve institutional buyers in Archegos block trades; reinforces buy conviction |
 
 ### InformationTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — InformationTrader)*
+*(Theory defined in simulation-bases.md §4.5 — InformationTrader)*
 
-| Theoretical Design Element                              | Implementation                                                                       |
+| Theory Component                                        | Implementation                                                                       |
 |---------------------------------------------------------|--------------------------------------------------------------------------------------|
 | Detection and front-run rules → sim-bases §4            | `RAG_INFORMATION_TRADER_SYS` = `RULELLM_INFORMATION_TRADER_SYS`                      |
 | Historical signal patterns from Archegos → sim-bases §8 | RAG may provide historical context on unusual block flow patterns before the cascade |
 
 ---
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 *Formula source: simulation-bases.md §3.1*
 
@@ -85,7 +85,7 @@ Deviations from simulation-bases.md design: None in market mechanics.
 
 ---
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 *(Reference: simulation-bases.md §9 — Rag variant entry)*
 
@@ -105,7 +105,7 @@ Deviations from simulation-bases.md design: None in market mechanics.
 
 ---
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
@@ -134,7 +134,7 @@ Deviations from simulation-bases.md design: None in market mechanics.
 
 ---
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 Key Configuration Parameters (`configs/ArchegosCollapse/Rag/players.yml`):
 
@@ -149,7 +149,7 @@ Key Configuration Parameters (`configs/ArchegosCollapse/Rag/players.yml`):
 
 ---
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 export ARK_API_KEY="your-bytedance-ark-api-key"
@@ -166,7 +166,7 @@ Output location: `EXPERIMENT/ArchegosCollapse/Rag/`
 
 ---
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase         | Rounds | Expected Agent Behavior                                                                                                          | Expected Price Dynamics                                                         |
 |---------------|--------|----------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
@@ -177,7 +177,7 @@ Output location: `EXPERIMENT/ArchegosCollapse/Rag/`
 
 ---
 
-## 8. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

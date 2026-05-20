@@ -1,6 +1,6 @@
 # ArchegosCollapse LLM — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                                   | Description                                                                                                                                                        |
 |----------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,12 +12,12 @@
 
 ---
 
-## 1. How Theoretical Design Is Implemented
+## §2 Theory → Implementation Mapping
 
 ### ConcentratedFund: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — ConcentratedFund)*
+*(Theory defined in simulation-bases.md §4.1 — ConcentratedFund)*
 
-| Theoretical Design Element                                    | Implementation                                                                          |
+| Theory Component                                              | Implementation                                                                          |
 |---------------------------------------------------------------|-----------------------------------------------------------------------------------------|
 | TRS leverage psychology → simulation-bases.md §4 LLM Persona  | `LLM_CONCENTRATED_FUND_SYS` in `prompts.py`; "denial is your first response"            |
 | Denial response to margin pressure → sim-bases §4 LLM Persona | Prompt: "you are slow to react to margin pressure — denial is your first response"      |
@@ -26,9 +26,9 @@
 | Prompt constant → `prompts.py`                                | `LLM_CONCENTRATED_FUND_SYS` loaded via `extras.sys_prompt_path` in `players.yml`        |
 
 ### PrimeBroker1: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — PrimeBroker1)*
+*(Theory defined in simulation-bases.md §4.2 — PrimeBroker1)*
 
-| Theoretical Design Element                                    | Implementation                                                                         |
+| Theory Component                                              | Implementation                                                                         |
 |---------------------------------------------------------------|----------------------------------------------------------------------------------------|
 | First-mover competitive psychology → sim-bases §4 LLM Persona | `LLM_PRIME_BROKER1_SYS`: "speed is paramount"; "first to act preserves the most value" |
 | Aggressive, decisive action → sim-bases §4 LLM Persona        | "you liquidate aggressively and quickly"; "act decisively when risk thresholds breach" |
@@ -36,27 +36,27 @@
 | Prompt constant                                               | `LLM_PRIME_BROKER1_SYS` in `prompts.py`                                                |
 
 ### PrimeBroker2: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — PrimeBroker2)*
+*(Theory defined in simulation-bases.md §4.3 — PrimeBroker2)*
 
-| Theoretical Design Element                         | Implementation                                                          |
+| Theory Component                                   | Implementation                                                          |
 |----------------------------------------------------|-------------------------------------------------------------------------|
 | Second-mover reluctance → sim-bases §4 LLM Persona | `LLM_PRIME_BROKER2_SYS`: "slower decision process, reluctant initially" |
 | Accepts price penalty → sim-bases §4 LLM Persona   | "accepts price penalties to complete liquidation quickly"               |
 | Amplifying role → sim-bases §4                     | "your selling accelerates the cascade triggered by the first broker"    |
 
 ### BlockTradeBuyer: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — BlockTradeBuyer)*
+*(Theory defined in simulation-bases.md §4.4 — BlockTradeBuyer)*
 
-| Theoretical Design Element                                | Implementation                                                                            |
+| Theory Component                                          | Implementation                                                                            |
 |-----------------------------------------------------------|-------------------------------------------------------------------------------------------|
 | Opportunistic discount-seeking → sim-bases §4 LLM Persona | `LLM_BLOCK_TRADE_BUYER_SYS`: "wait for dislocations — when forced sellers must unload"    |
 | Deploy fixed capital ratio → sim-bases §4 LLM Persona     | "deploy capital aggressively"; LLM decides actual ratio based on perceived discount depth |
 | Stabilizing force → sim-bases §4                          | "you are the stabilizing force that ultimately limits the cascade"                        |
 
 ### InformationTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — InformationTrader)*
+*(Theory defined in simulation-bases.md §4.5 — InformationTrader)*
 
-| Theoretical Design Element                                 | Implementation                                                                          |
+| Theory Component                                           | Implementation                                                                          |
 |------------------------------------------------------------|-----------------------------------------------------------------------------------------|
 | Order-flow detection capability → sim-bases §4 LLM Persona | `LLM_INFORMATION_TRADER_SYS`: "you specialize in reading unusual order flow patterns"   |
 | Short-then-cover pattern → sim-bases §4 LLM Persona        | "sell quickly to profit from the decline"; "cover your short positions when stabilized" |
@@ -64,7 +64,7 @@
 
 ---
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 *Formula source: simulation-bases.md §3.1*
 
@@ -95,7 +95,7 @@ Deviations from simulation-bases.md design: None in market mechanics. Investor d
 
 ---
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 *(Reference: simulation-bases.md §9 — LLM variant entry)*
 
@@ -111,7 +111,7 @@ Deviations from simulation-bases.md design: None in market mechanics. Investor d
 
 ---
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
@@ -151,7 +151,7 @@ LLM API Call Flow:
 
 ---
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 Key Configuration Parameters (`configs/ArchegosCollapse/LLM/players.yml`):
 
@@ -165,7 +165,7 @@ Key Configuration Parameters (`configs/ArchegosCollapse/LLM/players.yml`):
 
 ---
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 export ARK_API_KEY="your-bytedance-ark-api-key"
@@ -182,7 +182,7 @@ Output location: `EXPERIMENT/ArchegosCollapse/LLM/`
 
 ---
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase        | Rounds | Expected Agent Behavior                                                                    | Expected Price Dynamics                                         |
 |--------------|--------|--------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
@@ -194,7 +194,7 @@ Output location: `EXPERIMENT/ArchegosCollapse/LLM/`
 
 ---
 
-## 8. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

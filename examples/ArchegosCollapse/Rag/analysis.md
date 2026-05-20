@@ -1,6 +1,6 @@
 # ArchegosCollapse Rag — Analysis Documentation
 
-## Overview
+## §1 Analysis Objectives
 
 | Item                                | Description                                                                                                                                         |
 |-------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 
 ---
 
-## 1. Metric Implementation
+## §2 Metric → Function Mapping
 
 All metrics are defined in `../analysis-bases.md §2`. Rag `analysis.py` imports core functions from `Rule/analysis.py` and adds `analyze_rag_knowledge_effect()`.
 
@@ -24,17 +24,18 @@ from examples.ArchegosCollapse.Rule.analysis import (
 
 | Metric                     | Function                         | analysis-bases.md Ref   | Rag-Specific Notes                                                                           |
 |----------------------------|----------------------------------|-------------------------|----------------------------------------------------------------------------------------------|
-| **Price Deviation**        | `calculate_metrics()`            | `§2.1`                  | Near-RuleLLM baseline; knowledge may accelerate or modify cascade depth                      |
-| **Maximum Drawdown**       | `calculate_metrics()`            | `§2.2`                  | Expected similar to RuleLLM; historical knowledge may deepen or buffer cascade               |
-| **Cascade Volatility**     | `calculate_metrics()`            | `§2.3`                  | May show lower volatility if RAG provides stabilizing historical context                     |
-| **Return Autocorrelation** | `calculate_metrics()`            | `§2.4`                  | Near-RuleLLM; RAG effect on autocorrelation depends on knowledge content                     |
-| **Agent-Type Volume**      | `calculate_metrics()`            | `§2.5`                  | Similar to RuleLLM; RAG may increase BlockTradeBuyer conviction (historical recovery)        |
-| **Cascade Onset Round**    | `calculate_metrics()`            | `§2.6`                  | Near-RuleLLM; historical urgency cues may slightly advance broker liquidation                |
+| **Price Deviation**        | `calculate_metrics()`            | `analysis-bases.md §2.1` | Near-RuleLLM baseline; knowledge may accelerate or modify cascade depth                      |
+| **Maximum Drawdown**       | `calculate_metrics()`            | `analysis-bases.md §2.2` | Expected similar to RuleLLM; historical knowledge may deepen or buffer cascade               |
+| **Cascade Volatility**     | `calculate_metrics()`            | `analysis-bases.md §2.3` | May show lower volatility if RAG provides stabilizing historical context                     |
+| **Return Autocorrelation** | `calculate_metrics()`            | `analysis-bases.md §2.4` | Near-RuleLLM; RAG effect on autocorrelation depends on knowledge content                     |
+| **Agent-Type Volume**      | `calculate_metrics()`            | `analysis-bases.md §2.5` | Similar to RuleLLM; RAG may increase BlockTradeBuyer conviction (historical recovery)        |
+| **Cascade Onset Round**    | `calculate_metrics()`            | `analysis-bases.md §2.6` | Near-RuleLLM; historical urgency cues may slightly advance broker liquidation                |
+| **Recovery Half-Life**     | `calculate_metrics()`            | `analysis-bases.md §2.7` | Historical context may affect how quickly agents support recovery after the trough           |
 | **RAG Retrieval Effect**   | `analyze_rag_knowledge_effect()` | `§2` (variant-specific) | **Rag-only**: retrieval success vs fallback rate per agent; decision distribution comparison |
 
 ---
 
-## 2. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Price Cascade Dynamics
 *(Objective from analysis-bases.md §3.1)*
@@ -86,7 +87,7 @@ Monitor whether cascade phases align with RAG retrieval patterns. High retrieval
 
 ---
 
-## 3. Variant-Specific Observable Phenomena
+## §4 Variant-Specific Observable Phenomena
 
 | Phenomenon                       | Description                                                                | How to Observe                                               | Contrast with RuleLLM Baseline              |
 |----------------------------------|----------------------------------------------------------------------------|--------------------------------------------------------------|---------------------------------------------|
@@ -97,7 +98,7 @@ Monitor whether cascade phases align with RAG retrieval patterns. High retrieval
 
 ---
 
-## 4. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
@@ -125,7 +126,7 @@ Monitor whether cascade phases align with RAG retrieval patterns. High retrieval
 
 ---
 
-## 5. Output Files Reference
+## §6 Output Files Reference
 
 All outputs written to `EXPERIMENT/ArchegosCollapse/Rag/records/analysis/`.
 
@@ -137,7 +138,7 @@ All outputs written to `EXPERIMENT/ArchegosCollapse/Rag/records/analysis/`.
 
 ---
 
-## 6. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 - **Phenomenon emergence speed**: Near-RuleLLM; historical urgency cues may slightly accelerate broker liquidation timing
 - **Phenomenon intensity**: Variable — rich historical Archegos precedents may deepen cascade; recovery precedents may buffer it
@@ -148,7 +149,7 @@ Cross-variant comparison protocol: `../analysis-bases.md §5`.
 
 ---
 
-## References
+### References
 
 - `../analysis-bases.md` — master analysis specification
 - `../simulation-bases.md §8` — Historical Case Studies (source of RAG knowledge base content)
