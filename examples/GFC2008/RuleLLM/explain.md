@@ -77,3 +77,25 @@ This variant traces to `../simulation-bases.md §4` for investor design and
 `../analysis-bases.md §2` for metric definitions. Post-run review should verify
 full round count, order schema completeness, price and portfolio sanity, LLM
 parse/fallback rates, and rule-adherence patterns before accepting a sample.
+
+## §6 Running Instructions
+
+```bash
+python examples/GFC2008/RuleLLM/run_gfc2008_rulellm.py \
+  -c configs/GFC2008/RuleLLM/simulation.yml
+```
+
+## §7 Expected Behavior
+
+RuleLLM agents should preserve the Rule variant's directional triggers while
+allowing language-mediated reasoning and quantity variation.
+
+## §8 Cross-Variant Role
+
+RuleLLM isolates the effect of LLM reasoning when each agent receives explicit
+decision rules.
+
+## §9 Implementation Traceability
+
+System prompts must contain `== PERSONA ==` and `== DECISION RULES ==` sections;
+order parsing must emit valid trading payloads.

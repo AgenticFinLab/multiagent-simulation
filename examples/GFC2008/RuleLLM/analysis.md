@@ -54,3 +54,20 @@
 | RRI    | 0.25–0.65              | Higher   | Active LLM Regulator       |
 | OSP    | 0.60–0.90              | Similar  | Origination rate-dominated |
 | WDI    | 0.10–0.28              | Similar  | Crisis arc driven by Rule  |
+
+## §5 References
+
+Metric definitions are inherited from `analysis-bases.md §2`; RuleLLM prompt
+rules trace to `simulation-bases.md §4.1-§4.5`.
+
+## §6 Cross-Variant Comparison
+
+Compare RuleLLM against Rule to measure language-mediated quantity and timing
+effects under explicit decision rules.
+
+## §7 Quality Checks
+
+- Confirm the run completed 200 configured rounds.
+- Confirm prompts contain both `== PERSONA ==` and `== DECISION RULES ==`.
+- Confirm parse failures do not silently become fallback holds.
+- Confirm accepted orders preserve valid trading payloads.

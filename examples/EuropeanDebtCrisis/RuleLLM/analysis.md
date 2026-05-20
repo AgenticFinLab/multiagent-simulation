@@ -42,3 +42,18 @@ Measure whether embedded threshold rules preserve Rule baseline crisis dynamics 
 
 See `analysis-bases.md §2` for full metric derivations and Python function signatures.
 See `simulation-bases.md §2` for theoretical foundations.
+
+## §6 Cross-Variant Comparison
+
+| Comparison | Interpretation |
+|---|---|
+| RuleLLM vs Rule | Measures LLM reasoning effects under fixed sovereign-crisis rules. |
+| RuleLLM vs LLM | Tests whether explicit thresholds reduce crisis-reasoning drift. |
+| RuleLLM vs Rag | Isolates the effect of retrieved debt-crisis knowledge. |
+
+## §7 Quality Checks
+
+- Confirm the run completed 200 configured rounds.
+- Confirm prompts contain both `== PERSONA ==` and `== DECISION RULES ==` sections.
+- Confirm parse failures do not silently become fallback holds.
+- Confirm accepted decisions preserve valid order payloads.

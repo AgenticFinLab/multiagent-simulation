@@ -79,3 +79,25 @@ This variant traces to `../simulation-bases.md §4` for investor design and
 full round count, order schema completeness, price and portfolio sanity,
 retrieval health, LLM parse/fallback rates, and crisis-phase patterns before
 accepting a sample.
+
+## §6 Running Instructions
+
+```bash
+python examples/GFC2008/Rag/run_gfc2008_rag.py \
+  -c configs/GFC2008/Rag/simulation.yml
+```
+
+## §7 Expected Behavior
+
+RAG agents should preserve RuleLLM-style decision rules while retrieved crisis
+context changes confidence, intervention timing, and distressed-buyer behavior.
+
+## §8 Cross-Variant Role
+
+RAG isolates the marginal effect of external financial-crisis knowledge relative
+to RuleLLM.
+
+## §9 Implementation Traceability
+
+The user prompt must inject `{rag_context}` or the no-context marker, and sample
+acceptance requires retrieval-health and parse-quality review.

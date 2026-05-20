@@ -58,3 +58,20 @@
 | RRI    | 0.15–0.70          | Higher ceiling | More active LLM intervention     |
 | OSP    | 0.50–0.90          | Similar        | LLM-modulated origination        |
 | WDI    | 0.08–0.35          | Similar        | Crisis arc dependent             |
+
+## §5 References
+
+Metric definitions are inherited from `analysis-bases.md §2`; LLM investor
+roles trace to `simulation-bases.md §4.1-§4.5`.
+
+## §6 Cross-Variant Comparison
+
+Compare LLM results against Rule to measure persona-only crisis reasoning, and
+against RuleLLM/RAG to isolate explicit-rule and knowledge effects.
+
+## §7 Quality Checks
+
+- Confirm the run completed the configured 200 rounds.
+- Audit parse failures, retry counts, and fallback holds before acceptance.
+- Confirm accepted decisions produce valid `action` and numeric `quantity`.
+- Review action distribution for excessive holds or one-sided behavior.

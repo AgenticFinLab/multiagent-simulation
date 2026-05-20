@@ -42,3 +42,18 @@ Establish the deterministic baseline for crisis dynamics. Key questions:
 
 See `analysis-bases.md §2` for full metric derivations and Python function signatures.
 See `simulation-bases.md §2` for theoretical foundations.
+
+## §6 Cross-Variant Comparison
+
+| Variant | Expected comparison |
+|---|---|
+| LLM | More variable crisis depth and intervention timing from persona reasoning |
+| RuleLLM | Close to Rule because decision thresholds are embedded in the prompt |
+| Rag | RuleLLM-like behavior modified by retrieved sovereign-crisis context |
+
+## §7 Quality Checks
+
+- Confirm the run completed the configured 200 rounds.
+- Confirm price and fundamental histories are present for all rounds.
+- Confirm crisis metrics raise on missing records rather than fabricating zeros.
+- Confirm order payloads contain valid `action` and numeric `quantity`.

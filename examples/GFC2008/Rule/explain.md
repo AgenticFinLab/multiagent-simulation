@@ -77,3 +77,25 @@ This variant traces to `../simulation-bases.md §4` for investor design and
 `../analysis-bases.md §2` for metric definitions. Post-run review should verify
 full round count, order schema completeness, price and portfolio sanity, and
 crisis-phase patterns before accepting a sample.
+
+## §6 Running Instructions
+
+```bash
+python examples/GFC2008/Rule/run_gfc2008.py \
+  -c configs/GFC2008/Rule/simulation.yml
+```
+
+## §7 Expected Behavior
+
+The Rule variant should produce deterministic bubble build-up, fire-sale
+pressure, partial stabilizer response, and measurable wealth redistribution.
+
+## §8 Cross-Variant Role
+
+Rule output is the baseline for comparing persona-only LLM behavior, explicit
+RuleLLM guidance, and RAG knowledge effects.
+
+## §9 Implementation Traceability
+
+Investor behavior maps to `simulation-bases.md §4.1-§4.5`; metrics map to
+`analysis-bases.md §2`. No LLM calls are made in this variant.

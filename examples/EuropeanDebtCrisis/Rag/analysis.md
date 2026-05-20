@@ -42,3 +42,18 @@ Measure how RAG-retrieved crisis literature affects the self-fulfilling spiral d
 
 See `analysis-bases.md §2` for full metric derivations and Python function signatures.
 See `simulation-bases.md §2` for theoretical foundations.
+
+## §6 Cross-Variant Comparison
+
+| Comparison | Interpretation |
+|---|---|
+| Rag vs RuleLLM | Measures the marginal effect of retrieved sovereign-debt context. |
+| Rag vs LLM | Separates persona-only reasoning from knowledge-augmented reasoning. |
+| Rag vs Rule | Tests whether RAG knowledge improves or weakens baseline mechanism emergence. |
+
+## §7 Quality Checks
+
+- Confirm the run completed 200 configured rounds.
+- Confirm RAG assets and embedding configuration were available.
+- Confirm `{rag_context}` was populated or explicitly replaced by the no-context marker.
+- Audit parse failures, retry counts, fallback holds, and retrieval-health records before acceptance.

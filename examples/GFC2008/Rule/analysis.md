@@ -58,3 +58,20 @@
 | RRI    | 0.20–0.60           | Partial stabilization ratio              |
 | OSP    | 0.60–0.90           | MBSOriginator share of total sell volume |
 | WDI    | 0.10–0.30           | Wealth Gini from distressed-buyer gains  |
+
+## §5 References
+
+Metric definitions are inherited from `analysis-bases.md §2`; investor-role
+interpretation traces to `simulation-bases.md §4.1-§4.5`.
+
+## §6 Cross-Variant Comparison
+
+Rule metrics provide the deterministic baseline for LLM, RuleLLM, and RAG
+comparisons.
+
+## §7 Quality Checks
+
+- Confirm the run completed the configured 200 rounds.
+- Confirm price and fundamental records are present and non-zero.
+- Confirm the analysis raises on missing records instead of fabricating zeros.
+- Confirm order payloads preserve valid `action` and numeric `quantity`.

@@ -57,3 +57,20 @@
 | RRI    | 0.25–0.70          | Higher   | Retrieved bailout data anchors intervention |
 | OSP    | 0.60–0.92          | Similar  | Origination history retrieval               |
 | WDI    | 0.12–0.35          | Higher   | Deeper crisis → greater wealth transfer     |
+
+## §5 References
+
+Metric definitions are inherited from `analysis-bases.md §2`; RAG investor roles
+trace to `simulation-bases.md §4.1-§4.5`.
+
+## §6 Cross-Variant Comparison
+
+Compare RAG against RuleLLM to measure the marginal effect of retrieved
+financial-crisis knowledge.
+
+## §7 Quality Checks
+
+- Confirm the run completed 200 configured rounds.
+- Confirm RAG assets and embedding configuration were available.
+- Confirm `{rag_context}` was populated or explicitly replaced by the no-context marker.
+- Audit parse failures, fallback holds, and retrieval-health records before acceptance.
