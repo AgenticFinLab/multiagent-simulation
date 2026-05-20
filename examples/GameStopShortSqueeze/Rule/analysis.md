@@ -46,3 +46,21 @@ Analysis for the **Rule variant** of GameStopShortSqueeze. Metric definitions fr
 | SCD        | 2–8 rounds          | Target: 2–8            | Post-peak collapse is rapid in Rule variant      |
 | IEP        | Rounds 3–10         | Target: 3–10           | Institutional sells early at first overvaluation |
 | WTI        | 0.10–0.40           | Target: 0.10–0.40      | Short-seller wealth transferred to retail/MM     |
+
+## §5 References
+
+Metric definitions are inherited from `analysis-bases.md §2`; Rule investor
+roles trace to `simulation-bases.md §4.1-§4.5`.
+
+## §6 Cross-Variant Comparison
+
+Compare Rule against LLM to measure persona-only decision effects, against
+RuleLLM to measure explicit rule embedding under language reasoning, and
+against RAG to measure retrieval-augmented rule interpretation.
+
+## §7 Quality Checks
+
+- Confirm the run completed the configured 200 rounds.
+- Confirm market records include price and fundamental values for every round.
+- Confirm short-seller and gamma-hedging activation appear in the squeeze phase.
+- Confirm analysis raises on missing records rather than producing zero metrics.

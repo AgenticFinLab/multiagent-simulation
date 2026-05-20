@@ -90,3 +90,29 @@ This variant traces to `../simulation-bases.md §4` for investor design and
 full round count, order schema completeness, price and portfolio sanity,
 squeeze-phase patterns, and agent-level contribution patterns before accepting a
 sample.
+
+## §6 Running Instructions
+
+```bash
+python examples/GameStopShortSqueeze/Rule/run_gamestopshortsqueeze_rule.py \
+  -c configs/GameStopShortSqueeze/Rule/simulation.yml
+```
+
+## §7 Expected Behavior
+
+The Rule variant should produce a deterministic short-squeeze arc: coordinated
+retail buying lifts price above fundamental, short sellers cover, gamma hedgers
+add mechanical demand, and institutional value sellers eventually provide the
+main countervailing supply.
+
+## §8 Cross-Variant Role
+
+Rule is the baseline used to evaluate whether LLM, RuleLLM, and RAG variants
+preserve the GameStop squeeze mechanism while changing decision timing,
+quantity selection, or knowledge use.
+
+## §9 Implementation Traceability
+
+Investor classes in `players.py` map directly to `simulation-bases.md §4.1-§4.5`.
+Analysis functions in `analysis.py` should fail fast when market records are
+missing rather than fabricating zero-valued metrics.

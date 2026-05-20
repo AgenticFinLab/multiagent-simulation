@@ -71,3 +71,28 @@ This variant traces to `../simulation-bases.md §4` for investor design and
 full round count, order schema completeness, price and portfolio sanity,
 retrieval health, LLM parse/fallback rates, and squeeze-phase patterns before
 accepting a sample.
+
+## §6 Running Instructions
+
+```bash
+python examples/GameStopShortSqueeze/Rag/run_gamestopshortsqueeze_rag.py \
+  -c configs/GameStopShortSqueeze/Rag/simulation.yml
+```
+
+## §7 Expected Behavior
+
+RAG should preserve the RuleLLM action schema while adding retrieved short
+squeeze context to each decision round. Retrieved GME and squeeze material may
+increase buying conviction for retail and short-covering agents, while
+fundamental context may strengthen institutional selling.
+
+## §8 Cross-Variant Role
+
+The RAG variant measures whether external squeeze literature changes behavior
+relative to RuleLLM prompts with the same embedded decision rules.
+
+## §9 Implementation Traceability
+
+`Rag/prompts.py` imports RuleLLM system prompts and adds `{rag_context}` in the
+user template. RAG sample acceptance requires retrieval-health checks in
+addition to LLM parse and structural output checks.

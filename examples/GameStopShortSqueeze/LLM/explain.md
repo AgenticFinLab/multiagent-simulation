@@ -71,3 +71,28 @@ This variant traces to `../simulation-bases.md §4` for investor design and
 `../analysis-bases.md §2` for metric definitions. Post-run review should verify
 full round count, order schema completeness, price and portfolio sanity, LLM
 parse/fallback rates, and squeeze-phase patterns before accepting a sample.
+
+## §6 Running Instructions
+
+```bash
+python examples/GameStopShortSqueeze/LLM/run_gamestopshortsqueeze_llm.py \
+  -c configs/GameStopShortSqueeze/LLM/simulation.yml
+```
+
+## §7 Expected Behavior
+
+LLM agents should preserve the five investor archetypes while allowing more
+variation in timing and quantity than the deterministic Rule baseline. The
+short-seller and institutional-value agents are expected to create the largest
+behavioral variation because their prompts emphasize conviction under pressure.
+
+## §8 Cross-Variant Role
+
+The LLM variant tests whether persona-only language reasoning can reproduce the
+short-squeeze mechanism without embedded numerical rules.
+
+## §9 Implementation Traceability
+
+System prompts in `prompts.py` define persona behavior, while `players.py`
+parses the canonical `<analysis>` and `<decision>` response. Acceptance requires
+clean parse/retry/fallback quality logs in addition to successful execution.

@@ -68,3 +68,28 @@ This variant traces to `../simulation-bases.md §4` for investor design and
 `../analysis-bases.md §2` for metric definitions. Post-run review should verify
 full round count, order schema completeness, price and portfolio sanity, LLM
 parse/fallback rates, and rule-adherence patterns before accepting a sample.
+
+## §6 Running Instructions
+
+```bash
+python examples/GameStopShortSqueeze/RuleLLM/run_gamestopshortsqueeze_rulellm.py \
+  -c configs/GameStopShortSqueeze/RuleLLM/simulation.yml
+```
+
+## §7 Expected Behavior
+
+RuleLLM agents should remain close to Rule dynamics because the prompts contain
+the same directional thresholds and position constraints. Language reasoning may
+change timing explanations and selected quantities, but it should not invert the
+short-squeeze mechanism.
+
+## §8 Cross-Variant Role
+
+The RuleLLM variant isolates the effect of language reasoning when explicit
+short-squeeze trading rules are embedded in each system prompt.
+
+## §9 Implementation Traceability
+
+Each system prompt in `prompts.py` must keep separate `== PERSONA ==` and
+`== DECISION RULES ==` sections. Because RAG imports these RuleLLM system
+prompts, prompt-structure changes affect both RuleLLM and RAG samples.
