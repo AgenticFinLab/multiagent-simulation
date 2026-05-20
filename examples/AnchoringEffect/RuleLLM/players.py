@@ -210,31 +210,31 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMAnchoredTrader(RuleLLMInvestor):
-    """RuleLLM anchored trader — anchors to initial price, adjusts insufficiently. Theory: simulation-bases.md §4 — AnchoredTrader."""
+    """RuleLLM anchored trader — anchors to initial price, adjusts insufficiently. Theory: simulation-bases.md §4.1 — AnchoredTrader."""
 
     pass
 
 
 class RuleLLMHistoricalAnchor(RuleLLMInvestor):
-    """RuleLLM historical anchor — anchors to historical average price. Theory: simulation-bases.md §4 — HistoricalAnchor."""
+    """RuleLLM historical anchor — anchors to historical average price. Theory: simulation-bases.md §4.2 — HistoricalAnchor."""
 
     pass
 
 
 class RuleLLMRationalUpdater(RuleLLMInvestor):
-    """RuleLLM rational updater — Bayesian, no anchoring bias (benchmark). Theory: simulation-bases.md §4 — RationalUpdater."""
+    """RuleLLM rational updater — Bayesian, no anchoring bias (benchmark). Theory: simulation-bases.md §4.3 — RationalUpdater."""
 
     pass
 
 
 class RuleLLMMomentumTrader(RuleLLMInvestor):
-    """RuleLLM momentum trader — follows price trends. Theory: simulation-bases.md §4 — MomentumTrader."""
+    """RuleLLM momentum trader — follows price trends. Theory: simulation-bases.md §4.4 — MomentumTrader."""
 
     pass
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """RuleLLM noise trader — uninformed random participant. Theory: simulation-bases.md §4 — NoiseTrader."""
+    """RuleLLM noise trader — uninformed random participant. Theory: simulation-bases.md §4.5 — NoiseTrader."""
 
     pass
 

@@ -130,7 +130,7 @@ Each round, the Market broadcasts to all investors:
 
 ## §4 Investor Taxonomy
 
-### Investor: AnchoredTrader
+### §4.1 AnchoredTrader
 
 #### 4.1.1  Summary
 
@@ -271,7 +271,7 @@ directly producing and maintaining the anchoring-driven mispricing.
 
 ---
 
-### Investor: HistoricalAnchor
+### §4.2 HistoricalAnchor
 
 #### 4.2.1  Summary
 
@@ -407,7 +407,7 @@ This illustrates how historical anchoring can support prices even below fundamen
 
 ---
 
-### Investor: RationalUpdater
+### §4.3 RationalUpdater
 
 #### 4.3.1  Summary
 
@@ -537,7 +537,7 @@ persistent deviation zone [100, 104] characteristic of the AnchoringEffect simul
 
 ---
 
-### Investor: MomentumTrader
+### §4.4 MomentumTrader
 
 #### 4.4.1  Summary
 
@@ -642,7 +642,7 @@ amplifying the mean-reversion that RationalUpdater initiated. This is the Barber
 
 ---
 
-### Investor: NoiseTrader
+### §4.5 NoiseTrader
 
 #### 4.5.1  Summary
 

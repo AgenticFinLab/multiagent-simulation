@@ -24,10 +24,10 @@ market:
       record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
       # Market dynamics parameters (identical to Rule variant)
       fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.04        # Low: anchoring effect slows price discovery
-      mean_reversion: 0.02      # Moderate: reasonable reversion
-      noise_std: 0.02           # Low noise: anchoring effect is clearer
+      initial_price: 105.0
+      price_impact: 0.01        # Low: anchoring effect slows price discovery
+      mean_reversion: 0.01      # Low: sustains anchoring persistence
+      noise_std: 0.5            # Moderate price noise
       custom_state_hot_limit: 3
   persona: !include persona.yml
 

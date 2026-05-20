@@ -17,59 +17,59 @@
 Theory for each investor type is defined in `simulation-bases.md §4`. Below: how each theory is encoded in the RuleLLM hybrid via dual-section prompts.
 
 ### AnchoredTrader: Theory → Implementation Mapping
-(Theory defined in simulation-bases.md §4 — AnchoredTrader)
+(Theory defined in simulation-bases.md §4.1 — AnchoredTrader)
 
 | Theoretical Design Element                            | Implementation                                                                                                                                                                              |
 |-------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Theoretical basis → simulation-bases.md §2.1          | `== PERSONA ==` section: describes anchoring psychology; cites Tversky & Kahneman (1974) as CORE BELIEF                                                                                     |
-| Rule-based behavior → sim-bases §4 AnchoredTrader     | `== DECISION RULES ==` section: step-by-step plain-text version of `perceived_target = anchor_price + (fundamental − anchor_price) × 0.3`; threshold: `if perceived_deviation < -0.03: BUY` |
+| Rule-based behavior → sim-bases §4.1     | `== DECISION RULES ==` section: step-by-step plain-text version of `perceived_target = anchor_price + (fundamental − anchor_price) × 0.3`; threshold: `if perceived_deviation < -0.03: BUY` |
 | LLM Persona → simulation-bases.md §4 LLM Persona      | Persona section conveys anchoring psychology without naming the phenomenon; anchors to "first price you observed"                                                                           |
 | RuleLLM Hybrid Notes → sim-bases §4 RuleLLM           | LLM follows rule sign strictly; may adjust quantity by ±20%; `adjustment_factor` = 0.3 hardcoded in prompt (mirror of Rule)                                                                 |
 | Parameter values → simulation-bases.md §6             | `adjustment_factor` = 0.3; trade threshold = 3%; base size = 20 units; from `RULELLM_ANCHORED_TRADER_SYS`                                                                                   |
-| Market impact → simulation-bases.md §4 AnchoredTrader | Same destabilizing role as Rule variant; anchoring-induced perceived target creates persistent demand/supply imbalance                                                                      |
+| Market impact → simulation-bases.md §4.1 | Same destabilizing role as Rule variant; anchoring-induced perceived target creates persistent demand/supply imbalance                                                                      |
 
 ### HistoricalAnchor: Theory → Implementation Mapping
-(Theory defined in simulation-bases.md §4 — HistoricalAnchor)
+(Theory defined in simulation-bases.md §4.2 — HistoricalAnchor)
 
 | Theoretical Design Element                              | Implementation                                                                                                                            |
 |---------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
 | Theoretical basis → simulation-bases.md §2.2            | `== PERSONA ==` section: historical average as reference; cites Northcraft & Neale (1987)                                                 |
-| Rule-based behavior → sim-bases §4 HistoricalAnchor     | `== DECISION RULES ==` section: `perceived_deviation = (price − hist_avg) / hist_avg × (1 − 0.5)`; 60-round rolling average; 3% threshold |
+| Rule-based behavior → sim-bases §4.2     | `== DECISION RULES ==` section: `perceived_deviation = (price − hist_avg) / hist_avg × (1 − 0.5)`; 60-round rolling average; 3% threshold |
 | LLM Persona → simulation-bases.md §4 LLM Persona        | Persona: "you give excessive weight to the historical average price" — instills underreaction to current signals                          |
 | Parameter values → simulation-bases.md §6               | `anchor_weight` = 0.5; `lookback` = 60; base size = 20 units                                                                              |
-| Market impact → simulation-bases.md §4 HistoricalAnchor | Same momentum-dampening destabilizing role as Rule variant                                                                                |
+| Market impact → simulation-bases.md §4.2 | Same momentum-dampening destabilizing role as Rule variant                                                                                |
 
 ### RationalUpdater: Theory → Implementation Mapping
-(Theory defined in simulation-bases.md §4 — RationalUpdater)
+(Theory defined in simulation-bases.md §4.3 — RationalUpdater)
 
 | Theoretical Design Element                             | Implementation                                                                                                                       |
 |--------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
 | Theoretical basis → simulation-bases.md §2.4           | `== PERSONA ==` section: "disciplined Bayesian investor" — rational expectations benchmark; Muth (1961)                              |
-| Rule-based behavior → sim-bases §4 RationalUpdater     | `== DECISION RULES ==` section: `if deviation < -0.02: BUY`; `if deviation > +0.02: SELL`; quantity = min(25, abs(deviation) × 1000) |
+| Rule-based behavior → sim-bases §4.3     | `== DECISION RULES ==` section: `if deviation < -0.02: BUY`; `if deviation > +0.02: SELL`; quantity = min(25, abs(deviation) × 1000) |
 | LLM Persona → simulation-bases.md §4 LLM Persona       | Persona emphasizes unbiased updating; "you do not anchor to past prices"                                                             |
 | Parameter values → simulation-bases.md §6              | Threshold = 0.02; base size = 25 units; `deviation` from market broadcast                                                            |
-| Market impact → simulation-bases.md §4 RationalUpdater | Stabilizing force; with rule-constrained behavior, stabilization is expected to be very close to Rule baseline                       |
+| Market impact → simulation-bases.md §4.3 | Stabilizing force; with rule-constrained behavior, stabilization is expected to be very close to Rule baseline                       |
 
 ### MomentumTrader: Theory → Implementation Mapping
-(Theory defined in simulation-bases.md §4 — MomentumTrader)
+(Theory defined in simulation-bases.md §4.4 — MomentumTrader)
 
 | Theoretical Design Element                            | Implementation                                                                                                      |
 |-------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
 | Theoretical basis → simulation-bases.md §2.5          | `== PERSONA ==` section: "trend-following"; cites Jegadeesh & Titman (1993)                                         |
-| Rule-based behavior → sim-bases §4 MomentumTrader     | `== DECISION RULES ==` section: `return_pct = (price − prev_price) / prev_price`; if > +0.02: BUY; if < −0.02: SELL |
+| Rule-based behavior → sim-bases §4.4     | `== DECISION RULES ==` section: `return_pct = (price − prev_price) / prev_price`; if > +0.02: BUY; if < −0.02: SELL |
 | Parameter values → simulation-bases.md §6             | `entry_threshold` = 0.02; base size = 20 units                                                                      |
-| Market impact → simulation-bases.md §4 MomentumTrader | Neutral amplifier; with rule-constrained behavior, same trend-amplifying role as Rule                               |
+| Market impact → simulation-bases.md §4.4 | Neutral amplifier; with rule-constrained behavior, same trend-amplifying role as Rule                               |
 
 ### NoiseTrader: Theory → Implementation Mapping
-(Theory defined in simulation-bases.md §4 — NoiseTrader)
+(Theory defined in simulation-bases.md §4.5 — NoiseTrader)
 
 | Theoretical Design Element                         | Implementation                                                                                       |
 |----------------------------------------------------|------------------------------------------------------------------------------------------------------|
 | Theoretical basis → simulation-bases.md §2.6       | `== PERSONA ==` section: uninformed random trader; cites Black (1986)                                |
-| Rule-based behavior → sim-bases §4 NoiseTrader     | `== DECISION RULES ==` section: trade probability 0.05; random buy/sell; quantity uniform [100, 500] |
+| Rule-based behavior → sim-bases §4.5     | `== DECISION RULES ==` section: trade probability 0.05; random buy/sell; quantity uniform [100, 500] |
 | LLM Persona → simulation-bases.md §4 LLM Persona   | Persona: "your decisions are driven by sentiment and random impulses"                                |
 | Parameter values → simulation-bases.md §6          | `trade_probability` = 0.05; `min_order` = 100; `max_order` = 500                                     |
-| Market impact → simulation-bases.md §4 NoiseTrader | Background liquidity; same stochastic volatility contribution as Rule variant                        |
+| Market impact → simulation-bases.md §4.5 | Background liquidity; same stochastic volatility contribution as Rule variant                        |
 
 ---
 
@@ -187,7 +187,7 @@ Key Configuration Parameters (`configs/AnchoringEffect/RuleLLM/players.yml`):
 | `lookback`          | `extras.lookback`          | 60                           | Rolling average window — must match DECISION RULES prompt     |
 | `entry_threshold`   | `extras.entry_threshold`   | 0.02                         | MomentumTrader signal threshold — must match prompt           |
 | `trade_probability` | `extras.trade_probability` | 0.05                         | NoiseTrader activity level — must match prompt                |
-| `lm_name`           | `extras.llm.lm_name`       | doubao-pro-32k               | LLM model for RuleLLM agents                                  |
+| `lm_name`           | `extras.llm.lm_name`       | ark/doubao-seed-2-0-mini-260428               | LLM model for RuleLLM agents                                  |
 | `sys_message`       | `extras.llm.sys_message`   | `prompts:RULELLM_{TYPE}_SYS` | Path to dual-section prompt constant                          |
 
 ---

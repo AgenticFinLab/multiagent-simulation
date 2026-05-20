@@ -485,31 +485,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMAnchoredTrader(RagLLMInvestor):
-    """RAG-augmented anchored trader — anchors to initial price, adjusts insufficiently. Theory: simulation-bases.md §4 — AnchoredTrader."""
+    """RAG-augmented anchored trader — anchors to initial price, adjusts insufficiently. Theory: simulation-bases.md §4.1 — AnchoredTrader."""
 
     pass
 
 
 class RagLLMHistoricalAnchor(RagLLMInvestor):
-    """RAG-augmented historical anchor — anchors to historical average price. Theory: simulation-bases.md §4 — HistoricalAnchor."""
+    """RAG-augmented historical anchor — anchors to historical average price. Theory: simulation-bases.md §4.2 — HistoricalAnchor."""
 
     pass
 
 
 class RagLLMRationalUpdater(RagLLMInvestor):
-    """RAG-augmented rational updater — Bayesian, no anchoring bias (benchmark). Theory: simulation-bases.md §4 — RationalUpdater."""
+    """RAG-augmented rational updater — Bayesian, no anchoring bias (benchmark). Theory: simulation-bases.md §4.3 — RationalUpdater."""
 
     pass
 
 
 class RagLLMMomentumTrader(RagLLMInvestor):
-    """RAG-augmented momentum trader — follows price trends. Theory: simulation-bases.md §4 — MomentumTrader."""
+    """RAG-augmented momentum trader — follows price trends. Theory: simulation-bases.md §4.4 — MomentumTrader."""
 
     pass
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented noise trader — uninformed random participant. Theory: simulation-bases.md §4 — NoiseTrader."""
+    """RAG-augmented noise trader — uninformed random participant. Theory: simulation-bases.md §4.5 — NoiseTrader."""
 
     pass
 

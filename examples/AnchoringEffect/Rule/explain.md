@@ -15,7 +15,7 @@
 ## §2 How Theoretical Design Is Implemented
 
 ### AnchoredTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — AnchoredTrader)*
+*(Theory defined in simulation-bases.md §4.1 — AnchoredTrader)*
 
 | Theoretical Design Element                                                | Implementation                                                                                 |
 |---------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
@@ -27,7 +27,7 @@
 | Position sizing → sim-bases §6                                            | `quantity = min(base_position_size, abs(perceived_dev) × 1000)` constrained by cash/position   |
 
 ### HistoricalAnchor: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — HistoricalAnchor)*
+*(Theory defined in simulation-bases.md §4.2 — HistoricalAnchor)*
 
 | Theoretical Design Element                                     | Implementation                                                                                    |
 |----------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
@@ -38,7 +38,7 @@
 | Parameters from config → sim-bases §6                          | `anchor_weight`, `lookback`, `base_position_size` from `extras`                                   |
 
 ### RationalUpdater: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — RationalUpdater)*
+*(Theory defined in simulation-bases.md §4.3 — RationalUpdater)*
 
 | Theoretical Design Element                             | Implementation                                                                           |
 |--------------------------------------------------------|------------------------------------------------------------------------------------------|
@@ -48,7 +48,7 @@
 | Position sizing → sim-bases §6                         | `quantity = min(base_position_size, abs(deviation) × 1000)` constrained by cash/position |
 
 ### MomentumTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — MomentumTrader)*
+*(Theory defined in simulation-bases.md §4.4 — MomentumTrader)*
 
 | Theoretical Design Element                     | Implementation                                                                            |
 |------------------------------------------------|-------------------------------------------------------------------------------------------|
@@ -58,7 +58,7 @@
 | Position sizing → sim-bases §6                 | `quantity = min(base_position_size, abs(return_pct) × 1000)` constrained by cash/position |
 
 ### NoiseTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — NoiseTrader)*
+*(Theory defined in simulation-bases.md §4.5 — NoiseTrader)*
 
 | Theoretical Design Element                    | Implementation                                                                                    |
 |-----------------------------------------------|---------------------------------------------------------------------------------------------------|

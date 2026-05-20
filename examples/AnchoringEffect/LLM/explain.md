@@ -16,48 +16,48 @@
 ## §2 How Theoretical Design Is Implemented
 
 ### LLMAnchoredTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — AnchoredTrader / LLM Persona)*
+*(Theory defined in simulation-bases.md §4.1 — AnchoredTrader / LLM Persona)*
 
 | Theoretical Design Element                                       | Implementation                                                                            |
 |------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
-| Anchoring bias persona → sim-bases §4 AnchoredTrader LLM Persona | `LLM_ANCHORED_TRADER_SYS` in `prompts.py` — defines "slow to update from reference price" |
+| Anchoring bias persona → sim-bases §4.1 LLM Persona | `LLM_ANCHORED_TRADER_SYS` in `prompts.py` — defines "slow to update from reference price" |
 | Core belief: initial price as anchor → sim-bases §4              | "I trust the price I first saw" encodes the anchor-to-initial-price behavior              |
 | Insufficient adjustment psychology → sim-bases §2.1              | "adjustments toward fundamental value are smaller than rational analysis warrants"        |
 | No explicit formula → sim-bases §4 LLM (persona only)            | System prompt contains NO formula, NO threshold, NO mention of anchoring bias by name     |
 | Output format → JSON `{action, bid_price, quantity, reasoning}`  | Both system and user prompts include canonical output format instructions                 |
 
 ### LLMHistoricalAnchor: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — HistoricalAnchor / LLM Persona)*
+*(Theory defined in simulation-bases.md §4.2 — HistoricalAnchor / LLM Persona)*
 
 | Theoretical Design Element                                               | Implementation                                                                        |
 |--------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| Historical average anchoring → sim-bases §4 HistoricalAnchor LLM Persona | `LLM_HISTORICAL_ANCHOR_SYS` — "long-run average prices are true center of gravity"    |
+| Historical average anchoring → sim-bases §4.2 LLM Persona | `LLM_HISTORICAL_ANCHOR_SYS` — "long-run average prices are true center of gravity"    |
 | Discounting current fundamentals → sim-bases §2.2                        | "discount current fundamentals in favor of historical price memory"                   |
 | No explicit lookback formula → sim-bases §4 LLM                          | LLM infers historical behavior from market data in user prompt; no `hist_avg` formula |
 
 ### LLMRationalUpdater: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — RationalUpdater / LLM Persona)*
+*(Theory defined in simulation-bases.md §4.3 — RationalUpdater / LLM Persona)*
 
 | Theoretical Design Element                                     | Implementation                                                |
 |----------------------------------------------------------------|---------------------------------------------------------------|
-| Rational expectations benchmark → sim-bases §4 RationalUpdater | `LLM_RATIONAL_UPDATER_SYS` — "only fundamentals matter"       |
+| Rational expectations benchmark → sim-bases §4.3 | `LLM_RATIONAL_UPDATER_SYS` — "only fundamentals matter"       |
 | No anchoring bias → sim-bases §2.4                             | "You do not anchor to past prices — only fundamentals matter" |
 | Corrective trading role → sim-bases §4                         | "Your unbiased updating helps correct mispricings"            |
 
 ### LLMMomentumTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — MomentumTrader / LLM Persona)*
+*(Theory defined in simulation-bases.md §4.4 — MomentumTrader / LLM Persona)*
 
 | Theoretical Design Element                            | Implementation                                                                      |
 |-------------------------------------------------------|-------------------------------------------------------------------------------------|
-| Trend-following persona → sim-bases §4 MomentumTrader | `LLM_MOMENTUM_TRADER_SYS` — "price trends have inertia"                             |
+| Trend-following persona → sim-bases §4.4 | `LLM_MOMENTUM_TRADER_SYS` — "price trends have inertia"                             |
 | Fundamentals ignored → sim-bases §2.5                 | "You do not focus on fundamental value — you focus on price direction and velocity" |
 
 ### LLMNoiseTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — NoiseTrader / LLM Persona)*
+*(Theory defined in simulation-bases.md §4.5 — NoiseTrader / LLM Persona)*
 
 | Theoretical Design Element                                 | Implementation                                                        |
 |------------------------------------------------------------|-----------------------------------------------------------------------|
-| Random/sentiment-driven persona → sim-bases §4 NoiseTrader | `LLM_NOISE_TRADER_SYS` — "I trade on gut feeling and market chatter"  |
+| Random/sentiment-driven persona → sim-bases §4.5 | `LLM_NOISE_TRADER_SYS` — "I trade on gut feeling and market chatter"  |
 | No systematic analysis → sim-bases §2.6                    | "Your decisions are driven by sentiment, rumors, and random impulses" |
 
 ---
