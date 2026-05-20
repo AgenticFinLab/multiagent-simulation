@@ -1,6 +1,6 @@
 # AsianFinancialCrisis — Analysis Methodology Basis
 
-## 1. Analysis Objectives
+## §1 Analysis Objectives
 
 | Objective | Research Question                                                                   | Metric(s)                                         | Expected Finding                                                                      |
 |-----------|-------------------------------------------------------------------------------------|---------------------------------------------------|---------------------------------------------------------------------------------------|
@@ -12,9 +12,11 @@
 | O6        | How do variants differ in crisis depth, speed, and recovery?                        | All core metrics across Rule/LLM/RuleLLM/Rag      | LLM shows highest variance; RuleLLM near Rule; Rag potentially moderated by knowledge |
 
 
-## 2. Core Metrics Catalogue
+## §2 Core Metrics Catalogue
 
-### Metric: Price Deviation from Fundamental
+### §2.1 Metric: Price Deviation from Fundamental
+
+**Function signature**: `def analyze_asian_financial_crisis(config_path: str, output_dir: Optional[str] = None, show_plots: bool = False) -> Dict[str, Any]` with deviation computed inside the summary metrics.
 
 - **Category**: Price Dynamics / Phenomenon-Specific
 - **Definition**: Signed percentage difference between current exchange rate / price and pre-crisis fundamental value.
@@ -37,7 +39,9 @@
 
 ---
 
-### Metric: Maximum Drawdown
+### §2.2 Metric: Maximum Drawdown
+
+**Function signature**: `def _compute_max_drawdown(prices: np.ndarray) -> float`
 
 - **Category**: Price Dynamics / Crisis Severity
 - **Definition**: Largest peak-to-trough price decline as a percentage of the peak price, representing the worst-case currency depreciation.
@@ -56,7 +60,9 @@
 
 ---
 
-### Metric: Crisis Velocity (Maximum Round-to-Round Price Change)
+### §2.3 Metric: Crisis Velocity (Maximum Round-to-Round Price Change)
+
+**Function signature**: `def _compute_crisis_velocity(prices: np.ndarray) -> float`
 
 - **Category**: Phenomenon-Specific / Speed
 - **Definition**: Maximum absolute price change per round during the crisis phase, measuring the speed of the crisis cascade.
@@ -74,7 +80,9 @@
 
 ---
 
-### Metric: Return Autocorrelation (Lag-1)
+### §2.4 Metric: Return Autocorrelation (Lag-1)
+
+**Function signature**: `def _compute_rolling_ac1(returns: np.ndarray, window: int = 10) -> float`
 
 - **Category**: Behavioral / Cascade Dynamics
 - **Definition**: Pearson lag-1 autocorrelation of price returns across all rounds, identifying crisis momentum (positive AC1) vs. recovery mean reversion (negative AC1).
@@ -92,7 +100,9 @@
 
 ---
 
-### Metric: Agent-Type Volume by Phase
+### §2.5 Metric: Agent-Type Volume by Phase
+
+**Function signature**: `def analyze_asian_financial_crisis(config_path: str, output_dir: Optional[str] = None, show_plots: bool = False) -> Dict[str, Any]` with agent payload aggregation loaded by `def _load_data(results) -> Dict[str, Any]`.
 
 - **Category**: Behavioral Validation
 - **Definition**: Total signed net demand and unsigned volume by agent type, decomposed into crisis and recovery phases.
@@ -110,7 +120,9 @@
 
 ---
 
-### Metric: Crisis Onset Round
+### §2.6 Metric: Crisis Onset Round
+
+**Function signature**: `def _compute_crisis_onset(prices: np.ndarray, fundamentals: np.ndarray) -> Optional[int]`
 
 - **Category**: Phenomenon-Specific / Timing
 - **Definition**: First round in which deviation crosses −10% (significant crisis threshold indicating the crisis is fully established beyond initial HotMoneyFunder reversal).
@@ -128,7 +140,9 @@
 
 ---
 
-### Metric: IMF Rescue Activation Round
+### §2.7 Metric: IMF Rescue Activation Round
+
+**Function signature**: `def analyze_asian_financial_crisis(config_path: str, output_dir: Optional[str] = None, show_plots: bool = False) -> Dict[str, Any]` with rescue timing interpreted from the market deviation and investor payload trace.
 
 - **Category**: Phenomenon-Specific / Rescue Timing
 - **Definition**: First round in which IMFRescuer activates (deviation first crosses −5% threshold), measuring the delay between crisis onset and rescue.
@@ -142,7 +156,7 @@
 - **Red Flag**: `t_imf = NaN` → crisis never deep enough to trigger IMF; `t_imf < t_onset` → logical error in thresholds
 
 
-## 3. Analysis Dimensions
+## §3 Analysis Dimensions
 
 ### Dimension 1: Price Crisis Dynamics
 
@@ -181,7 +195,7 @@
 - **Expected Pattern**: Rule: fastest onset, most consistent depth; LLM: most variable (crisis persona may amplify or delay); RuleLLM: near Rule; Rag: potentially moderated by historical crisis knowledge
 
 
-## 4. Phase Analysis Framework
+## §4 Phase Analysis Framework
 
 ### Phase Detection Rules
 
@@ -225,7 +239,7 @@
 | Crisis too mild (drawdown < 15%) | Weak cascade                   | λ too low; sell ratios too small                   | Increase λ from 0.04 to 0.06            |
 
 
-## 5. Cross-Variant Comparison Framework
+## §5 Cross-Variant Comparison Framework
 
 ### Comparison Protocol
 
@@ -252,7 +266,7 @@
 | IMF rescue round            | X    | X ± X          | X ± X              | X ± X          |
 
 
-## 6. Expected Results and Validation
+## §6 Expected Results and Validation
 
 ### Calibration Targets from Literature
 
@@ -283,7 +297,7 @@
 | Recovery never starts | IMF and ValueContrarian insufficient | Increase initial_cash or reduce thresholds                 |
 
 
-## 7. Visualization Catalogue
+## §7 Visualization Catalogue
 
 | Plot Name                  | Type           | X-axis     | Y-axis             | Overlays                                                     | Purpose                                             |
 |----------------------------|----------------|------------|--------------------|--------------------------------------------------------------|-----------------------------------------------------|

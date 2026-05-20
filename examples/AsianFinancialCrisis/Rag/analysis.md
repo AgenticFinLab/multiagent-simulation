@@ -1,6 +1,6 @@
 # AsianFinancialCrisis Rag — Analysis Documentation
 
-## Overview
+## §1 Overview
 
 | Item                                | Description                                                                                                                                                         |
 |-------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,22 +11,23 @@
 
 ---
 
-## 1. Metric Implementation
+## §2 Metric Implementation
 
 Rag variant shares all metric functions with `Rule/analysis.py` — no separate analysis.py needed.
 
-| Metric                     | Function              | analysis-bases.md Ref | Rag-Specific Notes                                                                               |
+| Metric                     | Function              | Root Metric Reference | Rag-Specific Notes                                                                               |
 |----------------------------|-----------------------|-----------------------|--------------------------------------------------------------------------------------------------|
-| **Price Deviation**        | `calculate_metrics()` | `§2.1`                | May show milder crisis if RAG knowledge helps agents avoid panic amplification                   |
-| **Maximum Drawdown**       | `calculate_metrics()` | `§2.2`                | Expected 20%–55%; potentially shallower if RAG-informed IMFRescuer intervenes earlier            |
-| **Crisis Velocity**        | `calculate_metrics()` | `§2.3`                | May be slower than LLM if RAG provides context that moderates panic                              |
-| **Return Autocorrelation** | `calculate_metrics()` | `§2.4`                | Similar to LLM; behavioral stochasticity preserved, knowledge may reduce tail extremes           |
-| **Agent-Type Volume**      | `calculate_metrics()` | `§2.5`                | Most diagnostic: does RAG-informed IMFRescuer deploy more or earlier than LLM baseline?          |
-| **Crisis Onset Round**     | `calculate_metrics()` | `§2.6`                | Variable; historical knowledge may cause earlier or later detection than pure behavioral persona |
+| **Price Deviation**        | `def analyze_asian_financial_crisis(...)` | `analysis-bases.md §2.1`                | May show milder crisis if RAG knowledge helps agents avoid panic amplification                   |
+| **Maximum Drawdown**       | `def _compute_max_drawdown(prices)` | `analysis-bases.md §2.2`                | Expected 20%–55%; potentially shallower if RAG-informed IMFRescuer intervenes earlier            |
+| **Crisis Velocity**        | `def _compute_crisis_velocity(prices)` | `analysis-bases.md §2.3`                | May be slower than LLM if RAG provides context that moderates panic                              |
+| **Return Autocorrelation** | `def _compute_rolling_ac1(returns, window=10)` | `analysis-bases.md §2.4`                | Similar to LLM; behavioral stochasticity preserved, knowledge may reduce tail extremes           |
+| **Agent-Type Volume**      | `def _load_data(results)` | `analysis-bases.md §2.5`                | Most diagnostic: does RAG-informed IMFRescuer deploy more or earlier than LLM baseline?          |
+| **Crisis Onset Round**     | `def _compute_crisis_onset(prices, fundamentals)` | `analysis-bases.md §2.6`                | Variable; historical knowledge may cause earlier or later detection than pure behavioral persona |
+| **IMF Rescue Activation**  | `def analyze_asian_financial_crisis(...)` | `analysis-bases.md §2.7`                | RAG historical context may accelerate or moderate IMFRescuer activation timing                   |
 
 ---
 
-## 2. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Price Crisis Dynamics
 *(Objective from analysis-bases.md §3.1)*
@@ -71,7 +72,7 @@ Rag is the "informed" behavioral reference. Key question: does historical knowle
 
 ---
 
-## 3. Variant-Specific Observable Phenomena
+## §4 Variant-Specific Observable Phenomena
 
 | Phenomenon                              | Description                                                                       | How to Observe                                         | Contrast with LLM                        |
 |-----------------------------------------|-----------------------------------------------------------------------------------|--------------------------------------------------------|------------------------------------------|
@@ -82,7 +83,7 @@ Rag is the "informed" behavioral reference. Key question: does historical knowle
 
 ---
 
-## 4. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
@@ -102,7 +103,7 @@ Rag is the "informed" behavioral reference. Key question: does historical knowle
 
 ---
 
-## 5. Output Files Reference
+## §6 Output Files Reference
 
 All outputs written to `EXPERIMENT/AsianFinancialCrisis/Rag/records/analysis/`.
 
@@ -113,7 +114,7 @@ All outputs written to `EXPERIMENT/AsianFinancialCrisis/Rag/records/analysis/`.
 
 ---
 
-## 6. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 - **Crash emergence speed**: Variable; historical knowledge may accelerate or delay trigger depending on retrieved documents
 - **Crash intensity**: Potentially shallower than LLM if IMFRescuer is better calibrated; deeper if knowledge reinforces panic

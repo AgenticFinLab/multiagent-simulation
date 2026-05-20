@@ -1,6 +1,6 @@
 # AsianFinancialCrisis Rule — Analysis Documentation
 
-## Overview
+## §1 Overview
 
 | Item                                | Description                                                                                                                            |
 |-------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,22 +11,23 @@
 
 ---
 
-## 1. Metric Implementation
+## §2 Metric Implementation
 
 All metrics defined in `../analysis-bases.md §2`. Rule `analysis.py` is the authoritative implementation — all other variants import from it.
 
-| Metric                     | Function              | analysis-bases.md Ref | Rule-Specific Notes                                                                   |
+| Metric                     | Function              | Root Metric Reference | Rule-Specific Notes                                                                   |
 |----------------------------|-----------------------|-----------------------|---------------------------------------------------------------------------------------|
-| **Price Deviation**        | `calculate_metrics()` | `§2.1`                | Deterministic cascade; deviation follows predictable contagion spiral                 |
-| **Maximum Drawdown**       | `calculate_metrics()` | `§2.2`                | Calibration target 30%–60%; Rule shows cleanest drawdown matching threshold formulas  |
-| **Crisis Velocity**        | `calculate_metrics()` | `§2.3`                | Max price change per round; HotMoneyFunder + ContagionTrader combined selling visible |
-| **Return Autocorrelation** | `calculate_metrics()` | `§2.4`                | AC1 > 0.2 during contagion phase; negative in recovery                                |
-| **Agent-Type Volume**      | `calculate_metrics()` | `§2.5`                | HotMoneyFunder + ContagionTrader dominate sell volume; IMFRescuer dominates buy       |
-| **Crisis Onset Round**     | `calculate_metrics()` | `§2.6`                | First round deviation < −10%; Rule: expected rounds 10–20                             |
+| **Price Deviation**        | `def analyze_asian_financial_crisis(...)` | `analysis-bases.md §2.1`                | Deterministic cascade; deviation follows predictable contagion spiral                 |
+| **Maximum Drawdown**       | `def _compute_max_drawdown(prices)` | `analysis-bases.md §2.2`                | Calibration target 30%–60%; Rule shows cleanest drawdown matching threshold formulas  |
+| **Crisis Velocity**        | `def _compute_crisis_velocity(prices)` | `analysis-bases.md §2.3`                | Max price change per round; HotMoneyFunder + ContagionTrader combined selling visible |
+| **Return Autocorrelation** | `def _compute_rolling_ac1(returns, window=10)` | `analysis-bases.md §2.4`                | AC1 > 0.2 during contagion phase; negative in recovery                                |
+| **Agent-Type Volume**      | `def _load_data(results)` | `analysis-bases.md §2.5`                | HotMoneyFunder + ContagionTrader dominate sell volume; IMFRescuer dominates buy       |
+| **Crisis Onset Round**     | `def _compute_crisis_onset(prices, fundamentals)` | `analysis-bases.md §2.6`                | First round deviation < −10%; Rule: expected rounds 10–20                             |
+| **IMF Rescue Activation**  | `def analyze_asian_financial_crisis(...)` | `analysis-bases.md §2.7`                | IMFRescuer should activate after stress deepens; validates rescue timing              |
 
 ---
 
-## 2. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Price Crisis Dynamics
 *(Objective from analysis-bases.md §3.1)*
@@ -71,7 +72,7 @@ Rule is the deterministic reference. Other variants compared against Rule's draw
 
 ---
 
-## 3. Variant-Specific Observable Phenomena
+## §4 Variant-Specific Observable Phenomena
 
 | Phenomenon                        | Description                                                                | How to Observe                                      | Contrast with LLM                           |
 |-----------------------------------|----------------------------------------------------------------------------|-----------------------------------------------------|---------------------------------------------|
@@ -82,7 +83,7 @@ Rule is the deterministic reference. Other variants compared against Rule's draw
 
 ---
 
-## 4. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
@@ -102,7 +103,7 @@ Rule is the deterministic reference. Other variants compared against Rule's draw
 
 ---
 
-## 5. Output Files Reference
+## §6 Output Files Reference
 
 All outputs written to `EXPERIMENT/AsianFinancialCrisis/Rule/records/analysis/`.
 
@@ -113,7 +114,7 @@ All outputs written to `EXPERIMENT/AsianFinancialCrisis/Rule/records/analysis/`.
 
 ---
 
-## 6. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 - **Crash emergence speed**: Rule shows fastest, most predictable crisis (immediate formula triggers)
 - **Crash intensity**: Rule max drawdown is calibration reference (30–60%); other variants compared against this

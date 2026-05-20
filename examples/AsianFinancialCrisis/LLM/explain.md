@@ -1,6 +1,6 @@
 # AsianFinancialCrisis LLM — Simulation Documentation
 
-## Overview
+## §1 Overview
 
 | Item                      | Description                                                                                                                                   |
 |---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,13 +11,13 @@
 | **Research Contribution** | Tests whether pure behavioral personas — with no numerical rules — can reproduce contagion and crisis dynamics through emergent LLM reasoning |
 
 
-## 1. How Theoretical Design Is Implemented
+## §2 Theory to Implementation Mapping
 
 ### LLMHotMoneyFunder: Theory → Implementation Mapping
 
-*(Theory defined in simulation-bases.md §2.1 — Radelet & Sachs, 1998)*
+Theory citation: `simulation-bases.md §4.1`.
 
-| Theoretical Design Element         | Implementation                                                                        |
+| Theory Component         | Implementation                                                                        |
 |------------------------------------|---------------------------------------------------------------------------------------|
 | Opportunistic capital — quick exit | `LLM_HOT_MONEY_FUNDER_SYS`: "At the first whiff of instability...you rapidly reverse" |
 | No loyalty to market               | Prompt: "You have no loyalty to any market or asset"                                  |
@@ -26,9 +26,9 @@
 
 ### LLMContagionTrader: Theory → Implementation Mapping
 
-*(Theory defined in simulation-bases.md §2.2 — Kaminsky & Reinhart, 1999)*
+Theory citation: `simulation-bases.md §4.2`.
 
-| Theoretical Design Element    | Implementation                                                                                      |
+| Theory Component    | Implementation                                                                                      |
 |-------------------------------|-----------------------------------------------------------------------------------------------------|
 | Dual signal monitoring        | Prompt: "You watch both price deviation from fundamentals AND recent price momentum simultaneously" |
 | Front-running contagion       | Prompt: "You detect the first signs of cross-market selling and front-run the contagion wave"       |
@@ -37,9 +37,9 @@
 
 ### LLMIMFRescuer: Theory → Implementation Mapping
 
-*(Theory defined in simulation-bases.md §2.3 — Corsetti et al., 1999)*
+Theory citation: `simulation-bases.md §4.3`.
 
-| Theoretical Design Element    | Implementation                                                                                     |
+| Theory Component    | Implementation                                                                                     |
 |-------------------------------|----------------------------------------------------------------------------------------------------|
 | Patient lender of last resort | Prompt: "You act as a lender of last resort...only deploy capital at extreme dislocations"         |
 | No profit motive              | Prompt: "You do not sell during normal volatility — only reduce positions when markets normalized" |
@@ -48,9 +48,9 @@
 
 ### LLMValueContrarian: Theory → Implementation Mapping
 
-*(Theory defined in simulation-bases.md §2.4)*
+Theory citation: `simulation-bases.md §4.4`.
 
-| Theoretical Design Element      | Implementation                                                                     |
+| Theory Component      | Implementation                                                                     |
 |---------------------------------|------------------------------------------------------------------------------------|
 | Mean reversion conviction       | Prompt: "You trust that mean reversion is inevitable, even if timing is uncertain" |
 | Emotionally detached from panic | Prompt: "You are emotionally detached from short-term noise and panic"             |
@@ -59,15 +59,15 @@
 
 ### LLMNoiseTrader: Theory → Implementation Mapping
 
-*(Theory defined in simulation-bases.md §2 — Black, 1986 baseline)*
+Theory citation: `simulation-bases.md §4.5`.
 
-| Theoretical Design Element | Implementation                                                                  |
+| Theory Component | Implementation                                                                  |
 |----------------------------|---------------------------------------------------------------------------------|
 | Uninformed random trader   | Prompt: "You do not have a clear strategy — you trade because you feel like it" |
 | Sometimes contrarian       | Prompt: "You might buy in a falling market, or sell in a rising one"            |
 
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 Market mechanism is **identical** to Rule variant — only investor decision logic changes.
 
@@ -96,7 +96,7 @@ LLM must output canonical JSON inside `<decision>` tags:
 Parsed by `parse_llm_response_with_thinking()` from `examples/llm_utils.py`.
 
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 - **Persona-only prompts**: `LLM_*_SYS` prompts contain behavioral archetypes but zero numerical thresholds — decisions emerge from LLM's interpretation of deviation/price signals through persona lens
 - **Variable crisis timing**: HotMoneyFunder may panic before −2% threshold or hold through −5%; ContagionTrader may detect contagion from qualitative reading of deviation alone
@@ -105,7 +105,7 @@ Parsed by `parse_llm_response_with_thinking()` from `examples/llm_utils.py`.
 - **Max retries = 3**: If LLM parse fails, agent holds position; ensures simulation completion
 
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 Round t:
@@ -135,7 +135,7 @@ Round t:
 ```
 
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 | Config Path                 | Key Parameter  | Value               | Notes                                                                          |
 |-----------------------------|----------------|---------------------|--------------------------------------------------------------------------------|
@@ -146,7 +146,7 @@ Round t:
 Full config: `configs/AsianFinancialCrisis/LLM/players.yml`
 
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 # From project root:
@@ -161,7 +161,7 @@ python examples/AsianFinancialCrisis/LLM/analysis.py \
 Output: `EXPERIMENT/AsianFinancialCrisis/LLM/records/`
 
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase              | Deviation Range | LLM-Specific Behavior                                                         |
 |--------------------|-----------------|-------------------------------------------------------------------------------|
@@ -172,7 +172,7 @@ Output: `EXPERIMENT/AsianFinancialCrisis/LLM/records/`
 | **Recovery**       | Stabilizing     | LLMValueContrarian accumulates; market recovers; high variance vs. Rule path  |
 
 
-## 8. References
+## §9 References
 
 *(Theory sections from simulation-bases.md — cross-reference only)*
 

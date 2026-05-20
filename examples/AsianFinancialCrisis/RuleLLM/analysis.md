@@ -1,6 +1,6 @@
 # AsianFinancialCrisis RuleLLM — Analysis Documentation
 
-## Overview
+## §1 Overview
 
 | Item                                | Description                                                                                                                                      |
 |-------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,22 +11,23 @@
 
 ---
 
-## 1. Metric Implementation
+## §2 Metric Implementation
 
 RuleLLM shares all metric functions with `Rule/analysis.py` — no separate analysis.py needed.
 
-| Metric                     | Function              | analysis-bases.md Ref | RuleLLM-Specific Notes                                                                   |
+| Metric                     | Function              | Root Metric Reference | RuleLLM-Specific Notes                                                                   |
 |----------------------------|-----------------------|-----------------------|------------------------------------------------------------------------------------------|
-| **Price Deviation**        | `calculate_metrics()` | `§2.1`                | Lower variance than LLM; rule anchoring prevents extreme behavioral deviation            |
-| **Maximum Drawdown**       | `calculate_metrics()` | `§2.2`                | Expected 25%–55%; tighter range than LLM (30%–70%); closer to Rule (30%–60%)             |
-| **Crisis Velocity**        | `calculate_metrics()` | `§2.3`                | Moderate; rule-anchored agents trigger at near-threshold rather than before it           |
-| **Return Autocorrelation** | `calculate_metrics()` | `§2.4`                | Similar to Rule; rule constraints reduce spurious momentum from behavioral amplification |
-| **Agent-Type Volume**      | `calculate_metrics()` | `§2.5`                | Volume patterns closer to Rule; HotMoneyFunder sells near −2%, not significantly before  |
-| **Crisis Onset Round**     | `calculate_metrics()` | `§2.6`                | Expected rounds 10–25; tighter range than LLM (8–30)                                     |
+| **Price Deviation**        | `def analyze_asian_financial_crisis(...)` | `analysis-bases.md §2.1`                | Lower variance than LLM; rule anchoring prevents extreme behavioral deviation            |
+| **Maximum Drawdown**       | `def _compute_max_drawdown(prices)` | `analysis-bases.md §2.2`                | Expected 25%–55%; tighter range than LLM (30%–70%); closer to Rule (30%–60%)             |
+| **Crisis Velocity**        | `def _compute_crisis_velocity(prices)` | `analysis-bases.md §2.3`                | Moderate; rule-anchored agents trigger at near-threshold rather than before it           |
+| **Return Autocorrelation** | `def _compute_rolling_ac1(returns, window=10)` | `analysis-bases.md §2.4`                | Similar to Rule; rule constraints reduce spurious momentum from behavioral amplification |
+| **Agent-Type Volume**      | `def _load_data(results)` | `analysis-bases.md §2.5`                | Volume patterns closer to Rule; HotMoneyFunder sells near −2%, not significantly before  |
+| **Crisis Onset Round**     | `def _compute_crisis_onset(prices, fundamentals)` | `analysis-bases.md §2.6`                | Expected rounds 10–25; tighter range than LLM (8–30)                                     |
+| **IMF Rescue Activation**  | `def analyze_asian_financial_crisis(...)` | `analysis-bases.md §2.7`                | Rule constraints should keep IMFRescuer timing close to deterministic baseline            |
 
 ---
 
-## 2. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Price Crisis Dynamics
 *(Objective from analysis-bases.md §3.1)*
@@ -71,7 +72,7 @@ RuleLLM serves as the "disciplined hybrid" reference point. Key question: does r
 
 ---
 
-## 3. Variant-Specific Observable Phenomena
+## §4 Variant-Specific Observable Phenomena
 
 | Phenomenon                      | Description                                                                  | How to Observe                                       | Contrast with LLM                               |
 |---------------------------------|------------------------------------------------------------------------------|------------------------------------------------------|-------------------------------------------------|
@@ -82,7 +83,7 @@ RuleLLM serves as the "disciplined hybrid" reference point. Key question: does r
 
 ---
 
-## 4. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
@@ -101,7 +102,7 @@ RuleLLM serves as the "disciplined hybrid" reference point. Key question: does r
 
 ---
 
-## 5. Output Files Reference
+## §6 Output Files Reference
 
 All outputs written to `EXPERIMENT/AsianFinancialCrisis/RuleLLM/records/analysis/`.
 
@@ -112,7 +113,7 @@ All outputs written to `EXPERIMENT/AsianFinancialCrisis/RuleLLM/records/analysis
 
 ---
 
-## 6. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 - **Crash emergence speed**: Closer to Rule than LLM; threshold-anchored agents trigger at expected deviation levels
 - **Crash intensity**: Intermediate; rule constraints dampen but do not eliminate behavioral amplification
