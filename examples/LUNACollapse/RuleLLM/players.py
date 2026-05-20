@@ -129,31 +129,31 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMStablecoinHolder(RuleLLMInvestor):
-    """RuleLLM StablecoinHolder: redeems stablecoin on peg break."""
+    """RuleLLM stablecoin redeemer. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RULELLM_STABLECOINHOLDER_PROMPT
 
 
 class RuleLLMArbitrageur(RuleLLMInvestor):
-    """RuleLLM Arbitrageur: amplifies death spiral through arbitrage."""
+    """RuleLLM arbitrage amplifier. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RULELLM_ARBITRAGEUR_PROMPT
 
 
 class RuleLLMDeFiLender(RuleLLMInvestor):
-    """RuleLLM DeFiLender: automated liquidation cascades."""
+    """RuleLLM DeFi liquidation engine. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RULELLM_DEFILENDER_PROMPT
 
 
 class RuleLLMAnchorDepositor(RuleLLMInvestor):
-    """RuleLLM AnchorDepositor: exits yield protocol on stress signals."""
+    """RuleLLM yield depositor exit agent. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RULELLM_ANCHORDEPOSITOR_PROMPT
 
 
 class RuleLLMValueBuyer(RuleLLMInvestor):
-    """RuleLLM ValueBuyer: contrarian deep-discount buyer."""
+    """RuleLLM contrarian value buyer. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RULELLM_VALUEBUYER_PROMPT
 

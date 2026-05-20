@@ -127,31 +127,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMStablecoinHolder(LLMInvestor):
-    """LLM-driven StablecoinHolder: redeems stablecoin on peg break."""
+    """LLM-driven stablecoin redeemer. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = LLM_STABLECOINHOLDER_PROMPT
 
 
 class LLMArbitrageur(LLMInvestor):
-    """LLM-driven Arbitrageur: amplifies death spiral through arbitrage."""
+    """LLM-driven arbitrage amplifier. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = LLM_ARBITRAGEUR_PROMPT
 
 
 class LLMDeFiLender(LLMInvestor):
-    """LLM-driven DeFiLender: automated liquidation cascades."""
+    """LLM-driven DeFi liquidation engine. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = LLM_DEFILENDER_PROMPT
 
 
 class LLMAnchorDepositor(LLMInvestor):
-    """LLM-driven AnchorDepositor: exits yield protocol on stress signals."""
+    """LLM-driven yield depositor exit agent. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = LLM_ANCHORDEPOSITOR_PROMPT
 
 
 class LLMValueBuyer(LLMInvestor):
-    """LLM-driven ValueBuyer: contrarian deep-discount buyer."""
+    """LLM-driven contrarian value buyer. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = LLM_VALUEBUYER_PROMPT
 

@@ -1,14 +1,15 @@
-"""LUNACollapse Rag Prompts
+"""LUNACollapse RAG prompts.
 
-System prompts for RAG-augmented agents in the LUNACollapse simulation.
+RAG uses the RuleLLM persona/rule prompts and injects retrieved stablecoin
+crisis knowledge into the user message through ``{rag_context}``.
 """
 
-from examples.LUNACollapse.LLM.prompts import (
-    LLM_STABLECOINHOLDER_PROMPT as RAG_STABLECOINHOLDER_PROMPT,
-    LLM_ARBITRAGEUR_PROMPT as RAG_ARBITRAGEUR_PROMPT,
-    LLM_DEFILENDER_PROMPT as RAG_DEFILENDER_PROMPT,
-    LLM_ANCHORDEPOSITOR_PROMPT as RAG_ANCHORDEPOSITOR_PROMPT,
-    LLM_VALUEBUYER_PROMPT as RAG_VALUEBUYER_PROMPT,
+from examples.LUNACollapse.RuleLLM.prompts import (
+    RULELLM_ANCHORDEPOSITOR_PROMPT as RAG_ANCHORDEPOSITOR_PROMPT,
+    RULELLM_ARBITRAGEUR_PROMPT as RAG_ARBITRAGEUR_PROMPT,
+    RULELLM_DEFILENDER_PROMPT as RAG_DEFILENDER_PROMPT,
+    RULELLM_STABLECOINHOLDER_PROMPT as RAG_STABLECOINHOLDER_PROMPT,
+    RULELLM_VALUEBUYER_PROMPT as RAG_VALUEBUYER_PROMPT,
 )
 
 RAG_USER_TEMPLATE = """Relevant background knowledge:

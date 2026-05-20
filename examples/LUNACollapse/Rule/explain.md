@@ -1,81 +1,61 @@
-# LUNACollapse Simulation
+# LUNACollapse Rule — Implementation Explanation
 
-## §1 Overview
+## §1 Variant Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | May 2022 Terra/LUNA crash - $40B wiped out in algorithmic stablecoin death spiral |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Terra/LUNA collapse simulation with algorithmic stablecoin death spiral and DeFi contagion |
-| **Academic Value** | Understanding may 2022 terra/luna crash - $40b wiped out in algorithmic stablecoin death spiral through multi-agent simulation |
+|---|---|
+| Variant | Rule |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | Deterministic threshold rules |
+| Key Difference | Establishes the fixed death-spiral baseline |
+| Runtime Change | Threshold semantics aligned to configured deviation thresholds; rerun required |
 
-## §2 Theoretical Foundation
+## §2 Theory To Implementation Mapping
 
-- Algorithmic stablecoin mechanism design (Klages-Mundt et al., 2020)
-- Death spiral dynamics (Levy, 2022)
-- DeFi contagion (Werner et al., 2022)
+| Design Element | Implementation |
+|---|---|
+| StablecoinHolder (`simulation-bases.md §4.1`) | `StablecoinHolder.decide()` sells 50% when `deviation < -redemption_threshold` |
+| Arbitrageur (`simulation-bases.md §4.2`) | `Arbitrageur.decide()` trades when `abs(deviation) > arb_threshold`, capped at 5000 |
+| DeFiLender (`simulation-bases.md §4.3`) | `DeFiLender.decide()` sells 60% when `deviation < -liquidation_threshold` |
+| AnchorDepositor (`simulation-bases.md §4.4`) | `AnchorDepositor.decide()` sells 40% when `deviation < -yield_threshold` |
+| ValueBuyer (`simulation-bases.md §4.5`) | `ValueBuyer.decide()` buys deep discounts using 20% of cash, capped at 1000 |
 
-## §3 Agent Descriptions
+## §3 Market Mechanism Implementation
 
-### StablecoinHolder
-**Theoretical Basis**: Stablecoin redemption pressure
-**Market Role**: destabilizing
-**Description**: Redeems UST for LUNA, creating selling pressure on LUNA
-**Parameters**: holdings=100000, redemption_threshold=0.98, panic_speed=fast
+`Market` is implemented in `players.py` and follows
+`simulation-bases.md §3`: price changes with net demand, mean reversion, and
+Gaussian noise, then broadcasts `price`, `fundamental`, `deviation`, and
+`round`.
 
-### Arbitrageur
-**Theoretical Basis**: UST-LUNA arbitrage
-**Market Role**: destabilizing
-**Description**: Arbitrage between UST and LUNA amplifies death spiral
-**Parameters**: arb_threshold=0.01, position_size=50000, speed=HFT
+## §4 Variant-Specific Features
 
-### DeFiLender
-**Theoretical Basis**: DeFi liquidation cascade
-**Market Role**: destabilizing
-**Description**: Forced liquidations create additional selling pressure
-**Parameters**: liquidation_threshold=0.8, cascade_speed=fast
+Rule uses only deterministic Python logic and direct required-key config access.
+It is the baseline for evaluating whether LLM, RuleLLM, and Rag preserve or
+alter the stablecoin death-spiral mechanism.
 
-### AnchorDepositor
-**Theoretical Basis**: Yield farming exit
-**Market Role**: destabilizing
-**Description**: Withdraws from Anchor protocol when confidence drops
-**Parameters**: deposit_amount=500000, yield_threshold=0.15, exit_speed=moderate
+## §5 Architecture Diagram
 
-### ValueBuyer
-**Theoretical Basis**: Contrarian buying
-**Market Role**: stabilizing
-**Description**: Attempts to buy at deep discount but gets overwhelmed
-**Parameters**: discount_threshold=0.5, position_limit=100000
-
-
-## §4 Usage
-
-### Rule Variant
-```bash
-python examples/LUNACollapse/Rule/run_lunacollapse.py \
-    -c configs/LUNACollapse/Rule/simulation.yml
+```text
+Market broadcast -> Rule investor threshold decision -> order -> Market clearing
 ```
 
-### LLM Variant
-```bash
-python examples/LUNACollapse/LLM/run_lunacollapse_llm.py \
-    -c configs/LUNACollapse/LLM/simulation.yml
-```
+## §6 Configuration Reference
 
-### RuleLLM Variant
-```bash
-python examples/LUNACollapse/RuleLLM/run_lunacollapse_rulellm.py \
-    -c configs/LUNACollapse/RuleLLM/simulation.yml
-```
+Primary config: `configs/LUNACollapse/Rule/players.yml`. Key thresholds are
+`redemption_threshold=0.05`, `arb_threshold=0.02`,
+`liquidation_threshold=0.15`, `yield_threshold=0.05`, and
+`discount_threshold=0.30`.
 
-### RAG Variant
-```bash
-python examples/LUNACollapse/Rag/run_lunacollapse_rag.py \
-    -c configs/LUNACollapse/Rag/simulation.yml
-```
+## §7 Expected Behavior Patterns
 
-## §5 References
+Destabilizing redemptions, arbitrage, liquidations, and yield exits should
+dominate ValueBuyer demand once confidence breaks.
 
-- Algorithmic stablecoin mechanism design (Klages-Mundt et al., 2020)
-- Death spiral dynamics (Levy, 2022)
-- DeFi contagion (Werner et al., 2022)
+## §8 Validation Checklist
+
+Verify full rounds, canonical order schema, price/portfolio sanity, and sell
+pressure attribution before accepting a sample.
+
+## §9 References
+
+See `../simulation-bases.md §4` and `../analysis-bases.md §2`.

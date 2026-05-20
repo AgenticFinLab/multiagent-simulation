@@ -57,7 +57,7 @@ class RagLLMInvestor(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -154,31 +154,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMStablecoinHolder(RagLLMInvestor):
-    """RAG StablecoinHolder: redeems stablecoin on peg break."""
+    """RAG stablecoin redeemer. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RAG_STABLECOINHOLDER_PROMPT
 
 
 class RagLLMArbitrageur(RagLLMInvestor):
-    """RAG Arbitrageur: amplifies death spiral through arbitrage."""
+    """RAG arbitrage amplifier. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RAG_ARBITRAGEUR_PROMPT
 
 
 class RagLLMDeFiLender(RagLLMInvestor):
-    """RAG DeFiLender: automated liquidation cascades."""
+    """RAG DeFi liquidation engine. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RAG_DEFILENDER_PROMPT
 
 
 class RagLLMAnchorDepositor(RagLLMInvestor):
-    """RAG AnchorDepositor: exits yield protocol on stress signals."""
+    """RAG yield depositor exit agent. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RAG_ANCHORDEPOSITOR_PROMPT
 
 
 class RagLLMValueBuyer(RagLLMInvestor):
-    """RAG ValueBuyer: contrarian deep-discount buyer."""
+    """RAG contrarian value buyer. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RAG_VALUEBUYER_PROMPT
 

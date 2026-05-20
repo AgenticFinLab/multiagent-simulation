@@ -1,27 +1,46 @@
-# LUNACollapse Analysis Guide
+# LUNACollapse RuleLLM — Analysis Guide
 
-## §1 Metrics
+## §1 Objectives
 
-| Metric | Description | Expected Range |
-|--------|-------------|----------------|
-| Price deviation | Deviation from fundamental | Varies by scenario |
-| Max drawdown | Largest peak-to-trough decline | Varies by scenario |
-| Volatility | Annualized return volatility | Varies by scenario |
+This guide traces RuleLLM analysis to `../analysis-bases.md`. RuleLLM tests
+whether LLM reasoning can preserve the configured death-spiral rules while still
+producing natural-language reasoning and bounded variation.
 
-## §2 Visualization Guide
+## §2 Metric Mapping
 
-1. **Price vs Fundamental**: Shows whether agents create mispricings
-2. **Deviation Plot**: Magnitude and persistence of mispricings
-3. **Return Distribution**: Should show fat tails for behavioral scenarios
+| analysis-bases.md Metric | Implementation |
+|---|---|
+| §2.1 Price Deviation | `analysis.py` reuses Rule `calculate_metrics()` on the RuleLLM record path |
+| §2.2 Maximum Drawdown | `calculate_metrics()` records the largest one-round return drop |
+| §2.3 Crash Velocity | Interpreted from the most negative one-round return |
+| §2.4 Sell Pressure Share | Level-2 audit attributes sell volume by RuleLLM agent identity |
+| §2.5 Stabilization Ratio | Level-2 audit compares ValueBuyer buy volume with panic sell volume |
+| §2.6 Collapse Onset Round | Level-2 audit finds first material negative-deviation breach |
+| §2.7 Volume Acceleration | Level-2 audit checks volume acceleration during collapse phases |
 
-## §3 Troubleshooting
+## §3 Analysis Dimensions
 
-- **No phenomenon observed**: Adjust agent parameters
-- **Too extreme**: Add more stabilizing agents or increase mean reversion
-- **Too stable**: Increase destabilizing agent parameters
+Compare rule adherence, parse quality, threshold timing, sell-pressure share,
+and stabilization behavior against the deterministic Rule baseline.
 
-## §4 References
+## §4 Phase Analysis
 
-- Algorithmic stablecoin mechanism design (Klages-Mundt et al., 2020)
-- Death spiral dynamics (Levy, 2022)
-- DeFi contagion (Werner et al., 2022)
+RuleLLM should follow the same phase order as Rule. Differences should be
+limited to reasoning phrasing or bounded order-size variation rather than
+opposite trading signs.
+
+## §5 Cross-Variant Comparison
+
+RuleLLM sits between Rule and LLM: it should be closer to Rule on action timing
+while still exposing LLM reasoning quality for audit.
+
+## §6 Expected Results
+
+Accepted samples must complete full rounds, show low malformed-output retry
+rates, preserve canonical JSON fields, and keep thresholds aligned with
+`configs/LUNACollapse/RuleLLM/players.yml`.
+
+## §7 Visualization Catalogue
+
+Plot price/fundamental, deviation, rule-adherence timing, malformed-output
+counts, sell-pressure shares, stabilization ratio, and cross-variant drawdown.

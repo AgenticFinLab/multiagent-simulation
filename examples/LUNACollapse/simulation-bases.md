@@ -65,11 +65,11 @@ base-token selling pressure.
 deviation breaches the redemption threshold, sells a fraction of current
 position.
 
-**Decision Process**: If `deviation < -(1 - redemption_threshold)`, sell up to
+**Decision Process**: If `deviation < -redemption_threshold`, sell up to
 50% of position; otherwise hold.
 
-**Worked Numerical Example**: With `redemption_threshold = 0.98`,
-`deviation = -0.04`, and `position = 100000`, the holder sells 50000 units.
+**Worked Numerical Example**: With `redemption_threshold = 0.05`,
+`deviation = -0.06`, and `position = 100000`, the holder sells 50000 units.
 
 **Academic References**: Klages-Mundt et al. (2020); Levy (2022).
 
@@ -108,10 +108,10 @@ health deteriorates.
 
 **Behavioral Framework**: Monitors deviation and liquidation threshold.
 
-**Decision Process**: If price deviation implies collateral impairment beyond
-`liquidation_threshold`, sell a protocol-defined fraction of position.
+**Decision Process**: If `deviation < -liquidation_threshold`, sell a
+protocol-defined fraction of position.
 
-**Worked Numerical Example**: With `liquidation_threshold = 0.8` and a 25%
+**Worked Numerical Example**: With `liquidation_threshold = 0.15` and a 20%
 discount, the lender enters forced-sale mode.
 
 **Academic References**: Werner et al. (2022); DeFi liquidation literature.
@@ -133,7 +133,7 @@ confidence proxy.
 **Decision Process**: Withdraw/sell when confidence falls below the configured
 threshold; otherwise hold.
 
-**Worked Numerical Example**: If confidence-implied yield falls below 15%, the
+**Worked Numerical Example**: If confidence-implied stress exceeds 5%, the
 depositor exits part of the position.
 
 **Academic References**: Terra/Anchor event analyses; DeFi run literature.
@@ -154,8 +154,8 @@ panic selling.
 **Decision Process**: If discount is deep enough, buy cash-constrained quantity;
 otherwise hold.
 
-**Worked Numerical Example**: With `discount_threshold = 0.5`, the buyer waits
-for a 50% discount before deploying capital.
+**Worked Numerical Example**: With `discount_threshold = 0.30`, the buyer waits
+for a 30% discount before deploying capital.
 
 **Academic References**: Shleifer and Vishny (1997); crisis arbitrage evidence.
 

@@ -29,9 +29,9 @@ def load_simulation_data(config: dict) -> dict:
             if filename.endswith(".json"):
                 with open(os.path.join(market_path, filename), "r") as f:
                     record = json.load(f)
-                    custom = record.get("custom_state", {})
-                    data["prices"].append(custom.get("price", 0))
-                    data["fundamentals"].append(custom.get("fundamental", 0))
+                    custom = record["custom_state"]
+                    data["prices"].append(custom["price"])
+                    data["fundamentals"].append(custom["fundamental"])
     
     return data
 

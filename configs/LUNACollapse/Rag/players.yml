@@ -193,7 +193,7 @@ anchordepositor:
       initial_position: 600
       initial_price: 100.0
       fundamental_value: 100.0
-      exit_threshold: 0.03
+      yield_threshold: 0.05
       base_size: 350
       custom_state_hot_limit: 3
       private_knowledge:

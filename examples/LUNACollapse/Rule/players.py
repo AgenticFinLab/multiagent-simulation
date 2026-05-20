@@ -112,9 +112,9 @@ class Market(GeneralPlayer):
 
 
 class StablecoinHolder(GeneralPlayer):
-    """
-    Redeems stablecoin for base token when confidence drops, creating selling pressure.
+    """Redeems stablecoin for base token when confidence drops.
 
+    Theory: simulation-bases.md §4.1 — StablecoinHolder
     Theoretical Basis: Algorithmic stablecoin redemption mechanics
     Market Role: destabilizing — redemptions amplify LUNA supply collapse
     """
@@ -137,7 +137,7 @@ class StablecoinHolder(GeneralPlayer):
         extras = self.config.extras
         position = self.state.custom_state["position"]
         redemption_threshold = extras["redemption_threshold"]
-        if deviation < -(1 - redemption_threshold):
+        if deviation < -redemption_threshold:
             sell_qty = min(int(abs(position) * 0.5), max(position, 0))
             if sell_qty > 0:
                 return {"action": "sell", "quantity": sell_qty}
@@ -165,9 +165,9 @@ class StablecoinHolder(GeneralPlayer):
 
 
 class Arbitrageur(GeneralPlayer):
-    """
-    Arbitrage between stablecoin and base token amplifies the death spiral.
+    """Arbitrage between stablecoin and base token amplifies the death spiral.
 
+    Theory: simulation-bases.md §4.2 — Arbitrageur
     Theoretical Basis: Algorithmic stablecoin arbitrage mechanism
     Market Role: destabilizing — arbitrage activity amplifies price collapse
     """
@@ -226,9 +226,9 @@ class Arbitrageur(GeneralPlayer):
 
 
 class DeFiLender(GeneralPlayer):
-    """
-    DeFi protocol triggering forced liquidations when collateral value falls.
+    """DeFi protocol triggering forced liquidations when collateral value falls.
 
+    Theory: simulation-bases.md §4.3 — DeFiLender
     Theoretical Basis: DeFi contagion (Werner et al., 2022)
     Market Role: destabilizing — liquidation cascades amplify sell pressure
     """
@@ -251,7 +251,7 @@ class DeFiLender(GeneralPlayer):
         extras = self.config.extras
         position = self.state.custom_state["position"]
         liq_threshold = extras["liquidation_threshold"]
-        if deviation < -(1 - liq_threshold):
+        if deviation < -liq_threshold:
             sell_qty = min(int(abs(position) * 0.6), max(position, 0))
             if sell_qty > 0:
                 return {"action": "sell", "quantity": sell_qty}
@@ -279,9 +279,9 @@ class DeFiLender(GeneralPlayer):
 
 
 class AnchorDepositor(GeneralPlayer):
-    """
-    Withdraws from high-yield protocol when confidence in the ecosystem drops.
+    """Withdraws from high-yield protocol when ecosystem confidence drops.
 
+    Theory: simulation-bases.md §4.4 — AnchorDepositor
     Theoretical Basis: Bank run dynamics in DeFi yield protocols
     Market Role: destabilizing — rapid withdrawals collapse TVL
     """
@@ -303,8 +303,8 @@ class AnchorDepositor(GeneralPlayer):
         deviation = self.state.custom_state["deviation"]
         extras = self.config.extras
         position = self.state.custom_state["position"]
-        _ = extras["yield_threshold"]
-        if deviation < -0.05:
+        yield_threshold = extras["yield_threshold"]
+        if deviation < -yield_threshold:
             sell_qty = min(int(position * 0.4), max(position, 0))
             if sell_qty > 0:
                 return {"action": "sell", "quantity": sell_qty}
@@ -332,9 +332,9 @@ class AnchorDepositor(GeneralPlayer):
 
 
 class ValueBuyer(GeneralPlayer):
-    """
-    Contrarian value investor attempting to buy at deep discount.
+    """Contrarian value investor attempting to buy at deep discount.
 
+    Theory: simulation-bases.md §4.5 — ValueBuyer
     Theoretical Basis: Mean reversion / fundamental value investing
     Market Role: stabilizing — but overwhelmed by selling pressure in crisis
     """
