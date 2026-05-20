@@ -82,3 +82,10 @@ The Rule variant implements the Gambler's Fallacy simulation using deterministic
 | ACI (Arbitrage Correction Index)      | 0.35–0.65               | Fraction of large deviations corrected 50% within 5 rounds           |
 | VAF (Volatility Amplification Factor) | 1.5–3.5                 | Biased-active rounds 1.5–3.5× more volatile than quiet rounds        |
 | WDI (Wealth Distribution Index)       | 0.10–0.35               | Moderate inequality; rational agents outperform biased agents        |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity, and
+agent-level contribution patterns before accepting a sample.

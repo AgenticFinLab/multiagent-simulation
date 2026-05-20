@@ -79,3 +79,11 @@ The LLM variant implements the Framing Effect simulation using large language mo
 | VAF             | 1.2–3.0            | 1.5–3.5       | Slightly lower | LLM variability dampens systematic amplification           |
 | OWP             | 0.03–0.18          | 0.05–0.20     | Lower          | LLM biased agents sometimes reason their way out of losses |
 | WDI             | 0.08–0.25          | 0.10–0.30     | Lower          | Less systematic wealth transfer in stochastic LLM regime   |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity, LLM
+parse/fallback rates, and agent-level contribution patterns before accepting a
+sample.

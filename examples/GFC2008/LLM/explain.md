@@ -70,3 +70,10 @@
 | RRI    | 0.15–0.70          | Variable | LLM Regulator may intervene more actively           |
 | OSP    | 0.50–0.90          | Similar  | Origination pattern LLM-modulated                   |
 | WDI    | 0.08–0.35          | Similar  | Wealth transfer depends on crisis arc               |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity, LLM
+parse/fallback rates, and crisis-phase patterns before accepting a sample.

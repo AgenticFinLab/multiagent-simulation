@@ -73,3 +73,10 @@ The RuleLLM variant implements the Gambler's Fallacy simulation with rule-embedd
 | ACI    | 0.35–0.65              | 0.35–0.65     | ≈ Similar                                 |
 | VAF    | 1.4–3.3                | 1.5–3.5       | ≈ Similar                                 |
 | WDI    | 0.09–0.33              | 0.10–0.35     | ≈ Similar                                 |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity, LLM
+parse/fallback rates, and rule-adherence patterns before accepting a sample.

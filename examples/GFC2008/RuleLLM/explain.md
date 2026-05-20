@@ -70,3 +70,10 @@
 | RRI    | 0.25–0.65              | Higher   | LLM boosts Regulator intervention             |
 | OSP    | 0.60–0.90              | Similar  | Rule origination rate dominates               |
 | WDI    | 0.10–0.28              | Similar  | Crisis arc similar to Rule                    |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity, LLM
+parse/fallback rates, and rule-adherence patterns before accepting a sample.

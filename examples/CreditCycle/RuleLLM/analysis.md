@@ -27,3 +27,11 @@ Key RuleLLM-specific notes:
 
 All metric definitions with DOI citations: `analysis-bases.md §2`.  
 Investor theory references: `simulation-bases.md §4.1–§4.5`.
+
+## §4 Quality Review Notes
+
+Post-run review should verify full configured rounds, order schema completeness,
+price/portfolio sanity, and LLM parse/fallback rates. Because RuleLLM embeds
+credit-cycle rules in prompts, accepted samples should also be checked for
+rule-adherence patterns around leverage expansion, fragility buildup, and credit
+contraction.

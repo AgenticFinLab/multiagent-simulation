@@ -50,3 +50,11 @@
 ## §4 Market Dynamics
 
 Price follows: P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity,
+representativeness pressure, and rational-correction patterns before accepting a
+sample.

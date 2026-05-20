@@ -59,3 +59,10 @@ Key feedback loops:
 - SkepticalEvaluator and FactChecker correct belief toward truth (stabilizing)
 - Corrections travel slower than rumors (credibility_discount < 1.0)
 - Higher distortion makes fact-checking more effective (easier to debunk)
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for role design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, action schema completeness, rumor/correction state sanity, and
+information-flow patterns before accepting a sample.

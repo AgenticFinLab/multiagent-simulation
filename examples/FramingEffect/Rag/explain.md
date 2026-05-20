@@ -77,3 +77,11 @@ The Rag variant implements the Framing Effect simulation using RAG-augmented LLM
 | VAF             | 1.5–3.8            | 1.5–3.5       | Slightly higher | Biased retrieval amplifies cascade volatility slightly            |
 | OWP             | 0.05–0.22          | 0.05–0.20     | Slightly higher | Biased agents lose more due to retrieval-reinforced errors        |
 | WDI             | 0.10–0.32          | 0.10–0.30     | Slightly higher | More systematic wealth redistribution                             |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity,
+retrieval health, LLM parse/fallback rates, and agent-level contribution
+patterns before accepting a sample.

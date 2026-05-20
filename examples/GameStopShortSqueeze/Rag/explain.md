@@ -63,3 +63,11 @@ The Rag variant implements the short squeeze with RAG-augmented LLM reasoning. R
 | SCD    | 1–6 rounds         | Shorter  | Faster covering due to retrieved fear evidence      |
 | IEP    | Rounds 2–8         | Earlier  | Retrieved fundamental analysis prompts earlier sell |
 | WTI    | 0.15–0.50          | Higher   | Larger wealth transfer in amplified squeeze         |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity,
+retrieval health, LLM parse/fallback rates, and squeeze-phase patterns before
+accepting a sample.

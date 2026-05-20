@@ -82,3 +82,11 @@ The Rule variant implements the GameStop Short Squeeze simulation using determin
 | SCD (Squeeze Collapse Duration)      | 2–8 rounds                               | Rounds from peak deviation to 80% collapse                    |
 | IEP (Institutional Exhaustion Point) | Rounds 3–10                              | First round §4.4 exits fully; marks squeeze peak              |
 | WTI (Wealth Transfer Index)          | 0.10–0.40                                | Fraction of short-seller wealth transferred to retail/MM      |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity,
+squeeze-phase patterns, and agent-level contribution patterns before accepting a
+sample.

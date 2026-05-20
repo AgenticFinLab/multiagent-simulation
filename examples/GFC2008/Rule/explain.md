@@ -70,3 +70,10 @@
 | RRI    | 0.20–0.60           | Partial stabilization by DistressedBuyer + Regulator         |
 | OSP    | 0.60–0.90           | MBSOriginator origination fraction of total sell volume      |
 | WDI    | 0.10–0.30           | Wealth concentration from DistressedBuyer buying at discount |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity, and
+crisis-phase patterns before accepting a sample.

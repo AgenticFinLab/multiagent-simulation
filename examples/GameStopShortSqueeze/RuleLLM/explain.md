@@ -61,3 +61,10 @@ The RuleLLM variant implements the short squeeze with rule-embedded LLM reasonin
 | SCD    | 2–9 rounds             | ≈ Rule   |
 | IEP    | Rounds 3–11            | ≈ Rule   |
 | WTI    | 0.10–0.42              | ≈ Rule   |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity, LLM
+parse/fallback rates, and rule-adherence patterns before accepting a sample.

@@ -71,3 +71,11 @@
 | RRI    | 0.25–0.70          | Higher   | Retrieved bailout data improves Regulator calibration      |
 | OSP    | 0.60–0.92          | Similar  | Origination driven by historical origination cases         |
 | WDI    | 0.12–0.35          | Higher   | Larger crisis → more wealth transfer                       |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity,
+retrieval health, LLM parse/fallback rates, and crisis-phase patterns before
+accepting a sample.

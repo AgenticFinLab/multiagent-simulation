@@ -73,3 +73,11 @@ The Rag variant implements the Gambler's Fallacy simulation using RAG-augmented 
 | ACI    | 0.35–0.70          | 0.35–0.65     | Similar/slightly higher | Retrieved mean-reversion evidence strengthens rational agents    |
 | VAF    | 1.3–3.2            | 1.5–3.5       | Slightly lower          | Bias cancellation reduces net volatility amplification           |
 | WDI    | 0.08–0.30          | 0.10–0.35     | Slightly lower          | Less systematic exploitation with opposing Rag-reinforced biases |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity,
+retrieval health, LLM parse/fallback rates, and agent-level contribution
+patterns before accepting a sample.

@@ -77,3 +77,10 @@ The RuleLLM variant implements the Framing Effect simulation using LLM reasoning
 | VAF             | 1.4–3.3                | 1.5–3.5       | ≈ Similar | Slight reduction from LLM quantity modulation                   |
 | OWP             | 0.04–0.19              | 0.05–0.20     | ≈ Similar | Rule anchoring maintains systematic wealth penalty              |
 | WDI             | 0.09–0.28              | 0.10–0.30     | ≈ Similar | Near-Rule inequality distribution                               |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity, LLM
+parse/fallback rates, and rule-adherence patterns before accepting a sample.

@@ -73,3 +73,11 @@ The LLM variant implements the Gambler's Fallacy simulation using LLM persona re
 | ACI    | 0.35–0.70          | 0.35–0.65     | Similar/slightly higher | LLM rational agents may correct more efficiently              |
 | VAF    | 1.2–3.0            | 1.5–3.5       | Lower                   | Reduced net bias effect; cancelling biases dampen volatility  |
 | WDI    | 0.08–0.28          | 0.10–0.35     | Lower                   | Less systematic wealth redistribution with cancelling biases  |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity, LLM
+parse/fallback rates, and agent-level contribution patterns before accepting a
+sample.

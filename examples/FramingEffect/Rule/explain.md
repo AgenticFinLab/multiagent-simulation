@@ -85,3 +85,10 @@ The Rule variant implements the Framing Effect simulation using deterministic th
 | VAF (Volatility Amplification Factor) | 1.5–3.5                              | Framing-active rounds 1.5–3.5× more volatile than quiet rounds              |
 | OWP (Overconfidence Wealth Penalty)   | 0.05–0.20                            | Biased agents lose 5–20% of initial wealth vs. rational agents              |
 | WDI (Wealth Distribution Index)       | 0.10–0.30                            | Moderate inequality; rational agents outperform biased agents               |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity, and
+agent-level contribution patterns before accepting a sample.
