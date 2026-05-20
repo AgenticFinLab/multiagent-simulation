@@ -32,7 +32,7 @@ Rule results provide the baseline for account-level turnover, house-money risk s
 
 ## §6 Expected Results and Validation
 
-The accepted Rule sample should complete 200 rounds with non-empty market price records and no malformed order payloads. Existing output can be inherited because this pass only updates documentation.
+Valid Rule outputs should complete 200 rounds with non-empty market price records and no malformed order payloads.
 
 ## §7 Visualization Catalogue
 

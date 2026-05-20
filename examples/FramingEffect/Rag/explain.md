@@ -116,14 +116,14 @@ RAG prompt -> LLM -> parser -> capped order -> Market
 
 ## §7 Expected Runtime Outputs
 
-Accepted RAG runs should complete 200 rounds, produce valid order records, and expose retrievable RAG context observations for quality audit. Missing processed documents or bad embedding credentials should fail before a sample is accepted.
+Accepted RAG runs should complete 200 rounds, produce valid order records, and expose retrievable RAG context observations for quality review. Missing processed documents or bad embedding credentials should fail before a sample is accepted.
 
 ## §8 Validation Checklist
 
 - RAG config resolves `embed_type=litellm` and `embed_model=openai/hunyuan-embedding`.
 - `RAG_USER_TEMPLATE` contains `{rag_context}` and the canonical decision schema.
 - Dry-run discovers `FramingEffect__Rag`.
-- Previous failed RAG sample must not be inherited; RAG requires a new full 200-round run.
+- Runtime prompt and retrieval semantics should remain stable unless a documented mechanism or contract defect is found.
 
 ## §9 Cross-Variant Comparison Notes
 

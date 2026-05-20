@@ -122,11 +122,6 @@ All outputs written to `EXPERIMENT/AvailabilityBias/Rule/records/analysis/`.
 
 Cross-variant comparison protocol: `../analysis-bases.md §5`.
 
----
-
-## §8 References
-
-- `../analysis-bases.md` — master analysis specification
-- `../simulation-bases.md §3.1, §3.3` — Price formula and broadcast variables (return_pct)
-- `../simulation-bases.md §4` — Investor type specs and threshold formulas
-- `../simulation-bases.md §8` — Historical calibration targets (availability event magnitude)
+References: `../analysis-bases.md`, `../simulation-bases.md §3.1`,
+`../simulation-bases.md §3.3`, `../simulation-bases.md §4`, and
+`../simulation-bases.md §8`.

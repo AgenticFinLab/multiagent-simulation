@@ -107,14 +107,14 @@ Market broadcast -> RagLLMInvestor -> KnowledgeStore.query() -> RAG prompt -> LL
 
 ## §7 Expected Runtime Outputs
 
-Accepted RAG runs should complete 200 rounds, produce valid order records, and expose RAG context observations for retrieval-quality audit. The prior RAG row is pending and must be rerun.
+Accepted RAG runs should complete 200 rounds, produce valid order records, and expose RAG context observations for retrieval-quality review.
 
 ## §8 Validation Checklist
 
 - RAG embed config uses `litellm` and `openai/hunyuan-embedding`.
 - Prompt contains `{rag_context}` and canonical decision JSON.
 - Preflight validates class paths and config load.
-- `GamblerFallacy__Rag` requires a new full sample after this repair.
+- Runtime prompt and retrieval semantics should remain stable unless a documented mechanism or contract defect is found.
 
 ## §9 Cross-Variant Comparison Notes
 

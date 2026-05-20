@@ -28,7 +28,7 @@ evidence and not to invalid parser output.
 |---|---|
 | Knowledge-supported correction | FactChecker and SkepticalEvaluator correct earlier or stronger |
 | Knowledge-amplified salience | Spreaders may increase intensity if context reinforces rumor |
-| Retrieval quality | Irrelevant/no retrieval is marked in Level-2 review |
+| Retrieval quality | Irrelevant/no retrieval is marked in post-run retrieval review |
 
 ## §5 References
 

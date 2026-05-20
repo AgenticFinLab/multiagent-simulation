@@ -28,7 +28,7 @@ A full RuleLLM run should produce 200 rounds, valid order payloads, and model re
 - `players.py`, `prompts.py`, and `analysis.py` compile.
 - Prompt refs load and preserve the canonical decision schema.
 - Dry-run discovers `MentalAccounting__RuleLLM`.
-- Existing full sample can be inherited because this pass does not change prompt or player runtime semantics.
+- Full runs should complete 200 rounds with valid decision JSON and auditable rule-guided reasoning traces.
 
 ## §9 Cross-Variant Comparison Notes
 

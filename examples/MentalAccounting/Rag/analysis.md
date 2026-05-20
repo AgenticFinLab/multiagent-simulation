@@ -32,7 +32,7 @@ RAG results are compared primarily against RuleLLM to isolate the effect of retr
 
 ## §6 Expected Results and Validation
 
-The accepted RAG sample should complete 200 rounds with clean parse quality and usable retrieval context. Existing output can be inherited because this pass only updates documentation.
+Valid RAG outputs should complete 200 rounds with clean parse quality and usable retrieval context.
 
 ## §7 Visualization Catalogue
 

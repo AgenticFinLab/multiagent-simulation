@@ -59,7 +59,7 @@ LLM variant should show all metrics between Rule and Rag in magnitude (Rule most
 
 ## §6 Expected Results and Validation
 
-The accepted LLM sample should complete 200 rounds with clean parse quality and no fallback holds. Metrics should generally show weaker bias than Rule but preserve correct directionality: LAI > 1.0 and DEI > 1.0. Existing accepted LLM output can be inherited because this pass only updates analysis documentation.
+Valid LLM outputs should complete 200 rounds with clean parse quality and no fallback-hold distortion. Metrics should generally show weaker bias than Rule while preserving correct directionality: LAI > 1.0 and DEI > 1.0.
 
 ## §7 Visualization Catalogue
 

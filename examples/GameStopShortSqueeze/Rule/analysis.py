@@ -1,135 +1,67 @@
 #!/usr/bin/env python
-"""GameStopShortSqueeze Rule analysis utilities."""
+"""GameStopShortSqueeze Rule analysis using the standard output contract."""
 
 from __future__ import annotations
 
-import argparse
-import json
-import os
+from typing import Any, Dict
 
-import matplotlib.pyplot as plt
-import numpy as np
-
-from masim.utils.config import load_config
-
-
-def load_simulation_data(config: dict) -> dict:
-    """Load simulation data from experiment records."""
-    record_path = config["setting"]["record_path"]
-    data = {"prices": [], "fundamentals": [], "volumes": []}
-
-    market_path = os.path.join(record_path, "market")
-    if not os.path.exists(market_path):
-        raise FileNotFoundError(f"Market record directory not found: {market_path}")
-
-    for filename in sorted(os.listdir(market_path)):
-        if not filename.endswith(".json"):
-            continue
-        with open(os.path.join(market_path, filename), "r", encoding="utf-8") as f:
-            record = json.load(f)
-        custom = record["custom_state"]
-        data["prices"].append(float(custom["price"]))
-        data["fundamentals"].append(float(custom["fundamental"]))
-
-    if not data["prices"]:
-        raise ValueError(f"No market price records found in {market_path}")
-    return data
+from examples.standard_rule_analysis import (
+    _batch_to_rounds,
+    _load_data,
+    analyze_standard_scenario,
+    calculate_standard_metrics,
+    create_standard_visualizations,
+    run_standard_analysis,
+)
+from masim.utils import load_results
 
 
-def calculate_metrics(data: dict) -> dict:
-    """Calculate GameStopShortSqueeze metrics from analysis-bases.md §2."""
-    prices = np.asarray(data["prices"], dtype=float)
-    fundamentals = np.asarray(data["fundamentals"], dtype=float)
-
-    if len(prices) < 2:
-        raise ValueError("At least two price records are required for metrics")
-    if np.any(fundamentals == 0):
-        raise ValueError("Fundamental values must be non-zero")
-
-    returns = np.diff(prices) / prices[:-1]
-    deviation = (prices - fundamentals) / fundamentals
-
-    return {
-        "price_metrics": {
-            "initial": float(prices[0]),
-            "final": float(prices[-1]),
-            "min": float(np.min(prices)),
-            "max": float(np.max(prices)),
-            "max_drawdown_pct": float(np.min(returns) * 100),
-        },
-        "deviation_metrics": {
-            "max_deviation_pct": float(np.max(np.abs(deviation)) * 100),
-            "mean_deviation_pct": float(np.mean(np.abs(deviation)) * 100),
-        },
-        "volatility": {
-            "annualized_pct": float(np.std(returns) * np.sqrt(252) * 100),
-        },
-    }
+SCENARIO = "GameStopShortSqueeze"
+DEFAULT_CONFIG = "configs/GameStopShortSqueeze/Rule/simulation.yml"
+STANDARD_OUTPUT_FILES = (
+    "summary.json",
+    "00_investor_bids.png",
+    "01_gamestopshortsqueeze_dynamics.png",
+    "02_gamestopshortsqueeze_analysis.png",
+    "03_summary.png",
+)
 
 
-def create_visualizations(data: dict, output_path: str) -> None:
-    """Create analysis plots."""
-    prices = np.asarray(data["prices"], dtype=float)
-    fundamentals = np.asarray(data["fundamentals"], dtype=float)
-
-    if len(prices) < 2:
-        raise ValueError("At least two price records are required for visualization")
-    if np.any(fundamentals == 0):
-        raise ValueError("Fundamental values must be non-zero")
-
-    rounds = np.arange(len(prices))
-    deviation = (prices - fundamentals) / fundamentals * 100
-    returns = np.diff(prices) / prices[:-1] * 100
-
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    fig.suptitle("GameStopShortSqueeze Simulation Analysis", fontsize=14, fontweight="bold")
-
-    axes[0, 0].plot(rounds, prices, label="Price", color="red")
-    axes[0, 0].plot(rounds, fundamentals, label="Fundamental", color="blue", linestyle="--")
-    axes[0, 0].set_title("Price vs Fundamental")
-    axes[0, 0].legend()
-    axes[0, 0].grid(True, alpha=0.3)
-
-    axes[0, 1].plot(rounds, deviation, color="purple")
-    axes[0, 1].axhline(y=0, color="black", linestyle="--", alpha=0.5)
-    axes[0, 1].set_title("Price Deviation (%)")
-    axes[0, 1].grid(True, alpha=0.3)
-
-    axes[1, 0].plot(rounds[1:], returns, color="red", alpha=0.7)
-    axes[1, 0].set_title("Returns (%)")
-    axes[1, 0].grid(True, alpha=0.3)
-
-    axes[1, 1].hist(returns, bins=30, color="steelblue", alpha=0.7)
-    axes[1, 1].set_title("Return Distribution")
-    axes[1, 1].grid(True, alpha=0.3)
-
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_path, "gamestopshortsqueeze_analysis.png"), dpi=150)
-    plt.close()
+def load_simulation_data(config: Dict[str, Any]) -> Dict[str, Any]:
+    """Load simulation data through `masim.utils.load_results`."""
+    return _load_data(load_results(config))
 
 
-def main() -> None:
-    """CLI entry point."""
-    parser = argparse.ArgumentParser(description="Analyze GameStopShortSqueeze simulation results")
-    parser.add_argument("-c", "--config", type=str, default="configs/GameStopShortSqueeze/Rule/simulation.yml")
-    args = parser.parse_args()
-
-    config = load_config(args.config)
-    data = load_simulation_data(config)
-    metrics = calculate_metrics(data)
-
-    analysis_path = os.path.join(config["setting"]["record_path"], "analysis")
-    os.makedirs(analysis_path, exist_ok=True)
-
-    create_visualizations(data, analysis_path)
-
-    with open(os.path.join(analysis_path, "metrics.json"), "w", encoding="utf-8") as f:
-        json.dump(metrics, f, indent=2)
-
-    print("Analysis complete. Results in:", analysis_path)
+def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Calculate standard structural metrics."""
+    return calculate_standard_metrics(data)
 
 
-__all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations", "main"]
+def create_visualizations(data: Dict[str, Any], output_path: str) -> None:
+    """Create fixed standard analysis PNG outputs."""
+    create_standard_visualizations(SCENARIO, data, output_path)
+
+
+def analyze_gamestopshortsqueeze(data: Dict[str, Any], config: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
+    """Run metrics, validation, plots, and `summary.json` output."""
+    return analyze_standard_scenario(SCENARIO, data, config, output_dir)
+
+
+def main() -> Dict[str, Any]:
+    """Run GameStopShortSqueeze analysis."""
+    return run_standard_analysis(SCENARIO, DEFAULT_CONFIG)
+
+
+__all__ = [
+    "_batch_to_rounds",
+    "_load_data",
+    "load_simulation_data",
+    "calculate_metrics",
+    "create_visualizations",
+    "analyze_gamestopshortsqueeze",
+    "STANDARD_OUTPUT_FILES",
+    "main",
+]
 
 
 if __name__ == "__main__":

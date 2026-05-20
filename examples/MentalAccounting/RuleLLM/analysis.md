@@ -32,7 +32,7 @@ RuleLLM results are compared against Rule and LLM to identify whether rule guida
 
 ## §6 Expected Results and Validation
 
-The accepted RuleLLM sample should complete 200 rounds with clean parse quality. Existing output can be inherited because this pass only updates documentation.
+Valid RuleLLM outputs should complete 200 rounds with clean parse quality and auditable rule-guided decisions.
 
 ## §7 Visualization Catalogue
 

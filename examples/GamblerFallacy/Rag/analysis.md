@@ -30,7 +30,7 @@ RAG should be compared first to RuleLLM. Any RAG-only metric difference should b
 
 ## §6 Expected Results and Validation
 
-Valid RAG samples should complete 200 rounds, maintain valid decision JSON, and show retrievable context or explicit fallback context in records. The pending RAG sample must be rerun after this repair.
+Valid RAG outputs should complete 200 rounds, maintain valid decision JSON, and show retrievable context or explicit fallback context in records.
 
 ## §7 Visualization Catalogue
 

@@ -106,14 +106,14 @@ Market broadcast -> LLMInvestor prompt -> LLM response -> parser -> capped order
 
 ## §7 Expected Runtime Outputs
 
-Accepted LLM runs should complete 200 rounds with parseable decisions and no fallback holds. Existing Level-2 quality audit for the accepted LLM sample is clean.
+Accepted LLM runs should complete 200 rounds with parseable decisions and no fallback-hold distortion.
 
 ## §8 Validation Checklist
 
 - Prompt constants load through `_system_prompt_path`.
 - User template contains the full market and portfolio state.
-- API contract audit reports zero mismatches.
-- Existing LLM sample can be inherited because runtime code and prompts are unchanged.
+- Prompt/parser contract checks should report zero mismatches.
+- Runtime code and prompts should remain stable unless a documented mechanism or contract defect is found.
 
 ## §9 Cross-Variant Comparison Notes
 

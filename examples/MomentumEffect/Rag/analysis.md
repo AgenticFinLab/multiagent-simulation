@@ -28,7 +28,7 @@ not schema drift or parser failures.
 |---|---|
 | Knowledge-informed momentum | Trend agents cite or reflect retrieved momentum context |
 | Knowledge-informed correction | Contrarian/fundamental agents may respond earlier |
-| Retrieval quality | Low retrieval quality should be marked in Level-2 review |
+| Retrieval quality | Low retrieval quality should be marked in post-run retrieval review |
 
 ## §5 References
 

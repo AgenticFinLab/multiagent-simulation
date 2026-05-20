@@ -44,4 +44,4 @@ Metrics derive from `../analysis-bases.md §2`; mechanisms derive from
 ## §7 Reporting Notes
 
 Report this variant as the deterministic baseline. API variants should be
-compared against it after their parser and output-quality audits pass.
+compared against it after their parser and output-quality reviews pass.

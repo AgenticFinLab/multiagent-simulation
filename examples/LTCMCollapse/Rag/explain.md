@@ -67,8 +67,8 @@ RAG should preserve the RuleLLM action schema while allowing historical crisis k
 
 - `RAG_USER_TEMPLATE` includes `{rag_context}`.
 - RAG embedding config uses `litellm` and `openai/hunyuan-embedding`.
-- Static API contract audit reports zero issues.
-- Full 200-round run is required because no accepted RAG sample exists.
+- Prompt/parser contract checks should report zero issues.
+- Full runs should complete 200 rounds with valid decision JSON and usable retrieval context.
 
 ## §9 References
 

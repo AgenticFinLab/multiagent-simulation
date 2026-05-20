@@ -18,7 +18,7 @@ Rag analysis compares historically informed LLM behavior with Rule, LLM, and Rul
 
 ## §3 Variant-Specific Notes
 
-RAG success requires more than `exit=0`: embedding access, context injection, parse quality, and fallback rate must all be reviewed. The previous `fix-scenarios` branch has no accepted `LTCMCollapse__Rag` sample, so this branch needs a new full run.
+RAG success requires more than `exit=0`: embedding access, context injection, parse quality, and fallback rate must all be reviewed before outputs are accepted.
 
 ## §4 Expected Ranges
 
@@ -31,7 +31,7 @@ RAG success requires more than `exit=0`: embedding access, context injection, pa
 
 ## §5 Output Files
 
-The current `analysis.py` imports Rule analysis functions. RAG-specific quality checks are external Level-2 audit outputs in the experiment resource pack.
+The current `analysis.py` imports Rule analysis functions. RAG-specific quality checks are produced by post-run output quality review.
 
 ## §6 Cross-Variant Comparison
 

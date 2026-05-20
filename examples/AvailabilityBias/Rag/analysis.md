@@ -97,12 +97,6 @@ Rag is the "informed" behavioral reference. Research question: does knowledge ab
 
 Cross-variant comparison protocol: `../analysis-bases.md §5`.
 
----
-
-## §8 References
-
-- `../analysis-bases.md` — master analysis specification
-- `../simulation-bases.md §4.1–§4.5` — Availability bias archetype specifications
-- `../analysis-bases.md §6` — Expected Rag result ranges
-- `Rule/analysis.py` — imported metric functions
-- `players.py → RagLLMInvestor._build_prompt()` — RAG context injection
+References: `../analysis-bases.md`, `../simulation-bases.md §4.1-§4.5`,
+`../analysis-bases.md §6`, `Rule/analysis.py`, and
+`players.py -> RagLLMInvestor._build_prompt()`.

@@ -103,7 +103,7 @@ The market broadcasts `price`, `fundamental`, `deviation`, and `round` to all in
 - Deterministic baseline: investors do not call external models.
 - Biased traders activate earlier than rational traders, matching the phenomenon design in `simulation-bases.md §4`.
 - The noise trader is the only stochastic investor and supplies non-informational liquidity.
-- The accepted full sample can be inherited when only documentation or analysis-file backfill changes.
+- Runtime logic should remain stable unless a documented mechanism or contract defect is found.
 
 ## §5 Architecture Diagram
 
@@ -141,7 +141,7 @@ Market.clear_market() -> next price
 - `analysis.py` exposes `load_simulation_data`, `calculate_metrics`, and `create_visualizations`.
 - Dry-run discovers `FramingEffect__Rule`.
 - Preflight reports valid classes, runner, config load, and 200 rounds.
-- Existing full sample remains valid because market logic and order semantics are unchanged.
+- Market logic and order semantics should remain stable across documentation-only updates.
 
 ## §9 Cross-Variant Comparison Notes
 

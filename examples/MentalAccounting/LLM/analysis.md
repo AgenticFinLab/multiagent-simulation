@@ -32,7 +32,7 @@ LLM results are compared against Rule to measure whether persona-only reasoning 
 
 ## §6 Expected Results and Validation
 
-The accepted LLM sample should complete 200 rounds with clean parse quality. Existing output can be inherited because this pass only updates documentation.
+Valid LLM outputs should complete 200 rounds with clean parse quality and auditable decision traces.
 
 ## §7 Visualization Catalogue
 

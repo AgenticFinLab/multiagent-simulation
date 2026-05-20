@@ -13,10 +13,10 @@ death-spiral baseline established by Rule.
 | §2.1 Price Deviation | `analysis.py` reuses Rule `calculate_metrics()` on the LLM record path |
 | §2.2 Maximum Drawdown | `calculate_metrics()` records the largest one-round return drop |
 | §2.3 Crash Velocity | Interpreted from the most negative one-round return |
-| §2.4 Sell Pressure Share | Level-2 audit attributes sell orders to LLM agent identities |
-| §2.5 Stabilization Ratio | Level-2 audit compares ValueBuyer buy volume with destabilizing sell volume |
-| §2.6 Collapse Onset Round | Level-2 audit finds the first material negative-deviation round |
-| §2.7 Volume Acceleration | Level-2 audit checks whether market volume accelerates during collapse |
+| §2.4 Sell Pressure Share | Post-run order aggregation attributes sell orders to LLM agent identities |
+| §2.5 Stabilization Ratio | Post-run aggregation compares ValueBuyer buy volume with destabilizing sell volume |
+| §2.6 Collapse Onset Round | Derived from the first material negative-deviation round |
+| §2.7 Volume Acceleration | Post-run checks whether market volume accelerates during collapse |
 
 ## §3 Analysis Dimensions
 
@@ -37,7 +37,7 @@ from discretionary behavior.
 
 ## §6 Expected Results
 
-Accepted LLM samples must complete the full configured round count, contain
+Valid LLM outputs must complete the full configured round count, contain
 valid `<decision>` JSON for each accepted action, avoid silent fallback, and
 produce finite prices, positions, and cash balances.
 

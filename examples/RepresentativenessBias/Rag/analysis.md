@@ -28,7 +28,7 @@ to retrieved context rather than invalid output or missing fields.
 |---|---|
 | Knowledge-tempered bias | Bayesian/contrarian agents may correct earlier |
 | Knowledge-amplified salience | Pattern agents may cite vivid prototypes |
-| Retrieval quality | Missing/irrelevant retrieval is flagged in Level-2 review |
+| Retrieval quality | Missing/irrelevant retrieval is flagged in post-run retrieval review |
 
 ## §5 References
 
@@ -39,7 +39,7 @@ Metrics derive from `../analysis-bases.md §2`; Rag mechanism derives from
 
 - Confirm the run completed the configured round count.
 - Audit retrieval context availability, parse failures, and retry counts.
-- Confirm any RAG fallback context is explicitly recorded for Level-2 review.
+- Confirm any RAG fallback context is explicitly recorded for post-run retrieval review.
 
 ## §7 Reporting Notes
 

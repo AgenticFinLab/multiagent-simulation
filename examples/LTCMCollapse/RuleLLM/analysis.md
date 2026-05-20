@@ -18,7 +18,7 @@ RuleLLM analysis compares formula-guided LLM behavior with the deterministic Rul
 
 ## §3 Variant-Specific Notes
 
-Because the prompts changed in `example-standardization`, previous `fix-scenarios` RuleLLM samples should not be treated as final samples for this branch.
+RuleLLM outputs should be accepted only when the prompt/parser contract and output-quality review both pass.
 
 ## §4 Expected Ranges
 
@@ -31,7 +31,7 @@ Because the prompts changed in `example-standardization`, previous `fix-scenario
 
 ## §5 Output Files
 
-Price and volatility outputs follow the Rule analysis implementation. Quality outputs come from the Level-2 LLM audit script.
+Price and volatility outputs follow the Rule analysis implementation. Quality outputs come from post-run LLM output quality review.
 
 ## §6 Cross-Variant Comparison
 

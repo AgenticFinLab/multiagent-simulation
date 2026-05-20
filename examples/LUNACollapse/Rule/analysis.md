@@ -14,10 +14,10 @@ produce a stablecoin death spiral.
 | §2.1 Price Deviation | `calculate_metrics()` computes `(price - fundamental) / fundamental` from market records |
 | §2.2 Maximum Drawdown | `calculate_metrics()` records the largest one-round return drop as `max_drawdown_pct` |
 | §2.3 Crash Velocity | Approximated by the most negative one-round return in `price_metrics.max_drawdown_pct` |
-| §2.4 Sell Pressure Share | Requires order-level post-run audit; use accepted resource-pack Level-2 scripts |
-| §2.5 Stabilization Ratio | Requires buy/sell order aggregation; use accepted resource-pack Level-2 scripts |
-| §2.6 Collapse Onset Round | Derived from the first deviation below the configured stress threshold during Level-2 audit |
-| §2.7 Volume Acceleration | Market records expose `volume`; use Level-2 audit for acceleration checks |
+| §2.4 Sell Pressure Share | Requires order-level post-run aggregation by agent identity |
+| §2.5 Stabilization Ratio | Requires buy/sell order aggregation by destabilizing and stabilizing agent groups |
+| §2.6 Collapse Onset Round | Derived from the first deviation below the configured stress threshold |
+| §2.7 Volume Acceleration | Market records expose `volume`; use post-run acceleration checks |
 
 ## §3 Analysis Dimensions
 
@@ -40,7 +40,7 @@ knowledge, not by inconsistent thresholds.
 
 ## §6 Expected Results
 
-The accepted sample should complete the full configured round count, produce
+Valid outputs should complete the full configured round count, produce
 finite prices and fundamentals, show a meaningful negative deviation episode,
 and preserve canonical order records for sell-pressure and stabilization audit.
 

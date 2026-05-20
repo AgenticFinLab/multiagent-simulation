@@ -112,6 +112,14 @@ only if all conditions hold:
   errors still fail loudly;
 - the final sample is later reviewed for fallback rate and scenario quality.
 
+Post-run quality gates:
+- `0` fallback decisions: clean.
+- `>0` and `<=1%` of API decisions: acceptable with a quality note if scenario
+  metrics remain coherent.
+- `>1%`: quality-review required; rerun or repair unless a scenario-specific
+  design note justifies acceptance.
+- Any fallback caused by deterministic project bugs: invalid output.
+
 This exception does not weaken the root-cause rule. It separates deterministic
 project bugs from stochastic provider behavior.
 
@@ -173,7 +181,7 @@ Full details are in `02-remediation-standard.md`. Quick reference:
 | `simulation-bases.md`   | 9 sections        | §4 investor entries must use 7-part standard; no variant-specific content |
 | `analysis-bases.md`     | 7 sections        | §2 metrics must include Python function signatures                        |
 | `{Variant}/explain.md`  | 9 sections        | §2 Theory→Implementation mapping tables; cites `simulation-bases.md §4.N` |
-| `{Variant}/analysis.md` | 5 sections        | §2 Metric→Function mapping; variant-specific notes in §3                  |
+| `{Variant}/analysis.md` | 7 sections        | §2 Metric→Function mapping; §3–§7 map dimensions, phenomena, outputs, and cross-variant comparison |
 | `players.py` docstrings | Class-level       | Each investor class must cite `Theory: simulation-bases.md §4.N`          |
 
 ---

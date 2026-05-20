@@ -28,7 +28,7 @@ A full Rule run should produce 200 rounds of market records, valid order payload
 - `players.py` and `analysis.py` compile.
 - Dry-run discovers `MentalAccounting__Rule`.
 - Preflight validates config, runner, topology, class refs, and 200 rounds.
-- Existing full sample can be inherited because this standardization pass does not change runtime logic.
+- Full runs should complete 200 rounds with valid market records and order payloads.
 
 ## §9 Cross-Variant Comparison Notes
 

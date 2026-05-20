@@ -91,7 +91,6 @@ Implemented in `players.py → Market.decide()`. The market broadcasts `price`, 
 ## §4 Rule Variant-Specific Features
 
 - Streak-biased agents activate at smaller deviations than rational correction agents.
-- The accepted Rule sample can be inherited because this pass does not change Rule runtime semantics.
 - Legacy inline thresholds are documented as current runtime truth rather than silently redesigned.
 
 ## §5 Architecture Diagram
@@ -111,14 +110,14 @@ Market broadcast -> Rule investors -> order payloads -> Market.clear_market() ->
 
 ## §7 Expected Runtime Outputs
 
-Full runs should produce 200 rounds, market price history, and order records for all configured investors. The Rule sample already satisfies the full-run requirement in the existing resource pack.
+Full runs should produce 200 rounds, market price history, and order records for all configured investors.
 
 ## §8 Validation Checklist
 
 - `players.py` and `analysis.py` compile.
 - Dry-run discovers `GamblerFallacy__Rule`.
 - Preflight validates class paths, runner, total rounds, and topology.
-- Existing full sample remains valid because runtime logic is unchanged.
+- Runtime logic should remain stable unless a documented mechanism or contract defect is found.
 
 ## §9 Cross-Variant Comparison Notes
 

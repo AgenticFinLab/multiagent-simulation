@@ -118,8 +118,8 @@ Accepted runs should produce complete 200-round market records, valid order mess
 
 - Prompt constants load for all five investor classes.
 - `== PERSONA ==` and `== DECISION RULES ==` are present.
-- API audit reports zero parser-contract mismatches.
-- Existing sample can be inherited if only docs and analysis files change.
+- Prompt/parser contract checks should report zero parser-contract mismatches.
+- Runtime prompt and player semantics should remain stable unless a documented mechanism or contract defect is found.
 
 ## §9 Cross-Variant Comparison Notes
 

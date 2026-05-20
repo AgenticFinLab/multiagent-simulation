@@ -549,12 +549,11 @@ class RagLLMInvestor(GeneralPlayer):
         order = {
             "action": action,
             "bid_price": bid_price,
-            "action": action,
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": str(decision.get("reasoning", "fallback hold"))[:100],
-            "analysis": str(decision.get("analysis", "")),
+            "reasoning": str(decision["reasoning"])[:100],
+            "analysis": str(decision["analysis"]),
         }
 
         validate_order(order)

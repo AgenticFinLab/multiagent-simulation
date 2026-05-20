@@ -8,7 +8,6 @@
 | Implements | `../simulation-bases.md` |
 | Decision Logic | LLM prompts with `== PERSONA ==` and `== DECISION RULES ==` |
 | Key Difference | Tests language reasoning under explicit death-spiral rules |
-| Runtime Change | RuleLLM system prompts were standardized; rerun required |
 
 ## §2 Theory To Implementation Mapping
 
@@ -48,8 +47,8 @@ anchored, while still varying explanation and possibly quantity.
 
 ## §8 Validation Checklist
 
-Full 200-round rerun is required after prompt standardization. Review parse
-quality, rule adherence, and price/portfolio sanity.
+Review full-round completion, parse quality, rule adherence, and
+price/portfolio sanity.
 
 ## §9 References
 

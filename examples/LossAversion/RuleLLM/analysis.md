@@ -59,7 +59,7 @@ RuleLLM should fall between Rule and LLM for all bias metrics, closer to Rule.
 
 ## §6 Expected Results and Validation
 
-The accepted RuleLLM sample should complete 200 rounds with clean parse quality and metrics closer to Rule than pure LLM. Validation should inspect whether embedded rule guidance keeps LAI and DEI above rational levels while allowing some LLM quantity modulation. Existing accepted RuleLLM output can be inherited because this pass only updates analysis documentation.
+Valid RuleLLM outputs should complete 200 rounds with clean parse quality and metrics closer to Rule than pure LLM. Validation should inspect whether embedded rule guidance keeps LAI and DEI above rational levels while allowing some LLM quantity modulation.
 
 ## §7 Visualization Catalogue
 

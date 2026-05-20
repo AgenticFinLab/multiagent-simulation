@@ -28,7 +28,7 @@ high-volatility duration or threshold response.
 |---|---|
 | Knowledge-informed volatility response | VolatilityTrader decisions reflect retrieved volatility context |
 | Persistence change | High-volatility duration differs from RuleLLM |
-| Retrieval quality | Low retrieval or fallback is marked in Level-2 review |
+| Retrieval quality | Low retrieval or fallback is marked in post-run retrieval review |
 
 ## §5 References
 

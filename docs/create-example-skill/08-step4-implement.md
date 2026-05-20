@@ -85,7 +85,7 @@ class {ClassName}(GeneralPlayer):
 3. `step()` calls `_make_decision()` and sends one order message
 4. `_make_decision()` implements the logic from `simulation-bases.md §4.{N}.4.3 Mathematical Model`
 5. No hardcoded numbers anywhere in the code — all come from config
-6. No `.get(key, default)`, no `if X else fallback`, no silent error recovery — all missing data must `raise` immediately (see `00-overview.md` Principle #6)
+6. No `.get(key, default)`, no `if X else fallback`, no silent error recovery — all missing project data must `raise` immediately; stochastic API fallback is allowed only under `00-overview.md` Principle #6
 
 ### 4.1.3 `run_{name}.py` Pattern
 
@@ -395,7 +395,7 @@ What is your trading decision for this round?"""
 
 ### §4.2.3 LLM Decision Field Access Rule
 
-The `decide()` method in LLM/RuleLLM/Rag variants MUST read ALL four decision fields (`action`, `bid_price`, `quantity`, `reasoning`) directly from the LLM response via `decision["key"]`. NEVER derive or infer a missing field from another field (e.g., deriving `action` from the sign of `quantity`). If any field is missing, it must fail-fast via `KeyError`.
+The `decide()` method in LLM/RuleLLM/Rag variants MUST read ALL four decision fields (`action`, `bid_price`, `quantity`, `reasoning`) directly from the LLM response via `decision["key"]`. NEVER derive or infer a missing field from another field (e.g., deriving `action` from the sign of `quantity`). If any field is missing because the prompt/parser contract is wrong, it must fail-fast via `KeyError`; if the contract is already correct and stochastic malformed API output remains, use only the explicit counted fallback policy in `00-overview.md` Principle #6.
 
 Constraint and execution logic MUST branch on the `action` string value, not on quantity sign:
 - `if action == "buy"` / `elif action == "sell"` instead of `if quantity > 0` / `elif quantity < 0`
@@ -590,7 +590,7 @@ After implementing each variant:
 
 - [ ] No `.get(key, default)` on simulation data dicts (config extras, message payloads, LLM responses, coordinator data) — use `dict["key"]`
 - [ ] No `if X else fallback` for required data fields (e.g., `if fundamentals else 1.0` is forbidden)
-- [ ] No silent `hold` substitution when LLM parse fails — must `raise RuntimeError`
+- [ ] No silent `hold` substitution when LLM parse fails — must `raise RuntimeError` or use explicit counted stochastic API fallback under `00-overview.md` Principle #6
 - [ ] No `if rates else 0.0` for computed metrics — must `raise ValueError` if no data collected
 - [ ] No `payload.get("field", None)` in analysis scripts — use `payload["field"]`
 - [ ] Only legitimate `.get()` exceptions remain: RAG config resolution, `__getstate__`/`__setstate__`, truly optional config sections, matplotlib defaults

@@ -73,6 +73,14 @@ fallback is acceptable only when:
 - fatal provider errors such as auth/quota still fail loudly;
 - fallback count/reason is visible for later quality review.
 
+Post-run quality gates:
+- `0` fallback decisions: clean.
+- `>0` and `<=1%` of API decisions: acceptable with a quality note if scenario
+  metrics remain coherent.
+- `>1%`: quality-review required; rerun or repair unless a scenario-specific
+  design note justifies acceptance.
+- Any fallback caused by deterministic project bugs: invalid output.
+
 The successful pattern is a helper that classifies:
 - parse-contract error: no repeated full LLM calls; conservative explicit hold;
 - transient API error: bounded retry;

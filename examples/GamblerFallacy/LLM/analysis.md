@@ -29,7 +29,7 @@ LLM results are compared against Rule and RuleLLM. Differences from Rule represe
 
 ## §6 Expected Results and Validation
 
-Valid LLM samples complete 200 rounds with clean parse quality. Existing accepted LLM sample is inheritable because this pass only adds documentation and analysis files.
+Valid LLM outputs complete 200 rounds with clean parse quality.
 
 ## §7 Visualization Catalogue
 

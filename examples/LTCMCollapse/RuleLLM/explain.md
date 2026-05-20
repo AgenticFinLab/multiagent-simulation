@@ -60,9 +60,9 @@ RuleLLM should be closer to Rule than the persona-only LLM variant. Deviations a
 ## §8 Validation Checklist
 
 - System prompts contain `== PERSONA ==` and `== DECISION RULES ==`.
-- Static API contract audit reports zero issues.
-- Full 200-round rerun is required after prompt standardization.
-- Level-2 quality audit must pass before accepting the new sample.
+- Prompt/parser contract checks should report zero issues.
+- Full runs should complete 200 rounds with valid decision JSON.
+- Post-run output quality review should pass before outputs are accepted.
 
 ## §9 References
 

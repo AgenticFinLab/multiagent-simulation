@@ -121,8 +121,8 @@ Each accepted LLM run should include 200 rounds, complete order records, and LLM
 
 - Prompt constants load through each class `_system_prompt_path`.
 - User template contains current market and portfolio fields.
-- API contract audit reports zero prompt/parser issues.
-- Existing LLM sample can be inherited if only documentation and analysis files change.
+- Prompt/parser contract checks should report zero issues.
+- Runtime prompt and player semantics should remain stable unless a documented mechanism or contract defect is found.
 
 ## §9 Cross-Variant Comparison Notes
 

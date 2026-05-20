@@ -60,7 +60,7 @@ The Rule variant should consistently yield the highest LAI, DEI, BER, and lowest
 
 ## §6 Expected Results and Validation
 
-The Rule sample should complete 200 rounds with valid market records, non-empty price history, and deterministic loss-aversion behavior. It should be used as the baseline for LAI, DEI, BER, VAF, WPI, and SRR comparisons. Existing accepted Rule output can be inherited because this standardization pass does not change runtime code or configuration.
+Valid Rule outputs should complete 200 rounds with valid market records, non-empty price history, and deterministic loss-aversion behavior. They are the baseline for LAI, DEI, BER, VAF, WPI, and SRR comparisons.
 
 ## §7 Visualization Catalogue
 

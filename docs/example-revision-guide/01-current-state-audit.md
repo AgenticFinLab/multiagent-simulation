@@ -80,13 +80,15 @@ Mark `-` if missing.
 ### §2.4 `{Variant}/analysis.md` — compliant (✓) if ALL of:
 
 1. File exists
-2. Contains at least 5 sections beginning with `§1 Analysis Objectives`
+2. Contains exactly 7 sections beginning with `§1 Overview`
 3. Has a `§2 Metric → Function Mapping` table with all 7 metrics from `analysis-bases.md §2`
-4. Has `§3` variant-specific notes
-5. Has `§4` expected ranges table
-6. References `analysis-bases.md §2.X` for each metric
+4. Has `§3` dimension-by-dimension analysis linked to `analysis-bases.md §3`
+5. Has `§4` variant-specific observable phenomena
+6. Has `§5` scaling/sensitivity, `§6` output files reference, and `§7` cross-variant comparison notes
+7. References `analysis-bases.md §2.X` for each metric
 
-Mark `✓(lean)` if the file is fewer than 30 lines, uses generic language ("Varies by scenario"), or lacks the metric→function mapping table.
+Mark `✓(lean)` if the file uses generic language ("Varies by scenario"), lacks
+the metric→function mapping table, or has only the old 5-section structure.
 
 Mark `-` if missing.
 

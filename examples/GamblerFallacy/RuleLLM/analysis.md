@@ -29,7 +29,7 @@ RuleLLM should sit between Rule and LLM. Close alignment with Rule indicates str
 
 ## §6 Expected Results and Validation
 
-Valid samples complete 200 rounds with clean parse quality. Existing accepted RuleLLM sample is inheritable because this pass only adds docs and analysis files.
+Valid RuleLLM outputs complete 200 rounds with clean parse quality.
 
 ## §7 Visualization Catalogue
 

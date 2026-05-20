@@ -121,11 +121,6 @@ All outputs written to `EXPERIMENT/AvailabilityBias/LLM/records/analysis/`.
 
 Cross-variant comparison protocol: `../analysis-bases.md §5`.
 
----
-
-## §8 References
-
-- `../analysis-bases.md` — master analysis specification
-- `../simulation-bases.md §4.1, §4.2` — Availability bias archetype specifications
-- `../analysis-bases.md §6` — Expected LLM result ranges (5–15% bias amplitude)
-- `Rule/analysis.py` — imported metric functions
+References: `../analysis-bases.md`, `../simulation-bases.md §4.1`,
+`../simulation-bases.md §4.2`, `../analysis-bases.md §6`, and
+`Rule/analysis.py`.

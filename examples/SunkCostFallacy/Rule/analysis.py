@@ -166,3 +166,41 @@ __all__ = [
     "calculate_metrics",
     "create_visualizations",
 ]
+
+from examples.standard_rule_analysis import (  # noqa: E402
+    _batch_to_rounds,
+    _load_data,
+    analyze_standard_scenario as _analyze_standard_scenario,
+    run_standard_analysis as _run_standard_analysis,
+)
+
+STANDARD_OUTPUT_FILES = (
+    "summary.json",
+    "00_investor_bids.png",
+    "01_sunkcostfallacy_dynamics.png",
+    "02_sunkcostfallacy_analysis.png",
+    "03_summary.png",
+)
+
+
+def analyze_sunkcostfallacy_standard(data: Dict[str, Any], config: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
+    """Run the project standard validation, summary, and fixed PNG outputs."""
+    return _analyze_standard_scenario("SunkCostFallacy", data, config, output_dir)
+
+
+def main() -> Dict[str, Any]:
+    """Run SunkCostFallacy analysis using the standard output contract."""
+    return _run_standard_analysis("SunkCostFallacy", "configs/SunkCostFallacy/Rule/simulation.yml")
+
+
+__all__.extend([
+    "_batch_to_rounds",
+    "_load_data",
+    "STANDARD_OUTPUT_FILES",
+    "analyze_sunkcostfallacy_standard",
+    "main",
+])
+
+
+if __name__ == "__main__":
+    main()

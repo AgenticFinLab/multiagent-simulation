@@ -74,9 +74,9 @@ LLM agents may be more conservative or inconsistent than Rule agents, but valid 
 ## §8 Validation Checklist
 
 - Prompt references resolve from `players.yml`.
-- Static API contract audit reports no missing fields.
-- Level-2 LLM output quality audit reports low or zero parse failures/fallbacks.
-- Existing `fix-scenarios` LLM full sample can be inherited if prompts and player code remain unchanged.
+- Prompt/parser contract checks should report no missing fields.
+- Post-run LLM output quality review should report low or zero parse failures/fallbacks.
+- Prompts and player code should remain stable unless a documented mechanism or contract defect is found.
 
 ## §9 References
 

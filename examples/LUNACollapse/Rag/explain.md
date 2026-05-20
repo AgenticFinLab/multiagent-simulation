@@ -8,7 +8,6 @@
 | Implements | `../simulation-bases.md` |
 | Decision Logic | RuleLLM prompts plus retrieved stablecoin/depeg context |
 | Key Difference | Tests whether crisis knowledge changes death-spiral behavior |
-| Runtime Change | RAG now aliases standardized RuleLLM prompts; rerun required |
 
 ## §2 Theory To Implementation Mapping
 
@@ -29,7 +28,7 @@ RuleLLM system prompt and `RAG_USER_TEMPLATE`, which injects `{rag_context}`.
 
 Rag uses explicit fallback context when no scenario-specific context template is
 configured. Malformed-output fallback is explicit and must be reviewed in
-Level-2 quality audit.
+post-run output quality review.
 
 ## §5 Architecture Diagram
 
@@ -48,10 +47,9 @@ The action schema should remain the same as RuleLLM.
 
 ## §8 Validation Checklist
 
-Full 200-round rerun is required after RAG prompt standardization. Review
-retrieval health, parse/fallback quality, and scenario metrics.
+Review full-round completion, retrieval health, parse/fallback quality, and
+scenario metrics.
 
 ## §9 References
 
 See `../simulation-bases.md §4` and `../analysis-bases.md §2`.
-

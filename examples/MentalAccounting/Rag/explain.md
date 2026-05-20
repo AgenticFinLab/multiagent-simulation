@@ -28,7 +28,7 @@ A full RAG run should produce 200 rounds, valid order payloads, parseable LLM de
 - `players.py`, `prompts.py`, and `analysis.py` compile.
 - RAG embedding config resolves and prompt templates inject `{rag_context}`.
 - Dry-run discovers `MentalAccounting__Rag`.
-- Existing full sample can be inherited because this pass does not change runtime files.
+- Full runs should complete 200 rounds with valid decision JSON and auditable retrieval context.
 
 ## §9 Cross-Variant Comparison Notes
 

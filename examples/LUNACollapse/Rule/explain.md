@@ -8,7 +8,6 @@
 | Implements | `../simulation-bases.md` |
 | Decision Logic | Deterministic threshold rules |
 | Key Difference | Establishes the fixed death-spiral baseline |
-| Runtime Change | Threshold semantics aligned to configured deviation thresholds; rerun required |
 
 ## §2 Theory To Implementation Mapping
 
@@ -54,7 +53,7 @@ dominate ValueBuyer demand once confidence breaks.
 ## §8 Validation Checklist
 
 Verify full rounds, canonical order schema, price/portfolio sanity, and sell
-pressure attribution before accepting a sample.
+pressure attribution.
 
 ## §9 References
 

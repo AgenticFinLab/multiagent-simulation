@@ -27,7 +27,7 @@ should be checked against prompt adherence and parser quality.
 |---|---|
 | Prompt-rule adherence | LLM follows contrarian/value/momentum direction |
 | Bounded discretion | Quantity varies without reversing intended rule |
-| Clean structure | Low parse/fallback counts in Level-2 audit |
+| Clean structure | Low parse/fallback counts in post-run quality review |
 
 ## §5 References
 

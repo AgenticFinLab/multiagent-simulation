@@ -39,7 +39,7 @@ Metrics derive from `../analysis-bases.md §2`; Rag design derives from
 
 - Confirm the run completed the configured round count.
 - Audit retrieval context availability, parse failures, and retry counts.
-- Confirm `rag_context` appears in accepted output artifacts for Level-2 review.
+- Confirm `rag_context` appears in accepted output artifacts for post-run retrieval review.
 
 ## §7 Reporting Notes
 

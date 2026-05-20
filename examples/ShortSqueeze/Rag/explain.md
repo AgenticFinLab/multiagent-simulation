@@ -40,7 +40,7 @@ the context supplied to LLM agents.
 
 ## §4 Variant-Specific Features
 
-Rag adds retrieval quality as a Level-2 concern in addition to execution
+Rag adds retrieval quality as a post-run concern in addition to execution
 success.
 
 ## §5 Architecture Diagram

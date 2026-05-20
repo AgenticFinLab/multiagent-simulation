@@ -8,7 +8,6 @@
 | Implements | `../simulation-bases.md` |
 | Decision Logic | LLM persona prompts with canonical trading JSON |
 | Key Difference | Tests discretionary panic, arbitrage, liquidation, and value reasoning |
-| Runtime Change | Prompt thresholds aligned to configured deviation-threshold semantics; rerun required |
 
 ## §2 Theory To Implementation Mapping
 
@@ -45,13 +44,13 @@ reasoning to the model.
 
 ## §7 Expected Behavior Patterns
 
-LLM may alter panic timing and order sizes relative to Rule. Accepted samples
-must be reviewed for malformed-output and fallback quality.
+LLM may alter panic timing and order sizes relative to Rule. Outputs should be
+reviewed for malformed-output and fallback quality.
 
 ## §8 Validation Checklist
 
 Verify full rounds, canonical order schema, LLM parse quality, and price
-trajectory sanity before accepting a sample.
+trajectory sanity.
 
 ## §9 References
 

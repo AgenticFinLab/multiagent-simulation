@@ -13,10 +13,10 @@ producing natural-language reasoning and bounded variation.
 | §2.1 Price Deviation | `analysis.py` reuses Rule `calculate_metrics()` on the RuleLLM record path |
 | §2.2 Maximum Drawdown | `calculate_metrics()` records the largest one-round return drop |
 | §2.3 Crash Velocity | Interpreted from the most negative one-round return |
-| §2.4 Sell Pressure Share | Level-2 audit attributes sell volume by RuleLLM agent identity |
-| §2.5 Stabilization Ratio | Level-2 audit compares ValueBuyer buy volume with panic sell volume |
-| §2.6 Collapse Onset Round | Level-2 audit finds first material negative-deviation breach |
-| §2.7 Volume Acceleration | Level-2 audit checks volume acceleration during collapse phases |
+| §2.4 Sell Pressure Share | Post-run order aggregation attributes sell volume by RuleLLM agent identity |
+| §2.5 Stabilization Ratio | Post-run aggregation compares ValueBuyer buy volume with panic sell volume |
+| §2.6 Collapse Onset Round | Derived from the first material negative-deviation breach |
+| §2.7 Volume Acceleration | Post-run checks volume acceleration during collapse phases |
 
 ## §3 Analysis Dimensions
 
@@ -36,7 +36,7 @@ while still exposing LLM reasoning quality for audit.
 
 ## §6 Expected Results
 
-Accepted samples must complete full rounds, show low malformed-output retry
+Valid outputs must complete full rounds, show low malformed-output retry
 rates, preserve canonical JSON fields, and keep thresholds aligned with
 `configs/LUNACollapse/RuleLLM/players.yml`.
 

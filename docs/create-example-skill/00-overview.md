@@ -104,7 +104,7 @@ Every numeric value in `simulation-bases.md §6` must trace to an empirical stud
 - This discipline ensures the code reflects the design, not vice versa
 
 ### 6. Strict no-default, no-defensive-programming policy
-All simulation code (`players.py` and `analysis.py` in every variant) must follow **fail-fast** principles. When required data is missing or an LLM fails to return a value, the code must raise an explicit exception — never silently substitute a default value or fall back to a safe action.
+All simulation code (`players.py` and `analysis.py` in every variant) must follow **fail-fast** principles. When required project data is missing, the code must raise an explicit exception — never silently substitute a default value or fall back to a safe action.
 
 **Prohibited patterns** (applies universally to all variants):
 
@@ -117,6 +117,22 @@ All simulation code (`players.py` and `analysis.py` in every variant) must follo
 | `payload.get("field", None)` in analysis    | Silently drops records that should cause investigation     |
 
 **Required replacement**: Direct `dict["key"]` access (raises `KeyError`), `raise ValueError(...)`, or `raise RuntimeError(...)` when data is absent.
+
+**Runtime exception for stochastic API modes**: malformed external LLM output
+and transient provider errors are not authoritative project data. After the
+prompt/parser/player contract has been fixed at the source, a scenario-local
+fallback is allowed only when it is explicit, conservative, counted, and
+auditable. The fallback must return every field later read by `players.py` or
+written to the order record; auth, quota, missing-key, config, parser-reference,
+and framework schema errors still fail loudly.
+
+Post-run quality gates:
+- `0` fallback decisions: clean.
+- `>0` and `<=1%` of API decisions: acceptable with a quality note if scenario
+  metrics remain coherent.
+- `>1%`: quality-review required; rerun or repair unless a scenario-specific
+  design note justifies acceptance.
+- Any fallback caused by deterministic project bugs: invalid output.
 
 **Legitimate exceptions** (these `.get()` patterns are allowed):
 - RAG config resolution: `resolved_rag.get("embed_model", ...)` — external library config with genuine optional fields

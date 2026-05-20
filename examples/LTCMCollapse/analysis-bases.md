@@ -118,7 +118,7 @@ Uses deviation persistence and final recovery to infer whether liquidity withdra
 
 ### §3.4 Cross-Variant Behavior
 
-Compares Rule, LLM, RuleLLM, and Rag runs using the same price metrics and Level-2 API quality metadata.
+Compares Rule, LLM, RuleLLM, and Rag runs using the same price metrics and post-run API quality metadata.
 
 ## §4 Phase Analysis Framework
 
@@ -147,7 +147,7 @@ Compares Rule, LLM, RuleLLM, and Rag runs using the same price metrics and Level
 | final recovery | partial recovery toward fundamental | mean reversion and support should prevent permanent zero |
 | LLM fallback rate | low | high fallback invalidates behavioral interpretation |
 
-The Rule analysis implementation writes these metrics to `metrics.json` and writes validation status to `summary.json`. LLM-family quality checks are performed by the experiment resource-pack audit before a sample is accepted.
+The Rule analysis implementation writes these metrics to `metrics.json` and writes validation status to `summary.json`. LLM-family quality checks are performed by post-run output quality review before outputs are accepted.
 
 ## §7 Visualization Catalogue
 

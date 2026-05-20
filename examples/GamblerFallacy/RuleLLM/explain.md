@@ -106,13 +106,13 @@ Market broadcast -> RuleLLM prompt -> LLM response -> parser -> capped order -> 
 
 ## §7 Expected Runtime Outputs
 
-Accepted RuleLLM runs should complete 200 rounds with valid decision JSON and no fallback holds. Existing Level-2 quality audit for the accepted sample is clean.
+Accepted RuleLLM runs should complete 200 rounds with valid decision JSON and no fallback-hold distortion.
 
 ## §8 Validation Checklist
 
 - All prompt constants load.
-- Prompt/parser contract audit reports zero issues.
-- Full sample can be inherited because runtime prompt and player semantics are unchanged.
+- Prompt/parser contract checks should report zero issues.
+- Runtime prompt and player semantics should remain stable unless a documented mechanism or contract defect is found.
 
 ## §9 Cross-Variant Comparison Notes
 

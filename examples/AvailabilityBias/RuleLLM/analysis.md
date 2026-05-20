@@ -94,10 +94,5 @@ RuleLLM is the "disciplined" hypothesis: does formula embedding successfully iso
 
 Cross-variant comparison protocol: `../analysis-bases.md §5`.
 
----
-
-## §8 References
-
-- `../analysis-bases.md` — master analysis specification
-- `../simulation-bases.md §4` — Availability bias archetype specifications
-- `Rule/analysis.py` — imported metric functions
+References: `../analysis-bases.md`, `../simulation-bases.md §4`, and
+`Rule/analysis.py`.

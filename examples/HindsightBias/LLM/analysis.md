@@ -71,7 +71,7 @@ All functions defined in `LLM/analysis.py`. Inputs sourced from simulation outpu
 
 ## §6 Expected Results and Validation
 
-The accepted LLM sample should complete 200 rounds with parseable decision JSON and no fallback holds. Level-2 quality review should confirm clean parse quality and then compare HBI, OBI, NCE, VAF, OWP, and WDI against the Rule baseline.
+Valid LLM outputs should complete 200 rounds with parseable decision JSON and no fallback-hold distortion. Post-run quality review should confirm clean parse quality and then compare HBI, OBI, NCE, VAF, OWP, and WDI against the Rule baseline.
 
 ## §7 Visualization Catalogue
 

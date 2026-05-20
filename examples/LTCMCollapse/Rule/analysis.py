@@ -249,11 +249,24 @@ def create_visualizations(data: dict, output_path: str) -> None:
 
     plt.tight_layout()
     fig.savefig(output_dir / "00_ltcmcollapse_summary.png", dpi=150)
+    fig.savefig(output_dir / "00_investor_bids.png", dpi=150)
+    fig.savefig(output_dir / "03_summary.png", dpi=150)
     plt.close(fig)
 
     _save_single_plot(output_dir / "01_price_vs_fundamental.png", rounds, prices, "Price", fundamentals)
+    _save_single_plot(output_dir / "01_ltcmcollapse_dynamics.png", rounds, prices, "Price", fundamentals)
     _save_single_plot(output_dir / "02_deviation.png", rounds, deviation, "Deviation (%)")
+    _save_single_plot(output_dir / "02_ltcmcollapse_analysis.png", rounds, deviation, "Deviation (%)")
     _save_single_plot(output_dir / "03_returns.png", rounds[1:], returns, "Returns (%)")
+
+
+STANDARD_OUTPUT_FILES = (
+    "summary.json",
+    "00_investor_bids.png",
+    "01_ltcmcollapse_dynamics.png",
+    "02_ltcmcollapse_analysis.png",
+    "03_summary.png",
+)
 
 
 def _save_single_plot(

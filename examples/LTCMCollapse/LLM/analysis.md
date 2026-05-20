@@ -2,7 +2,7 @@
 
 ## §1 Analysis Objectives
 
-The LLM variant uses the same price-series analysis as Rule and adds Level-2 LLM output quality review. It implements `../analysis-bases.md` for API-mode behavioral evaluation.
+The LLM variant uses the same price-series analysis as Rule and adds post-run LLM output quality review. It implements `../analysis-bases.md` for API-mode behavioral evaluation.
 
 ## §2 Metric To Function Mapping
 
@@ -18,7 +18,7 @@ The LLM variant uses the same price-series analysis as Rule and adds Level-2 LLM
 
 ## §3 Variant-Specific Notes
 
-The LLM variant can finish successfully while still producing low-quality decisions. Therefore `exit=0` must be paired with Level-2 audit status before accepting the sample.
+The LLM variant can finish successfully while still producing low-quality decisions. Therefore `exit=0` must be paired with post-run output quality status before accepting outputs.
 
 ## §4 Expected Ranges
 
@@ -31,7 +31,7 @@ The LLM variant can finish successfully while still producing low-quality decisi
 
 ## §5 Output Files
 
-Analysis artifacts are written under the configured `record_path`. LLM quality artifacts are generated separately in the experiment resource-pack quality reports.
+Analysis artifacts are written under the configured `record_path`. LLM quality artifacts are generated separately by post-run quality review tooling.
 
 ## §6 Cross-Variant Comparison
 
@@ -41,4 +41,4 @@ LLM is compared against Rule to isolate language-only behavioral variation. Rule
 
 - `../analysis-bases.md`
 - `analysis.py`
-- `EXPERIMENT/fix-scenarios-20260515/tools/audit_llm_output_quality.py`
+- post-run LLM output quality review tooling

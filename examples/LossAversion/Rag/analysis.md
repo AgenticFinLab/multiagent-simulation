@@ -60,7 +60,7 @@ Rag variant should produce the lowest LAI, BER, VAF and highest NCE, WPI across 
 
 ## §6 Expected Results and Validation
 
-The accepted RAG sample should complete 200 rounds with clean parse quality and usable retrieval context. It should show the strongest narrative correction among API modes, but not erase the phenomenon entirely. Existing accepted RAG output can be inherited because this pass only updates analysis documentation.
+Valid RAG outputs should complete 200 rounds with clean parse quality and usable retrieval context. They should show the strongest narrative correction among API modes, but not erase the phenomenon entirely.
 
 ## §7 Visualization Catalogue
 

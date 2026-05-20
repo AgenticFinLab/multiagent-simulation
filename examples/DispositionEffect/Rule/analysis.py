@@ -26,6 +26,7 @@ Output figures (saved to EXPERIMENT/DispositionEffect/analysis/):
 import argparse
 import json
 import os
+import shutil
 
 from typing import Any, Dict, List
 
@@ -41,6 +42,30 @@ from masim.evaluation.finance import (
     validate_disposition_effect,
 )
 from masim.utils import load_config, load_results
+
+
+STANDARD_OUTPUT_FILES = (
+    "summary.json",
+    "00_investor_bids.png",
+    "01_dispositioneffect_dynamics.png",
+    "02_dispositioneffect_analysis.png",
+    "03_summary.png",
+)
+
+
+def _write_standard_named_outputs(output_dir: str) -> None:
+    """Create fixed-name aliases required by the standard output contract."""
+    aliases = {
+        "fig3_trading_activity.png": "00_investor_bids.png",
+        "fig1_price_dynamics.png": "01_dispositioneffect_dynamics.png",
+        "fig2_pgr_plr_comparison.png": "02_dispositioneffect_analysis.png",
+        "fig5_disposition_ratio.png": "03_summary.png",
+    }
+    for source, target in aliases.items():
+        source_path = os.path.join(output_dir, source)
+        if not os.path.exists(source_path):
+            raise FileNotFoundError(f"missing DispositionEffect analysis figure: {source_path}")
+        shutil.copyfile(source_path, os.path.join(output_dir, target))
 
 
 def calculate_pgr_plr(trades: List[Dict], prices: List[float]) -> Dict[str, float]:
@@ -1076,6 +1101,7 @@ def main():
 
     print("\n[3] Generating figures (7 plots)...")
     create_visualizations(data, metrics, output_dir)
+    _write_standard_named_outputs(output_dir)
     print(f"    All figures saved to: {output_dir}/")
 
     print("\n[4] Generating summary...")

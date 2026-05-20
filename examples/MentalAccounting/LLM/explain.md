@@ -21,14 +21,14 @@ The LLM variant uses `configs/MentalAccounting/LLM/simulation.yml`, `players.yml
 
 ## §7 Runtime Outputs
 
-A full LLM run should produce 200 rounds, valid order payloads, and parseable LLM decision traces. Level-2 review should confirm clean JSON parsing and no fallback-hold distortion before sample acceptance.
+A full LLM run should produce 200 rounds, valid order payloads, and parseable LLM decision traces. Post-run quality review should confirm clean JSON parsing and no fallback-hold distortion before output acceptance.
 
 ## §8 Validation Checklist
 
 - `players.py`, `prompts.py`, and `analysis.py` compile.
 - Prompt refs load and use the canonical `<analysis>` / `<decision>` decision contract.
 - Dry-run discovers `MentalAccounting__LLM`.
-- Existing full sample can be inherited because this pass does not change prompt or player runtime semantics.
+- Full runs should complete 200 rounds with valid decision JSON and auditable reasoning traces.
 
 ## §9 Cross-Variant Comparison Notes
 
