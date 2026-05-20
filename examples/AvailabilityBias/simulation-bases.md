@@ -1,6 +1,6 @@
 # AvailabilityBias — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                         |
 |--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 | Research Relevance | Isolates how cognitive salience (not just information) drives price distortion; contrasts availability-biased agents with rational benchmarks (SystematicAnalyst, ValueTrader) to quantify the bias's market impact                                 |
 
 
-## 2. Theoretical Foundation
+## §2 Theoretical Foundation
 
 ### 2.1 The Availability Heuristic (Tversky & Kahneman)
 
@@ -44,7 +44,7 @@
 - **Relevance to Investor Taxonomy**: ValueTrader embodies Graham's fundamental anchoring principle — deviation_threshold = 0.10 means it ignores all price movements within 10% of fundamental and trades only at clear mispricing, immune to availability-biased sentiment.
 
 
-## 3. Market Design Principles
+## §3 Market Design Principles
 
 ### 3.1 Price Formation Model
 
@@ -84,7 +84,7 @@ Each round, the Market sends to all investors:
 | `round`       | t                        | Simulation round; used for logging and phase analysis                                                                                |
 
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
 ### Investor: RecentEventOverweighter
 
@@ -571,7 +571,7 @@ r = 0.07 < 0.30 → trade. Direction: buy. Quantity: 180. Order: buy 180 at curr
 | 2 | Barber, B. M., & Odean, T. (2000). "Trading is hazardous to your wealth." *Journal of Finance*, 55(2), 773–806. DOI: 10.1111/j.1540-6261.2000.tb04002.x | Retail overtrading; trade frequency calibration  |
 
 
-## 5. Agent Diversity Verification
+## §5 Agent Diversity Verification
 
 Diversity Check:
 - Different bias channels: RecentEventOverweighter (recency/temporal availability); MediaInfluencedTrader (media/social availability); SystematicAnalyst (rational baseline); ValueTrader (deep value, high threshold); NoiseTrader (random)
@@ -581,7 +581,7 @@ Diversity Check:
 - Two distinct availability channels: temporal recency (RecentEventOverweighter) vs. media salience (MediaInfluencedTrader) — enables isolation of channel effects across variants
 
 
-## 6. Parameter Table
+## §6 Parameter Table
 
 | Parameter            | Value | Source Citation                                     | Description                                                    | Sensitivity                                            |
 |----------------------|-------|-----------------------------------------------------|----------------------------------------------------------------|--------------------------------------------------------|
@@ -600,7 +600,7 @@ Diversity Check:
 | trade_probability    | 0.30  | Black (1986)                                        | NoiseTrader: per-round trade probability                       | Low — adds stochastic variation                        |
 
 
-## 7. Communication and Round Structure
+## §7 Communication and Round Structure
 
 ```
 Round N:
@@ -620,7 +620,7 @@ Round N:
 Key difference from other simulations: the Market broadcasts `prev_price` and `return_pct` in addition to the standard fields, because RecentEventOverweighter requires the most recent return as its primary salience signal.
 
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
 ### Event 1: Post-Earnings Announcement Drift and Overreaction (Bernard & Thomas, 1989)
 
@@ -643,7 +643,7 @@ Key difference from other simulations: the Market broadcasts `prev_price` and `r
 **Lesson for Simulation**: The COVID crash demonstrates that when both availability bias channels (recency and media) are active simultaneously, the combined effect (RecentEventOverweighter + MediaInfluencedTrader both selling) can produce crash dynamics approaching those of structural crises (ArchegosCollapse, BlackMonday1987) even in the absence of fundamental damage.
 
 
-## 9. Variant Comparison Preview
+## §9 Variant Comparison Preview
 
 | Aspect            | Rule                                                  | LLM                                                   | RuleLLM                                       | Rag                                                           |
 |-------------------|-------------------------------------------------------|-------------------------------------------------------|-----------------------------------------------|---------------------------------------------------------------|

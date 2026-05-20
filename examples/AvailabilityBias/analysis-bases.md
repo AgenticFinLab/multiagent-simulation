@@ -1,6 +1,6 @@
 # AvailabilityBias — Analysis Methodology Basis
 
-## 1. Analysis Objectives
+## §1 Analysis Objectives
 
 | Objective | Research Question                                                                        | Metric(s)                                       | Expected Finding                                                                        |
 |-----------|------------------------------------------------------------------------------------------|-------------------------------------------------|-----------------------------------------------------------------------------------------|
@@ -12,7 +12,7 @@
 | O6        | Does the Rag variant's historical overreaction context change agent behavior?            | Rag vs. Rule deviation comparison               | Rag may show moderated bias if agents "recall" correction outcomes                      |
 
 
-## 2. Core Metrics Catalogue
+## §2 Core Metrics Catalogue
 
 ### Metric 1: Price Deviation from Fundamental
 
@@ -148,7 +148,7 @@
 - **Red Flag**: No reversal in any episode → stabilizing agents completely inactive; check ValueTrader and SystematicAnalyst parameterization.
 
 
-## 3. Analysis Dimensions
+## §3 Analysis Dimensions
 
 ### Dimension 1: Bias-Induced Price Dynamics
 
@@ -186,7 +186,7 @@
 **Expected Pattern**: Rule variant most deterministic; LLM variant may show stronger or weaker bias depending on persona; Rag variant potentially moderated if historical overreaction correction examples are retrieved
 
 
-## 4. Phase Analysis Framework
+## §4 Phase Analysis Framework
 
 ### Phase Detection Rules
 
@@ -219,7 +219,7 @@
 | Equilibrium    | Inactive                                           | Inactive                          | Occasional small trades                | Inactive                                  | ≈ 0          |
 
 
-## 5. Cross-Variant Comparison Framework
+## §5 Cross-Variant Comparison Framework
 
 ### Comparison Protocol
 
@@ -241,7 +241,7 @@
 | ValueTrader activation              | Exact at                      | deviation                                                                         | > 10%                       | May activate at 8–12% range due to narrative judgment                                                     |
 
 
-## 6. Expected Results and Validation
+## §6 Expected Results and Validation
 
 ### Expected Stylized Facts (Literature-Sourced)
 
@@ -273,7 +273,7 @@
 | MediaInfluencedTrader dominant | Media channel >> recency channel          | amplified_signal = 3× deviation activates too easily | Raise implicit threshold from 0.03 to 0.05; reduce social_amplification                        |
 
 
-## 7. Visualization Catalogue
+## §7 Visualization Catalogue
 
 | Plot Name                          | Type        | X-axis              | Y-axis                               | Overlays / Annotations                          | Purpose                                                           |
 |------------------------------------|-------------|---------------------|--------------------------------------|-------------------------------------------------|-------------------------------------------------------------------|

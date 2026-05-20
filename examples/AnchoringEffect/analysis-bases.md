@@ -1,6 +1,6 @@
 # AnchoringEffect — Analysis Methodology Basis
 
-## 1. Analysis Objectives
+## §1 Analysis Objectives
 
 | Objective | Research Question                                                                        | Metric(s)                                          | Expected Finding                                                                       |
 |-----------|------------------------------------------------------------------------------------------|----------------------------------------------------|----------------------------------------------------------------------------------------|
@@ -12,7 +12,7 @@
 | O6        | Do all variants (Rule/LLM/RuleLLM/Rag) reproduce the anchoring phenomenon?               | Cross-variant MAD and half-life                    | All variants show persistent deviation; LLM more variable; Rag potentially reduced MAD |
 
 
-## 2. Core Metrics Catalogue
+## §2 Core Metrics Catalogue
 
 ### Metric: Price Deviation from Fundamental
 
@@ -157,7 +157,7 @@
 - **Red Flag**: max_drawdown > 40% → price overshoots fundamental significantly; check noise_std and γ
 
 
-## 3. Analysis Dimensions
+## §3 Analysis Dimensions
 
 ### Dimension 1: Price Dynamics and Anchoring Persistence
 
@@ -195,7 +195,7 @@
 - **Expected Pattern**: Rule shows cleanest anchoring signal (MAD = 3–8%, half-life = 20–60); LLM shows same phenomenon with higher variance; RuleLLM tracks Rule closely (±20%); Rag may show reduced MAD if retrieved knowledge includes anchoring awareness
 
 
-## 4. Phase Analysis Framework
+## §4 Phase Analysis Framework
 
 ### Phase Detection Rules
 
@@ -233,7 +233,7 @@
 | half_life = NaN (diverges)      | Price rises continuously         | γ too small; MomentumTrader + anchoring agents overwhelm correction | Increase γ; reduce NoiseTrader max_order                         |
 
 
-## 5. Cross-Variant Comparison Framework
+## §5 Cross-Variant Comparison Framework
 
 ### Comparison Protocol
 
@@ -258,7 +258,7 @@
 | AC1 (full series)  | X.XX | X.XX ± X.XX      | X.XX ± X.XX          | X.XX ± X.XX      |
 
 
-## 6. Expected Results and Validation
+## §6 Expected Results and Validation
 
 ### Calibration Targets from Literature
 
@@ -289,7 +289,7 @@
 | AC1 > 0.5 throughout           | Excessive momentum (not anchoring) | Check MomentumTrader is not dominating; reduce aggressiveness     |
 
 
-## 7. Visualization Catalogue
+## §7 Visualization Catalogue
 
 | Plot Name                 | Type                 | X-axis     | Y-axis                        | Overlays                                              | Purpose                                               |
 |---------------------------|----------------------|------------|-------------------------------|-------------------------------------------------------|-------------------------------------------------------|

@@ -1,6 +1,6 @@
 # AssetBubble — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 |--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 | Research Relevance | Asset bubbles cause systemic financial risk, capital misallocation, and severe economic downturns. Understanding their formation, persistence, and collapse is central to financial-stability policy, macroprudential regulation, and behavioural finance research.                                                                                                                                                                                                                        |
 
 
-## 2. Theoretical Foundation
+## §2 Theoretical Foundation
 
 ### Theory: Greater Fool Theory and Speculative Demand
 
@@ -86,7 +86,7 @@
 - **Calibration Implication**: `leverage_ratio = 3.0` (3× leverage) and `margin_call_threshold = 0.70` are consistent with typical margin trading requirements; at 3× leverage, a 10% price decline produces a ~20–25% equity decline, quickly approaching the maintenance threshold.
 
 
-## 3. Market Design Principles
+## §3 Market Design Principles
 
 ### 3.1 Price Formation Model
 
@@ -156,7 +156,7 @@ Each round, the Market broadcasts to all investors:
 | `short_cost_rate` | float | Current short-selling cost rate; needed by RationalArbitrageur cost_penalty calculation   |
 
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
 ### Investor: MomentumSpeculator
 
@@ -910,7 +910,7 @@ demand and pushing price down further — the procyclical leverage cascade docum
 | 3 | Brunnermeier, M. K., & Pedersen, L. H. (2009). Market liquidity and funding liquidity. *Review of Financial Studies*, 22(6), 2201–2238. https://doi.org/10.1093/rfs/hhn098 | Funding-liquidity spiral: forced selling → lower prices → more margin calls; validates LeveragedBuyer cascade effect |
 
 
-## 5. Agent Diversity Verification
+## §5 Agent Diversity Verification
 
 ```
 Diversity Check:
@@ -945,7 +945,7 @@ Diversity Check:
 ```
 
 
-## 6. Parameter Table
+## §6 Parameter Table
 
 All parameters loaded from `configs/AssetBubble/{Variant}/players.yml`. Values below reflect the Rule variant calibration.
 
@@ -977,7 +977,7 @@ All parameters loaded from `configs/AssetBubble/{Variant}/players.yml`. Values b
 | `rebalance_rate`             | 0.5      | Standardised                                                                 | Fraction of gap closed per rebalance                         | Low                                           |
 
 
-## 7. Communication and Round Structure
+## §7 Communication and Round Structure
 
 ```
 Round N:
@@ -1003,7 +1003,7 @@ Round N:
 ```
 
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
 ### Event: Dutch Tulip Mania (1634–1637)
 
@@ -1069,7 +1069,7 @@ Round N:
   - Source: Case, K. E., & Shiller, R. J. (2003). Is there a bubble in the housing market? *Brookings Papers on Economic Activity*, 2003(2), 299–342. https://doi.org/10.1353/eca.2004.0004
 
 
-## 9. Variant Comparison Preview
+## §9 Variant Comparison Preview
 
 This table is updated after all variants are implemented.
 

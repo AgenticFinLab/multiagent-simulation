@@ -1,6 +1,6 @@
 # FramingEffect — Analysis Methodology Basis
 
-## 1. Analysis Objectives
+## §1 Analysis Objectives
 
 | Objective | Research Question                                                            | Primary Metric(s) | Expected Finding                                                     | Failure Indicator                           |
 |-----------|------------------------------------------------------------------------------|-------------------|----------------------------------------------------------------------|---------------------------------------------|
@@ -11,7 +11,7 @@
 
 ---
 
-## 2. Core Metrics Catalogue
+## §2 Core Metrics Catalogue
 
 ### Metric: Framing Deviation Index (FDI)
 
@@ -323,7 +323,7 @@ WDI of 0.15–0.35 expected; rational agents should modestly outperform biased a
 
 ---
 
-## 3. Analysis Dimensions
+## §3 Analysis Dimensions
 
 ### Dimension 1: Framing Distortion Dynamics
 
@@ -357,7 +357,7 @@ WDI of 0.15–0.35 expected; rational agents should modestly outperform biased a
 
 ---
 
-## 4. Phase Analysis Framework
+## §4 Phase Analysis Framework
 
 | Phase | Name                | Entry Condition | Exit Condition | Key Indicators               |
 |-------|---------------------|-----------------|----------------|------------------------------|
@@ -368,7 +368,7 @@ WDI of 0.15–0.35 expected; rational agents should modestly outperform biased a
 
 ---
 
-## 5. Cross-Variant Comparison Framework
+## §5 Cross-Variant Comparison Framework
 
 | Axis                   | Measurement | Expected Ordering                                      |
 |------------------------|-------------|--------------------------------------------------------|
@@ -378,7 +378,7 @@ WDI of 0.15–0.35 expected; rational agents should modestly outperform biased a
 
 ---
 
-## 6. Expected Results and Validation
+## §6 Expected Results and Validation
 
 ### 6.1 Expected Stylised Facts
 
@@ -418,7 +418,7 @@ WDI of 0.15–0.35 expected; rational agents should modestly outperform biased a
 
 ---
 
-## 7. Visualization Catalogue
+## §7 Visualization Catalogue
 
 | Plot Name              | Type        | X-axis     | Y-axis              | Overlays                 | Purpose                               |
 |------------------------|-------------|------------|---------------------|--------------------------|---------------------------------------|

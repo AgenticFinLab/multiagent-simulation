@@ -1,6 +1,6 @@
 # CarryTradeUnwind — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                                                                   |
 |--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 | Research Relevance | Examines how leveraged carry positions create endogenous crash risk; tests whether forced-liquidation cascades can be distinguished from fundamental FX adjustments; quantifies the role of stop-loss thresholds in amplifying volatility                                                     |
 
 
-## 2. Theoretical Foundation
+## §2 Theoretical Foundation
 
 ### 2.1 Carry Trade Returns and Crash Risk (Brunnermeier, Nagel & Pedersen)
 
@@ -52,7 +52,7 @@
 - **Empirical Evidence**: BIS Triennial Survey data suggest speculative flow (including carry) accounts for approximately 30–40% of daily FX volume; the remaining 60–70% is non-speculative, consistent with the NoiseTrader modeling background non-carry order flow.
 
 
-## 3. Market Design Principles
+## §3 Market Design Principles
 
 ### 3.1 Price Formation Model
 
@@ -104,7 +104,7 @@ Each round, the Market sends to all investors:
 Note: `return_pct` is deliberately NOT included because carry trade strategies are fundamentally level-based (not momentum-based) — traders monitor whether the rate is above or below their entry level and stop-loss level, not the recent direction of movement.
 
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
 ### Investor: CarryTrader
 
@@ -539,7 +539,7 @@ r = 0.12 < 0.30 → trade. Direction: sell. Quantity: 210. Order: sell 210 at cu
 | 1 | Black, F. (1986). "Noise." *Journal of Finance*, 41(3), 529–543. DOI: 10.2307/2328481 | trade_probability calibration; noise trading theory |
 
 
-## 5. Agent Diversity Verification
+## §5 Agent Diversity Verification
 
 Diversity Check:
 - Different roles: CarryTrader (gradual unwind); LeveragedCarryFund (forced binary exit); FundingCurrencyBuyer (safe-haven counter); HedgedCarryTrader (volatility-aware sophistication); NoiseTrader (background noise)
@@ -549,7 +549,7 @@ Diversity Check:
 - Asymmetric behavior: HedgedCarryTrader requires BOTH favorable deviation AND low volatility to enter; sole agent with two-signal decision logic
 
 
-## 6. Parameter Table
+## §6 Parameter Table
 
 | Parameter                           | Value | Source Citation                        | Description                            | Sensitivity                                       |
 |-------------------------------------|-------|----------------------------------------|----------------------------------------|---------------------------------------------------|
@@ -568,7 +568,7 @@ Diversity Check:
 | NoiseTrader trade_probability       | 0.30  | Black (1986)                           | Per-round trade probability            | Low — background noise level                      |
 
 
-## 7. Communication and Round Structure
+## §7 Communication and Round Structure
 
 ```
 Round N:
@@ -588,7 +588,7 @@ Round N:
 Key difference from equity simulations: `return_pct` is NOT broadcast — all agents use deviation from PPP fundamental, not price momentum, as their primary signal.
 
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
 ### Event 1: JPY Carry Unwind — 2008 Financial Crisis
 
@@ -633,7 +633,7 @@ Key difference from equity simulations: `return_pct` is NOT broadcast — all ag
 **Lesson for Simulation**: The 2024 episode confirms that the carry unwind mechanism is not historically isolated — it is a recurring feature of leveraged FX markets whenever funding rate expectations shift. The simulation captures this recurrence by parameterizing the cascade condition as a permanent structural risk.
 
 
-## 9. Variant Comparison Preview
+## §9 Variant Comparison Preview
 
 | Aspect               | Rule                                                  | LLM                                                        | RuleLLM                                          | Rag                                                             |
 |----------------------|-------------------------------------------------------|------------------------------------------------------------|--------------------------------------------------|-----------------------------------------------------------------|

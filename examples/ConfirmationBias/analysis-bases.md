@@ -1,6 +1,6 @@
 # ConfirmationBias — Analysis Methodology Basis
 
-## 1. Analysis Objectives
+## §1 Analysis Objectives
 
 | Objective | Research Question                                                                                 | Metric(s)                                       | Expected Finding                                                                       |
 |-----------|---------------------------------------------------------------------------------------------------|-------------------------------------------------|----------------------------------------------------------------------------------------|
@@ -12,7 +12,7 @@
 | O6        | How does each variant's bias strength and correction effectiveness compare?                       | All metrics by variant                          | Rule ≥ RuleLLM ≥ LLM ≥ Rag for bias_amplitude; Rag ≥ LLM ≥ Rule for correction_ratio   |
 
 
-## 2. Core Metrics Catalogue
+## §2 Core Metrics Catalogue
 
 ### Metric 1: Bias Amplitude (%)
 
@@ -154,7 +154,7 @@
 - **Red Flag**: annualized_vol > 35% → unexpected crash dynamics; check that λ × order_size product is not inadvertently large. annualized_vol < 5% → near-deterministic simulation; verify noise_std = 0.02 is correctly loaded from config.
 
 
-## 3. Phase Analysis
+## §3 Phase Analysis
 
 ### Phase Framework
 
@@ -200,7 +200,7 @@ The ConfirmationBias simulation proceeds through 5 characteristic phases reflect
 - Key diagnostic: Final-round |deviation| determines correction_ratio denominator; correction_ratio < 0.5 confirms persistent bias consistent with design intent
 
 
-## 4. Dimension-by-Dimension Analysis
+## §4 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Bias Magnitude
 
@@ -253,7 +253,7 @@ Compare across variants:
 - Rag: Retrieved confirmation bias literature may improve BalancedAnalyst and ContrarianTrader behavior → expect highest correction_ratio
 
 
-## 5. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Key Sensitivity Parameters
 
@@ -297,7 +297,7 @@ Expected metric ordering across variants (from most to least bias-consistent):
 | annualized_volatility_pct    | LLM          | LLM ≈ Rule > RuleLLM > Rag | Rag         |
 
 
-## 6. Expected Results and Calibration Targets
+## §6 Expected Results and Calibration Targets
 
 ### Simulation-Level Targets
 
@@ -331,7 +331,7 @@ Expected metric ordering across variants (from most to least bias-consistent):
 | CarryTradeUnwind | Leverage cascade   | 10%–25%           | 25%–50%            | Stop-loss forced liquidation             |
 
 
-## 7. Output Files and Cross-Variant Analysis
+## §7 Output Files and Cross-Variant Analysis
 
 ### Output Files by Variant
 

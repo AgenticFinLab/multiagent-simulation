@@ -1,6 +1,6 @@
 # AnchoringEffect — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                |
 |--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 | Research Relevance | Anchoring is one of the most empirically robust cognitive biases in financial markets. It explains slow price discovery, momentum effects, analyst forecast conservatism, and the well-documented post-earnings drift anomaly — all of which have direct implications for market efficiency, arbitrage profitability, and behavioural finance theory.                                                                                      |
 
 
-## 2. Theoretical Foundation
+## §2 Theoretical Foundation
 
 ### Theory: Anchoring and Insufficient Adjustment
 
@@ -74,7 +74,7 @@
 - **Relevance to This Simulation**: `MomentumTrader` amplifies existing trends, including the slow anchoring-driven drift toward or away from fundamental. During the initial overvalued phase, MomentumTrader may briefly extend the mispricing; during correction, it may accelerate it.
 
 
-## 3. Market Design Principles
+## §3 Market Design Principles
 
 ### 3.1 Price Formation Model
 
@@ -128,7 +128,7 @@ Each round, the Market broadcasts to all investors:
 **Design note**: Making `fundamental` visible to all agents (including AnchoredTrader) is the critical design choice that makes this a "cognitive bias" simulation rather than an "information asymmetry" simulation. AnchoredTrader sees that fundamental = 100 but still cannot adjust fully to it — this is the empirically documented nature of the anchoring bias.
 
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
 ### Investor: AnchoredTrader
 
@@ -726,7 +726,7 @@ RationalUpdater to hold (price closer to F after shock) or MomentumTrader to sel
 | 2 | Glosten, L. R., & Milgrom, P. R. (1985). Bid, ask and transaction prices in a specialist market with heterogeneously informed traders. *Journal of Financial Economics*, 14(1), 71–100. https://doi.org/10.1016/0304-405X(85)90044-3 | Establishes informed vs. uninformed order flow fractions                        |
 
 
-## 5. Agent Diversity Verification
+## §5 Agent Diversity Verification
 
 ```
 Diversity Check:
@@ -760,7 +760,7 @@ Diversity Check:
 ```
 
 
-## 6. Parameter Table
+## §6 Parameter Table
 
 | Parameter            | Value    | Source Citation                                                                 | Description                                           | Sensitivity                                                                                       |
 |----------------------|----------|---------------------------------------------------------------------------------|-------------------------------------------------------|---------------------------------------------------------------------------------------------------|
@@ -779,7 +779,7 @@ Diversity Check:
 | `base_position_size` | 20.0     | Calibrated                                                                      | Max shares per trade (anchoring and rational agents)  | Medium                                                                                            |
 
 
-## 7. Communication and Round Structure
+## §7 Communication and Round Structure
 
 ```
 Round N:
@@ -805,7 +805,7 @@ Topology: Star — Market at centre broadcasts to all 15 investors; investors se
 Initialization: Market starts at `initial_price = 105.0` (5% above fundamental 100.0). AnchoredTrader records this as its permanent anchor on round 1, seeding the initial mispricing that the simulation then studies.
 
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
 ### Event: Analyst Earnings Forecast Anchoring (US Equity Markets, 1992–2006)
 
@@ -866,7 +866,7 @@ Initialization: Market starts at `initial_price = 105.0` (5% above fundamental 1
   - Source: Loughran, T., & Ritter, J. R. (2002). Why don't issuers get upset about leaving money on the table in IPOs? *Review of Financial Studies*, 15(2), 413–444. https://doi.org/10.1093/rfs/15.2.413
 
 
-## 9. Variant Comparison Preview
+## §9 Variant Comparison Preview
 
 | Aspect                   | Rule                                                                    | LLM                                                            | RuleLLM                                                              | Rag                                                                             |
 |--------------------------|-------------------------------------------------------------------------|----------------------------------------------------------------|----------------------------------------------------------------------|---------------------------------------------------------------------------------|

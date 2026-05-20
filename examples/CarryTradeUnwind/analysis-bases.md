@@ -1,6 +1,6 @@
 # CarryTradeUnwind — Analysis Methodology Basis
 
-## 1. Analysis Objectives
+## §1 Analysis Objectives
 
 | Objective | Research Question                                                            | Metric(s)                                    | Expected Finding                                                               |
 |-----------|------------------------------------------------------------------------------|----------------------------------------------|--------------------------------------------------------------------------------|
@@ -12,7 +12,7 @@
 | O6        | How does cross-variant carry crash behavior compare?                         | All core metrics by variant                  | Rule most deterministic; Rag potentially shows altered leveraged exit behavior |
 
 
-## 2. Core Metrics Catalogue
+## §2 Core Metrics Catalogue
 
 ### Metric 1: Maximum Drawdown (%)
 
@@ -148,7 +148,7 @@
 - **Red Flag**: Volatility < 5% throughout → cascade never occurring; noise too low or LCF never triggering.
 
 
-## 3. Analysis Dimensions
+## §3 Analysis Dimensions
 
 ### Dimension 1: Crash Severity and Cascade Dynamics
 
@@ -186,7 +186,7 @@
 **Expected Pattern**: Rule most deterministic (lowest std); LLM may show delayed exit (persona deliberation before forced sell) or earlier exit (anticipatory behavior); Rag potentially modified by 2008 JPY or 2015 CHF historical context
 
 
-## 4. Phase Analysis Framework
+## §4 Phase Analysis Framework
 
 ### Phase Detection Rules
 
@@ -219,7 +219,7 @@
 | Recovery       | Inactive or small buy | Exhausted (zero volume)  | Possibly re-entering  | Still active         | −0.2 to 0         |
 
 
-## 5. Cross-Variant Comparison Framework
+## §5 Cross-Variant Comparison Framework
 
 ### Comparison Protocol
 
@@ -241,7 +241,7 @@
 | HedgedCarryTrader vol exit      | Exact dual condition       | LLM may better articulate the volatility rationale but may also hesitate | Near-exact                   | May use historical volatility spikes as reference      |
 
 
-## 6. Expected Results and Validation
+## §6 Expected Results and Validation
 
 ### Expected Stylized Facts (Literature-Sourced)
 
@@ -274,7 +274,7 @@ Sensitivity: If FCB position_size is increased to 2000, cascade condition become
 | FCB never activates | FCB volume = 0       | risk_threshold too high; crash not reaching −5% | Reduce risk_threshold to 0.03; verify cascade depth  |
 
 
-## 7. Visualization Catalogue
+## §7 Visualization Catalogue
 
 | Plot Name                         | Type        | X-axis     | Y-axis                          | Overlays / Annotations                                | Purpose                                                           |
 |-----------------------------------|-------------|------------|---------------------------------|-------------------------------------------------------|-------------------------------------------------------------------|

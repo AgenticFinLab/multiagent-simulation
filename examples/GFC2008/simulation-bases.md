@@ -1,6 +1,6 @@
 # GFC2008 — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 |--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -44,7 +44,7 @@ Keys, Mukherjee, Seru and Vig (2010) provided empirical evidence for the origina
 
 ---
 
-## 2. Theoretical Foundation
+## §2 Theoretical Foundation
 
 ### Theory 1: Originate-to-Distribute Moral Hazard
 
@@ -185,7 +185,7 @@ Theory 3 is the primary mechanism for the crisis phase (negative deviation). Lev
 
 ---
 
-## 3. Market Design
+## §3 Market Design
 
 | Component             | Design Choice                                    | Justification                                           |
 |-----------------------|--------------------------------------------------|---------------------------------------------------------|
@@ -198,7 +198,7 @@ Theory 3 is the primary mechanism for the crisis phase (negative deviation). Lev
 
 ---
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
 ### §4.1 MBSOriginator
 
@@ -254,7 +254,7 @@ Theory 3 is the primary mechanism for the crisis phase (negative deviation). Lev
 
 ---
 
-## 5. Agent Diversity Rationale
+## §5 Agent Diversity Rationale
 
 | Agent Pair               | Diversity Purpose                                                                               |
 |--------------------------|-------------------------------------------------------------------------------------------------|
@@ -267,7 +267,7 @@ Theory 3 is the primary mechanism for the crisis phase (negative deviation). Lev
 
 ---
 
-## 6. Parameter Reference Table
+## §6 Parameter Reference Table
 
 | Parameter              | Agent                  | Default  | Calibrated Range | Source                                      |
 |------------------------|------------------------|----------|------------------|---------------------------------------------|
@@ -288,7 +288,7 @@ Theory 3 is the primary mechanism for the crisis phase (negative deviation). Lev
 
 ---
 
-## 7. Round Structure
+## §7 Round Structure
 
 | Step | Agent                                                                      | Action                                                | Output                |
 |------|----------------------------------------------------------------------------|-------------------------------------------------------|-----------------------|
@@ -301,7 +301,7 @@ Theory 3 is the primary mechanism for the crisis phase (negative deviation). Lev
 
 ---
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
 ### Case 1: Lehman Brothers Bankruptcy — The Cascade Trigger
 
@@ -341,7 +341,7 @@ Theory 3 is the primary mechanism for the crisis phase (negative deviation). Lev
 
 ---
 
-## 9. Variant Comparison
+## §9 Variant Comparison
 
 | Variant | Investor Logic                              | Key Difference from Rule                                         | Expected Outcome                                                        |
 |---------|---------------------------------------------|------------------------------------------------------------------|-------------------------------------------------------------------------|

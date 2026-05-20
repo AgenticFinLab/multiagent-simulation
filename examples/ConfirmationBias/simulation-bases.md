@@ -1,6 +1,6 @@
 # ConfirmationBias — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                               |
 |--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 | Research Relevance | Isolates the belief-updating distortion from other biases (availability, anchoring); tests whether a self-reinforcing belief state produces measurable, persistent mispricing that rational mean-reversion and contrarian trading cannot fully correct    |
 
 
-## 2. Theoretical Foundation
+## §2 Theoretical Foundation
 
 ### 2.1 Confirmation Bias — Selective Information Processing (Nickerson)
 
@@ -51,7 +51,7 @@
 - **Empirical Evidence**: trade_probability = 0.30 is calibrated identically to AvailabilityBias and CarryTradeUnwind simulations, representing background retail participation.
 
 
-## 3. Market Design Principles
+## §3 Market Design Principles
 
 ### 3.1 Price Formation Model
 
@@ -93,7 +93,7 @@ Each round, the Market sends to all investors:
 Note: Crucially, the deviation signal is the same for all agents — confirmation bias is NOT about different agents receiving different information. It is about the same signal being processed differently by biased agents (BeliefAnchor, SelectiveScanner) vs. rational agents (BalancedAnalyst, ContrarianTrader).
 
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
 ### Investor: BeliefAnchor
 
@@ -456,7 +456,7 @@ P(trade) = 0.30; direction 50/50; Q ~ Uniform(100, 500).
 | max_order         | 500   | Convention   |
 
 
-## 5. Agent Diversity Verification
+## §5 Agent Diversity Verification
 
 Diversity Check:
 - Different bias mechanisms: BeliefAnchor (belief-state compounding); SelectiveScanner (asymmetric position-based response); BalancedAnalyst (rational baseline); ContrarianTrader (active bias-fader); NoiseTrader (random)
@@ -466,7 +466,7 @@ Diversity Check:
 - Unique feature: BeliefAnchor is the only agent in the entire simulation suite with a persistent cross-round internal state variable (belief), making ConfirmationBias the most psychologically realistic simulation
 
 
-## 6. Parameter Table
+## §6 Parameter Table
 
 | Parameter                             | Value | Source Citation                          | Description                                             | Sensitivity                                         |
 |---------------------------------------|-------|------------------------------------------|---------------------------------------------------------|-----------------------------------------------------|
@@ -485,7 +485,7 @@ Diversity Check:
 | NoiseTrader trade_probability         | 0.30  | Black (1986)                             | Per-round trade probability                             | Low                                                 |
 
 
-## 7. Communication and Round Structure
+## §7 Communication and Round Structure
 
 ```
 Round N:
@@ -505,7 +505,7 @@ Round N:
 Key difference: BeliefAnchor's `perceive()` step also updates the internal `belief` state based on deviation — belief updating happens BEFORE `decide()`, meaning the trade decision in each round reflects the fully updated belief.
 
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
 ### Event 1: Analyst Forecast Clustering and Confirmation Bias (Hong & Kubik, 2003)
 
@@ -525,7 +525,7 @@ Key difference: BeliefAnchor's `perceive()` step also updates the internal `beli
 **Lesson for Simulation**: The housing bubble demonstrates that when BeliefAnchor agents dominate (and initial_belief is uniformly positive across the population), the combined confirmation bias creates systemic mispricing that persists for years. The simulation's single BeliefAnchor represents a "representative biased agent" — in reality, much of the financial system played this role in 2004–2007.
 
 
-## 9. Variant Comparison Preview
+## §9 Variant Comparison Preview
 
 | Aspect            | Rule                                                   | LLM                                                                              | RuleLLM                                           | Rag                                                                     |
 |-------------------|--------------------------------------------------------|----------------------------------------------------------------------------------|---------------------------------------------------|-------------------------------------------------------------------------|

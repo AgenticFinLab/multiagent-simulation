@@ -1,6 +1,6 @@
 # GameStopShortSqueeze — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 |--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -42,7 +42,7 @@ The momentum and FOMO dimension was documented by Barber et al. (2022), who show
 
 ---
 
-## 2. Theoretical Foundation
+## §2 Theoretical Foundation
 
 ### Theory 1: Short Sale Constraints and Overvaluation
 
@@ -178,7 +178,7 @@ Theory 3 is encoded by RetailCoordinated (§4.1) and partially by MomentumRetail
 
 ---
 
-## 3. Market Design
+## §3 Market Design
 
 | Component                           | Design Choice                                    | Justification                                                                   |
 |-------------------------------------|--------------------------------------------------|---------------------------------------------------------------------------------|
@@ -191,7 +191,7 @@ Theory 3 is encoded by RetailCoordinated (§4.1) and partially by MomentumRetail
 
 ---
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
 ### §4.1 RetailCoordinated
 
@@ -249,7 +249,7 @@ Theory 3 is encoded by RetailCoordinated (§4.1) and partially by MomentumRetail
 
 ---
 
-## 5. Agent Diversity Rationale
+## §5 Agent Diversity Rationale
 
 | Agent Pair                  | Diversity Purpose                                                                                   |
 |-----------------------------|-----------------------------------------------------------------------------------------------------|
@@ -261,7 +261,7 @@ Theory 3 is encoded by RetailCoordinated (§4.1) and partially by MomentumRetail
 
 ---
 
-## 6. Parameter Reference Table
+## §6 Parameter Reference Table
 
 | Parameter          | Agent              | Default | Calibrated Range | Source                                                  |
 |--------------------|--------------------|---------|------------------|---------------------------------------------------------|
@@ -281,7 +281,7 @@ Theory 3 is encoded by RetailCoordinated (§4.1) and partially by MomentumRetail
 
 ---
 
-## 7. Round Structure
+## §7 Round Structure
 
 | Step | Agent                                                                                  | Action                                                | Output                |
 |------|----------------------------------------------------------------------------------------|-------------------------------------------------------|-----------------------|
@@ -294,7 +294,7 @@ Theory 3 is encoded by RetailCoordinated (§4.1) and partially by MomentumRetail
 
 ---
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
 ### Case 1: GameStop January 2021 — The Textbook Short Squeeze
 
@@ -334,7 +334,7 @@ Theory 3 is encoded by RetailCoordinated (§4.1) and partially by MomentumRetail
 
 ---
 
-## 9. Variant Comparison
+## §9 Variant Comparison
 
 | Variant | Investor Logic                                                   | Key Difference from Rule                                         | Expected Outcome                                                        |
 |---------|------------------------------------------------------------------|------------------------------------------------------------------|-------------------------------------------------------------------------|
