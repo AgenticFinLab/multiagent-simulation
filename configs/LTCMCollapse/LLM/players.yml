@@ -141,7 +141,7 @@ liquidityprovider:
   persona: !include persona.yml
 
 centralbank:
-  name: "NoiseTrader"
+  name: "CentralBank"
   class: "examples.LTCMCollapse.LLM.players:LLMCentralBank"
   num_instances: 2
   config:
