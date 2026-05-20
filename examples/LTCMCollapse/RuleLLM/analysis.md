@@ -1,27 +1,44 @@
-# LTCMCollapse Analysis Guide
+# LTCMCollapse RuleLLM — Analysis Documentation
 
-## Metrics
+## §1 Analysis Objectives
 
-| Metric | Description | Expected Range |
-|--------|-------------|----------------|
-| Price deviation | Deviation from fundamental | Varies by scenario |
-| Max drawdown | Largest peak-to-trough decline | Varies by scenario |
-| Volatility | Annualized return volatility | Varies by scenario |
+RuleLLM analysis compares formula-guided LLM behavior with the deterministic Rule baseline and the persona-only LLM variant.
 
-## Visualization Guide
+## §2 Metric To Function Mapping
 
-1. **Price vs Fundamental**: Shows whether agents create mispricings
-2. **Deviation Plot**: Magnitude and persistence of mispricings
-3. **Return Distribution**: Should show fat tails for behavioral scenarios
+| Metric | analysis-bases Ref | Function | RuleLLM-Specific Note |
+|---|---|---|---|
+| Price deviation | `§2.1` | imported `calculate_metrics(data)` | should remain close to Rule if embedded rules bind |
+| Maximum drawdown proxy | `§2.2` | imported `calculate_metrics(data)` | compare severity against Rule and LLM |
+| Mean absolute deviation | `§2.3` | imported `calculate_metrics(data)` | persistence of stress |
+| Volatility | `§2.4` | imported `calculate_metrics(data)` | rule-guided crisis instability |
+| Price trough | `§2.5` | imported `calculate_metrics(data)` | lowest rule-guided API price |
+| Final recovery | `§2.6` | imported `calculate_metrics(data)` | recovery relative to baseline |
+| LLM output quality | `§2.7` | `audit_llm_output_quality.py` | parse/fallback/action quality |
 
-## Troubleshooting
+## §3 Variant-Specific Notes
 
-- **No phenomenon observed**: Adjust agent parameters
-- **Too extreme**: Add more stabilizing agents or increase mean reversion
-- **Too stable**: Increase destabilizing agent parameters
+Because the prompts changed in `example-standardization`, previous `fix-scenarios` RuleLLM samples should not be treated as final samples for this branch.
 
-## References
+## §4 Expected Ranges
 
-- Shleifer & Vishny (1997): Limits to arbitrage
-- Long-Term Capital Management (1998): Convergence trades gone wrong
-- Morris & Shin (2004): Liquidity black holes
+| Metric | Expected Pattern |
+|---|---|
+| parse failures | zero or low |
+| fallback count | zero or explicitly reviewed |
+| price path | closer to Rule than LLM |
+| action distribution | consistent with embedded rules |
+
+## §5 Output Files
+
+Price and volatility outputs follow the Rule analysis implementation. Quality outputs come from the Level-2 LLM audit script.
+
+## §6 Cross-Variant Comparison
+
+RuleLLM isolates the effect of language reasoning when the investor's rule knowledge is made explicit in the prompt.
+
+## §7 References
+
+- `../analysis-bases.md`
+- `analysis.py`
+- `prompts.py`

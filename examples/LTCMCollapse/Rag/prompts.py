@@ -1,17 +1,18 @@
-"""LTCMCollapse Rag Prompts
+"""LTCMCollapse RAG prompts.
 
-System prompts for RAG-augmented agents in the LTCMCollapse simulation.
+RAG uses the RuleLLM persona/rule system prompts and injects retrieved crisis
+knowledge into the user message through ``{rag_context}``.
 """
 
-from examples.LTCMCollapse.LLM.prompts import (
-    LLM_CONVERGENCEARBITRAGEUR_PROMPT as RAG_CONVERGENCEARBITRAGEUR_PROMPT,
-    LLM_LEVERAGETRADER_PROMPT as RAG_LEVERAGETRADER_PROMPT,
-    LLM_RISKMANAGER_PROMPT as RAG_RISKMANAGER_PROMPT,
-    LLM_LIQUIDITYPROVIDER_PROMPT as RAG_LIQUIDITYPROVIDER_PROMPT,
-    LLM_CENTRALBANK_PROMPT as RAG_CENTRALBANK_PROMPT,
+from examples.LTCMCollapse.RuleLLM.prompts import (
+    RULELLM_CENTRALBANK_PROMPT as RAG_CENTRALBANK_PROMPT,
+    RULELLM_CONVERGENCEARBITRAGEUR_PROMPT as RAG_CONVERGENCEARBITRAGEUR_PROMPT,
+    RULELLM_LEVERAGETRADER_PROMPT as RAG_LEVERAGETRADER_PROMPT,
+    RULELLM_LIQUIDITYPROVIDER_PROMPT as RAG_LIQUIDITYPROVIDER_PROMPT,
+    RULELLM_RISKMANAGER_PROMPT as RAG_RISKMANAGER_PROMPT,
 )
 
-RAG_USER_TEMPLATE = """Relevant background knowledge:
+RAG_USER_TEMPLATE = """Relevant crisis knowledge retrieved for this decision:
 {rag_context}
 
 Current Market State (Round {round_num}):
@@ -22,10 +23,9 @@ Current Market State (Round {round_num}):
 - Your Position: {position} shares
 - Portfolio Value: ${portfolio_value:.2f}
 
-Based on your trading strategy and the background knowledge above, what action do you take?
-Provide your analysis and decision in the specified format.
-
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
+Use the retrieved knowledge as contextual evidence, but still follow your persona and decision rules.
+Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": <number>, "quantity": <number>, "reasoning": "brief rationale"}}</decision>.
+"""
 
 __all__ = [
     "RAG_CONVERGENCEARBITRAGEUR_PROMPT",
