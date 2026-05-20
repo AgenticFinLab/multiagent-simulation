@@ -1,52 +1,60 @@
-# SunkCostFallacy Simulation
+# SunkCostFallacy Rule — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | Sunk cost fallacy causes traders to continue investing based on past unrecoverable costs rather than future prospects |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | SunkCostFallacy simulation with SunkCostHolder, CommitmentEscalator, RationalCutter |
-| **Academic Value** | Understanding sunkcostfallacy through multi-agent simulation |
+|---|---|
+| Variant | Rule |
+| Mechanism | Deterministic sunk-cost holding, commitment escalation, rational cutting, and opportunity-cost rules |
+| Market | Price/fundamental market with loss-state behavior |
+| Agents | SunkCostHolder, CommitmentEscalator, RationalCutter, OpportunityCostTrader, NoiseTrader |
+| Runtime Change | Documentation-only rewrite of existing Rule guide; no code/config change |
 
-## Theoretical Foundation
+## §2 Theory → Implementation Mapping
 
-- Arkes & Blumer (1985): The psychology of sunk cost
-- Thaler (1980): Toward a positive theory of consumer choice
-- Dawes (1998): Behavioral decision making and judgment
-## Agent Descriptions
+| Agent | Root Section | Runtime Implementation |
+|---|---|---|
+| SunkCostHolder | `simulation-bases.md §4.1` | Rule class refuses to realize losing positions |
+| CommitmentEscalator | `simulation-bases.md §4.2` | Rule class adds exposure after losses |
+| RationalCutter | `simulation-bases.md §4.3` | Rule class cuts based on future value |
+| OpportunityCostTrader | `simulation-bases.md §4.4` | Rule class reallocates capital by opportunity cost |
+| NoiseTrader | `simulation-bases.md §4.5` | Rule class supplies stochastic background liquidity |
 
-### SunkCostHolder
-**Theoretical Basis**: Sunk cost escalation (Arkes & Blumer, 1985)
-**Market Role**: destabilizing
-**Description**: Holds losing positions because of prior investment, refuses to cut losses
-**Parameters**: escalation_factor=1.5, cut_loss_threshold=0.25
+## §3 Market Mechanism Implementation
 
-### CommitmentEscalator
-**Theoretical Basis**: Escalation of commitment (Staw, 1976)
-**Market Role**: destabilizing
-**Description**: Doubles down on losing positions, increasing exposure to justify prior commitment
-**Parameters**: double_down_threshold=0.1, max_escalation=3
+The Rule variant implements the shared market in `players.py`. Orders from
+sunk-cost, escalation, rational, opportunity-cost, and noise agents are cleared
+by the market player and update price relative to fundamental value.
 
-### RationalCutter
-**Theoretical Basis**: Forward-looking rationality (Dawes, 1998 baseline)
-**Market Role**: stabilizing
-**Description**: Cuts losses ruthlessly based on forward-looking assessment, ignores past investment
-**Parameters**: stop_loss=0.08, position_size=500
+## §4 Rule Variant-Specific Features
 
-### OpportunityCostTrader
-**Theoretical Basis**: Opportunity cost analysis (Thaler, 1980 baseline)
-**Market Role**: stabilizing
-**Description**: Evaluates positions by opportunity cost, reallocates capital from underperformers
-**Parameters**: reallocation_threshold=0.06, position_size=400
+All investor decisions are encoded in Python thresholds and sizing rules. This
+variant provides the deterministic baseline for comparing LLM, RuleLLM, and Rag
+behavior.
 
-### NoiseTrader
-**Theoretical Basis**: Noise trader model (Black, 1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader providing baseline liquidity
-**Parameters**: trade_probability=0.3
+## §5 Architecture Diagram
 
+```text
+Market broadcast -> rule investor decide() -> order dict -> Market clearing
+```
 
-## Market Dynamics
+## §6 Configuration Reference
 
-Price follows: P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
+Primary config: `configs/SunkCostFallacy/Rule/players.yml`.
+
+## §7 Running Instructions
+
+```bash
+python examples/SunkCostFallacy/Rule/run_sunkcostfallacy.py \
+  -c configs/SunkCostFallacy/Rule/simulation.yml
+```
+
+## §8 Expected Behavior Patterns
+
+Sunk-cost and commitment agents should hold or add to losers; rational and
+opportunity-cost agents should cut or reallocate.
+
+## §9 References
+
+See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
+`../analysis-bases.md §2`.

@@ -1,52 +1,60 @@
-# TulipMania Simulation
+# TulipMania Rule — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | 1637 Dutch tulip bubble where speculative frenzy drove tulip prices to extraordinary levels before catastrophic collapse |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | TulipMania simulation with TrendChaser, SocialProofFollower, IntrinsicValueTrader |
-| **Academic Value** | Understanding tulipmania through multi-agent simulation |
+|---|---|
+| Variant | Rule |
+| Mechanism | Deterministic trend chasing, social proof, valuation resistance, early exit, and noise rules |
+| Market | Price/fundamental market with mania and correction dynamics |
+| Agents | TrendChaser, SocialProofFollower, IntrinsicValueTrader, EarlyExitTrader, NoiseTrader |
+| Runtime Change | Documentation-only rewrite of existing Rule guide; no code/config change |
 
-## Theoretical Foundation
+## §2 Theory → Implementation Mapping
 
-- Garber (2000): Famous first bubbles
-- Mackay (1841): Extraordinary popular delusions and the madness of crowds
-- Thompson (2007): The tulip mania - Fact or artifact?
-## Agent Descriptions
+| Agent | Root Section | Runtime Implementation |
+|---|---|---|
+| TrendChaser | `simulation-bases.md §4.1` | Rule class buys rising prices |
+| SocialProofFollower | `simulation-bases.md §4.2` | Rule class follows crowd participation |
+| IntrinsicValueTrader | `simulation-bases.md §4.3` | Rule class sells extreme overvaluation |
+| EarlyExitTrader | `simulation-bases.md §4.4` | Rule class exits before collapse |
+| NoiseTrader | `simulation-bases.md §4.5` | Rule class supplies stochastic background liquidity |
 
-### TrendChaser
-**Theoretical Basis**: Greater fool theory (Mackay, 1841)
-**Market Role**: destabilizing
-**Description**: Buys assets purely because prices are rising, regardless of intrinsic value
-**Parameters**: momentum_strength=0.8, max_position=1000
+## §3 Market Mechanism Implementation
 
-### SocialProofFollower
-**Theoretical Basis**: Social proof and crowd psychology (Mackay, 1841)
-**Market Role**: destabilizing
-**Description**: Follows crowd into speculative positions because everyone else is doing it
-**Parameters**: herd_weight=0.7, entry_threshold=0.05
+The Rule variant implements the shared market in `players.py`. Orders from
+trend, social-proof, value, early-exit, and noise agents are cleared by the
+market player and update price relative to intrinsic/fundamental value.
 
-### IntrinsicValueTrader
-**Theoretical Basis**: Fundamental value discipline (Garber, 2000)
-**Market Role**: stabilizing
-**Description**: Values assets by intrinsic utility, sells when price far exceeds use value
-**Parameters**: value_threshold=3.0, position_size=400
+## §4 Rule Variant-Specific Features
 
-### EarlyExitTrader
-**Theoretical Basis**: Rational bubble riding (Thompson, 2007)
-**Market Role**: stabilizing
-**Description**: Recognizes speculative excess early and exits before the crash
-**Parameters**: exit_threshold=0.2, timing_sensitivity=0.6
+All investor decisions are encoded in Python thresholds and sizing rules. This
+variant provides the deterministic baseline for comparing LLM, RuleLLM, and Rag
+behavior.
 
-### NoiseTrader
-**Theoretical Basis**: Noise trader model (Black, 1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader providing baseline liquidity
-**Parameters**: trade_probability=0.3
+## §5 Architecture Diagram
 
+```text
+Market broadcast -> rule investor decide() -> order dict -> Market clearing
+```
 
-## Market Dynamics
+## §6 Configuration Reference
 
-Price follows: P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
+Primary config: `configs/TulipMania/Rule/players.yml`.
+
+## §7 Running Instructions
+
+```bash
+python examples/TulipMania/Rule/run_tulipmania.py \
+  -c configs/TulipMania/Rule/simulation.yml
+```
+
+## §8 Expected Behavior Patterns
+
+Trend and social-proof agents should amplify mania; intrinsic-value and
+early-exit agents should provide correction pressure.
+
+## §9 References
+
+See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
+`../analysis-bases.md §2`.

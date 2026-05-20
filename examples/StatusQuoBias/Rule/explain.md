@@ -1,57 +1,60 @@
-# StatusQuoBias Simulation
+# StatusQuoBias Rule — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | Status quo bias causes traders to prefer inaction and maintain current positions despite new information |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | StatusQuoBias simulation with InertialHolder, DefaultFollower, ActiveRebalancer |
-| **Academic Value** | Understanding statusquobias through multi-agent simulation |
+|---|---|
+| Variant | Rule |
+| Mechanism | Deterministic inertia, default-following, rebalancing, momentum, and noise rules |
+| Market | Price/fundamental market with signal underreaction |
+| Agents | InertialHolder, DefaultFollower, ActiveRebalancer, MomentumTrader, NoiseTrader |
+| Runtime Change | Documentation-only rewrite of existing Rule guide; no code/config change |
 
-## Theoretical Foundation
+## §2 Theory → Implementation Mapping
 
-- Samuelson & Zeckhauser (1988): Status quo bias in decision making
-- Kahneman, Knetsch & Thaler (1991): Anomalies - The endowment effect, loss aversion, and status quo bias
-- Fernandez & Rodrik (1991): Resistance to reform - Status quo bias in the presence of individual-specific uncertainty
-## Agent Descriptions
+| Agent | Root Section | Runtime Implementation |
+|---|---|---|
+| InertialHolder | `simulation-bases.md §4.1` | Rule class holds unless evidence is strong |
+| DefaultFollower | `simulation-bases.md §4.2` | Rule class stays near default allocation |
+| ActiveRebalancer | `simulation-bases.md §4.3` | Rule class responds directly to signals |
+| MomentumTrader | `simulation-bases.md §4.4` | Rule class follows trend signals |
+| NoiseTrader | `simulation-bases.md §4.5` | Rule class supplies stochastic background liquidity |
 
-### InertialHolder
-**Theoretical Basis**: Decision inertia (Samuelson & Zeckhauser, 1988)
-**Market Role**: destabilizing
-**Description**: Strongly prefers maintaining current portfolio, requires overwhelming evidence to change
-**Parameters**: inertia_strength=0.8, change_threshold=0.15
+## §3 Market Mechanism Implementation
 
-### DefaultFollower
-**Theoretical Basis**: Default bias and decision avoidance (Kahneman et al., 1991)
-**Market Role**: destabilizing
-**Description**: Follows default allocation suggestions, avoids active decisions
-**Parameters**: default_weight=0.7, active_deviation=0.1
+The Rule variant implements the shared market in `players.py`. Orders from
+inertial, default, active, momentum, and noise agents are cleared by the market
+player and update price relative to fundamental value.
 
-### ActiveRebalancer
-**Theoretical Basis**: Rational portfolio management (Fernandez & Rodrik, 1991 baseline)
-**Market Role**: stabilizing
-**Description**: Proactively adjusts positions based on new information regardless of current holdings
-**Parameters**: rebalance_threshold=0.05, position_size=500
+## §4 Rule Variant-Specific Features
 
-### MomentumTrader
-**Theoretical Basis**: Momentum-based trading (Jegadeesh & Titman, 1993)
-**Market Role**: neutral
-**Description**: Trades on price trends, naturally overcoming status quo
-**Parameters**: lookback=5, entry_threshold=0.03
+All investor decisions are encoded in Python thresholds and sizing rules. This
+variant provides the deterministic baseline for comparing LLM, RuleLLM, and Rag
+behavior.
 
-### NoiseTrader
-**Theoretical Basis**: Noise trader model (Black, 1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader providing baseline liquidity
-**Parameters**: trade_probability=0.3
+## §5 Architecture Diagram
 
+```text
+Market broadcast -> rule investor decide() -> order dict -> Market clearing
+```
 
-## Market Dynamics
+## §6 Configuration Reference
 
-Price follows: P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
+Primary config: `configs/StatusQuoBias/Rule/players.yml`.
 
-Key feedback loops:
-- Destabilizing agents amplify price deviations
-- Stabilizing agents provide mean-reverting pressure
-- Interaction determines whether bias produces persistent market effects
+## §7 Running Instructions
+
+```bash
+python examples/StatusQuoBias/Rule/run_statusquobias.py \
+  -c configs/StatusQuoBias/Rule/simulation.yml
+```
+
+## §8 Expected Behavior Patterns
+
+Inertial and default agents should underreact to signals; active and momentum
+agents should create faster adjustment.
+
+## §9 References
+
+See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
+`../analysis-bases.md §2`.

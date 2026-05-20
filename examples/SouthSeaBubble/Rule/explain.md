@@ -1,52 +1,60 @@
-# SouthSeaBubble Simulation
+# SouthSeaBubble Rule — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | 1720 South Sea Company bubble where insider advantages and political connections drove stock to impossible valuations |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | SouthSeaBubble simulation with InsiderAdvantaged, NarrativeBeliever, SkepticalAnalyst |
-| **Academic Value** | Understanding southseabubble through multi-agent simulation |
+|---|---|
+| Variant | Rule |
+| Mechanism | Deterministic narrative bubble, insider timing, skepticism, and arbitrage rules |
+| Market | Price/fundamental market with narrative-driven demand |
+| Agents | InsiderAdvantaged, NarrativeBeliever, SkepticalAnalyst, Arbitrageur, NoiseTrader |
+| Runtime Change | Documentation-only rewrite of existing Rule guide; no code/config change |
 
-## Theoretical Foundation
+## §2 Theory → Implementation Mapping
 
-- Temin & Voth (2004): Riding the South Sea Bubble
-- Carswell (1960): The South Sea Bubble
-- Dale (2004): The first crash - Lessons from the South Sea Bubble
-## Agent Descriptions
+| Agent | Root Section | Runtime Implementation |
+|---|---|---|
+| InsiderAdvantaged | `simulation-bases.md §4.1` | Rule class models privileged timing and early exit |
+| NarrativeBeliever | `simulation-bases.md §4.2` | Rule class converts promotional narrative into demand |
+| SkepticalAnalyst | `simulation-bases.md §4.3` | Rule class resists overpricing using fundamentals |
+| Arbitrageur | `simulation-bases.md §4.4` | Rule class trades against large mispricing |
+| NoiseTrader | `simulation-bases.md §4.5` | Rule class supplies stochastic background liquidity |
 
-### InsiderAdvantaged
-**Theoretical Basis**: Insider trading advantage (Temin & Voth, 2004)
-**Market Role**: destabilizing
-**Description**: Exploits privileged information and political connections to front-run the market
-**Parameters**: information_advantage=0.7, front_run_size=600
+## §3 Market Mechanism Implementation
 
-### NarrativeBeliever
-**Theoretical Basis**: Narrative-driven speculation (Carswell, 1960)
-**Market Role**: destabilizing
-**Description**: Believes promotional narratives about monopolistic trading privileges without verification
-**Parameters**: narrative_weight=2.0, skepticism_level=0.1
+The Rule variant implements the shared market in `players.py`. Orders from
+narrative, insider, skeptical, and arbitrage agents are cleared by the market
+player and update price relative to fundamental value.
 
-### SkepticalAnalyst
-**Theoretical Basis**: Cash flow analysis (Dale, 2004)
-**Market Role**: stabilizing
-**Description**: Analyzes actual cash flows and trading prospects, ignoring promotional narratives
-**Parameters**: cash_flow_weight=1.0, narrative_discount=0.8
+## §4 Rule Variant-Specific Features
 
-### Arbitrageur
-**Theoretical Basis**: Limits to arbitrage (Shleifer & Vishny, 1997)
-**Market Role**: stabilizing
-**Description**: Exploits the gap between narrative-driven prices and fundamental value
-**Parameters**: spread_threshold=0.15, position_size=450
+All investor decisions are encoded in Python thresholds and sizing rules. This
+variant provides the deterministic baseline for comparing LLM, RuleLLM, and Rag
+behavior.
 
-### NoiseTrader
-**Theoretical Basis**: Noise trader model (Black, 1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader providing baseline liquidity
-**Parameters**: trade_probability=0.3
+## §5 Architecture Diagram
 
+```text
+Market broadcast -> rule investor decide() -> order dict -> Market clearing
+```
 
-## Market Dynamics
+## §6 Configuration Reference
 
-Price follows: P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
+Primary config: `configs/SouthSeaBubble/Rule/players.yml`.
+
+## §7 Running Instructions
+
+```bash
+python examples/SouthSeaBubble/Rule/run_southseabubble.py \
+  -c configs/SouthSeaBubble/Rule/simulation.yml
+```
+
+## §8 Expected Behavior Patterns
+
+Narrative and insider agents should push prices away from fundamentals while
+skeptical and arbitrage agents create correction pressure.
+
+## §9 References
+
+See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
+`../analysis-bases.md §2`.

@@ -1,52 +1,61 @@
-# SorosPound Simulation
+# SorosPound Rule — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | 1992 Black Wednesday where speculative attacks forced GBP exit from the ERM, demonstrating self-fulfilling currency crises |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | SorosPound simulation with MacroHedgeFund, PegDefender, ConvergenceTrader |
-| **Academic Value** | Understanding sorospound through multi-agent simulation |
+|---|---|
+| Variant | Rule |
+| Mechanism | Deterministic speculative-attack and peg-defense rules |
+| Market | Price/fundamental market with peg-pressure dynamics |
+| Agents | MacroHedgeFund, PegDefender, ConvergenceTrader, OpportunisticTrader, NoiseTrader |
+| Runtime Change | Documentation-only rewrite of existing Rule guide; no code/config change |
 
-## Theoretical Foundation
+## §2 Theory → Implementation Mapping
 
-- Obstfeld (1996): Models of currency crises with self-fulfilling features
-- Eichengreen & Wyplosz (1993): The unstable EMS
-- Soros (2003): The alchemy of finance
-## Agent Descriptions
+| Agent | Root Section | Runtime Implementation |
+|---|---|---|
+| MacroHedgeFund | `simulation-bases.md §4.1` | Rule class builds directional pressure against an unsustainable peg |
+| PegDefender | `simulation-bases.md §4.2` | Rule class offsets pressure with stabilizing intervention |
+| ConvergenceTrader | `simulation-bases.md §4.3` | Rule class represents capital betting the peg holds |
+| OpportunisticTrader | `simulation-bases.md §4.4` | Rule class joins visible speculative pressure |
+| NoiseTrader | `simulation-bases.md §4.5` | Rule class supplies stochastic background liquidity |
 
-### MacroHedgeFund
-**Theoretical Basis**: Macro speculative attacks (Soros, 2003)
-**Market Role**: destabilizing
-**Description**: Builds massive short positions against currencies with unsustainable pegs
-**Parameters**: position_size=2000, leverage=10.0
+## §3 Market Mechanism Implementation
 
-### PegDefender
-**Theoretical Basis**: Central bank peg defense (Eichengreen & Wyplosz, 1993)
-**Market Role**: stabilizing
-**Description**: Attempts to maintain currency peg through interest rate hikes and intervention
-**Parameters**: reserve_capacity=1000000, rate_hike_limit=0.15
+The Rule variant implements the shared market in `players.py`. Orders from
+investors are cleared by the market player and update price relative to
+fundamental/peg pressure. The implementation corresponds to
+`simulation-bases.md §3`.
 
-### ConvergenceTrader
-**Theoretical Basis**: ERM convergence trade (Eichengreen & Wyplosz, 1993)
-**Market Role**: neutral
-**Description**: Takes positions expecting the peg to hold, loses when it breaks
-**Parameters**: convergence_threshold=0.02, position_size=500
+## §4 Rule Variant-Specific Features
 
-### OpportunisticTrader
-**Theoretical Basis**: Second-generation crisis (Obstfeld, 1996)
-**Market Role**: destabilizing
-**Description**: Joins speculative attacks once they begin, amplifying selling pressure
-**Parameters**: attack_join_threshold=0.05, position_size=400
+All investor decisions are encoded in Python thresholds and sizing rules. This
+variant provides the deterministic baseline for comparing LLM, RuleLLM, and Rag
+behavior.
 
-### NoiseTrader
-**Theoretical Basis**: Noise trader model (Black, 1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader providing baseline liquidity
-**Parameters**: trade_probability=0.3
+## §5 Architecture Diagram
 
+```text
+Market broadcast -> rule investor decide() -> order dict -> Market clearing
+```
 
-## Market Dynamics
+## §6 Configuration Reference
 
-Price follows: P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
+Primary config: `configs/SorosPound/Rule/players.yml`.
+
+## §7 Running Instructions
+
+```bash
+python examples/SorosPound/Rule/run_sorospound.py \
+  -c configs/SorosPound/Rule/simulation.yml
+```
+
+## §8 Expected Behavior Patterns
+
+Macro and opportunistic agents should increase attack pressure; PegDefender and
+ConvergenceTrader should resist until credibility weakens.
+
+## §9 References
+
+See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
+`../analysis-bases.md §2`.
