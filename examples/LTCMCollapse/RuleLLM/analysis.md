@@ -8,13 +8,13 @@ RuleLLM analysis compares formula-guided LLM behavior with the deterministic Rul
 
 | Metric | analysis-bases Ref | Function | RuleLLM-Specific Note |
 |---|---|---|---|
-| Price deviation | `§2.1` | imported `calculate_metrics(data)` | should remain close to Rule if embedded rules bind |
-| Maximum drawdown proxy | `§2.2` | imported `calculate_metrics(data)` | compare severity against Rule and LLM |
-| Mean absolute deviation | `§2.3` | imported `calculate_metrics(data)` | persistence of stress |
-| Volatility | `§2.4` | imported `calculate_metrics(data)` | rule-guided crisis instability |
-| Price trough | `§2.5` | imported `calculate_metrics(data)` | lowest rule-guided API price |
-| Final recovery | `§2.6` | imported `calculate_metrics(data)` | recovery relative to baseline |
-| LLM output quality | `§2.7` | `audit_llm_output_quality.py` | parse/fallback/action quality |
+| Price deviation | `analysis-bases.md §2.1` | imported `calculate_metrics(data)` | should remain close to Rule if embedded rules bind |
+| Maximum drawdown | `analysis-bases.md §2.2` | imported `calculate_metrics(data)` | compare severity against Rule and LLM |
+| Mean absolute deviation | `analysis-bases.md §2.3` | imported `calculate_metrics(data)` | persistence of stress |
+| Volatility | `analysis-bases.md §2.4` | imported `calculate_metrics(data)` | rule-guided crisis instability |
+| Price trough | `analysis-bases.md §2.5` | imported `calculate_metrics(data)` | lowest rule-guided API price |
+| Final recovery | `analysis-bases.md §2.6` | imported `calculate_metrics(data)` | recovery relative to baseline |
+| LLM output quality | `analysis-bases.md §2.7` | `audit_llm_output_quality.py` | parse/fallback/action quality |
 
 ## §3 Variant-Specific Notes
 
@@ -35,7 +35,7 @@ Price and volatility outputs follow the Rule analysis implementation. Quality ou
 
 ## §6 Cross-Variant Comparison
 
-RuleLLM isolates the effect of language reasoning when the investor's rule knowledge is made explicit in the prompt.
+RuleLLM isolates the effect of language reasoning when the investor's rule knowledge from `simulation-bases.md §4` is made explicit in the prompt and then evaluated through `analysis-bases.md §2`.
 
 ## §7 References
 

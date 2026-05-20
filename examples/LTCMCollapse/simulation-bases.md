@@ -141,11 +141,11 @@ The `ConvergenceArbitrageur` represents an LTCM-style relative-value trader that
 
 The simulation uses this investor to model the central LTCM hypothesis: sophisticated arbitrage can be correct in the long run and still fragile under short-run funding pressure.
 
-#### §4.1.2 Theoretical And Empirical Foundation
+#### §4.1.2 Theoretical and Empirical Foundation
 
 Primary theory is limits to arbitrage (§2.1). The agent uses `entry_spread`, `leverage`, and `max_position` to translate deviations into leveraged order size. Empirically, LTCM's convergence trades were exposed to spread widening after the Russian default, making the strategy a natural mapping to this agent.
 
-#### §4.1.3 Design Purpose And Activation Scenarios
+#### §4.1.3 Design Purpose and Activation Scenarios
 
 | Market Condition | Response | Economic Effect | Theory |
 |---|---|---|---|
@@ -188,11 +188,11 @@ The `LeverageTrader` represents balance-sheet-constrained investors whose action
 
 This investor produces forced selling pressure after losses accumulate, capturing the leverage-cycle channel of the LTCM crisis.
 
-#### §4.2.2 Theoretical And Empirical Foundation
+#### §4.2.2 Theoretical and Empirical Foundation
 
 The primary basis is the leverage cycle (§2.2). The code computes equity from portfolio value and leverage exposure, then triggers a 30% deleveraging order when equity falls below a margin-call threshold.
 
-#### §4.2.3 Design Purpose And Activation Scenarios
+#### §4.2.3 Design Purpose and Activation Scenarios
 
 | Market Condition | Response | Economic Effect | Theory |
 |---|---|---|---|
@@ -238,11 +238,11 @@ Geanakoplos (2010); Brunnermeier & Pedersen (2009); Jorion (2000).
 
 The `RiskManager` represents institutional risk-control desks that cut exposure when deviations exceed allowed risk limits. The agent is stabilizing at the individual-book level but can amplify systemic stress when many agents cut positions simultaneously.
 
-#### §4.3.2 Theoretical And Empirical Foundation
+#### §4.3.2 Theoretical and Empirical Foundation
 
 The design is based on VaR procyclicality (§2.3). It operationalizes a risk breach when price deviation exceeds three times the configured VaR limit.
 
-#### §4.3.3 Design Purpose And Activation Scenarios
+#### §4.3.3 Design Purpose and Activation Scenarios
 
 | Market Condition | Response | Economic Effect | Theory |
 |---|---|---|---|
@@ -286,11 +286,11 @@ Jorion (2000); Danielsson et al. (2001), "An academic response to Basel II."
 
 The `LiquidityProvider` represents market makers that supply liquidity when deviations are moderate but withdraw when stress becomes large. Its withdrawal is central to the liquidity-black-hole mechanism.
 
-#### §4.4.2 Theoretical And Empirical Foundation
+#### §4.4.2 Theoretical and Empirical Foundation
 
 The design follows Morris & Shin's liquidity black-hole mechanism (§2.4). Liquidity provision is conditionally stabilizing and disappears in stressed deviations.
 
-#### §4.4.3 Design Purpose And Activation Scenarios
+#### §4.4.3 Design Purpose and Activation Scenarios
 
 | Market Condition | Response | Economic Effect | Theory |
 |---|---|---|---|
@@ -320,11 +320,11 @@ Morris & Shin (2004); Brunnermeier & Pedersen (2009).
 
 The `CentralBank` represents official-sector or coordinated private-sector lender-of-last-resort intervention. It is not a literal central-bank asset purchase model; it abstracts the 1998 coordination role into a stabilizing liquidity injection.
 
-#### §4.5.2 Theoretical And Empirical Foundation
+#### §4.5.2 Theoretical and Empirical Foundation
 
 The design follows Bagehot's lender-of-last-resort principle (§2.5) and the historical New York Fed-facilitated coordination among LTCM counterparties.
 
-#### §4.5.3 Design Purpose And Activation Scenarios
+#### §4.5.3 Design Purpose and Activation Scenarios
 
 | Market Condition | Response | Economic Effect | Theory |
 |---|---|---|---|

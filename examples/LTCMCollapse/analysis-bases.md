@@ -14,7 +14,11 @@
 
 ### §2.1 Price Deviation
 
-- **Function**: `calculate_metrics(data: dict) -> dict`
+- **Function**:
+  ```python
+  def calculate_metrics(data: dict) -> dict:
+      ...
+  ```
 - **Formula**:
   ```
   deviation(t) = (P(t) - F(t)) / F(t)
@@ -24,13 +28,24 @@
 
 ### §2.2 Maximum Drawdown
 
-- **Function**: `calculate_metrics(data: dict) -> dict`
-- **Current Implementation**: reports the minimum one-round return as `price_metrics.max_drawdown_pct`.
-- **Target Interpretation**: worst price decline during crisis. A future analysis enhancement may compute peak-to-trough drawdown explicitly.
+- **Function**:
+  ```python
+  def calculate_metrics(data: dict) -> dict:
+      ...
+  ```
+- **Formula**:
+  ```
+  max_drawdown = max_t((peak_price(t) - P(t)) / peak_price(t))
+  ```
+- **Interpretation**: worst peak-to-trough price decline during the crisis.
 
 ### §2.3 Mean Absolute Deviation
 
-- **Function**: `calculate_metrics(data: dict) -> dict`
+- **Function**:
+  ```python
+  def calculate_metrics(data: dict) -> dict:
+      ...
+  ```
 - **Formula**:
   ```
   mean_abs_deviation = mean(|deviation(t)|)
@@ -39,7 +54,11 @@
 
 ### §2.4 Volatility
 
-- **Function**: `calculate_metrics(data: dict) -> dict`
+- **Function**:
+  ```python
+  def calculate_metrics(data: dict) -> dict:
+      ...
+  ```
 - **Formula**:
   ```
   volatility = std(returns) * sqrt(252) * 100
@@ -49,7 +68,11 @@
 
 ### §2.5 Price Trough
 
-- **Function**: `calculate_metrics(data: dict) -> dict`
+- **Function**:
+  ```python
+  def calculate_metrics(data: dict) -> dict:
+      ...
+  ```
 - **Formula**:
   ```
   min_price = min(P(t))
@@ -58,7 +81,11 @@
 
 ### §2.6 Final Recovery
 
-- **Function**: `calculate_metrics(data: dict) -> dict`
+- **Function**:
+  ```python
+  def calculate_metrics(data: dict) -> dict:
+      ...
+  ```
 - **Formula**:
   ```
   final_deviation = (P(T) - F(T)) / F(T)
@@ -67,7 +94,11 @@
 
 ### §2.7 LLM Output Quality
 
-- **Function**: external Level-2 audit, `audit_llm_output_quality.py`
+- **Function**:
+  ```python
+  def audit_llm_output_quality(sample_path: str) -> dict:
+      ...
+  ```
 - **Fields**: parse failures, fallback counts, action distribution, completed rounds.
 - **Interpretation**: API-mode success is not just `exit=0`; malformed output and fallback rate must be reviewed.
 
@@ -116,7 +147,7 @@ Compares Rule, LLM, RuleLLM, and Rag runs using the same price metrics and Level
 | final recovery | partial recovery toward fundamental | mean reversion and support should prevent permanent zero |
 | LLM fallback rate | low | high fallback invalidates behavioral interpretation |
 
-The existing `analysis.py` implements a compact subset of these metrics. The analysis basis documents the target framework and identifies future metric expansions without changing simulation runtime.
+The Rule analysis implementation writes these metrics to `metrics.json` and writes validation status to `summary.json`. LLM-family quality checks are performed by the experiment resource-pack audit before a sample is accepted.
 
 ## §7 Visualization Catalogue
 

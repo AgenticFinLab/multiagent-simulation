@@ -12,13 +12,13 @@
 
 ## §2 Theory To Implementation Mapping
 
-| Investor | sim-bases Ref | Class | Prompt Constant | Implementation |
-|---|---|---|---|---|
-| ConvergenceArbitrageur | `§4.1` | `LLMConvergenceArbitrageur` | `LLM_CONVERGENCEARBITRAGEUR_PROMPT` | persona emphasizes spread convergence and leveraged sizing |
-| LeverageTrader | `§4.2` | `LLMLeverageTrader` | `LLM_LEVERAGETRADER_PROMPT` | persona emphasizes margin calls and forced deleveraging |
-| RiskManager | `§4.3` | `LLMRiskManager` | `LLM_RISKMANAGER_PROMPT` | persona emphasizes VaR/risk-limit cuts |
-| LiquidityProvider | `§4.4` | `LLMLiquidityProvider` | `LLM_LIQUIDITYPROVIDER_PROMPT` | persona emphasizes market making and stress withdrawal |
-| CentralBank | `§4.5` | `LLMCentralBank` | `LLM_CENTRALBANK_PROMPT` | persona emphasizes lender-of-last-resort support |
+| Theory Component | Implementation |
+|---|---|
+| ConvergenceArbitrageur (`simulation-bases.md §4.1`) | `LLMConvergenceArbitrageur` uses `LLM_CONVERGENCEARBITRAGEUR_PROMPT`; persona emphasizes spread convergence and leveraged sizing |
+| LeverageTrader (`simulation-bases.md §4.2`) | `LLMLeverageTrader` uses `LLM_LEVERAGETRADER_PROMPT`; persona emphasizes margin calls and forced deleveraging |
+| RiskManager (`simulation-bases.md §4.3`) | `LLMRiskManager` uses `LLM_RISKMANAGER_PROMPT`; persona emphasizes VaR/risk-limit cuts |
+| LiquidityProvider (`simulation-bases.md §4.4`) | `LLMLiquidityProvider` uses `LLM_LIQUIDITYPROVIDER_PROMPT`; persona emphasizes market making and stress withdrawal |
+| CentralBank (`simulation-bases.md §4.5`) | `LLMCentralBank` uses `LLM_CENTRALBANK_PROMPT`; persona emphasizes lender-of-last-resort support |
 
 The LLM variant intentionally does not execute the Rule formulas. It supplies market state and personality instructions, then parses the returned decision JSON.
 

@@ -8,13 +8,13 @@ Rag analysis compares historically informed LLM behavior with Rule, LLM, and Rul
 
 | Metric | analysis-bases Ref | Function | Rag-Specific Note |
 |---|---|---|---|
-| Price deviation | `§2.1` | imported `calculate_metrics(data)` | effect of retrieved context on dislocation |
-| Maximum drawdown proxy | `§2.2` | imported `calculate_metrics(data)` | crisis severity |
-| Mean absolute deviation | `§2.3` | imported `calculate_metrics(data)` | persistence |
-| Volatility | `§2.4` | imported `calculate_metrics(data)` | instability |
-| Price trough | `§2.5` | imported `calculate_metrics(data)` | lowest RAG price |
-| Final recovery | `§2.6` | imported `calculate_metrics(data)` | stabilization |
-| LLM output quality | `§2.7` | `audit_llm_output_quality.py` | parse failures, fallback holds, action validity |
+| Price deviation | `analysis-bases.md §2.1` | imported `calculate_metrics(data)` | effect of retrieved context on dislocation |
+| Maximum drawdown | `analysis-bases.md §2.2` | imported `calculate_metrics(data)` | crisis severity |
+| Mean absolute deviation | `analysis-bases.md §2.3` | imported `calculate_metrics(data)` | persistence |
+| Volatility | `analysis-bases.md §2.4` | imported `calculate_metrics(data)` | instability |
+| Price trough | `analysis-bases.md §2.5` | imported `calculate_metrics(data)` | lowest RAG price |
+| Final recovery | `analysis-bases.md §2.6` | imported `calculate_metrics(data)` | stabilization |
+| LLM output quality | `analysis-bases.md §2.7` | `audit_llm_output_quality.py` | parse failures, fallback holds, action validity |
 
 ## §3 Variant-Specific Notes
 
@@ -35,7 +35,7 @@ The current `analysis.py` imports Rule analysis functions. RAG-specific quality 
 
 ## §6 Cross-Variant Comparison
 
-RAG should be compared primarily against RuleLLM, because both share persona/rule prompts and differ by retrieved context.
+RAG should be compared primarily against RuleLLM, because both share persona/rule prompts from `simulation-bases.md §4` and differ by retrieved context under the same `analysis-bases.md §2` metric catalogue.
 
 ## §7 References
 

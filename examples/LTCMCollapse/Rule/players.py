@@ -26,6 +26,11 @@ from masim.player.general import GeneralPlayer
 logger = logging.getLogger("LTCMCollapse")
 
 
+def _require_positive(value: float, name: str) -> None:
+    if value <= 0:
+        raise ValueError(f"{name} must be positive, got {value}")
+
+
 class Market(GeneralPlayer):
     """
     Market agent for LTCMCollapse simulation.
@@ -75,7 +80,8 @@ class Market(GeneralPlayer):
     async def decide(self) -> dict:
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        deviation = (price - fundamental) / fundamental if fundamental > 0 else 0
+        _require_positive(fundamental, "fundamental")
+        deviation = (price - fundamental) / fundamental
         market_update = {
             "type": "market_update",
             "price": price,
@@ -114,11 +120,11 @@ class Market(GeneralPlayer):
 
 
 class ConvergenceArbitrageur(GeneralPlayer):
-    """
-    Bets on spread convergence between related securities using high leverage.
+    """Bets on spread convergence between related securities using high leverage.
 
-    Theoretical Basis: Limits to arbitrage (Shleifer & Vishny, 1997)
-    Market Role: destabilizing — amplifies swings when leveraged bets unwind
+    Theory: simulation-bases.md §4.1 — ConvergenceArbitrageur
+    Theoretical basis: Shleifer & Vishny (1997) limits to arbitrage.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -146,22 +152,14 @@ class ConvergenceArbitrageur(GeneralPlayer):
         max_position = extras["max_position"]
         if abs(deviation) > entry_spread:
             leveraged_cash = cash * leverage
+            _require_positive(price, "price")
             if deviation < 0:
-                buy_qty = (
-                    min(int(leveraged_cash * abs(deviation) / price), max_position)
-                    if price > 0
-                    else 0
-                )
+                buy_qty = min(int(leveraged_cash * abs(deviation) / price), max_position)
                 if buy_qty > 0:
                     return {"action": "buy", "quantity": buy_qty}
-            else:
-                sell_qty = (
-                    min(int(leveraged_cash * abs(deviation) / price), max(position, 0))
-                    if price > 0
-                    else 0
-                )
-                if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
+            sell_qty = min(int(leveraged_cash * abs(deviation) / price), max(position, 0))
+            if sell_qty > 0:
+                return {"action": "sell", "quantity": sell_qty}
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
@@ -186,11 +184,11 @@ class ConvergenceArbitrageur(GeneralPlayer):
 
 
 class LeverageTrader(GeneralPlayer):
-    """
-    Highly leveraged trader forced to deleverage when losses mount.
+    """Highly leveraged trader forced to deleverage when losses mount.
 
-    Theoretical Basis: Leverage cycle (Geanakoplos, 2010)
-    Market Role: destabilizing — fire-sale selling amplifies downturns
+    Theory: simulation-bases.md §4.2 — LeverageTrader
+    Theoretical basis: Geanakoplos (2010) leverage cycle.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -222,7 +220,8 @@ class LeverageTrader(GeneralPlayer):
                 return {"action": "sell", "quantity": min(delever_qty, position)}
             if position < 0:
                 return {"action": "buy", "quantity": delever_qty}
-        elif deviation < -0.03 and price > 0:
+        elif deviation < -0.03:
+            _require_positive(price, "price")
             buy_qty = min(int(cash * leverage_ratio * 0.01 / price), 5000)
             if buy_qty > 0:
                 return {"action": "buy", "quantity": buy_qty}
@@ -250,11 +249,11 @@ class LeverageTrader(GeneralPlayer):
 
 
 class RiskManager(GeneralPlayer):
-    """
-    Monitors portfolio risk and cuts positions when VaR thresholds are breached.
+    """Monitors portfolio risk and cuts positions when VaR thresholds are breached.
 
-    Theoretical Basis: VaR-based risk management
-    Market Role: stabilizing short-term, but can amplify crises through simultaneous cuts
+    Theory: simulation-bases.md §4.3 — RiskManager
+    Theoretical basis: Jorion (2000) VaR and LTCM risk-management lessons.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -305,11 +304,11 @@ class RiskManager(GeneralPlayer):
 
 
 class LiquidityProvider(GeneralPlayer):
-    """
-    Provides market liquidity under normal conditions but withdraws under stress.
+    """Provides market liquidity under normal conditions but withdraws under stress.
 
-    Theoretical Basis: Liquidity black holes (Morris & Shin, 2004)
-    Market Role: stabilizing when normal, but amplifies crises when withdrawing
+    Theory: simulation-bases.md §4.4 — LiquidityProvider
+    Theoretical basis: Morris & Shin (2004) liquidity black holes.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -335,12 +334,13 @@ class LiquidityProvider(GeneralPlayer):
         if abs(deviation) > 0.05:
             return {"action": "hold", "quantity": 0}
         if abs(position) < inventory_limit:
+            _require_positive(price, "price")
             qty = min(500, inventory_limit - abs(position))
             if deviation > 0:
                 return {"action": "sell", "quantity": qty}
             return {
                 "action": "buy",
-                "quantity": min(qty, int(cash / price) if price > 0 else 0),
+                "quantity": min(qty, int(cash / price)),
             }
         return {"action": "hold", "quantity": 0}
 
@@ -366,11 +366,11 @@ class LiquidityProvider(GeneralPlayer):
 
 
 class CentralBank(GeneralPlayer):
-    """
-    Lender of last resort providing emergency liquidity during crisis.
+    """Lender of last resort providing emergency liquidity during crisis.
 
-    Theoretical Basis: Bagehot (1873): lend freely at a penalty rate against good collateral
-    Market Role: stabilizing — arrests panic and prevents systemic collapse
+    Theory: simulation-bases.md §4.5 — CentralBank
+    Theoretical basis: Bagehot (1873) lender of last resort.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:

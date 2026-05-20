@@ -12,13 +12,13 @@
 
 ## §2 Theory To Implementation Mapping
 
-| Investor | sim-bases Ref | Class | Prompt Constant | Rule Encoding |
-|---|---|---|---|---|
-| ConvergenceArbitrageur | `§4.1` | `RuleLLMConvergenceArbitrageur` | `RULELLM_CONVERGENCEARBITRAGEUR_PROMPT` | `== DECISION RULES ==` states ±3% spread trigger and capped leveraged sizing |
-| LeverageTrader | `§4.2` | `RuleLLMLeverageTrader` | `RULELLM_LEVERAGETRADER_PROMPT` | margin-call deleveraging and undervaluation buying rules |
-| RiskManager | `§4.3` | `RuleLLMRiskManager` | `RULELLM_RISKMANAGER_PROMPT` | three-times-VaR breach and 50% risk-cut rule |
-| LiquidityProvider | `§4.4` | `RuleLLMLiquidityProvider` | `RULELLM_LIQUIDITYPROVIDER_PROMPT` | 5% stress withdrawal and normal liquidity provision |
-| CentralBank | `§4.5` | `RuleLLMCentralBank` | `RULELLM_CENTRALBANK_PROMPT` | -10% systemic stress threshold and buy-only intervention |
+| Theory Component | Implementation |
+|---|---|
+| ConvergenceArbitrageur (`simulation-bases.md §4.1`) | `RuleLLMConvergenceArbitrageur` uses `RULELLM_CONVERGENCEARBITRAGEUR_PROMPT`; `== DECISION RULES ==` states ±3% spread trigger and capped leveraged sizing |
+| LeverageTrader (`simulation-bases.md §4.2`) | `RuleLLMLeverageTrader` uses `RULELLM_LEVERAGETRADER_PROMPT`; prompt encodes margin-call deleveraging and undervaluation buying rules |
+| RiskManager (`simulation-bases.md §4.3`) | `RuleLLMRiskManager` uses `RULELLM_RISKMANAGER_PROMPT`; prompt encodes three-times-VaR breach and 50% risk-cut rule |
+| LiquidityProvider (`simulation-bases.md §4.4`) | `RuleLLMLiquidityProvider` uses `RULELLM_LIQUIDITYPROVIDER_PROMPT`; prompt encodes 5% stress withdrawal and normal liquidity provision |
+| CentralBank (`simulation-bases.md §4.5`) | `RuleLLMCentralBank` uses `RULELLM_CENTRALBANK_PROMPT`; prompt encodes -10% systemic stress threshold and buy-only intervention |
 
 ## §3 Market Mechanism Implementation
 

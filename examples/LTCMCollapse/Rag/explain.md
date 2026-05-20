@@ -12,13 +12,13 @@
 
 ## §2 Theory To Implementation Mapping
 
-| Investor | sim-bases Ref | Class | Prompt Constant | RAG Addition |
-|---|---|---|---|---|
-| ConvergenceArbitrageur | `§4.1` | `RagLLMConvergenceArbitrageur` | `RAG_CONVERGENCEARBITRAGEUR_PROMPT` | retrieved knowledge can contextualize spread widening and convergence risk |
-| LeverageTrader | `§4.2` | `RagLLMLeverageTrader` | `RAG_LEVERAGETRADER_PROMPT` | retrieved knowledge can emphasize funding spirals |
-| RiskManager | `§4.3` | `RagLLMRiskManager` | `RAG_RISKMANAGER_PROMPT` | retrieved knowledge can inform risk-limit urgency |
-| LiquidityProvider | `§4.4` | `RagLLMLiquidityProvider` | `RAG_LIQUIDITYPROVIDER_PROMPT` | retrieved knowledge can inform liquidity withdrawal |
-| CentralBank | `§4.5` | `RagLLMCentralBank` | `RAG_CENTRALBANK_PROMPT` | retrieved knowledge can inform intervention rationale |
+| Theory Component | Implementation |
+|---|---|
+| ConvergenceArbitrageur (`simulation-bases.md §4.1`) | `RagLLMConvergenceArbitrageur` uses `RAG_CONVERGENCEARBITRAGEUR_PROMPT`; retrieved knowledge can contextualize spread widening and convergence risk |
+| LeverageTrader (`simulation-bases.md §4.2`) | `RagLLMLeverageTrader` uses `RAG_LEVERAGETRADER_PROMPT`; retrieved knowledge can emphasize funding spirals |
+| RiskManager (`simulation-bases.md §4.3`) | `RagLLMRiskManager` uses `RAG_RISKMANAGER_PROMPT`; retrieved knowledge can inform risk-limit urgency |
+| LiquidityProvider (`simulation-bases.md §4.4`) | `RagLLMLiquidityProvider` uses `RAG_LIQUIDITYPROVIDER_PROMPT`; retrieved knowledge can inform liquidity withdrawal |
+| CentralBank (`simulation-bases.md §4.5`) | `RagLLMCentralBank` uses `RAG_CENTRALBANK_PROMPT`; retrieved knowledge can inform intervention rationale |
 
 ## §3 Market Mechanism Implementation
 

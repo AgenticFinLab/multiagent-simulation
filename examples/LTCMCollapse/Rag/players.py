@@ -42,8 +42,9 @@ class RagLLMInvestor(GeneralPlayer):
     def _initialize_rag(self):
         """Initialize RAG context from config extras."""
         extras = self.config.extras
-        if extras.get("rag_context"):
+        if "rag_context" in extras and extras["rag_context"]:
             return extras["rag_context"]
+
         rag_cfg = extras.get("rag") or extras.get("private_knowledge", {}).get("rag", {})
         if rag_cfg.get("context_template"):
             return rag_cfg["context_template"]
@@ -57,7 +58,7 @@ class RagLLMInvestor(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -152,31 +153,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMConvergenceArbitrageur(RagLLMInvestor):
-    """RAG ConvergenceArbitrageur: leveraged spread convergence trader."""
+    """RAG leveraged spread convergence trader. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RAG_CONVERGENCEARBITRAGEUR_PROMPT
 
 
 class RagLLMLeverageTrader(RagLLMInvestor):
-    """RAG LeverageTrader: forced deleveraging under margin pressure."""
+    """RAG margin-pressure deleveraging trader. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RAG_LEVERAGETRADER_PROMPT
 
 
 class RagLLMRiskManager(RagLLMInvestor):
-    """RAG RiskManager: VaR-based position cutting."""
+    """RAG VaR-based position cutter. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RAG_RISKMANAGER_PROMPT
 
 
 class RagLLMLiquidityProvider(RagLLMInvestor):
-    """RAG LiquidityProvider: market maker withdrawing under stress."""
+    """RAG stress-sensitive liquidity provider. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RAG_LIQUIDITYPROVIDER_PROMPT
 
 
 class RagLLMCentralBank(RagLLMInvestor):
-    """RAG CentralBank: lender of last resort."""
+    """RAG lender-of-last-resort intervention agent. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RAG_CENTRALBANK_PROMPT
 

@@ -12,9 +12,9 @@
 
 ## §2 Theory To Implementation Mapping
 
-### ConvergenceArbitrageur
+### §2.1 ConvergenceArbitrageur (simulation-bases.md §4.1)
 
-| Design Element | Implementation |
+| Theory Component | Implementation |
 |---|---|
 | Theory | `simulation-bases.md §4.1` |
 | Class | `ConvergenceArbitrageur` in `players.py` |
@@ -23,9 +23,9 @@
 | State | `cash`, `position`, `price`, `fundamental`, `deviation` |
 | Config | `configs/LTCMCollapse/Rule/players.yml` key `convergencearbitrageur` |
 
-### LeverageTrader
+### §2.2 LeverageTrader (simulation-bases.md §4.2)
 
-| Design Element | Implementation |
+| Theory Component | Implementation |
 |---|---|
 | Theory | `simulation-bases.md §4.2` |
 | Class | `LeverageTrader` |
@@ -33,27 +33,27 @@
 | Deleveraging | sells or buys `int(abs(position) * 0.3)` |
 | Opportunity Branch | buys when `deviation < -0.03` and no margin breach |
 
-### RiskManager
+### §2.3 RiskManager (simulation-bases.md §4.3)
 
-| Design Element | Implementation |
+| Theory Component | Implementation |
 |---|---|
 | Theory | `simulation-bases.md §4.3` |
 | Class | `RiskManager` |
 | Trigger | `abs(deviation) > extras["var_limit"] * 3` |
 | Sizing | cuts 50% of absolute position |
 
-### LiquidityProvider
+### §2.4 LiquidityProvider (simulation-bases.md §4.4)
 
-| Design Element | Implementation |
+| Theory Component | Implementation |
 |---|---|
 | Theory | `simulation-bases.md §4.4` |
 | Class | `LiquidityProvider` |
 | Stress Withdrawal | holds when `abs(deviation) > 0.05` |
 | Normal Liquidity | buys or sells up to 500 shares inside `inventory_limit` |
 
-### CentralBank
+### §2.5 CentralBank (simulation-bases.md §4.5)
 
-| Design Element | Implementation |
+| Theory Component | Implementation |
 |---|---|
 | Theory | `simulation-bases.md §4.5` |
 | Class | `CentralBank` |

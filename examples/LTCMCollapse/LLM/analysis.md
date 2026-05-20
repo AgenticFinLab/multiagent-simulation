@@ -8,13 +8,13 @@ The LLM variant uses the same price-series analysis as Rule and adds Level-2 LLM
 
 | Metric | analysis-bases Ref | Function | LLM-Specific Note |
 |---|---|---|---|
-| Price deviation | `§2.1` | imported `calculate_metrics(data)` | compare dislocation with Rule |
-| Maximum drawdown proxy | `§2.2` | imported `calculate_metrics(data)` | API behavior may change severity |
-| Mean absolute deviation | `§2.3` | imported `calculate_metrics(data)` | tracks persistence |
-| Volatility | `§2.4` | imported `calculate_metrics(data)` | tracks crisis instability |
-| Price trough | `§2.5` | imported `calculate_metrics(data)` | lowest API-mode price |
-| Final recovery | `§2.6` | imported `calculate_metrics(data)` | end-state stabilization |
-| LLM output quality | `§2.7` | `audit_llm_output_quality.py` | parse/fallback/action-quality review |
+| Price deviation | `analysis-bases.md §2.1` | imported `calculate_metrics(data)` | compare dislocation with Rule |
+| Maximum drawdown | `analysis-bases.md §2.2` | imported `calculate_metrics(data)` | API behavior may change severity |
+| Mean absolute deviation | `analysis-bases.md §2.3` | imported `calculate_metrics(data)` | tracks persistence |
+| Volatility | `analysis-bases.md §2.4` | imported `calculate_metrics(data)` | tracks crisis instability |
+| Price trough | `analysis-bases.md §2.5` | imported `calculate_metrics(data)` | lowest API-mode price |
+| Final recovery | `analysis-bases.md §2.6` | imported `calculate_metrics(data)` | end-state stabilization |
+| LLM output quality | `analysis-bases.md §2.7` | `audit_llm_output_quality.py` | parse/fallback/action-quality review |
 
 ## §3 Variant-Specific Notes
 
@@ -35,7 +35,7 @@ Analysis artifacts are written under the configured `record_path`. LLM quality a
 
 ## §6 Cross-Variant Comparison
 
-LLM is compared against Rule to isolate language-only behavioral variation. RuleLLM and Rag should later determine whether explicit rules or retrieved knowledge narrow or widen that variation.
+LLM is compared against Rule to isolate language-only behavioral variation. RuleLLM and Rag should later determine whether explicit rules or retrieved knowledge narrow or widen that variation against `analysis-bases.md §2` and `simulation-bases.md §4`.
 
 ## §7 References
 

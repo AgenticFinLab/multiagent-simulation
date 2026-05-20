@@ -127,31 +127,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMConvergenceArbitrageur(LLMInvestor):
-    """LLM-driven ConvergenceArbitrageur: leveraged spread convergence trader."""
+    """LLM-driven leveraged spread convergence trader. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = LLM_CONVERGENCEARBITRAGEUR_PROMPT
 
 
 class LLMLeverageTrader(LLMInvestor):
-    """LLM-driven LeverageTrader: forced deleveraging under margin pressure."""
+    """LLM-driven margin-pressure deleveraging trader. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = LLM_LEVERAGETRADER_PROMPT
 
 
 class LLMRiskManager(LLMInvestor):
-    """LLM-driven RiskManager: VaR-based position cutting."""
+    """LLM-driven VaR-based position cutter. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = LLM_RISKMANAGER_PROMPT
 
 
 class LLMLiquidityProvider(LLMInvestor):
-    """LLM-driven LiquidityProvider: market maker withdrawing under stress."""
+    """LLM-driven stress-sensitive liquidity provider. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = LLM_LIQUIDITYPROVIDER_PROMPT
 
 
 class LLMCentralBank(LLMInvestor):
-    """LLM-driven CentralBank: lender of last resort emergency interventions."""
+    """LLM-driven lender-of-last-resort intervention agent. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = LLM_CENTRALBANK_PROMPT
 
