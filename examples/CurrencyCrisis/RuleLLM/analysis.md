@@ -1,42 +1,61 @@
 # CurrencyCrisis RuleLLM Variant — analysis.md
 
-## §1 Metrics and Functions
+## §1 Analysis Overview
 
-| Metric                                      | Function                                                                      | analysis-bases.md Ref |
-|---------------------------------------------|-------------------------------------------------------------------------------|-----------------------|
-| Attack Intensity Index (AII)                | `attack_intensity_index(price_history, fundamental)`                          | §2.1                  |
-| Peg Survival Duration (PSD)                 | `peg_survival_duration(price_history, fundamental, breach_threshold=-0.05)`   | §2.2                  |
-| Defense Exhaustion Rate (DER)               | `defense_exhaustion_rate(defender_cash_history, initial_cash, crisis_rounds)` | §2.3                  |
-| Self-Fulfilling Amplification Factor (SFAF) | `self_fulfilling_amplification_factor(agent_volume_by_type)`                  | §2.4                  |
-| Fundamental Anchor Strength (FAS)           | `fundamental_anchor_strength(hedger_orders, attack_phase_rounds)`             | §2.5                  |
-| Recovery Speed (RS)                         | `recovery_speed(price_history, fundamental, recovery_threshold=0.03)`         | §2.6                  |
-| Wealth Transfer Index (WTI)                 | `wealth_transfer_index(agent_final_states, final_price, initial_wealth)`      | §2.7                  |
+The RuleLLM analysis evaluates agents that receive the same behavioral rule
+structure as the Rule variant but express decisions through LLM reasoning. The
+core question is whether language-mediated decisions preserve the deterministic
+crisis mechanism while changing timing, quantities, or reasoning traces.
 
-## §2 RuleLLM Variant Notes
+## §2 Metric Implementation
 
-**Analysis script**: `CurrencyCrisis/RuleLLM/analysis.py`
+`RuleLLM/analysis.py` imports the Rule analysis functions:
 
-Key RuleLLM-variant-specific analysis notes:
+| Function | Purpose | Root reference |
+|---|---|---|
+| `load_simulation_data(config)` | Load market and order records | `analysis-bases.md §2` |
+| `calculate_metrics(data)` | Compute AII, PSD, DER, SFAF, FAS, RS, and WTI | `analysis-bases.md §2.1-§2.7` |
+| `create_visualizations(data, output_dir, variant)` | Generate standard diagnostics | `analysis-bases.md §7` |
 
-- **Rule fidelity check**: Compute AII and PSD for RuleLLM vs. Rule; differences > 10% indicate LLM is overriding embedded rules.
-- **SFAF hybrid signal**: RuleLLM SFAF should bracket Rule (mechanical) and LLM (narrative-driven); values outside this range indicate rule-prompt conflict.
-- **DER step vs. smooth**: Plot DER curve and compare step-function shape (Rule) vs. smoother profile (LLM); RuleLLM should resemble Rule with minor smoothing.
-- **FAS compliance**: RuleLLM FundamentalHedger should hit 8% threshold reliably; FAS deviation from Rule signals LLM threshold drift.
-- **WTI symmetry**: RuleLLM symmetric design should maintain WTI ≈ 0; positive WTI indicates rule-constrained attacker still outperforms.
+## §3 Dimension-by-Dimension Interpretation
 
-## §3 Output Files
+| Dimension | RuleLLM-specific interpretation |
+|---|---|
+| Attack depth | Should remain near Rule if embedded decision rules are followed. |
+| Peg survival | Deviations from Rule indicate LLM quantity adjustment or delayed action. |
+| Defense exhaustion | Should show rule-anchored central-bank defense with possible LLM smoothing. |
+| Self-fulfilling amplification | Should preserve the expectation-channel direction from Rule. |
+| Fundamental anchor | Should remain active during attack phases. |
+| Recovery | Language reasoning may speed or slow post-trough stabilization. |
+| Wealth transfer | Measures whether LLM reasoning shifts profits relative to the rule baseline. |
 
-RuleLLM variant produces the following output files in `outputs/CurrencyCrisis/RuleLLM/`:
+## §4 Variant-Specific Phenomena
 
-| File                   | Content                                       |
-|------------------------|-----------------------------------------------|
-| `price_history.csv`    | Round-by-round price and deviation            |
-| `agent_orders.csv`     | Per-agent order action, quantity, round       |
-| `agent_wealth.csv`     | Per-agent cash, position, wealth by round     |
-| `metrics_summary.json` | AII, PSD, DER, SFAF, FAS, RS, WTI             |
-| `llm_responses.jsonl`  | Raw LLM outputs with embedded rule compliance |
+RuleLLM prompts must contain `== PERSONA ==` and `== DECISION RULES ==` sections.
+The decision-rules section re-expresses the Rule variant's thresholds and order
+limits in natural language, while the persona section supplies institutional
+role and behavioral style.
 
-## §4 References
+## §5 Output Files
 
-All metric definitions with DOI citations: `analysis-bases.md §2`.  
-Investor theory references: `simulation-bases.md §4.1–§4.5`.
+Running `RuleLLM/analysis.py` writes:
+
+| File | Contents |
+|---|---|
+| `currencycrisis_rulellm_analysis.png` | Standard market and deviation diagnostics |
+| `currencycrisis_rulellm_metrics.json` | Core metric summary |
+
+## §6 Cross-Variant Comparison
+
+| Comparison | Interpretation |
+|---|---|
+| RuleLLM vs Rule | Measures language-reasoning effects under fixed rule guidance. |
+| RuleLLM vs LLM | Measures the effect of explicit quantitative rules. |
+| RuleLLM vs Rag | Isolates the effect of retrieved domain knowledge. |
+
+## §7 Quality Checks
+
+- Confirm 200 configured rounds completed.
+- Confirm no LLM parse failures or retries remain unresolved.
+- Confirm prompt sections include both persona and decision-rule labels.
+- Confirm order actions and quantities remain valid after LLM parsing.

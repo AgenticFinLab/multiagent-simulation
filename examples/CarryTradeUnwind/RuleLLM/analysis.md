@@ -84,3 +84,10 @@ Within-rule decisions (correct sign) may have different quantities than Rule:
 | Recovery ratio     | Moderate        | Variable          | Informed by rule text |
 
 **Primary finding to report**: Compare dynamics across variants to understand how embedded rules influence LLM decision-making. If RuleLLM dynamics ≈ Rule baseline, then rule embedding successfully characterizes investor behavior.
+
+## §7 Quality Checks
+
+- Confirm the run completed the configured round count.
+- Audit parse failures, retry counts, and fallback behavior before acceptance.
+- Confirm RuleLLM reasoning remains compatible with embedded carry-trade rules
+  while preserving valid order payload fields.

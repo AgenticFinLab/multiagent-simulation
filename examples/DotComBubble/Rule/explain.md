@@ -87,3 +87,13 @@ python -m examples.DotComBubble.Rule.run_dotcombubble
 ## §8 References
 
 See `simulation-bases.md §2` for full DOI citations.
+
+## §9 Cross-Variant Role
+
+Rule output is the deterministic baseline for:
+
+| Comparison | Purpose |
+|---|---|
+| Rule vs LLM | Test whether persona-only LLM agents reproduce narrative-driven bubble dynamics. |
+| Rule vs RuleLLM | Test whether explicit rule guidance preserves the deterministic bubble mechanism under LLM reasoning. |
+| RuleLLM vs Rag | Test whether retrieved bubble-history knowledge changes valuation discipline, momentum following, or short-seller behavior. |

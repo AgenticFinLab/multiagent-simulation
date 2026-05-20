@@ -82,3 +82,10 @@ market signals are borderline. This reduces crisis severity compared to Rule.
 | `annualized_vol_pct` | Lower (LLM smoothing)    |
 
 Use `summary.json` from each variant to build a comparison table.
+
+## §7 Quality Checks
+
+- Confirm the run completed the configured round count.
+- Audit parse failures, retry counts, and fallback behavior before acceptance.
+- Confirm LLM decisions preserve valid `action`, `quantity`, and order payload
+  fields throughout the run.

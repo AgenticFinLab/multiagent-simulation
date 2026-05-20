@@ -2,88 +2,98 @@
 
 ## §1 Overview
 
-The Rule variant implements CurrencyCrisis with deterministic threshold rules. Attack behavior scales with current deviation; self-fulfilling momentum is tracked via 3-period price history; central bank defense is activated by fixed thresholds. This provides the baseline FX crisis dynamics.
+The Rule variant implements `simulation-bases.md` with deterministic FX-market
+threshold rules. It is the baseline for measuring whether speculative selling,
+self-fulfilling momentum, central-bank defense, and fundamental anchoring can
+produce a currency-crisis path without language-model reasoning.
 
-| Aspect             | Detail                                        |
-|--------------------|-----------------------------------------------|
-| Variant            | Rule                                          |
-| Simulation         | CurrencyCrisis                                |
-| Decision Mechanism | Threshold rules on δ(t) and 3-period momentum |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`               |
-| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`  |
+| Aspect | Implementation |
+|---|---|
+| Variant | Rule |
+| Market | `Market` clears order flow and broadcasts `price`, `fundamental`, `deviation`, `round` |
+| Agents | `SpeculativeAttacker`, `SelfFulfillingTrader`, `CentralBankDefender`, `FundamentalHedger`, `NoiseTrader` |
+| Runtime source | `examples/CurrencyCrisis/Rule/players.py` |
+| Config source | `configs/CurrencyCrisis/Rule/players.yml` |
 
 ## §2 Theory → Implementation Mapping
 
-### §2.1 SpeculativeAttacker (simulation-bases.md §4.1)
-
-| Theory Component                         | Implementation                               |
-|------------------------------------------|----------------------------------------------|
-| Reserve depletion attack (Krugman, 1979) | `if deviation < −0.03: sell qty × (1 +       |
-| Short-cover on recovery                  | `if deviation > 0.05: buy cover_size`        |
-| Attack scaling                           | `attack_size = 500`; scales dynamically with |
-
-### §2.2 SelfFulfillingTrader (simulation-bases.md §4.2)
-
-| Theory Component                            | Implementation                                     |
-|---------------------------------------------|----------------------------------------------------|
-| Expectation-based momentum (Obstfeld, 1996) | Sell when 3-period momentum < −0.5                 |
-| Coordination signal                         | `momentum = mean(price[-3:]) - mean(price[-6:-3])` |
-| Momentum threshold                          | `momentum_threshold = 0.5`                         |
-
-### §2.3 CentralBankDefender (simulation-bases.md §4.3)
-
-| Theory Component     | Implementation                                  |
-|----------------------|-------------------------------------------------|
-| Reserve intervention | `if deviation < −0.03: buy defense_size (600)`  |
-| Emergency defense    | `if deviation < −0.10: buy reserve_size (1000)` |
-| Reserve constraint   | Limited by `initial_cash`                       |
-
-### §2.4 FundamentalHedger (simulation-bases.md §4.4)
-
-| Theory Component                         | Implementation                               |
-|------------------------------------------|----------------------------------------------|
-| Fundamental anchor (Morris & Shin, 1998) | `if deviation < −0.08: buy order_size (400)` |
-| Overvaluation sell                       | `if deviation > 0.08: sell order_size`       |
-
-### §2.5 NoiseTrader (simulation-bases.md §4.5)
-
-| Theory Component                | Implementation                                       |
-|---------------------------------|------------------------------------------------------|
-| Random FX trading (Black, 1986) | `trade_probability = 0.3`, `qty ~ Uniform(100, 500)` |
+| Theory Component | Implementation |
+|---|---|
+| Reserve-depletion attack (`simulation-bases.md §4.1`) | `SpeculativeAttacker` sells when `deviation < -attack_threshold` and buys back when deviation recovers. |
+| Self-fulfilling expectation channel (`simulation-bases.md §4.2`) | `SelfFulfillingTrader` sells on negative deviation and buys cautiously on recovery. |
+| Peg defense (`simulation-bases.md §4.3`) | `CentralBankDefender` buys when currency weakness exceeds `defense_threshold` and sells when overvalued. |
+| Fundamental-value anchor (`simulation-bases.md §4.4`) | `FundamentalHedger` trades against large deviations from fair value. |
+| Baseline FX liquidity (`simulation-bases.md §4.5`) | `NoiseTrader` adds random buy/sell/hold flow. |
+| Price impact and mean reversion (`simulation-bases.md §3`) | `Market.perceive()` applies net-demand price impact, mean reversion to fundamental value, and Gaussian noise. |
 
 ## §3 Market Mechanism
 
+The market uses the root-document price equation:
+
+```text
+P(t+1) = P(t) + price_impact * net_demand
+       + mean_reversion * (fundamental - P(t)) + noise
 ```
-P(t+1) = P(t) + λ·D(t) + γ·[F(t)−P(t)] + ε(t)
-λ = 0.01, γ = 0.02 (weaker mean-reversion than equity — persistent crisis)
-```
+
+`deviation = (price - fundamental) / fundamental` is the state variable consumed
+by every investor class. Negative deviation means the domestic currency is weak
+relative to the peg.
 
 ## §4 Variant-Specific Features
 
-- **Scaled attack**: SpeculativeAttacker's sell volume scales with `|δ| × 10` — unique to this simulation's attack model.
-- **3-period momentum**: SelfFulfillingTrader uses a 3/6-period moving average difference for the momentum signal.
-- **Two-tier defense**: Normal (600 units at δ < −0.03) and emergency (1,000 units at δ < −0.10).
-- **Wider FundamentalHedger threshold**: 8% vs. 5% in other simulations — reflects FX market broader tolerance.
+Rule decisions are deterministic conditional on the current market state and
+config extras:
+
+| Agent | Trigger | Action |
+|---|---|---|
+| `SpeculativeAttacker` | `deviation < -attack_threshold` | Sell up to `order_size` |
+| `SpeculativeAttacker` | `deviation > attack_threshold` | Buy up to `order_size` |
+| `SelfFulfillingTrader` | `deviation < -contagion_sensitivity` | Sell up to `order_size` |
+| `CentralBankDefender` | `deviation < -defense_threshold` | Buy up to `order_size` |
+| `FundamentalHedger` | `abs(deviation) > fundamental_threshold` | Buy below fair value, sell above fair value |
+| `NoiseTrader` | random draw below `trade_probability` | Random buy or sell |
 
 ## §5 Config Reference
 
-Config file: `CurrencyCrisis/Rule/config.yaml`
+The variant uses `configs/CurrencyCrisis/Rule/players.yml`. Required extras are
+read directly by the corresponding player classes:
 
-Key extras: `initial_price`, `fundamental_value`, `price_impact`, `mean_reversion`, `noise_std`, `attack_threshold`, `attack_size`, `momentum_threshold`, `defense_threshold`, `defense_size`, `crisis_threshold`, `reserve_size`, `fundamental_threshold`, `trade_probability`.
+| Component | Required extras |
+|---|---|
+| `Market` | `record_path`, `custom_state_hot_limit`, `initial_price`, `fundamental_value`, `price_impact`, `mean_reversion`, `noise_std` |
+| Trading agents | `initial_cash`, `initial_position`, and each agent's threshold/order-size parameters |
+| `NoiseTrader` | `trade_probability`, `min_order`, `max_order` |
 
 ## §6 Running Instructions
 
 ```bash
-python -m examples.CurrencyCrisis.Rule.run
+python examples/CurrencyCrisis/Rule/run_currencycrisis.py \
+  -c configs/CurrencyCrisis/Rule/simulation.yml
 ```
+
+The standard matrix runner can also discover this row as `CurrencyCrisis__Rule`.
 
 ## §7 Expected Behavior
 
-- Attack may deepen to −15% to −25% below peg before defense stabilizes
-- SFAF ≈ 0.6–0.9 (self-fulfilling amplification present but not dominant)
-- FAS ≈ 0.5–0.8
-- WTI near-zero if defense is effective; positive if peg collapses
+- Speculative and self-fulfilling sellers should create negative-deviation
+  pressure when the peg weakens.
+- Central-bank and fundamental investors should dampen the sell-off.
+- The price series should show whether attack pressure exceeds stabilizing
+  demand.
+- The Rule variant provides the deterministic benchmark for the LLM, RuleLLM,
+  and RAG variants.
 
 ## §8 References
 
-See `simulation-bases.md §2` for full DOI citations.
+The theoretical references and calibration rationale are in
+`simulation-bases.md §2`, `§4`, and `§6`.
+
+## §9 Cross-Variant Role
+
+Rule output is the baseline for:
+
+| Comparison | Purpose |
+|---|---|
+| Rule vs LLM | Test whether persona-only LLM agents reproduce crisis dynamics. |
+| Rule vs RuleLLM | Test how language reasoning changes outcomes when rule structure is explicit. |
+| RuleLLM vs RAG | Test whether retrieved FX-crisis knowledge changes decision quality or crisis severity. |

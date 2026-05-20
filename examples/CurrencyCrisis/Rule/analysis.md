@@ -1,59 +1,65 @@
 # CurrencyCrisis Rule Variant — analysis.md
 
-## §1 Metrics and Functions
+## §1 Analysis Overview
 
-| Metric                                      | Function                                                                      | analysis-bases.md Ref |
-|---------------------------------------------|-------------------------------------------------------------------------------|-----------------------|
-| Attack Intensity Index (AII)                | `attack_intensity_index(price_history, fundamental)`                          | §2.1                  |
-| Peg Survival Duration (PSD)                 | `peg_survival_duration(price_history, fundamental, breach_threshold=-0.05)`   | §2.2                  |
-| Defense Exhaustion Rate (DER)               | `defense_exhaustion_rate(defender_cash_history, initial_cash, crisis_rounds)` | §2.3                  |
-| Self-Fulfilling Amplification Factor (SFAF) | `self_fulfilling_amplification_factor(agent_volume_by_type)`                  | §2.4                  |
-| Fundamental Anchor Strength (FAS)           | `fundamental_anchor_strength(hedger_orders, attack_phase_rounds)`             | §2.5                  |
-| Recovery Speed (RS)                         | `recovery_speed(price_history, fundamental, recovery_threshold=0.03)`         | §2.6                  |
-| Wealth Transfer Index (WTI)                 | `wealth_transfer_index(agent_final_states, final_price, initial_wealth)`      | §2.7                  |
+The Rule analysis interprets deterministic currency-crisis dynamics produced by
+threshold-based agents. It checks whether the simulated peg experiences attack
+pressure, defense, recovery, or collapse in terms defined by
+`analysis-bases.md`.
 
-## §2 Rule Variant Notes
+## §2 Metric Implementation
 
-**Analysis script**: `CurrencyCrisis/Rule/analysis.py`
+`Rule/analysis.py` is the authoritative analysis implementation for all variants.
+It exports:
 
-The Rule variant produces fully deterministic outputs for a given random seed. Key variant-specific analysis notes:
+| Function | Purpose | Root reference |
+|---|---|---|
+| `load_simulation_data(config)` | Load market prices, fundamentals, bids, and payloads | `analysis-bases.md §2` |
+| `calculate_metrics(data)` | Compute attack, defense, amplification, anchor, recovery, and wealth metrics | `analysis-bases.md §2.1-§2.7` |
+| `create_visualizations(data, output_dir, variant)` | Save the standard CurrencyCrisis diagnostic chart | `analysis-bases.md §7` |
 
-- **AII determinism**: SpeculativeAttacker's scaled sell `qty × (1 + |δ| × 10)` means AII is determined mechanically; minimal run-to-run variance (noise term only).
-- **PSD precision**: Peg breach is triggered at exact δ = −0.05 threshold; PSD is predictable from parameter settings.
-- **SFAF baseline**: Rule variant provides the mechanical SFAF baseline (expected ≈ 0.6–0.9) against which LLM coordination amplification is measured.
-- **DER regularity**: Two-tier defense (600/1000 units) produces step-function DER; useful for calibrating reserve sufficiency.
-- **WTI near-zero design**: Rule symmetric design means neither side dominates; deviations from zero indicate parameter imbalance.
+## §3 Dimension-by-Dimension Interpretation
 
-## §3 Output Files
-
-Rule variant produces the following output files in `outputs/CurrencyCrisis/Rule/`:
-
-| File                   | Content                                   |
-|------------------------|-------------------------------------------|
-| `price_history.csv`    | Round-by-round price and deviation        |
-| `agent_orders.csv`     | Per-agent order action, quantity, round   |
-| `agent_wealth.csv`     | Per-agent cash, position, wealth by round |
-| `metrics_summary.json` | AII, PSD, DER, SFAF, FAS, RS, WTI         |
+| Dimension | Metric focus | Interpretation |
+|---|---|---|
+| Attack depth | Attack Intensity Index (`§2.1`) | Larger values indicate deeper devaluation pressure. |
+| Peg survival | Peg Survival Duration (`§2.2`) | More rounds before breach indicates stronger defense. |
+| Reserve pressure | Defense Exhaustion Rate (`§2.3`) | Higher values indicate faster intervention spending. |
+| Coordination | Self-Fulfilling Amplification Factor (`§2.4`) | Values above 1 indicate expectation-driven selling dominates initial attack. |
+| Fundamental anchor | Fundamental Anchor Strength (`§2.5`) | Higher values mean hedgers buy consistently during attacks. |
+| Recovery | Recovery Speed (`§2.6`) | Shorter recovery indicates peg resilience. |
+| Distributional outcome | Wealth Transfer Index (`§2.7`) | Positive values favor attackers; negative values favor defenders. |
 
 ## §4 Phase Attribution
 
-For each attack event (δ < −0.03), compute per-agent sell and buy contribution:
+Attack phases are identified using the deviation thresholds in
+`analysis-bases.md §4`. During each phase, order payloads are grouped by agent
+type to attribute selling and buying pressure to speculative, self-fulfilling,
+defensive, and fundamental channels.
 
-```python
-attack_sellers = {
-    "SpeculativeAttacker": sum_sell_volume_during_attack,
-    "SelfFulfillingTrader": sum_sell_volume_during_attack,
-}
-attack_buyers = {
-    "CentralBankDefender": sum_buy_volume_during_attack,
-    "FundamentalHedger": sum_buy_volume_during_attack,
-}
-```
+## §5 Output Files
 
-SFAF is computed as `attack_sellers["SelfFulfillingTrader"] / attack_sellers["SpeculativeAttacker"]` (analysis-bases.md §2.4).  
-FAS is computed from `attack_buyers["FundamentalHedger"]` active rounds fraction (analysis-bases.md §2.5).
+Running `Rule/analysis.py` writes the standard analysis artifacts under the
+configured experiment output directory:
 
-## §5 References
+| File | Contents |
+|---|---|
+| `currencycrisis_rule_analysis.png` | Price, deviation, returns, and diagnostic plots |
+| `currencycrisis_rule_metrics.json` | Metric dictionary returned by `calculate_metrics()` |
 
-All metric definitions with DOI citations: `analysis-bases.md §2`.  
-Investor theory references: `simulation-bases.md §4.1–§4.5`.
+## §6 Cross-Variant Comparison
+
+Rule metrics provide the baseline for comparing:
+
+| Variant | Expected comparison |
+|---|---|
+| LLM | More stochastic attack timing and defense behavior |
+| RuleLLM | Similar directional behavior with language-mediated quantities |
+| Rag | RuleLLM-like behavior modified by retrieved FX-crisis context |
+
+## §7 Quality Checks
+
+- Confirm the run completed the configured 200 rounds.
+- Confirm market price, fundamental, and deviation histories contain all rounds.
+- Confirm order payloads contain valid `action` and `quantity` fields.
+- Confirm no NaN or infinite values appear in metric inputs or outputs.

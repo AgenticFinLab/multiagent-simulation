@@ -38,3 +38,18 @@ Quantify bubble formation, peak amplitude, crash severity, and agent-wealth dive
 ## §5 References
 
 See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md §4` for agent parameter sources.
+
+## §6 Cross-Variant Comparison
+
+| Variant | Expected comparison |
+|---|---|
+| LLM | Higher variance in bubble amplitude and crash timing from persona reasoning |
+| RuleLLM | Similar directional behavior with language-mediated quantities |
+| Rag | RuleLLM-like behavior modified by retrieved bubble and crash cases |
+
+## §7 Quality Checks
+
+- Confirm the run completed the configured 200 rounds.
+- Confirm price and fundamental histories are non-empty and aligned by round.
+- Confirm analysis raises on missing market records rather than fabricating zero metrics.
+- Confirm order payloads contain valid `action` and numeric `quantity`.

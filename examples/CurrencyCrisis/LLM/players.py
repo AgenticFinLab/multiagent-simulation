@@ -107,8 +107,6 @@ class LLMInvestor(GeneralPlayer):
 
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
         last_error = None
-        action_str = "hold"
-        quantity = 0
         for attempt in range(3):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
@@ -129,11 +127,9 @@ class LLMInvestor(GeneralPlayer):
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
                 last_error = exc
                 if attempt == 2:
-                    logger.warning(
-                        "[%s] LLM parse failed after 3 retries: %s. Holding.",
-                        self.identity,
-                        last_error,
-                    )
+                    raise RuntimeError(
+                        f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+                    ) from last_error
 
         if action_str == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
