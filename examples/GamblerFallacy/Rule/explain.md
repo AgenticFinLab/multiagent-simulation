@@ -86,7 +86,7 @@ Formula source: `simulation-bases.md §3.1`.
 P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
 ```
 
-Implemented in `players.py → Market.decide()`. The market broadcasts `price`, `fundamental`, `deviation`, and `round`; investors return `order` payloads with `action`, `quantity`, `agent_type`, and sender identity.
+Implemented in `players.py → Market.decide()`. The market broadcasts `price`, `fundamental`, `deviation`, and `round`; investors return `order` payloads with `action`, `bid_price`, `quantity`, `reasoning`, `agent_type`, `strategy`, and sender identity.
 
 ## §4 Rule Variant-Specific Features
 
@@ -110,7 +110,7 @@ Market broadcast -> Rule investors -> order payloads -> Market.clear_market() ->
 
 ## §7 Expected Runtime Outputs
 
-Full runs should produce 200 rounds, market price history, and order records for all configured investors.
+Full runs should produce 200 rounds, market price history, and canonical order records for all configured investors.
 
 ## §8 Validation Checklist
 

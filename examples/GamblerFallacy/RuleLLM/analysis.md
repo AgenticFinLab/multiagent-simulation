@@ -17,7 +17,10 @@ RuleLLM analysis follows `../analysis-bases.md §1` and asks whether embedded ru
 
 ## §3 Data Loading and Structural Checks
 
-`RuleLLM/analysis.py` imports the Rule implementation. Quality review should additionally inspect rule-adherence in reasoning and parse-quality counters.
+`RuleLLM/analysis.py → main()` uses the shared standard analysis contract for
+`summary.json`, structured validation output, and fixed PNG outputs. Quality
+review should additionally inspect rule-adherence in reasoning and parse-quality
+counters.
 
 ## §4 Phase Analysis
 
@@ -33,4 +36,7 @@ Valid RuleLLM outputs complete 200 rounds with clean parse quality.
 
 ## §7 Visualization Catalogue
 
-The inherited price-dynamics figure is primary. Reports may add rule-adherence and action-distribution summaries.
+The fixed PNG output set is primary: `00_investor_bids.png`,
+`01_gamblerfallacy_dynamics.png`, `02_gamblerfallacy_analysis.png`, and
+`03_summary.png`. Reports may add rule-adherence and action-distribution
+summaries.

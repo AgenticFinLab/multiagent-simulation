@@ -18,7 +18,10 @@ RAG analysis follows `../analysis-bases.md §1` and adds retrieval-quality revie
 
 ## §3 Data Loading and Structural Checks
 
-`Rag/analysis.py` imports Rule metrics and adds `_RAG_FALLBACK` plus `analyze_rag_knowledge_effect()`. Review must check round count, order schema, parse quality, and RAG context availability.
+`Rag/analysis.py → main()` imports the standard Rule analysis contract and adds
+`_RAG_FALLBACK`, `analyze_rag_knowledge_effect()`, and `rag_stats.json`. Review
+must check round count, order schema, parse quality, and RAG context
+availability.
 
 ## §4 Phase Analysis
 
@@ -30,8 +33,13 @@ RAG should be compared first to RuleLLM. Any RAG-only metric difference should b
 
 ## §6 Expected Results and Validation
 
-Valid RAG outputs should complete 200 rounds, maintain valid decision JSON, and show retrievable context or explicit fallback context in records.
+Valid RAG outputs should complete 200 rounds, maintain valid decision JSON, show
+retrievable context or explicit fallback context in records, and emit
+`rag_stats.json`.
 
 ## §7 Visualization Catalogue
 
-The inherited price-dynamics figure is primary. RAG reports should add retrieval success rate, fallback rate, and count of RAG context observations.
+The fixed PNG output set is primary: `00_investor_bids.png`,
+`01_gamblerfallacy_dynamics.png`, `02_gamblerfallacy_analysis.png`, and
+`03_summary.png`. RAG reports should add `rag_stats.json` with retrieval success
+rate, fallback rate, and count of RAG context observations.

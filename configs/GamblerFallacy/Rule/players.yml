@@ -36,8 +36,9 @@ streakreversaltrader:
       initial_position: 0
       initial_price: 100.0
       fundamental_value: 100.0
-      streak_threshold: 3
-      base_size: 400
+      activation_threshold: 0.02
+      quantity_scale: 5000
+      max_order: 800
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
@@ -57,9 +58,9 @@ hothandtrader:
       initial_position: 0
       initial_price: 100.0
       fundamental_value: 100.0
-      hot_threshold: 2
-      base_size: 350
-      continuation_multiplier: 1.5
+      activation_threshold: 0.02
+      quantity_scale: 5000
+      max_order: 800
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
@@ -79,8 +80,9 @@ independentassessor:
       initial_position: 0
       initial_price: 100.0
       fundamental_value: 100.0
-      value_trigger: 0.04
-      base_size: 400
+      activation_threshold: 0.05
+      quantity_scale: 3000
+      max_order: 500
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
@@ -100,8 +102,9 @@ arbitrageur:
       initial_position: 0
       initial_price: 100.0
       fundamental_value: 100.0
-      arbitrage_threshold: 0.05
-      position_size: 500
+      activation_threshold: 0.05
+      quantity_scale: 3000
+      max_order: 500
       custom_state_hot_limit: 3
   persona: !include persona.yml
 

@@ -88,7 +88,7 @@ Rag imports the Rule `Market`, preserving identical price formation and message 
 - Indexes are loaded locally, copied from shared storage, or built from processed documents.
 - `{rag_context}` is injected before market state.
 - Empty retrieval uses `"(No relevant knowledge retrieved this round.)"`.
-- Optional `extras["knowledge"]` is read through the project-allowed RAG config-resolution path.
+- Optional `extras["knowledge"]` is read through the project-allowed RAG config-resolution path; if it is absent, the shared `examples/document-sources` layout is used.
 
 ## §5 Architecture Diagram
 
@@ -107,7 +107,8 @@ Market broadcast -> RagLLMInvestor -> KnowledgeStore.query() -> RAG prompt -> LL
 
 ## §7 Expected Runtime Outputs
 
-Accepted RAG runs should complete 200 rounds, produce valid order records, and expose RAG context observations for retrieval-quality review.
+Accepted RAG runs should complete 200 rounds, produce valid order records with
+`rag_context`, and expose `rag_stats.json` for retrieval-quality review.
 
 ## §8 Validation Checklist
 

@@ -73,6 +73,7 @@ class RagLLMInvestor(GeneralPlayer):
         self.state.custom_state["position"] = extras["initial_position"]
         self.state.custom_state["price"] = extras["initial_price"]
         self.state.custom_state["fundamental"] = extras["fundamental_value"]
+        self.state.custom_state["max_order"] = extras["max_order"]
         self.state.custom_state["deviation"] = 0.0
 
         project_root = Path(__file__).parent.parent.parent
@@ -103,13 +104,17 @@ class RagLLMInvestor(GeneralPlayer):
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
-                "global_uri": rag_cfg["docs_dir"],
+                "global_uri": "examples/document-sources",
+                "resource_csv": [
+                    "examples/document-sources/books.csv",
+                    "examples/document-sources/source",
+                ],
                 "preprocessing": {
                     "parser": "mineru",
-                    "output_position": rag_cfg["mineru_output_dir"],
+                    "output_position": "MinerU_processed",
                 },
                 "rag": {
-                    "output_position": rag_cfg["shared_rag_index_dir"],
+                    "output_position": "rag_index",
                 },
             }
 
@@ -294,6 +299,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         return RAG_USER_TEMPLATE.format(
             rag_context=rag_context,
@@ -340,12 +346,19 @@ class RagLLMInvestor(GeneralPlayer):
             )
 
         action = decision["action"]
+        if action not in ("buy", "sell", "hold"):
+            raise ValueError(f"[{self.identity}] Invalid LLM action: {action}")
+        bid_price = float(decision["bid_price"])
+        reasoning = decision["reasoning"]
+        analysis = decision["analysis"]
         quantity = int(decision["quantity"])
+        rag_context = self.state.custom_state["last_rag_context"]
+        max_order = self.state.custom_state["max_order"]
 
         if action == "buy" and price > 0:
-            quantity = min(quantity, int(cash / price), 1000)
+            quantity = min(quantity, int(cash / price), max_order)
         elif action == "sell":
-            quantity = min(quantity, max(position, 0), 1000)
+            quantity = min(quantity, max(position, 0), max_order)
         else:
             quantity = 0
         quantity = max(0, quantity)
@@ -362,12 +375,22 @@ class RagLLMInvestor(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": bid_price,
             "quantity": quantity,
+            "reasoning": reasoning,
+            "analysis": analysis,
             "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
+            "rag_context": rag_context,
         }
         return {
             "action": action,
+            "bid_price": bid_price,
             "quantity": quantity,
+            "reasoning": reasoning,
+            "analysis": analysis,
+            "strategy": self.__class__.__name__,
+            "rag_context": rag_context,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
@@ -376,8 +399,13 @@ class RagLLMInvestor(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": decision_payload["action"],
+            "bid_price": decision_payload["bid_price"],
             "quantity": decision_payload["quantity"],
+            "reasoning": decision_payload["reasoning"],
+            "analysis": decision_payload["analysis"],
             "agent_type": self.__class__.__name__,
+            "strategy": decision_payload["strategy"],
+            "rag_context": decision_payload["rag_context"],
         }
         return Action(
             action_type="order",

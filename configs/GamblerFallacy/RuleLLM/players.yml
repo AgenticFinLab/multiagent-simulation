@@ -36,6 +36,7 @@ streakreversaltrader:
       initial_position: 0
       initial_price: 100.0
       fundamental_value: 100.0
+      max_order: 800
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_STREAK_REVERSAL_TRADER_SYS"
@@ -63,6 +64,7 @@ hothandtrader:
       initial_position: 0
       initial_price: 100.0
       fundamental_value: 100.0
+      max_order: 800
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_HOT_HAND_TRADER_SYS"
@@ -90,6 +92,7 @@ independentassessor:
       initial_position: 0
       initial_price: 100.0
       fundamental_value: 100.0
+      max_order: 500
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_INDEPENDENT_ASSESSOR_SYS"
@@ -117,6 +120,7 @@ arbitrageur:
       initial_position: 0
       initial_price: 100.0
       fundamental_value: 100.0
+      max_order: 500
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_ARBITRAGEUR_SYS"
@@ -144,6 +148,7 @@ noisetrader:
       initial_position: 0
       initial_price: 100.0
       fundamental_value: 100.0
+      max_order: 500
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"

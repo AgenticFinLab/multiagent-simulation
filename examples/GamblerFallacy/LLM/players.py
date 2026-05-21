@@ -44,6 +44,7 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras["fundamental_value"]
+            self.state.custom_state["max_order"] = extras["max_order"]
             self.state.custom_state["deviation"] = 0.0
             await self._initialize_agent()
 
@@ -123,19 +124,32 @@ class LLMInvestor(GeneralPlayer):
             )
 
         action = decision["action"]
+        if action not in ("buy", "sell", "hold"):
+            raise ValueError(f"[{self.identity}] Invalid LLM action: {action}")
+        bid_price = float(decision["bid_price"])
+        reasoning = decision["reasoning"]
+        analysis = decision["analysis"]
         quantity = int(decision["quantity"])
         price_val = self.state.custom_state["price"]
+        max_order = self.state.custom_state["max_order"]
 
         if action == "buy":
             max_qty = int(cash / price_val) if price_val > 0 else 0
-            quantity = min(quantity, max_qty, 1000)
+            quantity = min(quantity, max_qty, max_order)
         elif action == "sell":
-            quantity = min(quantity, max(position, 0), 1000)
+            quantity = min(quantity, max(position, 0), max_order)
         else:
             quantity = 0
 
         quantity = max(0, quantity)
-        return {"action": action, "quantity": quantity}
+        return {
+            "action": action,
+            "bid_price": bid_price,
+            "quantity": quantity,
+            "reasoning": reasoning,
+            "analysis": analysis,
+            "strategy": self.__class__.__name__,
+        }
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order."""
@@ -154,8 +168,12 @@ class LLMInvestor(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": decision_payload["bid_price"],
             "quantity": quantity,
+            "reasoning": decision_payload["reasoning"],
+            "analysis": decision_payload["analysis"],
             "agent_type": self.__class__.__name__,
+            "strategy": decision_payload["strategy"],
         }
         return Action(
             action_type="order",

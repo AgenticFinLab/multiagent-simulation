@@ -17,7 +17,10 @@ LLM analysis reuses `../analysis-bases.md §1` and adds quality review of parse 
 
 ## §3 Data Loading and Structural Checks
 
-`LLM/analysis.py` imports the Rule analysis functions. Quality review should additionally inspect model responses for malformed JSON, missing decisions, retry loops, and fallback holds.
+`LLM/analysis.py → main()` uses the shared standard analysis contract for
+`summary.json`, structured validation output, and fixed PNG outputs. Quality
+review should additionally inspect model responses for malformed JSON, missing
+decisions, retry loops, and fallback holds.
 
 ## §4 Phase Analysis
 
@@ -33,4 +36,7 @@ Valid LLM outputs complete 200 rounds with clean parse quality.
 
 ## §7 Visualization Catalogue
 
-The inherited price-dynamics figure is primary. Reports may add LLM action distribution and parse-quality summaries.
+The fixed PNG output set is primary: `00_investor_bids.png`,
+`01_gamblerfallacy_dynamics.png`, `02_gamblerfallacy_analysis.png`, and
+`03_summary.png`. Reports may add LLM action distribution and parse-quality
+summaries.

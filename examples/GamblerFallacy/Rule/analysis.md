@@ -33,4 +33,9 @@ Expected Rule behavior includes nonzero GFI, active biased demand during streak-
 
 ## §7 Visualization Catalogue
 
-`analysis.py → create_visualizations(data, output_dir)` creates `gamblerfallacy_price_dynamics.png`, plotting price against fundamental value across rounds.
+`analysis.py → main()` uses the shared standard analysis contract to create
+`summary.json`, a structured validation console report, and fixed PNG outputs:
+`00_investor_bids.png`, `01_gamblerfallacy_dynamics.png`,
+`02_gamblerfallacy_analysis.png`, and `03_summary.png`. The legacy
+`create_visualizations(data, output_dir)` helper remains available for focused
+price/fundamental plotting in ad hoc analysis.
