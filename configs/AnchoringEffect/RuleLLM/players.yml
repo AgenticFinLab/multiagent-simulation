@@ -50,7 +50,7 @@ rulellm_anchored:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # Rule parameters (from AnchoringEffect AnchoredTrader)
       anchor_weight: 0.7
@@ -85,7 +85,7 @@ rulellm_historical:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # Rule parameters (from AnchoringEffect HistoricalAnchor)
       anchor_weight: 0.5
@@ -118,7 +118,7 @@ rulellm_rational:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # Rule parameters (from AnchoringEffect RationalUpdater)
       base_position_size: 25.0
@@ -150,7 +150,7 @@ rulellm_momentum:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # Rule parameters (from AnchoringEffect MomentumTrader)
       entry_threshold: 0.02
@@ -183,7 +183,7 @@ rulellm_noise:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # Rule parameters (from AnchoringEffect NoiseTrader)
       trade_probability: 0.05

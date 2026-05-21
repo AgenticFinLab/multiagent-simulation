@@ -109,12 +109,13 @@ ragllm_anchored:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect AnchoredTrader)
       # ------------------------------------------------------------------
-      anchor_adjustment_factor: 0.3     # 30% adjustment from anchor to fundamental
+      adjustment_factor: 0.3            # 30% adjustment from anchor to fundamental
+      anchor_weight: 0.7                # Same anchor influence label as Rule/RuleLLM
       trade_threshold: 0.03             # |deviation| > 3% triggers trade
       base_position_size: 20.0          # Base shares per trade
       # ------------------------------------------------------------------
@@ -168,16 +169,15 @@ ragllm_historical:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect HistoricalAnchor)
       # ------------------------------------------------------------------
-      history_window: 5                 # Rolling average window for historical anchor
-      history_weight: 0.6               # 60% weight to historical average price
-      current_weight: 0.4               # 40% weight to current fundamental
-      trade_threshold: 0.04             # |deviation| > 4% triggers trade
-      base_position_size: 15.0
+      anchor_weight: 0.5                # Dampens perceived deviation
+      lookback: 60                      # Rolling average window for historical anchor
+      trade_threshold: 0.03             # |deviation| > 3% triggers trade
+      base_position_size: 20.0
       # ------------------------------------------------------------------
       # Private Knowledge
       # ------------------------------------------------------------------
@@ -228,7 +228,7 @@ ragllm_rational:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect RationalUpdater)
@@ -286,12 +286,12 @@ ragllm_momentum:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect MomentumTrader)
       # ------------------------------------------------------------------
-      momentum_threshold: 0.02          # |return| > 2% triggers momentum trade
+      entry_threshold: 0.02             # |return| > 2% triggers momentum trade
       base_position_size: 20.0
       # ------------------------------------------------------------------
       # Private Knowledge
@@ -344,14 +344,14 @@ ragllm_noise:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect NoiseTrader)
       # ------------------------------------------------------------------
       trade_probability: 0.05           # 5% chance of random trade per round
-      min_quantity: 100.0               # Min random trade size
-      max_quantity: 500.0               # Max random trade size
+      min_order: 100.0                  # Min random trade size
+      max_order: 500.0                  # Max random trade size
       # ------------------------------------------------------------------
       # Private Knowledge
       # ------------------------------------------------------------------

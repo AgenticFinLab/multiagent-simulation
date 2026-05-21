@@ -220,7 +220,7 @@ Required environment variables:
 First run: RAG indices are built from docs and persisted (~2-5 min per agent type)
 Subsequent runs: indices loaded from private_knowledge.rag.local_index_dir (~1-2 min per agent type)
 
-Expected runtime: ~10-20 minutes for 100 rounds (RAG retrieval + LLM API latency)
+Expected runtime: API-latency dependent for the 200-round full experiment (RAG retrieval + 9 LLM investor calls per round)
 Output location:  EXPERIMENT/AnchoringEffect/Rag/
 ```
 

@@ -265,6 +265,7 @@ def main() -> None:
 
     # Core analysis via Rule/analysis.py
     summary = analyze_anchoring(data, config, output_dir)
+    summary["variant"] = "Rag"
 
     # Rag-specific: RAG knowledge effect analysis
     rag_stats = analyze_rag_knowledge_effect(data["investor_payloads"])
@@ -273,6 +274,8 @@ def main() -> None:
     rag_stats_path = os.path.join(output_dir, "rag_stats.json")
     with open(rag_stats_path, "w", encoding="utf-8") as fh:
         json.dump(rag_stats, fh, indent=2)
+    with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as fh:
+        json.dump(summary, fh, indent=2)
 
     agg = rag_stats["aggregate"]
     if agg:

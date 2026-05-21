@@ -153,7 +153,7 @@ python examples/AnchoringEffect/LLM/run_anchoringeffect_llm.py \
 Required environment variables:
 - `ARK_API_KEY`: ByteDance Doubao API key (required for all LLM calls)
 
-Expected runtime: ~5–15 minutes for 100 rounds (13 LLM calls per round × 100 rounds)
+Expected runtime: API-latency dependent for the 200-round full experiment (9 LLM investor calls per round)
 
 Output location: `EXPERIMENT/AnchoringEffect/LLM/`
 

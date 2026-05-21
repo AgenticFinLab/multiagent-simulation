@@ -1,7 +1,7 @@
 # =============================================================================
 # AnchoringEffectLLM Players Configuration
 # =============================================================================
-# 1 Market (rule-based) + 5 LLM Investor types with anchoring-bias personas.
+# 1 Market (rule-based) + 9 LLM investor instances across 5 anchoring-bias personas.
 # Each LLM agent uses a system prompt persona from prompts.py.
 # =============================================================================
 
@@ -47,7 +47,8 @@ anchored_trader:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
+      adjustment_factor: 0.3
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_ANCHORED_TRADER_SYS"
@@ -77,7 +78,7 @@ historical_anchor:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_HISTORICAL_ANCHOR_SYS"
@@ -105,7 +106,7 @@ rational_updater:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_RATIONAL_UPDATER_SYS"
@@ -135,7 +136,7 @@ momentum_trader:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_MOMENTUM_TRADER_SYS"
@@ -165,7 +166,7 @@ noise_trader:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_NOISE_TRADER_SYS"

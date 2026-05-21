@@ -362,7 +362,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         rag_context = ""
         if rag_store and rag_store.is_built():
-            top_k = rag_cfg["top_k"] if "top_k" in rag_cfg else 3
+            top_k = rag_cfg["top_k"]
             query = KnowledgeQuery(
                 text=(
                     f"anchoring bias trading strategy when: "
@@ -379,6 +379,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         template = load_prompt(self.config.extras["llm"]["user_message"])
         # Compute price_change for template (not broadcast by Market)
@@ -466,8 +467,8 @@ class RagLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": decision["reasoning"][:100],
             "analysis": decision["analysis"],
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
-
 
         validate_order(order)
 

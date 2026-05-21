@@ -6,7 +6,7 @@
 |-----------|------------------------------------------------------------------------------------------|----------------------------------------------------|----------------------------------------------------------------------------------------|
 | O1        | Do anchoring agents create persistent price deviations from fundamental value?           | Price deviation (%), Mean Absolute Deviation (MAD) | Prices remain 3–10% above fundamental for extended periods                             |
 | O2        | How long does it take the market to revert to fundamental after initial mispricing?      | Anchoring persistence half-life                    | Slow convergence: half-life 20–60 rounds (vs. ~5 rounds in a fully rational market)    |
-| O3        | What is the relative corrective power of RationalUpdater vs. anchoring agent resistance? | Agent-type order contribution, deviation slope     | RationalUpdater partially corrects but is insufficient to overcome 6 anchoring agents  |
+| O3        | What is the relative corrective power of RationalUpdater vs. anchoring agent resistance? | Agent-type order contribution, deviation slope     | RationalUpdater partially corrects but is insufficient to overcome 4 anchoring agents  |
 | O4        | Does simulation anchoring magnitude match empirical literature calibration targets?      | MAD vs. Campbell & Sharpe (2009) benchmarks        | MAD ∈ [3%, 10%] matching analyst forecast error magnitudes                             |
 | O5        | How does anchoring affect agent portfolio performance?                                   | Portfolio Sharpe ratio, final wealth by agent type | RationalUpdater outperforms AnchoredTrader and HistoricalAnchor long-run               |
 | O6        | Do all variants (Rule/LLM/RuleLLM/Rag) reproduce the anchoring phenomenon?               | Cross-variant MAD and half-life                    | All variants show persistent deviation; LLM more variable; Rag potentially reduced MAD |
@@ -22,6 +22,7 @@
   ```
   deviation(t) = (P(t) − F) / F
   ```
+- **Function Signature**: `def calculate_price_deviation(market_prices: dict[int, float], fundamentals: dict[int, float]) -> list[float]`
   Note: F = 100.0 (constant in baseline AnchoringEffect configuration). Unlike AssetBubble where F grows, the constant F here ensures all price deviations are attributable purely to anchoring bias, not fundamental growth.
 - **Derivation Rationale**: The percentage form is the standard normalised measure used in the anchoring literature (Campbell & Sharpe, 2009 measure forecast errors as % of prior estimate). A signed measure allows detection of both upward anchoring (prices above F) and downward anchoring (prices resist falling below anchor).
 - **Academic Calibration Source**:
@@ -46,6 +47,7 @@
   ```
   MAD = (1/T) × Σ_t |P(t) − F| / F
   ```
+- **Function Signature**: `def _compute_mad(prices_list: list[float], fundamental: float) -> float`
   where T is the total number of rounds.
 - **Derivation Rationale**: A single-round deviation can be temporarily elevated by noise (NoiseTrader) without reflecting true anchoring. MAD integrates over all rounds, correctly capturing persistent mispricings while averaging out transient noise shocks. It is the appropriate measure for comparing simulation anchoring magnitude to Campbell & Sharpe's (2009) time-averaged forecast errors.
 - **Academic Calibration Source**:
@@ -69,6 +71,7 @@
   Fit: |deviation(t)| ≈ D₀ × exp(−t / τ)
   half_life = τ × ln(2)
   ```
+- **Function Signature**: `def _compute_half_life(prices_list: list[float], fundamental: float) -> float`
   where D₀ = initial deviation (= 0.05, since initial_price = 105 and F = 100), and τ is the exponential decay constant estimated by regression.
 - **Derivation Rationale**: The exponential decay model is appropriate because the system has a linear restoring force (the γ-term and RationalUpdater provide forces proportional to deviation), leading to exponential convergence in the absence of noise. The half-life is the most interpretable summary of correction speed — it directly answers "how many rounds does the anchoring bias last?".
 - **Academic Calibration Source**:
@@ -93,6 +96,7 @@
   r(t)    = log(P(t) / P(t−1))
   vol(t)  = std({r(t−9), …, r(t)})
   ```
+- **Function Signature**: `def _compute_rolling_volatility(prices_list: list[float], window: int = 10) -> list[float]`
   Note: Uses log returns (not arithmetic) consistent with standard financial time series analysis.
 - **Derivation Rationale**: Anchoring creates a specific volatility signature: moderate, persistent volatility with no large spikes (unlike AssetBubble which has a crash-driven volatility spike). The anchoring-specific expected pattern is relatively flat rolling volatility that represents the noise term σ = 0.5 modulated by small anchoring demand shocks.
 - **Academic Calibration Source**:
@@ -112,6 +116,7 @@
   r(t)  = (P(t) − P(t−1)) / P(t−1)
   AC1   = corr(r(t), r(t−1))
   ```
+- **Function Signature**: `def _compute_autocorrelation(prices_list: list[float], lag: int = 1) -> float`
 - **Derivation Rationale**: In an anchoring-driven market, the persistent upward price support from AnchoredTrader creates mild positive return autocorrelation early in the simulation (when prices are above their biased anchor targets). As the market corrects, AC1 should turn negative (mean-reverting). This phase shift in AC1 is a diagnostic signature of the anchoring lifecycle.
 - **Academic Calibration Source**:
   - Lo, A. W., & MacKinlay, A. C. (1988). Stock market prices do not follow random walks. *Review of Financial Studies*, 1(1), 41–66. https://doi.org/10.1093/rfs/1.1.41 — documents AC1 ≈ 0.17 at weekly intervals in US equities. For anchoring simulations, AC1 ∈ [0.0, 0.30] is consistent with mild persistent drift rather than strong momentum.
@@ -134,6 +139,7 @@
                  = |anchor + (F − anchor) × α − F| / F
                  = (1 − α) × |anchor − F| / F
   ```
+- **Function Signature**: `def _compute_bias_magnitude(prices_list: list[float], fundamental: float, adjustment_factor: float) -> float`
   For anchor = 105, F = 100, α = 0.3: `bias_magnitude = 0.7 × 5/100 = 0.035` (3.5%)
 - **Derivation Rationale**: The bias magnitude is theoretically fixed given the parameters (it depends only on α and the anchor-fundamental gap). Computing it from simulation outputs validates that the anchoring mechanism is operating as designed.
 - **Academic Calibration Source**:
@@ -151,10 +157,29 @@
   ```
   max_drawdown = max_{t₁ < t₂} [(P(t₁) − P(t₂)) / P(t₁)]
   ```
+- **Function Signature**: `def _compute_max_drawdown(prices_list: list[float]) -> float`
 - **Derivation Rationale**: In an anchoring simulation, the drawdown is expected to be moderate (not crash-scale). The max drawdown captures the maximum correction that anchoring agents fail to prevent — measuring how quickly corrective forces (RationalUpdater, γ-term) overcome the anchoring resistance.
 - **Academic Calibration Source**: Standard risk metric; for anchoring-driven markets, drawdowns of 5–20% are typical (much smaller than leveraged crash scenarios). Northcraft & Neale (1987) document that expert anchoring reduces price adjustments by ~12%, so a 5–20% downward correction starting from 5% overvaluation is the expected range.
 - **Normal Range**: [5%, 20%] for anchoring-driven correction; not a crash, just a gradual return to fundamental
 - **Red Flag**: max_drawdown > 40% → price overshoots fundamental significantly; check noise_std and γ
+
+---
+
+### Metric: Agent-Type Trading Volume
+
+- **Category**: Investor Behaviour / Mechanism Attribution
+- **Definition**: Cumulative buy and sell quantities by investor identity, used to verify that anchoring, rational-updating, momentum, and noise mechanisms all contribute to the price path.
+- **Formula**:
+  ```
+  buy_volume_i = Σ_t quantity_i(t) where action_i(t) = buy
+  sell_volume_i = Σ_t quantity_i(t) where action_i(t) = sell
+  total_volume_i = buy_volume_i + sell_volume_i
+  ```
+- **Function Signature**: `def calculate_metrics(data: dict[str, object], config: dict) -> dict[str, object]`
+- **Derivation Rationale**: Price-level metrics alone cannot identify whether the anchoring effect is produced by the intended agents. Volume attribution verifies that AnchoredTrader and HistoricalAnchor provide biased support, RationalUpdater supplies corrective pressure, MomentumTrader amplifies local trends, and NoiseTrader adds background liquidity.
+- **Academic Calibration Source**: Grossman & Stiglitz (1980) motivate informed-trader share; Black (1986) motivates noise-trader background order flow.
+- **Normal Range**: Anchoring and rational agents should both have non-zero volume in 200-round runs; NoiseTrader volume is stochastic but should be sparse.
+- **Red Flag**: Any intended active agent type has zero total volume across 200 rounds; check initial positions, cash constraints, and thresholds.
 
 
 ## §3 Analysis Dimensions
@@ -164,7 +189,7 @@
 - **Purpose**: Verify that anchoring agents create measurable, persistent price deviations from fundamental value
 - **Metrics Used**: Price deviation, MAD, half-life
 - **Visualization**: Line chart — Price vs. Fundamental over time; horizontal reference line at F = 100; shaded deviation band; annotations at half-life milestone
-- **Expected Pattern**: Price starts at 105 (5% above fundamental); slow convergence toward 100 over 100 rounds; deviation remains above 2% for most of the simulation; final price 2–4% above fundamental
+- **Expected Pattern**: Price starts at 105 (5% above fundamental); slow convergence toward 100 over the 200-round full experiment; deviation remains above 2% through the persistence phase; final price approaches fundamental after the tail correction phase
 
 ### Dimension 2: Anchoring Bias Lifecycle Analysis
 
@@ -237,7 +262,7 @@
 
 ### Comparison Protocol
 
-1. **Normalize**: Identical initial conditions across all variants: `initial_price = 105`, `fundamental = 100`, 100 rounds, same agent count (15 total)
+1. **Normalize**: Identical initial conditions across all variants: `initial_price = 105`, `fundamental = 100`, 200 full rounds, same agent roster (9 investors plus 1 market coordinator)
 2. **Statistical test**: For stochastic variants (LLM, RuleLLM, Rag): run ≥ 10 trials; report mean ± std; compare to Rule baseline using t-test (p < 0.05)
 3. **Key comparison axes**:
 
@@ -264,7 +289,7 @@
 
 | Metric             | Target Range           | Calibration Source                                                                      | Validation Method                                               |
 |--------------------|------------------------|-----------------------------------------------------------------------------------------|-----------------------------------------------------------------|
-| MAD (%)            | [3%, 10%]              | Campbell & Sharpe (2009): mean analyst forecast error ~5%                               | Compute MAD across all 100 rounds; reject if < 1%               |
+| MAD (%)            | [3%, 10%]              | Campbell & Sharpe (2009): mean analyst forecast error ~5%                               | Compute MAD across all 200 full-round observations; reject if < 1% |
 | Half-life (rounds) | [20, 60]               | Campbell & Sharpe (2009): quarterly persistence → 25–75 trading days                    | Fit exponential decay; extract τ                                |
 | Max drawdown       | [5%, 20%]              | Typical equity correction magnitude; anchoring creates moderate not extreme corrections | Compute across full simulation                                  |
 | Rolling volatility | [0.5%, 2.0%] per round | Black (1986): noise trader background volatility range                                  | Compute rolling std; report mean ± std                          |

@@ -17,14 +17,14 @@ All metrics are defined in `../analysis-bases.md §2`. This variant's `analysis.
 
 | Metric                        | Function                            | analysis-bases.md Ref | Rule-Specific Notes                                                 |
 |-------------------------------|-------------------------------------|-----------------------|---------------------------------------------------------------------|
-| **Price Deviation**           | `calculate_price_deviation()`       | `§2.1`                | Deterministic; deviation follows a predictable decay path           |
-| **Mean Absolute Deviation**   | `calculate_mean_abs_deviation()`    | `§2.2`                | Calibration target: [3%, 10%]; Rule baseline is most interpretable  |
-| **Anchoring Persistence**     | `calculate_anchoring_persistence()` | `§2.3`                | Exponential fit to deviation decay; yields half-life estimate       |
-| **Rolling Volatility**        | `calculate_rolling_volatility()`    | `§2.4`                | window=10; expect 0.5%–2.0% per round in Rule variant               |
-| **Return Autocorrelation**    | `calculate_autocorrelation()`       | `§2.5`                | lag=1; expect positive (0.1–0.3) in anchoring-dominant phase        |
-| **Max Drawdown**              | `calculate_max_drawdown()`          | `§2.6`                | Moderate (5–20%); Rule shows cleanest drawdown pattern              |
-| **Agent-Type Trading Volume** | `calculate_agent_volumes()`         | `§2.7`                | Loads per-agent order histories; validates RationalUpdater activity |
-| **Anchoring Bias Magnitude**  | `calculate_bias_magnitude()`        | `§2.8`                | Computes `                                                          |
+| **Price Deviation**           | `calculate_price_deviation()`       | `§2`                  | Deterministic; deviation follows a predictable decay path           |
+| **Mean Absolute Deviation**   | `_compute_mad()`                    | `§2`                  | Calibration target: [3%, 10%]; Rule baseline is most interpretable  |
+| **Anchoring Persistence**     | `_compute_half_life()`              | `§2`                  | Half-life of deviation decay                                        |
+| **Rolling Volatility**        | `_compute_rolling_volatility()`     | `§2`                  | window=10; expect 0.5%–2.0% per round in Rule variant               |
+| **Return Autocorrelation**    | `_compute_autocorrelation()`        | `§2`                  | lag=1; expect positive (0.1–0.3) in anchoring-dominant phase        |
+| **Max Drawdown**              | `_compute_max_drawdown()`           | `§2`                  | Moderate (5–20%); Rule shows cleanest drawdown pattern              |
+| **Agent-Type Trading Volume** | `calculate_metrics()`               | `§2`                  | Loads per-agent order histories; validates RationalUpdater activity |
+| **Anchoring Bias Magnitude**  | `_compute_bias_magnitude()`         | `§2`                  | Computes `(1 - adjustment_factor) * abs(anchor - fundamental) / fundamental` |
 
 ---
 
@@ -48,8 +48,8 @@ Rule variant shows a clean, monotone decay of deviation from ~5% toward ~1–2%.
 *(Objective from analysis-bases.md §3.2)*
 
 **Implementation in analysis.py:**
-- Function: `calculate_anchoring_persistence()` — fits exponential decay to `|deviation(t)|`
-- Output: `03_anchoring_persistence.png` — decay curve with half-life annotation
+- Function: `_compute_half_life()` — identifies the half-life of `|deviation(t)|`
+- Output: `03_summary.png` — includes anchoring persistence with half-life annotation
 
 **Variant-Specific Interpretation:**
 Rule variant should show half-life ≈ 20–60 rounds. Half-life < 10 means anchoring agents have insufficient market impact; half-life > 80 means `mean_reversion` is too low.
@@ -60,8 +60,8 @@ Rule variant should show half-life ≈ 20–60 rounds. Half-life < 10 means anch
 *(Objective from analysis-bases.md §3.3)*
 
 **Implementation in analysis.py:**
-- Function: `calculate_agent_volumes()` — parses per-agent order records
-- Output: `04_agent_volume.png`, `05_portfolio_performance.png`
+- Function: `calculate_metrics()` — parses per-agent order records into `agent_volumes`
+- Output: `00_investor_bids.png`, `summary.json`
 
 **Variant-Specific Interpretation:**
 RationalUpdater should show consistent selling (short-term) followed by buying once price overcorrects. AnchoredTrader/HistoricalAnchor show low trading frequency but persistent biased direction.
@@ -72,8 +72,8 @@ RationalUpdater should show consistent selling (short-term) followed by buying o
 *(Objective from analysis-bases.md §3.4)*
 
 **Implementation in analysis.py:**
-- Function: `calculate_rolling_volatility()` — rolling std of log-returns, window=10
-- Output: `07_rolling_volatility.png`, `06_return_distribution.png`
+- Function: `_compute_rolling_volatility()` — rolling std of returns, window=10
+- Output: `02_market_dynamics.png`
 
 **Variant-Specific Interpretation:**
 Rule variant shows stable, low-moderate volatility (0.5%–2%). No sudden volatility spikes typical in this variant.
@@ -98,15 +98,15 @@ Rule variant shows stable, low-moderate volatility (0.5%–2%). No sudden volati
 | Total Rounds   | Expected Observable                                                              |
 |----------------|----------------------------------------------------------------------------------|
 | **50 rounds**  | Anchoring clearly visible; correction incomplete; half-life not fully observable |
-| **100 rounds** | Full anchoring lifecycle: onset → persistence → partial correction               |
-| **200 rounds** | Near-full convergence; tail-end anchoring from HistoricalAnchor only             |
+| **100 rounds** | Full anchoring lifecycle starts but tail convergence may be incomplete           |
+| **200 rounds** | Full experiment length; near-full convergence and tail-end HistoricalAnchor effects |
 
 ### Agent Count Scaling
 
 | Agent Count            | Expected Observable                                             |
 |------------------------|-----------------------------------------------------------------|
 | **3–5 total**          | Very noisy; insufficient anchoring mass vs. rational correction |
-| **13 total (default)** | Balanced — anchoring agents slightly dominant; clean phenomenon |
+| **9 investors (default)** | Balanced — anchoring agents slightly dominant; clean phenomenon |
 | **20+ total**          | Strong anchoring; half-life extends to 80+ rounds               |
 
 ### Parameter Sensitivity
@@ -127,12 +127,8 @@ All outputs written to `EXPERIMENT/AnchoringEffect/Rule/analysis/`.
 | Output File                    | Generated By              | Contents                                          | Interpretation                            |
 |--------------------------------|---------------------------|---------------------------------------------------|-------------------------------------------|
 | `01_price_dynamics.png`        | `create_visualizations()` | Price vs. Fundamental time-series                 | Primary phenomenon verification           |
-| `02_deviation_timeseries.png`  | `create_visualizations()` | Deviation (%) over time                           | Anchoring persistence visualization       |
-| `03_anchoring_persistence.png` | `create_visualizations()` |                                                   | Deviation                                 |
-| `04_agent_volume.png`          | `create_visualizations()` | Grouped bar: total volume by agent type           | Which agents drive market activity        |
-| `05_portfolio_performance.png` | `create_visualizations()` | Portfolio value by agent type over time           | Who profits from anchoring                |
-| `06_return_distribution.png`   | `create_visualizations()` | Histogram of returns with normal overlay          | Fat tails / asymmetry check               |
-| `07_rolling_volatility.png`    | `create_visualizations()` | Rolling 10-round volatility                       | Volatility regime identification          |
+| `02_market_dynamics.png`       | `create_visualizations()` | Rolling volatility and return distribution        | Market-quality and risk diagnostics       |
+| `03_summary.png`               | `create_visualizations()` | Metric summary and anchoring persistence          | Compact validation overview               |
 | `summary.json`                 | `main()`                  | All scalar metrics (MAD, half-life, max_drawdown) | Machine-readable cross-variant comparison |
 
 ---
@@ -148,9 +144,7 @@ This variant is the **ground truth baseline** for all cross-variant comparisons.
 
 Cross-variant comparison protocol: `../analysis-bases.md §5`.
 
----
-
-## §8 References
+References:
 
 - `../analysis-bases.md` — master analysis specification (all metrics, dimensions, validation targets)
 - `../simulation-bases.md §3.1` — price formula implementation

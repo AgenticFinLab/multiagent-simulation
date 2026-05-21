@@ -172,7 +172,7 @@ python examples/AnchoringEffect/Rule/run_anchoringeffect.py \
 
 Required environment variables: None (Rule variant requires no API keys)
 
-Expected runtime: ~10–30 seconds for 100 rounds (pure Python, no LLM calls)
+Expected runtime: ~30–90 seconds for the 200-round full experiment (pure Python, no LLM calls)
 
 Output location: `EXPERIMENT/AnchoringEffect/Rule/`
 

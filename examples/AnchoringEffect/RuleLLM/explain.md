@@ -203,7 +203,7 @@ Required environment variables:
   ARK_API_KEY: ByteDance Doubao API key (obtain from volcengine.com)
                Must be set in project root .env file
 
-Expected runtime: ~5-15 minutes for 100 rounds (5 LLM agents × 100 rounds × API latency)
+Expected runtime: API-latency dependent for the 200-round full experiment (9 RuleLLM investor calls per round)
 Output location:  EXPERIMENT/AnchoringEffect/RuleLLM/
 ```
 

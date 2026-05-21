@@ -26,7 +26,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Mean Absolute Deviation (MAD)
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_mean_abs_deviation()`
+- Implemented in: `Rule/analysis.py → _compute_mad()`
 - Data source: market price records + fundamental value from config
 - Variant-specific notes: Cross-run standard deviation of MAD is expected to be 1.5–2× higher than Rule variant. Single-run MAD may be within Rule range or significantly outside it.
 - Expected range for this variant: [2%, 14%]
@@ -34,7 +34,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Anchoring Persistence (Half-Life)
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_anchoring_persistence()`
+- Implemented in: `Rule/analysis.py → _compute_half_life()`
 - Data source: deviation time series from market records
 - Variant-specific notes: LLM agents may exhibit variable anchoring strength — some runs show shorter half-lives (LLM breaks from anchor sooner due to narrative reasoning) and others show longer half-lives (LLM reinforces anchor via self-consistent narrative). Expect bimodal distribution across runs.
 - Expected range for this variant: [15, 70] rounds — wider interval than Rule [20, 60]
@@ -42,7 +42,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Rolling Volatility
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_rolling_volatility()`
+- Implemented in: `Rule/analysis.py → _compute_rolling_volatility()`
 - Data source: price return series
 - Variant-specific notes: LLM narrative framing creates occasional volatility spikes — periods where multiple LLM agents simultaneously adopt a bearish or bullish narrative, generating correlated order flow. These spikes are absent from the deterministic Rule variant.
 - Expected range for this variant: [0.3%, 2.5%] per round
@@ -50,7 +50,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Return Autocorrelation
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_autocorrelation()`
+- Implemented in: `Rule/analysis.py → _compute_autocorrelation()`
 - Data source: price return series
 - Variant-specific notes: Positive autocorrelation is expected in early rounds (anchored LLM agents create momentum-like persistence), potentially decreasing faster than Rule if LLM agents shift narrative mid-simulation.
 - Expected range for this variant: lag-1 AC in [0.05, 0.30]
@@ -58,7 +58,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Max Drawdown
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_max_drawdown()`
+- Implemented in: `Rule/analysis.py → _compute_max_drawdown()`
 - Data source: cumulative price series
 - Variant-specific notes: LLM agents may exhibit "emergent caution" — after observing price drops in their context window, they suddenly shift to sell or hold, amplifying drawdown events beyond Rule levels.
 - Expected range for this variant: [4%, 22%]
@@ -66,7 +66,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Agent-Type Trading Volume
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_agent_volumes()`
+- Implemented in: `Rule/analysis.py → calculate_metrics()`
 - Data source: `EXPERIMENT/AnchoringEffect/LLM/records/{agent_id}/*.json`
 - Variant-specific notes: Volume distribution across agent types is more variable in LLM. Noise Trader and Momentum Trader may have similar volumes as in Rule, but Anchored/Historical/Rational agents can have substantially different volumes depending on the LLM's narrative interpretation.
 - Expected range for this variant: varies by run; overall market volume ±30% of Rule baseline
@@ -74,7 +74,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Anchoring Bias Magnitude
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_anchoring_bias_magnitude()`
+- Implemented in: `Rule/analysis.py → _compute_bias_magnitude()`
 - Data source: LLM agent records (price, reasoning field from decision JSON)
 - Variant-specific notes: This is the primary LLM-specific metric. The qualitative reasoning traces in `<analysis>` tags reveal whether the LLM is actually exhibiting anchoring psychology or rationalizing away from it. In approximately 20–30% of rounds, LLM agents may show "reasoning override" — their stated reasoning departs from anchoring psychology. Anchoring bias magnitude may be lower than Rule in these rounds.
 - Expected range for this variant: [0.0, 0.5] (dimensionless, lower than Rule's [0.1, 0.6] due to reasoning escape)
@@ -88,10 +88,10 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 Objective (from analysis-bases.md): Measure how anchoring-induced demand creates and sustains price deviations from fundamental value across simulation rounds.
 
 Implementation in analysis.py:
-- Function: `analyze_price_dynamics()`
+- Function: `analyze_anchoring()`
 - Input data: market price records, fundamental value from config
 - Computation: compute deviation series, MAD, half-life, rolling volatility; overlay phases on price chart
-- Output: `price_dynamics.png`, contribution to `summary.json`
+- Output: `01_price_dynamics.png`, contribution to `summary.json`
 
 Variant-Specific Interpretation:
 - LLM price paths are stochastic; a single run is not representative. Run at least 3 independent runs to characterize the distribution of outcomes.
@@ -111,10 +111,10 @@ around fundamental than Rule variant. Occasional sharp corrections not seen in R
 Objective (from analysis-bases.md): Characterize how each investor type's decisions contribute to anchoring dynamics, including volume patterns and wealth evolution.
 
 Implementation in analysis.py:
-- Function: `analyze_investor_behavior()`
+- Function: `calculate_metrics()`
 - Input data: per-agent decision records (action, quantity, reasoning)
 - Computation: aggregate buy/sell/hold counts by agent type; compute portfolio value trajectory; extract reasoning variance metrics
-- Output: `investor_behavior.png`, `agent_volumes.json`
+- Output: `00_investor_bids.png`, plus `agent_volumes` in `summary.json`
 
 Variant-Specific Interpretation:
 - LLM agents' reasoning strings can be analyzed for keyword frequency (e.g., "anchor," "historical," "momentum") to verify persona consistency.
@@ -134,10 +134,10 @@ Line chart: portfolio value by agent type — similar ordering to Rule (Rational
 Objective (from analysis-bases.md): Confirm that anchoring effect emerges from LLM persona-driven behavior, without explicit quantitative rules.
 
 Implementation in analysis.py:
-- Function: `analyze_anchoring_phenomenon()`
+- Function: `analyze_anchoring()`
 - Input data: deviation series, agent decision records
 - Computation: test that price deviates from fundamental for ≥20 consecutive rounds; measure half-life; verify anchoring agents' perceived targets differ from true fundamental
-- Output: `anchoring_verification.png`
+- Output: `03_summary.png`
 
 Variant-Specific Interpretation:
 - Success criterion: anchoring phenomenon visible (MAD > 3%, half-life > 20 rounds) in ≥70% of independent runs, even without explicit quantitative rules in prompts.
@@ -147,7 +147,7 @@ Variant-Specific Interpretation:
 Expected Output Sample:
 ```
 Heatmap or time-series showing rounds with active anchoring signal (deviation > 3%).
-Expected: at least 40-60 rounds with deviation > 3% per 100-round simulation.
+Expected: at least 40-60 rounds with deviation > 3% during the 200-round full simulation.
 ```
 
 ---
@@ -157,10 +157,10 @@ Expected: at least 40-60 rounds with deviation > 3% per 100-round simulation.
 Objective (from analysis-bases.md): Position LLM results relative to Rule, RuleLLM, and Rag to isolate the effect of language reasoning.
 
 Implementation in analysis.py:
-- Function: `generate_comparison_table()`
+- Function: Cross-variant comparison consumes this variant's `summary.json`
 - Input data: LLM summary.json + Rule/RuleLLM/Rag summary.json (if available)
 - Computation: compare MAD, half-life, max drawdown, total volume across variants
-- Output: `cross_variant_comparison.png`, updated `summary.json`
+- Output: `summary.json` for external cross-variant comparison
 
 Variant-Specific Interpretation:
 - LLM vs. Rule: the key comparison. Higher LLM MAD = LLM personas amplify anchoring. Lower = LLM reasoning provides escape from bias.
@@ -190,14 +190,14 @@ Phenomena unique to the LLM variant not present in the deterministic Rule varian
 | Total Rounds          | Expected Observable                                               | Phenomenon Clarity                                              |
 |-----------------------|-------------------------------------------------------------------|-----------------------------------------------------------------|
 | 50 rounds             | Anchoring bias visible but insufficient half-life measurement     | Partial — MAD measurable but persistence analysis unreliable    |
-| 100 rounds (standard) | Full anchoring lifecycle observable; reasoning patterns stabilize | Good — all 8 metrics computable; LLM narrative patterns visible |
+| 100 rounds | Full anchoring lifecycle begins; reasoning patterns stabilize | Good for canary analysis but not the full experiment |
 | 200 rounds            | Multiple anchoring cycles possible; persona drift detectable      | Excellent — enables longitudinal LLM reasoning analysis         |
 
 ### Agent Count Scaling
 
 | Agent Count            | Expected Observable                                         | Market Dynamics                                       |
 |------------------------|-------------------------------------------------------------|-------------------------------------------------------|
-| 5 agents (1 per type)  | Clean individual-agent signals; high idiosyncratic noise    | Low market depth; single LLM reasoning trace per type |
+| 9 investors (default)  | Two anchored, two historical, one rational, two momentum, two noise agents | Full configured market depth |
 | 10 agents (2 per type) | More stable aggregate behavior; intra-type variance visible | Standard — sufficient for statistic comparison        |
 | 20+ agents             | LLM API cost high; narrative convergence effects possible   | Rich but expensive; run only for final validation     |
 
@@ -218,11 +218,11 @@ All outputs written to: `EXPERIMENT/AnchoringEffect/LLM/analysis/`
 
 | Output File                    | Generated By                     | Contents                                                            | Interpretation                                                |
 |--------------------------------|----------------------------------|---------------------------------------------------------------------|---------------------------------------------------------------|
-| `price_dynamics.png`           | `analyze_price_dynamics()`       | Price vs. fundamental; deviation series; rolling volatility overlay | Primary evidence for anchoring phenomenon emergence           |
-| `investor_behavior.png`        | `analyze_investor_behavior()`    | Buy/sell/hold counts by agent type; portfolio value trajectories    | Shows which LLM personas are most/least active                |
-| `anchoring_verification.png`   | `analyze_anchoring_phenomenon()` | Anchoring signal heatmap; half-life estimate; MAD time series       | Verifies LLM personas successfully produce anchoring dynamics |
-| `cross_variant_comparison.png` | `generate_comparison_table()`    | Side-by-side metric comparison with Rule/RuleLLM/Rag                | Shows LLM position in the variant comparison matrix           |
-| `agent_volumes.json`           | `calculate_agent_volumes()`      | Per-agent-type total buy/sell volume by round                       | Supports investor behavior analysis                           |
+| `00_investor_bids.png`         | `create_visualizations()`        | Agent bid and order distribution                                    | Shows which LLM personas are most/least active                |
+| `01_price_dynamics.png`        | `create_visualizations()`        | Price vs. fundamental; deviation series                             | Primary evidence for anchoring phenomenon emergence           |
+| `02_market_dynamics.png`       | `create_visualizations()`        | Volatility and return distribution                                  | Market-quality diagnostics                                    |
+| `03_summary.png`               | `create_visualizations()`        | Summary metrics and persistence                                     | Verifies LLM personas successfully produce anchoring dynamics |
+| `summary.json`                 | `main()`                         | Machine-readable metrics with `variant = "LLM"`                     | Cross-variant comparison input                                |
 | `summary.json`                 | `main()`                         | All 8 metrics; variant label; run metadata                          | Used for cross-variant comparison pipeline                    |
 
 ---
