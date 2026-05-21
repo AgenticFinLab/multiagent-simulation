@@ -1,100 +1,94 @@
-# MentalAccounting Simulation
+# MentalAccounting Rag — Implementation Explanation
 
 ## §1 Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | Mental accounting causes investors to treat money differently based on its source or intended use |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Mental accounting simulation showing how portfolio segregation leads to suboptimal decisions |
-| **Academic Value** | Understanding mental accounting causes investors to treat money differently based on its source or intended use through multi-agent simulation |
+|---|---|
+| Variant | Rag |
+| Simulation | MentalAccounting |
+| Decision Mechanism | RuleLLM-style decisions augmented with retrieved mental-accounting knowledge |
+| Theory Reference | `simulation-bases.md §2` and `simulation-bases.md §4` |
+| Market Broadcast | `price`, `fundamental`, `deviation`, `net_demand`, `volume`, `round` |
 
-## §2 Theoretical Foundation
+## §2 Theory → Implementation Mapping
 
-- Thaler (1999): Mental Accounting Matters
-- Thaler (1985): Mental accounting and consumer choice
-- Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
+### §2.1 MentalAccountant (simulation-bases.md §4.1)
 
-## §6 Configuration Reference
+| Theory Component | Implementation |
+|---|---|
+| Account segregation | Uses `RULELLM_MENTAL_ACCOUNTANT_SYS` with retrieved context. |
+| Reference dependence | User prompt provides entry price, P&L, and relevant knowledge. |
+| Decision contract | Parsed output must include action, bid price, quantity, reasoning, and analysis. |
 
-The RAG variant uses `configs/MentalAccounting/Rag/simulation.yml`, `players.yml`, `topology.yml`, and `persona.yml`. It adds knowledge and embedding configuration to the LLM-style investor setup while preserving the same market topology.
+### §2.2 HouseMoneyTrader (simulation-bases.md §4.2)
 
-## §7 Runtime Outputs
+| Theory Component | Implementation |
+|---|---|
+| House-money effect | Uses house-money decision rules plus retrieved examples. |
+| Risk sensitivity | Retrieved context may inform reasoning but not change schema constraints. |
+| Cash discipline | Player code caps orders by available cash and inventory. |
 
-A full RAG run should produce 200 rounds, valid order payloads, parseable LLM decisions, and retrieval context sufficient for quality review of knowledge-augmented decisions.
+### §2.3 RationalPortfolioManager (simulation-bases.md §4.3)
 
-## §8 Validation Checklist
+| Theory Component | Implementation |
+|---|---|
+| Whole-portfolio view | Uses rational portfolio RuleLLM prompt. |
+| Fundamental anchor | RAG query includes price, fundamental, and deviation. |
+| Stabilization | Orders enter the shared market equation. |
 
-- `players.py`, `prompts.py`, and `analysis.py` compile.
-- RAG embedding config resolves and prompt templates inject `{rag_context}`.
-- Dry-run discovers `MentalAccounting__Rag`.
-- Full runs should complete 200 rounds with valid decision JSON and auditable retrieval context.
+### §2.4 SunkCostHolder (simulation-bases.md §4.4)
 
-## §9 Cross-Variant Comparison Notes
+| Theory Component | Implementation |
+|---|---|
+| Sunk-cost inertia | Uses sunk-cost RuleLLM prompt with retrieved context. |
+| Winner realization | Keeps explicit gain-threshold reasoning. |
+| Context trace | Each accepted order stores `rag_context` for analysis. |
 
-RAG is compared primarily against RuleLLM to isolate whether retrieved financial-behavioral knowledge changes mental-accounting intensity, house-money risk taking, or sunk-cost persistence.
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-## §3 Agent Descriptions
+| Theory Component | Implementation |
+|---|---|
+| Background liquidity | Uses noisy RuleLLM prompt. |
+| Weak information | Retrieved context is available but action remains schema-bounded. |
+| Bounded random flow | Portfolio constraints are enforced after parsing. |
 
-### MentalAccountant
-**Theoretical Basis**: Mental accounting (Thaler, 1999)
-**Market Role**: destabilizing
-**Description**: Segregates portfolio into separate accounts, doesn't net gains/losses
-**Parameters**: num_accounts=3, loss_aversion_per_account=2.25, no_cross_subsidy=True
+## §3 Market Mechanism
 
-### HouseMoneyTrader
-**Theoretical Basis**: House money effect (Thaler & Johnson, 1990)
-**Market Role**: destabilizing
-**Description**: Takes more risk with recent gains
-**Parameters**: gain_risk_multiplier=1.5, loss_risk_multiplier=0.5, reset_period=20
+Rag reuses the Rule market. Retrieved knowledge affects only investor reasoning and order choice; price formation remains the shared MentalAccounting market equation.
 
-### RationalPortfolioManager
-**Theoretical Basis**: Mean-variance optimization (Markowitz, 1952)
-**Market Role**: stabilizing
-**Description**: Optimizes entire portfolio without mental accounting
-**Parameters**: risk_aversion=0.5, correlation_aware=True
+## §4 Variant Architecture
 
-### SunkCostHolder
-**Theoretical Basis**: Sunk cost fallacy (Arkes & Blumer, 1985)
-**Market Role**: destabilizing
-**Description**: Holds losing positions due to already invested capital
-**Parameters**: sunk_cost_weight=0.6, aversion_to_realize=high
+| Component | Implementation |
+|---|---|
+| Coordinator | Rule market imported from `examples.MentalAccounting.Rule.players` |
+| Investors | `RagLLMInvestor` subclasses |
+| Retrieval | `ResourceManager`, `KnowledgeStore`, and per-round `KnowledgeQuery` |
+| Prompt Structure | RuleLLM system prompt plus `RAG_USER_TEMPLATE` with `{rag_context}` |
+| Output Contract | Required `action`, `bid_price`, `quantity`, `reasoning`, `analysis`, and recorded `rag_context` |
+| Error Policy | Missing documents or invalid final decision contracts raise; provider retries are bounded. |
 
-### NoiseTrader
-**Theoretical Basis**: Black (1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader
-**Parameters**: trade_probability=0.05, min_order=100, max_order=500
+## §5 Config Reference
 
+Primary config: `configs/MentalAccounting/Rag/simulation.yml`. RAG knowledge and embedding settings live in `configs/MentalAccounting/Rag/players.yml` and the project document-source directories.
 
-## §4 Usage
+## §6 Running Instructions
 
-### Rule Variant
 ```bash
-python examples/MentalAccounting/Rule/run_mentalaccounting.py \
-    -c configs/MentalAccounting/Rule/simulation.yml
+python examples/MentalAccounting/Rag/run_mentalaccounting.py \
+  -c configs/MentalAccounting/Rag/simulation.yml
 ```
 
-### LLM Variant
-```bash
-python examples/MentalAccounting/LLM/run_mentalaccounting_llm.py \
-    -c configs/MentalAccounting/LLM/simulation.yml
-```
+## §7 Expected Behavior
 
-### RuleLLM Variant
-```bash
-python examples/MentalAccounting/RuleLLM/run_mentalaccounting_rulellm.py \
-    -c configs/MentalAccounting/RuleLLM/simulation.yml
-```
+- Retrieved knowledge is recorded in each accepted order as `rag_context`.
+- The standard order schema remains identical to RuleLLM.
+- `Rag/analysis.py` writes the standard analysis outputs plus `rag_stats.json`.
+- Retrieval failures are visible through the RAG statistics rather than hidden in the market state.
 
-### RAG Variant
-```bash
-python examples/MentalAccounting/Rag/run_mentalaccounting_rag.py \
-    -c configs/MentalAccounting/Rag/simulation.yml
-```
+## §8 References
 
-## §5 References
+See `simulation-bases.md §2` for full DOI citations.
 
-- Thaler (1999): Mental Accounting Matters
-- Thaler (1985): Mental accounting and consumer choice
-- Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
+## §9 Variant Comparison
+
+See `simulation-bases.md §9` for Rule / LLM / RuleLLM / Rag comparison.

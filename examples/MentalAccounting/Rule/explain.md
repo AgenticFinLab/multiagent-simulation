@@ -1,100 +1,92 @@
-# MentalAccounting Simulation
+# MentalAccounting Rule — Implementation Explanation
 
 ## §1 Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | Mental accounting causes investors to treat money differently based on its source or intended use |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Mental accounting simulation showing how portfolio segregation leads to suboptimal decisions |
-| **Academic Value** | Understanding mental accounting causes investors to treat money differently based on its source or intended use through multi-agent simulation |
+|---|---|
+| Variant | Rule |
+| Simulation | MentalAccounting |
+| Decision Mechanism | Deterministic account-level formulas |
+| Theory Reference | `simulation-bases.md §2` and `simulation-bases.md §4` |
+| Market Broadcast | `price`, `fundamental`, `deviation`, `net_demand`, `volume`, `round` |
 
-## §2 Theoretical Foundation
+## §2 Theory → Implementation Mapping
 
-- Thaler (1999): Mental Accounting Matters
-- Thaler (1985): Mental accounting and consumer choice
-- Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
+### §2.1 MentalAccountant (simulation-bases.md §4.1)
 
-## §6 Configuration Reference
+| Theory Component | Implementation |
+|---|---|
+| Account segregation | `MentalAccountant._make_decision()` computes `position / num_accounts`. |
+| Account-local P&L | Uses `entry_price` and current `price` to calculate local P&L. |
+| Realization behavior | Sells part of one account after configured gain/loss thresholds. |
 
-The Rule variant uses `configs/MentalAccounting/Rule/simulation.yml`, `players.yml`, `topology.yml`, and `persona.yml`. Market and investor parameters are loaded from `players.yml`; topology routes market broadcasts to investors and investor orders back to the market.
+### §2.2 HouseMoneyTrader (simulation-bases.md §4.2)
 
-## §7 Runtime Outputs
+| Theory Component | Implementation |
+|---|---|
+| Gains increase risk appetite | Uses `gain_risk_multiplier` when P&L is positive. |
+| Losses reduce risk appetite | Uses `loss_risk_multiplier` otherwise. |
+| Value-direction trading | Buys undervaluation and sells overvaluation when deviation exceeds threshold. |
 
-A full Rule run should produce 200 rounds of market records, valid order payloads, and price/fundamental histories suitable for account-level turnover, price impact, and volatility analysis.
+### §2.3 RationalPortfolioManager (simulation-bases.md §4.3)
 
-## §8 Validation Checklist
+| Theory Component | Implementation |
+|---|---|
+| Whole-portfolio rationality | Ignores mental-account labels and trades on aggregate deviation. |
+| Risk-scaled sizing | Uses `risk_aversion`, `quantity_scale`, and `base_size`. |
+| Stabilization | Buys below fundamental and sells above fundamental. |
 
-- `players.py` and `analysis.py` compile.
-- Dry-run discovers `MentalAccounting__Rule`.
-- Preflight validates config, runner, topology, class refs, and 200 rounds.
-- Full runs should complete 200 rounds with valid market records and order payloads.
+### §2.4 SunkCostHolder (simulation-bases.md §4.4)
 
-## §9 Cross-Variant Comparison Notes
+| Theory Component | Implementation |
+|---|---|
+| Sunk-cost inertia | Holds losers instead of realizing losses. |
+| Winner realization | Sells configured fraction only after gains exceed 10%. |
+| Sticky inventory | Maintains losing positions unless the winner threshold appears. |
 
-Rule is the deterministic baseline for comparing whether LLM, RuleLLM, and RAG agents reduce mental-accounting distortions or change house-money and sunk-cost behavior.
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-## §3 Agent Descriptions
+| Theory Component | Implementation |
+|---|---|
+| Noise liquidity | Trades with `trade_probability`. |
+| Random direction | Randomly chooses buy or sell. |
+| Bounded random size | Uses config `noise_size` and cash/inventory constraints. |
 
-### MentalAccountant
-**Theoretical Basis**: Mental accounting (Thaler, 1999)
-**Market Role**: destabilizing
-**Description**: Segregates portfolio into separate accounts, doesn't net gains/losses
-**Parameters**: num_accounts=3, loss_aversion_per_account=2.25, no_cross_subsidy=True
+## §3 Market Mechanism
 
-### HouseMoneyTrader
-**Theoretical Basis**: House money effect (Thaler & Johnson, 1990)
-**Market Role**: destabilizing
-**Description**: Takes more risk with recent gains
-**Parameters**: gain_risk_multiplier=1.5, loss_risk_multiplier=0.5, reset_period=20
+The market implements `P(t+1) = max(0.01, P(t) + lambda * net_demand + gamma * (F - P(t)) + epsilon)`. It records `price`, `fundamental`, and `volume` for analysis.
 
-### RationalPortfolioManager
-**Theoretical Basis**: Mean-variance optimization (Markowitz, 1952)
-**Market Role**: stabilizing
-**Description**: Optimizes entire portfolio without mental accounting
-**Parameters**: risk_aversion=0.5, correlation_aware=True
+## §4 Variant Architecture
 
-### SunkCostHolder
-**Theoretical Basis**: Sunk cost fallacy (Arkes & Blumer, 1985)
-**Market Role**: destabilizing
-**Description**: Holds losing positions due to already invested capital
-**Parameters**: sunk_cost_weight=0.6, aversion_to_realize=high
+| Component | Implementation |
+|---|---|
+| Coordinator | `Market` in `Rule/players.py` |
+| Investors | Five deterministic investor classes |
+| Order Schema | Canonical order with `type`, `from`, `action`, `bid_price`, `quantity`, `reasoning`, `agent_type`, `strategy` |
+| Failure Policy | Missing or invalid required market/account data raises immediately. |
 
-### NoiseTrader
-**Theoretical Basis**: Black (1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader
-**Parameters**: trade_probability=0.05, min_order=100, max_order=500
+## §5 Config Reference
 
+Primary config: `configs/MentalAccounting/Rule/simulation.yml`. Investor parameters live in `configs/MentalAccounting/Rule/players.yml`.
 
-## §4 Usage
+## §6 Running Instructions
 
-### Rule Variant
 ```bash
 python examples/MentalAccounting/Rule/run_mentalaccounting.py \
-    -c configs/MentalAccounting/Rule/simulation.yml
+  -c configs/MentalAccounting/Rule/simulation.yml
 ```
 
-### LLM Variant
-```bash
-python examples/MentalAccounting/LLM/run_mentalaccounting_llm.py \
-    -c configs/MentalAccounting/LLM/simulation.yml
-```
+## §7 Expected Behavior
 
-### RuleLLM Variant
-```bash
-python examples/MentalAccounting/RuleLLM/run_mentalaccounting_rulellm.py \
-    -c configs/MentalAccounting/RuleLLM/simulation.yml
-```
+- Account-level and sunk-cost agents create non-rational order flow.
+- RationalPortfolioManager provides stabilizing whole-portfolio trades.
+- NoiseTrader adds background liquidity.
+- Full runs produce the standard analysis output set.
 
-### RAG Variant
-```bash
-python examples/MentalAccounting/Rag/run_mentalaccounting_rag.py \
-    -c configs/MentalAccounting/Rag/simulation.yml
-```
+## §8 References
 
-## §5 References
+See `simulation-bases.md §2` for full citations.
 
-- Thaler (1999): Mental Accounting Matters
-- Thaler (1985): Mental accounting and consumer choice
-- Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
+## §9 Variant Comparison
+
+See `simulation-bases.md §9` for Rule / LLM / RuleLLM / Rag comparison.

@@ -7,11 +7,20 @@ Usage:
 """
 
 from examples.MentalAccounting.Rule.analysis import (
+    SCENARIO,
     calculate_metrics,
     create_visualizations,
     load_simulation_data,
-    main,
+    run_standard_analysis,
 )
+
+DEFAULT_CONFIG = "configs/MentalAccounting/RuleLLM/simulation.yml"
+
+
+def main():
+    """Run MentalAccounting RuleLLM analysis."""
+    return run_standard_analysis(SCENARIO, DEFAULT_CONFIG)
+
 
 __all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations", "main"]
 

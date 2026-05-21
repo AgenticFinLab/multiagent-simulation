@@ -1,100 +1,93 @@
-# MentalAccounting Simulation
+# MentalAccounting RuleLLM — Implementation Explanation
 
 ## §1 Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | Mental accounting causes investors to treat money differently based on its source or intended use |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Mental accounting simulation showing how portfolio segregation leads to suboptimal decisions |
-| **Academic Value** | Understanding mental accounting causes investors to treat money differently based on its source or intended use through multi-agent simulation |
+|---|---|
+| Variant | RuleLLM |
+| Simulation | MentalAccounting |
+| Decision Mechanism | LLM reasoning constrained by explicit mental-accounting decision rules |
+| Theory Reference | `simulation-bases.md §2` and `simulation-bases.md §4` |
+| Market Broadcast | `price`, `fundamental`, `deviation`, `net_demand`, `volume`, `round` |
 
-## §2 Theoretical Foundation
+## §2 Theory → Implementation Mapping
 
-- Thaler (1999): Mental Accounting Matters
-- Thaler (1985): Mental accounting and consumer choice
-- Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
+### §2.1 MentalAccountant (simulation-bases.md §4.1)
 
-## §6 Configuration Reference
+| Theory Component | Implementation |
+|---|---|
+| Segregated accounts | `RULELLM_MENTAL_ACCOUNTANT_SYS` requires per-account position reasoning. |
+| Gain/loss thresholds | The prompt states winner and loser realization rules. |
+| Bounded order | `RuleLLMInvestor.decide()` validates and constrains the parsed action. |
 
-The RuleLLM variant uses `configs/MentalAccounting/RuleLLM/simulation.yml`, `players.yml`, `topology.yml`, and `persona.yml`. System prompts provide persona and rule guidance while model settings are loaded from `players.yml`.
+### §2.2 HouseMoneyTrader (simulation-bases.md §4.2)
 
-## §7 Runtime Outputs
+| Theory Component | Implementation |
+|---|---|
+| House-money risk | `RULELLM_HOUSE_MONEY_SYS` switches risk appetite by P&L sign. |
+| Value direction | The prompt trades undervaluation/overvaluation only beyond threshold. |
+| Position constraints | Buy/sell quantities are bounded by cash and inventory. |
 
-A full RuleLLM run should produce 200 rounds, valid order payloads, and model reasoning traces that remain compatible with the rule-guided decision contract.
+### §2.3 RationalPortfolioManager (simulation-bases.md §4.3)
 
-## §8 Validation Checklist
+| Theory Component | Implementation |
+|---|---|
+| Holistic valuation | `RULELLM_RATIONAL_PORTFOLIO_SYS` compares price and fundamental value. |
+| Stabilizing behavior | Buys undervaluation and sells overvaluation. |
+| Risk-scaled sizing | Prompt rules constrain sizing with risk aversion and base size. |
 
-- `players.py`, `prompts.py`, and `analysis.py` compile.
-- Prompt refs load and preserve the canonical decision schema.
-- Dry-run discovers `MentalAccounting__RuleLLM`.
-- Full runs should complete 200 rounds with valid decision JSON and auditable rule-guided reasoning traces.
+### §2.4 SunkCostHolder (simulation-bases.md §4.4)
 
-## §9 Cross-Variant Comparison Notes
+| Theory Component | Implementation |
+|---|---|
+| Loss holding | `RULELLM_SUNK_COST_SYS` holds unless gain threshold is reached. |
+| Winner realization | Positive P&L can trigger a configured sell fraction. |
+| Commitment effect | Explanation should reference entry price and prior investment. |
 
-RuleLLM is compared against Rule to isolate language-reasoning effects when rule guidance is present, and against LLM to assess whether explicit rules reduce behavioral drift.
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-## §3 Agent Descriptions
+| Theory Component | Implementation |
+|---|---|
+| Background random flow | `RULELLM_NOISE_TRADER_SYS` describes probabilistic trading. |
+| Weak signal basis | Reasoning remains brief and noisy. |
+| Bounded order size | Parsed quantity is constrained by portfolio state. |
 
-### MentalAccountant
-**Theoretical Basis**: Mental accounting (Thaler, 1999)
-**Market Role**: destabilizing
-**Description**: Segregates portfolio into separate accounts, doesn't net gains/losses
-**Parameters**: num_accounts=3, loss_aversion_per_account=2.25, no_cross_subsidy=True
+## §3 Market Mechanism
 
-### HouseMoneyTrader
-**Theoretical Basis**: House money effect (Thaler & Johnson, 1990)
-**Market Role**: destabilizing
-**Description**: Takes more risk with recent gains
-**Parameters**: gain_risk_multiplier=1.5, loss_risk_multiplier=0.5, reset_period=20
+RuleLLM reuses the Rule market and sends canonical investor orders into the same price update equation.
 
-### RationalPortfolioManager
-**Theoretical Basis**: Mean-variance optimization (Markowitz, 1952)
-**Market Role**: stabilizing
-**Description**: Optimizes entire portfolio without mental accounting
-**Parameters**: risk_aversion=0.5, correlation_aware=True
+## §4 Variant Architecture
 
-### SunkCostHolder
-**Theoretical Basis**: Sunk cost fallacy (Arkes & Blumer, 1985)
-**Market Role**: destabilizing
-**Description**: Holds losing positions due to already invested capital
-**Parameters**: sunk_cost_weight=0.6, aversion_to_realize=high
+| Component | Implementation |
+|---|---|
+| Coordinator | Rule market imported from the Rule variant |
+| Investors | `RuleLLMInvestor` subclasses |
+| Prompt Structure | Exact `== PERSONA ==` and `== DECISION RULES ==` blocks |
+| Parser | `parse_llm_response_with_thinking()` |
+| Output Contract | Required `action`, `bid_price`, `quantity`, `reasoning`, and `analysis` |
+| Error Policy | Retryable provider errors are retried; invalid final decision contracts raise. |
 
-### NoiseTrader
-**Theoretical Basis**: Black (1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader
-**Parameters**: trade_probability=0.05, min_order=100, max_order=500
+## §5 Config Reference
 
+Primary config: `configs/MentalAccounting/RuleLLM/simulation.yml`. Investor extras and model settings live in `configs/MentalAccounting/RuleLLM/players.yml`.
 
-## §4 Usage
+## §6 Running Instructions
 
-### Rule Variant
 ```bash
-python examples/MentalAccounting/Rule/run_mentalaccounting.py \
-    -c configs/MentalAccounting/Rule/simulation.yml
+python examples/MentalAccounting/RuleLLM/run_mentalaccounting.py \
+  -c configs/MentalAccounting/RuleLLM/simulation.yml
 ```
 
-### LLM Variant
-```bash
-python examples/MentalAccounting/LLM/run_mentalaccounting_llm.py \
-    -c configs/MentalAccounting/LLM/simulation.yml
-```
+## §7 Expected Behavior
 
-### RuleLLM Variant
-```bash
-python examples/MentalAccounting/RuleLLM/run_mentalaccounting_rulellm.py \
-    -c configs/MentalAccounting/RuleLLM/simulation.yml
-```
+- RuleLLM preserves deterministic rule direction while allowing natural-language calculations.
+- Orders use the same schema as Rule and LLM.
+- Analysis remains comparable across variants.
 
-### RAG Variant
-```bash
-python examples/MentalAccounting/Rag/run_mentalaccounting_rag.py \
-    -c configs/MentalAccounting/Rag/simulation.yml
-```
+## §8 References
 
-## §5 References
+See `simulation-bases.md §2` for full DOI citations.
 
-- Thaler (1999): Mental Accounting Matters
-- Thaler (1985): Mental accounting and consumer choice
-- Barberis & Huang (2001): Mental accounting, loss aversion, and individual stock returns
+## §9 Variant Comparison
+
+See `simulation-bases.md §9` for Rule / LLM / RuleLLM / Rag comparison.

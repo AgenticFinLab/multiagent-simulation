@@ -68,6 +68,7 @@ housemoneytrader:
       fundamental_value: 100.0
       gain_risk_multiplier: 2.0
       loss_risk_multiplier: 0.5
+      deviation_threshold: 0.02
       base_size: 400
       custom_state_hot_limit: 3
       llm:
@@ -97,6 +98,8 @@ rationalportfoliomanager:
       initial_price: 100.0
       fundamental_value: 100.0
       risk_aversion: 0.7
+      deviation_threshold: 0.02
+      quantity_scale: 3000
       base_size: 300
       custom_state_hot_limit: 3
       llm:

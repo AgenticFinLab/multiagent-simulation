@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from examples.MentalAccounting.Rag.prompts import (
     RULELLM_MENTAL_ACCOUNTANT_SYS,
     RULELLM_HOUSE_MONEY_SYS,
@@ -32,17 +32,44 @@ from masim.knowledge import (
     KnowledgeStore,
     ResourceManager,
 )
-from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
-from examples.MentalAccounting.Rule.players import Market  # noqa: F401
+from examples.MentalAccounting.Rule.players import (  # noqa: F401
+    Market,
+    _build_order,
+    _require_positive,
+)
 
 logger = logging.getLogger("MentalAccounting.Rag")
 
 
+def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
+    """Validate the shared mental-accounting RAG decision contract."""
+    action = decision["action"]
+    if action not in ("buy", "sell", "hold"):
+        raise ValueError(f"[{identity}] Invalid LLM action: {action}")
+    bid_price = float(decision["bid_price"])
+    _require_positive(bid_price, "bid_price")
+    quantity = int(decision["quantity"])
+    if quantity < 0:
+        raise ValueError(f"[{identity}] quantity must be non-negative, got {quantity}")
+    return {
+        "action": action,
+        "bid_price": bid_price,
+        "quantity": quantity,
+        "reasoning": decision["reasoning"],
+        "analysis": decision["analysis"],
+    }
+
+
 class RagLLMInvestor(GeneralPlayer):
     """Base class for RAG-augmented LLM mental accounting investors.
+
+    Theoretical basis: simulation-bases.md §4.
+    Strategy specification: RuleLLM prompts plus retrieved knowledge map to
+        simulation-bases.md §4.
+    Parameters: simulation-bases.md §6.
 
     Parameters from config extras:
         - initial_cash, initial_position, custom_state_hot_limit, record_path
@@ -81,7 +108,9 @@ class RagLLMInvestor(GeneralPlayer):
 
         self.state.custom_state["cash"] = extras["initial_cash"]
         self.state.custom_state["position"] = extras["initial_position"]
-        self.state.custom_state["entry_price"] = 0.0
+        initial_price = extras["initial_price"]
+        _require_positive(initial_price, "initial_price")
+        self.state.custom_state["entry_price"] = initial_price
         self.state.custom_state["price_history"] = HistoryBuffer(
             folder=os.path.join(base_path, "price"),
             entry_limit=hot_limit,
@@ -111,17 +140,21 @@ class RagLLMInvestor(GeneralPlayer):
         extras = self.config.extras
         record_path = extras["record_path"]
 
-        knowledge_config = extras["knowledge"]
+        knowledge_config = extras.get("knowledge", {})
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
-                "global_uri": rag_cfg["docs_dir"],
+                "global_uri": "examples/document-sources",
+                "resource_csv": [
+                    "examples/document-sources/books.csv",
+                    "examples/document-sources/source",
+                ],
                 "preprocessing": {
                     "parser": "mineru",
-                    "output_position": rag_cfg["mineru_output_dir"],
+                    "output_position": "MinerU_processed",
                 },
                 "rag": {
-                    "output_position": rag_cfg["shared_rag_index_dir"],
+                    "output_position": "rag_index",
                 },
             }
 
@@ -188,7 +221,7 @@ class RagLLMInvestor(GeneralPlayer):
                         "[%s] Failed to load local index (%s)", self.identity, exc
                     )
 
-        shared_rag_dirs = resolved_rag["shared_rag_index_dirs"]
+        shared_rag_dirs = resolved_rag.get("shared_rag_index_dirs", [])
         if not shared_rag_dirs and os.path.isdir(shared_rag_dir):
             shared_rag_dirs = [shared_rag_dir]
 
@@ -302,7 +335,8 @@ class RagLLMInvestor(GeneralPlayer):
         entry_price = self.state.custom_state["entry_price"]
         strategy_name = self.__class__.__name__
 
-        pnl = (price - entry_price) / entry_price * 100 if entry_price > 0 else 0.0
+        _require_positive(entry_price, "entry_price")
+        pnl = (price - entry_price) / entry_price * 100
 
         rag_store: KnowledgeStore = self.state.custom_state["rag_store"]
         rag_cfg: Dict[str, Any] = self.state.custom_state["rag_cfg"]
@@ -324,6 +358,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         user_msg = RAG_USER_TEMPLATE.format(
             rag_context=rag_context,
@@ -340,32 +375,47 @@ class RagLLMInvestor(GeneralPlayer):
 
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
         max_retries = 3
-        decision: Dict[str, Any] = {}
+        decision = None
+        last_error = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=self._system_prompt, user_msg=user_msg)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_output = llm_client.run([infer_input])
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
+                decision = _validate_decision(decision, self.identity)
                 break
-            except ValueError as e:
-                if attempt == max_retries - 1:
-                    raise RuntimeError(
-                        f"[{self.identity}] LLM failed after {max_retries} attempts: {e}"
-                    )
+            except Exception as exc:
+                last_error = exc
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if attempt == max_retries - 1 and (
+                    parse_error or retryable_api_error
+                ):
+                    break
+                if not parse_error and not retryable_api_error:
+                    raise
                 logger.debug(
-                    "[%s] LLM parse failed (attempt %d), retrying...",
+                    "[%s] LLM call/parse failed (attempt %d), retrying...",
                     self.identity,
                     attempt + 1,
                 )
 
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM decision contract failed after "
+                f"{max_retries} retries: {last_error}"
+            )
+
         action = decision["action"]
         quantity = int(decision["quantity"])
-        quantity = max(0, quantity)
+        bid_price = float(decision["bid_price"])
+        _require_positive(bid_price, "bid_price")
 
         if action == "buy" and quantity > 0:
-            max_affordable = int(cash / price) if price > 0 else 0
+            _require_positive(price, "price")
+            max_affordable = int(cash / price)
             quantity = min(quantity, max_affordable)
             if quantity > 0:
                 self.state.custom_state["cash"] -= quantity * price
@@ -373,7 +423,7 @@ class RagLLMInvestor(GeneralPlayer):
                 if self.state.custom_state["entry_price"] == 0:
                     self.state.custom_state["entry_price"] = price
         elif action == "sell" and quantity > 0:
-            quantity = min(quantity, position)
+            quantity = min(quantity, max(int(position), 0))
             if quantity > 0:
                 self.state.custom_state["cash"] += quantity * price
                 self.state.custom_state["position"] -= quantity
@@ -392,12 +442,16 @@ class RagLLMInvestor(GeneralPlayer):
             self.state.custom_state["position"],
         )
 
-        order = {
-            "type": "order",
-            "action": action,
-            "quantity": quantity,
-            "agent_type": strategy_name,
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            bid_price,
+            str(decision["reasoning"]),
+        )
+        order["analysis"] = str(decision["analysis"])
+        order["strategy"] = strategy_name
+        order["rag_context"] = self.state.custom_state["last_rag_context"]
 
         return {
             **order,
@@ -413,31 +467,51 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMMentalAccountant(RagLLMInvestor):
-    """RAG-augmented: MentalAccountant rules + LLM + retrieved knowledge."""
+    """RAG-augmented: MentalAccountant rules + LLM + retrieved knowledge.
+
+    Theoretical basis: simulation-bases.md §4.1 — MentalAccountant.
+    Strategy specification: simulation-bases.md §4.1.4.
+    """
 
     _system_prompt = RULELLM_MENTAL_ACCOUNTANT_SYS
 
 
 class RagLLMHouseMoneyTrader(RagLLMInvestor):
-    """RAG-augmented: HouseMoneyTrader rules + LLM + retrieved knowledge."""
+    """RAG-augmented: HouseMoneyTrader rules + LLM + retrieved knowledge.
+
+    Theoretical basis: simulation-bases.md §4.2 — HouseMoneyTrader.
+    Strategy specification: simulation-bases.md §4.2.4.
+    """
 
     _system_prompt = RULELLM_HOUSE_MONEY_SYS
 
 
 class RagLLMRationalPortfolioManager(RagLLMInvestor):
-    """RAG-augmented: RationalPortfolioManager rules + LLM + retrieved knowledge."""
+    """RAG-augmented: RationalPortfolioManager rules + LLM + retrieved knowledge.
+
+    Theoretical basis: simulation-bases.md §4.3 — RationalPortfolioManager.
+    Strategy specification: simulation-bases.md §4.3.4.
+    """
 
     _system_prompt = RULELLM_RATIONAL_PORTFOLIO_SYS
 
 
 class RagLLMSunkCostHolder(RagLLMInvestor):
-    """RAG-augmented: SunkCostHolder rules + LLM + retrieved knowledge."""
+    """RAG-augmented: SunkCostHolder rules + LLM + retrieved knowledge.
+
+    Theoretical basis: simulation-bases.md §4.4 — SunkCostHolder.
+    Strategy specification: simulation-bases.md §4.4.4.
+    """
 
     _system_prompt = RULELLM_SUNK_COST_SYS
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented: NoiseTrader rules + LLM + retrieved knowledge."""
+    """RAG-augmented: NoiseTrader rules + LLM + retrieved knowledge.
+
+    Theoretical basis: simulation-bases.md §4.5 — NoiseTrader.
+    Strategy specification: simulation-bases.md §4.5.4.
+    """
 
     _system_prompt = RULELLM_NOISE_TRADER_SYS
 
