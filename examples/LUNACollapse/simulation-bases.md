@@ -47,7 +47,8 @@ where `D(t)` is buy volume minus sell volume, `lambda` is price impact, `gamma`
 is mean reversion toward fundamental value, and `epsilon(t)` is Gaussian noise.
 
 The market publishes `price`, `fundamental`, `deviation`, and `round` each
-round. Investors send `{action, quantity}` orders.
+round. Investors send canonical orders containing `type`, `from`, `action`,
+`bid_price`, `quantity`, `reasoning`, `agent_type`, and `strategy`.
 
 ## §4 Investor Archetypes
 
@@ -167,18 +168,18 @@ one stabilizing archetype, matching the intended death-spiral design.
 
 ## §6 Parameter Table
 
-| Parameter | Meaning | Used By | Sensitivity |
-|---|---|---|---|
-| `initial_price` | Starting asset price | Market | Scale only |
-| `fundamental_value` | Reference value | Market | Determines deviation |
-| `price_impact` | Demand-to-price response | Market | High |
-| `mean_reversion` | Pull toward fundamental | Market | Medium |
-| `noise_std` | Exogenous noise | Market | Low |
-| `redemption_threshold` | Stablecoin-holder panic trigger | StablecoinHolder | High |
-| `arb_threshold` | Arbitrage activation threshold | Arbitrageur | Medium |
-| `liquidation_threshold` | Forced-sale trigger | DeFiLender | High |
-| `yield_threshold` | Yield exit trigger | AnchorDepositor | Medium |
-| `discount_threshold` | Value-buyer entry discount | ValueBuyer | Medium |
+| Parameter | Config Path | Meaning | Source Rationale | Sensitivity |
+|---|---|---|---|---|
+| `initial_price` | `market.extras.initial_price` | Starting asset price | Normalized index value for cross-scenario comparison | Scale only |
+| `fundamental_value` | `market.extras.fundamental_value` | Reference value | Stablecoin peg/fundamental anchor abstraction | Determines deviation |
+| `price_impact` | `market.extras.price_impact` | Demand-to-price response | Thin crisis liquidity during stablecoin runs | High |
+| `mean_reversion` | `market.extras.mean_reversion` | Pull toward fundamental | Weak stabilizing arbitrage under stress | Medium |
+| `noise_std` | `market.extras.noise_std` | Exogenous noise | Background market uncertainty | Low |
+| `redemption_threshold` | `stablecoinholder.extras.redemption_threshold` | Panic redemption trigger | Peg-break confidence threshold | High |
+| `arb_threshold` | `arbitrageur.extras.arb_threshold` | Arbitrage activation threshold | Spread threshold for conversion trades | Medium |
+| `liquidation_threshold` | `defilender.extras.liquidation_threshold` | Forced-sale trigger | Collateral impairment threshold | High |
+| `yield_threshold` | `anchordepositor.extras.yield_threshold` | Yield exit trigger | Confidence-loss threshold for Anchor-style withdrawals | Medium |
+| `discount_threshold` | `valuebuyer.extras.discount_threshold` | Value-buyer entry discount | Limits-of-arbitrage entry point | Medium |
 
 ## §7 Communication And Round Structure
 
@@ -204,6 +205,14 @@ overwhelmed value buying.
 Earlier algorithmic stablecoin failures showed that confidence-based
 stabilization can invert into a run dynamic. These cases motivate the generic
 stablecoin-holder and arbitrageur mechanisms.
+
+### §8.3 Iron Finance / TITAN Collapse, June 2021
+
+Iron Finance's partially algorithmic stablecoin design suffered a reflexive run
+when redemption pressure and confidence loss overwhelmed stabilization
+mechanisms. The episode motivates the simulation's conversion of peg stress into
+base-token sell pressure and the limited ability of arbitrage to restore value
+once confidence has broken.
 
 ## §9 Variant Comparison Preview
 

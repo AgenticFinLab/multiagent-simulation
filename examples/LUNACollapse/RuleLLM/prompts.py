@@ -18,7 +18,7 @@ Use price deviation from fundamental as the confidence signal.
 
 OUTPUT FORMAT:
 <analysis>Your peg-confidence and redemption assessment</analysis>
-<decision>{"action": "sell", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
 
 The <decision> JSON must include action ("buy", "sell", or "hold"), bid_price
 (number), quantity (number), and reasoning (brief string)."""
@@ -40,7 +40,7 @@ Use absolute deviation as the arbitrage spread.
 
 OUTPUT FORMAT:
 <analysis>Your arbitrage-spread and sizing assessment</analysis>
-<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
 
 The <decision> JSON must include action ("buy", "sell", or "hold"), bid_price
 (number), quantity (number), and reasoning (brief string)."""
@@ -57,7 +57,7 @@ Use negative deviation as collateral impairment.
 
 OUTPUT FORMAT:
 <analysis>Your collateral-health and liquidation assessment</analysis>
-<decision>{"action": "sell", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
 
 The <decision> JSON must include action ("buy", "sell", or "hold"), bid_price
 (number), quantity (number), and reasoning (brief string)."""
@@ -75,7 +75,7 @@ Use negative deviation as the ecosystem stress signal.
 
 OUTPUT FORMAT:
 <analysis>Your yield-confidence and withdrawal assessment</analysis>
-<decision>{"action": "sell", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
 
 The <decision> JSON must include action ("buy", "sell", or "hold"), bid_price
 (number), quantity (number), and reasoning (brief string)."""
@@ -93,12 +93,12 @@ Use negative deviation as the discount signal.
 
 OUTPUT FORMAT:
 <analysis>Your deep-discount and value-trap assessment</analysis>
-<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
 
 The <decision> JSON must include action ("buy", "sell", or "hold"), bid_price
 (number), quantity (number), and reasoning (brief string)."""
 
-RULELLM_USER_TEMPLATE = """Current Market State (Round {round}):
+RULELLM_USER_TEMPLATE = """Current Market State (Round {round_num}):
 - Current Price: ${price:.2f}
 - Fundamental Value: ${fundamental:.2f}
 - Price Deviation: {deviation:+.2%}
@@ -107,7 +107,7 @@ RULELLM_USER_TEMPLATE = """Current Market State (Round {round}):
 - Portfolio Value: ${portfolio_value:.2f}
 
 Apply your persona and decision rules to decide your action.
-Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": <number>, "quantity": <number>, "reasoning": "brief rationale"}}</decision>.
+Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f}, "quantity": non-negative integer, "reasoning": "brief rationale"}}</decision>.
 """
 
 __all__ = [

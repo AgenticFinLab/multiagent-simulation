@@ -20,8 +20,9 @@ intensity, or stabilization relative to RuleLLM.
 
 ## §3 Analysis Dimensions
 
-Assess retrieval health, prompt-output validity, fallback count, sell-pressure
-timing, and whether retrieved context amplifies or dampens RuleLLM behavior.
+Assess retrieval health, prompt-output validity, parser retry/failure quality,
+sell-pressure timing, and whether retrieved context amplifies or dampens
+RuleLLM behavior.
 
 ## §4 Phase Analysis
 
@@ -37,10 +38,10 @@ Rule and LLM for market-level consequences.
 ## §6 Expected Results
 
 Valid RAG outputs must complete full rounds, use valid RAG assets and embedding
-config, preserve canonical decision JSON, and report any malformed-output or
-retrieval fallback in post-run quality notes.
+config, preserve canonical decision JSON, write `rag_stats.json`, and report any
+malformed-output or retrieval-miss events in post-run quality notes.
 
 ## §7 Visualization Catalogue
 
-Plot price/fundamental, deviation, retrieval/fallback counts, agent sell-pressure
+Plot price/fundamental, deviation, retrieval-miss counts, agent sell-pressure
 shares, stabilization ratio, and cross-variant drawdown.

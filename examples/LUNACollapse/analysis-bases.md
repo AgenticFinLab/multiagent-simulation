@@ -102,5 +102,7 @@ sizes.
 
 ## §7 Visualization Plan
 
-Generate price/fundamental curves, deviation bands, agent-type volume stacked
-bars, stabilization ratio over time, and cross-variant drawdown comparison.
+Generate the fixed standard output files `00_investor_bids.png`,
+`01_lunacollapse_dynamics.png`, `02_lunacollapse_analysis.png`,
+`03_summary.png`, plus `summary.json`. Rag additionally writes
+`rag_stats.json` to summarize retrieval success and retrieval-miss rates.

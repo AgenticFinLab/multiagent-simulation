@@ -26,9 +26,10 @@ RuleLLM system prompt and `RAG_USER_TEMPLATE`, which injects `{rag_context}`.
 
 ## §4 Variant-Specific Features
 
-Rag uses explicit fallback context when no scenario-specific context template is
-configured. Malformed-output fallback is explicit and must be reviewed in
-post-run output quality review.
+Rag resolves local or shared knowledge indexes through `ResourceManager`, queries
+`KnowledgeStore` each round, records `rag_context` on every accepted order, and
+fails loudly if the LLM response cannot satisfy the decision contract after
+bounded retries.
 
 ## §5 Architecture Diagram
 
@@ -47,8 +48,8 @@ The action schema should remain the same as RuleLLM.
 
 ## §8 Validation Checklist
 
-Review full-round completion, retrieval health, parse/fallback quality, and
-scenario metrics.
+Review full-round completion, retrieval health, parser retry/failure quality,
+`rag_stats.json`, and scenario metrics.
 
 ## §9 References
 

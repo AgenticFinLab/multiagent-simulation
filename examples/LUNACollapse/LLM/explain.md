@@ -28,7 +28,7 @@ changes: `LLMInvestor.decide()` builds a market-state prompt, calls
 ## §4 Variant-Specific Features
 
 LLM retries malformed output up to three times and then fails loudly with
-`RuntimeError`. There is no silent hold fallback in this variant.
+`RuntimeError`. There is no silent hold path in this variant.
 
 ## §5 Architecture Diagram
 
@@ -38,14 +38,14 @@ Market state -> persona prompt -> LLM decision JSON -> order -> Market clearing
 
 ## §6 Configuration Reference
 
-Primary config: `configs/LUNACollapse/LLM/players.yml`. LLM prompts describe
-the same economic trigger scale used by the configs while leaving discretionary
-reasoning to the model.
+Primary config: `configs/LUNACollapse/LLM/players.yml`. LLM prompts define role
+psychology and market interpretation while leaving discretionary reasoning to
+the model.
 
 ## §7 Expected Behavior Patterns
 
 LLM may alter panic timing and order sizes relative to Rule. Outputs should be
-reviewed for malformed-output and fallback quality.
+reviewed for parser retry/failure quality.
 
 ## §8 Validation Checklist
 

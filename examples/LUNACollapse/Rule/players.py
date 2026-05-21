@@ -16,12 +16,51 @@ Key Dynamics:
 """
 
 import logging
+import os
 import random
 
 from masim.player.base import Action
 from masim.player.general import GeneralPlayer
+from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("LUNACollapse")
+
+
+def _require_positive(value: float, name: str) -> None:
+    """Validate a positive market scalar."""
+    if value <= 0:
+        raise ValueError(f"{name} must be positive, got {value}")
+
+
+def _build_order(
+    player: GeneralPlayer,
+    action: str,
+    quantity: int,
+    price: float,
+    reasoning: str,
+) -> dict:
+    """Build the canonical order payload shared by all LUNA variants."""
+    if action not in ("buy", "sell", "hold"):
+        raise ValueError(f"invalid action: {action}")
+    _require_positive(float(price), "bid_price")
+    quantity = int(quantity)
+    if quantity < 0:
+        raise ValueError(f"quantity must be non-negative, got {quantity}")
+    return {
+        "type": "order",
+        "from": player.identity,
+        "action": action,
+        "bid_price": float(price),
+        "quantity": quantity,
+        "reasoning": reasoning,
+        "agent_type": player.__class__.__name__,
+        "strategy": player.__class__.__name__,
+    }
+
+
+def _decision(action: str, quantity: int, reasoning: str) -> dict:
+    """Build a Rule decision payload before execution constraints."""
+    return {"action": action, "quantity": int(quantity), "reasoning": reasoning}
 
 
 class Market(GeneralPlayer):
@@ -36,17 +75,36 @@ class Market(GeneralPlayer):
         self.state.custom_state["round"] = observation.round
         if "price" not in self.state.custom_state:
             extras = self.config.extras
-            self.state.custom_state["price"] = extras["initial_price"]
-            self.state.custom_state["fundamental"] = extras["fundamental_value"]
-            self.state.custom_state["price_history"] = []
-            self.state.custom_state["volume_history"] = []
-            self.state.custom_state["price_impact"] = extras["price_impact"]
-            self.state.custom_state["mean_reversion"] = extras["mean_reversion"]
-            self.state.custom_state["noise_std"] = extras["noise_std"]
+            record_path = extras["record_path"]
+            base_path = os.path.join(record_path, self.config.identity)
+            custom_state_hot_limit = extras["custom_state_hot_limit"]
+            price = float(extras["initial_price"])
+            fundamental = float(extras["fundamental_value"])
+            _require_positive(price, "initial_price")
+            _require_positive(fundamental, "fundamental_value")
+            self.state.custom_state["price"] = price
+            self.state.custom_state["fundamental"] = fundamental
+            self.state.custom_state["price_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "price"),
+                entry_limit=custom_state_hot_limit,
+            )
+            self.state.custom_state["fundamental_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "fundamental"),
+                entry_limit=custom_state_hot_limit,
+            )
+            self.state.custom_state["volume_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "volume"),
+                entry_limit=custom_state_hot_limit,
+            )
+            self.state.custom_state["price_impact"] = float(extras["price_impact"])
+            self.state.custom_state["mean_reversion"] = float(extras["mean_reversion"])
+            self.state.custom_state["noise_std"] = float(extras["noise_std"])
         orders = []
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload["type"] == "order":
+            if isinstance(payload, dict) and "order" in payload:
+                payload = payload["order"]
+            if isinstance(payload, dict) and payload.get("type") == "order":
                 orders.append(
                     {
                         "action": payload["action"],
@@ -64,6 +122,7 @@ class Market(GeneralPlayer):
         new_price = max(price + price_change + reversion + noise, 0.01)
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
+        self.state.custom_state["fundamental_history"].append(fundamental)
         volume = min(buy_vol, sell_vol) + abs(net_demand) * 0.5
         self.state.custom_state["volume_history"].append(volume)
         logger.debug(
@@ -127,7 +186,7 @@ class StablecoinHolder(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload["type"] == "market_update":
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -140,8 +199,8 @@ class StablecoinHolder(GeneralPlayer):
         if deviation < -redemption_threshold:
             sell_qty = min(int(abs(position) * 0.5), max(position, 0))
             if sell_qty > 0:
-                return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                return _decision("sell", sell_qty, "peg break redemption pressure")
+        return _decision("hold", 0, "peg deviation below redemption threshold")
 
     async def act(self, decision_payload: dict) -> Action:
         action = decision_payload["action"]
@@ -153,7 +212,7 @@ class StablecoinHolder(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
+        order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
         return Action(
             action_type="order",
             payload={
@@ -180,7 +239,7 @@ class Arbitrageur(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload["type"] == "market_update":
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -197,12 +256,12 @@ class Arbitrageur(GeneralPlayer):
             if deviation > 0:
                 sell_qty = min(qty, max(position, 0))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
+                    return _decision("sell", sell_qty, "positive spread arbitrage sale")
             else:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
-        return {"action": "hold", "quantity": 0}
+                    return _decision("buy", buy_qty, "negative spread arbitrage buy")
+        return _decision("hold", 0, "spread below arbitrage threshold")
 
     async def act(self, decision_payload: dict) -> Action:
         action = decision_payload["action"]
@@ -214,7 +273,7 @@ class Arbitrageur(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
+        order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
         return Action(
             action_type="order",
             payload={
@@ -241,7 +300,7 @@ class DeFiLender(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload["type"] == "market_update":
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -254,8 +313,8 @@ class DeFiLender(GeneralPlayer):
         if deviation < -liq_threshold:
             sell_qty = min(int(abs(position) * 0.6), max(position, 0))
             if sell_qty > 0:
-                return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                return _decision("sell", sell_qty, "collateral breach liquidation")
+        return _decision("hold", 0, "collateral deviation below liquidation threshold")
 
     async def act(self, decision_payload: dict) -> Action:
         action = decision_payload["action"]
@@ -267,7 +326,7 @@ class DeFiLender(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
+        order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
         return Action(
             action_type="order",
             payload={
@@ -294,7 +353,7 @@ class AnchorDepositor(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload["type"] == "market_update":
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -307,8 +366,8 @@ class AnchorDepositor(GeneralPlayer):
         if deviation < -yield_threshold:
             sell_qty = min(int(position * 0.4), max(position, 0))
             if sell_qty > 0:
-                return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                return _decision("sell", sell_qty, "Anchor confidence withdrawal")
+        return _decision("hold", 0, "ecosystem stress below withdrawal threshold")
 
     async def act(self, decision_payload: dict) -> Action:
         action = decision_payload["action"]
@@ -320,7 +379,7 @@ class AnchorDepositor(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
+        order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
         return Action(
             action_type="order",
             payload={
@@ -347,7 +406,7 @@ class ValueBuyer(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload["type"] == "market_update":
+            if isinstance(payload, dict) and payload.get("type") == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -361,8 +420,8 @@ class ValueBuyer(GeneralPlayer):
         if deviation < -discount_threshold:
             buy_qty = min(1000, int(cash * 0.2 / price) if price > 0 else 0)
             if buy_qty > 0:
-                return {"action": "buy", "quantity": buy_qty}
-        return {"action": "hold", "quantity": 0}
+                return _decision("buy", buy_qty, "deep discount value entry")
+        return _decision("hold", 0, "discount below value-entry threshold")
 
     async def act(self, decision_payload: dict) -> Action:
         action = decision_payload["action"]
@@ -374,7 +433,7 @@ class ValueBuyer(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
+        order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
         return Action(
             action_type="order",
             payload={

@@ -38,7 +38,7 @@ from discretionary behavior.
 ## §6 Expected Results
 
 Valid LLM outputs must complete the full configured round count, contain
-valid `<decision>` JSON for each accepted action, avoid silent fallback, and
+valid `<decision>` JSON for each accepted action, avoid silent holds, and
 produce finite prices, positions, and cash balances.
 
 ## §7 Visualization Catalogue

@@ -29,7 +29,15 @@ STANDARD_OUTPUT_FILES = (
 
 def load_simulation_data(config: Dict[str, Any]) -> Dict[str, Any]:
     """Load simulation data through `masim.utils.load_results`."""
-    return _load_data(load_results(config))
+    results = load_results(config)
+    data = _load_data(results)
+    rag_contexts: Dict[str, Dict[int, Any]] = {}
+    for pid, player in results.players_by_role("player").items():
+        contexts = player.turns.field("rag_context")
+        if contexts:
+            rag_contexts[pid] = contexts
+    data["rag_contexts"] = rag_contexts
+    return data
 
 
 def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
