@@ -10,6 +10,32 @@
 | Real-World Origin  | Documented in post-crash surveys (Shiller, 1987), earnings-announcement overreactions (Bernard & Thomas, 1989), and media-driven return predictability (Tetlock, 2007)                                                                              |
 | Research Relevance | Isolates how cognitive salience (not just information) drives price distortion; contrasts availability-biased agents with rational benchmarks (SystematicAnalyst, ValueTrader) to quantify the bias's market impact                                 |
 
+### §1.1 Origin and Source Analysis
+
+#### §1.1.1 Intellectual Lineage
+
+Availability bias enters financial-market modeling through a chain from cognitive psychology to behavioral asset pricing. Tversky and Kahneman (1973) identify availability as a probability-judgment heuristic: people use ease of recall as evidence about frequency or likelihood. In a market, recent and vivid price moves therefore become decision inputs even when the public fundamental value is unchanged.
+
+The finance link is the overreaction literature. De Bondt and Thaler (1985) show that dramatic past winners and losers later reverse, consistent with salient events being overweighted relative to fundamentals. Tetlock (2007) adds the media channel: repeated public narratives can make market conditions feel more important and persistent than objective signals justify.
+
+This simulation operationalizes that lineage as two destabilizing channels and two stabilizing benchmarks. RecentEventOverweighter represents recent-event salience, MediaInfluencedTrader represents media/social salience, SystematicAnalyst represents objective weighting, and ValueTrader represents fundamental anchoring.
+
+#### §1.1.2 Real-World Event Catalogue
+
+| Event | Quantitative Magnitude | Availability Channel | Simulation Agent Correspondence |
+|---|---|---|---|
+| Post-earnings announcement drift | abnormal drift over roughly 60 trading days after earnings surprises (Bernard & Thomas 1989, DOI: 10.2307/2491062) | recent salient corporate news | RecentEventOverweighter, SystematicAnalyst |
+| September 11 market reopening | S&P 500 fell about 14.3% after the four-day closure, then recovered much of the loss within weeks | vivid catastrophic event and continuous media coverage | RecentEventOverweighter, MediaInfluencedTrader, ValueTrader |
+| COVID-19 crash | S&P 500 fell about 34% from 2020-02-19 to 2020-03-23 and recovered by August 2020 | salient daily losses plus intensive media/social amplification | MediaInfluencedTrader, RecentEventOverweighter, SystematicAnalyst |
+
+#### §1.1.3 Book and Practitioner Literature
+
+| Source | Role in Scenario Design |
+|---|---|
+| Kahneman, D. (2011). *Thinking, Fast and Slow*. | Practitioner-facing account of availability and System 1 salience. |
+| Graham, B. (1949). *The Intelligent Investor*. | Practitioner foundation for the ValueTrader's fundamental anchor. |
+| Shiller, R. J. (2000). *Irrational Exuberance*. | Market narrative and salience account linking public attention to mispricing. |
+
 
 ## §2 Theoretical Foundation
 
@@ -148,10 +174,10 @@ The RecentEventOverweighter is a retail or semi-institutional investor who gives
 
 | Parameter          | Value | Meaning                                     | Config Path                                                     | Source                                              |
 |--------------------|-------|---------------------------------------------|-----------------------------------------------------------------|-----------------------------------------------------|
-| recency_weight     | 0.70  | Weight on most recent return                | `AvailabilityBias/Rule/config.yaml → recent_event_overweighter` | Tversky & Kahneman (1973); De Bondt & Thaler (1985) |
-| salience_threshold | 0.02  | Perceived signal threshold for trading      | `AvailabilityBias/Rule/config.yaml → recent_event_overweighter` | Calibrated to 2% salience filter                    |
-| initial_cash       | 10000 | Starting cash reserves                      | `AvailabilityBias/Rule/config.yaml → recent_event_overweighter` | Normalization                                       |
-| initial_position   | 0     | Starting share position                     | `AvailabilityBias/Rule/config.yaml → recent_event_overweighter` | Normalization                                       |
+| recency_weight     | 0.70  | Weight on most recent return                | `configs/AvailabilityBias/Rule/players.yml → recent_event_overweighter` | Tversky & Kahneman (1973); De Bondt & Thaler (1985) |
+| salience_threshold | 0.02  | Perceived signal threshold for trading      | `configs/AvailabilityBias/Rule/players.yml → recent_event_overweighter` | Calibrated to 2% salience filter                    |
+| initial_cash       | 10000 | Starting cash reserves                      | `configs/AvailabilityBias/Rule/players.yml → recent_event_overweighter` | Normalization                                       |
+| initial_position   | 0     | Starting share position                     | `configs/AvailabilityBias/Rule/players.yml → recent_event_overweighter` | Normalization                                       |
 
 **4.1.4.4  Behavioral Properties**
 - Time horizon: Short-term — reacts to each round's most recent return; no multi-period horizon
@@ -264,10 +290,10 @@ The MediaInfluencedTrader is an investor whose perceptions of market conditions 
 
 | Parameter            | Value | Meaning                                           | Config Path                                                   | Source                  |
 |----------------------|-------|---------------------------------------------------|---------------------------------------------------------------|-------------------------|
-| media_weight         | 0.80  | Media intensity amplification of deviation signal | `AvailabilityBias/Rule/config.yaml → media_influenced_trader` | Tetlock (2007)          |
-| social_amplification | 1.5   | Social network additional amplification factor    | `AvailabilityBias/Rule/config.yaml → media_influenced_trader` | Kasperson et al. (1988) |
-| initial_cash         | 10000 | Starting cash reserves                            | `AvailabilityBias/Rule/config.yaml → media_influenced_trader` | Normalization           |
-| initial_position     | 0     | Starting share position                           | `AvailabilityBias/Rule/config.yaml → media_influenced_trader` | Normalization           |
+| media_weight         | 0.80  | Media intensity amplification of deviation signal | `configs/AvailabilityBias/Rule/players.yml → media_influenced_trader` | Tetlock (2007)          |
+| social_amplification | 1.5   | Social network additional amplification factor    | `configs/AvailabilityBias/Rule/players.yml → media_influenced_trader` | Kasperson et al. (1988) |
+| initial_cash         | 10000 | Starting cash reserves                            | `configs/AvailabilityBias/Rule/players.yml → media_influenced_trader` | Normalization           |
+| initial_position     | 0     | Starting share position                           | `configs/AvailabilityBias/Rule/players.yml → media_influenced_trader` | Normalization           |
 
 **4.2.4.4  Behavioral Properties**
 - Time horizon: Short-to-medium term — responds to current deviation level; position held until deviation corrects
@@ -363,10 +389,10 @@ The SystematicAnalyst is the rational benchmark — an institutional investor wh
 
 | Parameter          | Value | Meaning                                           | Config Path                                              | Source                       |
 |--------------------|-------|---------------------------------------------------|----------------------------------------------------------|------------------------------|
-| evidence_threshold | 0.03  | Minimum deviation to trigger rational trading     | `AvailabilityBias/Rule/config.yaml → systematic_analyst` | Mullainathan (2002)          |
-| weight_decay       | 0.80  | Historical signal weight decay (reserved for multi-period variants) | `AvailabilityBias/Rule/config.yaml → systematic_analyst` | Bayesian updating convention |
-| initial_cash       | 10000 | Starting cash                                     | `AvailabilityBias/Rule/config.yaml → systematic_analyst` | Normalization                |
-| initial_position   | 0     | Starting position                                 | `AvailabilityBias/Rule/config.yaml → systematic_analyst` | Normalization                |
+| evidence_threshold | 0.03  | Minimum deviation to trigger rational trading     | `configs/AvailabilityBias/Rule/players.yml → systematic_analyst` | Mullainathan (2002)          |
+| weight_decay       | 0.80  | Historical signal weight decay (reserved for multi-period variants) | `configs/AvailabilityBias/Rule/players.yml → systematic_analyst` | Bayesian updating convention |
+| initial_cash       | 10000 | Starting cash                                     | `configs/AvailabilityBias/Rule/players.yml → systematic_analyst` | Normalization                |
+| initial_position   | 0     | Starting position                                 | `configs/AvailabilityBias/Rule/players.yml → systematic_analyst` | Normalization                |
 
 **4.3.4.4  Behavioral Properties**
 - Time horizon: Medium-term — responds to current deviation without momentum consideration
@@ -460,10 +486,10 @@ The ValueTrader is a patient, fundamental-focused investor who trades only when 
 
 | Parameter           | Value | Meaning                                    | Config Path                                        | Source                                                     |
 |---------------------|-------|--------------------------------------------|----------------------------------------------------|------------------------------------------------------------|
-| deviation_threshold | 0.05  | Minimum deviation to trigger value trading | `AvailabilityBias/Rule/config.yaml → value_trader` | Graham (1949); calibrated to availability-bias episodes |
-| position_size       | 300   | Fixed shares per value trade               | `AvailabilityBias/Rule/config.yaml → value_trader` | Graham (1949) fixed sizing discipline                   |
-| initial_cash        | 10000 | Starting cash                              | `AvailabilityBias/Rule/config.yaml → value_trader` | Normalization                                           |
-| initial_position    | 0     | Starting position                          | `AvailabilityBias/Rule/config.yaml → value_trader` | Normalization                                           |
+| deviation_threshold | 0.05  | Minimum deviation to trigger value trading | `configs/AvailabilityBias/Rule/players.yml → value_trader` | Graham (1949); calibrated to availability-bias episodes |
+| position_size       | 300   | Fixed shares per value trade               | `configs/AvailabilityBias/Rule/players.yml → value_trader` | Graham (1949) fixed sizing discipline                   |
+| initial_cash        | 10000 | Starting cash                              | `configs/AvailabilityBias/Rule/players.yml → value_trader` | Normalization                                           |
+| initial_position    | 0     | Starting position                          | `configs/AvailabilityBias/Rule/players.yml → value_trader` | Normalization                                           |
 
 **4.4.4.4  Behavioral Properties**
 - Time horizon: Long-term — activates only at deep mispricings; patient between activations
@@ -540,9 +566,9 @@ The NoiseTrader is a random, uninformed participant whose trades are unconnected
 
 | Parameter         | Value | Meaning                                 | Config Path                                        | Source          |
 |-------------------|-------|-----------------------------------------|----------------------------------------------------|-----------------|
-| trade_probability | 0.30  | Probability of trading in a given round | `AvailabilityBias/Rule/config.yaml → noise_trader` | Black (1986)    |
-| min_order         | 100   | Minimum random trade quantity           | `AvailabilityBias/Rule/config.yaml → noise_trader` | Retail lot size |
-| max_order         | 500   | Maximum random trade quantity           | `AvailabilityBias/Rule/config.yaml → noise_trader` | Retail lot size |
+| trade_probability | 0.30  | Probability of trading in a given round | `configs/AvailabilityBias/Rule/players.yml → noise_trader` | Black (1986)    |
+| min_order         | 100   | Minimum random trade quantity           | `configs/AvailabilityBias/Rule/players.yml → noise_trader` | Retail lot size |
+| max_order         | 500   | Maximum random trade quantity           | `configs/AvailabilityBias/Rule/players.yml → noise_trader` | Retail lot size |
 
 **4.5.4.4  Behavioral Properties**
 - Time horizon: Random

@@ -2,126 +2,60 @@
 
 ## §1 Overview
 
-| Item                                | Description                                                                                                                      |
-|-------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
-| **Implements**                      | `../analysis-bases.md`                                                                                                           |
-| **Analysis Script**                 | `analysis.py` in this directory                                                                                                  |
-| **Output Location**                 | `EXPERIMENT/AvailabilityBias/Rule/records/analysis/`                                                                             |
-| **Variant-Specific Considerations** | Deterministic baseline; availability bias channels are algebraic — provides calibration reference for LLM/RuleLLM/Rag comparison |
-
----
+| Item | Description |
+|---|---|
+| Variant | Rule |
+| Analysis Script | `examples/AvailabilityBias/Rule/analysis.py` |
+| Basis | `../analysis-bases.md` |
+| Outputs | `summary.json`, `00_investor_bids.png`, `01_availability_bias_dynamics.png`, `02_availability_bias_analysis.png`, `03_summary.png` |
 
 ## §2 Metric Implementation
 
-All metrics defined in `../analysis-bases.md §2`. Rule `analysis.py` is the reference implementation — all other variants import from it.
+| Metric | Function | analysis-bases.md Ref | Rule-Specific Notes |
+|---|---|---|---|
+| Price Deviation from Fundamental | `_compute_peak_deviation(...)` | `§2 Metric: Price Deviation from Fundamental` | Primary bias-depth statistic. |
+| Bias Persistence Score | `_compute_bias_persistence(...)` | `§2 Metric: Bias Persistence Score` | Detects sustained availability episodes. |
+| Availability Bias Magnitude | volume decomposition in `_compute_stabilization_ratio(...)` | `§2 Metric: Availability Bias Magnitude` | Interpreted through biased/rational volume. |
+| Return Autocorrelation | `_compute_rolling_ac1(...)` | `§2 Metric: Return Autocorrelation` | Detects momentum and reversal. |
+| Agent-Type Volume Share | `_load_data(...)` investor payloads | `§2 Metric: Agent-Type Volume Share` | Separates recency, media, rational, and noise channels. |
+| Stabilization Ratio | `_compute_stabilization_ratio(...)` | `§2 Metric: Stabilization Ratio` | Measures rational correction during bias episodes. |
+| RAG Retrieval Failure Rate | not applicable | `§2 Metric: RAG Retrieval Failure Rate` | Rule variant has no retrieval. |
 
-| Metric                       | Function              | analysis-bases.md Ref | Rule-Specific Notes                                                                       |
-|------------------------------|-----------------------|-----------------------|-------------------------------------------------------------------------------------------|
-| **Bias Amplitude**           | `calculate_metrics()` | `§2.1`                | Peak deviation from fundamental caused by availability bias; target 3–10%                 |
-| **Correction Ratio**         | `calculate_metrics()` | `§2.2`                | Fraction of bias corrected by end of simulation; Rule shows cleanest correction shape     |
-| **Bias Persistence**         | `calculate_metrics()` | `§2.3`                | Rounds until price returns within 1% of fundamental; Rule provides minimum persistence    |
-| **Return Autocorrelation**   | `calculate_metrics()` | `§2.4`                | Positive AC during bias amplification; negative during correction; Rule is deterministic  |
-| **Agent-Type Volume**        | `calculate_metrics()` | `§2.5`                | RecentEventOverweighter + MediaInfluencedTrader dominate overreaction phase volume        |
-| **Availability Event Onset** | `calculate_metrics()` | `§2.6`                | Round when bias exceeds 3% threshold; Rule: predictable from noise_std and recency_weight |
+## §3 Analysis Dimensions
 
----
+| Dimension | Rule Interpretation |
+|---|---|
+| Bias-Induced Price Dynamics | Rule provides the deterministic formula baseline. |
+| Channel Attribution | Recency and media channels are directly traceable to config parameters. |
+| Stabilization Effectiveness | SystematicAnalyst and ValueTrader correction is exact and interpretable. |
+| Cross-Variant Comparison | Rule is the reference for LLM, RuleLLM, and Rag deviations. |
 
-## §3 Dimension-by-Dimension Analysis
+## §4 Phase Analysis
 
-### Dimension 1: Bias Dynamics
-*(Objective from analysis-bases.md §3.1)*
+Rule runs should move from equilibrium into possible bias onset when return or deviation signals cross thresholds, then into correction as stabilizing agents and mean reversion offset biased order flow.
 
-**Implementation in analysis.py:**
-- Function: `load_simulation_data()` → price/fundamental from `records/market/*.json`
-- Output: `availabilitybias_analysis.png` (4-panel: Price, Deviation, Returns, Agent Volume)
+## §5 Cross-Variant Comparison
 
-**Variant-Specific Interpretation:**
-Rule shows cleanest bias shape: sharp overreaction when `return_pct` triggers RecencyOverweighter, followed by media amplification, then systematic correction. If bias amplitude < 3%, noise_std may be too low or recency_weight too weak.
+Use Rule as the calibrated baseline. LLM should be compared for persona drift, RuleLLM for formula adherence, and Rag for knowledge effects.
 
----
+## §6 Expected Results
 
-### Dimension 2: Agent Behavior Analysis
-*(Objective from analysis-bases.md §3.2)*
+### §6.1 Stylised Facts
 
-**Implementation in analysis.py:**
-- Computation: per-agent volume from order records
-- Output: `metrics.json` with volume breakdown by agent type and phase
+The Rule variant should show bounded mispricing, nonzero biased-agent volume, and partial correction rather than permanent divergence.
 
-**Variant-Specific Interpretation:**
-RecencyOverweighter first buys should match first round where `|return_pct| > 0.05 / recency_weight`. MediaInfluencedTrader activates when `|deviation| > threshold / (media_weight × social_amplification)`. SystematicAnalyst's counter-trades should appear immediately after bias creates |deviation| > 0.03.
+### §6.2 Calibration Targets
 
----
+Targets come from `analysis-bases.md §6.2`: peak deviation 5%-15%, persistence at least 10% in clear episodes, AC1 0.20-0.40 during active bias, and stabilization ratio 0.4-0.8.
 
-### Dimension 3: Correction Dynamics
-*(Objective from analysis-bases.md §3.3)*
+### §6.3 Cross-Variant Predictions
 
-**Implementation in analysis.py:**
-- Computation: rolling correction_ratio = (peak_deviation − current_deviation) / peak_deviation
-- Output: correction ratio time series in Panel 2
+Rule is expected to be less variable than LLM and Rag because only NoiseTrader is stochastic.
 
-**Variant-Specific Interpretation:**
-Rule correction is smooth and monotonic (no behavioral noise). ValueTrader + SystematicAnalyst progressively correct bias. If correction_ratio < 0.5 by end of run, availability bias is persistent (mean reversion too weak).
+### §6.4 Validation Failure Signs
 
----
+No price data, no fundamental batch store, all-zero quantities, or invalid order fields indicate a contract problem rather than a meaningful market result.
 
-### Dimension 4: Cross-Variant Comparison
-*(Objective from analysis-bases.md §3.4)*
+## §7 Visualization Catalogue
 
-Rule is the deterministic reference. Key question: do LLM availability personas produce deeper or shallower bias than formula? Expected: LLM bias amplitude higher (persona panic); Rag bias lower (historical calibration moderates overreaction).
-
----
-
-## §4 Variant-Specific Observable Phenomena
-
-| Phenomenon                          | Description                                                                     | How to Observe                                       | Contrast with LLM                           |
-|-------------------------------------|---------------------------------------------------------------------------------|------------------------------------------------------|---------------------------------------------|
-| **Dual-Channel Availability**       | Both recency and media channels fire simultaneously during event                | RecencyOverweighter + MediaInfluencedTrader buying   | LLM: channels may fire at different rounds  |
-| **SystematicAnalyst Exact Trigger** | Counter-trade starts exactly at deviation = ±0.03                               | First SystematicAnalyst trade round                  | LLM: subjective "overvalued" assessment     |
-| **Deterministic Bias Shape**        | Same bias trajectory in each run (given same seed)                              | Multiple runs overlay — identical curves             | LLM: variable bias amplitude per run        |
-| **Recency Decay**                   | Bias fades as return_pct reverts; RecencyOverweighter stops trading after shock | RecencyOverweighter volume drops in correction phase | LLM: may linger due to behavioral narrative |
-
----
-
-## §5 Scaling and Sensitivity Analysis
-
-### Round Scaling
-
-| Total Rounds   | Expected Observable                                                     |
-|----------------|-------------------------------------------------------------------------|
-| **50 rounds**  | Bias event + peak + early correction; full lifecycle if noise_std ≥ 0.5 |
-| **100 rounds** | Complete correction + stabilization; all 5 phases observable            |
-
-### Parameter Sensitivity
-
-| Parameter              | Change      | Expected Effect                                                  |
-|------------------------|-------------|------------------------------------------------------------------|
-| `recency_weight`       | 3.0 → 5.0   | Deeper bias amplitude; faster RecencyOverweighter activation     |
-| `social_amplification` | 1.5 → 2.5   | Amplified media channel; bias_amplitude increases proportionally |
-| `evidence_threshold`   | 0.03 → 0.05 | SystematicAnalyst activates later; longer bias persistence       |
-| `price_impact`         | 0.01 → 0.02 | Faster price response to orders; sharper bias spike              |
-
----
-
-## §6 Output Files Reference
-
-All outputs written to `EXPERIMENT/AvailabilityBias/Rule/records/analysis/`.
-
-| Output File                     | Generated By              | Contents                                         | Interpretation                            |
-|---------------------------------|---------------------------|--------------------------------------------------|-------------------------------------------|
-| `availabilitybias_analysis.png` | `create_visualizations()` | 4-panel: Price, Deviation, Returns, Agent Volume | Primary bias verification                 |
-| `metrics.json`                  | `main()`                  | bias_metrics, correction_metrics, agent_volumes  | Machine-readable cross-variant comparison |
-
----
-
-## §7 Cross-Variant Comparison Notes
-
-- **Bias amplitude**: Rule is calibration reference (3–10%); LLM expected higher; Rag expected lower
-- **Correction speed**: Rule fastest and most predictable; LLM slowest (behavioral denial possible)
-- **Behavioral realism**: Rule is least realistic; provides pure formula baseline
-- **Channel independence**: Rule channels are algebraically independent; LLM channels may co-vary through narrative
-
-Cross-variant comparison protocol: `../analysis-bases.md §5`.
-
-References: `../analysis-bases.md`, `../simulation-bases.md §3.1`,
-`../simulation-bases.md §3.3`, `../simulation-bases.md §4`, and
-`../simulation-bases.md §8`.
+The analysis writes the fixed output set required by `docs/create-example-skill/08-step4-implement.md`: `00_investor_bids.png`, `01_availability_bias_dynamics.png`, `02_availability_bias_analysis.png`, `03_summary.png`, and `summary.json`.

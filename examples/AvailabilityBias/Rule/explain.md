@@ -2,198 +2,93 @@
 
 ## §1 Overview
 
-| Item                                   | Description                                                                                                                                                |
-|----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Variant**                            | Rule (deterministic baseline)                                                                                                                              |
-| **Implements**                         | `../simulation-bases.md`                                                                                                                                   |
-| **Decision Logic**                     | Fixed formulas — all thresholds and parameters loaded from config; no LLM calls                                                                            |
-| **Key Difference from Other Variants** | Fully deterministic; recency and media channels are exact algebraic formulas with no stochastic LLM component                                              |
-| **Primary Research Contribution**      | Establish the deterministic baseline: do mechanical availability bias formulas alone reproduce the recency/media-driven overreaction and partial recovery? |
+| Item | Description |
+|---|---|
+| Variant | Rule |
+| Simulation | AvailabilityBias |
+| Decision Mechanism | Deterministic formulas loaded from `configs/AvailabilityBias/Rule/players.yml` |
+| Theory Reference | `simulation-bases.md §2` and investor designs in `simulation-bases.md §4` |
+| Market Broadcast | `price`, `prev_price`, `fundamental`, `deviation`, `return_pct`, `volume`, `round` |
 
----
+## §2 Theory → Implementation Mapping
 
-## §2 How Theoretical Design Is Implemented
+### §2.1 RecentEventOverweighter (simulation-bases.md §4.1)
 
-### RecentEventOverweighter: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — RecentEventOverweighter)*
+| Theory Component | Implementation |
+|---|---|
+| Recency salience overweighting | `RecentEventOverweighter.decide()` computes `recency_weight * return_pct + (1 - recency_weight) * deviation`. |
+| Salient-event activation | Trades only when `abs(perceived_signal) > salience_threshold`. |
+| Bounded order sizing | Uses `quantity_scale` and `max_order` from config, then applies cash or inventory limits. |
 
-| Theoretical Design Element                                                  | Implementation                                                                                                                       |
-|-----------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
-| Availability heuristic recency channel → simulation-bases.md §2.1           | Class docstring cites Tversky & Kahneman (1973); `players.py RecentEventOverweighter`                                                |
-| Uses `return_pct` from broadcast → sim-bases §3.3                           | `return_pct = market_data["return_pct"]` — unique to AvailabilityBias broadcast                                                      |
-| perceived_signal = recency_weight × return_pct + (1 − recency_weight) × dev | `perceived_signal = recency_weight * return_pct + (1 - recency_weight) * deviation`                                                  |
-| recency_weight = 0.70, salience_threshold = 0.02 → sim-bases §6             | `recency_weight = float(extras["recency_weight"])` and `salience_threshold = float(extras["salience_threshold"])` from `players.yml` |
-| Buy when perceived_signal > threshold → sim-bases §4                        | `if perceived_signal > salience_threshold: buy order_size`                                                                           |
-| Sell when perceived_signal < −threshold → sim-bases §4                      | `elif perceived_signal < -salience_threshold: sell order_size`                                                                       |
+### §2.2 MediaInfluencedTrader (simulation-bases.md §4.2)
 
-### MediaInfluencedTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — MediaInfluencedTrader)*
+| Theory Component | Implementation |
+|---|---|
+| Media/social amplification | `MediaInfluencedTrader.decide()` computes `media_weight * deviation * social_amplification`. |
+| Narrative-trigger threshold | Trades only when `abs(amplified_signal) > media_threshold`. |
+| Bounded order sizing | Uses config-driven `quantity_scale` and `max_order`. |
 
-| Theoretical Design Element                                              | Implementation                                                                                   |
-|-------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| Media-driven availability channel → simulation-bases.md §2.2            | Class docstring cites Schwarz et al. (1991); Tetlock (2007); `players.py MediaInfluencedTrader`  |
-| amplified_signal = media_weight × deviation × social_amplification → §4 | `amplified_signal = media_weight * deviation * social_amplification`                             |
-| media_weight = 0.80, social_amplification = 1.50 → sim-bases §6         | Both loaded via `extras["media_weight"]` and `extras["social_amplification"]` from `players.yml` |
-| Trade when                                                              | amplified_signal                                                                                 |
+### §2.3 SystematicAnalyst (simulation-bases.md §4.3)
 
-### SystematicAnalyst: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — SystematicAnalyst)*
+| Theory Component | Implementation |
+|---|---|
+| Objective information weighting | Uses `deviation` only; ignores `return_pct` and media amplification. |
+| Stabilizing counter-trade | Buys undervaluation and sells overvaluation beyond `evidence_threshold`. |
+| Bounded order sizing | Uses `quantity_scale` and `max_order` from config. |
 
-| Theoretical Design Element                                         | Implementation                                                                                 |
-|--------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| Bayesian rational processing → simulation-bases.md §2.3            | Class docstring cites Mullainathan (2002); `players.py SystematicAnalyst`                      |
-| Uses only deviation (no recency or media weighting) → sim-bases §4 | `deviation = market_data["deviation"]` — does NOT use `return_pct`                             |
-| evidence_threshold = 0.03 → sim-bases §6                           | `evidence_threshold = float(extras["evidence_threshold"])` from `players.yml`                  |
-| Stabilizing counter-trade → sim-bases §4                           | `if deviation > evidence_threshold: sell order_size` (fades overvaluation); buy if undervalued |
+### §2.4 ValueTrader (simulation-bases.md §4.4)
 
-### ValueTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — ValueTrader)*
+| Theory Component | Implementation |
+|---|---|
+| Fundamental value discipline | Trades only when `abs(deviation) > deviation_threshold`. |
+| Patient fixed sizing | Uses `position_size` from config. |
+| Stabilization role | Buys below fundamental and sells above fundamental. |
 
-| Theoretical Design Element                                     | Implementation                                                                           |
-|----------------------------------------------------------------|------------------------------------------------------------------------------------------|
-| Value investing discipline → simulation-bases.md §2.4          | Class docstring cites Graham (1949); Baker & Wurgler (2007); `players.py ValueTrader`    |
-| Trade at significant deviation threshold = 0.05 → sim-bases §6 | `deviation_threshold = float(extras["deviation_threshold"])` (= 0.05) from `players.yml` |
-| Buy when deeply undervalued → sim-bases §4                     | `if deviation < -deviation_threshold: buy min(position_size, cash / price)`              |
-| Sell when significantly overvalued → sim-bases §4              | `elif deviation > deviation_threshold: sell min(position_size, position)`                |
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-### NoiseTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — NoiseTrader)*
+| Theory Component | Implementation |
+|---|---|
+| Uninformed background liquidity | Trades with `trade_probability`. |
+| Random direction and size | Draws quantity between config-driven `min_order` and `max_order`. |
+| No signal interpretation | Does not use deviation or return signals for direction. |
 
-| Theoretical Design Element                             | Implementation                                                                                                    |
-|--------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
-| Random uninformed trading → simulation-bases.md §4     | Class docstring cites Black (1986); `players.py NoiseTrader`                                                      |
-| Trade probability = 0.30 → sim-bases §6                | `if random.random() < trade_probability:` where `trade_probability = float(extras["trade_probability"])` (= 0.30) |
-| Quantity uniform [min_order, max_order] → sim-bases §6 | `qty = random.randint(100, 500)`; constrained by cash/position                                                    |
-| Random direction → sim-bases §4                        | `if random.random() > 0.5: action = "buy" else: action = "sell"`                                                  |
+## §3 Market Mechanism
 
----
+The market implements `P(t+1) = P(t) + lambda * D(t) + gamma * [F - P(t)] + epsilon`.
+`D(t)` is buy quantity minus sell quantity from canonical order payloads. The market records `price`, `fundamental`, and `volume` batch stores for analysis.
 
-## §3 Market Mechanism Implementation
+## §4 Variant Architecture
 
-*Formula source: simulation-bases.md §3.1*
+| Component | Implementation |
+|---|---|
+| Coordinator | `Market` in `Rule/players.py` |
+| Investors | Five deterministic investor classes |
+| Output Schema | Canonical order fields: `type`, `from`, `action`, `bid_price`, `quantity`, `reasoning`, `agent_type`, `strategy` |
+| Failure Policy | Missing required data, invalid price, or invalid action raises immediately. |
 
-```
-P(t+1) = P(t) + λ × D(t) + γ × [F − P(t)] + ε(t)
-```
+## §5 Config Reference
 
-Implemented in: `players.py → Market.perceive()` (inline computation after order collection)
+Primary config: `configs/AvailabilityBias/Rule/simulation.yml`.
+Investor parameters are in `configs/AvailabilityBias/Rule/players.yml`, including `recency_weight`, `salience_threshold`, `media_threshold`, `quantity_scale`, `max_order`, `position_size`, and `trade_probability`.
 
-Code translation:
-
-| sim-bases variable   | Python variable                      | Config path                        | Value |
-|----------------------|--------------------------------------|------------------------------------|-------|
-| `λ` (price_impact)   | `price_impact`                       | `extras["price_impact"]`           | 0.02  |
-| `γ` (mean_reversion) | `mean_reversion`                     | `extras["mean_reversion"]`         | 0.03  |
-| `F` (fundamental)    | `fundamental`                        | `extras["fundamental_value"]`      | 100.0 |
-| `D(t)` (net demand)  | `net_demand = buy_qty − sell_qty`    | computed from orders               | —     |
-| `ε(t)` (noise)       | `noise = random.gauss(0, noise_std)` | `extras["noise_std"]`              | 0.5   |
-| `P(t)` (current)     | `current_price`                      | `self.state.custom_state["price"]` | —     |
-
-Price floor: `new_price = max(new_price, 0.01)` — prevents negative prices.
-
-**Unique broadcast**: Unlike all other simulations, Market broadcasts both `return_pct` and `prev_price` in addition to `price`, `fundamental`, `deviation`, and `round`. This enables RecentEventOverweighter to use the recency channel.
-
-Deviations from simulation-bases.md design: None.
-
----
-
-## §4 Variant-Specific Features
-
-*(Reference: simulation-bases.md §9 — Rule variant entry)*
-
-**Two availability channels**: The Rule variant encodes both availability channels as exact algebraic formulas:
-1. **Recency channel** (RecentEventOverweighter): `perceived_signal = 0.70 × return_pct + 0.30 × deviation`
-2. **Media channel** (MediaInfluencedTrader): `amplified_signal = 0.80 × deviation × 1.50 = 1.20 × deviation`
-
-**Fully deterministic channels**: Given the same noise seed, both availability distortions are exactly reproducible, establishing the baseline for how much distortion the LLM and Rag variants reproduce.
-
-**SystematicAnalyst independence from recency**: SystematicAnalyst is the only agent that deliberately ignores `return_pct`, using only `deviation`. This is the baseline stabilizer that corrects availability-biased pricing through pure fundamental analysis.
-
----
-
-## §5 Architecture Diagram
-
-```
-╔══════════════════════════════════════════════════════════════════════╗
-║                              ROUND N                                  ║
-╠══════════════════════════════════════════════════════════════════════╣
-║  Market.perceive()                                                    ║
-║    ├── buy_qty = Σ buy orders; sell_qty = Σ sell orders              ║
-║    ├── P(t+1) = P(t) + 0.02×D + 0.03×(100−P) + N(0, 0.5²)         ║
-║    ├── return_pct = (P(t+1) − P(t)) / P(t)                          ║
-║    └── deviation = (P(t+1) − 100) / 100                              ║
-║                                                                       ║
-║  Market.decide() → broadcast {price, prev_price, fundamental,        ║
-║                               deviation, return_pct, round}          ║
-║                                                                       ║
-║  RecentEventOverweighter: perceived_signal = 0.70×return_pct+0.30×dev║
-║    → buy if perceived_signal > 0.02; sell if < −0.02                 ║
-║  MediaInfluencedTrader:   amplified_signal = 1.20 × deviation         ║
-║    → buy if amplified_signal > threshold; sell if < −threshold       ║
-║  SystematicAnalyst:       evidence = deviation (no recency)           ║
-║    → sell if deviation > 0.03; buy if deviation < −0.03              ║
-║  ValueTrader:             trade if |deviation| > 0.05                 ║
-║  NoiseTrader:             p=0.30 → random 100–500 buy/sell           ║
-║         │                                                             ║
-║         └──── send orders → Market.perceive() [next round]           ║
-╚══════════════════════════════════════════════════════════════════════╝
-```
-
----
-
-## §6 Configuration Reference
-
-Key Configuration Parameters (`configs/AvailabilityBias/Rule/players.yml`):
-
-| Parameter              | Config Path                   | Value | Design Justification                                                        |
-|------------------------|-------------------------------|-------|-----------------------------------------------------------------------------|
-| `price_impact`         | `extras.price_impact`         | 0.02  | Moderate λ — availability bias creates overreaction, not leverage cascade   |
-| `mean_reversion`       | `extras.mean_reversion`       | 0.03  | Moderate γ — allows bias to persist briefly but not permanently             |
-| `noise_std`            | `extras.noise_std`            | 0.5   | Higher σ — availability events are stochastic surprises; see sim-bases §3.1 |
-| `recency_weight`       | `extras.recency_weight`       | 0.70  | Tversky & Kahneman (1973) recency weighting; see sim-bases §6               |
-| `salience_threshold`   | `extras.salience_threshold`   | 0.02  | Salient event threshold; see sim-bases §6                                   |
-| `media_weight`         | `extras.media_weight`         | 0.80  | Tetlock (2007) media amplification; see sim-bases §6                        |
-| `social_amplification` | `extras.social_amplification` | 1.5   | Kasperson et al. (1988) social amplification; see sim-bases §6              |
-| `evidence_threshold`   | `extras.evidence_threshold`   | 0.03  | Mullainathan (2002) systematic processing threshold; see sim-bases §6       |
-| `deviation_threshold`  | `extras.deviation_threshold`  | 0.05  | Graham (1949) value investing threshold; see sim-bases §6                   |
-
----
-
-## §7 Running Instructions
+## §6 Running Instructions
 
 ```bash
-python examples/AvailabilityBias/Rule/run_availabilitybias.py \
-    -c configs/AvailabilityBias/Rule/simulation.yml
+python examples/AvailabilityBias/Rule/run_availabilitybias_rule.py \
+  -c configs/AvailabilityBias/Rule/simulation.yml
 ```
 
-Required environment variables: None (Rule variant requires no API keys)
+## §7 Expected Behavior
 
-Expected runtime: ~10–30 seconds for 100 rounds (pure Python, no LLM calls)
+- Recency and media agents create measurable but bounded deviation from fundamental value.
+- SystematicAnalyst and ValueTrader partially correct overreaction.
+- NoiseTrader supplies background liquidity without directional information.
+- Full 200-round runs should produce all analysis outputs listed in `analysis-bases.md §7`.
 
-Output location: `EXPERIMENT/AvailabilityBias/Rule/`
+## §8 References
 
----
+See `simulation-bases.md §2` for full DOI citations.
 
-## §8 Expected Behavior Patterns
+## §9 Variant Comparison
 
-| Phase              | Rounds | Expected Agent Behavior                                                                                         | Expected Price Dynamics                                              |
-|--------------------|--------|-----------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
-| Pre-Event          | 1–20   | NoiseTrader provides background; small returns keep `return_pct` near 0                                         | Price near 100; deviation < 2%                                       |
-| Availability Event | 20–30  | Large noise shock →                                                                                             | return_pct                                                           |
-| Bias Amplification | 30–50  | Continued availability signal → both biased agents trading in same direction; SystematicAnalyst counter-trading | Peak bias; bias_amplitude_pct = 3–10%                                |
-| Partial Correction | 50–80  | Recency signal decays as `return_pct` normalizes; SystematicAnalyst + ValueTrader stabilize                     | Price returns toward fundamental; correction_ratio accumulating      |
-| Stabilization      | 80–100 | All biased signals below threshold; ValueTrader absorbs remaining mispricing                                    | Price within 1–3% of fundamental; bias_persistence accumulation ends |
-
----
-
-## §9 References
-
-*Do not repeat citations from simulation-bases.md §2. Cross-references only:*
-
-- Availability heuristic recency → `simulation-bases.md §2.1, §4 — RecentEventOverweighter`
-- Media-driven availability → `simulation-bases.md §2.2, §4 — MediaInfluencedTrader`
-- Bounded rationality memory model → `simulation-bases.md §2.3, §4 — SystematicAnalyst`
-- Value investing discipline → `simulation-bases.md §2.4, §4 — ValueTrader`
-- Noise trader theory → `simulation-bases.md §2.5, §4 — NoiseTrader`
-- Price formula + unique broadcast → `simulation-bases.md §3.1, §3.3`
-- Full parameter table with source citations → `simulation-bases.md §6`
+See `simulation-bases.md §9` for Rule / LLM / RuleLLM / Rag comparison.

@@ -57,6 +57,8 @@ recent_event_overweighter:
       # Availability bias: heavily overweight recent salient events
       recency_weight: 0.70      # 70% weight on recent returns vs fundamental
       salience_threshold: 0.02  # 2% threshold to trigger availability response
+      quantity_scale: 5000.0
+      max_order: 300.0
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -80,6 +82,9 @@ media_influenced_trader:
       # Media amplification: widely reported events feel more likely
       media_weight: 0.80          # 80% reliance on media-highlighted deviation
       social_amplification: 1.50  # 1.5x amplification from social reinforcement
+      media_threshold: 0.03
+      quantity_scale: 5000.0
+      max_order: 300.0
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -103,6 +108,8 @@ systematic_analyst:
       # Bayesian evidence weighting
       weight_decay: 0.80         # Recency decay factor (not used in base version)
       evidence_threshold: 0.03   # 3% deviation required before acting
+      quantity_scale: 5000.0
+      max_order: 300.0
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -148,4 +155,6 @@ noise_trader:
       custom_state_hot_limit: 3
       # Random noise: 30% probability of random 100-500 share trade
       trade_probability: 0.30
+      min_order: 100.0
+      max_order: 500.0
   persona: !include persona.yml

@@ -35,6 +35,26 @@ def load_prompt(prompt_path: str) -> str:
     return getattr(module, var_name)
 
 
+def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
+    """Validate the shared LLM trading decision contract."""
+    action = decision["action"]
+    if action not in ("buy", "sell", "hold"):
+        raise ValueError(f"[{identity}] Invalid LLM action: {action}")
+    bid_price = float(decision["bid_price"])
+    if bid_price <= 0:
+        raise ValueError(f"[{identity}] bid_price must be positive, got {bid_price}")
+    quantity = float(decision["quantity"])
+    if quantity < 0:
+        raise ValueError(f"[{identity}] quantity must be non-negative, got {quantity}")
+    return {
+        "action": action,
+        "bid_price": bid_price,
+        "quantity": quantity,
+        "reasoning": decision["reasoning"],
+        "analysis": decision["analysis"],
+    }
+
+
 class RuleLLMInvestor(GeneralPlayer):
     """Base class for RuleLLM-powered investors in the AvailabilityBias scenario."""
 
@@ -128,6 +148,7 @@ class RuleLLMInvestor(GeneralPlayer):
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
+                decision = _validate_decision(decision, self.identity)
                 break
             except Exception as exc:
                 last_error = exc
@@ -140,41 +161,34 @@ class RuleLLMInvestor(GeneralPlayer):
                     raise
 
         if decision is None:
-            logger.warning(
-                "[%s] LLM failed after %d retries: %s. Holding.",
-                self.identity,
-                max_retries,
-                last_error,
+            raise RuntimeError(
+                f"[{self.identity}] LLM decision contract failed after "
+                f"{max_retries} retries: {last_error}"
             )
-            decision = {
-                "action": "hold",
-                "bid_price": market_data["price"],
-                "quantity": 0.0,
-                "reasoning": f"LLM fallback hold after retries: {last_error}",
-                "analysis": "",
-            }
 
         action = decision["action"]
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
-        if bid_price <= 0:
-            bid_price = market_data["price"]
 
         if action == "buy":
-            max_affordable = cash / bid_price if bid_price > 0 else 0
+            max_affordable = cash / bid_price
             quantity = min(quantity, max_affordable)
             self.state.custom_state["cash"] -= quantity * bid_price
             self.state.custom_state["position"] += quantity
         elif action == "sell":
-            quantity = max(-position, quantity)
+            quantity = min(quantity, max(position, 0.0))
             self.state.custom_state["cash"] += quantity * bid_price
-            self.state.custom_state["position"] += quantity
+            self.state.custom_state["position"] -= quantity
+        else:
+            quantity = 0.0
 
         logger.info(
             "[%s] R%d (%s): Q=%+.2f", self.identity, round_num, strategy_name, quantity
         )
 
         order = {
+            "type": "order",
+            "from": self.identity,
             "action": action,
             "bid_price": bid_price,
             "quantity": quantity,
@@ -182,6 +196,7 @@ class RuleLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": str(decision["reasoning"])[:100],
             "analysis": str(decision["analysis"]),
+            "agent_type": strategy_name,
         }
 
         validate_order(order)

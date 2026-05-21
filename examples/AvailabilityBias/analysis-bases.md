@@ -2,290 +2,460 @@
 
 ## §1 Analysis Objectives
 
-| Objective | Research Question                                                                        | Metric(s)                                       | Expected Finding                                                                        |
-|-----------|------------------------------------------------------------------------------------------|-------------------------------------------------|-----------------------------------------------------------------------------------------|
-| O1        | Does availability bias produce measurable persistent deviation from fundamental value?   | Price deviation, bias persistence score         | Availability-biased agents create 5–15% persistent mispricings vs. rational baseline    |
-| O2        | Which availability channel (recency vs. media) generates larger or more persistent bias? | Channel-specific volume, deviation by phase     | RecentEventOverweighter: larger per-round impact; MediaInfluencedTrader: more sustained |
-| O3        | Do stabilizing agents (SystematicAnalyst, ValueTrader) limit mispricing effectively?     | Stabilization ratio, floor/ceiling activation   | Combined stabilization limits maximum deviation to ≤15% in most runs                    |
-| O4        | Does availability bias create measurable overreaction followed by reversal?              | Return autocorrelation, post-peak reversal rate | Positive AC1 during bias episode; negative AC1 during correction                        |
-| O5        | How does the LLM variant's bias magnitude compare to the Rule baseline?                  | Cross-variant deviation, agent volume           | LLM may over- or under-apply bias intensity; RuleLLM near-Rule                          |
-| O6        | Does the Rag variant's historical overreaction context change agent behavior?            | Rag vs. Rule deviation comparison               | Rag may show moderated bias if agents "recall" correction outcomes                      |
+AvailabilityBias analysis measures whether salient recent events and heavily repeated narratives create persistent price deviation from a constant fundamental value. The analysis also separates destabilizing recency/media volume from stabilizing systematic/value volume.
 
+| Objective | Research Question | Primary Metrics | Expected Finding |
+|---|---|---|---|
+| O1 | Does availability bias create mispricing? | M1, M2 | Peak deviation reaches 5%-15%. |
+| O2 | Is the mispricing persistent rather than a one-round shock? | M2, M4 | At least 10% of rounds are in sustained bias episodes. |
+| O3 | Which agent channel drives the distortion? | M5, M6 | Recency and media channels contribute measurable volume. |
+| O4 | Do rational agents stabilize the market? | M6, M7 | Stabilization ratio remains partial, typically 0.4-0.8. |
+| O5 | Do API variants preserve the same mechanism? | M1-M7 plus reasoning/RAG audit | LLM/RuleLLM/Rag differ in strength, not market contract. |
 
 ## §2 Core Metrics Catalogue
 
-### Metric 1: Price Deviation from Fundamental
+### Metric: Price Deviation from Fundamental (PDF)
 
-- **Category**: Price Dynamics / Bias Magnitude
-- **Definition**: Percentage difference between market price and fundamental value; the primary measure of bias-induced mispricing
-- **Formula**: deviation(t) = (P(t) − F) / F × 100, where F = 100.0 (constant)
+#### Category
+Price Dynamics / Primary Phenomenon Detection
 
-**Derivation Rationale**: With constant fundamental (F = 100.0), all price movements represent endogenous cognitive bias effects rather than rational responses to news. Deviation is the most direct quantitative measure of the availability bias's market impact. Baker & Wurgler (2007) use similar deviation-from-fundamental measures to document sentiment-driven mispricing episodes. The formula is scale-independent (percentage) enabling comparison across simulation variants.
+#### Definition
+Absolute percentage distance between the market price and the constant fundamental value.
 
-**Academic Calibration Source**: Baker, M., & Wurgler, J. (2007). "Investor sentiment in the stock market." *Journal of Economic Perspectives*, 21(2), 129–151. DOI: 10.1257/jep.21.2.129. Historical availability-bias-driven mispricings: 5–15% for typical episodes (post-announcement drift, sentiment cycles); up to 30% for extreme events (COVID crash initial phase). Simulation target: 5–15% peak deviation.
+#### Formula
+`PDF_t = |P_t - F| / F * 100`
 
-- **Interpretation**:
-    - 0%: Price at fundamental — no net bias effect
-    - 1%–5%: Mild bias effect — consistent with noise-level availability activation
-    - 5%–15%: Moderate bias episode — target zone; consistent with Baker & Wurgler (2007) sentiment-driven mispricings
-    - > 15%: Strong bias effect — all biased agents actively reinforcing direction; stabilizing agents overwhelmed
-- **Normal Range**: −15% to +15%; most rounds within ±5%
-- **Red Flag**: Deviation never exceeds ±3% → biased agents not generating sufficient signal; check recency_weight and media_weight. Deviation exceeds ±20% persistently → stabilizing agents insufficient; increase position_size or reduce λ.
+| Symbol | Meaning |
+|---|---|
+| `P_t` | market price in round `t` |
+| `F` | constant fundamental value |
 
----
+**Computation notes**: `F` must be positive; zero or missing fundamentals are invalid data.
 
-### Metric 2: Bias Persistence Score
+**Python function**:
+```python
+def compute_peak_deviation(prices: list[float], fundamentals: list[float]) -> float:
+    """Return max absolute percentage deviation from fundamental."""
+```
 
-- **Category**: Phenomenon-Specific / Temporal Dynamics
-- **Definition**: Fraction of simulation rounds in which deviation remains above a threshold magnitude (|deviation| > 0.05) continuously for ≥5 rounds; measures how long availability bias episodes last
-- **Formula**: persistence_score = count{t : all of t, t−1, t−2, t−3, t−4 have |deviation| > 0.05} / (T − 4)
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| 0%-3% | near fundamental | bias weak or corrected quickly |
+| 5%-15% | calibrated bias episode | target range |
+| >20% | excessive mispricing | stabilizers may be too weak |
 
-**Derivation Rationale**: Availability bias differs from cascade crises in its temporal dynamics: it creates persistent moderate mispricings rather than acute crashes. The persistence score quantifies this "slow burn" characteristic — how many simulation rounds feature sustained bias-driven mispricing. Tetlock (2007) documents that media-driven return effects persist for 2–3 weeks (consistent with 5+ round persistence in simulation terms). De Bondt & Thaler (1985) document 3-year overreaction cycles — at the simulation's time scale, this corresponds to multi-round persistent episodes.
+#### Academic Basis
+**Primary source**: Baker, M., & Wurgler, J. (2007). DOI: 10.1257/jep.21.2.129. Investor sentiment creates measurable mispricing relative to fundamentals.
+**Supporting studies**: | Study | Context | Finding | Relevance |
+|---|---|---|---|
+| De Bondt & Thaler (1985), DOI: 10.2307/2327804 | overreaction | extreme-return reversal | validates mispricing correction |
+| Tetlock (2007), DOI: 10.1111/j.1540-6261.2007.01232.x | media sentiment | return pressure then reversal | validates media channel |
 
-**Academic Calibration Source**: Tetlock, P. C. (2007). "Giving content to investor sentiment." *Journal of Finance*, 62(3), 1139–1168. DOI: 10.1111/j.1540-6261.2007.01232.x. Media-driven effects persist 2–3 weeks; De Bondt & Thaler (1985) overreaction persists 2–3 years. Calibration target: persistence_score ≥ 0.10 (10%+ of rounds in sustained episode).
+#### Normal Range (from literature)
+5%-15% peak deviation for moderate sentiment episodes; extreme crises can exceed this range.
 
-- **Interpretation**:
-    - < 5%: Low persistence — bias episodes are transient; stabilizing agents correct quickly
-    - 5%–20%: Moderate persistence — target zone; consistent with Tetlock's 2–3 week media effect
-    - > 20%: High persistence — bias overwhelms stabilizing forces; significant sustained mispricing
-- **Normal Range**: 5%–20% for this calibration
-- **Red Flag**: Persistence score = 0 → bias creates no sustained episodes; increase recency_weight to ≥ 3.0 or check noise_std not too high. Persistence > 40% → stabilizing agents inactive or under-parameterized.
+#### Red Flag Threshold
+- **Too high** (>20%): price impact too strong or stabilizers too weak.
+- **Too low** (<3%): availability agents not activating.
+- **Zero for all rounds**: no market dynamics or no recorded price data.
 
----
+#### Relationship to Other Metrics
+Higher PDF should coincide with higher biased volume and nonzero persistence.
 
-### Metric 3: Availability Bias Magnitude (Overreaction Measure)
+#### Implementation Notes
+Implemented by `_compute_peak_deviation(...)` in `Rule/analysis.py`; reused by LLM, RuleLLM, and Rag.
 
-- **Category**: Phenomenon-Specific / Agent-Level
-- **Definition**: Ratio of biased agent actual trade size to the rational baseline trade size at the same deviation; directly quantifies how much agents are overreacting relative to rational behavior
-- **Formula**: bias_magnitude(i, t) = Q_actual_i(t) / Q_rational(t) where Q_rational(t) = min(300, |deviation(t)| × 5000) is the SystematicAnalyst's formula applied at the same deviation
+### Metric: Bias Persistence Score (BPS)
 
-**Derivation Rationale**: The core of availability bias is overreaction — biased agents trade larger quantities than their fundamental information warrants. Comparing biased agent trade sizes to the rational baseline (SystematicAnalyst's formula) directly quantifies the bias premium in action at each round. A bias_magnitude of 2.0 means the biased agent traded twice what rational analysis would justify. Tversky & Kahneman (1973) predict overweighting of 2–4× for highly salient events, suggesting bias_magnitude ≥ 2.0 during active availability episodes.
+#### Category
+Phenomenon-Specific / Temporal Dynamics
 
-**Academic Calibration Source**: Tversky, A., & Kahneman, D. (1973). "Availability heuristic." *Cognitive Psychology*, 5(2), 207–232. DOI: 10.1016/0010-0285(73)90033-9. Expected overweighting: 2–4× for salient events. Simulation target: average bias_magnitude ≥ 2.0 when RecentEventOverweighter/MediaInfluencedTrader are active.
+#### Definition
+Fraction of rounds in which absolute deviation remains above 5% for a five-round rolling window.
 
-- **Interpretation**:
-    - bias_magnitude = 1.0: No bias — agent trading exactly at rational level
-    - 1.0–2.0: Mild bias — modest overreaction
-    - 2.0–4.0: Target zone — consistent with Tversky & Kahneman (1973) experimental evidence
-    - > 4.0: Extreme bias — verify recency_weight not miscalibrated
-- **Normal Range**: 2.0–4.0 for RecentEventOverweighter; 2.5–4.5 for MediaInfluencedTrader (higher combined amplification)
-- **Red Flag**: Average bias_magnitude < 1.5 → biased agents barely overreacting; recency_weight or media_weight too low. bias_magnitude consistently = Q_max/Q_rational (i.e., biased agent always maxing out at 300) → both biased and rational agents are capping at 300; signals are too large for the Q_max constraint to allow differentiation.
+#### Formula
+`BPS = count_t(all(|PDF_{t-j}| > 5 for j=0..4)) / (T - 4)`
 
----
+| Symbol | Meaning |
+|---|---|
+| `PDF_t` | price deviation in round `t` |
+| `T` | total recorded rounds |
 
-### Metric 4: Return Autocorrelation (Overreaction → Reversal Pattern)
+**Computation notes**: Requires at least five rounds; shorter runs are invalid for full-sample interpretation.
 
-- **Category**: Behavioral / Temporal Patterns
-- **Definition**: Lag-1 autocorrelation of per-round returns; positive during availability bias episodes (momentum from overreaction); negative during correction (reversal)
-- **Formula**: AC1(window) = Corr(r(t), r(t−1)) over a rolling window of W rounds
+**Python function**:
+```python
+def compute_bias_persistence(prices: list[float], fundamentals: list[float]) -> float:
+    """Return sustained-deviation fraction using a 5-round window."""
+```
 
-**Derivation Rationale**: The availability heuristic creates a two-phase return pattern: (1) Overreaction phase — availability-biased agents pile in the direction of the salient signal → positive AC1 (momentum); (2) Correction phase — mean reversion and rational agents correct the mispricing → negative AC1 (reversal). De Bondt & Thaler (1985) documented this exact AC1 sign flip in their 3-year overreaction/reversal study. In the simulation context, the rolling window captures this temporal dynamic at the round level.
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| <5% | transient shock | weak availability effect |
+| 5%-20% | persistent bias | target range |
+| >40% | overpersistent distortion | stabilizers likely underpowered |
 
-**Academic Calibration Source**: De Bondt, W. F. M., & Thaler, R. H. (1985). "Does the stock market overreact?" *Journal of Finance*, 40(3), 793–805. DOI: 10.2307/2327804. AC1 during overreaction phase (extreme past losers/winners): positive momentum; AC1 during reversal phase: negative. Lo & MacKinlay (1988): short-horizon AC1 ≈ +0.1 to +0.3 in momentum-driven markets. Target: AC1 = +0.2 to +0.4 during bias episodes; AC1 = −0.1 to −0.2 during correction.
+#### Academic Basis
+**Primary source**: Tetlock (2007), DOI: 10.1111/j.1540-6261.2007.01232.x. Media effects persist over short horizons before reversal.
+**Supporting studies**: | Study | Context | Finding | Relevance |
+|---|---|---|---|
+| Bernard & Thomas (1989), DOI: 10.2307/2491062 | earnings salience | drift after announcements | persistence calibration |
+| De Bondt & Thaler (1985), DOI: 10.2307/2327804 | long-run overreaction | later reversal | temporal pattern |
 
-- **Interpretation**:
-    - AC1 > +0.2: Availability bias generating momentum — overreaction reinforcing itself
-    - AC1 ≈ 0: Random walk — bias effects and corrections balancing
-    - AC1 < −0.1: Mean reversion/reversal dominant — rational correction underway
-- **Normal Range**: +0.2 to +0.4 during active availability episodes; −0.2 to 0 during recovery
-- **Red Flag**: AC1 ≈ 0 throughout → bias not creating persistent momentum; reduce γ to allow bias effects to build. AC1 strongly negative throughout → mean reversion dominates entirely; γ too high.
+#### Normal Range (from literature)
+At least 10% of rounds in sustained episodes for a clear simulated bias.
 
----
+#### Red Flag Threshold
+- **Too high** (>40%): mean reversion too weak.
+- **Too low** (<5%): bias agents not producing sustained demand.
+- **Zero for all rounds**: no sustained event.
 
-### Metric 5: Agent-Type Volume by Bias Channel
+#### Relationship to Other Metrics
+BPS should rise with biased volume and fall as stabilization ratio rises.
 
-- **Category**: Volume / Activity / Attribution
-- **Definition**: Total trading volume by agent type, disaggregated into recency-channel (RecentEventOverweighter), media-channel (MediaInfluencedTrader), rational (SystematicAnalyst, ValueTrader), and noise (NoiseTrader)
-- **Formula**: volume_channel = Σ_t Σ_{i ∈ channel} |quantity_i(t)|
+#### Implementation Notes
+Implemented by `_compute_bias_persistence(...)` in `Rule/analysis.py`.
 
-**Derivation Rationale**: To isolate the contribution of each availability bias channel, volume must be attributed to agent type. The Tetlock (2007) finding that media-driven effects are distinct from recency effects is testable only if the two channels can be separated. Volume attribution also validates that biased agents are actually trading (not holding too often due to threshold calibration) and that stabilizing agents are providing sufficient corrective volume.
+### Metric: Availability Bias Magnitude (ABM)
 
-**Academic Calibration Source**: Tetlock, P. C. (2007) documents that media-driven sentiment creates order flow distinct from momentum-driven order flow. Expected: roughly equal volumes from RecentEventOverweighter and MediaInfluencedTrader (different channels, similar parameterization). Expected: SystematicAnalyst volume ≥ 30% of biased agent volume to provide effective correction.
+#### Category
+Phenomenon-Specific / Agent Activity
 
-- **Interpretation**:
-    - RecentEventOverweighter and MediaInfluencedTrader: each should contribute 15–25% of total volume
-    - SystematicAnalyst + ValueTrader: combined ≥ 30% of total volume (sufficient for correction)
-    - NoiseTrader: 20–40% (30% trade probability × random direction)
-- **Normal Range**: RecentEventOverweighter: 15–25%; MediaInfluencedTrader: 15–25%; SystematicAnalyst: 10–20%; ValueTrader: 5–15% (activates less frequently); NoiseTrader: 20–40%
-- **Red Flag**: ValueTrader volume = 0 → deviation never reached 5%; bias effects moderate. RecentEventOverweighter or MediaInfluencedTrader volume = 0 → salience threshold or amplification misconfigured; agent not activating.
+#### Definition
+Ratio of biased-agent trading intensity to the rational baseline intensity at comparable deviations.
 
----
+#### Formula
+`ABM_t = Q_biased_t / max(Q_rational_t, epsilon)`
 
-### Metric 6: Stabilization Ratio
+| Symbol | Meaning |
+|---|---|
+| `Q_biased_t` | RecentEventOverweighter plus MediaInfluencedTrader volume |
+| `Q_rational_t` | SystematicAnalyst plus ValueTrader volume |
 
-- **Category**: Phenomenon-Specific / Market Correction
-- **Definition**: Ratio of stabilizing agent (SystematicAnalyst + ValueTrader) corrective volume to destabilizing agent (RecentEventOverweighter + MediaInfluencedTrader) biased volume during active bias episodes
-- **Formula**: stabilization_ratio = [V_SystematicAnalyst + V_ValueTrader] / [V_RecentEvent + V_MediaInfluenced] during rounds where |deviation| > 0.05
+**Computation notes**: Use volume decomposition from investor payloads; zero rational volume is a validation warning.
 
-**Derivation Rationale**: The fundamental tension in the availability bias simulation is between bias amplification and rational correction. The stabilization ratio directly measures the balance of forces. Baker & Wurgler (2007) find that institutional arbitrage partially but incompletely corrects sentiment-driven mispricing — implying stabilization_ratio should be < 1.0 (insufficient to fully correct bias) but > 0.3 (meaningful corrective force). Shleifer & Vishny (1997) predict stabilization_ratio < 0.5 in the presence of limits-to-arbitrage.
+**Python function**:
+```python
+def compute_bias_magnitude(investor_payloads: dict[int, dict]) -> float:
+    """Return biased-volume to rational-volume intensity ratio."""
+```
 
-**Academic Calibration Source**: Baker, M., & Wurgler, J. (2007): institutional arbitrage corrects ~50–60% of sentiment mispricing on average. Shleifer, A., & Vishny, R. W. (1997). DOI: 10.2307/2329555. Target: stabilization_ratio = 0.4–0.8 (partial correction; persistent mispricing remains).
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| <1 | rational volume dominates | bias may be suppressed |
+| 1-4 | availability overreaction | target region |
+| >4 | excessive one-sided bias | risk of runaway calibration |
 
-- **Interpretation**:
-    - stabilization_ratio < 0.3: Bias overwhelms correction — persistent large mispricings
-    - stabilization_ratio = 0.4–0.8: Target zone — partial correction consistent with limits-of-arbitrage
-    - stabilization_ratio > 1.0: Rational agents dominate — bias effects corrected quickly; simulation too stable
-- **Normal Range**: 0.4–0.8 during active bias episodes
-- **Red Flag**: stabilization_ratio consistently < 0.3 → reduce Q_max for biased agents or increase SystematicAnalyst position limits. Ratio > 1.2 → stabilizing agents are over-parameterized relative to biased agents.
+#### Academic Basis
+**Primary source**: Tversky & Kahneman (1973), DOI: 10.1016/0010-0285(73)90033-9. Salient examples receive disproportionate decision weight.
+**Supporting studies**: | Study | Context | Finding | Relevance |
+|---|---|---|---|
+| Schwarz et al. (1991), DOI: 10.1037/0022-3514.61.2.195 | ease of retrieval | salience affects judgment | recency/media channels |
+| Baker & Wurgler (2007), DOI: 10.1257/jep.21.2.129 | sentiment | limits to correction | biased/rational balance |
 
----
+#### Normal Range (from literature)
+1x-4x relative intensity is plausible for a bounded heuristic distortion.
 
-### Metric 7: Post-Episode Reversal Rate
+#### Red Flag Threshold
+- **Too high** (>5): biased volume overwhelms design.
+- **Too low** (<1): stabilizers dominate before bias forms.
+- **Zero for all rounds**: no biased-agent activity.
 
-- **Category**: Phenomenon-Specific / Dynamics Validation
-- **Definition**: Average return in the 5 rounds following the peak deviation of a bias episode; tests whether overreaction is followed by mean-reverting correction (as De Bondt & Thaler predict)
-- **Formula**: reversal_return(episode) = [P(t_peak + 5) − P(t_peak)] / P(t_peak); average over all identified bias episodes (defined as periods where |deviation| > 0.05 for ≥5 rounds)
+#### Relationship to Other Metrics
+ABM should explain PDF and BPS; high ABM without deviation indicates low price impact.
 
-**Derivation Rationale**: The behavioral finance literature's key prediction about availability bias is that overreaction is followed by reversal. De Bondt & Thaler (1985) document a 24.6% 3-year reversal for extreme past losers. Tetlock (2007) finds reversal within 2–3 weeks for media-driven returns. The post-episode reversal rate tests whether the simulation reproduces this canonical prediction: price moves driven by availability bias should reverse, not persist, as rational agents (SystematicAnalyst, ValueTrader) provide correction and biased agents exhaust their activation conditions.
+#### Implementation Notes
+Derived from investor payloads and the stabilization-ratio helper.
 
-**Academic Calibration Source**: De Bondt, W. F. M., & Thaler, R. H. (1985). DOI: 10.2307/2327804. Expected: reversal_return < 0 following positive bias episodes (overvaluation corrects); reversal_return > 0 following negative bias episodes (undervaluation corrects). Magnitude: 2–8% per 5 rounds in simulation (consistent with partial correction over short horizon).
+### Metric: Return Autocorrelation (RAC)
 
-- **Interpretation**:
-    - No reversal (reversal_return same sign as episode direction): Bias is persistent, not correcting — overpowered stabilization
-    - Reversal of 2%–8% per 5 rounds: Target zone — consistent with Tetlock (2007) and De Bondt & Thaler (1985)
-    - Reversal > 10%: Overcorrection — γ mean reversion too aggressive
-- **Normal Range**: −2% to −8% following positive bias episodes; +2% to +8% following negative episodes
-- **Red Flag**: No reversal in any episode → stabilizing agents completely inactive; check ValueTrader and SystematicAnalyst parameterization.
+#### Category
+Behavioral / Price Dynamics
 
+#### Definition
+Rolling lag-1 autocorrelation of returns, used to detect overreaction momentum followed by reversal.
+
+#### Formula
+`RAC_W = corr(r_t, r_{t-1})` over a rolling window `W`
+
+| Symbol | Meaning |
+|---|---|
+| `r_t` | return from round `t-1` to `t` |
+| `W` | rolling window size |
+
+**Computation notes**: Use finite returns only; windows shorter than three returns are invalid.
+
+**Python function**:
+```python
+def compute_rolling_ac1(returns: list[float], window: int = 10) -> float:
+    """Return maximum rolling lag-1 autocorrelation."""
+```
+
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| >0.20 | momentum | active availability episode |
+| near 0 | no serial pattern | weak or balanced forces |
+| < -0.10 | reversal | correction phase |
+
+#### Academic Basis
+**Primary source**: De Bondt & Thaler (1985), DOI: 10.2307/2327804. Overreaction creates later reversal.
+**Supporting studies**: | Study | Context | Finding | Relevance |
+|---|---|---|---|
+| Lo & MacKinlay (1988), DOI: 10.1093/rfs/1.1.41 | return predictability | serial correlation | momentum diagnostic |
+| Tetlock (2007), DOI: 10.1111/j.1540-6261.2007.01232.x | media pressure | short-horizon reversal | media channel |
+
+#### Normal Range (from literature)
+0.20-0.40 during active bias episodes; -0.20 to 0 during correction.
+
+#### Red Flag Threshold
+- **Too high** (>0.60): runaway trend.
+- **Too low** (near zero throughout): no overreaction pattern.
+- **Zero for all rounds**: no price movement or invalid return series.
+
+#### Relationship to Other Metrics
+RAC should be positive when biased volume is high and lower during stabilization.
+
+#### Implementation Notes
+Implemented by `_compute_rolling_ac1(...)` in `Rule/analysis.py`.
+
+### Metric: Agent-Type Volume Share (ATV)
+
+#### Category
+Volume / Attribution
+
+#### Definition
+Share of total order quantity produced by each investor channel.
+
+#### Formula
+`ATV_c = sum(|Q_i| for i in channel c) / sum(|Q_i| for all investors)`
+
+| Symbol | Meaning |
+|---|---|
+| `Q_i` | investor order quantity |
+| `c` | recency, media, systematic, value, or noise channel |
+
+**Computation notes**: Use absolute quantities; hold actions contribute zero.
+
+**Python function**:
+```python
+def compute_agent_type_volume(investor_payloads: dict[str, dict[int, dict]]) -> dict:
+    """Return volume share by investor channel."""
+```
+
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| biased share 30%-60% | active heuristic pressure | target pattern |
+| rational share 20%-50% | stabilizing force present | target pattern |
+| noise share 10%-40% | background liquidity | target pattern |
+
+#### Academic Basis
+**Primary source**: Tetlock (2007), DOI: 10.1111/j.1540-6261.2007.01232.x. Media-driven order flow is distinct from rational correction.
+**Supporting studies**: | Study | Context | Finding | Relevance |
+|---|---|---|---|
+| Black (1986), DOI: 10.1111/j.1540-6261.1986.tb04513.x | noise traders | background liquidity | noise channel |
+| Shleifer & Vishny (1997), DOI: 10.2307/2329555 | arbitrage limits | constrained correction | rational volume |
+
+#### Normal Range (from literature)
+No single fixed share; calibrated target is balanced biased/rational/noise activity.
+
+#### Red Flag Threshold
+- **Too high** (>80% one channel): agent mix dominated by one mechanism.
+- **Too low** (<5% biased volume): phenomenon absent.
+- **Zero for all rounds**: no investor orders recorded.
+
+#### Relationship to Other Metrics
+ATV explains PDF, BPS, and stabilization ratio.
+
+#### Implementation Notes
+Read from `player.turns.payloads()` via `_load_data(...)`.
+
+### Metric: Stabilization Ratio (SR)
+
+#### Category
+Phenomenon-Specific / Market Correction
+
+#### Definition
+Corrective rational volume divided by availability-biased volume during active bias episodes.
+
+#### Formula
+`SR = (V_systematic + V_value) / (V_recent + V_media)`
+
+| Symbol | Meaning |
+|---|---|
+| `V_systematic` | SystematicAnalyst volume |
+| `V_value` | ValueTrader volume |
+| `V_recent` | RecentEventOverweighter volume |
+| `V_media` | MediaInfluencedTrader volume |
+
+**Computation notes**: Evaluate primarily in rounds with absolute deviation above 5%.
+
+**Python function**:
+```python
+def compute_stabilization_ratio(investor_payloads: dict, prices: list[float], fundamentals: list[float]) -> float:
+    """Return rational-to-biased volume ratio during bias episodes."""
+```
+
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| <0.3 | weak correction | bias dominates |
+| 0.4-0.8 | partial correction | target range |
+| >1.2 | overcorrection | rational agents too strong |
+
+#### Academic Basis
+**Primary source**: Shleifer & Vishny (1997), DOI: 10.2307/2329555. Arbitrage is limited and does not instantly erase mispricing.
+**Supporting studies**: | Study | Context | Finding | Relevance |
+|---|---|---|---|
+| Baker & Wurgler (2007), DOI: 10.1257/jep.21.2.129 | sentiment | partial correction | target range |
+| Graham (1949) | value discipline | fundamental anchor | ValueTrader design |
+
+#### Normal Range (from literature)
+0.4-0.8 for partial correction under limits to arbitrage.
+
+#### Red Flag Threshold
+- **Too high** (>1.2): scenario may not express availability bias.
+- **Too low** (<0.3): runaway bias risk.
+- **Zero for all rounds**: no stabilizing volume or no bias episodes.
+
+#### Relationship to Other Metrics
+Higher SR should reduce persistence and peak deviation.
+
+#### Implementation Notes
+Implemented by `_compute_stabilization_ratio(...)` in `Rule/analysis.py`.
+
+### Metric: RAG Retrieval Failure Rate (RFR)
+
+#### Category
+RAG / Knowledge Quality
+
+#### Definition
+Fraction of RAG decisions whose recorded `rag_context` is empty or the explicit no-retrieval marker.
+
+#### Formula
+`RFR = retrieval_failure_rounds / total_rag_rounds`
+
+| Symbol | Meaning |
+|---|---|
+| `retrieval_failure_rounds` | RAG payloads with no useful retrieved context |
+| `total_rag_rounds` | RAG payloads containing a `rag_context` field |
+
+**Computation notes**: Applies only to Rag; non-Rag variants report not applicable.
+
+**Python function**:
+```python
+def analyze_rag_knowledge_effect(investor_payloads: dict[str, dict[int, dict]]) -> dict:
+    """Return RAG retrieval statistics by agent and aggregate."""
+```
+
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| 0%-20% | healthy retrieval | RAG is active |
+| 20%-50% | partial retrieval | inspect index quality |
+| >50% | weak RAG | RAG variant close to LLM |
+
+#### Academic Basis
+**Primary source**: Lewis et al. (2020). Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. DOI: 10.48550/arXiv.2005.11401.
+**Supporting studies**: | Study | Context | Finding | Relevance |
+|---|---|---|---|
+| Tetlock (2007), DOI: 10.1111/j.1540-6261.2007.01232.x | media knowledge | retrieved finance context | RAG content |
+| Tversky & Kahneman (1973), DOI: 10.1016/0010-0285(73)90033-9 | bias theory | retrieved bias mechanism | RAG content |
+
+#### Normal Range (from literature)
+RAG should retrieve useful context for most rounds once the shared index exists.
+
+#### Red Flag Threshold
+- **Too high** (>50%): index/path/key problem.
+- **Too low** (0% with no context variation): possible static or stale context.
+- **Zero for all rounds**: `rag_context` not recorded.
+
+#### Relationship to Other Metrics
+RFR qualifies Rag-vs-RuleLLM comparisons; high RFR weakens claims about knowledge effects.
+
+#### Implementation Notes
+Implemented by `Rag/analysis.py` and written to `rag_stats.json`.
 
 ## §3 Analysis Dimensions
 
-### Dimension 1: Bias-Induced Price Dynamics
-
-**Purpose**: Verify that availability bias produces measurable, literature-calibrated persistent deviations from fundamental value
-**Metrics Used**: Price deviation (Metric 1), bias persistence score (Metric 2)
-**Visualization**: Price vs. fundamental time series with ±5% and ±10% threshold lines; bias episode count and duration bar chart
-**Expected Pattern**: Price oscillates around fundamental; availability bias agents create directional overreaction episodes of 5–15% lasting ≥5 rounds; stabilizing agents gradually correct; no permanent divergence
-
-### Dimension 2: Overreaction Magnitude by Channel
-
-**Purpose**: Isolate and compare the recency-channel (RecentEventOverweighter) versus media-channel (MediaInfluencedTrader) contributions to bias-driven mispricing
-**Metrics Used**: Bias magnitude (Metric 3), agent-type volume (Metric 5)
-**Visualization**: Side-by-side comparison of perceived_signal distribution (RecentEventOverweighter) vs. amplified_signal distribution (MediaInfluencedTrader); per-agent volume time series during bias episodes
-**Expected Pattern**: Both channels produce overreaction (bias_magnitude > 2.0); recency channel is more volatile (reacts to recent_return noise); media channel is more persistent (responds to sustained deviation)
-
-### Dimension 3: Overreaction-Reversal Dynamics
-
-**Purpose**: Test whether availability bias produces the characteristic overreaction → reversal return pattern documented by De Bondt & Thaler (1985) and Tetlock (2007)
-**Metrics Used**: Return autocorrelation (Metric 4), post-episode reversal rate (Metric 7)
-**Visualization**: Rolling AC1 time series with phase markers (positive during bias episode, turning negative during correction); scatter plot of peak deviation vs. subsequent 5-round return reversal
-**Expected Pattern**: Positive AC1 during active bias episodes; negative AC1 during post-episode correction; post-episode reversal_return consistently opposite in sign to episode direction
-
-### Dimension 4: Stabilization Effectiveness
-
-**Purpose**: Measure how effectively rational agents (SystematicAnalyst, ValueTrader) limit the magnitude and duration of availability-bias-driven mispricings
-**Metrics Used**: Stabilization ratio (Metric 6), ValueTrader activation count
-**Visualization**: Net demand decomposition (biased vs. rational agent contributions) during bias episodes; stabilization ratio over time; ValueTrader activation rounds annotated on price chart
-**Expected Pattern**: Stabilization ratio = 0.4–0.8 (partial correction, consistent with limits-of-arbitrage); ValueTrader activates when |deviation| > 5%; combined stabilization limits max persistent deviation to ≤15%
-
-### Dimension 5: Cross-Variant Comparison
-
-**Purpose**: Compare bias magnitude, persistence, and reversal patterns across Rule, LLM, RuleLLM, and Rag variants
-**Metrics Used**: All core metrics (1–7) by variant
-**Visualization**: Side-by-side price deviation curves; bar chart of mean ± std for each metric across 10 runs per variant
-**Expected Pattern**: Rule variant most deterministic; LLM variant may show stronger or weaker bias depending on persona; Rag variant potentially moderated if historical overreaction correction examples are retrieved
-
+| Dimension | Metrics | Interpretation |
+|---|---|---|
+| Bias-Induced Price Dynamics | M1, M2, M4 | Detect overreaction and reversal. |
+| Channel Attribution | M3, M5 | Separate recency, media, rational, and noise channels. |
+| Stabilization Effectiveness | M6 | Test whether systematic/value agents limit mispricing. |
+| RAG Knowledge Effect | M7 plus M1-M6 | Test whether retrieved knowledge changes bias expression. |
+| Cross-Variant Comparison | all metrics | Compare Rule, LLM, RuleLLM, and Rag under the same market. |
 
 ## §4 Phase Analysis Framework
 
-### Phase Detection Rules
+| Phase | Entry Condition | Exit Condition | Key Metrics |
+|---|---|---|---|
+| Equilibrium | round 1 | `|PDF| > 5%` | M1, M5 |
+| Bias Onset | `|PDF| > 5%` | `|PDF| > 10%` or reversal begins | M2, M4 |
+| Active Bias Episode | sustained `|PDF| > 5%` | stabilization ratio rises | M2, M5, M6 |
+| Correction | price moves toward fundamental | `|PDF| < 5%` | M4, M6 |
+| Return to Equilibrium | `|PDF| < 5%` | end of run | M1, M5 |
 
-| Phase | Name                  | Entry Condition                   | Exit Condition | Key Indicators            | Typical Round Range                                      |
-|-------|-----------------------|-----------------------------------|----------------|---------------------------|----------------------------------------------------------|
-| 1     | Equilibrium           | Round 1                           |                | deviation(t)              | > 0.05 for ≥2 consecutive                                |
-| 2     | Bias Onset            |                                   | deviation(t)   | > 0.05 for ≥2 consecutive |                                                          |
-| 3     | Active Bias Episode   |                                   | deviation(t)   | > 0.10                    | Biased agents reduce volume; deviation plateaus or turns |
-| 4     | Correction            | Deviation plateauing or reversing |                | deviation(t)              | < 0.05                                                   |
-| 5     | Return to Equilibrium |                                   | deviation(t)   | < 0.05                    | Round T (end of simulation)                              |
+## §5 Cross-Variant Comparison
 
-### Quantitative Phase Transition Criteria
-
-**Phase 1 → 2**: Deviation exceeds 5% for 2+ rounds. Diagnostic: at least one of RecentEventOverweighter or MediaInfluencedTrader is generating non-zero volume.
-
-**Phase 2 → 3**: Deviation exceeds 10%. Diagnostic: both biased channels active; combined volume from RecentEventOverweighter + MediaInfluencedTrader > combined volume from SystematicAnalyst + ValueTrader.
-
-**Phase 3 → 4**: Deviation stops increasing or reverses sign. Diagnostic: stabilization_ratio rising; per-round deviation change turns from amplifying to diminishing.
-
-**Phase 4 → 5**: Deviation falls below 5% and stays there. Diagnostic: biased agents returning to hold state; AC1 turning near-zero or negative.
-
-### Observable Signatures by Phase
-
-| Phase          | RecentEventOverweighter                            | MediaInfluencedTrader             | SystematicAnalyst                      | ValueTrader                               | AC1          |
-|----------------|----------------------------------------------------|-----------------------------------|----------------------------------------|-------------------------------------------|--------------|
-| Equilibrium    | Inactive                                           | Inactive                          | Occasionally active                    | Inactive                                  | ≈ 0          |
-| Bias Onset     | Active (moderate perceived_signal)                 | Active (small deviation triggers) | Active (countering)                    | Inactive                                  | +0.1 to +0.2 |
-| Active Episode | Active (large perceived_signal from recent return) | Active (sustained amplification)  | Active (insufficient to fully correct) | Possibly active                           | +0.2 to +0.4 |
-| Correction     | Reducing (recent returns normalizing)              | Reducing                          | Active (increasing)                    | Active (buying/selling at 5%+ threshold) | 0 to −0.2    |
-| Equilibrium    | Inactive                                           | Inactive                          | Occasional small trades                | Inactive                                  | ≈ 0          |
-
-
-## §5 Cross-Variant Comparison Framework
-
-### Comparison Protocol
-
-1. **Normalize**: Same initial price (100.0), same fundamental (100.0) across all variants.
-2. **Statistical test**: Compare bias_persistence_score, peak_deviation, and stabilization_ratio across variants using mean ± std over 10 simulation runs per variant.
-3. **Key comparison axes**:
-   - **Bias magnitude**: Does LLM variant over- or under-apply availability bias? Rule variant is the calibrated baseline.
-   - **Channel distinction**: Do LLM personas for RecentEventOverweighter and MediaInfluencedTrader produce distinct behaviors (different signals, different timing)?
-   - **Stabilization**: Do LLM versions of SystematicAnalyst and ValueTrader maintain rational discipline or succumb to availability bias in their reasoning?
-   - **Rag modification**: Does retrieving historical overreaction examples (De Bondt & Thaler, post-crash recoveries) moderate the biased agents' behavior?
-
-### Expected Cross-Variant Behavioral Differences
-
-| Behavioral Dimension                | Rule                          | LLM                                                                               | RuleLLM                     | Rag                                                                                                       |
-|-------------------------------------|-------------------------------|-----------------------------------------------------------------------------------|-----------------------------|-----------------------------------------------------------------------------------------------------------|
-| RecentEventOverweighter activation  | Mechanical at                 | perceived_signal                                                                  | > 0.05                      | LLM may show stronger narrative-driven overreaction ("that was a dramatic move!") or deliberate restraint |
-| MediaInfluencedTrader amplification | Exact 3× deviation scaling    | LLM may interpret "heavy media coverage" differently each call; varying intensity | Near-3× with ±20% variation | May retrieve examples of media-driven reversal and reduce amplification                                   |
-| SystematicAnalyst rationality       | Perfect — uses deviation only | May inadvertently reference recent returns in reasoning; slight contamination     | Near-perfect rational       | May over-emphasize rational behavior based on retrieved efficient-market evidence                         |
-| ValueTrader activation              | Exact at                      | deviation                                                                         | > 5%                        | May activate around the 5% margin-of-safety threshold due to narrative judgment                            |
-
+| Variant | Expected Bias Expression | Primary Diagnostic |
+|---|---|---|
+| Rule | deterministic formula baseline | formulas and volume shares match config |
+| LLM | persona-only stochastic expression | reasoning preserves persona without formula injection |
+| RuleLLM | formula-constrained stochastic expression | prompt calculations match Rule thresholds |
+| Rag | RuleLLM plus retrieved knowledge | `rag_context` and `rag_stats.json` show active retrieval |
 
 ## §6 Expected Results and Validation
 
-### Expected Stylized Facts (Literature-Sourced)
+### §6.1 Stylised Facts
 
-| Stylized Fact                              | Target Value                | Literature Source                                | DOI                              |
-|--------------------------------------------|-----------------------------|--------------------------------------------------|----------------------------------|
-| Peak availability bias deviation           | 5%–15%                      | Baker & Wurgler (2007) sentiment mispricings     | 10.1257/jep.21.2.129             |
-| Bias persistence duration                  | ≥5 rounds sustained         | Tetlock (2007) media effects persist 2–3 weeks   | 10.1111/j.1540-6261.2007.01232.x |
-| Overreaction bias magnitude                | 2.0×–4.0× rational baseline | Tversky & Kahneman (1973)                        | 10.1016/0010-0285(73)90033-9     |
-| Return autocorrelation during bias episode | AC1 > +0.2                  | De Bondt & Thaler (1985)                         | 10.2307/2327804                  |
-| Post-episode reversal                      | 2%–8% per 5 rounds          | De Bondt & Thaler (1985); Tetlock (2007)         | 10.2307/2327804                  |
-| Stabilization ratio                        | 0.4–0.8                     | Baker & Wurgler (2007); Shleifer & Vishny (1997) | 10.2307/2329555                  |
+| Fact | Quantitative Target | Source | Verification |
+|---|---|---|---|
+| Peak mispricing | 5%-15% | Baker & Wurgler 2007, DOI: 10.1257/jep.21.2.129 | M1 |
+| Sustained episode | >=10% of rounds | Tetlock 2007, DOI: 10.1111/j.1540-6261.2007.01232.x | M2 |
+| Overreaction momentum | AC1 0.20-0.40 | De Bondt & Thaler 1985, DOI: 10.2307/2327804 | M4 |
+| Partial correction | SR 0.4-0.8 | Shleifer & Vishny 1997, DOI: 10.2307/2329555 | M6 |
 
-### Sensitivity Discussion
+### §6.2 Calibration Targets
 
-- **Increasing recency_weight**: Stronger per-round overreaction; larger peak deviation; faster bias onset. Most sensitive parameter for RecentEventOverweighter channel.
-- **Increasing media_weight or social_amplification**: More sustained overreaction (responds to deviation level, not recency); higher persistence score. Key parameter for MediaInfluencedTrader.
-- **Decreasing γ (mean reversion)**: More persistent mispricings; higher bias_persistence_score. Risk: simulation may not return to equilibrium within run length.
-- **Increasing SystematicAnalyst position limits**: Higher stabilization_ratio; lower peak deviation; shorter episode duration.
-- **Increasing ValueTrader deviation_threshold**: ValueTrader activates less frequently; deeper mispricings possible before floor/ceiling engaged.
+| Metric | Target | Failure Signal | Adjustment |
+|---|---|---|---|
+| M1 | 5%-15% | no visible deviation | check bias activation and price impact |
+| M2 | >=0.10 | transient only | lower mean reversion or increase bias size |
+| M4 | 0.20-0.40 during bias | no momentum | inspect recency channel |
+| M6 | 0.4-0.8 | zero stabilizer volume | inspect systematic/value thresholds |
+| M7 | <20% ideal | high no-context rate | inspect RAG index/key/path |
 
-### Validation Failure Diagnostics
+Calibration protocol: verify 200 rounds, inspect finite price series, confirm nonzero orders, compare M1-M6 to targets, then inspect API reasoning/RAG quality for affected variants.
 
-| Failure Mode                   | Symptom                                   | Likely Cause                                         | Corrective Action                                                                              |
-|--------------------------------|-------------------------------------------|------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| No bias effect                 | Deviation always < ±3%                    | recency_weight too low or noise_std too high         | Increase recency_weight to 3.5; reduce noise_std to 0.3                                        |
-| No persistence                 | All bias episodes < 3 rounds              | γ too high (corrects too fast)                       | Reduce γ to 0.01; check stabilizing agent volumes                                              |
-| No reversal                    | Post-episode returns same sign as episode | Biased agents maintain activation; γ too low         | Ensure salience_threshold creates natural deactivation; increase γ to 0.03                     |
-| No ValueTrader activation      | Absorption ratio = 0                      | Deviation never crosses 5%                           | Verify biased agents generating sufficient combined signal; review deviation_threshold calibration |
-| MediaInfluencedTrader dominant | Media channel >> recency channel          | amplified_signal = 3× deviation activates too easily | Raise implicit threshold from 0.03 to 0.05; reduce social_amplification                        |
+### §6.3 Cross-Variant Predictions
 
+| Metric | Rule | LLM | RuleLLM | Rag |
+|---|---|---|---|---|
+| Peak deviation | calibrated baseline | higher variance | near Rule | knowledge-dependent |
+| Persistence | moderate | potentially higher | moderate | lower if debiasing works |
+| Stabilization | clean formulas | possible rational contamination | constrained rationality | evidence-guided correction |
+| Retrieval quality | n/a | n/a | n/a | must be audited with RFR |
+
+### §6.4 Validation Failure Signs
+
+| Symptom | Likely Diagnosis | Corrective Action |
+|---|---|---|
+| all agents hold | prompt/parser/schema mismatch | fail-fast and repair contract |
+| no fundamental data | market batch recording bug | record fundamental history |
+| negative or zero bid price | parser contract violation | retry then fail-fast |
+| Rag has no context | missing index or embedding key | fix RAG config before execution |
 
 ## §7 Visualization Catalogue
 
-| Plot Name                          | Type        | X-axis              | Y-axis                               | Overlays / Annotations                          | Purpose                                                           |
-|------------------------------------|-------------|---------------------|--------------------------------------|-------------------------------------------------|-------------------------------------------------------------------|
-| Price vs. Fundamental              | Line        | Rounds              | Price                                | Fundamental dashed; ±5%, ±10% threshold lines   | Primary bias dynamics; shows episode depth and correction         |
-| Price Deviation Time Series        | Line        | Rounds              | Deviation (%)                        | Phase markers; ±5%, ±10%, ±15% thresholds       | Bias episode identification; quantitative mispricing measure      |
-| Perceived Signal Distribution      | Histogram   | Signal value        | Frequency                            | Salience threshold marked                       | Shows RecentEventOverweighter activation frequency and magnitude  |
-| Amplified Signal Distribution      | Histogram   | Signal value        | Frequency                            | 0.03 threshold marked                           | Shows MediaInfluencedTrader activation frequency and magnitude    |
-| Agent Volume by Type               | Stacked Bar | Agent               | Total volume                         | SystematicAnalyst+ValueTrader combined baseline | Volume attribution; validates both availability channels active   |
-| Per-Round Volume Time Series       | Line        | Rounds              | Volume                               | One line per agent; bias episode markers        | Shows when each channel activates; stabilization timing           |
-| Rolling Return Autocorrelation     | Line        | Rounds              | AC1 (10-round rolling)               | Zero line; +0.2 and −0.1 thresholds             | Overreaction → reversal pattern; momentum vs. mean-reversion      |
-| Bias Magnitude by Agent            | Bar/Scatter | Round (when active) | Bias magnitude (Q_actual/Q_rational) | 1.0 rational baseline; 2.0, 4.0 benchmarks      | Quantifies overreaction relative to rational baseline             |
-| Stabilization Ratio Time Series    | Line        | Rounds              | Stabilization ratio                  | 0.4 and 0.8 target range lines                  | Tests limits-of-arbitrage prediction; rational vs. biased balance |
-| Post-Episode Reversal Analysis     | Scatter     | Peak deviation      | Post-5-round return                  | Zero return line; reversal target range         | Validates De Bondt & Thaler overreaction → reversal prediction    |
-| Cross-Variant Deviation Comparison | Line        | Rounds              | Deviation (%)                        | One line per variant (Rule/LLM/RuleLLM/Rag)     | Quantifies behavioral differences across implementation types     |
-| Rule Adherence (RuleLLM variant)   | Bar         | Agent               | Adherence rate (%)                   | 80% target threshold                            | Validates quantitative rule anchoring in RuleLLM variant          |
+| File | Plot | Interpretation |
+|---|---|---|
+| `00_investor_bids.png` | market price and investor bids | order quality and participant behavior |
+| `01_availability_bias_dynamics.png` | price and deviation path | core mispricing dynamics |
+| `02_availability_bias_analysis.png` | volume and autocorrelation | channel attribution and reversal |
+| `03_summary.png` | validation scores and return distribution | fit summary |
+| `rag_stats.json` | retrieval summary for Rag | knowledge-quality audit |

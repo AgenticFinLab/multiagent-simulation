@@ -2,97 +2,55 @@
 
 ## §1 Overview
 
-| Item                                | Description                                                                                                                                    |
-|-------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Implements**                      | `../analysis-bases.md`                                                                                                                         |
-| **Analysis Script**                 | `Rule/analysis.py` (imported)                                                                                                                  |
-| **Output Location**                 | `EXPERIMENT/AvailabilityBias/RuleLLM/records/analysis/`                                                                                        |
-| **Variant-Specific Considerations** | Rule-constrained LLM; lower bias amplitude than pure LLM; key diagnostic is whether formula embedding prevents SystematicAnalyst contamination |
-
----
+| Item | Description |
+|---|---|
+| Variant | RuleLLM |
+| Analysis Script | `examples/AvailabilityBias/RuleLLM/analysis.py` imports the Rule analysis implementation |
+| Basis | `../analysis-bases.md` |
+| Outputs | Same fixed output set as Rule |
 
 ## §2 Metric Implementation
 
-| Metric                       | Function              | analysis-bases.md Ref | RuleLLM-Specific Notes                                                                        |
-|------------------------------|-----------------------|-----------------------|-----------------------------------------------------------------------------------------------|
-| **Bias Amplitude**           | `calculate_metrics()` | `§2.1`                | Expected 3%–8%; tighter than LLM (5%–15%); closer to Rule (3%–10%)                            |
-| **Correction Ratio**         | `calculate_metrics()` | `§2.2`                | Higher than LLM; formula anchoring helps SystematicAnalyst counter-trade at correct threshold |
-| **Bias Persistence**         | `calculate_metrics()` | `§2.3`                | Shorter than LLM; rule constraints limit denial episodes                                      |
-| **Return Autocorrelation**   | `calculate_metrics()` | `§2.4`                | Intermediate; formula-driven momentum but LLM quantity variation adds noise                   |
-| **Agent-Type Volume**        | `calculate_metrics()` | `§2.5`                | Volumes closer to Rule; formula thresholds prevent spurious trading                           |
-| **Availability Event Onset** | `calculate_metrics()` | `§2.6`                | Expected rounds 5–20; tighter than LLM (5–25)                                                 |
+| Metric | Function | analysis-bases.md Ref | RuleLLM-Specific Notes |
+|---|---|---|---|
+| Price Deviation from Fundamental | `_compute_peak_deviation(...)` | `§2 Metric: Price Deviation from Fundamental` | Should remain near Rule baseline. |
+| Bias Persistence Score | `_compute_bias_persistence(...)` | `§2 Metric: Bias Persistence Score` | Formula anchoring should reduce narrative persistence. |
+| Availability Bias Magnitude | investor payload decomposition | `§2 Metric: Availability Bias Magnitude` | Confirm calculations in reasoning. |
+| Return Autocorrelation | `_compute_rolling_ac1(...)` | `§2 Metric: Return Autocorrelation` | Expected between Rule and LLM variance. |
+| Agent-Type Volume Share | `_load_data(...)` | `§2 Metric: Agent-Type Volume Share` | Checks formula-driven channel attribution. |
+| Stabilization Ratio | `_compute_stabilization_ratio(...)` | `§2 Metric: Stabilization Ratio` | Tests whether rational rules remain effective. |
+| RAG Retrieval Failure Rate | not applicable | `§2 Metric: RAG Retrieval Failure Rate` | RuleLLM variant has no retrieval. |
 
----
+## §3 Analysis Dimensions
 
-## §3 Dimension-by-Dimension Analysis
+RuleLLM analysis focuses on whether explicit formulas constrain persona variability while preserving the same market mechanism.
 
-### Dimension 1: Bias Dynamics
-*(Objective from analysis-bases.md §3.1)*
+## §4 Phase Analysis
 
-**Implementation:** `load_simulation_data()` → `availabilitybias_rulellm_analysis.png`
+Bias onset should follow the Rule thresholds with stochastic wording and minor quantity variation from LLM decisions.
 
-**Variant-Specific Interpretation:**
-RuleLLM bias trajectory should follow Rule's shape with 1–2 round timing variation. If bias amplitude > 10%, check whether RecencyOverweighter is computing formula correctly (its reasoning should show "perceived_signal = 0.70 × return_pct + 0.30 × deviation...").
+## §5 Cross-Variant Comparison
 
----
+RuleLLM should be compared against Rule for formula adherence and against LLM for reduction of persona drift.
 
-### Dimension 2: Agent Behavior Analysis
-*(Objective from analysis-bases.md §3.2)*
+## §6 Expected Results
 
-**Key Diagnostic:** Does RuleLLMSystematicAnalyst's reasoning contain "return_pct" mentions? If yes, rule constraint prohibiting return_pct use is being violated — SystematicAnalyst contamination occurred despite rule embedding.
+### §6.1 Stylised Facts
 
----
+RuleLLM should produce bounded availability-bias episodes and explicit calculation traces in reasoning.
 
-### Dimension 3: Correction Dynamics
-*(Objective from analysis-bases.md §3.3)*
+### §6.2 Calibration Targets
 
-**Variant-Specific Interpretation:**
-RuleLLM correction should be smoother than LLM. Formula-anchored SystematicAnalyst activates at exact ±0.03 deviation threshold. Compare correction_ratio trajectory to Rule and LLM baselines.
+Same targets as `analysis-bases.md §6.2`; successful samples must have parse-valid decisions without fallback-hold substitution.
 
----
+### §6.3 Cross-Variant Predictions
 
-### Dimension 4: Cross-Variant Comparison
-*(Objective from analysis-bases.md §3.4)*
+RuleLLM is expected to be more disciplined than LLM and more stochastic than Rule.
 
-RuleLLM is the "disciplined" hypothesis: does formula embedding successfully isolate the two availability channels and prevent contamination? Expected order: Rule ≤ RuleLLM bias < LLM bias.
+### §6.4 Validation Failure Signs
 
----
+Reasoning that omits formulas, invalid action JSON, or SystematicAnalyst use of recency salience indicates a contract or quality issue.
 
-## §4 Variant-Specific Observable Phenomena
+## §7 Visualization Catalogue
 
-| Phenomenon                              | Description                                                          | How to Observe                                 |
-|-----------------------------------------|----------------------------------------------------------------------|------------------------------------------------|
-| **Formula Citation in Reasoning**       | Agents cite exact formula values (3.0×, 0.05 threshold) in reasoning | Grep reasoning for "3.0" or "perceived_signal" |
-| **SystematicAnalyst Isolation Success** | LLMSystematicAnalyst does not mention return_pct in reasoning        | Grep SystematicAnalyst reasoning for "return"  |
-| **Tighter Bias Range**                  | Multiple runs show narrower peak deviation IQR than LLM              | Run 5 seeds; compare IQR vs. LLM               |
-
----
-
-## §5 Scaling and Sensitivity Analysis
-
-| Parameter     | Change     | Expected Effect                                                          |
-|---------------|------------|--------------------------------------------------------------------------|
-| `temperature` | 0.7 → 1.0  | More variance; formula embedding less effective at constraining behavior |
-| Seeds         | 1 → 5 runs | Confirm RuleLLM variance is between Rule (zero) and LLM (high)           |
-
----
-
-## §6 Output Files Reference
-
-| Output File                             | Generated By              | Contents                                         | Interpretation                    |
-|-----------------------------------------|---------------------------|--------------------------------------------------|-----------------------------------|
-| `availabilitybias_rulellm_analysis.png` | `create_visualizations()` | 4-panel: Price, Deviation, Returns, Agent Volume | Primary RuleLLM bias verification |
-| `metrics.json`                          | `main()`                  | `{"variant": "RuleLLM", metrics}`                | Cross-variant comparison input    |
-
----
-
-## §7 Cross-Variant Comparison Notes
-
-- **Bias amplitude**: Intermediate (Rule ≤ RuleLLM < LLM expected order)
-- **Correction**: Faster and more reliable than LLM due to SystematicAnalyst rule enforcement
-- **Formula adherence**: Key test — does RecencyOverweighter compute formula in reasoning chain?
-
-Cross-variant comparison protocol: `../analysis-bases.md §5`.
-
-References: `../analysis-bases.md`, `../simulation-bases.md §4`, and
-`Rule/analysis.py`.
+The imported analysis writes `summary.json`, `00_investor_bids.png`, `01_availability_bias_dynamics.png`, `02_availability_bias_analysis.png`, and `03_summary.png`.
