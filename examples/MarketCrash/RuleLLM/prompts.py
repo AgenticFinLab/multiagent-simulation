@@ -7,11 +7,11 @@ Design principle:
        counterpart (MarketCrash), written as plain-text formulas and thresholds.
 
 Agents:
-    - RuleLLMPanicSeller → RiskParityFund rules
-    - RuleLLMRiskParityFund → LeveragedHedgeFund rules
-    - RuleLLMLeveragedFund → MarketMaker rules
-    - RuleLLMMarketMaker → PassiveInvestor rules
-    - RuleLLMBottomFisher → PanicSeller rules
+    - RuleLLMPanicSeller → PanicSeller rules
+    - RuleLLMRiskParityFund → RiskParityFund rules
+    - RuleLLMLeveragedFund → LeveragedHedgeFund rules
+    - RuleLLMMarketMaker → MarketMaker rules
+    - RuleLLMBottomFisher → BottomFisher rules
 """
 
 # =============================================================================
@@ -102,22 +102,22 @@ IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 
 
 # =============================================================================
-# RuleLLM PassiveInvestor
-# Rule-based counterpart: MarketCrash.PassiveInvestor
+# RuleLLM BottomFisher
+# Rule-based counterpart: MarketCrash.BottomFisher
 # =============================================================================
 
-RULELLM_PASSIVE_INVESTOR_SYS = """You are a PASSIVE INVESTOR in the financial market.
+RULELLM_BOTTOM_FISHER_SYS = """You are a BOTTOM FISHER in the financial market.
 
 == PERSONA ==
-Identity: PassiveInvestor with specific behavioral traits.
+Identity: BottomFisher with specific behavioral traits.
 Belief: "I follow systematic rules informed by quantitative principles."
 Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from PassiveInvestor) ==
+== DECISION RULES (from BottomFisher) ==
 
-Apply the quantitative decision rules from the PassiveInvestor strategy:
+Apply the quantitative decision rules from the BottomFisher strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
 - Use LLM reasoning to interpret market context and adjust within ±20%
 - The sign (buy/sell/hold) MUST follow the rule direction

@@ -2,150 +2,151 @@
 
 ## §1 Phenomenon Definition
 
-MarketCrash models a broad equity-market crash caused by leverage, volatility
-targeting, liquidity withdrawal, panic selling, and delayed stabilizing demand.
-The scenario emphasizes endogenous feedback: falling prices increase risk,
-forced selling, and panic, which further lowers prices.
+MarketCrash models an endogenous crash in which falling prices, rising
+volatility, liquidity withdrawal, and forced deleveraging amplify one another.
+The scenario is not driven by exogenous news; the main mechanism is internal
+feedback between market state and heterogeneous investor reactions.
 
 ## §2 Theoretical Foundation
 
-### §2.1 Leverage And Margin Spirals
+### §2.1 Volatility Targeting
 
-Leveraged investors facing margin constraints sell into falling markets,
-creating a self-reinforcing decline.
+Risk-managed portfolios reduce exposure when realized volatility rises. This
+creates mechanical selling pressure after the market has already weakened.
 
-### §2.2 Volatility Targeting And Risk Parity
+### §2.2 Leverage And Margin Spirals
 
-Risk-managed portfolios reduce exposure when realized volatility rises, adding
-mechanical sell pressure during drawdowns.
+Leveraged investors facing margin constraints must deleverage into drawdowns,
+which pushes prices lower and worsens balance-sheet stress.
 
 ### §2.3 Liquidity Withdrawal
 
-Market makers reduce quote size and inventory risk when volatility rises,
-making price impact larger exactly when liquidity is needed.
+Liquidity providers reduce activity when volatility is high. Price impact then
+increases precisely when sell pressure is strongest.
+
+### §2.4 Behavioral Panic And Contrarian Absorption
+
+Some investors panic-sell after losses, while contrarian buyers only step in
+after deep discounts. The timing mismatch determines whether the crash
+stabilizes or cascades.
 
 ## §3 Market Mechanism
 
-The market broadcasts price, fundamental value, deviation, volatility, and round
-state. Net buy/sell demand moves price through a demand-impact equation with
-mean reversion and noise. Liquidity-sensitive agents can reduce stabilizing
-depth and increase effective crash severity.
+The coordinator receives investor orders each round and updates price with a
+liquidity-sensitive impact equation plus mean reversion and noise.
+
+- Rule variant: `examples/MarketCrash/Rule/players.py:Market`
+  tracks `price`, `volatility`, `liquidity`, `volume`, `net_demand`, and
+  `is_crash`.
+- RuleLLM and Rag variants: their `Market` coordinators use explicit
+  `provides_liquidity` flags from investor orders to measure available depth.
+- LLM variant: its coordinator does not consume `provides_liquidity`; it uses
+  internal liquidity state driven by net demand and volatility.
 
 ## §4 Investor Archetypes
 
 ### §4.1 RiskParityFund
 
-**Summary**: A volatility-targeting fund that rebalances toward target risk.
-**Theoretical and Empirical Basis**: Risk parity and volatility-managed
-portfolio literature.
-**Design Purpose**: Add mechanical selling when volatility rises.
-**Behavioral Framework**: Uses `target_volatility`, `rebalance_speed`, and
-`base_position`.
-**Decision Process**: Reduce exposure when observed volatility exceeds target.
-**Worked Numerical Example**: If realized volatility doubles target volatility,
-the fund sells part of the base position.
-**Academic References**: Volatility-managed portfolio and risk-parity studies.
+**Summary**: A volatility-targeting institutional investor.  
+**Design Purpose**: Add procyclical selling when volatility rises.  
+**Implementation Ground Truth**: Rule uses `target_volatility=2.0`,
+`vol_lookback=5`, `rebalance_speed=0.3`, `base_position=50.0`.
 
 ### §4.2 LeveragedHedgeFund
 
-**Summary**: A leveraged trader subject to margin calls and liquidation.
-**Theoretical and Empirical Basis**: Leverage-cycle and margin-spiral theory.
-**Design Purpose**: Create forced selling after losses.
-**Behavioral Framework**: Uses `margin_call_level`, `liquidation_level`, and
-`momentum_sensitivity`.
-**Decision Process**: Sell when losses approach margin constraints; liquidate
-more aggressively below liquidation level.
-**Worked Numerical Example**: A price drop below margin-call level triggers
-partial deleveraging.
-**Academic References**: Brunnermeier and Pedersen (2009).
+**Summary**: A leveraged investor subject to margin calls and liquidation.  
+**Design Purpose**: Create forced deleveraging after losses.  
+**Implementation Ground Truth**: Rule uses `initial_leverage=3.0`,
+`margin_call_level=0.5`, `liquidation_level=0.3`,
+`momentum_sensitivity=0.5`.
 
 ### §4.3 MarketMaker
 
-**Summary**: A liquidity supplier that withdraws when volatility is high.
-**Theoretical and Empirical Basis**: Market microstructure and inventory-risk
-models.
-**Design Purpose**: Make liquidity endogenous.
-**Behavioral Framework**: Uses `inventory_limit`, `normal_quote_size`, and
-`volatility_withdraw_threshold`.
-**Decision Process**: Provide quotes in normal markets; reduce quote size or
-hold when volatility exceeds threshold.
-**Worked Numerical Example**: When volatility crosses the withdrawal threshold,
-quote size drops from normal size toward zero.
-**Academic References**: Ho and Stoll (1981); liquidity spiral literature.
+**Summary**: A liquidity supplier that withdraws under stress.  
+**Design Purpose**: Make crash severity depend on endogenous market depth.  
+**Implementation Ground Truth**: Rule uses
+`volatility_withdraw_threshold=5.0`, `inventory_limit=30.0`,
+`normal_quote_size=20.0`, `spread_multiplier=0.02`.
 
 ### §4.4 PassiveInvestor
 
-**Summary**: A slow rebalancer that targets a long-run position.
-**Theoretical and Empirical Basis**: Passive index and allocation rebalancing.
-**Design Purpose**: Provide slow stabilizing demand.
-**Behavioral Framework**: Uses `target_position` and `rebalance_frequency`.
-**Decision Process**: Rebalance periodically toward target position.
-**Worked Numerical Example**: If position falls below target on a rebalance
-round, the investor buys.
-**Academic References**: Portfolio rebalancing literature.
+**Summary**: A slow stabilizing allocator that rebalances only occasionally.  
+**Design Purpose**: Provide delayed, weak mean-reverting demand in the Rule
+baseline.  
+**Implementation Ground Truth**: Rule uses `rebalance_frequency=20`,
+`target_position=30.0`.
 
 ### §4.5 PanicSeller
 
-**Summary**: A discretionary investor who sells after losses exceed a trigger.
-**Theoretical and Empirical Basis**: Loss aversion and panic selling.
-**Design Purpose**: Add behavioral selling during drawdowns.
-**Behavioral Framework**: Uses `loss_threshold`, `crash_trigger`, and
-`panic_sell_fraction`.
-**Decision Process**: Sell a fraction of holdings when loss/crash thresholds
-are crossed.
-**Worked Numerical Example**: With a 20% panic fraction and 1000 shares, sells
-200 shares after trigger.
-**Academic References**: Prospect theory and crisis-selling evidence.
+**Summary**: A loss-sensitive investor that sells after drawdowns or sharp
+single-round drops.  
+**Design Purpose**: Add discretionary crash amplification.  
+**Implementation Ground Truth**: Rule uses `loss_threshold=0.10`,
+`crash_trigger=-0.03`, `panic_sell_fraction=0.5`.
 
 ### §4.6 BottomFisher
 
-**Summary**: A stabilizing buyer that enters after deep discounts.
-**Theoretical and Empirical Basis**: Value investing and limits of arbitrage.
-**Design Purpose**: Test whether contrarian capital can absorb panic selling.
-**Behavioral Framework**: Uses `discount_threshold`, `crash_buy_threshold`,
-`buy_size`, and `lookback`.
-**Decision Process**: Buy when discount and crash-depth conditions are met.
-**Worked Numerical Example**: If price is 30% below fundamental and threshold
-is 20%, buys configured size if cash allows.
-**Academic References**: Graham-style value investing; Shleifer and Vishny
-(1997).
+**Summary**: A contrarian buyer that enters after large discounts.  
+**Design Purpose**: Test whether opportunistic capital can absorb forced sales.  
+**Implementation Ground Truth**: Rule uses `crash_buy_threshold=-0.03`,
+`discount_threshold=0.10`, `buy_size=15.0`, `lookback=10`.
 
 ## §5 Agent Diversity Verification
 
-The scenario combines mechanical deleveragers, liquidity withdrawers,
-behavioral sellers, slow passive stabilizers, and contrarian buyers.
+The full Rule baseline contains six investor archetypes:
+RiskParityFund, LeveragedHedgeFund, MarketMaker, PassiveInvestor, PanicSeller,
+and BottomFisher.
+
+The current API variants intentionally retain five archetypes:
+PanicSeller, RiskParityFund, LeveragedFund, MarketMaker, and BottomFisher.
+They omit PassiveInvestor in the configured player set. This is a runtime fact
+that variant documentation must describe honestly rather than silently
+normalizing away.
 
 ## §6 Parameter Table
 
-| Parameter | Meaning | Used By | Sensitivity |
-|---|---|---|---|
-| `target_volatility` | Risk target | RiskParityFund | High |
-| `rebalance_speed` | Speed of risk reduction | RiskParityFund | High |
-| `margin_call_level` | Deleveraging trigger | LeveragedHedgeFund | High |
-| `liquidation_level` | Forced liquidation trigger | LeveragedHedgeFund | High |
-| `volatility_withdraw_threshold` | Liquidity withdrawal trigger | MarketMaker | High |
-| `panic_sell_fraction` | Behavioral sell size | PanicSeller | Medium |
-| `discount_threshold` | Value entry threshold | BottomFisher | Medium |
+| Parameter | Value | Used By | Role In Crash |
+|---|---:|---|---|
+| `base_price_impact` | 0.08 | Market | Base sensitivity of price to net demand |
+| `mean_reversion` | 0.01 | Market | Pull toward fundamental value |
+| `noise_std` | 0.5 | Market | Small exogenous disturbance |
+| `target_volatility` | 2.0 | RiskParityFund | Volatility target for deleveraging |
+| `margin_call_level` | 0.5 | LeveragedHedgeFund | Partial deleveraging trigger |
+| `liquidation_level` | 0.3 | LeveragedHedgeFund | Forced liquidation trigger |
+| `volatility_withdraw_threshold` | 5.0 | MarketMaker | Liquidity withdrawal trigger |
+| `rebalance_frequency` | 20 | PassiveInvestor | Slow stabilizing rebalance cadence |
+| `panic_sell_fraction` | 0.5 | PanicSeller | Fraction sold in panic state |
+| `discount_threshold` | 0.10 | BottomFisher | Entry discount for contrarian buying |
 
 ## §7 Communication And Round Structure
 
-Market broadcasts state; investors evaluate risk, leverage, liquidity, panic,
-or value thresholds; orders return to market; price and volatility update.
+Each round follows the same message flow:
+
+1. The market broadcasts current state to all investors.
+2. Investors decide order direction, quantity, and price.
+3. Orders return to the market through `investor_bid`.
+4. The market updates price, liquidity-relevant state, and aggregate records.
+
+RuleLLM and Rag additionally require the canonical order schema field
+`provides_liquidity` because their market coordinators distinguish liquidity
+provision from directional demand.
 
 ## §8 Historical Case Studies
 
-### §8.1 2008 Global Equity Crash
+### §8.1 2008 Global Financial Crisis
 
-Deleveraging, funding constraints, liquidity withdrawal, and panic selling
-combined to produce broad equity declines.
+The scenario draws on the interaction of leverage, funding stress, market-maker
+withdrawal, and panic liquidation seen during the 2008 crash.
 
-### §8.2 March 2020 COVID Liquidity Shock
+### §8.2 March 2020 Liquidity Shock
 
-Risk reduction and liquidity withdrawal amplified a rapid equity drawdown before
-policy stabilization.
+The scenario also resembles rapid liquidity evaporation episodes in which
+volatility-targeting and dealer risk limits magnified large price moves.
 
 ## §9 Variant Comparison Preview
 
-Rule provides deterministic crash feedback. LLM may show discretionary panic or
-hesitation. RuleLLM anchors agents to explicit rules. Rag may introduce crisis
-precedent knowledge into risk and liquidity reasoning.
+- **Rule**: six archetypes, deterministic policies, full baseline mechanism.
+- **LLM**: five archetypes, persona-driven discretionary API decisions.
+- **RuleLLM**: five archetypes, API decisions constrained by explicit rule text.
+- **Rag**: five archetypes, RuleLLM-style prompts plus retrieved reference
+  context recorded in run artifacts.

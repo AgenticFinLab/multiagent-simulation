@@ -307,6 +307,8 @@ class RiskParityFund(BaseInvestor):
     """
     Risk parity fund with volatility targeting strategy.
 
+    Theory: simulation-bases.md §4.1.
+
     Parameters from config extras:
         - target_volatility, vol_lookback, rebalance_speed, base_position
     """
@@ -374,6 +376,8 @@ class RiskParityFund(BaseInvestor):
 class LeveragedHedgeFund(BaseInvestor):
     """
     Leveraged hedge fund subject to margin constraints.
+
+    Theory: simulation-bases.md §4.2.
 
     Parameters from config extras:
         - initial_leverage, margin_call_level, liquidation_level, momentum_sensitivity
@@ -462,6 +466,8 @@ class MarketMaker(BaseInvestor):
     """
     Market maker providing liquidity (and withdrawing in stress).
 
+    Theory: simulation-bases.md §4.3.
+
     Parameters from config extras:
         - volatility_withdraw_threshold, inventory_limit, normal_quote_size, spread_multiplier
     """
@@ -526,6 +532,8 @@ class PassiveInvestor(BaseInvestor):
     """
     Passive buy-and-hold investor.
 
+    Theory: simulation-bases.md §4.4.
+
     Parameters from config extras:
         - rebalance_frequency, target_position
     """
@@ -579,6 +587,8 @@ class PassiveInvestor(BaseInvestor):
 class PanicSeller(BaseInvestor):
     """
     Panic seller triggered by losses.
+
+    Theory: simulation-bases.md §4.5.
 
     Parameters from config extras:
         - loss_threshold, crash_trigger, panic_sell_fraction
@@ -650,6 +660,8 @@ class PanicSeller(BaseInvestor):
 class BottomFisher(BaseInvestor):
     """
     Bottom fisher buying during crashes.
+
+    Theory: simulation-bases.md §4.6.
 
     Parameters from config extras:
         - crash_buy_threshold, discount_threshold, buy_size, lookback

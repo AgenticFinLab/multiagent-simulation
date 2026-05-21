@@ -381,31 +381,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMPanicSeller(LLMInvestor):
-    """LLM Loss-Averse Retail Investor."""
+    """LLM PanicSeller. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = LLM_PANIC_SELLER_SYS
 
 
 class LLMRiskParityFund(LLMInvestor):
-    """LLM Risk Parity Fund - volatility-targeting institutional."""
+    """LLM RiskParityFund. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = LLM_RISK_PARITY_SYS
 
 
 class LLMLeveragedFund(LLMInvestor):
-    """LLM Leveraged Fund - margin-constrained."""
+    """LLM LeveragedHedgeFund. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = LLM_LEVERAGED_FUND_SYS
 
 
 class LLMMarketMaker(LLMInvestor):
-    """LLM Market Maker - liquidity provider."""
+    """LLM MarketMaker. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = LLM_MARKET_MAKER_SYS
 
 
 class LLMBottomFisher(LLMInvestor):
-    """LLM Value Buyer - patient buyer."""
+    """LLM BottomFisher. Theory: simulation-bases.md §4.6."""
 
     _system_prompt = LLM_BOTTOM_FISHER_SYS
 

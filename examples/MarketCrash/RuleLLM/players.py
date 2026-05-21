@@ -30,10 +30,10 @@ from lmbase.inference.base import InferInput
 
 from examples.llm_utils import parse_llm_response_with_thinking
 from examples.MarketCrash.RuleLLM.prompts import (
+    RULELLM_BOTTOM_FISHER_SYS,
     RULELLM_RISK_PARITY_FUND_SYS,
     RULELLM_LEVERAGED_HEDGE_FUND_SYS,
     RULELLM_MARKET_MAKER_SYS,
-    RULELLM_PASSIVE_INVESTOR_SYS,
     RULELLM_PANIC_SELLER_SYS,
     RULELLM_USER_TEMPLATE,
 )
@@ -396,33 +396,33 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMPanicSeller(RuleLLMInvestor):
-    """Hybrid: PanicSeller rules + LLM reasoning."""
+    """Hybrid PanicSeller. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RULELLM_PANIC_SELLER_SYS
 
 
 class RuleLLMRiskParityFund(RuleLLMInvestor):
-    """Hybrid: RiskParityFund rules + LLM reasoning."""
+    """Hybrid RiskParityFund. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RULELLM_RISK_PARITY_FUND_SYS
 
 
 class RuleLLMLeveragedFund(RuleLLMInvestor):
-    """Hybrid: LeveragedHedgeFund rules + LLM reasoning."""
+    """Hybrid LeveragedHedgeFund. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RULELLM_LEVERAGED_HEDGE_FUND_SYS
 
 
 class RuleLLMMarketMaker(RuleLLMInvestor):
-    """Hybrid: MarketMaker rules + LLM reasoning."""
+    """Hybrid MarketMaker. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RULELLM_MARKET_MAKER_SYS
 
 
 class RuleLLMBottomFisher(RuleLLMInvestor):
-    """Hybrid: PassiveInvestor rules + LLM reasoning."""
+    """Hybrid BottomFisher. Theory: simulation-bases.md §4.6."""
 
-    _system_prompt = RULELLM_PASSIVE_INVESTOR_SYS
+    _system_prompt = RULELLM_BOTTOM_FISHER_SYS
 
 
 __all__ = [

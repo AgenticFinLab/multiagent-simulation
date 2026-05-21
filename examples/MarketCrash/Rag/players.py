@@ -53,10 +53,10 @@ from lmbase.inference.base import InferInput
 
 from examples.llm_utils import parse_llm_response_with_thinking
 from examples.MarketCrash.Rag.prompts import (
+    RAGLLM_BOTTOM_FISHER_SYS,
     RAGLLM_RISK_PARITY_FUND_SYS,
     RAGLLM_LEVERAGED_HEDGE_FUND_SYS,
     RAGLLM_MARKET_MAKER_SYS,
-    RAGLLM_PASSIVE_INVESTOR_SYS,
     RAGLLM_PANIC_SELLER_SYS,
     RAGLLM_USER_TEMPLATE,
 )
@@ -617,6 +617,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         return RAGLLM_USER_TEMPLATE.format(
             round=round_num,
@@ -686,11 +687,11 @@ class RagLLMInvestor(GeneralPlayer):
                     raise RuntimeError(
                         f"[{self.identity}] LLM failed after {max_retries} attempts: {e}"
                     )
-                logger.debug(
-                    "[%s] LLM parse failed (attempt %d), retrying…",
-                    self.identity,
-                    attempt + 1,
-                )
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
@@ -722,6 +723,7 @@ class RagLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
             "provides_liquidity": decision["provides_liquidity"],
+            "rag_context": self.state.custom_state.get("last_rag_context"),
         }
 
         return {
@@ -743,33 +745,33 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMPanicSeller(RagLLMInvestor):
-    """RAG-augmented: PanicSeller rules + LLM + retrieved knowledge."""
+    """RAG PanicSeller. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RAGLLM_PANIC_SELLER_SYS
 
 
 class RagLLMRiskParityFund(RagLLMInvestor):
-    """RAG-augmented: RiskParityFund rules + LLM + retrieved knowledge."""
+    """RAG RiskParityFund. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RAGLLM_RISK_PARITY_FUND_SYS
 
 
 class RagLLMLeveragedFund(RagLLMInvestor):
-    """RAG-augmented: LeveragedFund rules + LLM + retrieved knowledge."""
+    """RAG LeveragedHedgeFund. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RAGLLM_LEVERAGED_HEDGE_FUND_SYS
 
 
 class RagLLMMarketMaker(RagLLMInvestor):
-    """RAG-augmented: MarketMaker rules + LLM + retrieved knowledge."""
+    """RAG MarketMaker. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RAGLLM_MARKET_MAKER_SYS
 
 
 class RagLLMBottomFisher(RagLLMInvestor):
-    """RAG-augmented: BottomFisher rules + LLM + retrieved knowledge."""
+    """RAG BottomFisher. Theory: simulation-bases.md §4.6."""
 
-    _system_prompt = RAGLLM_PASSIVE_INVESTOR_SYS
+    _system_prompt = RAGLLM_BOTTOM_FISHER_SYS
 
 
 __all__ = [
