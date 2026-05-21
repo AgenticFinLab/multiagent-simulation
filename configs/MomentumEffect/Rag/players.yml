@@ -170,7 +170,7 @@ ragllm_technical:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.MomentumEffect.Rag.prompts:RAGLLM_INDEX_FUND_SYS"
+        sys_message: "examples.MomentumEffect.Rag.prompts:RAGLLM_TECHNICAL_TRADER_SYS"
         user_message: "examples.MomentumEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -213,7 +213,7 @@ ragllm_trend_follower:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.MomentumEffect.Rag.prompts:RAGLLM_MARKET_MAKER_SYS"
+        sys_message: "examples.MomentumEffect.Rag.prompts:RAGLLM_TREND_FOLLOWER_SYS"
         user_message: "examples.MomentumEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -256,7 +256,7 @@ ragllm_fundamental:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.MomentumEffect.Rag.prompts:RAGLLM_TECHNICAL_TRADER_SYS"
+        sys_message: "examples.MomentumEffect.Rag.prompts:RAGLLM_FUNDAMENTAL_ANCHOR_SYS"
         user_message: "examples.MomentumEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

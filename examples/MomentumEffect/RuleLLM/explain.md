@@ -5,80 +5,86 @@
 | Field | Value |
 |---|---|
 | Variant | RuleLLM |
-| Simulation | Momentum Effect |
-| Decision Mechanism | LLM-generated trading orders constrained by explicit scenario rules |
+| Simulation | MomentumEffect |
+| Decision Mechanism | API trading orders constrained by explicit momentum rules |
 | Theory Reference | `examples/MomentumEffect/simulation-bases.md` |
 | Market Broadcast | `configs/MomentumEffect/RuleLLM/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+This API variant uses five roles and requires `provides_liquidity` in every
+decision payload because the market consumes that field.
 
 ## §2 Theory -> Implementation Mapping
 
-### §2.1 MomentumTrader (simulation-bases.md §4.1)
+### §2.1 MomentumTrader
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `RuleLLMMomentumTrader` in `examples/MomentumEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
-### §2.2 ContrarianTrader (simulation-bases.md §4.2)
+| `simulation-bases.md §4.1` | `RuleLLMMomentumTrader` |
+| Prompt | `RULELLM_MOMENTUM_TRADER_SYS` |
+
+### §2.2 ContrarianTrader
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `RuleLLMContrarianTrader` in `examples/MomentumEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
-### §2.3 IndexFund (simulation-bases.md §4.3)
+| `simulation-bases.md §4.2` | `RuleLLMContrarianTrader` |
+| Prompt | `RULELLM_CONTRARIAN_TRADER_SYS` |
+
+### §2.3 IndexFund
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `configured player class family` in `examples/MomentumEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
-### §2.4 MarketMaker (simulation-bases.md §4.4)
+| `simulation-bases.md §4.3` | Not configured in this RuleLLM variant |
+
+### §2.4 MarketMaker
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `configured player class family` in `examples/MomentumEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
-### §2.5 TechnicalTrader (simulation-bases.md §4.5)
+| `simulation-bases.md §4.4` | Not configured in this RuleLLM variant |
+
+### §2.5 TechnicalTrader
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMTechnicalTrader` in `examples/MomentumEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
-### §2.6 FundamentalTrader (simulation-bases.md §4.6)
+| `simulation-bases.md §4.5` | `RuleLLMTechnicalTrader` |
+| Prompt | `RULELLM_TECHNICAL_TRADER_SYS` |
+
+### §2.6 FundamentalAnchor
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.6 | `configured player class family` in `examples/MomentumEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| `simulation-bases.md §4.6` | `RuleLLMFundamentalAnchor` |
+| Prompt | `RULELLM_FUNDAMENTAL_ANCHOR_SYS` |
+
+### §2.7 TrendFollower
+
+| Theory Component | Implementation |
+|---|---|
+| `simulation-bases.md §4.7` | `RuleLLMTrendFollower` |
+| Prompt | `RULELLM_TREND_FOLLOWER_SYS` |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/MomentumEffect/RuleLLM/players.py` and its configured counterpart in `configs/MomentumEffect/RuleLLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+`examples/MomentumEffect/RuleLLM/players.py:Market` uses a
+liquidity-sensitive price-impact equation and consumes
+`order["provides_liquidity"]`.
 
 ## §4 Variant Architecture
 
 | Component | Implementation |
 |---|---|
-| Player classes | `examples/MomentumEffect/RuleLLM/players.py` |
-| Prompt module | `examples/MomentumEffect/RuleLLM/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Players | `examples/MomentumEffect/RuleLLM/players.py` |
+| Prompts | `examples/MomentumEffect/RuleLLM/prompts.py` |
+| Parser | `parse_llm_response_with_thinking` |
+| Error handling | Retry plus explicit conservative fallback hold |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/MomentumEffect/RuleLLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/MomentumEffect/RuleLLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/MomentumEffect/RuleLLM/topology.yml` | Message routing between coordinator and agents. |
-| `configs/MomentumEffect/RuleLLM/persona.yml` | Turn recording and persona metadata. |
+| `configs/MomentumEffect/RuleLLM/simulation.yml` | 200-round entry point |
+| `configs/MomentumEffect/RuleLLM/players.yml` | Prompt bindings and API model configuration |
+| `configs/MomentumEffect/RuleLLM/topology.yml` | Message routing |
+| `configs/MomentumEffect/RuleLLM/persona.yml` | Recording metadata |
 
 ## §6 Running Instructions
 
@@ -88,15 +94,14 @@ python examples/MomentumEffect/RuleLLM/run_momentum_effect_rulellm.py -c configs
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+RuleLLM should show API variation while preserving directionality from explicit
+momentum, contrarian, technical, trend-following, and fundamental rules.
 
 ## §8 References
 
-See `examples/MomentumEffect/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/MomentumEffect/simulation-bases.md §2`.
 
 ## §9 Variant Comparison
 
-See `examples/MomentumEffect/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+Use RuleLLM to isolate the effect of adding explicit strategy rules to API
+decisions.

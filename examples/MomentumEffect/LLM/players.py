@@ -351,31 +351,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMMomentumTrader(LLMInvestor):
-    """Buys past winners, sells past losers."""
+    """LLM MomentumTrader. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = LLM_MOMENTUM_TRADER_SYS
 
 
 class LLMContrarianTrader(LLMInvestor):
-    """Mean reversion strategy - opposing momentum."""
+    """LLM ContrarianTrader. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = LLM_CONTRARIAN_SYS
 
 
 class LLMTechnicalTrader(LLMInvestor):
-    """Moving average crossover strategy."""
+    """LLM TechnicalTrader. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = LLM_TECHNICAL_SYS
 
 
 class LLMTrendFollower(LLMInvestor):
-    """Aggressive trend following."""
+    """LLM TrendFollower. Theory: simulation-bases.md §4.7."""
 
     _system_prompt = LLM_TREND_FOLLOWER_SYS
 
 
 class LLMFundamentalAnchor(LLMInvestor):
-    """Value-based anchor providing fundamental gravity."""
+    """LLM FundamentalAnchor. Theory: simulation-bases.md §4.6."""
 
     _system_prompt = LLM_FUNDAMENTAL_SYS
 

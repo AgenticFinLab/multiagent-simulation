@@ -2,8 +2,9 @@
 
 ## §1 Analysis Objectives
 
-The analysis tests whether recent returns predict subsequent order flow and
-price continuation before contrarian/fundamental forces offset the trend.
+The analysis tests whether recent returns generate continuation in subsequent
+orders and prices, and whether contrarian or fundamental forces later weaken
+that continuation.
 
 ## §2 Metrics
 
@@ -13,7 +14,7 @@ price continuation before contrarian/fundamental forces offset the trend.
 def compute_return_autocorrelation(returns: list[float], lag: int = 1) -> float
 ```
 
-Measures continuation in returns.
+Measures whether returns continue in the same direction across rounds.
 
 ### §2.2 Momentum Order Imbalance
 
@@ -21,31 +22,32 @@ Measures continuation in returns.
 def compute_momentum_order_imbalance(orders: list[dict]) -> float
 ```
 
-Measures trend-following buy minus sell pressure.
+Measures net buy pressure from MomentumTrader, TechnicalTrader, and
+TrendFollower roles.
 
-### §2.3 Trend Duration
+### §2.3 Contrarian Offset
+
+```python
+def compute_contrarian_offset(orders: list[dict]) -> float
+```
+
+Measures how much ContrarianTrader order flow opposes trend-following pressure.
+
+### §2.4 Trend Duration
 
 ```python
 def compute_trend_duration(prices: list[float]) -> int
 ```
 
-Counts consecutive rounds of directional price movement.
-
-### §2.4 Reversal Strength
-
-```python
-def compute_reversal_strength(prices: list[float]) -> float
-```
-
-Measures contrarian response after overshoot.
+Counts consecutive same-direction price movements.
 
 ### §2.5 Fundamental Deviation
 
 ```python
-def compute_fundamental_deviation(prices: list[float], fundamental: float) -> list[float]
+def compute_fundamental_deviation(prices: list[float], fundamentals: list[float]) -> list[float]
 ```
 
-Tracks distance from fundamental value.
+Tracks price distance from fundamental value.
 
 ### §2.6 Agent Volume Share
 
@@ -53,38 +55,48 @@ Tracks distance from fundamental value.
 def compute_agent_volume_share(orders: list[dict]) -> dict[str, float]
 ```
 
-Attributes volume by strategy.
+Attributes trading volume across momentum, contrarian, passive, liquidity, and
+fundamental roles.
 
-### §2.7 Momentum Profitability
+### §2.7 Retrieval Coverage
 
 ```python
-def compute_momentum_profitability(agent_values: list[float]) -> float
+def compute_rag_retrieval_coverage(rag_payloads: dict[str, dict[int, dict]]) -> dict
 ```
 
-Measures whether trend followers benefit from continuation.
+For Rag runs, measures how often retrieved context is present versus fallback
+text.
 
 ## §3 Analysis Dimensions
 
-Return continuation, trend-following pressure, technical signals, contrarian
-offset, and fundamental anchoring.
+Analyze continuation, trend-following pressure, contrarian offset, value
+anchoring, agent concentration, and RAG retrieval quality.
 
 ## §4 Phase Analysis
 
-Signal formation, trend amplification, crowded continuation, contrarian entry,
-and possible reversal.
+Use five phases:
+
+1. signal formation,
+2. momentum activation,
+3. crowded continuation,
+4. contrarian or fundamental offset,
+5. stabilization or reversal.
 
 ## §5 Cross-Variant Comparison
 
-Rule provides deterministic signal following. LLM may vary conviction. RuleLLM
-stays formula anchored. Rag may cite momentum literature and alter trend
-confidence.
+Rule is the deterministic baseline. LLM shows persona-driven momentum
+interpretation. RuleLLM checks whether explicit signal rules stabilize API
+behavior. Rag checks whether external momentum literature changes conviction or
+timing.
 
 ## §6 Expected Results
 
-Positive return autocorrelation and momentum order imbalance should appear in
-trend phases, with reversal/fundamental agents reducing persistence later.
+A valid run should show positive continuation during trend phases, measurable
+momentum-side order imbalance, and later reduction in persistence when
+contrarian or fundamental agents become active.
 
 ## §7 Visualization Plan
 
-Plot price, returns, rolling autocorrelation, momentum-vs-contrarian volume,
-fundamental deviation, and cross-variant trend duration.
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_momentumeffect_dynamics.png`, `02_momentumeffect_analysis.png`, and
+`03_summary.png`. Rag additionally writes `rag_stats.json`.

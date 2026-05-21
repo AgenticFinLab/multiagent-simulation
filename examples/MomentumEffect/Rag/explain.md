@@ -5,80 +5,86 @@
 | Field | Value |
 |---|---|
 | Variant | Rag |
-| Simulation | Momentum Effect |
-| Decision Mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema |
+| Simulation | MomentumEffect |
+| Decision Mechanism | Rule-guided API trading with retrieved domain context |
 | Theory Reference | `examples/MomentumEffect/simulation-bases.md` |
 | Market Broadcast | `configs/MomentumEffect/Rag/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+This variant keeps the RuleLLM five-role set and records per-round
+`rag_context` for retrieval-quality audit.
 
 ## §2 Theory -> Implementation Mapping
 
-### §2.1 MomentumTrader (simulation-bases.md §4.1)
+### §2.1 MomentumTrader
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMMomentumTrader` in `examples/MomentumEffect/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
-### §2.2 ContrarianTrader (simulation-bases.md §4.2)
+| `simulation-bases.md §4.1` | `RagLLMMomentumTrader` |
+| Prompt | `RAGLLM_MOMENTUM_TRADER_SYS` |
+
+### §2.2 ContrarianTrader
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMContrarianTrader` in `examples/MomentumEffect/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
-### §2.3 IndexFund (simulation-bases.md §4.3)
+| `simulation-bases.md §4.2` | `RagLLMContrarianTrader` |
+| Prompt | `RAGLLM_CONTRARIAN_TRADER_SYS` |
+
+### §2.3 IndexFund
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `configured player class family` in `examples/MomentumEffect/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
-### §2.4 MarketMaker (simulation-bases.md §4.4)
+| `simulation-bases.md §4.3` | Not configured in this Rag variant |
+
+### §2.4 MarketMaker
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `configured player class family` in `examples/MomentumEffect/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
-### §2.5 TechnicalTrader (simulation-bases.md §4.5)
+| `simulation-bases.md §4.4` | Not configured in this Rag variant |
+
+### §2.5 TechnicalTrader
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMTechnicalTrader` in `examples/MomentumEffect/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
-### §2.6 FundamentalTrader (simulation-bases.md §4.6)
+| `simulation-bases.md §4.5` | `RagLLMTechnicalTrader` |
+| Prompt | `RAGLLM_TECHNICAL_TRADER_SYS` |
+
+### §2.6 FundamentalAnchor
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.6 | `configured player class family` in `examples/MomentumEffect/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/MomentumEffect/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| `simulation-bases.md §4.6` | `RagLLMFundamentalAnchor` |
+| Prompt | `RAGLLM_FUNDAMENTAL_ANCHOR_SYS` |
+
+### §2.7 TrendFollower
+
+| Theory Component | Implementation |
+|---|---|
+| `simulation-bases.md §4.7` | `RagLLMTrendFollower` |
+| Prompt | `RAGLLM_TREND_FOLLOWER_SYS` |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/MomentumEffect/Rag/players.py` and its configured counterpart in `configs/MomentumEffect/Rag/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The Rag market matches the RuleLLM liquidity-sensitive coordinator and consumes
+`provides_liquidity`. Players retrieve context, inject it into prompts, and
+record the resolved `rag_context`.
 
 ## §4 Variant Architecture
 
 | Component | Implementation |
 |---|---|
-| Player classes | `examples/MomentumEffect/Rag/players.py` |
-| Prompt module | `examples/MomentumEffect/Rag/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Players | `examples/MomentumEffect/Rag/players.py` |
+| Prompts | `examples/MomentumEffect/Rag/prompts.py` |
+| Retrieval | Unified `masim.knowledge` stack |
+| Analysis | Standard output contract plus `rag_stats.json` |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/MomentumEffect/Rag/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/MomentumEffect/Rag/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/MomentumEffect/Rag/topology.yml` | Message routing between coordinator and agents. |
-| `configs/MomentumEffect/Rag/persona.yml` | Turn recording and persona metadata. |
+| `configs/MomentumEffect/Rag/simulation.yml` | 200-round entry point |
+| `configs/MomentumEffect/Rag/players.yml` | RAG, prompt, and API model configuration |
+| `configs/MomentumEffect/Rag/topology.yml` | Message routing |
+| `configs/MomentumEffect/Rag/persona.yml` | Recording metadata |
 
 ## §6 Running Instructions
 
@@ -88,15 +94,15 @@ python examples/MomentumEffect/Rag/run_momentum_effect_ragllm.py -c configs/Mome
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+Rag should preserve RuleLLM strategy direction while allowing retrieved
+momentum literature to affect reasoning and conviction. Successful samples must
+be audited for retrieval coverage.
 
 ## §8 References
 
-See `examples/MomentumEffect/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/MomentumEffect/simulation-bases.md §2`.
 
 ## §9 Variant Comparison
 
-See `examples/MomentumEffect/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+Use Rag to test whether retrieved knowledge changes trend-following intensity
+or stabilization timing relative to RuleLLM.
