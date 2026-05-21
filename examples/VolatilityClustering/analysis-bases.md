@@ -2,8 +2,11 @@
 
 ## §1 Analysis Objectives
 
-The analysis verifies volatility persistence, regime switching, trend
-amplification, slow adaptation, and fundamental stabilization.
+The analysis verifies whether returns exhibit clustered volatility, whether
+large absolute returns persist across adjacent rounds, whether trend and noise
+orders contribute to high-volatility periods, and whether fundamentalist and
+slow-adapter behavior stabilizes the path. It also checks the structural
+requirements for 200-round experiments and API/RAG quality.
 
 ## §2 Metrics
 
@@ -13,15 +16,15 @@ amplification, slow adaptation, and fundamental stabilization.
 def compute_rolling_volatility(returns: list[float], window: int) -> list[float]
 ```
 
-Measures time-varying volatility.
+Measures time-varying volatility over a rolling return window.
 
-### §2.2 Volatility Autocorrelation
+### §2.2 Absolute-Return Autocorrelation
 
 ```python
-def compute_volatility_autocorrelation(returns: list[float], lag: int = 1) -> float
+def compute_abs_return_autocorrelation(returns: list[float], lag: int = 1) -> float
 ```
 
-Measures persistence of absolute returns.
+Measures whether large absolute returns follow large absolute returns.
 
 ### §2.3 High-Volatility Duration
 
@@ -29,61 +32,74 @@ Measures persistence of absolute returns.
 def compute_high_vol_duration(volatility: list[float], threshold: float) -> int
 ```
 
-Counts consecutive high-volatility rounds.
+Counts persistent high-volatility regimes.
 
-### §2.4 Trend-Follower Contribution
-
-```python
-def compute_trend_follower_contribution(orders: list[dict]) -> float
-```
-
-Attributes order flow to trend amplification.
-
-### §2.5 Slow-Adapter Lag
+### §2.4 Trend Amplification Share
 
 ```python
-def compute_slow_adapter_lag(agent_states: list[dict]) -> float
+def compute_trend_amplification_share(orders: list[dict]) -> float
 ```
 
-Measures persistence from gradual belief updates.
+Measures the share of signed order flow from trend-following investors.
 
-### §2.6 Volatility-Trader Regime Response
+### §2.5 Volatility-Regime Response
 
 ```python
-def compute_volatility_trader_response(orders: list[dict], volatility: list[float]) -> float
+def compute_volatility_regime_response(orders: list[dict], volatility: list[float]) -> float
 ```
 
-Measures order changes around volatility thresholds.
+Measures how volatility-trader orders change around high- and low-volatility
+thresholds.
 
-### §2.7 Fundamental Stabilization
+### §2.6 Stabilization Pressure
 
 ```python
-def compute_fundamental_stabilization(orders: list[dict]) -> float
+def compute_stabilization_pressure(orders: list[dict], prices: list[float], fundamental: float) -> float
 ```
 
-Measures fundamentalist offset to volatility-driven mispricing.
+Measures fundamentalist and slow-adapter order flow against price deviation.
+
+### §2.7 API And Retrieval Quality
+
+```python
+def compute_api_and_retrieval_quality(events: list[dict]) -> dict[str, float]
+```
+
+Reports parse failures, explicit fallback rate, conservative liquidity defaults,
+and RAG retrieval coverage.
 
 ## §3 Analysis Dimensions
 
-Volatility persistence, regime duration, trend amplification, slow adaptation,
-and fundamental stabilization.
+The main dimensions are price path, return distribution, rolling volatility,
+absolute-return persistence, high-volatility duration, agent order-flow
+attribution, liquidity-depth behavior for RuleLLM/Rag, and API/RAG quality.
 
 ## §4 Phase Analysis
 
-Calm baseline, shock onset, clustered high volatility, adaptation, and
-reversion to calm.
+The phase framework is calm baseline, shock onset, clustered high volatility,
+adaptive response, and reversion toward calm. A valid run should contain enough
+return variation for the high-volatility and calmer phases to be distinguished.
 
 ## §5 Cross-Variant Comparison
 
-Rule is deterministic. LLM may vary regime interpretation. RuleLLM keeps
-threshold logic. Rag may use volatility-model context.
+Rule provides the deterministic GARCH and heterogeneous-agent benchmark. LLM
+tests persona interpretation of volatility. RuleLLM tests whether explicit rules
+stabilize API decisions under liquidity-aware pricing. Rag tests whether
+retrieved volatility knowledge changes order timing, liquidity provision, or
+regime interpretation.
 
-## §6 Expected Results
+## §6 Expected Results And Validation Criteria
 
-Absolute returns should be autocorrelated; high-volatility regimes should last
-multiple rounds; trend and slow-adapter agents should contribute to persistence.
+A valid full experiment records 200 market rounds, finite prices, nonzero
+volume, bounded volatility, and a nonzero rolling-volatility series. Absolute
+returns should show positive persistence or visible high-volatility clusters.
+API variants should have low parse/fallback rates. Rag variants should record
+`rag_context` and write `rag_stats.json`.
 
 ## §7 Visualization Plan
 
-Plot price, returns, rolling volatility, absolute-return autocorrelation,
-agent-type volume, and cross-variant high-volatility duration.
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_volatilityclustering_dynamics.png`, `02_volatilityclustering_analysis.png`,
+and `03_summary.png`. Rag additionally writes `rag_stats.json`. Scenario-level
+figures should emphasize price, returns, rolling volatility, high-volatility
+duration, and order flow by archetype.

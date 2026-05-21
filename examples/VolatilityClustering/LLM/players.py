@@ -423,31 +423,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMFundamentalist(LLMInvestor):
-    """LLM-powered Fundamentalist - Slow mean reversion."""
+    """LLM Fundamentalist. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = LLM_FUNDAMENTALIST_SYS
 
 
 class LLMTrendFollower(LLMInvestor):
-    """LLM-powered Trend Follower - Fast momentum, vol-sensitive."""
+    """LLM TrendFollower. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = LLM_TREND_FOLLOWER_SYS
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-powered Noise Trader - Random liquidity."""
+    """LLM NoiseTrader. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = LLM_NOISE_TRADER_SYS
 
 
 class LLMSlowAdapter(LLMInvestor):
-    """LLM-powered Slow Adapter - Conservative, delayed."""
+    """LLM SlowAdapter. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = LLM_SLOW_ADAPTER_SYS
 
 
 class LLMVolatilityTrader(LLMInvestor):
-    """LLM-powered Volatility Trader - Trades vol regime."""
+    """LLM VolatilityTrader. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = LLM_VOLATILITY_TRADER_SYS
 

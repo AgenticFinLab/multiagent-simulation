@@ -2,35 +2,41 @@
 
 ## §1 Objectives
 
-This analysis checks whether the LLM variant produces a complete, analyzable Volatility Clustering trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
+This analysis checks whether persona-driven API investors preserve volatility
+clustering while producing complete structured order records.
 
 ## §2 Core Metrics
 
 | Metric | Function Contract | Source |
 |---|---|---|
-| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
-| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
-| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
-| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
-| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
-| Scenario-specific diagnostic | `def compute_volatilityclustering_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
+| Rolling volatility | `def compute_rolling_volatility(returns: list[float], window: int) -> list[float]` | `analysis-bases.md §2.1` |
+| Absolute-return autocorrelation | `def compute_abs_return_autocorrelation(returns: list[float], lag: int = 1) -> float` | `analysis-bases.md §2.2` |
+| High-volatility duration | `def compute_high_vol_duration(volatility: list[float], threshold: float) -> int` | `analysis-bases.md §2.3` |
+| Trend amplification share | `def compute_trend_amplification_share(orders: list[dict]) -> float` | `analysis-bases.md §2.4` |
+| API and retrieval quality | `def compute_api_and_retrieval_quality(events: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.7` |
 
 ## §3 Analysis Dimensions
 
-Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether LLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
+Review volatility persistence, role-level order flow, parser retries, fallback
+events, and portfolio constraints.
 
 ## §4 Phase Analysis
 
-The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
+Use the same phase framework as Rule and inspect whether LLM investors interpret
+volatility regimes earlier or later than deterministic thresholds.
 
 ## §5 Cross-Variant Comparison
 
-Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+Compare LLM with Rule to isolate prompt-driven stochasticity and with RuleLLM to
+measure whether explicit rules reduce dispersion.
 
 ## §6 Expected Results and Validation Criteria
 
-Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+A valid full run records 200 rounds, finite prices, structured order fields, and
+low API parse/fallback rates.
 
 ## §7 Visualization Catalogue
 
-Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_volatilityclustering_dynamics.png`, `02_volatilityclustering_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_volatilityclustering_dynamics.png`, `02_volatilityclustering_analysis.png`,
+and `03_summary.png`.

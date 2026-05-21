@@ -614,10 +614,11 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         portfolio_value = cash + position * market_data["price"]
         return (
-            f"Round {round_num} — Market Update\n"
+            f"Round {round_num} - Market Update\n"
             f"Retrieved Knowledge:\n{rag_context}\n\n"
             f"Current Price: {market_data['price']:.2f} (prev: {market_data['prev_price']:.2f}, "
             f"return: {market_data['return_pct']:+.2f}%)\n"
@@ -625,7 +626,7 @@ class RagLLMInvestor(GeneralPlayer):
             f"Fundamental: {market_data['fundamental']:.2f}\n"
             f"Volume: {market_data['volume']:.2f}  Net Demand: {market_data['net_demand']:+.2f}\n"
             f"Recent Prices: {recent_prices}\n"
-            f"Portfolio — Cash: {cash:.2f}  Position: {position:.2f}  "
+            f"Portfolio - Cash: {cash:.2f}  Position: {position:.2f}  "
             f"Value: {portfolio_value:.2f}\n\n"
             "Respond with <analysis>...</analysis> then <decision>...</decision> containing "
             'JSON: {"bid_price": float, "quantity": float, "reasoning": str, '
@@ -685,7 +686,7 @@ class RagLLMInvestor(GeneralPlayer):
                         f"[{self.identity}] LLM failed after {max_retries} attempts: {e}"
                     )
                 logger.debug(
-                    "[%s] LLM parse failed (attempt %d), retrying…",
+                    "[%s] LLM parse failed (attempt %d), retrying...",
                     self.identity,
                     attempt + 1,
                 )
@@ -721,6 +722,7 @@ class RagLLMInvestor(GeneralPlayer):
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
             "provides_liquidity": bool(decision.get("provides_liquidity", False)),
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
 
         return {
@@ -742,31 +744,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMFundamentalist(RagLLMInvestor):
-    """RAG-augmented: Fundamentalist rules + LLM + retrieved knowledge."""
+    """RAG Fundamentalist. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RAGLLM_FUNDAMENTALIST_SYS
 
 
 class RagLLMTrendFollower(RagLLMInvestor):
-    """RAG-augmented: TrendFollower rules + LLM + retrieved knowledge."""
+    """RAG TrendFollower. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RAGLLM_TREND_FOLLOWER_SYS
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented: NoiseTrader rules + LLM + retrieved knowledge."""
+    """RAG NoiseTrader. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RAGLLM_NOISE_TRADER_SYS
 
 
 class RagLLMSlowAdapter(RagLLMInvestor):
-    """RAG-augmented: SlowAdapter rules + LLM + retrieved knowledge."""
+    """RAG SlowAdapter. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RAGLLM_SLOW_ADAPTER_SYS
 
 
 class RagLLMVolatilityTrader(RagLLMInvestor):
-    """RAG-augmented: VolatilityTrader rules + LLM + retrieved knowledge."""
+    """RAG VolatilityTrader. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RAGLLM_VOLATILITY_TRADER_SYS
 

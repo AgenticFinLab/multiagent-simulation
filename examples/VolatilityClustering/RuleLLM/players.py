@@ -301,8 +301,13 @@ class RuleLLMInvestor(GeneralPlayer):
         Delegates to shared utility in examples/llm_utils.py
         """
         decision = parse_llm_response_with_thinking(response_text)
-        if "provides_liquidity" not in decision or decision["provides_liquidity"] is None:
-            raise ValueError("Fields missing or null in LLM response: ['provides_liquidity']")
+        if (
+            "provides_liquidity" not in decision
+            or decision["provides_liquidity"] is None
+        ):
+            raise ValueError(
+                "Fields missing or null in LLM response: ['provides_liquidity']"
+            )
         return decision
 
     def _apply_constraints(
@@ -418,31 +423,31 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMFundamentalist(RuleLLMInvestor):
-    """Hybrid: Fundamentalist rules + LLM reasoning."""
+    """Hybrid Fundamentalist. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RULELLM_FUNDAMENTALIST_SYS
 
 
 class RuleLLMTrendFollower(RuleLLMInvestor):
-    """Hybrid: TrendFollower rules + LLM reasoning."""
+    """Hybrid TrendFollower. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RULELLM_TREND_FOLLOWER_SYS
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """Hybrid: NoiseTrader rules + LLM reasoning."""
+    """Hybrid NoiseTrader. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RULELLM_NOISE_TRADER_SYS
 
 
 class RuleLLMSlowAdapter(RuleLLMInvestor):
-    """Hybrid: SlowAdapter rules + LLM reasoning."""
+    """Hybrid SlowAdapter. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RULELLM_SLOW_ADAPTER_SYS
 
 
 class RuleLLMVolatilityTrader(RuleLLMInvestor):
-    """Hybrid: VolatilityTrader rules + LLM reasoning."""
+    """Hybrid VolatilityTrader. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RULELLM_VOLATILITY_TRADER_SYS
 

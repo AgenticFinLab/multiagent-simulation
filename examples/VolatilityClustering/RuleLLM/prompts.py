@@ -7,11 +7,11 @@ Design principle:
        counterpart (VolatilityClustering), written as plain-text formulas and thresholds.
 
 Agents:
-    - RuleLLMFundamentalist → Fundamentalist rules
-    - RuleLLMTrendFollower → TrendFollower rules
-    - RuleLLMNoiseTrader → NoiseTrader rules
-    - RuleLLMSlowAdapter → SlowAdapter rules
-    - RuleLLMVolatilityTrader → VolatilityTrader rules
+    - RuleLLMFundamentalist -> Fundamentalist rules
+    - RuleLLMTrendFollower -> TrendFollower rules
+    - RuleLLMNoiseTrader -> NoiseTrader rules
+    - RuleLLMSlowAdapter -> SlowAdapter rules
+    - RuleLLMVolatilityTrader -> VolatilityTrader rules
 """
 
 # =============================================================================

@@ -1,4 +1,4 @@
-"""VolatilityClusteringRuleLLM Prompts - Hybrid Rule + LLM System and User Message Templates
+"""VolatilityClusteringRag Prompts - RAG + Rule + LLM Message Templates
 
 Design principle:
     Each agent's system prompt has two sections:
@@ -7,15 +7,15 @@ Design principle:
        counterpart (VolatilityClustering), written as plain-text formulas and thresholds.
 
 Agents:
-    - RuleLLMFundamentalist → Fundamentalist rules
-    - RuleLLMTrendFollower → TrendFollower rules
-    - RuleLLMNoiseTrader → NoiseTrader rules
-    - RuleLLMSlowAdapter → SlowAdapter rules
-    - RuleLLMVolatilityTrader → VolatilityTrader rules
+    - RagLLMFundamentalist -> Fundamentalist rules
+    - RagLLMTrendFollower -> TrendFollower rules
+    - RagLLMNoiseTrader -> NoiseTrader rules
+    - RagLLMSlowAdapter -> SlowAdapter rules
+    - RagLLMVolatilityTrader -> VolatilityTrader rules
 """
 
 # =============================================================================
-# RuleLLM Fundamentalist
+# RagLLM Fundamentalist
 # Rule-based counterpart: VolatilityClustering.Fundamentalist
 # =============================================================================
 
@@ -38,13 +38,14 @@ Apply the quantitative decision rules from the Fundamentalist strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
+Set provides_liquidity to true only when the order is intended to add passive market liquidity; otherwise set it to false.
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
 
 # =============================================================================
-# RuleLLM TrendFollower
+# RagLLM TrendFollower
 # Rule-based counterpart: VolatilityClustering.TrendFollower
 # =============================================================================
 
@@ -67,13 +68,14 @@ Apply the quantitative decision rules from the TrendFollower strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
+Set provides_liquidity to true only when the order is intended to add passive market liquidity; otherwise set it to false.
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
 
 # =============================================================================
-# RuleLLM NoiseTrader
+# RagLLM NoiseTrader
 # Rule-based counterpart: VolatilityClustering.NoiseTrader
 # =============================================================================
 
@@ -96,13 +98,14 @@ Apply the quantitative decision rules from the NoiseTrader strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
+Set provides_liquidity to true only when the order is intended to add passive market liquidity; otherwise set it to false.
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
 
 # =============================================================================
-# RuleLLM SlowAdapter
+# RagLLM SlowAdapter
 # Rule-based counterpart: VolatilityClustering.SlowAdapter
 # =============================================================================
 
@@ -125,13 +128,14 @@ Apply the quantitative decision rules from the SlowAdapter strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
+Set provides_liquidity to true only when the order is intended to add passive market liquidity; otherwise set it to false.
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
 
 # =============================================================================
-# RuleLLM VolatilityTrader
+# RagLLM VolatilityTrader
 # Rule-based counterpart: VolatilityClustering.VolatilityTrader
 # =============================================================================
 
@@ -154,7 +158,8 @@ Apply the quantitative decision rules from the VolatilityTrader strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
+Set provides_liquidity to true only when the order is intended to add passive market liquidity; otherwise set it to false.
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -185,5 +190,6 @@ Apply your DECISION RULES, informed by the relevant knowledge above and output y
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <NUMBER>, "quantity": <NUMBER, +buy/-sell>, "reasoning": "<brief>", "provides_liquidity": true|false}}
+Set provides_liquidity to true only when the order is intended to add passive market liquidity; otherwise set it to false.
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """

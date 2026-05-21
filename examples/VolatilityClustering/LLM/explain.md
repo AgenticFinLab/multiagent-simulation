@@ -5,54 +5,29 @@
 | Field | Value |
 |---|---|
 | Variant | LLM |
-| Simulation | Volatility Clustering |
-| Decision Mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning |
+| Decision Mechanism | API-generated trading orders |
+| Scenario Contract | `action`, `bid_price`, `quantity`, `reasoning` |
 | Theory Reference | `examples/VolatilityClustering/simulation-bases.md` |
-| Market Broadcast | `configs/VolatilityClustering/LLM/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+The LLM variant keeps the bounded GARCH market and five role families but
+replaces deterministic investor formulas with persona prompts and canonical JSON
+orders.
 
 ## §2 Theory -> Implementation Mapping
 
-### §2.1 Fundamentalist (simulation-bases.md §4.1)
-
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `LLMFundamentalist` in `examples/VolatilityClustering/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
-### §2.2 TrendFollower (simulation-bases.md §4.2)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `LLMTrendFollower` in `examples/VolatilityClustering/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
-### §2.3 NoiseTrader (simulation-bases.md §4.3)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `LLMNoiseTrader` in `examples/VolatilityClustering/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
-### §2.4 SlowAdapter (simulation-bases.md §4.4)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `LLMSlowAdapter` in `examples/VolatilityClustering/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
-### §2.5 VolatilityTrader (simulation-bases.md §4.5)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `LLMVolatilityTrader` in `examples/VolatilityClustering/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Fundamentalist, `simulation-bases.md §4.1` | `LLMFundamentalist` follows the value-oriented persona and structured order parser. |
+| TrendFollower, `simulation-bases.md §4.2` | `LLMTrendFollower` reacts quickly to trends and volatility. |
+| NoiseTrader, `simulation-bases.md §4.3` | `LLMNoiseTrader` produces low-information random order flow. |
+| SlowAdapter, `simulation-bases.md §4.4` | `LLMSlowAdapter` uses conservative delayed-reaction prompts. |
+| VolatilityTrader, `simulation-bases.md §4.5` | `LLMVolatilityTrader` trades based on volatility regime interpretation. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/VolatilityClustering/LLM/players.py` and its configured counterpart in `configs/VolatilityClustering/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The market mechanism matches the Rule GARCH coordinator. The difference is that
+agent orders are produced by the project ARK LLM client and parsed from
+`<analysis>` and `<decision>` sections.
 
 ## §4 Variant Architecture
 
@@ -60,18 +35,18 @@ The coordinator mechanism is the final implementation in `examples/VolatilityClu
 |---|---|
 | Player classes | `examples/VolatilityClustering/LLM/players.py` |
 | Prompt module | `examples/VolatilityClustering/LLM/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | Project ARK LLM policy from config extras |
+| Output parsing | Canonical LLM parser requiring action, bid_price, quantity, and reasoning |
+| Error handling | Parse failures retry and then fail fast for deterministic contract errors |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/VolatilityClustering/LLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/VolatilityClustering/LLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/VolatilityClustering/LLM/topology.yml` | Message routing between coordinator and agents. |
-| `configs/VolatilityClustering/LLM/persona.yml` | Turn recording and persona metadata. |
+| `configs/VolatilityClustering/LLM/simulation.yml` | Full 200-round entry point. |
+| `configs/VolatilityClustering/LLM/players.yml` | GARCH market and five API investor definitions. |
+| `configs/VolatilityClustering/LLM/topology.yml` | Market broadcast and investor-order routing. |
+| `configs/VolatilityClustering/LLM/persona.yml` | Recording/persona metadata. |
 
 ## §6 Running Instructions
 
@@ -81,15 +56,16 @@ python examples/VolatilityClustering/LLM/run_volatility_llm.py -c configs/Volati
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+The LLM path should preserve volatility clustering while allowing role-level
+variation in order timing and size. The sample should be reviewed for parse
+failures and fallback events.
 
 ## §8 References
 
-See `examples/VolatilityClustering/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/VolatilityClustering/simulation-bases.md §2` for volatility
+theory and `analysis-bases.md §2.7` for API quality.
 
 ## §9 Variant Comparison
 
-See `examples/VolatilityClustering/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+LLM is compared with Rule to measure stochastic prompt interpretation. It does
+not use liquidity-depth fields or RAG retrieval.

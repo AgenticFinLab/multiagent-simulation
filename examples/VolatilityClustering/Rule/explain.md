@@ -5,73 +5,48 @@
 | Field | Value |
 |---|---|
 | Variant | Rule |
-| Simulation | Volatility Clustering |
-| Decision Mechanism | deterministic rule-based trading orders |
+| Decision Mechanism | deterministic trading rules |
+| Scenario Contract | signed trading orders |
 | Theory Reference | `examples/VolatilityClustering/simulation-bases.md` |
-| Market Broadcast | `configs/VolatilityClustering/Rule/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+The Rule variant is the deterministic baseline. It combines a bounded GARCH
+market update with Fundamentalist, TrendFollower, NoiseTrader, SlowAdapter, and
+VolatilityTrader roles.
 
 ## §2 Theory -> Implementation Mapping
 
-### §2.1 Fundamentalist (simulation-bases.md §4.1)
-
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `Fundamentalist` in `examples/VolatilityClustering/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.2 TrendFollower (simulation-bases.md §4.2)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `TrendFollower` in `examples/VolatilityClustering/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.3 NoiseTrader (simulation-bases.md §4.3)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `NoiseTrader` in `examples/VolatilityClustering/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.4 SlowAdapter (simulation-bases.md §4.4)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `SlowAdapter` in `examples/VolatilityClustering/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.5 VolatilityTrader (simulation-bases.md §4.5)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `VolatilityTrader` in `examples/VolatilityClustering/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/VolatilityClustering/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Fundamentalist, `simulation-bases.md §4.1` | `Fundamentalist` trades toward noisy fundamental value at configured intervals. |
+| TrendFollower, `simulation-bases.md §4.2` | `TrendFollower` trades with recent price trend and scales size by volatility. |
+| NoiseTrader, `simulation-bases.md §4.3` | `NoiseTrader` generates random order shocks with inventory mean reversion. |
+| SlowAdapter, `simulation-bases.md §4.4` | `SlowAdapter` blends fundamental value with moving average and trades slowly. |
+| VolatilityTrader, `simulation-bases.md §4.5` | `VolatilityTrader` changes exposure when volatility crosses relative thresholds. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/VolatilityClustering/Rule/players.py` and its configured counterpart in `configs/VolatilityClustering/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+`Market` in `examples/VolatilityClustering/Rule/players.py` updates volatility
+with bounded GARCH(1,1), aggregates signed orders, and updates price through
+net-demand impact, mean reversion, and volatility-scaled noise.
 
 ## §4 Variant Architecture
 
 | Component | Implementation |
 |---|---|
 | Player classes | `examples/VolatilityClustering/Rule/players.py` |
-| Prompt module | Not applicable for Rule baseline |
-| Inference | No remote model call is used in the Rule baseline. |
-| Output parsing | Direct deterministic decision construction |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Prompt module | Not applicable |
+| Inference | No remote model call |
+| Output parsing | Direct deterministic order construction |
+| Error handling | Deterministic config/schema errors fail fast |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/VolatilityClustering/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/VolatilityClustering/Rule/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/VolatilityClustering/Rule/topology.yml` | Message routing between coordinator and agents. |
-| `configs/VolatilityClustering/Rule/persona.yml` | Turn recording and persona metadata. |
+| `configs/VolatilityClustering/Rule/simulation.yml` | Full 200-round entry point. |
+| `configs/VolatilityClustering/Rule/players.yml` | GARCH market and five investor definitions. |
+| `configs/VolatilityClustering/Rule/topology.yml` | Market broadcast and investor-order routing. |
+| `configs/VolatilityClustering/Rule/persona.yml` | Recording/persona metadata. |
 
 ## §6 Running Instructions
 
@@ -81,15 +56,17 @@ python examples/VolatilityClustering/Rule/run_volatility.py -c configs/Volatilit
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+The run should produce finite prices, nonzero volume, persistent volatility
+state, and alternating calm/high-volatility phases caused by shocks and
+heterogeneous order flow.
 
 ## §8 References
 
-See `examples/VolatilityClustering/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/VolatilityClustering/simulation-bases.md §2` for theory and
+`analysis-bases.md §2` for metric contracts.
 
 ## §9 Variant Comparison
 
-See `examples/VolatilityClustering/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+Rule is the benchmark for GARCH and role-driven clustering. LLM, RuleLLM, and
+Rag are compared against it for stochastic interpretation, rule adherence,
+liquidity effects, and retrieval effects.

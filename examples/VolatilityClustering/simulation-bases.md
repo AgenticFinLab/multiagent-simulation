@@ -2,131 +2,195 @@
 
 ## §1 Phenomenon Definition
 
-VolatilityClustering models the empirical fact that large price changes tend to
-be followed by large price changes and calm periods by calm periods. The
-scenario combines trend following, slow belief updating, volatility-sensitive
-trading, and fundamental anchoring.
+VolatilityClustering models the empirical regularity that large asset-price
+changes tend to be followed by large changes, and quiet periods tend to be
+followed by quiet periods. The simulation combines GARCH-style volatility
+persistence with heterogeneous investors whose orders amplify, dampen, or delay
+return shocks.
+
+This is a trading-schema scenario. Rule and LLM variants use a GARCH market with
+signed orders. RuleLLM and Rag use a liquidity-aware extension that consumes
+`provides_liquidity` and changes price impact through effective depth.
 
 ## §2 Theoretical Foundation
 
 ### §2.1 Conditional Heteroskedasticity
 
-ARCH/GARCH-style models describe volatility persistence in financial returns.
+ARCH and GARCH models represent volatility persistence by making current
+variance depend on prior squared returns and prior variance. The market
+coordinator implements this mechanism directly through a bounded GARCH(1,1)
+update.
 
-### §2.2 Trend Following Under Volatility
+### §2.2 Heterogeneous Agent Feedback
 
-Trend followers can increase trading during volatile trends, reinforcing
-clusters of large returns.
+Heterogeneous agent models show how fundamentalists, trend followers, and noise
+traders can produce persistent nonlinear market dynamics. Trend following and
+noise shocks help create clustered high-volatility periods; fundamentalists and
+slow adapters provide stabilizing pressure.
 
-### §2.3 Slow Information Adaptation
+### §2.3 Trend Following Under Volatility
 
-Slow adapters update beliefs gradually, causing persistent reactions after
-shocks.
+Trend followers often size positions by market state. In this scenario,
+volatility-sensitive trend demand can amplify price moves during turbulent
+periods.
+
+### §2.4 Slow Adaptation
+
+Slow information processing spreads reactions across multiple rounds, making
+the effect of a shock persist after the initial return.
+
+### §2.5 Volatility Timing
+
+Volatility traders react to high- and low-volatility regimes rather than price
+direction alone, creating direct order-flow feedback from the volatility state.
 
 ## §3 Market Mechanism
 
-The market broadcasts price, fundamental, returns, and volatility state. Agents
-trade based on value, trend, noise, slow adaptation, or volatility thresholds.
-Net demand updates price, creating clustered high- and low-volatility regimes.
+The Rule and LLM market broadcasts price, previous price, return, volatility,
+previous volatility, volume, net demand, and fundamental value. It aggregates
+signed quantities and updates price using net-demand impact, mean reversion, and
+GARCH-scaled noise:
+
+`P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + sigma(t) * epsilon`
+
+`sigma(t)^2 = omega + alpha * r(t-1)^2 + beta * sigma(t-1)^2`
+
+RuleLLM and Rag retain the same volatility phenomenon but use a
+liquidity-sensitive market. Orders marked with `provides_liquidity=true` add to
+effective depth; low depth increases price impact. Missing Rag liquidity flags
+default to `false`, which is conservative because it cannot inflate market
+liquidity.
 
 ## §4 Investor Archetypes
 
 ### §4.1 Fundamentalist
 
-**Summary**: Trades toward fundamental value.
-**Theoretical and Empirical Basis**: Fundamental anchoring.
-**Design Purpose**: Provide stabilizing mean-reversion pressure.
-**Behavioral Framework**: Uses `value_sensitivity`, `value_noise_std`,
-`trade_frequency`, and `base_position_size`.
-**Decision Process**: Buy undervaluation and sell overvaluation with noise.
-**Worked Numerical Example**: A 10% discount creates buy pressure scaled by
-value sensitivity.
-**Academic References**: Fundamental trading literature.
+**Summary**: Trades toward fundamental value at a low frequency.
+**Theoretical and Empirical Basis**: Fundamental anchoring and stabilizing value
+demand.
+**Design Purpose**: Damp excessive deviation and prevent unbounded price drift.
+**Behavioral Framework**: Uses `trade_frequency`, `value_sensitivity`,
+`base_position_size`, and `value_noise_std`.
+**Decision Process**: Trade only on configured rounds; estimate value with
+noise; buy undervaluation and sell overvaluation.
+**Worked Numerical Example**: If price is 95 and noisy estimated value is 100,
+the positive deviation creates a buy order scaled by value sensitivity.
+**Academic References**: Graham (1949); Brock and Hommes (1998).
 
 ### §4.2 TrendFollower
 
-**Summary**: Trades with recent trends and responds to volatility.
-**Theoretical and Empirical Basis**: Trend following and volatility targeting.
-**Design Purpose**: Amplify volatile trends.
+**Summary**: Trades with recent price trends and sizes by volatility.
+**Theoretical and Empirical Basis**: Chartist and managed-futures trend
+following.
+**Design Purpose**: Amplify shocks and help create clustered large returns.
 **Behavioral Framework**: Uses `lookback_window`, `trend_threshold`,
 `baseline_volatility`, `volatility_sensitivity`, and `base_position_size`.
-**Decision Process**: Trade with trend when signal exceeds threshold, with size
-affected by volatility.
-**Worked Numerical Example**: A trend above threshold in high volatility creates
-larger order.
-**Academic References**: Trend-following and managed-futures literature.
+**Decision Process**: Compare current price with recent average; trade in the
+trend direction if the signal exceeds threshold; increase size in high
+volatility.
+**Worked Numerical Example**: A price above its lookback average with volatility
+twice baseline creates a larger buy order.
+**Academic References**: Jegadeesh and Titman (1993); Moskowitz, Ooi, and
+Pedersen (2012).
 
 ### §4.3 NoiseTrader
 
-**Summary**: Random trader with mean-reverting position process.
-**Theoretical and Empirical Basis**: Noise-trader models.
-**Design Purpose**: Add stochastic shocks.
+**Summary**: Produces stochastic order flow with position mean reversion.
+**Theoretical and Empirical Basis**: Noise-trader risk and uninformed liquidity
+trading.
+**Design Purpose**: Generate shocks that feed the GARCH volatility process.
 **Behavioral Framework**: Uses `position_volatility` and
 `mean_reversion_speed`.
-**Decision Process**: Random position change with reversion toward zero.
-**Worked Numerical Example**: A random shock creates buy/sell order.
-**Academic References**: Black (1986).
+**Decision Process**: Draw a random trade and offset extreme inventory through
+mean reversion.
+**Worked Numerical Example**: A positive random draw creates a buy order, while
+a large existing long position reduces the order through reversion.
+**Academic References**: Black (1986); De Long et al. (1990).
 
 ### §4.4 SlowAdapter
 
-**Summary**: Updates beliefs slowly after price changes.
-**Theoretical and Empirical Basis**: Adaptive expectations.
-**Design Purpose**: Create persistence after shocks.
+**Summary**: Updates perceived value gradually after market moves.
+**Theoretical and Empirical Basis**: Adaptive expectations and delayed
+information processing.
+**Design Purpose**: Extend the effect of shocks over several rounds.
 **Behavioral Framework**: Uses `lookback_window`, `update_weight`, and
 `base_position_size`.
-**Decision Process**: Gradually adjusts desired position based on lagged
-information.
-**Worked Numerical Example**: A shock affects orders for several rounds because
-beliefs update slowly.
-**Academic References**: Adaptive learning literature.
+**Decision Process**: Blend fundamental value with a long moving average; trade
+only when the deviation is material.
+**Worked Numerical Example**: After a price shock, the moving average remains
+away from fundamental and influences orders for multiple rounds.
+**Academic References**: Hommes (2006); adaptive learning literature.
 
 ### §4.5 VolatilityTrader
 
-**Summary**: Trades differently in high- and low-volatility regimes.
-**Theoretical and Empirical Basis**: Volatility regime and clustering models.
+**Summary**: Changes exposure based on volatility regime.
+**Theoretical and Empirical Basis**: Volatility timing and volatility
+mean-reversion strategies.
 **Design Purpose**: Make volatility state directly affect order flow.
-**Behavioral Framework**: Uses `vol_lookback`, `low_vol_threshold`,
-`high_vol_threshold`, and `base_position_size`.
-**Decision Process**: Change exposure when volatility crosses configured
-thresholds.
-**Worked Numerical Example**: Volatility above high threshold triggers defensive
-order.
-**Academic References**: ARCH/GARCH and volatility timing literature.
+**Behavioral Framework**: Uses `vol_lookback`, `high_vol_threshold`,
+`low_vol_threshold`, and `base_position_size`.
+**Decision Process**: Sell or reduce exposure when volatility is high relative
+to its moving average; buy or increase exposure in low-volatility regimes.
+**Worked Numerical Example**: If current volatility is 1.8 times its recent
+average and the high threshold is 1.5, the trader sells.
+**Academic References**: Engle (1982); Bollerslev (1986); volatility timing
+literature.
 
 ## §5 Agent Diversity Verification
 
-The population includes fundamental anchors, trend amplifiers, random shocks,
-slow adapters, and volatility-regime traders.
+The population contains one stabilizing value anchor, one trend amplifier, one
+stochastic shock source, one delayed-response investor, and one volatility-regime
+trader. This role mix is sufficient to produce clustered volatility through
+both exogenous shocks and endogenous order-flow feedback.
+
+All four variants preserve the same five archetypes. RuleLLM and Rag add the
+liquidity flag required by their liquidity-aware market. Rag additionally
+records retrieved context for post-run audit.
 
 ## §6 Parameter Table
 
 | Parameter | Meaning | Used By | Sensitivity |
 |---|---|---|---|
-| `value_sensitivity` | Fundamental response | Fundamentalist | Medium |
+| `initial_price` | Starting price | Market | Medium |
+| `fundamental_value` | Value anchor | Market, Fundamentalist | High |
+| `price_impact` / `base_price_impact` | Net-demand price impact | Market | High |
+| `mean_reversion` | Pull toward fundamental | Market | Medium |
+| `garch_omega` | Long-run variance component | Market | High |
+| `garch_alpha` | Return-shock variance loading | Market | High |
+| `garch_beta` | Volatility persistence | Market | High |
+| `min_volatility` / `max_volatility` | Volatility bounds | Market | Medium |
 | `trend_threshold` | Trend activation | TrendFollower | High |
 | `volatility_sensitivity` | Volatility-scaled trend size | TrendFollower | High |
-| `position_volatility` | Noise shock size | NoiseTrader | Medium |
-| `update_weight` | Adaptation speed | SlowAdapter | High |
-| `high_vol_threshold` | High-vol regime trigger | VolatilityTrader | High |
+| `position_volatility` | Noise-trader shock size | NoiseTrader | Medium |
+| `update_weight` | Slow-adapter fundamental weight | SlowAdapter | High |
+| `high_vol_threshold` / `low_vol_threshold` | Volatility-regime triggers | VolatilityTrader | High |
 
 ## §7 Communication And Round Structure
 
-Market broadcasts state; agents compute value, trend, volatility, noise, or
-adaptive signals; orders update price and future volatility.
+Each round follows market broadcast, investor decision, order aggregation, and
+market update. Investors record portfolio state and submit one order. The market
+records price, volatility, and volume histories. API variants parse `<analysis>`
+and `<decision>` sections; deterministic schema/config errors fail fast, while
+explicit stochastic API fallback is allowed only when conservative and
+quality-audited.
 
 ## §8 Historical Case Studies
 
-### §8.1 Equity Volatility Clustering
+### §8.1 Equity Index Stress Periods
 
-Daily equity returns show persistent high-volatility periods after shocks.
+Equity markets often show persistent high absolute returns after news shocks,
+earnings uncertainty, or macro stress.
 
-### §8.2 Crisis And Calm Regime Alternation
+### §8.2 Calm-to-Stress Transitions
 
-Markets often alternate between calm periods and clustered stress episodes,
-matching conditional volatility models.
+Markets can remain quiet for extended periods and then move into clustered
+stress when trend followers, volatility traders, and noise shocks interact.
 
 ## §9 Variant Comparison Preview
 
-Rule gives explicit clustering mechanisms. LLM may alter perceived regime
-changes. RuleLLM anchors decisions to volatility rules. Rag may retrieve
-volatility-model context and affect regime interpretation.
+| Variant | Decision Source | Expected Volatility-Clustering Behavior |
+|---|---|---|
+| Rule | Deterministic GARCH market and formulaic investors | Clean baseline with explicit volatility persistence. |
+| LLM | Persona prompts and structured orders | Same volatility state with more variable role interpretation. |
+| RuleLLM | Persona plus explicit rules under liquidity-aware pricing | Rule-constrained API orders and liquidity-depth effects. |
+| Rag | RuleLLM plus retrieved volatility context | Same market contract plus auditable retrieval context. |
