@@ -1,16 +1,17 @@
-# South Sea Bubble Rag Variant Explanation
+# SouthSeaBubble Rag Variant Explanation
 
 ## §1 Overview
 
 | Field | Value |
 |---|---|
 | Variant | Rag |
-| Simulation | South Sea Bubble |
-| Decision Mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema |
+| Simulation | SouthSeaBubble |
+| Decision Mechanism | Retrieved historical bubble context plus API quantity orders |
 | Theory Reference | `examples/SouthSeaBubble/simulation-bases.md` |
 | Market Broadcast | `configs/SouthSeaBubble/Rag/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+Rag preserves the current-market quantity schema and records `rag_context` for
+retrieval-quality audit.
 
 ## §2 Theory -> Implementation Mapping
 
@@ -18,41 +19,46 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMInsiderAdvantaged` in `examples/SouthSeaBubble/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Insider advantage | `RagLLMInsiderAdvantaged` combines insider persona with retrieved bubble history. |
+| Config link | Portfolio, LLM, and RAG configs from `configs/SouthSeaBubble/Rag/players.yml`. |
+| Output contract | Quantity order plus `rag_context` and parser-quality fields. |
+
 ### §2.2 NarrativeBeliever (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMNarrativeBeliever` in `examples/SouthSeaBubble/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Narrative demand | `RagLLMNarrativeBeliever` retrieves bubble narratives and mania context. |
+| Config link | Narrative metadata and RAG config. |
+| Output contract | Quantity order with retrieval context. |
+
 ### §2.3 SkepticalAnalyst (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMSkepticalAnalyst` in `examples/SouthSeaBubble/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Fundamental skepticism | `RagLLMSkepticalAnalyst` retrieves cash-flow and bubble-collapse context. |
+| Config link | Cash-flow metadata and RAG config. |
+| Output contract | Quantity order plus retrieval/fallback artifacts. |
+
 ### §2.4 Arbitrageur (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMArbitrageur` in `examples/SouthSeaBubble/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Mispricing correction | `RagLLMArbitrageur` retrieves limits-to-arbitrage context. |
+| Config link | Spread metadata and RAG config. |
+| Output contract | Quantity order plus `rag_context`. |
+
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMNoiseTrader` in `examples/SouthSeaBubble/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Noise liquidity | `RagLLMNoiseTrader` uses retrieved context only superficially. |
+| Config link | Noise metadata and RAG config. |
+| Output contract | Quantity order and retrieval audit fields. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/SouthSeaBubble/Rag/players.py` and its configured counterpart in `configs/SouthSeaBubble/Rag/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The Rag variant reuses the Rule market. Retrieval affects reasoning only; market
+clearing remains current-market quantity aggregation.
 
 ## §4 Variant Architecture
 
@@ -60,18 +66,19 @@ The coordinator mechanism is the final implementation in `examples/SouthSeaBubbl
 |---|---|
 | Player classes | `examples/SouthSeaBubble/Rag/players.py` |
 | Prompt module | `examples/SouthSeaBubble/Rag/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | Project ARK model policy plus Hunyuan/LiteLLM embedding policy |
+| Retrieval | `KnowledgeStore` over configured document resources |
+| Output parsing | Shared parser plus required-field validation |
+| Error handling | Missing document/index failures fail; parse fallback is explicit |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/SouthSeaBubble/Rag/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/SouthSeaBubble/Rag/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/SouthSeaBubble/Rag/topology.yml` | Message routing between coordinator and agents. |
-| `configs/SouthSeaBubble/Rag/persona.yml` | Turn recording and persona metadata. |
+| `configs/SouthSeaBubble/Rag/simulation.yml` | 200-round simulation entry point |
+| `configs/SouthSeaBubble/Rag/players.yml` | Class paths, portfolio, LLM, and RAG config |
+| `configs/SouthSeaBubble/Rag/topology.yml` | Message routing |
+| `configs/SouthSeaBubble/Rag/persona.yml` | Recording/persona metadata |
 
 ## §6 Running Instructions
 
@@ -81,15 +88,14 @@ python examples/SouthSeaBubble/Rag/run_southseabubble_rag.py -c configs/SouthSea
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+Rag must record `rag_context`, preserve valid quantity orders, and write
+`rag_stats.json` for retrieval-quality review.
 
 ## §8 References
 
-See `examples/SouthSeaBubble/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/SouthSeaBubble/simulation-bases.md §2` and `§8`.
 
 ## §9 Variant Comparison
 
-See `examples/SouthSeaBubble/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+Compare Rag with RuleLLM to isolate how retrieved bubble history affects
+narrative demand, skepticism, and correction timing.

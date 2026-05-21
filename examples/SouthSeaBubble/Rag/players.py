@@ -27,13 +27,15 @@ from masim.knowledge import (
 from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
+
 from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+
 from .prompts import (
+    RAGLLM_ARBITRAGEUR_SYS,
     RAGLLM_INSIDER_ADVANTAGED_SYS,
     RAGLLM_NARRATIVE_BELIEVER_SYS,
-    RAGLLM_SKEPTICAL_ANALYST_SYS,
-    RAGLLM_ARBITRAGEUR_SYS,
     RAGLLM_NOISE_TRADER_SYS,
+    RAGLLM_SKEPTICAL_ANALYST_SYS,
 )
 from ..Rule.players import Market  # noqa: F401 — re-exported
 
@@ -306,6 +308,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         return (
             f"Round {round_num} — Market Update\n"
@@ -316,9 +319,38 @@ class RagLLMInvestor(GeneralPlayer):
             f"Value: ${portfolio_value:.2f}\n\n"
             "Apply your decision rules, informed by retrieved knowledge, to determine action.\n"
             "Respond with <analysis>...</analysis> then <decision>...</decision> containing "
-            'JSON: {"action": "buy" or "sell" or "hold", "bid_price": current price, '
-            '"quantity": integer, "reasoning": "brief rationale"}'
+            'JSON: {"action": "buy" or "sell" or "hold", "quantity": integer, '
+            '"reasoning": "brief rationale"}. Do not include any price field.'
         )
+
+    def _parse_decision(self, response_text: str) -> Dict[str, Any]:
+        """Parse and validate the SouthSeaBubble quantity-order contract."""
+        decision = parse_llm_response_with_thinking(response_text)
+        missing = [
+            field
+            for field in ("action", "quantity", "reasoning")
+            if field not in decision or decision[field] is None
+        ]
+        if missing:
+            raise ValueError(f"missing decision fields: {', '.join(missing)}")
+        action = str(decision["action"]).lower()
+        if action not in {"buy", "sell", "hold"}:
+            raise ValueError(f"invalid action: {decision['action']!r}")
+        try:
+            quantity = int(float(decision["quantity"]))
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"invalid quantity: {decision['quantity']!r}") from exc
+        if quantity < 0:
+            raise ValueError(f"negative quantity: {quantity}")
+        reasoning = str(decision.pop("reasoning")).strip()
+        if not reasoning:
+            raise ValueError("empty reasoning")
+        return {
+            "action": action,
+            "quantity": quantity,
+            "reasoning": reasoning,
+            "analysis": str(decision["analysis"]) if "analysis" in decision else "",
+        }
 
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
@@ -329,16 +361,16 @@ class RagLLMInvestor(GeneralPlayer):
         user_prompt = self._build_prompt()
         system_prompt = self._system_prompt
 
-        decision: Dict[str, Any] = {"action": "hold", "quantity": 0}
+        decision: Optional[Dict[str, Any]] = None
         max_retries = 3
         last_error: BaseException | None = None
+        parser_fallback = False
+        fallback_reason = ""
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             try:
                 infer_output = llm_client.run([infer_input])
-                decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
+                decision = self._parse_decision(infer_output.outputs[0].response)
                 break
             except Exception as exc:  # pylint: disable=broad-except
                 last_error = exc
@@ -357,10 +389,17 @@ class RagLLMInvestor(GeneralPlayer):
                         "action": "hold",
                         "quantity": 0,
                         "reasoning": f"LLM fallback hold after retries: {last_error}",
+                        "analysis": "",
                     }
+                    parser_fallback = parse_error
+                    fallback_reason = "parse" if parse_error else "retryable_api"
 
+        if decision is None:
+            raise RuntimeError(f"[{self.identity}] LLM decision unavailable")
         action = decision["action"]
         quantity = int(decision["quantity"])
+        reasoning = str(decision.pop("reasoning"))[:120]
+        analysis = str(decision.pop("analysis"))
 
         valid_actions = ["buy", "sell", "hold"]
         if action not in valid_actions:
@@ -370,11 +409,16 @@ class RagLLMInvestor(GeneralPlayer):
 
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        if action == "buy":
+        if action == "hold":
+            quantity = 0
+        elif action == "buy":
             max_affordable = int(cash / price) if price > 0 else 0
             quantity = min(quantity, max_affordable)
         elif action == "sell":
             quantity = min(quantity, int(position))
+        if quantity <= 0:
+            action = "hold"
+            quantity = 0
 
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
@@ -395,10 +439,15 @@ class RagLLMInvestor(GeneralPlayer):
         )
 
         order = {
+            "type": "order",
             "action": action,
             "quantity": quantity,
             "agent_type": strategy_name,
-            "reasoning": str(decision.get("reasoning", "fallback hold"))[:120],
+            "reasoning": reasoning,
+            "analysis": analysis,
+            "parser_fallback": parser_fallback,
+            "fallback_reason": fallback_reason,
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
         return {
             **order,
@@ -414,31 +463,46 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMInsiderAdvantaged(RagLLMInvestor):
-    """RAG-augmented insider trader exploiting privileged information."""
+    """RAG-augmented insider trader exploiting privileged information.
+
+    Theory: simulation-bases.md §4.1
+    """
 
     _system_prompt = RAGLLM_INSIDER_ADVANTAGED_SYS
 
 
 class RagLLMNarrativeBeliever(RagLLMInvestor):
-    """RAG-augmented narrative believer following promotional hype."""
+    """RAG-augmented narrative believer following promotional hype.
+
+    Theory: simulation-bases.md §4.2
+    """
 
     _system_prompt = RAGLLM_NARRATIVE_BELIEVER_SYS
 
 
 class RagLLMSkepticalAnalyst(RagLLMInvestor):
-    """RAG-augmented skeptical analyst focused on cash flow fundamentals."""
+    """RAG-augmented skeptical analyst focused on cash flow fundamentals.
+
+    Theory: simulation-bases.md §4.3
+    """
 
     _system_prompt = RAGLLM_SKEPTICAL_ANALYST_SYS
 
 
 class RagLLMArbitrageur(RagLLMInvestor):
-    """RAG-augmented arbitrageur exploiting narrative vs fundamental gap."""
+    """RAG-augmented arbitrageur exploiting narrative vs fundamental gap.
+
+    Theory: simulation-bases.md §4.4
+    """
 
     _system_prompt = RAGLLM_ARBITRAGEUR_SYS
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented noise trader providing random baseline liquidity."""
+    """RAG-augmented noise trader providing random baseline liquidity.
+
+    Theory: simulation-bases.md §4.5
+    """
 
     _system_prompt = RAGLLM_NOISE_TRADER_SYS
 

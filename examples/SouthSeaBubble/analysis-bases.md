@@ -2,8 +2,9 @@
 
 ## §1 Analysis Objectives
 
-The analysis verifies narrative-driven overpricing, insider timing, skeptical
-resistance, arbitrage correction, and bubble collapse.
+The analysis verifies whether the simulation produces a coherent narrative
+bubble: rising price premium, narrative/insider demand, skeptical and arbitrage
+resistance, possible correction, and structurally valid API/RAG artifacts.
 
 ## §2 Metrics
 
@@ -13,7 +14,7 @@ resistance, arbitrage correction, and bubble collapse.
 def compute_bubble_magnitude(prices: list[float], fundamental: float) -> float
 ```
 
-Measures peak premium over fundamental.
+Measure peak premium over fundamental value.
 
 ### §2.2 Narrative Demand
 
@@ -21,7 +22,8 @@ Measures peak premium over fundamental.
 def compute_narrative_demand(orders: list[dict]) -> float
 ```
 
-Measures demand from NarrativeBeliever.
+Sum buy quantities from `NarrativeBeliever` agents during positive deviation
+rounds.
 
 ### §2.3 Insider Timing Profit
 
@@ -29,7 +31,7 @@ Measures demand from NarrativeBeliever.
 def compute_insider_timing_profit(values: list[float]) -> float
 ```
 
-Measures insider advantage over other agents.
+Estimate insider portfolio advantage relative to other investor groups.
 
 ### §2.4 Skeptical Resistance
 
@@ -37,7 +39,8 @@ Measures insider advantage over other agents.
 def compute_skeptical_resistance(orders: list[dict]) -> float
 ```
 
-Measures sell/avoidance pressure from SkepticalAnalyst.
+Sum sell/correction quantities from `SkepticalAnalyst` agents during
+overpricing.
 
 ### §2.5 Arbitrage Correction
 
@@ -45,15 +48,15 @@ Measures sell/avoidance pressure from SkepticalAnalyst.
 def compute_arbitrage_correction(orders: list[dict]) -> float
 ```
 
-Measures correction pressure against mispricing.
+Measure arbitrage quantity that leans against large price deviations.
 
 ### §2.6 Crash Round
 
 ```python
-def compute_crash_round(prices: list[float]) -> int
+def compute_crash_round(prices: list[float], drawdown_threshold: float) -> int
 ```
 
-Finds bubble peak-to-collapse transition.
+Return the first round after peak where drawdown exceeds the threshold.
 
 ### §2.7 Agent Attribution
 
@@ -61,29 +64,40 @@ Finds bubble peak-to-collapse transition.
 def compute_agent_attribution(orders: list[dict]) -> dict[str, float]
 ```
 
-Attributes bubble and correction pressure.
+Attribute bubble-building and correction pressure by investor role.
 
 ## §3 Analysis Dimensions
 
-Narrative growth, insider timing, valuation resistance, arbitrage, noise, and
-collapse.
+| Dimension | Question | Primary Metrics |
+|---|---|---|
+| Bubble severity | Did price detach from fundamental value? | §2.1 |
+| Narrative flow | Did narrative believers add demand? | §2.2 |
+| Insider edge | Did insiders benefit from timing? | §2.3 |
+| Skepticism | Did analysts resist overpricing? | §2.4 |
+| Arbitrage | Did arbitrageurs lean against mispricing? | §2.5 |
+| Crash timing | Did the bubble reverse materially? | §2.6 |
+| Attribution | Which roles built or corrected the bubble? | §2.7 |
 
 ## §4 Phase Analysis
 
-Early accumulation, narrative boom, peak overpricing, correction pressure, and
-collapse.
+Use five phases: early accumulation, narrative boom, peak overpricing,
+correction pressure, and collapse or stabilization.
 
 ## §5 Cross-Variant Comparison
 
-Rule is deterministic. LLM may amplify narrative language. RuleLLM keeps
-explicit bubble rules. Rag may inject historical bubble knowledge.
+Rule provides the baseline. LLM may strengthen narrative conviction. RuleLLM
+should preserve retained thresholds. Rag should reveal whether historical bubble
+context changes demand, skepticism, or correction timing.
 
-## §6 Expected Results
+## §6 Expected Results And Validation Criteria
 
-Prices should exceed fundamental under narrative demand, then weaken when
-skeptical/arbitrage pressure dominates.
+A valid full sample should complete 200 rounds, keep finite state values, record
+non-trivial role activity, show some measurable price premium or correction
+pressure, and expose parser fallback / RAG retrieval quality fields for API
+variants.
 
 ## §7 Visualization Plan
 
-Plot price premium, narrative demand, insider exposure, skeptical/arbitrage
-pressure, and cross-variant peak/crash timing.
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_southseabubble_dynamics.png`, `02_southseabubble_analysis.png`,
+`03_summary.png`, and Rag-specific `rag_stats.json`.

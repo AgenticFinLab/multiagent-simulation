@@ -1,16 +1,17 @@
-# South Sea Bubble LLM Variant Explanation
+# SouthSeaBubble LLM Variant Explanation
 
 ## §1 Overview
 
 | Field | Value |
 |---|---|
 | Variant | LLM |
-| Simulation | South Sea Bubble |
-| Decision Mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning |
+| Simulation | SouthSeaBubble |
+| Decision Mechanism | Persona-conditioned API quantity orders |
 | Theory Reference | `examples/SouthSeaBubble/simulation-bases.md` |
 | Market Broadcast | `configs/SouthSeaBubble/LLM/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+The LLM variant preserves the current-market quantity schema: `action`,
+`quantity`, and `reasoning`; no limit price is requested or consumed.
 
 ## §2 Theory -> Implementation Mapping
 
@@ -18,41 +19,46 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `LLMInsiderAdvantaged` in `examples/SouthSeaBubble/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Insider advantage | `LLMInsiderAdvantaged` uses insider persona and current market state. |
+| Config link | Portfolio metadata and ARK model config from `configs/SouthSeaBubble/LLM/players.yml`. |
+| Output contract | Required `action`, `quantity`, `reasoning`, optional analysis, and fallback metadata. |
+
 ### §2.2 NarrativeBeliever (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `LLMNarrativeBeliever` in `examples/SouthSeaBubble/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Narrative demand | `LLMNarrativeBeliever` reasons from promotional-story conviction. |
+| Config link | Narrative metadata and model config. |
+| Output contract | Current-market quantity order. |
+
 ### §2.3 SkepticalAnalyst (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `LLMSkepticalAnalyst` in `examples/SouthSeaBubble/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Fundamental skepticism | `LLMSkepticalAnalyst` reasons from valuation and cash-flow doubts. |
+| Config link | Cash-flow metadata and model config. |
+| Output contract | Quantity order with explicit fallback fields. |
+
 ### §2.4 Arbitrageur (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `LLMArbitrageur` in `examples/SouthSeaBubble/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Mispricing correction | `LLMArbitrageur` reasons about narrative price versus fundamental value. |
+| Config link | Spread metadata and model config. |
+| Output contract | Quantity order with parser quality artifacts. |
+
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `LLMNoiseTrader` in `examples/SouthSeaBubble/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SouthSeaBubble/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Background liquidity | `LLMNoiseTrader` supplies low-information orders. |
+| Config link | Noise metadata and model config. |
+| Output contract | Valid quantity order or explicit conservative fallback. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/SouthSeaBubble/LLM/players.py` and its configured counterpart in `configs/SouthSeaBubble/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The LLM variant reuses the Rule market; API output changes only investor
+decision generation, not market clearing.
 
 ## §4 Variant Architecture
 
@@ -60,18 +66,18 @@ The coordinator mechanism is the final implementation in `examples/SouthSeaBubbl
 |---|---|
 | Player classes | `examples/SouthSeaBubble/LLM/players.py` |
 | Prompt module | `examples/SouthSeaBubble/LLM/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | Project ARK model policy |
+| Output parsing | Shared parser plus required-field validation |
+| Error handling | Retryable API/parse failures are retried; final fallback is explicit |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/SouthSeaBubble/LLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/SouthSeaBubble/LLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/SouthSeaBubble/LLM/topology.yml` | Message routing between coordinator and agents. |
-| `configs/SouthSeaBubble/LLM/persona.yml` | Turn recording and persona metadata. |
+| `configs/SouthSeaBubble/LLM/simulation.yml` | 200-round simulation entry point |
+| `configs/SouthSeaBubble/LLM/players.yml` | Class paths, role metadata, and LLM config |
+| `configs/SouthSeaBubble/LLM/topology.yml` | Message routing |
+| `configs/SouthSeaBubble/LLM/persona.yml` | Recording/persona metadata |
 
 ## §6 Running Instructions
 
@@ -81,15 +87,13 @@ python examples/SouthSeaBubble/LLM/run_southseabubble_llm.py -c configs/SouthSea
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+LLM may amplify or dampen narrative conviction, but must preserve valid
+quantity-order payloads and visible fallback metadata.
 
 ## §8 References
 
-See `examples/SouthSeaBubble/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/SouthSeaBubble/simulation-bases.md §2` and `§8`.
 
 ## §9 Variant Comparison
 
-See `examples/SouthSeaBubble/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+Compare LLM against Rule on bubble magnitude, role attribution, and API quality.
