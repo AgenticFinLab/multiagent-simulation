@@ -49,8 +49,10 @@ config extras:
 | `SpeculativeAttacker` | `deviation < -attack_threshold` | Sell up to `order_size` |
 | `SpeculativeAttacker` | `deviation > attack_threshold` | Buy up to `order_size` |
 | `SelfFulfillingTrader` | `deviation < -contagion_sensitivity` | Sell up to `order_size` |
+| `SelfFulfillingTrader` | `deviation > 2 * contagion_sensitivity` | Buy up to half `order_size` |
 | `CentralBankDefender` | `deviation < -defense_threshold` | Buy up to `order_size` |
-| `FundamentalHedger` | `abs(deviation) > fundamental_threshold` | Buy below fair value, sell above fair value |
+| `CentralBankDefender` | `deviation > defense_threshold` | Sell up to `order_size` |
+| `FundamentalHedger` | `abs(deviation) > hedge_ratio` | Buy below fair value, sell above fair value |
 | `NoiseTrader` | random draw below `trade_probability` | Random buy or sell |
 
 ## §5 Config Reference
@@ -62,7 +64,7 @@ read directly by the corresponding player classes:
 |---|---|
 | `Market` | `record_path`, `custom_state_hot_limit`, `initial_price`, `fundamental_value`, `price_impact`, `mean_reversion`, `noise_std` |
 | Trading agents | `initial_cash`, `initial_position`, and each agent's threshold/order-size parameters |
-| `NoiseTrader` | `trade_probability`, `min_order`, `max_order` |
+| `NoiseTrader` | `trade_probability`; order size is uniformly sampled from 100 to 500 |
 
 ## §6 Running Instructions
 

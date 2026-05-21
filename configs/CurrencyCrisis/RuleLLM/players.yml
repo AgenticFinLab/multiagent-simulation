@@ -14,11 +14,11 @@ market:
       record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"
       initial_price: 100.0
       peg_rate: 100.0
-      fundamental_value: 95.0
+      fundamental_value: 100.0
       reserve_level: 500000.0
-      price_impact: 0.04
-      mean_reversion: 0.01
-      noise_std: 0.015
+      price_impact: 0.01
+      mean_reversion: 0.02
+      noise_std: 0.5
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
@@ -35,8 +35,8 @@ speculativeattacker:
     extras:
       record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"
       initial_cash: 1000000.0
-      initial_position: 0
-      attack_threshold: 0.05
+      initial_position: 5000
+      attack_threshold: 0.03
       position_size: 800
       custom_state_hot_limit: 3
       llm:
@@ -62,8 +62,8 @@ selffulfillingtrader:
     extras:
       record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"
       initial_cash: 800000.0
-      initial_position: 0
-      contagion_sensitivity: 0.7
+      initial_position: 5000
+      contagion_sensitivity: 0.01
       exit_threshold: 0.03
       position_size: 500
       custom_state_hot_limit: 3
@@ -90,9 +90,9 @@ centralbankdefender:
     extras:
       record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"
       initial_cash: 5000000.0
-      initial_position: 0
+      initial_position: 3000
       defense_size: 600
-      defense_threshold: 0.02
+      defense_threshold: 0.05
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_CENTRAL_BANK_DEFENDER_SYS"
@@ -117,8 +117,8 @@ fundamentalhedger:
     extras:
       record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"
       initial_cash: 1000000.0
-      initial_position: 0
-      hedge_ratio: 0.3
+      initial_position: 2000
+      hedge_ratio: 0.05
       position_size: 400
       custom_state_hot_limit: 3
       llm:
@@ -144,7 +144,7 @@ noisetrader:
     extras:
       record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"
       initial_cash: 500000.0
-      initial_position: 0
+      initial_position: 500
       trade_probability: 0.3
       noise_size: 100
       custom_state_hot_limit: 3

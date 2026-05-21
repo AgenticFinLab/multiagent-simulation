@@ -14,9 +14,14 @@ It exports:
 
 | Function | Purpose | Root reference |
 |---|---|---|
-| `load_simulation_data(config)` | Load market prices, fundamentals, bids, and payloads | `analysis-bases.md §2` |
-| `calculate_metrics(data)` | Compute attack, defense, amplification, anchor, recovery, and wealth metrics | `analysis-bases.md §2.1-§2.7` |
-| `create_visualizations(data, output_dir, variant)` | Save the standard CurrencyCrisis diagnostic chart | `analysis-bases.md §7` |
+| `_load_data(results)` | Load market prices, fundamentals, bids, and order payloads | `analysis-bases.md §2` |
+| `_compute_attack_intensity_index(...)` | Compute attack depth from maximum negative deviation | `analysis-bases.md §2.1` |
+| `_compute_peg_survival_duration(...)` | Compute rounds until peg breach | `analysis-bases.md §2.2` |
+| `_compute_defense_exhaustion_rate(...)` | Compute central-bank intervention spending during crisis rounds | `analysis-bases.md §2.3` |
+| `_compute_self_fulfilling_amplification_factor(...)` | Compare self-fulfilling sell flow with attacker sell flow | `analysis-bases.md §2.4` |
+| `_compute_fundamental_anchor_strength(...)` | Compute stabilizing hedger buy activity during attack rounds | `analysis-bases.md §2.5` |
+| `_compute_recovery_speed(...)` | Compute rounds from trough back toward the peg | `analysis-bases.md §2.6` |
+| `_create_visualizations(...)` | Save the standard CurrencyCrisis diagnostic plots | `analysis-bases.md §7` |
 
 ## §3 Dimension-by-Dimension Interpretation
 
@@ -44,8 +49,11 @@ configured experiment output directory:
 
 | File | Contents |
 |---|---|
-| `currencycrisis_rule_analysis.png` | Price, deviation, returns, and diagnostic plots |
-| `currencycrisis_rule_metrics.json` | Metric dictionary returned by `calculate_metrics()` |
+| `00_investor_bids.png` | Market price, peg line, and investor bid curves |
+| `01_currencycrisis_dynamics.png` | Exchange rate vs. peg and deviation thresholds |
+| `02_currencycrisis_analysis.png` | Rolling volatility and per-round returns |
+| `03_summary.png` | Agent VWAP and total volume summary |
+| `summary.json` | Metrics, validation criteria, and agent VWAP data |
 
 ## §6 Cross-Variant Comparison
 
@@ -61,5 +69,5 @@ Rule metrics provide the baseline for comparing:
 
 - Confirm the run completed the configured 200 rounds.
 - Confirm market price, fundamental, and deviation histories contain all rounds.
-- Confirm order payloads contain valid `action` and `quantity` fields.
+- Confirm order payloads contain valid `action`, `bid_price`, `quantity`, `investor`, `strategy`, and `reasoning` fields.
 - Confirm no NaN or infinite values appear in metric inputs or outputs.

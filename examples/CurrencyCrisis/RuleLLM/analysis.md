@@ -13,9 +13,14 @@ crisis mechanism while changing timing, quantities, or reasoning traces.
 
 | Function | Purpose | Root reference |
 |---|---|---|
-| `load_simulation_data(config)` | Load market and order records | `analysis-bases.md §2` |
-| `calculate_metrics(data)` | Compute AII, PSD, DER, SFAF, FAS, RS, and WTI | `analysis-bases.md §2.1-§2.7` |
-| `create_visualizations(data, output_dir, variant)` | Generate standard diagnostics | `analysis-bases.md §7` |
+| `_load_data(results)` | Load market and canonical order records | `analysis-bases.md §2` |
+| `_compute_attack_intensity_index(...)` | Compute attack depth from maximum negative deviation | `analysis-bases.md §2.1` |
+| `_compute_peg_survival_duration(...)` | Compute rounds until peg breach | `analysis-bases.md §2.2` |
+| `_compute_defense_exhaustion_rate(...)` | Compute central-bank intervention spending during crisis rounds | `analysis-bases.md §2.3` |
+| `_compute_self_fulfilling_amplification_factor(...)` | Compare self-fulfilling sell flow with attacker sell flow | `analysis-bases.md §2.4` |
+| `_compute_fundamental_anchor_strength(...)` | Compute stabilizing hedger buy activity during attack rounds | `analysis-bases.md §2.5` |
+| `_compute_recovery_speed(...)` | Compute rounds from trough back toward the peg | `analysis-bases.md §2.6` |
+| `_create_visualizations(...)` | Generate fixed diagnostic plots | `analysis-bases.md §7` |
 
 ## §3 Dimension-by-Dimension Interpretation
 
@@ -42,8 +47,11 @@ Running `RuleLLM/analysis.py` writes:
 
 | File | Contents |
 |---|---|
-| `currencycrisis_rulellm_analysis.png` | Standard market and deviation diagnostics |
-| `currencycrisis_rulellm_metrics.json` | Core metric summary |
+| `00_investor_bids.png` | Market price, peg line, and investor bid curves |
+| `01_currencycrisis_dynamics.png` | Exchange rate vs. peg and deviation thresholds |
+| `02_currencycrisis_analysis.png` | Rolling volatility and per-round returns |
+| `03_summary.png` | Agent VWAP and total volume summary |
+| `summary.json` | Metrics, validation criteria, and agent VWAP data |
 
 ## §6 Cross-Variant Comparison
 

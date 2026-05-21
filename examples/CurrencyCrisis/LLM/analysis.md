@@ -13,9 +13,14 @@ the Rule baseline.
 
 | Function | Purpose | Root reference |
 |---|---|---|
-| `load_simulation_data(config)` | Load market and agent records | `analysis-bases.md §2` |
-| `calculate_metrics(data)` | Compute the seven CurrencyCrisis metrics | `analysis-bases.md §2.1-§2.7` |
-| `create_visualizations(data, output_dir, variant)` | Generate the standard diagnostic plot | `analysis-bases.md §7` |
+| `_load_data(results)` | Load market and canonical order records | `analysis-bases.md §2` |
+| `_compute_attack_intensity_index(...)` | Compute attack depth from maximum negative deviation | `analysis-bases.md §2.1` |
+| `_compute_peg_survival_duration(...)` | Compute rounds until peg breach | `analysis-bases.md §2.2` |
+| `_compute_defense_exhaustion_rate(...)` | Compute central-bank intervention spending during crisis rounds | `analysis-bases.md §2.3` |
+| `_compute_self_fulfilling_amplification_factor(...)` | Compare self-fulfilling sell flow with attacker sell flow | `analysis-bases.md §2.4` |
+| `_compute_fundamental_anchor_strength(...)` | Compute stabilizing hedger buy activity during attack rounds | `analysis-bases.md §2.5` |
+| `_compute_recovery_speed(...)` | Compute rounds from trough back toward the peg | `analysis-bases.md §2.6` |
+| `_create_visualizations(...)` | Generate the fixed CurrencyCrisis diagnostic plots | `analysis-bases.md §7` |
 
 LLM-specific review adds action-distribution and output-quality checks over raw
 LLM decision records.
@@ -26,7 +31,7 @@ LLM decision records.
 |---|---|
 | Attack depth | Higher variance than Rule indicates persona-driven crisis intensity. |
 | Peg survival | Longer survival can indicate central-bank caution or delayed attack coordination. |
-| Defense exhaustion | Smooth spending indicates adaptive intervention; abrupt spending indicates panic defense. |
+| Defense exhaustion | Smooth spending indicates adaptive intervention; abrupt spending indicates urgent peg defense. |
 | Self-fulfilling amplification | High SFAF indicates LLM traders coordinated on crisis expectations. |
 | Fundamental anchor | Low FAS indicates the fundamental hedger abandoned stabilizing behavior. |
 | Recovery | Recovery speed reflects whether LLM agents recognize stabilization opportunities. |
@@ -47,9 +52,11 @@ configured experiment output directory:
 
 | File | Contents |
 |---|---|
-| `currencycrisis_llm_analysis.png` | Standard market and deviation diagnostics |
-| `currencycrisis_llm_metrics.json` | Core metric summary |
-| `currencycrisis_llm_actions.png` | LLM action distribution by agent when available |
+| `00_investor_bids.png` | Market price, peg line, and investor bid curves |
+| `01_currencycrisis_dynamics.png` | Exchange rate vs. peg and deviation thresholds |
+| `02_currencycrisis_analysis.png` | Rolling volatility and per-round returns |
+| `03_summary.png` | Agent VWAP and total volume summary |
+| `summary.json` | Metrics, validation criteria, and agent VWAP data |
 
 ## §6 Cross-Variant Comparison
 
@@ -70,4 +77,4 @@ Compare LLM metrics against Rule:
   the sample.
 - Treat any silent fallback hold as a quality failure unless explicitly
   documented and justified.
-- Confirm all accepted orders preserve valid `action` and numeric `quantity`.
+- Confirm all accepted orders preserve valid `action`, numeric `bid_price`, numeric `quantity`, and non-empty `reasoning`.

@@ -14,11 +14,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
+from masim.format.order import validate_order
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from examples.CurrencyCrisis.Rule.players import Market  # noqa: F401
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,35 @@ def load_prompt(prompt_path: str) -> str:
     module_path, var_name = prompt_path.rsplit(":", 1)
     module = importlib.import_module(module_path)
     return getattr(module, var_name)
+
+
+def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
+    """Validate canonical trading decision fields before portfolio mutation."""
+    action = decision["action"]
+    if action not in {"buy", "sell", "hold"}:
+        raise ValueError(f"[{identity}] invalid action: {action}")
+    bid_price = float(decision["bid_price"])
+    if bid_price <= 0:
+        raise ValueError(f"[{identity}] invalid bid_price: {bid_price}")
+    quantity = float(decision["quantity"])
+    if quantity < 0:
+        raise ValueError(f"[{identity}] invalid quantity: {quantity}")
+    reasoning = str(decision["reasoning"]).strip()
+    if not reasoning:
+        raise ValueError(f"[{identity}] empty reasoning")
+    analysis = str(decision["analysis"]).strip()
+    if not analysis:
+        raise ValueError(f"[{identity}] empty analysis")
+    if action == "hold":
+        quantity = 0.0
+    return {
+        **decision,
+        "action": action,
+        "bid_price": bid_price,
+        "quantity": quantity,
+        "reasoning": reasoning,
+        "analysis": analysis,
+    }
 
 
 class LLMInvestor(GeneralPlayer):
@@ -106,42 +136,66 @@ class LLMInvestor(GeneralPlayer):
         )
 
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
+        decision = None
         last_error = None
-        for attempt in range(3):
+        max_retries = 3
+        for attempt in range(max_retries):
+            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             try:
-                infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 result = llm_client.run([infer_input])
                 response = result.outputs[0].response
                 parsed = parse_llm_response_with_thinking(response)
-                action_str = parsed["action"]
-                quantity = int(parsed["quantity"])
-                if action_str not in ("buy", "sell", "hold"):
-                    action_str = "hold"
-                quantity = max(0, quantity)
-                if action_str == "buy":
-                    quantity = min(quantity, int(cash / price) if price > 0 else 0)
-                elif action_str == "sell":
-                    quantity = min(quantity, max(position, 0))
+                decision = _validate_decision(parsed, self.identity)
                 break
             except Exception as exc:  # pylint: disable=broad-except
-                logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
                 last_error = exc
-                if attempt == 2:
-                    raise RuntimeError(
-                        f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
-                    ) from last_error
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if attempt < max_retries - 1 and (parse_error or retryable_api_error):
+                    logger.debug(
+                        "[%s] LLM call/parse failed, retrying: %s",
+                        self.identity,
+                        exc,
+                    )
+                    continue
+                if not parse_error and not retryable_api_error:
+                    raise
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
+            ) from last_error
+
+        action_str = decision["action"]
+        bid_price = decision["bid_price"]
+        quantity = decision["quantity"]
+        if action_str == "buy":
+            quantity = min(quantity, cash / bid_price)
+        elif action_str == "sell":
+            quantity = min(quantity, max(position, 0))
+
+        order = {
+            "action": action_str,
+            "bid_price": bid_price,
+            "quantity": quantity,
+            "investor": self.identity,
+            "strategy": self.__class__.__name__,
+            "cash": cash,
+            "position": position,
+            "reasoning": decision["reasoning"][:100],
+            "analysis": decision["analysis"],
+        }
+        validate_order(order)
 
         if action_str == "buy" and quantity > 0:
-            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["cash"] -= quantity * bid_price
             self.state.custom_state["position"] += quantity
         elif action_str == "sell" and quantity > 0:
-            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["cash"] += quantity * bid_price
             self.state.custom_state["position"] -= quantity
 
-        order = {"action": action_str, "quantity": quantity}
         return {
-            "action": action_str,
-            "quantity": quantity,
+            **order,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 

@@ -46,14 +46,14 @@ Where:
 **4.1.3 Mathematical Model**:
 
 ```
-qty(t) = attack_size × (1 + abs(deviation) × 10)   if deviation < −attack_threshold  [sell]
-qty(t) = cover_size                                   if deviation > 0.05              [buy/cover]
-qty(t) = 0                                            otherwise
+qty(t) = order_size   if deviation < −attack_threshold  [sell]
+qty(t) = order_size   if deviation > +attack_threshold  [buy/cover]
+qty(t) = 0            otherwise
 ```
 
-Parameters: `attack_threshold` = 0.03, `attack_size` = 500, `cover_size` = 200.
+Parameters: `attack_threshold` = 0.03, `order_size` = 600, `initial_position` = 5000.
 
-**4.1.4 Calibration Targets**: Attack volume scales with deviation severity; peak sell ≈ 1,500–2,500 units when δ < −0.15.
+**4.1.4 Calibration Targets**: Attack volume activates once the peg is visibly weak; two attacker instances can contribute up to 1,200 units of sell pressure per round.
 
 **4.1.5 Historical Analogue**: George Soros / Quantum Fund during EMS crisis (1992); LTCM/others during Asian crisis (1997).
 
@@ -72,15 +72,14 @@ Parameters: `attack_threshold` = 0.03, `attack_size` = 500, `cover_size` = 200.
 **4.2.3 Mathematical Model**:
 
 ```
-momentum = mean(price_history[-3:]) - mean(price_history[-6:-3])   [recent trend]
-qty(t) = order_size × (1 + abs(momentum) × 5)   if momentum < −momentum_threshold  [sell]
-qty(t) = order_size                               if momentum > momentum_threshold   [buy]
-qty(t) = 0                                        otherwise
+qty(t) = order_size        if deviation < −contagion_sensitivity  [sell]
+qty(t) = order_size / 2    if deviation > 2×contagion_sensitivity [buy]
+qty(t) = 0                 otherwise
 ```
 
-Parameters: `momentum_threshold` = 0.5, `order_size` = 400.
+Parameters: `contagion_sensitivity` = 0.01, `order_size` = 700, `initial_position` = 5000.
 
-**4.2.4 Calibration Targets**: Activates on 3-period negative price momentum; compounds attack once SpeculativeAttacker initiates.
+**4.2.4 Calibration Targets**: Activates on mild negative deviation; two self-fulfilling trader instances can add up to 1,400 units of coordinated sell pressure per round.
 
 **4.2.5 Historical Analogue**: EMS speculators tracking other fund selling; Asian currency crisis herding (1997).
 
@@ -99,14 +98,14 @@ Parameters: `momentum_threshold` = 0.5, `order_size` = 400.
 **4.3.3 Mathematical Model**:
 
 ```
-qty(t) = defense_size                if deviation < −defense_threshold  [buy/defend]
-qty(t) = reserve_size                if deviation < −crisis_threshold   [emergency buy]
-qty(t) = 0                           otherwise
+qty(t) = order_size   if deviation < −defense_threshold  [buy/defend]
+qty(t) = order_size   if deviation > +defense_threshold  [sell reserves]
+qty(t) = 0            otherwise
 ```
 
-Parameters: `defense_threshold` = 0.03, `defense_size` = 600, `crisis_threshold` = 0.10, `reserve_size` = 1000.
+Parameters: `defense_threshold` = 0.05, `order_size` = 500, `initial_cash` = 5,000,000, `initial_position` = 3000.
 
-**4.3.4 Calibration Targets**: Normal defense ≈ 600 units; emergency defense ≈ 1,000 units when δ < −0.10.
+**4.3.4 Calibration Targets**: Defense activates once the peg is under material pressure; the central bank can provide up to 500 units of stabilizing buy pressure per round.
 
 **4.3.5 Historical Analogue**: Bank of England defending sterling (1992, pre-Black Wednesday); Bank of Thailand defending baht (1997).
 
@@ -125,14 +124,14 @@ Parameters: `defense_threshold` = 0.03, `defense_size` = 600, `crisis_threshold`
 **4.4.3 Mathematical Model**:
 
 ```
-qty(t) = order_size   if deviation < −fundamental_threshold   [buy]
-qty(t) = order_size   if deviation > fundamental_threshold    [sell]
+qty(t) = order_size   if deviation < −hedge_ratio   [buy]
+qty(t) = order_size   if deviation > hedge_ratio    [sell]
 qty(t) = 0            otherwise
 ```
 
-Parameters: `fundamental_threshold` = 0.08, `order_size` = 400.
+Parameters: `hedge_ratio` = 0.05, `order_size` = 400, `initial_position` = 2000.
 
-**4.4.4 Calibration Targets**: Activates at ±8% deviation from peg; provides stabilizing flow without reserve constraints.
+**4.4.4 Calibration Targets**: Activates at ±5% deviation from peg; provides stabilizing flow without reserve constraints.
 
 **4.4.5 Historical Analogue**: Long-term institutional investors using purchasing-power-parity models; exporters hedging FX exposure.
 
@@ -187,29 +186,32 @@ Diversity across: (1) speculative aggression vs. government defense; (2) expecta
 | `mean_reversion` (γ)    | Market               | 0.02  | Weaker than equity (persistent crisis) |
 | `noise_std`             | Market               | 0.5   | Calibration                            |
 | `attack_threshold`      | SpeculativeAttacker  | 0.03  | Krugman (1979)                         |
-| `attack_size`           | SpeculativeAttacker  | 500   | Calibration                            |
-| `momentum_threshold`    | SelfFulfillingTrader | 0.5   | Obstfeld (1996)                        |
-| `order_size`            | SelfFulfillingTrader | 400   | Calibration                            |
-| `defense_threshold`     | CentralBankDefender  | 0.03  | Central bank intervention literature   |
-| `defense_size`          | CentralBankDefender  | 600   | Calibration                            |
-| `crisis_threshold`      | CentralBankDefender  | 0.10  | Calibration                            |
-| `reserve_size`          | CentralBankDefender  | 1000  | Calibration                            |
-| `fundamental_threshold` | FundamentalHedger    | 0.08  | Morris & Shin (1998)                   |
+| `order_size`            | SpeculativeAttacker  | 600   | Calibration                            |
+| `initial_position`      | SpeculativeAttacker  | 5000  | Borrowed/held domestic-currency inventory for attack sales |
+| `contagion_sensitivity` | SelfFulfillingTrader | 0.01  | Obstfeld (1996)                        |
+| `order_size`            | SelfFulfillingTrader | 700   | Calibration                            |
+| `initial_position`      | SelfFulfillingTrader | 5000  | Currency inventory for coordinated selling |
+| `defense_threshold`     | CentralBankDefender  | 0.05  | Central bank intervention literature   |
+| `order_size`            | CentralBankDefender  | 500   | Calibration                            |
+| `initial_position`      | CentralBankDefender  | 3000  | Reserve inventory for overvaluation sells |
+| `hedge_ratio`           | FundamentalHedger    | 0.05  | Morris & Shin (1998); operational threshold for fundamental-value hedging |
 | `order_size`            | FundamentalHedger    | 400   | Calibration                            |
+| `initial_position`      | FundamentalHedger    | 2000  | Hedge inventory for premium sells      |
 | `trade_probability`     | NoiseTrader          | 0.3   | Black (1986)                           |
+| `initial_position`      | NoiseTrader          | 500   | Baseline inventory for random sells    |
 
 ## §7 Round Structure
 
 1. **Market.perceive**: Collects orders; computes new price via formation equation; broadcasts `market_data`.
 2. **SpeculativeAttacker.perceive**: Receives market_data; updates price_history; monitors deviation.
-3. **SelfFulfillingTrader.perceive**: Receives market_data; computes 3-period momentum.
+3. **SelfFulfillingTrader.perceive**: Receives market_data; monitors deviation as an expectation-coordination signal.
 4. **CentralBankDefender.perceive**: Receives market_data; checks crisis thresholds.
 5. **FundamentalHedger.perceive**: Receives market_data; checks fundamental threshold.
 6. **NoiseTrader.perceive**: Receives market_data (largely ignored).
 7. **All.decide → act**: Submit orders; Market aggregates next round.
 
 **Attack phase** (δ < −0.03): SpeculativeAttacker and SelfFulfillingTrader sell; CentralBankDefender buys.  
-**Crisis phase** (δ < −0.10): Emergency defense; SpeculativeAttacker scales attack with |δ|×10.  
+**Crisis phase** (δ < −0.10): Attack and self-fulfilling sell flow remain active while defense and fundamental hedging absorb pressure.
 **Recovery** (δ > −0.03): SpeculativeAttacker covers shorts; peg stabilizes.
 
 ## §8 Historical Cases
@@ -226,7 +228,7 @@ Diversity across: (1) speculative aggression vs. government defense; (2) expecta
 
 | Variant | Decision Mechanism                      | Self-Fulfilling Logic                     | Intervention Timing         |
 |---------|-----------------------------------------|-------------------------------------------|-----------------------------|
-| Rule    | Threshold on δ and 3-period momentum    | Mechanical momentum sell                  | Fixed threshold defense     |
+| Rule    | Threshold on δ                          | Mechanical deviation-triggered sell       | Fixed threshold defense     |
 | LLM     | LLM persona interprets crisis narrative | LLM may model coordination beliefs        | LLM timing variable         |
 | RuleLLM | Rule-anchored with LLM narrative        | Rule triggers momentum sell; LLM narrates | Rule-anchored defense       |
 | Rag     | LLM + retrieved FX crisis case studies  | RAG may enhance coordination modeling     | RAG-informed defense timing |

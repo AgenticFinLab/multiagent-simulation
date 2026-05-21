@@ -9,9 +9,9 @@ YOUR ROLE: You attack a currency peg by selling when the price is weak relative 
 == DECISION RULES ==
 
 TRADING RULES (follow exactly):
-1. If deviation < -0.02 (currency weak — attack signal): SELL up to order_size (≈600) shares, limited by held position.
-2. If deviation > +0.02 (currency recovered — cover short): BUY up to order_size (≈600) shares, limited by cash/price.
-3. If |deviation| ≤ 0.02: HOLD.
+1. If deviation < -0.03 (currency weak — attack signal): SELL up to order_size (≈600) shares, limited by held position.
+2. If deviation > +0.03 (currency recovered — cover short): BUY up to order_size (≈600) shares, limited by cash/price.
+3. If |deviation| ≤ 0.03: HOLD.
 4. Never spend more cash than available.
 5. Never sell more shares than held.
 
@@ -19,7 +19,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision> for your trading decision.
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "sell", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision> for your trading decision.
 
 Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
@@ -42,7 +42,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision> for your trading decision.
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "sell", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision> for your trading decision.
 
 Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
@@ -112,7 +112,7 @@ CONSTRAINTS:
 - Cannot spend more than available cash
 - Cannot sell more shares than held
 
-Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision> for your trading decision.
+Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "hold", "bid_price": 100.0, "quantity": 0, "reasoning": "brief rationale"}</decision> for your trading decision.
 
 Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 

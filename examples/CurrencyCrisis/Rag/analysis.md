@@ -13,10 +13,14 @@ knowledge-effect checks:
 
 | Function | Purpose | Root reference |
 |---|---|---|
-| `load_simulation_data(config)` | Load market and agent records | `analysis-bases.md §2` |
-| `calculate_metrics(data)` | Compute the seven CurrencyCrisis metrics | `analysis-bases.md §2.1-§2.7` |
-| `create_visualizations(data, output_dir, variant)` | Generate standard diagnostics | `analysis-bases.md §7` |
-| `analyze_rag_knowledge_effect(...)` | Inspect retrieval availability and context use when implemented | `analysis-bases.md §5` |
+| `_load_data(results)` | Load market and canonical order records | `analysis-bases.md §2` |
+| `_compute_attack_intensity_index(...)` | Compute attack depth from maximum negative deviation | `analysis-bases.md §2.1` |
+| `_compute_peg_survival_duration(...)` | Compute rounds until peg breach | `analysis-bases.md §2.2` |
+| `_compute_defense_exhaustion_rate(...)` | Compute central-bank intervention spending during crisis rounds | `analysis-bases.md §2.3` |
+| `_compute_self_fulfilling_amplification_factor(...)` | Compare self-fulfilling sell flow with attacker sell flow | `analysis-bases.md §2.4` |
+| `_compute_fundamental_anchor_strength(...)` | Compute stabilizing hedger buy activity during attack rounds | `analysis-bases.md §2.5` |
+| `_compute_recovery_speed(...)` | Compute rounds from trough back toward the peg | `analysis-bases.md §2.6` |
+| `analyze_rag_knowledge_effect(...)` | Inspect recorded `rag_context` availability and retrieval failure rates | `analysis-bases.md §5` |
 
 ## §3 Dimension-by-Dimension Interpretation
 
@@ -43,9 +47,12 @@ Running `Rag/analysis.py` writes:
 
 | File | Contents |
 |---|---|
-| `currencycrisis_rag_analysis.png` | Standard market and deviation diagnostics |
-| `currencycrisis_rag_metrics.json` | Core metric summary |
-| `currencycrisis_rag_knowledge.json` | Retrieval-quality summary when generated |
+| `00_investor_bids.png` | Market price, peg line, and investor bid curves |
+| `01_currencycrisis_dynamics.png` | Exchange rate vs. peg and deviation thresholds |
+| `02_currencycrisis_analysis.png` | Rolling volatility and per-round returns |
+| `03_summary.png` | Agent VWAP and total volume summary |
+| `summary.json` | Metrics, validation criteria, agent VWAP data, and `rag_knowledge_effect` |
+| `rag_stats.json` | Per-agent retrieval success/failure statistics |
 
 ## §6 Cross-Variant Comparison
 

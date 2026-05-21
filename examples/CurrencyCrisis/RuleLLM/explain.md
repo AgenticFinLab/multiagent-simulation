@@ -19,31 +19,31 @@ The RuleLLM variant embeds the deterministic threshold rules from the Rule varia
 
 | Theory Component                         | RuleLLM Implementation                                                             |
 |------------------------------------------|------------------------------------------------------------------------------------|
-| Reserve depletion attack (Krugman, 1979) | Rule embedded: "If deviation < −0.03, sell `attack_size × (1 +                     |
-| Short-cover rule                         | Rule embedded: "If deviation > 0.05, buy `cover_size`"                             |
+| Reserve depletion attack (Krugman, 1979) | Rule embedded: "If deviation < −0.03, sell up to order_size"                       |
+| Short-cover rule                         | Rule embedded: "If deviation > +0.03, buy up to order_size"                        |
 | LLM edge cases                           | LLM handles ambiguous deviation near threshold; may scale more/less than pure rule |
 
 ### §2.2 RuleLLMSelfFulfillingTrader (simulation-bases.md §4.2)
 
 | Theory Component                        | RuleLLM Implementation                                          |
 |-----------------------------------------|-----------------------------------------------------------------|
-| 3-period momentum rule (Obstfeld, 1996) | Rule embedded: "Sell if 3-period momentum < −0.5"               |
-| Momentum calculation                    | LLM instructed: "Compute mean(price[-3:]) − mean(price[-6:-3])" |
+| Deviation coordination rule (Obstfeld, 1996) | Rule embedded: "Sell if deviation < −0.01"                    |
+| Recovery condition                          | Rule embedded: "Buy cautiously if deviation > +0.02"          |
 | Coordination edge case                  | LLM may reason about whether momentum is building or reversing  |
 
 ### §2.3 RuleLLMCentralBankDefender (simulation-bases.md §4.3)
 
 | Theory Component      | RuleLLM Implementation                                                   |
 |-----------------------|--------------------------------------------------------------------------|
-| Two-tier defense rule | Rule embedded: "Buy 600 if δ < −0.03; buy 1000 if δ < −0.10"             |
-| Reserve constraint    | Rule embedded: "Do not buy if cash < defense_size × price"               |
+| Peg defense rule     | Rule embedded: "Buy up to 500 if δ < −0.05; sell up to 500 if δ > +0.05" |
+| Reserve constraint   | Rule embedded: "Do not buy if cash < quantity × price"                   |
 | LLM credibility       | LLM may articulate defense commitment reasoning alongside rule execution |
 
 ### §2.4 RuleLLMFundamentalHedger (simulation-bases.md §4.4)
 
 | Theory Component                        | RuleLLM Implementation                              |
 |-----------------------------------------|-----------------------------------------------------|
-| 8% threshold rule (Morris & Shin, 1998) | Rule embedded: "Buy if δ < −0.08; sell if δ > 0.08" |
+| 5% threshold rule (Morris & Shin, 1998) | Rule embedded: "Buy if δ < −0.05; sell if δ > +0.05" |
 | Fundamental value                       | `{fundamental}` and `{deviation}` in prompt         |
 | LLM reasoning                           | Provides rationale for fundamental-anchored trade   |
 
@@ -64,14 +64,13 @@ The RuleLLM variant embeds the deterministic threshold rules from the Rule varia
 | `{round}`       | Market broadcast | `18`                  |
 | `{cash}`        | Agent state      | `75000.0`             |
 | `{position}`    | Agent state      | `1200`                |
-| `{history}`     | `HistoryBuffer`  | Last 5 rounds summary |
 
 ## §4 Variant-Specific Features
 
 - **Rule fidelity testing**: Compare RuleLLM outputs to Rule variant to measure LLM's rule-following accuracy.
 - **Edge-case handling**: RuleLLM is expected to behave identically to Rule near thresholds; divergence indicates LLM reasoning override.
 - **Hybrid SFAF**: If RuleLLM SFAF > Rule SFAF, LLM reasoning amplifies the self-fulfilling channel beyond the mechanical rule.
-- **Response parsing**: `parse_llm_response_with_thinking()` extracts `action` and `quantity`; rule compliance verified post-hoc.
+- **Response parsing**: `parse_llm_response_with_thinking()` extracts canonical `action`, `bid_price`, `quantity`, and `reasoning`; schema failures fail after bounded retries.
 
 ## §5 Architecture
 
@@ -79,26 +78,29 @@ The RuleLLM variant embeds the deterministic threshold rules from the Rule varia
 Market.decide() → broadcast market_data
 RuleLLMInvestor.perceive() → store market_data
 RuleLLMInvestor.decide() → LangChainAPIInference.infer(rule-embedded system_prompt, user_prompt)
-                         → parse_llm_response_with_thinking() → {action, quantity}
-RuleLLMInvestor.act() → update cash/position, submit order
+                         → parse_llm_response_with_thinking()
+                         → validate {action, bid_price, quantity, reasoning}
+RuleLLMInvestor.act() → submit canonical order
 ```
 
 ## §6 Config Reference
 
-Same `config.yaml` as Rule variant; LLM extras: `model_name`, `temperature`, `max_tokens`.
+The variant uses `configs/CurrencyCrisis/RuleLLM/players.yml`; LLM extras include
+`sys_message`, `user_message`, `lm_name`, `temperature`, and `max_tokens`.
 
 ## §7 Running Instructions
 
 ```bash
-python -m examples.CurrencyCrisis.RuleLLM.run
+python examples/CurrencyCrisis/RuleLLM/run_currencycrisis_rulellm.py \
+  -c configs/CurrencyCrisis/RuleLLM/simulation.yml
 ```
 
 ## §8 Expected Behavior
 
 - AII and PSD should closely match Rule baseline; deviations indicate LLM reasoning override
 - SFAF may be slightly higher (LLM amplifies coordination via reasoning)
-- DER should track Rule two-tier step-function; smooth DER indicates LLM is interpolating
-- FAS should match Rule; LLMFundamentalHedger persona reinforces 8% threshold
+- DER should track Rule central-bank intervention around the defense threshold
+- FAS should match Rule; LLMFundamentalHedger persona reinforces the 5% threshold
 
 ## §9 References
 
