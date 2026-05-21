@@ -37,7 +37,9 @@ hindsightoverconfident:
       initial_price: 100.0
       fundamental_value: 100.0
       hindsight_inflation: 1.5
-      base_size: 400
+      activation_threshold: 0.02
+      quantity_scale: 5000
+      max_order: 800
       custom_state_hot_limit: 3
       prediction_overweight: 1.0
   persona: !include persona.yml
@@ -59,7 +61,9 @@ outcomelearner:
       initial_price: 100.0
       fundamental_value: 100.0
       success_attribution: 1.3
-      base_size: 350
+      activation_threshold: 0.02
+      quantity_scale: 5000
+      max_order: 800
       custom_state_hot_limit: 3
       failure_discount: 1.0
   persona: !include persona.yml
@@ -81,7 +85,9 @@ processevaluator:
       initial_price: 100.0
       fundamental_value: 100.0
       process_weight: 0.8
-      base_size: 300
+      activation_threshold: 0.05
+      quantity_scale: 3000
+      max_order: 500
       custom_state_hot_limit: 3
       outcome_weight: 1.0
   persona: !include persona.yml
@@ -103,9 +109,10 @@ contrarianskeptic:
       initial_price: 100.0
       fundamental_value: 100.0
       skepticism_level: 0.6
-      base_size: 250
+      activation_threshold: 0.05
+      quantity_scale: 3000
+      max_order: 500
       custom_state_hot_limit: 3
-      position_size: 100
   persona: !include persona.yml
 
 noisetrader:
@@ -125,6 +132,7 @@ noisetrader:
       initial_price: 100.0
       fundamental_value: 100.0
       trade_probability: 0.3
-      noise_size: 150
+      min_order: 100
+      max_order: 500
       custom_state_hot_limit: 3
   persona: !include persona.yml

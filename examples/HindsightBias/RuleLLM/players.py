@@ -17,6 +17,7 @@ from examples.HindsightBias.RuleLLM.prompts import (
     RULELLM_PROCESSEVALUATOR_PROMPT,
     RULELLM_CONTRARIANSKEPTIC_PROMPT,
     RULELLM_NOISETRADER_PROMPT,
+    RULELLM_USER_TEMPLATE,
 )
 from examples.HindsightBias.Rule.players import Market
 from examples.llm_utils import parse_llm_response_with_thinking
@@ -44,6 +45,10 @@ class RuleLLMInvestor(GeneralPlayer):
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["price"] = extras["initial_price"]
+            self.state.custom_state["fundamental"] = extras["fundamental_value"]
+            self.state.custom_state["deviation"] = 0.0
+            self.state.custom_state["max_order"] = extras["max_order"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload["type"] == "market_update":
@@ -64,16 +69,14 @@ class RuleLLMInvestor(GeneralPlayer):
         position = self.state.custom_state["position"]
         round_num = self.state.custom_state["round"]
         portfolio_value = cash + position * price
-        user_msg = (
-            f"Current Market State (Round {round_num}):\n"
-            f"- Current Price: ${price:.2f}\n"
-            f"- Fundamental Value: ${fundamental:.2f}\n"
-            f"- Price Deviation: {deviation * 100:+.2f}%\n"
-            f"- Your Cash: ${cash:.2f}\n"
-            f"- Your Position: {position} shares\n"
-            f"- Portfolio Value: ${portfolio_value:.2f}\n\n"
-            "Based on your trading strategy and current market conditions, what action do you take?\n"
-            "Provide your analysis and decision in the specified format."
+        user_msg = RULELLM_USER_TEMPLATE.format(
+            round=round_num,
+            price=price,
+            fundamental=fundamental,
+            deviation=deviation,
+            cash=cash,
+            position=position,
+            portfolio_value=portfolio_value,
         )
         infer_input = InferInput(system_msg=self._system_prompt, user_msg=user_msg)
         decision = None
@@ -97,7 +100,28 @@ class RuleLLMInvestor(GeneralPlayer):
                 f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
             )
 
-        return decision
+        action = decision["action"]
+        if action not in ("buy", "sell", "hold"):
+            raise ValueError(f"[{self.identity}] Invalid LLM action: {action}")
+        bid_price = float(decision["bid_price"])
+        reasoning = decision["reasoning"]
+        analysis = decision["analysis"]
+        quantity = int(decision["quantity"])
+        max_order = self.state.custom_state["max_order"]
+        if action == "buy":
+            quantity = min(quantity, int(cash / price) if price > 0 else 0, max_order)
+        elif action == "sell":
+            quantity = min(quantity, max(position, 0), max_order)
+        else:
+            quantity = 0
+        return {
+            "action": action,
+            "bid_price": bid_price,
+            "quantity": max(0, quantity),
+            "reasoning": reasoning,
+            "analysis": analysis,
+            "strategy": self.__class__.__name__,
+        }
 
     async def act(self, decision_payload: dict) -> Action:
         action = decision_payload["action"]
@@ -115,7 +139,17 @@ class RuleLLMInvestor(GeneralPlayer):
             self.state.custom_state["position"] -= quantity
         else:
             quantity = 0
-        order = {"type": "order", "action": action, "quantity": quantity}
+        order = {
+            "type": "order",
+            "from": self.identity,
+            "action": action,
+            "bid_price": decision_payload["bid_price"],
+            "quantity": quantity,
+            "reasoning": decision_payload["reasoning"],
+            "analysis": decision_payload["analysis"],
+            "agent_type": self.__class__.__name__,
+            "strategy": decision_payload["strategy"],
+        }
         return Action(
             action_type="order",
             payload={

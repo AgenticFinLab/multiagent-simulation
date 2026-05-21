@@ -11,7 +11,7 @@
 | Market Broadcast   | `price`, `fundamental`, `deviation`, `round`                         |
 | Price Model        | `P(t+1) = P(t) + λ × NetDemand + γ × (F − P(t)) + ε`                 |
 
-The RuleLLM variant embeds the deterministic threshold rules from the Rule variant directly into each investor's system prompt. LLM must activate at the same deviation thresholds as Rule (0.02 for biased, 0.05 for rational), but can reason contextually about trade sizing and narrative strength.
+The RuleLLM variant embeds the deterministic threshold rules from the Rule variant directly into each investor's system prompt. Every prompt has `== PERSONA ==` and `== DECISION RULES ==`; the rules anchor activation thresholds and order limits while the LLM reasons contextually about trade sizing and narrative strength.
 
 ## §2 Theory → Implementation Mapping
 
@@ -19,7 +19,7 @@ The RuleLLM variant embeds the deterministic threshold rules from the Rule varia
 
 | Theory Component                  | Implementation                                                                                       |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
-| Fischhoff (1975) hindsight effect | Rule embedded: must activate at                                                                      |
+| Fischhoff (1975) hindsight effect | Rule embedded: biased agents activate at the Rule threshold and follow deviation direction. |
 | Momentum amplification            | LLM contextualises order size within rule-bounded range (max 800)                                    |
 | Inflation parameters              | `hindsight_inflation`, `prediction_overweight` passed as prompt context; LLM modulates within bounds |
 
@@ -35,7 +35,7 @@ The RuleLLM variant embeds the deterministic threshold rules from the Rule varia
 
 | Theory Component            | Implementation                                               |
 |-----------------------------|--------------------------------------------------------------|
-| Process rationality         | Rule embedded: must activate at                              |
+| Process rationality         | Rule embedded: rational agents activate at the larger Rule threshold. |
 | Contrarian sizing           | LLM sizes orders within rule-bounded range (max 500)         |
 | Rule-constrained correction | Threshold prevents premature activation; LLM adds conviction |
 
@@ -63,9 +63,9 @@ The RuleLLM variant embeds the deterministic threshold rules from the Rule varia
 P(t+1) = P(t) + λ × NetDemand(t) + γ × (F − P(t)) + ε(t)
 
 where:
-  λ = price_impact      [default: 0.001]
-  γ = mean_reversion    [default: 0.05]
-  ε ~ N(0, noise_std)   [default: 0.5]
+  λ = price_impact      [default: 0.03]
+  γ = mean_reversion    [default: 0.01]
+  ε ~ N(0, noise_std)   [default: 0.015]
   NetDemand = Σ signed_quantities
 ```
 
@@ -78,8 +78,8 @@ Rule constraints injected as explicit conditions in the system prompt: "You must
 | Base class         | `RuleLLMPlayer`                                              |
 | Inference          | LLM API call with embedded rule constraints in system prompt |
 | Context            | `market_data` + `agent_extras` + embedded rule text          |
-| Output             | `{"action": "buy"/"sell"/"hold", "quantity": int}`           |
-| Capacity asymmetry | Preserved in rules: biased max 800; rational max 500         |
+| Output             | Canonical parser JSON with `action`, `bid_price`, `quantity`, and `reasoning` |
+| Capacity asymmetry | Preserved in rules and enforced by `max_order` config after parsing |
 
 ## §5 Config Reference
 
@@ -90,8 +90,8 @@ Key extras per investor:
 - `hindsight_inflation`, `prediction_overweight` (HindsightOverconfident)
 - `success_attribution`, `failure_discount` (OutcomeLearner)
 - `process_weight`, `outcome_weight` (ProcessEvaluator)
-- `skepticism_level`, `position_size` (ContrarianSkeptic)
-- `trade_probability` (NoiseTrader)
+- `skepticism_level`, `max_order` (ContrarianSkeptic)
+- `trade_probability`, `max_order` (NoiseTrader)
 - Market: `price_impact`, `mean_reversion`, `noise_std`, `fundamental_value`, `initial_price`
 - LLM: `model`, `temperature`, `max_tokens`
 

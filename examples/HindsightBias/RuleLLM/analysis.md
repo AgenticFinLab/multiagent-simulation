@@ -71,4 +71,7 @@ The accepted RuleLLM sample should complete 200 rounds with clean parse quality 
 
 ## §7 Visualization Catalogue
 
-`RuleLLM/analysis.py` reuses the core price-dynamics visualization from Rule. Reports may add rule-adherence tables and action-distribution summaries.
+`RuleLLM/analysis.py → main()` uses the standard analysis output contract:
+`summary.json`, `00_investor_bids.png`, `01_hindsightbias_dynamics.png`,
+`02_hindsightbias_analysis.png`, and `03_summary.png`. Reports may add
+rule-adherence tables and action-distribution summaries.

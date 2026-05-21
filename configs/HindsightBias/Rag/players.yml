@@ -56,7 +56,7 @@ hindsightoverconfident:
       initial_price: 100.0
       fundamental_value: 100.0
       hindsight_inflation: 1.5
-      base_size: 400
+      max_order: 800
       custom_state_hot_limit: 3
       private_knowledge:
         from_global_resources:
@@ -102,7 +102,7 @@ outcomelearner:
       initial_price: 100.0
       fundamental_value: 100.0
       success_attribution: 1.3
-      base_size: 350
+      max_order: 800
       custom_state_hot_limit: 3
       private_knowledge:
         from_global_resources:
@@ -148,7 +148,7 @@ processevaluator:
       initial_price: 100.0
       fundamental_value: 100.0
       process_weight: 0.8
-      base_size: 300
+      max_order: 500
       custom_state_hot_limit: 3
       private_knowledge:
         from_global_resources:
@@ -194,7 +194,7 @@ contrarianskeptic:
       initial_price: 100.0
       fundamental_value: 100.0
       skepticism_level: 0.6
-      base_size: 250
+      max_order: 500
       custom_state_hot_limit: 3
       private_knowledge:
         from_global_resources:
@@ -240,7 +240,7 @@ noisetrader:
       initial_price: 100.0
       fundamental_value: 100.0
       trade_probability: 0.3
-      noise_size: 150
+      max_order: 500
       custom_state_hot_limit: 3
       private_knowledge:
         from_global_resources:

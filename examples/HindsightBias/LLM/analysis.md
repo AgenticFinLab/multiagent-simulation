@@ -36,7 +36,7 @@ All functions defined in `LLM/analysis.py`. Inputs sourced from simulation outpu
 ## §3 LLM-Specific Notes
 
 - **Multi-seed averaging required**: Run ≥5 seeds; report mean ± std for each metric.
-- **§4.1 vs. §4.2 differentiation**: Unlike the Rule variant where both agents are identical at default extras, LLM prompts produce distinct personas. Monitor whether HindsightOverconfident and OutcomeLearner trade volumes diverge — divergence is a research finding.
+- **§4.1 vs. §4.2 differentiation**: The Rule variant already differentiates scale through configured attribution parameters; LLM prompts add persona-level variation. Monitor whether HindsightOverconfident and OutcomeLearner trade volumes diverge — divergence is a research finding.
 - **LLM narrative resistance**: LLM agents occasionally step out of bias persona when the LLM "notices" the obvious narrative fallacy. This produces lower HBI than Rule on some seeds. Document the frequency of "narrative resistance" events.
 - **NCE interpretation**: LLM NCE may be higher than Rule NCE if ProcessEvaluator and ContrarianSkeptic apply contextual reasoning to identify and trade against mispricings earlier. Track the average round of first correction action.
 - **Temperature effect**: Higher temperature → more narrative resistance → lower HBI; lower temperature → closer to Rule baseline.
@@ -75,4 +75,7 @@ Valid LLM outputs should complete 200 rounds with parseable decision JSON and no
 
 ## §7 Visualization Catalogue
 
-`LLM/analysis.py` reuses the core price-dynamics visualization from Rule. LLM reports may add action-distribution, parse-quality, and narrative-resistance summaries.
+`LLM/analysis.py → main()` uses the standard analysis output contract:
+`summary.json`, `00_investor_bids.png`, `01_hindsightbias_dynamics.png`,
+`02_hindsightbias_analysis.png`, and `03_summary.png`. LLM reports may add
+action-distribution, parse-quality, and narrative-resistance summaries.

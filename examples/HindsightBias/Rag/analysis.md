@@ -76,4 +76,7 @@ The accepted RAG sample should complete 200 rounds with clean parse quality and 
 
 ## §7 Visualization Catalogue
 
-`Rag/analysis.py` reuses the core price-dynamics visualization and adds `analyze_rag_knowledge_effect(records)` for retrieval-quality tables.
+`Rag/analysis.py → main()` uses the standard analysis output contract:
+`summary.json`, `00_investor_bids.png`, `01_hindsightbias_dynamics.png`,
+`02_hindsightbias_analysis.png`, and `03_summary.png`. It also writes
+`rag_stats.json` and adds `rag_knowledge_effect` to `summary.json`.

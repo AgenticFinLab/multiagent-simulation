@@ -10,7 +10,7 @@ The Rule variant analysis measures the **deterministic baseline** of HindsightBi
 
 Analysis objectives:
 - Confirm HBI in 0.02–0.08 (sustained hindsight-induced deviation from fundamental)
-- Verify OBI in 0.8–1.5 (mild to moderate bull-phase dominance at default extras)
+- Verify OBI in 0.8–1.5 (mild to moderate bull-phase dominance under configured attribution parameters)
 - Validate NCE in 0.35–0.65 (partial rational correction — never full correction)
 - Confirm VAF in 1.5–3.5 (bias-active rounds amplify volatility)
 - Verify OWP in 0.05–0.25 (rational agents outperform biased agents)
@@ -35,10 +35,10 @@ All functions defined in `Rule/analysis.py`. Inputs sourced from simulation outp
 
 ## §3 Rule-Specific Notes
 
-- **§4.1/§4.2 identical at default extras**: At default parameters (all extras = 1.0), HindsightOverconfident and OutcomeLearner produce identical behavior. HBI captures their combined effect. OBI becomes meaningful only when `success_attribution ≠ failure_discount`.
-- **§4.3/§4.4 identical at default extras**: ProcessEvaluator and ContrarianSkeptic also produce identical behavior at default extras. NCE measures their combined correction capacity.
+- **§4.1/§4.2 share direction but differ in scale**: HindsightOverconfident uses hindsight inflation, while OutcomeLearner scales positive and negative deviations through attribution parameters. HBI captures their combined effect.
+- **§4.3/§4.4 share contrarian direction but differ in scale**: ProcessEvaluator uses process/outcome weights, while ContrarianSkeptic uses skepticism strength. NCE measures their combined correction capacity.
 - **Capacity asymmetry is deterministic**: In the Rule variant, biased agents always trade 800 shares at max and rational agents 500 shares. The asymmetry is consistent across all seeds — Rule NCE has the lowest variance.
-- **OBI interpretation at default extras**: At default extras (all = 1.0), OBI ≈ 1.0 exactly. OBI becomes a useful diagnostic only when `success_attribution` > 1.0 (OutcomeLearner asymmetry enabled). Flag this in results.
+- **OBI interpretation under configured extras**: Branch-current `success_attribution = 1.3` and `failure_discount = 1.0` make bull-phase dominance a meaningful diagnostic.
 - **Phase consistency**: Rule phases (Baseline → Bias Onset → Active Momentum → Rational Correction) are the most consistent across seeds. Compare phase entry rounds to LLM/RuleLLM/Rag for research insights.
 
 ---
@@ -48,7 +48,7 @@ All functions defined in `Rule/analysis.py`. Inputs sourced from simulation outp
 | Metric | Rule Baseline | Notes                                                                 |
 |--------|---------------|-----------------------------------------------------------------------|
 | HBI    | 0.02–0.08     | Deterministic deviation; tightest inter-seed variance                 |
-| OBI    | 0.8–1.5       | ≈ 1.0 at default extras; becomes > 1.0 with success_attribution > 1.0 |
+| OBI    | 0.8–1.5       | Expected to exceed 1.0 when positive-deviation attribution dominates |
 | NCE    | 0.35–0.65     | Partial correction; never fully corrects due to capacity asymmetry    |
 | VAF    | 1.5–3.5       | Bias-active rounds 1.5–3.5× more volatile than quiet rounds           |
 | OWP    | 0.05–0.25     | Rational agents outperform; consistent with Barber & Odean (2000)     |
@@ -74,4 +74,7 @@ The Rule sample is expected to show nonzero HBI, OBI close to the configured hin
 
 ## §7 Visualization Catalogue
 
-`Rule/analysis.py → create_visualizations(data, output_dir)` creates `hindsightbias_price_dynamics.png`, plotting price against fundamental value. Additional reports may add OBI phase decomposition, NCE event tables, and wealth-distribution plots.
+`Rule/analysis.py → main()` produces the standard analysis output contract:
+`summary.json`, `00_investor_bids.png`, `01_hindsightbias_dynamics.png`,
+`02_hindsightbias_analysis.png`, and `03_summary.png`. Additional reports may
+add OBI phase decomposition, NCE event tables, and wealth-distribution plots.
