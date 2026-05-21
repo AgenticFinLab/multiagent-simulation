@@ -51,6 +51,19 @@ def parse_rumor_response(response_text: str) -> Dict[str, Any]:
     ]
     if missing_or_null:
         raise ValueError(f"Fields missing or null in LLM response: {missing_or_null}")
+    action_type = str(parsed["action_type"]).lower()
+    if action_type not in {"spread", "ignore", "correct"}:
+        raise ValueError(f"Invalid action_type: {parsed['action_type']!r}")
+    try:
+        intensity = float(parsed["intensity"])
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"Invalid intensity: {parsed['intensity']!r}") from exc
+    reasoning = str(parsed["reasoning"]).strip()
+    if not reasoning:
+        raise ValueError("Empty reasoning")
 
+    parsed["action_type"] = action_type
+    parsed["intensity"] = max(0.0, min(1.0, intensity))
+    parsed["reasoning"] = reasoning
     parsed["analysis"] = analysis
     return parsed

@@ -2,89 +2,111 @@
 
 ## §1 Analysis Objectives
 
-The analysis measures rumor reach, belief distortion, correction timing, and the
-relative influence of spreaders, relayers, skeptics, and fact checkers.
+RumorSpread analysis verifies whether the model produces a plausible false-rumor
+cycle: belief rises through spread actions, distortion accumulates through
+retelling, and skeptical or fact-checking agents create delayed correction. The
+analysis also separates deterministic behavior from LLM, RuleLLM, and Rag
+reasoning effects while preserving the same special `social_action` schema.
 
-## §2 Metrics
+Primary objectives are to measure belief-truth divergence, distortion growth,
+spread/correction activity, correction lag, role-level belief dispersion, and
+RAG retrieval coverage for the Rag variant.
+
+## §2 Core Metrics Catalogue
 
 ### §2.1 Belief Level
 
-```python
-def compute_belief_level(states: list[dict]) -> list[float]
-```
+`def compute_belief_level(states: list[dict]) -> list[float]`
 
-Tracks global belief in the rumor.
+Tracks environment `belief` over rounds. High values indicate widespread belief
+in the rumor, regardless of truth.
 
-### §2.2 Spread Velocity
+### §2.2 Belief-Truth Divergence
 
-```python
-def compute_spread_velocity(actions: list[dict]) -> float
-```
+`def compute_truth_divergence(belief: list[float], truth_value: float) -> dict`
 
-Measures rate of spread actions per round.
+Computes absolute distance between public belief and ground truth. This is the
+primary misinformation intensity metric.
 
-### §2.3 Distortion Index
+### §2.3 Rumor Amplification Ratio
 
-```python
-def compute_distortion_index(states: list[dict]) -> float
-```
+`def compute_rumor_amplification(belief: list[float]) -> float`
 
-Measures accumulated mutation of the claim.
+Computes peak belief divided by initial belief. Ratios above 1.0 indicate that
+social transmission amplified the original rumor seed.
 
-### §2.4 Correction Lag
+### §2.4 Distortion Index
 
-```python
-def compute_correction_lag(actions: list[dict]) -> int
-```
+`def compute_distortion_index(distortion: list[float]) -> dict`
 
-Measures delay between spread acceleration and correction.
+Measures maximum, final, and average distortion. It captures leveling and
+sharpening effects from `simulation-bases.md §2.2`.
 
-### §2.5 Skepticism Effect
+### §2.5 Spread And Correction Activity
 
-```python
-def compute_skepticism_effect(actions: list[dict]) -> float
-```
+`def compute_activity_balance(spread_count: list[int], correction_count: list[int]) -> dict`
 
-Measures reduction in spread caused by skeptical evaluators.
+Measures total spread events, total correction events, average action rates, and
+the correction-to-spread ratio.
 
-### §2.6 Fact-Check Strength
+### §2.6 Correction Lag
 
-```python
-def compute_fact_check_strength(actions: list[dict]) -> float
-```
+`def compute_correction_lag(spread_count: list[int], correction_count: list[int]) -> float`
 
-Measures belief reduction from fact-check actions.
+Uses cross-correlation to estimate how many rounds correction activity lags
+spread activity.
 
-### §2.7 Agent Action Share
+### §2.7 RAG Retrieval Coverage
 
-```python
-def compute_agent_action_share(actions: list[dict]) -> dict[str, float]
-```
+`def analyze_rag_knowledge_effect(payloads: dict[str, dict[int, dict]]) -> dict`
 
-Attributes spread/correct/distort actions by agent type.
+Rag-only metric that measures how often `rag_context` contains retrieved content
+rather than the canonical fallback text.
 
 ## §3 Analysis Dimensions
 
-Spread speed, distortion, correction, skepticism, passive participation, and
-variant-specific reasoning.
+Analysis is performed by round, by role, by action type, by phase, and by
+variant. The key dimensions are belief dynamics, truth divergence, distortion,
+spread/correction activity, personal belief dispersion, and LLM/RAG artifact
+quality.
 
-## §4 Phase Analysis
+## §4 Phase Analysis Framework
 
-Initial rumor, amplification, distortion, skeptical challenge, correction, and
-residual belief.
+The expected phases are rumor seeding, amplification, distortion accumulation,
+skeptical challenge, fact-check correction, and residual belief. In a valid
+simulation, spread activity should precede correction activity, and belief
+should not automatically collapse to truth in early rounds.
 
-## §5 Cross-Variant Comparison
+## §5 Cross-Variant Comparison Framework
 
-Rule is deterministic. LLM may produce richer but less controlled narratives.
-RuleLLM should follow the special rumor action schema. Rag may use retrieved
-evidence to strengthen correction.
+Rule provides the deterministic baseline. LLM measures whether persona-only
+reasoning can select coherent social actions. RuleLLM measures the effect of
+explicit formula guidance in the prompt. Rag measures whether retrieved
+misinformation/correction knowledge changes reasoning and correction coverage.
 
-## §6 Expected Results
+## §6 Expected Results And Validation
 
-Rumor belief should initially increase under spreader activity; fact checking
-and skepticism should reduce belief or slow spread after a lag.
+Expected full-round outputs include 200 recorded belief rounds, nonzero spread
+activity, nonzero correction activity, bounded belief/distortion in `[0, 1]`,
+and a `summary.json` with `validation.score`, `validation.is_valid`, and
+`validation.criteria`. Rag additionally writes `rag_stats.json`; retrieval
+failure rate should be reviewed if it exceeds 30% and should be reported in the
+resource ledger.
 
-## §7 Visualization Plan
+Failure signs include missing belief history, all-zero activity, unbounded
+belief or distortion, absent `rag_context` in Rag records, or API decisions that
+do not conform to `action_type/intensity/reasoning`.
 
-Plot belief level, distortion, action shares, correction lag, and cross-variant
-final belief.
+## §7 Visualization Catalogue
+
+The authoritative analysis writes fixed PNG names into `analysis/`:
+
+| File | Content |
+|---|---|
+| `00_investor_bids.png` | Compatibility plot slot containing the scenario summary figure. |
+| `01_rumorspread_dynamics.png` | Belief and truth-divergence dynamics. |
+| `02_rumorspread_analysis.png` | Distortion and spread/correction activity. |
+| `03_summary.png` | Combined summary visualization. |
+
+The same core visualizations are shared across Rule, LLM, RuleLLM, and Rag.
+Rag adds `rag_stats.json` for retrieval-quality analysis.

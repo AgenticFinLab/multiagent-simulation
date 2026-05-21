@@ -25,6 +25,7 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+from examples.llm_utils import is_retryable_llm_error
 from examples.RumorSpread.llm_parser import parse_rumor_response
 
 from lmbase.inference.api_call import LangChainAPIInference
@@ -130,40 +131,31 @@ class RuleLLMSocialAgent(GeneralPlayer):
         decision = None
         last_error = None
         for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
+                infer_output = llm_client.run([infer_input])
                 decision = self._parse_llm_response(infer_output.outputs[0].response)
                 break
-            except ValueError as e:
-                last_error = e
+            except Exception as exc:  # pylint: disable=broad-except
+                last_error = exc
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if not parse_error and not retryable_api_error:
+                    raise
                 if attempt < max_retries - 1:
                     logger.debug(
                         f"[{self.identity}] LLM parse failed (attempt {attempt+1}), retrying..."
                     )
 
         if decision is None:
-            logger.warning(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}. Skipping."
+            raise RuntimeError(
+                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
             )
-            action = {
-                "action_type": "ignore",
-                "intensity": 0.0,
-                "agent_role": strategy_name,
-                "agent_id": self.identity,
-                "reasoning": "LLM parse failed",
-                "analysis": "",
-            }
-            return {
-                **action,
-                "outbound_messages": [
-                    {"payload": action, "content_type": "social_action"}
-                ],
-            }
 
         action_type = decision["action_type"]
         intensity = float(decision["intensity"])
-        intensity = max(0.0, min(1.0, intensity))
+        reasoning = str(decision.pop("reasoning"))[:120]
+        analysis = str(decision.pop("analysis"))
 
         my_belief = self.state.custom_state["my_belief"]
         if action_type == "spread":
@@ -183,8 +175,8 @@ class RuleLLMSocialAgent(GeneralPlayer):
             "intensity": intensity,
             "agent_role": strategy_name,
             "agent_id": self.identity,
-            "reasoning": decision["reasoning"][:120],
-            "analysis": decision["analysis"],
+            "reasoning": reasoning,
+            "analysis": analysis,
         }
 
         return {
@@ -201,31 +193,46 @@ class RuleLLMSocialAgent(GeneralPlayer):
 
 
 class RuleLLMGullibleSpreader(RuleLLMSocialAgent):
-    """Hybrid: Allport & Postman leveling rules + LLM gullible reasoning."""
+    """Hybrid gullible spreader.
+
+    Theory: simulation-bases.md §4.1
+    """
 
     _system_prompt = RULELLM_GULLIBLE_SYS
 
 
 class RuleLLMDistortingRelayer(RuleLLMSocialAgent):
-    """Hybrid: Sharpening + assimilation rules + LLM distorting reasoning."""
+    """Hybrid distorting relayer.
+
+    Theory: simulation-bases.md §4.2
+    """
 
     _system_prompt = RULELLM_DISTORTING_SYS
 
 
 class RuleLLMSkepticalEvaluator(RuleLLMSocialAgent):
-    """Hybrid: Critical evaluation + correction threshold + LLM skeptical reasoning."""
+    """Hybrid skeptical evaluator.
+
+    Theory: simulation-bases.md §4.3
+    """
 
     _system_prompt = RULELLM_SKEPTICAL_SYS
 
 
 class RuleLLMFactChecker(RuleLLMSocialAgent):
-    """Hybrid: Active denial + credibility discount + LLM fact-checking reasoning."""
+    """Hybrid fact checker.
+
+    Theory: simulation-bases.md §4.4
+    """
 
     _system_prompt = RULELLM_FACTCHECKER_SYS
 
 
 class RuleLLMUninformedBystander(RuleLLMSocialAgent):
-    """Hybrid: Random engagement rule + LLM casual reasoning."""
+    """Hybrid uninformed bystander.
+
+    Theory: simulation-bases.md §4.5
+    """
 
     _system_prompt = RULELLM_BYSTANDER_SYS
 

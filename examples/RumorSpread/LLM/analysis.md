@@ -1,36 +1,44 @@
-# Rumor Spread LLM Analysis Plan
+# RumorSpread LLM Analysis
 
-## §1 Objectives
+## §1 Overview
 
-This analysis checks whether the LLM variant produces a complete, analyzable Rumor Spread trajectory. It maps recorded belief series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
+LLM analysis delegates core metrics and plots to `Rule/analysis.py`, preserving
+the same belief/distortion interpretation while adding API output-quality review
+through experiment-level ledgers.
 
-## §2 Core Metrics
+## §2 Metric Mapping
 
-| Metric | Function Contract | Source |
+| Metric | Root Reference | Implementation |
 |---|---|---|
-| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
-| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
-| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
-| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
-| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
-| Scenario-specific diagnostic | `def compute_rumorspread_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
+| Belief Level | `analysis-bases.md §2.1` | Rule loader reads environment history. |
+| Belief-Truth Divergence | `analysis-bases.md §2.2` | Rule `calculate_metrics()`. |
+| Rumor Amplification Ratio | `analysis-bases.md §2.3` | Rule `calculate_metrics()`. |
+| Distortion Index | `analysis-bases.md §2.4` | Rule `calculate_metrics()`. |
+| Spread And Correction Activity | `analysis-bases.md §2.5` | Rule `calculate_metrics()`. |
+| Correction Lag | `analysis-bases.md §2.6` | Rule `calculate_metrics()`. |
+| RAG Retrieval Coverage | `analysis-bases.md §2.7` | Not applicable. |
 
 ## §3 Analysis Dimensions
 
-Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether LLM preserves belief dynamics and communication_action activity while changing the distribution of communication_action relative to the deterministic baseline.
+The LLM run is analyzed by belief dynamics, distortion, action balance, and API
+parse/retry quality recorded in logs.
 
-## §4 Phase Analysis
+## §4 Variant-Specific Observables
 
-The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
+Valid LLM records include `reasoning` and `analysis` on social-action payloads.
+Repeated parse failures are execution failures, not accepted silent holds.
 
-## §5 Cross-Variant Comparison
+## §5 Cross-Variant Use
 
-Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+LLM metrics are compared with Rule to determine whether persona-only reasoning
+strengthens or weakens rumor amplification.
 
-## §6 Expected Results and Validation Criteria
+## §6 Output Files
 
-Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+The inherited analysis writes `summary.json` and the four fixed PNG files named
+in `analysis-bases.md §7`.
 
-## §7 Visualization Catalogue
+## §7 Validation
 
-Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_rumorspread_dynamics.png`, `02_rumorspread_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.
+Full experiments require 200 rounds and clean parser-contract behavior, with any API
+quality warning recorded outside `examples/`.

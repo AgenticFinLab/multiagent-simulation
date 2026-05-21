@@ -291,7 +291,7 @@ def create_visualizations(
         axes[1, 0].grid(True, alpha=0.3)
 
     # Panel 4: Per-agent belief trajectories
-    agent_beliefs = data.get("agent_beliefs", {})
+    agent_beliefs = data["agent_beliefs"]
     colors = plt.cm.tab10(np.linspace(0, 1, max(len(agent_beliefs), 1)))
     for idx, (agent_id, agent_belief) in enumerate(sorted(agent_beliefs.items())):
         if agent_belief:
@@ -353,12 +353,9 @@ def main():
         print("No simulation data found. Run the simulation first.")
         return
 
-    truth_value = 0.1
-    env_config = config.get("players", {}).get("environment", {})
-    if isinstance(env_config, dict):
-        extras = env_config.get("config", {}).get("extras", {})
-        if "rumor_truth_value" in extras:
-            truth_value = extras["rumor_truth_value"]
+    truth_value = config["players"]["environment"]["config"]["extras"][
+        "rumor_truth_value"
+    ]
 
     metrics = calculate_metrics(data, truth_value=truth_value)
 
@@ -367,13 +364,13 @@ def main():
 
     create_visualizations(data, analysis_dir, truth_value=truth_value)
 
-    score = 1.0 if metrics.get("total_rounds", 0) > 0 else 0.0
+    score = 1.0 if metrics["total_rounds"] > 0 else 0.0
     metrics["validation"] = {
         "score": score,
         "is_valid": bool(score >= 0.5),
         "criteria": {
             "Rumor State Recorded": {
-                "value": metrics.get("total_rounds", 0),
+                "value": metrics["total_rounds"],
                 "target": "positive number of recorded belief rounds; 200 expected for full experiments",
                 "score": score,
                 "passed": bool(score >= 0.5),
