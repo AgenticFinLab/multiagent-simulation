@@ -42,6 +42,7 @@ llm_disposition_biased:
       record_path: "EXPERIMENT/DispositionEffect/LLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
+      initial_purchase_price: 100.0
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffect.LLM.prompts:LLM_DISPOSITION_BIASED_SYS"
@@ -68,6 +69,7 @@ llm_rational:
       record_path: "EXPERIMENT/DispositionEffect/LLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
+      initial_purchase_price: 100.0
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffect.LLM.prompts:LLM_RATIONAL_SYS"
@@ -94,6 +96,7 @@ llm_tax_aware:
       record_path: "EXPERIMENT/DispositionEffect/LLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
+      initial_purchase_price: 100.0
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffect.LLM.prompts:LLM_TAX_AWARE_SYS"
@@ -120,6 +123,7 @@ llm_institutional:
       record_path: "EXPERIMENT/DispositionEffect/LLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
+      initial_purchase_price: 100.0
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffect.LLM.prompts:LLM_INSTITUTIONAL_SYS"
@@ -146,6 +150,7 @@ llm_loss_averse:
       record_path: "EXPERIMENT/DispositionEffect/LLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
+      initial_purchase_price: 100.0
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffect.LLM.prompts:LLM_LOSS_AVERSE_SYS"

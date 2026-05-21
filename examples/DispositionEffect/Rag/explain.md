@@ -12,7 +12,7 @@ The Rag variant augments each LLM agent with a retrieval-augmented knowledge sto
 | Theory Reference   | `simulation-bases.md §4.1–§4.5`                                               |
 | Market Broadcast   | `price`, `purchase_price`, `gain_loss`, `cash`, `position`, `portfolio_value` |
 | Prompt Location    | `DispositionEffect/Rag/prompts.py`                                            |
-| Knowledge Store    | `DispositionEffect/Rag/knowledge/`                                            |
+| Knowledge Store    | Per-agent `KnowledgeStore` configured in `configs/DispositionEffect/Rag/players.yml` |
 
 ## §2 Theory → Implementation Mapping
 
@@ -38,6 +38,20 @@ The Rag variant augments each LLM agent with a retrieval-augmented knowledge sto
 | Tax-loss harvesting (Constantinides, 1983) | RAG retrieves tax-loss harvesting strategy literature and year-end patterns |
 | December effect                            | RAG case studies on year-end tax harvesting reversals                       |
 
+### §2.4 RagInstitutionalInvestor (simulation-bases.md §4.5)
+
+| Theory Component                           | Rag Implementation                                                         |
+|--------------------------------------------|----------------------------------------------------------------------------|
+| Professional discipline                    | RAG retrieves institutional risk management and professional trading norms |
+| Symmetric gain/loss treatment              | Prompt rules apply configured gain and loss thresholds symmetrically       |
+
+### §2.5 RagLossAverse (simulation-bases.md §4.1)
+
+| Theory Component                           | Rag Implementation                                                        |
+|--------------------------------------------|---------------------------------------------------------------------------|
+| Loss aversion                              | RAG retrieves Prospect Theory and loss-aversion context                   |
+| Disposition-effect amplification           | Prompt rules preserve quick winner selling and reluctant loser selling    |
+
 ## §3 Prompt Variables
 
 | Variable              | Source                   | Example Value                    |
@@ -48,12 +62,11 @@ The Rag variant augments each LLM agent with a retrieval-augmented knowledge sto
 | `{cash}`              | Agent state              | `75000.0`                        |
 | `{position}`          | Agent state              | `500`                            |
 | `{portfolio_value}`   | Computed                 | `127500.0`                       |
-| `{retrieved_context}` | `KnowledgeStore.query()` | Behavioral finance study excerpt |
-| `{history}`           | `HistoryBuffer`          | Last 5 rounds summary            |
+| `{rag_context}`       | `KnowledgeStore.query()` | Behavioral finance study excerpt |
 
 ## §4 Variant-Specific Features
 
-- **Only 3 investor types**: Rag variant implements `RagDispositionInvestor`, `RagRationalInvestor`, `RagTaxAwareInvestor` only (no IndexHolder or InstitutionalInvestor).
+- **Five active API investor types**: Rag mirrors the active LLM/RuleLLM investor set with disposition-biased, rational, tax-aware, institutional, and extreme loss-averse agents.
 - **Academic calibration**: RAG context may improve PGR/PLR calibration toward Odean empirical benchmarks.
 - **Self-awareness paradox**: RagDispositionInvestor retrieves Prospect Theory studies — it "knows" about its own bias; testing whether this awareness reduces the effect.
 - **RAG query formulation**: `_formulate_rag_query()` constructs context-specific query based on current `gain_loss` magnitude and direction.
@@ -65,14 +78,14 @@ The Rag variant augments each LLM agent with a retrieval-augmented knowledge sto
 Market.decide() → broadcast market_data
 RagInvestor.perceive() → store market_data, purchase_price
 RagInvestor.decide() → KnowledgeStore.query(gain_loss_context) → retrieved_chunks
-                     → LangChainAPIInference.infer(persona + retrieved_context, user_prompt)
-                     → parse_llm_response_with_thinking() → {action, quantity}
+                     → LangChainAPIInference.infer(persona + rag_context, user_prompt)
+                     → parse_llm_response_with_thinking() → {action, bid_price, quantity, reasoning}
 RagInvestor.act() → update cash/position, submit bid order
 ```
 
 ## §6 Config Reference
 
-Same `config.yaml` as Rule variant; additional Rag extras: `model_name`, `temperature`, `max_tokens`, `persist_dir`, `knowledge_sources`, `top_k`, `embed_model`.
+Rag uses `configs/DispositionEffect/Rag/players.yml`. Each investor has `llm` settings, configured decision parameters, and `rag` settings including `persist_dir`, `docs_dir`, `top_k`, `embed_type`, `embed_model`, and chunking parameters.
 
 ## §7 Running Instructions
 
@@ -86,6 +99,8 @@ python -m examples.DispositionEffect.Rag.run_disposition_rag
 - RagDispositionInvestor DC may be weaker than pure LLM (bias awareness from reading Prospect Theory)
 - RagRationalInvestor may exhibit stronger rationality (retrieves empirical evidence against reference point anchoring)
 - RagTaxAwareInvestor PLR highest (RAG reinforces tax-harvesting rationale)
+- RagInstitutionalInvestor should remain more symmetric than retail-biased agents
+- RagLossAverse may preserve or amplify quick winner selling and loser holding
 
 ## §9 References
 

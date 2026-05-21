@@ -39,7 +39,7 @@ def analyze_rag_knowledge_effect(trades: Dict[str, list]) -> Dict[str, Any]:
         raise ValueError("No RAG trade payloads found")
 
     retrieval_rate = context_payloads / total_payloads
-    fallback_rate = fallback_payloads / context_payloads if context_payloads else 0.0
+    fallback_rate = fallback_payloads / context_payloads if context_payloads else 1.0
     return {
         "total_payloads": total_payloads,
         "context_payloads": context_payloads,

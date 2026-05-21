@@ -37,24 +37,24 @@ Step 1 — Compute gain/loss relative to reference point:
     where purchase_price is your cost basis (reference point).
 
 Step 2 — Decide action based on gain/loss:
-    IF gain_loss >= gain_threshold (default 0.10 = 10% gain):
+    IF gain_loss >= configured gain_threshold:
         SELL WINNERS quickly — realize gains
         quantity = -position × sell_fraction_gain
-            where sell_fraction_gain = 0.3 (sell 30% of position)
+            where sell_fraction_gain is the configured gain-sale fraction
         bid_price = current_price
         action = "SELL_WINNER"
     
-    ELIF gain_loss <= loss_threshold (default -0.30 = 30% loss):
+    ELIF gain_loss <= configured loss_threshold:
         Reluctantly sell losers — only at extreme loss
         quantity = -position × sell_fraction_loss
-            where sell_fraction_loss = 0.1 (sell only 10%)
+            where sell_fraction_loss is the configured loss-sale fraction
         bid_price = current_price
         action = "SELL_LOSER"
     
     ELIF -0.01 <= gain_loss < 0.01 (price near reference point, ±1%):
         BUY at perceived "fair value"
         target_qty = (max_position - position) × buy_fraction
-            where buy_fraction = 0.2
+            where buy_fraction is the configured near-reference buy fraction
         affordable = (cash × 0.15) / price
         quantity = min(target_qty, affordable)
         bid_price = current_price
@@ -74,7 +74,7 @@ but the SIGN (buy/sell/hold) MUST follow the rule.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric (positive buy, negative sell, zero hold), NOT expressions or formulas.
 """
 
 
@@ -102,10 +102,10 @@ Step 1 — Compute current portfolio allocation:
 
 Step 2 — Compute deviation from target:
     deviation = current_alloc - target_allocation
-        where target_allocation = 0.6 (60% equity target)
+        where target_allocation is the configured equity target
 
 Step 3 — Decide action:
-    IF |deviation| > rebalance_threshold (default 0.10 = 10%):
+    IF |deviation| > configured rebalance_threshold:
         REBALANCE toward target
         target_equity = total_value × target_allocation
         target_position = target_equity / current_price
@@ -126,7 +126,7 @@ You MAY adjust the rebalance speed (the 0.5 factor) by ±20% based on market vie
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric (positive buy, negative sell, zero hold), NOT expressions or formulas.
 """
 
 
@@ -151,14 +151,14 @@ Step 1 — Compute gain/loss relative to purchase price:
     gain_loss = (current_price - purchase_price) / purchase_price
 
 Step 2 — Decide action based on tax optimization:
-    IF gain_loss <= tax_loss_threshold (default -0.10 = 10% loss):
+    IF gain_loss <= configured tax_loss_threshold:
         TAX LOSS HARVESTING — sell losers to realize capital loss
         quantity = -position × tax_harvest_fraction
-            where tax_harvest_fraction = 0.4 (harvest 40% of losing position)
+            where tax_harvest_fraction is the configured harvest fraction
         bid_price = current_price
         action = "TAX_HARVEST"
     
-    ELIF gain_loss >= capital_gains_hold (default 0.20 = 20% gain):
+    ELIF gain_loss >= configured capital_gains_hold:
         HOLD WINNERS — defer capital gains tax
         quantity = 0
         action = "DEFER_GAINS"
@@ -176,7 +176,7 @@ You MAY adjust harvest_fraction by ±20% based on end-of-year tax considerations
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric (positive buy, negative sell, zero hold), NOT expressions or formulas.
 """
 
 
@@ -201,17 +201,17 @@ Step 1 — Compute gain/loss relative to purchase price:
     gain_loss = (current_price - purchase_price) / purchase_price
 
 Step 2 — Decide action with SYMMETRIC thresholds:
-    IF gain_loss >= gain_threshold (default 0.15 = 15% gain):
+    IF gain_loss >= configured gain_threshold:
         TAKE PROFIT systematically
         quantity = -position × sell_fraction
-            where sell_fraction = 0.25 (sell 25%)
+            where sell_fraction is the configured sell fraction
         bid_price = current_price
         action = "TAKE_PROFIT"
     
-    ELIF gain_loss <= loss_threshold (default -0.15 = 15% loss):
+    ELIF gain_loss <= configured loss_threshold:
         CUT LOSS systematically (no reluctance to realize)
         quantity = -position × sell_fraction
-            where sell_fraction = 0.25 (same fraction as gains)
+            where sell_fraction is the configured sell fraction
         bid_price = current_price
         action = "CUT_LOSS"
     
@@ -227,7 +227,7 @@ You MAY adjust sell_fraction by ±20% based on risk committee guidance.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric (positive buy, negative sell, zero hold), NOT expressions or formulas.
 """
 
 
@@ -252,17 +252,17 @@ Step 1 — Compute gain/loss relative to purchase price:
     gain_loss = (current_price - purchase_price) / purchase_price
 
 Step 2 — Decide action with EXTREME asymmetry:
-    IF gain_loss >= gain_threshold (default 0.05 = 5% small gain):
+    IF gain_loss >= configured gain_threshold:
         SELL WINNERS IMMEDIATELY — lock in any profit
         quantity = -position × sell_fraction_gain
-            where sell_fraction_gain = 0.5 (sell half immediately)
+            where sell_fraction_gain is the configured gain-sale fraction
         bid_price = current_price
         action = "LOCK_GAINS"
     
-    ELIF gain_loss <= loss_threshold (default -0.50 = 50% extreme loss):
+    ELIF gain_loss <= configured loss_threshold:
         ONLY THEN consider selling losers — extreme threshold
         quantity = -position × sell_fraction_loss
-            where sell_fraction_loss = 0.05 (sell only 5%)
+            where sell_fraction_loss is the configured loss-sale fraction
         bid_price = current_price
         action = "RELUCTANT_SELL"
     
@@ -283,7 +283,7 @@ You MAY hold losers even longer than the rule specifies if conviction is strong.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric (positive buy, negative sell, zero hold), NOT expressions or formulas.
 """
 
 
@@ -307,9 +307,12 @@ RULELLM_USER_TEMPLATE = """
 - Current Gain/Loss:  {gain_loss_pct:+.2f}%
 - Portfolio Value:    ${portfolio_value:.2f}
 
+== CONFIGURED PARAMETERS ==
+{decision_params}
+
 Apply your DECISION RULES above to this data and output your trade decision.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <your price as NUMBER>, "quantity": <shares as NUMBER, +buy/-sell>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <current price as POSITIVE NUMBER>, "quantity": <shares as NUMBER, +buy/-sell/0 hold>, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """

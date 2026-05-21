@@ -26,9 +26,7 @@ Environment Variables:
 """
 
 import os
-import json
 import random
-import re
 import sys
 import importlib
 import logging
@@ -38,7 +36,6 @@ from dotenv import load_dotenv
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
-from masim.format.order import validate_order
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -197,8 +194,7 @@ class LLMInvestor(GeneralPlayer):
 
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            # Reference point for disposition effect calculation
-            self.state.custom_state["purchase_price"] = 100.0
+            self.state.custom_state["purchase_price"] = extras["initial_purchase_price"]
 
             load_dotenv()
             llm_config = extras["llm"]
@@ -251,6 +247,8 @@ class LLMInvestor(GeneralPlayer):
         position = self.state.custom_state["position"]
         purchase_price = self.state.custom_state["purchase_price"]
         current_price = market_data["price"]
+        if purchase_price <= 0:
+            raise ValueError("purchase_price must be positive")
 
         gain_loss = (current_price - purchase_price) / purchase_price * 100
         gain_loss_status = (
@@ -258,37 +256,20 @@ class LLMInvestor(GeneralPlayer):
         )
 
         llm_config = self.config.extras["llm"]
-        if "user_message" in llm_config:
-            template = load_prompt(llm_config["user_message"])
-            return template.format(
-                price=market_data["price"],
-                prev_price=market_data["prev_price"],
-                return_pct=market_data["return_pct"],
-                fundamental=market_data["fundamental"],
-                purchase_price=purchase_price,
-                gain_loss=gain_loss,
-                gain_loss_status=gain_loss_status,
-                news_event=market_data["news_event"],
-                cash=cash,
-                position=position,
-                portfolio_value=cash + position * market_data["price"],
-            )
-
-        return f"""
-Market Data:
-- Price: ${market_data['price']:.2f}
-- Return: {market_data['return_pct']:+.2f}%
-- Fundamental: ${market_data['fundamental']:.2f}
-
-Your Position:
-- Purchase Price: ${purchase_price:.2f} (your reference point)
-- Current Price: ${current_price:.2f}
-- Gain/Loss: {gain_loss:+.2f}% ({gain_loss_status})
-- Position: {position:.2f} shares
-- Cash: ${cash:.2f}
-
-Respond with JSON: {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}}
-"""
+        template = load_prompt(llm_config["user_message"])
+        return template.format(
+            price=market_data["price"],
+            prev_price=market_data["prev_price"],
+            return_pct=market_data["return_pct"],
+            fundamental=market_data["fundamental"],
+            purchase_price=purchase_price,
+            gain_loss=gain_loss,
+            gain_loss_status=gain_loss_status,
+            news_event=market_data["news_event"],
+            cash=cash,
+            position=position,
+            portfolio_value=cash + position * market_data["price"],
+        )
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with thinking and decision sections.
@@ -301,7 +282,9 @@ Respond with JSON: {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantit
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         if quantity > 0:
-            max_affordable = cash / bid_price if bid_price > 0 else 0
+            if bid_price <= 0:
+                raise ValueError("bid_price must be positive")
+            max_affordable = cash / bid_price
             quantity = min(quantity, max_affordable)
         elif quantity < 0:
             quantity = max(-position, quantity)
@@ -325,6 +308,12 @@ Respond with JSON: {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantit
             infer_output = llm_client.run([infer_input])
             try:
                 decision = self._parse_llm_response(infer_output.outputs[0].response)
+                if decision["action"] not in ("buy", "sell", "hold"):
+                    raise ValueError(f"invalid action: {decision['action']}")
+                if float(decision["bid_price"]) <= 0:
+                    raise ValueError(f"invalid bid_price: {decision['bid_price']}")
+                if not str(decision["reasoning"]).strip():
+                    raise ValueError("missing reasoning")
                 break
             except Exception as exc:
                 last_error = exc
@@ -338,11 +327,13 @@ Respond with JSON: {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantit
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
+        if decision["action"] == "sell":
+            quantity = -abs(quantity)
+        elif decision["action"] == "buy":
+            quantity = abs(quantity)
+        else:
+            quantity = 0.0
 
-        # Guard: LLMs sometimes output bid_price=0 for hold actions.
-        # Use the current market price so recorded bids stay meaningful.
-        if bid_price <= 0:
-            bid_price = market_data["price"]
         quantity = self._apply_constraints(bid_price, quantity)
 
         # Update purchase price if buying
@@ -366,6 +357,7 @@ Respond with JSON: {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantit
         )
 
         order = {
+            "action": decision["action"],
             "bid_price": bid_price,
             "quantity": quantity,
             "strategy": strategy_name,

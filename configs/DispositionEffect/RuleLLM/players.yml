@@ -48,6 +48,11 @@ rulellm_disposition_biased:
       initial_purchase_price: 100.0
       max_position: 200.0
       custom_state_hot_limit: 3
+      gain_threshold: 0.03
+      loss_threshold: -0.10
+      sell_fraction_gain: 0.5
+      sell_fraction_loss: 0.15
+      buy_fraction: 0.15
       llm:
         sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_DISPOSITION_BIASED_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -75,6 +80,8 @@ rulellm_rational:
       initial_position: 50.0
       initial_purchase_price: 100.0
       custom_state_hot_limit: 3
+      target_allocation: 0.5
+      rebalance_threshold: 0.1
       llm:
         sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_RATIONAL_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -102,6 +109,9 @@ rulellm_tax_aware:
       initial_position: 50.0
       initial_purchase_price: 100.0
       custom_state_hot_limit: 3
+      tax_loss_threshold: -0.05
+      capital_gains_hold: 0.20
+      tax_harvest_fraction: 0.5
       llm:
         sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_TAX_AWARE_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -129,6 +139,9 @@ rulellm_institutional:
       initial_position: 50.0
       initial_purchase_price: 100.0
       custom_state_hot_limit: 3
+      gain_threshold: 0.25
+      loss_threshold: -0.15
+      sell_fraction: 0.4
       llm:
         sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_INSTITUTIONAL_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -156,6 +169,10 @@ rulellm_loss_averse:
       initial_position: 50.0
       initial_purchase_price: 100.0
       custom_state_hot_limit: 3
+      gain_threshold: 0.03
+      loss_threshold: -0.10
+      sell_fraction_gain: 0.5
+      sell_fraction_loss: 0.15
       llm:
         sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_LOSS_AVERSE_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"

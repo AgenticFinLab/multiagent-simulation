@@ -29,7 +29,7 @@ BEHAVIOR:
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric (positive buy, negative sell, zero hold), NOT expressions or formulas.
 """
 
 # =============================================================================
@@ -52,7 +52,7 @@ DECISION:
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric (positive buy, negative sell, zero hold), NOT expressions or formulas.
 """
 
 # =============================================================================
@@ -73,7 +73,7 @@ TAX LOGIC:
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric (positive buy, negative sell, zero hold), NOT expressions or formulas.
 """
 
 # =============================================================================
@@ -95,7 +95,7 @@ RULES:
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric (positive buy, negative sell, zero hold), NOT expressions or formulas.
 """
 
 # =============================================================================
@@ -118,7 +118,7 @@ BEHAVIOR:
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric (positive buy, negative sell, zero hold), NOT expressions or formulas.
 """
 
 # =============================================================================
@@ -141,6 +141,6 @@ Your Position:
 - Portfolio Value: ${portfolio_value:.2f}
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <price as NUMBER>, "quantity": <+buy/-sell as NUMBER>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <current price as POSITIVE NUMBER>, "quantity": <+buy/-sell/0 hold as NUMBER>, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """

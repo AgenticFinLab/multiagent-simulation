@@ -83,7 +83,7 @@ RuleLLMInvestor.act() → update cash/position, submit bid order
 
 ## §6 Config Reference
 
-Same `config.yaml` as Rule variant; LLM extras: `model_name`, `temperature`, `max_tokens`.
+RuleLLM uses `configs/DispositionEffect/RuleLLM/players.yml` for market parameters, embedded decision-rule parameters, and provider settings.
 
 ## §7 Running Instructions
 

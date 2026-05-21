@@ -85,7 +85,7 @@ Investors
 
 ## §6 Config Reference
 
-Config file: `DispositionEffect/Rule/config.yaml`
+Config files: `configs/DispositionEffect/Rule/simulation.yml`, `players.yml`, and `topology.yml`
 
 Key extras: `initial_price`, `fundamental_value`, `price_impact`, `mean_reversion`, `noise_std`, `news_probability`, `news_impact_range`, `gain_threshold`, `loss_threshold`, `loss_aversion`, `sell_fraction_gain`, `sell_fraction_loss`, `target_allocation`, `tax_loss_threshold`.
 
