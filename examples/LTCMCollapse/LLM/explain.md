@@ -45,7 +45,7 @@ LLM prompts define investor psychology without naming the historical event in th
 <decision>{"action": "buy|sell|hold", "bid_price": 100.0, "quantity": 1, "reasoning": "..."}</decision>
 ```
 
-The actor retries parse failures up to three times and raises `RuntimeError` if no valid decision is produced. There is no silent fallback in this variant.
+The actor retries parse failures up to three times and raises `RuntimeError` if no valid decision is produced. It does not substitute a hidden hold decision.
 
 ## §5 Architecture Diagram
 
@@ -75,7 +75,7 @@ LLM agents may be more conservative or inconsistent than Rule agents, but valid 
 
 - Prompt references resolve from `players.yml`.
 - Prompt/parser contract checks should report no missing fields.
-- Post-run LLM output quality review should report low or zero parse failures/fallbacks.
+- Post-run LLM output quality review should report low or zero parse or contract failures.
 - Prompts and player code should remain stable unless a documented mechanism or contract defect is found.
 
 ## §9 References

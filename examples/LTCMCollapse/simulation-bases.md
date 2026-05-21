@@ -388,7 +388,7 @@ The mix covers rational arbitrage, funding fragility, institutional risk control
 
 Each round follows:
 
-1. Market receives prior investor orders and updates price.
+1. Market receives previous investor orders and updates price.
 2. Market broadcasts `market_update`.
 3. Investors perceive the update and update local state.
 4. Rule investors compute deterministic actions; API variants call an LLM using the same market state.

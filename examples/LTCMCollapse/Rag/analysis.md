@@ -14,11 +14,11 @@ Rag analysis compares historically informed LLM behavior with Rule, LLM, and Rul
 | Volatility | `analysis-bases.md §2.4` | imported `calculate_metrics(data)` | instability |
 | Price trough | `analysis-bases.md §2.5` | imported `calculate_metrics(data)` | lowest RAG price |
 | Final recovery | `analysis-bases.md §2.6` | imported `calculate_metrics(data)` | stabilization |
-| LLM output quality | `analysis-bases.md §2.7` | `audit_llm_output_quality.py` | parse failures, fallback holds, action validity |
+| LLM output quality | `analysis-bases.md §2.7` | `audit_llm_output_quality.py` | parse failures, contract failures, action validity |
 
 ## §3 Variant-Specific Notes
 
-RAG success requires more than `exit=0`: embedding access, context injection, parse quality, and fallback rate must all be reviewed before outputs are accepted.
+RAG success requires more than `exit=0`: embedding access, context injection, parse quality, and retrieval-miss rate must all be reviewed before outputs are accepted.
 
 ## §4 Expected Ranges
 
@@ -26,8 +26,8 @@ RAG success requires more than `exit=0`: embedding access, context injection, pa
 |---|---|
 | completed rounds | 200/200 |
 | parse failures | zero or low |
-| fallback holds | reviewed and documented if nonzero |
-| RAG context | present or explicit fallback context |
+| contract failures | reviewed and documented if nonzero |
+| RAG context | present or explicit no-retrieval marker |
 
 ## §5 Output Files
 

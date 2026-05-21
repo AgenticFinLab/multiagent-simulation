@@ -14,7 +14,7 @@ The LLM variant uses the same price-series analysis as Rule and adds post-run LL
 | Volatility | `analysis-bases.md §2.4` | imported `calculate_metrics(data)` | tracks crisis instability |
 | Price trough | `analysis-bases.md §2.5` | imported `calculate_metrics(data)` | lowest API-mode price |
 | Final recovery | `analysis-bases.md §2.6` | imported `calculate_metrics(data)` | end-state stabilization |
-| LLM output quality | `analysis-bases.md §2.7` | `audit_llm_output_quality.py` | parse/fallback/action-quality review |
+| LLM output quality | `analysis-bases.md §2.7` | `audit_llm_output_quality.py` | parse/contract/action-quality review |
 
 ## §3 Variant-Specific Notes
 
@@ -25,7 +25,7 @@ The LLM variant can finish successfully while still producing low-quality decisi
 | Metric | Expected Pattern |
 |---|---|
 | parse failures | zero or very low |
-| fallback count | zero for this variant |
+| contract failures | zero for this variant |
 | action distribution | coherent with persona and market stress |
 | price metrics | comparable to Rule but not necessarily identical |
 

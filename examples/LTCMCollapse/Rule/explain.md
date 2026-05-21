@@ -88,7 +88,7 @@ All investor thresholds are read from `config.extras`. The implemented order sch
 
 ```text
 Market.perceive()
-  -> clear prior orders and update price
+  -> clear previous orders and update price
 Market.decide()/act()
   -> broadcast {price, fundamental, deviation, round}
 Investors.perceive()

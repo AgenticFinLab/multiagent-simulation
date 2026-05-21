@@ -14,7 +14,7 @@ RuleLLM analysis compares formula-guided LLM behavior with the deterministic Rul
 | Volatility | `analysis-bases.md §2.4` | imported `calculate_metrics(data)` | rule-guided crisis instability |
 | Price trough | `analysis-bases.md §2.5` | imported `calculate_metrics(data)` | lowest rule-guided API price |
 | Final recovery | `analysis-bases.md §2.6` | imported `calculate_metrics(data)` | recovery relative to baseline |
-| LLM output quality | `analysis-bases.md §2.7` | `audit_llm_output_quality.py` | parse/fallback/action quality |
+| LLM output quality | `analysis-bases.md §2.7` | `audit_llm_output_quality.py` | parse/contract/action quality |
 
 ## §3 Variant-Specific Notes
 
@@ -25,7 +25,7 @@ RuleLLM outputs should be accepted only when the prompt/parser contract and outp
 | Metric | Expected Pattern |
 |---|---|
 | parse failures | zero or low |
-| fallback count | zero or explicitly reviewed |
+| contract failures | zero or explicitly reviewed |
 | price path | closer to Rule than LLM |
 | action distribution | consistent with embedded rules |
 

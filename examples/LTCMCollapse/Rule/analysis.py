@@ -20,7 +20,8 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.utils.config import load_config
+from examples.standard_rule_analysis import _load_data, _series
+from masim.utils import load_config, load_results
 
 
 @dataclass(frozen=True)
@@ -42,34 +43,28 @@ class ValidationResult:
 
 
 def load_simulation_data(config: dict) -> dict:
-    """Load market price and fundamental series from MASim records.
+    """Load market price and fundamental series via `masim.utils.load_results`."""
 
-    Returns a dict with ``prices`` and ``fundamentals`` lists. Missing record
-    fields fail loudly because analysis data is part of the experiment contract.
-    """
-
-    record_path = Path(config["setting"]["record_path"])
-    market_path = record_path / "market"
-    if not market_path.exists():
-        raise FileNotFoundError(f"Market record directory not found: {market_path}")
-
-    prices: list[float] = []
-    fundamentals: list[float] = []
-    files = sorted(path for path in market_path.iterdir() if path.suffix == ".json")
-    if not files:
-        raise ValueError(f"No market JSON records found in {market_path}")
-
-    for path in files:
-        with path.open("r", encoding="utf-8") as handle:
-            record = json.load(handle)
-        custom = record["custom_state"]
-        prices.append(float(custom["price"]))
-        fundamentals.append(float(custom["fundamental"]))
-
+    results = load_results(config)
+    raw = _load_data(results)
+    rag_contexts = {}
+    for pid, player in results.players_by_role("player").items():
+        contexts = player.turns.field("rag_context")
+        if contexts:
+            rag_contexts[pid] = contexts
+    prices = _series(raw["market_prices"])
+    fundamentals = _series(raw["fundamentals"])
+    if not prices:
+        raise ValueError("No market price data recorded")
+    if not fundamentals:
+        raise ValueError("No fundamental data recorded")
     if len(prices) != len(fundamentals):
         raise ValueError("Price and fundamental series lengths differ")
-
-    return {"prices": prices, "fundamentals": fundamentals}
+    return {
+        "prices": prices,
+        "fundamentals": fundamentals,
+        "rag_contexts": rag_contexts,
+    }
 
 
 def _returns(prices: np.ndarray) -> np.ndarray:
@@ -288,28 +283,16 @@ def _save_single_plot(
     plt.close(fig)
 
 
-def main() -> None:
-    """Run LTCMCollapse analysis and write metrics plus validation summary."""
-
-    parser = argparse.ArgumentParser(description="Analyze LTCMCollapse simulation results")
-    parser.add_argument("-c", "--config", type=str, default="configs/LTCMCollapse/Rule/simulation.yml")
-    args = parser.parse_args()
-
-    config = load_config(args.config)
-    data = load_simulation_data(config)
-    metrics = calculate_metrics(data)
-    validation = validate_metrics(metrics)
-
-    analysis_path = Path(config["setting"]["record_path"]) / "analysis"
-    analysis_path.mkdir(parents=True, exist_ok=True)
-    create_visualizations(data, str(analysis_path))
-
+def _write_summary(
+    analysis_path: Path,
+    metrics: dict,
+    validation: ValidationResult,
+) -> None:
+    """Write metrics, summary JSON, and validation console report."""
     summary = {
         "metrics": metrics,
         "validation": validation.to_dict(),
     }
-    with (analysis_path / "metrics.json").open("w", encoding="utf-8") as handle:
-        json.dump(metrics, handle, indent=2)
     with (analysis_path / "summary.json").open("w", encoding="utf-8") as handle:
         json.dump(summary, handle, indent=2)
 
@@ -325,6 +308,24 @@ def main() -> None:
     print("[SUMMARY]")
     print(validation.interpretation)
     print("Analysis complete. Results in:", analysis_path)
+
+
+def main() -> None:
+    """Run LTCMCollapse analysis and write metrics plus validation summary."""
+
+    parser = argparse.ArgumentParser(description="Analyze LTCMCollapse simulation results")
+    parser.add_argument("-c", "--config", type=str, default="configs/LTCMCollapse/Rule/simulation.yml")
+    args = parser.parse_args()
+
+    config = load_config(args.config)
+    data = load_simulation_data(config)
+    metrics = calculate_metrics(data)
+    validation = validate_metrics(metrics)
+
+    analysis_path = Path(os.path.dirname(config["setting"]["record_path"])) / "analysis"
+    analysis_path.mkdir(parents=True, exist_ok=True)
+    create_visualizations(data, str(analysis_path))
+    _write_summary(analysis_path, metrics, validation)
 
 
 if __name__ == "__main__":

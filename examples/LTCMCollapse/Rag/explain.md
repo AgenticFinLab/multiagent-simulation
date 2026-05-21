@@ -35,7 +35,7 @@ Relevant crisis knowledge retrieved for this decision:
 
 RAG system prompts alias the standardized RuleLLM prompts. This ensures each agent has both `== PERSONA ==` and `== DECISION RULES ==`.
 
-The RAG user template adds retrieved crisis knowledge. If no scenario-specific context is available, `RagLLMInvestor._initialize_rag()` returns an explicit fallback string. This is recorded in the reasoning context rather than silently changing the action schema.
+The RAG user template adds retrieved crisis knowledge. If no relevant passage is retrieved, the recorded `rag_context` contains an explicit no-retrieval marker while the action schema remains unchanged.
 
 ## §5 Architecture Diagram
 
@@ -43,8 +43,8 @@ The RAG user template adds retrieved crisis knowledge. If no scenario-specific c
 Rule market broadcast
   -> RagLLMInvestor.perceive()
   -> _initialize_rag()
-       -> read private_knowledge.rag / context template
-       -> fallback text if no context template is configured
+       -> resolve private_knowledge.rag and shared index
+       -> retrieve per-round crisis context
   -> RAG_USER_TEMPLATE.format(..., rag_context=context)
   -> LLM decision parsing
   -> emit standard order
@@ -61,7 +61,7 @@ Rule market broadcast
 
 ## §7 Expected Behavior Patterns
 
-RAG should preserve the RuleLLM action schema while allowing historical crisis knowledge to influence reasoning. Valid samples should show completed rounds, low malformed-output rates, and reviewed fallback counts.
+RAG should preserve the RuleLLM action schema while allowing historical crisis knowledge to influence reasoning. Valid samples should show completed rounds, low malformed-output rates, and reviewed retrieval-miss counts.
 
 ## §8 Validation Checklist
 

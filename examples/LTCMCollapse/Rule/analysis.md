@@ -37,7 +37,6 @@ Rule analysis has no LLM quality component. Its main responsibility is to verify
 | `01_price_vs_fundamental.png` | `create_visualizations()` | price and fundamental series |
 | `02_deviation.png` | `create_visualizations()` | deviation series |
 | `03_returns.png` | `create_visualizations()` | return series |
-| `metrics.json` | `main()` | machine-readable metrics |
 | `summary.json` | `main()` | metrics plus validation status |
 
 ## §6 Cross-Variant Comparison

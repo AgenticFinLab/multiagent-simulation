@@ -99,8 +99,8 @@
   def audit_llm_output_quality(sample_path: str) -> dict:
       ...
   ```
-- **Fields**: parse failures, fallback counts, action distribution, completed rounds.
-- **Interpretation**: API-mode success is not just `exit=0`; malformed output and fallback rate must be reviewed.
+- **Fields**: parse failures, contract failures, action distribution, completed rounds.
+- **Interpretation**: API-mode success is not just `exit=0`; malformed output and contract failure rate must be reviewed.
 
 ## §3 Analysis Dimensions
 
@@ -145,9 +145,9 @@ Compares Rule, LLM, RuleLLM, and Rag runs using the same price metrics and post-
 | max absolute deviation | higher than normal-market noise | should exceed small random noise band |
 | volatility | rises during stress | volatility should not remain flat across 200 rounds |
 | final recovery | partial recovery toward fundamental | mean reversion and support should prevent permanent zero |
-| LLM fallback rate | low | high fallback invalidates behavioral interpretation |
+| LLM contract failure rate | low | high malformed-output rate invalidates behavioral interpretation |
 
-The Rule analysis implementation writes these metrics to `metrics.json` and writes validation status to `summary.json`. LLM-family quality checks are performed by post-run output quality review before outputs are accepted.
+The Rule analysis implementation writes these metrics and validation status to `summary.json`. LLM-family quality checks are performed by post-run output quality review before outputs are accepted.
 
 ## §7 Visualization Catalogue
 

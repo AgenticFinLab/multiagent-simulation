@@ -18,13 +18,13 @@ RAG_USER_TEMPLATE = """Relevant crisis knowledge retrieved for this decision:
 Current Market State (Round {round_num}):
 - Current Price: ${price:.2f}
 - Fundamental Value: ${fundamental:.2f}
-- Price Deviation: {deviation:+.2f}%
+- Price Deviation: {deviation:+.2%}
 - Your Cash: ${cash:.2f}
 - Your Position: {position} shares
 - Portfolio Value: ${portfolio_value:.2f}
 
 Use the retrieved knowledge as contextual evidence, but still follow your persona and decision rules.
-Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": <number>, "quantity": <number>, "reasoning": "brief rationale"}}</decision>.
+Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f}, "quantity": non-negative integer, "reasoning": "brief rationale"}}</decision>.
 """
 
 __all__ = [

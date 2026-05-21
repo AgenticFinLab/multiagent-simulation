@@ -19,7 +19,7 @@ Use the market deviation as the spread signal.
 
 OUTPUT FORMAT:
 <analysis>Your spread, leverage, and convergence assessment</analysis>
-<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
 
 The <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (number), quantity (number), and reasoning (brief string)."""
 
@@ -39,7 +39,7 @@ Use portfolio equity and market deviation to decide.
 
 OUTPUT FORMAT:
 <analysis>Your leverage, margin, and required action assessment</analysis>
-<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
 
 The <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (number), quantity (number), and reasoning (brief string)."""
 
@@ -58,7 +58,7 @@ Use absolute price deviation as a VaR stress proxy.
 
 OUTPUT FORMAT:
 <analysis>Your VaR and risk-limit assessment</analysis>
-<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
 
 The <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (number), quantity (number), and reasoning (brief string)."""
 
@@ -77,7 +77,7 @@ Use deviation magnitude as the stress indicator.
 
 OUTPUT FORMAT:
 <analysis>Your market stress, inventory, and liquidity provision assessment</analysis>
-<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
 
 The <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (number), quantity (number), and reasoning (brief string)."""
 
@@ -95,7 +95,7 @@ Use negative deviation as the systemic stress signal.
 
 OUTPUT FORMAT:
 <analysis>Your systemic-risk and intervention assessment</analysis>
-<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
 
 The <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (number), quantity (number), and reasoning (brief string)."""
 
@@ -108,7 +108,7 @@ RULELLM_USER_TEMPLATE = """Current Market State (Round {round}):
 - Portfolio Value: ${portfolio_value:.2f}
 
 Apply your persona and decision rules to decide your action.
-Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": <number>, "quantity": <number>, "reasoning": "brief rationale"}}</decision>.
+Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f}, "quantity": non-negative integer, "reasoning": "brief rationale"}}</decision>.
 """
 
 __all__ = [
