@@ -157,7 +157,7 @@ Momentum is conditioned only on the single-period return; multi-period trend fol
 
 | Decision Variable | Logic                         | Formula                                                                        |
 |-------------------|-------------------------------|--------------------------------------------------------------------------------|
-| `volatility`      | Single-period absolute return | `                                                                              |
+| `volatility`      | Single-period absolute return | `abs(market_data["return"])`                                                   |
 | Stress condition  | Exceed volatility threshold   | `volatility > volatility_threshold`                                            |
 | Stress response   | Withdraw + offload inventory  | `provides_liquidity = 0; quantity = −position × withdraw_rebalance`            |
 | Normal response   | Provide liquidity + rebalance | `provides_liquidity = base_liquidity; quantity = −position × normal_rebalance` |
@@ -170,7 +170,7 @@ Momentum is conditioned only on the single-period return; multi-period trend fol
 4. Else: set `provides_liquidity = base_liquidity`; rebalance inventory by `position × normal_rebalance`.
 5. Cap quantity at ±25.
 
-**Worked Example**: `position = 10`, `|return| = 0.04 > volatility_threshold = 0.03`. Withdraw: `provides_liquidity = 0`, `quantity = −10 × 0.5 = −5` (sell 5 to reduce inventory). Effective liquidity in market drops by `base_liquidity`, amplifying next-round price impact.
+**Worked Example**: `position = 10`, `|return| = 0.04 > volatility_threshold = 0.02`. Withdraw: `provides_liquidity = 0`, `quantity = -10 × 0.3 = -3` (sell 3 to reduce inventory). Effective liquidity in market drops by `base_liquidity`, amplifying next-round price impact.
 
 **References**: simulation-bases.md §2 Theory 1 (Grossman–Miller); doi:10.1111/j.1540-6261.1988.tb04594.x; doi:10.1093/rfs/hhn098
 
@@ -218,8 +218,8 @@ Momentum is conditioned only on the single-period return; multi-period trend fol
 | Decision Variable   | Logic                            | Formula                               |
 |---------------------|----------------------------------|---------------------------------------|
 | `deviation`         | Price deviation from fundamental | `(fundamental − price) / fundamental` |
-| Liquidity provision | Active when large deviation      | `base_liquidity_provision if          |
-| Quantity            | Value-corrective trade           | `deviation × value_multiplier if      |
+| Liquidity provision | Active when large deviation      | `base_liquidity_provision if abs(deviation) > liquidity_threshold else 0` |
+| Quantity            | Value-corrective trade           | `deviation × value_multiplier if abs(deviation) > trade_threshold else 0` |
 | Quantity cap        | Limits to arbitrage              | `max(−25, min(25, quantity))`         |
 
 **Decision Walkthrough**:
@@ -228,7 +228,7 @@ Momentum is conditioned only on the single-period return; multi-period trend fol
 3. If `|deviation| > trade_threshold`: trade `deviation × value_multiplier` (buy if underpriced, sell if overpriced).
 4. Cap at ±25.
 
-**Worked Example**: `fundamental = 100`, `price = 85`, `deviation = 0.15 > trade_threshold = 0.05`. `quantity = 0.15 × 100 = 15`. Buy 15 shares + provide `base_liquidity_provision = 20` liquidity units.
+**Worked Example**: `fundamental = 100`, `price = 85`, `deviation = 0.15 > trade_threshold = 0.03`. `quantity = 0.15 × 30 = 4.5`. Buy about 4.5 shares + provide `base_liquidity_provision = 20` liquidity units.
 
 **References**: simulation-bases.md §2 Theory 3 (Kyle Impact); doi:10.1111/j.1540-6261.1997.tb03807.x
 
@@ -247,7 +247,7 @@ Momentum is conditioned only on the single-period return; multi-period trend fol
 | Decision Variable | Logic                 | Formula                       |
 |-------------------|-----------------------|-------------------------------|
 | `ret`             | Single-period return  | `market_data["return"]`       |
-| Activation        | Significant trend     | `                             |
+| Activation        | Significant trend     | `abs(ret) > momentum_threshold` |
 | Quantity          | Proportional to trend | `ret × momentum_multiplier`   |
 | Quantity cap      | Position risk limit   | `max(−35, min(35, quantity))` |
 
@@ -257,7 +257,7 @@ Momentum is conditioned only on the single-period return; multi-period trend fol
 3. Else: `quantity = return × momentum_multiplier` (positive return → buy; negative → sell).
 4. Cap at ±35 (larger than other agents to reflect momentum trader aggression).
 
-**Worked Example**: `return = −0.04`, `momentum_threshold = 0.02`, `momentum_multiplier = 500`. `quantity = −0.04 × 500 = −20`. Sell 20 shares, amplifying the decline, further stressing market makers.
+**Worked Example**: `return = -0.04`, `momentum_threshold = 0.01`, `momentum_multiplier = 200`. `quantity = -0.04 × 200 = -8`. Sell 8 shares, amplifying the decline, further stressing market makers.
 
 **References**: simulation-bases.md §2 Theory 5 (Momentum Cascades); doi:10.1111/j.1540-6261.1990.tb03695.x
 
@@ -306,10 +306,10 @@ liquidity_factor(t) = 100 / max(total_liquidity(t), 10)
 
 | Parameter                | Symbol | Typical Value   | Role                  |
 |--------------------------|--------|-----------------|-----------------------|
-| Price impact coefficient | λ      | 0.001           | Base Kyle lambda      |
-| Liquidity factor         | 100/L  | 1.0–10.0        | Endogenous amplifier  |
-| Mean reversion           | γ      | 0.05            | Fundamental anchor    |
-| Noise                    | ε      | N(0, noise_std) | Exogenous uncertainty |
+| Price impact coefficient | λ      | 0.08 config     | Base Kyle lambda      |
+| Liquidity factor         | 100/L  | 1.0-10.0        | Endogenous amplifier  |
+| Mean reversion           | γ      | 0.015 config    | Fundamental anchor    |
+| Noise                    | ε      | N(0, 0.4)       | Exogenous uncertainty |
 
 The key insight: `effective_lambda = price_impact × liquidity_factor`. As `total_liquidity → 10` (minimum floor), `liquidity_factor → 10`, and price impact is 10× the base level. This endogenous amplification is the core of the liquidity spiral.
 
@@ -445,8 +445,8 @@ All market makers withdrawn. `total_liquidity = base_liquidity_value_traders_onl
 
 | Dimension               | Rule                             | LLM                                          | RuleLLM                                        | Rag                                              |
 |-------------------------|----------------------------------|----------------------------------------------|------------------------------------------------|--------------------------------------------------|
-| Market maker withdrawal | Volatility threshold formula     | LLM perceives stress and decides to withdraw | Rule triggers; LLM determines withdrawal speed | Rule triggers; KB confirms crisis precedent      |
-| Liquidity spiral        | Automatic via `liquidity_factor` | Emergent from LLM coordination               | Rule-anchored spiral + LLM modulation          | RAG may moderate spiral via historical precedent |
-| Cascade trigger         | Deterministic `                  | return                                       | > threshold`                                   | LLM observes others withdrawing                  |
-| Value trader entry      | Fixed deviation formula          | LLM judges "crisis opportunity"              | Rule threshold + LLM confirmation              | KB retrieves post-crisis recovery data           |
-| Key diagnostic          | LRI, MWF                         | LRI, LPI                                     | LRI, MWF                                       | NCE, LRI                                         |
+| Market maker withdrawal | Volatility threshold formula | LLM perceives stress and emits numeric liquidity provision | Rule formula is embedded in the prompt and parsed as numeric liquidity depth | RAG retrieves crisis precedent before emitting numeric liquidity depth |
+| Liquidity spiral | Automatic via `liquidity_factor` | Emergent from API orders and numeric `provides_liquidity` | Rule-anchored spiral plus LLM modulation | Rule-anchored spiral plus retrieved historical context |
+| Cascade trigger | Deterministic `abs(return) > volatility_threshold` | Persona-perceived stress from return and liquidity factor | Prompt states the same threshold logic | Prompt states the same threshold logic with retrieved context |
+| Value trader entry | Fixed deviation formula | LLM judges crisis opportunity and liquidity support | Prompt states deviation thresholds | Retrieved crisis-recovery examples can moderate entry timing |
+| Key diagnostic | LRI, MWF, LPI | LRI, LPI, parse quality | LRI, MWF, LPI, parse quality | LRI, MWF, LPI, parse quality, RAG retrieval success |

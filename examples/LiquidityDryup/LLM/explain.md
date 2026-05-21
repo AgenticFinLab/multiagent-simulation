@@ -10,7 +10,7 @@
 | Theory Reference | `examples/LiquidityDryup/simulation-bases.md` |
 | Market Broadcast | `configs/LiquidityDryup/LLM/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+This is a trading-schema scenario. API decisions emit `action`, `bid_price`, `quantity`, numeric `provides_liquidity`, and `reasoning`; `players.py` consumes those fields directly after the shared parser succeeds.
 
 ## §2 Theory -> Implementation Mapping
 
@@ -18,41 +18,41 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `LLMMarketMaker` in `examples/LiquidityDryup/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/LiquidityDryup/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.1 | `LLMMarketMaker` uses `LLM_MARKET_MAKER_SYS` to reason about stress, withdrawal, and numeric liquidity provision. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/LLM/players.yml:llm_market_maker.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven API output parsed into the numeric liquidity order schema. |
 ### §2.2 LiquiditySeeker (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `configured player class family` in `examples/LiquidityDryup/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/LiquidityDryup/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.2 | `LLMLiquidityDemander` uses `LLM_LIQUIDITY_DEMANDER_SYS` to scale demand by available liquidity. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/LLM/players.yml:llm_liquidity_demander.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven constrained execution order. |
 ### §2.3 ValueTrader (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `configured player class family` in `examples/LiquidityDryup/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/LiquidityDryup/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.3 | `LLMArbitrageur` uses `LLM_ARBITRAGEUR_SYS` to seek price dislocations and provide liquidity when others withdraw. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/LLM/players.yml:llm_arbitrageur.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven value/liquidity-provider order. |
 ### §2.4 MomentumTrader (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `configured player class family` in `examples/LiquidityDryup/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/LiquidityDryup/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.4 | `LLMValueInvestor` is a legacy class name whose prompt `LLM_VALUE_SYS` implements momentum-trader behavior. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/LLM/players.yml:llm_value.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven trend-following order. |
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `configured player class family` in `examples/LiquidityDryup/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/LiquidityDryup/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.5 | `LLMForcedSeller` is a legacy class name whose prompt `LLM_FORCED_SELLER_SYS` implements noise-trader behavior. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/LLM/players.yml:llm_forced_seller.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven uninformed order flow. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/LiquidityDryup/LLM/players.py` and its configured counterpart in `configs/LiquidityDryup/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The LLM market uses the same liquidity-amplified price equation as the Rule baseline. It sums numeric `provides_liquidity` from API orders, computes `liquidity_factor = 100 / max(total_liquidity, 10)`, and broadcasts price, return, liquidity, liquidity factor, and fundamental value.
 
 ## §4 Variant Architecture
 
@@ -60,9 +60,9 @@ The coordinator mechanism is the final implementation in `examples/LiquidityDryu
 |---|---|
 | Player classes | `examples/LiquidityDryup/LLM/players.py` |
 | Prompt module | `examples/LiquidityDryup/LLM/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | ARK LLM via `LangChainAPIInference` and `ark/doubao-seed-2-0-mini-260428`. |
+| Output parsing | `parse_llm_response_with_thinking()` parses `<analysis>` and `<decision>` blocks; malformed responses are retried three times. |
+| Error handling | Deterministic config/schema/API errors fail fast; this variant does not silently fallback after malformed decisions. |
 
 ## §5 Config Reference
 

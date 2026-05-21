@@ -29,7 +29,7 @@ LRI(t) = total_liquidity(t) / (base_liquidity × n_market_makers)
 
 Where `total_liquidity(t)` is computed from Market agent state.
 
-**Python function**: `liquidity_ratio_index(liquidity_history, base_liquidity, n_market_makers)`
+**Python function**: `def liquidity_ratio_index(liquidity_history: list, base_liquidity: float, n_market_makers: int) -> float`
 
 **Inputs**: `liquidity_history` (list of total liquidity per round), `base_liquidity` (config), `n_market_makers` (count)
 
@@ -66,7 +66,7 @@ Where `total_liquidity(t)` is computed from Market agent state.
 MWF(t) = (n_market_makers_withdrawn(t)) / (n_market_makers_total)
 ```
 
-**Python function**: `market_maker_withdrawal_fraction(agent_states, round_num)`
+**Python function**: `def market_maker_withdrawal_fraction(agent_states: dict, round_num: int) -> float`
 
 **Inputs**: `agent_states` per round, filtered for `MarketMaker` class; `provides_liquidity = 0` indicates withdrawal
 
@@ -103,7 +103,7 @@ MWF(t) = (n_market_makers_withdrawn(t)) / (n_market_makers_total)
 MPI(t) = |ΔP(t)| / |NetDemand(t)| if NetDemand(t) ≠ 0
 ```
 
-**Python function**: `market_price_impact(price_history, trade_history)`
+**Python function**: `def market_price_impact(price_history: list, trade_history: list) -> float`
 
 **Inputs**: `price_history` (round-by-round prices), `trade_history` (quantities by agent)
 
@@ -139,7 +139,7 @@ MPI(t) = |ΔP(t)| / |NetDemand(t)| if NetDemand(t) ≠ 0
 PAD = max(|P(t) − F| / F) over the dry-up episode (rounds where LRI < 0.5)
 ```
 
-**Python function**: `price_amplitude_dislocation(price_history, fundamental, lri_history, threshold=0.5)`
+**Python function**: `def price_amplitude_dislocation(price_history: list, fundamental: float, lri_history: list, threshold: float = 0.5) -> float`
 
 **Inputs**: `price_history`, `fundamental` value, `lri_history`, `threshold` for dry-up definition
 
@@ -176,7 +176,7 @@ PAD = max(|P(t) − F| / F) over the dry-up episode (rounds where LRI < 0.5)
 LPD = max consecutive rounds with LRI(t) < 0.5
 ```
 
-**Python function**: `liquidity_persistence_duration(lri_history, threshold=0.5)`
+**Python function**: `def liquidity_persistence_duration(lri_history: list, threshold: float = 0.5) -> int`
 
 **Inputs**: `lri_history` (list of LRI per round)
 
@@ -191,7 +191,7 @@ LPD = max consecutive rounds with LRI(t) < 0.5
 
 **Academic Basis**: Amihud, Y. (2002). doi:[10.1016/S1386-4181(01)00024-6](https://doi.org/10.1016/S1386-4181(01)00024-6). Historical episodes: Black Monday ~1 day (short); GFC ~6 months (long).
 
-**Normal Range**: 5–20 rounds for a well-calibrated 100-round simulation
+**Normal Range**: 10-40 rounds for a well-calibrated 200-round simulation
 
 **Red Flag Threshold**: LPD = 0 (no dry-up — check `volatility_threshold`) or LPD > 60 (permanent dry-up — check `value_multiplier`)
 
@@ -213,7 +213,7 @@ LPD = max consecutive rounds with LRI(t) < 0.5
 WDI = Gini(terminal_wealth_i for all agents i)
 ```
 
-**Python function**: `wealth_distribution_index(agent_states, final_price)`
+**Python function**: `def wealth_distribution_index(agent_states: dict, final_price: float) -> float`
 
 **Inputs**: `agent_states` (final cash and positions), `final_price`
 
@@ -250,7 +250,7 @@ WDI = Gini(terminal_wealth_i for all agents i)
 LPI_class = Σ(provides_liquidity from class) / Σ(total_provides_liquidity across all rounds)
 ```
 
-**Python function**: `liquidity_provider_index(trade_history)`
+**Python function**: `def liquidity_provider_index(trade_history: list) -> dict`
 
 **Inputs**: `trade_history` with `provides_liquidity` field per agent per round
 
@@ -322,7 +322,7 @@ LRI → LiquiditySeeker execution (constrained orders → "missing demand")
 | LRI minimum during dry-up    | 0.05–0.20                        | Amihud (2002) ILLIQ spikes       |
 | MPI during crisis            | 5–10× normal                     | Kyle (1985); GFC data            |
 | PAD during GFC-like scenario | 0.15–0.30                        | Credit spread data, 2008         |
-| LPD for major crisis         | 15–30 rounds (for 100-round sim) | Black Monday 1 day; GFC 6 months |
+| LPD for major crisis         | 20-60 rounds (for 200-round sim) | Black Monday 1 day; GFC 6 months |
 
 ### §6.3 Cross-Variant Predictions
 
@@ -343,11 +343,13 @@ LRI → LiquiditySeeker execution (constrained orders → "missing demand")
 
 ---
 
-## §7 Visualization Recommendations
+## §7 Visualization Catalogue
 
-1. **LRI time series**: Line chart of LRI per round; shade regions where LRI < 0.5 as "dry-up episodes".
-2. **Stacked liquidity chart**: Per-round stacked bar of `provides_liquidity` by agent class (shows transition from MM-dominated to VT-only).
-3. **Price deviation chart**: `(P − F) / F` per round; overlay with LRI on secondary axis.
-4. **MPI evolution**: Effective price impact per round; mark dry-up onset with vertical line.
-5. **Wealth trajectory**: Line chart of cumulative wealth for each agent class; identify redistribution timing.
-6. **Cross-variant LRI comparison**: 4-panel chart with LRI for Rule/LLM/RuleLLM/Rag; compare minimum LRI and recovery speed.
+| Output | Content | Purpose |
+|---|---|---|
+| `summary.json` | Total rounds, price/deviation/return/volume metrics, validation score, and Rag retrieval stats when applicable | Machine-readable Level-2 structural quality summary |
+| `00_investor_bids.png` | Investor bid or order paths when recorded by the shared analysis helper | Headline investor behavior plot |
+| `01_liquiditydryup_dynamics.png` | Price, fundamental, deviation, returns, and volume | Shows dry-up onset, amplification, and recovery |
+| `02_liquiditydryup_analysis.png` | Structural metric dashboard for price, deviation, volatility, and volume | Links run outputs to the liquidity-dry-up metric catalogue |
+| `03_summary.png` | Agent/order/summary comparison | Cross-agent behavior review |
+| `rag_stats.json` | Rag only: retrieval success/failure counts by agent and aggregate retrieval failure rate | RAG knowledge-quality validation |

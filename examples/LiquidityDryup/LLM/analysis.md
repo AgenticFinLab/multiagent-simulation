@@ -8,12 +8,13 @@ This analysis checks whether the LLM variant produces a complete, analyzable Liq
 
 | Metric | Function Contract | Source |
 |---|---|---|
-| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
-| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
-| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
-| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
-| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
-| Scenario-specific diagnostic | `def compute_liquiditydryup_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
+| Liquidity Ratio Index | `def liquidity_ratio_index(liquidity_history: list, base_liquidity: float, n_market_makers: int) -> float` | `analysis-bases.md §2.1` |
+| Market Maker Withdrawal Fraction | `def market_maker_withdrawal_fraction(agent_states: dict, round_num: int) -> float` | `analysis-bases.md §2.2` |
+| Market Price Impact | `def market_price_impact(price_history: list, trade_history: list) -> float` | `analysis-bases.md §2.3` |
+| Price-Amplitude Dislocation | `def price_amplitude_dislocation(price_history: list, fundamental: float, lri_history: list, threshold: float = 0.5) -> float` | `analysis-bases.md §2.4` |
+| Liquidity Persistence Duration | `def liquidity_persistence_duration(lri_history: list, threshold: float = 0.5) -> int` | `analysis-bases.md §2.5` |
+| Wealth Distribution Index | `def wealth_distribution_index(agent_states: dict, final_price: float) -> float` | `analysis-bases.md §2.6` |
+| Liquidity Provider Index | `def liquidity_provider_index(trade_history: list) -> dict` | `analysis-bases.md §2.7` |
 
 ## §3 Analysis Dimensions
 
@@ -33,4 +34,4 @@ Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full
 
 ## §7 Visualization Catalogue
 
-Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_liquiditydryup_dynamics.png`, `02_liquiditydryup_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.
+Required outputs are `summary.json`, `00_investor_bids.png`, `01_liquiditydryup_dynamics.png`, `02_liquiditydryup_analysis.png`, and `03_summary.png`.

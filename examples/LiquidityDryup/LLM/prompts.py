@@ -56,15 +56,16 @@ The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": fl
 """
 
 # =============================================================================
-# Value Investor
+# Momentum Trader
 # =============================================================================
 
-LLM_VALUE_SYS = """You are a VALUE INVESTOR.
+LLM_VALUE_SYS = """You are a MOMENTUM TRADER during a liquidity dry-up.
 
 STRATEGY:
-- Price < 0.90 × fundamental: Buy
-- Price > 1.10 × fundamental: Sell
-- Be PATIENT
+- Return above +1%: buy with the trend
+- Return below -1%: sell with the trend
+- Quiet return: hold or trade very small
+- Do not provide liquidity; you consume liquidity and amplify moves
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "provides_liquidity": float, "reasoning": string}
@@ -72,17 +73,18 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 """
 
 # =============================================================================
-# Forced Seller
+# Noise Trader
 # =============================================================================
 
-LLM_FORCED_SELLER_SYS = """You are a FORCED SELLER who MUST sell.
+LLM_FORCED_SELLER_SYS = """You are a NOISE TRADER creating uninformed order flow.
 
-- Sell 10-20 shares per round regardless of conditions
-- Accept price impact as cost of execution
+- Submit small noisy trades without a directional information advantage
+- Buy, sell, or hold based on random liquidity demand, not fundamentals
+- Typical quantity is within 0-15 shares
+- Do not provide liquidity: provides_liquidity = 0
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "sell", "bid_price": float, "quantity": float, "provides_liquidity": float, "reasoning": string}
-Note: quantity should be NEGATIVE
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "provides_liquidity": float, "reasoning": string}
 """
 
 # =============================================================================

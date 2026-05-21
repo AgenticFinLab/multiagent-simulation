@@ -31,14 +31,16 @@ Emotional state: Composed and analytical.
 == DECISION RULES (from MarketMaker) ==
 
 Apply the quantitative decision rules from the MarketMaker strategy:
-- Follow the mathematical formulas and thresholds from the rule-based variant
-- Use LLM reasoning to interpret market context and adjust within ±20%
-- The sign (buy/sell/hold) MUST follow the rule direction
+- If absolute return exceeds 2%, withdraw: set provides_liquidity = 0.
+- Otherwise quote normal depth: set provides_liquidity around 30.
+- If withdrawing, reduce inventory by selling or buying about 30% of current position.
+- If active, rebalance inventory by about 20% of current position.
+- Keep order quantity within approximately -25 to +25 shares.
 
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": <float>, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -60,14 +62,15 @@ Emotional state: Composed and analytical.
 == DECISION RULES (from LiquiditySeeker) ==
 
 Apply the quantitative decision rules from the LiquiditySeeker strategy:
-- Follow the mathematical formulas and thresholds from the rule-based variant
-- Use LLM reasoning to interpret market context and adjust within ±20%
-- The sign (buy/sell/hold) MUST follow the rule direction
+- Target an order size based on execution need, around +/-15 shares in normal liquidity.
+- Scale order size down when liquidity is below 100 using liquidity / 100.
+- Do not provide liquidity: set provides_liquidity = 0.
+- Keep order quantity within approximately -20 to +20 shares.
 
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": <float>, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -89,14 +92,16 @@ Emotional state: Composed and analytical.
 == DECISION RULES (from ValueTrader) ==
 
 Apply the quantitative decision rules from the ValueTrader strategy:
-- Follow the mathematical formulas and thresholds from the rule-based variant
-- Use LLM reasoning to interpret market context and adjust within ±20%
-- The sign (buy/sell/hold) MUST follow the rule direction
+- Estimate deviation as (fundamental - price) / fundamental.
+- If absolute deviation exceeds 5%, provide crisis liquidity around 20.
+- If absolute deviation exceeds 3%, trade quantity ~= deviation * 30.
+- Buy when price is below fundamental; sell when price is above fundamental.
+- Keep order quantity within approximately -25 to +25 shares.
 
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": <float>, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -118,14 +123,16 @@ Emotional state: Composed and analytical.
 == DECISION RULES (from MomentumTrader) ==
 
 Apply the quantitative decision rules from the MomentumTrader strategy:
-- Follow the mathematical formulas and thresholds from the rule-based variant
-- Use LLM reasoning to interpret market context and adjust within ±20%
-- The sign (buy/sell/hold) MUST follow the rule direction
+- If absolute return is at or below 1%, hold.
+- If absolute return exceeds 1%, trade with the trend: quantity ~= return * 200.
+- Positive return means buy; negative return means sell.
+- Do not provide liquidity: set provides_liquidity = 0.
+- Keep order quantity within approximately -35 to +35 shares.
 
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": <float>, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -147,14 +154,14 @@ Emotional state: Composed and analytical.
 == DECISION RULES (from NoiseTrader) ==
 
 Apply the quantitative decision rules from the NoiseTrader strategy:
-- Follow the mathematical formulas and thresholds from the rule-based variant
-- Use LLM reasoning to interpret market context and adjust within ±20%
-- The sign (buy/sell/hold) MUST follow the rule direction
+- Submit small noisy orders with no systematic signal.
+- Typical size is within +/-10 shares; keep absolute quantity below about 15 shares.
+- Random direction is acceptable, but do not provide liquidity: set provides_liquidity = 0.
 
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": <float>, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -184,6 +191,6 @@ RAGLLM_USER_TEMPLATE = """
 Apply your DECISION RULES, informed by the relevant knowledge above and output your trade decision.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <NUMBER>, "quantity": <NUMBER, +buy/-sell>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <NUMBER>, "quantity": <NUMBER, +buy/-sell>, "provides_liquidity": <NUMBER>, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """

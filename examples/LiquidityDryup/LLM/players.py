@@ -303,13 +303,13 @@ class LLMArbitrageur(LLMInvestor):
 
 
 class LLMValueInvestor(LLMInvestor):
-    """Value investor - patient buyer. Theory: simulation-bases.md §4.4"""
+    """Momentum-style LLM investor using the legacy class name. Theory: simulation-bases.md §4.4"""
 
     _system_prompt = LLM_VALUE_SYS
 
 
 class LLMForcedSeller(LLMInvestor):
-    """Forced seller - must sell. Theory: simulation-bases.md §4.5"""
+    """Noise-trader LLM investor using the legacy class name. Theory: simulation-bases.md §4.5"""
 
     _system_prompt = LLM_FORCED_SELLER_SYS
 
