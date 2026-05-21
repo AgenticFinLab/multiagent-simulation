@@ -366,4 +366,5 @@ Using CRSP data 1926–1990, Benartzi & Thaler showed that loss-averse investors
 | Equity premium source | Hard-coded loss_aversion × perceived_risk | LLM reasons about risk aversion | Rules set floor; LLM adjusts within bounds | Retrieved literature informs allocation |
 | Stochasticity         | Only noise_std randomness                 | Full LLM stochasticity          | Threshold-bounded LLM variance             | RAG retrieval variance                  |
 | Realism               | Mechanistic but calibrated                | Nuanced but inconsistent        | Balanced control and flexibility           | Knowledge-grounded                      |
-| provides_liquidity    | Not applicable                            | Not applicable                  | `decision["provides_liquidity"]`           | `decision["provides_liquidity"]`        |
+| `stock_qty`           | Deterministic formula output              | LLM allocation decision         | Rule-anchored LLM allocation decision      | RAG-augmented allocation decision       |
+| `reasoning`           | Not applicable                            | LLM rationale                   | RuleLLM rationale                          | RAG-grounded rationale                  |

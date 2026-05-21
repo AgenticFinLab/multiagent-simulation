@@ -62,7 +62,8 @@ The Rag variant augments LLM investor personas with Retrieval-Augmented Generati
 P(t+1) = P(t) × (1 + μ_stock + demand_impact + ε(t))
 ```
 
-Market is shared with Rule variant. All Rag investors send `stock_qty` orders with `provides_liquidity` field.
+Market is shared with the Rule/LLM stock-bond allocation variants. All Rag
+investors send `stock_qty` orders; no liquidity-provision schema is used.
 
 ## §4 Variant Architecture
 
@@ -71,7 +72,7 @@ Market is shared with Rule variant. All Rag investors send `stock_qty` orders wi
 | Base class     | `RagLLMInvestor` → `GeneralPlayer`                                                           |
 | Inference      | `LangChainAPIInference` + RAG knowledge retrieval                                            |
 | Context        | `stock_price`, `stock_return`, `bond_return`, `cash`, `stock`, `round` + retrieved documents |
-| Output parsing | JSON response with `stock_qty`, `strategy`, `reasoning`, `provides_liquidity`                |
+| Output parsing | JSON response with `stock_qty` and `reasoning`; player adds `strategy`, fallback metadata, and `rag_context` |
 | RAG retrieval  | Query built from market state; documents from equity premium knowledge base                  |
 
 ## §5 Config Reference

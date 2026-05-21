@@ -41,3 +41,15 @@ Measure whether embedded allocation rules constrain LLM variance while preservin
 
 See `analysis-bases.md §2` for full metric derivations and Python function signatures.
 See `simulation-bases.md §2` for theoretical foundations.
+
+## §6 Validation Criteria
+
+RuleLLM samples must preserve the `stock_qty` allocation schema, use prompts with
+`== PERSONA ==` and `== DECISION RULES ==`, and write the same fixed analysis
+outputs as Rule.
+
+## §7 Cross-Variant Use
+
+Compare RuleLLM against Rule to measure language-reasoning effects under explicit
+allocation rules, and against LLM to measure whether rule anchoring reduces
+allocation variance.
