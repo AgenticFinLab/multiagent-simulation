@@ -19,7 +19,7 @@ The RuleLLM variant implements the short squeeze with rule-embedded LLM reasonin
 ### §2.1 RuleLLMRetailCoordinated (`simulation-bases.md §4.1`)
 | Theory Component      | Implementation                                                           |
 |-----------------------|--------------------------------------------------------------------------|
-| Social coordination   | Embedded: "buy when cash > price×50; use buy_pressure = 0.3 of cash"     |
+| Social coordination   | Embedded: "buy when cash > price×50; use configured buy_pressure"        |
 | LLM contextualisation | LLM reasons about social momentum; may amplify buy_pressure in narrative |
 
 ### §2.2 RuleLLMShortSellerHF (`simulation-bases.md §4.2`)
@@ -67,7 +67,7 @@ The RuleLLM variant implements the short squeeze with rule-embedded LLM reasonin
 This variant traces to `../simulation-bases.md §4` for investor design and
 `../analysis-bases.md §2` for metric definitions. Post-run review should verify
 full round count, order schema completeness, price and portfolio sanity, LLM
-parse/fallback rates, and rule-adherence patterns before accepting a sample.
+parse/retry logs, and rule-adherence patterns.
 
 ## §6 Running Instructions
 
@@ -92,4 +92,8 @@ short-squeeze trading rules are embedded in each system prompt.
 
 Each system prompt in `prompts.py` must keep separate `== PERSONA ==` and
 `== DECISION RULES ==` sections. Because RAG imports these RuleLLM system
-prompts, prompt-structure changes affect both RuleLLM and RAG samples.
+prompts, prompt-structure changes affect both RuleLLM and RAG runtime behavior.
+Accepted decisions must contain `action`, positive `bid_price`, `quantity`, and
+non-empty `reasoning`; deterministic parser or provider failures fail fast after
+bounded retries. The user prompt injects the agent's configured decision
+parameters so explicit rules use the same values as `players.yml`.

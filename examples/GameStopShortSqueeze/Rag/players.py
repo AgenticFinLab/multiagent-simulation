@@ -27,10 +27,17 @@ from masim.knowledge import (
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 
-from examples.GameStopShortSqueeze.Rule.players import Market
+from examples.GameStopShortSqueeze.Rule.players import Market, _build_order
 from examples.GameStopShortSqueeze.Rag.prompts import RAG_USER_TEMPLATE
 
 logger = logging.getLogger(__name__)
+PARAMETER_KEYS = (
+    "buy_pressure",
+    "cover_threshold",
+    "gamma_exposure",
+    "sell_threshold",
+    "fomo_threshold",
+)
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -38,6 +45,13 @@ def load_prompt(prompt_path: str) -> str:
     module_path, var_name = prompt_path.rsplit(":", 1)
     module = importlib.import_module(module_path)
     return getattr(module, var_name)
+
+
+def _format_decision_params(params: Dict[str, Any]) -> str:
+    """Format configured decision parameters for the RAG user prompt."""
+    if not params:
+        return "None for this agent."
+    return "\n".join(f"- {key}: {value}" for key, value in sorted(params.items()))
 
 
 class RagLLMInvestor(GeneralPlayer):
@@ -61,6 +75,9 @@ class RagLLMInvestor(GeneralPlayer):
         extras = self.config.extras
         self.state.custom_state["cash"] = extras["initial_cash"]
         self.state.custom_state["position"] = extras["initial_position"]
+        self.state.custom_state["decision_params"] = {
+            key: extras[key] for key in PARAMETER_KEYS if key in extras
+        }
 
         project_root = Path(__file__).parent.parent.parent
         load_dotenv(project_root / ".env")
@@ -281,6 +298,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         return RAG_USER_TEMPLATE.format(
             rag_context=rag_context,
@@ -291,6 +309,9 @@ class RagLLMInvestor(GeneralPlayer):
             cash=cash,
             position=position,
             portfolio_value=portfolio_value,
+            decision_params=_format_decision_params(
+                self.state.custom_state["decision_params"]
+            ),
         )
 
     async def decide(self) -> Dict[str, Any]:
@@ -311,6 +332,12 @@ class RagLLMInvestor(GeneralPlayer):
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
+                if decision["action"] not in ("buy", "sell", "hold"):
+                    raise ValueError(f"Invalid action: {decision['action']}")
+                if float(decision["bid_price"]) <= 0:
+                    raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
+                if not str(decision["reasoning"]).strip():
+                    raise ValueError("Missing reasoning")
                 break
             except Exception as exc:
                 last_error = exc
@@ -345,23 +372,35 @@ class RagLLMInvestor(GeneralPlayer):
                 self.state.custom_state["cash"] += quantity * price
                 self.state.custom_state["position"] -= quantity
 
-        order = {"type": "order", "action": action, "quantity": quantity}
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision["bid_price"]),
+            str(decision["reasoning"]),
+        )
         return {
-            "action": action,
-            "quantity": quantity,
+            **order,
+            "rag_context": self.state.custom_state["last_rag_context"],
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
         order = {
             "type": "order",
+            "from": self.identity,
             "action": decision_payload["action"],
+            "bid_price": decision_payload["bid_price"],
             "quantity": decision_payload["quantity"],
+            "reasoning": decision_payload["reasoning"],
+            "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
         }
         return Action(
             action_type="order",
             payload={
                 "order": order,
+                "rag_context": decision_payload["rag_context"],
                 "outbound_messages": [{"payload": order, "content_type": "order"}],
             },
             source_id=self.identity,

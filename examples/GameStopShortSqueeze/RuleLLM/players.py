@@ -16,11 +16,18 @@ from lmbase.inference.base import InferInput
 from masim.player.base import Action
 from masim.player.general import GeneralPlayer
 
-from examples.GameStopShortSqueeze.Rule.players import Market  # noqa: F401
+from examples.GameStopShortSqueeze.Rule.players import Market, _build_order  # noqa: F401
 from examples.llm_utils import parse_llm_response_with_thinking
 from examples.GameStopShortSqueeze.RuleLLM.prompts import RULELLM_USER_TEMPLATE
 
 logger = logging.getLogger("GameStopShortSqueeze.RuleLLM")
+PARAMETER_KEYS = (
+    "buy_pressure",
+    "cover_threshold",
+    "gamma_exposure",
+    "sell_threshold",
+    "fomo_threshold",
+)
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -28,6 +35,13 @@ def load_prompt(prompt_path: str) -> str:
     module_path, var_name = prompt_path.rsplit(":", 1)
     module = importlib.import_module(module_path)
     return getattr(module, var_name)
+
+
+def _format_decision_params(params):
+    """Format configured decision parameters for the RuleLLM user prompt."""
+    if not params:
+        return "None for this agent."
+    return "\n".join(f"- {key}: {value}" for key, value in sorted(params.items()))
 
 
 class RuleLLMInvestor(GeneralPlayer):
@@ -50,6 +64,9 @@ class RuleLLMInvestor(GeneralPlayer):
         extras = self.config.extras
         self.state.custom_state["cash"] = extras["initial_cash"]
         self.state.custom_state["position"] = extras["initial_position"]
+        self.state.custom_state["decision_params"] = {
+            key: extras[key] for key in PARAMETER_KEYS if key in extras
+        }
         llm_cfg = extras["llm"]
         self._llm_params = {
             "lm_name": llm_cfg["lm_name"],
@@ -93,6 +110,9 @@ class RuleLLMInvestor(GeneralPlayer):
             cash=cash,
             position=position,
             portfolio_value=portfolio_value,
+            decision_params=_format_decision_params(
+                self.state.custom_state["decision_params"]
+            ),
         )
         infer_input = InferInput(system_msg=system_msg, user_msg=user_msg)
 
@@ -102,6 +122,12 @@ class RuleLLMInvestor(GeneralPlayer):
             try:
                 response = self._llm_client.run([infer_input]).outputs[0].response
                 decision = parse_llm_response_with_thinking(response)
+                if decision["action"] not in ("buy", "sell", "hold"):
+                    raise ValueError(f"Invalid action: {decision['action']}")
+                if float(decision["bid_price"]) <= 0:
+                    raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
+                if not str(decision["reasoning"]).strip():
+                    raise ValueError("Missing reasoning")
                 break
             except Exception as exc:
                 last_error = exc
@@ -126,7 +152,13 @@ class RuleLLMInvestor(GeneralPlayer):
         elif action == "sell":
             quantity = min(quantity, max(position, 0))
 
-        return {"action": action, "quantity": quantity}
+        return _build_order(
+            self,
+            action,
+            quantity,
+            float(decision["bid_price"]),
+            str(decision["reasoning"]),
+        )
 
     async def act(self, decision_payload):
         action = decision_payload["action"]
@@ -138,7 +170,13 @@ class RuleLLMInvestor(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision_payload["bid_price"]),
+            str(decision_payload["reasoning"]),
+        )
         return Action(
             action_type="order",
             payload={

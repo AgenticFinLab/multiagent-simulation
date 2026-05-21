@@ -69,8 +69,7 @@ The Rag variant implements the short squeeze with RAG-augmented LLM reasoning. R
 This variant traces to `../simulation-bases.md §4` for investor design and
 `../analysis-bases.md §2` for metric definitions. Post-run review should verify
 full round count, order schema completeness, price and portfolio sanity,
-retrieval health, LLM parse/fallback rates, and squeeze-phase patterns before
-accepting a sample.
+retrieval health, LLM parse/retry logs, and squeeze-phase patterns.
 
 ## §6 Running Instructions
 
@@ -94,5 +93,8 @@ relative to RuleLLM prompts with the same embedded decision rules.
 ## §9 Implementation Traceability
 
 `Rag/prompts.py` imports RuleLLM system prompts and adds `{rag_context}` in the
-user template. RAG sample acceptance requires retrieval-health checks in
-addition to LLM parse and structural output checks.
+user template. `Rag/players.py` records `rag_context` with each decision and
+`Rag/analysis.py` writes `rag_stats.json` alongside the standard analysis
+outputs. Accepted decisions must keep the same canonical order schema as
+RuleLLM. The RAG user prompt includes the agent's configured decision parameters
+alongside retrieved context.

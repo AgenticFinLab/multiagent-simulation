@@ -145,6 +145,9 @@ Cash Available: ${cash:.2f}
 Position:       {position} shares
 Portfolio Value: ${portfolio_value:.2f}
 
+== CONFIGURED PARAMETERS ==
+{decision_params}
+
 Apply your trading rules to this market state and make your decision.
 
 Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

@@ -70,7 +70,7 @@ The LLM variant implements the short squeeze simulation via LLM persona reasonin
 This variant traces to `../simulation-bases.md §4` for investor design and
 `../analysis-bases.md §2` for metric definitions. Post-run review should verify
 full round count, order schema completeness, price and portfolio sanity, LLM
-parse/fallback rates, and squeeze-phase patterns before accepting a sample.
+parse/retry logs, and squeeze-phase patterns.
 
 ## §6 Running Instructions
 
@@ -94,5 +94,8 @@ short-squeeze mechanism without embedded numerical rules.
 ## §9 Implementation Traceability
 
 System prompts in `prompts.py` define persona behavior, while `players.py`
-parses the canonical `<analysis>` and `<decision>` response. Acceptance requires
-clean parse/retry/fallback quality logs in addition to successful execution.
+parses the canonical `<analysis>` and `<decision>` response. Accepted decisions
+must contain `action`, positive `bid_price`, `quantity`, and non-empty
+`reasoning`; deterministic parser or provider failures fail fast after bounded
+retries. The user prompt injects the agent's configured decision parameters so
+threshold references resolve to the same runtime values used by configs.

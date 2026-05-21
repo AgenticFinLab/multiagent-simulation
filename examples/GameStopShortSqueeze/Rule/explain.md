@@ -22,7 +22,7 @@ The Rule variant implements the GameStop Short Squeeze simulation using determin
 | Theory Component                          | Implementation                                                                             |
 |-------------------------------------------|--------------------------------------------------------------------------------------------|
 | Social coordination (Barber et al., 2022) | `if cash > price * 50 and price > 0: buy_qty = min(int(cash * buy_pressure / price), 500)` |
-| Buy-pressure parameter                    | `buy_pressure` (default 0.3) controls fraction of cash deployed per round                  |
+| Buy-pressure parameter                    | `buy_pressure = 0.12` controls fraction of cash deployed per round                         |
 | Cash threshold gate                       | `cash > price * 50` — requires minimum cash to trade; prevents exhausted buyers            |
 | Max 500 shares                            | Position cap; social-media retail investor buying constraint                               |
 
@@ -30,9 +30,9 @@ The Rule variant implements the GameStop Short Squeeze simulation using determin
 
 | Theory Component                                    | Implementation                                                                                              |
 |-----------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
-| Short sale constraints (Diamond & Verrecchia, 1987) | `initial_position = -500` — starts fully short                                                              |
+| Short sale constraints (Diamond & Verrecchia, 1987) | `initial_position = -1000` — starts fully short                                                             |
 | Forced covering on squeeze                          | `if position < 0 and deviation > cover_threshold: cover_qty = min(abs(position), int(abs(position) * 0.5))` |
-| Partial covering                                    | Covers 50% of remaining short position per round when deviation > `cover_threshold`                         |
+| Partial covering                                    | Covers 50% of remaining short position per round when deviation > `cover_threshold = 0.05`                  |
 | Squeeze mechanics                                   | Covering creates buying pressure, amplifying price rise, forcing more covering                              |
 
 ### §2.3 MarketMakerGamma (`simulation-bases.md §4.3`)
@@ -41,15 +41,15 @@ The Rule variant implements the GameStop Short Squeeze simulation using determin
 |-----------------------------------|----------------------------------------------------------------------------------------------------|
 | Gamma squeeze (Jarrow & Li, 2021) | `hedge_qty = int(abs(deviation) * gamma_exposure * 5000)`                                          |
 | Delta hedging buy                 | `if deviation > 0 and hedge_qty > 0: buy_qty = min(hedge_qty, int(cash / price))`                  |
-| Gamma exposure parameter          | `gamma_exposure` (default 1.0) scales hedging response to deviation                                |
+| Gamma exposure parameter          | `gamma_exposure = 0.3` scales hedging response to deviation                                       |
 | Mechanical hedging                | Market maker must hedge delta exposure as options go in-the-money; creates systematic buy pressure |
 
 ### §2.4 InstitutionalValue (`simulation-bases.md §4.4`)
 
 | Theory Component          | Implementation                                                                                             |
 |---------------------------|------------------------------------------------------------------------------------------------------------|
-| Fundamental value selling | `initial_position = 1000` — starts long at pre-squeeze price                                               |
-| Sell on overvaluation     | `if deviation > sell_threshold: sell_qty = min(1000, max(position, 0))`                                    |
+| Fundamental value selling | `initial_position = 2000` — starts long at pre-squeeze price                                               |
+| Sell on overvaluation     | `if deviation > sell_threshold: sell_qty = min(1000, max(position, 0))`; `sell_threshold = 0.30`            |
 | IEP trigger               | Sells entire long position when deviation > `sell_threshold`; tracks first round of full exit (IEP metric) |
 | Countervailing force      | §4.4 provides selling pressure opposing the squeeze forces of §4.1, §4.2, §4.3                             |
 
@@ -57,7 +57,7 @@ The Rule variant implements the GameStop Short Squeeze simulation using determin
 
 | Theory Component                    | Implementation                                                                  |
 |-------------------------------------|---------------------------------------------------------------------------------|
-| FOMO momentum (Lyocsa et al., 2022) | `if deviation > fomo_threshold: buy_qty = min(50, int(cash / price))`           |
+| FOMO momentum (Lyocsa et al., 2022) | `if deviation > fomo_threshold: buy_qty = min(50, int(cash / price))`; `fomo_threshold = 0.05` |
 | Small position cap                  | 50 shares max — small retail investor; low individual impact but many instances |
 | FOMO activation                     | Only buys on positive deviation > `fomo_threshold`; does not short or sell      |
 

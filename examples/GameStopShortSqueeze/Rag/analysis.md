@@ -21,6 +21,7 @@
 | SCD    | `squeeze_collapse_duration(price_history, fundamental)`                   | §2.4                  |
 | IEP    | `institutional_exhaustion_point(agent_states_history)`                    | §2.5                  |
 | WTI    | `wealth_transfer_index(agent_states, final_price)`                        | §2.6                  |
+| AQR    | `analyze_rag_knowledge_effect(rag_contexts)`                              | §2.7                  |
 
 ---
 
@@ -73,4 +74,5 @@ baseline mechanism.
 - Confirm the run completed 200 configured rounds.
 - Confirm RAG assets and embedding configuration were available.
 - Confirm `{rag_context}` was populated or explicitly replaced by the no-context marker.
-- Audit parse failures, retry counts, fallback holds, and retrieval-health records before acceptance.
+- Audit parse failures, retry counts, and retrieval-health records; deterministic parser/provider failures fail fast.
+- Confirm `rag_stats.json` was written with per-agent and aggregate retrieval-health statistics.

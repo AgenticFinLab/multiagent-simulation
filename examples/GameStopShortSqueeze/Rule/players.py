@@ -19,12 +19,37 @@ Parameters from config (see configs/GameStopShortSqueeze/Rule/players.yml).
 
 import logging
 import random
+from typing import Any, Dict
 
 from masim.player.base import Action
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("GameStopShortSqueeze")
+
+
+def _build_order(
+    player: GeneralPlayer,
+    action: str,
+    quantity: int,
+    price: float,
+    reasoning: str,
+) -> Dict[str, Any]:
+    """Build the canonical trading order shared by all variants."""
+    if action not in ("buy", "sell", "hold"):
+        raise ValueError(f"{player.identity} emitted invalid action: {action}")
+    if price <= 0:
+        raise ValueError(f"{player.identity} emitted non-positive bid_price: {price}")
+    return {
+        "type": "order",
+        "from": player.identity,
+        "action": action,
+        "bid_price": float(price),
+        "quantity": max(0, int(quantity)),
+        "reasoning": reasoning,
+        "agent_type": player.__class__.__name__,
+        "strategy": player.__class__.__name__,
+    }
 
 
 class Market(GeneralPlayer):
@@ -48,7 +73,9 @@ class Market(GeneralPlayer):
         orders = []
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload["type"] == "order":
+            if isinstance(payload, dict) and "type" not in payload and "order" in payload:
+                payload = payload["order"]
+            if isinstance(payload, dict) and payload.get("type") == "order":
                 orders.append(payload)
 
         price = self.state.custom_state["price"]
@@ -148,8 +175,20 @@ class RetailCoordinated(GeneralPlayer):
         if cash > price * 50 and price > 0:
             buy_qty = min(int(cash * buy_pressure / price), 500)
             if buy_qty > 0:
-                return {"action": "buy", "quantity": buy_qty}
-        return {"action": "hold", "quantity": 0}
+                return _build_order(
+                    self,
+                    "buy",
+                    buy_qty,
+                    price,
+                    "coordinated retail trader deploys cash into squeeze buying pressure",
+                )
+        return _build_order(
+            self,
+            "hold",
+            0,
+            price,
+            "cash threshold is not sufficient for coordinated buying",
+        )
 
     async def act(self, decision_payload):
         action = decision_payload["action"]
@@ -158,7 +197,13 @@ class RetailCoordinated(GeneralPlayer):
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision_payload["bid_price"]),
+            str(decision_payload["reasoning"]),
+        )
         return Action(
             action_type="order",
             payload={
@@ -199,8 +244,20 @@ class ShortSellerHF(GeneralPlayer):
         if position < 0 and deviation > cover_threshold:
             cover_qty = min(abs(position), int(abs(position) * 0.5))
             if cover_qty > 0:
-                return {"action": "buy", "quantity": cover_qty}
-        return {"action": "hold", "quantity": 0}
+                return _build_order(
+                    self,
+                    "buy",
+                    cover_qty,
+                    self.state.custom_state["price"],
+                    "short seller covers after squeeze pressure breaches threshold",
+                )
+        return _build_order(
+            self,
+            "hold",
+            0,
+            self.state.custom_state["price"],
+            "short-cover threshold has not been breached",
+        )
 
     async def act(self, decision_payload):
         action = decision_payload["action"]
@@ -209,7 +266,13 @@ class ShortSellerHF(GeneralPlayer):
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision_payload["bid_price"]),
+            str(decision_payload["reasoning"]),
+        )
         return Action(
             action_type="order",
             payload={
@@ -252,8 +315,20 @@ class MarketMakerGamma(GeneralPlayer):
         if deviation > 0 and hedge_qty > 0 and price > 0:
             buy_qty = min(hedge_qty, int(cash / price))
             if buy_qty > 0:
-                return {"action": "buy", "quantity": buy_qty}
-        return {"action": "hold", "quantity": 0}
+                return _build_order(
+                    self,
+                    "buy",
+                    buy_qty,
+                    price,
+                    "market maker buys underlying shares to hedge positive gamma exposure",
+                )
+        return _build_order(
+            self,
+            "hold",
+            0,
+            price,
+            "gamma hedge condition is inactive",
+        )
 
     async def act(self, decision_payload):
         action = decision_payload["action"]
@@ -262,7 +337,13 @@ class MarketMakerGamma(GeneralPlayer):
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision_payload["bid_price"]),
+            str(decision_payload["reasoning"]),
+        )
         return Action(
             action_type="order",
             payload={
@@ -303,8 +384,20 @@ class InstitutionalValue(GeneralPlayer):
         if deviation > sell_threshold:
             sell_qty = min(1000, max(position, 0))
             if sell_qty > 0:
-                return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                return _build_order(
+                    self,
+                    "sell",
+                    sell_qty,
+                    self.state.custom_state["price"],
+                    "institutional value investor sells into extreme overvaluation",
+                )
+        return _build_order(
+            self,
+            "hold",
+            0,
+            self.state.custom_state["price"],
+            "valuation threshold is not high enough to sell",
+        )
 
     async def act(self, decision_payload):
         action = decision_payload["action"]
@@ -313,7 +406,13 @@ class InstitutionalValue(GeneralPlayer):
         if action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision_payload["bid_price"]),
+            str(decision_payload["reasoning"]),
+        )
         return Action(
             action_type="order",
             payload={
@@ -355,8 +454,20 @@ class MomentumRetail(GeneralPlayer):
         if deviation > fomo_threshold and price > 0:
             buy_qty = min(50, int(cash / price))
             if buy_qty > 0:
-                return {"action": "buy", "quantity": buy_qty}
-        return {"action": "hold", "quantity": 0}
+                return _build_order(
+                    self,
+                    "buy",
+                    buy_qty,
+                    price,
+                    "momentum retail trader buys after FOMO threshold is crossed",
+                )
+        return _build_order(
+            self,
+            "hold",
+            0,
+            price,
+            "FOMO threshold has not been crossed",
+        )
 
     async def act(self, decision_payload):
         action = decision_payload["action"]
@@ -365,7 +476,13 @@ class MomentumRetail(GeneralPlayer):
         if action == "buy" and quantity > 0 and price > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision_payload["bid_price"]),
+            str(decision_payload["reasoning"]),
+        )
         return Action(
             action_type="order",
             payload={
@@ -378,6 +495,7 @@ class MomentumRetail(GeneralPlayer):
 
 __all__ = [
     "Market",
+    "_build_order",
     "RetailCoordinated",
     "ShortSellerHF",
     "MarketMakerGamma",

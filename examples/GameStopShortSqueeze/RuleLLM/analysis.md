@@ -58,5 +58,5 @@ to measure the marginal effect of retrieved context.
 
 - Confirm the run completed the configured 200 rounds.
 - Confirm RuleLLM prompts keep separate persona and decision-rule sections.
-- Audit parse failures, retry counts, and fallback holds before acceptance.
-- Confirm accepted decisions preserve valid order payloads.
+- Audit parse failures and retry counts; deterministic parser/provider failures fail fast.
+- Confirm accepted decisions preserve canonical `action`, `bid_price`, `quantity`, and `reasoning`.

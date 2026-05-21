@@ -61,7 +61,7 @@ shortsellerhf:
     extras:
       record_path: "EXPERIMENT/GameStopShortSqueeze/LLM/records"
       initial_cash: 2000000.0
-      initial_position: 1000
+      initial_position: -1000
       initial_price: 20.0
       fundamental_value: 20.0
       custom_state_hot_limit: 3

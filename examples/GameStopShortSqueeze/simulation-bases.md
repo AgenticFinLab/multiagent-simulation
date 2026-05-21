@@ -58,7 +58,7 @@ Short sale constraints distort price discovery in a fundamentally asymmetric way
 
 The short squeeze dynamic is the acute extreme of this mechanism: when price rises sufficiently above the short seller's entry point, their mark-to-market loss exceeds their risk tolerance or margin constraint, forcing them to buy shares to close the position. This forced buying further drives up price, triggering the next short seller's margin call, creating a cascade. In GameStop, this cascade was deliberately engineered by WSB: by buying aggressively and not selling ("diamond hands"), they created a price level that triggered mass short covering.
 
-The simulation implements this through ShortSellerHF (§4.2): initial position is −500 shares (already short), and covering is triggered when deviation > cover_threshold. Each covering purchase further increases deviation, potentially triggering additional covering in subsequent rounds — the cascade mechanics of a real short squeeze compressed into the simulation's round structure.
+The simulation implements this through ShortSellerHF (§4.2): initial position is −1,000 shares (already short), and covering is triggered when deviation > cover_threshold. Each covering purchase further increases deviation, potentially triggering additional covering in subsequent rounds — the cascade mechanics of a real short squeeze compressed into the simulation's round structure.
 
 #### 1.3 Mathematical Formulation
 
@@ -73,8 +73,8 @@ Deviation amplification:
 
 | Symbol                           | Definition                             | Calibrated Value | Source                          |
 |----------------------------------|----------------------------------------|------------------|---------------------------------|
-| cover_threshold                  | Deviation level triggering short cover | 0.10–0.30        | Jones & Lamont (2002) empirical |
-| initial_position (ShortSellerHF) | Initial short exposure                 | −500 shares      | GME 140% short float analog     |
+| cover_threshold                  | Deviation level triggering short cover | 0.05             | Jones & Lamont (2002) empirical |
+| initial_position (ShortSellerHF) | Initial short exposure                 | −1,000 shares    | GME 140% short float analog     |
 | 50% cover per round              | Rate of forced covering                | Fixed 0.5        | Realistic margin-call mechanics |
 
 #### 1.4 Empirical Evidence
@@ -88,7 +88,7 @@ Deviation amplification:
 
 #### 1.5 Relevance to Simulation
 
-Theory 1 is the primary mechanism for ShortSellerHF (§4.2) and directly motivates the initial_position = −500 short starting condition. The cover_threshold parameter calibrates when forced buying begins; setting it to 0.10 (10% overvaluation) mimics realistic margin constraint levels.
+Theory 1 is the primary mechanism for ShortSellerHF (§4.2) and directly motivates the initial_position = −1,000 short starting condition. The cover_threshold parameter calibrates when forced buying begins; setting it to 0.05 (5% overvaluation) creates an early forced-cover trigger for the compressed multi-agent squeeze.
 
 ---
 
@@ -121,7 +121,7 @@ Simulation approximation:
 
 | Symbol               | Definition                     | Calibrated Value                      | Source                                  |
 |----------------------|--------------------------------|---------------------------------------|-----------------------------------------|
-| gamma_exposure       | Aggregate net gamma of MM book | 0.5–2.0                               | Jarrow & Li (2021) empirical            |
+| gamma_exposure       | Aggregate net gamma of MM book | 0.3–2.0                               | Jarrow & Li (2021) empirical            |
 | 5000                 | Scaling constant               | Fixed                                 | Consistent with deviation × qty formula |
 | Activation condition | deviation > 0                  | Any upward deviation triggers hedging | Delta-hedging requirement               |
 
@@ -186,7 +186,7 @@ Theory 3 is encoded by RetailCoordinated (§4.1) and partially by MomentumRetail
 | Fundamental value                   | Constant F                                       | Isolates squeeze as source of deviation (GME fundamental ~$10–20 vs. $483 peak) |
 | Market broadcast                    | `{type, price, fundamental, deviation, round}`   | All signals needed for threshold-based decisions                                |
 | Order format                        | buy / sell / hold with quantity                  | Standard asymmetric order flow                                                  |
-| ShortSellerHF initial position      | −500 shares                                      | Short position must exist before squeeze can begin                              |
+| ShortSellerHF initial position      | −1,000 shares                                    | Short position must exist before squeeze can begin                              |
 | InstitutionalValue initial position | +1,000 shares                                    | Long supply to sell against the squeeze                                         |
 
 ---
@@ -195,57 +195,194 @@ Theory 3 is encoded by RetailCoordinated (§4.1) and partially by MomentumRetail
 
 ### §4.1 RetailCoordinated
 
-| Attribute            | Value                                                                            |
-|----------------------|----------------------------------------------------------------------------------|
-| Theoretical Basis    | Lyocsa et al. (2022) WSB social coordination; Hasso et al. (2022) retail herding |
-| Market Role          | Destabilizing — primary squeeze initiator                                        |
-| Activation Condition | cash > price × 50 AND price > 0                                                  |
-| Buy Signal           | Buys aggressively when cash reserves are large relative to price                 |
-| Trade Size           | min(int(cash × buy_pressure / price), 500); `buy_pressure` ∈ [0.1, 0.5]          |
-| Hold Condition       | cash ≤ price × 50 (capital depleted relative to price)                           |
-| Note                 | Never sells — "diamond hands" ideology; position only accumulates                |
+#### §4.1.1 Summary
+
+`RetailCoordinated` represents the WallStreetBets-style coordinated retail cohort. It buys aggressively when collective cash capacity is high enough to pressure the market and does not sell proactively.
+
+#### §4.1.2 Theoretical and Empirical Foundation
+
+The basis is Lyocsa et al. (2022) on WSB attention and returns, Hasso et al. (2022) on retail participation, and Barber et al. (2022) on social attention and retail trading volume.
+
+#### §4.1.3 Design Purpose and Activation Scenarios
+
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| `cash > price * 50` | buy | starts coordinated squeeze pressure | §2 Theory 3 |
+| otherwise | hold | cash capacity too small to affect price | §2 Theory 3 |
+
+#### §4.1.4 Behavioral Framework
+
+```
+if cash > price * 50:
+    buy min(int(cash * buy_pressure / price), 500)
+else:
+    hold
+```
+
+#### §4.1.5 Decision Process Walkthrough
+
+At price 20 and cash 500,000, the cash threshold is satisfied. With `buy_pressure = 0.12`, the desired buy is 3,000 shares, so the 500-share cap binds.
+
+#### §4.1.6 Worked Numerical Example
+
+Buying 500 shares at 20 costs 10,000 and increases the retail position from 100 to 600.
+
+#### §4.1.7 Academic References
+
+Lyocsa et al. (2022); Hasso et al. (2022); Barber et al. (2022).
 
 ### §4.2 ShortSellerHF
 
-| Attribute            | Value                                                                |
-|----------------------|----------------------------------------------------------------------|
-| Theoretical Basis    | Jones & Lamont (2002) short constraints; Diamond & Verrecchia (1987) |
-| Market Role          | Paradoxically destabilizing — forced covering amplifies the squeeze  |
-| Initial Position     | −500 shares (short)                                                  |
-| Activation Condition | position < 0 AND deviation > cover_threshold                         |
-| Action               | Buys (covers): min(                                                  |
-| Cover Threshold      | `cover_threshold` ∈ [0.10, 0.50]                                     |
+#### §4.2.1 Summary
+
+`ShortSellerHF` represents a hedge fund that begins with a short position and is forced to buy shares to cover when the squeeze moves price above its loss threshold.
+
+#### §4.2.2 Theoretical and Empirical Foundation
+
+The basis is Jones and Lamont (2002) on short-sale constraints and Diamond and Verrecchia (1987) on the informational consequences of constrained short selling. The GameStop analogue is Melvin Capital's forced-risk-management response.
+
+#### §4.2.3 Design Purpose and Activation Scenarios
+
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| `position < 0` and `deviation > cover_threshold` | buy to cover | forced buying amplifies squeeze | §2 Theory 1 |
+| otherwise | hold | short remains open | §2 Theory 1 |
+
+#### §4.2.4 Behavioral Framework
+
+```
+if position < 0 and deviation > cover_threshold:
+    buy min(abs(position), int(abs(position) * 0.5))
+else:
+    hold
+```
+
+#### §4.2.5 Decision Process Walkthrough
+
+With initial position -1,000 and `cover_threshold = 0.05`, a 6% overvaluation triggers cover buying. The agent buys half of the remaining short exposure.
+
+#### §4.2.6 Worked Numerical Example
+
+At position -1,000, the first cover order is 500 shares. The short position becomes -500 after the trade.
+
+#### §4.2.7 Academic References
+
+Jones & Lamont (2002); Diamond & Verrecchia (1987); Lyocsa et al. (2022).
 
 ### §4.3 MarketMakerGamma
 
-| Attribute            | Value                                                                   |
-|----------------------|-------------------------------------------------------------------------|
-| Theoretical Basis    | Jarrow & Li (2021) gamma squeeze; Hu et al. (2021) empirical            |
-| Market Role          | Mechanically destabilizing — gamma hedging amplifies buying             |
-| Activation Condition | deviation > 0                                                           |
-| Trade Size           | int(\|deviation\| × gamma_exposure × 5000); capped by int(cash / price) |
-| `gamma_exposure`     | 0.5–2.0 (net options book gamma)                                        |
+#### §4.3.1 Summary
+
+`MarketMakerGamma` represents options market makers who must buy the underlying stock as price rises in order to hedge short-call gamma exposure.
+
+#### §4.3.2 Theoretical and Empirical Foundation
+
+The basis is Jarrow and Li (2021) on short-squeeze risk and Hu et al. (2021) on options-flow amplification in the GameStop episode.
+
+#### §4.3.3 Design Purpose and Activation Scenarios
+
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| `deviation > 0` | buy hedge quantity | mechanical gamma amplification | §2 Theory 2 |
+| otherwise | hold | no positive-delta hedge need | §2 Theory 2 |
+
+#### §4.3.4 Behavioral Framework
+
+```
+hedge_qty = int(abs(deviation) * gamma_exposure * 5000)
+if deviation > 0:
+    buy min(hedge_qty, cash / price)
+else:
+    hold
+```
+
+#### §4.3.5 Decision Process Walkthrough
+
+With deviation 20% and `gamma_exposure = 0.3`, hedge demand is `int(0.20 * 0.3 * 5000) = 300` shares.
+
+#### §4.3.6 Worked Numerical Example
+
+At price 30 with sufficient cash, the market maker buys 300 shares, adding to the upward price impact.
+
+#### §4.3.7 Academic References
+
+Jarrow & Li (2021); Hu et al. (2021).
 
 ### §4.4 InstitutionalValue
 
-| Attribute            | Value                                                                            |
-|----------------------|----------------------------------------------------------------------------------|
-| Theoretical Basis    | Graham & Dodd fundamental analysis; Shleifer & Vishny (1997) limits to arbitrage |
-| Market Role          | Stabilizing — fundamental value anchor; overwhelmed in squeeze                   |
-| Initial Position     | +1,000 shares (long; ready to sell)                                              |
-| Activation Condition | deviation > sell_threshold                                                       |
-| Trade Size           | min(1,000, max(position, 0)) — sells up to full position                         |
-| `sell_threshold`     | 0.30–1.00 (activates only at extreme overvaluation)                              |
+#### §4.4.1 Summary
+
+`InstitutionalValue` represents a fundamental investor that sells into extreme overvaluation. It is the main stabilizing seller, but its inventory is finite.
+
+#### §4.4.2 Theoretical and Empirical Foundation
+
+The basis is fundamental-value investing and Shleifer and Vishny (1997) on limits to arbitrage: rational sellers can be overwhelmed by speculative pressure and capital constraints.
+
+#### §4.4.3 Design Purpose and Activation Scenarios
+
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| `deviation > sell_threshold` and position > 0 | sell | provides valuation anchor | §2 Theory 1 |
+| otherwise | hold | overvaluation not high enough or inventory exhausted | §2 Theory 1 |
+
+#### §4.4.4 Behavioral Framework
+
+```
+if deviation > sell_threshold:
+    sell min(1000, position)
+else:
+    hold
+```
+
+#### §4.4.5 Decision Process Walkthrough
+
+With deviation 40% and `sell_threshold = 0.30`, the institutional value investor sells because price is far above fundamental.
+
+#### §4.4.6 Worked Numerical Example
+
+With 2,000 shares, the first sell order is capped at 1,000 shares.
+
+#### §4.4.7 Academic References
+
+Shleifer & Vishny (1997); Graham and Dodd value-investing tradition.
 
 ### §4.5 MomentumRetail
 
-| Attribute            | Value                                                                     |
-|----------------------|---------------------------------------------------------------------------|
-| Theoretical Basis    | Barber et al. (2022) FOMO retail momentum; social media attention trading |
-| Market Role          | Destabilizing — joins squeeze late (FOMO buyer)                           |
-| Activation Condition | deviation > fomo_threshold                                                |
-| Trade Size           | min(50, int(cash / price)) — small FOMO purchases                         |
-| `fomo_threshold`     | 0.05–0.30 (activates when squeeze is already underway)                    |
+#### §4.5.1 Summary
+
+`MomentumRetail` represents late-arriving FOMO buyers who join after the squeeze is already visible. It is smaller than `RetailCoordinated` but extends the upward pressure.
+
+#### §4.5.2 Theoretical and Empirical Foundation
+
+The basis is Barber et al. (2022) on retail attention and momentum trading. The agent captures the social-media attention wave after price movement becomes public.
+
+#### §4.5.3 Design Purpose and Activation Scenarios
+
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| `deviation > fomo_threshold` | buy | late-cycle momentum amplification | §2 Theory 3 |
+| otherwise | hold | no FOMO signal | §2 Theory 3 |
+
+#### §4.5.4 Behavioral Framework
+
+```
+if deviation > fomo_threshold:
+    buy min(50, cash / price)
+else:
+    hold
+```
+
+#### §4.5.5 Decision Process Walkthrough
+
+With deviation 8% and `fomo_threshold = 0.05`, the trader buys because the upward move is visible enough to trigger FOMO.
+
+#### §4.5.6 Worked Numerical Example
+
+At price 25 and cash 300,000, the affordable quantity exceeds 50, so the small-retail cap binds at 50 shares.
+
+#### §4.5.7 Academic References
+
+Barber et al. (2022); Lyocsa et al. (2022).
 
 ---
 
@@ -267,17 +404,24 @@ Theory 3 is encoded by RetailCoordinated (§4.1) and partially by MomentumRetail
 |--------------------|--------------------|---------|------------------|---------------------------------------------------------|
 | initial_price      | Market             | 20.0    | 10–50            | GME pre-squeeze price                                   |
 | fundamental_value  | Market             | 20.0    | 10–30            | GME fundamental estimate                                |
-| price_impact (λ)   | Market             | 0.005   | 0.001–0.02       | Higher than baseline due to illiquid squeeze conditions |
+| price_impact (λ)   | Market             | 0.04    | 0.001–0.05       | Illiquid squeeze-market order impact                    |
 | mean_reversion (γ) | Market             | 0.01    | 0.001–0.05       | Low: squeeze suppresses mean-reversion                  |
-| noise_std          | Market             | 1.0     | 0.5–3.0          | High noise consistent with squeeze volatility           |
-| initial_cash       | All investors      | 100000  | Fixed            |                                                         |
-| initial_position   | ShortSellerHF      | −500    | −200 to −1000    | Short interest analog                                   |
-| initial_position   | InstitutionalValue | +1000   | +500 to +2000    | Institutional long position                             |
-| buy_pressure       | §4.1               | 0.30    | 0.10–0.50        | Lyocsa et al. (2022) coordination intensity             |
-| cover_threshold    | §4.2               | 0.20    | 0.10–0.50        | Jones & Lamont (2002) margin constraint                 |
-| gamma_exposure     | §4.3               | 1.0     | 0.5–2.0          | Hu et al. (2021) options gamma                          |
-| sell_threshold     | §4.4               | 0.50    | 0.30–1.00        | Institutional value sell discipline                     |
-| fomo_threshold     | §4.5               | 0.10    | 0.05–0.30        | Barber et al. (2022) momentum trigger                   |
+| noise_std          | Market             | 0.02    | 0.005–0.05       | Bounded round noise relative to order impact            |
+| initial_cash       | RetailCoordinated  | 500000  | Fixed            | coordinated retail buying capacity                      |
+| initial_cash       | ShortSellerHF      | 2000000 | Fixed            | hedge fund cash reserve for forced covering             |
+| initial_cash       | MarketMakerGamma   | 3000000 | Fixed            | market-maker hedging capacity                           |
+| initial_cash       | InstitutionalValue | 2000000 | Fixed            | institutional investor balance sheet                    |
+| initial_cash       | MomentumRetail     | 300000  | Fixed            | late retail buying capacity                             |
+| initial_position   | RetailCoordinated  | +100    | Fixed            | initial retail long exposure                            |
+| initial_position   | ShortSellerHF      | −1000   | −200 to −1000    | short interest analog; negative value is required       |
+| initial_position   | MarketMakerGamma   | 0       | Fixed            | starts delta-neutral                                    |
+| initial_position   | InstitutionalValue | +2000   | +500 to +2000    | institutional long inventory                            |
+| initial_position   | MomentumRetail     | 0       | Fixed            | joins after FOMO trigger                                |
+| buy_pressure       | §4.1               | 0.12    | 0.10–0.50        | Lyocsa et al. (2022) coordination intensity             |
+| cover_threshold    | §4.2               | 0.05    | 0.05–0.50        | short-seller pain threshold                             |
+| gamma_exposure     | §4.3               | 0.30    | 0.3–2.0          | Hu et al. (2021) options gamma                          |
+| sell_threshold     | §4.4               | 0.30    | 0.30–1.00        | Institutional value sell discipline                     |
+| fomo_threshold     | §4.5               | 0.05    | 0.05–0.30        | Barber et al. (2022) momentum trigger                   |
 
 ---
 

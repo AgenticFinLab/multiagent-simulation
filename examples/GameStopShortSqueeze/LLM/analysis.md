@@ -59,6 +59,6 @@ effect of retrieved squeeze context.
 ## §7 Quality Checks
 
 - Confirm the run completed the configured 200 rounds.
-- Audit LLM parse failures, retry counts, and fallback holds before acceptance.
-- Confirm accepted decisions produce valid `action` and numeric `quantity`.
+- Audit LLM parse failures and retry counts before acceptance; deterministic parser/provider failures must fail fast.
+- Confirm accepted decisions produce canonical `action`, `bid_price`, `quantity`, and `reasoning`.
 - Review action distribution for excessive holds or one-sided buying.

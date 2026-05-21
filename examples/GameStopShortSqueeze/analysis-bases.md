@@ -341,6 +341,47 @@ WTI of 0.10–0.40 expected; Melvin Capital lost ~53% of assets = WTI ≈ 0.35�
 
 ---
 
+### Metric: API and RAG Quality (AQR)
+
+#### Category
+API Quality / RAG Diagnostics
+
+#### Definition
+Structural quality of LLM-family decisions and retrieval coverage in the Rag variant. Short-squeeze metrics are meaningful only when accepted decisions are parseable, canonical, and auditable.
+
+#### Formula
+```
+retrieval_failure_rate = retrieval_failure_rounds / total_rag_rounds
+api_contract_issue_rate = malformed_or_retry_exhausted_decisions / total_api_decisions
+```
+
+**Python function**:
+```python
+def analyze_rag_knowledge_effect(rag_contexts: dict[str, dict[int, object]]) -> dict:
+    """Calculate retrieval coverage from recorded RAG contexts."""
+```
+
+#### Interpretation
+
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| clean | valid behavioral evidence | preferred state |
+| low retry-only issue rate | stochastic API noise recovered by retry | attach quality note |
+| any exhausted contract failure | incomplete behavioral sample | repair or rerun before acceptance |
+
+#### Academic Basis
+
+**Primary source**: Project Level-2 quality standard. API outputs must be structurally valid before economic interpretation.
+
+#### Red Flag Threshold
+- **Any exhausted parser/provider contract failure**: incomplete run; repair or rerun.
+- **Missing `rag_stats.json`**: RAG retrieval behavior is not auditable.
+
+#### Relationship to Other Metrics
+AQR gates interpretation of SQI, PAR, ACC, SCD, IEP, and WTI for LLM-family variants.
+
+---
+
 ## §3 Analysis Dimensions
 
 ### Dimension 1: Squeeze Dynamics
@@ -434,7 +475,7 @@ WTI of 0.10–0.40 expected; Melvin Capital lost ~53% of assets = WTI ≈ 0.35�
 | Symptom      | Diagnosis                          | Root Cause                                          | Corrective Action                                  |
 |--------------|------------------------------------|-----------------------------------------------------|----------------------------------------------------|
 | SQI = 0      | Squeeze never starts               | buy_pressure too low or cover_threshold too high    | Lower cover_threshold; increase buy_pressure       |
-| ACC_§4.2 = 0 | ShortSellerHF never covers         | initial_position ≥ 0 or cover_threshold unreachable | Set initial_position = −500; lower cover_threshold |
+| ACC_§4.2 = 0 | ShortSellerHF never covers         | initial_position ≥ 0 or cover_threshold unreachable | Set initial_position = −1000; lower cover_threshold |
 | ACC_§4.3 = 0 | MarketMakerGamma inactive          | gamma_exposure = 0 or deviation never > 0           | Set gamma_exposure > 0; verify squeeze starts      |
 | IEP = T      | InstitutionalValue never exhausted | sell_threshold too high                             | Lower sell_threshold to 0.30                       |
 | SCD = −1     | Squeeze never collapses            | γ too small; simulation too short                   | Increase γ or lengthen simulation                  |
@@ -452,3 +493,4 @@ WTI of 0.10–0.40 expected; Melvin Capital lost ~53% of assets = WTI ≈ 0.35�
 | wealth_trajectories      | Line         | Round   | Wealth              | By agent                      | Shows WTI accumulation                 |
 | acc_pie                  | Pie          | —       | ACC fractions       | Agent labels                  | Coalition attribution summary          |
 | cross_variant_sqi        | Bar          | Variant | SQI                 | GME analog reference          | Research comparison                    |
+| rag_stats.json           | JSON         | Agent/Round | Retrieval coverage | no-context marker counts      | RAG retrieval quality audit            |
