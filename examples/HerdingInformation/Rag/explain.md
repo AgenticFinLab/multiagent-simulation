@@ -18,41 +18,41 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMCascadeFollower` in `examples/HerdingInformation/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMCascadeFollower` uses `RAGLLM_CASCADE_FOLLOWER_SYS` and retrieved cascade literature to evaluate deviation-following orders. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rag/players.yml:cascadefollower.config.extras` supplies portfolio state, ARK model policy, and RAG retrieval configuration. |
+| Variant-specific decision mechanism | RAG-augmented ARK output parsed into `action`, `bid_price`, `quantity`, and `reasoning`; `players.py` executes the parsed action and quantity. |
 ### §2.2 ReputationHerder (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMReputationHerder` in `examples/HerdingInformation/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMReputationHerder` uses `RAGLLM_REPUTATION_HERDER_SYS` and retrieved career-concern context to decide whether to follow consensus. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rag/players.yml:reputationherder.config.extras` supplies portfolio state, ARK model policy, and RAG retrieval configuration. |
+| Variant-specific decision mechanism | RAG-augmented ARK output parsed into the shared trading schema. |
 ### §2.3 IndependentThinker (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMIndependentThinker` in `examples/HerdingInformation/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMIndependentThinker` uses `RAGLLM_INDEPENDENT_THINKER_SYS` and retrieved cascade-fragility context to preserve private-signal reasoning. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rag/players.yml:independentthinker.config.extras` supplies portfolio state, ARK model policy, and RAG retrieval configuration. |
+| Variant-specific decision mechanism | RAG-augmented ARK output parsed into the shared trading schema. |
 ### §2.4 Contrarian (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMContrarian` in `examples/HerdingInformation/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMContrarian` uses `RAGLLM_CONTRARIAN_SYS` and retrieved overreaction context to oppose crowd direction. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rag/players.yml:contrarian.config.extras` supplies portfolio state, ARK model policy, and RAG retrieval configuration. |
+| Variant-specific decision mechanism | RAG-augmented ARK output parsed into the shared trading schema. |
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMNoiseTrader` in `examples/HerdingInformation/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMNoiseTrader` uses `RAGLLM_NOISE_TRADER_SYS` with retrieved context while retaining unsystematic noise-trader behavior. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rag/players.yml:noisetrader.config.extras` supplies portfolio state, ARK model policy, and RAG retrieval configuration. |
+| Variant-specific decision mechanism | RAG-augmented ARK output parsed into the shared trading schema. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/HerdingInformation/Rag/players.py` and its configured counterpart in `configs/HerdingInformation/Rag/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The Rag variant reuses the Rule `Market` class. The market broadcasts `price`, `fundamental`, `deviation`, and `round`; RAG investors retrieve information-cascade context, submit parsed buy/sell/hold orders, and the market aggregates them using the Rule baseline price equation.
 
 ## §4 Variant Architecture
 
@@ -60,9 +60,10 @@ The coordinator mechanism is the final implementation in `examples/HerdingInform
 |---|---|
 | Player classes | `examples/HerdingInformation/Rag/players.py` |
 | Prompt module | `examples/HerdingInformation/Rag/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | ARK LLM via `LangChainAPIInference`; retrieval uses the project Hunyuan/LiteLLM embedding policy and configured local RAG index. |
+| Retrieval audit | `RagLLMInvestor.decide()` records retrieved context as `rag_context`; `analysis.py` summarizes retrieval availability in `rag_stats.json`. |
+| Output parsing | `parse_llm_response_with_thinking()` parses `<analysis>` and `<decision>` blocks; parse failures are retried three times and then fail fast. |
+| Error handling | Deterministic config/schema/retrieval-contract errors fail fast; retrieval availability is audited through `rag_context` and `rag_stats.json`. |
 
 ## §5 Config Reference
 

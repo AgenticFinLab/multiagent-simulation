@@ -10,9 +10,9 @@
 | Real-World Origin  | Formally modeled by Banerjee (1992) and Bikhchandani et al. (1992); empirically documented in analyst forecast revisions (Welch, 2000), IPO subscription herding (Welch, 1992), and fund manager career-concern herding (Scharfstein & Stein, 1990)                                                                                                                                                                             |
 | Research Relevance | Explains why markets can remain mispriced even when most individual agents have correct private information — the cascade suppresses private signal usage; relevant to market efficiency debates, regulatory disclosure policy, and the design of information aggregation mechanisms                                                                                                                                            |
 
-### 1.1 Origin and Source Analysis
+### §1.1 Origin and Source Analysis
 
-#### 1.1.1 Intellectual Lineage
+#### §1.1.1 Intellectual Lineage
 
 The theoretical foundation for information cascade herding was established simultaneously and independently by Banerjee (1992) in "A Simple Model of Herd Behavior" and Bikhchandani, Hirshleifer and Welch (1992) in "A Theory of Fads, Fashion, Custom, and Cultural Change." Both papers established the central result: when agents make sequential decisions and observe the decisions (not the private signals) of predecessors, a cascade forms when the cumulative public information from observed actions outweighs any individual private signal. Once the cascade forms, every rational agent ignores their private signal and follows the crowd — even though the crowd's collective "decision" may be based on a coincidental early majority, not on the aggregate of private information.
 
@@ -24,7 +24,7 @@ Welch (2000) provided direct empirical evidence for information cascades in anal
 
 The limits of cascade correction are documented by Avery and Zemsky (1998), who showed that when assets can be traded (vs. binary decision models), information cascades are less likely to form because the price signal aggregates some of the suppressed private information. However, they also showed that when private signal quality is heterogeneous (some agents have better information than others), partial cascades can still form among the lower-quality signal holders — which is precisely the heterogeneous population modeled here (CascadeFollower vs. IndependentThinker).
 
-#### 1.1.2 Real-World Event Catalogue
+#### §1.1.2 Real-World Event Catalogue
 
 | Event Name                                 | Date(s)                    | Market / Asset                              | Trigger                                                                            | Magnitude                                                                                         | Duration                       | Correspondence to Simulation                                                                                                                                     | Primary Source                                                                                                                                            |
 |--------------------------------------------|----------------------------|---------------------------------------------|------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -34,7 +34,7 @@ The limits of cascade correction are documented by Avery and Zemsky (1998), who 
 | Hong Kong Stock Market Herding 1997        | July 1997 – January 1998   | Hong Kong HSI                               | Asian financial crisis contagion; consensus sell signal                            | HSI fell 60% from July 1997 peak; institutional cascade selling despite mixed private signals     | 6 months                       | CascadeFollower (§4.1): accumulates cascade_count from sustained negative deviation; full cascade selling at cascade_trigger threshold                           | Christie, W.G. & Huang, R.D. (1995). "Following the Pied Piper: Do Individual Returns Herd around the Market?" *Financial Analysts Journal*, 51(4), 31–37 |
 | COVID-19 Tech Stock Re-Rating 2020–2021    | April 2020 – February 2021 | US tech equities (FAANG + ARK ETF holdings) | COVID remote-work narrative → analyst consensus buy → institutional cascade buying | Nasdaq 100: +74% in 10 months; ARK Innovation ETF ×3                                              | 10 months                      | ReputationHerder (§4.2): analyst consensus buy → reputation herding; CascadeFollower (§4.1): cascade lock-in after 3+ consecutive positive deviations            | Chang, E.C., Cheng, J.W. & Khorana, A. (2000). "An Examination of Herd Behavior in Equity Markets." *Journal of Banking & Finance*, 24(10), 1651–1679     |
 
-#### 1.1.3 Book and Practitioner Literature
+#### §1.1.3 Book and Practitioner Literature
 
 | Title                                                     | Author(s)                     | Year | Publisher                  | Relevance                                                                                                                                                                                                                                                                                                 |
 |-----------------------------------------------------------|-------------------------------|------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -83,8 +83,8 @@ Cascade trade size:
 
 | Symbol          | Definition                                        | Calibrated Value | Source                                               |
 |-----------------|---------------------------------------------------|------------------|------------------------------------------------------|
-| cascade_trigger | Number of consistent observations to form cascade | 3–8              | Welch (2000): 2–3 prior analyst revisions sufficient |
-| social_weight   | Scale factor for cascade trade size               | 1.0–3.0          | Scharfstein & Stein (1990) herding intensity         |
+| cascade_trigger | Runtime activation threshold for accumulated cascade evidence | 0.3 config; activates after the first qualifying deviation round | Low-trigger cascade stress calibration |
+| social_weight   | Scale factor for cascade trade size               | 0.8 config | Current scenario calibration                         |
 | 0.03 threshold  | Minimum deviation to count as cascade evidence    | Fixed            | Bikhchandani et al. (1992) practical calibration     |
 
 #### §T1.4 Empirical Evidence
@@ -126,9 +126,9 @@ Activation: |deviation| > 0.02
 qty = min(600, int(|dev| × reputation_concern × 4000))
 Action: follow deviation direction
 
-where reputation_concern ∈ [1.0, 3.0]
-  1.0 = weak career concern (young portfolio manager)
-  3.0 = strong career concern (large fund manager under close scrutiny)
+where reputation_concern = 0.7 in the current config
+  lower values = weaker career concern
+  higher values = stronger career concern
 ```
 
 #### §T2.4 Empirical Evidence
@@ -219,7 +219,7 @@ Theory 3 explains why IndependentThinker and Contrarian cannot fully prevent cas
 |-------------------------|----------------------------------------------------|------------------------------------|
 | Cascade count increment | Each round                                         | deviation                          |
 | Cascade activation      | Permanent after threshold                          | `cascade_count ≥ cascade_trigger`  |
-| Trade size              | Proportional to deviation × social amplification   | `min(800, int(                     |
+| Trade size              | Proportional to deviation × social amplification   | `min(800, int(abs(dev) × social_weight × 5000))` |
 | Direction               | Follow deviation (buy if dev > 0; sell if dev < 0) | Unconditional after cascade active |
 | Pre-cascade             | Hold                                               | `cascade_count < cascade_trigger`  |
 
@@ -230,10 +230,10 @@ Theory 3 explains why IndependentThinker and Contrarian cannot fully prevent cas
 4. If cascade active: `qty = min(800, int(|dev| × social_weight × 5000))`; direction = sign(deviation)
 5. If cascade inactive: hold
 
-**Worked Example** (cascade_trigger=3, social_weight=1.5, deviation=+0.06, cascade_count=3):
-- cascade_count(3) ≥ cascade_trigger(3) → cascade active
-- qty = min(800, int(0.06 × 1.5 × 5000)) = min(800, 450) = 450
-- Action: buy 450 shares — cascade lock-in
+**Worked Example** (cascade_trigger=0.3, social_weight=0.8, deviation=+0.06, cascade_count=1):
+- cascade_count(1) ≥ cascade_trigger(0.3) → cascade active under the current low-trigger calibration
+- qty = min(800, int(0.06 × 0.8 × 5000)) = min(800, 240) = 240
+- Action: buy 240 shares — cascade lock-in
 
 **References**: simulation-bases.md §2 Theory 1; `doi:10.1086/261849`
 
@@ -251,20 +251,20 @@ Theory 3 explains why IndependentThinker and Contrarian cannot fully prevent cas
 
 | Decision Variable    | Logic                                                | Formula                |
 |----------------------|------------------------------------------------------|------------------------|
-| Activation threshold | Lower than CascadeFollower                           | `                      |
-| Trade size           | Proportional to deviation × reputation amplification | `min(600, int(         |
+| Activation threshold | Lower than CascadeFollower                           | `abs(deviation) > 0.02` |
+| Trade size           | Proportional to deviation × reputation amplification | `min(600, int(abs(dev) × reputation_concern × 4000))` |
 | Direction            | Follow deviation direction                           | Consensus follower     |
-| reputation_concern   | Career pressure intensity                            | 1.0 (low) → 3.0 (high) |
+| reputation_concern   | Career pressure intensity                            | 0.7 config             |
 
 **Decision Walkthrough** (one round):
 1. Receive market broadcast
 2. If `|deviation| > 0.02`: trade
 3. `qty = min(600, int(|dev| × reputation_concern × 4000))`; direction = sign(deviation)
 
-**Worked Example** (reputation_concern=1.5, deviation=+0.04):
+**Worked Example** (reputation_concern=0.7, deviation=+0.04):
 - `|0.04| > 0.02` → activates
-- qty = min(600, int(0.04 × 1.5 × 4000)) = min(600, 240) = 240
-- Action: buy 240 shares — reputation herding
+- qty = min(600, int(0.04 × 0.7 × 4000)) = min(600, 112) = 112
+- Action: buy 112 shares — reputation herding
 
 **References**: simulation-bases.md §2 Theory 2; `doi:10.2307/2006957`
 
@@ -282,8 +282,8 @@ Theory 3 explains why IndependentThinker and Contrarian cannot fully prevent cas
 
 | Decision Variable    | Logic                                             | Formula                        |
 |----------------------|---------------------------------------------------|--------------------------------|
-| Activation threshold | Detects cascade misvaluation                      | `                              |
-| Trade size           | Precision-scaled contrarian                       | `min(500, int(                 |
+| Activation threshold | Detects cascade misvaluation                      | `abs(deviation) > 0.03` |
+| Trade size           | Precision-scaled contrarian                       | `min(500, int(abs(dev) × signal_precision × 3000))` |
 | Direction            | Contrarian: buys when dev < 0; sells when dev > 0 | Against cascade direction      |
 | signal_precision     | Private signal quality                            | 0.5 (low) → 2.0 (high quality) |
 
@@ -292,9 +292,9 @@ Theory 3 explains why IndependentThinker and Contrarian cannot fully prevent cas
 2. If `|deviation| > 0.03`: trade contrariantly
 3. `qty = min(500, int(|dev| × signal_precision × 3000))`; direction = -sign(deviation)
 
-**Worked Example** (signal_precision=1.0, deviation=+0.07 — cascade is buying):
+**Worked Example** (signal_precision=0.9, deviation=+0.07 — cascade is buying):
 - `|0.07| > 0.03` → activates
-- qty = min(500, int(0.07 × 1.0 × 3000)) = min(500, 210) = 210
+- qty = min(500, int(0.07 × 0.9 × 3000)) = min(500, 189) = 189
 - Action: sell 210 shares — correcting overvaluation
 
 **References**: simulation-bases.md §2 Theory 3; `doi:10.1086/261849`
@@ -313,8 +313,8 @@ Theory 3 explains why IndependentThinker and Contrarian cannot fully prevent cas
 
 | Decision Variable    | Logic                                    | Formula                               |
 |----------------------|------------------------------------------|---------------------------------------|
-| Activation threshold | Configurable                             | `                                     |
-| Trade size           | Simple deviation-based                   | `min(400, int(                        |
+| Activation threshold | Configurable                             | `abs(deviation) > contrarian_threshold × 0.05` |
+| Trade size           | Simple deviation-based                   | `min(400, int(abs(dev) × 2000))` |
 | Direction            | Contrarian — against deviation direction | Sells when dev > 0; buys when dev < 0 |
 | contrarian_threshold | Activation level multiplier              | 1 → 20 (multiplied by 0.05)           |
 
@@ -323,8 +323,8 @@ Theory 3 explains why IndependentThinker and Contrarian cannot fully prevent cas
 2. If `|deviation| > contrarian_threshold × 0.05`: trade contrariantly
 3. `qty = min(400, int(|dev| × 2000))`; direction = -sign(deviation)
 
-**Worked Example** (contrarian_threshold=1, deviation=+0.08):
-- threshold = 1 × 0.05 = 0.05; `|0.08| > 0.05` → activates
+**Worked Example** (contrarian_threshold=0.4, deviation=+0.08):
+- threshold = 0.4 × 0.05 = 0.02; `|0.08| > 0.02` → activates
 - qty = min(400, int(0.08 × 2000)) = min(400, 160) = 160
 - Action: sell 160 shares
 
@@ -377,15 +377,15 @@ Theory 3 explains why IndependentThinker and Contrarian cannot fully prevent cas
 |----------------------|---------------|---------|------------------|---------------------------------|
 | initial_price        | Market        | 100.0   | 80–120           | Standard ABM                    |
 | fundamental_value    | Market        | 100.0   | 80–120           | Stable fundamental              |
-| price_impact (λ)     | Market        | 0.001   | 0.0005–0.005     | Farmer & Foley (2009)           |
-| mean_reversion (γ)   | Market        | 0.05    | 0.01–0.10        | Standard ABM                    |
-| noise_std            | Market        | 0.5     | 0.1–2.0          | Black (1986)                    |
-| initial_cash         | All investors | 100000  | Fixed            |                                 |
-| social_weight        | §4.1          | 1.5     | 1.0–3.0          | Welch (2000) herding intensity  |
-| cascade_trigger      | §4.1          | 3       | 2–8              | Welch (2000): 2–3 observations  |
-| reputation_concern   | §4.2          | 1.5     | 1.0–3.0          | Scharfstein & Stein (1990)      |
-| signal_precision     | §4.3          | 1.0     | 0.5–2.0          | Information quality calibration |
-| contrarian_threshold | §4.4          | 1       | 1–20             | Contrarian activation level     |
+| price_impact (λ)     | Market        | 0.03    | 0.0005–0.05      | Rule configuration      |
+| mean_reversion (γ)   | Market        | 0.01    | 0.01–0.10        | Rule configuration      |
+| noise_std            | Market        | 0.015   | 0.001–2.0        | Rule configuration      |
+| initial_cash         | Investors     | 500000–2000000 | Fixed by investor class | Rule configuration      |
+| social_weight        | §4.1          | 0.8     | 0.5–3.0          | Rule configuration      |
+| cascade_trigger      | §4.1          | 0.3     | Runtime low-trigger calibration | Rule configuration      |
+| reputation_concern   | §4.2          | 0.7     | 0.5–3.0          | Rule configuration      |
+| signal_precision     | §4.3          | 0.9     | 0.5–2.0          | Rule configuration      |
+| contrarian_threshold | §4.4          | 0.4     | 0.1–20           | Rule configuration      |
 | trade_probability    | §4.5          | 0.30    | 0.20–0.40        | Black (1986)                    |
 
 ---

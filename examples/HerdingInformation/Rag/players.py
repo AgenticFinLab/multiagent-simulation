@@ -275,6 +275,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         system_msg = load_prompt(self._system_prompt_path)
         user_msg = RAG_USER_TEMPLATE.format(
@@ -325,7 +326,11 @@ class RagLLMInvestor(GeneralPlayer):
         else:
             quantity = 0
 
-        return {"action": action, "quantity": quantity}
+        return {
+            "action": action,
+            "quantity": quantity,
+            "rag_context": self.state.custom_state["last_rag_context"],
+        }
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order to market."""

@@ -8,12 +8,12 @@ This analysis checks whether the Rule variant produces a complete, analyzable He
 
 | Metric | Function Contract | Source |
 |---|---|---|
-| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
-| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
-| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
-| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
-| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
-| Scenario-specific diagnostic | `def compute_herdinginformation_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
+| Cascade Concentration Index | `def cascade_concentration_index(trade_history: list, price_history: list, fundamental: float, activation_threshold: float = 0.02) -> float` | `analysis-bases.md §2.1` |
+| Cascade Persistence Duration | `def cascade_persistence_duration(price_history: list, fundamental: float, activation_threshold: float = 0.02) -> float` | `analysis-bases.md §2.2` |
+| Reputation Herding Index | `def reputation_herding_index(trade_history: list, price_history: list, fundamental: float, activation_threshold: float = 0.02) -> float` | `analysis-bases.md §2.3` |
+| Information Cascade Efficiency | `def information_cascade_efficiency(trade_history: list, price_history: list, fundamental: float) -> float` | `analysis-bases.md §2.4` |
+| Volatility Amplification Factor | `def volatility_amplification_factor(price_history: list, fundamental: float, activation_threshold: float = 0.02, min_obs: int = 5) -> float` | `analysis-bases.md §2.5` |
+| Wealth Distribution Index | `def wealth_distribution_index(agent_states: list, final_price: float) -> float` | `analysis-bases.md §2.6` |
 
 ## §3 Analysis Dimensions
 
@@ -33,4 +33,4 @@ Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full
 
 ## §7 Visualization Catalogue
 
-Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_herdinginformation_dynamics.png`, `02_herdinginformation_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.
+Required outputs are `summary.json`, `00_investor_bids.png`, `01_herdinginformation_dynamics.png`, `02_herdinginformation_analysis.png`, and `03_summary.png`.

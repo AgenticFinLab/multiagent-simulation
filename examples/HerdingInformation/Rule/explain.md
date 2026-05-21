@@ -18,41 +18,41 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `CascadeFollower` in `examples/HerdingInformation/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Investor role and activation rule from simulation-bases.md §4.1 | `CascadeFollower.decide()` increments `cascade_count` when `abs(deviation) > 0.03`; once `cascade_count >= cascade_trigger`, it follows deviation direction. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rule/players.yml:cascadefollower.config.extras` supplies `social_weight`, `cascade_trigger`, cash, and position state. |
+| Variant-specific decision mechanism | Deterministic buy/sell/hold quantity from `min(800, int(abs(deviation) * social_weight * 5000))`. |
 ### §2.2 ReputationHerder (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `ReputationHerder` in `examples/HerdingInformation/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Investor role and activation rule from simulation-bases.md §4.2 | `ReputationHerder.decide()` follows deviation direction whenever `abs(deviation) > 0.02`. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rule/players.yml:reputationherder.config.extras` supplies `reputation_concern`, cash, and position state. |
+| Variant-specific decision mechanism | Deterministic quantity from `min(600, int(abs(deviation) * reputation_concern * 4000))`. |
 ### §2.3 IndependentThinker (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `IndependentThinker` in `examples/HerdingInformation/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Investor role and activation rule from simulation-bases.md §4.3 | `IndependentThinker.decide()` trades against deviation when `abs(deviation) > 0.03`. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rule/players.yml:independentthinker.config.extras` supplies `signal_precision`, cash, and position state. |
+| Variant-specific decision mechanism | Deterministic contrarian quantity from `min(500, int(abs(deviation) * signal_precision * 3000))`. |
 ### §2.4 Contrarian (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `Contrarian` in `examples/HerdingInformation/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Investor role and activation rule from simulation-bases.md §4.4 | `Contrarian.decide()` trades against deviation when `abs(deviation) > contrarian_threshold * 0.05`. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rule/players.yml:contrarian.config.extras` supplies `contrarian_threshold`, cash, and position state. |
+| Variant-specific decision mechanism | Deterministic quantity from `min(400, int(abs(deviation) * 2000))`. |
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `NoiseTrader` in `examples/HerdingInformation/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Investor role and activation rule from simulation-bases.md §4.5 | `NoiseTrader.decide()` trades randomly with probability `trade_probability`. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rule/players.yml:noisetrader.config.extras` supplies `trade_probability`, cash, and position state. |
+| Variant-specific decision mechanism | Random buy/sell quantity from 100 to 500 shares subject to affordability and holdings. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/HerdingInformation/Rule/players.py` and its configured counterpart in `configs/HerdingInformation/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+`Market.decide()` in `examples/HerdingInformation/Rule/players.py` broadcasts `price`, `fundamental`, `deviation`, and `round`. `Market.perceive()` aggregates buy/sell order quantities and updates price with `price + price_impact * net_demand + mean_reversion * (fundamental - price) + noise`.
 
 ## §4 Variant Architecture
 
@@ -62,7 +62,7 @@ The coordinator mechanism is the final implementation in `examples/HerdingInform
 | Prompt module | Not applicable for Rule baseline |
 | Inference | No remote model call is used in the Rule baseline. |
 | Output parsing | Direct deterministic decision construction |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Error handling | Deterministic Rule logic has no API fallback path; config/schema errors fail fast. |
 
 ## §5 Config Reference
 

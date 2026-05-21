@@ -18,41 +18,41 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `LLMCascadeFollower` in `examples/HerdingInformation/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.1 | `LLMCascadeFollower` uses `LLM_CASCADE_FOLLOWER_SYS` to express cascade-following behavior from the current deviation signal. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/LLM/players.yml:cascadefollower.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven ARK output parsed into `action`, `bid_price`, `quantity`, and `reasoning`; `players.py` executes the parsed action and quantity. |
 ### §2.2 ReputationHerder (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `LLMReputationHerder` in `examples/HerdingInformation/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.2 | `LLMReputationHerder` uses `LLM_REPUTATION_HERDER_SYS` to model career-concern consensus following. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/LLM/players.yml:reputationherder.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven ARK output parsed into the shared trading schema. |
 ### §2.3 IndependentThinker (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `LLMIndependentThinker` in `examples/HerdingInformation/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.3 | `LLMIndependentThinker` uses `LLM_INDEPENDENT_THINKER_SYS` to reason from fundamental value rather than social signals. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/LLM/players.yml:independentthinker.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven ARK output parsed into the shared trading schema. |
 ### §2.4 Contrarian (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `LLMContrarian` in `examples/HerdingInformation/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.4 | `LLMContrarian` uses `LLM_CONTRARIAN_SYS` to oppose crowd overreaction. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/LLM/players.yml:contrarian.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven ARK output parsed into the shared trading schema. |
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `LLMNoiseTrader` in `examples/HerdingInformation/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdingInformation/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.5 | `LLMNoiseTrader` uses `LLM_NOISE_TRADER_SYS` to produce unsystematic retail-style orders. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/LLM/players.yml:noisetrader.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven ARK output parsed into the shared trading schema. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/HerdingInformation/LLM/players.py` and its configured counterpart in `configs/HerdingInformation/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The LLM variant reuses the Rule `Market` class. The market broadcasts `price`, `fundamental`, `deviation`, and `round`; LLM investors submit buy/sell/hold orders that are aggregated by the same price equation as the Rule baseline.
 
 ## §4 Variant Architecture
 
@@ -60,9 +60,9 @@ The coordinator mechanism is the final implementation in `examples/HerdingInform
 |---|---|
 | Player classes | `examples/HerdingInformation/LLM/players.py` |
 | Prompt module | `examples/HerdingInformation/LLM/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | ARK LLM via `LangChainAPIInference` and `ark/doubao-seed-2-0-mini-260428`. |
+| Output parsing | `parse_llm_response_with_thinking()` parses `<analysis>` and `<decision>` blocks; parse failures are retried three times and then fail fast. |
+| Error handling | Deterministic config/schema/API errors fail fast; this variant does not silently fallback after malformed decisions. |
 
 ## §5 Config Reference
 
