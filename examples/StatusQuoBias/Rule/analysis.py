@@ -1,13 +1,30 @@
-"""Analysis utilities for the StatusQuoBias Rule variant."""
+#!/usr/bin/env python
+"""StatusQuoBias Rule analysis using the standard output contract."""
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
-import matplotlib.pyplot as plt
-import numpy as np
+from examples.standard_rule_analysis import (
+    _batch_to_rounds,
+    _load_data,
+    analyze_standard_scenario,
+    calculate_standard_metrics,
+    create_standard_visualizations,
+    run_standard_analysis,
+)
+from masim.utils import load_results
+
+
+SCENARIO = "StatusQuoBias"
+DEFAULT_CONFIG = "configs/StatusQuoBias/Rule/simulation.yml"
+STANDARD_OUTPUT_FILES = (
+    "summary.json",
+    "00_investor_bids.png",
+    "01_statusquobias_dynamics.png",
+    "02_statusquobias_analysis.png",
+    "03_summary.png",
+)
 
 
 def compute_inertia_rate(orders: list[dict]) -> float:
@@ -26,7 +43,7 @@ def compute_default_adherence(states: list[dict]) -> float:
         abs(float(state["allocation"]) - float(state["default_allocation"]))
         for state in states
     ]
-    return float(1.0 - np.mean(gaps))
+    return float(1.0 - (sum(gaps) / len(gaps)))
 
 
 def compute_active_rebalance_volume(orders: list[dict]) -> float:
@@ -35,9 +52,9 @@ def compute_active_rebalance_volume(orders: list[dict]) -> float:
         raise ValueError("orders must not be empty")
     return float(
         sum(
-            int(order["quantity"])
+            abs(int(order["quantity"]))
             for order in orders
-            if order["agent_type"] == "ActiveRebalancer"
+            if "ActiveRebalancer" in order["agent_type"]
         )
     )
 
@@ -61,9 +78,9 @@ def compute_momentum_offset(orders: list[dict]) -> float:
         raise ValueError("orders must not be empty")
     return float(
         sum(
-            int(order["quantity"])
+            abs(int(order["quantity"]))
             for order in orders
-            if order["agent_type"] == "MomentumTrader"
+            if "MomentumTrader" in order["agent_type"]
         )
     )
 
@@ -91,58 +108,41 @@ def compute_agent_attribution(orders: list[dict]) -> dict[str, float]:
     return attribution
 
 
-def load_simulation_data(record_path: str | Path) -> Dict[str, Any]:
-    """Load a JSON simulation result file from a record directory."""
-    root = Path(record_path)
-    if not root.exists():
-        raise FileNotFoundError(f"record_path does not exist: {root}")
-    candidates = sorted(root.rglob("*.json"))
-    if not candidates:
-        raise FileNotFoundError(f"no JSON records found under {root}")
-    with candidates[-1].open("r", encoding="utf-8") as handle:
-        return json.load(handle)
+def load_simulation_data(config: Dict[str, Any]) -> Dict[str, Any]:
+    """Load simulation data through `masim.utils.load_results`."""
+    return _load_data(load_results(config))
 
 
 def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
-    """Calculate core StatusQuoBias metrics from structured data."""
-    prices: List[float] = data["price_history"]
-    fundamental = float(data["fundamental"])
-    metrics: Dict[str, Any] = {
-        "price_deviation": compute_price_deviation(prices, fundamental),
-    }
-    if "orders" in data:
-        metrics["inertia_rate"] = compute_inertia_rate(data["orders"])
-        metrics["active_rebalance_volume"] = compute_active_rebalance_volume(
-            data["orders"]
-        )
-        metrics["momentum_offset"] = compute_momentum_offset(data["orders"])
-    if "states" in data:
-        metrics["default_adherence"] = compute_default_adherence(data["states"])
-    return metrics
+    """Calculate standard structural metrics for StatusQuoBias."""
+    return calculate_standard_metrics(data)
 
 
-def create_visualizations(data: Dict[str, Any], output_dir: str | Path) -> None:
-    """Create the core price-deviation visualization."""
-    prices = data["price_history"]
-    if not prices:
-        raise ValueError("data['price_history'] must not be empty")
-    output = Path(output_dir)
-    output.mkdir(parents=True, exist_ok=True)
-    fundamental = float(data["fundamental"])
-    rounds = list(range(1, len(prices) + 1))
-    plt.figure(figsize=(10, 5))
-    plt.plot(rounds, prices, label="price")
-    plt.axhline(fundamental, color="black", linestyle="--", label="fundamental")
-    plt.xlabel("Round")
-    plt.ylabel("Price")
-    plt.title("StatusQuoBias Price Dynamics")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(output / "statusquobias_price_dynamics.png")
-    plt.close()
+def create_visualizations(data: Dict[str, Any], output_dir: str) -> None:
+    """Create fixed standard analysis PNG outputs."""
+    create_standard_visualizations(SCENARIO, data, output_dir)
+
+
+def analyze_statusquobias(
+    data: Dict[str, Any],
+    config: Dict[str, Any],
+    output_dir: str,
+) -> Dict[str, Any]:
+    """Run metrics, validation, plots, and `summary.json` output."""
+    return analyze_standard_scenario(SCENARIO, data, config, output_dir)
+
+
+def main() -> Dict[str, Any]:
+    """Run StatusQuoBias Rule analysis."""
+    return run_standard_analysis(SCENARIO, DEFAULT_CONFIG)
 
 
 __all__ = [
+    "_batch_to_rounds",
+    "_load_data",
+    "SCENARIO",
+    "DEFAULT_CONFIG",
+    "STANDARD_OUTPUT_FILES",
     "compute_inertia_rate",
     "compute_default_adherence",
     "compute_active_rebalance_volume",
@@ -153,41 +153,9 @@ __all__ = [
     "load_simulation_data",
     "calculate_metrics",
     "create_visualizations",
-]
-
-from examples.standard_rule_analysis import (  # noqa: E402
-    _batch_to_rounds,
-    _load_data,
-    analyze_standard_scenario as _analyze_standard_scenario,
-    run_standard_analysis as _run_standard_analysis,
-)
-
-STANDARD_OUTPUT_FILES = (
-    "summary.json",
-    "00_investor_bids.png",
-    "01_statusquobias_dynamics.png",
-    "02_statusquobias_analysis.png",
-    "03_summary.png",
-)
-
-
-def analyze_statusquobias_standard(data: Dict[str, Any], config: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
-    """Run the project standard validation, summary, and fixed PNG outputs."""
-    return _analyze_standard_scenario("StatusQuoBias", data, config, output_dir)
-
-
-def main() -> Dict[str, Any]:
-    """Run StatusQuoBias analysis using the standard output contract."""
-    return _run_standard_analysis("StatusQuoBias", "configs/StatusQuoBias/Rule/simulation.yml")
-
-
-__all__.extend([
-    "_batch_to_rounds",
-    "_load_data",
-    "STANDARD_OUTPUT_FILES",
-    "analyze_statusquobias_standard",
+    "analyze_statusquobias",
     "main",
-])
+]
 
 
 if __name__ == "__main__":

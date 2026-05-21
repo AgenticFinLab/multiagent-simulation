@@ -165,7 +165,13 @@ class BaseInvestor(GeneralPlayer):
                 self.state.custom_state["deviation"] = market_data["deviation"]
 
     def _make_decision(self) -> Dict[str, Any]:
-        return {"action": "hold", "quantity": 0}
+        price = self.state.custom_state["price"]
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "No configured signal crossed this investor's action threshold.",
+        }
 
     async def decide(self) -> Dict[str, Any]:
         price = self.state.custom_state["price"]
@@ -175,7 +181,8 @@ class BaseInvestor(GeneralPlayer):
 
         decision = self._make_decision()
         action = decision["action"]
-        quantity = decision["quantity"]
+        bid_price = float(decision["bid_price"])
+        quantity = int(decision["quantity"])
 
         if action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
@@ -197,8 +204,10 @@ class BaseInvestor(GeneralPlayer):
 
         order = {
             "action": action,
+            "bid_price": bid_price,
             "quantity": quantity,
             "agent_type": strategy_name,
+            "reasoning": str(decision["reasoning"])[:120],
         }
         return {
             **order,
@@ -236,17 +245,37 @@ class InertialHolder(BaseInvestor):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
 
-        if abs(deviation) > 0.02:
-            qty = min(800, int(abs(deviation) * 5000))
-            if deviation > 0:
+        extras = self.config.extras
+        threshold = float(extras["change_threshold"])
+        base_size = int(extras["base_size"])
+        inertia_strength = float(extras["inertia_strength"])
+
+        if abs(deviation) > threshold:
+            qty = max(1, int(base_size * abs(deviation) / threshold * (1.0 - inertia_strength + 0.1)))
+            if deviation < 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
+                    return {
+                        "action": "buy",
+                        "bid_price": price,
+                        "quantity": buy_qty,
+                        "reasoning": "Large undervaluation finally overcame status quo inertia.",
+                    }
             else:
                 sell_qty = min(qty, max(int(position), 0))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                    return {
+                        "action": "sell",
+                        "bid_price": price,
+                        "quantity": sell_qty,
+                        "reasoning": "Large overvaluation finally overcame status quo inertia.",
+                    }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Status quo inertia dominates a signal below the change threshold.",
+        }
 
 
 class DefaultFollower(BaseInvestor):
@@ -267,17 +296,37 @@ class DefaultFollower(BaseInvestor):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
 
-        if abs(deviation) > 0.02:
-            qty = min(800, int(abs(deviation) * 5000))
-            if deviation > 0:
+        extras = self.config.extras
+        threshold = float(extras["active_deviation"])
+        default_weight = float(extras["default_weight"])
+        base_size = int(extras["base_size"])
+
+        if abs(deviation) > threshold:
+            qty = max(1, int(base_size * abs(deviation) / threshold * max(default_weight, 0.1)))
+            if deviation < 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
+                    return {
+                        "action": "buy",
+                        "bid_price": price,
+                        "quantity": buy_qty,
+                        "reasoning": "Default allocation drift is large enough to justify buying undervalued shares.",
+                    }
             else:
                 sell_qty = min(qty, max(int(position), 0))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                    return {
+                        "action": "sell",
+                        "bid_price": price,
+                        "quantity": sell_qty,
+                        "reasoning": "Default allocation drift is large enough to justify trimming overvalued shares.",
+                    }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Default-following keeps the current allocation when drift is moderate.",
+        }
 
 
 class ActiveRebalancer(BaseInvestor):
@@ -298,17 +347,36 @@ class ActiveRebalancer(BaseInvestor):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
 
-        if abs(deviation) > 0.05:
-            qty = min(500, int(abs(deviation) * 3000))
+        extras = self.config.extras
+        threshold = float(extras["rebalance_threshold"])
+        position_size = int(extras["position_size"])
+
+        if abs(deviation) > threshold:
+            qty = max(1, int(position_size * abs(deviation) / threshold))
             if deviation < 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
+                    return {
+                        "action": "buy",
+                        "bid_price": price,
+                        "quantity": buy_qty,
+                        "reasoning": "Active rebalancing buys when price is below fundamental value.",
+                    }
             else:
                 sell_qty = min(qty, max(int(position), 0))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                    return {
+                        "action": "sell",
+                        "bid_price": price,
+                        "quantity": sell_qty,
+                        "reasoning": "Active rebalancing sells when price exceeds fundamental value.",
+                    }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Deviation is inside the active rebalancing band.",
+        }
 
 
 class MomentumTrader(BaseInvestor):
@@ -325,19 +393,34 @@ class MomentumTrader(BaseInvestor):
 
     def _make_decision(self) -> Dict[str, Any]:
         price = self.state.custom_state["price"]
+        deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
 
-        if random.random() < 0.3:
-            qty = random.randint(100, 500)
-            action = "buy" if random.random() > 0.5 else "sell"
+        extras = self.config.extras
+        entry_threshold = float(extras["entry_threshold"])
+        position_size = int(extras["position_size"])
+
+        if abs(deviation) > entry_threshold:
+            qty = max(1, int(position_size * abs(deviation) / entry_threshold))
+            action = "buy" if deviation > 0 else "sell"
             if action == "buy":
                 qty = min(qty, int(cash / price) if price > 0 else 0)
             else:
                 qty = min(qty, max(int(position), 0))
             if qty > 0:
-                return {"action": action, "quantity": qty}
-        return {"action": "hold", "quantity": 0}
+                return {
+                    "action": action,
+                    "bid_price": price,
+                    "quantity": qty,
+                    "reasoning": "Trend-sensitive momentum rule follows the current price deviation.",
+                }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Momentum signal is below the entry threshold.",
+        }
 
 
 class NoiseTrader(BaseInvestor):
@@ -357,16 +440,30 @@ class NoiseTrader(BaseInvestor):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
 
-        if random.random() < 0.3:
-            qty = random.randint(100, 500)
+        extras = self.config.extras
+        trade_probability = float(extras["trade_probability"])
+        noise_size = int(extras["noise_size"])
+
+        if random.random() < trade_probability:
+            qty = random.randint(1, noise_size)
             action = "buy" if random.random() > 0.5 else "sell"
             if action == "buy":
                 qty = min(qty, int(cash / price) if price > 0 else 0)
             else:
                 qty = min(qty, max(int(position), 0))
             if qty > 0:
-                return {"action": action, "quantity": qty}
-        return {"action": "hold", "quantity": 0}
+                return {
+                    "action": action,
+                    "bid_price": price,
+                    "quantity": qty,
+                    "reasoning": "Random noise-trader liquidity order.",
+                }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Noise trader did not activate this round.",
+        }
 
 
 __all__ = [

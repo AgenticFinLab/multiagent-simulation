@@ -5,42 +5,117 @@
 | Item | Description |
 |---|---|
 | Variant | Rule |
-| Mechanism | Deterministic inertia, default-following, rebalancing, momentum, and noise rules |
-| Market | Price/fundamental market with signal underreaction |
-| Agents | InertialHolder, DefaultFollower, ActiveRebalancer, MomentumTrader, NoiseTrader |
-| Runtime Change | Documentation-only rewrite of existing Rule guide; no code/config change |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | Config-driven deterministic formulas |
+| Key Difference from Other Variants | Investor behavior is fully specified in Python thresholds and sizing rules. |
+| Primary Research Contribution | Establishes the deterministic status quo and default-inertia baseline. |
+| Files | `players.py`, `run_statusquobias.py`, `analysis.py`, `explain.md`, `analysis.md` |
 
-## §2 Theory → Implementation Mapping
+## §2 Theory To Implementation Mapping
 
-| Agent | Root Section | Runtime Implementation |
-|---|---|---|
-| InertialHolder | `simulation-bases.md §4.1` | Rule class holds unless evidence is strong |
-| DefaultFollower | `simulation-bases.md §4.2` | Rule class stays near default allocation |
-| ActiveRebalancer | `simulation-bases.md §4.3` | Rule class responds directly to signals |
-| MomentumTrader | `simulation-bases.md §4.4` | Rule class follows trend signals |
-| NoiseTrader | `simulation-bases.md §4.5` | Rule class supplies stochastic background liquidity |
+### InertialHolder
+
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis | `simulation-bases.md §4.1`; class docstring cites `simulation-bases.md §4.1`. |
+| Behavioral mechanism | `InertialHolder._make_decision()` holds unless `abs(deviation) > extras["change_threshold"]`. |
+| Mathematical model | Quantity scales with `base_size`, deviation intensity, and `inertia_strength`. |
+| State variables | `cash`, `position`, `price`, `fundamental`, and `deviation` are maintained in `custom_state`. |
+| Parameters | `change_threshold`, `base_size`, and `inertia_strength` from `configs/StatusQuoBias/Rule/players.yml`. |
+
+### DefaultFollower
+
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis | `simulation-bases.md §4.2`; class docstring cites `simulation-bases.md §4.2`. |
+| Behavioral mechanism | `DefaultFollower._make_decision()` holds inside `active_deviation`. |
+| Mathematical model | Quantity scales with `base_size`, `default_weight`, and deviation magnitude. |
+| State variables | Same market and portfolio state as §4.1. |
+| Parameters | `active_deviation`, `default_weight`, and `base_size` from config. |
+
+### ActiveRebalancer
+
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis | `simulation-bases.md §4.3`; class docstring cites `simulation-bases.md §4.3`. |
+| Behavioral mechanism | `ActiveRebalancer._make_decision()` trades when valuation deviation crosses `rebalance_threshold`. |
+| Mathematical model | Quantity is `position_size * abs(deviation) / rebalance_threshold`, bounded by cash or holdings. |
+| State variables | Same market and portfolio state as §4.1. |
+| Parameters | `rebalance_threshold` and `position_size` from config. |
+
+### MomentumTrader
+
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis | `simulation-bases.md §4.4`; class docstring cites `simulation-bases.md §4.4`. |
+| Behavioral mechanism | `MomentumTrader._make_decision()` follows deviation sign after `entry_threshold` is crossed. |
+| Mathematical model | Quantity is `position_size * abs(deviation) / entry_threshold`, bounded by constraints. |
+| State variables | Same market and portfolio state as §4.1. |
+| Parameters | `entry_threshold` and `position_size` from config. |
+
+### NoiseTrader
+
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis | `simulation-bases.md §4.5`; class docstring cites `simulation-bases.md §4.5`. |
+| Behavioral mechanism | `NoiseTrader._make_decision()` samples a random buy or sell when `trade_probability` activates. |
+| Mathematical model | Quantity is sampled from `1..noise_size`, then bounded by cash or holdings. |
+| State variables | Same market and portfolio state as §4.1. |
+| Parameters | `trade_probability` and `noise_size` from config. |
 
 ## §3 Market Mechanism Implementation
 
-The Rule variant implements the shared market in `players.py`. Orders from
-inertial, default, active, momentum, and noise agents are cleared by the market
-player and update price relative to fundamental value.
+Formula source: `simulation-bases.md §3.1`.
+
+```text
+P(t+1) = max(0.01, P(t) + lambda * D(t) + gamma * [F - P(t)] + epsilon(t))
+```
+
+| Simulation Symbol | Python Variable | Config Path | Default |
+|---|---|---|---:|
+| lambda | `price_impact` | `market.config.extras.price_impact` | 0.02 |
+| gamma | `mean_reversion` | `market.config.extras.mean_reversion` | 0.02 |
+| F | `fundamental` | `market.config.extras.fundamental_value` | 100.0 |
+| sigma | `noise_std` | `market.config.extras.noise_std` | 0.01 |
+| D(t) | `net_demand` | computed from investor orders | round-specific |
+
+The market consumes `action`, `quantity`, and `agent_type`; investors also emit
+`bid_price` and `reasoning` so the analysis output contract can inspect bid
+curves and decision rationale.
 
 ## §4 Rule Variant-Specific Features
 
-All investor decisions are encoded in Python thresholds and sizing rules. This
-variant provides the deterministic baseline for comparing LLM, RuleLLM, and Rag
-behavior.
+The Rule variant is deterministic except for market noise and the
+`NoiseTrader`. It uses direct config fields rather than prompt text. All
+investor classes return canonical order fields: `action`, `bid_price`,
+`quantity`, `agent_type`, and `reasoning`.
 
 ## §5 Architecture Diagram
 
 ```text
-Market broadcast -> rule investor decide() -> order dict -> Market clearing
+Market.perceive(orders)
+        |
+        v
+Market.decide() -> price/fundamental/deviation broadcast
+        |
+        v
+Rule investor perceive() -> _make_decision() -> canonical order
+        |
+        v
+Market aggregates net demand and updates P(t+1)
 ```
 
 ## §6 Configuration Reference
 
-Primary config: `configs/StatusQuoBias/Rule/players.yml`.
+| Parameter | Config Path | Used By | Purpose |
+|---|---|---|---|
+| `price_impact` | `market.extras.price_impact` | Market | Demand impact. |
+| `mean_reversion` | `market.extras.mean_reversion` | Market | Fundamental pull. |
+| `change_threshold` | `inertialholder.extras.change_threshold` | InertialHolder | Status quo switching threshold. |
+| `active_deviation` | `defaultfollower.extras.active_deviation` | DefaultFollower | Default drift threshold. |
+| `rebalance_threshold` | `activerebalancer.extras.rebalance_threshold` | ActiveRebalancer | Rational rebalancing threshold. |
+| `entry_threshold` | `momentumtrader.extras.entry_threshold` | MomentumTrader | Momentum activation threshold. |
+| `trade_probability` | `noisetrader.extras.trade_probability` | NoiseTrader | Noise activation probability. |
 
 ## §7 Running Instructions
 
@@ -51,10 +126,11 @@ python examples/StatusQuoBias/Rule/run_statusquobias.py \
 
 ## §8 Expected Behavior Patterns
 
-Inertial and default agents should underreact to signals; active and momentum
-agents should create faster adjustment.
+`InertialHolder` and `DefaultFollower` should hold more often than
+`ActiveRebalancer` after moderate deviations. Momentum and noise flow should
+prevent the price path from being a pure threshold system.
 
 ## §9 References
 
-See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
-`../analysis-bases.md §2`.
+Implementation traces to `../simulation-bases.md §3`, `../simulation-bases.md §4`,
+and `../simulation-bases.md §6`. Analysis traces to `../analysis-bases.md §2`.

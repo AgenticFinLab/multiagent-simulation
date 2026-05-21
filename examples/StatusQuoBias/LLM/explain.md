@@ -5,40 +5,96 @@
 | Item | Description |
 |---|---|
 | Variant | LLM |
-| Mechanism | Persona-driven status quo, default, active, momentum, and noise decisions |
-| Market | Same price/fundamental market as Rule |
-| Agents | LLM inertial holder, default follower, active rebalancer, momentum trader, noise trader |
-| Runtime Change | Documentation-only backfill; no code/config change |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | Persona-only LLM prompts with canonical trading JSON |
+| Key Difference from Other Variants | Investor behavior is produced by language-model reasoning rather than hard-coded thresholds. |
+| Primary Research Contribution | Tests whether status quo and default rationalizations emerge from investor personas. |
+| Files | `players.py`, `prompts.py`, `run_statusquobias_llm.py`, `analysis.py`, `explain.md`, `analysis.md` |
 
-## §2 Theory → Implementation Mapping
+## §2 Theory To Implementation Mapping
 
-| Agent | Root Section | Runtime Implementation |
-|---|---|---|
-| LLMInertialHolder | `simulation-bases.md §4.1` | Persona prompt emphasizes resistance to change |
-| LLMDefaultFollower | `simulation-bases.md §4.2` | Persona prompt follows default allocation |
-| LLMActiveRebalancer | `simulation-bases.md §4.3` | Persona prompt provides rational benchmark |
-| LLMMomentumTrader | `simulation-bases.md §4.4` | Persona prompt responds to trend signals |
-| LLMNoiseTrader | `simulation-bases.md §4.5` | Persona prompt supplies random baseline liquidity |
+### LLMInertialHolder
+
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis | `simulation-bases.md §4.1`; class docstring cites `simulation-bases.md §4.1`. |
+| Persona | `LLM_INERTIAL_HOLDER_SYS` describes resistance to changing current holdings. |
+| Runtime state | `LLMInvestor._build_prompt()` supplies price, fundamental, deviation, cash, and position. |
+| Output contract | `_validate_decision()` requires `action`, `bid_price`, `quantity`, and `reasoning`. |
+
+### LLMDefaultFollower
+
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis | `simulation-bases.md §4.2`; class docstring cites `simulation-bases.md §4.2`. |
+| Persona | `LLM_DEFAULT_FOLLOWER_SYS` emphasizes passive default adherence. |
+| Runtime state | Same market and portfolio prompt fields as §4.1. |
+| Output contract | Same canonical JSON parser and validator as other LLM investors. |
+
+### LLMActiveRebalancer
+
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis | `simulation-bases.md §4.3`; class docstring cites `simulation-bases.md §4.3`. |
+| Persona | `LLM_ACTIVE_REBALANCER_SYS` describes rational rebalancing and active adjustment. |
+| Runtime state | Same prompt fields; no hidden information. |
+| Output contract | Same canonical JSON parser and validator. |
+
+### LLMMomentumTrader
+
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis | `simulation-bases.md §4.4`; class docstring cites `simulation-bases.md §4.4`. |
+| Persona | `LLM_MOMENTUM_TRADER_SYS` emphasizes trend response. |
+| Runtime state | Same prompt fields; deviation is the trend proxy. |
+| Output contract | Same canonical JSON parser and validator. |
+
+### LLMNoiseTrader
+
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis | `simulation-bases.md §4.5`; class docstring cites `simulation-bases.md §4.5`. |
+| Persona | `LLM_NOISE_TRADER_SYS` represents low-information liquidity supply. |
+| Runtime state | Same prompt fields; stochasticity comes from LLM behavior and temperature. |
+| Output contract | Same canonical JSON parser and validator. |
 
 ## §3 Market Mechanism Implementation
 
-Market mechanics match Rule. LLM changes the decision generator from explicit
-rules to persona reasoning and canonical order JSON.
+The LLM variant reuses `Market` from `StatusQuoBias.Rule.players`, so price
+formation is identical to `simulation-bases.md §3.1`. Only the investor decision
+generator changes.
 
-## §4 Variant-Specific Features
+## §4 LLM Variant-Specific Features
 
-LLM tests whether status quo rationalizations and default adherence emerge from
-personas without changing market clearing.
+Prompts contain `== PERSONA ==` and `== DECISION RULES ==` blocks. In this
+variant the decision rules are qualitative behavioral guidance rather than
+deterministic formulas. The user prompt always repeats the canonical decision
+schema, and parse failures are retried a bounded number of times before the row
+fails fast.
 
 ## §5 Architecture Diagram
 
 ```text
-Market state -> persona prompt -> LLM decision JSON -> order -> Market
+Market broadcast
+        |
+        v
+LLMInvestor._build_prompt(market + portfolio state)
+        |
+        v
+LangChainAPIInference -> parse_llm_response_with_thinking()
+        |
+        v
+_validate_decision() -> canonical investor order -> Market
 ```
 
 ## §6 Configuration Reference
 
-Primary config: `configs/StatusQuoBias/LLM/players.yml`.
+| Parameter | Config Path | Purpose |
+|---|---|---|
+| `lm_name` | `*.extras.llm.lm_name` | ARK model used for all LLM investors. |
+| `generation_config.temperature` | `*.extras.llm.generation_config.temperature` | Persona-specific stochasticity. |
+| `generation_config.max_tokens` | `*.extras.llm.generation_config.max_tokens` | Bounds response length. |
+| `initial_cash` / `initial_position` | `*.extras` | Portfolio constraints. |
 
 ## §7 Running Instructions
 
@@ -49,11 +105,11 @@ python examples/StatusQuoBias/LLM/run_statusquobias_llm.py \
 
 ## §8 Expected Behavior Patterns
 
-Inertial and default personas should underreact relative to active and momentum
-personas.
+Inertial and default personas should explain holding or conservative trading
+more often than active and momentum personas. Invalid schema output should fail
+after bounded retries rather than silently entering the market.
 
 ## §9 References
 
-See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
-`../analysis-bases.md §2`.
-
+Persona design traces to `../simulation-bases.md §4` and variant rationale to
+`../simulation-bases.md §9`. Analysis uses `../analysis-bases.md §2`.

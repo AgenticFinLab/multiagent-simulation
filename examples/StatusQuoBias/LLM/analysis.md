@@ -2,47 +2,48 @@
 
 ## §1 Analysis Objectives
 
-Evaluate whether persona-only LLM agents produce status quo underreaction,
-default adherence, active rebalancing, and momentum offset.
+Evaluate whether persona-only LLM agents reproduce status quo inaction and
+default adherence while preserving the same structural market outputs as Rule.
 
-## §2 Metric → Function Mapping
+## §2 Metric To Function Mapping
 
 | Metric | Function | analysis-bases.md Ref | LLM Notes |
 |---|---|---|---|
-| Inertia Rate | `compute_inertia_rate()` | `analysis-bases.md §2.1` | Inertial persona hold rate |
-| Default Adherence | `compute_default_adherence()` | `analysis-bases.md §2.2` | Default-following strength |
-| Active Rebalance Volume | `compute_active_rebalance_volume()` | `analysis-bases.md §2.3` | Active persona response |
-| Underreaction Lag | `compute_underreaction_lag()` | `analysis-bases.md §2.4` | Delayed adjustment |
-| Momentum Offset | `compute_momentum_offset()` | `analysis-bases.md §2.5` | Trend pressure |
-| Price Deviation | `compute_price_deviation()` | `analysis-bases.md §2.6` | Fundamental gap |
-| Agent Attribution | `compute_agent_attribution()` | `analysis-bases.md §2.7` | Agent contribution |
+| Inertia Rate | `compute_inertia_rate()` | `analysis-bases.md §2.1` | Persona-driven hold behavior. |
+| Default Adherence | `compute_default_adherence()` | `analysis-bases.md §2.2` | Optional allocation-state diagnostic. |
+| Active Rebalance Volume | `compute_active_rebalance_volume()` | `analysis-bases.md §2.3` | Active persona corrective volume. |
+| Underreaction Lag | `compute_underreaction_lag()` | `analysis-bases.md §2.4` | LLM-driven adjustment delay. |
+| Momentum Offset | `compute_momentum_offset()` | `analysis-bases.md §2.5` | Trend persona pressure. |
+| Price Deviation | `compute_price_deviation()` | `analysis-bases.md §2.6` | Fundamental gap. |
+| Agent Attribution | `compute_agent_attribution()` | `analysis-bases.md §2.7` | Signed order pressure by class. |
 
-## §3 Dimension-by-Dimension Analysis
+## §3 Dimension-By-Dimension Analysis
 
-Compare LLM with Rule to evaluate whether natural-language inertia changes
-underreaction magnitude or timing.
+Compare the LLM output with Rule on hold rates, price deviation, active
+rebalancing volume, and the presence of natural-language reasoning.
 
 ## §4 Variant-Specific Observable Phenomena
 
 | Phenomenon | Expected Observation |
 |---|---|
-| Inaction rationalization | LLM explanations justify holding current allocation |
-| Active benchmark | Active persona should be less inertial |
-| Output quality | Parse/fallback rates must be reviewed |
+| Inaction rationalization | Reasoning explains why current holdings or defaults are retained. |
+| Persona separation | Active and momentum personas trade more readily than inertial personas. |
+| Output quality | Invalid JSON or missing required fields fail after bounded retries. |
 
 ## §5 References
 
-Metrics derive from `../analysis-bases.md §2`; LLM mechanism derives from
-`../simulation-bases.md §9`.
+Metrics derive from `../analysis-bases.md §2`; persona targets derive from
+`../simulation-bases.md §4` and `../simulation-bases.md §9`.
 
 ## §6 Quality Checks
 
-- Confirm the run completed the configured round count.
-- Audit parse failures, retry counts, and fallback behavior before acceptance.
-- Confirm output reasoning explains inaction, default adherence, or active
-  rebalancing without invalid JSON.
+- Confirm the run completed the configured 200 rounds for final samples.
+- Confirm `summary.json.validation.is_valid` is true.
+- Review LLM logs for parse failures, retries, and provider errors.
+- Confirm no silent fallback hold path is used for deterministic contract
+  failures.
 
 ## §7 Reporting Notes
 
-Report LLM outcomes together with output-quality diagnostics. Parse failure
-after retries should fail the sample rather than entering a silent hold.
+Report LLM as the persona-reasoning condition. If parse failures occur, include
+the count and whether the final accepted order remained schema-valid.
