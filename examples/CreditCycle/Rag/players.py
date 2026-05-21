@@ -312,6 +312,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
         template = load_prompt("examples.CreditCycle.Rag.prompts:RAG_USER_TEMPLATE")
         return template.format(
             round=round_num,
@@ -367,6 +368,7 @@ class RagLLMInvestor(GeneralPlayer):
             "fallback": decision["fallback"],
             "fallback_type": decision["fallback_type"],
             "llm_attempts": decision["llm_attempts"],
+            "rag_context": self.state.custom_state["last_rag_context"],
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 

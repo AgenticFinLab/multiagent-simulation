@@ -18,41 +18,41 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `ProCyclicalLender` in `examples/CreditCycle/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Investor role and activation rule from simulation-bases.md §4.1 | `ProCyclicalLender.decide()` reads `market_data["deviation"]`; buys when `deviation > expansion_threshold`, sells when `deviation < contraction_threshold`, and sizes with `order_size * credit_multiplier`. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rule/players.yml:procyclicallender.config.extras` supplies `expansion_threshold`, `contraction_threshold`, `credit_multiplier`, and `order_size`. |
+| Variant-specific decision mechanism | Deterministic threshold order construction with no remote model call. |
 ### §2.2 MinskyBorrower (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `MinskyBorrower` in `examples/CreditCycle/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Investor role and activation rule from simulation-bases.md §4.2 | `MinskyBorrower.decide()` tracks `stable_rounds`; buys after stability accumulation and sells aggressively when `deviation < crisis_threshold`. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rule/players.yml:minskyborrower.config.extras` supplies `crisis_threshold`, phase sizes, leverage parameters, and `order_size`. |
+| Variant-specific decision mechanism | Deterministic stability-counter and crisis-threshold logic. |
 ### §2.3 CounterCyclicalLender (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `CounterCyclicalLender` in `examples/CreditCycle/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Investor role and activation rule from simulation-bases.md §4.3 | `CounterCyclicalLender.decide()` buys below `crisis_buy_threshold` and sells above `boom_sell_threshold`, opposing the pro-cyclical agents. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rule/players.yml:countercyclicallender.config.extras` supplies `crisis_buy_threshold`, `boom_sell_threshold`, and `order_size`. |
+| Variant-specific decision mechanism | Deterministic contrarian threshold orders. |
 ### §2.4 ValueInvestor (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `ValueInvestor` in `examples/CreditCycle/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Investor role and activation rule from simulation-bases.md §4.4 | `ValueInvestor.decide()` buys when `deviation < -value_discount` and sells when `deviation > value_discount`. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rule/players.yml:valueinvestor.config.extras` supplies `value_discount` and `order_size`. |
+| Variant-specific decision mechanism | Deterministic fundamental-value threshold orders. |
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `NoiseTrader` in `examples/CreditCycle/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Investor role and activation rule from simulation-bases.md §4.5 | `NoiseTrader.decide()` samples whether to trade using `trade_probability` and chooses buy/sell randomly within available cash/position constraints. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rule/players.yml:noisetrader.config.extras` supplies `trade_probability` and `noise_size`. |
+| Variant-specific decision mechanism | Deterministic code path with stochastic random sampling; no LLM is involved. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/CreditCycle/Rule/players.py` and its configured counterpart in `configs/CreditCycle/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+`Market.decide()` in `examples/CreditCycle/Rule/players.py` aggregates inbound buy/sell quantities, computes net demand, applies `P(t+1) = P(t) + 0.05 * D(t) + 0.02 * [100-P(t)] + epsilon(t)`, and broadcasts `price`, `fundamental`, and `deviation` to all investors through `configs/CreditCycle/Rule/topology.yml`.
 
 ## §4 Variant Architecture
 
@@ -82,9 +82,9 @@ python examples/CreditCycle/Rule/run_creditcycle.py -c configs/CreditCycle/Rule/
 ## §7 Expected Behavior
 
 - The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+- ProCyclicalLender and MinskyBorrower should create boom and deleveraging pressure.
+- CounterCyclicalLender and ValueInvestor should supply offsetting orders during bust or mispricing phases.
+- A successful full experiment must pass Level-1 execution review and Level-2 structural quality review using `summary.json` and fixed PNG outputs from `Rule/analysis.py`.
 
 ## §8 References
 

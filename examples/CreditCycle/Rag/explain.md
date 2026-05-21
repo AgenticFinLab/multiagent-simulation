@@ -18,41 +18,41 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMProCyclicalLender` in `examples/CreditCycle/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMProCyclicalLender` uses the RuleLLM pro-cyclical system prompt plus retrieved credit-cycle context. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rag/players.yml:procyclicallender.config.extras` supplies cash/position, order caps, ARK policy, and private knowledge settings. |
+| Variant-specific decision mechanism | RAG context is injected into `RAG_USER_TEMPLATE`; ARK output is parsed by `decide_with_llm_contract()` and recorded with `rag_context`. |
 ### §2.2 MinskyBorrower (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMMinskyBorrower` in `examples/CreditCycle/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMMinskyBorrower` uses the RuleLLM Minsky prompt plus retrieved leverage-cycle context. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rag/players.yml:minskyborrower.config.extras` supplies cash/position, order caps, ARK policy, and private knowledge settings. |
+| Variant-specific decision mechanism | RAG context is injected into `RAG_USER_TEMPLATE`; parsed decisions are logged with fallback and retrieval-quality fields. |
 ### §2.3 CounterCyclicalLender (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMCounterCyclicalLender` in `examples/CreditCycle/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMCounterCyclicalLender` uses the RuleLLM counter-cyclical prompt plus retrieved credit-stabilization context. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rag/players.yml:countercyclicallender.config.extras` supplies cash/position, order caps, ARK policy, and private knowledge settings. |
+| Variant-specific decision mechanism | Retrieved context should help calibrate crisis liquidity and reserve-building decisions. |
 ### §2.4 ValueInvestor (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMInvestor` in `examples/CreditCycle/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMValueInvestor` uses the RuleLLM value-investor prompt plus retrieved valuation and crisis-context evidence. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rag/players.yml:valueinvestor.config.extras` supplies cash/position, order caps, ARK policy, and private knowledge settings. |
+| Variant-specific decision mechanism | Retrieved context should refine fundamental-value reasoning without changing the canonical order schema. |
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMNoiseTrader` in `examples/CreditCycle/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMNoiseTrader` uses the RuleLLM noise-trader prompt plus retrieved context, but remains a stochastic liquidity source. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rag/players.yml:noisetrader.config.extras` supplies cash/position, order caps, ARK policy, and private knowledge settings. |
+| Variant-specific decision mechanism | RAG context is available for inspection, but the persona remains intentionally weakly informed. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/CreditCycle/Rag/players.py` and its configured counterpart in `configs/CreditCycle/Rag/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The coordinator market is inherited from the Rule implementation. `RagLLMInvestor._initialize_rag()` resolves local or shared indexes from `private_knowledge`, `_build_prompt()` queries top-k credit-cycle passages, and `decide()` emits canonical orders with the retrieved `rag_context` preserved for analysis.
 
 ## §4 Variant Architecture
 
@@ -60,9 +60,9 @@ The coordinator mechanism is the final implementation in `examples/CreditCycle/R
 |---|---|
 | Player classes | `examples/CreditCycle/Rag/players.py` |
 | Prompt module | `examples/CreditCycle/Rag/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | ARK LLM via `LangChainAPIInference`; embeddings use Hunyuan/LiteLLM through the project RAG configuration. |
+| Output parsing | `examples/CreditCycle/llm_decision.py:decide_with_llm_contract()` parses and clamps canonical order JSON. |
+| Error handling | Missing knowledge documents or deterministic schema errors fail fast; stochastic API parse-contract failures become explicit logged hold fallbacks and are quality-audited. |
 
 ## §5 Config Reference
 

@@ -6,20 +6,23 @@ import importlib
 import logging
 import os
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Dict
 
 from dotenv import load_dotenv
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
-from lmbase.inference.base import InferInput
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
-from examples.llm_utils import parse_llm_response_with_thinking
 from examples.CreditCycle.Rule.players import Market  # noqa: F401
+from examples.CreditCycle.llm_decision import (
+    decide_with_llm_contract,
+    infer_max_order_size,
+    record_fallback,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +57,8 @@ class RuleLLMInvestor(GeneralPlayer):
         self.state.custom_state["position"] = int(extras["initial_position"])
         self.state.custom_state["price_history"] = []
         self.state.custom_state["market_data"] = {}
+        self.state.custom_state["max_order_size"] = infer_max_order_size(extras)
+        self.state.custom_state["llm_fallback_counts"] = {}
         self.state.custom_state["history_buffer"] = HistoryBuffer(
             folder=f"CreditCycle/RuleLLM/{self.__class__.__name__}", entry_limit=200
         )
@@ -90,6 +95,10 @@ class RuleLLMInvestor(GeneralPlayer):
         position = self.state.custom_state["position"]
         portfolio_value = cash + position * price
         round_num = self.state.custom_state["round"]
+        max_order_size = self.state.custom_state.get("max_order_size")
+        if max_order_size is None:
+            max_order_size = infer_max_order_size(self.config.extras)
+            self.state.custom_state["max_order_size"] = max_order_size
 
         system_prompt = load_prompt(self._system_prompt_path)
         user_template = load_prompt(
@@ -103,33 +112,25 @@ class RuleLLMInvestor(GeneralPlayer):
             cash=cash,
             position=position,
             portfolio_value=portfolio_value,
+            max_order_size=max_order_size,
         )
 
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
-        last_error = None
-        for attempt in range(3):
-            try:
-                infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-                result = llm_client.run([infer_input])
-                response = result.outputs[0].response
-                parsed = parse_llm_response_with_thinking(response)
-                action_str = parsed["action"]
-                quantity = int(parsed["quantity"])
-                if action_str not in ("buy", "sell", "hold"):
-                    action_str = "hold"
-                quantity = max(0, quantity)
-                if action_str == "buy":
-                    quantity = min(quantity, int(cash / price) if price > 0 else 0)
-                elif action_str == "sell":
-                    quantity = min(quantity, max(position, 0))
-                break
-            except Exception as exc:  # pylint: disable=broad-except
-                logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
-                last_error = exc
-                if attempt == 2:
-                    raise RuntimeError(
-                        f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
-                    ) from last_error
+        decision = decide_with_llm_contract(
+            llm_client=llm_client,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            cash=cash,
+            position=position,
+            price=price,
+            max_order_size=max_order_size,
+            identity=self.identity,
+        )
+        if decision["fallback"]:
+            record_fallback(self.state.custom_state, decision["fallback_type"])
+
+        action_str = decision["action"]
+        quantity = decision["quantity"]
 
         if action_str == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
@@ -142,6 +143,11 @@ class RuleLLMInvestor(GeneralPlayer):
         return {
             "action": action_str,
             "quantity": quantity,
+            "bid_price": decision["bid_price"],
+            "reasoning": decision["reasoning"],
+            "fallback": decision["fallback"],
+            "fallback_type": decision["fallback_type"],
+            "llm_attempts": decision["llm_attempts"],
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 

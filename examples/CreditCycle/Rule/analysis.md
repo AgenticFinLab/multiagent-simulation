@@ -8,12 +8,12 @@ This analysis checks whether the Rule variant produces a complete, analyzable Cr
 
 | Metric | Function Contract | Source |
 |---|---|---|
-| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
-| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
-| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
-| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
-| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
-| Scenario-specific diagnostic | `def compute_creditcycle_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
+| Leverage Amplitude Index | `_compute_leverage_amplitude_index(peak, trough) -> float` | `analysis-bases.md §2.1` |
+| Minsky Fragility Score | `_compute_minsky_fragility_score(investor_payloads, prices_list, fundamental, crisis_threshold=-0.05) -> float` | `analysis-bases.md §2.2` |
+| Credit Contraction Speed | `_compute_credit_contraction_speed(prices_list) -> float` | `analysis-bases.md §2.3` |
+| Counter-Cyclical Offset Ratio | `_compute_counter_cyclical_offset_ratio(investor_payloads, prices_list, fundamental, bust_threshold=-0.05) -> float` | `analysis-bases.md §2.4` |
+| Phase Duration Ratio | `_compute_phase_duration_ratio(prices_list, fundamental, threshold=0.02) -> float` | `analysis-bases.md §2.5` |
+| Noise/volatility diagnostics | `_compute_autocorrelation(prices_list)`, `_compute_peak_rolling_volatility(prices_list)` | `analysis-bases.md §2.6` |
 
 ## §3 Analysis Dimensions
 
@@ -33,4 +33,4 @@ Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full
 
 ## §7 Visualization Catalogue
 
-Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_creditcycle_dynamics.png`, `02_creditcycle_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.
+Required outputs are `summary.json`, `00_investor_bids.png`, `01_creditcycle_dynamics.png`, `02_creditcycle_analysis.png`, and `03_summary.png`.

@@ -18,41 +18,41 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `RuleLLMProCyclicalLender` in `examples/CreditCycle/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Investor role and activation rule from simulation-bases.md §4.1 | `RuleLLMProCyclicalLender` uses `RULELLM_PRO_CYCLICAL_LENDER_SYS`, whose `== DECISION RULES ==` encode pro-cyclical expansion and contraction thresholds. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/RuleLLM/players.yml:procyclicallender.config.extras` supplies cash/position, order caps, and ARK policy. |
+| Variant-specific decision mechanism | Rule-anchored ARK LLM output parsed by `decide_with_llm_contract()` into the canonical order schema. |
 ### §2.2 MinskyBorrower (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `RuleLLMMinskyBorrower` in `examples/CreditCycle/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Investor role and activation rule from simulation-bases.md §4.2 | `RuleLLMMinskyBorrower` uses `RULELLM_MINSKY_BORROWER_SYS` to bind calm-period leverage and crisis deleveraging to explicit rules. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/RuleLLM/players.yml:minskyborrower.config.extras` supplies cash/position, phase parameters, and ARK policy. |
+| Variant-specific decision mechanism | Rule-anchored ARK decision parsed and clamped by the shared CreditCycle decision helper. |
 ### §2.3 CounterCyclicalLender (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `RuleLLMCounterCyclicalLender` in `examples/CreditCycle/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Investor role and activation rule from simulation-bases.md §4.3 | `RuleLLMCounterCyclicalLender` uses `RULELLM_COUNTER_CYCLICAL_LENDER_SYS` to encode crisis-buy and boom-sell stabilizing behavior. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/RuleLLM/players.yml:countercyclicallender.config.extras` supplies cash/position, order caps, and ARK policy. |
+| Variant-specific decision mechanism | Rule-anchored ARK decision with explicit fallback counters for stochastic parse failures. |
 ### §2.4 ValueInvestor (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `RuleLLMValueInvestor` in `examples/CreditCycle/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Investor role and activation rule from simulation-bases.md §4.4 | `RuleLLMValueInvestor` uses `RULELLM_VALUE_INVESTOR_SYS` to encode fundamental discount/premium rules. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/RuleLLM/players.yml:valueinvestor.config.extras` supplies cash/position, order caps, and ARK policy. |
+| Variant-specific decision mechanism | Rule-anchored ARK decision parsed into the canonical order schema. |
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMNoiseTrader` in `examples/CreditCycle/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/CreditCycle/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMNoiseTrader` uses `RULELLM_NOISE_TRADER_SYS` to keep stochastic liquidity behavior bounded by explicit rules. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/RuleLLM/players.yml:noisetrader.config.extras` supplies cash/position, order caps, and ARK policy. |
+| Variant-specific decision mechanism | Rule-anchored ARK decision parsed into the canonical order schema. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/CreditCycle/RuleLLM/players.py` and its configured counterpart in `configs/CreditCycle/RuleLLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The coordinator market is inherited from the Rule implementation. `RuleLLMInvestor.decide()` formats `RULELLM_USER_TEMPLATE` with price, fundamental, deviation, portfolio state, and maximum single-order quantity; it then calls the configured ARK model and emits canonical trading orders.
 
 ## §4 Variant Architecture
 
@@ -60,9 +60,9 @@ The coordinator mechanism is the final implementation in `examples/CreditCycle/R
 |---|---|
 | Player classes | `examples/CreditCycle/RuleLLM/players.py` |
 | Prompt module | `examples/CreditCycle/RuleLLM/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | ARK LLM via `LangChainAPIInference` with `ark/doubao-seed-2-0-mini-260428`. |
+| Output parsing | `examples/CreditCycle/llm_decision.py:decide_with_llm_contract()` parses and clamps canonical order JSON. |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse-contract failures become explicit logged hold fallbacks and are quality-audited. |
 
 ## §5 Config Reference
 
