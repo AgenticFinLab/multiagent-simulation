@@ -6,53 +6,57 @@
 |---|---|
 | Variant | Rag |
 | Simulation | 2010 Flash Crash |
-| Decision Mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema |
+| Decision Mechanism | RAG-augmented RuleLLM orders with class-mapped market agent types |
 | Theory Reference | `examples/FlashCrash2010/simulation-bases.md` |
 | Market Broadcast | `configs/FlashCrash2010/Rag/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+This variant extends RuleLLM with retrieval. Each investor retrieves flash-crash context, injects it into the decision prompt, emits a liquidity-aware order, and records `rag_context` for Level-2 retrieval audit.
 
 ## §2 Theory -> Implementation Mapping
 
-### §2.1 HFTMarketMaker (simulation-bases.md §4.1)
+### §2.1 HFTMarketMaker
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMHFTMarketMaker` in `examples/FlashCrash2010/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash2010/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
-### §2.2 MomentumChaser (simulation-bases.md §4.2)
+| HFT liquidity withdrawal | `RagLLMHFTMarketMaker` combines the RuleLLM HFT prompt with retrieved market-stress context. |
+| Market effect | It is class-mapped to `agent_type="hft"` and contributes to depth-collapse calculations. |
+| Config source | `configs/FlashCrash2010/Rag/players.yml` with `RAGLLM_HFT_MARKET_MAKER_SYS` and `knowledge_config`. |
+
+### §2.2 MomentumChaser
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMMomentumChaser` in `examples/FlashCrash2010/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash2010/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
-### §2.3 FundamentalTrader (simulation-bases.md §4.3)
+| Positive-feedback trading | `RagLLMMomentumChaser` combines trend rules with retrieved crash-pattern context. |
+| Market effect | It is class-mapped to `agent_type="hft"` and supplies directional HFT order flow. |
+| Config source | `configs/FlashCrash2010/Rag/players.yml` with `RAGLLM_MOMENTUM_CHASER_SYS`. |
+
+### §2.3 FundamentalTrader
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMFundamentalTrader` in `examples/FlashCrash2010/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash2010/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
-### §2.4 StopLossTrader (simulation-bases.md §4.4)
+| Value-based stabilization | `RagLLMFundamentalTrader` combines value rules with retrieved recovery context. |
+| Market effect | It is class-mapped to `agent_type="fundamental"`. |
+| Config source | `configs/FlashCrash2010/Rag/players.yml` with `RAGLLM_FUNDAMENTAL_SYS`. |
+
+### §2.4 StopLossTrader
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMStopLossTrader` in `examples/FlashCrash2010/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash2010/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
-### §2.5 NoiseTrader (simulation-bases.md §4.5)
+| Stop-loss cascade | `RagLLMStopLossTrader` combines stop-level rules with retrieved cascade examples. |
+| Market effect | It is class-mapped to `agent_type="stoploss"`. |
+| Config source | `configs/FlashCrash2010/Rag/players.yml` with `RAGLLM_STOP_LOSS_SYS`. |
+
+### §2.5 NoiseTrader
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMNoiseTrader` in `examples/FlashCrash2010/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash2010/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Background order flow | `RagLLMNoiseTrader` combines random-trading rules with retrieved market context. |
+| Market effect | It is class-mapped to `agent_type="noise"`. |
+| Config source | `configs/FlashCrash2010/Rag/players.yml` with `RAGLLM_NOISE_TRADER_SYS`. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/FlashCrash2010/Rag/players.py` and its configured counterpart in `configs/FlashCrash2010/Rag/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The coordinator is imported from the Rule variant. Retrieval does not bypass the order-book contract: RAG orders are class-mapped to Rule `agent_type`, include `provides_liquidity` when emitted, and record conservative missing-liquidity defaults for audit.
 
 ## §4 Variant Architecture
 
@@ -60,16 +64,17 @@ The coordinator mechanism is the final implementation in `examples/FlashCrash201
 |---|---|
 | Player classes | `examples/FlashCrash2010/Rag/players.py` |
 | Prompt module | `examples/FlashCrash2010/Rag/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Retrieval | `masim.knowledge` loaders, stores, and resource manager configured by `knowledge_config`. |
+| Inference | Uses the project ARK LLM policy and the configured embedding policy. |
+| Output parsing | `parse_llm_response_with_thinking()` plus explicit class-based order enrichment in `players.py`. |
+| Error handling | Retrieval fallback context, missing-liquidity conservative defaults, and LLM hold fallback are explicit and quality-auditable; deterministic config/schema errors fail fast. |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
 | `configs/FlashCrash2010/Rag/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/FlashCrash2010/Rag/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/FlashCrash2010/Rag/players.yml` | Player class paths, prompt paths, model name, rule parameters, and retrieval configuration. |
 | `configs/FlashCrash2010/Rag/topology.yml` | Message routing between coordinator and agents. |
 | `configs/FlashCrash2010/Rag/persona.yml` | Turn recording and persona metadata. |
 
@@ -81,14 +86,14 @@ python examples/FlashCrash2010/Rag/run_flashcrash2010_rag.py -c configs/FlashCra
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+- RAG agents should preserve RuleLLM order schema and class-mapped `agent_type`.
+- `rag_context` should be recorded for each investor decision when retrieval is attempted.
+- `rag_stats.json` should summarize retrieval coverage and missing-liquidity markers.
+- Level-2 audit should inspect parse-fallback and retrieval-fallback rates.
 
 ## §8 References
 
-See `examples/FlashCrash2010/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/FlashCrash2010/simulation-bases.md §2` for the cited market microstructure and May 6, 2010 sources.
 
 ## §9 Variant Comparison
 

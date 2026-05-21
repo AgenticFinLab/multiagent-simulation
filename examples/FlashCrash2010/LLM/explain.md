@@ -6,53 +6,57 @@
 |---|---|
 | Variant | LLM |
 | Simulation | 2010 Flash Crash |
-| Decision Mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning |
+| Decision Mechanism | LLM-generated trading orders with class-mapped market agent types |
 | Theory Reference | `examples/FlashCrash2010/simulation-bases.md` |
 | Market Broadcast | `configs/FlashCrash2010/LLM/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+This variant keeps the Rule coordinator but replaces deterministic investor formulas with LLM decisions. The player code maps each LLM class to the Rule market's `agent_type` taxonomy so the order-book depth formula still sees HFT, fundamental, stop-loss, and noise participants.
 
 ## §2 Theory -> Implementation Mapping
 
-### §2.1 HFTMarketMaker (simulation-bases.md §4.1)
+### §2.1 HFTMarketMaker
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `LLMHFTMarketMaker` in `examples/FlashCrash2010/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash2010/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
-### §2.2 MomentumChaser (simulation-bases.md §4.2)
+| HFT liquidity withdrawal | `LLMHFTMarketMaker` receives HFT market-maker stress instructions and emits numeric trading decisions plus `provides_liquidity`. |
+| Market effect | `agent_type_for_strategy()` maps the class to `agent_type="hft"` so HFT participation affects depth. |
+| Config source | `configs/FlashCrash2010/LLM/players.yml` with `LLM_HFT_MARKET_MAKER_SYS`. |
+
+### §2.2 MomentumChaser
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `LLMMomentumChaser` in `examples/FlashCrash2010/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash2010/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
-### §2.3 FundamentalTrader (simulation-bases.md §4.3)
+| Positive-feedback trading | `LLMMomentumChaser` receives momentum-size thresholds and produces trend-following orders. |
+| Market effect | It is class-mapped to `agent_type="hft"` and contributes to HFT participation. |
+| Config source | `configs/FlashCrash2010/LLM/players.yml` with `LLM_MOMENTUM_CHASER_SYS`. |
+
+### §2.3 FundamentalTrader
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `LLMFundamentalTrader` in `examples/FlashCrash2010/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash2010/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
-### §2.4 StopLossTrader (simulation-bases.md §4.4)
+| Value-based stabilization | `LLMFundamentalTrader` receives value-deviation instructions and can buy undervaluation. |
+| Market effect | It is class-mapped to `agent_type="fundamental"` for recovery diagnostics. |
+| Config source | `configs/FlashCrash2010/LLM/players.yml` with `LLM_FUNDAMENTAL_SYS`. |
+
+### §2.4 StopLossTrader
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `LLMStopLossTrader` in `examples/FlashCrash2010/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash2010/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
-### §2.5 NoiseTrader (simulation-bases.md §4.5)
+| Stop-loss cascade | `LLMStopLossTrader` receives non-negotiable stop-loss rules and can liquidate position. |
+| Market effect | It is class-mapped to `agent_type="stoploss"` so cascade waves remain analyzable. |
+| Config source | `configs/FlashCrash2010/LLM/players.yml` with `LLM_STOP_LOSS_SYS`. |
+
+### §2.5 NoiseTrader
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `LLMNoiseTrader` in `examples/FlashCrash2010/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/FlashCrash2010/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Background order flow | `LLMNoiseTrader` receives low-probability uninformed trading instructions. |
+| Market effect | It is class-mapped to `agent_type="noise"`. |
+| Config source | `configs/FlashCrash2010/LLM/players.yml` with `LLM_NOISE_TRADER_SYS`. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/FlashCrash2010/LLM/players.py` and its configured counterpart in `configs/FlashCrash2010/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The market mechanism is imported from the Rule variant. LLM outputs are parsed into numeric orders, constrained by cash/position, class-mapped to Rule `agent_type`, and then consumed by the same depth/spread/price update.
 
 ## §4 Variant Architecture
 
@@ -60,16 +64,16 @@ The coordinator mechanism is the final implementation in `examples/FlashCrash201
 |---|---|
 | Player classes | `examples/FlashCrash2010/LLM/players.py` |
 | Prompt module | `examples/FlashCrash2010/LLM/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | Uses the project ARK LLM policy. |
+| Output parsing | `parse_llm_response_with_thinking()` extracts `<decision>` JSON and required numeric fields. |
+| Error handling | API parse failures are retried; missing `provides_liquidity` uses an explicit conservative false marker; deterministic config/schema errors fail fast. |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
 | `configs/FlashCrash2010/LLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/FlashCrash2010/LLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/FlashCrash2010/LLM/players.yml` | Player class paths, prompt paths, model name, and market parameters. |
 | `configs/FlashCrash2010/LLM/topology.yml` | Message routing between coordinator and agents. |
 | `configs/FlashCrash2010/LLM/persona.yml` | Turn recording and persona metadata. |
 
@@ -81,14 +85,13 @@ python examples/FlashCrash2010/LLM/run_flashcrash2010_llm.py -c configs/FlashCra
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+- HFT classes should remain visible as `agent_type="hft"` in the market order stream.
+- LLM sizing and reasoning may vary, but depth collapse should still depend on HFT participation.
+- Stop-loss and fundamental roles should remain distinguishable for Level-2 audit.
 
 ## §8 References
 
-See `examples/FlashCrash2010/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/FlashCrash2010/simulation-bases.md §2` for the cited market microstructure and May 6, 2010 sources.
 
 ## §9 Variant Comparison
 

@@ -335,6 +335,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         llm_cfg = self.config.extras["llm"]
         system_prompt = load_prompt(llm_cfg["sys_message"])
@@ -419,17 +420,25 @@ class RagLLMInvestor(GeneralPlayer):
             self.state.custom_state["position"] += quantity
 
         strategy_name = self.__class__.__name__
+        liquidity_field_missing = decision.get("provides_liquidity") is None
+        if liquidity_field_missing:
+            logger.warning(
+                "[%s] LLM decision omitted provides_liquidity; using conservative false",
+                self.identity,
+            )
+
         order = {
             "action": action,
             "bid_price": bid_price,
-            "action": action,
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": str(decision.get("reasoning", "fallback hold"))[:120],
-            "analysis": str(decision.get("analysis", "")),
+            "reasoning": str(decision["reasoning"])[:120],
+            "analysis": str(decision["analysis"]),
             "agent_type": agent_type_for_strategy(strategy_name),
             "provides_liquidity": bool(decision.get("provides_liquidity", False)),
+            "liquidity_field_missing": liquidity_field_missing,
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
         validate_order(order)
         return {
