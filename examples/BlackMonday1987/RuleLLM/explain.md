@@ -80,7 +80,7 @@ Market class identical to Rule variant (imported). See Rule `explain.md §2` for
 
 **Feedback amplification preserved**: ProgramTrader's amplification formula is embedded in the DECISION RULES section. The LLM must execute it step-by-step, ensuring the feedback loop is maintained even in the hybrid variant.
 
-**Rule adherence target**: `analysis.py → analyze_rule_adherence()` measures directional agreement. Target ≥80%. ProgramTrader and PortfolioInsurer should show near-perfect adherence (clear threshold formulas). IndexArbitrageur may show lower adherence near the threshold boundary.
+**Rule adherence target**: `summary.json`, `03_summary.png`, and order records allow directional agreement to be audited against the Rule thresholds in `simulation-bases.md §4`. ProgramTrader and PortfolioInsurer should show near-perfect adherence (clear threshold formulas). IndexArbitrageur may show lower adherence near the threshold boundary.
 
 **Cascade depth variation**: ±20% quantity adjustment on each agent creates compound variation in cascade depth. If all agents adjust +20%, crash is 20% deeper than Rule; if all adjust −20%, 20% shallower.
 
@@ -149,5 +149,5 @@ Output location: `EXPERIMENT/BlackMonday1987/RuleLLM/`
 
 - Feedback amplification formula embedded in prompts → `simulation-bases.md §4 (Rule-Based Behavior — ProgramTrader)`
 - RuleLLM quantity ranges → `simulation-bases.md §4 (RuleLLM Hybrid Notes per investor type)`
-- Rule adherence analysis → `analysis.py → analyze_rule_adherence()` (target ≥80%)
+- Rule adherence analysis -> order records plus `summary.json` / `03_summary.png` (target >=80% directional agreement in post-run review)
 - Price formula → `simulation-bases.md §3.1`
