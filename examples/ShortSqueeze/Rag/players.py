@@ -638,7 +638,8 @@ class RagLLMInvestor(GeneralPlayer):
             f"Portfolio: cash={cash:.2f}  position={position:.4f}"
             f"  value={cash + position * market_data['price']:.2f}\n"
             "Respond with <analysis>...</analysis> then "
-            '<decision>{"bid_price":...,"quantity":...,"reasoning":"...","provides_liquidity":false}</decision>'
+            '<decision>{"action":"buy"|"sell"|"hold","bid_price":...,"quantity":...,'
+            '"reasoning":"...","provides_liquidity":false}</decision>'
         )
 
     # ------------------------------------------------------------------

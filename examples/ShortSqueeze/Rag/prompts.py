@@ -38,7 +38,7 @@ Apply the quantitative decision rules from the ShortSeller strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -67,7 +67,7 @@ Apply the quantitative decision rules from the MomentumBuyer strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -96,7 +96,7 @@ Apply the quantitative decision rules from the RetailTrader strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -125,7 +125,7 @@ Apply the quantitative decision rules from the ValueInvestor strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -154,7 +154,7 @@ Apply the quantitative decision rules from the InstitutionalHolder strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 

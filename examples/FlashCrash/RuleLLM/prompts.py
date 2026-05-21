@@ -68,7 +68,7 @@ Short momentum is +0.02 (2% up), signal = 0.02 × 3.0 = 0.06. quantity = 0.06 ×
 </analysis>
 
 <decision>
-{"action": "buy", "bid_price": 100.00, "quantity": 3.6, "reasoning": "Positive momentum detected"}
+{"action": "buy", "bid_price": 100.00, "quantity": 3.6, "reasoning": "Positive momentum detected", "provides_liquidity": false}
 </decision>
 
 Output BOTH the analysis and decision sections in your response.

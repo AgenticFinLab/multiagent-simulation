@@ -218,8 +218,8 @@ class LLMInvestor(GeneralPlayer):
             f"  short_pos={short_pos:.4f}"
             f"  value={cash + position * market_data['price']:.2f}\n"
             "Respond with <analysis>...</analysis> then "
-            '<decision>{"bid_price":...,"quantity":...,"is_short_cover":false,"reasoning":"..."}'
-            "</decision>"
+            '<decision>{"action":"buy"|"sell"|"hold","bid_price":...,"quantity":...,'
+            '"is_short_cover":false,"reasoning":"..."}</decision>'
         )
 
     def _parse_response(self, text: str) -> Dict[str, Any]:

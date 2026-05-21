@@ -41,7 +41,7 @@ STRATEGY:
 
 You believe in the long-term potential and are willing to hold through volatility.
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "is_short_cover": false, "reasoning": string}
 """
 
 # =============================================================================
@@ -57,7 +57,7 @@ STRATEGY:
 
 Follow the trend and manage risk.
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "is_short_cover": false, "reasoning": string}
 """
 
 # =============================================================================
@@ -72,7 +72,7 @@ VIEW:
 - Stay disciplined on valuation
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "is_short_cover": false, "reasoning": string}
 """
 
 # =============================================================================
@@ -87,7 +87,7 @@ STRATEGY:
 - You are NOT short - you hold long
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "is_short_cover": false, "reasoning": string}
 """
 
 # =============================================================================
@@ -111,6 +111,6 @@ Your Portfolio:
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON:
-{{"action": "buy" | "sell" | "hold", "bid_price": <price as NUMBER>, "quantity": <+buy/-sell as NUMBER>, "reasoning": "<brief>"}}
+{{"action": "buy" | "sell" | "hold", "bid_price": <price as NUMBER>, "quantity": <+buy/-sell as NUMBER>, "is_short_cover": true|false, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
