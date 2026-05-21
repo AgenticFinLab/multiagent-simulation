@@ -15,13 +15,40 @@ VolatilityTrader roles.
 
 ## §2 Theory -> Implementation Mapping
 
+### §2.1 Fundamentalist (simulation-bases.md §4.1)
+
 | Theory Component | Implementation |
 |---|---|
-| Fundamentalist, `simulation-bases.md §4.1` | `Fundamentalist` trades toward noisy fundamental value at configured intervals. |
-| TrendFollower, `simulation-bases.md §4.2` | `TrendFollower` trades with recent price trend and scales size by volatility. |
-| NoiseTrader, `simulation-bases.md §4.3` | `NoiseTrader` generates random order shocks with inventory mean reversion. |
-| SlowAdapter, `simulation-bases.md §4.4` | `SlowAdapter` blends fundamental value with moving average and trades slowly. |
-| VolatilityTrader, `simulation-bases.md §4.5` | `VolatilityTrader` changes exposure when volatility crosses relative thresholds. |
+| Fundamental anchoring | `Fundamentalist` trades toward noisy fundamental value at configured intervals. |
+| Order schema | Emits deterministic signed quantity, bid price, strategy, and investor label. |
+
+### §2.2 TrendFollower (simulation-bases.md §4.2)
+
+| Theory Component | Implementation |
+|---|---|
+| Volatility-sensitive trend demand | `TrendFollower` trades with recent price trend and scales size by volatility. |
+| Order schema | Emits larger trend-following quantities in high-volatility states. |
+
+### §2.3 NoiseTrader (simulation-bases.md §4.3)
+
+| Theory Component | Implementation |
+|---|---|
+| Shock generation | `NoiseTrader` generates random order shocks with inventory mean reversion. |
+| Order schema | Emits bounded stochastic buy or sell orders around current price. |
+
+### §2.4 SlowAdapter (simulation-bases.md §4.4)
+
+| Theory Component | Implementation |
+|---|---|
+| Delayed information processing | `SlowAdapter` blends fundamental value with moving average and trades slowly. |
+| Order schema | Emits delayed stabilizing orders after price shocks. |
+
+### §2.5 VolatilityTrader (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Volatility-regime response | `VolatilityTrader` changes exposure when volatility crosses relative thresholds. |
+| Order schema | Emits orders based on high- or low-volatility regimes. |
 
 ## §3 Market Mechanism
 

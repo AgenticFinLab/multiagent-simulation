@@ -3,99 +3,97 @@
 ## §1 Analysis Objectives
 
 The analysis checks whether a run exhibits a coherent crash process rather than
-just a valid execution. The core questions are:
-
-1. How deep and how fast was the drawdown?
-2. How much selling came from mechanical deleveraging versus panic behavior?
-3. Did liquidity provision weaken during stress?
-4. Did BottomFisher demand absorb any portion of the sell cascade?
+only a successful execution. It measures crash depth, crash speed, volatility
+stress, forced selling, liquidity withdrawal, panic selling, and contrarian
+absorption.
 
 ## §2 Metrics
 
 ### §2.1 Maximum Drawdown
 
-Measure peak-to-trough loss in the market price path.
+```python
+def compute_maximum_drawdown(prices: list[float]) -> float
+```
+
+Measures peak-to-trough crash severity.
 
 ### §2.2 Largest One-Round Drop
 
-Measure crash velocity as the most negative round return.
+```python
+def compute_largest_one_round_drop(prices: list[float]) -> float
+```
+
+Measures crash velocity as the most negative one-round return.
 
 ### §2.3 Volatility Spike
 
-Measure whether realized volatility rises materially during the crash window.
+```python
+def compute_volatility_spike(returns: list[float], window: int) -> float
+```
+
+Measures whether realized volatility rises materially during the crash window.
 
 ### §2.4 Forced-Selling Pressure
 
-Measure sell volume attributable to `RiskParityFund` and
-`LeveragedHedgeFund`/`LeveragedFund` archetypes.
+```python
+def compute_forced_selling_pressure(orders: list[dict]) -> float
+```
+
+Measures sell volume attributable to RiskParityFund and leveraged-fund
+archetypes.
 
 ### §2.5 Liquidity Withdrawal
 
-Measure reduced market-making activity using quote flow and, for RuleLLM/Rag,
-`provides_liquidity` participation.
+```python
+def compute_liquidity_withdrawal(orders: list[dict], liquidity: list[float]) -> float
+```
+
+Measures reduced market-making activity and lower effective liquidity during
+stress.
 
 ### §2.6 Panic Contribution
 
-Measure sell volume from `PanicSeller` agents during negative-return rounds.
+```python
+def compute_panic_contribution(orders: list[dict], returns: list[float]) -> float
+```
+
+Measures selling by PanicSeller agents during negative-return rounds.
 
 ### §2.7 Bottom-Fisher Absorption
 
-Measure whether `BottomFisher` buy volume offsets a meaningful share of crash
-selling after deep discounts emerge.
+```python
+def compute_bottom_fisher_absorption(orders: list[dict]) -> float
+```
+
+Measures whether BottomFisher buy volume offsets crash selling after discounts.
 
 ## §3 Analysis Dimensions
 
-The scenario should be analyzed along four axes:
-
-- round-level price and return dynamics,
-- investor-type order-flow contributions,
-- liquidity versus volatility interaction,
-- stabilizing versus amplifying demand.
+Analyze round-level price and return dynamics, investor-type order flow,
+liquidity versus volatility interaction, and stabilizing versus amplifying
+demand.
 
 ## §4 Phase Analysis
 
-Interpret the trajectory in five phases:
-
-1. pre-crash positioning,
-2. volatility onset,
-3. deleveraging cascade,
-4. liquidity stress,
-5. stabilization or failed recovery.
+Interpret the trajectory in five phases: pre-crash positioning, volatility
+onset, deleveraging cascade, liquidity stress, and stabilization or failed
+recovery.
 
 ## §5 Cross-Variant Comparison
 
-The Rule baseline is the reference for mechanism shape. LLM, RuleLLM, and Rag
-should be compared on:
+Rule is the reference mechanism. LLM, RuleLLM, and Rag should be compared on
+crash depth, crash speed, liquidity withdrawal timing, forced/panic selling
+share, bottom-fisher support, and API/RAG quality.
 
-- crash depth and speed,
-- liquidity withdrawal timing,
-- share of forced or panic selling,
-- whether Rag retrieval changes stabilization timing,
-- whether API variants remain structurally coherent despite stochastic output.
+## §6 Expected Results And Validation Criteria
 
-## §6 Expected Results
-
-A valid MarketCrash run should show:
-
-- a clear drawdown episode,
-- elevated volatility around the crash window,
-- non-trivial selling from deleveraging or panic archetypes,
-- reduced liquidity support during stress,
-- limited but visible contrarian support from BottomFisher.
+A valid MarketCrash run should complete 200 rounds, record finite prices, show
+a clear drawdown episode, exhibit elevated volatility around stress, contain
+non-trivial sell pressure from deleveraging or panic archetypes, and show
+limited but visible contrarian support.
 
 ## §7 Visualization And Output Contract
 
-All variants must produce:
-
-- `summary.json`
-- `00_investor_bids.png`
-- `01_marketcrash_dynamics.png`
-- `02_marketcrash_analysis.png`
-- `03_summary.png`
-
-The Rag variant must additionally produce:
-
-- `rag_stats.json`
-
-Variant-level `analysis.md` files should map these outputs to the scenario’s
-actual metrics rather than using placeholder function contracts.
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_marketcrash_dynamics.png`, `02_marketcrash_analysis.png`, and
+`03_summary.png`. Rag additionally writes `rag_stats.json`.

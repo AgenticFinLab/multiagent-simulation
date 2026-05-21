@@ -12,7 +12,9 @@ under API generation and liquidity-sensitive market impact.
 | Overshoot magnitude | `def compute_overshoot_magnitude(prices: list[float], fundamental: float) -> float` | `analysis-bases.md §2.1` |
 | Reversal return | `def compute_reversal_return(prices: list[float], onset: int, extreme: int) -> float` | `analysis-bases.md §2.2` |
 | Contrarian order share | `def compute_contrarian_order_share(orders: list[dict]) -> float` | `analysis-bases.md §2.3` |
+| Momentum delay | `def compute_momentum_delay(prices: list[float], orders: list[dict]) -> int` | `analysis-bases.md §2.4` |
 | Liquidity depth | `def compute_liquidity_depth(orders: list[dict], base_liquidity: float) -> float` | `analysis-bases.md §2.5` |
+| Agent attribution | `def compute_agent_attribution(orders: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.6` |
 | API quality | `def compute_api_quality(events: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.7` |
 
 ## §3 Analysis Dimensions
@@ -27,8 +29,9 @@ value orders stabilize the path.
 
 ## §5 Cross-Variant Comparison
 
-Compare RuleLLM with LLM to assess the stabilizing effect of explicit rules, and
-with Rag to isolate the incremental contribution of retrieved knowledge.
+Use `analysis-bases.md §5` to compare RuleLLM with LLM and assess the
+stabilizing effect of explicit rules, then compare with Rag to isolate the
+incremental contribution of retrieved knowledge.
 
 ## §6 Expected Results and Validation Criteria
 

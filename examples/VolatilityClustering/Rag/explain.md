@@ -16,13 +16,40 @@ records `rag_context` for retrieval-quality analysis. If an LLM omits
 
 ## §2 Theory -> Implementation Mapping
 
+### §2.1 Fundamentalist (simulation-bases.md §4.1)
+
 | Theory Component | Implementation |
 |---|---|
-| Fundamentalist, `simulation-bases.md §4.1` | `RagLLMFundamentalist` uses fundamentalist rules plus retrieved context. |
-| TrendFollower, `simulation-bases.md §4.2` | `RagLLMTrendFollower` uses trend rules plus retrieved context. |
-| NoiseTrader, `simulation-bases.md §4.3` | `RagLLMNoiseTrader` uses noise-trader rules plus retrieved context. |
-| SlowAdapter, `simulation-bases.md §4.4` | `RagLLMSlowAdapter` uses slow-adapter rules plus retrieved context. |
-| VolatilityTrader, `simulation-bases.md §4.5` | `RagLLMVolatilityTrader` uses volatility-regime rules plus retrieved context. |
+| Fundamental anchoring | `RagLLMFundamentalist` uses fundamentalist rules plus retrieved context. |
+| RAG contract | Records `rag_context` and emits liquidity-aware canonical trading JSON. |
+
+### §2.2 TrendFollower (simulation-bases.md §4.2)
+
+| Theory Component | Implementation |
+|---|---|
+| Volatility-sensitive trend demand | `RagLLMTrendFollower` uses trend rules plus retrieved context. |
+| RAG contract | Retrieved context may affect timing and conviction but not the schema. |
+
+### §2.3 NoiseTrader (simulation-bases.md §4.3)
+
+| Theory Component | Implementation |
+|---|---|
+| Shock generation | `RagLLMNoiseTrader` uses noise-trader rules plus retrieved context. |
+| RAG contract | Conservative `provides_liquidity=false` default prevents missing text from inflating depth. |
+
+### §2.4 SlowAdapter (simulation-bases.md §4.4)
+
+| Theory Component | Implementation |
+|---|---|
+| Delayed information processing | `RagLLMSlowAdapter` uses slow-adapter rules plus retrieved context. |
+| RAG contract | Records retrieval text for quality audit. |
+
+### §2.5 VolatilityTrader (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Volatility-regime response | `RagLLMVolatilityTrader` uses volatility-regime rules plus retrieved context. |
+| RAG contract | Structured JSON remains aligned with the RuleLLM parser. |
 
 ## §3 Market Mechanism
 

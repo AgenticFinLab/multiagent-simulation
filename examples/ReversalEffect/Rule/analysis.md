@@ -14,7 +14,9 @@ correction pressure, and finite 200-round market series.
 | Reversal return | `def compute_reversal_return(prices: list[float], onset: int, extreme: int) -> float` | `analysis-bases.md §2.2` |
 | Contrarian order share | `def compute_contrarian_order_share(orders: list[dict]) -> float` | `analysis-bases.md §2.3` |
 | Momentum delay | `def compute_momentum_delay(prices: list[float], orders: list[dict]) -> int` | `analysis-bases.md §2.4` |
+| Liquidity depth | `def compute_liquidity_depth(orders: list[dict], base_liquidity: float) -> float` | `analysis-bases.md §2.5`; reported as baseline depth for Rule |
 | Agent attribution | `def compute_agent_attribution(orders: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.6` |
+| API quality | `def compute_api_quality(events: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.7`; reported as not applicable for Rule |
 
 ## §3 Analysis Dimensions
 
@@ -29,9 +31,9 @@ make these phases interpretable without API quality confounds.
 
 ## §5 Cross-Variant Comparison
 
-Compare Rule against LLM, RuleLLM, and Rag on overshoot, correction strength,
-activity, and terminal deviation. Rule has the most complete role set because it
-includes IndexTracker.
+Use `analysis-bases.md §5` to compare Rule against LLM, RuleLLM, and Rag on
+overshoot, correction strength, activity, and terminal deviation. Rule has the
+most complete role set because it includes IndexTracker.
 
 ## §6 Expected Results and Validation Criteria
 

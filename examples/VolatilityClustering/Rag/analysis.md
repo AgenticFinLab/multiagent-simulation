@@ -13,7 +13,9 @@ preserving the RuleLLM market contract.
 | Rolling volatility | `def compute_rolling_volatility(returns: list[float], window: int) -> list[float]` | `analysis-bases.md §2.1` |
 | Absolute-return autocorrelation | `def compute_abs_return_autocorrelation(returns: list[float], lag: int = 1) -> float` | `analysis-bases.md §2.2` |
 | High-volatility duration | `def compute_high_vol_duration(volatility: list[float], threshold: float) -> int` | `analysis-bases.md §2.3` |
+| Trend amplification share | `def compute_trend_amplification_share(orders: list[dict]) -> float` | `analysis-bases.md §2.4` |
 | Volatility-regime response | `def compute_volatility_regime_response(orders: list[dict], volatility: list[float]) -> float` | `analysis-bases.md §2.5` |
+| Stabilization pressure | `def compute_stabilization_pressure(orders: list[dict], prices: list[float], fundamental: float) -> float` | `analysis-bases.md §2.6` |
 | API and retrieval quality | `def compute_api_and_retrieval_quality(events: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.7` |
 
 ## §3 Analysis Dimensions
@@ -28,8 +30,8 @@ persistence, or reversion toward calmer volatility.
 
 ## §5 Cross-Variant Comparison
 
-Compare Rag against RuleLLM to isolate retrieval effects, and against Rule/LLM
-for broader mechanism preservation.
+Use `analysis-bases.md §5` to compare Rag against RuleLLM and isolate retrieval
+effects, then compare against Rule/LLM for broader mechanism preservation.
 
 ## §6 Expected Results and Validation Criteria
 

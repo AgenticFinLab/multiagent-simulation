@@ -19,25 +19,29 @@ signed orders. RuleLLM and Rag use a liquidity-aware extension that consumes
 ARCH and GARCH models represent volatility persistence by making current
 variance depend on prior squared returns and prior variance. The market
 coordinator implements this mechanism directly through a bounded GARCH(1,1)
-update.
+update, following ARCH evidence (DOI: 10.2307/1912773) and GARCH modeling
+(DOI: 10.1016/0304-4076(86)90063-1).
 
 ### §2.2 Heterogeneous Agent Feedback
 
 Heterogeneous agent models show how fundamentalists, trend followers, and noise
 traders can produce persistent nonlinear market dynamics. Trend following and
 noise shocks help create clustered high-volatility periods; fundamentalists and
-slow adapters provide stabilizing pressure.
+slow adapters provide stabilizing pressure (DOI:
+10.1016/S0165-1889(98)00011-6).
 
 ### §2.3 Trend Following Under Volatility
 
 Trend followers often size positions by market state. In this scenario,
 volatility-sensitive trend demand can amplify price moves during turbulent
-periods.
+periods, consistent with time-series momentum evidence (DOI:
+10.1016/j.jfineco.2011.11.003).
 
 ### §2.4 Slow Adaptation
 
 Slow information processing spreads reactions across multiple rounds, making
-the effect of a shock persist after the initial return.
+the effect of a shock persist after the initial return, following adaptive
+expectations and bounded-rationality market models.
 
 ### §2.5 Volatility Timing
 
@@ -75,7 +79,8 @@ demand.
 noise; buy undervaluation and sell overvaluation.
 **Worked Numerical Example**: If price is 95 and noisy estimated value is 100,
 the positive deviation creates a buy order scaled by value sensitivity.
-**Academic References**: Graham (1949); Brock and Hommes (1998).
+**Academic References**: Graham (1949); Brock and Hommes (1998), DOI:
+10.1016/S0165-1889(98)00011-6.
 
 ### §4.2 TrendFollower
 
@@ -90,8 +95,9 @@ trend direction if the signal exceeds threshold; increase size in high
 volatility.
 **Worked Numerical Example**: A price above its lookback average with volatility
 twice baseline creates a larger buy order.
-**Academic References**: Jegadeesh and Titman (1993); Moskowitz, Ooi, and
-Pedersen (2012).
+**Academic References**: Jegadeesh and Titman (1993), DOI:
+10.1111/j.1540-6261.1993.tb04702.x; Moskowitz, Ooi, and Pedersen (2012), DOI:
+10.1016/j.jfineco.2011.11.003.
 
 ### §4.3 NoiseTrader
 
@@ -105,7 +111,8 @@ trading.
 mean reversion.
 **Worked Numerical Example**: A positive random draw creates a buy order, while
 a large existing long position reduces the order through reversion.
-**Academic References**: Black (1986); De Long et al. (1990).
+**Academic References**: Black (1986), DOI: 10.1111/j.1540-6261.1986.tb04513.x;
+De Long et al. (1990), DOI: 10.1086/261703.
 
 ### §4.4 SlowAdapter
 
@@ -119,7 +126,8 @@ information processing.
 only when the deviation is material.
 **Worked Numerical Example**: After a price shock, the moving average remains
 away from fundamental and influences orders for multiple rounds.
-**Academic References**: Hommes (2006); adaptive learning literature.
+**Academic References**: Hommes (2006); Brock and Hommes (1998), DOI:
+10.1016/S0165-1889(98)00011-6.
 
 ### §4.5 VolatilityTrader
 
@@ -133,8 +141,8 @@ mean-reversion strategies.
 to its moving average; buy or increase exposure in low-volatility regimes.
 **Worked Numerical Example**: If current volatility is 1.8 times its recent
 average and the high threshold is 1.5, the trader sells.
-**Academic References**: Engle (1982); Bollerslev (1986); volatility timing
-literature.
+**Academic References**: Engle (1982), DOI: 10.2307/1912773; Bollerslev (1986),
+DOI: 10.1016/0304-4076(86)90063-1; volatility timing literature.
 
 ## §5 Agent Diversity Verification
 
@@ -149,21 +157,21 @@ records retrieved context for post-run audit.
 
 ## §6 Parameter Table
 
-| Parameter | Meaning | Used By | Sensitivity |
-|---|---|---|---|
-| `initial_price` | Starting price | Market | Medium |
-| `fundamental_value` | Value anchor | Market, Fundamentalist | High |
-| `price_impact` / `base_price_impact` | Net-demand price impact | Market | High |
-| `mean_reversion` | Pull toward fundamental | Market | Medium |
-| `garch_omega` | Long-run variance component | Market | High |
-| `garch_alpha` | Return-shock variance loading | Market | High |
-| `garch_beta` | Volatility persistence | Market | High |
-| `min_volatility` / `max_volatility` | Volatility bounds | Market | Medium |
-| `trend_threshold` | Trend activation | TrendFollower | High |
-| `volatility_sensitivity` | Volatility-scaled trend size | TrendFollower | High |
-| `position_volatility` | Noise-trader shock size | NoiseTrader | Medium |
-| `update_weight` | Slow-adapter fundamental weight | SlowAdapter | High |
-| `high_vol_threshold` / `low_vol_threshold` | Volatility-regime triggers | VolatilityTrader | High |
+| Parameter | Meaning | Used By | Sensitivity | Source / Rationale |
+|---|---|---|---|---|
+| `initial_price` | Starting price | Market | Medium | Normalized starting point for volatility paths |
+| `fundamental_value` | Value anchor | Market, Fundamentalist | High | Stabilizing reference value |
+| `price_impact` / `base_price_impact` | Net-demand price impact | Market | High | Converts order-flow shocks into returns |
+| `mean_reversion` | Pull toward fundamental | Market | Medium | Prevents unbounded drift |
+| `garch_omega` | Long-run variance component | Market | High | GARCH baseline variance |
+| `garch_alpha` | Return-shock variance loading | Market | High | ARCH shock response |
+| `garch_beta` | Volatility persistence | Market | High | GARCH persistence channel |
+| `min_volatility` / `max_volatility` | Volatility bounds | Market | Medium | Numerical stability and scenario observability |
+| `trend_threshold` | Trend activation | TrendFollower | High | Activates continuation trades only on meaningful trends |
+| `volatility_sensitivity` | Volatility-scaled trend size | TrendFollower | High | Links turbulence to order size |
+| `position_volatility` | Noise-trader shock size | NoiseTrader | Medium | Generates shocks that feed volatility updates |
+| `update_weight` | Slow-adapter fundamental weight | SlowAdapter | High | Controls delayed information processing |
+| `high_vol_threshold` / `low_vol_threshold` | Volatility-regime triggers | VolatilityTrader | High | Implements volatility timing behavior |
 
 ## §7 Communication And Round Structure
 

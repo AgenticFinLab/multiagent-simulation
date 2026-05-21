@@ -17,32 +17,45 @@ variant that includes `PassiveInvestor`.
 
 ### §2.1 RiskParityFund (simulation-bases.md §4.1)
 
-Implemented by `RiskParityFund` in
-`examples/MarketCrash/Rule/players.py` with parameters from
-`configs/MarketCrash/Rule/players.yml`.
+| Theory Component | Implementation |
+|---|---|
+| Volatility targeting and procyclical selling | `RiskParityFund` in `examples/MarketCrash/Rule/players.py` reads target-volatility parameters from `configs/MarketCrash/Rule/players.yml`. |
+| Order schema | Emits signed `quantity`, `bid_price`, `strategy`, and `investor`. |
 
 ### §2.2 LeveragedHedgeFund (simulation-bases.md §4.2)
 
-Implemented by `LeveragedHedgeFund` in
-`examples/MarketCrash/Rule/players.py`.
+| Theory Component | Implementation |
+|---|---|
+| Margin spiral and forced deleveraging | `LeveragedHedgeFund` monitors leverage and liquidation thresholds in `players.py`. |
+| Order schema | Emits forced sell orders when configured stress thresholds are crossed. |
 
 ### §2.3 MarketMaker (simulation-bases.md §4.3)
 
-Implemented by `MarketMaker` in `examples/MarketCrash/Rule/players.py`.
+| Theory Component | Implementation |
+|---|---|
+| Liquidity supply and withdrawal | `MarketMaker` reduces quote size under high volatility and inventory stress. |
+| Order schema | Emits stabilizing or inventory-management orders without API fields. |
 
 ### §2.4 PassiveInvestor (simulation-bases.md §4.4)
 
-Implemented by `PassiveInvestor` in
-`examples/MarketCrash/Rule/players.py`. This archetype is present only in the
-Rule baseline.
+| Theory Component | Implementation |
+|---|---|
+| Slow rebalancing stabilizer | `PassiveInvestor` trades toward target exposure on configured rebalance rounds. |
+| Variant scope | Present only in the Rule baseline. |
 
 ### §2.5 PanicSeller (simulation-bases.md §4.5)
 
-Implemented by `PanicSeller` in `examples/MarketCrash/Rule/players.py`.
+| Theory Component | Implementation |
+|---|---|
+| Behavioral panic selling | `PanicSeller` reacts to drawdown and crash-trigger thresholds. |
+| Order schema | Sells a configured fraction of position during panic states. |
 
 ### §2.6 BottomFisher (simulation-bases.md §4.6)
 
-Implemented by `BottomFisher` in `examples/MarketCrash/Rule/players.py`.
+| Theory Component | Implementation |
+|---|---|
+| Contrarian crash absorption | `BottomFisher` buys after discount or crash-return triggers. |
+| Order schema | Emits buy orders subject to configured size and cash constraints. |
 
 ## §3 Market Mechanism
 

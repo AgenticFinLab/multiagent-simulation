@@ -15,14 +15,47 @@ provides passive liquidity.
 
 ## §2 Theory -> Implementation Mapping
 
+### §2.1 ContrarianInvestor (simulation-bases.md §4.1)
+
 | Theory Component | Implementation |
 |---|---|
-| ContrarianInvestor, `simulation-bases.md §4.1` | `RuleLLMContrarianInvestor` maps to the contrarian rule prompt. |
-| MomentumInvestor, `simulation-bases.md §4.2` | `RuleLLMMomentumChaser` maps to the momentum rule prompt. |
-| OverconfidentTrader, `simulation-bases.md §4.3` | `RuleLLMOverconfidentTrader` maps to the overconfident rule prompt. |
-| NoiseTrader, `simulation-bases.md §4.4` | `RuleLLMNoiseTrader` maps to the noise-trader rule prompt. |
-| ValueInvestor, `simulation-bases.md §4.5` | `RuleLLMValueInvestor` maps to the value-investor rule prompt. |
-| IndexTracker, `simulation-bases.md §4.6` | Not instantiated in this API variant. |
+| Contrarian reversal pressure | `RuleLLMContrarianInvestor` maps to the contrarian rule prompt. |
+| API contract | Emits `action`, `bid_price`, `quantity`, `reasoning`, and `provides_liquidity`. |
+
+### §2.2 MomentumInvestor (simulation-bases.md §4.2)
+
+| Theory Component | Implementation |
+|---|---|
+| Continuation pressure | `RuleLLMMomentumChaser` maps to the momentum rule prompt. |
+| API contract | Explicit rules constrain trend-following direction and size. |
+
+### §2.3 OverconfidentTrader (simulation-bases.md §4.3)
+
+| Theory Component | Implementation |
+|---|---|
+| Signal overweighting | `RuleLLMOverconfidentTrader` maps to the overconfident rule prompt. |
+| API contract | Liquidity flag is required by the market depth calculation. |
+
+### §2.4 NoiseTrader (simulation-bases.md §4.4)
+
+| Theory Component | Implementation |
+|---|---|
+| Stochastic background flow | `RuleLLMNoiseTrader` maps to the noise-trader rule prompt. |
+| API contract | Explicit rules keep random-flow behavior bounded. |
+
+### §2.5 ValueInvestor (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Fundamental anchoring | `RuleLLMValueInvestor` maps to the value-investor rule prompt. |
+| API contract | Structured JSON is parsed into liquidity-aware market orders. |
+
+### §2.6 IndexTracker (simulation-bases.md §4.6)
+
+| Theory Component | Implementation |
+|---|---|
+| Passive rebalancing | Not instantiated in this API variant. |
+| Variant scope | The passive role is retained only in Rule. |
 
 ## §3 Market Mechanism
 

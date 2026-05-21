@@ -7,14 +7,15 @@ recording usable per-round RAG evidence.
 
 ## §2 Core Metrics
 
-| Metric | Interpretation |
-|---|---|
-| Maximum drawdown | Crash severity |
-| Largest one-round drop | Crash velocity |
-| Volatility spike | Stress amplification |
-| Liquidity withdrawal | `provides_liquidity` participation under stress |
-| Bottom-fisher absorption | Stabilizing demand after discount triggers |
-| Retrieval quality | Success versus fallback retrieval rounds in `rag_stats.json` |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Maximum drawdown | `def compute_maximum_drawdown(prices: list[float]) -> float` | `analysis-bases.md §2.1` |
+| Largest one-round drop | `def compute_largest_one_round_drop(prices: list[float]) -> float` | `analysis-bases.md §2.2` |
+| Volatility spike | `def compute_volatility_spike(returns: list[float], window: int) -> float` | `analysis-bases.md §2.3` |
+| Forced-selling pressure | `def compute_forced_selling_pressure(orders: list[dict]) -> float` | `analysis-bases.md §2.4` |
+| Liquidity withdrawal | `def compute_liquidity_withdrawal(orders: list[dict], liquidity: list[float]) -> float` | `analysis-bases.md §2.5` |
+| Panic contribution | `def compute_panic_contribution(orders: list[dict], returns: list[float]) -> float` | `analysis-bases.md §2.6` |
+| Bottom-fisher absorption | `def compute_bottom_fisher_absorption(orders: list[dict]) -> float` | `analysis-bases.md §2.7` |
 
 ## §3 Analysis Dimensions
 
@@ -28,14 +29,14 @@ and stabilization or failed recovery.
 
 ## §5 Cross-Variant Comparison
 
-Compare Rag against RuleLLM to determine whether retrieved crisis knowledge
-changes urgency, liquidity decisions, or stabilization timing.
+Use `analysis-bases.md §5` to compare Rag against RuleLLM and isolate whether
+retrieved crisis knowledge changes urgency, liquidity decisions, or stabilization
+timing.
 
 ## §6 Expected Results And Validation Criteria
 
 Successful runs should complete 200 rounds, preserve the RuleLLM market
-contract, record `rag_context` in player turns, and produce `rag_stats.json`
-without placeholder-only analysis outputs.
+contract, record `rag_context` in player turns, and produce `rag_stats.json`.
 
 ## §7 Visualization Catalogue
 

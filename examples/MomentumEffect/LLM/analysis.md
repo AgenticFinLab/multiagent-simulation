@@ -9,12 +9,13 @@ with the five-role API population.
 
 | Metric | Function Contract | Source |
 |---|---|---|
-| Return autocorrelation | `compute_return_autocorrelation(returns, lag=1)` | `analysis-bases.md §2.1` |
-| Momentum order imbalance | `compute_momentum_order_imbalance(orders)` | `analysis-bases.md §2.2` |
-| Contrarian offset | `compute_contrarian_offset(orders)` | `analysis-bases.md §2.3` |
-| Trend duration | `compute_trend_duration(prices)` | `analysis-bases.md §2.4` |
-| Fundamental deviation | `compute_fundamental_deviation(prices, fundamentals)` | `analysis-bases.md §2.5` |
-| Agent volume share | `compute_agent_volume_share(orders)` | `analysis-bases.md §2.6` |
+| Return autocorrelation | `def compute_return_autocorrelation(returns: list[float], lag: int = 1) -> float` | `analysis-bases.md §2.1` |
+| Momentum order imbalance | `def compute_momentum_order_imbalance(orders: list[dict]) -> float` | `analysis-bases.md §2.2` |
+| Contrarian offset | `def compute_contrarian_offset(orders: list[dict]) -> float` | `analysis-bases.md §2.3` |
+| Trend duration | `def compute_trend_duration(prices: list[float]) -> int` | `analysis-bases.md §2.4` |
+| Fundamental deviation | `def compute_fundamental_deviation(prices: list[float], fundamentals: list[float]) -> list[float]` | `analysis-bases.md §2.5` |
+| Agent volume share | `def compute_agent_volume_share(orders: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.6` |
+| Retrieval coverage | `def compute_rag_retrieval_coverage(rag_payloads: dict[str, dict[int, dict]]) -> dict` | `analysis-bases.md §2.7`; reported as not applicable for LLM |
 
 ## §3 Analysis Dimensions
 
@@ -28,8 +29,8 @@ stabilization or reversal.
 
 ## §5 Cross-Variant Comparison
 
-Compare against Rule for mechanism shape and against RuleLLM for the value of
-explicit rules.
+Use `analysis-bases.md §5` to compare against Rule for mechanism shape and
+against RuleLLM for the value of explicit rules.
 
 ## §6 Expected Results And Validation Criteria
 

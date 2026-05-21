@@ -18,30 +18,45 @@ configured in this API variant.
 
 ### §2.1 RiskParityFund (simulation-bases.md §4.1)
 
-Implemented by `RagLLMRiskParityFund` in
-`examples/MarketCrash/Rag/players.py`.
+| Theory Component | Implementation |
+|---|---|
+| Volatility targeting | `RagLLMRiskParityFund` uses RuleLLM-style rules plus retrieved context. |
+| RAG contract | Records `rag_context` and emits liquidity-aware order fields. |
 
 ### §2.2 LeveragedHedgeFund (simulation-bases.md §4.2)
 
-Represented by `RagLLMLeveragedFund`.
+| Theory Component | Implementation |
+|---|---|
+| Margin spiral | `RagLLMLeveragedFund` represents leveraged deleveraging with retrieved crisis context. |
+| RAG contract | Uses canonical trading JSON plus conservative liquidity default if omitted. |
 
 ### §2.3 MarketMaker (simulation-bases.md §4.3)
 
-Implemented by `RagLLMMarketMaker`.
+| Theory Component | Implementation |
+|---|---|
+| Liquidity supply/withdrawal | `RagLLMMarketMaker` reasons over retrieved market-liquidity context. |
+| RAG contract | `provides_liquidity` affects explicit depth in the market coordinator. |
 
 ### §2.4 PassiveInvestor (simulation-bases.md §4.4)
 
-Omitted from this configured variant.
+| Theory Component | Implementation |
+|---|---|
+| Slow passive stabilization | Not instantiated in this API variant. |
+| Variant scope | Documented omission relative to the six-role Rule baseline. |
 
 ### §2.5 PanicSeller (simulation-bases.md §4.5)
 
-Implemented by `RagLLMPanicSeller`.
+| Theory Component | Implementation |
+|---|---|
+| Panic selling | `RagLLMPanicSeller` combines crash-trigger rules with retrieved context. |
+| RAG contract | Per-round retrieval text is stored for quality audit. |
 
 ### §2.6 BottomFisher (simulation-bases.md §4.6)
 
-Implemented by `RagLLMBottomFisher` with
-`RAGLLM_BOTTOM_FISHER_SYS`; this replaces the previous incorrect
-PassiveInvestor prompt binding.
+| Theory Component | Implementation |
+|---|---|
+| Contrarian absorption | `RagLLMBottomFisher` binds to `RAGLLM_BOTTOM_FISHER_SYS`. |
+| RAG contract | Uses corrected BottomFisher rules plus retrieved crisis context. |
 
 ## §3 Market Mechanism
 

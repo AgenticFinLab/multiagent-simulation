@@ -17,14 +17,47 @@ missing text output cannot inflate effective market depth.
 
 ## §2 Theory -> Implementation Mapping
 
+### §2.1 ContrarianInvestor (simulation-bases.md §4.1)
+
 | Theory Component | Implementation |
 |---|---|
-| ContrarianInvestor, `simulation-bases.md §4.1` | `RagLLMContrarianInvestor` uses contrarian rules plus retrieved context. |
-| MomentumInvestor, `simulation-bases.md §4.2` | `RagLLMMomentumChaser` uses momentum rules plus retrieved context. |
-| OverconfidentTrader, `simulation-bases.md §4.3` | `RagLLMOverconfidentTrader` uses overconfident rules plus retrieved context. |
-| NoiseTrader, `simulation-bases.md §4.4` | `RagLLMNoiseTrader` uses noise-trader rules plus retrieved context. |
-| ValueInvestor, `simulation-bases.md §4.5` | `RagLLMValueInvestor` uses value-investor rules plus retrieved context. |
-| IndexTracker, `simulation-bases.md §4.6` | Not instantiated in this API variant. |
+| Contrarian reversal pressure | `RagLLMContrarianInvestor` uses contrarian rules plus retrieved context. |
+| RAG contract | Records `rag_context` and emits liquidity-aware canonical trading JSON. |
+
+### §2.2 MomentumInvestor (simulation-bases.md §4.2)
+
+| Theory Component | Implementation |
+|---|---|
+| Continuation pressure | `RagLLMMomentumChaser` uses momentum rules plus retrieved context. |
+| RAG contract | Retrieved context may affect timing and conviction but not the schema. |
+
+### §2.3 OverconfidentTrader (simulation-bases.md §4.3)
+
+| Theory Component | Implementation |
+|---|---|
+| Signal overweighting | `RagLLMOverconfidentTrader` uses overconfident rules plus retrieved context. |
+| RAG contract | Conservative `provides_liquidity=false` default prevents missing text from inflating depth. |
+
+### §2.4 NoiseTrader (simulation-bases.md §4.4)
+
+| Theory Component | Implementation |
+|---|---|
+| Stochastic background flow | `RagLLMNoiseTrader` uses noise-trader rules plus retrieved context. |
+| RAG contract | Records retrieval text for quality audit. |
+
+### §2.5 ValueInvestor (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Fundamental anchoring | `RagLLMValueInvestor` uses value-investor rules plus retrieved context. |
+| RAG contract | Structured JSON remains aligned with the RuleLLM parser. |
+
+### §2.6 IndexTracker (simulation-bases.md §4.6)
+
+| Theory Component | Implementation |
+|---|---|
+| Passive rebalancing | Not instantiated in this API variant. |
+| Variant scope | The passive role is retained only in Rule. |
 
 ## §3 Market Mechanism
 

@@ -15,14 +15,47 @@ structured JSON decisions.
 
 ## §2 Theory -> Implementation Mapping
 
+### §2.1 ContrarianInvestor (simulation-bases.md §4.1)
+
 | Theory Component | Implementation |
 |---|---|
-| ContrarianInvestor, `simulation-bases.md §4.1` | `LLMContrarianInvestor` uses the mean-reversion persona and a structured order parser. |
-| MomentumInvestor, `simulation-bases.md §4.2` | `LLMMomentumChaser` follows recent short-term direction. |
-| OverconfidentTrader, `simulation-bases.md §4.3` | `LLMOverconfidentTrader` extrapolates recent returns. |
-| NoiseTrader, `simulation-bases.md §4.4` | `LLMNoiseTrader` represents low-conviction retail order flow. |
-| ValueInvestor, `simulation-bases.md §4.5` | `LLMValueInvestor` compares price to fundamental value. |
-| IndexTracker, `simulation-bases.md §4.6` | Not instantiated in the API variants; the passive role is retained only in Rule. |
+| Contrarian reversal pressure | `LLMContrarianInvestor` uses the mean-reversion persona and a structured order parser. |
+| API contract | Emits `action`, `bid_price`, `quantity`, and `reasoning`. |
+
+### §2.2 MomentumInvestor (simulation-bases.md §4.2)
+
+| Theory Component | Implementation |
+|---|---|
+| Continuation pressure | `LLMMomentumChaser` follows recent short-term direction. |
+| API contract | Parser converts canonical JSON into signed market orders. |
+
+### §2.3 OverconfidentTrader (simulation-bases.md §4.3)
+
+| Theory Component | Implementation |
+|---|---|
+| Signal overweighting | `LLMOverconfidentTrader` extrapolates recent returns. |
+| API contract | Bounded retries handle stochastic parse errors; deterministic schema errors fail fast. |
+
+### §2.4 NoiseTrader (simulation-bases.md §4.4)
+
+| Theory Component | Implementation |
+|---|---|
+| Stochastic background flow | `LLMNoiseTrader` represents low-conviction retail order flow. |
+| API contract | Emits canonical trading JSON rather than special-schema actions. |
+
+### §2.5 ValueInvestor (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Fundamental anchoring | `LLMValueInvestor` compares price to fundamental value. |
+| API contract | Reasoning text is recorded for post-run quality review. |
+
+### §2.6 IndexTracker (simulation-bases.md §4.6)
+
+| Theory Component | Implementation |
+|---|---|
+| Passive rebalancing | Not instantiated in the API variants. |
+| Variant scope | The passive role is retained only in Rule. |
 
 ## §3 Market Mechanism
 

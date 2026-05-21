@@ -18,29 +18,45 @@ and `BottomFisher`. `PassiveInvestor` is not configured in this API variant.
 
 ### §2.1 RiskParityFund (simulation-bases.md §4.1)
 
-Implemented by `LLMRiskParityFund` in `examples/MarketCrash/LLM/players.py`.
+| Theory Component | Implementation |
+|---|---|
+| Volatility targeting | `LLMRiskParityFund` uses persona prompts and canonical JSON orders. |
+| API contract | Emits `action`, `bid_price`, `quantity`, and `reasoning`. |
 
 ### §2.2 LeveragedHedgeFund (simulation-bases.md §4.2)
 
-Represented by `LLMLeveragedFund` in
-`examples/MarketCrash/LLM/players.py`.
+| Theory Component | Implementation |
+|---|---|
+| Margin spiral | `LLMLeveragedFund` represents the leveraged-fund archetype. |
+| API contract | Parser validates canonical trading fields. |
 
 ### §2.3 MarketMaker (simulation-bases.md §4.3)
 
-Implemented by `LLMMarketMaker` in `examples/MarketCrash/LLM/players.py`.
+| Theory Component | Implementation |
+|---|---|
+| Liquidity-supply behavior | `LLMMarketMaker` expresses dealer/liquidity reasoning through prompts. |
+| Variant scope | The LLM market uses internal liquidity state, not `provides_liquidity`. |
 
 ### §2.4 PassiveInvestor (simulation-bases.md §4.4)
 
-Omitted from the configured LLM investor set. This is a runtime simplification,
-not a documentation omission.
+| Theory Component | Implementation |
+|---|---|
+| Slow passive stabilization | Not instantiated in this API variant. |
+| Variant scope | Documented omission relative to the six-role Rule baseline. |
 
 ### §2.5 PanicSeller (simulation-bases.md §4.5)
 
-Implemented by `LLMPanicSeller` in `examples/MarketCrash/LLM/players.py`.
+| Theory Component | Implementation |
+|---|---|
+| Loss-sensitive panic selling | `LLMPanicSeller` uses prompt-driven discretionary selling. |
+| API contract | Conservative fallback is explicit and logged after bounded retries. |
 
 ### §2.6 BottomFisher (simulation-bases.md §4.6)
 
-Implemented by `LLMBottomFisher` in `examples/MarketCrash/LLM/players.py`.
+| Theory Component | Implementation |
+|---|---|
+| Contrarian crash absorption | `LLMBottomFisher` represents value/contrarian buying after discounts. |
+| API contract | Emits canonical trading JSON parsed by `players.py`. |
 
 ## §3 Market Mechanism
 

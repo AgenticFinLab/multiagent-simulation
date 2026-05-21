@@ -15,14 +15,47 @@ OverconfidentTrader, NoiseTrader, ValueInvestor, and IndexTracker.
 
 ## §2 Theory -> Implementation Mapping
 
+### §2.1 ContrarianInvestor (simulation-bases.md §4.1)
+
 | Theory Component | Implementation |
 |---|---|
-| ContrarianInvestor, `simulation-bases.md §4.1` | `ContrarianInvestor` buys after sufficiently negative recent returns and sells after sufficiently positive recent returns. |
-| MomentumInvestor, `simulation-bases.md §4.2` | `MomentumInvestor` follows recent return direction and can delay correction. |
-| OverconfidentTrader, `simulation-bases.md §4.3` | `OverconfidentTrader` scales directional reaction by overconfidence parameters. |
-| NoiseTrader, `simulation-bases.md §4.4` | `NoiseTrader` adds stochastic order flow with bounded inventory behavior. |
-| ValueInvestor, `simulation-bases.md §4.5` | `ValueInvestor` trades against price-fundamental deviations. |
-| IndexTracker, `simulation-bases.md §4.6` | `IndexTracker` rebalances toward configured target exposure. |
+| Contrarian reversal pressure | `ContrarianInvestor` buys after sufficiently negative recent returns and sells after sufficiently positive recent returns. |
+| Order schema | Emits deterministic signed quantity, bid price, strategy, and investor label. |
+
+### §2.2 MomentumInvestor (simulation-bases.md §4.2)
+
+| Theory Component | Implementation |
+|---|---|
+| Continuation pressure | `MomentumInvestor` follows recent return direction and can delay correction. |
+| Order schema | Emits trend-following signed quantity under configured thresholds. |
+
+### §2.3 OverconfidentTrader (simulation-bases.md §4.3)
+
+| Theory Component | Implementation |
+|---|---|
+| Signal overweighting | `OverconfidentTrader` scales directional reaction by overconfidence parameters. |
+| Order schema | Emits larger directional orders when recent return signals exceed thresholds. |
+
+### §2.4 NoiseTrader (simulation-bases.md §4.4)
+
+| Theory Component | Implementation |
+|---|---|
+| Stochastic background flow | `NoiseTrader` adds random order flow with bounded inventory behavior. |
+| Order schema | Emits small stochastic buy or sell quantities around current price. |
+
+### §2.5 ValueInvestor (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Fundamental anchoring | `ValueInvestor` trades against price-fundamental deviations. |
+| Order schema | Emits value-side signed quantities when mispricing exceeds threshold. |
+
+### §2.6 IndexTracker (simulation-bases.md §4.6)
+
+| Theory Component | Implementation |
+|---|---|
+| Passive rebalancing | `IndexTracker` rebalances toward configured target exposure. |
+| Variant scope | Present only in the deterministic Rule baseline. |
 
 ## §3 Market Mechanism
 

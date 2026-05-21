@@ -13,6 +13,8 @@ mechanism while producing complete, auditable trading records.
 | Reversal return | `def compute_reversal_return(prices: list[float], onset: int, extreme: int) -> float` | `analysis-bases.md §2.2` |
 | Contrarian order share | `def compute_contrarian_order_share(orders: list[dict]) -> float` | `analysis-bases.md §2.3` |
 | Momentum delay | `def compute_momentum_delay(prices: list[float], orders: list[dict]) -> int` | `analysis-bases.md §2.4` |
+| Liquidity depth | `def compute_liquidity_depth(orders: list[dict], base_liquidity: float) -> float` | `analysis-bases.md §2.5`; reported as not applicable for LLM |
+| Agent attribution | `def compute_agent_attribution(orders: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.6` |
 | API quality | `def compute_api_quality(events: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.7` |
 
 ## §3 Analysis Dimensions
@@ -29,8 +31,9 @@ thresholds.
 
 ## §5 Cross-Variant Comparison
 
-Compare LLM with Rule to isolate prompt-driven stochasticity, and with RuleLLM
-to measure whether explicit rules reduce dispersion or parse risk.
+Use `analysis-bases.md §5` to compare LLM with Rule and isolate prompt-driven
+stochasticity, then compare with RuleLLM to measure whether explicit rules
+reduce dispersion or parse risk.
 
 ## §6 Expected Results and Validation Criteria
 

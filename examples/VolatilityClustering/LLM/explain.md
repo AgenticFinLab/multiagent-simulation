@@ -15,13 +15,40 @@ orders.
 
 ## §2 Theory -> Implementation Mapping
 
+### §2.1 Fundamentalist (simulation-bases.md §4.1)
+
 | Theory Component | Implementation |
 |---|---|
-| Fundamentalist, `simulation-bases.md §4.1` | `LLMFundamentalist` follows the value-oriented persona and structured order parser. |
-| TrendFollower, `simulation-bases.md §4.2` | `LLMTrendFollower` reacts quickly to trends and volatility. |
-| NoiseTrader, `simulation-bases.md §4.3` | `LLMNoiseTrader` produces low-information random order flow. |
-| SlowAdapter, `simulation-bases.md §4.4` | `LLMSlowAdapter` uses conservative delayed-reaction prompts. |
-| VolatilityTrader, `simulation-bases.md §4.5` | `LLMVolatilityTrader` trades based on volatility regime interpretation. |
+| Fundamental anchoring | `LLMFundamentalist` follows the value-oriented persona and structured order parser. |
+| API contract | Emits `action`, `bid_price`, `quantity`, and `reasoning`. |
+
+### §2.2 TrendFollower (simulation-bases.md §4.2)
+
+| Theory Component | Implementation |
+|---|---|
+| Volatility-sensitive trend demand | `LLMTrendFollower` reacts quickly to trends and volatility. |
+| API contract | Parser converts canonical JSON into signed market orders. |
+
+### §2.3 NoiseTrader (simulation-bases.md §4.3)
+
+| Theory Component | Implementation |
+|---|---|
+| Shock generation | `LLMNoiseTrader` produces low-information random order flow. |
+| API contract | Bounded retries handle stochastic parse errors; deterministic schema errors fail fast. |
+
+### §2.4 SlowAdapter (simulation-bases.md §4.4)
+
+| Theory Component | Implementation |
+|---|---|
+| Delayed information processing | `LLMSlowAdapter` uses conservative delayed-reaction prompts. |
+| API contract | Reasoning text is recorded for post-run quality review. |
+
+### §2.5 VolatilityTrader (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Volatility-regime response | `LLMVolatilityTrader` trades based on volatility regime interpretation. |
+| API contract | Emits canonical trading JSON rather than a special volatility schema. |
 
 ## §3 Market Mechanism
 

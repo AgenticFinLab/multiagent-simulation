@@ -8,19 +8,20 @@ stabilizing demand.
 
 ## §2 Core Metrics
 
-| Metric | Interpretation |
-|---|---|
-| Maximum drawdown | Peak-to-trough crash severity |
-| Largest one-round drop | Crash velocity |
-| Volatility spike | Stress amplification |
-| Forced-selling pressure | Mechanical selling by RiskParityFund and LeveragedHedgeFund |
-| Panic-selling volume | Behavioral amplification by PanicSeller |
-| Bottom-fisher absorption | Stabilizing demand after deep discount |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Maximum drawdown | `def compute_maximum_drawdown(prices: list[float]) -> float` | `analysis-bases.md §2.1` |
+| Largest one-round drop | `def compute_largest_one_round_drop(prices: list[float]) -> float` | `analysis-bases.md §2.2` |
+| Volatility spike | `def compute_volatility_spike(returns: list[float], window: int) -> float` | `analysis-bases.md §2.3` |
+| Forced-selling pressure | `def compute_forced_selling_pressure(orders: list[dict]) -> float` | `analysis-bases.md §2.4` |
+| Liquidity withdrawal | `def compute_liquidity_withdrawal(orders: list[dict], liquidity: list[float]) -> float` | `analysis-bases.md §2.5` |
+| Panic contribution | `def compute_panic_contribution(orders: list[dict], returns: list[float]) -> float` | `analysis-bases.md §2.6` |
+| Bottom-fisher absorption | `def compute_bottom_fisher_absorption(orders: list[dict]) -> float` | `analysis-bases.md §2.7` |
 
 ## §3 Analysis Dimensions
 
 Analyze by round, by investor class, by crash phase, and by aggregate market
-state.
+state. Rule is the deterministic reference path.
 
 ## §4 Phase Analysis
 
@@ -29,7 +30,8 @@ and attempted stabilization.
 
 ## §5 Cross-Variant Comparison
 
-This baseline defines the reference crash shape for LLM, RuleLLM, and Rag.
+Use `analysis-bases.md §5` to compare the Rule baseline against LLM, RuleLLM,
+and Rag on crash depth, speed, liquidity withdrawal, and stabilizing demand.
 
 ## §6 Expected Results And Validation Criteria
 

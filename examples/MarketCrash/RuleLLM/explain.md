@@ -20,29 +20,45 @@ PassiveInvestor binding.
 
 ### §2.1 RiskParityFund (simulation-bases.md §4.1)
 
-Implemented by `RuleLLMRiskParityFund` in
-`examples/MarketCrash/RuleLLM/players.py`.
+| Theory Component | Implementation |
+|---|---|
+| Volatility targeting | `RuleLLMRiskParityFund` combines persona text with explicit risk-parity rules. |
+| API contract | Emits canonical trading JSON plus `provides_liquidity`. |
 
 ### §2.2 LeveragedHedgeFund (simulation-bases.md §4.2)
 
-Represented by `RuleLLMLeveragedFund`.
+| Theory Component | Implementation |
+|---|---|
+| Margin spiral | `RuleLLMLeveragedFund` represents leveraged deleveraging rules. |
+| API contract | Parser requires liquidity flag because the market consumes it. |
 
 ### §2.3 MarketMaker (simulation-bases.md §4.3)
 
-Implemented by `RuleLLMMarketMaker`.
+| Theory Component | Implementation |
+|---|---|
+| Liquidity supply/withdrawal | `RuleLLMMarketMaker` maps dealer rules into API decisions. |
+| API contract | `provides_liquidity=true` identifies passive depth contributions. |
 
 ### §2.4 PassiveInvestor (simulation-bases.md §4.4)
 
-Omitted from this configured variant.
+| Theory Component | Implementation |
+|---|---|
+| Slow passive stabilization | Not instantiated in this API variant. |
+| Variant scope | Documented omission relative to the Rule baseline. |
 
 ### §2.5 PanicSeller (simulation-bases.md §4.5)
 
-Implemented by `RuleLLMPanicSeller`.
+| Theory Component | Implementation |
+|---|---|
+| Panic selling | `RuleLLMPanicSeller` follows explicit crash-trigger prompt rules. |
+| API contract | Fallback hold is explicit and conservative after bounded retries. |
 
 ### §2.6 BottomFisher (simulation-bases.md §4.6)
 
-Implemented by `RuleLLMBottomFisher` with
-`RULELLM_BOTTOM_FISHER_SYS` in `examples/MarketCrash/RuleLLM/prompts.py`.
+| Theory Component | Implementation |
+|---|---|
+| Contrarian absorption | `RuleLLMBottomFisher` binds to `RULELLM_BOTTOM_FISHER_SYS`. |
+| API contract | Uses the corrected BottomFisher prompt, not PassiveInvestor. |
 
 ## §3 Market Mechanism
 

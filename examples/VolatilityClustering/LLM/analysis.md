@@ -13,6 +13,8 @@ clustering while producing complete structured order records.
 | Absolute-return autocorrelation | `def compute_abs_return_autocorrelation(returns: list[float], lag: int = 1) -> float` | `analysis-bases.md §2.2` |
 | High-volatility duration | `def compute_high_vol_duration(volatility: list[float], threshold: float) -> int` | `analysis-bases.md §2.3` |
 | Trend amplification share | `def compute_trend_amplification_share(orders: list[dict]) -> float` | `analysis-bases.md §2.4` |
+| Volatility-regime response | `def compute_volatility_regime_response(orders: list[dict], volatility: list[float]) -> float` | `analysis-bases.md §2.5` |
+| Stabilization pressure | `def compute_stabilization_pressure(orders: list[dict], prices: list[float], fundamental: float) -> float` | `analysis-bases.md §2.6` |
 | API and retrieval quality | `def compute_api_and_retrieval_quality(events: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.7` |
 
 ## §3 Analysis Dimensions
@@ -27,8 +29,9 @@ volatility regimes earlier or later than deterministic thresholds.
 
 ## §5 Cross-Variant Comparison
 
-Compare LLM with Rule to isolate prompt-driven stochasticity and with RuleLLM to
-measure whether explicit rules reduce dispersion.
+Use `analysis-bases.md §5` to compare LLM with Rule and isolate prompt-driven
+stochasticity, then compare with RuleLLM to measure whether explicit rules
+reduce dispersion.
 
 ## §6 Expected Results and Validation Criteria
 

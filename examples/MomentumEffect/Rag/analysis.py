@@ -46,9 +46,7 @@ def analyze_rag_knowledge_effect(
         total_rag_rounds = 0
 
         for payload in round_payloads.values():
-            rag_context = payload.get("rag_context")
-            if rag_context is None:
-                continue
+            rag_context = payload["rag_context"]
             total_rag_rounds += 1
             if rag_context.strip() == _RAG_FALLBACK.strip():
                 failure_rounds += 1

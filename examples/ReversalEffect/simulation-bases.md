@@ -19,9 +19,10 @@ portfolio accounting.
 ### §2.1 Overreaction And Reversal
 
 De Bondt and Thaler (1985) argue that extreme prior winners and losers can
-subsequently reverse as investors reassess exaggerated expectations. The
-simulation implements this as price pressure away from fundamentals followed by
-order flow that trades against the extreme move.
+subsequently reverse as investors reassess exaggerated expectations (DOI:
+10.1111/j.1540-6261.1985.tb05004.x). The simulation implements this as price
+pressure away from fundamentals followed by order flow that trades against the
+extreme move.
 
 ### §2.2 Contrarian Trading
 
@@ -33,7 +34,8 @@ pressure when the recent price path exceeds a threshold.
 
 Momentum and positive-feedback traders can continue the current move before the
 reversal takes hold. This makes the reversal timing endogenous rather than an
-immediate mechanical snap-back.
+immediate mechanical snap-back, matching winner-loser continuation evidence
+(DOI: 10.1111/j.1540-6261.1993.tb04702.x).
 
 ### §2.4 Overconfidence And Noise
 
@@ -44,7 +46,8 @@ path is not fully deterministic even when the main mechanism is threshold based.
 ### §2.5 Fundamental Anchoring
 
 Value investors compare price with fundamental value. Their orders anchor the
-longer-run path and distinguish reversal from an unconstrained random walk.
+longer-run path and distinguish reversal from an unconstrained random walk,
+subject to limits of arbitrage (DOI: 10.1111/j.1540-6261.1997.tb03807.x).
 
 ## §3 Market Mechanism
 
@@ -73,8 +76,9 @@ overreaction.
 rises.
 **Worked Numerical Example**: If the recent return is -15% and the threshold is
 10%, the agent submits a buy order scaled by the excess move.
-**Academic References**: De Bondt and Thaler (1985); Lakonishok, Shleifer, and
-Vishny (1994).
+**Academic References**: De Bondt and Thaler (1985), DOI:
+10.1111/j.1540-6261.1985.tb05004.x; Lakonishok, Shleifer, and Vishny (1994),
+DOI: 10.1111/j.1540-6261.1994.tb04772.x.
 
 ### §4.2 MomentumInvestor
 
@@ -89,8 +93,8 @@ pressure.
 momentum when the signal exceeds threshold.
 **Worked Numerical Example**: A recent +6% move above a 3% threshold creates a
 buy order proportional to the excess trend.
-**Academic References**: Jegadeesh and Titman (1993); Shleifer and Summers
-(1990).
+**Academic References**: Jegadeesh and Titman (1993), DOI:
+10.1111/j.1540-6261.1993.tb04702.x; Shleifer and Summers (1990).
 
 ### §4.3 OverconfidentTrader
 
@@ -104,8 +108,9 @@ and `overconfidence_multiplier`.
 a calibrated investor would place.
 **Worked Numerical Example**: A +4% return is inflated by the overconfidence
 factor and can trigger a larger buy order.
-**Academic References**: Daniel, Hirshleifer, and Subrahmanyam (1998); Barber
-and Odean (2001).
+**Academic References**: Daniel, Hirshleifer, and Subrahmanyam (1998), DOI:
+10.1111/0022-1082.00077; Barber and Odean (2001), DOI:
+10.1111/0022-1082.00308.
 
 ### §4.4 NoiseTrader
 
@@ -120,7 +125,8 @@ avoid unbounded inventory.
 as liquidity supply in liquidity-aware variants.
 **Worked Numerical Example**: A positive random draw creates a small buy order
 near current price.
-**Academic References**: Black (1986); De Long et al. (1990).
+**Academic References**: Black (1986), DOI: 10.1111/j.1540-6261.1986.tb04513.x;
+De Long et al. (1990), DOI: 10.1086/261703.
 
 ### §4.5 ValueInvestor
 
@@ -134,7 +140,8 @@ arbitrage.
 sell when it is above fundamental by enough margin.
 **Worked Numerical Example**: Price at 80 against a fundamental of 100 creates a
 buy signal scaled by the 20% undervaluation.
-**Academic References**: Graham (1949); Shleifer and Vishny (1997).
+**Academic References**: Graham (1949); Shleifer and Vishny (1997), DOI:
+10.1111/j.1540-6261.1997.tb03807.x.
 
 ### §4.6 IndexTracker
 
@@ -147,7 +154,8 @@ rebalancing.
 band.
 **Worked Numerical Example**: If current position is materially below target,
 the agent buys the gap subject to threshold rules.
-**Academic References**: Index rebalancing and passive-investment literature.
+**Academic References**: Index rebalancing and passive-investment literature;
+Perold and Sharpe (1988).
 
 ## §5 Agent Diversity Verification
 
@@ -164,18 +172,18 @@ because their market calculates liquidity-sensitive price impact.
 
 ## §6 Parameter Table
 
-| Parameter | Meaning | Used By | Sensitivity |
-|---|---|---|---|
-| `initial_price` | Starting traded price | Market | Medium |
-| `fundamental_value` | Value anchor | Market, ValueInvestor | High |
-| `price_impact` / `base_price_impact` | Net-demand impact scale | Market | High |
-| `mean_reversion` | Pull toward fundamental | Market | High |
-| `noise_std` | Exogenous price noise | Market | Medium |
-| `reversal_threshold` | Contrarian activation threshold | ContrarianInvestor | High |
-| `momentum_threshold` | Trend-following activation threshold | MomentumInvestor | High |
-| `overconfidence_factor` | Signal inflation | OverconfidentTrader | High |
-| `value_threshold` | Fundamental-deviation activation | ValueInvestor | Medium |
-| `base_liquidity` | Baseline market depth | RuleLLM, Rag market | High |
+| Parameter | Meaning | Used By | Sensitivity | Source / Rationale |
+|---|---|---|---|---|
+| `initial_price` | Starting traded price | Market | Medium | Normalized starting point for price-path comparison |
+| `fundamental_value` | Value anchor | Market, ValueInvestor | High | Defines reversal target |
+| `price_impact` / `base_price_impact` | Net-demand impact scale | Market | High | Converts excess order flow into overshoot |
+| `mean_reversion` | Pull toward fundamental | Market | High | Creates correction pressure |
+| `noise_std` | Exogenous price noise | Market | Medium | Prevents deterministic path degeneracy |
+| `reversal_threshold` | Contrarian activation threshold | ContrarianInvestor | High | Implements overreaction trigger |
+| `momentum_threshold` | Trend-following activation threshold | MomentumInvestor | High | Allows delayed correction |
+| `overconfidence_factor` | Signal inflation | OverconfidentTrader | High | Encodes overconfident reaction strength |
+| `value_threshold` | Fundamental-deviation activation | ValueInvestor | Medium | Avoids value trading on trivial deviations |
+| `base_liquidity` | Baseline market depth | RuleLLM, Rag market | High | Controls liquidity-aware price impact |
 
 ## §7 Communication And Round Structure
 

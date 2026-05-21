@@ -15,13 +15,40 @@ reminders. It uses the liquidity-aware market extension, so the
 
 ## §2 Theory -> Implementation Mapping
 
+### §2.1 Fundamentalist (simulation-bases.md §4.1)
+
 | Theory Component | Implementation |
 |---|---|
-| Fundamentalist, `simulation-bases.md §4.1` | `RuleLLMFundamentalist` maps to the fundamentalist rule prompt. |
-| TrendFollower, `simulation-bases.md §4.2` | `RuleLLMTrendFollower` maps to the trend-following rule prompt. |
-| NoiseTrader, `simulation-bases.md §4.3` | `RuleLLMNoiseTrader` maps to the noise-trader rule prompt. |
-| SlowAdapter, `simulation-bases.md §4.4` | `RuleLLMSlowAdapter` maps to the slow-adapter rule prompt. |
-| VolatilityTrader, `simulation-bases.md §4.5` | `RuleLLMVolatilityTrader` maps to the volatility-regime rule prompt. |
+| Fundamental anchoring | `RuleLLMFundamentalist` maps to the fundamentalist rule prompt. |
+| API contract | Emits `action`, `bid_price`, `quantity`, `reasoning`, and `provides_liquidity`. |
+
+### §2.2 TrendFollower (simulation-bases.md §4.2)
+
+| Theory Component | Implementation |
+|---|---|
+| Volatility-sensitive trend demand | `RuleLLMTrendFollower` maps to the trend-following rule prompt. |
+| API contract | Explicit rules constrain trend direction and volatility-scaled sizing. |
+
+### §2.3 NoiseTrader (simulation-bases.md §4.3)
+
+| Theory Component | Implementation |
+|---|---|
+| Shock generation | `RuleLLMNoiseTrader` maps to the noise-trader rule prompt. |
+| API contract | Liquidity flag is required by the market depth calculation. |
+
+### §2.4 SlowAdapter (simulation-bases.md §4.4)
+
+| Theory Component | Implementation |
+|---|---|
+| Delayed information processing | `RuleLLMSlowAdapter` maps to the slow-adapter rule prompt. |
+| API contract | Explicit rules keep delayed-reaction behavior bounded. |
+
+### §2.5 VolatilityTrader (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Volatility-regime response | `RuleLLMVolatilityTrader` maps to the volatility-regime rule prompt. |
+| API contract | Structured JSON is parsed into liquidity-aware market orders. |
 
 ## §3 Market Mechanism
 
