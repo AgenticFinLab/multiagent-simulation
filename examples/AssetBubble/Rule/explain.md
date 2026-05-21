@@ -14,52 +14,33 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 ## §2 Theory -> Implementation Mapping
 
-### §2.1 MomentumSpeculator (simulation-bases.md §4.1)
+This variant is the executable baseline for `simulation-bases.md §4`: every
+investor class directly computes a deterministic order from market state and
+`configs/AssetBubble/Rule/players.yml`.
 
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `MomentumSpeculator` in `examples/AssetBubble/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.2 RationalArbitrageur (simulation-bases.md §4.2)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `RationalArbitrageur` in `examples/AssetBubble/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.3 NoiseTrader (simulation-bases.md §4.3)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `NoiseTrader` in `examples/AssetBubble/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.4 FundamentalInvestor (simulation-bases.md §4.4)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `FundamentalInvestor` in `examples/AssetBubble/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.5 LeveragedBuyer (simulation-bases.md §4.5)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `LeveragedBuyer` in `examples/AssetBubble/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.6 ConservativeHolder (simulation-bases.md §4.6)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.6 | `ConservativeHolder` in `examples/AssetBubble/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Investor | Theory reference | Code implementation | Config path | Decision mechanism |
+|---|---|---|---|---|
+| `MomentumSpeculator` | `simulation-bases.md §4.1` | `players.py::MomentumSpeculator.decide()` computes `momentum = (price - MA_k) / MA_k`, buys above `0.01`, sells below `-0.02`, and caps orders after cash/short constraints. | `momentum_speculator.config.extras.{lookback_short,aggressiveness,base_position_size,leverage_multiplier}` | Greater-fool positive feedback demand. |
+| `RationalArbitrageur` | `simulation-bases.md §4.2` | `players.py::RationalArbitrageur.decide()` computes `(price - fundamental) / fundamental`, shorts above threshold with a short-cost penalty, and respects `max_short_position`. | `rational_arbitrageur.config.extras.{deviation_threshold,base_position_size,max_short_position,short_cost_sensitivity}` | Limited corrective arbitrage. |
+| `NoiseTrader` | `simulation-bases.md §4.3` | `players.py::NoiseTrader.decide()` combines Gaussian sentiment and `herding_weight * return * 10`, then trades only when the signal exceeds `+/-0.1`. | `noise_trader.config.extras.{sentiment_volatility,herding_weight,base_position_size}` | Stochastic herding and noise-trader risk. |
+| `FundamentalInvestor` | `simulation-bases.md §4.4` | `players.py::FundamentalInvestor.decide()` trades every `trade_frequency` rounds using `(fundamental - price) / price`, capped at `+/-15`. | `fundamental_investor.config.extras.{trade_frequency,value_sensitivity,base_position_size}` | Slow value anchor. |
+| `LeveragedBuyer` | `simulation-bases.md §4.5` | `players.py::LeveragedBuyer.decide()` checks `portfolio_value / initial_equity`; below threshold it sells half the long position, otherwise it scales momentum exposure by `leverage_ratio`. | `leveraged_buyer.config.extras.{leverage_ratio,margin_call_threshold,base_position_size,initial_equity}` | Procyclical leverage and forced deleveraging. |
+| `ConservativeHolder` | `simulation-bases.md §4.6` | `players.py::ConservativeHolder.decide()` rebalances every `rebalance_frequency` rounds toward `target_position` with `gap * rebalance_rate`, capped at `+/-10`. | `conservative_holder.config.extras.{target_position,rebalance_frequency,rebalance_rate}` | Stabilizing strategic allocation. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/AssetBubble/Rule/players.py` and its configured counterpart in `configs/AssetBubble/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The coordinator is `players.py::Market`. It implements `simulation-bases.md §3.1`:
+
+```text
+P(t+1) = P(t) + price_impact * net_demand
+               + mean_reversion * (fundamental(t+1) - P(t))
+               + noise
+```
+
+`Market.perceive()` consumes orders with `bid_price`, `quantity`, and `strategy`.
+`Market.decide()` broadcasts `price`, `prev_price`, `return`, `return_pct`,
+`fundamental`, `bubble_ratio`, `volume`, `net_demand`, `round`, and
+`short_cost_rate`. The same broadcast contract is retained by the API variants.
 
 ## §4 Variant Architecture
 

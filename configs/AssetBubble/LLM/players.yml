@@ -1,7 +1,7 @@
 # =============================================================================
 # AssetBubbleLLM Players Configuration
 # =============================================================================
-# 1 Market (rule-based) + 5 LLM Bubble Investors
+# 1 Market (rule-based) + 6 LLM Bubble Investors
 # =============================================================================
 
 # Market (rule-based)
@@ -160,5 +160,35 @@ llm_leveraged:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# LLM Conservative Holder
+llm_conservative:
+  name: "LLM Conservative Holder"
+  class: "examples.AssetBubble.LLM.players:LLMConservativeHolder"
+  # Expander -> llm_conservative_1, llm_conservative_2
+  num_instances: 2
+  config:
+    identity: "llm_conservative"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "EXPERIMENT/AssetBubble/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      target_position: 20.0
+      rebalance_frequency: 10
+      rebalance_rate: 0.2
+      llm:
+        sys_message: "examples.AssetBubble.LLM.prompts:LLM_CONSERVATIVE_SYS"
+        user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.2
           max_new_tokens: 500
   persona: !include persona.yml

@@ -14,52 +14,26 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 ## §2 Theory -> Implementation Mapping
 
-### §2.1 MomentumSpeculator (simulation-bases.md §4.1)
+The Rag variant uses the same RuleLLM rule/persona structure and injects
+retrieved domain context into `{rag_context}` before each LLM decision. All
+investors use the same canonical trading order schema as the other API modes.
 
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMMomentumSpeculator` in `examples/AssetBubble/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
-### §2.2 RationalArbitrageur (simulation-bases.md §4.2)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMRationalArbitrageur` in `examples/AssetBubble/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
-### §2.3 NoiseTrader (simulation-bases.md §4.3)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMNoiseTrader` in `examples/AssetBubble/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
-### §2.4 FundamentalInvestor (simulation-bases.md §4.4)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMInvestor` in `examples/AssetBubble/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
-### §2.5 LeveragedBuyer (simulation-bases.md §4.5)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMLeveragedBuyer` in `examples/AssetBubble/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
-### §2.6 ConservativeHolder (simulation-bases.md §4.6)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.6 | `configured player class family` in `examples/AssetBubble/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Investor | Theory reference | Code implementation | Prompt/config mapping | RAG mapping |
+|---|---|---|---|---|
+| `RagLLMMomentumSpeculator` | `simulation-bases.md §4.1` | `players.py::RagLLMInvestor.decide()` retrieves context, calls the configured prompt, parses `<decision>` JSON, applies constraints, and validates the order. | `ragllm_momentum.config.extras.llm.sys_message -> RAGLLM_MOMENTUM_SYS` | Queries momentum, price/fundamental ratio, and demand context against the shared knowledge store. |
+| `RagLLMRationalArbitrageur` | `simulation-bases.md §4.2` | Shared RAG decision path. | `ragllm_arbitrageur.config.extras.llm.sys_message -> RAGLLM_ARBITRAGEUR_SYS` | Retrieves limits-to-arbitrage and short-selling context. |
+| `RagLLMNoiseTrader` | `simulation-bases.md §4.3` | Shared RAG decision path. | `ragllm_noise.config.extras.llm.sys_message -> RAGLLM_NOISE_SYS` | Retrieves sentiment, herding, and crowd-psychology context. |
+| `RagLLMValueInvestor` | `simulation-bases.md §4.4` | Shared RAG decision path. | `ragllm_value.config.extras.llm.sys_message -> RAGLLM_VALUE_SYS` | Retrieves value-investing and fundamental-analysis context. |
+| `RagLLMLeveragedBuyer` | `simulation-bases.md §4.5` | Shared RAG decision path. | `ragllm_leveraged.config.extras.llm.sys_message -> RAGLLM_LEVERAGED_SYS` | Retrieves leverage-cycle and margin-call context. |
+| `RagLLMConservativeHolder` | `simulation-bases.md §4.6` | Shared RAG decision path; added to topology as `ragllm_conservative`. | `ragllm_conservative.config.extras.llm.sys_message -> RAGLLM_CONSERVATIVE_SYS` | Retrieves strategic allocation and stabilizing-demand context. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/AssetBubble/Rag/players.py` and its configured counterpart in `configs/AssetBubble/Rag/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The coordinator is `players.py::Market`, matching the Rule price equation and
+broadcast schema. `RagLLMInvestor._build_prompt()` formulates a `KnowledgeQuery`
+from price, price/fundamental ratio, round return, and net demand; the retrieved
+text is injected into `RAGLLM_USER_TEMPLATE` and recorded as `rag_context` for
+post-run retrieval-quality analysis.
 
 ## §4 Variant Architecture
 
@@ -67,8 +41,8 @@ The coordinator mechanism is the final implementation in `examples/AssetBubble/R
 |---|---|
 | Player classes | `examples/AssetBubble/Rag/players.py` |
 | Prompt module | `examples/AssetBubble/Rag/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Inference | Uses the project ARK LLM policy for decisions and Hunyuan/LiteLLM embedding policy for retrieval. |
+| Output parsing | `parse_llm_response_with_thinking()` requires `<analysis>` and `<decision>`; parsed orders include `action`, `bid_price`, `quantity`, `reasoning`, and recorded `rag_context`, then pass `validate_order()`. |
 | Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
 ## §5 Config Reference

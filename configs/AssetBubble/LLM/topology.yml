@@ -16,6 +16,7 @@ connections:
     - llm_sentiment
     - llm_value
     - llm_leveraged
+    - llm_conservative
 
   llm_greater_fool:
     - market
@@ -30,4 +31,7 @@ connections:
     - market
 
   llm_leveraged:
+    - market
+
+  llm_conservative:
     - market

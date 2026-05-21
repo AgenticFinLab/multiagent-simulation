@@ -15,6 +15,26 @@
 
 ## §2 Core Metrics Catalogue
 
+The concrete analysis modules implement these metrics through the shared
+`examples/AssetBubble/Rule/analysis.py::analyze_bubble()` pipeline and the
+finance helpers in `masim.evaluation.finance`.
+
+```python
+def calculate_price_deviation(market_prices: dict[int, float], fundamental: float) -> dict[int, float]: ...
+def calculate_bubble_magnitude(market_prices: dict[int, float], fundamental: float) -> dict[int, float]: ...
+def calculate_rolling_volatility(market_prices: dict[int, float], window: int = 10) -> dict[int, float]: ...
+def calculate_max_drawdown(prices: list[float]) -> tuple[float, int, int]: ...
+def calculate_autocorrelation(returns: list[float], max_lag: int = 5) -> list[float]: ...
+def validate_asset_bubble(
+    market_prices: dict[int, float],
+    fundamental: float,
+    max_deviation_pct: float,
+    max_drawdown: float,
+    total_rounds: int,
+) -> ValidationResult: ...
+def analyze_rag_knowledge_effect(investor_payloads: dict[str, dict[int, dict]]) -> dict: ...
+```
+
 ### Metric: Price Deviation from Fundamental
 
 - **Category**: Price Dynamics / Phenomenon-Specific
@@ -319,16 +339,11 @@
 
 ## §7 Visualization Catalogue
 
-| Plot Name                 | Type            | X-axis        | Y-axis                                  | Overlays                                    | Purpose                                                     |
-|---------------------------|-----------------|---------------|-----------------------------------------|---------------------------------------------|-------------------------------------------------------------|
-| Price vs Fundamental      | Line (dual)     | Rounds        | Left: Price; Right: Fundamental         | bubble_ratio as secondary line; phase bands | Primary phenomenon plot — verify bubble formation and crash |
-| Bubble Analysis           | Line + bar      | Rounds        | Deviation (%); bubble_ratio             | Phase detection markers; drawdown shading   | Detailed bubble lifecycle                                   |
-| Summary Panel             | Multi-panel 3×2 | Rounds        | Various                                 | All key metrics                             | Quick health check                                          |
-| Agent Net Demand          | Stacked bar     | Rounds        | Net demand by type                      | Price overlay                               | Who drove demand during bubble vs. crash                    |
-| Portfolio Performance     | Line            | Rounds        | Portfolio value (normalised to initial) | One line per agent type                     | Which strategies profit/lose                                |
-| Rolling Volatility        | Line            | Rounds        | vol(t) (rolling std)                    | Phase bands; 0.01 and 0.03 thresholds       | Verify volatility clustering                                |
-| Rolling Autocorrelation   | Line            | Rounds        | AC1 (lag-1)                             | Zero line; +0.3 and −0.2 lines              | Show regime shift: bubble vs. recovery                      |
-| Return Distribution       | Histogram       | Return (%)    | Frequency                               | Normal fit overlay                          | Show fat tails and positive skew during bubble              |
-| Positive Feedback Scatter | Scatter         | net_demand(t) | return(t+1)                             | Linear regression line                      | Validate demand-price feedback loop                         |
-| Crash Catalyst Timeline   | Line + events   | Rounds        | Price                                   | Vertical markers at margin call rounds      | Confirm LeveragedBuyer as crash catalyst                    |
-| Cross-Variant Comparison  | Bar (4 groups)  | Metric name   | Metric value                            | Error bars for stochastic variants          | Final cross-variant summary                                 |
+| Output File | Plot Name | Type | X-axis | Y-axis | Purpose |
+|---|---|---|---|---|---|
+| `00_investor_bids.png` | Investor Bid Curves | Line | Rounds | Bid and market price | Compare submitted investor bids against market price. |
+| `01_assetbubble_dynamics.png` | Price vs Fundamental | Line | Rounds | Price and fundamental | Primary phenomenon plot: verify bubble formation and crash. |
+| `02_assetbubble_analysis.png` | Bubble Analysis | Line + diagnostics | Rounds | Deviation, bubble ratio, drawdown | Detailed bubble lifecycle and crash diagnostics. |
+| `03_summary.png` | Summary Panel | Multi-panel | Rounds / metrics | Various | Quick run-health and structural-quality check. |
+| `summary.json` | Structured Summary | JSON | N/A | N/A | Metric values, validation result, and scenario metadata. |
+| `rag_stats.json` | RAG Retrieval Quality | JSON | N/A | N/A | Rag-only retrieval success/fallback rates from recorded `rag_context`. |

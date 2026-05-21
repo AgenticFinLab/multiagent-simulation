@@ -229,13 +229,13 @@ def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     plot_price_dynamics(
         market_prices,
         fundamental=fundamental_value,
-        output_path=os.path.join(output_dir, "01_price_dynamics.png"),
+        output_path=os.path.join(output_dir, "01_assetbubble_dynamics.png"),
     )
 
     plot_bubble_crash_analysis(
         market_prices,
         fundamental=fundamental_value,
-        output_path=os.path.join(output_dir, "02_bubble_analysis.png"),
+        output_path=os.path.join(output_dir, "02_assetbubble_analysis.png"),
     )
 
     plot_multi_panel_summary(

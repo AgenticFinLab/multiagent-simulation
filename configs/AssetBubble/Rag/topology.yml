@@ -16,6 +16,7 @@ connections:
     - ragllm_noise
     - ragllm_value
     - ragllm_leveraged
+    - ragllm_conservative
 
   ragllm_momentum:
     - market
@@ -30,4 +31,7 @@ connections:
     - market
 
   ragllm_leveraged:
+    - market
+
+  ragllm_conservative:
     - market

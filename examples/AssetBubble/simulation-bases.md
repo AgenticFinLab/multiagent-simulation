@@ -10,10 +10,52 @@
 | Real-World Origin  | Dutch Tulip Mania (1637); South Sea Bubble (1720); NASDAQ Dot-com Bubble (1995–2000, peak NASDAQ P/F ~2.5×); US Housing Bubble (2002–2008, Case-Shiller +124% from 2000); Bitcoin 2017 (+1,400% in 12 months)                                                                                                                                                                                                                                                                              |
 | Research Relevance | Asset bubbles cause systemic financial risk, capital misallocation, and severe economic downturns. Understanding their formation, persistence, and collapse is central to financial-stability policy, macroprudential regulation, and behavioural finance research.                                                                                                                                                                                                                        |
 
+### §1.1 Origin and Source Analysis
+
+#### §1.1.1 Intellectual Lineage
+
+Asset bubbles enter modern financial theory through the tension between
+fundamental valuation and speculative resale value. Keynes's Chapter 12 beauty
+contest framed the problem as one of higher-order expectations: investors may
+buy not because an asset is intrinsically cheap, but because they expect later
+buyers to pay more. Shiller's *Irrational Exuberance* then connected that
+intuition to modern narrative economics and recurring waves of public
+over-optimism.
+
+The formal foundation is split across positive-feedback trading, limits to
+arbitrage, and crash synchronization. De Long, Shleifer, Summers, and Waldmann
+model how noise traders and momentum demand can make mispricing persistent.
+Shleifer and Vishny show why rational arbitrage cannot always eliminate that
+mispricing. Abreu and Brunnermeier explain why rational traders may ride a known
+bubble until exit beliefs become synchronized.
+
+This simulation implements that lineage directly: `MomentumSpeculator` supplies
+greater-fool demand, `RationalArbitrageur` supplies limited correction,
+`NoiseTrader` supplies stochastic herding, `FundamentalInvestor` supplies slow
+valuation anchoring, `LeveragedBuyer` supplies forced-deleveraging crash
+amplification, and `ConservativeHolder` supplies weak stabilizing allocation.
+
+#### §1.1.2 Real-World Event Catalogue
+
+| Event Name | Date(s) | Market / Asset | Trigger | Magnitude | Duration | Correspondence to Simulation | Primary Source |
+|---|---|---|---|---|---|---|---|
+| Dutch Tulip Mania | 1634-1637 | Dutch tulip futures / bulbs | Futures-like speculative resale contracts expanded beyond intrinsic bulb value | Rare-bulb contracts reportedly rose 20x and then collapsed about 99% in 1637 | Roughly 3 years, with collapse in days | `MomentumSpeculator` and `NoiseTrader` drive mania; absence of deep arbitrage mirrors `RationalArbitrageur` limits | Garber (1989), *Journal of Political Economy*, https://doi.org/10.1086/261615 |
+| NASDAQ Dot-com Bubble | 1995-2002 | US technology equities | Internet growth narratives and momentum buying overwhelmed earnings-based valuation | NASDAQ Composite fell about 78% peak-to-trough after March 2000 | Formation about 5 years, crash about 2 years | `MomentumSpeculator`, `LeveragedBuyer`, and `RationalArbitrageur` reproduce momentum, leverage, and delayed correction | Ofek & Richardson (2003), *Journal of Finance*, https://doi.org/10.1111/1540-6261.00522 |
+| US Housing Bubble / GFC | 2002-2009 | US residential housing and mortgage credit | Cheap credit, securitization, leverage, and extrapolative price beliefs | Case-Shiller national index rose about 124% from 2000 peak cycle and then fell about 33% from peak | Formation about 5 years, crisis about 2 years | `LeveragedBuyer` captures procyclical leverage and forced deleveraging; `NoiseTrader` captures extrapolative sentiment | Mian & Sufi (2009), *Quarterly Journal of Economics*, https://doi.org/10.1162/qjec.2009.124.4.1449 |
+| Bitcoin 2017 Bubble | 2017-2018 | Cryptocurrency | Retail attention and speculative resale expectations accelerated demand | Bitcoin rose about 1,400% in 2017 and then fell about 80% in 2018 | About 12 months up, 12 months down | `MomentumSpeculator` and `NoiseTrader` capture attention-driven buying and reversal selling | Cheah & Fry (2015), *Economics Letters*, https://doi.org/10.1016/j.econlet.2015.02.029 |
+
+#### §1.1.3 Book and Practitioner Literature
+
+| Title | Author(s) | Year | Publisher | Relevance to This Simulation |
+|---|---|---|---|---|
+| *Irrational Exuberance* | Robert J. Shiller | 2000 | Princeton University Press | Grounds narrative-driven overvaluation, bubble diagnostics, and P/F deviation thresholds. |
+| *Manias, Panics, and Crashes* | Charles P. Kindleberger and Robert Z. Aliber | 1978/2011 | Palgrave Macmillan | Supplies the boom-euphoria-distress-crash lifecycle reflected in §4 phase analysis. |
+| *A Short History of Financial Euphoria* | John Kenneth Galbraith | 1990 | Viking | Practitioner narrative for recurring speculative overconfidence and memory loss across bubbles. |
+
 
 ## §2 Theoretical Foundation
 
-### Theory: Greater Fool Theory and Speculative Demand
+### Theory 1: Greater Fool Theory and Speculative Demand
 
 - **Citation**: Keynes, J. M. (1936). *The General Theory of Employment, Interest and Money*. Macmillan. Chapter 12, "The State of Long-Term Expectation." (Beauty Contest analogy widely cited in behavioural finance as the canonical formulation of speculative, non-fundamental demand.)
 - **Core Insight**: Investors can rationally purchase assets they know to be overvalued, provided they expect to resell to a "greater fool" at a higher price before the bubble collapses. The strategy generates positive expected returns at the individual level as long as momentum persists, even though it is collectively irrational and self-destructive. The key insight is that price momentum, not fundamental value, drives short-term demand.
@@ -32,7 +74,7 @@
 
 ---
 
-### Theory: Limits to Arbitrage
+### Theory 2: Limits to Arbitrage
 
 - **Citation**: Shleifer, A., & Vishny, R. W. (1997). The limits of arbitrage. *Journal of Finance*, 52(1), 35–55. https://doi.org/10.1111/j.1540-6261.1997.tb03807.x
 - **Core Insight**: Even when rational investors identify a mispricing, they cannot profitably arbitrage it because of (a) short-selling costs that reduce returns, (b) position limits imposed by risk management, and (c) the risk that the mispricing deepens before correcting ("noise trader risk"), which can force the arbitrageur to close their position at a loss before convergence. These frictions mean that rational corrective forces are insufficient to prevent bubbles.
@@ -51,7 +93,7 @@
 
 ---
 
-### Theory: Noise Trader Risk and Herding
+### Theory 3: Noise Trader Risk and Herding
 
 - **Citation**: De Long, J. B., Shleifer, A., Summers, L. H., & Waldmann, R. J. (1990). Noise trader risk in financial markets. *Journal of Political Economy*, 98(4), 703–738. https://doi.org/10.1086/261703
 - **Core Insight**: Uninformed traders acting on noise (sentiment, rumour, trend extrapolation) create systematic and persistent deviations from fundamental value. Their irrational behaviour introduces a risk that rational arbitrageurs cannot diversify away — if sentiment becomes more bullish, mispricings can widen, causing rational arbitrageurs to lose money before the eventual correction. This "noise trader risk" is itself a cost that limits arbitrage and sustains bubbles.
@@ -69,7 +111,7 @@
 
 ---
 
-### Theory: Synchronisation Risk, Bubble Burst Timing, and Leverage Cascades
+### Theory 4: Synchronisation Risk, Bubble Burst Timing, and Leverage Cascades
 
 - **Citation**: Abreu, D., & Brunnermeier, M. K. (2003). Bubbles and crashes. *Econometrica*, 71(1), 173–204. https://doi.org/10.1111/1468-0262.00393
 - **Core Insight**: Rational arbitrageurs who know a bubble exists still ride it because they cannot coordinate the precise moment of exit. Each arbitrageur delays shorting, anticipating that others will "blink first" and trigger the crash. The bubble persists until a sufficient mass of arbitrageurs simultaneously exit. In practice, forced deleveraging by leveraged participants — when margin calls hit simultaneously — provides the synchronisation shock that triggers the collapse.
@@ -158,7 +200,7 @@ Each round, the Market broadcasts to all investors:
 
 ## §4 Investor Taxonomy
 
-### Investor: MomentumSpeculator
+### §4.1 MomentumSpeculator
 
 #### 4.1.1  Summary
 
@@ -302,7 +344,7 @@ the asset is already 33% above fundamental value — a pure "greater fool" decis
 
 ---
 
-### Investor: RationalArbitrageur
+### §4.2 RationalArbitrageur
 
 #### 4.2.1  Summary
 
@@ -460,7 +502,7 @@ knowing prices are extreme — this is the Shleifer-Vishny limits to arbitrage i
 
 ---
 
-### Investor: NoiseTrader
+### §4.3 NoiseTrader
 
 #### 4.3.1  Summary
 
@@ -604,7 +646,7 @@ This illustrates how informational cascades cause individuals to override their 
 
 ---
 
-### Investor: FundamentalInvestor
+### §4.4 FundamentalInvestor
 
 #### 4.4.1  Summary
 
@@ -741,7 +783,7 @@ prices back toward fundamental — the "patient value investor buys the crash" p
 
 ---
 
-### Investor: LeveragedBuyer
+### §4.5 LeveragedBuyer
 
 #### 4.5.1  Summary
 
@@ -910,6 +952,29 @@ demand and pushing price down further — the procyclical leverage cascade docum
 | 3 | Brunnermeier, M. K., & Pedersen, L. H. (2009). Market liquidity and funding liquidity. *Review of Financial Studies*, 22(6), 2201–2238. https://doi.org/10.1093/rfs/hhn098 | Funding-liquidity spiral: forced selling → lower prices → more margin calls; validates LeveragedBuyer cascade effect |
 
 
+### §4.6 ConservativeHolder
+
+ConservativeHolder is the stabilizing allocation agent. It does not chase
+momentum, does not short mispricing, and does not use leverage. Instead, it
+maintains a strategic target position and rebalances slowly when its holdings
+drift away from that target. This provides a weak but persistent stabilizing
+flow that prevents the simulated market from being composed only of aggressive
+speculators and arbitrageurs.
+
+Behavioral rule:
+
+```text
+if round % rebalance_frequency != 0:
+    quantity = 0
+else:
+    gap = target_position - current_position
+    quantity = clamp(gap * rebalance_rate, -10, +10)
+```
+
+Parameters are loaded from `configs/AssetBubble/{Variant}/players.yml` under
+`conservative_holder`, `llm_conservative`, `rulellm_conservative`, or
+`ragllm_conservative`.
+
 ## §5 Agent Diversity Verification
 
 ```
@@ -947,7 +1012,9 @@ Diversity Check:
 
 ## §6 Parameter Table
 
-All parameters loaded from `configs/AssetBubble/{Variant}/players.yml`. Values below reflect the Rule variant calibration.
+All parameters are loaded from `configs/AssetBubble/{Variant}/players.yml`.
+Where values differ across variants, the table lists the explicit Rule value
+and the API-family value used by LLM/RuleLLM/Rag.
 
 | Parameter                    | Value    | Source Citation                                                              | Description                                                  | Sensitivity                                   |
 |------------------------------|----------|------------------------------------------------------------------------------|--------------------------------------------------------------|-----------------------------------------------|
@@ -958,23 +1025,23 @@ All parameters loaded from `configs/AssetBubble/{Variant}/players.yml`. Values b
 | `fundamental_growth`         | 0.001    | 0.1% per round ≈ 10% annual at 100 rounds/year                               | Slow steady fundamental growth                               | Low                                           |
 | `noise_std` (σ)              | 0.3      | Calibrated to realistic daily stock noise                                    | Std dev of random price shock                                | Medium                                        |
 | `short_cost_rate`            | 0.02     | D'Avolio (2002): 1–5% annual stock borrowing costs, scaled to per-round      | Cost of maintaining short position                           | Medium                                        |
-| `lookback_short` (MA window) | 5        | Jegadeesh & Titman (1993): 5-period short-horizon momentum window            | MA period for MomentumSpeculator                             | Medium                                        |
+| `lookback_short` (MA window) | Rule: 3; API: 5 | Jegadeesh & Titman (1993): short-horizon momentum window            | MA period for MomentumSpeculator                             | Medium                                        |
 | `aggressiveness`             | 2.0      | De Long et al. (1990b): momentum demand ≈ 2–4× fundamental demand            | Scaling factor for MomentumSpeculator                        | **High**                                      |
-| `base_position_size`         | 20.0     | Standardised across all agents                                               | Reference lot size                                           | Medium                                        |
-| `leverage_multiplier`        | 2.0      | Adrian & Shin (2010): retail margin leverage 2–3×                            | Additional leverage on MomentumSpeculator buys               | High                                          |
-| `deviation_threshold`        | 0.05     | Shleifer & Vishny (1997): 5–10% threshold before arbitrage entry             | Minimum deviation for RationalArbitrageur                    | Medium                                        |
-| `max_short_position`         | 30.0     | D'Avolio (2002): borrow capacity limits                                      | Hard cap on RationalArbitrageur short shares                 | Medium                                        |
-| `short_cost_sensitivity`     | 2.0      | Shleifer & Vishny (1997): calibrated to ~40% size reduction at baseline cost | Scales cost penalty                                          | Medium                                        |
+| `base_position_size`         | Agent-specific | Standardised within each agent family                                  | Reference lot size; see per-agent config extras              | Medium                                        |
+| `leverage_multiplier`        | Rule: 1.5; API: 2.0 | Adrian & Shin (2010): retail margin leverage 2–3×                            | Additional leverage on MomentumSpeculator buys               | High                                          |
+| `deviation_threshold`        | Rule: 0.10; API: 0.05 | Shleifer & Vishny (1997): 5–10% threshold before arbitrage entry             | Minimum deviation for RationalArbitrageur                    | Medium                                        |
+| `max_short_position`         | Rule: 40.0; API: 30.0 | D'Avolio (2002): borrow capacity limits                                      | Hard cap on RationalArbitrageur short shares                 | Medium                                        |
+| `short_cost_sensitivity`     | Rule: 0.5; API: 2.0 | Shleifer & Vishny (1997): calibrated to short-cost reduction                 | Scales cost penalty                                          | Medium                                        |
 | `sentiment_volatility`       | 0.3      | De Long et al. (1990): closed-end fund discount σ ≈ 0.12–0.17                | Std dev of NoiseTrader random sentiment                      | Medium                                        |
-| `herding_weight`             | 0.7      | Barber & Odean (2008): ~70% of retail buys are attention-driven              | Fraction of sentiment from price return                      | Medium                                        |
+| `herding_weight`             | Rule: 0.6; API: 0.7 | Barber & Odean (2008): retail buys are attention-driven              | Fraction of sentiment from price return                      | Medium                                        |
 | `trade_frequency`            | 5        | Barber & Odean (2000): patient investors outperform                          | Frequency gate for FundamentalInvestor (acts every 5 rounds) | Low                                           |
-| `value_sensitivity`          | 1.5      | Fama & French (1992): value tilt proportional to P/B gap                     | Scaling factor for FundamentalInvestor                       | Low                                           |
-| `leverage_ratio`             | 3.0      | Adrian & Shin (2010): typical margin leverage 3–5×                           | Leverage on LeveragedBuyer buys                              | **High**                                      |
-| `margin_call_threshold`      | 0.70     | Industry standard: 70% equity maintenance margin                             | Equity ratio trigger for forced deleveraging                 | High                                          |
+| `value_sensitivity`          | Rule: 0.3; API: 1.5 | Fama & French (1992): value tilt proportional to P/B gap                     | Scaling factor for FundamentalInvestor                       | Low                                           |
+| `leverage_ratio`             | Rule: 2.0; API: 3.0 | Adrian & Shin (2010): typical margin leverage 2–5×                           | Leverage on LeveragedBuyer buys                              | **High**                                      |
+| `margin_call_threshold`      | Rule: 0.3; API: 0.70 | Maintenance-margin trigger calibration                             | Equity ratio trigger for forced deleveraging                 | High                                          |
 | `initial_equity`             | 10,000.0 | Standardised starting portfolio                                              | Denominator for equity_ratio                                 | Low                                           |
-| `target_position`            | 10.0     | Standard long-term holding                                                   | Target for ConservativeHolder                                | Low                                           |
+| `target_position`            | 20.0     | Standard long-term holding                                                   | Target for ConservativeHolder                                | Low                                           |
 | `rebalance_frequency`        | 10       | Standardised                                                                 | Rebalance period for ConservativeHolder                      | Low                                           |
-| `rebalance_rate`             | 0.5      | Standardised                                                                 | Fraction of gap closed per rebalance                         | Low                                           |
+| `rebalance_rate`             | 0.2      | Standardised                                                                 | Fraction of gap closed per rebalance                         | Low                                           |
 
 
 ## §7 Communication and Round Structure

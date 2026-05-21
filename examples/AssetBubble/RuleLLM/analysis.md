@@ -6,18 +6,21 @@ This analysis checks whether the RuleLLM variant produces a complete, analyzable
 
 ## §2 Core Metrics
 
-| Metric | Function Contract | Source |
+| Metric | Function / implementation | Source |
 |---|---|---|
-| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
-| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
-| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
-| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
-| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
-| Scenario-specific diagnostic | `def compute_assetbubble_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
+| Price deviation from fundamental | Delegates to `Rule/analysis.py::analyze_bubble()` and `calculate_price_deviation(...)` | `analysis-bases.md §2` |
+| Bubble magnitude | `calculate_bubble_magnitude(market_prices, fundamental_value)` | `analysis-bases.md §2` |
+| Rolling volatility | `calculate_rolling_volatility(market_prices, window=10)` | `analysis-bases.md §2` |
+| Maximum drawdown | `calculate_max_drawdown(prices_list)` | `analysis-bases.md §2` |
+| Return autocorrelation | `calculate_autocorrelation(returns_list, max_lag=5)` | `analysis-bases.md §2` |
+| Rule-following order validity | `players.py::RuleLLMInvestor.decide()` parses rule-grounded `<decision>` JSON and calls `validate_order(order)` | `analysis-bases.md §6` |
+| Agent order flow | `_load_data(results)` extracts `quantity`, `bid_price`, and portfolio fields from turn records | `analysis-bases.md §3` |
 
 ## §3 Analysis Dimensions
 
-Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether RuleLLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
+Analysis is performed by round, by agent type, by market phase, and by variant.
+The main comparison is whether explicit rule text keeps LLM behavior closer to
+the deterministic Rule baseline than the persona-only LLM variant.
 
 ## §4 Phase Analysis
 
@@ -33,4 +36,6 @@ Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full
 
 ## §7 Visualization Catalogue
 
-Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_assetbubble_dynamics.png`, `02_assetbubble_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_assetbubble_dynamics.png`, `02_assetbubble_analysis.png`, and
+`03_summary.png`.

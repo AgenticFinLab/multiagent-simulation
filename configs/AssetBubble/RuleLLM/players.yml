@@ -188,3 +188,34 @@ rulellm_leveraged:
           temperature: 0.3
           max_new_tokens: 500
   persona: !include persona.yml
+
+# Hybrid Conservative Holder (Strategic allocation + LLM reasoning)
+rulellm_conservative:
+  name: "RuleLLM Conservative Holder"
+  class: "examples.AssetBubble.RuleLLM.players:RuleLLMConservativeHolder"
+  # Expander -> rulellm_conservative_1, rulellm_conservative_2
+  num_instances: 2
+  config:
+    identity: "rulellm_conservative"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AssetBubble ConservativeHolder)
+      target_position: 20.0
+      rebalance_frequency: 10
+      rebalance_rate: 0.2
+      llm:
+        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_CONSERVATIVE_SYS"
+        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.2
+          max_new_tokens: 500
+  persona: !include persona.yml

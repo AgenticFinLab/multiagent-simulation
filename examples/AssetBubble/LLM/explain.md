@@ -14,52 +14,25 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 ## §2 Theory -> Implementation Mapping
 
-### §2.1 MomentumSpeculator (simulation-bases.md §4.1)
+The LLM variant preserves the Rule market coordinator but delegates investor
+decisions to persona-only prompts. Prompts describe investor character and risk
+style without embedding the deterministic Rule formulas.
 
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `configured player class family` in `examples/AssetBubble/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
-### §2.2 RationalArbitrageur (simulation-bases.md §4.2)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `LLMRationalArbitrageur` in `examples/AssetBubble/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
-### §2.3 NoiseTrader (simulation-bases.md §4.3)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `configured player class family` in `examples/AssetBubble/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
-### §2.4 FundamentalInvestor (simulation-bases.md §4.4)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `LLMInvestor` in `examples/AssetBubble/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
-### §2.5 LeveragedBuyer (simulation-bases.md §4.5)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `configured player class family` in `examples/AssetBubble/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
-### §2.6 ConservativeHolder (simulation-bases.md §4.6)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.6 | `configured player class family` in `examples/AssetBubble/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/AssetBubble/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor | Theory reference | Code implementation | Prompt/config mapping | Decision contract |
+|---|---|---|---|---|
+| `LLMGreaterFoolSpeculator` | `simulation-bases.md §4.1` | `players.py::LLMInvestor.decide()` calls the configured prompt and parses `<decision>` JSON. | `llm_greater_fool.config.extras.llm.sys_message -> LLM_GREATER_FOOL_SYS` | Momentum persona emits `action`, `bid_price`, `quantity`, `reasoning`. |
+| `LLMRationalArbitrageur` | `simulation-bases.md §4.2` | Same shared LLM decision path; portfolio constraints are applied after parsing. | `llm_arbitrageur.config.extras.llm.sys_message -> LLM_ARBITRAGEUR_SYS` | Fundamental-value analyst persona. |
+| `LLMSentimentTrader` | `simulation-bases.md §4.3` | Same shared LLM decision path; market state includes `net_demand` and `return_pct`. | `llm_sentiment.config.extras.llm.sys_message -> LLM_SENTIMENT_SYS` | Sentiment/crowd-following persona. |
+| `LLMValueInvestor` | `simulation-bases.md §4.4` | Same shared LLM decision path; user template supplies price, fundamental, and portfolio state. | `llm_value.config.extras.llm.sys_message -> LLM_VALUE_SYS` | Patient value-investing persona. |
+| `LLMLeveragedSpeculator` | `simulation-bases.md §4.5` | Same shared LLM decision path; prompt highlights portfolio-value risk. | `llm_leveraged.config.extras.llm.sys_message -> LLM_LEVERAGED_SYS` | Leveraged trader persona. |
+| `LLMConservativeHolder` | `simulation-bases.md §4.6` | Same shared LLM decision path; added to topology as `llm_conservative`. | `llm_conservative.config.extras.llm.sys_message -> LLM_CONSERVATIVE_SYS` | Conservative allocation persona. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/AssetBubble/LLM/players.py` and its configured counterpart in `configs/AssetBubble/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The coordinator is `players.py::Market`, which retains the same price formation
+as `Rule/players.py::Market`: demand impact, weak mean reversion toward the
+growing fundamental, and Gaussian noise. Investor turns are LLM-generated, but
+the market consumes the same canonical trading order fields as the Rule baseline.
 
 ## §4 Variant Architecture
 
@@ -67,8 +40,8 @@ The coordinator mechanism is the final implementation in `examples/AssetBubble/L
 |---|---|
 | Player classes | `examples/AssetBubble/LLM/players.py` |
 | Prompt module | `examples/AssetBubble/LLM/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
+| Inference | Uses the project ARK LLM policy. |
+| Output parsing | `parse_llm_response_with_thinking()` requires `<analysis>` and `<decision>`; the decision JSON is then validated against `masim.format.order.validate_order`. |
 | Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
 
 ## §5 Config Reference

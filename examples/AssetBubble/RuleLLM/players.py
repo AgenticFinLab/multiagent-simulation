@@ -458,6 +458,8 @@ Respond with ONLY valid JSON:
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
+        if bid_price <= 0:
+            bid_price = market_data["price"]
         quantity = self._apply_constraints(bid_price, quantity, market_data["price"])
 
         # Execute trade and update portfolio
@@ -484,6 +486,7 @@ Respond with ONLY valid JSON:
         )
 
         order = {
+            "action": decision["action"],
             "bid_price": bid_price,
             "quantity": quantity,
             "strategy": strategy_name,
@@ -493,6 +496,8 @@ Respond with ONLY valid JSON:
             "cash": self.state.custom_state["cash"],
             "position": self.state.custom_state["position"],
         }
+
+        validate_order(order)
 
         return {
             **order,
@@ -513,30 +518,36 @@ Respond with ONLY valid JSON:
 
 
 class RuleLLMMomentumSpeculator(RuleLLMInvestor):
-    """Hybrid: Greater Fool Theory momentum rules + LLM narrative reasoning. Theory: simulation-bases.md §4 — MomentumSpeculator."""
+    """Hybrid momentum rules with LLM reasoning. Theory: simulation-bases.md §4.1 — MomentumSpeculator."""
 
     pass
 
 
 class RuleLLMRationalArbitrageur(RuleLLMInvestor):
-    """Hybrid: Limits to Arbitrage deviation formula + LLM analytical reasoning. Theory: simulation-bases.md §4 — RationalArbitrageur."""
+    """Hybrid deviation rules with LLM reasoning. Theory: simulation-bases.md §4.2 — RationalArbitrageur."""
 
     pass
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """Hybrid: Noise Trader Risk sentiment formula + LLM crowd-following reasoning. Theory: simulation-bases.md §4 — NoiseTrader."""
+    """Hybrid sentiment rules with LLM reasoning. Theory: simulation-bases.md §4.3 — NoiseTrader."""
 
     pass
 
 
 class RuleLLMValueInvestor(RuleLLMInvestor):
-    """Hybrid: Value investing frequency + deviation rules + LLM patient reasoning. Theory: simulation-bases.md §4 — FundamentalInvestor."""
+    """Hybrid value rules with LLM reasoning. Theory: simulation-bases.md §4.4 — FundamentalInvestor."""
 
     pass
 
 
 class RuleLLMLeveragedBuyer(RuleLLMInvestor):
-    """Hybrid: Leverage amplification + margin call rules + LLM risk-aware reasoning. Theory: simulation-bases.md §4 — LeveragedBuyer."""
+    """Hybrid leverage rules with LLM reasoning. Theory: simulation-bases.md §4.5 — LeveragedBuyer."""
+
+    pass
+
+
+class RuleLLMConservativeHolder(RuleLLMInvestor):
+    """Hybrid rebalancing rules with LLM reasoning. Theory: simulation-bases.md §4.6 — ConservativeHolder."""
 
     pass

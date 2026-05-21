@@ -16,6 +16,7 @@ connections:
     - rulellm_noise
     - rulellm_value
     - rulellm_leveraged
+    - rulellm_conservative
 
   rulellm_momentum:
     - market
@@ -30,4 +31,7 @@ connections:
     - market
 
   rulellm_leveraged:
+    - market
+
+  rulellm_conservative:
     - market
