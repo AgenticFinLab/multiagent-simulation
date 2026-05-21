@@ -18,41 +18,41 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `LLMMomentumInvestor` in `examples/HerdEffect/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdEffect/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.1 | `LLMMomentumInvestor` uses `LLM_MOMENTUM_SYS` and `LLM_USER_TEMPLATE` to interpret return, recent prices, cash, and position. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdEffect/LLM/players.yml:llm_momentum.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | ARK LLM emits `<decision>` JSON with `action`, `bid_price`, `quantity`, and `reasoning`; `LLMInvestor.decide()` parses and clamps cash/position. |
 ### §2.2 ContrarianInvestor (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `LLMContrarianInvestor` in `examples/HerdEffect/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdEffect/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.2 | `LLMContrarianInvestor` uses `LLM_CONTRARIAN_SYS` to express value/mean-reversion reasoning against current price. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdEffect/LLM/players.yml:llm_contrarian.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-only ARK decision parsed into signed `quantity` and `bid_price`. |
 ### §2.3 RiskAverseInvestor (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `LLMRiskAverseInvestor` in `examples/HerdEffect/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdEffect/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.3 | `LLMRiskAverseInvestor` uses `LLM_RISK_AVERSE_SYS` to reason about volatility and reduce exposure in unstable markets. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdEffect/LLM/players.yml:llm_risk_averse.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-only ARK decision parsed into the order-book trading schema. |
 ### §2.4 NoiseTrader (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `LLMNoiseTrader` in `examples/HerdEffect/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdEffect/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.4 | `LLMNoiseTrader` uses `LLM_NOISE_SYS` to produce unsystematic signed orders. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdEffect/LLM/players.yml:llm_noise.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-only ARK decision parsed into the order-book trading schema. |
 ### §2.5 AggressiveInvestor (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `LLMAggressiveInvestor` in `examples/HerdEffect/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/HerdEffect/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Investor role and activation rule from simulation-bases.md §4.5 | `LLMAggressiveInvestor` uses `LLM_AGGRESSIVE_SYS` to express high-conviction acceleration-based momentum. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdEffect/LLM/players.yml:llm_aggressive.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-only ARK decision parsed into the order-book trading schema. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/HerdEffect/LLM/players.py` and its configured counterpart in `configs/HerdEffect/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The coordinator market is implemented in `examples/HerdEffect/LLM/players.py` with the same order-book price equation as the Rule baseline. LLM investors submit signed `quantity` orders with `bid_price`, `reasoning`, `cash`, and `position` fields through `configs/HerdEffect/LLM/topology.yml`.
 
 ## §4 Variant Architecture
 
@@ -60,9 +60,9 @@ The coordinator mechanism is the final implementation in `examples/HerdEffect/LL
 |---|---|
 | Player classes | `examples/HerdEffect/LLM/players.py` |
 | Prompt module | `examples/HerdEffect/LLM/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | ARK LLM via `examples.llm_utils.call_llm` and `ark/doubao-seed-2-0-mini-260428`. |
+| Output parsing | `parse_llm_response_with_thinking()` parses `<analysis>` and `<decision>` blocks; parse failures are retried up to three times and then fail fast. |
+| Error handling | Deterministic config/schema/API errors fail fast; this variant does not silently fallback after malformed decisions. |
 
 ## §5 Config Reference
 

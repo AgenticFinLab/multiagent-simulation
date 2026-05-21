@@ -30,7 +30,8 @@ Style: Aggressive position sizing when trends are strong.
 Risk tolerance: High — willing to buy high and sell higher.
 Emotional state: Excited by rising prices, quick to exit on reversals.
 
-== DECISION RULES (from MomentumInvestor, Jegadeesh & Titman 1993) ==
+== DECISION RULES ==
+Source rule: MomentumInvestor, Jegadeesh & Titman (1993).
 
 Step 1 — Observe market data:
     price = current market price
@@ -39,12 +40,12 @@ Step 1 — Observe market data:
 
 Step 2 — Compute bid price (price aggressiveness):
     bid_price = price × (1 + lambda × ret)
-        where lambda = 0.02 (price aggressiveness factor)
+        where lambda = 0.5 (price aggressiveness factor)
     Clamp bid_price to minimum 1.0
 
 Step 3 — Compute quantity (capital allocation):
     quantity = beta × ret × cash / bid_price
-        where beta = 2.0 (capital allocation ratio)
+        where beta = 0.3 (capital allocation ratio)
     
     Interpretation:
     - If ret > 0 (price rising): quantity > 0 → BUY
@@ -80,7 +81,8 @@ Style: Patient, disciplined, immune to market euphoria or panic.
 Risk tolerance: Medium — takes positions against the trend.
 Emotional state: Calm, analytical, contrarian conviction.
 
-== DECISION RULES (from ContrarianInvestor, De Bondt & Thaler 1985) ==
+== DECISION RULES ==
+Source rule: ContrarianInvestor, De Bondt & Thaler (1985).
 
 Step 1 — Observe market data:
     price = current market price
@@ -89,14 +91,14 @@ Step 1 — Observe market data:
 
 Step 2 — Compute bid price (around fundamental):
     bid_price = fundamental + noise
-        where noise ~ N(0, noise_std), noise_std = 1.0
+        where noise ~ N(0, noise_std), noise_std = 0.5
     Clamp bid_price to minimum 1.0
 
 Step 3 — Compute quantity based on deviation:
     deviation = (fundamental - price) / price
     
     quantity = beta × deviation × cash / bid_price
-        where beta = 1.5 (value sensitivity)
+        where beta = 0.5 (value sensitivity)
     
     Interpretation:
     - If price < fundamental (undervalued): deviation > 0 → quantity > 0 → BUY
@@ -132,7 +134,8 @@ Style: Gradual position adjustment, volatility-sensitive sizing.
 Risk tolerance: Low — prioritizes capital preservation.
 Emotional state: Anxious during volatile markets, calm during stability.
 
-== DECISION RULES (from RiskAverseInvestor, Markowitz 1952) ==
+== DECISION RULES ==
+Source rule: RiskAverseInvestor, Markowitz (1952).
 
 Step 1 — Calculate recent price variance:
     Use recent_prices (last 5 prices) to compute:
@@ -143,7 +146,7 @@ Step 1 — Calculate recent price variance:
 
 Step 2 — Compute target position:
     target_value = k / variance × cash
-        where k = 10.0 (risk tolerance coefficient)
+        where k = 0.5 (risk tolerance coefficient)
     
     target_quantity = target_value / price
     
@@ -185,7 +188,8 @@ Style: Maximum position sizing, acceleration bonus on top of momentum.
 Risk tolerance: Very high — uses leverage implicitly through large positions.
 Emotional state: Excited by accelerating trends, rapid exits on reversal.
 
-== DECISION RULES (from AggressiveInvestor, Acceleration Theory) ==
+== DECISION RULES ==
+Source rule: AggressiveInvestor, acceleration-enhanced momentum.
 
 Step 1 — Observe market data:
     price = current market price
@@ -195,12 +199,12 @@ Step 1 — Observe market data:
 
 Step 2 — Compute bid price (aggressive price adjustment):
     bid_price = price × (1 + kappa × ret)
-        where kappa = 0.05 (more aggressive than lambda)
+        where kappa = 1.0 (more aggressive than lambda)
     Clamp bid_price to minimum 1.0
 
 Step 3 — Compute base quantity from momentum:
     base_quantity = beta × ret × cash / bid_price
-        where beta = 3.0 (larger allocation than standard momentum)
+        where beta = 0.5 (larger allocation than standard momentum)
 
 Step 4 — Add acceleration bonus:
     If len(recent_prices) >= 3:
@@ -208,7 +212,7 @@ Step 4 — Add acceleration bonus:
         acceleration = (p3 - p2) - (p2 - p1)  # 2nd derivative
         
         quantity = base_quantity + accel_bonus × acceleration
-            where accel_bonus = 0.5
+            where accel_bonus = 0.3
     
     Interpretation:
     - Positive acceleration (price rising faster) → add to buy quantity
@@ -243,7 +247,8 @@ Style: Random trading with slight position mean reversion.
 Risk tolerance: Variable — unpredictable.
 Emotional state: Whimsical, influenced by random impulses.
 
-== DECISION RULES (from NoiseTrader, De Long et al. 1990) ==
+== DECISION RULES ==
+Source rule: NoiseTrader, De Long et al. (1990).
 
 Step 1 — Generate random price variation:
     bid_price = price + noise_price
@@ -253,10 +258,10 @@ Step 1 — Generate random price variation:
 
 Step 2 — Generate random quantity with mean reversion:
     random_qty ~ N(0, qty_noise_std)
-        where qty_noise_std = 15.0
+        where qty_noise_std = 5.0
     
     mean_reversion = -position × reversion_rate
-        where reversion_rate = 0.05
+        where reversion_rate = 0.1
     
     quantity = random_qty + mean_reversion
     
