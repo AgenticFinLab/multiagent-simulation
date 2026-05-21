@@ -239,15 +239,18 @@ class LLMInvestor(GeneralPlayer):
         parsed = None
         try:
             parsed = json.loads(decision_text)
-        except:
+        except json.JSONDecodeError:
             match = re.search(r"\{.*\}", decision_text, re.DOTALL)
             if match:
-                parsed = json.loads(match.group(0))
+                try:
+                    parsed = json.loads(match.group(0))
+                except json.JSONDecodeError as exc:
+                    raise ValueError(f"Parse failed: {text[:100]}") from exc
         if parsed is None:
             raise ValueError(f"Parse failed: {text[:100]}")
 
-        # Validate required fields with fallback to trigger retry
-        required_fields = ["bid_price", "quantity", "reasoning"]
+        # Validate required fields with fallback to trigger retry.
+        required_fields = ["action", "bid_price", "quantity", "reasoning"]
         missing_or_null = []
         for field in required_fields:
             if field not in parsed or parsed[field] is None:
@@ -264,28 +267,50 @@ class LLMInvestor(GeneralPlayer):
         system_prompt = self._system_prompt
         llm_client = self._get_llm()
 
-        decision: Dict[str, Any] = {
-            "action": "hold",
-            "bid_price": market_data["price"],
-            "quantity": 0,
-            "is_short_cover": False,
-            "reasoning": "error",
-            "analysis": "",
-        }
-        for _ in range(3):
+        max_retries = 3
+        decision = None
+        last_error = None
+        for attempt in range(max_retries):
+            output = llm_client.run(
+                [
+                    InferInput(
+                        system_msg=system_prompt,
+                        user_msg=self._build_prompt(market_data),
+                    )
+                ]
+            )
             try:
-                output = llm_client.run(
-                    [
-                        InferInput(
-                            system_msg=system_prompt,
-                            user_msg=self._build_prompt(market_data),
-                        )
-                    ]
-                )
                 decision = self._parse_response(output.outputs[0].response)
                 break
-            except Exception:
-                pass
+            except ValueError as exc:
+                last_error = exc
+                if attempt < max_retries - 1:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d/%d): %s",
+                        self.identity,
+                        attempt + 1,
+                        max_retries,
+                        exc,
+                    )
+
+        if decision is None:
+            logger.warning(
+                "[%s] LLM parse contract failed after %d attempts: %s. Holding.",
+                self.identity,
+                max_retries,
+                last_error,
+            )
+            decision = {
+                "action": "hold",
+                "bid_price": market_data["price"],
+                "quantity": 0,
+                "is_short_cover": False,
+                "reasoning": f"LLM parse failed after {max_retries} attempts: {last_error}",
+                "analysis": "",
+            }
+            parser_fallback = True
+        else:
+            parser_fallback = False
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
@@ -314,6 +339,7 @@ class LLMInvestor(GeneralPlayer):
 
         strategy_name = self.__class__.__name__
         order = {
+            "action": decision["action"],
             "bid_price": bid_price,
             "quantity": quantity,
             "strategy": strategy_name,
@@ -321,6 +347,7 @@ class LLMInvestor(GeneralPlayer):
             "is_short_cover": is_short_cover,
             "reasoning": decision["reasoning"][:100],
             "analysis": decision["analysis"],
+            "parser_fallback": parser_fallback,
         }
         return {
             **order,
@@ -336,31 +363,46 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMShortSeller(LLMInvestor):
-    """Short seller - manages short position risk."""
+    """Short seller - manages short position risk.
+
+    Theory: simulation-bases.md §4.1
+    """
 
     _system_prompt = LLM_SHORT_SELLER_SYS
 
 
 class LLMRetailCoordinator(LLMInvestor):
-    """Retail trader - aggressive bullish buyer."""
+    """Retail trader - aggressive bullish buyer.
+
+    Theory: simulation-bases.md §4.3
+    """
 
     _system_prompt = LLM_RETAIL_COORD_SYS
 
 
 class LLMMomentumBuyer(LLMInvestor):
-    """Momentum trader - follows price trends."""
+    """Momentum trader - follows price trends.
+
+    Theory: simulation-bases.md §4.2
+    """
 
     _system_prompt = LLM_MOMENTUM_SYS
 
 
 class LLMValueInvestor(LLMInvestor):
-    """Value investor - fundamentals-focused."""
+    """Value investor - fundamentals-focused.
+
+    Theory: simulation-bases.md §4.4
+    """
 
     _system_prompt = LLM_VALUE_SYS
 
 
 class LLMInstitutionalHolder(LLMInvestor):
-    """Large institutional holder - manages large position."""
+    """Large institutional holder - manages large position.
+
+    Theory: simulation-bases.md §4.5
+    """
 
     _system_prompt = LLM_INSTITUTIONAL_SYS
 

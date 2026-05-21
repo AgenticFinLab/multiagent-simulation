@@ -98,9 +98,7 @@ class Market(GeneralPlayer):
             custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price"] = extras["initial_price"]
-            self.state.custom_state["short_interest"] = extras.get(
-                "initial_short_interest", 0.0
-            )
+            self.state.custom_state["short_interest"] = extras["initial_short_interest"]
             self.state.custom_state["buying_pressure"] = 0.0
             self.state.custom_state["liquidity"] = 100.0
             self.state.custom_state["price_history"] = HistoryBuffer(
@@ -435,31 +433,46 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMShortSeller(RuleLLMInvestor):
-    """Hybrid: ShortSeller rules + LLM reasoning."""
+    """Hybrid: ShortSeller rules + LLM reasoning.
+
+    Theory: simulation-bases.md §4.1
+    """
 
     _system_prompt = RULELLM_SHORT_SELLER_SYS
 
 
 class RuleLLMRetailCoordinator(RuleLLMInvestor):
-    """Hybrid: RetailCoordinator rules + LLM reasoning."""
+    """Hybrid: RetailTrader rules + LLM reasoning.
+
+    Theory: simulation-bases.md §4.3
+    """
 
     _system_prompt = RULELLM_RETAIL_TRADER_SYS
 
 
 class RuleLLMMomentumBuyer(RuleLLMInvestor):
-    """Hybrid: MomentumBuyer rules + LLM reasoning."""
+    """Hybrid: MomentumBuyer rules + LLM reasoning.
+
+    Theory: simulation-bases.md §4.2
+    """
 
     _system_prompt = RULELLM_MOMENTUM_BUYER_SYS
 
 
 class RuleLLMValueInvestor(RuleLLMInvestor):
-    """Hybrid: ValueInvestor rules + LLM reasoning."""
+    """Hybrid: ValueInvestor rules + LLM reasoning.
+
+    Theory: simulation-bases.md §4.4
+    """
 
     _system_prompt = RULELLM_VALUE_INVESTOR_SYS
 
 
 class RuleLLMInstitutionalHolder(RuleLLMInvestor):
-    """Hybrid: InstitutionalHolder rules + LLM reasoning."""
+    """Hybrid: InstitutionalHolder rules + LLM reasoning.
+
+    Theory: simulation-bases.md §4.5
+    """
 
     _system_prompt = RULELLM_INSTITUTIONAL_HOLDER_SYS
 

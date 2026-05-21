@@ -5,12 +5,14 @@
 | Field | Value |
 |---|---|
 | Variant | RuleLLM |
-| Simulation | Short Squeeze |
-| Decision Mechanism | LLM-generated trading orders constrained by explicit scenario rules |
+| Simulation | ShortSqueeze |
+| Decision Mechanism | API orders constrained by explicit squeeze rules |
 | Theory Reference | `examples/ShortSqueeze/simulation-bases.md` |
 | Market Broadcast | `configs/ShortSqueeze/RuleLLM/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+RuleLLM combines persona descriptions with explicit quantitative rules and uses
+the liquidity-aware market extension, so each order must include
+`provides_liquidity`.
 
 ## §2 Theory -> Implementation Mapping
 
@@ -18,41 +20,42 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `RuleLLMShortSeller` in `examples/ShortSqueeze/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Forced covering | `RuleLLMShortSeller` uses short-seller rule prompts and liquidity-aware order fields. |
+| API contract | Emits `action`, `bid_price`, `quantity`, `reasoning`, and `provides_liquidity`. |
+
 ### §2.2 MomentumBuyer (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `RuleLLMMomentumBuyer` in `examples/ShortSqueeze/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Positive-feedback demand | `RuleLLMMomentumBuyer` applies momentum buyer rules with bounded LLM judgment. |
+| API contract | Explicit rules constrain sign and magnitude. |
+
 ### §2.3 RetailTrader (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `configured player class family` in `examples/ShortSqueeze/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Attention-driven bullish flow | `RuleLLMRetailCoordinator` applies retail trader rules. |
+| API contract | Liquidity flag feeds the market depth calculation. |
+
 ### §2.4 ValueInvestor (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `RuleLLMValueInvestor` in `examples/ShortSqueeze/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Fundamental resistance | `RuleLLMValueInvestor` applies valuation rules. |
+| API contract | Structured JSON is parsed into liquidity-aware market orders. |
+
 ### §2.5 InstitutionalHolder (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMInstitutionalHolder` in `examples/ShortSqueeze/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Float scarcity | `RuleLLMInstitutionalHolder` applies holding/profit-taking rules. |
+| API contract | Conservative fallback hold is logged and records `provides_liquidity=false`. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/ShortSqueeze/RuleLLM/players.py` and its configured counterpart in `configs/ShortSqueeze/RuleLLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+`Market` in `examples/ShortSqueeze/RuleLLM/players.py` consumes
+`provides_liquidity` to calculate effective depth and liquidity-sensitive price
+impact.
 
 ## §4 Variant Architecture
 
@@ -60,18 +63,18 @@ The coordinator mechanism is the final implementation in `examples/ShortSqueeze/
 |---|---|
 | Player classes | `examples/ShortSqueeze/RuleLLM/players.py` |
 | Prompt module | `examples/ShortSqueeze/RuleLLM/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | ARK API model configured in `players.yml` |
+| Output parsing | Shared `parse_llm_response_with_thinking` plus liquidity-field validation |
+| Error handling | Bounded retry; explicit conservative fallback hold after stochastic parse failure |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/ShortSqueeze/RuleLLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/ShortSqueeze/RuleLLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/ShortSqueeze/RuleLLM/topology.yml` | Message routing between coordinator and agents. |
-| `configs/ShortSqueeze/RuleLLM/persona.yml` | Turn recording and persona metadata. |
+| `configs/ShortSqueeze/RuleLLM/simulation.yml` | Full simulation entry point |
+| `configs/ShortSqueeze/RuleLLM/players.yml` | RuleLLM investor set and liquidity market config |
+| `configs/ShortSqueeze/RuleLLM/topology.yml` | Message routing |
+| `configs/ShortSqueeze/RuleLLM/persona.yml` | Recording/persona metadata |
 
 ## §6 Running Instructions
 
@@ -81,15 +84,15 @@ python examples/ShortSqueeze/RuleLLM/run_short_squeeze_rulellm.py -c configs/Sho
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+RuleLLM should stay closer to Rule than LLM in trade direction while showing
+API-level variation and liquidity-depth effects.
 
 ## §8 References
 
-See `examples/ShortSqueeze/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/ShortSqueeze/simulation-bases.md §2` and
+`examples/ShortSqueeze/analysis-bases.md §2`.
 
 ## §9 Variant Comparison
 
-See `examples/ShortSqueeze/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+Compare RuleLLM against LLM for rule anchoring and against Rag for retrieved
+knowledge effects.

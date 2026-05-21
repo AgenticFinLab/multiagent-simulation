@@ -113,9 +113,7 @@ class Market(GeneralPlayer):
             hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price"] = extras["initial_price"]
-            self.state.custom_state["short_interest"] = extras.get(
-                "initial_short_interest", 0.0
-            )
+            self.state.custom_state["short_interest"] = extras["initial_short_interest"]
             self.state.custom_state["buying_pressure"] = 0.0
             self.state.custom_state["liquidity"] = 100.0
             self.state.custom_state["_random"] = random
@@ -626,6 +624,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         return (
             f"Round {round_num}\n"
@@ -648,7 +647,10 @@ class RagLLMInvestor(GeneralPlayer):
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with analysis and decision sections."""
-        return parse_llm_response_with_thinking(response_text)
+        decision = parse_llm_response_with_thinking(response_text)
+        if "provides_liquidity" not in decision or decision["provides_liquidity"] is None:
+            raise ValueError("Fields missing or null in LLM response: ['provides_liquidity']")
+        return decision
 
     # ------------------------------------------------------------------
     # Portfolio constraints
@@ -731,6 +733,7 @@ class RagLLMInvestor(GeneralPlayer):
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
             "provides_liquidity": decision["provides_liquidity"],
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
 
         return {
@@ -752,31 +755,46 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMShortSeller(RagLLMInvestor):
-    """RAG-augmented short seller."""
+    """RAG-augmented short seller.
+
+    Theory: simulation-bases.md §4.1
+    """
 
     _system_prompt = RAGLLM_SHORT_SELLER_SYS
 
 
 class RagLLMRetailCoordinator(RagLLMInvestor):
-    """RAG-augmented retail coordinator."""
+    """RAG-augmented retail coordinator.
+
+    Theory: simulation-bases.md §4.3
+    """
 
     _system_prompt = RAGLLM_RETAIL_TRADER_SYS
 
 
 class RagLLMMomentumBuyer(RagLLMInvestor):
-    """RAG-augmented momentum buyer."""
+    """RAG-augmented momentum buyer.
+
+    Theory: simulation-bases.md §4.2
+    """
 
     _system_prompt = RAGLLM_MOMENTUM_BUYER_SYS
 
 
 class RagLLMValueInvestor(RagLLMInvestor):
-    """RAG-augmented value investor."""
+    """RAG-augmented value investor.
+
+    Theory: simulation-bases.md §4.4
+    """
 
     _system_prompt = RAGLLM_VALUE_INVESTOR_SYS
 
 
 class RagLLMInstitutionalHolder(RagLLMInvestor):
-    """RAG-augmented institutional holder."""
+    """RAG-augmented institutional holder.
+
+    Theory: simulation-bases.md §4.5
+    """
 
     _system_prompt = RAGLLM_INSTITUTIONAL_HOLDER_SYS
 

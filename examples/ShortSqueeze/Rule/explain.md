@@ -5,12 +5,14 @@
 | Field | Value |
 |---|---|
 | Variant | Rule |
-| Simulation | Short Squeeze |
-| Decision Mechanism | deterministic rule-based trading orders |
+| Simulation | ShortSqueeze |
+| Decision Mechanism | Deterministic rule-based trading orders |
 | Theory Reference | `examples/ShortSqueeze/simulation-bases.md` |
 | Market Broadcast | `configs/ShortSqueeze/Rule/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+The Rule variant is the deterministic benchmark. It uses five configured
+archetypes: `ShortSeller`, `MomentumBuyer`, `RetailTrader`, `ValueInvestor`,
+and `InstitutionalHolder`.
 
 ## §2 Theory -> Implementation Mapping
 
@@ -18,60 +20,61 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `ShortSeller` in `examples/ShortSqueeze/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Forced covering | `ShortSeller` in `examples/ShortSqueeze/Rule/players.py` covers part of the short position when loss exceeds `cover_threshold`. |
+| Config path | `configs/ShortSqueeze/Rule/players.yml:short_seller.config.extras`. |
+
 ### §2.2 MomentumBuyer (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `MomentumBuyer` in `examples/ShortSqueeze/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Positive-feedback demand | `MomentumBuyer` buys when recent momentum exceeds `momentum_threshold`. |
+| Config path | `configs/ShortSqueeze/Rule/players.yml:momentum_buyer.config.extras`. |
+
 ### §2.3 RetailTrader (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `RetailTrader` in `examples/ShortSqueeze/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Attention-driven bullish flow | `RetailTrader` adds noisy demand shifted by `bullish_bias`. |
+| Config path | `configs/ShortSqueeze/Rule/players.yml:retail.config.extras`. |
+
 ### §2.4 ValueInvestor (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `ValueInvestor` in `examples/ShortSqueeze/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Fundamental resistance | `ValueInvestor` buys undervaluation and sells overvaluation relative to fundamental value. |
+| Config path | `configs/ShortSqueeze/Rule/players.yml:value_investor.config.extras`. |
+
 ### §2.5 InstitutionalHolder (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `InstitutionalHolder` in `examples/ShortSqueeze/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ShortSqueeze/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Float scarcity | `InstitutionalHolder` starts with a large long position and generally withholds supply. |
+| Config path | `configs/ShortSqueeze/Rule/players.yml:institutional.config.extras`. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/ShortSqueeze/Rule/players.py` and its configured counterpart in `configs/ShortSqueeze/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+`Market` in `examples/ShortSqueeze/Rule/players.py` aggregates signed orders,
+tracks buy-to-cover quantity through `is_short_cover`, applies extra short-cover
+price impact, and records price and volume histories.
 
 ## §4 Variant Architecture
 
 | Component | Implementation |
 |---|---|
 | Player classes | `examples/ShortSqueeze/Rule/players.py` |
-| Prompt module | Not applicable for Rule baseline |
-| Inference | No remote model call is used in the Rule baseline. |
-| Output parsing | Direct deterministic decision construction |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Prompt module | Not applicable |
+| Inference | No remote model call |
+| Output parsing | Direct deterministic order construction |
+| Error handling | Deterministic config/schema errors fail fast |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/ShortSqueeze/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/ShortSqueeze/Rule/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/ShortSqueeze/Rule/topology.yml` | Message routing between coordinator and agents. |
-| `configs/ShortSqueeze/Rule/persona.yml` | Turn recording and persona metadata. |
+| `configs/ShortSqueeze/Rule/simulation.yml` | Full simulation entry point |
+| `configs/ShortSqueeze/Rule/players.yml` | Market and five investor definitions |
+| `configs/ShortSqueeze/Rule/topology.yml` | Market-to-investor routing |
+| `configs/ShortSqueeze/Rule/persona.yml` | Recording/persona metadata |
 
 ## §6 Running Instructions
 
@@ -81,15 +84,15 @@ python examples/ShortSqueeze/Rule/run_short_squeeze.py -c configs/ShortSqueeze/R
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+The run should show a rally that can force short covering, additional demand
+from momentum and retail roles, constrained supply from the institutional
+holder, and value resistance near high price premiums.
 
 ## §8 References
 
-See `examples/ShortSqueeze/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/ShortSqueeze/simulation-bases.md §2` and
+`examples/ShortSqueeze/analysis-bases.md §2`.
 
 ## §9 Variant Comparison
 
-See `examples/ShortSqueeze/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+Use Rule as the deterministic benchmark when judging LLM, RuleLLM, and Rag.

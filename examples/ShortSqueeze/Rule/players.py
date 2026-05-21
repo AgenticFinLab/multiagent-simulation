@@ -196,6 +196,7 @@ class BaseInvestor(GeneralPlayer):
 class ShortSeller(BaseInvestor):
     """
     Short seller who must cover when losses mount.
+    Theory: simulation-bases.md §4.1
 
     Parameters from config extras:
         - short_initial_position, short_entry_price, cover_threshold
@@ -272,6 +273,7 @@ class ShortSeller(BaseInvestor):
 class MomentumBuyer(BaseInvestor):
     """
     Momentum buyer who amplifies squeeze.
+    Theory: simulation-bases.md §4.2
 
     Parameters from config extras:
         - lookback, base_size, momentum_threshold, momentum_multiplier, max_quantity
@@ -338,6 +340,7 @@ class MomentumBuyer(BaseInvestor):
 class RetailTrader(BaseInvestor):
     """
     Retail trader who can trigger squeeze.
+    Theory: simulation-bases.md §4.3
 
     Parameters from config extras:
         - noise_std, bullish_bias, min_quantity, max_quantity
@@ -391,6 +394,7 @@ class RetailTrader(BaseInvestor):
 class ValueInvestor(BaseInvestor):
     """
     Value investor buying undervalued stock.
+    Theory: simulation-bases.md §4.4
 
     Parameters from config extras:
         - value_threshold, base_size, value_multiplier, max_quantity
@@ -450,6 +454,8 @@ class ValueInvestor(BaseInvestor):
 class InstitutionalHolder(BaseInvestor):
     """
     Large passive institutional holder.
+    Theory: simulation-bases.md §4.5
+
     Rarely trades, initial_position from config defines holdings.
     """
 
