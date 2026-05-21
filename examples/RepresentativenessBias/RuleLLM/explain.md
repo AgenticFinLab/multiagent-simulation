@@ -5,79 +5,85 @@
 | Item | Description |
 |---|---|
 | Variant | RuleLLM |
-| Mechanism | Explicit representativeness/base-rate rules embedded in LLM prompts |
-| Market | Same market as Rule |
-| Agents | RuleLLM pattern matcher, category generalizer, Bayesian updater, contrarian, noise trader |
-| Runtime Change | Documentation-only backfill; no code/config change |
+| Simulation | RepresentativenessBias |
+| Decision Mechanism | LLM reasoning constrained by explicit decision rules |
+| Theory Reference | `simulation-bases.md §2` and `§4` |
+| Market Broadcast | Same Market implementation as Rule |
 
 ## §2 Theory → Implementation Mapping
 
-### §2.1 RuleLLM Pattern Matcher
+### §2.1 RuleLLMPatternMatcher (simulation-bases.md §4.1)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.1` | Prompt states pattern sensitivity and base-rate neglect |
-| Runtime path | LLM decision parsed into canonical order |
+| Prototype matching | `RULELLM_PATTERN_MATCHER_SYS` includes pattern trigger rules |
+| Quantity formula | Prompt states `min(800, int(abs(deviation) * 5000))` |
+| Runtime path | `RuleLLMInvestor.decide()` validates `action`, `bid_price`, `quantity`, and `reasoning` |
 
-### §2.2 RuleLLM Category Generalizer
-
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.2` | Prompt states category-weight and sample-bias behavior |
-| Runtime path | Structured decision records reasoning |
-
-### §2.3 RuleLLM Bayesian Updater
+### §2.2 RuleLLMCategoryOvergeneralizer (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.3` | Prompt states base-rate/evidence weighting |
-| Runtime path | Rational benchmark remains formula anchored |
+| Category extrapolation | Prompt labels positive deviation as growth category and negative deviation as falling-knife category |
+| Small sample bias | Rule text preserves threshold-based overgeneralization |
+| Runtime path | Quantity is capped by available cash or position |
 
-### §2.4 RuleLLM Contrarian Statistical
-
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.4` | Prompt states contrarian threshold behavior |
-| Runtime path | Order constrained by state and market price |
-
-### §2.5 RuleLLM Noise Trader
+### §2.3 RuleLLMBayesianUpdater (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.5` | Prompt states noisy baseline behavior |
-| Runtime path | Emits valid order schema |
+| Bayesian discipline | Prompt activates only outside the 5% base-rate band |
+| Fundamental correction | Buys undervaluation and sells overvaluation |
+| Runtime path | Failed parse after three attempts raises an error |
 
-## §3 Market Mechanism Implementation
+### §2.4 RuleLLMContrarianStatistical (simulation-bases.md §4.4)
 
-Market mechanics are unchanged. RuleLLM changes only the investor decision path.
+| Theory Component | Implementation |
+|---|---|
+| Arbitrage against biased pressure | Prompt identifies large deviations as representativeness-driven mispricing |
+| Correction threshold | 5% threshold matches the Rule stabilizer |
+| Runtime path | Orders include canonical fields for post-run audit |
 
-## §4 Variant-Specific Features
+### §2.5 RuleLLMNoiseTrader (simulation-bases.md §4.5)
 
-RuleLLM tests whether explicit base-rate and representativeness rules remain
-stable under LLM reasoning.
+| Theory Component | Implementation |
+|---|---|
+| Random liquidity | Prompt states 30% random trade probability |
+| Neutral role | Persona is liquidity-oriented, not biased |
+| Runtime path | LLM output remains bounded by state constraints |
 
-## §5 Architecture Diagram
+## §3 Market Mechanism
+
+Market mechanics are unchanged from Rule. RuleLLM changes only the investor
+decision generator.
+
+## §4 Variant Architecture
 
 ```text
-Market state -> rule prompt + context -> LLM decision JSON -> order -> Market
+Market state -> == PERSONA == + == DECISION RULES == prompt -> LLM -> validated order
 ```
 
-## §6 Configuration Reference
+## §5 Config Reference
 
 Primary config: `configs/RepresentativenessBias/RuleLLM/players.yml`.
+LLM settings live under `extras.llm`.
 
-## §7 Running Instructions
+## §6 Running Instructions
 
 ```bash
 python examples/RepresentativenessBias/RuleLLM/run_representativenessbias_rulellm.py \
   -c configs/RepresentativenessBias/RuleLLM/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-RuleLLM should preserve the Rule bias/correction structure while adding bounded
-natural-language variation.
+RuleLLM should keep the Rule sign and threshold structure while allowing
+language reasoning to explain or modestly modulate decisions.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §4` and `../analysis-bases.md §2`.
+See `simulation-bases.md §2` for full citations.
+
+## §9 Variant Comparison
+
+See `simulation-bases.md §9`.

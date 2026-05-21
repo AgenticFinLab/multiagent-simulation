@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -80,14 +81,12 @@ def compute_agent_attribution(orders: list[dict]) -> dict[str, float]:
     """Attribute signed order pressure by agent type. See analysis-bases.md §2.7."""
     if not orders:
         raise ValueError("orders must not be empty")
-    attribution: dict[str, float] = {}
+    attribution: defaultdict[str, float] = defaultdict(float)
     for order in orders:
         agent_type = order["agent_type"]
         sign = 1 if order["action"] == "buy" else -1 if order["action"] == "sell" else 0
-        attribution[agent_type] = attribution.get(agent_type, 0.0) + sign * int(
-            order["quantity"]
-        )
-    return attribution
+        attribution[agent_type] += sign * int(order["quantity"])
+    return dict(attribution)
 
 
 def load_simulation_data(record_path: str | Path) -> Dict[str, Any]:
@@ -118,24 +117,8 @@ def calculate_metrics(data: Dict[str, Any]) -> Dict[str, float]:
 
 
 def create_visualizations(data: Dict[str, Any], output_dir: str | Path) -> None:
-    """Create the core price-deviation visualization."""
-    prices = data["price_history"]
-    if not prices:
-        raise ValueError("data['price_history'] must not be empty")
-    output = Path(output_dir)
-    output.mkdir(parents=True, exist_ok=True)
-    fundamental = float(data["fundamental"])
-    rounds = list(range(1, len(prices) + 1))
-    plt.figure(figsize=(10, 5))
-    plt.plot(rounds, prices, label="price")
-    plt.axhline(fundamental, color="black", linestyle="--", label="fundamental")
-    plt.xlabel("Round")
-    plt.ylabel("Price")
-    plt.title("RepresentativenessBias Price Dynamics")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(output / "representativenessbias_price_dynamics.png")
-    plt.close()
+    """Create the fixed standard analysis PNG outputs."""
+    create_standard_visualizations("RepresentativenessBias", data, str(output_dir))
 
 
 __all__ = [
@@ -155,6 +138,7 @@ from examples.standard_rule_analysis import (  # noqa: E402
     _batch_to_rounds,
     _load_data,
     analyze_standard_scenario as _analyze_standard_scenario,
+    create_standard_visualizations,
     run_standard_analysis as _run_standard_analysis,
 )
 

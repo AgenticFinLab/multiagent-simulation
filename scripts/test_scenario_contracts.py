@@ -289,7 +289,10 @@ class ScenarioContractTest(unittest.TestCase):
             ),
             (
                 ROOT / "examples" / "RepresentativenessBias" / "Rag" / "players.py",
-                ['extras.get("rag")', 'extras.get("private_knowledge", {})'],
+                [
+                    'private_knowledge = extras["private_knowledge"]',
+                    "from examples.RepresentativenessBias.Rule.players import Market, _info_payload",
+                ],
             ),
             (
                 ROOT / "examples" / "LTCMCollapse" / "Rag" / "players.py",

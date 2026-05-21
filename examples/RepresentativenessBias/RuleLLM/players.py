@@ -23,6 +23,18 @@ from examples.RepresentativenessBias.Rule.players import Market, _info_payload
 logger = logging.getLogger("RepresentativenessBias.RuleLLM")
 
 
+def _validate_decision(decision: Dict[str, Any]) -> None:
+    """Validate canonical trading decision JSON."""
+    if decision["action"] not in ("buy", "sell", "hold"):
+        raise ValueError(f"Invalid action: {decision['action']}")
+    if float(decision["bid_price"]) <= 0:
+        raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
+    if int(decision["quantity"]) < 0:
+        raise ValueError(f"Invalid quantity: {decision['quantity']}")
+    if not str(decision["reasoning"]).strip():
+        raise ValueError("Missing reasoning")
+
+
 class RuleLLMInvestor(GeneralPlayer):
     """Base RuleLLM investor for RepresentativenessBias simulation."""
 
@@ -56,7 +68,7 @@ class RuleLLMInvestor(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = _info_payload(msg)
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -86,6 +98,7 @@ class RuleLLMInvestor(GeneralPlayer):
             try:
                 response = llm.run([infer_input]).outputs[0].response
                 decision = parse_llm_response_with_thinking(response)
+                _validate_decision(decision)
                 break
             except Exception as exc:
                 last_error = exc
@@ -107,8 +120,15 @@ class RuleLLMInvestor(GeneralPlayer):
             quantity = min(quantity, max_qty)
         elif action == "sell":
             quantity = min(quantity, max(position, 0))
+        else:
+            quantity = 0
         quantity = max(0, min(quantity, 1000))
-        return {"action": action, "quantity": quantity}
+        return {
+            "action": action,
+            "bid_price": float(decision["bid_price"]),
+            "quantity": quantity,
+            "reasoning": str(decision["reasoning"]),
+        }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
         action = decision_payload["action"]
@@ -124,8 +144,10 @@ class RuleLLMInvestor(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": float(decision_payload["bid_price"]),
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
+            "reasoning": decision_payload["reasoning"],
         }
         return Action(
             action_type="order",

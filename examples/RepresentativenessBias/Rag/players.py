@@ -1,10 +1,17 @@
 """RepresentativenessBias Rag-Driven Simulation Players."""
 
 import logging
+import os
 from typing import Any, Dict, List, Optional
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
+from masim.knowledge import (
+    KnowledgeLoader,
+    KnowledgeQuery,
+    KnowledgeStore,
+    ResourceManager,
+)
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
@@ -21,6 +28,19 @@ from .prompts import (
 from examples.RepresentativenessBias.Rule.players import Market, _info_payload
 
 logger = logging.getLogger("RepresentativenessBias.Rag")
+RAG_FALLBACK_CONTEXT = "(No relevant knowledge retrieved this round.)"
+
+
+def _validate_decision(decision: Dict[str, Any]) -> None:
+    """Validate canonical trading decision JSON."""
+    if decision["action"] not in ("buy", "sell", "hold"):
+        raise ValueError(f"Invalid action: {decision['action']}")
+    if float(decision["bid_price"]) <= 0:
+        raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
+    if int(decision["quantity"]) < 0:
+        raise ValueError(f"Invalid quantity: {decision['quantity']}")
+    if not str(decision["reasoning"]).strip():
+        raise ValueError("Missing reasoning")
 
 
 class RagLLMInvestor(GeneralPlayer):
@@ -31,11 +51,13 @@ class RagLLMInvestor(GeneralPlayer):
     def __getstate__(self) -> Dict[str, Any]:
         state = self.__dict__.copy()
         state.pop("_llm", None)
+        state.pop("_rag_store", None)
         return state
 
     def __setstate__(self, state: Dict[str, Any]) -> None:
         self.__dict__.update(state)
         self._llm = None
+        self._rag_store = None
 
     def _get_llm(self) -> LangChainAPIInference:
         if not getattr(self, "_llm", None):
@@ -51,26 +73,86 @@ class RagLLMInvestor(GeneralPlayer):
         extras = self.config.extras
         self.state.custom_state["cash"] = extras["initial_cash"]
         self.state.custom_state["position"] = extras["initial_position"]
-        self._initialize_rag()
+        self._initialize_rag(extras)
 
-    def _initialize_rag(self) -> None:
-        """Initialize RAG retriever. Override in subclass if needed."""
-        self.state.custom_state["rag_initialized"] = True
+    def _initialize_rag(self, extras: Dict[str, Any]) -> None:
+        """Build or load the per-agent RAG index."""
+        private_knowledge = extras["private_knowledge"]
+        rag_cfg = private_knowledge["rag"]
+        knowledge_config = {
+            "backend": "local",
+            "global_uri": "examples/document-sources",
+            "preprocessing": {"output_position": "MinerU_processed"},
+            "rag": {"output_position": "rag_index"},
+        }
+        resource_manager = ResourceManager(knowledge_config)
+        agent_knowledge = resource_manager.resolve_agent_knowledge(
+            agent_id=self.identity,
+            private_knowledge=private_knowledge,
+            record_path=extras["record_path"],
+        )
+        resolved_rag = agent_knowledge["rag"]
+        local_rag_dir = agent_knowledge["local_rag_dir"]
+        processed_dir = agent_knowledge["processed_dir"]
+
+        embed_type = resolved_rag["embed_type"]
+        embed_api_key = resolved_rag["embed_api_key"]
+        if not embed_api_key:
+            embed_api_key = os.getenv(
+                "HUNYUAN_API_KEY" if embed_type == "litellm" else "ARK_API_KEY",
+                "",
+            )
+
+        rag_store = KnowledgeStore(
+            embed_model_name=resolved_rag["embed_model"],
+            embed_api_key=embed_api_key,
+            embed_api_base=resolved_rag["embed_api_base"],
+            embed_type=embed_type,
+            persist_dir=local_rag_dir,
+            chunk_size=int(resolved_rag["chunk_size"]),
+            chunk_overlap=int(resolved_rag["chunk_overlap"]),
+        )
+        if os.path.isdir(local_rag_dir) and os.listdir(local_rag_dir):
+            try:
+                rag_store.load(local_rag_dir)
+                self._rag_store = rag_store
+                self.state.custom_state["rag_cfg"] = resolved_rag
+                return
+            except Exception as exc:
+                logger.warning("[%s] Failed to load RAG index: %s", self.identity, exc)
+
+        if not os.path.isdir(processed_dir) or not os.listdir(processed_dir):
+            logger.warning("[%s] No processed RAG documents in %s", self.identity, processed_dir)
+            self._rag_store = None
+            self.state.custom_state["rag_cfg"] = resolved_rag
+            return
+
+        docs = KnowledgeLoader().load_from_dir(processed_dir)
+        rag_store.build(docs)
+        self._rag_store = rag_store
+        self.state.custom_state["rag_cfg"] = resolved_rag
 
     def _retrieve_rag_context(
         self, price: float, fundamental: float, deviation: float
     ) -> str:
         """Retrieve relevant context for current market state."""
-        extras = self.config.extras
-        rag_cfg = extras.get("rag") or extras.get("private_knowledge", {}).get("rag", {})
-        context_template = rag_cfg.get("context_template")
-        if context_template:
-            return context_template.format(
-                price=price,
-                fundamental=fundamental,
-                deviation=deviation,
+        rag_store = getattr(self, "_rag_store", None)
+        if rag_store and rag_store.is_built():
+            rag_cfg = self.state.custom_state["rag_cfg"]
+            query = KnowledgeQuery(
+                text=(
+                    "representativeness heuristic base-rate neglect trading "
+                    f"price={price:.2f} fundamental={fundamental:.2f} "
+                    f"deviation={deviation:+.2%}"
+                ),
+                top_k=int(rag_cfg["top_k"]),
+                round_num=self.state.custom_state["round"],
+                agent_id=self.identity,
             )
-        return "(No scenario-specific RAG context template configured.)"
+            result = rag_store.query(query)
+            if result.formatted_text:
+                return result.formatted_text
+        return RAG_FALLBACK_CONTEXT
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
@@ -80,7 +162,7 @@ class RagLLMInvestor(GeneralPlayer):
             self._initialize_agent()
         for msg in observation.inbounds:
             payload = _info_payload(msg)
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -112,6 +194,7 @@ class RagLLMInvestor(GeneralPlayer):
             try:
                 response = llm.run([infer_input]).outputs[0].response
                 decision = parse_llm_response_with_thinking(response)
+                _validate_decision(decision)
                 break
             except Exception as exc:
                 last_error = exc
@@ -133,8 +216,16 @@ class RagLLMInvestor(GeneralPlayer):
             quantity = min(quantity, max_qty)
         elif action == "sell":
             quantity = min(quantity, max(position, 0))
+        else:
+            quantity = 0
         quantity = max(0, min(quantity, 1000))
-        return {"action": action, "quantity": quantity, "rag_context": rag_context}
+        return {
+            "action": action,
+            "bid_price": float(decision["bid_price"]),
+            "quantity": quantity,
+            "reasoning": str(decision["reasoning"]),
+            "rag_context": rag_context,
+        }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
         action = decision_payload["action"]
@@ -150,14 +241,17 @@ class RagLLMInvestor(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": float(decision_payload["bid_price"]),
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
+            "reasoning": decision_payload["reasoning"],
             "rag_context": decision_payload["rag_context"],
         }
         return Action(
             action_type="order",
             payload={
                 "order": order,
+                "rag_context": decision_payload["rag_context"],
                 "outbound_messages": [{"payload": order, "content_type": "order"}],
             },
             source_id=self.identity,

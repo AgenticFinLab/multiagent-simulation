@@ -5,67 +5,89 @@
 | Item | Description |
 |---|---|
 | Variant | Rag |
-| Mechanism | Representativeness decisions augmented with retrieved behavioral-finance context |
-| Market | Same market as Rule/LLM/RuleLLM |
-| Knowledge Sources | Shared document corpus and RAG index |
-| Runtime Change | Documentation-only backfill; no code/config change |
+| Simulation | RepresentativenessBias |
+| Decision Mechanism | RuleLLM prompts plus retrieved behavioral-finance context |
+| Theory Reference | `simulation-bases.md §2` and `§4` |
+| Market Broadcast | Same Market implementation as Rule |
 
 ## §2 Theory → Implementation Mapping
 
-### §2.1 Rag Pattern And Category Agents
+### §2.1 RagLLMPatternMatcher (simulation-bases.md §4.1)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.1` and `§4.2` | Retrieved representativeness/base-rate context is added to prompt |
-| Effect | May temper or amplify prototype/category reasoning |
+| Prototype matching | Inherits `RULELLM_PATTERN_MATCHER_SYS` |
+| Retrieved context | `_retrieve_rag_context()` queries representativeness/base-rate material |
+| Runtime path | Recorded `rag_context` supports retrieval-quality audit |
 
-### §2.2 Rag Bayesian And Contrarian Agents
-
-| Theory Component | Implementation |
-|---|---|
-| `simulation-bases.md §4.3` and `§4.4` | Retrieved statistical reasoning context informs correction |
-| Effect | May strengthen base-rate discipline |
-
-### §2.3 Rag Noise Trader
+### §2.2 RagLLMCategoryOvergeneralizer (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| `simulation-bases.md §4.5` | Keeps baseline stochastic participation |
-| Effect | Should preserve valid order schema |
+| Category extrapolation | Inherits category overgeneralization decision rules |
+| Small-sample warning | Retrieved context may surface sample-size and base-rate cautions |
+| Runtime path | Decision JSON is validated before order submission |
 
-## §3 Market Mechanism Implementation
+### §2.3 RagLLMBayesianUpdater (simulation-bases.md §4.3)
 
-Rag preserves the same market and order schema. Retrieval changes the context
-available to LLM agents.
+| Theory Component | Implementation |
+|---|---|
+| Bayesian correction | Inherits base-rate disciplined prompt rules |
+| Retrieved context | Retrieval can strengthen statistical prior reasoning |
+| Runtime path | `rag_stats.json` measures whether context was available |
 
-## §4 Variant-Specific Features
+### §2.4 RagLLMContrarianStatistical (simulation-bases.md §4.4)
 
-Rag requires retrieval quality review in addition to execution and parser
-quality checks.
+| Theory Component | Implementation |
+|---|---|
+| Contrarian correction | Inherits contrarian threshold rules |
+| Knowledge effect | Retrieved context may identify representativeness-driven mispricing |
+| Runtime path | Canonical order includes `bid_price`, `quantity`, and `reasoning` |
 
-## §5 Architecture Diagram
+### §2.5 RagLLMNoiseTrader (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Uninformed liquidity | Inherits neutral noise-trader prompt |
+| Retrieval neutrality | Context should not turn the agent into a biased prototype trader |
+| Runtime path | Records fallback context if no index is available |
+
+## §3 Market Mechanism
+
+Rag preserves the Rule market. Retrieval changes the information supplied to
+LLM investors before they submit orders.
+
+## §4 Variant Architecture
 
 ```text
-Market state -> retrieve context -> LLM decision JSON -> order -> Market
+Market state -> KnowledgeStore query -> RAG user prompt -> LLM -> validated order -> Market
 ```
 
-## §6 Configuration Reference
+`Rag/analysis.py` adds `analyze_rag_knowledge_effect()` and writes
+`rag_stats.json`.
+
+## §5 Config Reference
 
 Primary config: `configs/RepresentativenessBias/Rag/players.yml`.
+RAG settings live under `private_knowledge.rag` and use
+`openai/hunyuan-embedding` through LiteLLM.
 
-## §7 Running Instructions
+## §6 Running Instructions
 
 ```bash
 python examples/RepresentativenessBias/Rag/run_representativenessbias_rag.py \
   -c configs/RepresentativenessBias/Rag/simulation.yml
 ```
 
-## §8 Expected Behavior Patterns
+## §7 Expected Behavior
 
-Retrieved base-rate evidence may reduce representativeness bias, while retrieved
-examples may also make salient prototypes more compelling.
+Retrieved base-rate evidence should reduce uncontrolled pattern extrapolation
+without eliminating the representativeness mechanism entirely.
 
-## §9 References
+## §8 References
 
-See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
-`../analysis-bases.md §2`.
+See `simulation-bases.md §2` for full citations.
+
+## §9 Variant Comparison
+
+See `simulation-bases.md §9`.
