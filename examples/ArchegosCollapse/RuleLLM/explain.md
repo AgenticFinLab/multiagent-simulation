@@ -58,7 +58,7 @@
 | Theory Component                                                  | Implementation                                                                                      |
 |-------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
 | Detect at −0.05, probability 0.50 → sim-bases §4 Rule-Based       | `== DECISION RULES ==`: "IF deviation < -0.05 AND detection probability 0.50 → SELL min(1000, pos)" |
-| Cover at −0.03 → sim-bases §4                                     | Rule: "ELSE IF deviation > -0.03 AND short_position < 0 → BUY min(500,                              |
+| Cover at −0.03 → sim-bases §4                                     | `== DECISION RULES ==`: buy up to 500 shares when recovery conditions indicate prior front-run exposure should be covered |
 | Front-runner / fast analytical persona → sim-bases §4 LLM Persona | `== PERSONA ==`: "fast, analytical, and unafraid of being early"                                    |
 
 ---
@@ -155,7 +155,7 @@ python examples/ArchegosCollapse/RuleLLM/run_archegsoscollapse_rulellm.py \
 Required environment variables:
 - `ARK_API_KEY`: ByteDance Doubao API key
 
-Expected runtime: ~5–20 minutes for 100 rounds
+Expected runtime: ~5–20 minutes for 200 rounds
 
 Output location: `EXPERIMENT/ArchegosCollapse/RuleLLM/`
 

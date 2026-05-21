@@ -63,7 +63,7 @@
 | Information-based front-running → simulation-bases.md §2 (Kyle, 1985)            | Class docstring; probabilistic detection simulates partial information advantage                  |
 | Detection: `deviation < -detection_threshold` AND `random() < detection_ability` | `if deviation < detection_threshold and random.random() < detection_ability:` in `decide()`       |
 | Front-run size = min(front_run_size, position) → sim-bases §4                    | `sell_qty = min(front_run_size, max(position, 0.0))`; `front_run_size = extras["front_run_size"]` |
-| Cover short when recovery: `deviation > cover_threshold` → sim-bases §4          | `elif deviation > cover_threshold and short_position > 0:` branch in `decide()`                   |
+| Short-cover ledger → sim-bases §4                                                | `short_position` increments after front-run sells and decrements when recovery-cover buys execute |
 
 ---
 
@@ -172,7 +172,7 @@ python examples/ArchegosCollapse/Rule/run_archegsoscollapse.py \
 
 Required environment variables: None (Rule variant requires no API keys)
 
-Expected runtime: ~10–30 seconds for 100 rounds (pure Python, no LLM calls)
+Expected runtime: ~10–30 seconds for 200 rounds (pure Python, no LLM calls)
 
 Output location: `EXPERIMENT/ArchegosCollapse/Rule/`
 

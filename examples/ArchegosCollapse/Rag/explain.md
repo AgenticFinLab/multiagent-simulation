@@ -161,7 +161,7 @@ python examples/ArchegosCollapse/Rag/run_archegsoscollapse_rag.py \
 Required environment variables:
 - `ARK_API_KEY`: ByteDance Doubao API key
 
-Expected runtime: ~5–20 minutes for 100 rounds (retrieval adds latency per round)
+Expected runtime: ~5–20 minutes for 200 rounds (retrieval adds latency per round)
 
 Output location: `EXPERIMENT/ArchegosCollapse/Rag/`
 

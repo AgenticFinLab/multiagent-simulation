@@ -160,9 +160,9 @@ Step 2:
       quantity = min(1000, position)   [position-constrained]
     ELSE:
       ACTION = HOLD
-  ELSE IF deviation > -0.03  AND position < 0 (prior short position → cover):
+  ELSE IF deviation > -0.03  AND you previously sold to front-run the cascade:
     ACTION = BUY (cover short)
-    quantity = min(500, |short_position|)   [cash-constrained]
+    quantity = min(500, cash / price)   [cash-constrained]
   ELSE:
     ACTION = HOLD
 

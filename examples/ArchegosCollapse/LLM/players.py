@@ -38,6 +38,31 @@ def load_prompt(prompt_path: str) -> str:
     return getattr(module, var_name)
 
 
+def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
+    """Validate canonical trading decision fields before portfolio mutation."""
+    action = decision["action"]
+    if action not in {"buy", "sell", "hold"}:
+        raise ValueError(f"[{identity}] invalid action: {action}")
+    bid_price = float(decision["bid_price"])
+    if bid_price <= 0:
+        raise ValueError(f"[{identity}] invalid bid_price: {bid_price}")
+    quantity = float(decision["quantity"])
+    if quantity < 0:
+        raise ValueError(f"[{identity}] invalid quantity: {quantity}")
+    reasoning = str(decision["reasoning"]).strip()
+    if not reasoning:
+        raise ValueError(f"[{identity}] empty reasoning")
+    if action == "hold":
+        quantity = 0.0
+    return {
+        **decision,
+        "action": action,
+        "bid_price": bid_price,
+        "quantity": quantity,
+        "reasoning": reasoning,
+    }
+
+
 class LLMInvestor(GeneralPlayer):
     """Base class for LLM-powered investors in the ArchegosCollapse scenario."""
 
@@ -130,6 +155,7 @@ class LLMInvestor(GeneralPlayer):
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
+                decision = _validate_decision(decision, self.identity)
                 break
             except Exception as exc:
                 last_error = exc
@@ -153,13 +179,9 @@ class LLMInvestor(GeneralPlayer):
         action = decision["action"]
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
-        # Guard: LLMs sometimes output bid_price=0 for hold actions.
-        # Use the current market price so recorded bids stay meaningful.
-        if bid_price <= 0:
-            bid_price = market_data["price"]
 
         if action == "buy":
-            max_affordable = cash / bid_price if bid_price > 0 else 0
+            max_affordable = cash / bid_price
             quantity = min(quantity, max_affordable)
             self.state.custom_state["cash"] -= quantity * bid_price
             self.state.custom_state["position"] += quantity
@@ -234,4 +256,5 @@ __all__ = [
     "LLMPrimeBroker2",
     "LLMBlockTradeBuyer",
     "LLMInformationTrader",
+    "_validate_decision",
 ]

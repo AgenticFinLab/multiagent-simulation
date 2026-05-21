@@ -169,9 +169,10 @@ def _compute_agent_vwap(
             abs_qty = abs(qty)
             price_volume_sum += abs_qty * price
             total_vol += abs_qty
-            if qty > 0:
-                total_buy += qty
-            else:
+            action = payload["action"]
+            if action == "buy":
+                total_buy += abs_qty
+            elif action == "sell":
                 total_sell += abs_qty
         vwap_data[aid] = {
             "vwap": price_volume_sum / total_vol if total_vol > 0 else 0.0,
@@ -497,8 +498,8 @@ def _create_visualizations(
     Plots
     -----
     00_investor_bids.png   : Investor Bidding Curves (headline chart)
-    01_price_dynamics.png  : Price vs Fundamental + Deviation %
-    02_cascade_dynamics.png: Rolling Volatility + Return Autocorrelation
+    01_archegoscollapse_dynamics.png: Price vs Fundamental + Deviation %
+    02_archegoscollapse_analysis.png : Rolling Volatility + Return Autocorrelation
     03_summary.png         : Agent VWAP comparison + Cascade onset annotation
     """
     rounds_sorted = sorted(market_prices.keys())
@@ -614,7 +615,9 @@ def _create_visualizations(
 
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "01_price_dynamics.png"), dpi=150, bbox_inches="tight"
+        os.path.join(output_dir, "01_archegoscollapse_dynamics.png"),
+        dpi=150,
+        bbox_inches="tight",
     )
     plt.close()
 
@@ -683,7 +686,7 @@ def _create_visualizations(
 
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "02_cascade_dynamics.png"),
+        os.path.join(output_dir, "02_archegoscollapse_analysis.png"),
         dpi=150,
         bbox_inches="tight",
     )

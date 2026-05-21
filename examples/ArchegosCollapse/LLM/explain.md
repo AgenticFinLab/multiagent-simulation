@@ -59,7 +59,7 @@
 | Theory Component                                           | Implementation                                                                          |
 |------------------------------------------------------------|-----------------------------------------------------------------------------------------|
 | Order-flow detection capability → sim-bases §4 LLM Persona | `LLM_INFORMATION_TRADER_SYS`: "you specialize in reading unusual order flow patterns"   |
-| Short-then-cover pattern → sim-bases §4 LLM Persona        | "sell quickly to profit from the decline"; "cover your short positions when stabilized" |
+| Front-run then rebuild pattern → sim-bases §4 LLM Persona  | "sell exposure ahead of the selling wave"; "buy back exposure when stabilized"          |
 | Amplifies then aids price discovery → sim-bases §4         | "your front-running amplifies the initial decline but helps price discovery"            |
 
 ---
@@ -137,7 +137,7 @@ silently substitute a hold action.
 ║  PrimeBroker1:      speed urgency → SELL aggressively                ║
 ║  PrimeBroker2:      delayed but ultimately SELL at worse price       ║
 ║  BlockTradeBuyer:   discount-seeking → BUY on dislocation            ║
-║  InformationTrader: signal detection → SELL / cover → BUY            ║
+║  InformationTrader: signal detection → SELL / rebuild exposure → BUY ║
 ║         │                                                             ║
 ║         └──── send orders → Market [next round]                       ║
 ╚══════════════════════════════════════════════════════════════════════╝
@@ -180,7 +180,7 @@ python examples/ArchegosCollapse/LLM/run_archegsoscollapse_llm.py \
 Required environment variables:
 - `ARK_API_KEY`: ByteDance Doubao API key (required for all LLM calls)
 
-Expected runtime: ~5–20 minutes for 100 rounds (depends on API latency, 5 LLM calls per round)
+Expected runtime: ~5–20 minutes for 200 rounds (depends on API latency, 5 LLM calls per round)
 
 Output location: `EXPERIMENT/ArchegosCollapse/LLM/`
 
