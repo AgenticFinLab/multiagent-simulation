@@ -28,7 +28,7 @@ from masim.knowledge import (
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 
-from examples.GFC2008.Rule.players import Market
+from examples.GFC2008.Rule.players import Market, _build_order
 from examples.GFC2008.Rag.prompts import RAG_USER_TEMPLATE
 
 logger = logging.getLogger(__name__)
@@ -285,6 +285,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         system_msg = load_prompt(self._system_prompt_path)
         user_msg = RAG_USER_TEMPLATE.format(
@@ -309,6 +310,12 @@ class RagLLMInvestor(GeneralPlayer):
                 infer_input = InferInput(system_msg=system_msg, user_msg=user_msg)
                 response = llm_client.run([infer_input]).outputs[0].response
                 decision = parse_llm_response_with_thinking(response)
+                if decision["action"] not in ("buy", "sell", "hold"):
+                    raise ValueError(f"Invalid action: {decision['action']}")
+                if float(decision["bid_price"]) <= 0:
+                    raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
+                if not str(decision["reasoning"]).strip():
+                    raise ValueError("Missing reasoning")
                 break
             except Exception as exc:
                 last_error = exc
@@ -336,7 +343,17 @@ class RagLLMInvestor(GeneralPlayer):
             quantity = 0
 
         quantity = max(0, quantity)
-        return {"action": action, "quantity": quantity}
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision["bid_price"]),
+            str(decision["reasoning"]),
+        )
+        return {
+            **order,
+            "rag_context": self.state.custom_state["last_rag_context"],
+        }
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order to market."""
@@ -351,17 +368,19 @@ class RagLLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision_payload["bid_price"]),
+            str(decision_payload["reasoning"]),
+        )
+        rag_context = decision_payload["rag_context"]
         return Action(
             action_type="order",
             payload={
                 "order": order,
+                "rag_context": rag_context,
                 "outbound_messages": [{"payload": order, "content_type": "order"}],
             },
             source_id=self.identity,

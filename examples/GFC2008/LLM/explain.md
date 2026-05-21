@@ -76,7 +76,7 @@
 This variant traces to `../simulation-bases.md §4` for investor design and
 `../analysis-bases.md §2` for metric definitions. Post-run review should verify
 full round count, order schema completeness, price and portfolio sanity, LLM
-parse/fallback rates, and crisis-phase patterns before accepting a sample.
+parse and retry rates, and crisis-phase patterns before acceptance.
 
 ## §6 Running Instructions
 
@@ -97,5 +97,5 @@ dynamics without explicit formula instructions.
 
 ## §9 Implementation Traceability
 
-Prompts and parsed orders must remain consistent with `players.py`; sample
-acceptance requires clean parse/fallback quality logs.
+Prompts and parsed orders must remain consistent with `players.py`; acceptance
+requires canonical order fields and clean parse-quality logs.

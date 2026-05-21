@@ -76,7 +76,7 @@
 This variant traces to `../simulation-bases.md §4` for investor design and
 `../analysis-bases.md §2` for metric definitions. Post-run review should verify
 full round count, order schema completeness, price and portfolio sanity, LLM
-parse/fallback rates, and rule-adherence patterns before accepting a sample.
+parse and retry rates, and rule-adherence patterns before acceptance.
 
 ## §6 Running Instructions
 

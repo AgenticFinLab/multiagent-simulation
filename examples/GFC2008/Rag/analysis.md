@@ -21,6 +21,7 @@
 | RRI    | `rescue_response_index(stabilizer_volume, destabilizer_volume)` | `stabilizer_volume: float`, `destabilizer_volume: float` |
 | OSP    | `originator_sell_pressure(mbs_sell_volume, total_sell_volume)`  | `mbs_sell_volume: float`, `total_sell_volume: float`     |
 | WDI    | `wealth_distribution_index(final_wealth)`                       | `final_wealth: dict`                                     |
+| AQR    | `analyze_rag_knowledge_effect(rag_contexts)`                    | `rag_contexts: dict`                                     |
 
 ---
 
@@ -42,8 +43,8 @@
 - Expect RRI = 0.30–0.70 (vs. Rule 0.20–0.60).
 
 ### §3.5 RagLLMRegulator
-- TARP/bailout retrieval anchors intervention size at 3000–5000 units.
-- Effective rescue_probability higher than Rule's stochastic 0.30.
+- TARP/bailout retrieval anchors a bounded intervention decision rather than a silent rescue.
+- Retrieval context can make regulator reasoning more decisive, while the player still emits canonical orders.
 
 ---
 
@@ -73,4 +74,5 @@ financial-crisis knowledge.
 - Confirm the run completed 200 configured rounds.
 - Confirm RAG assets and embedding configuration were available.
 - Confirm `{rag_context}` was populated or explicitly replaced by the no-context marker.
-- Audit parse failures, fallback holds, and retrieval-health records before acceptance.
+- Confirm `rag_stats.json` is written and retrieval-health records are auditable.
+- Audit parse failures and retry counts before acceptance; deterministic parser/provider failures must fail fast.

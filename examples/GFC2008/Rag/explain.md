@@ -77,8 +77,8 @@
 This variant traces to `../simulation-bases.md §4` for investor design and
 `../analysis-bases.md §2` for metric definitions. Post-run review should verify
 full round count, order schema completeness, price and portfolio sanity,
-retrieval health, LLM parse/fallback rates, and crisis-phase patterns before
-accepting a sample.
+retrieval health, LLM parse and retry rates, and crisis-phase patterns before
+acceptance.
 
 ## §6 Running Instructions
 
@@ -99,5 +99,5 @@ to RuleLLM.
 
 ## §9 Implementation Traceability
 
-The user prompt must inject `{rag_context}` or the no-context marker, and sample
-acceptance requires retrieval-health and parse-quality review.
+The user prompt must inject `{rag_context}` or the no-context marker, and
+acceptance requires `rag_stats.json`, retrieval-health review, and parse-quality review.

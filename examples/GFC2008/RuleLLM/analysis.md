@@ -69,5 +69,5 @@ effects under explicit decision rules.
 
 - Confirm the run completed 200 configured rounds.
 - Confirm prompts contain both `== PERSONA ==` and `== DECISION RULES ==`.
-- Confirm parse failures do not silently become fallback holds.
-- Confirm accepted orders preserve valid trading payloads.
+- Confirm parse failures do not silently become hold decisions; deterministic contract failures must fail fast.
+- Confirm accepted orders preserve canonical `action`, `bid_price`, `quantity`, and `reasoning`.

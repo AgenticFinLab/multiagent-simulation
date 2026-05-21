@@ -27,6 +27,30 @@ from masim.utils.history import HistoryBuffer
 logger = logging.getLogger("GFC2008")
 
 
+def _build_order(
+    player: GeneralPlayer,
+    action: str,
+    quantity: int,
+    price: float,
+    reasoning: str,
+) -> Dict[str, Any]:
+    """Build the canonical trading order shared by all GFC2008 variants."""
+    if action not in ("buy", "sell", "hold"):
+        raise ValueError(f"{player.identity} emitted invalid action: {action}")
+    if price <= 0:
+        raise ValueError(f"{player.identity} emitted non-positive bid_price: {price}")
+    return {
+        "type": "order",
+        "from": player.identity,
+        "action": action,
+        "bid_price": float(price),
+        "quantity": max(0, int(quantity)),
+        "reasoning": reasoning,
+        "agent_type": player.__class__.__name__,
+        "strategy": player.__class__.__name__,
+    }
+
+
 class Market(GeneralPlayer):
     """
     Market agent for GFC2008 simulation.
@@ -60,7 +84,9 @@ class Market(GeneralPlayer):
         orders = []
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload["type"] == "order":
+            if isinstance(payload, dict) and "type" not in payload and "order" in payload:
+                payload = payload["order"]
+            if isinstance(payload, dict) and payload.get("type") == "order":
                 orders.append(
                     {
                         "agent_id": payload["from"],
@@ -169,8 +195,18 @@ class MBSOriginator(GeneralPlayer):
 
         sell_qty = int(abs(position) * origination_rate)
         if sell_qty > 0 and position > 0:
-            return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+            return {
+                "action": "sell",
+                "bid_price": self.state.custom_state["price"],
+                "quantity": sell_qty,
+                "reasoning": "originator distributes MBS inventory to generate fee income",
+            }
+        return {
+            "action": "hold",
+            "bid_price": self.state.custom_state["price"],
+            "quantity": 0,
+            "reasoning": "originator has no positive distribution quantity",
+        }
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order."""
@@ -185,13 +221,13 @@ class MBSOriginator(GeneralPlayer):
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision_payload["bid_price"]),
+            str(decision_payload["reasoning"]),
+        )
         return Action(
             action_type="order",
             payload={
@@ -243,8 +279,18 @@ class RatingAgency(GeneralPlayer):
         if price < perceived_fundamental * 0.95:
             buy_qty = min(300, int(cash / price) if price > 0 else 0)
             if buy_qty > 0:
-                return {"action": "buy", "quantity": buy_qty}
-        return {"action": "hold", "quantity": 0}
+                return {
+                    "action": "buy",
+                    "bid_price": price,
+                    "quantity": buy_qty,
+                    "reasoning": "rating agency buys below inflated perceived fundamental value",
+                }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "price is not attractive under the inflated rating view",
+        }
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order."""
@@ -259,13 +305,13 @@ class RatingAgency(GeneralPlayer):
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision_payload["bid_price"]),
+            str(decision_payload["reasoning"]),
+        )
         return Action(
             action_type="order",
             payload={
@@ -315,8 +361,18 @@ class LeveragedInvestor(GeneralPlayer):
         if deviation < -margin_trigger:
             fire_sale_qty = int(abs(position) * 0.5)
             if position > 0 and fire_sale_qty > 0:
-                return {"action": "sell", "quantity": min(fire_sale_qty, position)}
-        return {"action": "hold", "quantity": 0}
+                return {
+                    "action": "sell",
+                    "bid_price": self.state.custom_state["price"],
+                    "quantity": min(fire_sale_qty, position),
+                    "reasoning": "margin-call pressure forces leveraged deleveraging",
+                }
+        return {
+            "action": "hold",
+            "bid_price": self.state.custom_state["price"],
+            "quantity": 0,
+            "reasoning": "margin-call threshold has not been breached",
+        }
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order."""
@@ -331,13 +387,13 @@ class LeveragedInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision_payload["bid_price"]),
+            str(decision_payload["reasoning"]),
+        )
         return Action(
             action_type="order",
             payload={
@@ -388,8 +444,18 @@ class DistressedBuyer(GeneralPlayer):
         if deviation < -discount_threshold:
             buy_qty = min(1000, int(cash * 0.3 / price) if price > 0 else 0)
             if buy_qty > 0:
-                return {"action": "buy", "quantity": buy_qty}
-        return {"action": "hold", "quantity": 0}
+                return {
+                    "action": "buy",
+                    "bid_price": price,
+                    "quantity": buy_qty,
+                    "reasoning": "distressed buyer deploys capital after deep discount signal",
+                }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "discount is not deep enough for distressed entry",
+        }
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order."""
@@ -404,13 +470,13 @@ class DistressedBuyer(GeneralPlayer):
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision_payload["bid_price"]),
+            str(decision_payload["reasoning"]),
+        )
         return Action(
             action_type="order",
             payload={
@@ -458,8 +524,18 @@ class Regulator(GeneralPlayer):
         rescue_probability = extras["rescue_probability"]
 
         if deviation < -intervention_threshold and random.random() < rescue_probability:
-            return {"action": "buy", "quantity": 3000}
-        return {"action": "hold", "quantity": 0}
+            return {
+                "action": "buy",
+                "bid_price": self.state.custom_state["price"],
+                "quantity": int(extras["rescue_size"]),
+                "reasoning": "regulator backstop activates under systemic stress",
+            }
+        return {
+            "action": "hold",
+            "bid_price": self.state.custom_state["price"],
+            "quantity": 0,
+            "reasoning": "systemic intervention threshold or probability gate not met",
+        }
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order."""
@@ -474,13 +550,13 @@ class Regulator(GeneralPlayer):
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision_payload["bid_price"]),
+            str(decision_payload["reasoning"]),
+        )
         return Action(
             action_type="order",
             payload={
@@ -493,6 +569,7 @@ class Regulator(GeneralPlayer):
 
 __all__ = [
     "Market",
+    "_build_order",
     "MBSOriginator",
     "RatingAgency",
     "LeveragedInvestor",
