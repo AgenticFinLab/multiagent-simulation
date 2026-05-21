@@ -1,36 +1,47 @@
-# Soros Pound Sterling Crisis Rag Analysis Plan
+# SorosPound Rag Analysis Plan
 
 ## §1 Objectives
 
-This analysis checks whether the Rag variant produces a complete, analyzable Soros Pound Sterling Crisis trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
+The Rag analysis checks both speculative-attack mechanism quality and retrieval
+quality. It verifies the same SorosPound metrics as RuleLLM while ensuring that
+retrieved currency-crisis context is recorded and auditable.
 
 ## §2 Core Metrics
 
 | Metric | Function Contract | Source |
 |---|---|---|
-| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
-| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
-| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
-| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
-| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
-| Scenario-specific diagnostic | `def compute_sorospound_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
+| Peg pressure | `def compute_peg_pressure(prices: list[float], peg_value: float) -> list[float]` | `analysis-bases.md §2.1` |
+| Attack volume | `def compute_attack_volume(orders: list[dict]) -> float` | `analysis-bases.md §2.2` |
+| Defense volume | `def compute_defense_volume(orders: list[dict]) -> float` | `analysis-bases.md §2.3` |
+| Credibility loss | `def compute_credibility_loss(states: list[dict], peg_value: float) -> float` | `analysis-bases.md §2.4` |
+| Herding share | `def compute_herding_share(orders: list[dict]) -> float` | `analysis-bases.md §2.5` |
+| Break round | `def compute_break_round(peg_pressure: list[float], threshold: float) -> int` | `analysis-bases.md §2.6` |
+| Defense effectiveness | `def compute_defense_effectiveness(defense_volume: float, attack_volume: float) -> float` | `analysis-bases.md §2.7` |
 
 ## §3 Analysis Dimensions
 
-Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rag preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
+Review peg stress, attack and defense attribution, parser fallback rate,
+retrieval success rate, retrieved-context coverage by agent, and whether RAG
+changes quantity decisions without violating the schema.
 
 ## §4 Phase Analysis
 
-The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
+Use `analysis-bases.md §4`. Retrieved ERM and currency-crisis context is most
+relevant during pressure buildup, defense, and attack/break phases.
 
 ## §5 Cross-Variant Comparison
 
-Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+Compare Rag against RuleLLM to isolate retrieval effects and against Rule/LLM
+for attack timing, defense effectiveness, and quality metrics.
 
 ## §6 Expected Results and Validation Criteria
 
-Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+A full Rag sample should complete 200 rounds, record valid quantity orders,
+include `rag_context`, write `rag_stats.json`, and keep retrieval failures and
+parser fallbacks within documented quality gates.
 
 ## §7 Visualization Catalogue
 
-Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_sorospound_dynamics.png`, `02_sorospound_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_sorospound_dynamics.png`, `02_sorospound_analysis.png`,
+`03_summary.png`, and Rag-specific `rag_stats.json`.

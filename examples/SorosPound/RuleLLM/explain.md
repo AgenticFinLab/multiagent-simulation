@@ -1,16 +1,17 @@
-# Soros Pound Sterling Crisis RuleLLM Variant Explanation
+# SorosPound RuleLLM Variant Explanation
 
 ## §1 Overview
 
 | Field | Value |
 |---|---|
 | Variant | RuleLLM |
-| Simulation | Soros Pound Sterling Crisis |
-| Decision Mechanism | LLM-generated trading orders constrained by explicit scenario rules |
+| Simulation | SorosPound |
+| Decision Mechanism | Explicit rule prompts plus API reasoning over quantity orders |
 | Theory Reference | `examples/SorosPound/simulation-bases.md` |
 | Market Broadcast | `configs/SorosPound/RuleLLM/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+RuleLLM keeps the current-market quantity schema and uses prompts that separate
+persona from explicit decision rules.
 
 ## §2 Theory -> Implementation Mapping
 
@@ -18,41 +19,46 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `RuleLLMMacroHedgeFund` in `examples/SorosPound/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Speculative attack role | `RuleLLMMacroHedgeFund` receives macro persona plus threshold/sizing rules. |
+| Config link | Portfolio fields and ARK model config from `configs/SorosPound/RuleLLM/players.yml`. |
+| Output contract | Required `action`, `quantity`, `reasoning`, analysis, and fallback metadata. |
+
 ### §2.2 PegDefender (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `RuleLLMPegDefender` in `examples/SorosPound/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Peg defense role | `RuleLLMPegDefender` receives intervention threshold and direction rules. |
+| Config link | Defender portfolio metadata and LLM config. |
+| Output contract | Current-market quantity order. |
+
 ### §2.3 ConvergenceTrader (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `RuleLLMConvergenceTrader` in `examples/SorosPound/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Peg-stability belief role | `RuleLLMConvergenceTrader` receives stochastic convergence-trade rules. |
+| Config link | Convergence metadata and LLM config. |
+| Output contract | Quantity order with explicit reasoning. |
+
 ### §2.4 OpportunisticTrader (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `RuleLLMOpportunisticTrader` in `examples/SorosPound/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Momentum/herding role | `RuleLLMOpportunisticTrader` receives pressure-following threshold rules. |
+| Config link | Attack-join metadata and LLM config. |
+| Output contract | Quantity order and parser-quality metadata. |
+
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMNoiseTrader` in `examples/SorosPound/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| Noise liquidity role | `RuleLLMNoiseTrader` receives random-trade rules. |
+| Config link | Noise metadata and LLM config. |
+| Output contract | Quantity order with explicit fallback metadata. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/SorosPound/RuleLLM/players.py` and its configured counterpart in `configs/SorosPound/RuleLLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The RuleLLM variant reuses the Rule market. Prompt rules guide stochastic
+decisions, but market clearing remains net-demand aggregation.
 
 ## §4 Variant Architecture
 
@@ -60,18 +66,18 @@ The coordinator mechanism is the final implementation in `examples/SorosPound/Ru
 |---|---|
 | Player classes | `examples/SorosPound/RuleLLM/players.py` |
 | Prompt module | `examples/SorosPound/RuleLLM/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | Project ARK model policy from `players.yml` |
+| Output parsing | Required-field validation after shared LLM parser |
+| Error handling | Retryable API/parse failures are retried; final fallback is explicit |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/SorosPound/RuleLLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/SorosPound/RuleLLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/SorosPound/RuleLLM/topology.yml` | Message routing between coordinator and agents. |
-| `configs/SorosPound/RuleLLM/persona.yml` | Turn recording and persona metadata. |
+| `configs/SorosPound/RuleLLM/simulation.yml` | 200-round simulation entry point |
+| `configs/SorosPound/RuleLLM/players.yml` | Class paths, role metadata, portfolio state, and model config |
+| `configs/SorosPound/RuleLLM/topology.yml` | Market update and investor order routing |
+| `configs/SorosPound/RuleLLM/persona.yml` | Recording/persona metadata |
 
 ## §6 Running Instructions
 
@@ -81,15 +87,14 @@ python examples/SorosPound/RuleLLM/run_sorospound_rulellm.py -c configs/SorosPou
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+RuleLLM should remain closer to Rule than unconstrained LLM on threshold timing
+and role direction while still allowing natural-language reasoning.
 
 ## §8 References
 
-See `examples/SorosPound/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/SorosPound/simulation-bases.md §2` and `§8`.
 
 ## §9 Variant Comparison
 
-See `examples/SorosPound/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+Compare RuleLLM with Rule for rule fidelity and with LLM for reduced stochastic
+schema drift.

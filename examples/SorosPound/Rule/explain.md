@@ -1,16 +1,18 @@
-# Soros Pound Sterling Crisis Rule Variant Explanation
+# SorosPound Rule Variant Explanation
 
 ## §1 Overview
 
 | Field | Value |
 |---|---|
 | Variant | Rule |
-| Simulation | Soros Pound Sterling Crisis |
-| Decision Mechanism | deterministic rule-based trading orders |
+| Simulation | SorosPound |
+| Decision Mechanism | Deterministic current-market currency quantity orders |
 | Theory Reference | `examples/SorosPound/simulation-bases.md` |
 | Market Broadcast | `configs/SorosPound/Rule/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+SorosPound uses a current-market quantity schema: `action`, `quantity`, and
+`agent_type`. The market does not consume `bid_price`; it aggregates net demand
+and updates a sterling proxy.
 
 ## §2 Theory -> Implementation Mapping
 
@@ -18,60 +20,67 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `MacroHedgeFund` in `examples/SorosPound/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Speculative attack role | `MacroHedgeFund` activates when `abs(deviation) > 0.02`. |
+| Quantity rule | `min(800, int(abs(deviation) * 5000))`, constrained by cash or inventory. |
+| Config link | Uses portfolio fields plus macro metadata in `configs/SorosPound/Rule/players.yml`. |
+
 ### §2.2 PegDefender (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `PegDefender` in `examples/SorosPound/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Stabilizing intervention | `PegDefender` activates when `abs(deviation) > 0.05`. |
+| Quantity rule | `min(500, int(abs(deviation) * 3000))`, leaning against deviation. |
+| Config link | Uses portfolio fields plus reserve/defense metadata. |
+
 ### §2.3 ConvergenceTrader (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `ConvergenceTrader` in `examples/SorosPound/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Peg-stability belief trade | `ConvergenceTrader` supplies intermittent mixed flow. |
+| Quantity rule | Trades in 30% of rounds with random direction and quantity 100-500. |
+| Config link | Uses portfolio fields plus convergence metadata. |
+
 ### §2.4 OpportunisticTrader (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `OpportunisticTrader` in `examples/SorosPound/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Attack follower / herding role | `OpportunisticTrader` follows visible pressure after `abs(deviation) > 0.02`. |
+| Quantity rule | Same retained scale as macro attacker: `min(800, int(abs(deviation) * 5000))`. |
+| Config link | Uses portfolio fields plus attack-join metadata. |
+
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `NoiseTrader` in `examples/SorosPound/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Background liquidity | `NoiseTrader` adds random low-information flow. |
+| Quantity rule | Trades in 30% of rounds with random direction and quantity 100-500. |
+| Config link | Uses portfolio fields plus noise metadata. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/SorosPound/Rule/players.py` and its configured counterpart in `configs/SorosPound/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+`Market` in `examples/SorosPound/Rule/players.py` broadcasts current price,
+fundamental value, deviation, volume, and net demand. It then clears
+current-market quantities from investors and updates price using `price_impact`,
+`mean_reversion`, and `noise_std`.
 
 ## §4 Variant Architecture
 
 | Component | Implementation |
 |---|---|
 | Player classes | `examples/SorosPound/Rule/players.py` |
-| Prompt module | Not applicable for Rule baseline |
-| Inference | No remote model call is used in the Rule baseline. |
+| Prompt module | Not applicable |
+| Inference | No remote model call |
 | Output parsing | Direct deterministic decision construction |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Error handling | Config, topology, and schema errors fail fast |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/SorosPound/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/SorosPound/Rule/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/SorosPound/Rule/topology.yml` | Message routing between coordinator and agents. |
-| `configs/SorosPound/Rule/persona.yml` | Turn recording and persona metadata. |
+| `configs/SorosPound/Rule/simulation.yml` | 200-round simulation entry point |
+| `configs/SorosPound/Rule/players.yml` | Market, portfolio, and role parameters |
+| `configs/SorosPound/Rule/topology.yml` | Market update and investor order routing |
+| `configs/SorosPound/Rule/persona.yml` | Recording/persona metadata |
 
 ## §6 Running Instructions
 
@@ -81,15 +90,18 @@ python examples/SorosPound/Rule/run_sorospound.py -c configs/SorosPound/Rule/sim
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+- Attack pressure should become visible when deviation crosses the retained
+  thresholds.
+- Peg defense should lean against larger deviations.
+- Convergence and noise traders should create background flow.
+- A full accepted sample must complete 200 rounds and pass Level-2 structural
+  quality review.
 
 ## §8 References
 
-See `examples/SorosPound/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/SorosPound/simulation-bases.md §2` and `§8`.
 
 ## §9 Variant Comparison
 
-See `examples/SorosPound/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+Rule is the baseline for comparing API variants on attack pressure, defense
+effectiveness, herding share, and break timing.

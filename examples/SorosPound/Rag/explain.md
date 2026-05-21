@@ -1,16 +1,18 @@
-# Soros Pound Sterling Crisis Rag Variant Explanation
+# SorosPound Rag Variant Explanation
 
 ## §1 Overview
 
 | Field | Value |
 |---|---|
 | Variant | Rag |
-| Simulation | Soros Pound Sterling Crisis |
-| Decision Mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema |
+| Simulation | SorosPound |
+| Decision Mechanism | Retrieved currency-crisis context plus API quantity orders |
 | Theory Reference | `examples/SorosPound/simulation-bases.md` |
 | Market Broadcast | `configs/SorosPound/Rag/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+Rag preserves the current-market quantity schema and adds retrieved knowledge to
+the prompt. Investor payloads record `rag_context` so retrieval quality can be
+audited.
 
 ## §2 Theory -> Implementation Mapping
 
@@ -18,41 +20,47 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMMacroHedgeFund` in `examples/SorosPound/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Speculative attack role | `RagLLMMacroHedgeFund` combines macro attacker rules with retrieved crisis context. |
+| Config link | Portfolio, LLM, and RAG configs from `configs/SorosPound/Rag/players.yml`. |
+| Output contract | Quantity order plus `rag_context` and parser-quality metadata. |
+
 ### §2.2 PegDefender (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMPegDefender` in `examples/SorosPound/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Peg defense role | `RagLLMPegDefender` retrieves peg-defense and reserve-management context. |
+| Config link | Defender metadata, LLM config, and RAG config. |
+| Output contract | Quantity order and retrieval audit fields. |
+
 ### §2.3 ConvergenceTrader (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMConvergenceTrader` in `examples/SorosPound/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Convergence belief role | `RagLLMConvergenceTrader` uses ERM/convergence context when available. |
+| Config link | Convergence metadata and RAG config. |
+| Output contract | Quantity order plus recorded retrieval context. |
+
 ### §2.4 OpportunisticTrader (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMOpportunisticTrader` in `examples/SorosPound/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Momentum/herding role | `RagLLMOpportunisticTrader` retrieves historical attack-escalation context. |
+| Config link | Attack-join metadata and RAG config. |
+| Output contract | Quantity order plus retrieval and fallback fields. |
+
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMNoiseTrader` in `examples/SorosPound/Rag/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/Rag/players.yml` through `extras`. |
-| Variant-specific decision mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema. |
+| Noise liquidity role | `RagLLMNoiseTrader` may reference retrieved fragments only superficially. |
+| Config link | Noise metadata and RAG config. |
+| Output contract | Quantity order with RAG context recorded for audit. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/SorosPound/Rag/players.py` and its configured counterpart in `configs/SorosPound/Rag/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The Rag variant reuses the Rule market. Retrieved knowledge influences
+investor reasoning only; market clearing remains current-market net-demand
+aggregation.
 
 ## §4 Variant Architecture
 
@@ -60,18 +68,19 @@ The coordinator mechanism is the final implementation in `examples/SorosPound/Ra
 |---|---|
 | Player classes | `examples/SorosPound/Rag/players.py` |
 | Prompt module | `examples/SorosPound/Rag/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | Project ARK model policy plus Hunyuan/LiteLLM embedding policy |
+| Retrieval | `KnowledgeStore` over configured document resources |
+| Output parsing | Required-field validation after shared LLM parser |
+| Error handling | Missing documents/index failures fail; parse fallback is explicit and auditable |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/SorosPound/Rag/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/SorosPound/Rag/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/SorosPound/Rag/topology.yml` | Message routing between coordinator and agents. |
-| `configs/SorosPound/Rag/persona.yml` | Turn recording and persona metadata. |
+| `configs/SorosPound/Rag/simulation.yml` | 200-round simulation entry point |
+| `configs/SorosPound/Rag/players.yml` | Class paths, portfolio, LLM, and RAG config |
+| `configs/SorosPound/Rag/topology.yml` | Market update and investor order routing |
+| `configs/SorosPound/Rag/persona.yml` | Recording/persona metadata |
 
 ## §6 Running Instructions
 
@@ -81,15 +90,16 @@ python examples/SorosPound/Rag/run_sorospound_rag.py -c configs/SorosPound/Rag/s
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+Rag should preserve valid quantity orders while recording retrieval context in
+every investor decision after initialization. `rag_stats.json` must be reviewed
+before accepting full samples.
 
 ## §8 References
 
-See `examples/SorosPound/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/SorosPound/simulation-bases.md §2` and `§8`.
 
 ## §9 Variant Comparison
 
-See `examples/SorosPound/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+Compare Rag with RuleLLM to isolate the effect of retrieved ERM and currency
+crisis context on attack urgency, defense response, and fallback/retrieval
+quality.

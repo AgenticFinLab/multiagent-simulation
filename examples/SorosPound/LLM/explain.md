@@ -1,16 +1,18 @@
-# Soros Pound Sterling Crisis LLM Variant Explanation
+# SorosPound LLM Variant Explanation
 
 ## §1 Overview
 
 | Field | Value |
 |---|---|
 | Variant | LLM |
-| Simulation | Soros Pound Sterling Crisis |
-| Decision Mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning |
+| Simulation | SorosPound |
+| Decision Mechanism | Persona-conditioned API quantity orders |
 | Theory Reference | `examples/SorosPound/simulation-bases.md` |
 | Market Broadcast | `configs/SorosPound/LLM/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+The LLM variant preserves the SorosPound current-market quantity schema:
+`action`, `quantity`, and `reasoning`. It does not ask for or consume limit
+prices.
 
 ## §2 Theory -> Implementation Mapping
 
@@ -18,41 +20,47 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `LLMMacroHedgeFund` in `examples/SorosPound/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Speculative attack role | `LLMMacroHedgeFund` uses the macro attacker prompt and current market state. |
+| Config link | Portfolio fields, role metadata, and ARK model config from `configs/SorosPound/LLM/players.yml`. |
+| Output contract | Required `action`, `quantity`, `reasoning`, optional analysis, and explicit fallback metadata. |
+
 ### §2.2 PegDefender (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `LLMPegDefender` in `examples/SorosPound/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Peg defense role | `LLMPegDefender` reasons as a reserve-constrained defender. |
+| Config link | Defender portfolio and LLM config from `players.yml`. |
+| Output contract | Quantity order constrained by cash/inventory after parsing. |
+
 ### §2.3 ConvergenceTrader (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `LLMConvergenceTrader` in `examples/SorosPound/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Convergence belief role | `LLMConvergenceTrader` reasons from policy-commitment beliefs. |
+| Config link | Convergence metadata and LLM config. |
+| Output contract | Valid quantity order or explicit conservative fallback. |
+
 ### §2.4 OpportunisticTrader (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `LLMOpportunisticTrader` in `examples/SorosPound/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Attack follower role | `LLMOpportunisticTrader` reasons as a momentum participant. |
+| Config link | Attack-join metadata and LLM config. |
+| Output contract | Valid quantity order with reasoning. |
+
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `LLMNoiseTrader` in `examples/SorosPound/LLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/SorosPound/LLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning. |
+| Background liquidity role | `LLMNoiseTrader` reasons as low-information noise flow. |
+| Config link | Noise metadata and LLM config. |
+| Output contract | Valid quantity order; fallback rate must be quality-audited. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/SorosPound/LLM/players.py` and its configured counterpart in `configs/SorosPound/LLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The LLM variant reuses the Rule market. API output only changes investor
+decision generation; market clearing remains net-demand aggregation of
+current-market quantities.
 
 ## §4 Variant Architecture
 
@@ -60,18 +68,18 @@ The coordinator mechanism is the final implementation in `examples/SorosPound/LL
 |---|---|
 | Player classes | `examples/SorosPound/LLM/players.py` |
 | Prompt module | `examples/SorosPound/LLM/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | Project ARK model policy from `players.yml` |
+| Output parsing | `parse_llm_response_with_thinking` plus required-field validation |
+| Error handling | API call errors fail unless retryable; parse fallback is explicit and auditable |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/SorosPound/LLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/SorosPound/LLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/SorosPound/LLM/topology.yml` | Message routing between coordinator and agents. |
-| `configs/SorosPound/LLM/persona.yml` | Turn recording and persona metadata. |
+| `configs/SorosPound/LLM/simulation.yml` | 200-round simulation entry point |
+| `configs/SorosPound/LLM/players.yml` | Class paths, role metadata, portfolio state, and model config |
+| `configs/SorosPound/LLM/topology.yml` | Market update and investor order routing |
+| `configs/SorosPound/LLM/persona.yml` | Recording/persona metadata |
 
 ## §6 Running Instructions
 
@@ -81,15 +89,15 @@ python examples/SorosPound/LLM/run_sorospound_llm.py -c configs/SorosPound/LLM/s
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+LLM may alter confidence and quantity sizing, but it must preserve the
+SorosPound schema. Any parser fallback must be visible and reviewed before
+accepting the sample.
 
 ## §8 References
 
-See `examples/SorosPound/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/SorosPound/simulation-bases.md §2` and `§8`.
 
 ## §9 Variant Comparison
 
-See `examples/SorosPound/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+Compare LLM with Rule for attack timing, defense response, herding share, and
+parse/fallback quality.
