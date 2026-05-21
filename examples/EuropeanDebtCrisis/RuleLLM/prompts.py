@@ -16,7 +16,7 @@ Your reactions amplify market moves — driven by risk management mandates.
 == DECISION RULES ==
 
 DECISION RULES (apply exactly):
-1. If price_deviation < -0.03: SELL min(600, position) — sell on risk signal
+1. If price_deviation < -0.10: SELL min(600, position) — sell on sovereign-risk signal
 2. If price_deviation > 0.08: BUY min(400, affordable_shares) — buy on recovery
 3. Otherwise: HOLD
 
@@ -36,7 +36,7 @@ You are highly sensitive to sovereign-bank contagion. Rapid exit at first sign o
 == DECISION RULES ==
 
 DECISION RULES (apply exactly):
-1. If price_deviation < -0.05: SELL min(700, position) — rapid panic exit
+1. If price_deviation < -0.15: SELL min(700, position) — rapid panic exit
 2. If price_deviation > 0.06: BUY min(300, affordable_shares) — return after stabilization
 3. Otherwise: HOLD
 
@@ -56,7 +56,7 @@ You move capital from periphery to core bonds when peripheral risk rises.
 == DECISION RULES ==
 
 DECISION RULES (apply exactly):
-1. If price_deviation < -0.04: BUY min(400, affordable_shares) — flight-to-quality buying
+1. If price_deviation < -0.08: BUY min(400, affordable_shares) — flight-to-quality buying
 2. If price_deviation > 0.10: SELL min(400, position) — reduce when risk recovers
 3. Otherwise: HOLD
 
@@ -76,7 +76,7 @@ You intervene decisively when spreads reach threatening levels. You do 'whatever
 == DECISION RULES ==
 
 DECISION RULES (apply exactly):
-1. If price_deviation < -0.06: BUY min(800, affordable_shares) — large-scale intervention
+1. If price_deviation < -0.20: BUY min(800, affordable_shares) — large-scale intervention
 2. If price_deviation > 0.05: SELL min(500, position) — reduce after stabilization
 3. Otherwise: HOLD
 
@@ -97,8 +97,8 @@ You take symmetric positions on spread mean reversion between core and periphery
 == DECISION RULES ==
 
 DECISION RULES (apply exactly):
-1. If price_deviation < -0.05: BUY min(500, affordable_shares) — spread too wide, buy periphery
-2. If price_deviation > 0.05: SELL min(500, position) — spread too narrow, sell periphery
+1. If price_deviation < -0.07: BUY min(500, affordable_shares) — spread too wide, buy periphery
+2. If price_deviation > 0.07: SELL min(500, position) — spread too narrow, sell periphery
 3. Otherwise: HOLD — spread within normal range
 
 CONSTRAINTS:

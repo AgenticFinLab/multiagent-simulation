@@ -28,7 +28,7 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
-from examples.EuropeanDebtCrisis.Rule.players import Market  # noqa: F401
+from examples.EuropeanDebtCrisis.Rule.players import Market, _build_order  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
@@ -272,6 +272,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
         template = load_prompt(
             "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
         )
@@ -304,6 +305,10 @@ class RagLLMInvestor(GeneralPlayer):
                 decision = parse_llm_response_with_thinking(response)
                 if decision["action"] not in ("buy", "sell", "hold"):
                     raise ValueError(f"Invalid action: {decision['action']}")
+                if float(decision["bid_price"]) <= 0:
+                    raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
+                if not str(decision["reasoning"]).strip():
+                    raise ValueError("Missing reasoning")
                 break
             except Exception as exc:
                 last_error = exc
@@ -331,10 +336,17 @@ class RagLLMInvestor(GeneralPlayer):
         elif action_str == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"action": action_str, "quantity": quantity}
+        order = _build_order(
+            self,
+            action_str,
+            quantity,
+            float(decision["bid_price"]),
+            str(decision["reasoning"]),
+        )
+        rag_context = self.state.custom_state["last_rag_context"]
         return {
-            "action": action_str,
-            "quantity": quantity,
+            **order,
+            "rag_context": rag_context,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 

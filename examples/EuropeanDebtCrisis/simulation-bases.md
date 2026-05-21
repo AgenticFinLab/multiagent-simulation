@@ -1,331 +1,412 @@
 # EuropeanDebtCrisis — Simulation Design Basis
 
-## §1 Phenomenon
+## §1 Phenomenon Definition
 
-**European Sovereign Debt Crisis** (2010–2012): Multiple eurozone peripheral nations (Greece, Portugal, Ireland, Spain, Italy) experienced self-reinforcing speculative attacks on their sovereign bond markets. Unlike currency crises, this was a **bond price crisis**: selling pressure drove peripheral yields above sustainability thresholds, triggering further selling by creditors withdrawing funding from peripheral banks. The core channel was a **sovereign-bank doom loop** — weak sovereigns threatened to default on bank holdings, which threatened bank solvency, which threatened sovereign bailout costs, which further weakened the sovereign.
+| Item | Description |
+|---|---|
+| Phenomenon Name | European sovereign debt crisis and sovereign-bank doom loop |
+| Category | Self-fulfilling sovereign crisis, funding flight, central-bank backstop |
+| Historical Anchor | Eurozone sovereign debt crisis, especially Greece, Ireland, Portugal, Spain, and Italy during 2010-2012 |
+| Core Mechanism | Falling peripheral bond prices raise default fears, creditor panic and bank funding withdrawal amplify selling, flight-to-quality reallocates capital, hedge funds provide partial arbitrage, and ECB backstop buying can stop the spiral. |
+| Research Relevance | The scenario tests whether a sovereign bond market can exhibit a self-fulfilling crisis and recovery under heterogeneous rule, LLM, RuleLLM, and RAG investor behavior. |
 
-The theoretical foundation identifies this as a self-fulfilling crisis: the eurozone's institutional architecture (no monetary sovereignty for member states) created a structural vulnerability. Once market participants began pricing in default risk, the resulting yield rise could force the very default that was initially only feared — validating the initial speculation ex post.
+### §1.1 Origin And Source Analysis
 
-**Core stylized facts**:
-- Greek 10-year spread over German Bund rose from ~100bp (2009) to ~3500bp (2012)
-- ECB's "whatever it takes" announcement (Draghi, July 2012) reduced spreads by >200bp within days
-- Capital flight from periphery to core compressed German yields to near-zero
-- Sovereign-bank nexus: peripheral bank equity fell 60–80% alongside sovereign bond prices (Acharya et al., 2014)
+#### §1.1.1 Intellectual Lineage
 
-## §2 Theory
+The European debt crisis differs from a standard currency crisis because eurozone member states cannot unilaterally print their own currency, while their sovereign debt is still priced in a shared currency. De Grauwe's eurozone-fragility argument frames this as a multiple-equilibrium problem: fears of default can raise yields and lower bond prices enough to make default more plausible.
 
-### Primary: Self-Fulfilling Speculation (De Grauwe, 2011)
+The empirical sovereign-bank nexus literature adds the amplification channel. Peripheral banks held large domestic sovereign exposures; falling sovereign bond values weakened banks, and weaker banks increased expected sovereign bailout burdens. Acharya, Drechsler, and Schnabl describe this loop as a central mechanism in the crisis.
 
-Eurozone member states lack monetary sovereignty — they cannot print euros to service debt. This creates a structural vulnerability to speculative attack: if enough investors believe default is possible, yields rise to levels that make default inevitable, validating the initial belief. De Grauwe shows that market-determined interest rates in the eurozone can be far above the "optimal" rate, driven purely by self-fulfilling beliefs.
+The market-microstructure and limits-to-arbitrage perspective explains why stabilizing capital does not instantly close spreads. Hedge funds and value buyers may see peripheral bonds as cheap, but funding constraints, mark-to-market risk, and uncertainty about ECB policy prevent immediate correction. The Draghi "whatever it takes" episode is therefore represented as a credible backstop that changes beliefs and order flow.
 
-Reference: De Grauwe, P. (2011). The governance of the euro area in a speculative crisis. *CESifo Working Paper*. DOI: https://doi.org/10.2139/ssrn.1930063
+#### §1.1.2 Real-World Event Catalogue
 
-### Eurozone Self-Fulfilling Crises (De Grauwe & Ji, 2012)
+| Event | Date | Quantitative Magnitude | Agent Correspondence | Simulation Use |
+|---|---:|---|---|---|
+| Greek sovereign debt crisis | 2010-2012 | Greek 10-year yields rose from single digits to extreme crisis levels; restructuring followed in 2012 | `PeripheryBondSeller`, `CreditorPanicker`, `ECBIntervenor` | Main stress anchor for peripheral bond selling |
+| Ireland and Portugal assistance programs | 2010-2011 | Both entered EU/IMF support programs after funding pressure intensified | `CreditorPanicker`, `ECBIntervenor` | Funding-withdrawal and support-program analogue |
+| Spanish sovereign-bank stress | 2012 | Spain's 10-year spread over Germany peaked around 600+ bps in mid-2012 | `CreditorPanicker`, `CoreBondBuyer` | Sovereign-bank doom loop and flight-to-quality calibration |
+| Italian spread crisis | 2011-2012 | Italian spreads widened sharply despite large and liquid markets | `PeripheryBondSeller`, `HedgedFund` | Self-fulfilling spread pressure beyond fiscal fundamentals |
+| Draghi "whatever it takes" speech and OMT | 2012-07 | Peripheral spreads compressed after ECB commitment without immediate large purchases | `ECBIntervenor` | Backstop credibility and crisis-resolution mechanism |
 
-Empirically documents the self-fulfilling nature of eurozone sovereign spreads. Finds that spreads are not well explained by fiscal fundamentals; instead, they exhibit discontinuous jumps consistent with multiple equilibria. Flight-to-safety capital rotation from periphery to core deepens the divergence.
+#### §1.1.3 Book And Practitioner Literature
 
-Reference: De Grauwe, P., & Ji, Y. (2012). Self-fulfilling crises in the eurozone. *Journal of International Money and Finance*, 34, 15–36. DOI: https://doi.org/10.1016/j.jimonfin.2012.11.003
+| Source | Type | Use In This Scenario |
+|---|---|---|
+| De Grauwe, P. (2011). The governance of a fragile eurozone. CESifo Working Paper. https://doi.org/10.2139/ssrn.1930063 | Policy economics | Multiple-equilibrium sovereign-crisis mechanism. |
+| De Grauwe, P., & Ji, Y. (2013). Self-fulfilling crises in the eurozone. *Journal of International Money and Finance*, 34, 15-36. https://doi.org/10.1016/j.jimonfin.2012.11.003 | Empirical macro-finance | Spread movement beyond fiscal fundamentals and flight-to-safety interpretation. |
+| Acharya, V. V., Drechsler, I., & Schnabl, P. (2014). A pyrrhic victory? Bank bailouts and sovereign credit risk. *Journal of Finance*, 69(6), 2689-2739. https://doi.org/10.1111/jofi.12206 | Empirical finance | Sovereign-bank nexus and bailout-risk feedback. |
+| Draghi, M. (2012). Verbatim remarks at the Global Investment Conference. ECB speech. | Policy speech | Credible backstop and OMT expectation channel. |
 
-### Sovereign-Bank Nexus (Acharya et al., 2014)
+## §2 Theoretical Foundation
 
-Banks in peripheral countries held large portfolios of domestic sovereign bonds. As sovereign yields rose, bank balance sheets deteriorated, triggering funding withdrawal by creditors and amplifying the sovereign crisis through the banking channel. Acharya et al. document the negative feedback loop between sovereign and bank credit risk.
+### §2.1 Self-Fulfilling Sovereign Crisis
 
-Reference: Acharya, V. V., Dreschler, I., & Schnabl, P. (2014). A pyrrhic victory? Bank bailouts and sovereign credit risk. *Journal of Finance*, 69(6), 2689–2739. DOI: https://doi.org/10.1111/jofi.12206
+- **Citation**: De Grauwe, P. (2011). The governance of a fragile eurozone. https://doi.org/10.2139/ssrn.1930063
+- **Mechanism**: In a monetary union, countries issue debt in a currency they do not individually control. If investors expect default, they sell bonds, prices fall, yields rise, and debt sustainability worsens.
+- **Mathematical Formulation**:
+  ```
+  deviation(t) = (P(t) - F) / F
+  sell if deviation(t) < sell_threshold
+  ```
+- **Empirical Evidence**:
+  | Source | Setting | Finding | Scenario Role |
+  |---|---|---|---|
+  | De Grauwe (2011) | eurozone architecture | monetary non-sovereignty makes members vulnerable to speculative equilibria | motivates `PeripheryBondSeller` |
+  | De Grauwe & Ji (2013) | eurozone spreads | spreads moved beyond fiscal-fundamental explanations | motivates self-fulfilling price dynamics |
+- **Relevance**: Defines `PeripheryBondSeller` in §4.1.
 
-### Central Bank Backstop (Draghi, 2012)
+### §2.2 Sovereign-Bank Doom Loop
 
-Credible central bank commitment to unlimited bond purchases eliminates the multiple equilibria structure. The ECB's OMT program (announced July 2012) provided a "whatever it takes" backstop that prevented self-fulfilling crises by assuring market participants that the deflationary equilibrium was not attainable if the ECB chose to prevent it.
+- **Citation**: Acharya, V. V., Drechsler, I., & Schnabl, P. (2014). A pyrrhic victory? *Journal of Finance*, 69(6), 2689-2739. https://doi.org/10.1111/jofi.12206
+- **Mechanism**: Bank balance sheets deteriorate when sovereign bonds fall; expected bank rescues increase sovereign risk; creditors withdraw funding and intensify the cycle.
+- **Mathematical Formulation**:
+  ```
+  panic if deviation(t) < panic_threshold
+  sell_quantity = min(700, position)
+  ```
+- **Empirical Evidence**:
+  | Source | Setting | Finding | Scenario Role |
+  |---|---|---|---|
+  | Acharya et al. (2014) | eurozone banks and sovereign risk | sovereign and bank credit risk reinforce each other | motivates `CreditorPanicker` |
+  | Eurozone 2010-2012 | peripheral banks | bank equity and sovereign spreads moved together | motivates creditor withdrawal |
+- **Relevance**: Defines `CreditorPanicker` in §4.2.
 
-Reference: Draghi, M. (2012). Verbatim of the remarks at the Global Investment Conference. ECB Speech, London, July 26, 2012.
+### §2.3 Flight To Quality
 
-### Limits to Arbitrage in Crisis Markets (Shleifer & Vishny, 1997)
+- **Citation**: De Grauwe, P., & Ji, Y. (2013). https://doi.org/10.1016/j.jimonfin.2012.11.003; Krishnamurthy, A., & Vissing-Jorgensen, A. (2012). The aggregate demand for Treasury debt. *American Economic Review*, 102(6), 2332-2367. https://doi.org/10.1257/aer.102.6.2332
+- **Mechanism**: Crisis reallocates capital from risky peripheral bonds toward safer core sovereign assets, lowering core yields and withdrawing liquidity from the periphery.
+- **Mathematical Formulation**:
+  ```
+  buy safe/core proxy when deviation(t) < flight_threshold
+  reduce safe/core allocation when deviation(t) > 0.10
+  ```
+- **Empirical Evidence**:
+  | Source | Setting | Finding | Scenario Role |
+  |---|---|---|---|
+  | De Grauwe & Ji (2013) | eurozone spreads | periphery stress coincided with core compression | motivates `CoreBondBuyer` |
+  | Krishnamurthy & Vissing-Jorgensen (2012) | safe-asset demand | safe assets carry convenience value in stress | supports flight-to-quality behavior |
+- **Relevance**: Defines `CoreBondBuyer` in §4.3.
 
-Rational arbitrageurs who would normally exploit spread dislocations face capital constraints, margin calls, and fund redemptions under stress. This limits the corrective force of hedged funds during the crisis phase, allowing spreads to persist at elevated levels beyond fundamental justification.
+### §2.4 Central-Bank Backstop
 
-Reference: Shleifer, A., & Vishny, R. W. (1997). The limits of arbitrage. *Journal of Finance*, 52(1), 35–55. DOI: https://doi.org/10.1111/j.1540-6261.1997.tb03807.x
+- **Citation**: Draghi, M. (2012). Verbatim remarks at the Global Investment Conference, London; De Grauwe (2011), https://doi.org/10.2139/ssrn.1930063
+- **Mechanism**: A credible lender-of-last-resort commitment removes the bad equilibrium by assuring investors that disorderly funding failure will be countered.
+- **Mathematical Formulation**:
+  ```
+  intervene if deviation(t) < intervention_threshold
+  buy_quantity = min(800, cash / P(t))
+  ```
+- **Empirical Evidence**:
+  | Source | Setting | Finding | Scenario Role |
+  |---|---|---|---|
+  | Draghi (2012) | OMT announcement | spreads compressed after credible ECB commitment | motivates `ECBIntervenor` |
+  | De Grauwe (2011) | eurozone policy architecture | lender of last resort can remove self-fulfilling equilibrium | motivates backstop intervention |
+- **Relevance**: Defines `ECBIntervenor` in §4.4.
 
-## §3 Market Design
+### §2.5 Limits To Arbitrage In Crisis Markets
 
-### §3.1 Price Formation Model
+- **Citation**: Shleifer, A., & Vishny, R. W. (1997). The limits of arbitrage. *Journal of Finance*, 52(1), 35-55. https://doi.org/10.1111/j.1540-6261.1997.tb03807.x; Brunnermeier, M. K., & Pedersen, L. H. (2009). Market liquidity and funding liquidity. *Review of Financial Studies*, 22(6), 2201-2238. https://doi.org/10.1093/rfs/hhn098
+- **Mechanism**: Arbitrage funds can buy distressed bonds, but funding constraints, redemption pressure, and margin risk limit their stabilizing capacity.
+- **Mathematical Formulation**:
+  ```
+  buy when deviation(t) < -entry_threshold
+  sell when deviation(t) > entry_threshold
+  ```
+- **Empirical Evidence**:
+  | Source | Setting | Finding | Scenario Role |
+  |---|---|---|---|
+  | Shleifer & Vishny (1997) | constrained arbitrage | arbitrage capital can be withdrawn during mispricing | motivates bounded `HedgedFund` |
+  | Brunnermeier & Pedersen (2009) | funding liquidity | funding pressure limits market liquidity provision | motivates partial stabilization |
+- **Relevance**: Defines `HedgedFund` in §4.5.
+
+## §3 Market Design Principles
+
+The market represents a peripheral sovereign bond price. A lower price corresponds to a higher yield spread and deeper sovereign stress.
 
 ```
-P(t+1) = P(t) + λ × NetDemand(t) + γ × (F − P(t)) + ε(t)
+P(t+1) = max(P(t) + lambda * D(t) + gamma * [F - P(t)] + epsilon(t), 0.01)
+D(t) = buy_volume(t) - sell_volume(t)
+epsilon(t) ~ N(0, sigma^2)
+deviation(t) = (P(t) - F) / F
 ```
 
-| Symbol    | Meaning                                              | Config Key          |
-|-----------|------------------------------------------------------|---------------------|
-| P(t)      | Peripheral bond price at round t                     | `initial_price`     |
-| F         | Fundamental bond price (fiscal sustainability level) | `fundamental_value` |
-| λ         | Price impact coefficient                             | `price_impact`      |
-| γ         | Mean-reversion rate toward fundamental               | `mean_reversion`    |
-| NetDemand | sum(buy_qty) − sum(sell_qty)                         | derived from orders |
-| ε(t)      | Market noise ~ N(0, noise_std)                       | `noise_std`         |
+| Symbol | Config / Code Field | Baseline | Meaning |
+|---|---|---:|---|
+| `P(t)` | `state.custom_state["price"]` | 95.0 initial | peripheral bond price |
+| `F` | `extras["fundamental_value"]` | 100.0 | sustainable bond price |
+| `lambda` | `extras["price_impact"]` | 0.05 | price impact of net order flow |
+| `gamma` | `extras["mean_reversion"]` | 0.02 | mean reversion toward fundamental |
+| `sigma` | `extras["noise_std"]` | 0.01 | market noise |
 
-### §3.2 Broadcast Signal
-
-```json
-{
-  "price": <float>,
-  "fundamental": <float>,
-  "deviation": <float>,
-  "round": <int>
-}
-```
-
-`deviation = (price − fundamental) / fundamental` — negative deviation means bond price is below fundamental (crisis phase).
+Each investor emits canonical order messages with `type`, `from`, `action`, `bid_price`, `quantity`, `reasoning`, `agent_type`, and `strategy`. The market consumes `action` and `quantity`, while the extra fields support analysis and API-quality audit.
 
 ## §4 Investor Taxonomy
 
 ### §4.1 PeripheryBondSeller
 
-#### Summary
-Sells peripheral sovereign bonds when price falls below a risk threshold, amplifying the initial speculative pressure. Represents foreign creditors, institutional investors, and domestic banks exiting peripheral exposure.
+#### §4.1.1 Summary
 
-#### Theoretical and Empirical Foundation
-- **De Grauwe (2011)**: Self-fulfilling speculation. Sells when price falls below threshold, triggering further price falls. DOI: `https://doi.org/10.2139/ssrn.1930063`
-- **De Grauwe & Ji (2012)**: Empirical flight-from-periphery capital flows. DOI: `https://doi.org/10.1016/j.jimonfin.2012.11.003`
+The `PeripheryBondSeller` represents investors selling peripheral sovereign debt when market stress appears. It is the first crisis amplifier because selling lowers bond prices and raises implied yields.
 
-#### Design Purpose and Activation Scenarios
-- **Activates when**: `deviation < sell_threshold` (negative; bond price below fundamental)
-- **Role in phenomenon**: Primary crisis amplifier; selling pressure drives price further below fundamental
-- **Interaction effects**: Triggers CreditorPanicker via spread widening; countered by ECBIntervenor
+#### §4.1.2 Theoretical and Empirical Foundation
 
-#### Behavioral Framework
+The agent follows self-fulfilling crisis logic from De Grauwe (§2.1). De Grauwe and Ji's spread evidence supports the idea that selling can occur beyond what fiscal fundamentals alone explain.
 
-**Information set**: `price`, `fundamental`, `deviation`, `round`
+#### §4.1.3 Design Purpose and Activation Scenarios
 
-**Mechanism narrative**: Monitors deviation from fundamental. When bond prices fall below the sell threshold, sells up to 600 units per round. On recovery (deviation > 0.08), buys back at 400 units/round.
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| `deviation < sell_threshold` | sell | amplifies peripheral spread pressure | §2.1 |
+| `deviation > 0.08` | buy | returns when crisis abates | §2.1 |
 
-**Mathematical model**:
+#### §4.1.4 Behavioral Framework
+
 ```
-if deviation < sell_threshold: sell(min(600, position))
-elif deviation > 0.08: buy(min(400, affordable))
-else: hold()
+if deviation < sell_threshold: sell min(600, position)
+elif deviation > 0.08: buy min(400, cash / price)
+else: hold
 ```
 
-**Behavioral properties**: Trend-following; panic-amplifying; limited stabilizing role
+Information set: price, fundamental, deviation, cash, and position.
 
-#### Decision Process Walkthrough
+#### §4.1.5 Decision Process Walkthrough
 
-1. Observe `deviation` from market broadcast
-2. Compare to `sell_threshold = extras["sell_threshold"]`
-3. If below threshold: submit sell(min(600, position))
-4. If above 0.08: submit buy(min(400, affordable))
+At price 85 and fundamental 100, deviation is -15%. If `sell_threshold = -10%`, the seller liquidates because the stress signal has crossed its mandate threshold.
 
-#### Worked Numerical Example
+#### §4.1.6 Worked Numerical Example
 
-Given: price = 85, fundamental = 100, deviation = −0.15, sell_threshold = −0.10
-- deviation < sell_threshold: −0.15 < −0.10 → True
-- Action: sell(min(600, position)) → sell order submitted
+With position 500 and sell cap 600, sell quantity is `min(600, 500) = 500`.
 
-#### Academic References
-- De Grauwe, P. (2011). *The governance of the euro area*. CESifo. DOI: https://doi.org/10.2139/ssrn.1930063
+#### §4.1.7 Academic References
 
----
+De Grauwe (2011); De Grauwe & Ji (2013).
 
 ### §4.2 CreditorPanicker
 
-#### Summary
-Withdraws funding from peripheral banks when spread widens beyond a panic threshold. Embodies the sovereign-bank doom loop: sovereign stress → bank funding withdrawal → bank crisis amplification.
+#### §4.2.1 Summary
 
-#### Theoretical and Empirical Foundation
-- **Acharya et al. (2014)**: Sovereign-bank nexus. Creditor withdrawal amplifies crisis through banking channel. DOI: `https://doi.org/10.1111/jofi.12206`
-- **De Grauwe (2011)**: Cascading liquidity withdrawal in crisis phase. DOI: `https://doi.org/10.2139/ssrn.1930063`
+The `CreditorPanicker` represents bank creditors and funding providers that exit after sovereign stress becomes severe. It captures the sovereign-bank doom loop.
 
-#### Design Purpose and Activation Scenarios
-- **Activates when**: `deviation < panic_threshold` (typically more negative than PeripheryBondSeller threshold)
-- **Role in phenomenon**: Second wave of crisis amplification; reinforces PeripheryBondSeller after initial shock
-- **Interaction effects**: Extends crisis duration; more difficult for ECBIntervenor to offset
+#### §4.2.2 Theoretical and Empirical Foundation
 
-#### Behavioral Framework
+The basis is Acharya, Drechsler, and Schnabl (§2.2). Bank funding pressure rises as sovereign bond values fall, causing additional selling and liquidity withdrawal.
 
-**Information set**: `price`, `deviation`
+#### §4.2.3 Design Purpose and Activation Scenarios
 
-**Mechanism narrative**: Panics when deviation falls below panic_threshold; sells up to 700 units. On recovery (deviation > 0.06), re-enters at 300 units/round.
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| `deviation < panic_threshold` | sell | second-wave funding panic | §2.2 |
+| `deviation > 0.06` | buy | funding returns after stabilization | §2.2 |
 
-**Mathematical model**:
+#### §4.2.4 Behavioral Framework
+
 ```
-if deviation < panic_threshold: sell(min(700, position))
-elif deviation > 0.06: buy(min(300, affordable))
-else: hold()
+if deviation < panic_threshold: sell min(700, position)
+elif deviation > 0.06: buy min(300, cash / price)
+else: hold
 ```
 
-**Behavioral properties**: Panic-driven; amplifier; slow to re-enter after crisis
+#### §4.2.5 Decision Process Walkthrough
 
-#### Worked Numerical Example
+At deviation -20% with `panic_threshold = -15%`, the creditor sells because bank-sovereign contagion is active.
 
-Given: deviation = −0.20, panic_threshold = −0.15
-- deviation < panic_threshold → True → sell(min(700, position))
+#### §4.2.6 Worked Numerical Example
 
-#### Academic References
-- Acharya, V. V. et al. (2014). *A pyrrhic victory?* Journal of Finance. DOI: https://doi.org/10.1111/jofi.12206
+With position 400, sell quantity is `min(700, 400) = 400`.
 
----
+#### §4.2.7 Academic References
+
+Acharya, Drechsler, & Schnabl (2014); De Grauwe (2011).
 
 ### §4.3 CoreBondBuyer
 
-#### Summary
-Rotates capital from periphery to core sovereign bonds (flight-to-quality). Does not directly interact in periphery market but removes liquidity from periphery by absorbing core bond supply.
+#### §4.3.1 Summary
 
-#### Theoretical and Empirical Foundation
-- **De Grauwe & Ji (2012)**: Flight-to-safety capital rotation. DOI: `https://doi.org/10.1016/j.jimonfin.2012.11.003`
-- **Krishnamurthy & Vissing-Jorgensen (2012)**: Flight to safety in crisis episodes. DOI: `https://doi.org/10.1257/aer.102.6.3765`
+The `CoreBondBuyer` represents flight-to-quality capital reallocating toward safer core assets. In the normalized periphery market, it buys during stress and sells after recovery, modelling safe-asset rotation pressure.
 
-#### Design Purpose and Activation Scenarios
-- **Activates when**: `deviation < flight_threshold` — buys periphery representation; on deviation > 0.10, reverts
-- **Role in phenomenon**: Indirect deepening of periphery crisis by withdrawing capital; also stabilizing when crisis resolves
-- **Interaction effects**: Partially offsets PeripheryBondSeller on the buy side during recovery
+#### §4.3.2 Theoretical and Empirical Foundation
 
-#### Behavioral Framework
+The basis is eurozone flight-to-safety evidence (§2.3) and safe-asset demand. The agent is not a panicker; it reacts to stress by seeking safer exposure.
 
-**Information set**: `price`, `deviation`
+#### §4.3.3 Design Purpose and Activation Scenarios
 
-**Mechanism narrative**: Buys 400 units when deviation falls below flight_threshold (seeking safety). Sells back 400 units when deviation recovers above 0.10.
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| `deviation < flight_threshold` | buy | represents crisis-driven safety demand in the normalized bond index | §2.3 |
+| `deviation > 0.10` | sell | reduces safe-haven allocation after recovery | §2.3 |
 
-**Mathematical model**:
+#### §4.3.4 Behavioral Framework
+
 ```
-if deviation < flight_threshold: buy(min(400, affordable))
-elif deviation > 0.10: sell(min(400, position))
-else: hold()
+if deviation < flight_threshold: buy min(400, cash / price)
+elif deviation > 0.10: sell min(400, position)
+else: hold
 ```
 
-**Behavioral properties**: Counter-cyclical buying at crisis depths; flight-to-safety motif
+#### §4.3.5 Decision Process Walkthrough
 
-#### Worked Numerical Example
+At deviation -12% with `flight_threshold = -8%`, the agent buys the safety proxy.
 
-Given: deviation = −0.12, flight_threshold = −0.08
-- deviation < flight_threshold → True → buy(min(400, affordable))
+#### §4.3.6 Worked Numerical Example
 
-#### Academic References
-- De Grauwe, P., & Ji, Y. (2012). *Self-fulfilling crises in the eurozone*. JIMF. DOI: https://doi.org/10.1016/j.jimonfin.2012.11.003
+With cash 1,000,000 and price 88, affordable quantity is above 400, so order quantity is 400.
 
----
+#### §4.3.7 Academic References
+
+De Grauwe & Ji (2013); Krishnamurthy & Vissing-Jorgensen (2012).
 
 ### §4.4 ECBIntervenor
 
-#### Summary
-Provides unlimited backstop liquidity by buying periphery bonds when prices fall below the intervention threshold. Embodies the Draghi "whatever it takes" mechanism that ends the self-fulfilling crisis.
+#### §4.4.1 Summary
 
-#### Theoretical and Empirical Foundation
-- **Draghi (2012)**: Credible central bank commitment eliminates multiple equilibria. No DOI (ECB speech).
-- **De Grauwe (2011)**: A lender of last resort eliminates the self-fulfilling equilibrium. DOI: `https://doi.org/10.2139/ssrn.1930063`
+The `ECBIntervenor` represents credible central-bank backstop purchases. It is the main crisis-resolution force when peripheral bond prices fall far below fundamental value.
 
-#### Design Purpose and Activation Scenarios
-- **Activates when**: `deviation < intervention_threshold` — buys up to 800 units/round
-- **Role in phenomenon**: Circuit breaker; terminates the self-fulfilling crisis by removing the deflationary equilibrium
-- **Interaction effects**: Direct counterforce to PeripheryBondSeller and CreditorPanicker; determines crisis duration
+#### §4.4.2 Theoretical and Empirical Foundation
 
-#### Behavioral Framework
+The basis is Draghi's 2012 commitment and De Grauwe's lender-of-last-resort argument (§2.4). The agent is intentionally asymmetric: it buys more aggressively in crisis than it sells after recovery.
 
-**Information set**: `price`, `fundamental`, `deviation`
+#### §4.4.3 Design Purpose and Activation Scenarios
 
-**Mechanism narrative**: Buys 800 units when deviation falls below intervention_threshold (aggressive intervention). Sells back 500 units on recovery (deviation > 0.05).
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| `deviation < intervention_threshold` | buy | stops the self-fulfilling spiral | §2.4 |
+| `deviation > 0.05` | sell | normalizes balance sheet after stress | §2.4 |
 
-**Mathematical model**:
+#### §4.4.4 Behavioral Framework
+
 ```
-if deviation < intervention_threshold: buy(min(800, affordable))
-elif deviation > 0.05: sell(min(500, position))
-else: hold()
+if deviation < intervention_threshold: buy min(800, cash / price)
+elif deviation > 0.05: sell min(500, position)
+else: hold
 ```
 
-**Behavioral properties**: Stabilizing; large order size; asymmetric (larger buy than sell)
+#### §4.4.5 Decision Process Walkthrough
 
-#### Worked Numerical Example
+At deviation -25% with intervention threshold -20%, the ECB proxy buys because the crisis has reached systemic stress.
 
-Given: deviation = −0.25, intervention_threshold = −0.20
-- deviation < intervention_threshold → True → buy(min(800, affordable))
+#### §4.4.6 Worked Numerical Example
 
-#### Academic References
-- Draghi, M. (2012). *Verbatim of the remarks at the Global Investment Conference*. ECB, London.
+With cash 5,000,000 and price 75, affordable quantity is above 800, so the intervention order is 800.
 
----
+#### §4.4.7 Academic References
+
+Draghi (2012); De Grauwe (2011).
 
 ### §4.5 HedgedFund
 
-#### Summary
-Takes relative value positions between core and periphery bonds. Exploits spread dislocations for profit, but faces limits-to-arbitrage constraints that prevent full correction.
+#### §4.5.1 Summary
 
-#### Theoretical and Empirical Foundation
-- **Shleifer & Vishny (1997)**: Limits to arbitrage. Hedged funds face capital constraints preventing full spread correction. DOI: `https://doi.org/10.1111/j.1540-6261.1997.tb03807.x`
-- **Brunnermeier & Pedersen (2009)**: Funding constraints in crisis amplify spread dislocations. DOI: `https://doi.org/10.1093/rfs/hhn098`
+The `HedgedFund` is a relative-value arbitrageur that buys undervalued peripheral bonds and sells when the spread closes. It partially stabilizes the market but is bounded by capital and timing risk.
 
-#### Design Purpose and Activation Scenarios
-- **Activates when**: `|deviation| > entry_threshold` — buys on undervaluation, sells on overvaluation
-- **Role in phenomenon**: Partial stabilizer; limits extremes of the spread dislocation; cannot fully offset panickers
-- **Interaction effects**: Provides partial offset to PeripheryBondSeller and CreditorPanicker
+#### §4.5.2 Theoretical and Empirical Foundation
 
-#### Behavioral Framework
+The basis is limits to arbitrage (§2.5). Shleifer and Vishny explain why rational arbitrage is not infinite during stress; Brunnermeier and Pedersen explain the funding-liquidity constraint.
 
-**Information set**: `price`, `deviation`
+#### §4.5.3 Design Purpose and Activation Scenarios
 
-**Mechanism narrative**: Symmetric arbitrage around fundamental: buy 500 units when deviation < −entry_threshold; sell 500 units when deviation > +entry_threshold.
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| `deviation < -entry_threshold` | buy | stabilizes undervalued peripheral bond | §2.5 |
+| `deviation > entry_threshold` | sell | exits after spread compression | §2.5 |
 
-**Mathematical model**:
+#### §4.5.4 Behavioral Framework
+
 ```
-if deviation < -entry_threshold: buy(min(500, affordable))
-elif deviation > entry_threshold: sell(min(500, position))
-else: hold()
+if deviation < -entry_threshold: buy min(500, cash / price)
+elif deviation > entry_threshold: sell min(500, position)
+else: hold
 ```
 
-**Behavioral properties**: Rational; symmetric; constrained by capital limits
+#### §4.5.5 Decision Process Walkthrough
 
-#### Worked Numerical Example
+At deviation -18% with `entry_threshold = 7%`, the hedge fund buys because the bond is cheap relative to fundamental value.
 
-Given: deviation = −0.18, entry_threshold = 0.10
-- deviation < −entry_threshold: −0.18 < −0.10 → True → buy(500)
+#### §4.5.6 Worked Numerical Example
 
-#### Academic References
-- Shleifer, A., & Vishny, R. W. (1997). *The limits of arbitrage*. Journal of Finance. DOI: https://doi.org/10.1111/j.1540-6261.1997.tb03807.x
+With cash 1,000,000 and price 82, affordable quantity is above 500, so buy quantity is 500.
 
----
+#### §4.5.7 Academic References
 
-## §5 Agent Diversity
+Shleifer & Vishny (1997); Brunnermeier & Pedersen (2009).
 
-The five investors produce the European debt crisis through three distinct phases:
-1. **Crisis onset**: PeripheryBondSeller starts selling on minor fundamental weakening; CreditorPanicker amplifies once spread exceeds panic threshold
-2. **Self-fulfilling spiral**: Both sellers overwhelm HedgedFund's partial stabilization; CoreBondBuyer removes capital from periphery
-3. **Resolution**: ECBIntervenor's large buy orders reverse the spiral; HedgedFund benefits from spread compression
+## §5 Agent Diversity Verification
 
-The simulation tests whether ECBIntervenor intervention is sufficient to end the crisis given the amplification from PeripheryBondSeller and CreditorPanicker, and whether HedgedFund can provide meaningful stabilization before ECB acts.
+| Agent | Direction In Stress | Stabilizing? | Distinct Signal |
+|---|---|---|---|
+| `PeripheryBondSeller` | sells | destabilizing | first sell threshold |
+| `CreditorPanicker` | sells later but harder | destabilizing | deeper panic threshold |
+| `CoreBondBuyer` | buys during stress | stabilizing in normalized market | flight threshold |
+| `ECBIntervenor` | buys in severe stress | stabilizing | intervention threshold |
+| `HedgedFund` | buys undervaluation, sells overvaluation | stabilizing but bounded | symmetric entry threshold |
+
+The combination creates crisis onset, doom-loop amplification, flight-to-quality response, arbitrage stabilization, and backstop intervention.
 
 ## §6 Parameter Table
 
-| Parameter                | Investor            | Type  | Description                                                 |
-|--------------------------|---------------------|-------|-------------------------------------------------------------|
-| `sell_threshold`         | PeripheryBondSeller | float | Negative deviation triggering selling (e.g., −0.10)         |
-| `panic_threshold`        | CreditorPanicker    | float | More negative threshold for panic withdrawal (e.g., −0.15)  |
-| `flight_threshold`       | CoreBondBuyer       | float | Deviation triggering flight-to-quality buying (e.g., −0.08) |
-| `intervention_threshold` | ECBIntervenor       | float | ECB intervention trigger (e.g., −0.20)                      |
-| `entry_threshold`        | HedgedFund          | float | Arbitrage entry deviation (e.g., 0.10)                      |
-| `initial_cash`           | All investors       | float | Starting cash balance                                       |
-| `initial_position`       | All investors       | int   | Starting bond position                                      |
-| `price_impact`           | Market              | float | Price sensitivity to net demand                             |
-| `mean_reversion`         | Market              | float | Speed of price reversion to fundamental                     |
-| `noise_std`              | Market              | float | Market noise standard deviation                             |
-| `fundamental_value`      | Market              | float | Fiscal sustainability bond price                            |
-| `initial_price`          | Market              | float | Starting bond price                                         |
+| Parameter | Baseline | Config Location | Source / Rationale |
+|---|---:|---|---|
+| `initial_price` | 95.0 | `market.extras` | starts below fundamental to represent pre-crisis stress |
+| `fundamental_value` | 100.0 | `market.extras` | normalized sustainable bond price |
+| `price_impact` | 0.05 | `market.extras` | sovereign bond market sensitivity to net flow |
+| `mean_reversion` | 0.02 | `market.extras` | slow fiscal-fundamental reversion |
+| `noise_std` | 0.01 | `market.extras` | low market noise relative to order-flow pressure |
+| `sell_threshold` | -0.10 | `peripherybondseller.extras` | self-fulfilling sell trigger |
+| `panic_threshold` | -0.15 | `creditorpanicker.extras` | deeper stress threshold for creditor funding panic |
+| `flight_threshold` | -0.08 | `corebondbuyer.extras` | flight-to-quality activation |
+| `intervention_threshold` | -0.20 | `ecbintervenor.extras` | severe stress threshold for ECB backstop |
+| `entry_threshold` | 0.07 | `hedgedfund.extras` | relative-value entry threshold |
 
-## §7 Round Structure
+## §7 Communication And Round Structure
 
-1. **Market perceive**: Collects all investor orders; computes net demand
-2. **Market price update**: P(t+1) = P(t) + λ×NetDemand + γ×(F−P) + ε
-3. **Market decide**: Computes deviation; broadcasts `market_data`
-4. **Investor perceive**: Each investor receives `market_data`
-5. **Investor decide**: Compares deviation to personal threshold; submits order
+1. Market receives prior investor orders.
+2. Market computes net demand and updates the peripheral bond price.
+3. Market records price and fundamental histories.
+4. Market broadcasts `market_update`.
+5. Investors update state from the market broadcast.
+6. Investors emit canonical order payloads.
+7. The next round clears those orders.
 
-## §8 Historical Cases
+Full experiments use 200 rounds.
 
-### Greek Debt Crisis (2010–2012)
-Greek 10-year yields rose from 5% (2009) to 35% (2012) before debt restructuring. The crisis followed the self-fulfilling pattern: initial fiscal revelations triggered selling, yield rise increased debt costs, validating the solvency concern. ECB eventually provided backstop via OMT in July 2012.
+## §8 Historical Case Studies
 
-### Spanish Sovereign Crisis (2012)
-Spain's 10-year spread over Germany peaked at 650bp in July 2012. The sovereign-bank nexus was severe: Spanish banks held large domestic sovereign positions, creating the doom loop documented by Acharya et al. Draghi's "whatever it takes" speech reversed the trajectory within days.
+### §8.1 Greek Debt Crisis
 
-## §9 Variant Comparison
+| Field | Description |
+|---|---|
+| Event Profile | Greece entered acute sovereign stress after fiscal revisions and market-loss of confidence. |
+| Chronological Dynamics | fiscal revelations, bond selling, bailout negotiations, restructuring, ECB support architecture |
+| Quantitative Evidence | yields moved from single digits to extreme crisis levels; spreads versus Bunds widened by thousands of basis points; debt restructuring occurred in 2012; bank exposure concerns intensified |
+| Agent Mappings | `PeripheryBondSeller`, `CreditorPanicker`, `ECBIntervenor`, `HedgedFund` |
+| Calibration Lessons | crisis depth and duration should be visible before intervention recovery |
 
-| Aspect               | Rule                         | LLM                                 | RuleLLM                                          | Rag                                                   |
-|----------------------|------------------------------|-------------------------------------|--------------------------------------------------|-------------------------------------------------------|
-| Decision mechanism   | Threshold comparisons        | LLM persona per investor type       | Embedded thresholds + LLM context                | RAG-retrieved crisis literature + LLM                 |
-| Crisis amplification | Fixed sell_threshold         | LLM reasons about crisis severity   | Threshold locked; LLM adjusts quantity           | Retrieved crisis evidence informs severity assessment |
-| ECB intervention     | Fixed intervention_threshold | LLM models central bank credibility | Threshold embedded; LLM reasons about commitment | Retrieved OMT documents model Draghi credibility      |
-| Stochasticity        | Only noise_std randomness    | Full LLM stochasticity              | Bounded LLM variance                             | RAG retrieval variance                                |
+### §8.2 Spanish And Italian Spread Crisis
+
+| Field | Description |
+|---|---|
+| Event Profile | Spain and Italy experienced severe spread widening despite different fiscal and banking conditions. |
+| Chronological Dynamics | bank stress, sovereign spread widening, capital flight, ECB commitment, spread compression |
+| Quantitative Evidence | Spanish spread peaked around 600+ bps; Italian spreads widened sharply; banking stress linked to sovereign risk; post-Draghi spreads fell |
+| Agent Mappings | `CreditorPanicker`, `CoreBondBuyer`, `ECBIntervenor`, `PeripheryBondSeller` |
+| Calibration Lessons | core/periphery flow and central-bank credibility should matter alongside sell pressure |
+
+### §8.3 ECB OMT Backstop
+
+| Field | Description |
+|---|---|
+| Event Profile | Draghi's July 2012 statement and the OMT framework changed market expectations about euro breakup and default risk. |
+| Chronological Dynamics | statement, OMT announcement, credibility shift, spread compression without immediate large purchases |
+| Quantitative Evidence | peripheral spreads compressed after the announcement; the backstop changed expectations; euro breakup risk declined; ECB commitment targeted sovereign bond markets |
+| Agent Mappings | `ECBIntervenor`, `HedgedFund`, `PeripheryBondSeller` |
+| Calibration Lessons | a credible backstop can stabilize prices through order flow and expectation changes. |
+
+## §9 Variant Comparison Preview
+
+| Variant | Decision Mechanism | Expected Use |
+|---|---|---|
+| Rule | deterministic thresholds from §4 | calibrated baseline |
+| LLM | persona-only crisis reasoning | tests discretionary interpretation of sovereign stress |
+| RuleLLM | persona plus explicit threshold rules | should remain close to Rule while allowing language-based sizing |
+| Rag | crisis literature plus LLM reasoning | tests whether retrieved eurozone history changes intervention timing or panic severity |

@@ -17,6 +17,7 @@ Measure how RAG-retrieved crisis literature affects the self-fulfilling spiral d
 | Intervention Effectiveness Ratio (IER) | `intervention_effectiveness_ratio(ecb_buy_rounds, crisis_rounds)`            | §2.4                  |
 | Spread Recovery Time (SRT)             | `spread_recovery_time(price_history, fundamental, recovery_threshold=-0.05)` | §2.5                  |
 | Arbitrage Profit Rate (APR)            | `arbitrage_profit_rate(hf_terminal_wealth, hf_initial_wealth)`               | §2.6                  |
+| RAG Retrieval Quality                  | `analyze_rag_knowledge_effect(rag_contexts)`                                 | §2.7                  |
 
 ## §3 Rag-Specific Notes
 
@@ -56,4 +57,5 @@ See `simulation-bases.md §2` for theoretical foundations.
 - Confirm the run completed 200 configured rounds.
 - Confirm RAG assets and embedding configuration were available.
 - Confirm `{rag_context}` was populated or explicitly replaced by the no-context marker.
-- Audit parse failures, retry counts, fallback holds, and retrieval-health records before acceptance.
+- Confirm `rag_stats.json` is written and retrieval-health records are auditable.
+- Audit parse failures and retry counts before acceptance; deterministic parser/provider failures must fail fast.

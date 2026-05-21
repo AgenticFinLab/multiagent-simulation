@@ -28,6 +28,30 @@ from masim.utils.history import HistoryBuffer
 logger = logging.getLogger(__name__)
 
 
+def _build_order(
+    player: GeneralPlayer,
+    action: str,
+    quantity: int,
+    price: float,
+    reasoning: str,
+) -> Dict[str, Any]:
+    """Build the canonical trading order shared by all variants."""
+    if action not in ("buy", "sell", "hold"):
+        raise ValueError(f"{player.identity} emitted invalid action: {action}")
+    if price <= 0:
+        raise ValueError(f"{player.identity} emitted non-positive bid_price: {price}")
+    return {
+        "type": "order",
+        "from": player.identity,
+        "action": action,
+        "bid_price": float(price),
+        "quantity": max(0, int(quantity)),
+        "reasoning": reasoning,
+        "agent_type": player.__class__.__name__,
+        "strategy": player.__class__.__name__,
+    }
+
+
 class Market(GeneralPlayer):
     """Central market agent tracking peripheral bond price (inverse of yield spread)."""
 
@@ -52,7 +76,9 @@ class Market(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload
-                if isinstance(payload, dict) and "action" in payload:
+                if isinstance(payload, dict) and "type" not in payload and "order" in payload:
+                    payload = payload["order"]
+                if isinstance(payload, dict) and payload.get("action") in ("buy", "sell", "hold"):
                     orders.append(payload)
         extras = self.config.extras
         price = self.state.custom_state["price"]
@@ -73,6 +99,7 @@ class Market(GeneralPlayer):
         new_price = max(new_price, 0.01)
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
+        self.state.custom_state["fundamental_history"].append(fundamental)
 
     async def decide(self) -> Dict:
         price = self.state.custom_state["price"]
@@ -148,10 +175,15 @@ class PeripheryBondSeller(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"action": action, "quantity": quantity}
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            "periphery bond seller exits on sovereign-risk threshold and buys on recovery",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
+            **order,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
@@ -209,10 +241,15 @@ class CreditorPanicker(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"action": action, "quantity": quantity}
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            "creditor panicker withdraws funding on sovereign-bank stress and returns after stabilization",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
+            **order,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
@@ -270,10 +307,15 @@ class CoreBondBuyer(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"action": action, "quantity": quantity}
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            "core bond buyer follows flight-to-quality and rebalances after recovery",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
+            **order,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
@@ -332,10 +374,15 @@ class ECBIntervenor(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"action": action, "quantity": quantity}
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            "ECB intervenor provides backstop purchases when sovereign stress is severe",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
+            **order,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
@@ -393,10 +440,15 @@ class HedgedFund(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"action": action, "quantity": quantity}
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            "hedged fund takes relative-value positions around the sovereign spread deviation",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
+            **order,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
