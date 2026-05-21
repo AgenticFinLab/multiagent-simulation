@@ -33,4 +33,9 @@ Expected Rule behavior is moderate FDI, nonzero asymmetry, higher volatility dur
 
 ## §7 Visualization Catalogue
 
-`analysis.py → create_visualizations(data, output_dir)` creates `framingeffect_price_dynamics.png`, plotting price against fundamental value across rounds. Additional scenario reports may add per-agent contribution and wealth-distribution figures using the metric functions above.
+`analysis.py → main()` uses the shared standard analysis contract to create
+`summary.json`, a structured validation console report, and fixed PNG outputs:
+`00_investor_bids.png`, `01_framingeffect_dynamics.png`,
+`02_framingeffect_analysis.png`, and `03_summary.png`. The legacy
+`create_visualizations(data, output_dir)` helper remains available for focused
+price/fundamental plotting in ad hoc analysis.

@@ -110,6 +110,11 @@ class LLMInvestor(GeneralPlayer):
             ) from exc
 
         action = decision["action"]
+        if action not in ("buy", "sell", "hold"):
+            raise ValueError(f"[{self.identity}] Invalid LLM action: {action}")
+        bid_price = float(decision["bid_price"])
+        reasoning = decision["reasoning"]
+        analysis = decision["analysis"]
         quantity = int(decision["quantity"])
         price_val = self.state.custom_state["price"]
 
@@ -122,7 +127,14 @@ class LLMInvestor(GeneralPlayer):
             quantity = 0
 
         quantity = max(0, quantity)
-        return {"action": action, "quantity": quantity}
+        return {
+            "action": action,
+            "bid_price": bid_price,
+            "quantity": quantity,
+            "reasoning": reasoning,
+            "analysis": analysis,
+            "strategy": self.__class__.__name__,
+        }
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order."""
@@ -141,8 +153,12 @@ class LLMInvestor(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": decision_payload["bid_price"],
             "quantity": quantity,
+            "reasoning": decision_payload["reasoning"],
+            "analysis": decision_payload["analysis"],
             "agent_type": self.__class__.__name__,
+            "strategy": decision_payload["strategy"],
         }
         return Action(
             action_type="order",

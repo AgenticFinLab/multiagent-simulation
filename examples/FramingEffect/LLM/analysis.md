@@ -33,4 +33,8 @@ Valid LLM samples should complete 200 rounds with no fallback holds and with par
 
 ## §7 Visualization Catalogue
 
-The inherited visualization `framingeffect_price_dynamics.png` is the core figure. LLM reports may add action-distribution and parse-quality tables alongside the metric output.
+`LLM/analysis.py → main()` writes the same standard output contract as Rule:
+`summary.json`, structured validation output, `00_investor_bids.png`,
+`01_framingeffect_dynamics.png`, `02_framingeffect_analysis.png`, and
+`03_summary.png`. LLM reports may add action-distribution and parse-quality
+tables alongside the metric output.

@@ -114,7 +114,7 @@ Market broadcast(price, fundamental, deviation, round)
 GainFrameFollower / LossFrameReactor / FrameInvariantTrader / ArbitrageFramer / NoiseTrader
         |
         v
-order(action, quantity, agent_type)
+order(action, bid_price, quantity, reasoning, agent_type, strategy)
         |
         v
 Market.clear_market() -> next price
@@ -132,7 +132,7 @@ Market.clear_market() -> next price
 ## §7 Expected Runtime Outputs
 
 - Market records should include 200 price updates in full experiments.
-- Investor orders should include `action`, `quantity`, `agent_type`, and sender identity.
+- Investor orders should include `action`, `bid_price`, `quantity`, `reasoning`, `agent_type`, `strategy`, and sender identity.
 - Analysis should read `price_history`, compute framing deviation metrics, and create the price-dynamics figure.
 
 ## §8 Validation Checklist

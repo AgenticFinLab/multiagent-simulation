@@ -88,7 +88,7 @@ Rag imports `Market` from the Rule implementation. Market clearing is therefore 
 - The RAG store loads local index files, copies shared index files, or builds from processed documents.
 - `RAG_USER_TEMPLATE` injects `{rag_context}` before market state.
 - If retrieval returns no text, the prompt receives `"(No relevant knowledge retrieved this round.)"`.
-- The RAG config read in `players.py` accepts optional `extras["knowledge"]` because top-level knowledge can be resolved by the simulation setup.
+- The RAG config read in `players.py` accepts optional `extras["knowledge"]` and otherwise uses the shared `examples/document-sources` resource layout.
 
 ## §5 Architecture Diagram
 
@@ -116,7 +116,9 @@ RAG prompt -> LLM -> parser -> capped order -> Market
 
 ## §7 Expected Runtime Outputs
 
-Accepted RAG runs should complete 200 rounds, produce valid order records, and expose retrievable RAG context observations for quality review. Missing processed documents or bad embedding credentials should fail before a sample is accepted.
+Accepted RAG runs should complete 200 rounds, produce valid order records with
+`rag_context`, and expose `rag_stats.json` for quality review. Missing processed
+documents or bad embedding credentials should fail before a sample is accepted.
 
 ## §8 Validation Checklist
 

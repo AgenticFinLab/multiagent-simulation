@@ -18,7 +18,10 @@ RAG analysis follows `../analysis-bases.md §1` and adds retrieval-quality revie
 
 ## §3 Data Loading and Structural Checks
 
-`Rag/analysis.py` imports Rule metrics and adds `_RAG_FALLBACK` plus `analyze_rag_knowledge_effect()`. Quality review must verify full round count, valid order schema, parse quality, and presence of `rag_context` observations.
+`Rag/analysis.py → main()` imports the standard Rule analysis contract and adds
+`_RAG_FALLBACK`, `analyze_rag_knowledge_effect()`, and `rag_stats.json`.
+Quality review must verify full round count, valid order schema, parse quality,
+and presence of `rag_context` observations.
 
 ## §4 Phase Analysis
 
@@ -34,4 +37,8 @@ Valid RAG samples should complete 200 rounds, have low fallback context rate, an
 
 ## §7 Visualization Catalogue
 
-The inherited price-dynamics figure remains the primary plot. RAG reports should also include a retrieval-quality table with retrieval success rate, fallback rate, and count of RAG context observations.
+The fixed PNG set remains the primary structural visualization output:
+`00_investor_bids.png`, `01_framingeffect_dynamics.png`,
+`02_framingeffect_analysis.png`, and `03_summary.png`. RAG reports should also
+include `rag_stats.json` with retrieval success rate, fallback rate, and count
+of RAG context observations.

@@ -198,8 +198,11 @@ class GainFrameFollower(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": "gain-frame threshold rule",
             "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
         }
         return Action(
             action_type="order",
@@ -276,8 +279,11 @@ class LossFrameReactor(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": "loss-frame threshold rule",
             "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
         }
         return Action(
             action_type="order",
@@ -354,8 +360,11 @@ class FrameInvariantTrader(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": "frame-invariant fundamental rule",
             "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
         }
         return Action(
             action_type="order",
@@ -432,8 +441,11 @@ class ArbitrageFramer(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": "framing-arbitrage correction rule",
             "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
         }
         return Action(
             action_type="order",
@@ -508,8 +520,11 @@ class NoiseTrader(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": "noise-trader random liquidity rule",
             "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
         }
         return Action(
             action_type="order",

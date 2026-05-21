@@ -17,7 +17,10 @@ RuleLLM analysis follows `../analysis-bases.md §1` and focuses on whether embed
 
 ## §3 Data Loading and Structural Checks
 
-`RuleLLM/analysis.py` reuses the Rule analysis implementation. Structural review should additionally count parse failures and compare reasoning text against the embedded rule sections.
+`RuleLLM/analysis.py → main()` reuses the standard Rule analysis contract for
+`summary.json`, structured validation output, and the fixed PNG set. Structural
+review should additionally count parse failures and compare reasoning text
+against the embedded `== DECISION RULES ==` sections.
 
 ## §4 Phase Analysis
 
@@ -33,4 +36,8 @@ Valid samples should complete 200 rounds with parseable decisions, low retry cou
 
 ## §7 Visualization Catalogue
 
-The core price-dynamics figure is inherited from Rule. Reports may add rule-adherence tables that classify whether each LLM action matched the direction implied by the embedded rules.
+The fixed PNG set is inherited from Rule:
+`00_investor_bids.png`, `01_framingeffect_dynamics.png`,
+`02_framingeffect_analysis.png`, and `03_summary.png`. Reports may add
+rule-adherence tables that classify whether each LLM action matched the
+direction implied by the embedded rules.

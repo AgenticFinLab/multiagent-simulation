@@ -11,6 +11,14 @@ from examples.FramingEffect.Rule.analysis import (
     volatility_amplification_factor,
     wealth_distribution_index,
 )
+from examples.standard_rule_analysis import run_standard_analysis as _run_standard_analysis
+
+
+def main():
+    """Run FramingEffect RuleLLM analysis using the standard output contract."""
+    return _run_standard_analysis(
+        "FramingEffect", "configs/FramingEffect/RuleLLM/simulation.yml"
+    )
 
 __all__ = [
     "framing_deviation_index",
@@ -22,4 +30,9 @@ __all__ = [
     "load_simulation_data",
     "calculate_metrics",
     "create_visualizations",
+    "main",
 ]
+
+
+if __name__ == "__main__":
+    main()
