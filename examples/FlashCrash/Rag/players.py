@@ -635,6 +635,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         llm_config = self.config.extras["llm"]
         template = load_prompt(llm_config["user_message"])
+        self.state.custom_state["last_rag_context"] = rag_context
         return template.format(
             round=round_num,
             rag_context=rag_context,
@@ -703,7 +704,7 @@ class RagLLMInvestor(GeneralPlayer):
                 last_error = exc
                 if attempt < max_retries - 1:
                     logger.debug(
-                        "[%s] LLM parse failed (attempt %d), retrying\u2026",
+                        "[%s] LLM parse failed (attempt %d), retrying...",
                         self.identity,
                         attempt + 1,
                     )
@@ -736,14 +737,23 @@ class RagLLMInvestor(GeneralPlayer):
             self.state.custom_state["position"],
         )
 
+        liquidity_field_missing = decision.get("provides_liquidity") is None
+        if liquidity_field_missing:
+            logger.warning(
+                "[%s] LLM decision omitted provides_liquidity; using conservative false",
+                self.identity,
+            )
+
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": str(decision.get("reasoning", "fallback hold"))[:120],
-            "analysis": str(decision.get("analysis", "")),
+            "reasoning": decision["reasoning"][:120],
+            "analysis": decision["analysis"],
             "provides_liquidity": bool(decision.get("provides_liquidity", False)),
+            "liquidity_field_missing": liquidity_field_missing,
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
 
         return {

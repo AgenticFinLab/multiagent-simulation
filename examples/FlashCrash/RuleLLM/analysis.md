@@ -8,12 +8,12 @@ This analysis checks whether the RuleLLM variant produces a complete, analyzable
 
 | Metric | Function Contract | Source |
 |---|---|---|
-| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
-| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
-| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
-| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
-| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
-| Scenario-specific diagnostic | `def compute_flashcrash_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
+| Crash Depth | `def crash_depth(price_history: list, fundamental: float) -> float` | `analysis-bases.md §2` |
+| Liquidity Vacuum Duration | `def liquidity_vacuum_duration(liquidity_history: list, low_threshold: float = 50.0) -> int` | `analysis-bases.md §2` |
+| Stop-Loss Cascade Volume | `def stop_loss_cascade_volume(orders_history: list) -> float` | `analysis-bases.md §2` |
+| Recovery Speed | `def recovery_speed(price_history: list, trough_round: int, fundamental: float, recovery_threshold: float = 0.02) -> int` | `analysis-bases.md §2` |
+| Liquidity Provider Withdrawal Fraction | `def liquidity_provider_withdrawal_fraction(provides_liquidity_history: list, crash_start: int, crash_end: int) -> float` | `analysis-bases.md §2` |
+| Price Amplification Ratio | `def price_amplification_ratio(observed_max_drop: float, baseline_max_drop: float) -> float` | `analysis-bases.md §2` |
 
 ## §3 Analysis Dimensions
 
@@ -33,4 +33,4 @@ Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full
 
 ## §7 Visualization Catalogue
 
-Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_flashcrash_dynamics.png`, `02_flashcrash_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.
+Required outputs are `summary.json`, `00_investor_bids.png`, `01_flashcrash_dynamics.png`, `02_flashcrash_analysis.png`, and `03_summary.png`.

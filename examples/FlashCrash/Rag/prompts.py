@@ -62,7 +62,7 @@ scale MUST follow the decision rule above.
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": false}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 
 Example format:
@@ -71,7 +71,7 @@ Short momentum is +0.02 (2% up), signal = 0.02 × 3.0 = 0.06. quantity = 0.06 ×
 </analysis>
 
 <decision>
-{"action": "buy", "bid_price": 100.00, "quantity": 3.6, "reasoning": "Positive momentum detected"}
+{"action": "buy", "bid_price": 100.00, "quantity": 3.6, "reasoning": "Positive momentum detected", "provides_liquidity": false}
 </decision>
 
 Output BOTH the analysis and decision sections in your response.

@@ -28,11 +28,12 @@ liquidity_factor = high_impact_multiplier  if total_liquidity < low_liquidity_th
                  = 1.0 + (low_liquidity_threshold / total_liquidity − 1.0) × 0.5  otherwise
 ```
 
-- `total_liquidity` = sum of `provides_liquidity` flags across all investors' orders
-- When `provides_liquidity` providers withdraw, `liquidity_factor` jumps → amplified impact
+- In Rule, RuleLLM, and Rag, `total_liquidity = base_liquidity + sum(abs(quantity_i))` for orders whose `provides_liquidity` flag is true.
+- In LLM, the coordinator uses an internal liquidity state updated from total volume and net demand; the LLM order schema does not emit `provides_liquidity`.
+- When liquidity providers withdraw, the effective `liquidity_factor` jumps and amplifies net demand.
 - `mean_reversion` pulls price toward `fundamental_value`
 - Broadcast keys: `price`, `prev_price`, `return`, `return_pct`, `volume`, `net_demand`, `liquidity`, `round`, `fundamental`
-- Order keys: `bid_price`, `quantity`, `strategy`, `investor`, `provides_liquidity`
+- Order keys: `bid_price`, `quantity`, `strategy`, `investor`; Rule, RuleLLM, and Rag also require `provides_liquidity`.
 
 ## §4 Investor Taxonomy
 
@@ -215,14 +216,15 @@ else:
 |-----------------------------|---------|------------|-----------------------------|
 | `initial_price`             | 100.0   | 80–120     | Starting price level        |
 | `fundamental_value`         | 100.0   | 90–110     | Mean-reversion anchor       |
-| `base_price_impact`         | 0.005   | 0.001–0.02 | λ in price equation         |
-| `low_liquidity_threshold`   | 3       | 1–5        | Liquidity alarm level       |
+| `base_price_impact`         | 0.05    | 0.001–0.05 | Price impact coefficient    |
+| `base_liquidity`            | 100.0   | 50–150     | Baseline market depth       |
+| `low_liquidity_threshold`   | 50.0    | 25–75      | Liquidity alarm level       |
 | `high_impact_multiplier`    | 3.0     | 2.0–5.0    | Amplification when illiquid |
 | `mean_reversion`            | 0.02    | 0.01–0.05  | Speed of fundamental pull   |
 | `noise_std`                 | 0.1     | 0.05–0.5   | Market noise                |
 | `volatility_threshold` (MM) | 0.01    | 0.005–0.02 | MM withdrawal trigger       |
 | `stop_loss_percent`         | 0.05    | 0.02–0.10  | SL trigger depth            |
-| `value_threshold`           | 0.05    | 0.03–0.10  | FT entry deviation          |
+| `value_threshold`           | 0.10    | 0.03–0.10  | FT entry deviation          |
 
 ## §7 Round Structure
 
@@ -235,12 +237,12 @@ Round t:
   5. Investors.decide()   — compute quantity and provides_liquidity flag
   6. Investors.act()      — send order to Market
 
-Phase mapping (typical 50-round run):
-  Normal      rounds  1–10   : mixed activity; MM provides liquidity
-  Trigger     rounds 11–15   : HFT detects momentum; initial selling
-  Cascade     rounds 16–25   : MM withdraws; stop-losses trigger; deep crash
-  Trough      rounds 26–30   : maximum deviation; FT buys aggressively
-  Recovery    rounds 31–50   : price returns toward fundamental
+Phase mapping (illustrative 200-round full run):
+  Normal      early rounds          : mixed activity; MM provides liquidity
+  Trigger     after a negative shock: HFT and algorithmic agents reinforce the move
+  Cascade     stress window         : MM withdraws; stop-losses trigger; deep crash
+  Trough      crash minimum         : maximum deviation; FT buys aggressively
+  Recovery    post-trough rounds    : price returns toward fundamental
 ```
 
 ## §8 Historical Cases
@@ -260,6 +262,6 @@ Phase mapping (typical 50-round run):
 | HFT momentum detection | Deterministic formula         | LLM sentiment on returns          | Rule signal + LLM confirmation    | History-augmented LLM              |
 | Stop-loss cascade      | Fixed stop levels             | LLM decides when to cut losses    | Predefined stops + LLM adjustment | LLM informed by historical crashes |
 | Recovery mechanism     | Deviation > `value_threshold` | LLM "undervalued" assessment      | Rule entry + LLM sizing           | RAG-guided fundamental entry       |
-| `provides_liquidity`   | Boolean from formula          | LLM decision field                | Rule logic dominant               | RAG-enhanced decision              |
+| Liquidity accounting   | Boolean flag plus providing order size | Internal coordinator liquidity state | Boolean flag plus providing order size | Boolean flag plus providing order size |
 | Determinism            | High                          | Low                               | Medium                            | Medium-low                         |
 | Theoretical fidelity   | Exact                         | Emergent                          | Hybrid                            | Historically grounded              |
