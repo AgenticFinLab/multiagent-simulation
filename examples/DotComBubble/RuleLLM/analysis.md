@@ -52,5 +52,5 @@ See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md
 
 - Confirm the run completed 200 configured rounds.
 - Confirm prompts contain both `== PERSONA ==` and `== DECISION RULES ==` sections.
-- Confirm parse failures do not silently become fallback holds.
+- Confirm parse failures fail fast after bounded retries rather than silently producing hidden hold actions.
 - Confirm accepted decisions preserve valid order payloads.

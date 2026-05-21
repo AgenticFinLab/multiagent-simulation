@@ -66,7 +66,7 @@ P(t+1) = P(t) + λ·NetDemand(t) + γ·[F(t)−P(t)] + ε(t)
 
 ## §5 Config Reference
 
-Config file: `DotComBubble/Rule/config.yaml`
+Config files: `configs/DotComBubble/Rule/{simulation.yml,players.yml,topology.yml,persona.yml}`
 
 Key extras: `initial_price`, `fundamental_value`, `price_impact`, `mean_reversion`, `noise_std`, `order_size`, `flip_threshold`, `momentum_threshold`, `value_buy_threshold`, `value_sell_threshold`, `short_threshold`, `cover_threshold`.
 

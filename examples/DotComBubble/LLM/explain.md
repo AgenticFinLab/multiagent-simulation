@@ -66,12 +66,12 @@ Prompt includes: `price`, `fundamental`, `deviation`, `cash`, `position`, `portf
 | Base class     | `LLMInvestor` (extends `GeneralPlayer`)                     |
 | Inference      | `LangChainAPIInference`                                     |
 | Context        | `HistoryBuffer` (last 200 entries)                          |
-| Output parsing | `parse_llm_response_with_thinking()` → `{action, quantity}` |
-| Retry logic    | 3 attempts; fall back to hold on failure                    |
+| Output parsing | `parse_llm_response_with_thinking()` → canonical order fields: `action`, `bid_price`, `quantity`, `reasoning` |
+| Retry logic    | 3 attempts; fail fast if the provider or parser cannot produce the required contract |
 
 ## §5 Config Reference
 
-Config file: `DotComBubble/LLM/config.yaml`
+Config files: `configs/DotComBubble/LLM/{simulation.yml,players.yml,topology.yml,persona.yml}`
 
 Key extras: `llm.lm_name`, `llm.generation_config`, `initial_cash`, `initial_position`, `order_size`; system prompt loaded from `prompts.py`.
 

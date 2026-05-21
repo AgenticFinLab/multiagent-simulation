@@ -53,4 +53,5 @@ See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md
 - Confirm the run completed 200 configured rounds.
 - Confirm RAG assets and embedding configuration were available.
 - Confirm `{rag_context}` was populated or explicitly replaced by the no-context marker.
-- Audit parse failures, retry counts, fallback holds, and retrieval-health records before acceptance.
+- Audit parse failures, retry counts, and retrieval-health records before acceptance; deterministic parser or provider failures should fail fast rather than become hidden holds.
+- Confirm `rag_stats.json` is written and includes retrieval success/failure rates from recorded `rag_context` fields.

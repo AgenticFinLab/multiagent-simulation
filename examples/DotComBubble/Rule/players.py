@@ -28,6 +28,30 @@ from masim.utils.history import HistoryBuffer
 logger = logging.getLogger(__name__)
 
 
+def _build_order(
+    player: GeneralPlayer,
+    action: str,
+    quantity: int,
+    price: float,
+    reasoning: str,
+) -> Dict[str, Any]:
+    """Build the canonical trading order shared by all DotComBubble variants."""
+    if action not in ("buy", "sell", "hold"):
+        raise ValueError(f"{player.identity} emitted invalid action: {action}")
+    if price <= 0:
+        raise ValueError(f"{player.identity} emitted non-positive bid_price: {price}")
+    return {
+        "type": "order",
+        "from": player.identity,
+        "action": action,
+        "bid_price": float(price),
+        "quantity": max(0, int(quantity)),
+        "reasoning": reasoning,
+        "agent_type": player.__class__.__name__,
+        "strategy": player.__class__.__name__,
+    }
+
+
 class Market(GeneralPlayer):
     """Tech/equity market — clears orders and broadcasts price each round."""
 
@@ -56,7 +80,9 @@ class Market(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload
-                if isinstance(payload, dict):
+                if isinstance(payload, dict) and "type" not in payload and "order" in payload:
+                    payload = payload["order"]
+                if isinstance(payload, dict) and payload.get("action") in ("buy", "sell", "hold"):
                     orders.append(payload)
 
         price = self.state.custom_state["price"]
@@ -158,12 +184,18 @@ class NewEconomyEvangelist(GeneralPlayer):
             if qty > 0:
                 action, quantity = "sell", qty
 
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            "new-economy narrative buyer follows buy-unless-crash rule",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
+            **order,
             "outbound_messages": [
                 {
-                    "payload": {"action": action, "quantity": quantity},
+                    "payload": order,
                     "content_type": "order",
                 }
             ],
@@ -233,12 +265,18 @@ class IPOFlipper(GeneralPlayer):
             if qty > 0:
                 action, quantity = "buy", qty
 
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            "IPO flipper trades around deviation pop/dip thresholds",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
+            **order,
             "outbound_messages": [
                 {
-                    "payload": {"action": action, "quantity": quantity},
+                    "payload": order,
                     "content_type": "order",
                 }
             ],
@@ -314,12 +352,18 @@ class MomentumFollower(GeneralPlayer):
                 if qty > 0:
                     action, quantity = "sell", qty
 
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            "momentum follower reacts to one-period price continuation",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
+            **order,
             "outbound_messages": [
                 {
-                    "payload": {"action": action, "quantity": quantity},
+                    "payload": order,
                     "content_type": "order",
                 }
             ],
@@ -390,12 +434,18 @@ class SkepticalValueInvestor(GeneralPlayer):
             if qty > 0:
                 action, quantity = "sell", qty
 
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            "skeptical value investor trades only at valuation extremes",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
+            **order,
             "outbound_messages": [
                 {
-                    "payload": {"action": action, "quantity": quantity},
+                    "payload": order,
                     "content_type": "order",
                 }
             ],
@@ -466,12 +516,18 @@ class ShortSeller(GeneralPlayer):
             if qty > 0:
                 action, quantity = "buy", qty
 
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            "short seller trades against extreme overvaluation and covers after correction",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
+            **order,
             "outbound_messages": [
                 {
-                    "payload": {"action": action, "quantity": quantity},
+                    "payload": order,
                     "content_type": "order",
                 }
             ],

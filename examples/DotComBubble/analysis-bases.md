@@ -1,212 +1,393 @@
-# DotComBubble Analysis Bases
+# DotComBubble — Analysis Methodology Basis
 
-## §1 Objectives
+## §1 Analysis Objectives
 
-1. **Reproduce bubble dynamics**: Confirm that destabilizing agents (NewEconomyEvangelist, IPOFlipper, MomentumFollower) drive price above fundamental, creating measurable overvaluation.
-2. **Measure crash severity**: Quantify peak-to-trough decline and compare to NASDAQ historical benchmark (−78%).
-3. **Isolate narrative channel**: Compare bubble height with/without NewEconomyEvangelist to isolate narrative economics effect.
-4. **Evaluate short seller effectiveness**: Measure how much ShortSeller + SkepticalValueInvestor limit bubble height.
-5. **Cross-variant comparison**: Assess whether LLM agents exhibit richer narrative-driven bubble behavior than rule-based equivalents.
+| Objective | Research Question | Metrics | Expected Finding |
+|---|---|---|---|
+| O1 | Does narrative demand push price above fundamental value? | Bubble Amplitude Index, bubble duration | price remains above fundamental for a sustained period |
+| O2 | Does the bubble crash after overvaluation? | crash severity, recovery time | peak-to-trough decline is visible after the run-up |
+| O3 | Do momentum traders amplify the run-up? | momentum amplification factor, volatility | trend-following volume rises during positive price movement |
+| O4 | Do value investors and short sellers restrain the bubble? | short-seller resistance, wealth divergence | stabilizers sell into overvaluation but may be early |
+| O5 | Do API and RAG variants preserve valid market behavior? | API quality, RAG retrieval stats, cross-variant metrics | all variants complete 200 rounds with auditable decisions |
 
-## §2 Core Metrics
+## §2 Core Metrics Catalogue
 
-### §2.1 Bubble Amplitude Index (BAI)
+### Metric: Bubble Amplitude Index (BAI)
 
-**Definition**: Maximum price deviation from fundamental during bubble phase, normalized by fundamental.
+#### Category
+Price Dynamics / Phenomenon-Specific
 
-```python
-def bubble_amplitude_index(price_history, fundamental):
-    deviations = [(p - fundamental) / fundamental for p in price_history]
-    return max(deviations)
+#### Definition
+Maximum percentage overvaluation relative to fundamental value.
+
+#### Formula
+```
+BAI = max_t ((P(t) - F(t)) / F(t))
 ```
 
-**Interpretation**: BAI > 2.0 → extreme bubble (NASDAQ peaked at ~5× fundamental); BAI < 0.3 → mild overvaluation; BAI matching Abreu & Brunnermeier (2003) calibration ≈ 0.5–1.5.
+**Computation notes**: If price never exceeds fundamental, BAI can be zero or negative.
 
-**Reference**: Shiller (2000) CAPE ratio analysis — DOI: https://doi.org/10.1515/9781400865536
-
----
-
-### §2.2 Bubble Duration (BD)
-
-**Definition**: Number of rounds price remains above 10% overvaluation (δ > 0.10).
-
+**Python function**:
 ```python
-def bubble_duration(price_history, fundamental, bubble_threshold=0.10):
-    return sum(1 for p in price_history
-               if (p - fundamental) / fundamental > bubble_threshold)
+def bubble_amplitude_index(price_history: list[float], fundamental: float) -> float:
+    """Return maximum overvaluation relative to fundamental."""
 ```
 
-**Interpretation**: Longer BD → bubble persists longer; calibration target from Abreu & Brunnermeier (2003) — bubbles persist far beyond rational expectation.
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| `< 0.10` | weak bubble | narrative channel underpowered |
+| `0.10 to 1.50` | visible bubble | plausible normalized overvaluation |
+| `> 1.50` | extreme bubble | inspect price impact and order sizes |
 
-**Reference**: Abreu & Brunnermeier (2003) synchronization risk — DOI: https://doi.org/10.1111/1468-0262.00401
+#### Academic Basis
+**Primary source**: Shiller (2000), https://doi.org/10.1515/9781400865536. Valuation overextension is the central observable of speculative bubbles.
+**Supporting studies**: Ofek & Richardson (2003), https://doi.org/10.1111/1540-6261.00530, document internet-stock overvaluation and crash dynamics.
 
----
+#### Normal Range (from literature)
+The normalized target is a visible positive overvaluation, not an exact NASDAQ index reconstruction.
 
-### §2.3 Crash Severity (CS)
+#### Red Flag Threshold
+- **Too high** (> 2.0): price dynamics may be unstable.
+- **Too low** (< 0.10): bubble mechanism may not emerge.
+- **Zero for all rounds**: check order routing and narrative-buyer cash.
 
-**Definition**: Maximum peak-to-trough price decline during crash phase.
+#### Relationship to Other Metrics
+BAI should precede crash severity and recovery-time measurement.
 
-```python
-def crash_severity(price_history):
-    peak = max(price_history)
-    peak_idx = price_history.index(peak)
-    trough = min(price_history[peak_idx:])
-    return (peak - trough) / peak
+#### Implementation Notes
+Scenario-specific interpretation is layered on top of `calculate_standard_metrics()`.
+
+### Metric: Bubble Duration (BD)
+
+#### Category
+Persistence / Phenomenon-Specific
+
+#### Definition
+Number of rounds in which price remains more than 10% above fundamental.
+
+#### Formula
+```
+BD = count_t [ (P(t) - F(t)) / F(t) > 0.10 ]
 ```
 
-**Interpretation**: CS ≈ 0.78 matches NASDAQ dot-com historical crash; CS < 0.30 → mild correction; CS > 0.80 → extreme crash.
-
-**Reference**: Ofek & Richardson (2003) NASDAQ crash analysis — DOI: https://doi.org/10.1111/1540-6261.00530
-
----
-
-### §2.4 Momentum Amplification Factor (MAF)
-
-**Definition**: Ratio of MomentumFollower buy volume to total buy volume during bubble ascent phase.
-
+**Python function**:
 ```python
-def momentum_amplification_factor(agent_volume_by_type, bubble_rounds):
-    momentum_buys = sum(agent_volume_by_type["MomentumFollower"]["buy"][t]
-                        for t in bubble_rounds)
-    total_buys = sum(sum(v["buy"].get(t, 0) for v in agent_volume_by_type.values())
-                     for t in bubble_rounds)
-    return momentum_buys / total_buys if total_buys > 0 else 0.0
+def bubble_duration(price_history: list[float], fundamental: float, bubble_threshold: float = 0.10) -> int:
+    """Count rounds above the bubble threshold."""
 ```
 
-**Interpretation**: MAF > 0.4 → momentum followers dominate bubble inflation; MAF < 0.2 → narrative/IPO channels dominant.
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| `0` | no persistent bubble | narrative/momentum weak |
+| `> 15` | meaningful bubble | full-run bubble persistence visible |
+| very high with no crash | bubble may not resolve | inspect stabilizer and mean-reversion behavior |
 
-**Reference**: Jegadeesh & Titman (1993) momentum returns — DOI: https://doi.org/10.1111/j.1540-6261.1993.tb04702.x
+#### Academic Basis
+**Primary source**: Abreu & Brunnermeier (2003), https://doi.org/10.1111/1468-0262.00401. Synchronization risk allows bubbles to persist after informed traders identify mispricing.
 
----
+#### Normal Range (from literature)
+Bubble persistence should be long enough to distinguish speculative dynamics from noise.
 
-### §2.5 Short Squeeze Resistance (SSR)
+#### Red Flag Threshold
+- **Too low**: bubble does not form.
+- **Too high**: crash or value-anchor mechanism may be absent.
 
-**Definition**: Fraction of rounds where ShortSeller is net seller despite positive price momentum (resisting squeeze).
+#### Relationship to Other Metrics
+BD should rise with BAI and momentum amplification.
 
-```python
-def short_squeeze_resistance(short_seller_orders, momentum_sign_history):
-    squeeze_rounds = [t for t, m in enumerate(momentum_sign_history) if m > 0]
-    sells_in_squeeze = sum(1 for t in squeeze_rounds
-                           if short_seller_orders[t]["action"] == "sell")
-    return sells_in_squeeze / len(squeeze_rounds) if squeeze_rounds else 0.0
+#### Implementation Notes
+Computed during Level-2 post-run quality analysis from market price records.
+
+### Metric: Crash Severity (CS)
+
+#### Category
+Risk / Phenomenon Intensity
+
+#### Definition
+Largest peak-to-trough decline after the observed price peak.
+
+#### Formula
+```
+CS = (peak_price - post_peak_trough) / peak_price
 ```
 
-**Interpretation**: SSR = 1.0 → ShortSeller never capitulates; SSR < 0.3 → ShortSeller buys to cover under momentum pressure (classic short squeeze).
-
-**Reference**: Abreu & Brunnermeier (2003) arbitrage risk during bubble — DOI: https://doi.org/10.1111/1468-0262.00401
-
----
-
-### §2.6 Recovery Time (RT)
-
-**Definition**: Rounds from trough to recovery back to within 10% of fundamental.
-
+**Python function**:
 ```python
-def recovery_time(price_history, fundamental, recovery_threshold=0.10):
-    peak = max(price_history)
-    peak_idx = price_history.index(peak)
-    trough_idx = peak_idx + price_history[peak_idx:].index(min(price_history[peak_idx:]))
-    for t in range(trough_idx, len(price_history)):
-        if abs((price_history[t] - fundamental) / fundamental) < recovery_threshold:
-            return t - trough_idx
-    return len(price_history) - trough_idx  # no recovery
+def crash_severity(price_history: list[float]) -> float:
+    """Return post-peak drawdown severity."""
 ```
 
-**Interpretation**: Shorter RT → faster fundamental restoration; historical dot-com recovery took ~15 years.
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| `< 0.30` | mild correction | crash channel weak |
+| `0.30 to 0.80` | meaningful crash | dot-com mechanism visible |
+| `> 0.80` | extreme collapse | inspect numerical stability |
 
-**Reference**: Shiller (2000) irrational exuberance cycle length.
+#### Academic Basis
+**Primary source**: Ofek & Richardson (2003), https://doi.org/10.1111/1540-6261.00530. Internet-stock collapse provides the empirical crash benchmark.
 
----
+#### Normal Range (from literature)
+The NASDAQ historical decline was roughly 78%, but the normalized simulation accepts a broad crash range.
 
-### §2.7 Wealth Divergence Index (WDI)
+#### Red Flag Threshold
+- **Too low**: no post-bubble correction.
+- **Too high**: price impact or sell pressure may be excessive.
 
-**Definition**: Terminal wealth of destabilizing agents (NewEconomyEvangelist + IPOFlipper + MomentumFollower) vs. stabilizing agents (SkepticalValueInvestor + ShortSeller), normalized.
+#### Relationship to Other Metrics
+CS should follow high BAI or long BD.
 
-```python
-def wealth_divergence_index(agent_final_states, final_price, initial_wealth=100000):
-    destabilizing = ["NewEconomyEvangelist", "IPOFlipper", "MomentumFollower"]
-    stabilizing = ["SkepticalValueInvestor", "ShortSeller"]
-    dest_wealth = sum(s["cash"] + s["position"] * final_price
-                      for k, s in agent_final_states.items() if k in destabilizing)
-    stab_wealth = sum(s["cash"] + s["position"] * final_price
-                      for k, s in agent_final_states.items() if k in stabilizing)
-    return (dest_wealth - stab_wealth) / (3 * initial_wealth)
+#### Implementation Notes
+Post-run analysis can derive this from the same price path used by standard summary metrics.
+
+### Metric: Momentum Amplification Factor (MAF)
+
+#### Category
+Agent Activity / Behavioral
+
+#### Definition
+Share of bubble-phase buy volume attributable to momentum followers.
+
+#### Formula
+```
+MAF = momentum_buy_volume / total_buy_volume
 ```
 
-**Interpretation**: WDI > 0 → destabilizing agents profit (bubble not fully deflated); WDI < 0 → stabilizing agents profit (crash severe, short sellers vindicated).
+**Python function**:
+```python
+def momentum_amplification_factor(agent_volume_by_type: dict, bubble_rounds: list[int]) -> float:
+    """Return momentum buy share in bubble rounds."""
+```
 
-**Reference**: Ofek & Richardson (2003) — long-run returns after lock-up expiration.
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| `< 0.20` | narrative or IPO channel dominates | momentum weak |
+| `0.20 to 0.50` | mixed amplification | plausible bubble mechanics |
+| `> 0.50` | trend followers dominate | bubble mostly technical |
 
----
+#### Academic Basis
+**Primary source**: Jegadeesh & Titman (1993), https://doi.org/10.1111/j.1540-6261.1993.tb04702.x.
+
+#### Normal Range (from literature)
+Momentum should be material but not the only bubble driver.
+
+#### Red Flag Threshold
+- **Too low**: momentum class not trading.
+- **Too high**: narrative and IPO roles may be ineffective.
+
+#### Relationship to Other Metrics
+MAF should increase with BD and may increase crash severity after reversal.
+
+#### Implementation Notes
+Requires investor action records and agent type attribution from canonical order payloads.
+
+### Metric: Short-Seller Resistance (SSR)
+
+#### Category
+Agent Activity / Limits To Arbitrage
+
+#### Definition
+Fraction of overvaluation rounds in which short sellers keep selling rather than capitulating.
+
+#### Formula
+```
+SSR = short_seller_sell_rounds_during_overvaluation / overvaluation_rounds
+```
+
+**Python function**:
+```python
+def short_seller_resistance(short_seller_orders: list[dict], overvaluation_rounds: list[int]) -> float:
+    """Return short-seller sell frequency during overvaluation."""
+```
+
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| low | squeeze or timing failure | arbitrage constrained |
+| moderate | partial resistance | plausible limits-to-arbitrage behavior |
+| high | persistent short pressure | bubble may be capped |
+
+#### Academic Basis
+**Primary source**: Abreu & Brunnermeier (2003), https://doi.org/10.1111/1468-0262.00401.
+
+#### Normal Range (from literature)
+Short sellers should resist overvaluation but should not mechanically eliminate the bubble.
+
+#### Red Flag Threshold
+- **Zero**: short seller not participating.
+- **One with no bubble**: stabilizer may overpower narrative demand.
+
+#### Relationship to Other Metrics
+SSR can lower BAI and increase stabilizer wealth if timing is favorable.
+
+#### Implementation Notes
+Requires canonical `agent_type` and action payloads.
+
+### Metric: Recovery Time (RT)
+
+#### Category
+Recovery / Fundamental Reversion
+
+#### Definition
+Rounds from post-peak trough until price returns within 10% of fundamental.
+
+#### Formula
+```
+RT = min { t > trough : abs((P(t) - F) / F) < 0.10 } - trough
+```
+
+**Python function**:
+```python
+def recovery_time(price_history: list[float], fundamental: float, recovery_threshold: float = 0.10) -> int:
+    """Return recovery rounds after trough."""
+```
+
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| short | quick fundamental restoration | value anchor strong |
+| long | persistent post-crash dislocation | narrative crash severe |
+| no recovery | incomplete lifecycle | inspect round count and mean reversion |
+
+#### Academic Basis
+**Primary source**: Shiller (2000), https://doi.org/10.1515/9781400865536. Bubble recoveries can take long periods after valuation collapse.
+
+#### Normal Range (from literature)
+The full 200-round simulation should leave enough room for at least partial recovery.
+
+#### Red Flag Threshold
+- **No recovery**: lifecycle incomplete or mean reversion too weak.
+- **Immediate recovery**: crash dynamics too shallow.
+
+#### Relationship to Other Metrics
+RT depends on CS, mean reversion, and stabilizer buying.
+
+#### Implementation Notes
+Computed from market price and fundamental records.
+
+### Metric: API And RAG Quality (AQR)
+
+#### Category
+API Quality / RAG Diagnostics
+
+#### Definition
+Parse/contract/fallback quality for API variants and retrieval coverage for Rag.
+
+#### Formula
+```
+retrieval_failure_rate = retrieval_failure_rounds / total_rag_rounds
+fallback_rate = fallback_decisions / total_api_decisions
+```
+
+**Python function**:
+```python
+def analyze_rag_knowledge_effect(rag_contexts: dict[str, dict[int, object]]) -> dict[str, object]:
+    """Calculate retrieval coverage from recorded RAG contexts."""
+```
+
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| clean | valid behavioral evidence | preferred state |
+| low documented issue rate | stochastic API noise | attach quality note |
+| high issue rate | weak behavioral sample | repair or rerun before acceptance |
+
+#### Academic Basis
+**Primary source**: Project Level-2 quality standard. API outputs must be structurally valid before economic interpretation.
+
+#### Normal Range (from literature)
+Not applicable; project quality gate is used.
+
+#### Red Flag Threshold
+- **Fallback rate > 1%**: review before acceptance.
+- **Missing `rag_stats.json`**: RAG output is not auditable.
+
+#### Relationship to Other Metrics
+Economic metrics are not trusted if API behavior is malformed.
+
+#### Implementation Notes
+RAG stats are produced by `Rag/analysis.py`; broader API quality is checked by experiment audit tools.
 
 ## §3 Analysis Dimensions
 
-| Dimension          | Primary Metric | Secondary Metrics |
-|--------------------|----------------|-------------------|
-| Bubble height      | BAI (§2.1)     | BD (§2.2)         |
-| Bubble persistence | BD (§2.2)      | MAF (§2.4)        |
-| Crash severity     | CS (§2.3)      | RT (§2.6)         |
-| Momentum channel   | MAF (§2.4)     | BD (§2.2)         |
-| Short seller role  | SSR (§2.5)     | WDI (§2.7)        |
-| Recovery dynamics  | RT (§2.6)      | CS (§2.3)         |
-| Wealth outcomes    | WDI (§2.7)     | —                 |
+| Dimension | Primary Metrics | Interpretation |
+|---|---|---|
+| Bubble height | BAI, BD | overvaluation and persistence |
+| Crash severity | CS, RT | reversal and recovery lifecycle |
+| Momentum channel | MAF, volatility | trend-following contribution |
+| Arbitrage limits | SSR, wealth divergence | stabilizer pressure and timing risk |
+| API quality | AQR | behavioral validity of LLM-family variants |
 
-## §4 Phase Analysis
+## §4 Phase Analysis Framework
 
-### Bubble Inflation Phase (δ > 0.10)
+| Phase | Entry Condition | Expected Indicators | Metrics |
+|---|---|---|---|
+| Narrative Build-Up | early rounds and rising deviation | evangelist and momentum buying | BAI, MAF |
+| Bubble Peak | maximum positive deviation | flipper/value/short selling begins | BAI, SSR |
+| Crash | price falls from peak | momentum turns negative and evangelist capitulates | CS |
+| Recovery | price moves back toward fundamental | value buying and short covering | RT |
 
-- **Expected**: NewEconomyEvangelist buys regardless of price; MomentumFollower amplifies; IPOFlipper flips at δ > 0.05.
-- **Metrics**: BAI builds; BD counts rounds; MAF measures momentum contribution.
-- **Warning sign**: MAF > 0.5 → momentum self-reinforcing; crash likely to be sudden.
+## §5 Cross-Variant Comparison Framework
 
-### Peak Phase (BAI maximum)
+| Variant | Baseline Role | Comparison Question | Quality Gate |
+|---|---|---|---|
+| Rule | deterministic threshold baseline | do fixed rules produce a bubble lifecycle? | full output contract |
+| LLM | persona-only reasoning | does narrative language amplify overvaluation? | API output audit |
+| RuleLLM | explicit rule knowledge plus persona | does rule grounding keep behavior near baseline? | API output audit |
+| Rag | historically informed API reasoning | does retrieved bubble history change timing? | API output audit and `rag_stats.json` |
 
-- **Expected**: SkepticalValueInvestor begins selling at δ > 0.20; ShortSeller selling at δ > 0.15.
-- **Metrics**: SSR measures if short sellers hold positions; WDI direction determined here.
+## §6 Expected Results And Validation
 
-### Crash Phase (rapid δ decline)
+### §6.1 Stylised Facts
 
-- **Expected**: NewEconomyEvangelist finally sells at δ < −0.30; MomentumFollower sells on negative momentum; IPOFlipper sells.
-- **Metrics**: CS measured from peak; RT tracking begins at trough.
+| Stylised Fact | Target | Source | Verification Method | Failure Indicator |
+|---|---|---|---|---|
+| Narrative demand creates overvaluation | positive BAI | Shiller (2000) | price deviation | price never exceeds fundamental |
+| Bubble persists before crash | BD above zero | Abreu & Brunnermeier (2003) | duration count | one-round spike only |
+| Momentum amplifies movement | nonzero MAF | Jegadeesh & Titman (1993) | agent volume audit | momentum follower inactive |
+| Crash follows peak | material CS | Ofek & Richardson (2003) | post-peak drawdown | no post-peak drawdown |
+| API/RAG output is auditable | low API issue rate; `rag_stats.json` for Rag | project quality gate | audit scripts | malformed output or missing retrieval stats |
 
-### Recovery Phase (δ approaching 0)
+### §6.2 Calibration Targets
 
-- **Expected**: SkepticalValueInvestor buys at δ < −0.10; ShortSeller covers at δ < −0.05.
-- **Metrics**: RT measured; final WDI computed.
+| Metric | Target | Diagnostic Bound |
+|---|---|---|
+| BAI | `>= 0.10` visible bubble | `> 2.0` review calibration |
+| BD | `> 15` rounds preferred | `0` indicates no bubble |
+| CS | `0.30 to 0.80` broad crash range | `> 0.90` review numerical stability |
+| SSR | nonzero in overvaluation rounds | zero means short seller inactive |
+| AQR | clean preferred; `<=1%` issue rate with note | `>1%` review before acceptance |
 
-## §5 Cross-Variant Comparison
+Calibration protocol: verify run completion, compute price metrics, audit investor actions by `agent_type`, run API/RAG quality checks, and compare variants only after structural quality passes.
 
-| Metric | Rule (Expected)              | LLM (Expected)                                 | RuleLLM (Expected) | Rag (Expected)                                  |
-|--------|------------------------------|------------------------------------------------|--------------------|-------------------------------------------------|
-| BAI    | ≈ 0.5–1.5 (mechanical)       | Higher; LLM narrative conviction drives bubble | Close to Rule      | RAG historical cases may moderate overvaluation |
-| BD     | Parameter-driven             | LLM may prolong bubble (narrative persistence) | Close to Rule      | RAG bubble-burst timing may shorten BD          |
-| CS     | Parameter-driven (≈ 0.5–0.7) | May be more severe (LLM panic)                 | Close to Rule      | RAG crash history may moderate panic            |
-| MAF    | Deterministic                | LLM may show trend-following amplification     | Close to Rule      | RAG momentum literature may calibrate MAF       |
-| SSR    | Threshold-based (≈ 0.5)      | LLM short seller may capitulate (squeeze)      | Close to Rule      | RAG synchronization risk knowledge improves SSR |
+### §6.3 Cross-Variant Predictions
 
-## §6 Expected Results
+| Variant | Expected Metric Direction | Basis |
+|---|---|---|
+| Rule | reproducible BAI/BD/CS from thresholds | deterministic rules |
+| LLM | possibly higher BAI or longer BD | narrative language conviction |
+| RuleLLM | closer to Rule than LLM | explicit threshold grounding |
+| Rag | may reduce excessive BAI or shorten BD | historical crash context |
 
-**Rule baseline**:
-- BAI ≈ 0.5–1.5 (50–150% above fundamental)
-- BD ≈ 20–50 rounds
-- CS ≈ 0.4–0.7 (40–70% crash)
-- MAF ≈ 0.3–0.5
-- WDI near-zero or slightly negative (stabilizing agents partially vindicated)
+### §6.4 Validation Failure Signs
 
-**Calibration targets**:
-- BAI: 0.5–1.5 (realistic bubble range)
-- CS: 0.5–0.8 (matching dot-com historical range)
-- BD: > 15 rounds (bubble must persist meaningfully)
+| Symptom | Diagnosis | Root Cause | Corrective Action |
+|---|---|---|---|
+| no bubble | narrative/momentum channel weak | cash/order routing/threshold issue | inspect configs and order payloads |
+| no crash | stabilizers too weak or mean reversion too smooth | thresholds or order sizes | inspect value/short/momentum behavior |
+| missing `agent_type` | action attribution impossible | non-canonical order payload | repair order construction |
+| missing `rag_stats.json` | retrieval not auditable | no `rag_context` records | repair Rag player/analysis |
+| high API failure rate | behavioral sample weak | prompt/parser/provider issue | repair or rerun under quality gate |
 
 ## §7 Visualization Catalogue
 
-| Chart                     | X-axis         | Y-axis             | Purpose                        |
-|---------------------------|----------------|--------------------|--------------------------------|
-| Price trajectory          | Round          | Price              | Bubble inflation and crash     |
-| Deviation trajectory      | Round          | δ(t)               | Phase identification           |
-| Agent buy/sell volume     | Round          | Volume by agent    | Attribution analysis           |
-| BAI distribution          | Simulation run | BAI value          | Cross-variant comparison       |
-| Bubble duration histogram | Simulation run | BD value           | Persistence comparison         |
-| Crash severity box plot   | Variant        | CS value           | Cross-variant crash comparison |
-| Short seller wealth       | Round          | ShortSeller wealth | Squeeze visualization          |
-| WDI by variant            | Variant        | WDI value          | Wealth transfer comparison     |
+| Plot | Generated By | Purpose |
+|---|---|---|
+| `00_investor_bids.png` | `create_standard_visualizations()` | investor bidding curves against price |
+| `01_dotcombubble_dynamics.png` | `create_standard_visualizations()` | price and fundamental dynamics |
+| `02_dotcombubble_analysis.png` | `create_standard_visualizations()` | deviation, volume, and returns |
+| `03_summary.png` | `create_standard_visualizations()` | standard scenario summary panel |
+| `rag_stats.json` | `Rag/analysis.py::analyze_rag_knowledge_effect()` | RAG retrieval coverage audit |

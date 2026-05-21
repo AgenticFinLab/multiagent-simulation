@@ -69,12 +69,13 @@ RAG query: `f"dot-com bubble trading: price={price:.2f}, fundamental={fundamenta
 | Retrieval       | `KnowledgeQuery(text=query, top_k=3, round_num=round)`         |
 | Inference       | `LangChainAPIInference`                                        |
 | Context         | `HistoryBuffer` (last 200 entries)                             |
-| Output parsing  | `parse_llm_response_with_thinking()` → `{action, quantity}`    |
-| Retry logic     | 3 attempts; fall back to hold on failure                       |
+| Output parsing  | `parse_llm_response_with_thinking()` → canonical order fields: `action`, `bid_price`, `quantity`, `reasoning` |
+| Retry logic     | 3 attempts; fail fast if the provider or parser cannot produce the required contract |
+| RAG artifacts   | records `rag_context` in decision payloads and writes `rag_stats.json` during analysis |
 
 ## §5 Config Reference
 
-Config file: `DotComBubble/Rag/config.yaml`
+Config files: `configs/DotComBubble/Rag/{simulation.yml,players.yml,topology.yml,persona.yml}`
 
 Key extras: `llm.lm_name`, `llm.generation_config`, `initial_cash`, `initial_position`; `rag.docs_dir`, `rag.top_k`, `rag.embed_model`, `rag.shared_rag_index_dir`.
 

@@ -51,6 +51,6 @@ See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md
 ## §7 Quality Checks
 
 - Confirm the run completed the configured 200 rounds.
-- Audit parse failures, retry counts, and fallback holds before acceptance.
+- Audit parse failures and retry counts before acceptance; deterministic parser or provider failures should fail fast rather than become hidden holds.
 - Confirm accepted decisions produce valid `action` and numeric `quantity` fields.
 - Review action distribution for excessive holds that would indicate unusable output quality.
