@@ -169,6 +169,7 @@ class BaseInvestor(GeneralPlayer):
 class TrendChaser(BaseInvestor):
     """Buys assets purely because prices are rising, regardless of intrinsic value.
 
+    Theory: simulation-bases.md §4.1
     Theoretical Basis: Greater fool theory (Mackay, 1841)
     Market Role: destabilizing
     """
@@ -194,6 +195,7 @@ class TrendChaser(BaseInvestor):
 class SocialProofFollower(BaseInvestor):
     """Follows crowd into speculative positions because everyone else is doing it.
 
+    Theory: simulation-bases.md §4.2
     Theoretical Basis: Social proof and crowd psychology (Mackay, 1841)
     Market Role: destabilizing
     """
@@ -219,6 +221,7 @@ class SocialProofFollower(BaseInvestor):
 class IntrinsicValueTrader(BaseInvestor):
     """Values assets by intrinsic utility, sells when price far exceeds use value.
 
+    Theory: simulation-bases.md §4.3
     Theoretical Basis: Fundamental value discipline (Garber, 2000)
     Market Role: stabilizing
     """
@@ -244,6 +247,7 @@ class IntrinsicValueTrader(BaseInvestor):
 class EarlyExitTrader(BaseInvestor):
     """Recognizes speculative excess early and exits before the crash.
 
+    Theory: simulation-bases.md §4.4
     Theoretical Basis: Rational bubble riding (Thompson, 2007)
     Market Role: stabilizing
     """
@@ -269,6 +273,7 @@ class EarlyExitTrader(BaseInvestor):
 class NoiseTrader(BaseInvestor):
     """Random uninformed trader providing baseline liquidity.
 
+    Theory: simulation-bases.md §4.5
     Theoretical Basis: Noise trader model (Black, 1986)
     Market Role: neutral
     """

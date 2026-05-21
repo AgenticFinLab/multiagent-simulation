@@ -2,76 +2,37 @@
 
 ## §1 Overview
 
-| Field | Value |
-|---|---|
-| Variant | Rule |
-| Simulation | Tulip Mania |
-| Decision Mechanism | deterministic rule-based trading orders |
-| Theory Reference | `examples/TulipMania/simulation-bases.md` |
-| Market Broadcast | `configs/TulipMania/Rule/topology.yml` |
-
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+The Rule variant is the deterministic baseline for the TulipMania current-market
+quantity schema. It preserves the market mechanism and investor formulas
+defined in `simulation-bases.md`.
 
 ## §2 Theory -> Implementation Mapping
 
-### §2.1 TrendChaser (simulation-bases.md §4.1)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `TrendChaser` in `examples/TulipMania/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.2 SocialProofFollower (simulation-bases.md §4.2)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `SocialProofFollower` in `examples/TulipMania/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.3 IntrinsicValueTrader (simulation-bases.md §4.3)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `IntrinsicValueTrader` in `examples/TulipMania/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.4 EarlyExitTrader (simulation-bases.md §4.4)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `EarlyExitTrader` in `examples/TulipMania/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.5 NoiseTrader (simulation-bases.md §4.5)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `NoiseTrader` in `examples/TulipMania/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/TulipMania/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Investor | Theory Component | Implementation |
+|---|---|---|
+| `TrendChaser` | `simulation-bases.md §4.1` positive-feedback demand | `TrendChaser._make_decision` buys positive deviation and sells negative deviation. |
+| `SocialProofFollower` | `simulation-bases.md §4.2` social-proof demand | `SocialProofFollower._make_decision` uses the same formula interpreted as crowd validation. |
+| `IntrinsicValueTrader` | `simulation-bases.md §4.3` intrinsic-value resistance | `IntrinsicValueTrader._make_decision` buys discounts and sells overvaluation. |
+| `EarlyExitTrader` | `simulation-bases.md §4.4` strategic early exit | `EarlyExitTrader._make_decision` sells large overvaluation as peak-exit pressure. |
+| `NoiseTrader` | `simulation-bases.md §4.5` stochastic liquidity | `NoiseTrader._make_decision` samples occasional random buy/sell orders. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/TulipMania/Rule/players.py` and its configured counterpart in `configs/TulipMania/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+`Market` in `examples/TulipMania/Rule/players.py` aggregates buy and sell
+quantities and updates price through price impact, mean reversion, and Gaussian
+noise. It consumes only `action` and `quantity`; no `bid_price` field is used.
 
 ## §4 Variant Architecture
 
-| Component | Implementation |
-|---|---|
-| Player classes | `examples/TulipMania/Rule/players.py` |
-| Prompt module | Not applicable for Rule baseline |
-| Inference | No remote model call is used in the Rule baseline. |
-| Output parsing | Direct deterministic decision construction |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+The coordinator is `Market`; investors inherit `BaseInvestor`; deterministic
+decisions are constructed directly in Python. The output order is a
+current-market quantity order sent through `investor_order` messages.
 
 ## §5 Config Reference
 
-| Config | Purpose |
-|---|---|
-| `configs/TulipMania/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/TulipMania/Rule/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/TulipMania/Rule/topology.yml` | Message routing between coordinator and agents. |
-| `configs/TulipMania/Rule/persona.yml` | Turn recording and persona metadata. |
+`configs/TulipMania/Rule/simulation.yml` sets the 200-round experiment entry.
+`players.yml` binds player classes and initial portfolios. `topology.yml`
+routes market broadcasts to investors and investor orders back to the market.
 
 ## §6 Running Instructions
 
@@ -81,15 +42,17 @@ python examples/TulipMania/Rule/run_tulipmania.py -c configs/TulipMania/Rule/sim
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+Trend and social-proof demand should lift prices when positive deviation grows.
+Intrinsic-value and early-exit traders should generate selling pressure when
+prices are materially above the intrinsic anchor. Noise traders add background
+volume.
 
 ## §8 References
 
-See `examples/TulipMania/simulation-bases.md §2` for full DOI citations and mechanism references.
+The theoretical basis is listed in `simulation-bases.md §2`; investor-specific
+references are mapped in `simulation-bases.md §4`.
 
 ## §9 Variant Comparison
 
-See `examples/TulipMania/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+This variant is the baseline for comparing stochastic LLM, RuleLLM, and Rag
+decision mechanisms under the same market and order schema.
