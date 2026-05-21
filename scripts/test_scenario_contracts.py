@@ -417,7 +417,11 @@ class ScenarioContractTest(unittest.TestCase):
             text = path.read_text(encoding="utf-8")
             if "is_retryable_llm_error" not in text:
                 missing.append(f"{path.relative_to(ROOT)}:retryable")
-            if "LLM fallback hold after retries" not in text and "LLM parse failed" not in text:
+            has_audited_fallback = (
+                "LLM fallback hold after retries" in text or "LLM parse failed" in text
+            )
+            has_fail_fast_contract = "LLM decision contract failed after" in text
+            if not has_audited_fallback and not has_fail_fast_contract:
                 missing.append(f"{path.relative_to(ROOT)}:fallback")
 
         self.assertEqual(
