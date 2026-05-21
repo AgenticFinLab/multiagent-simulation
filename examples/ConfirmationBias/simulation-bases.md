@@ -95,7 +95,7 @@ Note: Crucially, the deviation signal is the same for all agents — confirmatio
 
 ## §4 Investor Taxonomy
 
-### Investor: BeliefAnchor
+### §4.1 BeliefAnchor
 
 #### 4.1.1  Summary
 
@@ -204,7 +204,7 @@ Rationale: The 2.5% positive deviation confirms BeliefAnchor's bullish prior; be
 
 ---
 
-### Investor: SelectiveScanner
+### §4.2 SelectiveScanner
 
 #### 4.2.1  Summary
 
@@ -303,7 +303,7 @@ Confirming buy: Q = 600. Order: buy 600. Rationale: Market confirming SelectiveS
 
 ---
 
-### Investor: BalancedAnalyst
+### §4.3 BalancedAnalyst
 
 #### 4.3.1  Summary
 
@@ -374,7 +374,7 @@ Market state: price = 93.5, deviation = −0.065. Trigger: −0.065 < −0.05 �
 
 ---
 
-### Investor: ContrarianTrader
+### §4.4 ContrarianTrader
 
 #### 4.4.1  Summary
 
@@ -434,7 +434,7 @@ Market state: deviation = +0.08. Trigger: sell. Q = 500. Rationale: 8% overvalua
 
 ---
 
-### Investor: NoiseTrader
+### §4.5 NoiseTrader
 
 #### 4.5.1  Summary
 
@@ -445,7 +445,14 @@ Random, uninformed background trader — provides stochastic variation and backg
 - Citation: Black, F. (1986). "Noise." *Journal of Finance*, 41(3), 529–543. DOI: 10.2307/2328481
 - trade_probability = 0.30 calibrated to retail participation in behavioral markets.
 
-#### 4.5.3  Behavioral Framework
+#### 4.5.3  Design Purpose and Activation Scenarios
+
+The NoiseTrader supplies non-informational order flow so confirmation-bias dynamics
+are not a perfectly deterministic interaction between biased and stabilizing
+agents. It activates independently of market fundamentals and keeps the market
+microstructure comparable with other behavioral-bias scenarios.
+
+#### 4.5.4  Behavioral Framework
 
 P(trade) = 0.30; direction 50/50; Q ~ Uniform(100, 500).
 
@@ -454,6 +461,27 @@ P(trade) = 0.30; direction 50/50; Q ~ Uniform(100, 500).
 | trade_probability | 0.30  | Black (1986) |
 | min_order         | 100   | Convention   |
 | max_order         | 500   | Convention   |
+
+#### 4.5.5  Decision Process Walkthrough
+
+1. Draw a Bernoulli trade decision with probability 0.30.
+2. If no trade is drawn, submit a hold order with zero quantity.
+3. If a trade is drawn, choose buy or sell with equal probability.
+4. Draw quantity uniformly from 100 to 500 shares, then apply cash or position
+   limits before submitting the order.
+
+#### 4.5.6  Worked Numerical Example
+
+Given price = 100, cash = 20,000, position = 0, and a buy draw with quantity
+350, the NoiseTrader submits `action=buy`, `quantity=200` after applying the
+cash constraint. If the draw is sell with zero position, quantity is constrained
+to zero and the order becomes hold-equivalent.
+
+#### 4.5.7  Academic References
+
+| # | Reference | Use |
+|---|-----------|-----|
+| 1 | Black, F. (1986). "Noise." *Journal of Finance*, 41(3), 529–543. DOI: 10.2307/2328481 | Uninformed trading and background liquidity |
 
 
 ## §5 Agent Diversity Verification

@@ -10,11 +10,20 @@ bias-like behavior without an explicit belief state variable?*
 
 ## §2 Metric Implementation (`LLM/analysis.py`)
 
-Imports `calculate_metrics`, `load_simulation_data`, `create_visualizations` from
-`Rule/analysis.py` (DRY pattern). Adds LLM-specific action-distribution plot.
-
-All 7 core metrics from analysis-bases.md §2 apply identically.
+Imports the shared metric and visualization functions from `Rule/analysis.py`
+(DRY pattern). All 7 core metrics from `analysis-bases.md §2.1` through
+`analysis-bases.md §2.7` apply identically.
 See `Rule/analysis.md §2` for metric formulas.
+
+| Metric | Implementation | Reference |
+|---|---|---|
+| `bias_amplitude_pct` | `analyze_confirmation_bias()` | `analysis-bases.md §2.1` |
+| `bias_persistence` | `analyze_confirmation_bias()` | `analysis-bases.md §2.2` |
+| `mean_absolute_deviation_pct` | Shared price-deviation calculations | `analysis-bases.md §2.3` |
+| `belief_flip_count` | LLM reasoning/action proxy interpretation | `analysis-bases.md §2.4` |
+| `correction_ratio` | `analyze_confirmation_bias()` | `analysis-bases.md §2.5` |
+| `return_autocorrelation_ac1` | `analyze_confirmation_bias()` | `analysis-bases.md §2.6` |
+| `annualized_vol_pct` | Shared return-volatility calculations | `analysis-bases.md §2.7` |
 
 ---
 
@@ -22,11 +31,13 @@ See `Rule/analysis.md §2` for metric formulas.
 
 Running `LLM/analysis.py` writes to `EXPERIMENT/ConfirmationBias/LLM/records/analysis/`:
 
-| File                                | Contents                                           |
-|-------------------------------------|----------------------------------------------------|
-| `confirmationbias_llm_analysis.png` | 2×2 chart: price, deviation, returns, distribution |
-| `confirmationbias_llm_actions.png`  | Bar chart: buy/sell/hold counts per agent          |
-| `summary.json`                      | `{variant: "LLM", ...metrics}`                     |
+| File                               | Contents                                  |
+|------------------------------------|-------------------------------------------|
+| `summary.json`                     | Metrics and validation result             |
+| `00_investor_bids.png`             | Market price and per-agent bid traces     |
+| `01_confirmationbias_dynamics.png` | Price/fundamental and deviation dynamics  |
+| `02_confirmationbias_analysis.png` | Volatility and cumulative bias diagnostics|
+| `03_summary.png`                   | Agent VWAP and trading-volume summary     |
 
 ---
 

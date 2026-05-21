@@ -29,6 +29,26 @@ from masim.utils.history import HistoryBuffer
 logger = logging.getLogger(__name__)
 
 
+def _canonical_order(
+    player: GeneralPlayer,
+    action: str,
+    quantity: int,
+    price: float,
+    reasoning: str,
+) -> Dict[str, Any]:
+    """Build the canonical order payload recorded and consumed by the market."""
+    return {
+        "type": "order",
+        "from": player.identity,
+        "action": action,
+        "bid_price": price,
+        "quantity": quantity,
+        "reasoning": reasoning,
+        "agent_type": player.__class__.__name__,
+        "strategy": player.__class__.__name__,
+    }
+
+
 class Market(GeneralPlayer):
     """Market agent — clears orders and broadcasts price each round."""
 
@@ -62,8 +82,15 @@ class Market(GeneralPlayer):
 
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        buy_vol = sum(o["quantity"] for o in orders if o["action"] == "buy")
-        sell_vol = sum(o["quantity"] for o in orders if o["action"] == "sell")
+        normalized_orders = [
+            order["order"] if "order" in order else order for order in orders
+        ]
+        buy_vol = sum(
+            o["quantity"] for o in normalized_orders if o["action"] == "buy"
+        )
+        sell_vol = sum(
+            o["quantity"] for o in normalized_orders if o["action"] == "sell"
+        )
         net_demand = buy_vol - sell_vol
 
         price_change = self.state.custom_state["price_impact"] * net_demand
@@ -166,12 +193,23 @@ class BeliefAnchor(GeneralPlayer):
             if sell_qty > 0:
                 action, quantity = "sell", sell_qty
 
+        order = _canonical_order(
+            self,
+            action,
+            quantity,
+            price,
+            f"Belief state {belief:.3f} generated a {action} decision.",
+        )
         return {
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": order["reasoning"],
+            "agent_type": order["agent_type"],
+            "strategy": order["strategy"],
             "outbound_messages": [
                 {
-                    "payload": {"action": action, "quantity": quantity},
+                    "payload": order,
                     "content_type": "order",
                 }
             ],
@@ -242,12 +280,23 @@ class SelectiveScanner(GeneralPlayer):
             if sell_qty > 0:
                 action, quantity = "sell", sell_qty
 
+        order = _canonical_order(
+            self,
+            action,
+            quantity,
+            price,
+            f"Selective scan threshold response produced {action}.",
+        )
         return {
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": order["reasoning"],
+            "agent_type": order["agent_type"],
+            "strategy": order["strategy"],
             "outbound_messages": [
                 {
-                    "payload": {"action": action, "quantity": quantity},
+                    "payload": order,
                     "content_type": "order",
                 }
             ],
@@ -315,12 +364,23 @@ class BalancedAnalyst(GeneralPlayer):
             if sell_qty > 0:
                 action, quantity = "sell", sell_qty
 
+        order = _canonical_order(
+            self,
+            action,
+            quantity,
+            price,
+            f"Balanced fundamental threshold response produced {action}.",
+        )
         return {
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": order["reasoning"],
+            "agent_type": order["agent_type"],
+            "strategy": order["strategy"],
             "outbound_messages": [
                 {
-                    "payload": {"action": action, "quantity": quantity},
+                    "payload": order,
                     "content_type": "order",
                 }
             ],
@@ -389,12 +449,23 @@ class ContrarianTrader(GeneralPlayer):
             if buy_qty > 0:
                 action, quantity = "buy", buy_qty
 
+        order = _canonical_order(
+            self,
+            action,
+            quantity,
+            price,
+            f"Contrarian threshold response produced {action}.",
+        )
         return {
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": order["reasoning"],
+            "agent_type": order["agent_type"],
+            "strategy": order["strategy"],
             "outbound_messages": [
                 {
-                    "payload": {"action": action, "quantity": quantity},
+                    "payload": order,
                     "content_type": "order",
                 }
             ],
@@ -461,12 +532,23 @@ class NoiseTrader(GeneralPlayer):
             if qty > 0:
                 action, quantity = side, qty
 
+        order = _canonical_order(
+            self,
+            action,
+            quantity,
+            price,
+            f"Noise trader stochastic branch produced {action}.",
+        )
         return {
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": order["reasoning"],
+            "agent_type": order["agent_type"],
+            "strategy": order["strategy"],
             "outbound_messages": [
                 {
-                    "payload": {"action": action, "quantity": quantity},
+                    "payload": order,
                     "content_type": "order",
                 }
             ],

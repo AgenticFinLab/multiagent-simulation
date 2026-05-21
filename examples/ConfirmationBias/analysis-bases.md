@@ -14,11 +14,12 @@
 
 ## §2 Core Metrics Catalogue
 
-### Metric 1: Bias Amplitude (%)
+### §2.1 Bias Amplitude (%)
 
 - **Category**: Price Dynamics / Bias Severity
 - **Definition**: Maximum absolute deviation of market price from fundamental value over the entire simulation run, expressed as a percentage of fundamental value
 - **Formula**: bias_amplitude_pct = max_t( |P(t) − F| / F ) × 100
+- **Function Signature**: `def compute_bias_amplitude_pct(price_history: list[float], fundamental: float) -> float`
 
 **Derivation Rationale**: Bias amplitude is the primary observable consequence of confirmation bias in asset pricing. Unlike crash simulations where the peak drawdown measures a one-directional collapse, bias amplitude measures the maximum excursion from fair value in either direction — the price can be persistently above OR below fundamental depending on whether BeliefAnchor's initial belief is positive or negative. Nickerson (1998) and Lord et al. (1979) document confirmation bias producing sustained mispricing of 5–15% in controlled experimental studies; Hong & Stein (1999) calibrate momentum effects producing 4–6% annual excess returns, consistent with sustained deviations of 2–8% in short-horizon trading simulations. The max-over-time operator captures the peak bias before any partial correction by BalancedAnalyst and ContrarianTrader.
 
@@ -34,11 +35,12 @@
 
 ---
 
-### Metric 2: Bias Persistence (Rounds)
+### §2.2 Bias Persistence (Rounds)
 
 - **Category**: Phenomenon-Specific / Temporal Dynamics
 - **Definition**: Number of simulation rounds during which the absolute price deviation exceeds the persistence threshold (BIAS_THRESHOLD = 0.02), i.e., price remains more than 2% from fundamental
 - **Formula**: bias_persistence = |{t : |deviation(t)| > 0.02}|
+- **Function Signature**: `def compute_bias_persistence(price_history: list[float], fundamental: float, threshold: float = 0.02) -> int`
 
 **Derivation Rationale**: Persistence is the defining temporal feature that distinguishes confirmation bias dynamics from other behavioral phenomena. Availability bias (single-event recency) tends to generate one-off spikes that decay within a few rounds; anchoring generates bounded errors that converge as new information accumulates. Confirmation bias, by contrast, is self-reinforcing: each round of confirming price movement strengthens BeliefAnchor's belief state, which increases demand, which sustains the deviation, which constitutes another confirming signal. Rabin & Schrag (1999) formally prove this self-reinforcing loop can produce permanent bias in infinite-horizon settings. The BIAS_THRESHOLD of 2% corresponds to 1 standard deviation of the noise process (σ = 0.02 × √100 rounds ≈ 0.20 annual), ensuring only genuine bias persistence (not noise fluctuations) is counted. Persistence > 30 rounds in a 100-round simulation indicates BeliefAnchor's belief is consistently above 0.5 (buy trigger) for most of the simulation.
 
@@ -54,11 +56,12 @@
 
 ---
 
-### Metric 3: Mean Absolute Deviation (%)
+### §2.3 Mean Absolute Deviation (%)
 
 - **Category**: Price Dynamics / Average Mispricing
 - **Definition**: Time-averaged absolute price deviation from fundamental value, expressed as percentage; measures sustained mispricing across the entire run rather than peak deviation alone
 - **Formula**: mean_absolute_deviation_pct = (1/T) × Σ_t |deviation(t)| × 100, where deviation(t) = (P(t) − F) / F
+- **Function Signature**: `def compute_mean_absolute_deviation_pct(price_history: list[float], fundamental: float) -> float`
 
 **Derivation Rationale**: While bias_amplitude captures the peak, mean_absolute_deviation measures the integrated economic cost of the bias — the average mispricing any investor encounters across the simulation. For persistent confirmation bias, MAD should be substantially non-zero (close to bias_amplitude) because the price remains far from fundamental for many rounds. For transient biases (anchoring, availability), MAD is much lower than peak amplitude because the price only briefly deviates. The ratio MAD / bias_amplitude is thus an indicator of persistence structure: ratio > 0.4 signals sustained bias consistent with confirmation bias; ratio < 0.2 signals spike-and-return characteristic of availability bias. Summers (1986) argues that market efficiency tests based on time-averaged deviations are more powerful than single-observation tests, motivating MAD as a cross-variant comparison metric.
 
@@ -74,11 +77,12 @@
 
 ---
 
-### Metric 4: Belief Flip Count
+### §2.4 Belief Flip Count
 
 - **Category**: Phenomenon-Specific / Belief State Dynamics
 - **Definition**: Number of times BeliefAnchor's internal `belief` variable changes sign (positive → negative or vice versa) across the simulation run; measures belief stability
 - **Formula**: belief_flip_count = Σ_{t=1}^{T-1} 𝟏[sign(belief(t+1)) ≠ sign(belief(t))]
+- **Function Signature**: `def compute_belief_flip_count(belief_history: list[float]) -> int`
 
 **Derivation Rationale**: The belief flip count is a simulation-unique metric enabled by BeliefAnchor's observable persistent internal state — the only cross-round state variable in the entire simulation suite. A flip represents a reversal in BeliefAnchor's directional conviction: from bullish (belief > 0) to bearish (belief < 0) or vice versa. In the Rabin-Schrag model, with high confirmation strength (q = 0.7), belief reversals should be rare because: (1) confirming signals amplify belief rapidly, making it hard to reverse; (2) disconfirming signals decay slowly (decay factor 0.95), preventing fast reversal. Lord et al. (1979) document that experimental subjects virtually never reversed their positions when exposed to mixed evidence — consistent with belief_flip_count ≈ 0–2 in a strong-bias run. A high flip count (> 5) suggests noise dominates over belief compounding, and the simulation is not generating authentic confirmation bias dynamics.
 
@@ -94,11 +98,12 @@
 
 ---
 
-### Metric 5: Correction Ratio
+### §2.5 Correction Ratio
 
 - **Category**: Phenomenon-Specific / Correction Effectiveness
 - **Definition**: Fraction of peak bias deviation that is recovered by the end of the simulation; measures the net effectiveness of stabilizing agents (BalancedAnalyst + ContrarianTrader) and mean reversion against persistent bias
 - **Formula**: correction_ratio = (bias_amplitude − |deviation(T)|) / bias_amplitude, where deviation(T) is the final-round deviation
+- **Function Signature**: `def compute_correction_ratio(price_history: list[float], fundamental: float) -> float`
 - **Bounds**: [0, 1]; correction_ratio = 1 means full correction; correction_ratio = 0 means no correction (terminal price equals peak bias price)
 
 **Derivation Rationale**: The correction ratio directly operationalizes the competition between biased agents (BeliefAnchor + SelectiveScanner, combined 1100 units) and corrective forces (BalancedAnalyst + ContrarianTrader combined 900 units + γ mean-reversion force). Because 1100 > 900, the bias dominance condition is satisfied and the simulation is designed to produce incomplete correction — correction_ratio < 0.5 in most runs. This asymmetry mirrors empirical findings from behavioral finance: Hong & Stein (1999) show that arbitrage forces (analogous to stabilizers here) can never fully eliminate bias-driven mispricing because: (1) arbitrage capacity is capital-limited; (2) the bias self-reinforces through belief compounding; (3) stabilizers bear fundamental risk if the price temporarily moves against them. The correction ratio serves as the key cross-variant comparison: if LLM or Rag variants produce higher correction_ratio, it indicates these variants' stabilizing agents behave more effectively than the mechanical Rule baseline.
@@ -115,11 +120,12 @@
 
 ---
 
-### Metric 6: Return Autocorrelation AC(1)
+### §2.6 Return Autocorrelation AC(1)
 
 - **Category**: Price Dynamics / Momentum Fingerprint
 - **Definition**: First-order serial correlation of single-round returns, measuring whether positive returns are followed by positive returns (positive AC(1)) or reversed (negative AC(1))
 - **Formula**: r(t) = (P(t+1) − P(t)) / P(t); AC(1) = corr(r[0:T-1], r[1:T])
+- **Function Signature**: `def compute_return_autocorrelation_ac1(price_history: list[float]) -> float`
 
 **Derivation Rationale**: Return autocorrelation is the statistical fingerprint that distinguishes confirmation bias dynamics from other phenomena. Because BeliefAnchor accumulates a belief that compounds with confirming signals, the simulation generates positive feedback: a positive return at t strengthens BeliefAnchor's bullish belief, leading to more buying at t+1, which tends to produce another positive return. This is precisely the mechanism that Jegadeesh & Titman (1993) identify as the source of momentum profits: short-horizon positive return autocorrelation lasting 3–12 months. AC(1) > 0 is the confirmation bias simulation's "momentum signature." Conversely, ContrarianTrader's mean-reverting trades push toward negative AC(1), creating a tension that is resolved in favor of positive AC(1) when the bias dominance condition holds (1100 > 900). The magnitude of AC(1) serves as a natural measure of how strongly confirmation bias is embedding momentum into price dynamics relative to mean-reverting forces.
 
@@ -135,11 +141,12 @@
 
 ---
 
-### Metric 7: Annualized Volatility (%)
+### §2.7 Annualized Volatility (%)
 
 - **Category**: Price Dynamics / Risk Level
 - **Definition**: Annualized standard deviation of per-round returns, converted to percentage
 - **Formula**: annualized_vol_pct = std(r) × √252 × 100, where r(t) = (P(t+1) − P(t)) / P(t)
+- **Function Signature**: `def compute_annualized_volatility_pct(price_history: list[float], periods_per_year: int = 252) -> float`
 
 **Derivation Rationale**: Volatility serves as the regime classifier that separates confirmation bias dynamics (moderate volatility, 5–15%) from crash simulations (high volatility, > 30%). Confirmation bias produces sustained drift rather than explosive dynamics: BeliefAnchor buys steadily each round (belief > 0.5 consistently), creating a gradual price trend rather than violent swings. This contrasts with BlackMonday1987 (positive feedback cascade → volatility > 40%) and CarryTradeUnwind (forced liquidation → volatility > 25%). Schwert (1989) documents that cognitive-bias-driven periods (such as extended bull markets driven by narrative) show elevated but not extreme volatility — typically 15–25% annualized — while crash episodes show 40–80% annualized volatility. The simulation's σ = 0.02 per round corresponds to 0.02 × √252 ≈ 32% annualized from noise alone; observed volatility in the simulation should be 15–25% (reduced below noise prediction because belief-driven demand creates systematic trend that reduces apparent variability).
 
@@ -337,10 +344,10 @@ Expected metric ordering across variants (from most to least bias-consistent):
 
 | Variant | Main PNG                                               | JSON Output                                  |
 |---------|--------------------------------------------------------|----------------------------------------------|
-| Rule    | `confirmationbias_rule_analysis.png`                   | `metrics.json`                               |
-| LLM     | `confirmationbias_llm_analysis.png` + `_actions.png`   | `summary.json`                               |
-| RuleLLM | `confirmationbias_rulellm_analysis.png`                | `summary.json`                               |
-| Rag     | `confirmationbias_rag_analysis.png` + `_retrieval.png` | `summary.json` + `rag_knowledge_effect.json` |
+| Rule    | `00_investor_bids.png`, `01_confirmationbias_dynamics.png`, `02_confirmationbias_analysis.png`, `03_summary.png` | `summary.json` |
+| LLM     | `00_investor_bids.png`, `01_confirmationbias_dynamics.png`, `02_confirmationbias_analysis.png`, `03_summary.png` | `summary.json` |
+| RuleLLM | `00_investor_bids.png`, `01_confirmationbias_dynamics.png`, `02_confirmationbias_analysis.png`, `03_summary.png` | `summary.json` |
+| Rag     | `00_investor_bids.png`, `01_confirmationbias_dynamics.png`, `02_confirmationbias_analysis.png`, `03_summary.png` | `summary.json` + `rag_stats.json` |
 
 ### Visualization Catalogue
 
@@ -361,7 +368,7 @@ Expected metric ordering across variants (from most to least bias-consistent):
 
 ```python
 comparison = {
-    "Rule":    load_json("EXPERIMENT/ConfirmationBias/Rule/records/analysis/metrics.json"),
+    "Rule":    load_json("EXPERIMENT/ConfirmationBias/Rule/records/analysis/summary.json"),
     "LLM":     load_json("EXPERIMENT/ConfirmationBias/LLM/records/analysis/summary.json"),
     "RuleLLM": load_json("EXPERIMENT/ConfirmationBias/RuleLLM/records/analysis/summary.json"),
     "Rag":     load_json("EXPERIMENT/ConfirmationBias/Rag/records/analysis/summary.json"),

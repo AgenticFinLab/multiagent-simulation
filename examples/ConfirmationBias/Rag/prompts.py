@@ -26,7 +26,7 @@ Relevant Domain Knowledge:
 {rag_context}
 
 Apply your trading rules and the domain knowledge above to decide your action.
-Respond with <analysis>...</analysis> and <decision>{{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}</decision>.
+Respond with <analysis>...</analysis> and <decision>{{"action": "buy", "bid_price": {price:.2f}, "quantity": 1, "reasoning": "brief rationale"}}</decision>.
 
 Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 

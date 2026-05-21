@@ -93,7 +93,7 @@ ragllm_belief_anchor:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
-          max_new_tokens: 600
+          max_tokens: 600
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -140,7 +140,7 @@ ragllm_selective_scanner:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
-          max_new_tokens: 600
+          max_tokens: 600
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -186,7 +186,7 @@ ragllm_balanced_analyst:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
-          max_new_tokens: 600
+          max_tokens: 600
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -231,7 +231,7 @@ ragllm_contrarian_trader:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
-          max_new_tokens: 600
+          max_tokens: 600
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -278,5 +278,5 @@ ragllm_noise_trader:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
-          max_new_tokens: 600
+          max_tokens: 600
   persona: !include persona.yml

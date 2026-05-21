@@ -66,7 +66,7 @@ class RagLLMInvestor(GeneralPlayer):
         self.state.custom_state["history_buffer"] = HistoryBuffer(
             folder=f"ConfirmationBias/Rag/{self.__class__.__name__}", entry_limit=200
         )
-        project_root = Path(__file__).parent.parent.parent
+        project_root = Path(__file__).parent.parent.parent.parent
         load_dotenv(project_root / ".env")
         llm_cfg = extras["llm"]
         lm_name = llm_cfg["lm_name"]
@@ -86,7 +86,21 @@ class RagLLMInvestor(GeneralPlayer):
     ) -> None:
         extras = self.config.extras
         record_path = extras["record_path"]
-        knowledge_config = extras["knowledge"]
+        knowledge_config = extras.get("knowledge", {})
+        if not knowledge_config:
+            knowledge_config = {
+                "backend": "local",
+                "global_uri": "examples/document-sources",
+                "resource_csv": [
+                    "examples/document-sources/books.csv",
+                    "examples/document-sources/source",
+                ],
+                "preprocessing": {
+                    "parser": "mineru",
+                    "output_position": "MinerU_processed",
+                },
+                "rag": {"output_position": "rag_index"},
+            }
 
         resource_manager = ResourceManager(knowledge_config)
         private_knowledge = extras["private_knowledge"]
@@ -286,6 +300,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
         template = load_prompt(
             "examples.ConfirmationBias.Rag.prompts:RAG_USER_TEMPLATE"
         )
@@ -316,14 +331,21 @@ class RagLLMInvestor(GeneralPlayer):
                 response = result.outputs[0].response
                 parsed = parse_llm_response_with_thinking(response)
                 action_str = parsed["action"]
-                quantity = int(parsed["quantity"])
                 if action_str not in ("buy", "sell", "hold"):
-                    action_str = "hold"
+                    raise ValueError(
+                        f"[{self.identity}] Invalid LLM action: {action_str}"
+                    )
+                bid_price = float(parsed["bid_price"])
+                reasoning = parsed["reasoning"]
+                analysis = parsed["analysis"]
+                quantity = int(parsed["quantity"])
                 quantity = max(0, quantity)
                 if action_str == "buy":
                     quantity = min(quantity, int(cash / price) if price > 0 else 0)
                 elif action_str == "sell":
                     quantity = min(quantity, max(position, 0))
+                else:
+                    quantity = 0
                 break
             except Exception as exc:
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
@@ -338,10 +360,29 @@ class RagLLMInvestor(GeneralPlayer):
         elif action_str == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"action": action_str, "quantity": quantity}
+        rag_context = self.state.custom_state["last_rag_context"]
+        order = {
+            "type": "order",
+            "from": self.identity,
+            "action": action_str,
+            "bid_price": bid_price,
+            "quantity": quantity,
+            "reasoning": reasoning,
+            "analysis": analysis,
+            "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
+            "rag_context": rag_context,
+        }
         return {
             "action": action_str,
+            "bid_price": bid_price,
             "quantity": quantity,
+            "reasoning": reasoning,
+            "analysis": analysis,
+            "from": self.identity,
+            "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
+            "rag_context": rag_context,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 

@@ -115,14 +115,21 @@ class RuleLLMInvestor(GeneralPlayer):
                 response = result.outputs[0].response
                 parsed = parse_llm_response_with_thinking(response)
                 action_str = parsed["action"]
-                quantity = int(parsed["quantity"])
                 if action_str not in ("buy", "sell", "hold"):
-                    action_str = "hold"
+                    raise ValueError(
+                        f"[{self.identity}] Invalid LLM action: {action_str}"
+                    )
+                bid_price = float(parsed["bid_price"])
+                reasoning = parsed["reasoning"]
+                analysis = parsed["analysis"]
+                quantity = int(parsed["quantity"])
                 quantity = max(0, quantity)
                 if action_str == "buy":
                     quantity = min(quantity, int(cash / price) if price > 0 else 0)
                 elif action_str == "sell":
                     quantity = min(quantity, max(position, 0))
+                else:
+                    quantity = 0
                 break
             except Exception as exc:
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
@@ -139,10 +146,26 @@ class RuleLLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
-        order = {"action": action_str, "quantity": quantity}
+        order = {
+            "type": "order",
+            "from": self.identity,
+            "action": action_str,
+            "bid_price": bid_price,
+            "quantity": quantity,
+            "reasoning": reasoning,
+            "analysis": analysis,
+            "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
+        }
         return {
             "action": action_str,
+            "bid_price": bid_price,
             "quantity": quantity,
+            "reasoning": reasoning,
+            "analysis": analysis,
+            "from": self.identity,
+            "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 

@@ -20,15 +20,15 @@ persistent price mispricing? Do rational/contrarian agents correct the bias?*
 
 ### Metric reference
 
-| Metric                        | Formula                             | Target                     |
-|-------------------------------|-------------------------------------|----------------------------|
-| `bias_amplitude_pct`          | `max(                               | deviation                  |
-| `bias_persistence_rounds`     | `count(                             | deviation                  |
-| `mean_absolute_deviation_pct` | `mean(                              | deviation                  |
-| `belief_flip_count`           | sign changes in deviation series    | 0 = one-direction bias     |
-| `correction_ratio`            | `(dev_peak - dev_final) / dev_peak` | > 0.5 = partial correction |
-| `return_autocorrelation_ac1`  | `corr(r_t, r_{t+1})`                | Positive during bias phase |
-| `annualized_vol_pct`          | `std(r) × √252 × 100`               | Observe                    |
+| Metric                        | Formula / Implementation                         | Reference |
+|-------------------------------|--------------------------------------------------|-----------|
+| `bias_amplitude_pct`          | `max(abs(price - fundamental) / fundamental)`    | `analysis-bases.md §2.1` |
+| `bias_persistence`            | rounds where `abs(deviation) > 0.02`             | `analysis-bases.md §2.2` |
+| `mean_absolute_deviation_pct` | average absolute deviation from fundamental      | `analysis-bases.md §2.3` |
+| `belief_flip_count`           | sign changes in belief/deviation proxy series    | `analysis-bases.md §2.4` |
+| `correction_ratio`            | fraction of peak deviation corrected by the end  | `analysis-bases.md §2.5` |
+| `return_autocorrelation_ac1`  | lag-1 correlation of returns                     | `analysis-bases.md §2.6` |
+| `annualized_vol_pct`          | `std(r) * sqrt(252) * 100`                       | `analysis-bases.md §2.7` |
 
 ---
 
@@ -110,8 +110,11 @@ Running `Rule/analysis.py` writes to `EXPERIMENT/ConfirmationBias/Rule/records/a
 
 | File                                 | Contents                                           |
 |--------------------------------------|----------------------------------------------------|
-| `confirmationbias_rule_analysis.png` | 2×2 chart: price, deviation, returns, distribution |
-| `metrics.json`                       | Full metric dict from `calculate_metrics()`        |
+| `summary.json`                       | Metrics and validation result                      |
+| `00_investor_bids.png`               | Market price and per-agent bid traces              |
+| `01_confirmationbias_dynamics.png`   | Price/fundamental and deviation dynamics           |
+| `02_confirmationbias_analysis.png`   | Volatility and cumulative bias diagnostics         |
+| `03_summary.png`                     | Agent VWAP and trading-volume summary              |
 
 ---
 

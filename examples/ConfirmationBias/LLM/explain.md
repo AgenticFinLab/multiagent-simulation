@@ -17,12 +17,42 @@
 
 | Theoretical Concept          | Agent / Mechanism                                                        | Code Location                               |
 |------------------------------|--------------------------------------------------------------------------|---------------------------------------------|
-| Belief anchoring             | `LLMBeliefAnchor` persona: strong prior, overweights confirming evidence | `LLM/prompts.py: LLM_BELIEF_ANCHOR_SYS`     |
-| Selective information search | `LLMSelectiveScanner` persona: actively seeks confirming signals         | `LLM/prompts.py: LLM_SELECTIVE_SCANNER_SYS` |
-| Rational Bayesian updating   | `LLMBalancedAnalyst` persona: equal weight to all evidence               | `LLM/prompts.py: LLM_BALANCED_ANALYST_SYS`  |
-| Contrarian exploitation      | `LLMContrarianTrader` persona: fades biased consensus                    | `LLM/prompts.py: LLM_CONTRARIAN_TRADER_SYS` |
-| Noise trader liquidity       | `LLMNoiseTrader` persona: uninformed random-ish trader                   | `LLM/prompts.py: LLM_NOISE_TRADER_SYS`      |
-| Price dynamics               | `Market` agent (Rule-based, unchanged)                                   | `Rule/players.py: Market`                   |
+| Belief anchoring (`simulation-bases.md §4.1`) | `LLMBeliefAnchor` persona: strong prior, overweights confirming evidence | `LLM/prompts.py: LLM_BELIEF_ANCHOR_SYS`     |
+| Selective information search (`simulation-bases.md §4.2`) | `LLMSelectiveScanner` persona: actively seeks confirming signals         | `LLM/prompts.py: LLM_SELECTIVE_SCANNER_SYS` |
+| Rational Bayesian updating (`simulation-bases.md §4.3`) | `LLMBalancedAnalyst` persona: equal weight to all evidence               | `LLM/prompts.py: LLM_BALANCED_ANALYST_SYS`  |
+| Contrarian exploitation (`simulation-bases.md §4.4`) | `LLMContrarianTrader` persona: fades biased consensus                    | `LLM/prompts.py: LLM_CONTRARIAN_TRADER_SYS` |
+| Noise trader liquidity (`simulation-bases.md §4.5`) | `LLMNoiseTrader` persona: uninformed random-ish trader                   | `LLM/prompts.py: LLM_NOISE_TRADER_SYS`      |
+| Price dynamics (`simulation-bases.md §3.1`) | `Market` agent (Rule-based, unchanged)                                   | `Rule/players.py: Market`                   |
+
+### §2.1 LLMBeliefAnchor (`simulation-bases.md §4.1`)
+
+| Theory Component | Implementation |
+|---|---|
+| Prior-belief anchoring | Persona emphasizes conviction and confirmatory interpretation without explicit formulas. |
+
+### §2.2 LLMSelectiveScanner (`simulation-bases.md §4.2`)
+
+| Theory Component | Implementation |
+|---|---|
+| Selective information search | Persona looks for supportive signals and is slow to act on contradictory evidence. |
+
+### §2.3 LLMBalancedAnalyst (`simulation-bases.md §4.3`)
+
+| Theory Component | Implementation |
+|---|---|
+| Rational updating | Persona weighs all market evidence symmetrically. |
+
+### §2.4 LLMContrarianTrader (`simulation-bases.md §4.4`)
+
+| Theory Component | Implementation |
+|---|---|
+| Bias exploitation | Persona seeks disconfirming evidence and fades biased consensus. |
+
+### §2.5 LLMNoiseTrader (`simulation-bases.md §4.5`)
+
+| Theory Component | Implementation |
+|---|---|
+| Noise liquidity | Persona trades intuitively and adds stochastic order flow. |
 
 ---
 
@@ -68,7 +98,7 @@ for each trader agent each round:
     1. Receive market_data {price, fundamental, deviation, round}
     2. Build system_prompt (persona) + user_prompt (market state + portfolio)
     3. Call LangChainAPIInference (3 retry attempts)
-    4. Parse JSON response → {action, quantity}
+    4. Parse JSON response → {action, bid_price, quantity, reasoning, analysis}
     5. Apply constraints (cash/position limits)
     6. Send order to Market
 ```
@@ -113,10 +143,10 @@ Config: `configs/ConfirmationBias/LLM/simulation.yml`
 
 | Parameter          | Value                   | Description             |
 |--------------------|-------------------------|-------------------------|
-| `llm.model`        | `gpt-4o-mini` (default) | LLM model name          |
-| `llm.temperature`  | 0.3                     | Decision randomness     |
+| `llm.model`        | `ark/doubao-seed-2-0-mini-260428` | LLM model name          |
+| `llm.temperature`  | 0.5–0.9 by agent        | Decision randomness     |
 | `llm.max_tokens`   | 512                     | Max response length     |
-| `initial_cash`     | 100000                  | Starting cash per agent |
+| `initial_cash`     | 50000 for core agents; 20000 for noise traders | Starting cash per agent |
 | `initial_position` | 0                       | Starting holdings       |
 
 Market parameters: identical to Rule variant (see Rule/explain.md §6).
