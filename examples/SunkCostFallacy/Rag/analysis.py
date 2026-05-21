@@ -1,8 +1,17 @@
-"""Analysis utilities for the SunkCostFallacy RAG variant."""
+#!/usr/bin/env python
+"""SunkCostFallacy Rag analysis with retrieval diagnostics."""
 
-from typing import Any, Dict, List
+from __future__ import annotations
+
+import argparse
+import json
+import os
+from pathlib import Path
+from typing import Any, Dict
 
 from examples.SunkCostFallacy.Rule.analysis import (
+    SCENARIO,
+    analyze_sunkcostfallacy,
     calculate_metrics,
     compute_agent_attribution,
     compute_escalation_volume,
@@ -12,38 +21,96 @@ from examples.SunkCostFallacy.Rule.analysis import (
     compute_performance_drag,
     compute_rational_cut_volume,
     create_visualizations,
-    load_simulation_data,
 )
+from examples.standard_rule_analysis import _load_data
+from masim.utils import load_config, load_results
 
+
+DEFAULT_CONFIG = "configs/SunkCostFallacy/Rag/simulation.yml"
 _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
-def analyze_rag_knowledge_effect(records: List[Dict[str, Any]]) -> Dict[str, float]:
-    """Measure retrieval coverage and fallback frequency for SunkCostFallacy."""
-    if not records:
-        raise ValueError("records must not be empty")
-    total = 0
-    retrieved = 0
-    fallback = 0
-    for record in records:
-        if "rag_context" not in record:
-            continue
-        total += 1
-        context = record["rag_context"]
-        if context == _RAG_FALLBACK:
-            fallback += 1
-        elif context:
-            retrieved += 1
-    if total == 0:
-        raise ValueError("records contain no rag_context entries")
-    return {
-        "retrieval_success_rate": retrieved / total,
-        "fallback_rate": fallback / total,
-        "rag_context_observations": float(total),
+def load_simulation_data(config: Dict[str, Any]) -> Dict[str, Any]:
+    """Load SunkCostFallacy RAG data and recorded `rag_context` fields."""
+    results = load_results(config)
+    data = _load_data(results)
+    rag_contexts: Dict[str, Dict[int, Any]] = {}
+    for player_id, player in results.players_by_role("player").items():
+        contexts = player.turns.field("rag_context")
+        if contexts:
+            rag_contexts[player_id] = contexts
+    data["rag_contexts"] = rag_contexts
+    return data
+
+
+def analyze_rag_knowledge_effect(
+    rag_contexts: Dict[str, Dict[int, Any]],
+) -> Dict[str, Any]:
+    """Measure retrieval coverage and fallback frequency for RAG decisions."""
+    per_agent: Dict[str, Any] = {}
+    total_rounds = 0
+    fallback_rounds = 0
+
+    for agent_id, round_contexts in rag_contexts.items():
+        agent_total = 0
+        agent_fallback = 0
+        for context in round_contexts.values():
+            agent_total += 1
+            if str(context).strip() == _RAG_FALLBACK:
+                agent_fallback += 1
+        if agent_total:
+            total_rounds += agent_total
+            fallback_rounds += agent_fallback
+            per_agent[agent_id] = {
+                "total_rag_rounds": agent_total,
+                "retrieval_success_rounds": agent_total - agent_fallback,
+                "retrieval_fallback_rounds": agent_fallback,
+                "retrieval_success_rate": (agent_total - agent_fallback) / agent_total,
+                "retrieval_fallback_rate": agent_fallback / agent_total,
+            }
+
+    if total_rounds == 0:
+        raise ValueError("No recorded RAG contexts found for SunkCostFallacy Rag analysis")
+
+    aggregate = {
+        "total_rag_rounds": total_rounds,
+        "retrieval_success_rounds": total_rounds - fallback_rounds,
+        "retrieval_fallback_rounds": fallback_rounds,
+        "retrieval_success_rate": (total_rounds - fallback_rounds) / total_rounds,
+        "retrieval_fallback_rate": fallback_rounds / total_rounds,
+        "target_met": (total_rounds - fallback_rounds) / total_rounds >= 0.70,
     }
+    return {"aggregate": aggregate, "per_agent": per_agent}
+
+
+def main() -> Dict[str, Any]:
+    """Run SunkCostFallacy Rag analysis and write `rag_stats.json`."""
+    parser = argparse.ArgumentParser(description="Analyze SunkCostFallacy Rag results")
+    parser.add_argument("-c", "--config", type=str, default=DEFAULT_CONFIG)
+    args = parser.parse_args()
+    config = load_config(args.config)
+    data = load_simulation_data(config)
+    output_dir = Path(os.path.dirname(config["setting"]["record_path"])) / "analysis"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    summary = analyze_sunkcostfallacy(data, config, str(output_dir))
+    rag_stats = analyze_rag_knowledge_effect(data["rag_contexts"])
+    summary["rag_knowledge_effect"] = rag_stats
+
+    with (output_dir / "rag_stats.json").open("w", encoding="utf-8") as handle:
+        json.dump(rag_stats, handle, indent=2)
+    with (output_dir / "summary.json").open("w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2)
+    return summary
 
 
 __all__ = [
+    "SCENARIO",
+    "DEFAULT_CONFIG",
+    "_RAG_FALLBACK",
+    "load_simulation_data",
+    "calculate_metrics",
+    "create_visualizations",
     "compute_losing_holding_rate",
     "compute_escalation_volume",
     "compute_rational_cut_volume",
@@ -51,9 +118,10 @@ __all__ = [
     "compute_performance_drag",
     "compute_loss_onset",
     "compute_agent_attribution",
-    "load_simulation_data",
-    "calculate_metrics",
-    "create_visualizations",
     "analyze_rag_knowledge_effect",
-    "_RAG_FALLBACK",
+    "main",
 ]
+
+
+if __name__ == "__main__":
+    main()

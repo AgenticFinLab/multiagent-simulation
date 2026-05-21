@@ -43,6 +43,29 @@ from ..Rule.players import Market  # noqa: F401 — re-exported
 logger = logging.getLogger("SunkCostFallacy.Rag")
 
 
+def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
+    """Validate canonical RAG trading decision fields before portfolio mutation."""
+    action = decision["action"]
+    if action not in {"buy", "sell", "hold"}:
+        raise ValueError(f"[{identity}] invalid action: {action}")
+    bid_price = float(decision["bid_price"])
+    if bid_price <= 0:
+        raise ValueError(f"[{identity}] invalid bid_price: {bid_price}")
+    quantity = int(decision["quantity"])
+    if quantity < 0:
+        raise ValueError(f"[{identity}] invalid quantity: {quantity}")
+    reasoning = str(decision["reasoning"]).strip()
+    if not reasoning:
+        raise ValueError(f"[{identity}] empty reasoning")
+    return {
+        **decision,
+        "action": action,
+        "bid_price": bid_price,
+        "quantity": quantity,
+        "reasoning": reasoning,
+    }
+
+
 class RagLLMInvestor(GeneralPlayer):
     """Base class for RAG-augmented SunkCostFallacy investors."""
 
@@ -338,6 +361,7 @@ class RagLLMInvestor(GeneralPlayer):
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
+                decision = _validate_decision(decision, self.identity)
                 break
             except Exception as exc:
                 last_error = exc
@@ -362,11 +386,9 @@ class RagLLMInvestor(GeneralPlayer):
             )
 
         action = decision["action"]
+        bid_price = float(decision["bid_price"])
         quantity = int(decision["quantity"])
-
-        valid_actions = ["buy", "sell", "hold"]
-        if action not in valid_actions:
-            action = "hold"
+        if action == "hold":
             quantity = 0
         quantity = max(0, min(quantity, 5000))
 
@@ -398,9 +420,10 @@ class RagLLMInvestor(GeneralPlayer):
 
         order = {
             "action": action,
+            "bid_price": bid_price,
             "quantity": quantity,
             "agent_type": strategy_name,
-            "reasoning": decision["reasoning"][:120],
+            "reasoning": str(decision["reasoning"])[:120],
             "rag_context": self.state.custom_state["last_rag_context"],
         }
         return {
@@ -448,6 +471,7 @@ class RagLLMNoiseTrader(RagLLMInvestor):
 
 __all__ = [
     "Market",
+    "_validate_decision",
     "RagLLMInvestor",
     "RagLLMSunkCostHolder",
     "RagLLMCommitmentEscalator",

@@ -1,4 +1,9 @@
-"""Analysis utilities for the SunkCostFallacy RuleLLM variant."""
+#!/usr/bin/env python
+"""SunkCostFallacy RuleLLM analysis using the standard output contract."""
+
+from __future__ import annotations
+
+from typing import Any, Dict
 
 from examples.SunkCostFallacy.Rule.analysis import (
     calculate_metrics,
@@ -12,8 +17,21 @@ from examples.SunkCostFallacy.Rule.analysis import (
     create_visualizations,
     load_simulation_data,
 )
+from examples.standard_rule_analysis import run_standard_analysis
+
+
+SCENARIO = "SunkCostFallacy"
+DEFAULT_CONFIG = "configs/SunkCostFallacy/RuleLLM/simulation.yml"
+
+
+def main() -> Dict[str, Any]:
+    """Run SunkCostFallacy RuleLLM analysis."""
+    return run_standard_analysis(SCENARIO, DEFAULT_CONFIG)
+
 
 __all__ = [
+    "SCENARIO",
+    "DEFAULT_CONFIG",
     "compute_losing_holding_rate",
     "compute_escalation_volume",
     "compute_rational_cut_volume",
@@ -24,4 +42,9 @@ __all__ = [
     "load_simulation_data",
     "calculate_metrics",
     "create_visualizations",
+    "main",
 ]
+
+
+if __name__ == "__main__":
+    main()

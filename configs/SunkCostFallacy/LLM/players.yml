@@ -5,7 +5,7 @@ market:
   persona: !include ../LLM/persona.yml
   config:
     identity: "market"
-    role: market
+    role: coordinator
     steps_per_turn: 1
     group_tags: [market]
     extras:

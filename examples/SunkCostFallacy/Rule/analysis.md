@@ -2,48 +2,49 @@
 
 ## §1 Analysis Objectives
 
-Evaluate whether deterministic sunk-cost holding, commitment escalation,
-rational cutting, opportunity-cost reallocation, and noise rules produce sticky
-losing positions and escalation.
+Evaluate whether deterministic sunk-cost and commitment rules produce holding
+of losing positions, averaging-down demand, and distinguishable rational
+counterpressure.
 
-## §2 Metric → Function Mapping
+## §2 Metric To Function Mapping
 
 | Metric | Function | analysis-bases.md Ref | Rule Notes |
 |---|---|---|---|
-| Losing Position Holding Rate | `compute_losing_holding_rate()` | `analysis-bases.md §2.1` | SunkCostHolder hold behavior |
-| Escalation Volume | `compute_escalation_volume()` | `analysis-bases.md §2.2` | CommitmentEscalator buys |
-| Rational Cut Volume | `compute_rational_cut_volume()` | `analysis-bases.md §2.3` | RationalCutter sells |
-| Opportunity Reallocation | `compute_opportunity_reallocation()` | `analysis-bases.md §2.4` | Opportunity-cost exit |
-| Performance Drag | `compute_performance_drag()` | `analysis-bases.md §2.5` | Bias cost |
-| Loss Onset Round | `compute_loss_onset()` | `analysis-bases.md §2.6` | First loss state |
-| Agent Attribution | `compute_agent_attribution()` | `analysis-bases.md §2.7` | Agent contribution |
+| Losing Position Holding Rate | `compute_losing_holding_rate()` | `analysis-bases.md §2.1` | Direct sunk-cost inertia metric. |
+| Escalation Volume | `compute_escalation_volume()` | `analysis-bases.md §2.2` | Commitment buy pressure after losses. |
+| Rational Cut Volume | `compute_rational_cut_volume()` | `analysis-bases.md §2.3` | Forward-looking correction volume. |
+| Opportunity Reallocation | `compute_opportunity_reallocation()` | `analysis-bases.md §2.4` | Opportunity-cost trade volume. |
+| Performance Drag | `compute_performance_drag()` | `analysis-bases.md §2.5` | Biased-vs-rational final-value gap. |
+| Loss Onset Round | `compute_loss_onset()` | `analysis-bases.md §2.6` | First loss-state round. |
+| Agent Attribution | `compute_agent_attribution()` | `analysis-bases.md §2.7` | Signed pressure by agent type. |
 
-## §3 Dimension-by-Dimension Analysis
+## §3 Dimension-By-Dimension Analysis
 
-Compare holding losers, escalation, rational cutting, opportunity reallocation,
-and performance drag.
+Use `summary.json` and fixed PNG outputs to inspect structural market quality.
+Use the scenario-specific functions in §2 for sunk-cost and escalation validity.
 
 ## §4 Variant-Specific Observable Phenomena
 
 | Phenomenon | Expected Observation |
 |---|---|
-| Sunk-cost holding | SunkCostHolder avoids realizing losses |
-| Escalation | CommitmentEscalator adds after losses |
-| Rational benchmark | RationalCutter exits based on forward-looking value |
+| Sunk-cost holding | `SunkCostHolder` does not sell losing states. |
+| Escalation | `CommitmentEscalator` buys after negative deviation. |
+| Rational benchmark | `RationalCutter` and `OpportunityCostTrader` trade on valuation. |
 
 ## §5 References
 
-Metrics derive from `../analysis-bases.md §2`; deterministic behavior derives
-from `../simulation-bases.md §4` and `§9`.
+Metric definitions come from `../analysis-bases.md §2`; behavioral targets come
+from `../simulation-bases.md §4` and `../simulation-bases.md §6`.
 
 ## §6 Quality Checks
 
-- Confirm the run completed the configured round count.
-- Confirm investor orders contain valid action, quantity, and agent type fields.
-- Confirm escalation, rational cutting, and opportunity-cost activity can be
-  attributed by agent.
+- Confirm the run completed the configured 200 rounds for final samples.
+- Confirm `summary.json.validation.is_valid` is true.
+- Confirm fixed PNG outputs exist in the analysis directory.
+- Confirm orders contain `action`, `bid_price`, `quantity`, `agent_type`, and
+  `reasoning`.
 
 ## §7 Reporting Notes
 
-Report this variant as the deterministic baseline for sunk-cost persistence.
-Compare API variants only after parser and output-quality checks pass.
+Report Rule as the deterministic baseline. API variants should be compared only
+after parser and output-quality checks pass.

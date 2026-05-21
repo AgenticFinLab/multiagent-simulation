@@ -5,40 +5,62 @@
 | Item | Description |
 |---|---|
 | Variant | Rag |
-| Mechanism | Retrieved behavioral-finance context plus LLM sunk-cost reasoning |
-| Market | Same price/fundamental market as Rule |
-| Agents | Rag sunk-cost holder, commitment escalator, rational cutter, opportunity-cost trader, noise trader |
-| Runtime Change | Documentation-only backfill; no code/config change |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | RAG-augmented LLM reasoning with canonical trading JSON |
+| Key Difference from Other Variants | Each investor retrieves behavioral-finance context before deciding. |
+| Primary Research Contribution | Tests whether evidence about sunk costs and escalation changes LLM trading behavior. |
+| Files | `players.py`, `prompts.py`, `run_sunkcostfallacy_rag.py`, `analysis.py`, `explain.md`, `analysis.md` |
 
-## §2 Theory → Implementation Mapping
+## §2 Theory To Implementation Mapping
 
-| Agent | Root Section | Runtime Implementation |
+| Agent | Root Section | Implementation |
 |---|---|---|
-| RagLLMSunkCostHolder | `simulation-bases.md §4.1` | Retrieval may reinforce sunk-cost evidence |
-| RagLLMCommitmentEscalator | `simulation-bases.md §4.2` | Retrieval may contextualize escalation |
-| RagLLMRationalCutter | `simulation-bases.md §4.3` | Retrieval may support forward-looking logic |
-| RagLLMOpportunityCostTrader | `simulation-bases.md §4.4` | Retrieval may support reallocation reasoning |
-| RagLLMNoiseTrader | `simulation-bases.md §4.5` | Baseline liquidity remains low-information |
+| `RagLLMSunkCostHolder` | `simulation-bases.md §4.1` | Retrieval can reinforce or challenge sunk-cost holding evidence. |
+| `RagLLMCommitmentEscalator` | `simulation-bases.md §4.2` | Retrieval can contextualize averaging-down and escalation base rates. |
+| `RagLLMRationalCutter` | `simulation-bases.md §4.3` | Retrieval can support forward-looking loss-cutting. |
+| `RagLLMOpportunityCostTrader` | `simulation-bases.md §4.4` | Retrieval can support opportunity-cost reallocation. |
+| `RagLLMNoiseTrader` | `simulation-bases.md §4.5` | Retrieval is available but not systematically used. |
 
 ## §3 Market Mechanism Implementation
 
-Rag leaves market clearing unchanged. Retrieved context is inserted into the
-LLM decision prompt before canonical order parsing.
+The Rag variant reuses the Rule market. RAG only changes the information set
+used by investor prompts before the LLM decision call.
 
-## §4 Variant-Specific Features
+## §4 Rag Variant-Specific Features
 
-Rag tests whether behavioral evidence changes sunk-cost persistence or rational
-cutting.
+Each agent initializes a `KnowledgeStore` from `private_knowledge.rag`. Retrieval
+queries include the current deviation, price, and fundamental value. When no
+context is retrieved, the explicit fallback string
+`(No relevant knowledge retrieved this round.)` is injected and recorded as
+`rag_context`.
 
 ## §5 Architecture Diagram
 
 ```text
-Market state -> retrieve context -> LLM decision JSON -> order -> Market
+Market broadcast
+        |
+        v
+RagLLMInvestor._build_prompt()
+        |
+        v
+KnowledgeStore.query(sunk cost + current market state)
+        |
+        v
+rag_context injected into prompt
+        |
+        v
+LLM response -> parser -> _validate_decision() -> order + rag_context -> Market
 ```
 
 ## §6 Configuration Reference
 
-Primary config: `configs/SunkCostFallacy/Rag/players.yml`.
+| Parameter | Config Path | Purpose |
+|---|---|---|
+| `private_knowledge.rag.embed_type` | `*.extras.private_knowledge.rag.embed_type` | Embedding provider type. |
+| `private_knowledge.rag.embed_model` | `*.extras.private_knowledge.rag.embed_model` | Hunyuan embedding model through LiteLLM convention. |
+| `private_knowledge.rag.top_k` | `*.extras.private_knowledge.rag.top_k` | Number of chunks retrieved per decision. |
+| `knowledge.global_resources` | top-level `knowledge` | Source document and index roots. |
+| `llm.lm_name` | `*.extras.llm.lm_name` | ARK model for final decision. |
 
 ## §7 Running Instructions
 
@@ -49,11 +71,12 @@ python examples/SunkCostFallacy/Rag/run_sunkcostfallacy_rag.py \
 
 ## §8 Expected Behavior Patterns
 
-Rag may make sunk-cost rationalizations more evidence-grounded or strengthen
-rational opportunity-cost corrections.
+RAG should preserve the canonical trading schema while adding auditable context
+about sunk-cost fallacy, escalation, opportunity cost, and rational loss
+cutting.
 
 ## §9 References
 
-See `../simulation-bases.md §2`, `../simulation-bases.md §4`, and
-`../analysis-bases.md §2`.
-
+RAG content is motivated by `../simulation-bases.md §1.1.2` and
+`../simulation-bases.md §8`. Metrics and `rag_stats.json` trace to
+`../analysis-bases.md §2` and `../analysis-bases.md §6`.

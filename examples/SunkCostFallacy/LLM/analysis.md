@@ -2,47 +2,47 @@
 
 ## §1 Analysis Objectives
 
-Evaluate whether persona-only LLM agents produce sunk-cost holding, commitment
-escalation, rational cutting, and opportunity-cost reallocation.
+Evaluate whether persona-only LLM agents reproduce sunk-cost holding,
+commitment escalation, rational cutting, and opportunity-cost reasoning.
 
-## §2 Metric → Function Mapping
+## §2 Metric To Function Mapping
 
 | Metric | Function | analysis-bases.md Ref | LLM Notes |
 |---|---|---|---|
-| Losing Position Holding Rate | `compute_losing_holding_rate()` | `analysis-bases.md §2.1` | Sunk-cost persona holds |
-| Escalation Volume | `compute_escalation_volume()` | `analysis-bases.md §2.2` | Escalation persona buys |
-| Rational Cut Volume | `compute_rational_cut_volume()` | `analysis-bases.md §2.3` | Rational persona exits |
-| Opportunity Reallocation | `compute_opportunity_reallocation()` | `analysis-bases.md §2.4` | Opportunity-cost shifts |
-| Performance Drag | `compute_performance_drag()` | `analysis-bases.md §2.5` | Bias performance cost |
-| Loss Onset Round | `compute_loss_onset()` | `analysis-bases.md §2.6` | Timing of loss state |
-| Agent Attribution | `compute_agent_attribution()` | `analysis-bases.md §2.7` | Agent contribution |
+| Losing Position Holding Rate | `compute_losing_holding_rate()` | `analysis-bases.md §2.1` | Persona-driven refusal to realize losses. |
+| Escalation Volume | `compute_escalation_volume()` | `analysis-bases.md §2.2` | Averaging-down pressure. |
+| Rational Cut Volume | `compute_rational_cut_volume()` | `analysis-bases.md §2.3` | Forward-looking persona behavior. |
+| Opportunity Reallocation | `compute_opportunity_reallocation()` | `analysis-bases.md §2.4` | Opportunity-cost persona behavior. |
+| Performance Drag | `compute_performance_drag()` | `analysis-bases.md §2.5` | Biased-vs-rational outcome gap. |
+| Loss Onset Round | `compute_loss_onset()` | `analysis-bases.md §2.6` | Start of loss-state evaluation. |
+| Agent Attribution | `compute_agent_attribution()` | `analysis-bases.md §2.7` | Signed pressure by class. |
 
-## §3 Dimension-by-Dimension Analysis
+## §3 Dimension-By-Dimension Analysis
 
-Compare LLM with Rule to evaluate whether natural-language rationalizations
-increase or reduce sunk-cost persistence.
+Compare LLM with Rule on escalation volume, rational counterpressure, price
+path, and explanation quality.
 
 ## §4 Variant-Specific Observable Phenomena
 
 | Phenomenon | Expected Observation |
 |---|---|
-| Sunk-cost rationalization | Explanations justify holding losers |
-| Escalation narrative | Commitment persona justifies averaging down |
-| Output quality | Parse/fallback rates must be reviewed |
+| Sunk-cost rationalization | Reasoning cites prior commitment or reluctance to realize losses. |
+| Escalation narrative | Commitment agents justify averaging down. |
+| Output quality | Invalid canonical decision fields fail after bounded retries. |
 
 ## §5 References
 
-Metrics derive from `../analysis-bases.md §2`; LLM mechanism derives from
-`../simulation-bases.md §9`.
+Metrics derive from `../analysis-bases.md §2`; persona targets derive from
+`../simulation-bases.md §4` and `../simulation-bases.md §9`.
 
 ## §6 Quality Checks
 
-- Confirm the run completed the configured round count.
-- Audit parse failures, retry counts, and fallback behavior before acceptance.
-- Confirm reasoning explains sunk-cost holding, commitment escalation, rational
-  cutting, or opportunity-cost reallocation without invalid JSON.
+- Confirm the run completed the configured 200 rounds for final samples.
+- Confirm `summary.json.validation.is_valid` is true.
+- Review LLM logs for parse failures, retries, and provider errors.
+- Confirm deterministic contract failures do not enter silent fallback.
 
 ## §7 Reporting Notes
 
-Report LLM outcomes together with output-quality diagnostics. Parse failure
-after retries should fail the sample rather than entering a silent hold.
+Report LLM as the persona-reasoning condition. Include parse-warning counts and
+accepted-decision quality in final sample review.

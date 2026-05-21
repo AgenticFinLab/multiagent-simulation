@@ -123,7 +123,12 @@ class BaseInvestor(GeneralPlayer):
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
     ) -> Dict[str, Any]:
-        return {"action": "hold", "quantity": 0}
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "No configured sunk-cost or reallocation trigger fired.",
+        }
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
@@ -149,7 +154,8 @@ class BaseInvestor(GeneralPlayer):
         decision = self._make_decision(price, fundamental, deviation)
 
         action = decision["action"]
-        quantity = decision["quantity"]
+        bid_price = float(decision["bid_price"])
+        quantity = int(decision["quantity"])
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         if action == "buy" and quantity > 0:
@@ -163,8 +169,10 @@ class BaseInvestor(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": bid_price,
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
+            "reasoning": str(decision["reasoning"])[:120],
         }
         return {
             **order,
@@ -191,18 +199,26 @@ class SunkCostHolder(BaseInvestor):
         self, price: float, fundamental: float, deviation: float
     ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
-        position = self.state.custom_state["position"]
-        if abs(deviation) > 0.02:
-            qty = min(800, int(abs(deviation) * 5000))
-            if deviation > 0:
-                buy_qty = min(qty, int(cash / price) if price > 0 else 0)
-                if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
-            else:
-                sell_qty = min(qty, int(position))
-                if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+        extras = self.config.extras
+        hold_threshold = float(extras["hold_threshold"])
+        base_size = int(extras["base_size"])
+
+        if deviation > hold_threshold:
+            qty = max(1, int(base_size * deviation / hold_threshold))
+            buy_qty = min(qty, int(cash / price) if price > 0 else 0)
+            if buy_qty > 0:
+                return {
+                    "action": "buy",
+                    "bid_price": price,
+                    "quantity": buy_qty,
+                    "reasoning": "Positive performance reinforces attachment to the prior investment.",
+                }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Sunk-cost attachment prevents selling the losing position.",
+        }
 
 
 class CommitmentEscalator(BaseInvestor):
@@ -217,18 +233,36 @@ class CommitmentEscalator(BaseInvestor):
         self, price: float, fundamental: float, deviation: float
     ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
-        position = self.state.custom_state["position"]
-        if abs(deviation) > 0.02:
-            qty = min(800, int(abs(deviation) * 5000))
-            if deviation > 0:
-                buy_qty = min(qty, int(cash / price) if price > 0 else 0)
-                if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
-            else:
-                sell_qty = min(qty, int(position))
-                if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+        extras = self.config.extras
+        threshold = float(extras["escalation_threshold"])
+        escalation_size = int(extras["escalation_size"])
+
+        if deviation < -threshold:
+            qty = max(1, int(escalation_size * abs(deviation) / threshold))
+            buy_qty = min(qty, int(cash / price) if price > 0 else 0)
+            if buy_qty > 0:
+                return {
+                    "action": "buy",
+                    "bid_price": price,
+                    "quantity": buy_qty,
+                    "reasoning": "Escalation of commitment buys more after losses to average down.",
+                }
+        if deviation > threshold:
+            qty = max(1, int(escalation_size * 0.5 * deviation / threshold))
+            buy_qty = min(qty, int(cash / price) if price > 0 else 0)
+            if buy_qty > 0:
+                return {
+                    "action": "buy",
+                    "bid_price": price,
+                    "quantity": buy_qty,
+                    "reasoning": "Prior commitment is reinforced by favorable price movement.",
+                }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Commitment remains high but deviation is below escalation threshold.",
+        }
 
 
 class RationalCutter(BaseInvestor):
@@ -244,17 +278,36 @@ class RationalCutter(BaseInvestor):
     ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        if abs(deviation) > 0.05:
-            qty = min(500, int(abs(deviation) * 3000))
+        extras = self.config.extras
+        threshold = float(extras["cut_threshold"])
+        position_size = int(extras["position_size"])
+
+        if abs(deviation) > threshold:
+            qty = max(1, int(position_size * abs(deviation) / threshold))
             if deviation < 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
+                    return {
+                        "action": "buy",
+                        "bid_price": price,
+                        "quantity": buy_qty,
+                        "reasoning": "Forward-looking value signal dominates sunk-cost emotions.",
+                    }
             else:
                 sell_qty = min(qty, int(position))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                    return {
+                        "action": "sell",
+                        "bid_price": price,
+                        "quantity": sell_qty,
+                        "reasoning": "Forward-looking overvaluation signal justifies cutting exposure.",
+                    }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Forward-looking signal is inside the rational cut band.",
+        }
 
 
 class OpportunityCostTrader(BaseInvestor):
@@ -270,17 +323,36 @@ class OpportunityCostTrader(BaseInvestor):
     ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        if abs(deviation) > 0.05:
-            qty = min(500, int(abs(deviation) * 3000))
+        extras = self.config.extras
+        threshold = float(extras["realloc_threshold"])
+        position_size = int(extras["position_size"])
+
+        if abs(deviation) > threshold:
+            qty = max(1, int(position_size * abs(deviation) / threshold))
             if deviation < 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
+                    return {
+                        "action": "buy",
+                        "bid_price": price,
+                        "quantity": buy_qty,
+                        "reasoning": "Opportunity-cost screen reallocates capital into undervalued value.",
+                    }
             else:
                 sell_qty = min(qty, int(position))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                    return {
+                        "action": "sell",
+                        "bid_price": price,
+                        "quantity": sell_qty,
+                        "reasoning": "Opportunity-cost screen reallocates away from overvalued exposure.",
+                    }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Current position remains acceptable relative to alternatives.",
+        }
 
 
 class NoiseTrader(BaseInvestor):
@@ -296,16 +368,30 @@ class NoiseTrader(BaseInvestor):
     ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        if random.random() < 0.3:
-            qty = random.randint(100, 500)
+        extras = self.config.extras
+        trade_probability = float(extras["trade_probability"])
+        noise_size = int(extras["noise_size"])
+
+        if random.random() < trade_probability:
+            qty = random.randint(1, noise_size)
             action = "buy" if random.random() > 0.5 else "sell"
             if action == "buy":
                 qty = min(qty, int(cash / price) if price > 0 else 0)
             else:
                 qty = min(qty, int(position))
             if qty > 0:
-                return {"action": action, "quantity": qty}
-        return {"action": "hold", "quantity": 0}
+                return {
+                    "action": action,
+                    "bid_price": price,
+                    "quantity": qty,
+                    "reasoning": "Random noise-trader liquidity order.",
+                }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Noise trader did not activate this round.",
+        }
 
 
 __all__ = [
