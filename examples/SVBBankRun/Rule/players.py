@@ -221,8 +221,11 @@ class BaseInvestor(GeneralPlayer):
 
 
 class Depositor(BaseInvestor):
-    """
-    Depositor: withdraws when bank health deteriorates.
+    """Depositor who exits the bank-health proxy when health deteriorates.
+
+    Theory: simulation-bases.md §4.1 — Depositor
+    Theoretical basis: Diamond and Dybvig (1983) coordination-run logic.
+    See simulation-bases.md §4.1 for the proxy withdrawal model.
 
     Parameters from config extras:
         - withdrawal_threshold, social_influence
@@ -242,8 +245,11 @@ class Depositor(BaseInvestor):
 
 
 class SocialMediaInfluencer(BaseInvestor):
-    """
-    Social media amplifier: amplifies panic signals.
+    """Social media amplifier that converts weak stress signals into sell pressure.
+
+    Theory: simulation-bases.md §4.2 — SocialMediaInfluencer
+    Theoretical basis: information cascade and social-contagion amplification.
+    See simulation-bases.md §4.2 for the amplification model.
 
     Parameters from config extras:
         - amplification_factor
@@ -265,8 +271,11 @@ class SocialMediaInfluencer(BaseInvestor):
 
 
 class BankManager(BaseInvestor):
-    """
-    Bank manager: manages asset-liability duration mismatch.
+    """Bank manager who supports the proxy market when duration stress appears.
+
+    Theory: simulation-bases.md §4.3 — BankManager
+    Theoretical basis: asset-liability duration mismatch and stabilization.
+    See simulation-bases.md §4.3 for the support rule.
 
     Parameters from config extras:
         - duration_gap
@@ -287,8 +296,11 @@ class BankManager(BaseInvestor):
 
 
 class Regulator(BaseInvestor):
-    """
-    Regulator: may intervene with guarantees or liquidity support.
+    """Regulator who may provide lender-of-last-resort proxy support.
+
+    Theory: simulation-bases.md §4.4 — Regulator
+    Theoretical basis: deposit guarantees and lender-of-last-resort policy.
+    See simulation-bases.md §4.4 for the intervention rule.
 
     Parameters from config extras:
         - intervention_threshold, guarantee_probability
@@ -306,8 +318,11 @@ class Regulator(BaseInvestor):
 
 
 class BondTrader(BaseInvestor):
-    """
-    Bond trader: trades based on interest rate expectations.
+    """Bond trader who reprices bank exposure from duration-loss signals.
+
+    Theory: simulation-bases.md §4.5 — BondTrader
+    Theoretical basis: fixed-income duration and mark-to-market losses.
+    See simulation-bases.md §4.5 for the bond-loss pressure rule.
 
     Parameters from config extras: (none specific)
     """

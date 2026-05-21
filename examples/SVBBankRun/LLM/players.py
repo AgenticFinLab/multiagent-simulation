@@ -19,7 +19,10 @@ from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.SVBBankRun.decision import (
+    fallback_hold_decision,
+    parse_svbbankrun_decision,
+)
 from .prompts import (
     LLM_DEPOSITOR_SYS,
     LLM_SOCIAL_MEDIA_INFLUENCER_SYS,
@@ -94,7 +97,8 @@ class LLMInvestor(GeneralPlayer):
             f"Value: ${portfolio_value:.2f}\n\n"
             "Based on your strategy and current conditions, decide your action.\n"
             "Respond with <analysis>...</analysis> then <decision>...</decision> containing "
-            'JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}'
+            'JSON: {"action": "buy" or "sell" or "hold", '
+            '"quantity": integer, "reasoning": "brief rationale"}'
         )
 
     async def decide(self) -> Dict[str, Any]:
@@ -106,25 +110,31 @@ class LLMInvestor(GeneralPlayer):
         user_prompt = self._build_prompt()
         system_prompt = self._system_prompt
 
-        decision: Dict[str, Any] = {"action": "hold", "quantity": 0}
+        decision: Optional[Dict[str, Any]] = None
+        last_error = ""
         max_retries = 3
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             infer_output = llm_client.run([infer_input])
             try:
-                decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
+                decision = parse_svbbankrun_decision(infer_output.outputs[0].response)
                 break
-            except (ValueError, KeyError):
+            except (ValueError, KeyError) as exc:
+                last_error = str(exc)
                 if attempt == max_retries - 1:
                     logger.warning(
-                        "[%s] LLM parse failed after %d attempts; holding.",
+                        "[%s] LLM parse failed after %d attempts; explicit fallback hold: %s",
                         self.identity,
                         max_retries,
+                        last_error,
                     )
-                    decision = {"action": "hold", "quantity": 0}
+                    decision = fallback_hold_decision(last_error)
 
+        if decision is None:
+            raise RuntimeError(f"[{self.identity}] LLM decision failed without fallback")
+
+        llm_fallback = bool(decision.pop("llm_fallback"))
+        fallback_reason = str(decision.pop("fallback_reason"))
         action = decision["action"]
         quantity = int(decision["quantity"])
 
@@ -167,6 +177,9 @@ class LLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "agent_type": strategy_name,
             "reasoning": decision["reasoning"][:120],
+            "analysis": decision["analysis"],
+            "llm_fallback": llm_fallback,
+            "fallback_reason": fallback_reason,
         }
         return {
             **order,
@@ -182,31 +195,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMDepositor(LLMInvestor):
-    """LLM-driven depositor managing savings under uncertainty."""
+    """LLM-driven depositor managing savings under uncertainty. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = LLM_DEPOSITOR_SYS
 
 
 class LLMSocialMediaInfluencer(LLMInvestor):
-    """LLM-driven social media influencer amplifying market signals."""
+    """LLM-driven social media influencer amplifying panic signals. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = LLM_SOCIAL_MEDIA_INFLUENCER_SYS
 
 
 class LLMBankManager(LLMInvestor):
-    """LLM-driven bank manager handling duration risk."""
+    """LLM-driven bank manager handling duration risk. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = LLM_BANK_MANAGER_SYS
 
 
 class LLMRegulator(LLMInvestor):
-    """LLM-driven regulator intervening with guarantees."""
+    """LLM-driven regulator intervening with guarantees. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = LLM_REGULATOR_SYS
 
 
 class LLMBondTrader(LLMInvestor):
-    """LLM-driven bond trader based on interest rate expectations."""
+    """LLM-driven bond trader based on interest rate expectations. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = LLM_BOND_TRADER_SYS
 

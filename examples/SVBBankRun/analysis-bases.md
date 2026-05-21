@@ -1,91 +1,120 @@
-# SVBBankRun Analysis Bases
+# SVBBankRun — Analysis Basis
 
 ## §1 Analysis Objectives
 
-The analysis verifies whether withdrawal pressure, information amplification,
-duration losses, and policy intervention produce a recognizable bank-run
-dynamic.
+The analysis evaluates whether the proxy market produces a recognizable bank-run
+dynamic: run pressure rises after bank-health deterioration, social amplification
+accelerates pressure, duration-sensitive trading transmits valuation losses, and
+manager/regulator support stabilizes or slows the drawdown.
 
-## §2 Metrics
+## §2 Metric Catalogue
 
-### §2.1 Withdrawal Pressure
+### §2.1 Bank Health Drawdown
+
+```python
+def compute_bank_health_drawdown(price_series: list[float]) -> float
+```
+
+Maximum peak-to-trough decline in the bank-health proxy price. Large values
+indicate a severe run.
+
+### §2.2 Withdrawal Pressure
 
 ```python
 def compute_withdrawal_pressure(orders: list[dict]) -> float
 ```
 
-Measures depositor exit volume.
+Total `sell` quantity from `Depositor` agents, interpreted as withdrawal
+pressure.
 
-### §2.2 Panic Amplification
-
-```python
-def compute_panic_amplification(messages: list[dict]) -> float
-```
-
-Measures how strongly social signals amplify negative state.
-
-### §2.3 Bank Health Drawdown
+### §2.3 Panic Amplification
 
 ```python
-def compute_health_drawdown(health_series: list[float]) -> float
+def compute_panic_amplification(orders: list[dict]) -> float
 ```
 
-Captures deterioration in bank-health proxy.
+Total `sell` quantity from `SocialMediaInfluencer` agents divided by depositor
+sell pressure. Values above 1 indicate amplification beyond direct withdrawal.
 
-### §2.4 Intervention Timing
+### §2.4 Support Intensity
 
 ```python
-def compute_intervention_round(events: list[dict]) -> int
+def compute_support_intensity(orders: list[dict]) -> float
 ```
 
-Finds the first regulatory support action.
+Total `buy` quantity from `BankManager` and `Regulator` agents.
 
-### §2.5 Bond-Loss Contribution
+### §2.5 Bond-Loss Pressure
 
 ```python
-def compute_bond_loss_contribution(orders: list[dict]) -> float
+def compute_bond_loss_pressure(orders: list[dict]) -> float
 ```
 
-Attributes sell pressure to bond-related repricing.
+Directional pressure from `BondTrader` agents, connecting duration-loss signals
+to proxy-market stress.
 
 ### §2.6 Run Onset Round
 
 ```python
-def compute_run_onset(health_series: list[float], threshold: float) -> int
+def compute_run_onset(price_series: list[float], threshold: float) -> int
 ```
 
-Identifies when the bank run begins.
+First round where proxy drawdown exceeds a configured stress threshold.
 
-### §2.7 Stabilization Effect
+### §2.7 RAG Retrieval Coverage
 
 ```python
-def compute_stabilization_effect(pre: list[float], post: list[float]) -> float
+def analyze_rag_knowledge_effect(records: dict) -> dict
 ```
 
-Compares bank health before and after intervention.
+For Rag runs, measures how often `rag_context` was present versus fallback text.
 
 ## §3 Analysis Dimensions
 
-Deposit flight, social amplification, duration loss, regulatory response, and
-stabilization.
+| Dimension | Metrics | Interpretation |
+|---|---|---|
+| Run severity | §2.1, §2.6 | Whether proxy bank health collapses and when. |
+| Withdrawal channel | §2.2 | Depositor-driven run pressure. |
+| Information channel | §2.3 | Incremental pressure from social amplification. |
+| Stabilization channel | §2.4 | Support from manager and regulator agents. |
+| Duration channel | §2.5 | Bond-market contribution to proxy pressure. |
+| Knowledge channel | §2.7 | RAG retrieval availability and possible reasoning effects. |
 
 ## §4 Phase Analysis
 
-Early rounds show latent duration risk. Middle rounds show depositor/influencer
-coordination. Later rounds show intervention or collapse.
+| Phase | Rounds | Expected Pattern |
+|---|---|---|
+| Latent fragility | Early rounds | Price near fundamental; limited action. |
+| Run ignition | Stress threshold crossed | Depositors and influencers add sell pressure. |
+| Escalation | Middle rounds | Net demand turns negative and drawdown deepens. |
+| Stabilization or collapse | Later rounds | Manager/regulator buy pressure may slow or reverse decline. |
 
 ## §5 Cross-Variant Comparison
 
-Rule provides threshold benchmark. LLM may accelerate or delay panic. RuleLLM
-should stay threshold-aligned. Rag may cite bank-run precedents and change
-support expectations.
+| Variant | Expected Difference |
+|---|---|
+| Rule | Fixed threshold response and reproducible pressure timing. |
+| LLM | Persona-driven discretion may accelerate or delay withdrawals. |
+| RuleLLM | Explicit rules should keep action direction close to Rule while allowing reasoning variability. |
+| Rag | Retrieved crisis context may change intervention timing or panic sensitivity. |
 
-## §6 Expected Results
+## §6 Expected Results And Validation
 
-Depositor and influencer pressure should dominate run onset; regulator action
-should reduce or reverse pressure if activated.
+| Criterion | Target | Failure Sign |
+|---|---|---|
+| Completion | 200 simulation rounds | Missing rounds or incomplete records. |
+| Message schema | All orders include `action`, `quantity`, `agent_type` | Key errors or unparseable API output. |
+| Run dynamics | Negative net demand during stress; support pressure in severe stress | Flat proxy series with no agent response. |
+| API quality | Fallback rate is 0 clean, <=1% acceptable with note | High fallback rate or missing reasoning. |
+| RAG audit | `rag_stats.json` records retrieval coverage | No `rag_context` field in records. |
 
-## §7 Visualization Plan
+## §7 Visualization Catalogue
 
-Plot bank-health proxy, withdrawal volume, panic amplification, bond sell
-pressure, and intervention markers across variants.
+Required outputs:
+
+1. `summary.json` with validation score and criteria.
+2. `00_investor_bids.png` showing investor pressure/order structure.
+3. `01_svbbankrun_dynamics.png` showing bank-health proxy evolution.
+4. `02_svbbankrun_analysis.png` showing derived pressure metrics.
+5. `03_summary.png` with validation summary.
+6. `rag_stats.json` for Rag retrieval analysis.

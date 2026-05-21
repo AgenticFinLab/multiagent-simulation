@@ -1,27 +1,44 @@
-# SVBBankRun Analysis Guide
+# SVBBankRun Rule — Analysis Guide
 
-## §1 Metrics
+## §1 Analysis Overview
 
-| Metric | Description | Expected Range |
-|--------|-------------|----------------|
-| Price deviation | Deviation from fundamental | Varies by scenario |
-| Max drawdown | Largest peak-to-trough decline | Varies by scenario |
-| Volatility | Annualized return volatility | Varies by scenario |
+The Rule analysis evaluates deterministic bank-health proxy dynamics from
+`analysis-bases.md`.
 
-## §2 Visualization Guide
+## §2 Metric Mapping
 
-1. **Price vs Fundamental**: Shows whether agents create mispricings
-2. **Deviation Plot**: Magnitude and persistence of mispricings
-3. **Return Distribution**: Should show fat tails for behavioral scenarios
+| Metric | Root Definition | Implementation |
+|---|---|---|
+| Bank Health Drawdown | `analysis-bases.md §2.1` | `Rule/analysis.py::calculate_metrics()` via standard metrics. |
+| Withdrawal Pressure | `analysis-bases.md §2.2` | Inferred from investor sell pressure by agent type. |
+| Panic Amplification | `analysis-bases.md §2.3` | Compare influencer sell pressure to depositor sell pressure. |
+| Support Intensity | `analysis-bases.md §2.4` | Manager/regulator buy pressure. |
+| Bond-Loss Pressure | `analysis-bases.md §2.5` | BondTrader directional pressure. |
+| Run Onset Round | `analysis-bases.md §2.6` | First sustained drawdown period. |
 
-## §3 Troubleshooting
+## §3 Data Sources
 
-- **No phenomenon observed**: Adjust agent parameters
-- **Too extreme**: Add more stabilizing agents or increase mean reversion
-- **Too stable**: Increase destabilizing agent parameters
+The analysis loads simulation records through `masim.utils.load_results()` and
+delegates standard structural plotting to `examples.standard_rule_analysis`.
 
-## §4 References
+## §4 Visualization Outputs
 
-- Diamond & Dybvig (1983): Bank runs, deposit insurance, and liquidity
-- Iyer & Puri (2012): Social networks in bank runs
-- Duffie et al. (2023): SVB failure analysis
+Required files are `summary.json`, `00_investor_bids.png`,
+`01_svbbankrun_dynamics.png`, `02_svbbankrun_analysis.png`, and
+`03_summary.png`.
+
+## §5 Validation Criteria
+
+The run must complete all configured rounds, include market and player records,
+and preserve the `investor_order` proxy schema.
+
+## §6 Troubleshooting
+
+Flat dynamics usually indicate insufficient net demand pressure. Extreme
+collapse usually indicates excessive sell-side pressure relative to mean
+reversion and support.
+
+## §7 Cross-Variant Use
+
+LLM, RuleLLM, and Rag analysis modules delegate base structural metrics to this
+Rule analysis contract.

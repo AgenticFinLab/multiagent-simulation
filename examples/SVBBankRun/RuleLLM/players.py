@@ -19,7 +19,10 @@ from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.SVBBankRun.decision import (
+    fallback_hold_decision,
+    parse_svbbankrun_decision,
+)
 from .prompts import (
     RULELLM_DEPOSITOR_SYS,
     RULELLM_SOCIAL_MEDIA_INFLUENCER_SYS,
@@ -94,7 +97,8 @@ class RuleLLMInvestor(GeneralPlayer):
             f"Value: ${portfolio_value:.2f}\n\n"
             "Apply your decision rules to determine action.\n"
             "Respond with <analysis>...</analysis> then <decision>...</decision> containing "
-            'JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}'
+            'JSON: {"action": "buy" or "sell" or "hold", '
+            '"quantity": integer, "reasoning": "brief rationale"}'
         )
 
     async def decide(self) -> Dict[str, Any]:
@@ -106,25 +110,31 @@ class RuleLLMInvestor(GeneralPlayer):
         user_prompt = self._build_prompt()
         system_prompt = self._system_prompt
 
-        decision: Dict[str, Any] = {"action": "hold", "quantity": 0}
+        decision: Optional[Dict[str, Any]] = None
+        last_error = ""
         max_retries = 3
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             infer_output = llm_client.run([infer_input])
             try:
-                decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
+                decision = parse_svbbankrun_decision(infer_output.outputs[0].response)
                 break
-            except (ValueError, KeyError):
+            except (ValueError, KeyError) as exc:
+                last_error = str(exc)
                 if attempt == max_retries - 1:
                     logger.warning(
-                        "[%s] LLM parse failed after %d attempts; holding.",
+                        "[%s] LLM parse failed after %d attempts; explicit fallback hold: %s",
                         self.identity,
                         max_retries,
+                        last_error,
                     )
-                    decision = {"action": "hold", "quantity": 0}
+                    decision = fallback_hold_decision(last_error)
 
+        if decision is None:
+            raise RuntimeError(f"[{self.identity}] RuleLLM decision failed without fallback")
+
+        llm_fallback = bool(decision.pop("llm_fallback"))
+        fallback_reason = str(decision.pop("fallback_reason"))
         action = decision["action"]
         quantity = int(decision["quantity"])
 
@@ -165,6 +175,9 @@ class RuleLLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "agent_type": strategy_name,
             "reasoning": decision["reasoning"][:120],
+            "analysis": decision["analysis"],
+            "llm_fallback": llm_fallback,
+            "fallback_reason": fallback_reason,
         }
         return {
             **order,
@@ -180,31 +193,31 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMDepositor(RuleLLMInvestor):
-    """Hybrid Rule+LLM depositor with explicit withdrawal rules."""
+    """Hybrid Rule+LLM depositor with explicit withdrawal rules. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RULELLM_DEPOSITOR_SYS
 
 
 class RuleLLMSocialMediaInfluencer(RuleLLMInvestor):
-    """Hybrid Rule+LLM social media influencer with amplification rules."""
+    """Hybrid Rule+LLM social media influencer with amplification rules. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RULELLM_SOCIAL_MEDIA_INFLUENCER_SYS
 
 
 class RuleLLMBankManager(RuleLLMInvestor):
-    """Hybrid Rule+LLM bank manager with ALM stabilization rules."""
+    """Hybrid Rule+LLM bank manager with ALM stabilization rules. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RULELLM_BANK_MANAGER_SYS
 
 
 class RuleLLMRegulator(RuleLLMInvestor):
-    """Hybrid Rule+LLM regulator with intervention rules."""
+    """Hybrid Rule+LLM regulator with intervention rules. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RULELLM_REGULATOR_SYS
 
 
 class RuleLLMBondTrader(RuleLLMInvestor):
-    """Hybrid Rule+LLM bond trader with fixed income rules."""
+    """Hybrid Rule+LLM bond trader with fixed income rules. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RULELLM_BOND_TRADER_SYS
 
