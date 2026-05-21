@@ -30,14 +30,46 @@ from .prompts import (
     RULELLM_NOISE_TRADER_SYS,
     RAG_USER_TEMPLATE,
 )
-from examples.llm_utils import parse_llm_response_with_thinking
-from examples.OverconfidenceBias.Rule.players import Market  # noqa: F401
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from examples.OverconfidenceBias.Rule.players import (  # noqa: F401
+    Market,
+    _build_order,
+    _require_positive,
+)
 
 logger = logging.getLogger("OverconfidenceBias.Rag")
 
 
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
+
+def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
+    """Validate the shared overconfidence RAG decision contract."""
+    action = decision["action"]
+    if action not in ("buy", "sell", "hold"):
+        raise ValueError(f"[{identity}] invalid action: {action}")
+    bid_price = float(decision["bid_price"])
+    _require_positive(bid_price, "bid_price")
+    quantity = int(decision["quantity"])
+    if quantity < 0:
+        raise ValueError(f"[{identity}] quantity must be non-negative, got {quantity}")
+    return {
+        "action": action,
+        "bid_price": bid_price,
+        "quantity": quantity,
+        "reasoning": decision["reasoning"],
+        "analysis": decision["analysis"],
+    }
+
+
 class RagLLMInvestor(GeneralPlayer):
-    """Base class for RAG-augmented overconfidence investors."""
+    """Base class for RAG-augmented overconfidence investors.
+
+    Theoretical basis: simulation-bases.md §4.
+    Strategy specification: RuleLLM prompts plus retrieved knowledge map to
+        simulation-bases.md §4.
+    Parameters: simulation-bases.md §6.
+    """
 
     _system_prompt: str = ""
 
@@ -64,7 +96,6 @@ class RagLLMInvestor(GeneralPlayer):
         """One-time initialization: LLM client + RAG index."""
         extras = self.config.extras
         record_path = extras["record_path"]
-        base_path = os.path.join(record_path, self.config.identity)
 
         self.state.custom_state["cash"] = extras["initial_cash"]
         self.state.custom_state["position"] = extras["initial_position"]
@@ -93,13 +124,21 @@ class RagLLMInvestor(GeneralPlayer):
         extras = self.config.extras
         record_path = extras["record_path"]
 
-        knowledge_config = extras["knowledge"]
+        knowledge_config = extras.get("knowledge", {})
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
-                "global_uri": rag_cfg["docs_dir"],
+                "global_uri": "examples/document-sources",
+                "resource_csv": [
+                    "examples/document-sources/books.csv",
+                    "examples/document-sources/source",
+                ],
+                "preprocessing": {
+                    "parser": "mineru",
+                    "output_position": "MinerU_processed",
+                },
                 "rag": {
-                    "output_position": rag_cfg["shared_rag_index_dir"]
+                    "output_position": "rag_index",
                 },
             }
 
@@ -165,6 +204,34 @@ class RagLLMInvestor(GeneralPlayer):
                         "[%s] Failed to load local index: %s", self.identity, exc
                     )
 
+        shared_rag_dirs = resolved_rag.get("shared_rag_index_dirs", [])
+        if not shared_rag_dirs and os.path.isdir(shared_rag_dir):
+            shared_rag_dirs = [shared_rag_dir]
+
+        for shared_dir in shared_rag_dirs:
+            if not os.path.isdir(shared_dir):
+                continue
+            shared_index_files = [
+                f for f in os.listdir(shared_dir) if not f.startswith(".")
+            ]
+            if shared_index_files:
+                try:
+                    for item in shared_index_files:
+                        src = os.path.join(shared_dir, item)
+                        dst = os.path.join(local_rag_dir, item)
+                        if os.path.isdir(src):
+                            shutil.copytree(src, dst, dirs_exist_ok=True)
+                        else:
+                            shutil.copy2(src, dst)
+                    rag_store.load(local_rag_dir)
+                    self.state.custom_state["rag_store"] = rag_store
+                    self.state.custom_state["rag_cfg"] = resolved_rag
+                    return
+                except Exception as exc:  # pylint: disable=broad-except
+                    logger.warning(
+                        "[%s] Failed to copy shared index: %s", self.identity, exc
+                    )
+
         loader = KnowledgeLoader()
         docs: List[Any] = []
         if os.path.isdir(processed_dir) and os.listdir(processed_dir):
@@ -176,6 +243,18 @@ class RagLLMInvestor(GeneralPlayer):
             raise RuntimeError(f"[{self.identity}] No documents available for RAG.")
 
         rag_store.build(docs)
+        try:
+            for item in os.listdir(local_rag_dir):
+                if item.startswith("."):
+                    continue
+                src = os.path.join(local_rag_dir, item)
+                dst = os.path.join(shared_rag_dir, item)
+                if os.path.isdir(src):
+                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(src, dst)
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.warning("[%s] Failed to copy shared index: %s", self.identity, exc)
         self.state.custom_state["rag_store"] = rag_store
         self.state.custom_state["rag_cfg"] = resolved_rag
 
@@ -197,6 +276,36 @@ class RagLLMInvestor(GeneralPlayer):
                     lm_name=custom["lm_name"],
                     generation_config=custom["generation_config"],
                 )
+            if "rag_cfg" in custom and "rag_store" not in custom:
+                rag_cfg = custom["rag_cfg"]
+                local_rag_dir = rag_cfg["local_index_dir"]
+                if not local_rag_dir:
+                    local_workspace_dir = rag_cfg["local_workspace_dir"]
+                    if local_workspace_dir:
+                        local_rag_dir = os.path.join(local_workspace_dir, "rag_index")
+                if local_rag_dir:
+                    embed_api_key = rag_cfg["embed_api_key"]
+                    if not embed_api_key:
+                        embed_type = rag_cfg["embed_type"]
+                        if embed_type == "litellm":
+                            embed_api_key = os.getenv("HUNYUAN_API_KEY", "")
+                        elif embed_type == "openai":
+                            embed_api_key = os.getenv("ARK_API_KEY", "")
+                    rag_store = KnowledgeStore(
+                        embed_model_name=rag_cfg["embed_model"],
+                        embed_api_key=embed_api_key,
+                        embed_api_base=rag_cfg["embed_api_base"],
+                        embed_type=rag_cfg["embed_type"],
+                        persist_dir=local_rag_dir,
+                        chunk_size=int(rag_cfg["chunk_size"]),
+                        chunk_overlap=int(rag_cfg["chunk_overlap"]),
+                    )
+                    if os.path.isdir(local_rag_dir):
+                        try:
+                            rag_store.load(local_rag_dir)
+                        except Exception as exc:  # pylint: disable=broad-except
+                            logger.warning("RAG store reload failed: %s", exc)
+                    custom["rag_store"] = rag_store
 
     def _build_prompt(self, rag_context: str = "") -> str:
         round_num = self.state.custom_state["round"]
@@ -206,7 +315,7 @@ class RagLLMInvestor(GeneralPlayer):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         return RAG_USER_TEMPLATE.format(
-            rag_context=rag_context or "(No relevant knowledge retrieved.)",
+            rag_context=rag_context or _RAG_FALLBACK,
             round_num=round_num,
             price=price,
             fundamental=fundamental,
@@ -219,6 +328,7 @@ class RagLLMInvestor(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
         price = self.state.custom_state["price"]
+        _require_positive(price, "price")
         strategy_name = self.__class__.__name__
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
 
@@ -235,6 +345,9 @@ class RagLLMInvestor(GeneralPlayer):
             )
             result = rag_store.query(query)
             rag_context = result.formatted_text
+        if not rag_context:
+            rag_context = _RAG_FALLBACK
+        self.state.custom_state["last_rag_context"] = rag_context
 
         user_prompt = self._build_prompt(rag_context)
 
@@ -245,52 +358,48 @@ class RagLLMInvestor(GeneralPlayer):
             infer_input = InferInput(
                 system_msg=self._system_prompt, user_msg=user_prompt
             )
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_output = llm_client.run([infer_input])
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
+                decision = _validate_decision(decision, self.identity)
                 break
-            except ValueError as e:
-                last_error = e
+            except Exception as exc:
+                last_error = exc
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
                 if attempt < max_retries - 1:
                     logger.debug(
-                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        "[%s] LLM call/parse failed (attempt %d), retrying...",
                         self.identity,
                         attempt + 1,
                     )
+                    continue
+                if not parse_error and not retryable_api_error:
+                    raise
 
         if decision is None:
-            logger.warning(
-                "[%s] LLM failed after %d attempts: %s. Holding.",
-                self.identity,
-                max_retries,
-                last_error,
+            raise RuntimeError(
+                f"[{self.identity}] LLM decision contract failed after "
+                f"{max_retries} retries: {last_error}"
             )
-            order = {
-                "type": "order",
-                "action": "hold",
-                "quantity": 0,
-                "agent_type": strategy_name,
-            }
-            return {
-                **order,
-                "outbound_messages": [{"payload": order, "content_type": "order"}],
-            }
 
         action = decision["action"]
         quantity = int(decision["quantity"])
+        bid_price = float(decision["bid_price"])
+        _require_positive(bid_price, "bid_price")
 
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         if action == "buy" and quantity > 0:
-            max_affordable = int(cash / price) if price > 0 else 0
+            max_affordable = int(cash / price)
             quantity = min(quantity, max_affordable)
             if quantity > 0:
                 self.state.custom_state["cash"] -= quantity * price
                 self.state.custom_state["position"] += quantity
         elif action == "sell" and quantity > 0:
-            quantity = min(quantity, position)
+            quantity = min(quantity, max(int(position), 0))
             if quantity > 0:
                 self.state.custom_state["cash"] += quantity * price
                 self.state.custom_state["position"] -= quantity
@@ -307,12 +416,16 @@ class RagLLMInvestor(GeneralPlayer):
             quantity,
         )
 
-        order = {
-            "type": "order",
-            "action": action,
-            "quantity": quantity,
-            "agent_type": strategy_name,
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            bid_price,
+            str(decision["reasoning"]),
+        )
+        order["analysis"] = str(decision["analysis"])
+        order["strategy"] = strategy_name
+        order["rag_context"] = self.state.custom_state["last_rag_context"]
         return {
             **order,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
@@ -327,31 +440,51 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMOverconfidentTrader(RagLLMInvestor):
-    """RAG-augmented OverconfidentTrader."""
+    """RAG-augmented OverconfidentTrader.
+
+    Theoretical basis: simulation-bases.md §4.1 — OverconfidentTrader.
+    Strategy specification: simulation-bases.md §4.1.4.
+    """
 
     _system_prompt = RULELLM_OVERCONFIDENT_TRADER_SYS
 
 
 class RagLLMSelfAttributor(RagLLMInvestor):
-    """RAG-augmented SelfAttributor."""
+    """RAG-augmented SelfAttributor.
+
+    Theoretical basis: simulation-bases.md §4.2 — SelfAttributor.
+    Strategy specification: simulation-bases.md §4.2.4.
+    """
 
     _system_prompt = RULELLM_SELF_ATTRIBUTOR_SYS
 
 
 class RagLLMCalibratedTrader(RagLLMInvestor):
-    """RAG-augmented CalibratedTrader."""
+    """RAG-augmented CalibratedTrader.
+
+    Theoretical basis: simulation-bases.md §4.3 — CalibratedTrader.
+    Strategy specification: simulation-bases.md §4.3.4.
+    """
 
     _system_prompt = RULELLM_CALIBRATED_TRADER_SYS
 
 
 class RagLLMContrarianInvestor(RagLLMInvestor):
-    """RAG-augmented ContrarianInvestor."""
+    """RAG-augmented ContrarianInvestor.
+
+    Theoretical basis: simulation-bases.md §4.4 — ContrarianInvestor.
+    Strategy specification: simulation-bases.md §4.4.4.
+    """
 
     _system_prompt = RULELLM_CONTRARIAN_INVESTOR_SYS
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented NoiseTrader."""
+    """RAG-augmented NoiseTrader.
+
+    Theoretical basis: simulation-bases.md §4.5 — NoiseTrader.
+    Strategy specification: simulation-bases.md §4.5.4.
+    """
 
     _system_prompt = RULELLM_NOISE_TRADER_SYS
 

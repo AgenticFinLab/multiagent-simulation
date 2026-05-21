@@ -22,13 +22,13 @@ Current Market State (Round {round_num}):
 - Your Position: {position} shares
 - Portfolio Value: ${portfolio_value:.2f}
 
-Apply your DECISION RULES, informed by the relevant knowledge above and output your trade decision.
+Apply your DECISION RULES, informed by the relevant knowledge above.
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}
-IMPORTANT: quantity MUST be a positive integer, NOT negative or a formula.
-
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
+Required output:
+<analysis>brief calculation, retrieved-knowledge use, and rationale</analysis>
+<decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f},
+"quantity": non-negative integer, "reasoning": "brief rationale"}}</decision>
+"""
 
 __all__ = [
     "RULELLM_OVERCONFIDENT_TRADER_SYS",

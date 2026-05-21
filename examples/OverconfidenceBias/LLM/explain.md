@@ -1,110 +1,93 @@
-# OverconfidenceBias Simulation
+# OverconfidenceBias LLM — Implementation Explanation
 
 ## §1 Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | Overconfidence bias causes traders to overestimate their precision, trade too much, and increase volatility |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Overconfidence bias simulation showing how excessive self-confidence leads to excessive trading and market instability |
-| **Academic Value** | Understanding overconfidence bias causes traders to overestimate their precision, trade too much, and increase volatility through multi-agent simulation |
+|---|---|
+| Variant | LLM |
+| Simulation | OverconfidenceBias |
+| Decision Mechanism | Persona-only LLM decisions constrained by canonical trading schema |
+| Theory Reference | `simulation-bases.md §2` and `simulation-bases.md §4` |
+| Market Broadcast | `price`, `fundamental`, `deviation`, `round` |
 
-## §2 Theoretical Foundation
+## §2 Theory → Implementation Mapping
 
-- Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
-- Odean (1998): Volume, volatility, price, and profit when all traders are above average
-- Barber & Odean (2001): Boys will be boys: Gender, overconfidence, and common stock investment
+### §2.1 OverconfidentTrader (simulation-bases.md §4.1)
 
-## §3 Agent Descriptions
+| Theory Component | Implementation |
+|---|---|
+| Signal overprecision | `LLM_OVERCONFIDENT_TRADER_PROMPT` frames weak evidence as meaningful. |
+| Excess trading | The model chooses a schema-valid action and quantity. |
+| Constraint enforcement | `LLMInvestor.decide()` caps buy/sell quantities. |
 
-### OverconfidentTrader
-**Theoretical Basis**: Overconfidence bias (Daniel et al., 1998)
-**Market Role**: destabilizing
-**Description**: Overestimates signal precision, trades too frequently
-**Parameters**: precision_overestimate=2.0, trade_frequency=high, position_size=800
+### §2.2 SelfAttributor (simulation-bases.md §4.2)
 
-### SelfAttributor
-**Theoretical Basis**: Self-attribution bias
-**Market Role**: destabilizing
-**Description**: Attributes success to skill, failure to bad luck
-**Parameters**: attribution_bias=0.7, confidence_boost=0.3
+| Theory Component | Implementation |
+|---|---|
+| Skill attribution | `LLM_SELF_ATTRIBUTOR_PROMPT` asks the model to reason about success and bad luck. |
+| Confidence drift | The prompt allows favorable states to reinforce exposure. |
+| Schema discipline | Parser requires `action`, `bid_price`, `quantity`, `reasoning`, and `analysis`. |
 
-### CalibratedTrader
-**Theoretical Basis**: Rational expectations
-**Market Role**: stabilizing
-**Description**: Correctly estimates signal precision, trades appropriately
-**Parameters**: signal_precision=0.6, trade_threshold=0.02, position_size=500
+### §2.3 CalibratedTrader (simulation-bases.md §4.3)
 
-### ContrarianInvestor
-**Theoretical Basis**: Contrarian strategy
-**Market Role**: stabilizing
-**Description**: Trades against overconfident moves
-**Parameters**: contrarian_threshold=0.05, patience=high
+| Theory Component | Implementation |
+|---|---|
+| Cautious signal use | `LLM_CALIBRATED_TRADER_PROMPT` discourages small-signal overreaction. |
+| Benchmark behavior | Current price and fundamental value are supplied every round. |
+| Bounded orders | Player constraints enforce cash and inventory limits. |
 
-### NoiseTrader
-**Theoretical Basis**: Black (1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader
-**Parameters**: trade_probability=0.05, min_order=100, max_order=500
+### §2.4 ContrarianInvestor (simulation-bases.md §4.4)
 
+| Theory Component | Implementation |
+|---|---|
+| Overreaction fading | `LLM_CONTRARIAN_INVESTOR_PROMPT` frames deviations as possible overshoots. |
+| Stabilization | Parsed orders enter the shared market. |
+| Risk control | Quantity is non-negative and bounded by portfolio state. |
 
-## §4 Usage
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-### Rule Variant
-```bash
-python examples/OverconfidenceBias/Rule/run_overconfidencebias.py \
-    -c configs/OverconfidenceBias/Rule/simulation.yml
-```
+| Theory Component | Implementation |
+|---|---|
+| Uninformed flow | `LLM_NOISE_TRADER_PROMPT` uses weak sentiment and random impulses. |
+| Liquidity role | Orders provide background market flow. |
+| Contract validity | Output must satisfy the canonical parser contract. |
 
-### LLM Variant
+## §3 Market Mechanism
+
+The LLM variant reuses the Rule `Market` and sends canonical orders into the same price equation.
+
+## §4 Variant Architecture
+
+| Component | Implementation |
+|---|---|
+| Coordinator | Rule market imported from `examples.OverconfidenceBias.Rule.players` |
+| Investors | `LLMInvestor` subclasses with persona-only prompts |
+| Inference | `LangChainAPIInference` from config model settings |
+| Parser | `parse_llm_response_with_thinking()` |
+| Output Contract | Required `action`, `bid_price`, `quantity`, `reasoning`, and `analysis` |
+| Error Policy | Retryable provider errors are retried; invalid final decision contracts raise. |
+
+## §5 Config Reference
+
+Primary config: `configs/OverconfidenceBias/LLM/simulation.yml`. Prompt and model settings live in `configs/OverconfidenceBias/LLM/players.yml`.
+
+## §6 Running Instructions
+
 ```bash
 python examples/OverconfidenceBias/LLM/run_overconfidencebias_llm.py \
-    -c configs/OverconfidenceBias/LLM/simulation.yml
+  -c configs/OverconfidenceBias/LLM/simulation.yml
 ```
 
-### RuleLLM Variant
-```bash
-python examples/OverconfidenceBias/RuleLLM/run_overconfidencebias_rulellm.py \
-    -c configs/OverconfidenceBias/RuleLLM/simulation.yml
-```
+## §7 Expected Behavior
 
-### RAG Variant
-```bash
-python examples/OverconfidenceBias/Rag/run_overconfidencebias_rag.py \
-    -c configs/OverconfidenceBias/Rag/simulation.yml
-```
+- Persona reasoning expresses overconfidence, self-attribution, calibration, contrarian correction, or noise.
+- Accepted orders use the canonical schema.
+- Market outputs remain comparable with Rule.
 
-## §5 References
+## §8 References
 
-- Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
-- Odean (1998): Volume, volatility, price, and profit when all traders are above average
-- Barber & Odean (2001): Boys will be boys: Gender, overconfidence, and common stock investment
+See `simulation-bases.md §2` for full DOI citations.
 
-## §6 Expected Mechanism
+## §9 Variant Comparison
 
-The simulation is expected to show how LLM-driven agents express overconfidence
-through aggressive interpretation of private signals, frequent trading, and
-larger position changes. Calibrated and contrarian agents provide stabilizing
-comparison groups, while noise traders maintain baseline market uncertainty.
-
-## §7 Experimental Controls
-
-- Prompts should preserve the overconfidence mechanism without changing the
-  market role of each agent.
-- LLM responses must use the configured trading action schema so market state
-  updates remain comparable to other variants.
-- The same fundamental value process and initial endowments should be used
-  across variants.
-
-## §8 Success Criteria
-
-- The run completes the configured number of rounds without runtime errors.
-- LLM outputs produce valid trading actions without requiring fallback holds.
-- Price deviations, volatility, and trading volume can be compared with the Rule
-  baseline to evaluate LLM-mediated overconfidence.
-
-## §9 Notes
-
-This variant relies on prompt-guided decisions. Any prompt revision should keep
-the agent roles and trading schema stable unless the affected mode is scheduled
-for rerun.
+See `simulation-bases.md §9` for Rule / LLM / RuleLLM / Rag comparison.

@@ -25,14 +25,42 @@ from .prompts import (
     RULELLM_NOISE_TRADER_SYS,
     RULELLM_USER_TEMPLATE,
 )
-from examples.llm_utils import parse_llm_response_with_thinking
-from examples.OverconfidenceBias.Rule.players import Market  # noqa: F401
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from examples.OverconfidenceBias.Rule.players import (  # noqa: F401
+    Market,
+    _build_order,
+    _require_positive,
+)
 
 logger = logging.getLogger("OverconfidenceBias.RuleLLM")
 
 
+def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
+    """Validate the shared overconfidence RuleLLM decision contract."""
+    action = decision["action"]
+    if action not in ("buy", "sell", "hold"):
+        raise ValueError(f"[{identity}] invalid action: {action}")
+    bid_price = float(decision["bid_price"])
+    _require_positive(bid_price, "bid_price")
+    quantity = int(decision["quantity"])
+    if quantity < 0:
+        raise ValueError(f"[{identity}] quantity must be non-negative, got {quantity}")
+    return {
+        "action": action,
+        "bid_price": bid_price,
+        "quantity": quantity,
+        "reasoning": decision["reasoning"],
+        "analysis": decision["analysis"],
+    }
+
+
 class RuleLLMInvestor(GeneralPlayer):
-    """Base class for hybrid Rule+LLM overconfidence investors."""
+    """Base class for hybrid Rule+LLM overconfidence investors.
+
+    Theoretical basis: simulation-bases.md §4.
+    Strategy specification: RuleLLM prompts map to simulation-bases.md §4.
+    Parameters: simulation-bases.md §6.
+    """
 
     _system_prompt: str = ""
 
@@ -95,6 +123,7 @@ class RuleLLMInvestor(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
         price = self.state.custom_state["price"]
+        _require_positive(price, "price")
         strategy_name = self.__class__.__name__
         llm = self._get_llm()
 
@@ -107,53 +136,49 @@ class RuleLLMInvestor(GeneralPlayer):
             infer_input = InferInput(
                 system_msg=self._system_prompt, user_msg=user_prompt
             )
-            infer_output = llm.run([infer_input])
             try:
+                infer_output = llm.run([infer_input])
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
+                decision = _validate_decision(decision, self.identity)
                 break
-            except ValueError as e:
-                last_error = e
+            except Exception as exc:
+                last_error = exc
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
                 if attempt < max_retries - 1:
                     logger.debug(
-                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        "[%s] LLM call/parse failed (attempt %d), retrying...",
                         self.identity,
                         attempt + 1,
                     )
+                    continue
+                if not parse_error and not retryable_api_error:
+                    raise
 
         if decision is None:
-            logger.warning(
-                "[%s] LLM failed after %d attempts: %s. Holding.",
-                self.identity,
-                max_retries,
-                last_error,
+            raise RuntimeError(
+                f"[{self.identity}] LLM decision contract failed after "
+                f"{max_retries} retries: {last_error}"
             )
-            order = {
-                "type": "order",
-                "action": "hold",
-                "quantity": 0,
-                "agent_type": strategy_name,
-            }
-            return {
-                **order,
-                "outbound_messages": [{"payload": order, "content_type": "order"}],
-            }
 
         action = decision["action"]
         quantity = int(decision["quantity"])
+        bid_price = float(decision["bid_price"])
+        _require_positive(bid_price, "bid_price")
 
         # Enforce portfolio constraints
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         if action == "buy" and quantity > 0:
-            max_affordable = int(cash / price) if price > 0 else 0
+            max_affordable = int(cash / price)
             quantity = min(quantity, max_affordable)
             if quantity > 0:
                 self.state.custom_state["cash"] -= quantity * price
                 self.state.custom_state["position"] += quantity
         elif action == "sell" and quantity > 0:
-            quantity = min(quantity, position)
+            quantity = min(quantity, max(int(position), 0))
             if quantity > 0:
                 self.state.custom_state["cash"] += quantity * price
                 self.state.custom_state["position"] -= quantity
@@ -170,12 +195,15 @@ class RuleLLMInvestor(GeneralPlayer):
             quantity,
         )
 
-        order = {
-            "type": "order",
-            "action": action,
-            "quantity": quantity,
-            "agent_type": strategy_name,
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            bid_price,
+            str(decision["reasoning"]),
+        )
+        order["analysis"] = str(decision["analysis"])
+        order["strategy"] = strategy_name
         return {
             **order,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
@@ -190,31 +218,51 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMOverconfidentTrader(RuleLLMInvestor):
-    """Hybrid: OverconfidentTrader rules + LLM reasoning."""
+    """Hybrid: OverconfidentTrader rules + LLM reasoning.
+
+    Theoretical basis: simulation-bases.md §4.1 — OverconfidentTrader.
+    Strategy specification: simulation-bases.md §4.1.4.
+    """
 
     _system_prompt = RULELLM_OVERCONFIDENT_TRADER_SYS
 
 
 class RuleLLMSelfAttributor(RuleLLMInvestor):
-    """Hybrid: SelfAttributor rules + LLM reasoning."""
+    """Hybrid: SelfAttributor rules + LLM reasoning.
+
+    Theoretical basis: simulation-bases.md §4.2 — SelfAttributor.
+    Strategy specification: simulation-bases.md §4.2.4.
+    """
 
     _system_prompt = RULELLM_SELF_ATTRIBUTOR_SYS
 
 
 class RuleLLMCalibratedTrader(RuleLLMInvestor):
-    """Hybrid: CalibratedTrader rules + LLM reasoning."""
+    """Hybrid: CalibratedTrader rules + LLM reasoning.
+
+    Theoretical basis: simulation-bases.md §4.3 — CalibratedTrader.
+    Strategy specification: simulation-bases.md §4.3.4.
+    """
 
     _system_prompt = RULELLM_CALIBRATED_TRADER_SYS
 
 
 class RuleLLMContrarianInvestor(RuleLLMInvestor):
-    """Hybrid: ContrarianInvestor rules + LLM reasoning."""
+    """Hybrid: ContrarianInvestor rules + LLM reasoning.
+
+    Theoretical basis: simulation-bases.md §4.4 — ContrarianInvestor.
+    Strategy specification: simulation-bases.md §4.4.4.
+    """
 
     _system_prompt = RULELLM_CONTRARIAN_INVESTOR_SYS
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """Hybrid: NoiseTrader rules + LLM reasoning."""
+    """Hybrid: NoiseTrader rules + LLM reasoning.
+
+    Theoretical basis: simulation-bases.md §4.5 — NoiseTrader.
+    Strategy specification: simulation-bases.md §4.5.4.
+    """
 
     _system_prompt = RULELLM_NOISE_TRADER_SYS
 
