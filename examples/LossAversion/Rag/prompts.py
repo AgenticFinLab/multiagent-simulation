@@ -32,9 +32,13 @@ Current Market State (Round {round_num}):
 - Price Deviation: {deviation:+.2f}%
 - Your Cash: ${cash:.2f}
 - Your Position: {position} shares
+- Your Entry Price Reference: ${entry_price:.2f}
 - Portfolio Value: ${portfolio_value:.2f}
 
-Apply your DECISION RULES, informed by the relevant knowledge above, and output your trade decision.
+Configured rule parameters for your class:
+{decision_parameters}
+
+Apply your DECISION RULES, informed by the relevant knowledge above and the configured parameters, and output your trade decision.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}

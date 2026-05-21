@@ -63,4 +63,4 @@ Valid LLM outputs should complete 200 rounds with clean parse quality and no fal
 
 ## §7 Visualization Catalogue
 
-`LLM/analysis.py` reuses the Rule analysis pipeline and writes `lossaversion_analysis.png`. LLM reports may add action-distribution, parse-quality, and narrative-correction summaries.
+`LLM/analysis.py` reuses the Rule analysis pipeline and writes `summary.json`, `00_investor_bids.png`, `01_lossaversion_dynamics.png`, `02_lossaversion_analysis.png`, and `03_summary.png`. LLM reports may add action-distribution, parse-quality, and narrative-correction summaries.

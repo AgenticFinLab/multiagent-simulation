@@ -64,4 +64,4 @@ Valid Rule outputs should complete 200 rounds with valid market records, non-emp
 
 ## §7 Visualization Catalogue
 
-`Rule/analysis.py → create_visualizations(data, output_path)` produces `lossaversion_analysis.png`, including price-vs-fundamental, deviation, return path, and return-distribution panels. Scenario reports may add LAI/DEI/BER/WPI summary tables when trade-level records are available.
+`Rule/analysis.py → create_visualizations(data, output_path)` produces `summary.json`, `00_investor_bids.png`, `01_lossaversion_dynamics.png`, `02_lossaversion_analysis.png`, and `03_summary.png`. Scenario reports may add LAI/DEI/BER/WPI summary tables when trade-level records are available.

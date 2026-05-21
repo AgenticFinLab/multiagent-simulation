@@ -22,6 +22,7 @@ The Rag variant is the expected optimum for bias reduction — agents retrieve P
 | NCE    | Narrative Correction Efficiency | §2.4                  | `narrative_correction_efficiency()` | lai_variant, lai_rule_baseline                         |
 | VAF    | Volatility Amplification Factor | §2.5                  | `volatility_amplification_factor()` | price_history, fundamental, rational_benchmark_std     |
 | WPI    | Wealth Penalty Index            | §2.6                  | `wealth_penalty_index()`            | agent_states, final_price, biased_types, rational_type |
+| RQS    | Retrieval Quality Summary       | Rag-specific          | `analyze_rag_knowledge_effect()`    | recorded `rag_context` payloads                        |
 
 ---
 
@@ -60,8 +61,8 @@ Rag variant should produce the lowest LAI, BER, VAF and highest NCE, WPI across 
 
 ## §6 Expected Results and Validation
 
-Valid RAG outputs should complete 200 rounds with clean parse quality and usable retrieval context. They should show the strongest narrative correction among API modes, but not erase the phenomenon entirely.
+Valid RAG outputs should complete 200 rounds with clean parse quality and usable retrieval context. `analyze_rag_knowledge_effect()` writes `rag_stats.json`; the aggregate retrieval-success target is at least 70%. The variant should show the strongest narrative correction among API modes, but not erase the phenomenon entirely.
 
 ## §7 Visualization Catalogue
 
-`Rag/analysis.py` reuses the Rule analysis pipeline and writes `lossaversion_analysis.png`. RAG reports should add retrieval-quality notes and compare LAI/DEI/BER against RuleLLM.
+`Rag/analysis.py` reuses the Rule analysis pipeline and writes `summary.json`, `00_investor_bids.png`, `01_lossaversion_dynamics.png`, `02_lossaversion_analysis.png`, and `03_summary.png`. It also writes `rag_stats.json` with aggregate and per-agent retrieval coverage.

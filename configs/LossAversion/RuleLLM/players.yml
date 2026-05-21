@@ -109,7 +109,7 @@ rationaltrader:
   persona: !include persona.yml
 
 momentumtrader:
-  name: "DispositionTrader"
+  name: "MomentumTrader"
   class: "examples.LossAversion.RuleLLM.players:RuleLLMMomentumTrader"
   num_instances: 2
   config:
@@ -124,7 +124,7 @@ momentumtrader:
       initial_position: 500
       initial_price: 100.0
       fundamental_value: 100.0
-      profit_trigger: 0.03
+      entry_threshold: 0.03
       base_size: 300
       custom_state_hot_limit: 3
       llm:
@@ -138,7 +138,7 @@ momentumtrader:
   persona: !include persona.yml
 
 marketmaker:
-  name: "NoiseTrader"
+  name: "MarketMaker"
   class: "examples.LossAversion.RuleLLM.players:RuleLLMMarketMaker"
   num_instances: 2
   config:
@@ -153,8 +153,7 @@ marketmaker:
       initial_position: 200
       initial_price: 100.0
       fundamental_value: 100.0
-      trade_probability: 0.3
-      noise_size: 150
+      inventory_limit: 2000
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_MARKET_MAKER_PROMPT"

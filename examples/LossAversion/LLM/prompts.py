@@ -151,6 +151,7 @@ LLM_USER_TEMPLATE = """Current Market State (Round {round_num}):
 - Price Deviation: {deviation:+.2f}%
 - Your Cash: ${cash:.2f}
 - Your Position: {position} shares
+- Your Entry Price Reference: ${entry_price:.2f}
 - Portfolio Value: ${portfolio_value:.2f}
 
 Based on your trading strategy and current market conditions, what action do you take?

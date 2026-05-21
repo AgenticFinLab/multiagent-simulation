@@ -98,10 +98,10 @@ Configuration file: `configs/LossAversion/RuleLLM/simulation.yml` → `players.y
 | `sell_gain_threshold`  | LossAverseInvestor | 0.05         | Rule gain trigger               |
 | `risk_increase_factor` | BreakEvenTrader    | 2.0          | Rule escalation factor          |
 | `risk_aversion`        | RationalTrader     | 0.5          | Rule deviation weight           |
-| `entry_threshold`      | MomentumTrader     | 0.02         | Rule trend gate                 |
+| `entry_threshold`      | MomentumTrader     | 0.03         | Rule trend gate                 |
 | `inventory_limit`      | MarketMaker        | 2000         | Rule inventory cap              |
-| `llm.model`            | All LLM agents     | (configured) | LLM model identifier            |
-| `llm.temperature`      | All LLM agents     | 0.3          | Sampling temperature            |
+| `llm.lm_name`                       | All LLM agents | (configured) | LLM model identifier |
+| `llm.generation_config.temperature` | All LLM agents | 0.3–0.95 | Sampling temperature |
 | `initial_cash`         | All investors      | 100000       | Starting cash                   |
 | `initial_position`     | All investors      | 500          | Starting shares                 |
 

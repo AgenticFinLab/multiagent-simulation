@@ -33,6 +33,18 @@ from examples.LossAversion.Rule.players import Market  # noqa: F401
 logger = logging.getLogger("LossAversion.LLM")
 
 
+def _validate_decision(decision: Dict[str, Any]) -> None:
+    """Validate the canonical trading decision contract."""
+    if decision["action"] not in ("buy", "sell", "hold"):
+        raise ValueError(f"Invalid action: {decision['action']}")
+    if float(decision["bid_price"]) <= 0:
+        raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
+    if int(decision["quantity"]) < 0:
+        raise ValueError(f"Invalid quantity: {decision['quantity']}")
+    if not str(decision["reasoning"]).strip():
+        raise ValueError("Missing reasoning")
+
+
 class LLMInvestor(GeneralPlayer):
     """Base class for LLM-driven investors in LossAversion simulation.
 
@@ -92,6 +104,7 @@ class LLMInvestor(GeneralPlayer):
             deviation=deviation * 100,
             cash=cash,
             position=position,
+            entry_price=self.state.custom_state["entry_price"],
             portfolio_value=cash + position * price,
         )
 
@@ -103,6 +116,7 @@ class LLMInvestor(GeneralPlayer):
                     [InferInput(system_msg=self._system_prompt, user_msg=user_msg)]
                 )
                 decision = parse_llm_response_with_thinking(output.outputs[0].response)
+                _validate_decision(decision)
                 break
             except Exception as exc:
                 last_error = exc
@@ -141,6 +155,7 @@ class LLMInvestor(GeneralPlayer):
         order = {
             "type": "order",
             "action": action,
+            "bid_price": float(decision["bid_price"]),
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
             "reasoning": decision["reasoning"][:120],

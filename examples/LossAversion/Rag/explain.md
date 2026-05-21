@@ -18,7 +18,7 @@
 
 | Theory Element            | Rag Implementation                                                                                     |
 |---------------------------|--------------------------------------------------------------------------------------------------------|
-| Loss-aversion λ = 2.25    | Rule threshold computes gain/loss triggers; KB papers (Kahneman & Tversky 1979) retrieved when `       |
+| Loss-aversion λ = 2.25    | RuleLLM prompt receives configured `loss_aversion_lambda` and `sell_gain_threshold`; KB papers are retrieved every decision round |
 | Disposition effect        | KB retrieval may surface Odean (1998) PGR/PLR findings; LLM may use this to moderate sell fraction     |
 | Self-correction potential | If retrieved paper explicitly documents disposition-effect cost, LLM may decide to sell more of losers |
 
@@ -62,12 +62,12 @@ P(t+1) = P(t) + λ × NetDemand(t) + γ × (F − P(t)) + ε(t)
 
 Rag agent flow per round:
 1. Market broadcasts `{price, fundamental, deviation}`.
-2. Rule layer computes preliminary action direction and baseline quantity.
-3. RAG system retrieves top-3 relevant knowledge base documents based on agent type + current PnL/deviation context.
-4. Retrieved documents prepended to LLM prompt as "Research Context".
-5. LLM reasons over `{preliminary_signal, retrieved_papers, price_context}`.
-6. Hard constraints enforced post-LLM.
-7. Orders aggregated; Market updates price.
+2. RAG system queries each agent's personal knowledge store with current price, fundamental, and deviation context.
+3. Retrieved chunks are injected into the user prompt as `{rag_context}`.
+4. The RuleLLM system prompt supplies `== PERSONA ==` and `== DECISION RULES ==`; configured rule parameters are listed in the user prompt.
+5. LLM output is parsed as `{action, bid_price, quantity, reasoning}` and hard constraints are enforced post-parse.
+6. The order records `rag_context` for retrieval-quality analysis.
+7. Orders aggregate at the Market; price updates with the same mechanism as the Rule variant.
 
 ---
 
@@ -77,7 +77,7 @@ Rag agent flow per round:
 Rag Variant Architecture
 ─────────────────────────
 Knowledge Base (behavioural finance papers)
-  ↓ (top-3 retrieval when |pnl_pct| > 0.03 OR round triggers)
+  ↓ (top-5 retrieval every decision round when the local index is available)
 Market (rule-based)
   │  broadcast {price, fundamental, deviation}
   ├─ Rag LossAverseInvestor  │ rule signal + KB[Kahneman,Odean,...] → LLM
@@ -93,9 +93,9 @@ Market (rule-based)
 |--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Knowledge Base     | Behavioural finance papers: Kahneman & Tversky (1979), Tversky & Kahneman (1992), Odean (1998), Barberis & Xiong (2009), Shefrin & Statman (1985), Barber & Odean (2000), Thaler (1999) |
 | Embedding Model    | Text embedding of paper abstracts and key empirical findings                                                                                                                            |
-| Retrieval Strategy | Top-3 most relevant papers by agent type, current PnL% magnitude, and deviation                                                                                                         |
-| Injection Format   | Prepended as "Research Context" section in system prompt                                                                                                                                |
-| Trigger Condition  | Retrieve when `                                                                                                                                                                         |
+| Retrieval Strategy | Top-5 most relevant chunks for the current price, fundamental, and deviation query                                                                                                      |
+| Injection Format   | Injected into the user prompt as `== RELEVANT KNOWLEDGE ==` via `{rag_context}`                                                                                                         |
+| Trigger Condition  | Every decision round with built knowledge index; otherwise `_RAG_FALLBACK` is recorded                                                                                                  |
 
 ---
 
@@ -108,11 +108,11 @@ Configuration file: `configs/LossAversion/Rag/simulation.yml` → `players.yml`
 | `loss_aversion_lambda` | LossAverseInvestor | 2.25         | Rule-layer threshold multiplier |
 | `sell_gain_threshold`  | LossAverseInvestor | 0.05         | Rule gain trigger               |
 | `risk_increase_factor` | BreakEvenTrader    | 2.0          | Rule escalation factor          |
-| `llm.model`            | All RAG agents     | (configured) | LLM model identifier            |
-| `llm.temperature`      | All RAG agents     | 0.3          | Sampling temperature            |
-| `rag.kb_path`          | All RAG agents     | (configured) | Knowledge base directory        |
-| `rag.top_k`            | All RAG agents     | 3            | Number of retrieved documents   |
-| `rag.trigger_pnl`      | All RAG agents     | 0.03         | PnL threshold for KB retrieval  |
+| `llm.lm_name`                       | All RAG agents | (configured) | LLM model identifier |
+| `llm.generation_config.temperature` | All RAG agents | 0.3–0.95 | Sampling temperature |
+| `private_knowledge.rag.from_global_index_dir` | All RAG agents | `rag_index` | Shared prebuilt index directory |
+| `private_knowledge.rag.top_k`                 | All RAG agents | 5           | Number of retrieved chunks      |
+| `private_knowledge.rag.embed_model`           | All RAG agents | `openai/hunyuan-embedding` | Hunyuan embedding model |
 | `initial_cash`         | All investors      | 100000       | Starting cash                   |
 | `initial_position`     | All investors      | 500          | Starting shares                 |
 
@@ -125,10 +125,9 @@ Configuration file: `configs/LossAversion/Rag/simulation.yml` → `players.yml`
 python examples/LossAversion/Rag/run_lossaversion_rag.py \
     -c configs/LossAversion/Rag/simulation.yml
 
-# Run with higher retrieval sensitivity
-python examples/LossAversion/Rag/run_lossaversion_rag.py \
-    -c configs/LossAversion/Rag/simulation.yml \
-    --extras rag.trigger_pnl=0.02
+# Run analysis after completion
+python examples/LossAversion/Rag/analysis.py \
+    -c configs/LossAversion/Rag/simulation.yml
 ```
 
 Output files written to `records/LossAversion/Rag/`.

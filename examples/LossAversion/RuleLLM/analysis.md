@@ -63,4 +63,4 @@ Valid RuleLLM outputs should complete 200 rounds with clean parse quality and me
 
 ## §7 Visualization Catalogue
 
-`RuleLLM/analysis.py` reuses the Rule analysis pipeline and writes `lossaversion_analysis.png`. Reports may add rule-adherence and quantity-modulation summaries.
+`RuleLLM/analysis.py` reuses the Rule analysis pipeline and writes `summary.json`, `00_investor_bids.png`, `01_lossaversion_dynamics.png`, `02_lossaversion_analysis.png`, and `03_summary.png`. Reports may add rule-adherence and quantity-modulation summaries.

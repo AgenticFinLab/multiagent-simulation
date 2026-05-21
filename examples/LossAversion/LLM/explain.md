@@ -69,7 +69,7 @@ LLM agent flow per round:
 1. Market broadcasts `{price, fundamental, deviation}`.
 2. Each LLM agent constructs user message: `{round, price, fundamental, deviation%, cash, position, portfolio_value}`.
 3. LLM called with `[system_prompt, user_message]`; up to 3 retry attempts on parse failure.
-4. Response parsed for `{action, quantity, reasoning}`.
+4. Response parsed for `{action, bid_price, quantity, reasoning}`.
 5. Hard constraints enforced: `buy ≤ cash/price`; `sell ≤ max(position, 0)`.
 6. Orders aggregated by Market; price updated.
 
@@ -90,7 +90,7 @@ Market (rule-based, same as Rule variant)
 ```
 
 Prompts defined in `examples/LossAversion/LLM/prompts.py`.
-LLM model configured via `extras.llm.model` and `extras.llm.temperature`.
+LLM model configured via `extras.llm.lm_name` and `extras.llm.generation_config.temperature`.
 
 ---
 
@@ -100,8 +100,8 @@ Configuration file: `configs/LossAversion/LLM/simulation.yml` → `players.yml`
 
 | Parameter          | Agent          | Default      | Description           |
 |--------------------|----------------|--------------|-----------------------|
-| `llm.model`        | All LLM agents | (configured) | LLM model identifier  |
-| `llm.temperature`  | All LLM agents | 0.3          | Sampling temperature  |
+| `llm.lm_name`                       | All LLM agents | (configured) | LLM model identifier  |
+| `llm.generation_config.temperature` | All LLM agents | 0.3–0.95     | Sampling temperature  |
 | `initial_cash`     | All investors  | 100000       | Starting cash         |
 | `initial_position` | All investors  | 500          | Starting shares       |
 | `initial_price`    | All            | 100.0        | Entry price reference |
@@ -120,10 +120,9 @@ Note: `loss_aversion_lambda`, `risk_increase_factor`, etc. are embedded in syste
 python examples/LossAversion/LLM/run_lossaversion_llm.py \
     -c configs/LossAversion/LLM/simulation.yml
 
-# Run with lower temperature for more consistent behaviour
-python examples/LossAversion/LLM/run_lossaversion_llm.py \
-    -c configs/LossAversion/LLM/simulation.yml \
-    --extras llm.temperature=0.1
+# Run analysis after completion
+python examples/LossAversion/LLM/analysis.py \
+    -c configs/LossAversion/LLM/simulation.yml
 ```
 
 Output files written to `records/LossAversion/LLM/`.
