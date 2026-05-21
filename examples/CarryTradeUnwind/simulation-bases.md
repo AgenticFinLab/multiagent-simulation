@@ -10,6 +10,32 @@
 | Real-World Origin  | 2008 JPY appreciation (USD/JPY −20% in weeks); 2015 CHF floor removal (CHF +20% in minutes); 2022 JPY carry unwind; JPY appreciation episodes of 1998, 2007–2008                                                                                                                              |
 | Research Relevance | Examines how leveraged carry positions create endogenous crash risk; tests whether forced-liquidation cascades can be distinguished from fundamental FX adjustments; quantifies the role of stop-loss thresholds in amplifying volatility                                                     |
 
+### 1.1 Origin and Source Analysis
+
+#### 1.1.1 Intellectual Lineage
+
+The carry-trade unwind literature begins with the empirical puzzle that high-yield currencies do not depreciate enough to offset their interest-rate advantage. This violation of uncovered interest parity made the carry trade a persistent strategy, but Brunnermeier, Nagel, and Pedersen (2009) showed that the premium is compensation for crash exposure rather than a free lunch. Their "up by the stairs, down by the elevator" description is the direct source of this simulation's slow accumulation and fast unwind phases.
+
+Plantin and Shin (2018) formalize the feedback mechanism used here: many investors hold the same funding-currency short / target-currency long position, so a risk-off shock creates mark-to-market losses, forces exits, strengthens the funding currency, and triggers more exits. Menkhoff et al. (2012) add the volatility channel: global FX volatility compresses carry capacity and makes otherwise profitable positions suddenly unattractive. Brunnermeier and Pedersen (2009) provide the funding-liquidity spiral logic that maps naturally to leveraged funds and limited stabilizing counterparties.
+
+The simulation preserves these mechanisms with five investor types. `CarryTrader` represents the ordinary carry-premium accumulator, `LeveragedCarryFund` models stop-loss and margin-driven forced selling, `HedgedCarryTrader` reduces exposure when risk rises, `FundingCurrencyBuyer` provides safe-haven counterflow, and `NoiseTrader` supplies non-systematic FX order flow. The price-impact term in §3.1 and the stop-loss thresholds in §4 convert the literature's qualitative feedback loop into an executable agent-based mechanism.
+
+#### 1.1.2 Real-World Event Catalogue
+
+| Event Name | Date(s) | Market / Asset | Trigger | Magnitude | Duration | Correspondence to Simulation | Primary Source |
+|---|---|---|---|---|---|---|---|
+| Russian default / LTCM carry unwind | 1998 | JPY-funded carry trades and global FX | Flight to quality and leveraged-fund deleveraging | USD/JPY fell roughly 15% in October 1998 | Weeks | `LeveragedCarryFund` stop-loss selling and `FundingCurrencyBuyer` safe-haven demand | Brunnermeier & Pedersen (2009), DOI: 10.1093/rfs/hhn098 |
+| Global financial crisis JPY carry unwind | 2007–2008 | USD/JPY, AUD/JPY, NZD/JPY | Global risk-off, margin calls, volatility spike | USD/JPY fell from about 110 to 88, roughly 20% in six weeks | Weeks to months | `CarryTrader` and `LeveragedCarryFund` simultaneous liquidation; `HedgedCarryTrader` volatility exit | Brunnermeier, Nagel & Pedersen (2009), DOI: 10.1086/593088 |
+| Swiss franc floor removal | 15 Jan 2015 | EUR/CHF and CHF-funded trades | Swiss National Bank removed EUR/CHF floor | CHF appreciated about 20–30% intraday | Minutes to days | Extreme price-impact shock with no circuit breaker; leveraged exits exceed stabilizing flow | BIS FX market commentary; Menkhoff et al. (2012), DOI: 10.1111/j.1540-6261.2012.01728.x |
+| Yen carry unwind in global rate shock | 2022 | JPY carry portfolios | Rapid rate repricing and global volatility | JPY reversal episodes near 10–20% from extremes | Weeks | Volatility-sensitive position reduction and safe-haven counterflow | BIS Triennial Survey 2022; Menkhoff et al. (2012) |
+
+#### 1.1.3 Book and Practitioner Literature
+
+| Title | Author(s) | Year | Publisher / Venue | Relevance to This Simulation |
+|---|---|---|---|---|
+| *Manias, Panics, and Crashes* | Charles P. Kindleberger and Robert Z. Aliber | 2011 | Palgrave Macmillan | Provides the practitioner crisis-cycle framing for leveraged accumulation, trigger, panic liquidation, and partial recovery. |
+| *BIS Triennial Central Bank Survey: Foreign Exchange Turnover* | Bank for International Settlements | 2022 | BIS | Grounds the distinction between speculative carry flow and broader FX order flow represented by `NoiseTrader`. |
+| *Foreign Exchange Market Liquidity* | Bank for International Settlements | 2015 | BIS | Supports the reduced-liquidity calibration used in §3.1 during carry stress episodes. |
 
 ## §2 Theoretical Foundation
 
@@ -106,7 +132,7 @@ Note: `return_pct` is deliberately NOT included because carry trade strategies a
 
 ## §4 Investor Taxonomy
 
-### Investor: CarryTrader
+### §4.1 CarryTrader
 
 #### 4.1.1  Summary
 
@@ -208,7 +234,7 @@ Rationale: Price has fallen 3.3% below PPP fundamental; CarryTrader begins unwin
 
 ---
 
-### Investor: LeveragedCarryFund
+### §4.2 LeveragedCarryFund
 
 #### 4.2.1  Summary
 
@@ -306,7 +332,7 @@ Rationale: LeveragedCarryFund has lost (1.20 − 1.155) / 1.20 = 3.75% on its po
 
 ---
 
-### Investor: FundingCurrencyBuyer
+### §4.3 FundingCurrencyBuyer
 
 #### 4.3.1  Summary
 
@@ -395,7 +421,7 @@ Rationale: 8.3% appreciation of the funding currency triggers safe-haven demand,
 
 ---
 
-### Investor: HedgedCarryTrader
+### §4.4 HedgedCarryTrader
 
 #### 4.4.1  Summary
 
@@ -487,7 +513,7 @@ Rationale: Volatility has spiked above threshold while carry is losing — Hedge
 
 ---
 
-### Investor: NoiseTrader
+### §4.5 NoiseTrader
 
 #### 4.5.1  Summary
 

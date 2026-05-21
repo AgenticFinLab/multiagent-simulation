@@ -1,93 +1,54 @@
-# CarryTradeUnwind RuleLLM — Analysis Guide
+# CarryTradeUnwind RuleLLM Variant — Analysis Guide
 
-## §1 Analysis Overview
+## §1 Overview
 
-| Item                | Description                                             |
-|---------------------|---------------------------------------------------------|
-| **Variant**         | RuleLLM                                                 |
-| **Script**          | `examples/CarryTradeUnwind/RuleLLM/analysis.py`         |
-| **Config**          | `configs/CarryTradeUnwind/RuleLLM/simulation.yml`       |
-| **Data Source**     | `EXPERIMENT/CarryTradeUnwind/RuleLLM/records/`          |
-| **Output**          | `EXPERIMENT/CarryTradeUnwind/RuleLLM/records/analysis/` |
-| **Methodology Ref** | `../analysis-bases.md`                                  |
-
-The RuleLLM variant embeds explicit carry trade rules in the LLM prompt as deeper investor characterization. The key question: do embedded rules help the LLM produce more structured, carry-trade-informed decisions?
-
----
+| Item | Description |
+|---|---|
+| Analysis script | `examples/CarryTradeUnwind/RuleLLM/analysis.py` |
+| Output location | `EXPERIMENT/CarryTradeUnwind/RuleLLM/records/analysis/` |
+| Imported functions | Delegates to `Rule/analysis.py` for loading, metrics, validation, plots, and `summary.json` |
+| Variant consideration | Interpret metrics as LLM reasoning constrained by explicit `== DECISION RULES ==` carry-trade formulas |
 
 ## §2 Metric Implementation
 
-Standard metrics: imported from `Rule/analysis.py` via `calculate_metrics()`.
-
-No additional variant-specific analysis function — the embedded rules serve as
-deeper investor characterization, not executable mandates to be measured against.
-
----
+| Metric | Function | analysis-bases.md ref |
+|---|---|---|
+| Maximum Drawdown | `_compute_max_drawdown(prices_list)` | §2 Metric 1 |
+| Unwind Velocity | `_compute_unwind_velocity(prices_list)` | §2 Metric 2 |
+| Unwind Duration | `_compute_unwind_duration(prices_list, fundamental)` | §2 Metric 3 |
+| Crisis Onset Round | `_compute_cascade_onset(prices_list, fundamental)` | §2 Metric 4 |
+| Recovery Ratio | `_compute_recovery_ratio(prices_list)` | §2 Metric 5 |
+| Return Autocorrelation AC(1) | `_compute_autocorrelation(prices_list, lag=1)` | §2 Metric 6 |
+| Annualized Volatility | `_compute_peak_rolling_volatility(prices_list)` | §2 Metric 7 |
 
 ## §3 Dimension-by-Dimension Analysis
 
-### Dimension 1: Market Price Dynamics
+| Dimension | Implementation and Interpretation |
+|---|---|
+| Crash Severity and Cascade Dynamics | Compare drawdown and velocity with Rule to test whether embedded rules preserve cascade severity. |
+| Cascade Attribution | Check whether leveraged-fund sells dominate stabilizing buyer volume during crisis rounds. |
+| Recovery Analysis | Use recovery ratio and AC(1) to determine whether rule-anchored reasoning changes post-trough stabilization. |
+| Timing and Sophistication | Compare action timing with LLM; RuleLLM should reduce unconstrained deliberation and improve directional alignment. |
+| Cross-Variant Comparison | Use `summary.json` under `analysis-bases.md §5` to compare Rule, LLM, RuleLLM, and Rag. |
 
-Same as Rule and LLM variants. Compare `summary.json → unwind_metrics`.
+## §4 Variant-Specific Observable Phenomena
 
-Expected: RuleLLM dynamics informed by explicit rules; compare against Rule baseline.
+RuleLLM-specific evidence comes from `<analysis>` reasoning that cites embedded carry-trade rules, valid canonical decision JSON, and quantity deviations within the prompt-defined ±20% discretion. LeveragedCarryFund reasoning should preserve the forced-sell sign when stop-loss conditions are reached.
 
-### Dimension 2: Cascade Mechanics Comparison
+## §5 Scaling and Sensitivity Analysis
 
-Compare RuleLLM vs Rule vs LLM:
-- `crisis_onset_round`: Compare timing across variants
-- `max_drawdown_pct`: Compare severity across variants
-- Differences reveal where LLM reasoning diverges from deterministic formulas
+Runtime follows API latency and total agent count. Market sensitivity remains governed by Rule parameters, while prompt-section clarity affects parse stability, directional fidelity, and quantity dispersion around the deterministic Rule baseline.
 
-### Dimension 3: LLM Reasoning Quality
+## §6 Output Files Reference
 
-Examine agent reasoning traces in `<analysis>` tags:
-- Agents with explicit carry trade rules should produce more structured reasoning
-- Look for agents referencing the embedded rules in their reasoning
-- Compare reasoning quality between LLM and RuleLLM variants
+| File | Contents |
+|---|---|
+| `00_investor_bids.png` | Market price, fundamental value, and per-agent bid traces |
+| `01_carrytradeunwind_dynamics.png` | FX rate, fundamental anchor, deviation, and crisis thresholds |
+| `02_carrytradeunwind_analysis.png` | Rolling volatility and per-round FX returns |
+| `03_summary.png` | Agent VWAP and total trading-volume summary |
+| `summary.json` | Metrics, price summary, agent VWAP, and nested validation result |
 
----
+## §7 Cross-Variant Comparison Notes
 
-## §4 Variant-Specific Phenomena
-
-### LLM Reasoning with Embedded Rules
-
-Examine agent reasoning traces for evidence of rule-informed decisions:
-- Common patterns: "Based on my carry trade rules, deviation exceeds threshold"
-- LeveragedCarryFund: forced sell rule should be prominent in reasoning
-- These reasoning traces are the most analytically valuable — they reveal how LLM integrates quantitative rules with qualitative judgment
-
-### Quantity Variation
-
-Within-rule decisions (correct sign) may have different quantities than Rule:
-- Expected: LLM quantities vary ±20% around Rule baseline
-- If LLM consistently uses larger quantities: aggressive persona dominates
-- If LLM consistently uses smaller quantities: risk-aversion persona dominates
-
----
-
-## §5 Output Files
-
-| File                                             | Content                                                  |
-|--------------------------------------------------|----------------------------------------------------------|
-| `analysis/carrytradeunwind_rulellm_analysis.png` | Multi-panel: FX rate, deviation, returns, trading volume |
-| `analysis/summary.json`                          | Market metrics                                           |
-
----
-
-## §6 Cross-Variant Comparison Notes
-
-| Metric             | Rule (baseline) | LLM               | RuleLLM (this)        |
-|--------------------|-----------------|-------------------|-----------------------|
-| Crisis onset round | Earliest        | 2–10 rounds later | Informed by rule text |
-| Max drawdown       | Deepest         | Variable          | Informed by rule text |
-| Recovery ratio     | Moderate        | Variable          | Informed by rule text |
-
-**Primary finding to report**: Compare dynamics across variants to understand how embedded rules influence LLM decision-making. If RuleLLM dynamics ≈ Rule baseline, then rule embedding successfully characterizes investor behavior.
-
-## §7 Quality Checks
-
-- Confirm the run completed the configured round count.
-- Audit parse failures, retry counts, and fallback behavior before acceptance.
-- Confirm RuleLLM reasoning remains compatible with embedded carry-trade rules
-  while preserving valid order payload fields.
+RuleLLM should sit between Rule and LLM: closer to Rule on direction and crisis timing, but still stochastic in reasoning and quantity. A valid sample must complete all configured rounds, preserve canonical order fields, and fail fast after retry exhaustion rather than substituting hidden hold orders.

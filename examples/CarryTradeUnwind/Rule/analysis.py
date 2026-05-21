@@ -24,6 +24,13 @@ from masim.utils import load_config, load_results
 __all__ = [
     "_batch_to_rounds",
     "_load_data",
+    "_compute_max_drawdown",
+    "_compute_unwind_velocity",
+    "_compute_unwind_duration",
+    "_compute_recovery_ratio",
+    "_compute_cascade_onset",
+    "_compute_peak_rolling_volatility",
+    "_compute_autocorrelation",
     "_validate_carry_trade_unwind",
     "_build_interpretation",
     "analyze_carry_trade_unwind",
@@ -96,6 +103,27 @@ def _compute_max_drawdown(prices_list: List[float]) -> float:
         if dd > max_dd:
             max_dd = dd
     return float(max_dd * 100)
+
+
+def _compute_unwind_velocity(prices_list: List[float]) -> float:
+    """Maximum absolute one-round FX-rate change."""
+    arr = np.array(prices_list)
+    if len(arr) < 2:
+        return 0.0
+    return float(np.max(np.abs(np.diff(arr))))
+
+
+def _compute_unwind_duration(
+    prices_list: List[float], fundamental: float, threshold: float = -0.05
+) -> int:
+    """Count rounds where price deviation is below the crisis threshold."""
+    if fundamental <= 0:
+        raise ValueError("fundamental must be positive for unwind duration")
+    return sum(
+        1
+        for price in prices_list
+        if (price - fundamental) / fundamental < threshold
+    )
 
 
 def _compute_recovery_ratio(prices_list: List[float]) -> float:
@@ -591,7 +619,7 @@ def _create_visualizations(
 
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "01_price_dynamics.png"),
+        os.path.join(output_dir, "01_carrytradeunwind_dynamics.png"),
         dpi=150,
         bbox_inches="tight",
     )
@@ -629,7 +657,7 @@ def _create_visualizations(
 
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "02_cascade_dynamics.png"),
+        os.path.join(output_dir, "02_carrytradeunwind_analysis.png"),
         dpi=150,
         bbox_inches="tight",
     )
@@ -701,6 +729,8 @@ def analyze_carry_trade_unwind(
 
     # Metrics
     max_drawdown_pct = _compute_max_drawdown(prices_list)
+    unwind_velocity = _compute_unwind_velocity(prices_list)
+    unwind_duration = _compute_unwind_duration(prices_list, fund_value)
     recovery_ratio = _compute_recovery_ratio(prices_list)
     cascade_onset_round = _compute_cascade_onset(
         prices_list, fund_value, threshold=-0.05
@@ -741,6 +771,8 @@ def analyze_carry_trade_unwind(
         "fundamental_value": round(fund_value, 4),
         "metrics": {
             "max_drawdown_pct": round(max_drawdown_pct, 4),
+            "unwind_velocity": round(unwind_velocity, 4),
+            "unwind_duration_rounds": unwind_duration,
             "recovery_ratio": round(recovery_ratio, 4),
             "cascade_onset_round": cascade_onset_round,
             "peak_rolling_vol_pct": round(peak_volatility_pct, 4),
@@ -766,6 +798,8 @@ def analyze_carry_trade_unwind(
     print("CARRY TRADE UNWIND ANALYSIS")
     print("=" * 50)
     print(f"Max drawdown: {max_drawdown_pct:.2f}%  (target: 10–25%)")
+    print(f"Unwind velocity: {unwind_velocity:.4f}  (target: 0.10–0.40)")
+    print(f"Unwind duration: {unwind_duration} rounds  (target: 5–30)")
     print(f"Recovery ratio: {recovery_ratio:.3f}  (target: 0.3–0.7)")
     print(f"Peak volatility: {peak_volatility_pct:.2f}% per round  (target: >3%)")
     print(f"Lag-1 autocorrelation: {autocorr:.3f}  (target: >+0.2)")

@@ -114,6 +114,13 @@ class LLMInvestor(GeneralPlayer):
                 result = llm_client.run([infer_input])
                 response = result.outputs[0].response
                 parsed = parse_llm_response_with_thinking(response)
+                action_str = parsed["action"]
+                if action_str not in ("buy", "sell", "hold"):
+                    raise ValueError(f"Invalid LLM action: {action_str}")
+                bid_price = float(parsed["bid_price"])
+                if bid_price <= 0:
+                    raise ValueError(f"Invalid bid_price: {bid_price}")
+                _ = str(parsed["reasoning"])
                 break
             except Exception as exc:
                 logger.warning("LLM attempt %d failed: %s", attempt + 1, exc)
@@ -128,8 +135,7 @@ class LLMInvestor(GeneralPlayer):
 
         action_str = parsed["action"]
         quantity = int(parsed["quantity"])
-        if action_str not in ("buy", "sell", "hold"):
-            action_str = "hold"
+        bid_price = float(parsed["bid_price"])
         quantity = max(0, quantity)
         if action_str == "buy":
             quantity = min(quantity, int(cash / price) if price > 0 else 0)
@@ -143,10 +149,15 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
-        order = {"action": action_str, "quantity": quantity}
-        return {
+        order = {
             "action": action_str,
+            "bid_price": bid_price,
             "quantity": quantity,
+            "reasoning": str(parsed["reasoning"]),
+            "analysis": str(parsed["analysis"]),
+        }
+        return {
+            **order,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 

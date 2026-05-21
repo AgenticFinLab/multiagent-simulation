@@ -14,42 +14,42 @@
 
 ## §2 How Theoretical Design Is Implemented
 
-### CarryTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — CarryTrader)*
+### §2.1 CarryTrader (simulation-bases.md §4.1)
 
-| Theoretical Design Element                     | Implementation                                                              |
-|------------------------------------------------|-----------------------------------------------------------------------------|
-| UIP deviation threshold = ±0.02 → sim-bases §5 | Embedded in `RULELLM_CARRY_TRADER_SYS` under `== DECISION RULES ==`         |
-| Buy when deviation > 0.02 → sim-bases §5       | Rule text: "If deviation > 0.02: BUY — carry trade is favorable"            |
-| Sell when deviation < −0.02 → sim-bases §5     | Rule text: "If deviation < −0.02: SELL — unwind carry position"             |
-| qty = min(4000,                                | deviation                                                                   |
-| LLM may adjust ±20% → spec §RuleLLM            | Instruction: "You may adjust quantity by ±20% based on contextual judgment" |
+| Theory Component | Implementation |
+|---|---|
+| Threshold response from simulation-bases.md §4.1.4 | `RULELLM_CARRY_TRADER_SYS` embeds buy when deviation > +0.02, sell when deviation < -0.02, otherwise hold. |
+| Quantity model from simulation-bases.md §4.1.4.3 | Prompt uses `min(800, deviation×5000)` / `min(800, |deviation|×5000)` and player clamps to cash or position. |
+| RuleLLM quantity discretion from simulation-bases.md §9 | Prompt permits at most ±20% quantity adjustment while preserving the rule-implied action sign. |
 
-### LeveragedCarryFund: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — LeveragedCarryFund)*
+### §2.2 LeveragedCarryFund (simulation-bases.md §4.2)
 
-| Theoretical Design Element                                   | Implementation                                                                       |
-|--------------------------------------------------------------|--------------------------------------------------------------------------------------|
-| Forced sell condition (stop-loss) → sim-bases §5             | Rule text: "If deviation < −0.03 OR (abs(deviation) > 0.02 AND deviation < 0): SELL" |
-| sell qty = min(4000, position) → sim-bases §5                | Embedded as formula; LLM must execute forced sell when condition met                 |
-| Earlier unwind than CarryTrader → sim-bases §5 (Key Insight) | Rule explicitly states: "This is a FORCED SELL — follow rule strictly"               |
+| Theory Component | Implementation |
+|---|---|
+| Forced liquidation from simulation-bases.md §4.2.4 | `RULELLM_LEVERAGED_CARRY_FUND_SYS` embeds immediate sell when deviation breaches stop-loss. |
+| Position cap from simulation-bases.md §4.2.4.3 | Prompt states `min(800×leverage, position)` and player clamps to current position. |
+| Forced-exit discipline from simulation-bases.md §4.2.3 | Prompt allows quantity judgment but forbids overriding the forced-sell sign. |
 
-### FundingCurrencyBuyer: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — FundingCurrencyBuyer)*
+### §2.3 FundingCurrencyBuyer (simulation-bases.md §4.3)
 
-| Theoretical Design Element                | Implementation                                                      |
-|-------------------------------------------|---------------------------------------------------------------------|
-| Counter-cyclical at risk_threshold = 0.05 | Rule text: "If deviation < −0.05: BUY (safe-haven demand)"          |
-| sell when deviation > +0.05               | Rule text: "If deviation > 0.05: SELL (reduce safe-haven exposure)" |
-| position_size = 500 → sim-bases §5        | Embedded as default quantity: "Standard order size: 500 units"      |
+| Theory Component | Implementation |
+|---|---|
+| Safe-haven activation from simulation-bases.md §4.3.4 | `RULELLM_FUNDING_CURRENCY_BUYER_SYS` embeds buy when deviation < -0.05 and sell when deviation > +0.05. |
+| Stabilizer capacity from simulation-bases.md §6 | Prompt uses position size around 500 and player enforces cash/position constraints. |
 
-### HedgedCarryTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — HedgedCarryTrader)*
+### §2.4 HedgedCarryTrader (simulation-bases.md §4.4)
 
-| Theoretical Design Element                   | Implementation                                                               |
-|----------------------------------------------|------------------------------------------------------------------------------|
-| Trade only when                              | deviation                                                                    |
-| Hedged qty = 350 (500 × 0.70) → sim-bases §5 | Rule text: "Adjusted quantity: 350 units (70% of full position, 30% hedged)" |
+| Theory Component | Implementation |
+|---|---|
+| Volatility-adjusted carry from simulation-bases.md §4.4.4 | `RULELLM_HEDGED_CARRY_TRADER_SYS` acts only when absolute deviation exceeds the 0.05 threshold. |
+| Hedge-ratio sizing from simulation-bases.md §4.4.4.3 | Prompt uses `500 × (1 - hedge_ratio) ≈ 350`, then player clamps to cash or position. |
+
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Non-systematic FX flow from simulation-bases.md §4.5.4 | `RULELLM_NOISE_TRADER_SYS` encodes random low-conviction participation around 30% of rounds. |
+| Bounded order size from simulation-bases.md §6 | Prompt uses 100-500 unit orders and player enforces cash/position constraints. |
 
 ---
 
