@@ -46,8 +46,11 @@ See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md
 
 ## §6 Output Artifacts
 
-`Rule/analysis.py` writes `summary.json`, `price_path.png`, and
-`strategy_volume.png` into the analysis output directory. These artifacts provide
+`Rule/analysis.py` writes `summary.json`, a structured validation console
+report, the helper plots `price_path.png` and `strategy_volume.png`, and the
+fixed PNG contract required by `docs/create-example-skill/08-step4-implement.md`:
+`00_investor_bids.png`, `01_endowmenteffect_dynamics.png`,
+`02_endowmenteffect_analysis.png`, and `03_summary.png`. These artifacts provide
 the deterministic baseline for comparing LLM, RuleLLM, and Rag variants.
 
 ## §7 Validation Criteria

@@ -11,6 +11,7 @@ from examples.EndowmentEffect.Rule.analysis import (
     calculate_metrics as _calculate_rule_metrics,
     create_visualizations,
     load_simulation_data,
+    validate_endowment_effect,
 )
 
 _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
@@ -59,13 +60,28 @@ def main() -> Dict[str, Any]:
     output_dir = os.path.join(os.path.dirname(record_dir), "analysis")
     data = load_simulation_data(config)
     metrics = calculate_metrics(data, config)
+    validation = validate_endowment_effect(metrics)
     create_visualizations(data, metrics, output_dir)
 
+    rag_stats_path = os.path.join(output_dir, "rag_stats.json")
+    with open(rag_stats_path, "w", encoding="utf-8") as f:
+        json.dump(metrics["rag_knowledge_effect"], f, indent=2)
+
+    summary = {
+        "scenario": "EndowmentEffect",
+        "variant": "Rag",
+        "total_rounds": metrics["total_rounds"],
+        "metrics": metrics,
+        "validation": validation,
+    }
     summary_path = os.path.join(output_dir, "summary.json")
     with open(summary_path, "w", encoding="utf-8") as f:
-        json.dump(metrics, f, indent=2)
+        json.dump(summary, f, indent=2)
+    print(f"\nVALIDATION: {validation['interpretation']}")
+    print(f"Fit Score: {validation['score']:.1%}")
+    print(f"Saved EndowmentEffect RAG retrieval stats to {rag_stats_path}")
     print(f"Saved EndowmentEffect RAG analysis summary to {summary_path}")
-    return metrics
+    return summary
 
 
 if __name__ == "__main__":

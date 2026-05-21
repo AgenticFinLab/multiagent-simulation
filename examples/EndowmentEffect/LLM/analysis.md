@@ -45,9 +45,11 @@ See `simulation-bases.md §2` for theoretical foundations.
 ## §6 Output Artifacts
 
 `LLM/analysis.py` reuses the Rule analysis pipeline and writes the same
-`summary.json`, `price_path.png`, and `strategy_volume.png` artifacts. LLM
-response artifacts and order `reasoning` fields should be inspected for
-persona-consistent explanations.
+`summary.json`, validation console report, helper plots, and fixed PNG contract:
+`00_investor_bids.png`, `01_endowmenteffect_dynamics.png`,
+`02_endowmenteffect_analysis.png`, and `03_summary.png`. LLM response artifacts
+and order `reasoning` fields should be inspected for persona-consistent
+explanations.
 
 ## §7 Validation Criteria
 
