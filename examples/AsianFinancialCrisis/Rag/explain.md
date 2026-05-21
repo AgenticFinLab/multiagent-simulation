@@ -89,7 +89,7 @@ Agent Init:
 
 | Variable            | Source                  | Format  | Notes                                                        |
 |---------------------|-------------------------|---------|--------------------------------------------------------------|
-| `{round}`           | market_data.round       | integer | Current simulation round                                     |
+| `{round_num}`       | market_data.round       | integer | Current simulation round                                     |
 | `{price}`           | market_data.price       | float   | Current price                                                |
 | `{prev_price}`      | market_data.prev_price  | float   | Previous round price for momentum calculation                |
 | `{deviation}`       | market_data.deviation   | `+.2%`  | Primary signal: deviation from fundamental                   |
@@ -97,7 +97,7 @@ Agent Init:
 | `{cash}`            | agent state             | float   | Available cash                                               |
 | `{position}`        | agent state             | float   | Current position (shares)                                    |
 | `{portfolio_value}` | cash + pos × price      | float   | Total portfolio value                                        |
-| `{rag_context}`     | KnowledgeStore.query()  | string  | Top-3 retrieved passages; "(No relevant knowledge)" if empty |
+| `{rag_context}`     | KnowledgeStore.query()  | string  | Top-k retrieved passages or the retrieval-miss marker        |
 
 ### RAG Query Logic
 
@@ -127,10 +127,10 @@ Parsed by `parse_llm_response_with_thinking()` from `examples/llm_utils.py`.
 ## §4 Variant-Specific Features
 
 - **Per-agent private knowledge index**: Each agent initializes its own `KnowledgeStore` — allows agent-specific document collections (e.g., IMFRescuer gets IMF papers, ContagionTrader gets contagion literature)
-- **Shared index fallback**: If local index absent, copies from shared RAG index; if shared absent, builds from `MinerU_processed` documents
+- **Shared index resolution**: If local index absent, copies from shared RAG index; if shared absent, builds from `MinerU_processed` documents
 - **RAG context quality dependency**: If document sources contain 1997 Asian crisis materials, agent decisions become historically grounded; poor documents → RAG behaves like LLM
 - **Knowledge-augmented crisis awareness**: Agents may cite historical crises ("similar to the Thai baht 1997") in reasoning field — validates knowledge retrieval quality
-- **Max retries = 3**: If LLM parse fails, agent holds position; ensures simulation completion
+- **Max retries = 3**: If LLM output still violates the decision contract, the row fails loudly for quality control
 
 
 ## §5 Architecture Diagram

@@ -65,6 +65,10 @@ class Market(GeneralPlayer):
                 folder=os.path.join(base_path, "price"),
                 entry_limit=hot_limit,
             )
+            self.state.custom_state["fundamental_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "fundamental"),
+                entry_limit=hot_limit,
+            )
             self.state.custom_state["volume_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "volume"),
                 entry_limit=hot_limit,
@@ -103,6 +107,7 @@ class Market(GeneralPlayer):
 
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
+        self.state.custom_state["fundamental_history"].append(fundamental)
         self.state.custom_state["volume_history"].append(volume)
 
         logger.debug(

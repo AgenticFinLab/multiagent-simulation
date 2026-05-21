@@ -8,7 +8,7 @@ RAG Knowledge Effect Analysis (analysis-bases.md §3 — Rag-specific dimension)
 Rag-variant note (analysis-bases.md §4):
     Knowledge Reinforcement Events occur when retrieved context aligns with action.
     Knowledge Correction Events occur when retrieved context reverses default bias.
-    Retrieval Failure Rounds: rounds where rag_context == fallback string.
+    Retrieval-miss rounds: rounds where rag_context equals the retrieval-miss marker.
     Compare vs. RuleLLM baseline for net RAG knowledge effect.
 
 Usage:
@@ -33,7 +33,7 @@ from examples.AsianFinancialCrisis.Rule.analysis import (
     analyze_asian_financial_crisis,
 )
 
-# Fallback string injected when no documents are retrieved (Rag/players.py)
+# Retrieval-miss marker injected when no documents are retrieved (Rag/players.py)
 _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
@@ -59,7 +59,7 @@ def analyze_rag_knowledge_effect(
         total_rag_rounds = 0
 
         for payload in round_payloads.values():
-            rag_context = payload["rag_context"]
+            rag_context = payload.get("rag_context")
             if rag_context is None:
                 continue
             total_rag_rounds += 1
@@ -127,7 +127,7 @@ def main() -> None:
     with open(rag_stats_path, "w", encoding="utf-8") as fh:
         json.dump(rag_stats, fh, indent=2)
 
-    agg = rag_stats["aggregate"]
+    agg = rag_stats.get("aggregate")
     if agg:
         print(
             f"Mean RAG retrieval failure rate: "
