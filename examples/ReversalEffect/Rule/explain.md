@@ -5,80 +5,50 @@
 | Field | Value |
 |---|---|
 | Variant | Rule |
-| Simulation | Reversal Effect |
-| Decision Mechanism | deterministic rule-based trading orders |
+| Decision Mechanism | deterministic trading rules |
+| Scenario Contract | trading-schema orders |
 | Theory Reference | `examples/ReversalEffect/simulation-bases.md` |
-| Market Broadcast | `configs/ReversalEffect/Rule/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+The Rule variant is the deterministic baseline for reversal dynamics. It uses
+six configured roles: ContrarianInvestor, MomentumInvestor,
+OverconfidentTrader, NoiseTrader, ValueInvestor, and IndexTracker.
 
 ## §2 Theory -> Implementation Mapping
 
-### §2.1 ContrarianInvestor (simulation-bases.md §4.1)
-
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `ContrarianInvestor` in `examples/ReversalEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.2 MomentumInvestor (simulation-bases.md §4.2)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `MomentumInvestor` in `examples/ReversalEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.3 OverconfidentTrader (simulation-bases.md §4.3)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `OverconfidentTrader` in `examples/ReversalEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.4 NoiseTrader (simulation-bases.md §4.4)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `NoiseTrader` in `examples/ReversalEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.5 ValueInvestor (simulation-bases.md §4.5)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `ValueInvestor` in `examples/ReversalEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
-### §2.6 IndexTracker (simulation-bases.md §4.6)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.6 | `IndexTracker` in `examples/ReversalEffect/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| ContrarianInvestor, `simulation-bases.md §4.1` | `ContrarianInvestor` buys after sufficiently negative recent returns and sells after sufficiently positive recent returns. |
+| MomentumInvestor, `simulation-bases.md §4.2` | `MomentumInvestor` follows recent return direction and can delay correction. |
+| OverconfidentTrader, `simulation-bases.md §4.3` | `OverconfidentTrader` scales directional reaction by overconfidence parameters. |
+| NoiseTrader, `simulation-bases.md §4.4` | `NoiseTrader` adds stochastic order flow with bounded inventory behavior. |
+| ValueInvestor, `simulation-bases.md §4.5` | `ValueInvestor` trades against price-fundamental deviations. |
+| IndexTracker, `simulation-bases.md §4.6` | `IndexTracker` rebalances toward configured target exposure. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/ReversalEffect/Rule/players.py` and its configured counterpart in `configs/ReversalEffect/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+`Market` in `examples/ReversalEffect/Rule/players.py` broadcasts price,
+fundamental value, recent return, volume, and net demand. It aggregates signed
+orders, applies price impact and mean reversion, and records the series consumed
+by the standard analysis helper.
 
 ## §4 Variant Architecture
 
 | Component | Implementation |
 |---|---|
 | Player classes | `examples/ReversalEffect/Rule/players.py` |
-| Prompt module | Not applicable for Rule baseline |
-| Inference | No remote model call is used in the Rule baseline. |
-| Output parsing | Direct deterministic decision construction |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Prompt module | Not applicable |
+| Inference | No remote model call |
+| Output parsing | Direct deterministic order construction |
+| Error handling | Deterministic config/schema errors fail fast |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/ReversalEffect/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/ReversalEffect/Rule/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/ReversalEffect/Rule/topology.yml` | Message routing between coordinator and agents. |
-| `configs/ReversalEffect/Rule/persona.yml` | Turn recording and persona metadata. |
+| `configs/ReversalEffect/Rule/simulation.yml` | Full 200-round entry point. |
+| `configs/ReversalEffect/Rule/players.yml` | Market and six investor definitions. |
+| `configs/ReversalEffect/Rule/topology.yml` | Broadcast and order routing. |
+| `configs/ReversalEffect/Rule/persona.yml` | Recording/persona metadata. |
 
 ## §6 Running Instructions
 
@@ -88,15 +58,17 @@ python examples/ReversalEffect/Rule/run_reversal.py -c configs/ReversalEffect/Ru
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+The path should show price deviation, continuation pressure from momentum or
+overconfidence, and later correction pressure from contrarian and value orders.
+The baseline should produce complete finite market series and nonzero volume.
 
 ## §8 References
 
-See `examples/ReversalEffect/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/ReversalEffect/simulation-bases.md §2` for theoretical
+references and `analysis-bases.md §2` for metric contracts.
 
 ## §9 Variant Comparison
 
-See `examples/ReversalEffect/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+Rule is the deterministic benchmark. LLM tests persona-driven stochastic orders,
+RuleLLM adds explicit quantitative rules under liquidity-aware pricing, and Rag
+adds retrieved domain context plus retrieval audit artifacts.

@@ -244,7 +244,7 @@ Respond with ONLY valid JSON:
         if parsed is None:
             raise ValueError(f"Parse failed: {text[:100]}")
 
-        required_fields = ["bid_price", "quantity", "reasoning"]
+        required_fields = ["action", "bid_price", "quantity", "reasoning"]
         missing_or_null = []
         for field in required_fields:
             if field not in parsed or parsed[field] is None:
@@ -260,7 +260,10 @@ Respond with ONLY valid JSON:
         llm_client = self.state.custom_state["llm_client"]
         system_prompt = self._system_prompt
 
-        for _ in range(3):
+        max_retries = 3
+        decision = None
+        last_error = None
+        for attempt in range(max_retries):
             try:
                 output = llm_client.run(
                     [
@@ -272,13 +275,29 @@ Respond with ONLY valid JSON:
                 )
                 decision = self._parse_response(output.outputs[0].response)
                 break
-            except:
-                decision = {
-                    "action": "hold",
-                    "bid_price": market_data["price"],
-                    "quantity": 0,
-                    "reasoning": "error",
-                }
+            except (ValueError, RuntimeError, KeyError) as exc:
+                last_error = exc
+                if attempt < max_retries - 1:
+                    logger.debug(
+                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        self.identity,
+                        attempt + 1,
+                    )
+
+        if decision is None:
+            logger.warning(
+                "[%s] LLM failed after %d attempts: %s. Holding this round.",
+                self.identity,
+                max_retries,
+                last_error,
+            )
+            decision = {
+                "action": "hold",
+                "bid_price": market_data["price"],
+                "quantity": 0,
+                "reasoning": "LLM parse failed: held position",
+                "analysis": "",
+            }
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
@@ -326,31 +345,31 @@ Respond with ONLY valid JSON:
 
 
 class LLMContrarianInvestor(LLMInvestor):
-    """Contrarian investor."""
+    """LLM ContrarianInvestor. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = LLM_CONTRARIAN_SYS
 
 
 class LLMOverconfidentTrader(LLMInvestor):
-    """Overconfident trader."""
+    """LLM OverconfidentTrader. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = LLM_OVERCONFIDENT_SYS
 
 
 class LLMValueInvestor(LLMInvestor):
-    """Value investor."""
+    """LLM ValueInvestor. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = LLM_VALUE_SYS
 
 
 class LLMMomentumChaser(LLMInvestor):
-    """Momentum chaser."""
+    """LLM MomentumInvestor. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = LLM_MOMENTUM_CHASER_SYS
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """Noise trader."""
+    """LLM NoiseTrader. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = LLM_NOISE_SYS
 

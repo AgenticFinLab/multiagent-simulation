@@ -5,61 +5,30 @@
 | Field | Value |
 |---|---|
 | Variant | RuleLLM |
-| Simulation | Reversal Effect |
-| Decision Mechanism | LLM-generated trading orders constrained by explicit scenario rules |
+| Decision Mechanism | API-generated orders constrained by explicit rules |
+| Scenario Contract | `action`, `bid_price`, `quantity`, `reasoning`, `provides_liquidity` |
 | Theory Reference | `examples/ReversalEffect/simulation-bases.md` |
-| Market Broadcast | `configs/ReversalEffect/RuleLLM/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+RuleLLM combines persona descriptions with quantitative rule reminders. It uses
+the liquidity-aware market extension, so every order must state whether it
+provides passive liquidity.
 
 ## §2 Theory -> Implementation Mapping
 
-### §2.1 ContrarianInvestor (simulation-bases.md §4.1)
-
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `RuleLLMContrarianInvestor` in `examples/ReversalEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
-### §2.2 MomentumInvestor (simulation-bases.md §4.2)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `configured player class family` in `examples/ReversalEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
-### §2.3 OverconfidentTrader (simulation-bases.md §4.3)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `RuleLLMOverconfidentTrader` in `examples/ReversalEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
-### §2.4 NoiseTrader (simulation-bases.md §4.4)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `RuleLLMNoiseTrader` in `examples/ReversalEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
-### §2.5 ValueInvestor (simulation-bases.md §4.5)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMValueInvestor` in `examples/ReversalEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
-### §2.6 IndexTracker (simulation-bases.md §4.6)
-
-| Theory Component | Implementation |
-|---|---|
-| Investor role and activation rule from simulation-bases.md §4.6 | `configured player class family` in `examples/ReversalEffect/RuleLLM/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/ReversalEffect/RuleLLM/players.yml` through `extras`. |
-| Variant-specific decision mechanism | LLM-generated trading orders constrained by explicit scenario rules. |
+| ContrarianInvestor, `simulation-bases.md §4.1` | `RuleLLMContrarianInvestor` maps to the contrarian rule prompt. |
+| MomentumInvestor, `simulation-bases.md §4.2` | `RuleLLMMomentumChaser` maps to the momentum rule prompt. |
+| OverconfidentTrader, `simulation-bases.md §4.3` | `RuleLLMOverconfidentTrader` maps to the overconfident rule prompt. |
+| NoiseTrader, `simulation-bases.md §4.4` | `RuleLLMNoiseTrader` maps to the noise-trader rule prompt. |
+| ValueInvestor, `simulation-bases.md §4.5` | `RuleLLMValueInvestor` maps to the value-investor rule prompt. |
+| IndexTracker, `simulation-bases.md §4.6` | Not instantiated in this API variant. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/ReversalEffect/RuleLLM/players.py` and its configured counterpart in `configs/ReversalEffect/RuleLLM/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+The RuleLLM market extends the baseline market with liquidity-sensitive impact.
+It reads `provides_liquidity` from each order, adds passive liquidity to base
+depth, and increases price impact when effective liquidity is below threshold.
 
 ## §4 Variant Architecture
 
@@ -67,18 +36,18 @@ The coordinator mechanism is the final implementation in `examples/ReversalEffec
 |---|---|
 | Player classes | `examples/ReversalEffect/RuleLLM/players.py` |
 | Prompt module | `examples/ReversalEffect/RuleLLM/prompts.py` |
-| Inference | Uses the project ARK LLM policy; RAG variants also use the project Hunyuan/LiteLLM embedding policy. |
-| Output parsing | Explicit parser contract in players.py and prompts.py |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Inference | Project ARK LLM policy from config extras |
+| Output parsing | Strict JSON parser requiring liquidity flag |
+| Error handling | Parse failures retry and then fail fast for deterministic contract errors |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/ReversalEffect/RuleLLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/ReversalEffect/RuleLLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/ReversalEffect/RuleLLM/topology.yml` | Message routing between coordinator and agents. |
-| `configs/ReversalEffect/RuleLLM/persona.yml` | Turn recording and persona metadata. |
+| `configs/ReversalEffect/RuleLLM/simulation.yml` | Full 200-round entry point. |
+| `configs/ReversalEffect/RuleLLM/players.yml` | Liquidity-aware market and five API investor definitions. |
+| `configs/ReversalEffect/RuleLLM/topology.yml` | Broadcast and order routing. |
+| `configs/ReversalEffect/RuleLLM/persona.yml` | Recording/persona metadata. |
 
 ## §6 Running Instructions
 
@@ -88,15 +57,16 @@ python examples/ReversalEffect/RuleLLM/run_reversal_effect_rulellm.py -c configs
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+Rule reminders should keep directional behavior close to the baseline while LLM
+reasoning changes order size and liquidity provision. The liquidity-aware market
+should remain finite and produce nonzero volume.
 
 ## §8 References
 
-See `examples/ReversalEffect/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/ReversalEffect/simulation-bases.md §3` for the liquidity-aware
+market and `analysis-bases.md §2.5` for liquidity-depth metrics.
 
 ## §9 Variant Comparison
 
-See `examples/ReversalEffect/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+RuleLLM should be compared with Rule on reversal timing and with LLM on parser
+quality and order dispersion. It is the direct runtime base for the Rag variant.

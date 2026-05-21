@@ -2,35 +2,45 @@
 
 ## §1 Objectives
 
-This analysis checks whether the Rule variant produces a complete, analyzable Reversal Effect trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
+This analysis checks whether the deterministic baseline produces complete
+reversal dynamics: measurable overshoot, nonzero order flow, contrarian/value
+correction pressure, and finite 200-round market series.
 
 ## §2 Core Metrics
 
 | Metric | Function Contract | Source |
 |---|---|---|
-| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
-| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
-| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
-| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
-| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
-| Scenario-specific diagnostic | `def compute_reversaleffect_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
+| Overshoot magnitude | `def compute_overshoot_magnitude(prices: list[float], fundamental: float) -> float` | `analysis-bases.md §2.1` |
+| Reversal return | `def compute_reversal_return(prices: list[float], onset: int, extreme: int) -> float` | `analysis-bases.md §2.2` |
+| Contrarian order share | `def compute_contrarian_order_share(orders: list[dict]) -> float` | `analysis-bases.md §2.3` |
+| Momentum delay | `def compute_momentum_delay(prices: list[float], orders: list[dict]) -> int` | `analysis-bases.md §2.4` |
+| Agent attribution | `def compute_agent_attribution(orders: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.6` |
 
 ## §3 Analysis Dimensions
 
-Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rule preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
+Review price deviation, reversal timing, order flow by strategy, and portfolio
+exposure. The Rule variant is the reference path for later API comparisons.
 
 ## §4 Phase Analysis
 
-The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
+Split the run into initialization, overreaction buildup, continuation pressure,
+contrarian/value correction, and terminal stabilization. The baseline should
+make these phases interpretable without API quality confounds.
 
 ## §5 Cross-Variant Comparison
 
-Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+Compare Rule against LLM, RuleLLM, and Rag on overshoot, correction strength,
+activity, and terminal deviation. Rule has the most complete role set because it
+includes IndexTracker.
 
 ## §6 Expected Results and Validation Criteria
 
-Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+A valid full run records 200 rounds, finite prices, nonzero volume, and a price
+path that moves away from and then at least partially back toward fundamental
+value.
 
 ## §7 Visualization Catalogue
 
-Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_reversaleffect_dynamics.png`, `02_reversaleffect_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_reversaleffect_dynamics.png`, `02_reversaleffect_analysis.png`, and
+`03_summary.png`.

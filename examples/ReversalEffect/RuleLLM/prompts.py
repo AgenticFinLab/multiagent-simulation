@@ -8,10 +8,10 @@ Design principle:
 
 Agents:
     - RuleLLMContrarianInvestor → ContrarianInvestor rules
-    - RuleLLMOverconfidentTrader → MomentumInvestor rules
-    - RuleLLMValueInvestor → OverconfidentTrader rules
-    - RuleLLMMomentumChaser → NoiseTrader rules
-    - RuleLLMNoiseTrader → ValueInvestor rules
+    - RuleLLMOverconfidentTrader → OverconfidentTrader rules
+    - RuleLLMValueInvestor → ValueInvestor rules
+    - RuleLLMMomentumChaser → MomentumInvestor rules
+    - RuleLLMNoiseTrader → NoiseTrader rules
 """
 
 # =============================================================================

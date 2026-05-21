@@ -2,35 +2,41 @@
 
 ## §1 Objectives
 
-This analysis checks whether the RuleLLM variant produces a complete, analyzable Reversal Effect trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
+This analysis checks whether explicit rule prompts preserve reversal dynamics
+under API generation and liquidity-sensitive market impact.
 
 ## §2 Core Metrics
 
 | Metric | Function Contract | Source |
 |---|---|---|
-| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
-| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
-| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
-| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
-| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
-| Scenario-specific diagnostic | `def compute_reversaleffect_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
+| Overshoot magnitude | `def compute_overshoot_magnitude(prices: list[float], fundamental: float) -> float` | `analysis-bases.md §2.1` |
+| Reversal return | `def compute_reversal_return(prices: list[float], onset: int, extreme: int) -> float` | `analysis-bases.md §2.2` |
+| Contrarian order share | `def compute_contrarian_order_share(orders: list[dict]) -> float` | `analysis-bases.md §2.3` |
+| Liquidity depth | `def compute_liquidity_depth(orders: list[dict], base_liquidity: float) -> float` | `analysis-bases.md §2.5` |
+| API quality | `def compute_api_quality(events: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.7` |
 
 ## §3 Analysis Dimensions
 
-Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether RuleLLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
+Review reversal timing, order flow by strategy, effective liquidity, and parser
+quality. The `provides_liquidity` field is a required market input.
 
 ## §4 Phase Analysis
 
-The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
+Analyze whether low-liquidity phases amplify price moves before contrarian and
+value orders stabilize the path.
 
 ## §5 Cross-Variant Comparison
 
-Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+Compare RuleLLM with LLM to assess the stabilizing effect of explicit rules, and
+with Rag to isolate the incremental contribution of retrieved knowledge.
 
 ## §6 Expected Results and Validation Criteria
 
-Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+A valid full run records 200 rounds, finite prices, nonzero volume, required
+liquidity flags, and low parse-failure rates.
 
 ## §7 Visualization Catalogue
 
-Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_reversaleffect_dynamics.png`, `02_reversaleffect_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_reversaleffect_dynamics.png`, `02_reversaleffect_analysis.png`, and
+`03_summary.png`.

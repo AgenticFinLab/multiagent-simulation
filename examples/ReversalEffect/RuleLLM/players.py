@@ -441,31 +441,31 @@ Respond with ONLY valid JSON:
 
 
 class RuleLLMContrarianInvestor(RuleLLMInvestor):
-    """Hybrid: ContrarianInvestor rules + LLM reasoning."""
+    """Hybrid ContrarianInvestor. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RULELLM_CONTRARIAN_INVESTOR_SYS
 
 
 class RuleLLMOverconfidentTrader(RuleLLMInvestor):
-    """Hybrid: OverconfidentTrader rules + LLM reasoning."""
+    """Hybrid OverconfidentTrader. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RULELLM_OVERCONFIDENT_TRADER_SYS
 
 
 class RuleLLMValueInvestor(RuleLLMInvestor):
-    """Hybrid: ValueInvestor rules + LLM reasoning."""
+    """Hybrid ValueInvestor. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RULELLM_VALUE_INVESTOR_SYS
 
 
 class RuleLLMMomentumChaser(RuleLLMInvestor):
-    """Hybrid: MomentumInvestor rules + LLM reasoning."""
+    """Hybrid MomentumInvestor. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RULELLM_MOMENTUM_INVESTOR_SYS
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """Hybrid: NoiseTrader rules + LLM reasoning."""
+    """Hybrid NoiseTrader. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RULELLM_NOISE_TRADER_SYS
 

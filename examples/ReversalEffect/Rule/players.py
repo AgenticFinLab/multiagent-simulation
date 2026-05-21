@@ -210,6 +210,8 @@ class ContrarianInvestor(BaseInvestor):
     """
     Contrarian investor exploiting mean reversion.
 
+    Theory: simulation-bases.md §4.1.
+
     Parameters from config extras:
         - lookback_window, reversal_threshold, base_position_size, value_sensitivity
     """
@@ -280,6 +282,8 @@ class MomentumInvestor(BaseInvestor):
     """
     Short-term momentum investor.
 
+    Theory: simulation-bases.md §4.2.
+
     Parameters from config extras:
         - lookback_window, momentum_threshold, base_position_size, momentum_multiplier
     """
@@ -339,6 +343,8 @@ class OverconfidentTrader(BaseInvestor):
     """
     Overconfident trader who overreacts to news.
 
+    Theory: simulation-bases.md §4.3.
+
     Parameters from config extras:
         - overconfidence_factor, reaction_threshold, base_position_size, overconfidence_multiplier
     """
@@ -393,6 +399,8 @@ class NoiseTrader(BaseInvestor):
     """
     Noise trader providing random liquidity.
 
+    Theory: simulation-bases.md §4.4.
+
     Parameters from config extras:
         - position_volatility, mean_reversion
     """
@@ -441,6 +449,8 @@ class NoiseTrader(BaseInvestor):
 class ValueInvestor(BaseInvestor):
     """
     Value investor based on fundamental analysis.
+
+    Theory: simulation-bases.md §4.5.
 
     Parameters from config extras:
         - value_sensitivity, base_position_size, value_noise, value_threshold
@@ -499,6 +509,8 @@ class ValueInvestor(BaseInvestor):
 class IndexTracker(BaseInvestor):
     """
     Passive index tracker for benchmarking.
+
+    Theory: simulation-bases.md §4.6.
 
     Parameters from config extras:
         - target_position, rebalance_threshold

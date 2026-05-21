@@ -2,132 +2,211 @@
 
 ## §1 Phenomenon Definition
 
-ReversalEffect models price overreaction followed by correction. Contrarian and
-value investors oppose excessive moves, while momentum and overconfident traders
-can delay reversal.
+ReversalEffect models short-horizon overreaction followed by partial correction
+toward fundamental value. The mechanism requires an initial price move large
+enough to attract contrarian and value demand, trend-following pressure that can
+delay the correction, and a market-clearing rule that converts net order flow
+into the next price.
+
+The scenario is a trading-schema example. Investor orders carry `bid_price`,
+signed `quantity`, `strategy`, and variant-specific explanatory fields. The
+Rule baseline uses deterministic trading rules. LLM, RuleLLM, and Rag use API
+generated decisions while preserving the same market state variables and
+portfolio accounting.
 
 ## §2 Theoretical Foundation
 
 ### §2.1 Overreaction And Reversal
 
-Behavioral finance documents that extreme price moves can reverse when initial
-reaction overshoots fundamentals.
+De Bondt and Thaler (1985) argue that extreme prior winners and losers can
+subsequently reverse as investors reassess exaggerated expectations. The
+simulation implements this as price pressure away from fundamentals followed by
+order flow that trades against the extreme move.
 
 ### §2.2 Contrarian Trading
 
-Contrarian strategies buy losers and sell winners when deviations become large.
+Contrarian trading buys after sufficiently negative recent returns and sells
+after sufficiently positive recent returns. This creates explicit correction
+pressure when the recent price path exceeds a threshold.
 
-### §2.3 Overconfidence And Momentum Delay
+### §2.3 Momentum And Delayed Correction
 
-Overconfident and momentum traders can extend mispricing before reversal occurs.
+Momentum and positive-feedback traders can continue the current move before the
+reversal takes hold. This makes the reversal timing endogenous rather than an
+immediate mechanical snap-back.
+
+### §2.4 Overconfidence And Noise
+
+Overconfident traders overweight recent signals and place larger orders than a
+calibrated trader would. Noise traders add stochastic background flow so that the
+path is not fully deterministic even when the main mechanism is threshold based.
+
+### §2.5 Fundamental Anchoring
+
+Value investors compare price with fundamental value. Their orders anchor the
+longer-run path and distinguish reversal from an unconstrained random walk.
 
 ## §3 Market Mechanism
 
-The market publishes price, fundamental, deviation, and recent history.
-Contrarian/value orders pull prices back, while momentum/noise orders can
-extend overshoot.
+The market coordinator broadcasts current price, previous price, round return,
+trading volume, net demand, liquidity where applicable, and fundamental value.
+Agents respond with signed quantities. Positive quantity is demand to buy;
+negative quantity is demand to sell.
+
+Rule and LLM variants use a mean-reverting price update that combines order
+impact, fundamental pull, and stochastic noise. RuleLLM and Rag use the
+liquidity-aware extension: passive liquidity supplied by agents increases
+effective depth, while low liquidity increases price impact. This preserves the
+same reversal concept but makes liquidity provision an explicit contract field.
 
 ## §4 Investor Archetypes
 
 ### §4.1 ContrarianInvestor
 
-**Summary**: Trades against excessive recent moves.
-**Theoretical and Empirical Basis**: Contrarian reversal evidence.
-**Design Purpose**: Generate reversal pressure.
-**Behavioral Framework**: Uses `lookback_window`, `reversal_threshold`,
-`value_sensitivity`, and `base_position_size`.
-**Decision Process**: Buy after excessive declines; sell after excessive rises.
-**Worked Numerical Example**: A 15% decline beyond threshold triggers buy.
-**Academic References**: De Bondt and Thaler (1985).
+**Summary**: Trades against large recent moves.
+**Theoretical and Empirical Basis**: Mean-reversion evidence after investor
+overreaction.
+**Design Purpose**: Generate direct reversal pressure.
+**Behavioral Framework**: Uses lookback returns, `reversal_threshold`,
+`base_position_size`, and value sensitivity.
+**Decision Process**: Buy after excessive declines and sell after excessive
+rises.
+**Worked Numerical Example**: If the recent return is -15% and the threshold is
+10%, the agent submits a buy order scaled by the excess move.
+**Academic References**: De Bondt and Thaler (1985); Lakonishok, Shleifer, and
+Vishny (1994).
 
 ### §4.2 MomentumInvestor
 
-**Summary**: Chases recent trends and delays reversal.
-**Theoretical and Empirical Basis**: Positive-feedback trading.
-**Design Purpose**: Compete against contrarian pressure.
-**Behavioral Framework**: Uses `momentum_threshold`, `momentum_multiplier`, and
-`base_position_size`.
-**Decision Process**: Trade with recent trend when it exceeds threshold.
-**Worked Numerical Example**: A strong recent rise triggers buy.
-**Academic References**: Jegadeesh and Titman (1993).
+**Summary**: Trades with the recent trend.
+**Theoretical and Empirical Basis**: Short-horizon continuation and
+positive-feedback trading.
+**Design Purpose**: Delay correction and create competition with contrarian
+pressure.
+**Behavioral Framework**: Uses recent return, `momentum_threshold`,
+`momentum_multiplier`, and `base_position_size`.
+**Decision Process**: Buy into positive momentum and sell into negative
+momentum when the signal exceeds threshold.
+**Worked Numerical Example**: A recent +6% move above a 3% threshold creates a
+buy order proportional to the excess trend.
+**Academic References**: Jegadeesh and Titman (1993); Shleifer and Summers
+(1990).
 
 ### §4.3 OverconfidentTrader
 
-**Summary**: Overreacts to signals because confidence is inflated.
-**Theoretical and Empirical Basis**: Overconfidence models.
-**Design Purpose**: Amplify initial overreaction.
-**Behavioral Framework**: Uses `reaction_threshold`,
-`overconfidence_factor`, and `overconfidence_multiplier`.
-**Decision Process**: Trades aggressively when perceived signal exceeds
-threshold.
-**Worked Numerical Example**: A modest signal becomes a large order after
-overconfidence multiplier.
-**Academic References**: Daniel, Hirshleifer, and Subrahmanyam (1998).
+**Summary**: Overweights recent signals and trades too aggressively.
+**Theoretical and Empirical Basis**: Overconfidence models of excessive trading
+and delayed correction.
+**Design Purpose**: Amplify the initial move and increase reversal amplitude.
+**Behavioral Framework**: Uses `reaction_threshold`, `overconfidence_factor`,
+and `overconfidence_multiplier`.
+**Decision Process**: Convert recent returns into larger directional orders than
+a calibrated investor would place.
+**Worked Numerical Example**: A +4% return is inflated by the overconfidence
+factor and can trigger a larger buy order.
+**Academic References**: Daniel, Hirshleifer, and Subrahmanyam (1998); Barber
+and Odean (2001).
 
 ### §4.4 NoiseTrader
 
-**Summary**: Random liquidity/noise participant.
-**Theoretical and Empirical Basis**: Noise-trader models.
-**Design Purpose**: Add stochastic price pressure.
-**Behavioral Framework**: Uses `position_volatility` and `mean_reversion`.
-**Decision Process**: Random position changes with mild reversion.
-**Worked Numerical Example**: Random positive draw creates buy order.
-**Academic References**: Black (1986).
+**Summary**: Adds random order flow with weak discipline.
+**Theoretical and Empirical Basis**: Noise-trader risk and non-informational
+trading.
+**Design Purpose**: Prevent perfectly deterministic paths and provide background
+volume.
+**Behavioral Framework**: Uses stochastic position draws and mild reversion to
+avoid unbounded inventory.
+**Decision Process**: Submit small random buy or sell orders, sometimes acting
+as liquidity supply in liquidity-aware variants.
+**Worked Numerical Example**: A positive random draw creates a small buy order
+near current price.
+**Academic References**: Black (1986); De Long et al. (1990).
 
 ### §4.5 ValueInvestor
 
-**Summary**: Trades on fundamental mispricing.
-**Theoretical and Empirical Basis**: Value investing and limits of arbitrage.
-**Design Purpose**: Anchor price to fundamental.
+**Summary**: Trades on price-fundamental deviations.
+**Theoretical and Empirical Basis**: Fundamental value anchoring and limits of
+arbitrage.
+**Design Purpose**: Pull price back toward fundamental value.
 **Behavioral Framework**: Uses `value_threshold`, `value_sensitivity`,
 `value_noise`, and `base_position_size`.
-**Decision Process**: Buy undervaluation and sell overvaluation.
-**Worked Numerical Example**: Price 20% below fundamental triggers buy.
+**Decision Process**: Buy when price is below fundamental by enough margin and
+sell when it is above fundamental by enough margin.
+**Worked Numerical Example**: Price at 80 against a fundamental of 100 creates a
+buy signal scaled by the 20% undervaluation.
 **Academic References**: Graham (1949); Shleifer and Vishny (1997).
 
 ### §4.6 IndexTracker
 
-**Summary**: Rebalances toward target index exposure.
-**Theoretical and Empirical Basis**: Passive index allocation.
-**Design Purpose**: Add slow stabilizing benchmark demand.
+**Summary**: Rebalances toward target exposure.
+**Theoretical and Empirical Basis**: Passive allocation and benchmark
+rebalancing.
+**Design Purpose**: Add slow stabilizing demand in the Rule baseline.
 **Behavioral Framework**: Uses `target_position` and `rebalance_threshold`.
-**Decision Process**: Trade toward target when drift exceeds threshold.
-**Worked Numerical Example**: If position falls below target by threshold, buy.
-**Academic References**: Passive investment rebalancing literature.
+**Decision Process**: Buy or sell when inventory drifts beyond the rebalance
+band.
+**Worked Numerical Example**: If current position is materially below target,
+the agent buys the gap subject to threshold rules.
+**Academic References**: Index rebalancing and passive-investment literature.
 
 ## §5 Agent Diversity Verification
 
-The population includes reversal traders, momentum chasers, overconfident
-overreactors, noise traders, value anchors, and passive trackers.
+The scenario separates six theoretical roles. The Rule baseline includes all six
+roles, including `IndexTracker`. API variants include contrarian,
+overconfident, value, momentum-chaser, and noise roles; they omit the passive
+index tracker to keep API cost and stochastic role count bounded. This is a
+documented role-count difference, not a schema exception.
+
+The diversity check is whether the population contains at least one reversal
+force, one continuation force, one fundamental anchor, and one stochastic order
+source. RuleLLM and Rag additionally require the `provides_liquidity` field
+because their market calculates liquidity-sensitive price impact.
 
 ## §6 Parameter Table
 
 | Parameter | Meaning | Used By | Sensitivity |
 |---|---|---|---|
-| `reversal_threshold` | Contrarian activation | ContrarianInvestor | High |
-| `momentum_threshold` | Momentum activation | MomentumInvestor | High |
+| `initial_price` | Starting traded price | Market | Medium |
+| `fundamental_value` | Value anchor | Market, ValueInvestor | High |
+| `price_impact` / `base_price_impact` | Net-demand impact scale | Market | High |
+| `mean_reversion` | Pull toward fundamental | Market | High |
+| `noise_std` | Exogenous price noise | Market | Medium |
+| `reversal_threshold` | Contrarian activation threshold | ContrarianInvestor | High |
+| `momentum_threshold` | Trend-following activation threshold | MomentumInvestor | High |
 | `overconfidence_factor` | Signal inflation | OverconfidentTrader | High |
-| `position_volatility` | Noise size | NoiseTrader | Low |
-| `value_threshold` | Fundamental activation | ValueInvestor | Medium |
-| `rebalance_threshold` | Passive rebalance trigger | IndexTracker | Low |
+| `value_threshold` | Fundamental-deviation activation | ValueInvestor | Medium |
+| `base_liquidity` | Baseline market depth | RuleLLM, Rag market | High |
 
 ## §7 Communication And Round Structure
 
-Market broadcasts state; agents compute trend, reversal, value, or noise
-signals; market aggregates orders and updates price.
+Each round follows a broadcast-order-update loop. The market broadcasts current
+state. Investors update portfolio state and generate orders. The market
+aggregates buy and sell quantities, computes volume and net demand, applies
+price impact and mean reversion, and records price and volume histories.
+
+LLM-family variants parse decisions from `<analysis>` and `<decision>` tags.
+Deterministic schema/config errors fail fast. Explicit stochastic API fallback
+is allowed only when it is conservative, logged, and reviewed by post-run
+quality audit.
 
 ## §8 Historical Case Studies
 
 ### §8.1 Post-Earnings Overreaction
 
-Initial investor overreaction can reverse as fundamentals are reassessed.
+Initial earnings surprises can trigger exaggerated buying or selling. Later
+rounds may reverse as fundamental and contrarian capital reassesses the move.
 
-### §8.2 Crisis Relief Rallies
+### §8.2 Oversold Relief Rallies
 
-Oversold markets often rebound when value and contrarian capital enters.
+During stressed markets, rapid selling can push price below plausible
+fundamental value. Reversal emerges when value and contrarian demand dominate
+continuation selling.
 
 ## §9 Variant Comparison Preview
 
-Rule produces explicit reversal thresholds. LLM may vary perceived overreaction.
-RuleLLM anchors rules while allowing explanation variance. Rag may use
-historical overreaction context.
+| Variant | Decision Source | Expected Reversal Behavior |
+|---|---|---|
+| Rule | Deterministic formulas | Clean threshold-driven reversal with all six roles. |
+| LLM | Persona prompt and structured JSON order | Same order schema with more variable timing and sizing. |
+| RuleLLM | Persona plus explicit quantitative rules | Liquidity-aware market with rule-constrained API orders. |
+| Rag | RuleLLM plus retrieved domain context | Same liquidity-aware contract plus auditable retrieval context. |
