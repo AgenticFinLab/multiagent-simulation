@@ -6,11 +6,14 @@
 |---|---|
 | Variant | Rule |
 | Simulation | Volmageddon |
-| Decision Mechanism | deterministic rule-based trading orders |
+| Decision Mechanism | Deterministic current-market volatility quantity orders |
 | Theory Reference | `examples/Volmageddon/simulation-bases.md` |
 | Market Broadcast | `configs/Volmageddon/Rule/topology.yml` |
 
-This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
+Volmageddon is a special trading schema scenario. It does not use limit-order
+`bid_price` fields. The market consumes `action`, `quantity`, and `agent_type`,
+then updates a volatility proxy from aggregate net demand at the current proxy
+level.
 
 ## §2 Theory -> Implementation Mapping
 
@@ -18,60 +21,67 @@ This is a trading-schema scenario. API decisions emit action, bid_price, quantit
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.1 | `ShortVolTrader` in `examples/Volmageddon/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/Volmageddon/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Short-vol carry and stop-loss covering | `ShortVolTrader` in `examples/Volmageddon/Rule/players.py` sells volatility when deviation is below -2% and buys to cover when `deviation > stop_loss`. |
+| Required config | `stop_loss`, `initial_cash`, `initial_position`, `initial_price`, `fundamental_value` from `configs/Volmageddon/Rule/players.yml`. |
+| Quantity schema | Emits `action` and non-negative `quantity`; no `bid_price` is used by the market. |
+
 ### §2.2 VolETNManager (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `VolETNManager` in `examples/Volmageddon/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/Volmageddon/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Inverse-volatility product rebalancing | `VolETNManager` buys volatility proxy exposure when deviation exceeds `rebalance_threshold`. |
+| Required config | `rebalance_threshold` and `rebalance_size` from `configs/Volmageddon/Rule/players.yml`. |
+| Quantity schema | Buy quantity is `int(deviation * rebalance_size)` subject to cash constraints. |
+
 ### §2.3 LongVolHedger (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `LongVolHedger` in `examples/Volmageddon/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/Volmageddon/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Long-volatility insurance and profit-taking | `LongVolHedger` buys when the proxy is cheap and sells when volatility spikes. |
+| Required config | `hedge_ratio` plus portfolio initialization fields. |
+| Quantity schema | Orders are capped at 500 units and constrained by cash or inventory. |
+
 ### §2.4 VolArbitrageur (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `VolArbitrageur` in `examples/Volmageddon/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/Volmageddon/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Term-structure dislocation arbitrage | `VolArbitrageur` trades only when `abs(deviation) > entry_threshold`. |
+| Required config | `entry_threshold` from `configs/Volmageddon/Rule/players.yml`. |
+| Quantity schema | Quantity is `min(5000, int(abs(deviation) * 20000))` before cash/inventory constraints. |
+
 ### §2.5 EquityTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `EquityTrader` in `examples/Volmageddon/Rule/players.py` implements the corresponding retained behavior for this variant. |
-| Behavioral parameters from simulation-bases.md §6 | Loaded from `configs/Volmageddon/Rule/players.yml` through `extras`. |
-| Variant-specific decision mechanism | deterministic rule-based trading orders. |
+| Volatility-linked equity de-risking | `EquityTrader` trades only when `abs(deviation) > 2 * risk_limit`. |
+| Required config | `risk_limit` from `configs/Volmageddon/Rule/players.yml`. |
+| Quantity schema | Quantity is `min(1000, int(abs(deviation) * 3000))` before constraints. |
 
 ## §3 Market Mechanism
 
-The coordinator mechanism is the final implementation in `examples/Volmageddon/Rule/players.py` and its configured counterpart in `configs/Volmageddon/Rule/players.yml`. It broadcasts scenario state each round, receives agent decisions, updates state variables, and records the series required by `analysis-bases.md`.
+`Market` is imported from `examples/Volmageddon/Rule/players.py`. It extracts
+orders with `action` and `quantity`, computes net demand, applies
+`price_impact`, `mean_reversion`, and `noise_std`, and broadcasts the next
+round's `price`, `fundamental`, and `deviation`.
 
 ## §4 Variant Architecture
 
 | Component | Implementation |
 |---|---|
 | Player classes | `examples/Volmageddon/Rule/players.py` |
-| Prompt module | Not applicable for Rule baseline |
-| Inference | No remote model call is used in the Rule baseline. |
+| Prompt module | Not applicable |
+| Inference | No remote model call |
 | Output parsing | Direct deterministic decision construction |
-| Error handling | Deterministic config/schema errors fail fast; stochastic API parse fallback is allowed only when explicit, conservative, logged, and quality-audited. |
+| Error handling | Deterministic config/schema errors fail fast |
 
 ## §5 Config Reference
 
 | Config | Purpose |
 |---|---|
-| `configs/Volmageddon/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
-| `configs/Volmageddon/Rule/players.yml` | Player class paths, extras, and model or retrieval configuration. |
-| `configs/Volmageddon/Rule/topology.yml` | Message routing between coordinator and agents. |
-| `configs/Volmageddon/Rule/persona.yml` | Turn recording and persona metadata. |
+| `configs/Volmageddon/Rule/simulation.yml` | 200-round simulation entry point and record path |
+| `configs/Volmageddon/Rule/players.yml` | Market parameters and five investor archetypes |
+| `configs/Volmageddon/Rule/topology.yml` | Market update and investor order routing |
+| `configs/Volmageddon/Rule/persona.yml` | Persona and recording metadata |
 
 ## §6 Running Instructions
 
@@ -81,15 +91,19 @@ python examples/Volmageddon/Rule/run_volmageddon.py -c configs/Volmageddon/Rule/
 
 ## §7 Expected Behavior
 
-- The run records the full scenario state path for the configured round count.
-- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
-- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
-- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
+- Short-volatility covering and inverse-ETN rebalancing should create
+  procyclical buy pressure during positive deviation episodes.
+- Long-vol and arbitrage roles should provide partial stabilization.
+- Equity traders should connect volatility stress to risk reduction.
+- A full accepted sample must complete 200 rounds and pass structural quality
+  review against `analysis-bases.md`.
 
 ## §8 References
 
-See `examples/Volmageddon/simulation-bases.md §2` for full DOI citations and mechanism references.
+See `examples/Volmageddon/simulation-bases.md §2` for theory references and
+`§8` for historical anchors.
 
 ## §9 Variant Comparison
 
-See `examples/Volmageddon/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.
+Rule is the deterministic baseline used to compare the LLM, RuleLLM, and Rag
+variants on spike magnitude, timing, feedback attribution, and quality metrics.

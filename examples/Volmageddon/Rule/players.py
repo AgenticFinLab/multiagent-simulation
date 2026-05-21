@@ -236,7 +236,10 @@ class BaseInvestor(GeneralPlayer):
 
 
 class ShortVolTrader(BaseInvestor):
-    """Short volatility trader: sells VIX futures/ETNs, profits from contango but faces tail risk."""
+    """Short volatility trader.
+
+    Theory: simulation-bases.md §4.1
+    """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -258,7 +261,10 @@ class ShortVolTrader(BaseInvestor):
 
 
 class VolETNManager(BaseInvestor):
-    """Inverse VIX ETN manager: must buy VIX futures when VIX rises, creating positive feedback."""
+    """Inverse VIX ETN manager.
+
+    Theory: simulation-bases.md §4.2
+    """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -279,7 +285,10 @@ class VolETNManager(BaseInvestor):
 
 
 class LongVolHedger(BaseInvestor):
-    """Long vol hedger: holds long VIX positions as portfolio insurance."""
+    """Long volatility hedger.
+
+    Theory: simulation-bases.md §4.3
+    """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -301,7 +310,10 @@ class LongVolHedger(BaseInvestor):
 
 
 class VolArbitrageur(BaseInvestor):
-    """Volatility arbitrageur: trades VIX term structure dislocations."""
+    """Volatility arbitrageur.
+
+    Theory: simulation-bases.md §4.4
+    """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -325,7 +337,10 @@ class VolArbitrageur(BaseInvestor):
 
 
 class EquityTrader(BaseInvestor):
-    """Equity trader: trades equities, affected by volatility spike."""
+    """Equity trader.
+
+    Theory: simulation-bases.md §4.5
+    """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
