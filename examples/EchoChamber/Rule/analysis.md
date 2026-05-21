@@ -1,36 +1,44 @@
-# Echo Chamber Rule Analysis Plan
+# EchoChamber Rule Analysis Plan
 
 ## §1 Objectives
 
-This analysis checks whether the Rule variant produces a complete, analyzable Echo Chamber trajectory. It maps recorded opinion series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
+The Rule analysis verifies deterministic polarization dynamics and provides the
+baseline for comparing API variants.
 
 ## §2 Core Metrics
 
 | Metric | Function Contract | Source |
 |---|---|---|
-| Price or state deviation | `def compute_deviation(series, reference) -> float` | `analysis-bases.md §2.1` |
-| Phenomenon intensity | `def compute_intensity(path, events) -> float` | `analysis-bases.md §2.2` |
-| Volatility or dispersion | `def compute_dispersion(series, window) -> float` | `analysis-bases.md §2.3` |
-| Agent wealth or state exposure | `def compute_agent_exposure(records) -> dict` | `analysis-bases.md §2.4` |
-| Volume or activity | `def compute_activity(decisions) -> float` | `analysis-bases.md §2.5` |
-| Scenario-specific diagnostic | `def compute_echochamber_diagnostic(data) -> float` | `analysis-bases.md §2.6` |
+| Polarization amplification | `def compute_polarization_amplification(polarization) -> float` | `analysis-bases.md §2.1` |
+| Polarization persistence | `def compute_polarization_persistence(polarization) -> float` | `analysis-bases.md §2.2` |
+| Cluster separation | `def compute_cluster_separation(cluster_series) -> dict` | `analysis-bases.md §2.3` |
+| Polarize activity | `def compute_polarize_activity(polarize_counts) -> float` | `analysis-bases.md §2.4` |
+| Depolarize activity | `def compute_depolarize_activity(depolarize_counts) -> float` | `analysis-bases.md §2.5` |
+| Opinion dispersion | `def compute_opinion_dispersion(agent_opinions) -> float` | `analysis-bases.md §2.6` |
+| Quality checks | `def compute_api_quality(actions, rag_contexts) -> dict` | `analysis-bases.md §2.7` |
 
 ## §3 Analysis Dimensions
 
-Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rule preserves opinion dynamics and influence_action activity while changing the distribution of influence_action relative to the deterministic baseline.
+Analyze polarization, mean opinion, cluster separation, polarize/depolarize
+activity, and per-agent opinion trajectories.
 
 ## §4 Phase Analysis
 
-The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
+Use initialization, reinforcement, cluster formation, depolarizing response, and
+terminal state phases from `analysis-bases.md §4`.
 
 ## §5 Cross-Variant Comparison
 
-Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+Rule is compared with LLM, RuleLLM, and Rag on polarization path, activity
+composition, and final opinion dispersion.
 
 ## §6 Expected Results and Validation Criteria
 
-Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+A full Rule sample should complete 200 rounds and produce finite polarization,
+cluster, activity, and opinion series.
 
 ## §7 Visualization Catalogue
 
-Required outputs are `summary.json`, `00_investor_bids.png` or the scenario-equivalent agent-state plot, `01_echochamber_dynamics.png`, `02_echochamber_analysis.png`, and `03_summary.png`. Special-schema scenarios may relabel plot content while preserving the fixed output set.
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_echochamber_dynamics.png`, `02_echochamber_analysis.png`, and
+`03_summary.png`.

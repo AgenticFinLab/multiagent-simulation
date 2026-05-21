@@ -56,7 +56,7 @@ from lmbase.inference.base import InferInput
 # Add examples directory to path for shared utilities
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 
 logger = logging.getLogger("EchoChamberRuleLLM")
 
@@ -454,7 +454,20 @@ Respond with ONLY valid JSON:
         missing = [f for f in required_fields if f not in parsed or parsed[f] is None]
         if missing:
             raise ValueError(f"Fields missing or null in LLM response: {missing}")
+        action_type = str(parsed["action_type"]).lower()
+        if action_type not in {"polarize", "neutral", "depolarize"}:
+            raise ValueError(f"Invalid action_type: {parsed['action_type']!r}")
+        try:
+            intensity = float(parsed["intensity"])
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"Invalid intensity: {parsed['intensity']!r}") from exc
+        reasoning = str(parsed["reasoning"]).strip()
+        if not reasoning:
+            raise ValueError("Empty reasoning")
 
+        parsed["action_type"] = action_type
+        parsed["intensity"] = self._apply_intensity_constraints(intensity)
+        parsed["reasoning"] = reasoning
         parsed["analysis"] = analysis
         return parsed
 
@@ -481,16 +494,20 @@ Respond with ONLY valid JSON:
         decision = None
         last_error = None
         for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
+                infer_output = llm_client.run([infer_input])
                 decision = self._parse_llm_response(infer_output.outputs[0].response)
                 break
             except Exception as exc:
                 last_error = exc
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if not parse_error and not retryable_api_error:
+                    raise
                 if attempt < max_retries - 1:
                     logger.debug(
-                        "[%s] LLM parse failed (attempt %d), retrying...",
+                        "[%s] LLM decision failed (attempt %d), retrying...",
                         self.identity,
                         attempt + 1,
                     )
@@ -502,7 +519,8 @@ Respond with ONLY valid JSON:
 
         action_type = decision["action_type"]
         intensity = float(decision["intensity"])
-        intensity = self._apply_intensity_constraints(intensity)
+        reasoning = str(decision.pop("reasoning"))[:120]
+        analysis = str(decision.pop("analysis"))
 
         # Update opinion based on LLM-decided action type
         # Opinion shifts follow the same direction as the rule-based counterpart
@@ -533,8 +551,8 @@ Respond with ONLY valid JSON:
             "agent_role": strategy_name,
             "agent_id": self.identity,
             "opinion": my_opinion,
-            "reasoning": decision["reasoning"][:120],
-            "analysis": decision["analysis"],
+            "reasoning": reasoning,
+            "analysis": analysis,
         }
 
         return {

@@ -21,6 +21,7 @@ import json as _json
 import re as _re
 
 from examples.llm_utils import (
+    is_retryable_llm_error,
     parse_llm_response_with_thinking,
 )  # noqa: F401 (keep for reference)
 from masim.knowledge import (
@@ -85,7 +86,20 @@ def _parse_echo_chamber_response(response_text: str) -> Dict[str, Any]:
     missing = [f for f in required_fields if f not in parsed or parsed[f] is None]
     if missing:
         raise ValueError(f"Fields missing or null in LLM response: {missing}")
+    action_type = str(parsed["action_type"]).lower()
+    if action_type not in {"polarize", "neutral", "depolarize"}:
+        raise ValueError(f"Invalid action_type: {parsed['action_type']!r}")
+    try:
+        intensity = float(parsed["intensity"])
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"Invalid intensity: {parsed['intensity']!r}") from exc
+    reasoning = str(parsed["reasoning"]).strip()
+    if not reasoning:
+        raise ValueError("Empty reasoning")
 
+    parsed["action_type"] = action_type
+    parsed["intensity"] = max(0.0, min(1.0, intensity))
+    parsed["reasoning"] = reasoning
     parsed["analysis"] = analysis
     return parsed
 
@@ -344,6 +358,7 @@ class RagLLMSocialAgent(GeneralPlayer):
             rag_context = result.formatted_text
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
         template = load_prompt("examples.EchoChamber.Rag.prompts:RAG_USER_TEMPLATE")
         return template.format(
             round=round_num,
@@ -377,6 +392,10 @@ class RagLLMSocialAgent(GeneralPlayer):
                 )
                 break
             except Exception as exc:
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if not parse_error and not retryable_api_error:
+                    raise
                 logger.warning(
                     "[%s] LLM attempt %d failed: %s", self.identity, attempt + 1, exc
                 )
@@ -389,6 +408,8 @@ class RagLLMSocialAgent(GeneralPlayer):
         action_type = decision["action_type"]
         intensity = float(decision["intensity"])
         intensity = self._apply_intensity_constraints(intensity)
+        reasoning = str(decision.pop("reasoning"))[:120]
+        analysis = str(decision.pop("analysis"))
         my_opinion = self.state.custom_state["my_opinion"]
         if action_type == "polarize":
             shift = 0.05 * (1 if my_opinion >= 0 else -1)
@@ -412,8 +433,9 @@ class RagLLMSocialAgent(GeneralPlayer):
             "agent_role": strategy_name,
             "agent_id": self.identity,
             "opinion": my_opinion,
-            "reasoning": str(decision["reasoning"])[:120],
-            "analysis": decision["analysis"],
+            "reasoning": reasoning,
+            "analysis": analysis,
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
         return {
             **action,

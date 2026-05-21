@@ -1,281 +1,210 @@
 # EchoChamber Simulation Bases
 
-## §1 Phenomenon
+## §1 Phenomenon Definition
 
-**Echo Chamber Polarization** (Sunstein, 2001): When like-minded individuals interact preferentially through homophily — the tendency to associate with similar others — their shared views become amplified and more extreme over time. This process, known as group polarization, produces a population divided into increasingly distant ideological clusters, even when individuals begin with moderate and overlapping positions.
+EchoChamber models social polarization rather than asset trading. Agents hold
+opinions in `[-1, 1]` and send `social_action` messages to an opinion
+environment. Like-minded reinforcement increases polarization; bridge building,
+critical evaluation, and center-pull reduce it. The scenario is intentionally a
+special schema and must not be converted into a `bid_price` trading order model.
 
-The mechanism operates through two reinforcing loops: (1) in-group amplification, where repeated exposure to like-minded peers pushes individual opinions toward extremes; and (2) out-group isolation, where cross-cutting information is discounted or filtered out, reducing the moderating influence of diverse viewpoints. Digital social networks and algorithmic curation have made these dynamics a major concern in contemporary political discourse, contributing to partisan polarization, radicalization, and the erosion of shared epistemic ground.
+## §2 Theoretical Foundation
 
-**Core stylized facts**:
-- Group discussion among like-minded individuals shifts median opinion toward a more extreme position (Moscovici & Zavalloni, 1969)
-- Selective exposure to in-group information amplifies pre-existing beliefs (Pariser, 2011 filter bubble)
-- Cross-cutting exposure — interactions with opposing viewpoints — is inversely correlated with polarization
-- Polarization is self-reinforcing: higher polarization reduces cross-cutting exposure, which in turn increases polarization
+### §2.1 Deliberative Enclaves And Echo Chambers
 
-## §2 Theory
+Sunstein-style enclave deliberation predicts that like-minded discussion can
+move participants toward more extreme versions of their initial views. The
+`Ideologue` role implements in-group amplification and out-group discounting.
 
-### Primary: Group Polarization (Moscovici & Zavalloni, 1969)
+### §2.2 Conformity And Social Proof
 
-After group discussion, the mean opinion of the group shifts toward a more extreme version of the initial mean — not merely toward the majority view. Two mechanisms: (1) persuasive arguments (exposure to new pro-attitudinal arguments shifts belief), and (2) social comparison (learning that others hold similar views motivates adopting a more extreme position to maintain status).
+Asch-style conformity and social-proof dynamics make agents align with perceived
+group opinion. The `Conformist` role moves toward the local group mean and
+polarizes once its own position becomes strong enough.
 
-Reference: Moscovici, S., & Zavalloni, M. (1969). The group as a polarizer of attitudes. *Journal of Personality and Social Psychology*, 12(2), 125–135. DOI: https://doi.org/10.1037/h0027568
+### §2.3 Persuasive Arguments And Critical Evaluation
 
-### Echo Chambers and Deliberative Enclaves (Sunstein, 2001)
+Critical agents resist group pressure and evaluate whether polarization itself
+is evidence of groupthink. The `CriticalThinker` role moves slowly toward the
+center and emits depolarizing actions when polarization is high.
 
-When deliberation occurs only among like-minded individuals (deliberative enclaves), the result is extreme views and fragmented discourse. Sunstein argues that exposure to diverse perspectives is a democratic prerequisite, and that selective exposure — facilitated by personalized media — represents a systemic threat to it.
+### §2.4 Cross-Cutting Exposure And Bridge Building
 
-Reference: Sunstein, C. R. (2001). *Republic.com*. Princeton University Press. ISBN: 9780691070254
+Deliberative-democracy and filter-bubble literature emphasize cross-cutting
+exposure as an antidote to social fragmentation. The `BridgeBuilder` role moves
+toward the center and depolarizes when cluster separation is high.
 
-### Filter Bubble (Pariser, 2011)
+### §2.5 Passive Participation
 
-Algorithmic curation of information feeds creates personalized information environments that reinforce existing beliefs and reduce exposure to challenging perspectives. The filter bubble is an automated echo chamber: users do not choose isolation, but are channeled into it by recommendation systems optimizing for engagement.
+Passive participants provide social mass without strong agency. The
+`PassiveFollower` role drifts toward mean opinion and only occasionally acts.
 
-Reference: Pariser, E. (2011). *The Filter Bubble: What the Internet Is Hiding from You*. Penguin Press. ISBN: 9781594203008
+## §3 Environment Mechanism
 
-### Persuasive Arguments Theory (Isenberg, 1986)
+The environment consumes actions with this schema:
 
-Group polarization is driven primarily by the persuasive arguments mechanism: discussion exposes members to novel arguments they had not considered, and since the pool of available arguments skews toward the pre-existing majority position, the group shifts further in that direction.
-
-Reference: Isenberg, D. J. (1986). Group polarization: A critical review and meta-analysis. *Journal of Personality and Social Psychology*, 50(6), 1141–1151. DOI: https://doi.org/10.1037/0022-3514.50.6.1141
-
-### Mass Communication and Passive Audiences (Lazarsfeld & Merton, 1954)
-
-Most of the population are passive recipients of communication, not active opinion leaders. Their slow drift toward the dominant opinion in their social environment provides the background mass that active agents (ideologues, bridge builders) leverage.
-
-Reference: Lazarsfeld, P. F., & Merton, R. K. (1954). Friendship as a social process. *Freedom and Control in Modern Society*, 18(1), 18–66.
-
-## §3 Market Design
-
-**Opinion Environment Model**:
+```json
+{
+  "action_type": "polarize|neutral|depolarize",
+  "intensity": 0.0,
+  "agent_role": "role name",
+  "agent_id": "agent id",
+  "opinion": 0.0,
+  "reasoning": "optional for API variants",
+  "analysis": "optional for API variants"
+}
 ```
-P(t+1) = P(t) + alpha * NetPolarization(t) + beta * CentripetalForce(t) + epsilon(t)
+
+It updates polarization through:
+
+```text
+polarization(t+1) = clamp(
+    polarization(t)
+    + polarization_impact * (sum(polarize intensity) - sum(depolarize intensity))
+    + centripetal_force * (0.3 - polarization(t))
+    + noise,
+    0, 1
+)
 ```
-Where:
-- P(t): Population polarization index ∈ [0, 1] (variance of opinion distribution)
-- alpha: Polarization impact coefficient (agent actions' effect on aggregate polarization)
-- beta: Centripetal force coefficient (weak pull toward moderate center, P_target ≈ 0.3)
-- NetPolarization(t) = Σ(polarize_intensity) − Σ(depolarize_intensity) across all agents
-- epsilon(t) ~ N(0, noise_std²): Stochastic perturbation in opinion dynamics
 
-**Individual Opinion Dynamics**: Each agent holds a personal opinion in [−1, 1]:
-- Negative values represent left-leaning positions
-- Positive values represent right-leaning positions
-- Zero represents a neutral center position
+The environment also records mean opinion, cluster separation, cross-cutting
+exposure, polarize counts, and depolarize counts.
 
-**Agent Actions**: Each round, agents submit one of three action types:
-- `polarize`: Opinion shifting toward extreme; contributes positive intensity to NetPolarization
-- `depolarize`: Opinion shifting toward center; contributes positive intensity to −NetPolarization
-- `neutral`: No net contribution to polarization dynamics
-
-**Environment Output** (broadcast to all agents each round):
-```
-{polarization, prev_polarization, polarization_change, mean_opinion,
- cluster_separation, cross_cutting_exposure, num_polarizers, num_depolarizers,
- net_polarization_intensity, round}
-```
-Where `cluster_separation` = right_cluster_mean − left_cluster_mean (distance between ideological poles).
-
-## §4 Investor Taxonomy
+## §4 Investor Archetypes
 
 ### §4.1 Ideologue
 
-**Role**: Primary polarization driver; holds strong views and amplifies in-group consensus.
-
-**Economic Archetype**: Committed partisan who rejects cross-cutting information and pushes opinions toward ideological extremes.
-
-**Theoretical Basis**: Sunstein (2001) echo chamber amplification; group polarization by in-group reinforcement and out-group rejection.
-
-**Decision Logic**:
-- When mean opinion is in-group (same sign as personal opinion): `opinion_update = in_group_weight * (mean_opinion * extremity_boost − my_opinion)` — amplify toward extreme
-- When mean opinion is out-group: `opinion_update = out_group_discount * (mean_opinion − my_opinion)` — heavily discount opposing signal
-- Polarize when `|my_opinion| > 0.3`: `intensity = |my_opinion| * spread_eagerness`
-
-**Key Parameters**:
-- `in_group_weight = 0.6` — responsiveness to in-group signal
-- `extremity_boost = 1.3` — multiplier pushing opinion beyond group mean toward extreme
-- `out_group_discount = 0.05` — near-zero weight given to opposing viewpoints
-- `spread_eagerness = 0.9` — high willingness to publicly polarize
-
-**Market Impact**: Strongly destabilizing — primary driver of sustained polarization increase.
-
-**Performance**: Produces largest individual opinion extremity over time; tends toward ±1 (maximum polarization).
-
----
+**Summary**: Strong opinion holder that amplifies in-group consensus.
+**Theoretical and Empirical Basis**: Echo-chamber and group-polarization
+theory.
+**Design Purpose**: Drive polarization when the environment leans toward the
+agent's side.
+**Behavioral Framework**: Treats same-sign mean opinion as validation and
+opposing mean opinion as discounted out-group information.
+**Decision Process**: If `my_opinion * mean_opinion > 0`, update toward
+`mean_opinion * extremity_boost` using `in_group_weight`; otherwise discount the
+opposing signal using `out_group_discount`. If `abs(my_opinion) > 0.3`, emit
+`polarize` with intensity `abs(my_opinion) * spread_eagerness`.
+**Worked Numerical Example**: Opinion `0.5` and mean `0.4` produce in-group
+validation and a polarizing action around `0.5 * 0.9 = 0.45`.
+**Academic References**: Echo chambers, enclave deliberation, and group
+polarization literature.
 
 ### §4.2 Conformist
 
-**Role**: Reinforces existing polarization by adopting the prevailing group opinion.
-
-**Economic Archetype**: Social follower with weakly held independent views; gravitates toward whichever cluster they are near.
-
-**Theoretical Basis**: Asch (1951) conformity; Sunstein (2001) group polarization; conformists amplify existing group tendencies without strong independent ideology.
-
-**Decision Logic**:
-- Determine local group direction from mean opinion relative to personal opinion
-- `opinion_update = conformity * (local_group_mean − my_opinion)` — move toward local cluster
-- Polarize when `|my_opinion| > group_proximity_threshold`: `intensity = |my_opinion| * conformity_eagerness`
-
-**Key Parameters**:
-- `conformity = 0.7` — high responsiveness to social pressure
-- `conformity_eagerness = 0.6` — moderate public polarization intensity
-- `group_proximity_threshold = 0.3` — threshold for active polarization action
-
-**Market Impact**: Destabilizing — amplifies whichever cluster dominates the social environment.
-
-**Performance**: Opinion tracks majority cluster; reinforces polarization without independent ideology.
-
----
+**Summary**: Group-oriented follower that adopts perceived local opinion.
+**Theoretical and Empirical Basis**: Conformity, social proof, and informational
+cascades.
+**Design Purpose**: Reinforce group tendencies without independent conviction.
+**Behavioral Framework**: Moves toward a local group mean derived from the
+population mean and the sign of current opinion.
+**Decision Process**: Update opinion using `conformity * (local_group_mean -
+my_opinion)`. If `abs(my_opinion) > group_proximity_threshold`, emit `polarize`
+with intensity `abs(my_opinion) * conformity_eagerness`.
+**Worked Numerical Example**: Opinion `0.2`, local mean `0.6`, and conformity
+`0.7` move opinion by `0.28` toward the group.
+**Academic References**: Conformity experiments and social-proof models.
 
 ### §4.3 CriticalThinker
 
-**Role**: Stabilizing intellectual anchor; evaluates evidence independently, resists group pressure.
-
-**Economic Archetype**: Deliberate reasoner who applies persuasive-arguments logic rather than social comparison.
-
-**Theoretical Basis**: Isenberg (1986) persuasive arguments vs social comparison; critical thinkers resist the social comparison mechanism of polarization and evaluate arguments on merit.
-
-**Decision Logic**:
-- Evidence signal = `−my_opinion * evidence_sensitivity * polarization` — motivation to depolarize increases with polarization level
-- `opinion_update = critical_weight * (evidence_signal − my_opinion * 0.1) * 0.3` — slow, evidence-driven movement
-- Depolarize when `polarization > 0.3`: `intensity = |my_opinion| * critical_eagerness`
-
-**Key Parameters**:
-- `critical_weight = 0.5` — moderate responsiveness to evidence
-- `critical_eagerness = 0.7` — active depolarization effort
-- `evidence_sensitivity = 0.6` — sensitivity to population polarization level
-
-**Market Impact**: Stabilizing — reduces polarization by pulling opinions toward moderate center.
-
-**Performance**: Maintains moderate opinion position; most effective when population polarization is high.
-
----
+**Summary**: Evidence-oriented agent that resists group pressure.
+**Theoretical and Empirical Basis**: Persuasive-arguments theory and
+independent evidence evaluation.
+**Design Purpose**: Provide stabilizing pressure when polarization becomes high.
+**Behavioral Framework**: Treats high polarization as evidence that views should
+move toward the center.
+**Decision Process**: Compute `evidence_signal = -my_opinion *
+evidence_sensitivity * polarization`, update slowly using `critical_weight`, and
+emit `depolarize` when `polarization > 0.3`.
+**Worked Numerical Example**: Opinion `0.6`, polarization `0.7`, and
+evidence_sensitivity `0.6` create a negative signal that pulls the agent toward
+the center.
+**Academic References**: Group-polarization and persuasive-arguments research.
 
 ### §4.4 BridgeBuilder
 
-**Role**: Strongly stabilizing; actively engages across ideological groups, demonstrating common ground.
-
-**Economic Archetype**: Deliberate cross-group communicator committed to reducing polarization through direct engagement.
-
-**Theoretical Basis**: Sunstein (2001) deliberative democracy; Pariser (2011) serendipity by design; bridge builders counter echo chambers by deliberately seeking out opposing viewpoints.
-
-**Decision Logic**:
-- Pull toward center: `opinion_update = bridge_weight * (0 − my_opinion) * centering_tendency`
-- Strongly depolarize when `cluster_separation > 0.5`: `intensity = bridge_strength * cluster_separation`
-- Moderately depolarize when `cluster_separation > 0.2`: `intensity = bridge_strength * cluster_separation * 0.5`
-
-**Key Parameters**:
-- `bridge_weight = 0.4` — centering force on own opinion
-- `bridge_strength = 0.8` — strong public depolarization contribution
-- `centering_tendency = 0.5` — multiplier on opinion centering pull
-
-**Market Impact**: Strongly stabilizing — primary depolarization mechanism; most effective when cluster separation is large.
-
-**Performance**: Consistently maintains near-neutral opinion; reduces cluster separation over time.
-
----
+**Summary**: Cross-group engager that reduces separation between opinion
+clusters.
+**Theoretical and Empirical Basis**: Cross-cutting exposure and deliberative
+democracy.
+**Design Purpose**: Counteract silo formation and provide strong depolarizing
+pressure when clusters are far apart.
+**Behavioral Framework**: Pulls its own opinion toward zero and emits
+depolarizing actions when cluster separation is elevated.
+**Decision Process**: Update opinion by `bridge_weight * (0 - my_opinion) *
+centering_tendency`; if `cluster_separation > 0.5`, emit `depolarize` with
+intensity `bridge_strength * min(cluster_separation, 1.0)`, with a weaker rule
+for separation above `0.2`.
+**Worked Numerical Example**: Cluster separation `0.8` and bridge strength `0.8`
+produce a depolarizing intensity of `0.64`.
+**Academic References**: Filter-bubble, deliberative-democracy, and
+cross-cutting exposure literature.
 
 ### §4.5 PassiveFollower
 
-**Role**: Neutral background mass; low engagement with occasional group alignment.
+**Summary**: Low-engagement participant that occasionally aligns with the
+population.
+**Theoretical and Empirical Basis**: Mass communication and passive audience
+models.
+**Design Purpose**: Provide background population inertia and stochastic
+engagement.
+**Behavioral Framework**: Drifts toward mean opinion and usually stays neutral.
+**Decision Process**: Move by `drift_rate * (mean_opinion - my_opinion)`. With
+probability `engagement_probability`, emit weak neutral or polarizing behavior
+depending on opinion strength; otherwise emit `neutral`.
+**Worked Numerical Example**: Opinion `0.1`, mean `0.4`, and drift rate `0.1`
+move opinion by `0.03`.
+**Academic References**: Mass communication and low-engagement audience
+literature.
 
-**Economic Archetype**: Majority passive audience member who drifts slowly toward the dominant population view.
+## §5 Agent Diversity Verification
 
-**Theoretical Basis**: Lazarsfeld & Merton (1954) mass communication; passive followers represent the large majority who are swayed by active agents on either side.
-
-**Decision Logic**:
-- Small drift: `drift = drift_rate * (mean_opinion − my_opinion)` — slow pull toward population mean
-- Random engagement with probability `engagement_probability`:
-  - If `|my_opinion| > 0.3`: polarize with `intensity = |my_opinion| * alignment_strength`
-  - Else: neutral with small random intensity
-
-**Key Parameters**:
-- `engagement_probability = 0.3` — low probability of active participation each round
-- `drift_rate = 0.1` — slow opinion drift toward mean
-- `alignment_strength = 0.4` — moderate intensity when engaged
-
-**Market Impact**: Neutral — provides background mass; can amplify either side depending on which cluster dominates.
-
-**Performance**: Opinion drifts slowly; never reaches extreme positions independently.
-
----
-
-## §5 Agent Diversity
-
-The combination of five agent types replicates the essential dynamics of echo chamber polarization:
-
-| Agent           | Role          | Effect on Polarization | Mechanism                                      |
-|-----------------|---------------|------------------------|------------------------------------------------|
-| Ideologue       | Destabilizing | Strongly increases     | In-group amplification, out-group rejection    |
-| Conformist      | Destabilizing | Increases              | Social conformity toward dominant cluster      |
-| CriticalThinker | Stabilizing   | Decreases              | Evidence-based depolarization                  |
-| BridgeBuilder   | Stabilizing   | Strongly decreases     | Cross-group engagement, centering              |
-| PassiveFollower | Neutral       | Slight increase        | Slow drift toward majority, low-intensity mass |
-
-The long-run polarization level is determined by the balance between destabilizing agents (Ideologue, Conformist) and stabilizing agents (CriticalThinker, BridgeBuilder), mediated by the centripetal force parameter. Higher proportions of Ideologues produce sustained high polarization; higher proportions of BridgeBuilders can reverse polarization trajectories.
+The model includes two polarizing roles (`Ideologue`, `Conformist`), two
+depolarizing roles (`CriticalThinker`, `BridgeBuilder`), and one low-engagement
+background role (`PassiveFollower`). This diversity lets analysis separate
+polarization generation from resistance and passive drift.
 
 ## §6 Parameter Table
 
-| Parameter                   | Default | Agent / Scope      | Source / Justification                         |
-|-----------------------------|---------|--------------------|------------------------------------------------|
-| `initial_polarization`      | 0.3     | OpinionEnvironment | Moderate starting condition before interaction |
-| `polarization_impact`       | 0.05    | OpinionEnvironment | Scaling factor for agent action effect         |
-| `centripetal_force`         | 0.02    | OpinionEnvironment | Weak moderate-center pull (Sunstein, 2001)     |
-| `noise_std`                 | 0.01    | OpinionEnvironment | Small stochastic perturbation                  |
-| `initial_opinion`           | varies  | All agents         | Distributed across [-1, 1] per agent config    |
-| `in_group_weight`           | 0.6     | Ideologue          | Responsiveness to in-group signal              |
-| `extremity_boost`           | 1.3     | Ideologue          | Amplification multiplier toward extreme        |
-| `out_group_discount`        | 0.05    | Ideologue          | Near-zero out-group signal weight              |
-| `spread_eagerness`          | 0.9     | Ideologue          | Public polarization intensity scaling          |
-| `conformity`                | 0.7     | Conformist         | Asch (1951) conformity magnitude               |
-| `conformity_eagerness`      | 0.6     | Conformist         | Public polarization effort                     |
-| `group_proximity_threshold` | 0.3     | Conformist         | Opinion threshold for active action            |
-| `critical_weight`           | 0.5     | CriticalThinker    | Evidence responsiveness (Isenberg, 1986)       |
-| `critical_eagerness`        | 0.7     | CriticalThinker    | Depolarization effort                          |
-| `evidence_sensitivity`      | 0.6     | CriticalThinker    | Sensitivity to population polarization level   |
-| `bridge_weight`             | 0.4     | BridgeBuilder      | Centering force on own opinion                 |
-| `bridge_strength`           | 0.8     | BridgeBuilder      | Public depolarization contribution             |
-| `centering_tendency`        | 0.5     | BridgeBuilder      | Multiplier on opinion centering pull           |
-| `engagement_probability`    | 0.3     | PassiveFollower    | Lazarsfeld (1954) low baseline engagement      |
-| `drift_rate`                | 0.1     | PassiveFollower    | Slow drift toward population mean              |
-| `alignment_strength`        | 0.4     | PassiveFollower    | Intensity when occasionally engaged            |
-| `custom_state_hot_limit`    | 50      | All agents         | HistoryBuffer in-memory entry limit            |
-| `record_path`               | varies  | All agents         | Output directory for history persistence       |
+| Config Path | Parameter | Runtime Meaning | Scenario Role |
+|---|---|---|---|
+| `environment.extras.initial_polarization` | `0.15` | Starting polarization | Moderate initial state |
+| `environment.extras.polarization_impact` | `0.12` | Action intensity impact | Converts actions into polarization movement |
+| `environment.extras.centripetal_force` | `0.01` | Center pull | Weak stabilizer |
+| `ideologue.extras.in_group_weight` | `0.6` | In-group updating | Echo-chamber amplification |
+| `ideologue.extras.spread_eagerness` | `0.9` | Polarizing intensity | Strong polarizer |
+| `conformist.extras.conformity` | `0.7` | Group alignment | Social proof |
+| `critical_thinker.extras.critical_eagerness` | `0.7` | Depolarizing intensity | Evidence resistance |
+| `bridge_builder.extras.bridge_strength` | `0.8` | Cross-group repair | Strong depolarizer |
+| `passive_follower.extras.engagement_probability` | `0.3` | Occasional engagement | Background participation |
 
-## §7 Round Structure
+## §7 Communication And Round Structure
 
-1. **OpinionEnvironment.perceive()**: Collects all agent social actions from previous round (`action_type`, `intensity`, `opinion`, `agent_role`) via `observation.inbounds`.
-2. **OpinionEnvironment.decide()**: Aggregates polarizing and depolarizing actions; computes NetPolarization; updates polarization index, mean opinion, cluster separation, and cross-cutting exposure; appends to HistoryBuffers.
-3. **OpinionEnvironment.act()**: Broadcasts `env_data` dict to all agents as `environment_update` message.
-4. **Agent.perceive()**: Receives `env_data`; updates `env_data` in custom_state; appends current opinion to `opinion_history`.
-5. **Agent.decide()**: Computes opinion update using agent-specific formula; determines action type and intensity; returns action dict with `outbound_messages`.
-6. **Agent.act()**: Returns `Action(action_type="social_action", payload=decision_payload, source_id=self.identity)`.
+The environment broadcasts polarization, mean opinion, cluster separation, and
+cross-cutting exposure. Social agents update their personal opinion and emit a
+`social_action`. The environment aggregates those actions and records the next
+state. API variants preserve the same schema but use LLM reasoning to decide
+`action_type` and `intensity`.
 
-## §8 Historical Cases
+## §8 Historical Case Studies
 
-### US Partisan Polarization (1994–Present)
+### §8.1 Political Enclave Deliberation
 
-Pew Research Center tracking shows American partisan polarization has increased dramatically since 1994. The share of Americans with consistently liberal or conservative views doubled from 10% to 21% between 1994 and 2017. Median partisan opinion gaps on core policy dimensions widened from ~15 points to ~36 points. Social media adoption (2004–2012) correlates with acceleration of the trend.
+Like-minded political discussion can create more extreme group positions by
+validating shared assumptions and excluding dissenting evidence.
 
-Reference: Pew Research Center (2017). *The Partisan Divide on Political Values Grows Even Wider*. pewresearch.org
+### §8.2 Algorithmic Filter Bubbles
 
-### Brexit Referendum (2016)
+Personalized feeds can reduce cross-cutting exposure and make the information
+environment more homogeneous, increasing cluster separation.
 
-The UK's EU referendum produced sharp opinion bifurcation along age, geography, and educational lines. Social media analysis found that Leave and Remain networks were highly segregated, with minimal cross-cutting exposure between clusters. Post-referendum polarization persisted and widened: YouGov tracking showed the Brexit identity became more predictive of social behavior than traditional class or party identity by 2019.
+### §8.3 Online Community Radicalization
 
-Reference: Hobolt, S. B. (2016). The Brexit vote: a divided nation, a divided continent. *Journal of European Public Policy*, 23(9), 1259–1277. DOI: https://doi.org/10.1080/13501763.2016.1225785
+Highly engaged communities can reward strong in-group signals, discount
+out-group claims, and make moderate members drift toward group extremes.
 
-### German Weimar Republic (1919–1933)
+## §9 Variant Comparison Preview
 
-The collapse of the Weimar Republic into extreme polarization between communist and fascist movements is a historical case of runaway echo chamber dynamics. Without institutional cross-cutting exposure mechanisms, the political center collapsed, and citizens sorted into mutually exclusive ideological camps that rejected each other's legitimacy.
-
-Reference: Evans, R. J. (2003). *The Coming of the Third Reich*. Penguin Press. ISBN: 9780143034698
-
-## §9 Variant Comparison
-
-| Aspect                | Rule                                      | LLM                                                  | RuleLLM                                          | Rag                                              |
-|-----------------------|-------------------------------------------|------------------------------------------------------|--------------------------------------------------|--------------------------------------------------|
-| Opinion update        | Exact formula from §4 parameters          | LLM reasons about social pressure and group dynamics | Embedded §4 formula + LLM contextual reasoning   | RAG academic context + LLM reasoning             |
-| Polarization dynamics | Deterministic given parameters            | Stochastic; may overweight emotional framing         | Closer to Rule with occasional LLM deviation     | Moderated by retrieved academic literature       |
-| Out-group response    | Hard-coded discount factor                | Emergent from persona; may be more nuanced           | Rule discount stated explicitly in system prompt | RAG may retrieve counter-polarization literature |
-| Cluster separation    | Computed from opinion distribution        | Influenced by LLM persona strength                   | Rule-consistent with minor LLM adjustments       | Literature-informed moderation possible          |
-| Research value        | Mechanism validation and parameter sweeps | Realistic agent heterogeneity and emergent behavior  | Rule compliance with interpretability            | Literature-grounded opinion dynamics             |
+Rule implements the opinion dynamics directly. LLM uses persona-only reasoning
+under the same special schema. RuleLLM gives the model explicit formulas. Rag
+adds retrieved social-science context and records retrieval coverage.
