@@ -25,6 +25,7 @@ Current Market State (Round {round_num}):
 
 Use the retrieved knowledge as contextual evidence, but still follow your persona and decision rules.
 Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f}, "quantity": non-negative integer, "reasoning": "brief rationale"}}</decision>.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
 """
 
 __all__ = [

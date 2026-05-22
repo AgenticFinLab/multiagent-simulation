@@ -24,7 +24,9 @@ Current Market State (Round {round_num}):
 - Portfolio Value: ${portfolio_value:.2f}
 
 Apply your persona, decision rules, and retrieved knowledge to choose one trading action.
-Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f}, "quantity": non-negative integer, "reasoning": "brief rationale"}}</decision>."""
+Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f}, "quantity": non-negative integer, "reasoning": "brief rationale"}}</decision>.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
+"""
 
 __all__ = [
     "RAG_STABLECOINHOLDER_PROMPT",

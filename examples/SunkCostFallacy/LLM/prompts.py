@@ -116,4 +116,5 @@ LLM_USER_TEMPLATE = """Current Market State (Round {round}):
 
 Apply your persona and decision rules to decide your action.
 Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": <number>, "quantity": <number>, "reasoning": "brief rationale"}}</decision>.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
 """

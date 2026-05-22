@@ -187,4 +187,5 @@ Apply your DECISION RULES above to this data and output your trade decision.
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <NUMBER>, "quantity": <NUMBER, +buy/-sell>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
 """

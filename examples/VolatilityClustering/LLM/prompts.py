@@ -195,6 +195,7 @@ The decision must be valid JSON:
     "reasoning": "<brief explanation>"
 }}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
 """
 
 # -----------------------------------------------------------------------------

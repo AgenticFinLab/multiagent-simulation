@@ -72,4 +72,6 @@ RULELLM_USER_TEMPLATE = """Current Market State (Round {round}):
 
 Apply your trading rules to decide your action.
 Your quantity must be an integer from 0 to {max_order_size}, and must also be affordable with your cash or covered by your current position.
-Respond with exactly one <analysis>...</analysis> block and exactly one <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f}, "quantity": integer, "reasoning": "brief rationale"}}</decision> block. Do not omit the <decision> block; if uncertain, choose {{"action": "hold", "bid_price": {price:.2f}, "quantity": 0, "reasoning": "uncertain"}}."""
+Respond with exactly one <analysis>...</analysis> block and exactly one <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f}, "quantity": integer, "reasoning": "brief rationale"}}</decision> block. Do not omit the <decision> block; if uncertain, choose {{"action": "hold", "bid_price": {price:.2f}, "quantity": 0, "reasoning": "uncertain"}}.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
+"""

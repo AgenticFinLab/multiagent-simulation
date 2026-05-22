@@ -82,4 +82,6 @@ LLM_USER_TEMPLATE = """Current Market State (Round {round}):
 Based on your strategy and current market conditions, decide your trading action.
 Respond with <analysis>...</analysis> and <decision>{{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}</decision>.
 
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string).
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
+"""

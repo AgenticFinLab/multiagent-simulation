@@ -196,6 +196,7 @@ Then provide your decision in <decision>...</decision>.
 The decision must be valid JSON:
 {{"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
 """
 
 __all__ = [

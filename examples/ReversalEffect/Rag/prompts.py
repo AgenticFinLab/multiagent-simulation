@@ -192,4 +192,5 @@ First output your reasoning inside <analysis>...</analysis> tags, then output yo
 The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <NUMBER>, "quantity": <NUMBER, +buy/-sell>, "reasoning": "<brief>", "provides_liquidity": true|false}}
 Set provides_liquidity to true only when the order is intended to add passive market liquidity; otherwise set it to false.
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
 """
