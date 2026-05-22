@@ -86,6 +86,12 @@ def _load_metric_values(metric_path: str) -> List[float]:
                 content = json.load(f)
                 if isinstance(content, list):
                     values.extend(content)
+                elif isinstance(content, dict):
+                    for block_values in content.values():
+                        if isinstance(block_values, list):
+                            values.extend(block_values)
+                        elif isinstance(block_values, (int, float)):
+                            values.append(float(block_values))
                 elif isinstance(content, (int, float)):
                     values.append(float(content))
             except (json.JSONDecodeError, ValueError):
@@ -359,13 +365,13 @@ def main():
 
     metrics = calculate_metrics(data, truth_value=truth_value)
 
-    analysis_dir = os.path.join(config["setting"]["record_path"], "analysis")
+    analysis_dir = os.path.join(os.path.dirname(config["setting"]["record_path"]), "analysis")
     os.makedirs(analysis_dir, exist_ok=True)
 
     create_visualizations(data, analysis_dir, truth_value=truth_value)
 
     score = 1.0 if metrics["total_rounds"] > 0 else 0.0
-    metrics["validation"] = {
+    validation = {
         "score": score,
         "is_valid": bool(score >= 0.5),
         "criteria": {
@@ -381,9 +387,16 @@ def main():
             f"{'VALID' if score >= 0.5 else 'INVALID'} ==="
         ),
     }
+    metrics["validation"] = validation
+    summary = {
+        "scenario": "RumorSpread",
+        "total_rounds": metrics["total_rounds"],
+        "metrics": metrics,
+        "validation": validation,
+    }
     summary_path = os.path.join(analysis_dir, "summary.json")
     with open(summary_path, "w", encoding="utf-8") as f:
-        json.dump(metrics, f, indent=2)
+        json.dump(summary, f, indent=2)
 
     print("\n" + "=" * 50)
     print("RUMOR SPREAD ANALYSIS")

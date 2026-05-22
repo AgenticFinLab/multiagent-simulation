@@ -60,6 +60,24 @@ def _batch_to_rounds(values: list[Any]) -> Dict[int, float]:
     return {index + 1: float(value) for index, value in enumerate(values)}
 
 
+def _market_data_from_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Return market data from a turn payload, supporting nested and flat shapes."""
+    market_data = payload.get("market_data")
+    if isinstance(market_data, dict):
+        return market_data
+    return payload
+
+
+def _market_players(results: Any) -> Dict[str, Any]:
+    """Return coordinator-like market players across historical role labels."""
+    players: Dict[str, Any] = {}
+    players.update(results.players_by_role("coordinator"))
+    players.update(results.players_by_role("market"))
+    if hasattr(results, "players") and "market" in results.players:
+        players.setdefault("market", results.players["market"])
+    return players
+
+
 def _load_data(results: Any) -> Dict[str, Any]:
     """Extract market and investor data from `SimulationResults`."""
     market_prices: Dict[int, float] = {}
@@ -68,13 +86,24 @@ def _load_data(results: Any) -> Dict[str, Any]:
     investor_quantities: Dict[str, Dict[int, float]] = {}
     investor_bids: Dict[str, Dict[int, float]] = {}
 
-    for player in results.players_by_role("coordinator").values():
+    for player in _market_players(results).values():
         if "price" in player.batch_store_names:
             market_prices.update(_batch_to_rounds(player.batch("price").all()))
         if "fundamental" in player.batch_store_names:
             fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
         if "volume" in player.batch_store_names:
             volumes.update(_batch_to_rounds(player.batch("volume").all()))
+        for round_num, payload in player.turns.payloads().items():
+            market_data = _market_data_from_payload(payload)
+            if round_num not in market_prices and "price" in market_data:
+                market_prices[round_num] = float(market_data["price"])
+            if round_num not in fundamentals:
+                if "fundamental" in market_data:
+                    fundamentals[round_num] = float(market_data["fundamental"])
+                elif "fundamental_value" in market_data:
+                    fundamentals[round_num] = float(market_data["fundamental_value"])
+            if round_num not in volumes and "volume" in market_data:
+                volumes[round_num] = float(market_data["volume"])
 
     for pid, player in results.players_by_role("player").items():
         quantities = player.turns.field("quantity")
@@ -96,6 +125,38 @@ def _load_data(results: Any) -> Dict[str, Any]:
 def _series(data: Dict[int, float]) -> list[float]:
     """Return values sorted by round."""
     return [float(data[round_num]) for round_num in sorted(data)]
+
+
+def _coordinator_extras(config: Dict[str, Any]) -> Dict[str, Any]:
+    """Return coordinator extras from a resolved simulation config."""
+    for key, player in config.get("players", {}).items():
+        player_config = player.get("config", {})
+        extras = player_config.get("extras", {})
+        if player_config.get("role") == "coordinator":
+            return extras
+        if key == "market" and "fundamental_value" in extras:
+            return extras
+    return {}
+
+
+def _ensure_fundamentals_from_config(
+    data: Dict[str, Any],
+    config: Dict[str, Any],
+) -> None:
+    """Populate missing fundamentals from coordinator config when possible."""
+    if data["fundamentals"] or not data["market_prices"]:
+        return
+
+    extras = _coordinator_extras(config)
+    if "fundamental_value" not in extras:
+        return
+
+    base_value = float(extras["fundamental_value"])
+    growth = float(extras.get("fundamental_growth", 0.0))
+    data["fundamentals"] = {
+        round_num: base_value * ((1.0 + growth) ** round_num)
+        for round_num in sorted(data["market_prices"])
+    }
 
 
 def calculate_standard_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -376,6 +437,7 @@ def analyze_standard_scenario(
     output_dir: str,
 ) -> Dict[str, Any]:
     """Run standard metrics, validation, plots, and JSON output."""
+    _ensure_fundamentals_from_config(data, config)
     metrics = calculate_standard_metrics(data)
     total_rounds = metrics["price_metrics"]["total_rounds"]
     validation = validate_standard_metrics(scenario, metrics, total_rounds)

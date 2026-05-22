@@ -90,7 +90,7 @@ def main() -> Dict[str, Any]:
     data = load_simulation_data(config)
     metrics = calculate_metrics(data)
 
-    analysis_dir = os.path.join(config["setting"]["record_path"], "analysis")
+    analysis_dir = os.path.join(os.path.dirname(config["setting"]["record_path"]), "analysis")
     os.makedirs(analysis_dir, exist_ok=True)
     if data["polarization"]:
         create_visualizations(data, analysis_dir)
@@ -98,13 +98,34 @@ def main() -> Dict[str, Any]:
     results = load_results(config)
     rag_stats = analyze_rag_knowledge_effect(_load_rag_payloads(results))
     metrics["rag_knowledge_effect"] = rag_stats
+    validation = {
+        "score": 1.0 if metrics.get("total_rounds", 0) > 0 else 0.0,
+        "is_valid": bool(metrics.get("total_rounds", 0) > 0),
+        "criteria": {
+            "Echo Chamber State Recorded": {
+                "value": metrics.get("total_rounds", 0),
+                "target": "positive number of recorded opinion rounds; 200 expected for full experiments",
+                "score": 1.0 if metrics.get("total_rounds", 0) > 0 else 0.0,
+                "passed": bool(metrics.get("total_rounds", 0) > 0),
+            }
+        },
+        "interpretation": "=== ECHO CHAMBER RAG SIMULATION VALIDATION ===",
+    }
+    metrics["validation"] = validation
+    summary = {
+        "scenario": "EchoChamber",
+        "variant": "Rag",
+        "total_rounds": metrics.get("total_rounds", 0),
+        "metrics": metrics,
+        "validation": validation,
+    }
 
     with open(os.path.join(analysis_dir, "rag_stats.json"), "w", encoding="utf-8") as f:
         json.dump(rag_stats, f, indent=2)
     with open(os.path.join(analysis_dir, "summary.json"), "w", encoding="utf-8") as f:
-        json.dump(metrics, f, indent=2)
+        json.dump(summary, f, indent=2)
 
-    return metrics
+    return summary
 
 
 __all__ = ["analyze_rag_knowledge_effect", "main"]

@@ -11,6 +11,7 @@ from examples.RepresentativenessBias.Rule.analysis import (
     compute_pattern_volume,
     create_visualizations,
     load_simulation_data,
+    main as _rule_main,
 )
 
 __all__ = [
@@ -25,3 +26,15 @@ __all__ = [
     "calculate_metrics",
     "create_visualizations",
 ]
+
+
+def main():
+    """Run RepresentativenessBias LLM analysis with the shared Rule pipeline."""
+    return _rule_main()
+
+
+__all__.append("main")
+
+
+if __name__ == "__main__":
+    main()

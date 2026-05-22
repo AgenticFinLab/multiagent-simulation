@@ -26,6 +26,18 @@ STANDARD_OUTPUT_FILES = (
 )
 
 
+def _player_extras(config: Dict[str, Any], key: str | None = None, **required: Any) -> Dict[str, Any]:
+    """Return player extras by config key and/or required extra fields."""
+    players = config.get("players", {})
+    if key and key in players:
+        return players[key].get("config", {}).get("extras", {})
+    for player in players.values():
+        extras = player.get("config", {}).get("extras", {})
+        if all(name in extras and (value is None or extras[name] == value) for name, value in required.items()):
+            return extras
+    return {}
+
+
 def price_deviation(price_history: List[float], fundamental: float) -> List[float]:
     """Return per-round signed deviation from fundamental value."""
     if fundamental <= 0:
@@ -110,11 +122,15 @@ def _strategy_summary(trades: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Dict
 def calculate_metrics(data: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
     """Calculate EndowmentEffect metrics from loaded run artifacts."""
     prices = data["prices"]
-    coordinator = config["players"]["coordinator"]
-    market_extras = coordinator["extras"]
+    market_extras = _player_extras(config, "market", fundamental_value=None)
+    if not market_extras:
+        raise ValueError("No EndowmentEffect market extras found in config")
     fundamental = float(market_extras["fundamental_value"])
+    endowed_extras = _player_extras(config, "endowedholder", endowment_premium=None)
+    if not endowed_extras:
+        raise ValueError("No EndowmentEffect endowed-holder extras found in config")
     endowment_premium = float(
-        config["players"]["player_1"]["extras"]["endowment_premium"]
+        endowed_extras["endowment_premium"]
     )
     deviations = price_deviation(prices, fundamental)
     volumes = [
@@ -164,10 +180,15 @@ def create_visualizations(data: Dict[str, Any], metrics: Dict[str, Any], output_
     plt.close(fig)
 
     labels = [res["strategy"] for res in metrics["strategy_summary"].values()]
-    volumes = [res["total_volume"] for res in metrics["strategy_summary"].values()]
+    volumes = [float(res["total_volume"]) for res in metrics["strategy_summary"].values()]
+    plot_volumes = [max(volume, 1e-12) for volume in volumes]
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.bar(labels, volumes)
-    ax.set_ylabel("Total Volume")
+    ax.bar(labels, plot_volumes)
+    if max(plot_volumes) > 1e9:
+        ax.set_yscale("log")
+        ax.set_ylabel("Total Volume (log scale)")
+    else:
+        ax.set_ylabel("Total Volume")
     ax.set_title("EndowmentEffect Trading Volume by Strategy")
     ax.tick_params(axis="x", rotation=30)
     save_figure(fig, os.path.join(output_dir, "strategy_volume.png"))

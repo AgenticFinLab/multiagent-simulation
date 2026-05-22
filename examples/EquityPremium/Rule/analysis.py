@@ -470,6 +470,22 @@ def main():
         json.dump(summary, f, indent=2)
     print(f"    Saved to {summary_path}")
 
+    fig, ax = plt.subplots(figsize=(8, 4))
+    validation = summary["validation"]
+    score = validation["score"] if isinstance(validation, dict) else 0
+    ax.axis("off")
+    ax.text(0.05, 0.75, "EquityPremium Summary", fontsize=16, fontweight="bold")
+    ax.text(0.05, 0.50, f"Rounds: {summary['total_rounds']}", fontsize=12)
+    ax.text(
+        0.05,
+        0.35,
+        f"Equity premium: {summary['equity_premium']['equity_premium_pct']:.2f}%",
+        fontsize=12,
+    )
+    ax.text(0.05, 0.20, f"Validation score: {score:.1%}", fontsize=12)
+    save_figure(fig, os.path.join(output_dir, "03_summary.png"))
+    plt.close(fig)
+
     # Print key findings
     print("\n" + "=" * 70)
     print("KEY FINDINGS")

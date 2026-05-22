@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
+from examples.standard_rule_analysis import _market_data_from_payload, _market_players
 
 # ---------------------------------------------------------------------------
 # Data loading
@@ -45,11 +46,20 @@ def _load_data(results) -> Dict[str, Any]:
     market_prices: Dict[int, float] = {}
     fundamentals: Dict[int, float] = {}
 
-    for player in results.players_by_role("coordinator").values():
+    for player in _market_players(results).values():
         if "price" in player.batch_store_names:
             market_prices.update(_batch_to_rounds(player.batch("price").all()))
         if "fundamental" in player.batch_store_names:
             fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
+        for round_num, payload in player.turns.payloads().items():
+            market_data = _market_data_from_payload(payload)
+            if round_num not in market_prices and "price" in market_data:
+                market_prices[round_num] = float(market_data["price"])
+            if round_num not in fundamentals:
+                if "fundamental" in market_data:
+                    fundamentals[round_num] = float(market_data["fundamental"])
+                elif "fundamental_value" in market_data:
+                    fundamentals[round_num] = float(market_data["fundamental_value"])
 
     investor_quantities: Dict[str, Dict[int, float]] = {}
     investor_bids: Dict[str, Dict[int, float]] = {}

@@ -16,6 +16,7 @@ import os
 from masim.utils import load_config
 
 from examples.DispositionEffect.Rule.analysis import (
+    _write_standard_named_outputs,
     calculate_metrics,
     create_visualizations,
     load_simulation_data,
@@ -63,6 +64,7 @@ def main():
 
     print("\n[3] Generating figures (7 plots)...")
     create_visualizations(data, metrics, output_dir)
+    _write_standard_named_outputs(output_dir)
     print(f"    All figures saved to: {output_dir}/")
 
     print("\n[4] Generating summary...")
