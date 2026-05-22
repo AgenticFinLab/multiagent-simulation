@@ -26,7 +26,8 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your peg-stability assessment</analysis>
-<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>"""
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0."""
 
 LLM_ARBITRAGEUR_PROMPT = """You are a crypto arbitrageur monitoring linked-token mispricing.
 
@@ -51,7 +52,8 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your arbitrage assessment</analysis>
-<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>"""
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0."""
 
 LLM_DEFILENDER_PROMPT = """You are a DeFi lending protocol reacting to collateral stress.
 
@@ -74,7 +76,8 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your collateral-health assessment</analysis>
-<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>"""
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0."""
 
 LLM_ANCHORDEPOSITOR_PROMPT = """You are a depositor in a high-yield DeFi protocol.
 
@@ -97,7 +100,8 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your ecosystem-health assessment</analysis>
-<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>"""
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0."""
 
 LLM_VALUEBUYER_PROMPT = """You are a contrarian value investor evaluating distressed tokens.
 
@@ -120,7 +124,8 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your distressed-value assessment</analysis>
-<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>"""
+<decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float, "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0."""
 
 LLM_USER_TEMPLATE = """Current Market State (Round {round_num}):
 - Current Price: ${price:.2f}
@@ -132,6 +137,7 @@ LLM_USER_TEMPLATE = """Current Market State (Round {round_num}):
 
 Apply your persona to choose one trading action for this round.
 Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f}, "quantity": non-negative integer, "reasoning": "brief rationale"}}</decision>.
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0.
 """
 
 __all__ = [

@@ -71,7 +71,7 @@ quantity by cash/inventory, and emits an investor order.
 | Player classes | `examples/Volmageddon/LLM/players.py` |
 | Prompt module | `examples/Volmageddon/LLM/prompts.py` |
 | Inference | Project ARK model policy from `players.yml` |
-| Output parsing | `parse_llm_response_with_thinking` plus required-field validation |
+| Output parsing | `parse_llm_quantity_response_with_thinking` plus required-field validation |
 | Error handling | API call errors fail; stochastic parse failures can trigger explicit conservative hold fallback after retries |
 
 ## §5 Config Reference

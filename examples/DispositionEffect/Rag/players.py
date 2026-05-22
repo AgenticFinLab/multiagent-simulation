@@ -598,6 +598,28 @@ class BaseRagInvestor(GeneralPlayer):
                 break
         self.state.custom_state["market_data"] = market_data
 
+    def update_reference_point(
+        self, quantity: float, price: float, move_reference: bool = True
+    ) -> None:
+        """Update position and cost basis after a RAG investor trade."""
+        position = self.state.custom_state["position"]
+        total_cost = self.state.custom_state["total_cost"]
+
+        if quantity > 0:
+            new_cost = quantity * price
+            total_cost += new_cost
+            position += quantity
+            if move_reference and position > 0:
+                self.state.custom_state["purchase_price"] = total_cost / position
+        elif quantity < 0:
+            if position > 0:
+                cost_per_share = total_cost / position
+                total_cost -= abs(quantity) * cost_per_share
+            position += quantity
+
+        self.state.custom_state["position"] = position
+        self.state.custom_state["total_cost"] = max(0, total_cost)
+
     def _formulate_rag_query(self, market_data: Dict[str, Any]) -> str:
         """Formulate a RAG query based on current market state."""
         price = market_data["price"]

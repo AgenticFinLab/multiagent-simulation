@@ -20,6 +20,7 @@ convergence arrives.
 Respond with <analysis>...</analysis> followed by
 <decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float,
 "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>.
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0.
 """
 
 LLM_LEVERAGETRADER_PROMPT = """You are a highly leveraged trader.
@@ -37,6 +38,7 @@ can force quick exposure reduction when prices move against you.
 Respond with <analysis>...</analysis> followed by
 <decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float,
 "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>.
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0.
 """
 
 LLM_RISKMANAGER_PROMPT = """You are a professional risk manager.
@@ -54,6 +56,7 @@ reducing exposure matters more than potential upside.
 Respond with <analysis>...</analysis> followed by
 <decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float,
 "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>.
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0.
 """
 
 LLM_LIQUIDITYPROVIDER_PROMPT = """You are a market maker and liquidity provider.
@@ -71,6 +74,7 @@ stress suggests spreads can gap wider and inventory risk can dominate.
 Respond with <analysis>...</analysis> followed by
 <decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float,
 "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>.
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0.
 """
 
 LLM_CENTRALBANK_PROMPT = """You represent a lender-of-last-resort coordination authority.
@@ -88,6 +92,7 @@ severe enough that liquidity support could prevent disorderly collapse.
 Respond with <analysis>...</analysis> followed by
 <decision>{"action": "buy"|"sell"|"hold", "bid_price": positive float,
 "quantity": non-negative integer, "reasoning": "brief rationale"}</decision>.
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0.
 """
 
 LLM_USER_TEMPLATE = """Current Market State (Round {round_num}):
@@ -104,6 +109,7 @@ Required output:
 <analysis>brief reasoning</analysis>
 <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f},
 "quantity": non-negative integer, "reasoning": "brief rationale"}}</decision>
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0.
 """
 
 __all__ = [

@@ -69,7 +69,7 @@ current-market quantities.
 | Player classes | `examples/SorosPound/LLM/players.py` |
 | Prompt module | `examples/SorosPound/LLM/prompts.py` |
 | Inference | Project ARK model policy from `players.yml` |
-| Output parsing | `parse_llm_response_with_thinking` plus required-field validation |
+| Output parsing | `parse_llm_quantity_response_with_thinking` plus required-field validation |
 | Error handling | API call errors fail unless retryable; parse fallback is explicit and auditable |
 
 ## §5 Config Reference

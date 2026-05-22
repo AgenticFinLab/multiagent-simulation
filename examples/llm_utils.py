@@ -40,27 +40,8 @@ def is_retryable_llm_error(exc: BaseException) -> bool:
     return any(marker in message for marker in RETRYABLE_API_MARKERS)
 
 
-def parse_llm_response_with_thinking(response_text: str) -> Dict[str, Any]:
-    """Parse LLM response with canonical analysis and decision sections.
-
-    Canonical output format (all LLM/RuleLLM/Rag agents must produce this):
-
-        <analysis>
-        ... reasoning about current market conditions ...
-        </analysis>
-
-        <decision>
-        {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
-        </decision>
-
-    Fallback formats accepted for robustness:
-        - <think>...</think> tags (legacy — treated as <analysis>)
-        - Raw JSON without surrounding tags
-        - JSON in code blocks
-
-    Returns dict with keys: analysis, action, bid_price, quantity, reasoning
-    Raises ValueError on parse failure.
-    """
+def _extract_analysis_and_decision(response_text: str) -> tuple[str, Dict[str, Any]]:
+    """Extract analysis text and decision JSON from a tagged LLM response."""
     analysis = ""
     decision_json = None
 
@@ -92,22 +73,65 @@ def parse_llm_response_with_thinking(response_text: str) -> Dict[str, Any]:
     if not decision_json:
         raise ValueError(f"No decision JSON found in response: {response_text[:100]}")
 
-    # Parse the JSON
-    parsed = None
     try:
         parsed = json.loads(decision_json)
     except json.JSONDecodeError:
         raise ValueError(f"Failed to parse decision JSON: {decision_json[:100]}")
+    if not isinstance(parsed, dict):
+        raise ValueError(f"Decision JSON must be an object: {decision_json[:100]}")
+    return analysis, parsed
 
-    # Validate required fields
-    required_fields = ["action", "bid_price", "quantity", "reasoning"]
-    missing_or_null = [
-        f for f in required_fields if f not in parsed or parsed[f] is None
-    ]
+
+def _require_fields(parsed: Dict[str, Any], fields: list[str]) -> None:
+    """Raise when parsed decision is missing required non-null fields."""
+    missing_or_null = [f for f in fields if f not in parsed or parsed[f] is None]
     if missing_or_null:
         raise ValueError(f"Fields missing or null in LLM response: {missing_or_null}")
 
+
+def parse_llm_response_with_thinking(response_text: str) -> Dict[str, Any]:
+    """Parse LLM response with canonical analysis and decision sections.
+
+    Canonical output format (all LLM/RuleLLM/Rag agents must produce this):
+
+        <analysis>
+        ... reasoning about current market conditions ...
+        </analysis>
+
+        <decision>
+        {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+        </decision>
+
+    Fallback formats accepted for robustness:
+        - <think>...</think> tags (legacy — treated as <analysis>)
+        - Raw JSON without surrounding tags
+        - JSON in code blocks
+
+    Returns dict with keys: analysis, action, bid_price, quantity, reasoning
+    Raises ValueError on parse failure.
+    """
+    # Validate required fields
+    analysis, parsed = _extract_analysis_and_decision(response_text)
+    _require_fields(parsed, ["action", "bid_price", "quantity", "reasoning"])
+
     # Include analysis in the returned dict
+    parsed["analysis"] = analysis
+    return parsed
+
+
+def parse_llm_quantity_response_with_thinking(response_text: str) -> Dict[str, Any]:
+    """Parse a current-market quantity-order LLM response.
+
+    Some scenarios intentionally clear orders at the current market price and
+    therefore do not ask for or consume `bid_price`. These scenarios still use
+    the same `<analysis>` / `<decision>` envelope, but their decision JSON is:
+
+        {"action": "buy"|"sell"|"hold", "quantity": float, "reasoning": string}
+
+    Use this parser only for documented current-market quantity schemas.
+    """
+    analysis, parsed = _extract_analysis_and_decision(response_text)
+    _require_fields(parsed, ["action", "quantity", "reasoning"])
     parsed["analysis"] = analysis
     return parsed
 

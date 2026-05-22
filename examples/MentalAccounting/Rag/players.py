@@ -10,6 +10,7 @@ All parameters are configured via players.yml config file.
 from __future__ import annotations
 
 import logging
+import math
 import os
 import shutil
 from typing import Any, Dict, List, Optional
@@ -42,6 +43,13 @@ from examples.MentalAccounting.Rule.players import (  # noqa: F401
 )
 
 logger = logging.getLogger("MentalAccounting.Rag")
+
+
+def safe_max_affordable(cash: float, price: float) -> int:
+    """Return a finite affordable quantity for API-driven portfolio updates."""
+    if not math.isfinite(cash) or not math.isfinite(price) or price <= 0:
+        return 0
+    return max(0, int(cash / price))
 
 
 def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
@@ -415,7 +423,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if action == "buy" and quantity > 0:
             _require_positive(price, "price")
-            max_affordable = int(cash / price)
+            max_affordable = safe_max_affordable(cash, price)
             quantity = min(quantity, max_affordable)
             if quantity > 0:
                 self.state.custom_state["cash"] -= quantity * price

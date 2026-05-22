@@ -15,6 +15,7 @@ Investor Parameters (from config.extras):
 """
 
 import logging
+import math
 import os
 from typing import Any, Dict, Optional
 
@@ -40,6 +41,13 @@ from examples.OverconfidenceBias.Rule.players import (  # noqa: F401
 )
 
 logger = logging.getLogger("OverconfidenceBias.LLM")
+
+
+def safe_max_affordable(cash: float, price: float) -> int:
+    """Return a finite affordable quantity for API-driven portfolio updates."""
+    if not math.isfinite(cash) or not math.isfinite(price) or price <= 0:
+        return 0
+    return max(0, int(cash / price))
 
 
 def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
@@ -179,7 +187,7 @@ class LLMInvestor(GeneralPlayer):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         if action == "buy" and quantity > 0:
-            max_affordable = int(cash / price)
+            max_affordable = safe_max_affordable(cash, price)
             quantity = min(quantity, max_affordable)
             if quantity > 0:
                 self.state.custom_state["cash"] -= quantity * price

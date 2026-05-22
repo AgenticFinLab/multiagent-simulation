@@ -19,7 +19,7 @@ from lmbase.inference.base import InferInput
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import parse_llm_quantity_response_with_thinking
 
 from .prompts import (
     RULELLM_EQUITY_TRADER_SYS,
@@ -104,7 +104,7 @@ class RuleLLMInvestor(GeneralPlayer):
 
     def _parse_decision(self, response_text: str) -> Dict[str, Any]:
         """Parse and validate the Volmageddon quantity-order contract."""
-        decision = parse_llm_response_with_thinking(response_text)
+        decision = parse_llm_quantity_response_with_thinking(response_text)
         missing = [
             field
             for field in ("action", "quantity", "reasoning")

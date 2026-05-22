@@ -10,6 +10,7 @@ All parameters are configured via players.yml config file.
 """
 
 import logging
+import math
 import os
 from typing import Any, Dict, Optional
 
@@ -33,6 +34,13 @@ from examples.MentalAccounting.LLM.prompts import (
 from examples.MentalAccounting.Rule.players import Market  # noqa: F401
 
 logger = logging.getLogger("MentalAccounting.LLM")
+
+
+def safe_max_affordable(cash: float, price: float) -> int:
+    """Return a finite affordable quantity for API-driven portfolio updates."""
+    if not math.isfinite(cash) or not math.isfinite(price) or price <= 0:
+        return 0
+    return max(0, int(cash / price))
 
 
 def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
@@ -181,7 +189,7 @@ class LLMInvestor(GeneralPlayer):
 
         if action == "buy" and quantity > 0:
             _require_positive(price, "price")
-            max_affordable = int(cash / price)
+            max_affordable = safe_max_affordable(cash, price)
             quantity = min(quantity, max_affordable)
             if quantity > 0:
                 self.state.custom_state["cash"] -= quantity * price

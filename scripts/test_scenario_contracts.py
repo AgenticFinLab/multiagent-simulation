@@ -89,6 +89,37 @@ class ScenarioContractTest(unittest.TestCase):
             "not narrow the schema below fields consumed by the player.",
         )
 
+    def test_current_market_quantity_schemas_use_quantity_parser(self):
+        player_files = [
+            ROOT / "examples" / "SorosPound" / "LLM" / "players.py",
+            ROOT / "examples" / "SorosPound" / "RuleLLM" / "players.py",
+            ROOT / "examples" / "SorosPound" / "Rag" / "players.py",
+            ROOT / "examples" / "SouthSeaBubble" / "LLM" / "players.py",
+            ROOT / "examples" / "SouthSeaBubble" / "RuleLLM" / "players.py",
+            ROOT / "examples" / "SouthSeaBubble" / "Rag" / "players.py",
+            ROOT / "examples" / "TulipMania" / "LLM" / "players.py",
+            ROOT / "examples" / "TulipMania" / "RuleLLM" / "players.py",
+            ROOT / "examples" / "TulipMania" / "Rag" / "players.py",
+            ROOT / "examples" / "Volmageddon" / "LLM" / "players.py",
+            ROOT / "examples" / "Volmageddon" / "RuleLLM" / "players.py",
+            ROOT / "examples" / "Volmageddon" / "Rag" / "players.py",
+        ]
+
+        wrong_parser = []
+        for path in player_files:
+            text = path.read_text(encoding="utf-8")
+            if "parse_llm_quantity_response_with_thinking" not in text:
+                wrong_parser.append(f"{path.relative_to(ROOT)}:missing_quantity_parser")
+            if "parse_llm_response_with_thinking" in text:
+                wrong_parser.append(f"{path.relative_to(ROOT)}:canonical_parser")
+
+        self.assertEqual(
+            wrong_parser,
+            [],
+            "Current-market quantity schemas must not reuse the canonical "
+            "bid_price parser; they intentionally do not request a price field.",
+        )
+
     def test_api_parse_failure_paths_are_contract_safe(self):
         player_files = [
             ROOT / "examples" / "SorosPound" / "LLM" / "players.py",
@@ -215,6 +246,24 @@ class ScenarioContractTest(unittest.TestCase):
         self.assertIn("monitoring", data["proxy"])
         self.assertIn("communication", data["proxy"])
         self.assertIn("resource", data["proxy"])
+
+    def test_disposition_rag_updates_reference_point_like_rulellm(self):
+        path = ROOT / "examples" / "DispositionEffect" / "Rag" / "players.py"
+        text = path.read_text(encoding="utf-8")
+
+        required = [
+            "def update_reference_point(",
+            'self.state.custom_state["purchase_price"] = total_cost / position',
+            'self.state.custom_state["total_cost"] = max(0, total_cost)',
+        ]
+        missing = [needle for needle in required if needle not in text]
+
+        self.assertEqual(
+            missing,
+            [],
+            "DispositionEffect RAG investors reuse the RuleLLM trading logic "
+            "and must update reference points after buys/sells.",
+        )
 
     def test_volmageddon_api_simulation_configs_have_no_top_level_llm(self):
         files = [
@@ -432,6 +481,119 @@ class ScenarioContractTest(unittest.TestCase):
             [],
             "Observed APITimeout/parse rows should classify transient transport "
             "errors separately from deterministic contract failures.",
+        )
+
+    def test_failed_rag_configs_provide_embed_api_key_when_players_require_it(self):
+        scenarios = ["SVBBankRun", "SunkCostFallacy", "TulipMania"]
+
+        missing = []
+        for scenario in scenarios:
+            player_path = ROOT / "examples" / scenario / "Rag" / "players.py"
+            player_text = player_path.read_text(encoding="utf-8")
+            directly_indexes_key = (
+                'resolved_rag["embed_api_key"]' in player_text
+                or 'rag_cfg["embed_api_key"]' in player_text
+            )
+            if not directly_indexes_key:
+                continue
+
+            cfg = load_config(str(ROOT / "configs" / scenario / "Rag" / "simulation.yml"))
+            for player_key, player in cfg["players"].items():
+                extras = player.get("config", {}).get("extras", {})
+                rag = extras.get("private_knowledge", {}).get("rag", {})
+                if rag and "embed_api_key" not in rag:
+                    missing.append(f"{scenario}__Rag:{player_key}")
+
+        self.assertEqual(
+            missing,
+            [],
+            "RAG configs must provide embed_api_key when their players directly "
+            "index the resolved RAG config.",
+        )
+
+    def test_failed_bid_price_prompts_explicitly_forbid_zero_for_hold(self):
+        prompt_files = [
+            ROOT / "examples" / "ArchegosCollapse" / "LLM" / "prompts.py",
+            ROOT / "examples" / "ArchegosCollapse" / "RuleLLM" / "prompts.py",
+            ROOT / "examples" / "ArchegosCollapse" / "Rag" / "prompts.py",
+            ROOT / "examples" / "AsianFinancialCrisis" / "LLM" / "prompts.py",
+            ROOT / "examples" / "AsianFinancialCrisis" / "RuleLLM" / "prompts.py",
+            ROOT / "examples" / "AsianFinancialCrisis" / "Rag" / "prompts.py",
+            ROOT / "examples" / "BlackMonday1987" / "LLM" / "prompts.py",
+            ROOT / "examples" / "BlackMonday1987" / "RuleLLM" / "prompts.py",
+            ROOT / "examples" / "BlackMonday1987" / "Rag" / "prompts.py",
+            ROOT / "examples" / "CarryTradeUnwind" / "LLM" / "prompts.py",
+            ROOT / "examples" / "CarryTradeUnwind" / "RuleLLM" / "prompts.py",
+            ROOT / "examples" / "CarryTradeUnwind" / "Rag" / "prompts.py",
+            ROOT / "examples" / "CurrencyCrisis" / "LLM" / "prompts.py",
+            ROOT / "examples" / "DotComBubble" / "LLM" / "prompts.py",
+            ROOT / "examples" / "DotComBubble" / "Rag" / "prompts.py",
+            ROOT / "examples" / "EuropeanDebtCrisis" / "LLM" / "prompts.py",
+            ROOT / "examples" / "LTCMCollapse" / "LLM" / "prompts.py",
+            ROOT / "examples" / "LUNACollapse" / "LLM" / "prompts.py",
+            ROOT / "examples" / "LUNACollapse" / "RuleLLM" / "prompts.py",
+        ]
+
+        missing = []
+        for path in prompt_files:
+            text = path.read_text(encoding="utf-8")
+            if "bid_price" not in text:
+                continue
+            lower = text.lower()
+            if "strictly positive" not in lower:
+                missing.append(f"{path.relative_to(ROOT)}:strictly_positive")
+            if "never output bid_price: 0" not in lower:
+                missing.append(f"{path.relative_to(ROOT)}:never_zero")
+            if "for hold" not in lower or "current price" not in lower:
+                missing.append(f"{path.relative_to(ROOT)}:hold_current_price")
+
+        self.assertEqual(
+            missing,
+            [],
+            "Prompts that feed strict bid_price validators must tell the model "
+            "that hold decisions still require a strictly positive current-price bid.",
+        )
+
+    def test_framingeffect_rulellm_retries_parse_contract_failures(self):
+        path = ROOT / "examples" / "FramingEffect" / "RuleLLM" / "players.py"
+        text = path.read_text(encoding="utf-8")
+
+        required = [
+            "max_retries = 3",
+            "parse_error = isinstance(exc, (ValueError, KeyError))",
+            "is_retryable_llm_error(exc)",
+            "LLM decision contract failed after",
+        ]
+        missing = [needle for needle in required if needle not in text]
+
+        self.assertEqual(
+            missing,
+            [],
+            "FramingEffect RuleLLM should retry stochastic malformed JSON before "
+            "failing the row.",
+        )
+
+    def test_failed_numeric_overflow_rows_guard_finite_portfolio_arithmetic(self):
+        player_files = [
+            ROOT / "examples" / "OverconfidenceBias" / "LLM" / "players.py",
+            ROOT / "examples" / "OverconfidenceBias" / "Rag" / "players.py",
+            ROOT / "examples" / "MentalAccounting" / "LLM" / "players.py",
+            ROOT / "examples" / "MentalAccounting" / "Rag" / "players.py",
+        ]
+
+        missing = []
+        for path in player_files:
+            text = path.read_text(encoding="utf-8")
+            if "math.isfinite" not in text:
+                missing.append(f"{path.relative_to(ROOT)}:math.isfinite")
+            if "safe_max_affordable" not in text:
+                missing.append(f"{path.relative_to(ROOT)}:safe_max_affordable")
+
+        self.assertEqual(
+            missing,
+            [],
+            "API portfolio updates must guard cash/price arithmetic before "
+            "int(cash / price) conversions.",
         )
 
 

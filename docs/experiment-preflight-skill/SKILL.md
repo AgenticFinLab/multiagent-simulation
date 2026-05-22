@@ -94,6 +94,9 @@ For API rows (`LLM`, `RuleLLM`, `Rag`), inspect effective prompts and players:
 - Trading rows request exactly the trading fields consumed by code:
   `action`, `bid_price` if used, `quantity`, `reasoning`, and scenario-specific
   extras such as `provides_liquidity` only when consumed.
+- Current-market quantity schemas that explicitly do not consume price fields
+  must use a quantity-order parser and must not reuse a canonical parser that
+  requires `bid_price`.
 - Dynamic user prompts built inside `players.py` must not narrow or contradict
   the schema already stated in system prompts. The most recent failure pattern
   was a correct system prompt but a dynamic user prompt that only requested
@@ -217,3 +220,6 @@ After a batch completes:
   actionable error, and classification.
 - For success rows, later run Level-2 checks for round count, structural fields,
   fallback rate, price/volume/portfolio sanity, and RAG retrieval health.
+- Treat runner `SUCCESS` as provisional if logs contain Ray unhandled errors,
+  tracebacks, fatal/native abort text, or heavy parser fallback. Such rows
+  should stay out of the resource pack until repaired and rerun.

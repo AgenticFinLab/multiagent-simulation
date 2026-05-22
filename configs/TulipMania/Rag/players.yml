@@ -50,6 +50,7 @@ trendchaser:
           embed_type: "litellm"
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
           top_k: 3
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_TREND_CHASER_SYS"
@@ -85,6 +86,7 @@ socialprooffollower:
           embed_type: "litellm"
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
           top_k: 3
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_SOCIAL_PROOF_FOLLOWER_SYS"
@@ -120,6 +122,7 @@ intrinsicvaluetrader:
           embed_type: "litellm"
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
           top_k: 3
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_INTRINSIC_VALUE_TRADER_SYS"
@@ -155,6 +158,7 @@ earlyexittrader:
           embed_type: "litellm"
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
           top_k: 3
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_EARLY_EXIT_TRADER_SYS"
@@ -190,6 +194,7 @@ noisetrader:
           embed_type: "litellm"
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
           top_k: 3
       llm:
         sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"

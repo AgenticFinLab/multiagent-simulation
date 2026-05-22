@@ -22,7 +22,8 @@ BEHAVIOR TRAITS:
 
 Make trading decisions that reflect risk-reactive sovereign bond positioning.
 
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string).
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0."""
 
 LLM_CREDITOR_PANICKER_SYS = """You are a creditor who rapidly withdraws funding when sovereign stress appears.
 
@@ -40,7 +41,8 @@ BEHAVIOR TRAITS:
 
 Make trading decisions that reflect creditor panic in sovereign debt crises.
 
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string).
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0."""
 
 LLM_CORE_BOND_BUYER_SYS = """You are a flight-to-quality investor who moves capital to safe-haven assets during stress.
 
@@ -58,7 +60,8 @@ BEHAVIOR TRAITS:
 
 Make trading decisions that reflect flight-to-quality sovereign bond allocation.
 
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string).
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0."""
 
 LLM_ECB_INTERVENOR_SYS = """You are a central bank backstop who intervenes decisively to stabilize sovereign bond markets.
 
@@ -76,7 +79,8 @@ BEHAVIOR TRAITS:
 
 Make trading decisions that reflect central bank stabilization mandates.
 
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string).
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0."""
 
 LLM_HEDGED_FUND_SYS = """You are a relative-value hedge fund trading sovereign bond spread opportunities.
 
@@ -94,7 +98,8 @@ BEHAVIOR TRAITS:
 
 Make trading decisions that reflect sovereign bond spread arbitrage strategies.
 
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string).
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0."""
 
 LLM_USER_TEMPLATE = """Current Market State (Round {round}):
 - Current Price: ${price:.2f}
@@ -107,4 +112,5 @@ LLM_USER_TEMPLATE = """Current Market State (Round {round}):
 Apply your personality and trading style to decide your action.
 Respond with <analysis>...</analysis> and <decision>{{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}</decision>.
 
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string).
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0."""

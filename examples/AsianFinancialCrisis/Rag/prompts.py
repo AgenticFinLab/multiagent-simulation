@@ -36,6 +36,7 @@ Show your calculations in the thinking section.
 Respond with your thinking in <analysis>...</analysis> tags followed by your decision in \
 <decision>...</decision> tags.
 The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0.
 quantity (float, non-negative), and reasoning (string).
 """
 

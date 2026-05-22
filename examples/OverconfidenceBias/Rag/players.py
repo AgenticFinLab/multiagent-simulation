@@ -6,6 +6,7 @@ Design:
 """
 
 import logging
+import math
 import os
 import shutil
 from typing import Any, Dict, List, Optional
@@ -41,6 +42,13 @@ logger = logging.getLogger("OverconfidenceBias.Rag")
 
 
 _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
+
+def safe_max_affordable(cash: float, price: float) -> int:
+    """Return a finite affordable quantity for API-driven portfolio updates."""
+    if not math.isfinite(cash) or not math.isfinite(price) or price <= 0:
+        return 0
+    return max(0, int(cash / price))
 
 
 def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
@@ -393,7 +401,7 @@ class RagLLMInvestor(GeneralPlayer):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         if action == "buy" and quantity > 0:
-            max_affordable = int(cash / price)
+            max_affordable = safe_max_affordable(cash, price)
             quantity = min(quantity, max_affordable)
             if quantity > 0:
                 self.state.custom_state["cash"] -= quantity * price
