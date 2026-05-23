@@ -7,8 +7,10 @@ retrieval-health summary over recorded RAG context payloads when present.
 import argparse
 import json
 import os
+import shutil
 from typing import Any, Dict
 
+import matplotlib.pyplot as plt
 from masim.utils import load_config
 
 from examples.DispositionEffect.Rule.analysis import (
@@ -18,6 +20,39 @@ from examples.DispositionEffect.Rule.analysis import (
 )
 
 _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
+
+def write_standard_artifacts(output_dir: str, summary: Dict[str, Any]) -> None:
+    """Add simulation-180 standard analysis filenames without removing rich plots."""
+    aliases = {
+        "fig1_price_dynamics.png": "01_price_dynamics.png",
+        "fig2_pgr_plr_comparison.png": "02_pgr_plr_comparison.png",
+    }
+    for src_name, dst_name in aliases.items():
+        src = os.path.join(output_dir, src_name)
+        dst = os.path.join(output_dir, dst_name)
+        if os.path.isfile(src):
+            shutil.copyfile(src, dst)
+
+    rag_stats = summary.get("rag_knowledge_effect", {})
+    with open(os.path.join(output_dir, "rag_stats.json"), "w", encoding="utf-8") as f:
+        json.dump(rag_stats, f, indent=2)
+
+    fig, ax = plt.subplots(figsize=(9, 5))
+    ax.axis("off")
+    lines = [
+        "DispositionEffect Rag Summary",
+        f"Disposition detected: {summary.get('disposition_effect_detected')}",
+        f"Mean PGR: {summary.get('mean_pgr', 0):.3f}",
+        f"Mean PLR: {summary.get('mean_plr', 0):.3f}",
+        f"Disposition coefficient: {summary.get('disposition_coefficient', 0):.3f}",
+        f"RAG retrieval rate: {rag_stats.get('retrieval_rate', 0):.1%}",
+        f"RAG fallback rate: {rag_stats.get('fallback_rate', 0):.1%}",
+    ]
+    ax.text(0.03, 0.95, "\n".join(lines), va="top", ha="left", fontsize=12)
+    fig.tight_layout()
+    fig.savefig(os.path.join(output_dir, "03_summary.png"), dpi=150)
+    plt.close(fig)
 
 
 def analyze_rag_knowledge_effect(trades: Dict[str, list]) -> Dict[str, Any]:
@@ -101,6 +136,7 @@ def main() -> Dict[str, Any]:
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
     print(f"    Saved to {summary_path}")
+    write_standard_artifacts(output_dir, summary)
 
     print("\n" + "=" * 70)
     print("KEY FINDINGS")
@@ -119,4 +155,9 @@ if __name__ == "__main__":
     main()
 
 
-__all__ = ["_RAG_FALLBACK", "analyze_rag_knowledge_effect", "main"]
+__all__ = [
+    "_RAG_FALLBACK",
+    "analyze_rag_knowledge_effect",
+    "write_standard_artifacts",
+    "main",
+]
