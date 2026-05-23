@@ -48,6 +48,7 @@ Environment Variables:
 import logging
 import os
 import json
+import math
 import random
 import re
 import sys
@@ -278,6 +279,14 @@ class LLMInvestor(GeneralPlayer):
                 missing_or_null.append(field)
         if missing_or_null:
             raise ValueError(f"Fields missing or null: {missing_or_null}")
+
+        try:
+            stock_qty = float(parsed["stock_qty"])
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"Invalid stock_qty: {parsed['stock_qty']!r}") from exc
+        if not math.isfinite(stock_qty):
+            raise ValueError(f"Invalid non-finite stock_qty: {parsed['stock_qty']!r}")
+        parsed["stock_qty"] = stock_qty
 
         parsed["analysis"] = analysis
         return parsed

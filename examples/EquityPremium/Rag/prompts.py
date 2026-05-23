@@ -15,7 +15,7 @@ Use the rule-based logic from simulation-bases.md §4.1 and retrieved knowledge:
 - Reduce stock allocation after negative short-horizon evidence.
 - Buy only when allocation is too low and risk evidence is moderate.
 
-Return <analysis>...</analysis> and <decision>{"stock_qty": <number>, "reasoning": "<brief>"}</decision>.
+Return <analysis>...</analysis> and <decision>{"stock_qty": <finite number>, "reasoning": "<brief>"}</decision>.
 """
 
 RAGLLM_LONG_HORIZON_INVESTOR_SYS = """You are a LONG HORIZON INVESTOR.
@@ -33,7 +33,7 @@ Use the rule-based logic from simulation-bases.md §4.2 and retrieved knowledge:
 - Buy when current stock allocation is below target.
 - Sell only when allocation is materially above target.
 
-Return <analysis>...</analysis> and <decision>{"stock_qty": <number>, "reasoning": "<brief>"}</decision>.
+Return <analysis>...</analysis> and <decision>{"stock_qty": <finite number>, "reasoning": "<brief>"}</decision>.
 """
 
 RAGLLM_RISK_NEUTRAL_INVESTOR_SYS = """You are a RISK NEUTRAL INSTITUTIONAL INVESTOR.
@@ -51,7 +51,7 @@ Use the rule-based logic from simulation-bases.md §4.3 and retrieved knowledge:
 - Positive excess return implies buying stock.
 - Negative excess return implies selling stock.
 
-Return <analysis>...</analysis> and <decision>{"stock_qty": <number>, "reasoning": "<brief>"}</decision>.
+Return <analysis>...</analysis> and <decision>{"stock_qty": <finite number>, "reasoning": "<brief>"}</decision>.
 """
 
 RAGLLM_CONSERVATIVE_INVESTOR_SYS = """You are a CONSERVATIVE RISK-AVERSE SAVER.
@@ -69,7 +69,7 @@ Use the rule-based logic from simulation-bases.md §4.4 and retrieved knowledge:
 - Sell when stock allocation is above the conservative target.
 - Buy only small amounts when allocation is far below target.
 
-Return <analysis>...</analysis> and <decision>{"stock_qty": <number>, "reasoning": "<brief>"}</decision>.
+Return <analysis>...</analysis> and <decision>{"stock_qty": <finite number>, "reasoning": "<brief>"}</decision>.
 """
 
 RAGLLM_NOISE_TRADER_SYS = """You are a NOISE TRADER / RATIONAL OPTIMIZER BENCHMARK.
@@ -84,10 +84,10 @@ Emotional state: Reactive to short-term impressions.
 == DECISION RULES ==
 Use the rule-based logic from simulation-bases.md §4.5 and retrieved knowledge:
 - Allow small noisy stock allocation changes.
-- Avoid extreme stock_qty values.
+- Avoid extreme stock_qty values; never output NaN or Infinity.
 - Do not change the market schema; output stock_qty only.
 
-Return <analysis>...</analysis> and <decision>{"stock_qty": <number>, "reasoning": "<brief>"}</decision>.
+Return <analysis>...</analysis> and <decision>{"stock_qty": <finite number>, "reasoning": "<brief>"}</decision>.
 """
 
 RAGLLM_USER_TEMPLATE = """
@@ -108,5 +108,5 @@ RAGLLM_USER_TEMPLATE = """
 - Total Value: ${total_value:.2f}
 
 Apply your PERSONA, DECISION RULES, and retrieved knowledge to decide the stock allocation change.
-Return <analysis>...</analysis> and <decision>{{"stock_qty": <+buy/-sell as number>, "reasoning": "<brief>"}}</decision>.
+Return <analysis>...</analysis> and <decision>{{"stock_qty": <+buy/-sell as finite number>, "reasoning": "<brief>"}}</decision>.
 """

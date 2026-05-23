@@ -11,7 +11,7 @@ PSYCHOLOGY:
 After negative return: Reduce stocks
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"stock_qty": float, "reasoning": string}
-IMPORTANT: stock_qty MUST be a numeric value (e.g., 10.5), NOT an expression or formula.
+IMPORTANT: stock_qty MUST be a finite numeric value (e.g., 10.5), NOT an expression, formula, NaN, or Infinity.
 """
 
 LLM_LONG_TERM_SYS = """You are a LONG-TERM INVESTOR (annual horizon).
@@ -24,7 +24,7 @@ PSYCHOLOGY:
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"stock_qty": float, "reasoning": string}
-IMPORTANT: stock_qty MUST be a numeric value (e.g., 10.5), NOT an expression or formula.
+IMPORTANT: stock_qty MUST be a finite numeric value (e.g., 10.5), NOT an expression, formula, NaN, or Infinity.
 """
 
 LLM_INSTITUTIONAL_SYS = """You are an INSTITUTIONAL INVESTOR.
@@ -36,7 +36,7 @@ TARGET: 60% stocks, 40% bonds
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"stock_qty": float, "reasoning": string}
-IMPORTANT: stock_qty MUST be a numeric value (e.g., 10.5), NOT an expression or formula.
+IMPORTANT: stock_qty MUST be a finite numeric value (e.g., 10.5), NOT an expression, formula, NaN, or Infinity.
 """
 
 LLM_RISK_AVERSE_SYS = """You are a RISK-AVERSE SAVER.
@@ -47,7 +47,7 @@ LLM_RISK_AVERSE_SYS = """You are a RISK-AVERSE SAVER.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"stock_qty": float, "reasoning": string}
-IMPORTANT: stock_qty MUST be a numeric value (e.g., 10.5), NOT an expression or formula.
+IMPORTANT: stock_qty MUST be a finite numeric value (e.g., 10.5), NOT an expression, formula, NaN, or Infinity.
 """
 
 LLM_RATIONAL_SYS = """You are a RATIONAL OPTIMIZER.
@@ -58,7 +58,7 @@ LLM_RATIONAL_SYS = """You are a RATIONAL OPTIMIZER.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"stock_qty": float, "reasoning": string}
-IMPORTANT: stock_qty MUST be a numeric value (e.g., 10.5), NOT an expression or formula.
+IMPORTANT: stock_qty MUST be a finite numeric value (e.g., 10.5), NOT an expression, formula, NaN, or Infinity.
 """
 
 LLM_USER_TEMPLATE = """
@@ -77,5 +77,5 @@ Your Portfolio:
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON:
 {{"stock_qty": <+buy/-sell as NUMBER>, "reasoning": "<brief>"}}
-IMPORTANT: stock_qty MUST be a numeric value, NOT an expression.
+IMPORTANT: stock_qty MUST be a finite numeric value, NOT an expression, NaN, or Infinity.
 """

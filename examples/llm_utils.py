@@ -6,6 +6,7 @@ Provides standardized parsing for LLM responses with analysis and decision secti
 from __future__ import annotations
 
 import json
+import math
 import re
 from typing import Any, Dict, List, Optional
 
@@ -89,6 +90,18 @@ def _require_fields(parsed: Dict[str, Any], fields: list[str]) -> None:
         raise ValueError(f"Fields missing or null in LLM response: {missing_or_null}")
 
 
+def _require_finite_numbers(parsed: Dict[str, Any], fields: list[str]) -> None:
+    """Normalize numeric fields and reject NaN/Infinity before market arithmetic."""
+    for field in fields:
+        try:
+            value = float(parsed[field])
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"Invalid numeric field {field}: {parsed[field]!r}") from exc
+        if not math.isfinite(value):
+            raise ValueError(f"Invalid non-finite numeric field {field}: {parsed[field]!r}")
+        parsed[field] = value
+
+
 def parse_llm_response_with_thinking(response_text: str) -> Dict[str, Any]:
     """Parse LLM response with canonical analysis and decision sections.
 
@@ -113,6 +126,7 @@ def parse_llm_response_with_thinking(response_text: str) -> Dict[str, Any]:
     # Validate required fields
     analysis, parsed = _extract_analysis_and_decision(response_text)
     _require_fields(parsed, ["action", "bid_price", "quantity", "reasoning"])
+    _require_finite_numbers(parsed, ["bid_price", "quantity"])
 
     # Include analysis in the returned dict
     parsed["analysis"] = analysis
@@ -132,6 +146,7 @@ def parse_llm_quantity_response_with_thinking(response_text: str) -> Dict[str, A
     """
     analysis, parsed = _extract_analysis_and_decision(response_text)
     _require_fields(parsed, ["action", "quantity", "reasoning"])
+    _require_finite_numbers(parsed, ["quantity"])
     parsed["analysis"] = analysis
     return parsed
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from typing import Any, Dict
 
@@ -57,9 +58,12 @@ def parse_svbbankrun_decision(response_text: str) -> Dict[str, Any]:
         raise ValueError(f"Invalid SVBBankRun action: {parsed['action']!r}")
 
     try:
-        quantity = int(float(parsed["quantity"]))
+        quantity_value = float(parsed["quantity"])
     except (TypeError, ValueError) as exc:
         raise ValueError(f"Invalid SVBBankRun quantity: {parsed['quantity']!r}") from exc
+    if not math.isfinite(quantity_value):
+        raise ValueError(f"Invalid non-finite SVBBankRun quantity: {parsed['quantity']!r}")
+    quantity = int(quantity_value)
 
     reasoning = str(parsed["reasoning"]).strip()
     if not reasoning:

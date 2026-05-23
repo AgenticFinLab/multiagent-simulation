@@ -27,7 +27,7 @@ Relevant Domain Knowledge:
 
 Apply your trading rules and the domain knowledge above to decide your action.
 Respond with <analysis>...</analysis> and <decision>{{"action": "buy", "bid_price": {price:.4f}, "quantity": 1, "reasoning": "brief rationale"}}</decision>.
-IMPORTANT: bid_price must be strictly positive. For hold, use the current exchange rate ({price:.4f}) as bid_price; never output bid_price: 0.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price/exchange rate ({price:.4f}) as bid_price; never output bid_price: 0.
 
 Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 

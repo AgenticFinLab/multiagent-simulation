@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from typing import Any, Dict
 
@@ -51,6 +52,8 @@ def parse_equity_premium_decision(response_text: str) -> Dict[str, Any]:
         stock_qty = float(parsed["stock_qty"])
     except (TypeError, ValueError) as exc:
         raise ValueError(f"Invalid stock_qty: {parsed['stock_qty']!r}") from exc
+    if not math.isfinite(stock_qty):
+        raise ValueError(f"Invalid non-finite stock_qty: {parsed['stock_qty']!r}")
 
     reasoning = str(parsed["reasoning"]).strip()
     if not reasoning:

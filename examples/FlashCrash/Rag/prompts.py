@@ -201,7 +201,7 @@ Step 2 — Decide action:
         provides_liquidity = False
     ELSE:
         quantity = 0  → hold (no trigger)
-        bid_price = 0.0
+        bid_price = current_price
 
 Step 3 — Apply portfolio constraints:
     If selling: quantity ≥ -current_position
@@ -257,7 +257,7 @@ Step 2 — Decide action:
         provides_liquidity = True
     ELSE  (within ±10% of fundamental — no clear opportunity):
         quantity = 0 → hold
-        bid_price = 0.0
+        bid_price = current_price
 
 Step 3 — Apply portfolio constraints:
     If buying: quantity ≤ available_cash / bid_price

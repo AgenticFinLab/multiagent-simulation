@@ -11,7 +11,7 @@ CONSTRAINTS:
 - Cannot sell more shares than held
 
 Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy", "bid_price": 1.2345, "quantity": 1, "reasoning": "brief rationale"}</decision> for your trading decision.
-IMPORTANT: bid_price must be strictly positive and should use the current exchange rate shown in the user message; for hold, use the current exchange rate as bid_price; never output bid_price: 0.
+IMPORTANT: bid_price must be strictly positive and should use the current price/exchange rate shown in the user message; for hold, use the current price/exchange rate as bid_price; never output bid_price: 0.
 
 Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
@@ -26,7 +26,7 @@ CONSTRAINTS:
 - Cannot sell more shares than held
 
 Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy", "bid_price": 1.2345, "quantity": 1, "reasoning": "brief rationale"}</decision> for your trading decision.
-IMPORTANT: bid_price must be strictly positive and should use the current exchange rate shown in the user message; for hold, use the current exchange rate as bid_price; never output bid_price: 0.
+IMPORTANT: bid_price must be strictly positive and should use the current price/exchange rate shown in the user message; for hold, use the current price/exchange rate as bid_price; never output bid_price: 0.
 
 Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
@@ -41,7 +41,7 @@ CONSTRAINTS:
 - Cannot sell more shares than held
 
 Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy", "bid_price": 1.2345, "quantity": 1, "reasoning": "brief rationale"}</decision> for your trading decision.
-IMPORTANT: bid_price must be strictly positive and should use the current exchange rate shown in the user message; for hold, use the current exchange rate as bid_price; never output bid_price: 0.
+IMPORTANT: bid_price must be strictly positive and should use the current price/exchange rate shown in the user message; for hold, use the current price/exchange rate as bid_price; never output bid_price: 0.
 
 Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
@@ -56,7 +56,7 @@ CONSTRAINTS:
 - Cannot sell more shares than held
 
 Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy", "bid_price": 1.2345, "quantity": 1, "reasoning": "brief rationale"}</decision> for your trading decision.
-IMPORTANT: bid_price must be strictly positive and should use the current exchange rate shown in the user message; for hold, use the current exchange rate as bid_price; never output bid_price: 0.
+IMPORTANT: bid_price must be strictly positive and should use the current price/exchange rate shown in the user message; for hold, use the current price/exchange rate as bid_price; never output bid_price: 0.
 
 Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
@@ -71,7 +71,7 @@ CONSTRAINTS:
 - Cannot sell more shares than held
 
 Respond with <analysis>...</analysis> for your reasoning and <decision>{"action": "buy", "bid_price": 1.2345, "quantity": 1, "reasoning": "brief rationale"}</decision> for your trading decision.
-IMPORTANT: bid_price must be strictly positive and should use the current exchange rate shown in the user message; for hold, use the current exchange rate as bid_price; never output bid_price: 0.
+IMPORTANT: bid_price must be strictly positive and should use the current price/exchange rate shown in the user message; for hold, use the current price/exchange rate as bid_price; never output bid_price: 0.
 
 Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
@@ -85,6 +85,6 @@ LLM_USER_TEMPLATE = """Current FX Market State (Round {round}):
 
 Based on your strategy and current market conditions, decide your trading action.
 Respond with <analysis>...</analysis> and <decision>{{"action": "buy", "bid_price": {price:.4f}, "quantity": 1, "reasoning": "brief rationale"}}</decision>.
-IMPORTANT: bid_price must be strictly positive. For hold, use the current exchange rate ({price:.4f}) as bid_price; never output bid_price: 0.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price/exchange rate ({price:.4f}) as bid_price; never output bid_price: 0.
 
 Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

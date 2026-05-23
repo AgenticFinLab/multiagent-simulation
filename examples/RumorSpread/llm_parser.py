@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from typing import Any, Dict
 
@@ -58,6 +59,8 @@ def parse_rumor_response(response_text: str) -> Dict[str, Any]:
         intensity = float(parsed["intensity"])
     except (TypeError, ValueError) as exc:
         raise ValueError(f"Invalid intensity: {parsed['intensity']!r}") from exc
+    if not math.isfinite(intensity):
+        raise ValueError(f"Invalid non-finite intensity: {parsed['intensity']!r}")
     reasoning = str(parsed["reasoning"]).strip()
     if not reasoning:
         raise ValueError("Empty reasoning")

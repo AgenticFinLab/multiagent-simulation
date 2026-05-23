@@ -554,6 +554,24 @@ class ScenarioContractTest(unittest.TestCase):
             "that hold decisions still require a strictly positive current-price bid.",
         )
 
+    def test_candidate_api_prompts_do_not_teach_zero_bid_price_holds(self):
+        prompt_files = [
+            ROOT / "examples" / "FlashCrash" / "RuleLLM" / "prompts.py",
+            ROOT / "examples" / "FlashCrash" / "Rag" / "prompts.py",
+        ]
+
+        offenders = []
+        for path in prompt_files:
+            if "bid_price = 0.0" in path.read_text(encoding="utf-8"):
+                offenders.append(str(path.relative_to(ROOT)))
+
+        self.assertEqual(
+            offenders,
+            [],
+            "Candidate API prompts must not teach hold decisions with bid_price=0; "
+            "use current price so strict order validators and market code stay aligned.",
+        )
+
     def test_framingeffect_rulellm_retries_parse_contract_failures(self):
         path = ROOT / "examples" / "FramingEffect" / "RuleLLM" / "players.py"
         text = path.read_text(encoding="utf-8")
@@ -609,6 +627,57 @@ class ScenarioContractTest(unittest.TestCase):
             "API portfolio updates must guard cash/price arithmetic before "
             "int(cash / price) conversions.",
         )
+
+    def test_equity_premium_api_rejects_non_finite_stock_qty(self):
+        from examples.EquityPremium.decision import parse_equity_premium_decision
+
+        bad_payloads = [
+            '<decision>{"stock_qty": NaN, "reasoning": "bad"}</decision>',
+            '<decision>{"stock_qty": Infinity, "reasoning": "bad"}</decision>',
+        ]
+        for payload in bad_payloads:
+            with self.subTest(payload=payload):
+                with self.assertRaisesRegex(ValueError, "non-finite stock_qty"):
+                    parse_equity_premium_decision(payload)
+
+        llm_player = ROOT / "examples" / "EquityPremium" / "LLM" / "players.py"
+        self.assertIn("math.isfinite(stock_qty)", llm_player.read_text(encoding="utf-8"))
+
+    def test_shared_llm_parsers_reject_non_finite_numeric_fields(self):
+        from examples.llm_utils import (
+            parse_llm_quantity_response_with_thinking,
+            parse_llm_response_with_thinking,
+        )
+
+        bad_canonical = (
+            '<decision>{"action": "buy", "bid_price": NaN, '
+            '"quantity": 1, "reasoning": "bad"}</decision>'
+        )
+        bad_quantity = (
+            '<decision>{"action": "buy", "quantity": Infinity, '
+            '"reasoning": "bad"}</decision>'
+        )
+        with self.assertRaisesRegex(ValueError, "non-finite numeric field bid_price"):
+            parse_llm_response_with_thinking(bad_canonical)
+        with self.assertRaisesRegex(ValueError, "non-finite numeric field quantity"):
+            parse_llm_quantity_response_with_thinking(bad_quantity)
+
+    def test_special_schema_parsers_reject_non_finite_numeric_fields(self):
+        from examples.RumorSpread.llm_parser import parse_rumor_response
+        from examples.SVBBankRun.decision import parse_svbbankrun_decision
+
+        bad_rumor = (
+            '<decision>{"action_type": "spread", "intensity": Infinity, '
+            '"reasoning": "bad"}</decision>'
+        )
+        bad_bank = (
+            '<decision>{"action": "buy", "quantity": NaN, '
+            '"reasoning": "bad"}</decision>'
+        )
+        with self.assertRaisesRegex(ValueError, "non-finite intensity"):
+            parse_rumor_response(bad_rumor)
+        with self.assertRaisesRegex(ValueError, "non-finite SVBBankRun quantity"):
+            parse_svbbankrun_decision(bad_bank)
 
     def test_rag_configs_include_embedding_and_chunk_contract_fields(self):
         rows = [
