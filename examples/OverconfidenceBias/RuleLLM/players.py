@@ -30,6 +30,9 @@ from examples.OverconfidenceBias.Rule.players import (  # noqa: F401
     Market,
     _build_order,
     _require_positive,
+    _to_nonnegative_int,
+    configured_order_limit,
+    safe_max_affordable,
 )
 
 logger = logging.getLogger("OverconfidenceBias.RuleLLM")
@@ -42,9 +45,7 @@ def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any
         raise ValueError(f"[{identity}] invalid action: {action}")
     bid_price = float(decision["bid_price"])
     _require_positive(bid_price, "bid_price")
-    quantity = int(decision["quantity"])
-    if quantity < 0:
-        raise ValueError(f"[{identity}] quantity must be non-negative, got {quantity}")
+    quantity = _to_nonnegative_int(decision["quantity"], f"[{identity}] quantity")
     return {
         "action": action,
         "bid_price": bid_price,
@@ -164,15 +165,18 @@ class RuleLLMInvestor(GeneralPlayer):
             )
 
         action = decision["action"]
-        quantity = int(decision["quantity"])
+        quantity = _to_nonnegative_int(decision["quantity"], f"[{self.identity}] quantity")
         bid_price = float(decision["bid_price"])
         _require_positive(bid_price, "bid_price")
 
         # Enforce portfolio constraints
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
+        order_limit = configured_order_limit(self.config.extras)
+        if order_limit > 0:
+            quantity = min(quantity, order_limit)
         if action == "buy" and quantity > 0:
-            max_affordable = int(cash / price)
+            max_affordable = safe_max_affordable(cash, price)
             quantity = min(quantity, max_affordable)
             if quantity > 0:
                 self.state.custom_state["cash"] -= quantity * price

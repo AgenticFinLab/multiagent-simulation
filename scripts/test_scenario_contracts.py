@@ -575,7 +575,9 @@ class ScenarioContractTest(unittest.TestCase):
 
     def test_failed_numeric_overflow_rows_guard_finite_portfolio_arithmetic(self):
         player_files = [
+            ROOT / "examples" / "OverconfidenceBias" / "Rule" / "players.py",
             ROOT / "examples" / "OverconfidenceBias" / "LLM" / "players.py",
+            ROOT / "examples" / "OverconfidenceBias" / "RuleLLM" / "players.py",
             ROOT / "examples" / "OverconfidenceBias" / "Rag" / "players.py",
             ROOT / "examples" / "MentalAccounting" / "LLM" / "players.py",
             ROOT / "examples" / "MentalAccounting" / "Rag" / "players.py",
@@ -584,16 +586,55 @@ class ScenarioContractTest(unittest.TestCase):
         missing = []
         for path in player_files:
             text = path.read_text(encoding="utf-8")
-            if "math.isfinite" not in text:
-                missing.append(f"{path.relative_to(ROOT)}:math.isfinite")
             if "safe_max_affordable" not in text:
                 missing.append(f"{path.relative_to(ROOT)}:safe_max_affordable")
+            if "OverconfidenceBias/Rule/players.py" in str(path):
+                if "math.isfinite" not in text:
+                    missing.append(f"{path.relative_to(ROOT)}:math.isfinite")
+                if "_to_nonnegative_int" not in text:
+                    missing.append(f"{path.relative_to(ROOT)}:_to_nonnegative_int")
+                continue
+            if "OverconfidenceBias" in str(path):
+                if "_to_nonnegative_int" not in text:
+                    missing.append(f"{path.relative_to(ROOT)}:_to_nonnegative_int")
+                if "configured_order_limit" not in text:
+                    missing.append(f"{path.relative_to(ROOT)}:configured_order_limit")
+                continue
+            if "math.isfinite" not in text:
+                missing.append(f"{path.relative_to(ROOT)}:math.isfinite")
 
         self.assertEqual(
             missing,
             [],
             "API portfolio updates must guard cash/price arithmetic before "
             "int(cash / price) conversions.",
+        )
+
+    def test_rag_configs_include_embedding_and_chunk_contract_fields(self):
+        rows = [
+            ("SVBBankRun", "Rag"),
+            ("SunkCostFallacy", "Rag"),
+            ("TulipMania", "Rag"),
+        ]
+
+        missing = []
+        required_fields = ("embed_api_key", "chunk_size", "chunk_overlap")
+        for scenario, mechanism in rows:
+            cfg = load_config(str(ROOT / "configs" / scenario / mechanism / "simulation.yml"))
+            for player_key, player in cfg["players"].items():
+                extras = player.get("config", {}).get("extras", {})
+                rag = extras.get("private_knowledge", {}).get("rag", {})
+                if not rag:
+                    continue
+                for field in required_fields:
+                    if field not in rag:
+                        missing.append(f"{scenario}__{mechanism}:{player_key}:{field}")
+
+        self.assertEqual(
+            missing,
+            [],
+            "RAG configs must provide the fields directly indexed by their "
+            "KnowledgeStore setup code.",
         )
 
 

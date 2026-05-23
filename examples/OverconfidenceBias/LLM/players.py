@@ -15,7 +15,6 @@ Investor Parameters (from config.extras):
 """
 
 import logging
-import math
 import os
 from typing import Any, Dict, Optional
 
@@ -38,16 +37,12 @@ from examples.OverconfidenceBias.Rule.players import (  # noqa: F401
     Market,
     _build_order,
     _require_positive,
+    _to_nonnegative_int,
+    configured_order_limit,
+    safe_max_affordable,
 )
 
 logger = logging.getLogger("OverconfidenceBias.LLM")
-
-
-def safe_max_affordable(cash: float, price: float) -> int:
-    """Return a finite affordable quantity for API-driven portfolio updates."""
-    if not math.isfinite(cash) or not math.isfinite(price) or price <= 0:
-        return 0
-    return max(0, int(cash / price))
 
 
 def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
@@ -57,9 +52,7 @@ def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any
         raise ValueError(f"[{identity}] invalid action: {action}")
     bid_price = float(decision["bid_price"])
     _require_positive(bid_price, "bid_price")
-    quantity = int(decision["quantity"])
-    if quantity < 0:
-        raise ValueError(f"[{identity}] quantity must be non-negative, got {quantity}")
+    quantity = _to_nonnegative_int(decision["quantity"], f"[{identity}] quantity")
     return {
         "action": action,
         "bid_price": bid_price,
@@ -179,13 +172,16 @@ class LLMInvestor(GeneralPlayer):
             )
 
         action = decision["action"]
-        quantity = int(decision["quantity"])
+        quantity = _to_nonnegative_int(decision["quantity"], f"[{self.identity}] quantity")
         bid_price = float(decision["bid_price"])
         _require_positive(bid_price, "bid_price")
 
         # Enforce portfolio constraints
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
+        order_limit = configured_order_limit(self.config.extras)
+        if order_limit > 0:
+            quantity = min(quantity, order_limit)
         if action == "buy" and quantity > 0:
             max_affordable = safe_max_affordable(cash, price)
             quantity = min(quantity, max_affordable)

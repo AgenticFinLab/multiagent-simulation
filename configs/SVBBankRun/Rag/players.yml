@@ -52,6 +52,8 @@ depositor:
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
         sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_DEPOSITOR_SYS"
@@ -88,6 +90,8 @@ socialmediainfluencer:
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
         sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_SOCIAL_MEDIA_INFLUENCER_SYS"
@@ -124,6 +128,8 @@ bankmanager:
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
         sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_BANK_MANAGER_SYS"
@@ -161,6 +167,8 @@ regulator:
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
         sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_REGULATOR_SYS"
@@ -197,6 +205,8 @@ bondtrader:
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
         sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_BOND_TRADER_SYS"
@@ -205,4 +215,3 @@ bondtrader:
         generation_config:
           temperature: 0.7
           max_tokens: 600
-

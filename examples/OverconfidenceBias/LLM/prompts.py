@@ -105,4 +105,6 @@ Required output:
 <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f},
 "quantity": non-negative integer, "reasoning": "brief rationale"}}</decision>
 IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
+IMPORTANT: always include both <analysis> and <decision>; analysis without a decision is invalid.
+IMPORTANT: keep quantity feasible under cash, inventory, and your configured role size.
 """

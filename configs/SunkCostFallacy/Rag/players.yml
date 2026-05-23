@@ -51,6 +51,8 @@ sunkcostholder:
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
         sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_SUNK_COST_HOLDER_SYS"
@@ -87,6 +89,8 @@ commitmentescalator:
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
         sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_COMMITMENT_ESCALATOR_SYS"
@@ -123,6 +127,8 @@ rationalcutter:
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
         sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_RATIONAL_CUTTER_SYS"
@@ -159,6 +165,8 @@ opportunitycosttrader:
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
         sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_OPPORTUNITY_COST_TRADER_SYS"
@@ -195,6 +203,8 @@ noisetrader:
           embed_model: "openai/hunyuan-embedding"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
         sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"

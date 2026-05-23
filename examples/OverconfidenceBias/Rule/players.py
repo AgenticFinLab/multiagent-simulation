@@ -19,6 +19,7 @@ Agent Types:
 """
 
 import logging
+import math
 import os
 import random
 from typing import Any, Dict, Optional
@@ -32,8 +33,52 @@ logger = logging.getLogger("OverconfidenceBias")
 
 def _require_positive(value: float, label: str) -> None:
     """Fail fast when a required positive scalar is invalid."""
-    if value <= 0:
+    try:
+        scalar = float(value)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError(f"{label} must be a finite positive number, got {value}") from exc
+    if not math.isfinite(scalar) or scalar <= 0:
         raise ValueError(f"{label} must be positive, got {value}")
+
+
+def _to_nonnegative_int(value: Any, label: str) -> int:
+    """Convert a quantity-like value without accepting non-finite numbers."""
+    try:
+        if isinstance(value, int) and not isinstance(value, bool):
+            parsed = value
+        else:
+            scalar = float(value)
+            if not math.isfinite(scalar):
+                raise ValueError(f"{label} must be finite, got {value}")
+            parsed = int(scalar)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError(f"{label} must be a non-negative integer, got {value}") from exc
+    if parsed < 0:
+        raise ValueError(f"{label} must be non-negative, got {value}")
+    return parsed
+
+
+def safe_max_affordable(cash: float, price: float) -> int:
+    """Return a finite affordable quantity for portfolio constraints."""
+    try:
+        cash_value = float(cash)
+        price_value = float(price)
+    except (TypeError, ValueError, OverflowError):
+        return 0
+    if not math.isfinite(cash_value) or not math.isfinite(price_value) or price_value <= 0:
+        return 0
+    return max(0, int(cash_value / price_value))
+
+
+def configured_order_limit(extras: Dict[str, Any]) -> int:
+    """Infer the per-order size limit encoded by this scenario's config."""
+    for key in ("base_size", "noise_size"):
+        if key not in extras:
+            continue
+        limit = _to_nonnegative_int(extras[key], key)
+        if limit > 0:
+            return limit
+    return 0
 
 
 def _build_order(
@@ -52,7 +97,7 @@ def _build_order(
         "from": player.identity,
         "action": action,
         "bid_price": price,
-        "quantity": max(0, int(quantity)),
+        "quantity": _to_nonnegative_int(quantity, "quantity"),
         "reasoning": reasoning,
         "agent_type": player.__class__.__name__,
         "strategy": player.__class__.__name__,
@@ -274,7 +319,7 @@ class OverconfidentTrader(BaseInvestor):
             qty = min(base_size * 2, int(abs(signal) * 5000))
             if signal > 0:
                 _require_positive(price, "price")
-                buy_qty = min(qty, int(cash / price))
+                buy_qty = min(qty, safe_max_affordable(cash, price))
                 if buy_qty > 0:
                     self.state.custom_state["cash"] -= buy_qty * price
                     self.state.custom_state["position"] += buy_qty
@@ -315,7 +360,7 @@ class SelfAttributor(BaseInvestor):
         if position > 0 and deviation > 0:
             _require_positive(price, "price")
             boosted_qty = min(base_size * 2, int(base_size * (1 + confidence_boost)))
-            buy_qty = min(boosted_qty, int(cash / price))
+            buy_qty = min(boosted_qty, safe_max_affordable(cash, price))
             if buy_qty > 0:
                 self.state.custom_state["cash"] -= buy_qty * price
                 self.state.custom_state["position"] += buy_qty
@@ -358,7 +403,7 @@ class CalibratedTrader(BaseInvestor):
             qty = min(base_size, int(abs(deviation) * signal_precision * 3000))
             if deviation < 0:
                 _require_positive(price, "price")
-                buy_qty = min(qty, int(cash / price))
+                buy_qty = min(qty, safe_max_affordable(cash, price))
                 if buy_qty > 0:
                     self.state.custom_state["cash"] -= buy_qty * price
                     self.state.custom_state["position"] += buy_qty
@@ -410,7 +455,7 @@ class ContrarianInvestor(BaseInvestor):
                     }
             else:
                 _require_positive(price, "price")
-                buy_qty = min(qty, int(cash / price))
+                buy_qty = min(qty, safe_max_affordable(cash, price))
                 if buy_qty > 0:
                     self.state.custom_state["cash"] -= buy_qty * price
                     self.state.custom_state["position"] += buy_qty
@@ -443,7 +488,7 @@ class NoiseTrader(BaseInvestor):
             action = "buy" if random.random() > 0.5 else "sell"
             if action == "buy":
                 _require_positive(price, "price")
-                qty = min(qty, int(cash / price))
+                qty = min(qty, safe_max_affordable(cash, price))
             else:
                 qty = min(qty, max(position, 0))
             if qty > 0:
