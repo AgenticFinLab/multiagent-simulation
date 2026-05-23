@@ -641,7 +641,10 @@ class ScenarioContractTest(unittest.TestCase):
                     parse_equity_premium_decision(payload)
 
         llm_player = ROOT / "examples" / "EquityPremium" / "LLM" / "players.py"
-        self.assertIn("math.isfinite(stock_qty)", llm_player.read_text(encoding="utf-8"))
+        llm_text = llm_player.read_text(encoding="utf-8")
+        self.assertIn("parse_equity_premium_decision", llm_text)
+        self.assertIn("fallback_hold_decision", llm_text)
+        self.assertIn('"llm_fallback": llm_fallback', llm_text)
 
     def test_shared_llm_parsers_reject_non_finite_numeric_fields(self):
         from examples.llm_utils import (

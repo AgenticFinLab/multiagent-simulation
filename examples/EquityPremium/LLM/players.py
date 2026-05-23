@@ -47,10 +47,7 @@ Environment Variables:
 
 import logging
 import os
-import json
-import math
 import random
-import re
 import sys
 import importlib
 from typing import Any, Dict, Optional
@@ -63,9 +60,12 @@ from masim.utils.history import HistoryBuffer
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-import sys
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from examples.EquityPremium.decision import (  # noqa: E402
+    fallback_hold_decision,
+    parse_equity_premium_decision,
+)
 
 logger = logging.getLogger("EquityPremiumLLM")
 
@@ -247,50 +247,6 @@ class LLMInvestor(GeneralPlayer):
             total_value=total_value,
         )
 
-    def _parse_response(self, text: str) -> Dict[str, Any]:
-        """Parse LLM response and validate required fields are present and non-null."""
-        analysis = ""
-        analysis_match = re.search(r"<analysis>(.*?)</analysis>", text, re.DOTALL)
-        if not analysis_match:
-            analysis_match = re.search(r"<think>(.*?)</think>", text, re.DOTALL)
-        if analysis_match:
-            analysis = analysis_match.group(1).strip()
-
-        decision_text = text
-        decision_match = re.search(r"<decision>(.*?)</decision>", text, re.DOTALL)
-        if decision_match:
-            decision_text = decision_match.group(1).strip()
-
-        parsed = None
-        try:
-            parsed = json.loads(decision_text)
-        except Exception:
-            match = re.search(r"\{.*\}", decision_text, re.DOTALL)
-            if match:
-                parsed = json.loads(match.group(0))
-        if parsed is None:
-            raise ValueError(f"Parse failed: {text[:100]}")
-
-        # Validate required fields with fallback to trigger retry
-        required_fields = ["stock_qty", "reasoning"]
-        missing_or_null = []
-        for field in required_fields:
-            if field not in parsed or parsed[field] is None:
-                missing_or_null.append(field)
-        if missing_or_null:
-            raise ValueError(f"Fields missing or null: {missing_or_null}")
-
-        try:
-            stock_qty = float(parsed["stock_qty"])
-        except (TypeError, ValueError) as exc:
-            raise ValueError(f"Invalid stock_qty: {parsed['stock_qty']!r}") from exc
-        if not math.isfinite(stock_qty):
-            raise ValueError(f"Invalid non-finite stock_qty: {parsed['stock_qty']!r}")
-        parsed["stock_qty"] = stock_qty
-
-        parsed["analysis"] = analysis
-        return parsed
-
     async def decide(self) -> Dict[str, Any]:
         market_data = self.state.custom_state["market_data"]
         llm_client = self.state.custom_state["llm_client"]
@@ -309,10 +265,10 @@ class LLMInvestor(GeneralPlayer):
                         )
                     ]
                 )
-                decision = self._parse_response(output.outputs[0].response)
+                decision = parse_equity_premium_decision(output.outputs[0].response)
                 break
-            except Exception as exc:
-                last_error = exc
+            except ValueError as exc:
+                last_error = str(exc)
                 if attempt < 2:
                     logger.debug(
                         "[%s] LLM parse failed (attempt %d), retrying...",
@@ -321,10 +277,15 @@ class LLMInvestor(GeneralPlayer):
                     )
 
         if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            logger.warning(
+                "[%s] parse failed after retries; explicit fallback: %s",
+                self.identity,
+                last_error,
             )
+            decision = fallback_hold_decision(str(last_error))
 
+        llm_fallback = bool(decision.pop("llm_fallback"))
+        fallback_reason = str(decision.pop("fallback_reason"))
         stock_qty = float(decision["stock_qty"])
         cash, stocks = (
             self.state.custom_state["cash"],
@@ -351,6 +312,8 @@ class LLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": decision["reasoning"][:100],
             "analysis": decision["analysis"],
+            "llm_fallback": llm_fallback,
+            "fallback_reason": fallback_reason,
         }
         return {
             **order,
