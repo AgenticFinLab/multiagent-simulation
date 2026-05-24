@@ -93,7 +93,8 @@ def main() -> Dict[str, Any]:
     ]
     metrics = calculate_metrics(data, truth_value=truth_value)
 
-    analysis_dir = os.path.join(config["setting"]["record_path"], "analysis")
+    artifact_dir = os.path.dirname(config["setting"]["record_path"])
+    analysis_dir = os.path.join(artifact_dir, "analysis")
     os.makedirs(analysis_dir, exist_ok=True)
     if data["belief"]:
         create_visualizations(data, analysis_dir, truth_value=truth_value)
@@ -125,12 +126,19 @@ def main() -> Dict[str, Any]:
         ),
     }
 
+    summary = {
+        "scenario": "RumorSpread",
+        "mechanism": "Rag",
+        "metrics": metrics,
+        "validation": metrics["validation"],
+    }
+
     with open(os.path.join(analysis_dir, "rag_stats.json"), "w", encoding="utf-8") as f:
         json.dump(rag_stats, f, indent=2)
     with open(os.path.join(analysis_dir, "summary.json"), "w", encoding="utf-8") as f:
-        json.dump(metrics, f, indent=2)
+        json.dump(summary, f, indent=2)
 
-    return metrics
+    return summary
 
 
 __all__ = ["analyze_rag_knowledge_effect", "main"]

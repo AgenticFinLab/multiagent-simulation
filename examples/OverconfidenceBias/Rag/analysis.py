@@ -16,10 +16,22 @@ from examples.OverconfidenceBias.Rule.analysis import (
     create_visualizations,
     load_simulation_data,
 )
-from masim.utils import load_config
+from masim.utils import load_config, load_results
 
 DEFAULT_CONFIG = "configs/OverconfidenceBias/Rag/simulation.yml"
 _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
+
+def _load_rag_payloads(results: Any) -> Dict[str, Dict[int, Dict[str, Any]]]:
+    """Extract recorded RAG contexts by player and round."""
+    payloads: Dict[str, Dict[int, Dict[str, Any]]] = {}
+    for pid, player in results.players_by_role("player").items():
+        round_payloads: Dict[int, Dict[str, Any]] = {}
+        for round_num, rag_context in player.turns.field("rag_context").items():
+            round_payloads[round_num] = {"rag_context": rag_context}
+        if round_payloads:
+            payloads[pid] = round_payloads
+    return payloads
 
 
 def analyze_rag_knowledge_effect(
@@ -69,10 +81,12 @@ def main(config_path: str | None = None) -> Dict[str, Any]:
     os.makedirs(output_dir, exist_ok=True)
     data = load_simulation_data(config)
     summary = analyze_overconfidencebias(data, config, output_dir)
-    rag_stats = analyze_rag_knowledge_effect(data["investor_payloads"])
+    rag_stats = analyze_rag_knowledge_effect(_load_rag_payloads(load_results(config)))
     summary["rag_knowledge_effect"] = rag_stats
     with open(os.path.join(output_dir, "rag_stats.json"), "w", encoding="utf-8") as handle:
         json.dump(rag_stats, handle, indent=2)
+    with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2)
     return summary
 
 
@@ -80,6 +94,7 @@ __all__ = [
     "load_simulation_data",
     "calculate_metrics",
     "create_visualizations",
+    "_load_rag_payloads",
     "analyze_rag_knowledge_effect",
     "main",
 ]
