@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
+1,9,FramingEffect,LLM,SUCCESS,0,3411.184,2026-05-22T04:43:21,2026-05-22T05:40:12,config/simulation.yml,examples/FramingEffect/LLM/run_framingeffect_llm.py,logs/FramingEffect__LLM.log,,200,200,,

@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
+6,9,EquityPremium,Rag,SUCCESS,0,8700.65,2026-05-22T15:48:27,2026-05-22T18:13:28,config/simulation.yml,examples/EquityPremium/Rag/run_equity_premium_ragllm.py,logs/EquityPremium__Rag.log,,200,200,,

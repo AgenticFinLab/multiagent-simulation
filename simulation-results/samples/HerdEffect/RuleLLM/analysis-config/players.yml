@@ -1,0 +1,164 @@
+# =============================================================================
+# HerdEffectRuleLLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 Hybrid Rule+LLM Investors
+# Each LLM agent's system prompt embeds:
+#   - Personal profile: identity, style, risk attitude
+#   - Quantitative rules: exact financial/mathematical principles
+# =============================================================================
+
+# Market (rule-based, identical to HerdEffect)
+market:
+  name: "Market"
+  class: "examples.HerdEffect.RuleLLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      supply_elasticity: 0.1
+      mean_reversion: 0.02
+      noise_std: 0.5
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# RuleLLM Momentum Investor (Trend Following)
+rulellm_momentum:
+  name: "RuleLLM Momentum Investor"
+  class: "examples.HerdEffect.RuleLLM.players:RuleLLMMomentumInvestor"
+  num_instances: 3
+  config:
+    identity: "rulellm_momentum"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      fundamental: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_MOMENTUM_SYS"
+        user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# RuleLLM Contrarian Investor (Value/Mean Reversion)
+rulellm_contrarian:
+  name: "RuleLLM Contrarian Investor"
+  class: "examples.HerdEffect.RuleLLM.players:RuleLLMContrarianInvestor"
+  num_instances: 2
+  config:
+    identity: "rulellm_contrarian"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      fundamental: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_CONTRARIAN_SYS"
+        user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# RuleLLM Risk Averse Investor (Variance Sensitive)
+rulellm_risk_averse:
+  name: "RuleLLM Risk Averse Investor"
+  class: "examples.HerdEffect.RuleLLM.players:RuleLLMRiskAverseInvestor"
+  num_instances: 2
+  config:
+    identity: "rulellm_risk_averse"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      fundamental: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_RISK_AVERSE_SYS"
+        user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# RuleLLM Aggressive Investor (Acceleration Momentum)
+rulellm_aggressive:
+  name: "RuleLLM Aggressive Investor"
+  class: "examples.HerdEffect.RuleLLM.players:RuleLLMAggressiveInvestor"
+  num_instances: 2
+  config:
+    identity: "rulellm_aggressive"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      fundamental: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_AGGRESSIVE_SYS"
+        user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# RuleLLM Noise Trader (Random Trading)
+rulellm_noise:
+  name: "RuleLLM Noise Trader"
+  class: "examples.HerdEffect.RuleLLM.players:RuleLLMNoiseTrader"
+  num_instances: 2
+  config:
+    identity: "rulellm_noise"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      fundamental: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_NOISE_SYS"
+        user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 500
+  persona: !include persona.yml

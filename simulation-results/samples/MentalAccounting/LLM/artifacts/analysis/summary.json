@@ -1,0 +1,60 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": 567.2147053299776,
+      "max_abs_deviation_pct": 1401.06843103832,
+      "mean_abs_deviation_pct": 131.2066377878826
+    },
+    "price_metrics": {
+      "final": 667.2147053299776,
+      "initial": 100.02075988184473,
+      "max": 1501.06843103832,
+      "mean": 231.11594316816235,
+      "min": 90.93053802797543,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 1474.2876480626717,
+      "max_drawdown_pct": -47.05865487705546,
+      "volatility_pct": 92.87139232733679
+    },
+    "volume_metrics": {
+      "mean_volume": 716.355,
+      "total_volume": 143271.0
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "MentalAccounting",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": false,
+        "score": 0.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 1401.068
+      },
+      "Volatility Sanity": {
+        "passed": true,
+        "score": 0.526,
+        "target": "0% to 1000% annualized volatility",
+        "value": 1474.288
+      }
+    },
+    "interpretation": "=== MentalAccounting SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 72.9% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 1401.07%\n    Expected: nonzero but bounded deviation\n    Score: 0.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 1474.29%\n    Expected: bounded annualized volatility\n    Score: 52.6%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe MentalAccounting run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 72.9%",
+    "is_valid": true,
+    "score": 0.7289
+  }
+}

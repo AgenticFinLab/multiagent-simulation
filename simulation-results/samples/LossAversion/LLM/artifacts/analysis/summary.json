@@ -1,0 +1,60 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": 123.5627170208065,
+      "max_abs_deviation_pct": 1914.2968420661848,
+      "mean_abs_deviation_pct": 408.39754548734203
+    },
+    "price_metrics": {
+      "final": 223.5627170208065,
+      "initial": 99.99240832057609,
+      "max": 2014.2968420661848,
+      "mean": 508.1005241435965,
+      "min": 70.30545730486264,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 3105.579590680217,
+      "max_drawdown_pct": -38.70273105363027,
+      "volatility_pct": 195.63312556327662
+    },
+    "volume_metrics": {
+      "mean_volume": 0.0,
+      "total_volume": 0.0
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "LossAversion",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": false,
+        "score": 0.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 1914.297
+      },
+      "Volatility Sanity": {
+        "passed": false,
+        "score": 0.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 3105.58
+      }
+    },
+    "interpretation": "=== LossAversion SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 65.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 1914.30%\n    Expected: nonzero but bounded deviation\n    Score: 0.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 3105.58%\n    Expected: bounded annualized volatility\n    Score: 0.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe LossAversion run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 65.0%",
+    "is_valid": true,
+    "score": 0.65
+  }
+}

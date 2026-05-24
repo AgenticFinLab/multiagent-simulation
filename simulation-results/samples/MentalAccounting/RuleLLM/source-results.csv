@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
+1,1,MentalAccounting,RuleLLM,SUCCESS,0,3900.296,2026-05-23T17:58:55,2026-05-23T19:03:56,config/simulation.yml,examples/MentalAccounting/RuleLLM/run_mentalaccounting_rulellm.py,logs/MentalAccounting__RuleLLM.log,,200,200,

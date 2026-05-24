@@ -1,0 +1,159 @@
+# CurrencyCrisis RuleLLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.CurrencyCrisis.RuleLLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      initial_price: 100.0
+      peg_rate: 100.0
+      fundamental_value: 100.0
+      reserve_level: 500000.0
+      price_impact: 0.01
+      mean_reversion: 0.02
+      noise_std: 0.5
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+speculativeattacker:
+  name: "SpeculativeAttacker"
+  class: "examples.CurrencyCrisis.RuleLLM.players:RuleLLMSpeculativeAttacker"
+  num_instances: 2
+  config:
+    identity: "speculativeattacker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 5000
+      attack_threshold: 0.03
+      position_size: 800
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_SPECULATIVE_ATTACKER_SYS"
+        user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+  persona: !include persona.yml
+
+selffulfillingtrader:
+  name: "SelfFulfillingTrader"
+  class: "examples.CurrencyCrisis.RuleLLM.players:RuleLLMSelfFulfillingTrader"
+  num_instances: 2
+  config:
+    identity: "selffulfillingtrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 800000.0
+      initial_position: 5000
+      contagion_sensitivity: 0.01
+      exit_threshold: 0.03
+      position_size: 500
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_SELF_FULFILLING_TRADER_SYS"
+        user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+  persona: !include persona.yml
+
+centralbankdefender:
+  name: "CentralBankDefender"
+  class: "examples.CurrencyCrisis.RuleLLM.players:RuleLLMCentralBankDefender"
+  num_instances: 1
+  config:
+    identity: "centralbankdefender"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 5000000.0
+      initial_position: 3000
+      defense_size: 600
+      defense_threshold: 0.05
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_CENTRAL_BANK_DEFENDER_SYS"
+        user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+fundamentalhedger:
+  name: "FundamentalHedger"
+  class: "examples.CurrencyCrisis.RuleLLM.players:RuleLLMFundamentalHedger"
+  num_instances: 1
+  config:
+    identity: "fundamentalhedger"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 2000
+      hedge_ratio: 0.05
+      position_size: 400
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_FUNDAMENTAL_HEDGER_SYS"
+        user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.CurrencyCrisis.RuleLLM.players:RuleLLMNoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 500
+      trade_probability: 0.3
+      noise_size: 100
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
+        user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml

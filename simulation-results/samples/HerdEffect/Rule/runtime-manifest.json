@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "Rule",
+  "omitted_raw_artifact_bytes": 9159241,
+  "omitted_raw_artifact_files": 1562,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 6572487,
+      "file_count": 1551,
+      "name": "records",
+      "source_path": "samples/HerdEffect/Rule/artifacts/records"
+    },
+    {
+      "bytes": 2574241,
+      "file_count": 9,
+      "name": "communication",
+      "source_path": "samples/HerdEffect/Rule/artifacts/communication"
+    },
+    {
+      "bytes": 12513,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/HerdEffect/Rule/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/HerdEffect/Rule/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "HerdEffect__Rule",
+  "scenario": "HerdEffect",
+  "source_resource_pack_sample_path": "samples/HerdEffect/Rule",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/HerdEffect/Rule"
+}

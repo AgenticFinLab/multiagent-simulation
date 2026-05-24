@@ -1,0 +1,166 @@
+# LossAversion LLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.LossAversion.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.03
+      mean_reversion: 0.01
+      noise_std: 0.015
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+lossaverseinvestor:
+  name: "LossAverseInvestor"
+  class: "examples.LossAversion.LLM.players:LLMLossAverseInvestor"
+  num_instances: 3
+  config:
+    identity: "lossaverseinvestor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      loss_aversion_lambda: 2.25
+      sell_gain_threshold: 0.05
+      base_size: 400
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.LossAversion.LLM.prompts:LLM_LOSS_AVERSE_PROMPT"
+        user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+  persona: !include persona.yml
+
+breakeventrader:
+  name: "BreakEvenTrader"
+  class: "examples.LossAversion.LLM.players:LLMBreakEvenTrader"
+  num_instances: 2
+  config:
+    identity: "breakeventrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1200000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      risk_increase_factor: 2.0
+      base_size: 350
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.LossAversion.LLM.prompts:LLM_BREAK_EVEN_PROMPT"
+        user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.8
+          max_tokens: 600
+  persona: !include persona.yml
+
+rationaltrader:
+  name: "RationalTrader"
+  class: "examples.LossAversion.LLM.players:LLMRationalTrader"
+  num_instances: 2
+  config:
+    identity: "rationaltrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1500000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      risk_aversion: 0.7
+      base_size: 300
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.LossAversion.LLM.prompts:LLM_RATIONAL_PROMPT"
+        user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 600
+  persona: !include persona.yml
+
+momentumtrader:
+  name: "MomentumTrader"
+  class: "examples.LossAversion.LLM.players:LLMMomentumTrader"
+  num_instances: 2
+  config:
+    identity: "momentumtrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      entry_threshold: 0.03
+      base_size: 300
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.LossAversion.LLM.prompts:LLM_MOMENTUM_PROMPT"
+        user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+  persona: !include persona.yml
+
+marketmaker:
+  name: "MarketMaker"
+  class: "examples.LossAversion.LLM.players:LLMMarketMaker"
+  num_instances: 2
+  config:
+    identity: "marketmaker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      inventory_limit: 2000
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.LossAversion.LLM.prompts:LLM_MARKET_MAKER_PROMPT"
+        user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.95
+          max_tokens: 600
+  persona: !include persona.yml

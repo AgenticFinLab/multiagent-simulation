@@ -1,0 +1,54 @@
+# =============================================================================
+# ReversalEffect Simulation Configuration
+# =============================================================================
+# Demonstrates the reversal effect (De Bondt & Thaler, 1985):
+# - Past losers outperform past winners over long horizons
+# - Market overreaction followed by mean reversion
+# =============================================================================
+
+setting:
+  name: "reversal_effect_simulation"
+  description: "Long-term mean reversion and overreaction correction"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "artifacts/records"
+  save_diagram_interval: 100
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "reversal_effect"
+  actor_prefix: null
+  # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
+  num_cpus: null
+  num_gpus: null
+  # Derived: 15 players, star topology -> 28 msgs/round
+  #   15 TurnResult + 15 pending_info + 28 Message = 58 Ray objects
+  #   58 obj x 64 KB min-alloc = 3712 KB (3.63 MB)
+  #   10x headroom = 36.3 MB; 128 MB minimum floor -> 134217728 bytes
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "artifacts/communication"
+  record_messages: true
+  message_block_size: 500

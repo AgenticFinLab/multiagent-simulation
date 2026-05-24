@@ -1,0 +1,47 @@
+{
+  "metrics": {
+    "ac1_crisis_phase": 0.948,
+    "crisis_onset_round": null,
+    "crisis_velocity_pct": 114.22,
+    "max_drawdown_pct": 75.066,
+    "total_rounds": 200
+  },
+  "record_path": "artifacts/records",
+  "scenario": "AsianFinancialCrisis",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "ac1_crisis_phase": {
+        "citation": "Kaminsky & Reinhart 1999",
+        "observed": 0.948,
+        "score": 0.104,
+        "target_range": "[0.25, 0.50]",
+        "weight": 0.15
+      },
+      "crisis_onset_round": {
+        "citation": "Kaminsky & Reinhart 1999",
+        "observed": "None (deviation never reached \u221210%)",
+        "score": 0.0,
+        "target_range": "[10, 20]",
+        "weight": 0.3
+      },
+      "crisis_velocity": {
+        "citation": "Radelet & Sachs 1998",
+        "observed": 114.22,
+        "score": 1.0,
+        "target_range": "> 2.0% / round",
+        "weight": 0.2
+      },
+      "max_drawdown": {
+        "citation": "Kaminsky & Reinhart 1999",
+        "observed": 75.07,
+        "score": 0.749,
+        "target_range": "[30%, 60%]",
+        "weight": 0.35
+      }
+    },
+    "interpretation": "=== ASIAN FINANCIAL CRISIS SIMULATION VALIDATION: INVALID ===\nOverall Fit Score: 47.8% (threshold: 50%)\n\n[1] CRISIS DEPTH (MAX DRAWDOWN)\n    Observed: 75.1%   Expected: 30\u201360% (Kaminsky & Reinhart 1999)\n    Score: 0.749   Assessment: PASS \u2014 drawdown within calibrated range (Kaminsky & Reinhart 1999: 30\u201360%)\n\n[2] CRISIS ONSET TIMING\n    Observed: None   Expected: rounds 10\u201320 (Kaminsky & Reinhart 1999)\n    Score: 0.000   Assessment: FAIL \u2014 deviation never reached \u221210%; crisis too shallow\n\n[3] CRISIS VELOCITY (MAX ROUND-TO-ROUND DROP)\n    Observed: 114.22%/round   Expected: > 2.0% (Radelet & Sachs 1998)\n    Score: 1.000   Assessment: PASS \u2014 sudden-stop velocity confirmed (Radelet & Sachs 1998: > 2%/round)\n\n[4] CONTAGION SELF-REINFORCEMENT (RETURN AC1 DURING CRISIS)\n    Observed: 0.9480   Expected: 0.25\u20130.50 (Kaminsky & Reinhart 1999)\n    Score: 0.104   Assessment: PASS \u2014 positive momentum autocorrelation during cascade (Kaminsky & Reinhart 1999)\n\n[SUMMARY]\n    Max Drawdown Score:       0.749 \u00d7 0.35\n    Crisis Onset Score:       0.000 \u00d7 0.30\n    Velocity Score:           1.000 \u00d7 0.20\n    AC1 Score:                0.104 \u00d7 0.15\n    Fit Score: 47.8%\n    Status: INVALID \u2014 calibration targets not met",
+    "is_valid": false,
+    "score": 0.4777
+  }
+}

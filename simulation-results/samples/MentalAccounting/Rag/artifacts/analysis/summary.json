@@ -1,0 +1,120 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": 0.1228475759980796,
+      "max_abs_deviation_pct": 4.291019133088511,
+      "mean_abs_deviation_pct": 0.41850593167228106
+    },
+    "price_metrics": {
+      "final": 100.12284757599808,
+      "initial": 100.00690284782097,
+      "max": 102.01833795742384,
+      "mean": 99.86854328230712,
+      "min": 95.70898086691149,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 11.157065203676316,
+      "max_drawdown_pct": -6.184532327066028,
+      "volatility_pct": 0.7028290450061843
+    },
+    "volume_metrics": {
+      "mean_volume": 6.8,
+      "total_volume": 1360.0
+    }
+  },
+  "rag_knowledge_effect": {
+    "aggregate": {
+      "max_retrieval_failure_rate": 0.0,
+      "mean_retrieval_failure_rate": 0.0
+    },
+    "housemoneytrader_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "housemoneytrader_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "mentalaccountant_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "mentalaccountant_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "noisetrader_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "noisetrader_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "rationalportfoliomanager": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "sunkcostholder_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "sunkcostholder_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "MentalAccounting",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 4.291
+      },
+      "Volatility Sanity": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 11.157
+      }
+    },
+    "interpretation": "=== MentalAccounting SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 100.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 4.29%\n    Expected: nonzero but bounded deviation\n    Score: 100.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 11.16%\n    Expected: bounded annualized volatility\n    Score: 100.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe MentalAccounting run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 100.0%",
+    "is_valid": true,
+    "score": 1.0
+  }
+}

@@ -1,0 +1,215 @@
+knowledge:
+  global_resources:
+    MinerU_processed:
+      path: "examples/document-sources/processed"
+  global_index_dir:
+    rag_index:
+      path: "examples/document-sources/rag_index"
+
+market:
+  name: "Market"
+  class: "examples.TulipMania.Rule.players:Market"
+  num_instances: 1
+  persona: !include ../Rag/persona.yml
+  config:
+    identity: "market"
+    role: market
+    steps_per_turn: 1
+    group_tags: [market]
+    extras:
+      record_path: "artifacts/records"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.02
+      mean_reversion: 0.008
+      noise_std: 0.015
+
+trendchaser:
+  name: "TrendChaser"
+  class: "examples.TulipMania.Rag.players:RagLLMTrendChaser"
+  num_instances: 4
+  persona: !include ../Rag/persona.yml
+  config:
+    identity: "trendchaser"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 300
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trend_threshold: 0.01
+      chase_size: 400
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 3
+      llm:
+        sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_TREND_CHASER_SYS"
+        user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+
+socialprooffollower:
+  name: "SocialProofFollower"
+  class: "examples.TulipMania.Rag.players:RagLLMSocialProofFollower"
+  num_instances: 3
+  persona: !include ../Rag/persona.yml
+  config:
+    identity: "socialprooffollower"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 800000.0
+      initial_position: 400
+      initial_price: 100.0
+      fundamental_value: 100.0
+      crowd_threshold: 0.3
+      follow_size: 350
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 3
+      llm:
+        sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_SOCIAL_PROOF_FOLLOWER_SYS"
+        user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+
+intrinsicvaluetrader:
+  name: "IntrinsicValueTrader"
+  class: "examples.TulipMania.Rag.players:RagLLMIntrinsicValueTrader"
+  num_instances: 2
+  persona: !include ../Rag/persona.yml
+  config:
+    identity: "intrinsicvaluetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1500000.0
+      initial_position: 600
+      initial_price: 100.0
+      fundamental_value: 100.0
+      overvalue_threshold: 0.2
+      position_size: 350
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 3
+      llm:
+        sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_INTRINSIC_VALUE_TRADER_SYS"
+        user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+
+earlyexittrader:
+  name: "EarlyExitTrader"
+  class: "examples.TulipMania.Rag.players:RagLLMEarlyExitTrader"
+  num_instances: 2
+  persona: !include ../Rag/persona.yml
+  config:
+    identity: "earlyexittrader"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1200000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      exit_threshold: 0.4
+      exit_size: 400
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 3
+      llm:
+        sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_EARLY_EXIT_TRADER_SYS"
+        user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.TulipMania.Rag.players:RagLLMNoiseTrader"
+  num_instances: 2
+  persona: !include ../Rag/persona.yml
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 100
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 3
+      llm:
+        sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
+        user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600

@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
+1,9,AnchoringEffect,RuleLLM,SUCCESS,0,16070.899,2026-05-22T04:59:06,2026-05-22T09:26:57,config/simulation.yml,examples/AnchoringEffect/RuleLLM/run_anchoringeffect_rulellm.py,logs/AnchoringEffect__RuleLLM.log,,200,200,,

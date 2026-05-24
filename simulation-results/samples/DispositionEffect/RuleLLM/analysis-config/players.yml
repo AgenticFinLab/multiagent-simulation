@@ -1,0 +1,184 @@
+# =============================================================================
+# DispositionEffectRuleLLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 Hybrid Rule+LLM Investors
+# Each LLM agent's system prompt embeds:
+#   - Personal profile: identity, style, risk attitude
+#   - Quantitative rules: exact financial/mathematical principles
+# =============================================================================
+
+# Market (rule-based, identical to DispositionEffect)
+market:
+  name: "Market"
+  class: "examples.DispositionEffect.RuleLLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.1
+      mean_reversion: 0.01
+      noise_std: 1.0
+      news_probability: 0.05
+      news_impact_range: 3.0
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# RuleLLM Disposition Biased (Prospect Theory)
+rulellm_disposition_biased:
+  name: "RuleLLM Disposition Biased"
+  class: "examples.DispositionEffect.RuleLLM.players:RuleLLMDispositionBiased"
+  num_instances: 3
+  config:
+    identity: "rulellm_disposition_biased"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      initial_purchase_price: 100.0
+      max_position: 200.0
+      custom_state_hot_limit: 3
+      gain_threshold: 0.03
+      loss_threshold: -0.10
+      sell_fraction_gain: 0.5
+      sell_fraction_loss: 0.15
+      buy_fraction: 0.15
+      llm:
+        sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_DISPOSITION_BIASED_SYS"
+        user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# RuleLLM Rational Investor (Expected Utility)
+rulellm_rational:
+  name: "RuleLLM Rational Investor"
+  class: "examples.DispositionEffect.RuleLLM.players:RuleLLMRationalInvestor"
+  num_instances: 2
+  config:
+    identity: "rulellm_rational"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      initial_purchase_price: 100.0
+      custom_state_hot_limit: 3
+      target_allocation: 0.5
+      rebalance_threshold: 0.1
+      llm:
+        sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_RATIONAL_SYS"
+        user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# RuleLLM Tax Aware Investor
+rulellm_tax_aware:
+  name: "RuleLLM Tax Aware Investor"
+  class: "examples.DispositionEffect.RuleLLM.players:RuleLLMTaxAwareInvestor"
+  num_instances: 2
+  config:
+    identity: "rulellm_tax_aware"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      initial_purchase_price: 100.0
+      custom_state_hot_limit: 3
+      tax_loss_threshold: -0.05
+      capital_gains_hold: 0.20
+      tax_harvest_fraction: 0.5
+      llm:
+        sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_TAX_AWARE_SYS"
+        user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# RuleLLM Institutional Investor
+rulellm_institutional:
+  name: "RuleLLM Institutional Investor"
+  class: "examples.DispositionEffect.RuleLLM.players:RuleLLMInstitutionalInvestor"
+  num_instances: 2
+  config:
+    identity: "rulellm_institutional"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      initial_purchase_price: 100.0
+      custom_state_hot_limit: 3
+      gain_threshold: 0.25
+      loss_threshold: -0.15
+      sell_fraction: 0.4
+      llm:
+        sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_INSTITUTIONAL_SYS"
+        user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# RuleLLM Loss Averse Investor
+rulellm_loss_averse:
+  name: "RuleLLM Loss Averse Investor"
+  class: "examples.DispositionEffect.RuleLLM.players:RuleLLMLossAverse"
+  num_instances: 2
+  config:
+    identity: "rulellm_loss_averse"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      initial_purchase_price: 100.0
+      custom_state_hot_limit: 3
+      gain_threshold: 0.03
+      loss_threshold: -0.10
+      sell_fraction_gain: 0.5
+      sell_fraction_loss: 0.15
+      llm:
+        sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_LOSS_AVERSE_SYS"
+        user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml

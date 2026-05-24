@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
+1,1,FlashCrash,Rag,SUCCESS,0,7570.676,2026-05-23T16:22:13,2026-05-23T18:28:24,config/simulation.yml,examples/FlashCrash/Rag/run_flash_crash_ragllm.py,logs/FlashCrash__Rag.log,,200,200,

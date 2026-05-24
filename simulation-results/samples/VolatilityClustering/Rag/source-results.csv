@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
+8,9,VolatilityClustering,Rag,SUCCESS,0,7940.705,2026-05-22T18:09:21,2026-05-22T20:21:42,config/simulation.yml,examples/VolatilityClustering/Rag/run_volatility_clustering_ragllm.py,logs/VolatilityClustering__Rag.log,,200,200,,

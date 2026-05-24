@@ -1,0 +1,27 @@
+# =============================================================================
+# VolatilityClusteringRuleLLM - Topology Configuration
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - rulellm_fundamentalist
+    - rulellm_trend_follower
+    - rulellm_noise_trader
+    - rulellm_slow_adapter
+    - rulellm_volatility_trader
+
+  rulellm_fundamentalist:
+    - market
+  rulellm_trend_follower:
+    - market
+  rulellm_noise_trader:
+    - market
+  rulellm_slow_adapter:
+    - market
+  rulellm_volatility_trader:
+    - market

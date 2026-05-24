@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "Rule",
+  "omitted_raw_artifact_bytes": 7353431,
+  "omitted_raw_artifact_files": 1245,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 5369101,
+      "file_count": 1235,
+      "name": "records",
+      "source_path": "samples/DotComBubble/Rule/artifacts/records"
+    },
+    {
+      "bytes": 1971708,
+      "file_count": 8,
+      "name": "communication",
+      "source_path": "samples/DotComBubble/Rule/artifacts/communication"
+    },
+    {
+      "bytes": 12622,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/DotComBubble/Rule/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/DotComBubble/Rule/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "DotComBubble__Rule",
+  "scenario": "DotComBubble",
+  "source_resource_pack_sample_path": "samples/DotComBubble/Rule",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/DotComBubble/Rule"
+}

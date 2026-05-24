@@ -1,0 +1,60 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": 147.31711694526007,
+      "max_abs_deviation_pct": 598.0064612490877,
+      "mean_abs_deviation_pct": 307.119559618686
+    },
+    "price_metrics": {
+      "final": 247.31711694526007,
+      "initial": 100.01188547663787,
+      "max": 698.0064612490877,
+      "mean": 407.119559618686,
+      "min": 100.01188547663787,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 97.26623969733716,
+      "max_drawdown_pct": -6.80113047882397,
+      "volatility_pct": 6.127197171465536
+    },
+    "volume_metrics": {
+      "mean_volume": 146.2725,
+      "total_volume": 29254.5
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "SouthSeaBubble",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": true,
+        "score": 0.804,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 598.006
+      },
+      "Volatility Sanity": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 97.266
+      }
+    },
+    "interpretation": "=== SouthSeaBubble SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 96.1% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 598.01%\n    Expected: nonzero but bounded deviation\n    Score: 80.4%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 97.27%\n    Expected: bounded annualized volatility\n    Score: 100.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe SouthSeaBubble run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 96.1%",
+    "is_valid": true,
+    "score": 0.9608
+  }
+}

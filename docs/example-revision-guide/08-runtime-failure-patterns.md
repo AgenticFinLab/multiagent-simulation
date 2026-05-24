@@ -191,9 +191,8 @@ Do not propagate:
 
 ## §5 Relationship To The Experiment Ledger
 
-Detailed raw evidence should stay in local experiment assets, for example:
-
-`EXPERIMENT/fix-scenarios-20260515/knowledge/bugfix-ledger.md`
+Detailed raw evidence should stay in untracked local experiment assets, using a
+dated workspace path chosen by the current experiment owner.
 
 This guide should only contain stable patterns that are reusable across future
 example revisions.

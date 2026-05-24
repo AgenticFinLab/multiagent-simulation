@@ -1,0 +1,27 @@
+# =============================================================================
+# ReversalEffectRuleLLM - Topology Configuration
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - rulellm_contrarian
+    - rulellm_overconfident
+    - rulellm_value
+    - rulellm_momentum_chaser
+    - rulellm_noise
+
+  rulellm_contrarian:
+    - market
+  rulellm_overconfident:
+    - market
+  rulellm_value:
+    - market
+  rulellm_momentum_chaser:
+    - market
+  rulellm_noise:
+    - market

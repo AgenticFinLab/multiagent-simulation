@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "RuleLLM",
+  "omitted_raw_artifact_bytes": 11855196,
+  "omitted_raw_artifact_files": 1823,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 8422476,
+      "file_count": 1810,
+      "name": "records",
+      "source_path": "samples/LiquidityDryup/RuleLLM/artifacts/records"
+    },
+    {
+      "bytes": 3347723,
+      "file_count": 11,
+      "name": "communication",
+      "source_path": "samples/LiquidityDryup/RuleLLM/artifacts/communication"
+    },
+    {
+      "bytes": 84997,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/LiquidityDryup/RuleLLM/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/LiquidityDryup/RuleLLM/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "LiquidityDryup__RuleLLM",
+  "scenario": "LiquidityDryup",
+  "source_resource_pack_sample_path": "samples/LiquidityDryup/RuleLLM",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/LiquidityDryup/RuleLLM"
+}

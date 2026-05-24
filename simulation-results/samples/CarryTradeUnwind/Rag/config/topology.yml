@@ -1,0 +1,30 @@
+# =============================================================================
+# CarryTradeUnwind Rag Topology - Star Pattern
+# =============================================================================
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - ragllm_carry_trader
+    - ragllm_leveraged_carry_fund
+    - ragllm_funding_currency_buyer
+    - ragllm_hedged_carry_trader
+    - ragllm_noise_trader
+
+  ragllm_carry_trader:
+    - market
+
+  ragllm_leveraged_carry_fund:
+    - market
+
+  ragllm_funding_currency_buyer:
+    - market
+
+  ragllm_hedged_carry_trader:
+    - market
+
+  ragllm_noise_trader:
+    - market

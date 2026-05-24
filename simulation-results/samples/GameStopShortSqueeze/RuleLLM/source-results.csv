@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
+4,9,GameStopShortSqueeze,RuleLLM,SUCCESS,0,5140.839,2026-05-22T07:46:38,2026-05-22T09:12:19,config/simulation.yml,examples/GameStopShortSqueeze/RuleLLM/run_gamestopshortsqueeze_rulellm.py,logs/GameStopShortSqueeze__RuleLLM.log,,200,200,,

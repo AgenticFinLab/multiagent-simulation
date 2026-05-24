@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
+5,9,MomentumEffect,LLM,SUCCESS,0,13210.999,2026-05-22T13:56:45,2026-05-22T17:36:56,config/simulation.yml,examples/MomentumEffect/LLM/run_momentum_llm.py,logs/MomentumEffect__LLM.log,,200,200,,

@@ -1,0 +1,160 @@
+# =============================================================================
+# AvailabilityBias Rule Players Configuration
+# =============================================================================
+# Heterogeneous agents for availability bias simulation.
+#
+# Agent Types:
+#   - Market: Rule-based coordinator
+#   - RecentEventOverweighter: Amplifies recent dramatic price events (DESTABILIZING)
+#   - MediaInfluencedTrader: Follows media-amplified narratives (DESTABILIZING)
+#   - SystematicAnalyst: Bayesian, immune to availability bias (STABILIZING)
+#   - ValueTrader: Pure fundamentals, ignores narratives (STABILIZING)
+#   - NoiseTrader: Random background liquidity (NEUTRAL)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator)
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.AvailabilityBias.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      # Market dynamics parameters
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.02        # Moderate: availability distortions persist
+      mean_reversion: 0.03      # Moderate: eventual correction
+      noise_std: 0.5
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Recent Event Overweighter (Primary Bias Driver)
+# -----------------------------------------------------------------------------
+recent_event_overweighter:
+  name: "Recent Event Overweighter"
+  class: "examples.AvailabilityBias.Rule.players:RecentEventOverweighter"
+  num_instances: 2
+  config:
+    identity: "recent_event_overweighter"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Availability bias: heavily overweight recent salient events
+      recency_weight: 0.70      # 70% weight on recent returns vs fundamental
+      salience_threshold: 0.02  # 2% threshold to trigger availability response
+      quantity_scale: 5000.0
+      max_order: 300.0
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Media Influenced Trader
+# -----------------------------------------------------------------------------
+media_influenced_trader:
+  name: "Media Influenced Trader"
+  class: "examples.AvailabilityBias.Rule.players:MediaInfluencedTrader"
+  num_instances: 2
+  config:
+    identity: "media_influenced_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Media amplification: widely reported events feel more likely
+      media_weight: 0.80          # 80% reliance on media-highlighted deviation
+      social_amplification: 1.50  # 1.5x amplification from social reinforcement
+      media_threshold: 0.03
+      quantity_scale: 5000.0
+      max_order: 300.0
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Systematic Analyst (Stabilizing Force)
+# -----------------------------------------------------------------------------
+systematic_analyst:
+  name: "Systematic Analyst"
+  class: "examples.AvailabilityBias.Rule.players:SystematicAnalyst"
+  num_instances: 1
+  config:
+    identity: "systematic_analyst"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Bayesian evidence weighting
+      weight_decay: 0.80         # Recency decay factor (not used in base version)
+      evidence_threshold: 0.03   # 3% deviation required before acting
+      quantity_scale: 5000.0
+      max_order: 300.0
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Value Trader (Stabilizing Force)
+# -----------------------------------------------------------------------------
+value_trader:
+  name: "Value Trader"
+  class: "examples.AvailabilityBias.Rule.players:ValueTrader"
+  num_instances: 2
+  config:
+    identity: "value_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Pure value: fixed position against mispricings
+      deviation_threshold: 0.05  # 5% deviation triggers value trade
+      position_size: 300.0       # Fixed trade size
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Noise Trader (Background Liquidity)
+# -----------------------------------------------------------------------------
+noise_trader:
+  name: "Noise Trader"
+  class: "examples.AvailabilityBias.Rule.players:NoiseTrader"
+  num_instances: 3
+  config:
+    identity: "noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Random noise: 30% probability of random 100-500 share trade
+      trade_probability: 0.30
+      min_order: 100.0
+      max_order: 500.0
+  persona: !include persona.yml

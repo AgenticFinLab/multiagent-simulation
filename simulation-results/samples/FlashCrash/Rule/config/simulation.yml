@@ -1,0 +1,51 @@
+# =============================================================================
+# FlashCrash Simulation Configuration
+# =============================================================================
+# Demonstrates flash crash dynamics with algorithmic trading and liquidity
+
+setting:
+  name: "flash_crash_simulation"
+  description: "Market microstructure with HFT and liquidity dynamics"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "artifacts/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "flash_crash"
+  actor_prefix: null
+  # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
+  num_cpus: null
+  num_gpus: null
+  # Derived: 16 players, star topology -> 30 msgs/round
+  #   16 TurnResult + 16 pending_info + 30 Message = 62 Ray objects
+  #   62 obj x 64 KB min-alloc = 3968 KB (3.88 MB)
+  #   10x headroom = 38.8 MB; 128 MB minimum floor -> 134217728 bytes
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "artifacts/communication"
+  record_messages: true
+  message_block_size: 500

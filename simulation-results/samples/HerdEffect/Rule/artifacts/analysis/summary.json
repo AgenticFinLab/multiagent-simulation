@@ -1,0 +1,60 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": 1.0704134556964533,
+      "max_abs_deviation_pct": 6.9596822319103495,
+      "mean_abs_deviation_pct": 2.1081290636739043
+    },
+    "price_metrics": {
+      "final": 101.07041345569645,
+      "initial": 100.0,
+      "max": 106.27400740452669,
+      "mean": 100.22448647129447,
+      "min": 93.04031776808965,
+      "total_rounds": 201
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 28.643349992944785,
+      "max_drawdown_pct": -4.432262148720864,
+      "volatility_pct": 1.8043614475503713
+    },
+    "volume_metrics": {
+      "mean_volume": 25.136977855609516,
+      "total_volume": 5052.53254897751
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "HerdEffect",
+  "total_rounds": 201,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 201
+      },
+      "Observable Price Deviation": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 6.96
+      },
+      "Volatility Sanity": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 28.643
+      }
+    },
+    "interpretation": "=== HerdEffect SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 100.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 201 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 6.96%\n    Expected: nonzero but bounded deviation\n    Score: 100.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 28.64%\n    Expected: bounded annualized volatility\n    Score: 100.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe HerdEffect run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 100.0%",
+    "is_valid": true,
+    "score": 1.0
+  }
+}

@@ -1,0 +1,155 @@
+# =============================================================================
+# MarketCrashLLM Players Configuration
+# =============================================================================
+
+market:
+  name: "Market with Liquidity Dynamics"
+  class: "examples.MarketCrash.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      base_price_impact: 0.08
+      mean_reversion: 0.01
+      noise_std: 0.5
+      liquidity_decay: 0.1
+      liquidity_recovery: 0.05
+      min_liquidity: 0.1
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+llm_panic_seller:
+  name: "LLM Panic Seller"
+  class: "examples.MarketCrash.LLM.players:LLMPanicSeller"
+  # Expander → llm_panic_seller_1, llm_panic_seller_2, llm_panic_seller_3
+  num_instances: 3
+  config:
+    identity: "llm_panic_seller"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.MarketCrash.LLM.prompts:LLM_PANIC_SELLER_SYS"
+        user_message: "examples.MarketCrash.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_risk_parity:
+  name: "LLM Risk Parity Fund"
+  class: "examples.MarketCrash.LLM.players:LLMRiskParityFund"
+  # Expander → llm_risk_parity_1, llm_risk_parity_2
+  num_instances: 2
+  config:
+    identity: "llm_risk_parity"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.MarketCrash.LLM.prompts:LLM_RISK_PARITY_SYS"
+        user_message: "examples.MarketCrash.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_leveraged_fund:
+  name: "LLM Leveraged Fund"
+  class: "examples.MarketCrash.LLM.players:LLMLeveragedFund"
+  # Expander → llm_leveraged_fund_1, llm_leveraged_fund_2, llm_leveraged_fund_3
+  num_instances: 3
+  config:
+    identity: "llm_leveraged_fund"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 80.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.MarketCrash.LLM.prompts:LLM_LEVERAGED_FUND_SYS"
+        user_message: "examples.MarketCrash.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_market_maker:
+  name: "LLM Market Maker"
+  class: "examples.MarketCrash.LLM.players:LLMMarketMaker"
+  # Expander → llm_market_maker_1, llm_market_maker_2
+  num_instances: 2
+  config:
+    identity: "llm_market_maker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 30.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.MarketCrash.LLM.prompts:LLM_MARKET_MAKER_SYS"
+        user_message: "examples.MarketCrash.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_bottom_fisher:
+  name: "LLM Bottom Fisher"
+  class: "examples.MarketCrash.LLM.players:LLMBottomFisher"
+  num_instances: 1
+  config:
+    identity: "llm_bottom_fisher"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 10.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.MarketCrash.LLM.prompts:LLM_BOTTOM_FISHER_SYS"
+        user_message: "examples.MarketCrash.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml

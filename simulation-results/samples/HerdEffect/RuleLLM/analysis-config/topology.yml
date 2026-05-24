@@ -1,0 +1,25 @@
+# =============================================================================
+# HerdEffectRuleLLM Topology Configuration
+# =============================================================================
+# Star topology: Market broadcasts to all investors, investors send orders to market
+# =============================================================================
+
+type: star
+
+sources:
+  - market
+
+connections:
+  market:
+    # Market broadcasts to all investors
+    - rulellm_momentum_1
+    - rulellm_momentum_2
+    - rulellm_momentum_3
+    - rulellm_contrarian_1
+    - rulellm_contrarian_2
+    - rulellm_risk_averse_1
+    - rulellm_risk_averse_2
+    - rulellm_aggressive_1
+    - rulellm_aggressive_2
+    - rulellm_noise_1
+    - rulellm_noise_2

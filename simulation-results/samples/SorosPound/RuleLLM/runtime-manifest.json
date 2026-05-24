@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "RuleLLM",
+  "omitted_raw_artifact_bytes": 10256412,
+  "omitted_raw_artifact_files": 1378,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 7462325,
+      "file_count": 1367,
+      "name": "records",
+      "source_path": "samples/SorosPound/RuleLLM/artifacts/records"
+    },
+    {
+      "bytes": 2709071,
+      "file_count": 9,
+      "name": "communication",
+      "source_path": "samples/SorosPound/RuleLLM/artifacts/communication"
+    },
+    {
+      "bytes": 85016,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/SorosPound/RuleLLM/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/SorosPound/RuleLLM/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "SorosPound__RuleLLM",
+  "scenario": "SorosPound",
+  "source_resource_pack_sample_path": "samples/SorosPound/RuleLLM",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/SorosPound/RuleLLM"
+}

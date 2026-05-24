@@ -1,0 +1,166 @@
+# SouthSeaBubble RuleLLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.SouthSeaBubble.RuleLLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.025
+      mean_reversion: 0.008
+      noise_std: 0.015
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+insideradvantaged:
+  name: "InsiderAdvantaged"
+  class: "examples.SouthSeaBubble.RuleLLM.players:RuleLLMInsiderAdvantaged"
+  num_instances: 2
+  config:
+    identity: "insideradvantaged"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 3000000.0
+      initial_position: 800
+      initial_price: 100.0
+      fundamental_value: 100.0
+      front_run_size: 500
+      information_advantage: 0.8
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.SouthSeaBubble.RuleLLM.prompts:RULELLM_INSIDER_ADVANTAGED_SYS"
+        user_message: "examples.SouthSeaBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.8
+          max_tokens: 512
+  persona: !include persona.yml
+
+narrativebeliever:
+  name: "NarrativeBeliever"
+  class: "examples.SouthSeaBubble.RuleLLM.players:RuleLLMNarrativeBeliever"
+  num_instances: 3
+  config:
+    identity: "narrativebeliever"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      narrative_weight: 0.8
+      base_size: 350
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.SouthSeaBubble.RuleLLM.prompts:RULELLM_NARRATIVE_BELIEVER_SYS"
+        user_message: "examples.SouthSeaBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml
+
+skepticalanalyst:
+  name: "SkepticalAnalyst"
+  class: "examples.SouthSeaBubble.RuleLLM.players:RuleLLMSkepticalAnalyst"
+  num_instances: 2
+  config:
+    identity: "skepticalanalyst"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1200000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      cash_flow_threshold: 0.15
+      base_size: 300
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.SouthSeaBubble.RuleLLM.prompts:RULELLM_SKEPTICAL_ANALYST_SYS"
+        user_message: "examples.SouthSeaBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+arbitrageur:
+  name: "Arbitrageur"
+  class: "examples.SouthSeaBubble.RuleLLM.players:RuleLLMArbitrageur"
+  num_instances: 2
+  config:
+    identity: "arbitrageur"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 2000000.0
+      initial_position: 600
+      initial_price: 100.0
+      fundamental_value: 100.0
+      spread_threshold: 0.25
+      position_size: 350
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.SouthSeaBubble.RuleLLM.prompts:RULELLM_ARBITRAGEUR_SYS"
+        user_message: "examples.SouthSeaBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+  persona: !include persona.yml
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.SouthSeaBubble.RuleLLM.players:RuleLLMNoiseTrader"
+  num_instances: 2
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 150
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.SouthSeaBubble.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
+        user_message: "examples.SouthSeaBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.95
+          max_tokens: 512
+  persona: !include persona.yml

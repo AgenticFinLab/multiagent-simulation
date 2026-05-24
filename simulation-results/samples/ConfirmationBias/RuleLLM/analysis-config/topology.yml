@@ -1,0 +1,30 @@
+# =============================================================================
+# ConfirmationBias RuleLLM Topology - Star Pattern
+# =============================================================================
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - rulellm_belief_anchor
+    - rulellm_selective_scanner
+    - rulellm_balanced_analyst
+    - rulellm_contrarian_trader
+    - rulellm_noise_trader
+
+  rulellm_belief_anchor:
+    - market
+
+  rulellm_selective_scanner:
+    - market
+
+  rulellm_balanced_analyst:
+    - market
+
+  rulellm_contrarian_trader:
+    - market
+
+  rulellm_noise_trader:
+    - market

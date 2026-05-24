@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "Rule",
+  "omitted_raw_artifact_bytes": 9922876,
+  "omitted_raw_artifact_files": 1791,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 7067699,
+      "file_count": 1778,
+      "name": "records",
+      "source_path": "samples/StatusQuoBias/Rule/artifacts/records"
+    },
+    {
+      "bytes": 2842633,
+      "file_count": 11,
+      "name": "communication",
+      "source_path": "samples/StatusQuoBias/Rule/artifacts/communication"
+    },
+    {
+      "bytes": 12544,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/StatusQuoBias/Rule/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/StatusQuoBias/Rule/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "StatusQuoBias__Rule",
+  "scenario": "StatusQuoBias",
+  "source_resource_pack_sample_path": "samples/StatusQuoBias/Rule",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/StatusQuoBias/Rule"
+}

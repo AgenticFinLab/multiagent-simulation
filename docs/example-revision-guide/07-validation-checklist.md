@@ -7,7 +7,9 @@ This file defines the **final verification gates** that must all pass before a s
 The checklist is organized in four layers — from structure down to cross-consistency. Each layer must pass completely before moving to the next.
 
 For full-round batch execution readiness, also apply
-`docs/experiment-preflight-skill/SKILL.md` after this checklist passes.
+`docs/experiment-preflight-skill/00-overview.md` and complete
+`docs/experiment-preflight-skill/06-launch-readiness-checklist.md` after this
+checklist passes.
 
 After validation, apply the runtime drift and rerun decision in
 `06-execution-order.md §2 Phase 7` before deciding whether previous experiment

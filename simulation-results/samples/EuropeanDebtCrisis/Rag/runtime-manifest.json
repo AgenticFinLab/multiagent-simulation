@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "Rag",
+  "omitted_raw_artifact_bytes": 49593100,
+  "omitted_raw_artifact_files": 1107,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 47732705,
+      "file_count": 1098,
+      "name": "records",
+      "source_path": "samples/EuropeanDebtCrisis/Rag/artifacts/records"
+    },
+    {
+      "bytes": 1775432,
+      "file_count": 7,
+      "name": "communication",
+      "source_path": "samples/EuropeanDebtCrisis/Rag/artifacts/communication"
+    },
+    {
+      "bytes": 84963,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/EuropeanDebtCrisis/Rag/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/EuropeanDebtCrisis/Rag/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "EuropeanDebtCrisis__Rag",
+  "scenario": "EuropeanDebtCrisis",
+  "source_resource_pack_sample_path": "samples/EuropeanDebtCrisis/Rag",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/EuropeanDebtCrisis/Rag"
+}

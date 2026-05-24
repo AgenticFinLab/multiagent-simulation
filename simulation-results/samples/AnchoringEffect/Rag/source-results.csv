@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
+1,9,AnchoringEffect,Rag,SUCCESS,0,16000.899,2026-05-22T05:10:09,2026-05-22T09:36:50,config/simulation.yml,examples/AnchoringEffect/Rag/run_anchoringeffect_rag.py,logs/AnchoringEffect__Rag.log,,200,200,,

@@ -1,0 +1,134 @@
+# FlashCrash2010 Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.FlashCrash2010.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      initial_price: 40.0
+      fundamental_value: 40.0
+      base_depth: 10000
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.01
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+hftmarketmaker:
+  name: "HFTMarketMaker"
+  class: "examples.FlashCrash2010.Rule.players:HFTMarketMaker"
+  num_instances: 3
+  config:
+    identity: "hftmarketmaker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      initial_price: 40.0
+      fundamental_value: 40.0
+      normal_spread: 0.0001
+      stress_spread: 0.005
+      inventory_limit: 1000
+      withdrawal_threshold: 0.02
+      mm_qty: 500
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+momentumchaser:
+  name: "MomentumChaser"
+  class: "examples.FlashCrash2010.Rule.players:MomentumChaser"
+  num_instances: 2
+  config:
+    identity: "momentumchaser"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 0
+      initial_price: 40.0
+      fundamental_value: 40.0
+      entry_threshold: 0.001
+      lookback_window: 5          # Lookback window for velocity calc (§4.2)
+      position_multiplier: 10000
+      max_size: 1000
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+fundamentaltrader:
+  name: "FundamentalTrader"
+  class: "examples.FlashCrash2010.Rule.players:FundamentalTrader"
+  num_instances: 2
+  config:
+    identity: "fundamentaltrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 2000000.0
+      initial_position: 0
+      initial_price: 40.0
+      fundamental_value: 40.0
+      value_trigger: 0.05
+      order_size: 500
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+stoplosstrader:
+  name: "StopLossTrader"
+  class: "examples.FlashCrash2010.Rule.players:StopLossTrader"
+  num_instances: 3
+  config:
+    identity: "stoplosstrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 1000
+      initial_price: 40.0
+      fundamental_value: 40.0
+      entry_price: 40.0
+      stop_percentage: 0.03
+      position_size: 1000
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.FlashCrash2010.Rule.players:NoiseTrader"
+  num_instances: 2
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 0
+      initial_price: 40.0
+      fundamental_value: 40.0
+      trade_probability: 0.05
+      min_order: 100
+      max_order: 500
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

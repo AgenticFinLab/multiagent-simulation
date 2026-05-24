@@ -1,0 +1,139 @@
+{
+  "scenario": "DispositionEffect",
+  "total_rounds": 200,
+  "price_statistics": {
+    "initial_price": 98.91565027011913,
+    "final_price": 8.000000000000005e+16,
+    "max_price": 5.068800000640001e+110,
+    "min_price": 1.0,
+    "volatility": 3.610325964559713e+111
+  },
+  "metrics": {
+    "max_drawdown": -100.0,
+    "peak_round": 132,
+    "trough_round": 133
+  },
+  "disposition_metrics": {
+    "pgr": 0.0,
+    "plr": 0.0,
+    "disposition_coefficient": 0.0,
+    "disposition_ratio": null
+  },
+  "disposition_investor": {
+    "strategy": "LLMDispositionBiased",
+    "pgr": 2.4324981753360648e-110,
+    "plr": 0.0,
+    "disposition_ratio": Infinity,
+    "disposition_effect": true,
+    "realized_gains": 768.0000000000007,
+    "realized_losses": 0,
+    "paper_gains": 3.1572480003768005e+112,
+    "paper_losses": 122094.30000000003,
+    "buy_count": 1,
+    "sell_count": 1,
+    "total_volume": 200.0
+  },
+  "rational_investor": {
+    "strategy": "LLMRationalInvestor",
+    "pgr": 1.0,
+    "plr": 0.0,
+    "disposition_ratio": Infinity,
+    "disposition_effect": true,
+    "realized_gains": 8.000000000001814e+58,
+    "realized_losses": 0,
+    "paper_gains": 1.3007439221158725e+17,
+    "paper_losses": 1024.2000000000007,
+    "buy_count": 59,
+    "sell_count": 36,
+    "total_volume": 1.6000000000000003e+111
+  },
+  "disposition_effect_detected": true,
+  "strategy_comparison": {
+    "llm_disposition_biased_1": {
+      "strategy": "LLMDispositionBiased",
+      "pgr": 0.0,
+      "plr": 0.0,
+      "disposition_ratio": 99
+    },
+    "llm_disposition_biased_2": {
+      "strategy": "LLMDispositionBiased",
+      "pgr": 0.0,
+      "plr": 0.0,
+      "disposition_ratio": 99
+    },
+    "llm_disposition_biased_3": {
+      "strategy": "LLMDispositionBiased",
+      "pgr": 0.0,
+      "plr": 0.0,
+      "disposition_ratio": 99
+    },
+    "llm_rational_1": {
+      "strategy": "LLMRationalInvestor",
+      "pgr": 1.0,
+      "plr": 0.0,
+      "disposition_ratio": 99
+    },
+    "llm_rational_2": {
+      "strategy": "LLMRationalInvestor",
+      "pgr": 1.0,
+      "plr": 0.0,
+      "disposition_ratio": 99
+    },
+    "llm_tax_aware_1": {
+      "strategy": "LLMTaxAwareInvestor",
+      "pgr": 0.0,
+      "plr": 0.0006,
+      "disposition_ratio": 0.0
+    },
+    "llm_tax_aware_2": {
+      "strategy": "LLMTaxAwareInvestor",
+      "pgr": 0.0,
+      "plr": 0.0,
+      "disposition_ratio": 99
+    },
+    "llm_institutional_1": {
+      "strategy": "LLMInstitutionalInvestor",
+      "pgr": 0.1795,
+      "plr": 0.0,
+      "disposition_ratio": 99
+    },
+    "llm_institutional_2": {
+      "strategy": "LLMInstitutionalInvestor",
+      "pgr": 0.4872,
+      "plr": 0.0,
+      "disposition_ratio": 99
+    },
+    "llm_loss_averse_1": {
+      "strategy": "LLMLossAverse",
+      "pgr": 0.0,
+      "plr": 0.0,
+      "disposition_ratio": 99
+    },
+    "llm_loss_averse_2": {
+      "strategy": "LLMLossAverse",
+      "pgr": 0.0,
+      "plr": 0.0,
+      "disposition_ratio": 99
+    }
+  },
+  "validation": {
+    "scenario": "DispositionEffect",
+    "is_valid": false,
+    "score": 0.4,
+    "criteria": {
+      "pgr_vs_plr": {
+        "value": "PGR=0.000, PLR=0.000",
+        "target": "PGR > PLR",
+        "score": 1.0,
+        "passed": true
+      },
+      "disposition_coefficient": {
+        "value": 2.4324981753360648e-110,
+        "target": "> 0.1",
+        "score": 0.0,
+        "passed": false
+      }
+    },
+    "interpretation": "=== DISPOSITION EFFECT SIMULATION VALIDATION: INVALID ===\nOverall Fit Score: 40.0% (threshold: 50%)\n\n[1] PROPORTION OF GAINS REALIZED (PGR) ANALYSIS\n    Observed: PGR = 0.0000\n    Expected: PGR > 0.20 (investors sell winners)\n    Score: 0.0%\n\n    Interpretation:\n    PGR measures: (Realized Gains) / (Realized Gains + Paper Gains)\n    LOW PGR - Infrequent gain realization.\n    Investors may be holding winners, which contradicts\n    the disposition effect hypothesis.\n\n[2] PGR vs PLR ASYMMETRY (Core Disposition Test)\n    Observed: PGR = 0.0000, PLR = 0.0000\n    Expected: PGR > PLR (sell winners, hold losers)\n    Score: 100.0%\n\n    Interpretation:\n    The disposition effect = systematic tendency to:\n    - Sell winners too early (high PGR)\n    - Hold losers too long (low PLR)\n    DISPOSITION CONFIRMED - PGR/PLR ratio = inf\n    Investors are more likely to realize gains than losses.\n    This matches Kahneman-Tversky prospect theory:\n    - Risk-averse in gains (sell to lock in profit)\n    - Risk-seeking in losses (hold hoping for recovery)\n\n[3] DISPOSITION COEFFICIENT (PGR - PLR)\n    Observed: Coefficient = 0.0000\n    Expected: > 0.05 (meaningful disposition effect)\n    Score: 0.0%\n\n    Interpretation:\n    WEAK EFFECT - Small positive coefficient.\n    Some disposition effect present but economically minor.\n    Agents may have weaker loss aversion than typical investors.\n\n[SUMMARY]\nThe simulation does not fully capture expected disposition dynamics.\nKey issues: low gain realization, weak/negative disposition coefficient.\nConsider: implementing prospect theory utility function,\nadding reference point tracking, or increasing loss aversion \u03bb."
+  }
+}

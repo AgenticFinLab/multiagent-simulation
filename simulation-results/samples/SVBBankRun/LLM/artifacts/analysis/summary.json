@@ -1,0 +1,60 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": 50.90603982494869,
+      "max_abs_deviation_pct": 214.4443916209898,
+      "mean_abs_deviation_pct": 64.02764978633161
+    },
+    "price_metrics": {
+      "final": 150.9060398249487,
+      "initial": 100.00764711371873,
+      "max": 314.4443916209898,
+      "mean": 92.6322598280491,
+      "min": 0.01,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 5101018.094551561,
+      "max_drawdown_pct": -99.9960312091616,
+      "volatility_pct": 321333.93598628556
+    },
+    "volume_metrics": {
+      "mean_volume": 2080.0675,
+      "total_volume": 416013.5
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "SVBBankRun",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 214.444
+      },
+      "Volatility Sanity": {
+        "passed": false,
+        "score": 0.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 5101018.095
+      }
+    },
+    "interpretation": "=== SVBBankRun SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 85.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 214.44%\n    Expected: nonzero but bounded deviation\n    Score: 100.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 5101018.09%\n    Expected: bounded annualized volatility\n    Score: 0.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe SVBBankRun run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 85.0%",
+    "is_valid": true,
+    "score": 0.85
+  }
+}

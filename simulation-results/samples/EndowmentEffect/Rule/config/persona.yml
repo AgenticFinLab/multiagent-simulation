@@ -1,0 +1,23 @@
+# EndowmentEffect Rule Persona Configuration
+
+auto_checkpoint: false
+debug_mode: true
+
+proxy:
+  storage:
+    checkpoint_dir: "artifacts/checkpoints"
+    record_path: "artifacts/records"
+    record_rounds: true
+    turn_block_size: 3
+
+  monitoring:
+    record_path: "artifacts/monitoring"
+    monitor_hot_limit: 3
+
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
+
+  resource:
+    mcp_servers: []
+    enable_caching: false

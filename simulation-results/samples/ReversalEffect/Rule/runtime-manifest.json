@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "Rule",
+  "omitted_raw_artifact_bytes": 11404818,
+  "omitted_raw_artifact_files": 2097,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 7981188,
+      "file_count": 2082,
+      "name": "records",
+      "source_path": "samples/ReversalEffect/Rule/artifacts/records"
+    },
+    {
+      "bytes": 3399142,
+      "file_count": 13,
+      "name": "communication",
+      "source_path": "samples/ReversalEffect/Rule/artifacts/communication"
+    },
+    {
+      "bytes": 24488,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/ReversalEffect/Rule/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/ReversalEffect/Rule/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "ReversalEffect__Rule",
+  "scenario": "ReversalEffect",
+  "source_resource_pack_sample_path": "samples/ReversalEffect/Rule",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/ReversalEffect/Rule"
+}

@@ -1,0 +1,99 @@
+{
+  "scenario": "ConfirmationBias",
+  "variant": "Rag",
+  "total_rounds": 200,
+  "fundamental_value": 100.0,
+  "metrics": {
+    "bias_amplitude_pct": 44.829,
+    "bias_persistence": 180,
+    "correction_ratio": 0.6281,
+    "return_autocorr_lag1": -0.4709
+  },
+  "price": {
+    "initial": 99.983,
+    "final": 110.2966,
+    "min": 84.7832,
+    "max": 144.829
+  },
+  "agent_vwap": {
+    "ragllm_belief_anchor_1": {
+      "vwap": 107.9819,
+      "total_volume": 463.0,
+      "total_buy": 463.0,
+      "total_sell": 0.0
+    },
+    "ragllm_belief_anchor_2": {
+      "vwap": 107.9875,
+      "total_volume": 463.0,
+      "total_buy": 463.0,
+      "total_sell": 0.0
+    },
+    "ragllm_selective_scanner_1": {
+      "vwap": 101.6068,
+      "total_volume": 6716.0,
+      "total_buy": 3402.0,
+      "total_sell": 3314.0
+    },
+    "ragllm_selective_scanner_2": {
+      "vwap": 101.9979,
+      "total_volume": 6058.0,
+      "total_buy": 3072.0,
+      "total_sell": 2986.0
+    },
+    "ragllm_balanced_analyst": {
+      "vwap": 103.4726,
+      "total_volume": 8000.0,
+      "total_buy": 4000.0,
+      "total_sell": 4000.0
+    },
+    "ragllm_contrarian_trader": {
+      "vwap": 102.6909,
+      "total_volume": 9000.0,
+      "total_buy": 4500.0,
+      "total_sell": 4500.0
+    },
+    "ragllm_noise_trader_1": {
+      "vwap": 108.7338,
+      "total_volume": 20420.0,
+      "total_buy": 10510.0,
+      "total_sell": 9910.0
+    },
+    "ragllm_noise_trader_2": {
+      "vwap": 108.9162,
+      "total_volume": 23913.0,
+      "total_buy": 12422.0,
+      "total_sell": 11491.0
+    }
+  },
+  "validation": {
+    "is_valid": false,
+    "score": 0.3609,
+    "criteria": {
+      "bias_amplitude": {
+        "value": 44.829,
+        "target": "2\u20138%",
+        "score": 0.1,
+        "passed": false
+      },
+      "bias_persistence": {
+        "value": 180,
+        "target": "60\u2013140 rounds (30\u201370% of 200)",
+        "score": 0.6,
+        "passed": true
+      },
+      "correction_ratio": {
+        "value": 0.6281,
+        "target": "0.2\u20130.5",
+        "score": 0.744,
+        "passed": true
+      },
+      "autocorrelation": {
+        "value": -0.4709,
+        "target": "0.05\u20130.20",
+        "score": 0.0,
+        "passed": false
+      }
+    },
+    "interpretation": "=== CONFIRMATION BIAS SIMULATION VALIDATION: INVALID ===\nOverall Fit Score: 36.1% (threshold: 50%)\n\n[1] BIAS AMPLITUDE (PEAK DEVIATION)\n    Observed: Peak bias amplitude = 44.83%\n    Expected: 2\u20138% (Nickerson 1998; Lord et al. 1979; Rabin & Schrag 1999)\n    Score: 10.0%\n    Assessment: PASS \u2014 Bias amplitude consistent with confirmation bias literature.\n\n[2] BIAS PERSISTENCE (ROUNDS ABOVE THRESHOLD)\n    Observed: Bias persistent for 180 of 200 rounds\n    Expected: 60\u2013140 rounds (Rabin & Schrag 1999 high-q persistence regime)\n    Score: 60.0%\n    Assessment: PASS \u2014 Bias persists across sufficient rounds.\n\n[3] CORRECTION DYNAMICS (CORRECTION RATIO)\n    Observed: Correction ratio = 0.628\n    Expected: 0.2\u20130.5 (Hong & Stein 1999; Fama 1970)\n    Score: 74.4%\n    Assessment: WEAK \u2014 Stabilizers too effective; bias corrected too quickly.\n\n[4] MOMENTUM SIGNATURE (RETURN AUTOCORRELATION AC1)\n    Observed: Lag-1 autocorrelation = -0.471\n    Expected: 0.05\u20130.20 (Jegadeesh & Titman 1993)\n    Score: 0.0%\n    Assessment: FAIL \u2014 Negative autocorrelation; mean-reversion dominates.\n\n[SUMMARY]\nThe simulation does not fully reproduce confirmation bias dynamics. Overall Fit Score 36.1% is below the 50% threshold. Key issues: no momentum; Review analysis-bases.md \u00a76 for parameter adjustments.\nFit Score: 36.1%"
+  }
+}

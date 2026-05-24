@@ -1,0 +1,173 @@
+# =============================================================================
+# ConfirmationBias RuleLLM Players Configuration
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based, identical to Rule variant
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.ConfirmationBias.RuleLLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.02
+      mean_reversion: 0.02
+      noise_std: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RuleLLM Belief Anchors
+# Theory: Nickerson (1998)
+# -----------------------------------------------------------------------------
+rulellm_belief_anchor:
+  name: "RuleLLM Belief Anchor"
+  class: "examples.ConfirmationBias.RuleLLM.players:RuleLLMBeliefAnchor"
+  # Expander → rulellm_belief_anchor_1, rulellm_belief_anchor_2
+  num_instances: 2
+  config:
+    identity: "rulellm_belief_anchor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 50000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_BELIEF_ANCHOR_SYS"
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RuleLLM Selective Scanners
+# Theory: Lord, Ross & Lepper (1979)
+# -----------------------------------------------------------------------------
+rulellm_selective_scanner:
+  name: "RuleLLM Selective Scanner"
+  class: "examples.ConfirmationBias.RuleLLM.players:RuleLLMSelectiveScanner"
+  # Expander → rulellm_selective_scanner_1, rulellm_selective_scanner_2
+  num_instances: 2
+  config:
+    identity: "rulellm_selective_scanner"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 50000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_SELECTIVE_SCANNER_SYS"
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RuleLLM Balanced Analyst
+# Theory: Rabin & Schrag (1999)
+# -----------------------------------------------------------------------------
+rulellm_balanced_analyst:
+  name: "RuleLLM Balanced Analyst"
+  class: "examples.ConfirmationBias.RuleLLM.players:RuleLLMBalancedAnalyst"
+  num_instances: 1
+  config:
+    identity: "rulellm_balanced_analyst"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 50000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_BALANCED_ANALYST_SYS"
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.2
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RuleLLM Contrarian Trader
+# -----------------------------------------------------------------------------
+rulellm_contrarian_trader:
+  name: "RuleLLM Contrarian Trader"
+  class: "examples.ConfirmationBias.RuleLLM.players:RuleLLMContrarianTrader"
+  num_instances: 1
+  config:
+    identity: "rulellm_contrarian_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 50000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_CONTRARIAN_TRADER_SYS"
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.2
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RuleLLM Noise Traders
+# Theory: Black (1986)
+# -----------------------------------------------------------------------------
+rulellm_noise_trader:
+  name: "RuleLLM Noise Trader"
+  class: "examples.ConfirmationBias.RuleLLM.players:RuleLLMNoiseTrader"
+  # Expander → rulellm_noise_trader_1, rulellm_noise_trader_2
+  num_instances: 2
+  config:
+    identity: "rulellm_noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 20000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml

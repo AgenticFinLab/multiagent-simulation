@@ -1,0 +1,33 @@
+# =============================================================================
+# FlashCrashRuleLLM - Topology Configuration
+# =============================================================================
+# Star topology: Market broadcasts to all hybrid rule+LLM investors
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - rulellm_hft
+    - rulellm_market_maker
+    - rulellm_algo
+    - rulellm_stop_loss
+    - rulellm_fundamental
+
+  rulellm_hft:
+    - market
+
+  rulellm_market_maker:
+    - market
+
+  rulellm_algo:
+    - market
+
+  rulellm_stop_loss:
+    - market
+
+  rulellm_fundamental:
+    - market

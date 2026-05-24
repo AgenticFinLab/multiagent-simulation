@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
+3,9,DotComBubble,RuleLLM,SUCCESS,0,8260.548,2026-05-22T15:44:57,2026-05-22T18:02:38,config/simulation.yml,examples/DotComBubble/RuleLLM/run_dotcombubble_rulellm.py,logs/DotComBubble__RuleLLM.log,,200,200,,

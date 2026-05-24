@@ -1,0 +1,60 @@
+{
+  "scenario": "RumorSpread",
+  "total_rounds": 200,
+  "metrics": {
+    "belief": {
+      "initial": 0.2968191957438141,
+      "peak": 1.0,
+      "peak_round": 13,
+      "final": 1.0,
+      "persistence_second_half": 1.0,
+      "amplification_ratio": 3.3691
+    },
+    "truth_divergence": {
+      "truth_value": 0.1,
+      "max_deviation": 0.9,
+      "avg_deviation": 0.864,
+      "final_deviation": 0.9
+    },
+    "distortion": {
+      "max": 1.0,
+      "final": 1.0,
+      "avg": 0.9758
+    },
+    "activity": {
+      "total_spread_events": 2317.0,
+      "total_correction_events": 988.0,
+      "avg_spread_per_round": 11.59,
+      "avg_correction_per_round": 4.94,
+      "correction_to_spread_ratio": 0.4264,
+      "correction_lag_rounds": 0.0
+    },
+    "total_rounds": 200,
+    "validation": {
+      "score": 1.0,
+      "is_valid": true,
+      "criteria": {
+        "Rumor State Recorded": {
+          "value": 200,
+          "target": "positive number of recorded belief rounds; 200 expected for full experiments",
+          "score": 1.0,
+          "passed": true
+        }
+      },
+      "interpretation": "=== RUMOR SPREAD SIMULATION VALIDATION: VALID ==="
+    }
+  },
+  "validation": {
+    "score": 1.0,
+    "is_valid": true,
+    "criteria": {
+      "Rumor State Recorded": {
+        "value": 200,
+        "target": "positive number of recorded belief rounds; 200 expected for full experiments",
+        "score": 1.0,
+        "passed": true
+      }
+    },
+    "interpretation": "=== RUMOR SPREAD SIMULATION VALIDATION: VALID ==="
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "hftmarketmaker_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0,
+    "liquidity_field_missing_rounds": 0
+  },
+  "hftmarketmaker_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0,
+    "liquidity_field_missing_rounds": 0
+  },
+  "hftmarketmaker_3": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0,
+    "liquidity_field_missing_rounds": 0
+  },
+  "momentumchaser_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0,
+    "liquidity_field_missing_rounds": 0
+  },
+  "momentumchaser_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0,
+    "liquidity_field_missing_rounds": 0
+  },
+  "fundamentaltrader_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0,
+    "liquidity_field_missing_rounds": 0
+  },
+  "fundamentaltrader_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0,
+    "liquidity_field_missing_rounds": 0
+  },
+  "stoplosstrader_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0,
+    "liquidity_field_missing_rounds": 0
+  },
+  "stoplosstrader_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0,
+    "liquidity_field_missing_rounds": 0
+  },
+  "stoplosstrader_3": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0,
+    "liquidity_field_missing_rounds": 0
+  },
+  "noisetrader_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0,
+    "liquidity_field_missing_rounds": 0
+  },
+  "noisetrader_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0,
+    "liquidity_field_missing_rounds": 0
+  },
+  "aggregate": {
+    "mean_retrieval_failure_rate": 0.0,
+    "max_retrieval_failure_rate": 0.0
+  }
+}

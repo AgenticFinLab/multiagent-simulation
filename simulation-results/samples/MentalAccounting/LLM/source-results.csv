@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
+1,1,MentalAccounting,LLM,SUCCESS,0,3470.247,2026-05-23T01:11:58,2026-05-23T02:09:48,config/simulation.yml,examples/MentalAccounting/LLM/run_mentalaccounting_llm.py,logs/MentalAccounting__LLM.log,,200,200,

@@ -1,0 +1,157 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": 8.83619904917066,
+      "max_abs_deviation_pct": 15.130756305508369,
+      "mean_abs_deviation_pct": 6.338777507507235
+    },
+    "price_metrics": {
+      "final": 108.83619904917066,
+      "initial": 100.47300128269481,
+      "max": 115.13075630550837,
+      "mean": 101.60901328798892,
+      "min": 87.69729565746316,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 34.20054054224544,
+      "max_drawdown_pct": -8.663484110902104,
+      "volatility_pct": 2.1544315471134183
+    },
+    "volume_metrics": {
+      "mean_volume": 33.176659381625285,
+      "total_volume": 6635.3318763250545
+    }
+  },
+  "rag_knowledge_effect": {
+    "aggregate": {
+      "max_retrieval_failure_rate": 0.0,
+      "mean_retrieval_failure_rate": 0.0
+    },
+    "ragllm_algo_1": {
+      "liquidity_field_missing_rounds": 0,
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_algo_2": {
+      "liquidity_field_missing_rounds": 0,
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_fundamental_1": {
+      "liquidity_field_missing_rounds": 0,
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_fundamental_2": {
+      "liquidity_field_missing_rounds": 0,
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_hft_1": {
+      "liquidity_field_missing_rounds": 0,
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_hft_2": {
+      "liquidity_field_missing_rounds": 0,
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_hft_3": {
+      "liquidity_field_missing_rounds": 0,
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_market_maker_1": {
+      "liquidity_field_missing_rounds": 0,
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_market_maker_2": {
+      "liquidity_field_missing_rounds": 0,
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_market_maker_3": {
+      "liquidity_field_missing_rounds": 0,
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_stop_loss_1": {
+      "liquidity_field_missing_rounds": 0,
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_stop_loss_2": {
+      "liquidity_field_missing_rounds": 0,
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_stop_loss_3": {
+      "liquidity_field_missing_rounds": 0,
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "FlashCrash",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 15.131
+      },
+      "Volatility Sanity": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 34.201
+      }
+    },
+    "interpretation": "=== FlashCrash SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 100.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 15.13%\n    Expected: nonzero but bounded deviation\n    Score: 100.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 34.20%\n    Expected: bounded annualized volatility\n    Score: 100.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe FlashCrash run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 100.0%",
+    "is_valid": true,
+    "score": 1.0
+  }
+}

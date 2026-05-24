@@ -1,0 +1,156 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": 40.13633711925581,
+      "max_abs_deviation_pct": 321.5358872025663,
+      "mean_abs_deviation_pct": 89.91555366128131
+    },
+    "price_metrics": {
+      "final": 140.1363371192558,
+      "initial": 100.00331163287397,
+      "max": 421.5358872025663,
+      "mean": 173.4157042289945,
+      "min": 0.01,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 359064.3599025011,
+      "max_drawdown_pct": -99.97146363457311,
+      "volatility_pct": 22618.92859449072
+    },
+    "volume_metrics": {
+      "mean_volume": 1704.9475,
+      "total_volume": 340989.5
+    }
+  },
+  "rag_knowledge_effect": {
+    "aggregate": {
+      "retrieval_fallback_rate": 0.0,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_success_rounds": 2400,
+      "target_met": true,
+      "total_rag_rounds": 2400
+    },
+    "per_agent": {
+      "activerebalancer_1": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "activerebalancer_2": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "defaultfollower_1": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "defaultfollower_2": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "defaultfollower_3": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "inertialholder_1": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "inertialholder_2": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "inertialholder_3": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "momentumtrader_1": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "momentumtrader_2": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "noisetrader_1": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "noisetrader_2": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      }
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "StatusQuoBias",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 321.536
+      },
+      "Volatility Sanity": {
+        "passed": false,
+        "score": 0.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 359064.36
+      }
+    },
+    "interpretation": "=== StatusQuoBias SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 85.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 321.54%\n    Expected: nonzero but bounded deviation\n    Score: 100.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 359064.36%\n    Expected: bounded annualized volatility\n    Score: 0.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe StatusQuoBias run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 85.0%",
+    "is_valid": true,
+    "score": 0.85
+  }
+}

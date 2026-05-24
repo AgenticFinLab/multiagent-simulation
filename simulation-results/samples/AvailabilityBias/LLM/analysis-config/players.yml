@@ -1,0 +1,168 @@
+# =============================================================================
+# AvailabilityBias LLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 LLM Availability Bias Investors
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (rule-based, identical to Rule variant)
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.AvailabilityBias.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.02
+      mean_reversion: 0.03
+      noise_std: 0.5
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Recent Event Overweighter
+# -----------------------------------------------------------------------------
+llm_recent_event_overweighter:
+  name: "LLM Recent Event Overweighter"
+  class: "examples.AvailabilityBias.LLM.players:LLMRecentEventOverweighter"
+  num_instances: 2
+  config:
+    identity: "llm_recent_event_overweighter"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_RECENT_EVENT_OVERWEIGHTER_SYS"
+        user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Media Influenced Trader
+# -----------------------------------------------------------------------------
+llm_media_influenced_trader:
+  name: "LLM Media Influenced Trader"
+  class: "examples.AvailabilityBias.LLM.players:LLMMediaInfluencedTrader"
+  num_instances: 2
+  config:
+    identity: "llm_media_influenced_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_MEDIA_INFLUENCED_TRADER_SYS"
+        user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Systematic Analyst
+# -----------------------------------------------------------------------------
+llm_systematic_analyst:
+  name: "LLM Systematic Analyst"
+  class: "examples.AvailabilityBias.LLM.players:LLMSystematicAnalyst"
+  num_instances: 1
+  config:
+    identity: "llm_systematic_analyst"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_SYSTEMATIC_ANALYST_SYS"
+        user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Value Trader
+# -----------------------------------------------------------------------------
+llm_value_trader:
+  name: "LLM Value Trader"
+  class: "examples.AvailabilityBias.LLM.players:LLMValueTrader"
+  num_instances: 2
+  config:
+    identity: "llm_value_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_VALUE_TRADER_SYS"
+        user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Noise Trader
+# -----------------------------------------------------------------------------
+llm_noise_trader:
+  name: "LLM Noise Trader"
+  class: "examples.AvailabilityBias.LLM.players:LLMNoiseTrader"
+  num_instances: 3
+  config:
+    identity: "llm_noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AvailabilityBias.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        user_message: "examples.AvailabilityBias.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 500
+  persona: !include persona.yml

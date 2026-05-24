@@ -1,0 +1,96 @@
+{
+  "aggregate": {
+    "total_rag_rounds": 2400,
+    "retrieval_success_rounds": 2400,
+    "retrieval_fallback_rounds": 0,
+    "retrieval_success_rate": 1.0,
+    "retrieval_fallback_rate": 0.0,
+    "target_met": true
+  },
+  "per_agent": {
+    "sunkcostholder_1": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "sunkcostholder_2": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "sunkcostholder_3": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "commitmentescalator_1": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "commitmentescalator_2": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "commitmentescalator_3": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "rationalcutter_1": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "rationalcutter_2": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "opportunitycosttrader_1": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "opportunitycosttrader_2": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "noisetrader_1": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "noisetrader_2": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    }
+  }
+}

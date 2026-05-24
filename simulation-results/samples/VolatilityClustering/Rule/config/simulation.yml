@@ -1,0 +1,55 @@
+# =============================================================================
+# VolatilityClustering Simulation Configuration
+# =============================================================================
+# Demonstrates GARCH-like volatility clustering through heterogeneous agents.
+#
+# Usage:
+#   python examples/VolatilityClustering/run_volatility.py -c configs/VolatilityClustering/Rule/simulation.yml
+# =============================================================================
+
+setting:
+  name: "volatility_clustering_simulation"
+  description: "GARCH-like volatility dynamics through heterogeneous agents"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "artifacts/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "volatility_clustering"
+  actor_prefix: null
+  # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
+  num_cpus: null
+  num_gpus: null
+  # Derived: 11 players, star topology -> 20 msgs/round
+  #   11 TurnResult + 11 pending_info + 20 Message = 42 Ray objects
+  #   42 obj x 64 KB min-alloc = 2688 KB (2.63 MB)
+  #   10x headroom = 26.3 MB; 128 MB minimum floor -> 134217728 bytes
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "artifacts/communication"
+  record_messages: true
+  message_block_size: 500

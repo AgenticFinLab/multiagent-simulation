@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
+4,9,AssetBubble,LLM,SUCCESS,0,18870.997,2026-05-22T07:39:34,2026-05-22T12:54:05,config/simulation.yml,examples/AssetBubble/LLM/run_bubble_llm.py,logs/AssetBubble__LLM.log,,200,200,,

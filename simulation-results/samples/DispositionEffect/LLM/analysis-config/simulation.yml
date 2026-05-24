@@ -1,0 +1,57 @@
+# =============================================================================
+# DispositionEffectLLM Simulation Configuration
+# =============================================================================
+# LLM-based Disposition Effect simulation - Prospect Theory
+# Tests: Loss aversion, selling winners too early, holding losers too long
+#
+# Usage:
+#   python examples/DispositionEffect/LLM/run_disposition_llm.py -c configs/DispositionEffect/LLM/simulation.yml
+# =============================================================================
+
+setting:
+  name: "disposition_effect_llm_simulation"
+  description: "LLM-based disposition effect with prospect theory investors"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "artifacts/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "disposition_effect_llm"
+  actor_prefix: null
+  # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
+  num_cpus: null
+  num_gpus: null
+  # Derived: 12 players, star topology -> 22 msgs/round
+  #   12 TurnResult + 12 pending_info + 22 Message = 46 Ray objects
+  #   46 obj x 64 KB min-alloc = 2944 KB (2.88 MB) base peak
+  #   LLM TurnResult also carries prompt+response strings (~4-8 KB each) -> extra overhead
+  #   Minimum 512 MB floor for LLM simulations -> 536870912 bytes
+  object_store_memory: 536870912
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "artifacts/communication"
+  record_messages: true
+  message_block_size: 500

@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "Rag",
+  "omitted_raw_artifact_bytes": 86839705,
+  "omitted_raw_artifact_files": 1687,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 64859192,
+      "file_count": 1675,
+      "name": "records",
+      "source_path": "samples/MarketCrash/Rag/artifacts/records"
+    },
+    {
+      "bytes": 21895255,
+      "file_count": 10,
+      "name": "communication",
+      "source_path": "samples/MarketCrash/Rag/artifacts/communication"
+    },
+    {
+      "bytes": 85258,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/MarketCrash/Rag/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/MarketCrash/Rag/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "MarketCrash__Rag",
+  "scenario": "MarketCrash",
+  "source_resource_pack_sample_path": "samples/MarketCrash/Rag",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/MarketCrash/Rag"
+}

@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
+4,9,EchoChamber,Rag,SUCCESS,0,9530.682,2026-05-22T11:33:26,2026-05-22T14:12:17,config/simulation.yml,examples/EchoChamber/Rag/run_echochamber_rag.py,logs/EchoChamber__Rag.log,,200,200,,

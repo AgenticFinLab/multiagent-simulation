@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
+1,9,LiquidityDryup,LLM,SUCCESS,0,11890.811,2026-05-22T04:45:22,2026-05-22T08:03:33,config/simulation.yml,examples/LiquidityDryup/LLM/run_liquidity_llm.py,logs/LiquidityDryup__LLM.log,,200,200,,

@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "RuleLLM",
+  "omitted_raw_artifact_bytes": 8173468,
+  "omitted_raw_artifact_files": 1575,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 6846719,
+      "file_count": 1567,
+      "name": "records",
+      "source_path": "samples/HerdingInformation/RuleLLM/artifacts/records"
+    },
+    {
+      "bytes": 1242668,
+      "file_count": 6,
+      "name": "communication",
+      "source_path": "samples/HerdingInformation/RuleLLM/artifacts/communication"
+    },
+    {
+      "bytes": 84081,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/HerdingInformation/RuleLLM/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/HerdingInformation/RuleLLM/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "HerdingInformation__RuleLLM",
+  "scenario": "HerdingInformation",
+  "source_resource_pack_sample_path": "samples/HerdingInformation/RuleLLM",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/HerdingInformation/RuleLLM"
+}

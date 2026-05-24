@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
+1,1,CreditCycle,RuleLLM,SUCCESS,0,3030.215,2026-05-23T19:12:39,2026-05-23T20:03:09,config/simulation.yml,examples/CreditCycle/RuleLLM/run_creditcycle_rulellm.py,logs/CreditCycle__RuleLLM.log,,200,200,

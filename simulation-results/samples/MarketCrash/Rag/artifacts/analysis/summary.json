@@ -1,0 +1,132 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": 4.0000000023839495e+28,
+      "max_abs_deviation_pct": 5.042693475371214e+32,
+      "mean_abs_deviation_pct": 2.590203566979413e+30
+    },
+    "price_metrics": {
+      "final": 4.0000000023839495e+28,
+      "initial": 99.81016778201094,
+      "max": 5.042693475371214e+32,
+      "mean": 2.5902035669794124e+30,
+      "min": 1.0,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 5.6616555359545905e+34,
+      "max_drawdown_pct": -100.0,
+      "volatility_pct": 3.5665077516780846e+33
+    },
+    "volume_metrics": {
+      "mean_volume": 1.2950517834896763e+32,
+      "total_volume": 2.5901035669793523e+34
+    }
+  },
+  "rag_knowledge_effect": {
+    "aggregate": {
+      "max_retrieval_failure_rate": 0.0,
+      "mean_retrieval_failure_rate": 0.0
+    },
+    "ragllm_bottom_fisher": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_leveraged_fund_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_leveraged_fund_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_leveraged_fund_3": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_market_maker_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_market_maker_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_panic_seller_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_panic_seller_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_panic_seller_3": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_risk_parity_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_risk_parity_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "MarketCrash",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": false,
+        "score": 0.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 5.042693475371214e+32
+      },
+      "Volatility Sanity": {
+        "passed": false,
+        "score": 0.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 5.6616555359545905e+34
+      }
+    },
+    "interpretation": "=== MarketCrash SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 65.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 504269347537121369635738357858304.00%\n    Expected: nonzero but bounded deviation\n    Score: 0.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 56616555359545905184473331689062400.00%\n    Expected: bounded annualized volatility\n    Score: 0.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe MarketCrash run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 65.0%",
+    "is_valid": true,
+    "score": 0.65
+  }
+}

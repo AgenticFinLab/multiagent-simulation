@@ -1,0 +1,37 @@
+# =============================================================================
+# AssetBubbleRag - Topology Configuration
+# =============================================================================
+# Star topology: Market broadcasts to all RAG+LLM investors
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - ragllm_momentum
+    - ragllm_arbitrageur
+    - ragllm_noise
+    - ragllm_value
+    - ragllm_leveraged
+    - ragllm_conservative
+
+  ragllm_momentum:
+    - market
+
+  ragllm_arbitrageur:
+    - market
+
+  ragllm_noise:
+    - market
+
+  ragllm_value:
+    - market
+
+  ragllm_leveraged:
+    - market
+
+  ragllm_conservative:
+    - market

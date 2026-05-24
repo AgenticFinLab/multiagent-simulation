@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
+2,9,LossAversion,LLM,SUCCESS,0,11600.872,2026-05-22T08:03:33,2026-05-22T11:16:54,config/simulation.yml,examples/LossAversion/LLM/run_lossaversion_llm.py,logs/LossAversion__LLM.log,,200,200,,

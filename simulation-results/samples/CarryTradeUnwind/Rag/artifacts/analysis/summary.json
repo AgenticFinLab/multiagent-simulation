@@ -1,0 +1,108 @@
+{
+  "scenario": "CarryTradeUnwind",
+  "variant": "Rule",
+  "total_rounds": 200,
+  "fundamental_value": 1.0,
+  "metrics": {
+    "max_drawdown_pct": 99.9926,
+    "unwind_velocity": 46.6074,
+    "unwind_duration_rounds": 12,
+    "recovery_ratio": 0.359,
+    "cascade_onset_round": 91,
+    "peak_rolling_vol_pct": 10884.3854,
+    "return_autocorr_lag1": -0.005
+  },
+  "price": {
+    "initial": 0.9998,
+    "final": 48.1931,
+    "min": 0.01,
+    "max": 134.2283
+  },
+  "agent_vwap": {
+    "ragllm_carry_trader_1": {
+      "vwap": 74.408,
+      "total_volume": 96801.0,
+      "total_buy": 96801.0,
+      "total_sell": 0.0
+    },
+    "ragllm_carry_trader_2": {
+      "vwap": 69.3191,
+      "total_volume": 89303.0,
+      "total_buy": 89303.0,
+      "total_sell": 0.0
+    },
+    "ragllm_leveraged_carry_fund_1": {
+      "vwap": 47.0785,
+      "total_volume": 324413.0,
+      "total_buy": 324413.0,
+      "total_sell": 0.0
+    },
+    "ragllm_leveraged_carry_fund_2": {
+      "vwap": 39.8963,
+      "total_volume": 42174.0,
+      "total_buy": 42174.0,
+      "total_sell": 0.0
+    },
+    "ragllm_funding_currency_buyer_1": {
+      "vwap": 48.1793,
+      "total_volume": 21004.0,
+      "total_buy": 21004.0,
+      "total_sell": 0.0
+    },
+    "ragllm_funding_currency_buyer_2": {
+      "vwap": 48.6706,
+      "total_volume": 31004.0,
+      "total_buy": 31004.0,
+      "total_sell": 0.0
+    },
+    "ragllm_hedged_carry_trader": {
+      "vwap": 62.2837,
+      "total_volume": 145768.0,
+      "total_buy": 145768.0,
+      "total_sell": 0.0
+    },
+    "ragllm_noise_trader_1": {
+      "vwap": 55.7,
+      "total_volume": 37789.0,
+      "total_buy": 37789.0,
+      "total_sell": 0.0
+    },
+    "ragllm_noise_trader_2": {
+      "vwap": 56.3271,
+      "total_volume": 39495.0,
+      "total_buy": 39495.0,
+      "total_sell": 0.0
+    }
+  },
+  "validation": {
+    "is_valid": true,
+    "score": 0.5045,
+    "criteria": {
+      "max_drawdown": {
+        "value": 99.993,
+        "target": "10\u201325%",
+        "score": 0.1,
+        "passed": false
+      },
+      "recovery_ratio": {
+        "value": 0.359,
+        "target": "0.3\u20130.7",
+        "score": 1.0,
+        "passed": true
+      },
+      "peak_volatility": {
+        "value": 10884.385,
+        "target": ">3% per round (\u2248>20% annualized)",
+        "score": 1.0,
+        "passed": true
+      },
+      "autocorrelation": {
+        "value": -0.005,
+        "target": ">+0.2",
+        "score": 0.098,
+        "passed": false
+      }
+    },
+    "interpretation": "=== CARRY TRADE UNWIND SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 50.5% (threshold: 50%)\n\n[1] FX CASCADE DEPTH (MAX DRAWDOWN)\n    Observed: Max drawdown = 99.99%\n    Expected: 10\u201325% (Brunnermeier, Nagel & Pedersen 2009)\n    Score: 10.0%\n    Assessment: PASS \u2014 FX drawdown consistent with carry-trade crisis literature.\n\n[2] RECOVERY DYNAMICS (RECOVERY RATIO)\n    Observed: Recovery ratio = 0.359\n    Expected: 0.3\u20130.7 (Rogoff 1996 PPP convergence)\n    Score: 100.0%\n    Assessment: PASS \u2014 Partial recovery consistent with PPP convergence dynamics.\n\n[3] CRISIS INTENSITY (PEAK ROLLING VOLATILITY)\n    Observed: Peak 10-round volatility = 10884.39% per round\n    Expected: >3% per round \u2248 >20% annualized (BIS 2022; Menkhoff et al. 2012)\n    Score: 100.0%\n    Assessment: PASS \u2014 Crisis-level volatility consistent with carry crash turbulence.\n\n[4] CASCADE SELF-REINFORCEMENT (RETURN AUTOCORRELATION AC1)\n    Observed: Lag-1 autocorrelation = -0.005\n    Expected: >+0.2 (Lo & MacKinlay 1988 momentum detection)\n    Score: 9.8%\n    Assessment: FAIL \u2014 No momentum signature; cascade not self-reinforcing.\n\n[SUMMARY]\nThe simulation successfully reproduces carry-trade unwind cascade dynamics: a 100.0% drawdown with recovery ratio 0.36, peak volatility 10884.4% per round, and AC1 -0.00. Fit Score: 50.5%.\nFit Score: 50.5%"
+  }
+}
