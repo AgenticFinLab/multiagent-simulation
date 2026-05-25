@@ -1,54 +1,17 @@
-"""VolatilityClusteringLLM Analysis - GARCH Dynamics Evaluation (LLM Version)
+#!/usr/bin/env python
+"""Volatility Clustering LLM Simulation Analysis.
 
-Analyzes volatility clustering in LLM-driven agents.
-Uses same methodology as rule-based VolatilityClustering.
-
-Usage:
-    python examples/VolatilityClustering/LLM/analysis.py -c configs/VolatilityClustering/LLM/simulation.yml
-
-See examples/VolatilityClustering/Rule/analysis.py for detailed documentation.
+Produces the standardized output set required by create-example-skill:
+summary.json, 00_investor_bids.png, 01_volatilityclustering_dynamics.png,
+02_volatilityclustering_analysis.png, and 03_summary.png.
 """
 
-import argparse
-import os
-
-from masim.utils import load_config, load_results
-
-from examples.VolatilityClustering.Rule.analysis import (
-    analyze_volatility_clustering,
-    _load_data,
-)
+from examples.standard_rule_analysis import run_standard_analysis
 
 
 def main():
-    """Run volatility clustering analysis for LLM version."""
-    parser = argparse.ArgumentParser(
-        description="Analyze VolatilityClusteringLLM simulation"
-    )
-    parser.add_argument(
-        "-c",
-        "--config",
-        type=str,
-        required=True,
-        help="Path to simulation configuration file (YAML)",
-    )
-    args = parser.parse_args()
-
-    # Load config and derive paths
-    config = load_config(args.config)
-    record_dir = config["setting"]["record_path"]
-    base_dir = os.path.dirname(record_dir)
-    output_dir = os.path.join(base_dir, "analysis")
-    os.makedirs(output_dir, exist_ok=True)
-
-    print("=" * 70)
-    print("VolatilityClusteringLLM Analysis - GARCH Dynamics (LLM Agents)")
-    print("=" * 70)
-
-    results = load_results(config)
-    data = _load_data(results)
-    summary = analyze_volatility_clustering(data, output_dir)
-    return summary
+    """Run the standard analysis output contract for this variant."""
+    return run_standard_analysis("VolatilityClustering", "configs/VolatilityClustering/LLM/simulation.yml")
 
 
 if __name__ == "__main__":

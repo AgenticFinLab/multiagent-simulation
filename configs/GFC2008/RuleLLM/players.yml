@@ -43,7 +43,7 @@ mbsoriginator:
         sys_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_MBS_ORIGINATOR_SYS"
         user_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_tokens: 512
@@ -74,7 +74,7 @@ leveragedinvestor:
         sys_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_LEVERAGED_INVESTOR_SYS"
         user_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -103,7 +103,7 @@ ratingagency:
         sys_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_RATING_AGENCY_SYS"
         user_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -132,7 +132,7 @@ distressedbuyer:
         sys_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_DISTRESSED_BUYER_SYS"
         user_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -162,7 +162,7 @@ regulator:
         sys_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_REGULATOR_SYS"
         user_message: "examples.GFC2008.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.2
           max_tokens: 512

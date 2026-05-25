@@ -1,0 +1,276 @@
+# =============================================================================
+# HerdEffectRuleLLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 Hybrid Rule+LLM Investors
+# Each LLM agent's system prompt embeds:
+#   - Personal profile: identity, style, risk attitude
+#   - Quantitative rules: exact financial/mathematical principles
+# =============================================================================
+
+# Market (rule-based, identical to HerdEffect)
+# =============================================================================
+# Shared Knowledge Configuration
+# =============================================================================
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    timeout_per_page: 30
+    max_pages: 250
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+
+market:
+  name: "Market"
+  class: "examples.HerdEffect.Rag.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      supply_elasticity: 0.1
+      mean_reversion: 0.02
+      noise_std: 0.5
+      custom_state_hot_limit: 3
+      base_liquidity: 50.0
+      base_price_impact: 0.08
+      high_impact_multiplier: 3.0
+      low_liquidity_threshold: 30.0
+  persona: !include persona.yml
+
+# RuleLLM Momentum Investor (Trend Following)
+ragllm_momentum:
+  name: "RAG Momentum Investor"
+  class: "examples.HerdEffect.Rag.players:RagLLMMomentumInvestor"
+  num_instances: 3
+  config:
+    identity: "ragllm_momentum"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      fundamental: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.HerdEffect.Rag.prompts:RAGLLM_MOMENTUM_SYS"
+        user_message: "examples.HerdEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# RuleLLM Contrarian Investor (Value/Mean Reversion)
+ragllm_contrarian:
+  name: "RAG Contrarian Investor"
+  class: "examples.HerdEffect.Rag.players:RagLLMContrarianInvestor"
+  num_instances: 2
+  config:
+    identity: "ragllm_contrarian"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      fundamental: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.HerdEffect.Rag.prompts:RAGLLM_CONTRARIAN_SYS"
+        user_message: "examples.HerdEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# RuleLLM Risk Averse Investor (Variance Sensitive)
+ragllm_risk_averse:
+  name: "RAG Risk Averse Investor"
+  class: "examples.HerdEffect.Rag.players:RagLLMRiskAverseInvestor"
+  num_instances: 2
+  config:
+    identity: "ragllm_risk_averse"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      fundamental: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.HerdEffect.Rag.prompts:RAGLLM_RISK_AVERSE_SYS"
+        user_message: "examples.HerdEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# RuleLLM Aggressive Investor (Acceleration Momentum)
+ragllm_aggressive:
+  name: "RAG Aggressive Investor"
+  class: "examples.HerdEffect.Rag.players:RagLLMAggressiveInvestor"
+  num_instances: 2
+  config:
+    identity: "ragllm_aggressive"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      fundamental: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.HerdEffect.Rag.prompts:RAGLLM_AGGRESSIVE_SYS"
+        user_message: "examples.HerdEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# RuleLLM Noise Trader (Random Trading)
+ragllm_noise:
+  name: "RAG Noise Trader"
+  class: "examples.HerdEffect.Rag.players:RagLLMNoiseTrader"
+  num_instances: 2
+  config:
+    identity: "ragllm_noise"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      fundamental: 100.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.HerdEffect.Rag.prompts:RAGLLM_NOISE_SYS"
+        user_message: "examples.HerdEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 600
+  persona: !include persona.yml

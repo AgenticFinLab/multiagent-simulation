@@ -235,7 +235,7 @@ This paper derived the theoretical basis for reputation-driven herding: managers
 
 | Study                                                                                                                            | Context                | Finding                                                                        | Relevance to This Metric                                         |
 |----------------------------------------------------------------------------------------------------------------------------------|------------------------|--------------------------------------------------------------------------------|------------------------------------------------------------------|
-| Banerjee, A. V. (1992). *QJE*, 107(3), 797–817.                                                                                  | Rational cascade model | Pure cascade agents trade larger quantities but with a higher threshold        | Predicts RHI < 1 at default calibration when cascade_trigger = 3 |
+| Banerjee, A. V. (1992). *QJE*, 107(3), 797–817.                                                                                  | Rational cascade model | Pure cascade agents trade larger quantities but with a higher threshold        | Predicts RHI < 1 when cascade-following volume dominates |
 | Lakonishok, J., Shleifer, A. & Vishny, R. W. (1992). "The Impact of Institutional Trading on Stock Prices." *JFE*, 32(1), 23–43. | Mutual fund herding    | Institutional herding attributed 35% to reputation, 65% to information cascade | Baseline: RHI ≈ 0.54 for institutional investors                 |
 
 #### Normal Range (from literature)
@@ -512,11 +512,11 @@ The six metrics above cover four distinct analytical dimensions:
 
 The HerdingInformation simulation exhibits three characteristic phases:
 
-| Phase              | Rounds | Characteristics                                                                    | Dominant Agents                          | Key Metrics                                                         |
-|--------------------|--------|------------------------------------------------------------------------------------|------------------------------------------|---------------------------------------------------------------------|
-| **Pre-cascade**    | 1–5    | Price near fundamental;                                                            | δ                                        | < 0.02; cascade_count accumulates                                   |
-| **Cascade active** | 6–40   |                                                                                    | δ                                        | > 0.02; cascade_count ≥ cascade_trigger; self-reinforcing deviation |
-| **Correction**     | 41–50  | IndependentThinker + Contrarian accumulate opposing positions; deviation reverting | IndependentThinker + Contrarian dominant | CCI falling, WDI increasing                                         |
+| Phase | Entry Condition | Exit Condition | Dominant Agents | Key Metrics |
+|---|---|---|---|---|
+| Pre-cascade | `abs(deviation) <= 0.02` and cascade agents mostly hold | `abs(deviation) > 0.02` or `abs(deviation) > 0.03` begins accumulating cascade evidence | NoiseTrader, IndependentThinker | Low CCI, low CPD, low VAF |
+| Cascade active | `abs(deviation) > 0.02` and CascadeFollower / ReputationHerder begin following deviation direction | Deviation starts reverting or stabilizer volume dominates | CascadeFollower, ReputationHerder | High CCI, rising CPD, elevated ICE |
+| Correction | IndependentThinker and Contrarian trade against a large deviation | Deviation returns near fundamental | IndependentThinker, Contrarian | Falling CCI, WDI redistribution, lower VAF |
 
 ---
 
@@ -539,7 +539,7 @@ The HerdingInformation simulation exhibits three characteristic phases:
 
 | Fact                                                   | Quantitative Target                | Literature Source                     | How to Verify in Simulation                               | Failure Indicator                              |
 |--------------------------------------------------------|------------------------------------|---------------------------------------|-----------------------------------------------------------|------------------------------------------------|
-| Information cascades produce sustained price deviation |                                    | deviation                             | > 0.02 for ≥ 5 consecutive rounds in at least one episode | Banerjee (1992), QJE 107(3), 797–817           |
+| Information cascades produce sustained price deviation | `abs(deviation) > 0.02` for at least one sustained episode | Banerjee (1992), QJE 107(3), 797–817 | Check deviation episodes in `price_history` | No sustained deviation episode |
 | Cascade agents dominate volume during herding          | CCI ≥ 0.40 during cascade episodes | Welch (2000), JFE 58(3), 369–396      | Compute CCI on cascade-active round subset                | CCI < 0.20 indicates calibration failure       |
 | Reputation herding co-exists with information cascade  | RHI in [0.40, 1.50]                | Scharfstein & Stein (1990), AER 80(3) | Compare ReputationHerder vs CascadeFollower volume        | RHI < 0.10 means reputation mechanism inactive |
 | Private signal information is destroyed                | ICE ≥ 0.15                         | Avery & Zemsky (1998), AER 88(4)      | Compute ICE over full simulation                          | ICE < 0.05 means cascade too weak              |
@@ -549,13 +549,13 @@ The HerdingInformation simulation exhibits three characteristic phases:
 
 | Metric | Target Range | Lower Bound Source                          | Upper Bound Source                                  | Adjustment if Below Range             | Adjustment if Above Range                                         |
 |--------|--------------|---------------------------------------------|-----------------------------------------------------|---------------------------------------|-------------------------------------------------------------------|
-| CCI    | 0.40–0.70    | Welch (2000): 40% min cascade share         | Bikhchandani et al. (1992): 70% max before lock-in  | Reduce `cascade_trigger` from 3 to 2  | Increase `signal_precision` of IndependentThinker from 0.7 to 0.9 |
+| CCI    | 0.40–0.70    | Welch (2000): 40% min cascade share         | Bikhchandani et al. (1992): 70% max before lock-in  | Increase `social_weight` or lower activation thresholds after design review | Increase `signal_precision` of IndependentThinker |
 | CPD    | 3–10 rounds  | Scharfstein & Stein (1990): 3 round minimum | Grinblatt et al. (1995): 10-round maximum           | Increase `price_impact` (λ)           | Decrease `social_weight` of CascadeFollower                       |
 | VAF    | 1.5–3.5      | De Long et al. (1990): 1.5× minimum         | Bikhchandani et al. (1992): 3.5× before instability | Increase `social_weight`              | Reduce `price_impact`                                             |
 | WDI    | 0.10–0.30    | De Long et al. (1991): 0.10 survival floor  | Literature consensus: 0.30 moderate inequality cap  | Increase cascade agent aggressiveness | Reduce position caps                                              |
 
 **Calibration protocol**:
-1. Run the Rule variant for 10 seeds with default parameters (`cascade_trigger=3`, `social_weight=0.7`, `reputation_concern=0.8`, `signal_precision=0.7`).
+1. Run the Rule variant for 10 seeds with current parameters (`cascade_trigger=0.3`, `social_weight=0.8`, `reputation_concern=0.7`, `signal_precision=0.9`).
 2. Compute mean of CCI, CPD, VAF, WDI across runs.
 3. Compare against target ranges above.
 4. If CCI < 0.40: reduce `cascade_trigger` from 3 to 2 first; then increase `social_weight` from 0.7 to 0.85.
@@ -575,30 +575,24 @@ The HerdingInformation simulation exhibits three characteristic phases:
 
 | Symptom               | Diagnosis                                             | Root Cause                                                    | Corrective Action                                                                                     |
 |-----------------------|-------------------------------------------------------|---------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| CCI = 0.0 on all runs | Cascade never activates                               | `cascade_trigger` too high; deviation never large enough      | Reduce `cascade_trigger` from 3 to 2; increase `price_impact` from 0.01 to 0.02                       |
-| CPD > 20 rounds       | Cascade locks in permanently                          | `signal_precision` too low; IndependentThinker cannot correct | Increase `signal_precision` from 0.7 to 0.9; increase IndependentThinker position cap from 500 to 800 |
+| CCI = 0.0 on all runs | Cascade never activates                               | Activation threshold too high; deviation never large enough   | Increase `price_impact` or lower activation thresholds after design review                            |
+| CPD > 20 rounds       | Cascade locks in permanently                          | `signal_precision` too low; IndependentThinker cannot correct | Increase `signal_precision` or IndependentThinker capacity after design review                         |
 | RHI = NaN always      | CascadeFollower never reaches cascade_count threshold | `cascade_trigger` too high AND deviation too small            | Reduce both `cascade_trigger` and `price_impact`; verify CascadeFollower logic in players.py          |
-| ICE > 0.60            | Cascade overwhelming private signals                  | Both `social_weight` and `reputation_concern` too high        | Reduce `social_weight` from 0.7 to 0.5 and `reputation_concern` from 0.8 to 0.6                       |
+| ICE > 0.60            | Cascade overwhelming private signals                  | Both `social_weight` and `reputation_concern` too high        | Reduce `social_weight` or `reputation_concern` after design review                                    |
 | WDI < 0.02            | All agents earning equal returns                      | No systematic bias producing wealth transfer                  | Verify cascade agents are actually following deviation direction (not random); check decide() logic   |
 | VAF < 1.0             | Cascade rounds less volatile than quiet rounds        | Price impact too low or cascade agents net flat               | Increase `price_impact`; verify cascade agents are not simultaneously buying and selling              |
 
 ---
 
-## §7 Visualization
+## §7 Visualization Catalogue
 
 ### 7.1 Primary Plots
 
-| Plot                           | X-axis       | Y-axis                            | Key Feature                     |
-|--------------------------------|--------------|-----------------------------------|---------------------------------|
-| Price Path with Cascade Phases | Round (1–50) | Price and Fundamental             | Shaded cascade episodes (       |
-| CCI Over Time                  | Round        | CCI (rolling 5-round window)      | Shows cascade buildup and decay |
-| Agent Volume Contribution      | Round        | Stacked bar: volume by agent type | Visual decomposition of CCI     |
-| Cascade Count Evolution        | Round        | cascade_count for CascadeFollower | Shows threshold-crossing event  |
-| Wealth Trajectories            | Round        | Cumulative wealth by agent type   | Shows WDI buildup over time     |
-
-### 7.2 Summary Dashboard
-
-- **Panel 1**: Price vs. fundamental with cascade episode shading
-- **Panel 2**: Bar chart of 6 metrics vs. target ranges
-- **Panel 3**: Agent volume attribution stacked bar (all rounds)
-- **Panel 4**: Wealth distribution at final round (Lorenz curve)
+| Output | Content | Purpose |
+|---|---|---|
+| `summary.json` | Total rounds, price/deviation/return/volume metrics, validation score, and Rag retrieval stats when applicable | Machine-readable Level-2 structural quality summary |
+| `00_investor_bids.png` | Investor bid or order paths when recorded by the shared analysis helper | Headline investor behavior plot |
+| `01_herdinginformation_dynamics.png` | Price, fundamental, deviation, returns, and volume | Shows cascade buildup, active herding, and correction |
+| `02_herdinginformation_analysis.png` | Structural metric dashboard for price, deviation, volatility, and volume | Links run outputs to the cascade metric catalogue |
+| `03_summary.png` | Agent/order/summary comparison | Cross-agent behavior review |
+| `rag_stats.json` | Rag only: retrieval success/failure counts by agent and aggregate retrieval failure rate | RAG knowledge-quality validation |

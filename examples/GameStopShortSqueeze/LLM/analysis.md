@@ -44,3 +44,21 @@ Analysis for the **LLM variant** of GameStopShortSqueeze. Metric definitions fro
 | SCD        | 2–12 rounds        | Longer            | LLM §4.2 delay extends squeeze                    |
 | IEP        | Rounds 2–15        | Delayed           | LLM §4.4 holds conviction longer                  |
 | WTI        | 0.08–0.45          | More variable     | Dependent on LLM §4.2 covering behavior           |
+
+## §5 References
+
+Metric definitions are inherited from `analysis-bases.md §2`; LLM investor
+roles trace to `simulation-bases.md §4.1-§4.5`.
+
+## §6 Cross-Variant Comparison
+
+Compare LLM against Rule to isolate persona-only reasoning, against RuleLLM to
+measure the stabilizing effect of embedded rules, and against RAG to measure the
+effect of retrieved squeeze context.
+
+## §7 Quality Checks
+
+- Confirm the run completed the configured 200 rounds.
+- Audit LLM parse failures and retry counts before acceptance; deterministic parser/provider failures must fail fast.
+- Confirm accepted decisions produce canonical `action`, `bid_price`, `quantity`, and `reasoning`.
+- Review action distribution for excessive holds or one-sided buying.

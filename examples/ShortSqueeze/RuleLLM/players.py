@@ -98,6 +98,8 @@ class Market(GeneralPlayer):
             custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price"] = extras["initial_price"]
+            self.state.custom_state["short_interest"] = extras["initial_short_interest"]
+            self.state.custom_state["buying_pressure"] = 0.0
             self.state.custom_state["liquidity"] = 100.0
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
@@ -131,6 +133,7 @@ class Market(GeneralPlayer):
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
+        short_interest = self.state.custom_state["short_interest"]
         orders = self.state.custom_state["orders"]
 
         base_liquidity = extras["base_liquidity"]
@@ -148,6 +151,11 @@ class Market(GeneralPlayer):
 
         total_buy_qty = sum(o["quantity"] for o in orders if o["quantity"] > 0)
         total_sell_qty = abs(sum(o["quantity"] for o in orders if o["quantity"] < 0))
+        cover_buying = sum(
+            o["quantity"]
+            for o in orders
+            if o["quantity"] > 0 and "ShortSeller" in o["strategy"]
+        )
         net_demand = total_buy_qty - total_sell_qty
         total_volume = total_buy_qty + total_sell_qty
 
@@ -164,8 +172,12 @@ class Market(GeneralPlayer):
 
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
         price_return = (new_price - current_price) / current_price
+        short_interest = max(0.0, short_interest - cover_buying * 0.5)
+        squeeze_pressure = max(0.0, (new_price / extras["initial_price"] - 1) * 100)
 
         self.state.custom_state["price"] = new_price
+        self.state.custom_state["short_interest"] = short_interest
+        self.state.custom_state["buying_pressure"] = squeeze_pressure
         self.state.custom_state["liquidity"] = total_liquidity
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["volume_history"].append(total_volume)
@@ -193,6 +205,8 @@ class Market(GeneralPlayer):
             "volume": total_volume,
             "net_demand": net_demand,
             "liquidity": total_liquidity,
+            "short_interest": short_interest,
+            "squeeze_pressure": squeeze_pressure,
             "round": round_num,
             "fundamental": fundamental_value,
         }
@@ -301,7 +315,10 @@ class RuleLLMInvestor(GeneralPlayer):
 
         Delegates to shared utility in examples/llm_utils.py
         """
-        return parse_llm_response_with_thinking(response_text)
+        decision = parse_llm_response_with_thinking(response_text)
+        if "provides_liquidity" not in decision or decision["provides_liquidity"] is None:
+            raise ValueError("Fields missing or null in LLM response: ['provides_liquidity']")
+        return decision
 
     def _apply_constraints(
         self, bid_price: float, quantity: float, current_price: float
@@ -416,31 +433,46 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMShortSeller(RuleLLMInvestor):
-    """Hybrid: ShortSeller rules + LLM reasoning."""
+    """Hybrid: ShortSeller rules + LLM reasoning.
+
+    Theory: simulation-bases.md §4.1
+    """
 
     _system_prompt = RULELLM_SHORT_SELLER_SYS
 
 
 class RuleLLMRetailCoordinator(RuleLLMInvestor):
-    """Hybrid: RetailCoordinator rules + LLM reasoning."""
+    """Hybrid: RetailTrader rules + LLM reasoning.
+
+    Theory: simulation-bases.md §4.3
+    """
 
     _system_prompt = RULELLM_RETAIL_TRADER_SYS
 
 
 class RuleLLMMomentumBuyer(RuleLLMInvestor):
-    """Hybrid: MomentumBuyer rules + LLM reasoning."""
+    """Hybrid: MomentumBuyer rules + LLM reasoning.
+
+    Theory: simulation-bases.md §4.2
+    """
 
     _system_prompt = RULELLM_MOMENTUM_BUYER_SYS
 
 
 class RuleLLMValueInvestor(RuleLLMInvestor):
-    """Hybrid: ValueInvestor rules + LLM reasoning."""
+    """Hybrid: ValueInvestor rules + LLM reasoning.
+
+    Theory: simulation-bases.md §4.4
+    """
 
     _system_prompt = RULELLM_VALUE_INVESTOR_SYS
 
 
 class RuleLLMInstitutionalHolder(RuleLLMInvestor):
-    """Hybrid: InstitutionalHolder rules + LLM reasoning."""
+    """Hybrid: InstitutionalHolder rules + LLM reasoning.
+
+    Theory: simulation-bases.md §4.5
+    """
 
     _system_prompt = RULELLM_INSTITUTIONAL_HOLDER_SYS
 

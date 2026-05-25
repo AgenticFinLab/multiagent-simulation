@@ -1,71 +1,48 @@
-# ReversalEffect LLM Analysis Methodology
+# Reversal Effect LLM Analysis Plan
 
-## Overview
+## §1 Objectives
 
-This document describes the evaluation metrics for the **LLM-based reversal effect** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
+This analysis checks whether persona-driven API investors preserve the reversal
+mechanism while producing complete, auditable trading records.
 
-For detailed metric definitions and financial theory, see: **`../ReversalEffect/analysis.md`**
+## §2 Core Metrics
 
----
+| Metric | Function Contract | Source |
+|---|---|---|
+| Overshoot magnitude | `def compute_overshoot_magnitude(prices: list[float], fundamental: float) -> float` | `analysis-bases.md §2.1` |
+| Reversal return | `def compute_reversal_return(prices: list[float], onset: int, extreme: int) -> float` | `analysis-bases.md §2.2` |
+| Contrarian order share | `def compute_contrarian_order_share(orders: list[dict]) -> float` | `analysis-bases.md §2.3` |
+| Momentum delay | `def compute_momentum_delay(prices: list[float], orders: list[dict]) -> int` | `analysis-bases.md §2.4` |
+| Liquidity depth | `def compute_liquidity_depth(orders: list[dict], base_liquidity: float) -> float` | `analysis-bases.md §2.5`; reported as not applicable for LLM |
+| Agent attribution | `def compute_agent_attribution(orders: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.6` |
+| API quality | `def compute_api_quality(events: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.7` |
 
-## Key Metrics (Summary)
+## §3 Analysis Dimensions
 
-| Metric                   | Purpose                              |
-|--------------------------|--------------------------------------|
-| Long-lag Autocorrelation | AC < 0 for lag > 15 (mean reversion) |
-| Winner-Loser Spread      | Losers outperform winners long-term  |
-| Overreaction Index       | σ(P) / σ(F) excess volatility        |
-| Contrarian Profit        | Buying losers profitable             |
+Review reversal behavior, role-level order flow, parse retry/fallback events,
+and portfolio constraints. Any fallback must be conservative, visible, and
+below the project quality threshold.
 
----
+## §4 Phase Analysis
 
-## LLM-Specific Observable Phenomena
+Use the same phase framework as Rule, then inspect whether API investors enter
+or exit phases earlier because of prompt interpretation rather than formulaic
+thresholds.
 
-### Emergent Behaviors
+## §5 Cross-Variant Comparison
 
-| Phenomenon               | LLM Behavior                                   | Contrast with Rule-Based                   |
-|--------------------------|------------------------------------------------|--------------------------------------------|
-| **Overreaction**         | LLM may extrapolate too far from recent news   | Rule-based uses fixed response coefficient |
-| **Value Recognition**    | LLM reasons about "overvalued/undervalued"     | Rule-based uses price-fundamental ratio    |
-| **Contrarian Reasoning** | LLM explicitly discusses betting against trend | Rule-based follows formula                 |
+Use `analysis-bases.md §5` to compare LLM with Rule and isolate prompt-driven
+stochasticity, then compare with RuleLLM to measure whether explicit rules
+reduce dispersion or parse risk.
 
-### Round and Agent Scaling
+## §6 Expected Results and Validation Criteria
 
-| Scale          | LLM-Specific Observation                         |
-|----------------|--------------------------------------------------|
-| **50 rounds**  | Overreaction visible; reversion may begin        |
-| **100 rounds** | Full cycle; LLM contrarian reasoning visible     |
-| **5 agents**   | Individual LLM overreaction dominates            |
-| **10 agents**  | Mix of momentum/contrarian LLMs creates reversal |
+A valid full run records 200 rounds, finite prices, structured order fields, and
+low API parse/fallback rates. Deterministic schema failures invalidate the
+sample.
 
----
+## §7 Visualization Catalogue
 
-## LLM-Specific Considerations
-
-1. **Overreaction Modeling**: LLM may naturally overreact to news
-2. **Representativeness Heuristic**: LLM responses may overweight recent data
-3. **Contrarian Reasoning**: LLM can be prompted for value-based thinking
-
----
-
-## Using Centralized Evaluation Module
-
-```python
-from masim.evaluation.finance import (
-    calculate_returns,
-    calculate_autocorrelation,
-    calculate_price_deviation,
-    plot_returns_analysis,
-)
-
-# Same analysis as rule-based version
-prices = {...}
-returns = calculate_returns(prices)
-ac_long = calculate_autocorrelation(returns, lag=20)  # Negative = reversal
-```
-
----
-
-## References
-
-See `../ReversalEffect/analysis.md` for complete academic references.
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_reversaleffect_dynamics.png`, `02_reversaleffect_analysis.png`, and
+`03_summary.png`.

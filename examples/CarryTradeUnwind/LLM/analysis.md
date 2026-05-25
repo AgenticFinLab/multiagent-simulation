@@ -1,84 +1,54 @@
 # CarryTradeUnwind LLM Variant — Analysis Guide
 
-## 1. Analysis Overview
+## §1 Overview
 
-This guide covers interpretation of results from the **CarryTradeUnwind LLM** variant.
-Key question: *Do LLM carry-trade personas reproduce the empirical crash pattern?
-How does stochastic LLM reasoning alter crisis severity versus the Rule baseline?*
+| Item | Description |
+|---|---|
+| Analysis script | `examples/CarryTradeUnwind/LLM/analysis.py` |
+| Output location | `EXPERIMENT/CarryTradeUnwind/LLM/records/analysis/` |
+| Imported functions | Delegates to `Rule/analysis.py` for core loading, metrics, validation, plots, and `summary.json` |
+| Variant consideration | Interpret metrics as stochastic persona-driven carry decisions under the same market mechanism as Rule |
 
----
+## §2 Metric Implementation
 
-## 2. Metric Implementation (`LLM/analysis.py`)
+| Metric | Function | analysis-bases.md ref |
+|---|---|---|
+| Maximum Drawdown | `_compute_max_drawdown(prices_list)` | §2 Metric 1 |
+| Unwind Velocity | `_compute_unwind_velocity(prices_list)` | §2 Metric 2 |
+| Unwind Duration | `_compute_unwind_duration(prices_list, fundamental)` | §2 Metric 3 |
+| Crisis Onset Round | `_compute_cascade_onset(prices_list, fundamental)` | §2 Metric 4 |
+| Recovery Ratio | `_compute_recovery_ratio(prices_list)` | §2 Metric 5 |
+| Return Autocorrelation AC(1) | `_compute_autocorrelation(prices_list, lag=1)` | §2 Metric 6 |
+| Annualized Volatility | `_compute_peak_rolling_volatility(prices_list)` | §2 Metric 7 |
 
-Imports `calculate_metrics`, `load_simulation_data`, `create_visualizations` from
-`Rule/analysis.py` (DRY pattern). Adds LLM-specific action-distribution plot.
+## §3 Dimension-by-Dimension Analysis
 
-All 7 core metrics from analysis-bases.md §2 apply identically.
-See `Rule/analysis.md §2` for metric formulas.
+| Dimension | Implementation and Interpretation |
+|---|---|
+| Crash Severity and Cascade Dynamics | Compare `max_drawdown_pct`, `unwind_velocity`, and `peak_rolling_vol_pct` against Rule to see whether persona reasoning delays or softens forced liquidation. |
+| Cascade Attribution | Inspect per-agent action distributions and order payloads to verify leveraged carry personas sell during negative-deviation stress. |
+| Recovery Analysis | Use `recovery_ratio` and AC(1) to detect whether LLM agents stabilize faster or remain hesitant after the trough. |
+| Timing and Sophistication | Compare crisis onset and sell timing with Rule and RuleLLM; delayed action indicates persona deliberation. |
+| Cross-Variant Comparison | Use `summary.json` fields from all four variants under `analysis-bases.md §5`. |
 
----
+## §4 Variant-Specific Observable Phenomena
 
-## 3. LLM-Specific Output Files
+LLM-specific observations include reasoning quality in `<analysis>` tags, valid canonical decisions in `<decision>` JSON, stochastic quantity variation at temperature 0.3, and possible under-trading when agents interpret borderline deviation signals conservatively.
 
-Running `LLM/analysis.py` writes to `EXPERIMENT/CarryTradeUnwind/LLM/records/analysis/`:
+## §5 Scaling and Sensitivity Analysis
 
-| File                                | Contents                                           |
-|-------------------------------------|----------------------------------------------------|
-| `carrytradeunwind_llm_analysis.png` | 2×2 chart: price, deviation, returns, distribution |
-| `carrytradeunwind_llm_actions.png`  | Bar chart: buy/sell/hold counts per agent          |
-| `summary.json`                      | `{variant: "LLM", ...metrics}`                     |
+Runtime grows with agent count, API latency, and total rounds. Metric sensitivity follows the Rule variant for market parameters, but LLM temperature and prompt clarity affect quantity dispersion, parse-failure rate, and directional fidelity to the carry-trade role.
 
----
+## §6 Output Files Reference
 
-## 4. Dimension-by-Dimension Interpretation
+| File | Contents |
+|---|---|
+| `00_investor_bids.png` | Market price, fundamental value, and per-agent bid traces |
+| `01_carrytradeunwind_dynamics.png` | FX rate, fundamental anchor, deviation, and crisis thresholds |
+| `02_carrytradeunwind_analysis.png` | Rolling volatility and per-round FX returns |
+| `03_summary.png` | Agent VWAP and total trading-volume summary |
+| `summary.json` | Metrics, price summary, agent VWAP, and nested validation result |
 
-### 4.1 Price vs Fundamental
+## §7 Cross-Variant Comparison Notes
 
-- Compare with Rule baseline: LLM agents may delay crisis onset
-- Stochastic decisions create smoother (less cliff-edge) crash profiles
-
-### 4.2 Deviation Time Series
-
-- LLM agents with carry-trader personas may tolerate deeper negative deviation
-  before selling (LLM "reasoning" about recovery potential)
-- If LLM crisis_onset_round > Rule baseline: LLMs are more optimistic
-
-### 4.3 Action Distribution Plot
-
-- `LLMCarryTrader`: should be mostly "buy" during positive deviation phases
-- `LLMCarryFund`: should show "sell" spikes during drawdown
-- `LLMFundingBuyer`: should show "buy" during negative deviation
-- High "hold" fraction = LLM uncertainty / conservative behavior
-
----
-
-## 5. Variant-Specific Phenomena
-
-### 5.1 Temperature Effect
-
-At `temperature=0.3`, the same deviation can produce slightly different quantities
-across runs. Run multiple simulations to build a distribution of `max_drawdown_pct`.
-
-### 5.2 Persona Fidelity
-
-Ideal: LLM agents should exhibit the same directional behavior as their
-Rule counterparts ~80%+ of rounds. Use RuleLLM variant for explicit measurement.
-
-### 5.3 Emergent Conservatism
-
-LLM agents sometimes under-buy or under-sell (defaulting to "hold") when
-market signals are borderline. This reduces crisis severity compared to Rule.
-
----
-
-## 6. Cross-Variant Comparison
-
-| Metric               | Expected vs Rule         |
-|----------------------|--------------------------|
-| `max_drawdown_pct`   | Lower (LLM conservatism) |
-| `crisis_onset_round` | Later (LLM caution)      |
-| `unwind_velocity`    | Lower                    |
-| `recovery_ratio`     | Similar or higher        |
-| `annualized_vol_pct` | Lower (LLM smoothing)    |
-
-Use `summary.json` from each variant to build a comparison table.
+Expected LLM behavior is more variable than Rule: `max_drawdown_pct` and `unwind_velocity` may be lower if agents hesitate, while `crisis_onset_round` may be later. A valid LLM sample must complete all configured rounds, preserve canonical order fields, and fail fast after retry exhaustion rather than substituting hidden hold orders.

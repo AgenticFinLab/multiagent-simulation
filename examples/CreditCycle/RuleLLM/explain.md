@@ -1,89 +1,95 @@
-# CreditCycle RuleLLM Variant — explain.md
+# Credit Cycle RuleLLM Variant Explanation
 
 ## §1 Overview
 
-The RuleLLM variant embeds deterministic threshold rules directly into the LLM system prompt. The LLM must follow these rules while also leveraging its language understanding to narrate reasoning. This hybrid approach combines the mechanical precision of the Rule variant with the interpretability of LLM-generated explanations.
+| Field | Value |
+|---|---|
+| Variant | RuleLLM |
+| Simulation | Credit Cycle |
+| Decision Mechanism | LLM-generated trading orders constrained by explicit scenario rules |
+| Theory Reference | `examples/CreditCycle/simulation-bases.md` |
+| Market Broadcast | `configs/CreditCycle/RuleLLM/topology.yml` |
 
-| Aspect             | Detail                                             |
-|--------------------|----------------------------------------------------|
-| Variant            | RuleLLM                                            |
-| Simulation         | CreditCycle                                        |
-| Decision Mechanism | LLM with embedded threshold rules in system prompt |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                    |
-| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`       |
-| Prompt Location    | `CreditCycle/RuleLLM/prompts.py`                   |
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-## §2 Theory → Implementation Mapping
+## §2 Theory -> Implementation Mapping
 
-### §2.1 RuleLLMProCyclicalLender (simulation-bases.md §4.1)
+### §2.1 ProCyclicalLender (simulation-bases.md §4.1)
 
-| Theory Component      | RuleLLM Implementation                                              |
-|-----------------------|---------------------------------------------------------------------|
-| Pro-cyclical leverage | Rule in prompt: "If deviation > 0.03, buy {order_size × 2.0} units" |
-| Credit contraction    | Rule in prompt: "If deviation < −0.03, sell {order_size} units"     |
-| LLM role              | Narrate reasoning; confirm rule-derived action                      |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `RuleLLMProCyclicalLender` uses `RULELLM_PRO_CYCLICAL_LENDER_SYS`, whose `== DECISION RULES ==` encode pro-cyclical expansion and contraction thresholds. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/RuleLLM/players.yml:procyclicallender.config.extras` supplies cash/position, order caps, and ARK policy. |
+| Variant-specific decision mechanism | Rule-anchored ARK LLM output parsed by `decide_with_llm_contract()` into the canonical order schema. |
+### §2.2 MinskyBorrower (simulation-bases.md §4.2)
 
-### §2.2 RuleLLMMinskyBorrower (simulation-bases.md §4.2)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `RuleLLMMinskyBorrower` uses `RULELLM_MINSKY_BORROWER_SYS` to bind calm-period leverage and crisis deleveraging to explicit rules. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/RuleLLM/players.yml:minskyborrower.config.extras` supplies cash/position, phase parameters, and ARK policy. |
+| Variant-specific decision mechanism | Rule-anchored ARK decision parsed and clamped by the shared CreditCycle decision helper. |
+### §2.3 CounterCyclicalLender (simulation-bases.md §4.3)
 
-| Theory Component       | RuleLLM Implementation                                                                    |
-|------------------------|-------------------------------------------------------------------------------------------|
-| Fragility accumulation | Rule in prompt: "If market has been stable for multiple rounds, buy to increase leverage" |
-| Crisis deleveraging    | Rule in prompt: "If deviation < −0.05, sell {order_size × 2} immediately"                 |
-| LLM role               | Provide Minsky narrative; may preemptively reduce leverage if reasoning detects fragility |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `RuleLLMCounterCyclicalLender` uses `RULELLM_COUNTER_CYCLICAL_LENDER_SYS` to encode crisis-buy and boom-sell stabilizing behavior. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/RuleLLM/players.yml:countercyclicallender.config.extras` supplies cash/position, order caps, and ARK policy. |
+| Variant-specific decision mechanism | Rule-anchored ARK decision with explicit fallback counters for stochastic parse failures. |
+### §2.4 ValueInvestor (simulation-bases.md §4.4)
 
-### §2.3 RuleLLMCounterCyclicalLender (simulation-bases.md §4.3)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `RuleLLMValueInvestor` uses `RULELLM_VALUE_INVESTOR_SYS` to encode fundamental discount/premium rules. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/RuleLLM/players.yml:valueinvestor.config.extras` supplies cash/position, order caps, and ARK policy. |
+| Variant-specific decision mechanism | Rule-anchored ARK decision parsed into the canonical order schema. |
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-| Theory Component            | RuleLLM Implementation                                                                           |
-|-----------------------------|--------------------------------------------------------------------------------------------------|
-| Counter-cyclical deployment | Rule in prompt: "If deviation < −0.05, buy {order_size}; if deviation > 0.05, sell {order_size}" |
-| LLM role                    | Explain counter-cyclical rationale                                                               |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMNoiseTrader` uses `RULELLM_NOISE_TRADER_SYS` to keep stochastic liquidity behavior bounded by explicit rules. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/RuleLLM/players.yml:noisetrader.config.extras` supplies cash/position, order caps, and ARK policy. |
+| Variant-specific decision mechanism | Rule-anchored ARK decision parsed into the canonical order schema. |
 
-### §2.4 RuleLLMValueInvestor (simulation-bases.md §4.4)
+## §3 Market Mechanism
 
-| Theory Component | RuleLLM Implementation                                               |
-|------------------|----------------------------------------------------------------------|
-| Value threshold  | Rule in prompt: "Buy if deviation < −0.10; sell if deviation > 0.10" |
-| LLM role         | Provide fundamental analysis narrative                               |
+The coordinator market is inherited from the Rule implementation. `RuleLLMInvestor.decide()` formats `RULELLM_USER_TEMPLATE` with price, fundamental, deviation, portfolio state, and maximum single-order quantity; it then calls the configured ARK model and emits canonical trading orders.
 
-### §2.5 RuleLLMNoiseTrader (simulation-bases.md §4.5)
+## §4 Variant Architecture
 
-| Theory Component | RuleLLM Implementation                                |
-|------------------|-------------------------------------------------------|
-| Random trading   | Rule in prompt: "Trade randomly with 30% probability" |
-
-## §3 Hybrid Decision Architecture
-
-```
-System Prompt: [Persona] + [Embedded Rule: "If δ > 0.03, buy qty × 2"]
-User Prompt:   Current market_data + position + history
-LLM Response:  action + quantity (must comply with embedded rule) + reasoning
-```
-
-The LLM is instructed to follow the rule but may add narrative context or slight modifications when reasoning suggests unusual market conditions.
-
-## §4 Variant-Specific Features
-
-- **Rule anchoring**: Extreme decisions (crisis sell, boom buy) are rule-anchored; LLM variation is mainly in intermediate cases.
-- **Minsky narrative**: RuleLLMMinskyBorrower provides the most detailed credit-cycle narrative since the Minsky trajectory is explicitly described in the prompt.
-- **Consistency advantage**: Higher cross-run consistency than pure LLM; similar LAI to Rule variant but with richer output logs.
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/CreditCycle/RuleLLM/players.py` |
+| Prompt module | `examples/CreditCycle/RuleLLM/prompts.py` |
+| Inference | ARK LLM via `LangChainAPIInference` with `ark/doubao-seed-2-0-mini-260428`. |
+| Output parsing | `examples/CreditCycle/llm_decision.py:decide_with_llm_contract()` parses and clamps canonical order JSON. |
+| Error handling | Deterministic config/schema errors fail fast; stochastic API parse-contract failures become explicit logged hold fallbacks and are quality-audited. |
 
 ## §5 Config Reference
 
-Same as Rule variant; adds LLM model config extras.
+| Config | Purpose |
+|---|---|
+| `configs/CreditCycle/RuleLLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/CreditCycle/RuleLLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/CreditCycle/RuleLLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/CreditCycle/RuleLLM/persona.yml` | Turn recording and persona metadata. |
 
 ## §6 Running Instructions
 
 ```bash
-cd multiagent-simulation
-python -m examples.CreditCycle.RuleLLM.run
+python examples/CreditCycle/RuleLLM/run_creditcycle_rulellm.py -c configs/CreditCycle/RuleLLM/simulation.yml
 ```
 
 ## §7 Expected Behavior
 
-- LAI and CCS values close to Rule baseline
-- MFS may be slightly lower if LLM anticipates fragility
-- LLM logs capture Minsky reasoning — useful for qualitative analysis
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
 ## §8 References
 
-See `simulation-bases.md §2` for full DOI citations.
+See `examples/CreditCycle/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/CreditCycle/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

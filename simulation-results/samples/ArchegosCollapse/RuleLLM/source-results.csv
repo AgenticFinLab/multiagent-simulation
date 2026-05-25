@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
+1,1,ArchegosCollapse,RuleLLM,SUCCESS,0,2520.138,2026-05-23T01:16:04,2026-05-23T01:58:04,config/simulation.yml,examples/ArchegosCollapse/RuleLLM/run_archegsoscollapse_rulellm.py,logs/ArchegosCollapse__RuleLLM.log,,200,200,

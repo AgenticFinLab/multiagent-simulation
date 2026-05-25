@@ -45,11 +45,16 @@ rag_disposition:
       initial_purchase_price: 100.0
       max_position: 200.0
       custom_state_hot_limit: 3
+      gain_threshold: 0.03
+      loss_threshold: -0.10
+      sell_fraction_gain: 0.5
+      sell_fraction_loss: 0.15
+      buy_fraction: 0.15
       llm:
         sys_message: "examples.DispositionEffect.Rag.prompts:RULELLM_DISPOSITION_BIASED_SYS"
         user_message: "examples.DispositionEffect.Rag.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -96,9 +101,9 @@ rag_disposition:
         # Embedding Configuration
         # -------------------------------------------------------------------
         # Using Doubao embedding via ARK API
-        embed_type: "openai"
-        embed_model: "doubao-embedding-text-24071"
-        embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
+        embed_type: "litellm"
+        embed_model: "openai/hunyuan-embedding"
+        embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
         
         # Chunking parameters
         chunk_size: 512
@@ -125,11 +130,13 @@ rag_rational:
       initial_position: 50.0
       initial_purchase_price: 100.0
       custom_state_hot_limit: 3
+      target_allocation: 0.5
+      rebalance_threshold: 0.1
       llm:
         sys_message: "examples.DispositionEffect.Rag.prompts:RULELLM_RATIONAL_SYS"
         user_message: "examples.DispositionEffect.Rag.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -150,9 +157,9 @@ rag_rational:
         llm_suggested_n_urls: 5
         docs_save_dir: *docs_dir_rational
         top_k: 5
-        embed_type: "openai"
-        embed_model: "doubao-embedding-text-24071"
-        embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
+        embed_type: "litellm"
+        embed_model: "openai/hunyuan-embedding"
+        embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
         chunk_size: 512
         chunk_overlap: 64
         knowledge_sources: []
@@ -175,11 +182,14 @@ rag_tax_aware:
       initial_position: 50.0
       initial_purchase_price: 100.0
       custom_state_hot_limit: 3
+      tax_loss_threshold: -0.05
+      capital_gains_hold: 0.20
+      tax_harvest_fraction: 0.5
       llm:
         sys_message: "examples.DispositionEffect.Rag.prompts:RULELLM_TAX_AWARE_SYS"
         user_message: "examples.DispositionEffect.Rag.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -193,16 +203,114 @@ rag_tax_aware:
         urls:
           - "https://en.wikipedia.org/wiki/Tax_loss_harvesting"
           - "https://en.wikipedia.org/wiki/Capital_gains_tax"
-          - "https://www.investopedia.com/terms/t/taxgainlossharvesting.asp"
         agent_autonomous: false
         catalog_path: "examples/document-sources/finance_books.csv"
         llm_suggested: false
         llm_suggested_n_urls: 5
         docs_save_dir: *docs_dir_tax
         top_k: 5
-        embed_type: "openai"
-        embed_model: "doubao-embedding-text-24071"
-        embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
+        embed_type: "litellm"
+        embed_model: "openai/hunyuan-embedding"
+        embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+        chunk_size: 512
+        chunk_overlap: 64
+        knowledge_sources: []
+  persona: !include persona.yml
+
+# RAG Institutional Investor
+rag_institutional:
+  name: "RAG Institutional Investor"
+  class: "examples.DispositionEffect.Rag.players:RagInstitutionalInvestor"
+  num_instances: 2
+  config:
+    identity: "rag_institutional"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rag_investors
+    extras:
+      record_path: "EXPERIMENT/DispositionEffect/Rag/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      initial_purchase_price: 100.0
+      custom_state_hot_limit: 3
+      gain_threshold: 0.25
+      loss_threshold: -0.15
+      sell_fraction: 0.4
+      llm:
+        sys_message: "examples.DispositionEffect.Rag.prompts:RULELLM_INSTITUTIONAL_SYS"
+        user_message: "examples.DispositionEffect.Rag.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+      rag:
+        persist_dir: "EXPERIMENT/DispositionEffect/Rag/rag_index/rag_institutional"
+        docs_dir: &docs_dir_institutional "examples/document-sources/files"
+        url_csv: "examples/document-sources/finance_books.csv"
+        urls:
+          - "https://en.wikipedia.org/wiki/Institutional_investor"
+          - "https://en.wikipedia.org/wiki/Risk_management"
+        agent_autonomous: false
+        catalog_path: "examples/document-sources/finance_books.csv"
+        llm_suggested: false
+        llm_suggested_n_urls: 5
+        docs_save_dir: *docs_dir_institutional
+        top_k: 5
+        embed_type: "litellm"
+        embed_model: "openai/hunyuan-embedding"
+        embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+        chunk_size: 512
+        chunk_overlap: 64
+        knowledge_sources: []
+  persona: !include persona.yml
+
+# RAG Loss-Averse Investor
+rag_loss_averse:
+  name: "RAG Loss-Averse Investor"
+  class: "examples.DispositionEffect.Rag.players:RagLossAverse"
+  num_instances: 2
+  config:
+    identity: "rag_loss_averse"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rag_investors
+    extras:
+      record_path: "EXPERIMENT/DispositionEffect/Rag/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      initial_purchase_price: 100.0
+      custom_state_hot_limit: 3
+      gain_threshold: 0.03
+      loss_threshold: -0.10
+      sell_fraction_gain: 0.5
+      sell_fraction_loss: 0.15
+      llm:
+        sys_message: "examples.DispositionEffect.Rag.prompts:RULELLM_LOSS_AVERSE_SYS"
+        user_message: "examples.DispositionEffect.Rag.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+      rag:
+        persist_dir: "EXPERIMENT/DispositionEffect/Rag/rag_index/rag_loss_averse"
+        docs_dir: &docs_dir_loss_averse "examples/document-sources/files"
+        url_csv: "examples/document-sources/finance_books.csv"
+        urls:
+          - "https://en.wikipedia.org/wiki/Loss_aversion"
+          - "https://en.wikipedia.org/wiki/Prospect_theory"
+        agent_autonomous: false
+        catalog_path: "examples/document-sources/finance_books.csv"
+        llm_suggested: false
+        llm_suggested_n_urls: 5
+        docs_save_dir: *docs_dir_loss_averse
+        top_k: 5
+        embed_type: "litellm"
+        embed_model: "openai/hunyuan-embedding"
+        embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
         chunk_size: 512
         chunk_overlap: 64
         knowledge_sources: []

@@ -14,7 +14,7 @@
 setting:
   name: "disposition_effect_rulellm_simulation"
   description: "Hybrid Rule+LLM investors with ByteDance Doubao"
-  total_rounds: 100
+  total_rounds: 200
   round_history_limit: 3
   record_path: "EXPERIMENT/DispositionEffect/RuleLLM/records"
   save_diagram_interval: 100

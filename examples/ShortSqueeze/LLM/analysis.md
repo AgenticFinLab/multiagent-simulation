@@ -1,71 +1,45 @@
-# ShortSqueeze LLM Analysis Methodology
+# Short Squeeze LLM Analysis Plan
 
-## Overview
+## §1 Objectives
 
-This document describes the evaluation metrics for the **LLM-based short squeeze** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
+Verify that persona-driven API investors preserve the short-squeeze mechanism
+while producing complete structured order records and auditable parser-quality
+signals.
 
-For detailed metric definitions and financial theory, see: **`../ShortSqueeze/analysis.md`**
+## §2 Core Metrics
 
----
+| Metric | Function Contract | Source |
+|---|---|---|
+| Squeeze magnitude | `def compute_squeeze_magnitude(prices: list[float], fundamental: float) -> float` | `analysis-bases.md §2.1` |
+| Covering volume | `def compute_covering_volume(orders: list[dict]) -> float` | `analysis-bases.md §2.2` |
+| Retail demand share | `def compute_retail_demand_share(orders: list[dict]) -> float` | `analysis-bases.md §2.3` |
+| Momentum amplification | `def compute_momentum_amplification(orders: list[dict], returns: list[float]) -> float` | `analysis-bases.md §2.4` |
+| Float constraint proxy | `def compute_float_constraint(orders: list[dict], institutional_holdings: list[float]) -> float` | `analysis-bases.md §2.5` |
+| Value resistance | `def compute_value_resistance(orders: list[dict], prices: list[float], fundamental: float) -> float` | `analysis-bases.md §2.6` |
+| API and retrieval quality | `def compute_api_and_retrieval_quality(events: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.7` |
 
-## Key Metrics (Summary)
+## §3 Analysis Dimensions
 
-| Metric          | Purpose                               |
-|-----------------|---------------------------------------|
-| Short Interest  | Squeeze vulnerability                 |
-| Price Spike     | Squeeze magnitude                     |
-| Forced Covering | Short sellers buy to close            |
-| Feedback Loop   | Covering → price rise → more covering |
+Analyze squeeze mechanics, role-level order flow, parser retries, explicit
+fallback holds, and portfolio constraints.
 
----
+## §4 Phase Analysis
 
-## LLM-Specific Observable Phenomena
+Use `analysis-bases.md §4` and inspect whether LLM investors enter forced
+covering, retail demand, or value-resistance phases earlier or later than Rule.
 
-### Emergent Behaviors
+## §5 Cross-Variant Comparison
 
-| Phenomenon               | LLM Behavior                                 | Contrast with Rule-Based             |
-|--------------------------|----------------------------------------------|--------------------------------------|
-| **Margin Panic**         | LLM expresses urgency when losses mount      | Rule-based triggers at threshold     |
-| **Covering Reasoning**   | LLM explains "must cover before margin call" | Rule-based follows formula           |
-| **Momentum Recognition** | LLM buyer identifies "squeeze in progress"   | Rule-based uses momentum coefficient |
+Use `analysis-bases.md §5` to compare LLM against Rule and RuleLLM, isolating
+persona-driven variation from explicit-rule anchoring.
 
-### Round and Agent Scaling
+## §6 Expected Results And Validation Criteria
 
-| Scale          | LLM-Specific Observation                         |
-|----------------|--------------------------------------------------|
-| **50 rounds**  | Squeeze begins; forced covering visible          |
-| **100 rounds** | Full squeeze cycle with normalization            |
-| **5 agents**   | Individual LLM short positions dominate          |
-| **10 agents**  | Diverse short/long LLMs create realistic squeeze |
+A valid LLM sample records 200 rounds, finite prices, structured order fields,
+and a fallback rate within the project quality gate.
 
----
+## §7 Visualization Catalogue
 
-## LLM-Specific Considerations
-
-1. **Margin Pressure**: LLM prompted with P&L and margin requirements
-2. **Forced Action**: LLM must cover when losses exceed threshold
-3. **Momentum Buying**: LLM buyers react to rising prices
-
----
-
-## Using Centralized Evaluation Module
-
-```python
-from masim.evaluation.finance import (
-    calculate_returns,
-    calculate_net_demand,
-    calculate_strategy_contribution,
-    plot_strategy_contribution,
-)
-
-# Same analysis as rule-based version
-prices = {...}
-returns = calculate_returns(prices)
-max_spike = max(returns)
-```
-
----
-
-## References
-
-See `../ShortSqueeze/analysis.md` for complete academic references.
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_shortsqueeze_dynamics.png`, `02_shortsqueeze_analysis.png`, and
+`03_summary.png`.

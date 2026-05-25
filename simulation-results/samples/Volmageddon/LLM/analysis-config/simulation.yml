@@ -1,0 +1,39 @@
+# Volmageddon LLM Simulation Configuration
+#
+# February 5, 2018 - VIX spiked 115%, XIV ETN lost 90%+ in after-hours trading
+#
+# Usage:
+#   python examples/Volmageddon/LLM/run_volmageddon_llm.py \
+#       -c configs/Volmageddon/LLM/simulation.yml
+
+setting:
+  name: "Volmageddon-LLM"
+  description: "Volmageddon simulation with VIX ETN blowup, short volatility crowd, and reverse feedback loop"
+  total_rounds: 200
+  round_history_limit: 3
+  save_diagram_interval: 50
+  
+  record_path: "artifacts/records"
+  storage_path: "artifacts/communication"
+  
+  log_level: "INFO"
+  log_to_file: true
+  log_path: "logs"
+
+environment:
+  dotenv_path: ".env"
+  workspace: "."
+
+ray:
+  namespace: "volmageddon_llm"
+  ignore_reinit_error: true
+  object_store_memory: 536870912
+  num_cpus: 4
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "artifacts/communication"
+  record_messages: true
+  message_block_size: 500

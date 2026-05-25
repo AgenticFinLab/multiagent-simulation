@@ -5,7 +5,7 @@
 setting:
   name: "svbbankrun_simulation"
   description: "SVBBankRun simulation with Rule agents"
-  total_rounds: 50
+  total_rounds: 200
   round_history_limit: 10
   record_path: "EXPERIMENT/SVBBankRun/Rule/records"
   save_diagram_interval: 10

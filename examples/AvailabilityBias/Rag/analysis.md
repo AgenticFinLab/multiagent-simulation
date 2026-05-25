@@ -1,108 +1,56 @@
 # AvailabilityBias Rag — Analysis Documentation
 
-## Overview
+## §1 Overview
 
-| Item                                | Description                                                                                                                                       |
-|-------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Implements**                      | `../analysis-bases.md`                                                                                                                            |
-| **Analysis Script**                 | `Rule/analysis.py` (imported)                                                                                                                     |
-| **Output Location**                 | `EXPERIMENT/AvailabilityBias/Rag/records/analysis/`                                                                                               |
-| **Variant-Specific Considerations** | Knowledge-augmented variant; key question is whether behavioral finance literature reduces or sharpens availability bias expression in LLM agents |
+| Item | Description |
+|---|---|
+| Variant | Rag |
+| Analysis Script | `examples/AvailabilityBias/Rag/analysis.py` imports Rule analysis and adds RAG statistics |
+| Basis | `../analysis-bases.md` |
+| Outputs | Standard fixed output set plus `rag_stats.json` |
 
----
+## §2 Metric Implementation
 
-## 1. Metric Implementation
+| Metric | Function | analysis-bases.md Ref | Rag-Specific Notes |
+|---|---|---|---|
+| Price Deviation from Fundamental | `_compute_peak_deviation(...)` | `§2 Metric: Price Deviation from Fundamental` | Tests knowledge-altered bias depth. |
+| Bias Persistence Score | `_compute_bias_persistence(...)` | `§2 Metric: Bias Persistence Score` | Compares knowledge-guided persistence to LLM/RuleLLM. |
+| Availability Bias Magnitude | investor payload decomposition | `§2 Metric: Availability Bias Magnitude` | Must be interpreted with RAG context quality. |
+| Return Autocorrelation | `_compute_rolling_ac1(...)` | `§2 Metric: Return Autocorrelation` | Detects knowledge-modified overreaction/reversal. |
+| Agent-Type Volume Share | `_load_data(...)` | `§2 Metric: Agent-Type Volume Share` | Shows whether retrieved context changes channel volume. |
+| Stabilization Ratio | `_compute_stabilization_ratio(...)` | `§2 Metric: Stabilization Ratio` | Tests whether debiasing context strengthens rational correction. |
+| RAG Retrieval Failure Rate | `analyze_rag_knowledge_effect(...)` | `§2 Metric: RAG Retrieval Failure Rate` | Written to `rag_stats.json`. |
 
-| Metric                       | Function              | analysis-bases.md Ref | Rag-Specific Notes                                                                                      |
-|------------------------------|-----------------------|-----------------------|---------------------------------------------------------------------------------------------------------|
-| **Bias Amplitude**           | `calculate_metrics()` | `§2.1`                | Unknown direction vs. LLM — knowledge may amplify (more articulate bias) or dampen (debiasing effect)   |
-| **Correction Ratio**         | `calculate_metrics()` | `§2.2`                | Potentially higher if SystematicAnalyst uses debiasing literature to resist contamination               |
-| **Bias Persistence**         | `calculate_metrics()` | `§2.3`                | May be shorter if knowledge-armed SystematicAnalyst counter-trades more effectively                     |
-| **Return Autocorrelation**   | `calculate_metrics()` | `§2.4`                | Similar to LLM unless debiasing literature significantly alters return momentum dynamics                |
-| **Agent-Type Volume**        | `calculate_metrics()` | `§2.5`                | Key diagnostic: does SystematicAnalyst volume increase vs. LLM (debiasing) or decrease (contamination)? |
-| **Availability Event Onset** | `calculate_metrics()` | `§2.6`                | Variable; knowledge-grounded agents may detect availability events earlier or later                     |
+## §3 Analysis Dimensions
 
----
+Rag analysis first applies the shared market metrics, then evaluates retrieval coverage and whether `rag_context` is present in investor payloads.
 
-## 2. Dimension-by-Dimension Analysis
+## §4 Phase Analysis
 
-### Dimension 1: Bias Dynamics
-*(Objective from analysis-bases.md §3.1)*
+RAG should not change the market phases directly; it changes the knowledge available to each investor during the same phase structure.
 
-**Implementation:** `load_simulation_data()` → `availabilitybias_rag_analysis.png`
+## §5 Cross-Variant Comparison
 
-**Variant-Specific Interpretation:**
-Compare Rag bias amplitude to LLM baseline. If Rag < LLM: knowledge is debiasing. If Rag > LLM: retrieved bias literature is reinforcing/amplifying expression. Either result is scientifically interesting — must be compared to expectations from `../analysis-bases.md §6`.
+Compare Rag primarily against RuleLLM because both use explicit decision rules; differences should be attributed to retrieved context and API stochasticity.
 
----
+## §6 Expected Results
 
-### Dimension 2: Agent Behavior Analysis
-*(Objective from analysis-bases.md §3.2)*
+### §6.1 Stylised Facts
 
-**Key Diagnostic:** Does RagSystematicAnalyst reasoning cite debiasing research ("research shows availability bias causes overreaction in this pattern")? Does it use this knowledge to counter-trade more aggressively? Presence of debiasing citations = knowledge is working as intended.
+Rag should preserve the same order schema and produce a usable retrieval-quality audit.
 
----
+### §6.2 Calibration Targets
 
-### Dimension 3: Correction Dynamics
-*(Objective from analysis-bases.md §3.3)*
+Same market targets as `analysis-bases.md §6.2`; retrieval failure rate should be low enough to justify knowledge-effect interpretation.
 
-**Variant-Specific Interpretation:**
-If correction_ratio is higher in Rag vs. LLM, SystematicAnalyst's knowledge-grounded debiasing is effective. Check whether RagSystematicAnalyst trades earlier and in larger size than LLM counterpart.
+### §6.3 Cross-Variant Predictions
 
----
+Rag may reduce or sharpen availability bias depending on retrieved evidence, but high retrieval failure makes the sample closer to RuleLLM.
 
-### Dimension 4: Cross-Variant Comparison
-*(Objective from analysis-bases.md §3.4)*
+### §6.4 Validation Failure Signs
 
-Rag is the "informed" behavioral reference. Research question: does knowledge about cognitive biases make agents more or less biased? This is the primary scientific contribution of the Rag variant.
+Missing `rag_context`, absent `rag_stats.json`, embedding-key failures, or parser failures require quality investigation.
 
----
+## §7 Visualization Catalogue
 
-## 3. Variant-Specific Observable Phenomena
-
-| Phenomenon                            | Description                                                                        | How to Observe                                             |
-|---------------------------------------|------------------------------------------------------------------------------------|------------------------------------------------------------|
-| **Debiasing via Research Citation**   | SystematicAnalyst cites bias research to justify counter-trading                   | Search reasoning for "research shows", "studies indicate"  |
-| **Bias Reinforcement via Literature** | RecencyOverweighter cites experimental evidence for availability heuristic         | Search reasoning for "Tversky", "Kahneman", "availability" |
-| **RAG Empty Context Rounds**          | Some rounds return "(No relevant knowledge)" — agent defaults to LLM behavior      | Count empty RAG rounds in reasoning logs                   |
-| **Knowledge Quality Effect**          | Outcome depends on document source quality (behavioral finance papers vs. generic) | Compare runs with different document sources               |
-
----
-
-## 4. Scaling and Sensitivity Analysis
-
-| Parameter               | Change      | Expected Effect                                                                |
-|-------------------------|-------------|--------------------------------------------------------------------------------|
-| `top_k`                 | 3 → 5       | More debiasing context; potentially lower bias amplitude                       |
-| Document source quality | thin → rich | Richer behavioral finance literature → stronger debiasing or more precise bias |
-| `temperature`           | 0.7 → 1.0   | More variance in how knowledge is interpreted and applied                      |
-
----
-
-## 5. Output Files Reference
-
-| Output File                         | Generated By              | Contents                                         | Interpretation                 |
-|-------------------------------------|---------------------------|--------------------------------------------------|--------------------------------|
-| `availabilitybias_rag_analysis.png` | `create_visualizations()` | 4-panel: Price, Deviation, Returns, Agent Volume | Primary Rag bias verification  |
-| `metrics.json`                      | `main()`                  | `{"variant": "Rag", metrics}`                    | Cross-variant comparison input |
-
----
-
-## 6. Cross-Variant Comparison Notes
-
-- **Bias amplitude**: Unknown direction vs. LLM — depends on document quality and retrieval success
-- **Correction**: Potentially best of all variants if debiasing literature is effective
-- **Scientific value**: Primary contribution is testing meta-knowledge effect on behavioral bias expression
-- **Document dependency**: Rag value contingent on behavioral finance paper availability
-
-Cross-variant comparison protocol: `../analysis-bases.md §5`.
-
----
-
-## References
-
-- `../analysis-bases.md` — master analysis specification
-- `../simulation-bases.md §4.1–§4.5` — Availability bias archetype specifications
-- `../analysis-bases.md §6` — Expected Rag result ranges
-- `Rule/analysis.py` — imported metric functions
-- `players.py → RagLLMInvestor._build_prompt()` — RAG context injection
+The imported analysis writes `summary.json`, `00_investor_bids.png`, `01_availability_bias_dynamics.png`, `02_availability_bias_analysis.png`, and `03_summary.png`. The Rag wrapper also writes `rag_stats.json`.

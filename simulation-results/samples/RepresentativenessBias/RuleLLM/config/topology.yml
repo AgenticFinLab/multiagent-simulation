@@ -1,0 +1,24 @@
+# RepresentativenessBias RuleLLM Topology Configuration
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - patternmatcher
+    - categoryovergeneralizer
+    - bayesianupdater
+    - contrarianstatistical
+    - noisetrader
+  patternmatcher:
+    - market
+  categoryovergeneralizer:
+    - market
+  bayesianupdater:
+    - market
+  contrarianstatistical:
+    - market
+  noisetrader:
+    - market

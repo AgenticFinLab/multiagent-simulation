@@ -57,3 +57,11 @@ The Rule variant should consistently yield the highest LAI, DEI, BER, and lowest
 - Odean, T. (1998). doi:[10.1111/0022-1082.00072](https://doi.org/10.1111/0022-1082.00072)
 - Barberis, N., & Xiong, W. (2009). doi:[10.1111/j.1540-6261.2009.01448.x](https://doi.org/10.1111/j.1540-6261.2009.01448.x)
 - Barber, B. M., & Odean, T. (2000). doi:[10.1111/0022-1082.00226](https://doi.org/10.1111/0022-1082.00226)
+
+## §6 Expected Results and Validation
+
+Valid Rule outputs should complete 200 rounds with valid market records, non-empty price history, and deterministic loss-aversion behavior. They are the baseline for LAI, DEI, BER, VAF, WPI, and SRR comparisons.
+
+## §7 Visualization Catalogue
+
+`Rule/analysis.py → create_visualizations(data, output_path)` produces `summary.json`, `00_investor_bids.png`, `01_lossaversion_dynamics.png`, `02_lossaversion_analysis.png`, and `03_summary.png`. Scenario reports may add LAI/DEI/BER/WPI summary tables when trade-level records are available.

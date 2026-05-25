@@ -1,0 +1,181 @@
+sample_id,scenario,mechanism,quality_status,quality_reason,parse_failures,fallback_count,retry_count,invalid_payload_count,missing_required_field_count,action_distribution,content_type_distribution
+AnchoringEffect__Rule,AnchoringEffect,Rule,accepted,,0,0,0,0,0,,
+AnchoringEffect__LLM,AnchoringEffect,LLM,accepted,,0,0,0,0,0,"{""buy"": 457, ""hold"": 491, ""sell"": 852}","{""investor_bid"": 1800}"
+AnchoringEffect__RuleLLM,AnchoringEffect,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 107, ""hold"": 1515, ""sell"": 178}","{""investor_bid"": 1800}"
+AnchoringEffect__Rag,AnchoringEffect,Rag,accepted,,0,0,0,0,0,"{""buy"": 286, ""hold"": 1189, ""sell"": 325}","{""investor_bid"": 1800}"
+ArchegosCollapse__Rule,ArchegosCollapse,Rule,accepted,,0,0,0,0,0,,
+ArchegosCollapse__LLM,ArchegosCollapse,LLM,accepted,,0,0,0,0,0,"{""buy"": 62, ""hold"": 1307, ""sell"": 31}","{""investor_bid"": 1400}"
+ArchegosCollapse__RuleLLM,ArchegosCollapse,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 2, ""hold"": 1386, ""sell"": 12}","{""investor_bid"": 1400}"
+ArchegosCollapse__Rag,ArchegosCollapse,Rag,accepted,,0,0,0,0,0,"{""buy"": 2, ""hold"": 1386, ""sell"": 12}","{""investor_bid"": 1400}"
+AsianFinancialCrisis__Rule,AsianFinancialCrisis,Rule,accepted,,0,0,0,0,0,,
+AsianFinancialCrisis__LLM,AsianFinancialCrisis,LLM,accepted,,0,0,0,0,0,"{""buy"": 156, ""hold"": 1305, ""sell"": 539}","{""investor_bid"": 2000}"
+AsianFinancialCrisis__RuleLLM,AsianFinancialCrisis,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 122, ""hold"": 1733, ""sell"": 145}","{""investor_bid"": 2000}"
+AsianFinancialCrisis__Rag,AsianFinancialCrisis,Rag,accepted,,0,0,0,0,0,"{""buy"": 146, ""hold"": 1718, ""sell"": 136}","{""investor_bid"": 2000}"
+AssetBubble__Rule,AssetBubble,Rule,accepted,,0,0,0,0,0,,
+AssetBubble__LLM,AssetBubble,LLM,accepted,,0,0,0,0,0,"{""buy"": 960, ""hold"": 1886, ""sell"": 954}","{""investor_bid"": 3800}"
+AssetBubble__RuleLLM,AssetBubble,RuleLLM,accepted,,2,0,4,0,0,"{""buy"": 431, ""hold"": 2958, ""sell"": 411}","{""investor_bid"": 3800}"
+AssetBubble__Rag,AssetBubble,Rag,accepted,,0,0,0,0,0,"{""buy"": 304, ""hold"": 3140, ""sell"": 356}","{""investor_bid"": 3800}"
+AvailabilityBias__Rule,AvailabilityBias,Rule,accepted,,0,0,0,0,0,,
+AvailabilityBias__LLM,AvailabilityBias,LLM,accepted,,0,0,0,0,0,"{""buy"": 297, ""hold"": 1119, ""sell"": 584}","{""investor_bid"": 2000}"
+AvailabilityBias__RuleLLM,AvailabilityBias,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 476, ""hold"": 1217, ""sell"": 307}","{""investor_bid"": 2000}"
+AvailabilityBias__Rag,AvailabilityBias,Rag,accepted,,0,0,0,0,0,"{""buy"": 569, ""hold"": 1026, ""sell"": 405}","{""investor_bid"": 2000}"
+BlackMonday1987__Rule,BlackMonday1987,Rule,accepted,,0,0,0,0,0,,
+BlackMonday1987__LLM,BlackMonday1987,LLM,accepted,,0,0,0,0,0,"{""buy"": 332, ""hold"": 1007, ""sell"": 461}","{""order"": 1800}"
+BlackMonday1987__RuleLLM,BlackMonday1987,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 423, ""hold"": 1117, ""sell"": 260}","{""order"": 1800}"
+BlackMonday1987__Rag,BlackMonday1987,Rag,accepted,,0,0,0,0,0,"{""buy"": 603, ""hold"": 712, ""sell"": 485}","{""order"": 1800}"
+CarryTradeUnwind__Rule,CarryTradeUnwind,Rule,accepted,,0,0,0,0,0,,
+CarryTradeUnwind__LLM,CarryTradeUnwind,LLM,accepted,,1,0,1,0,0,"{""buy"": 362, ""hold"": 773, ""sell"": 665}","{""order"": 1800}"
+CarryTradeUnwind__RuleLLM,CarryTradeUnwind,RuleLLM,accepted,,2,0,2,0,0,"{""buy"": 961, ""hold"": 583, ""sell"": 256}","{""order"": 1800}"
+CarryTradeUnwind__Rag,CarryTradeUnwind,Rag,accepted,,2,0,2,0,0,"{""buy"": 1007, ""hold"": 540, ""sell"": 253}","{""order"": 1800}"
+ConfirmationBias__Rule,ConfirmationBias,Rule,accepted,,0,0,0,0,0,,
+ConfirmationBias__LLM,ConfirmationBias,LLM,accepted,,0,0,0,0,0,"{""buy"": 380, ""hold"": 884, ""sell"": 336}","{""order"": 1600}"
+ConfirmationBias__RuleLLM,ConfirmationBias,RuleLLM,accepted,,1,0,2,0,0,"{""buy"": 112, ""hold"": 1449, ""sell"": 39}","{""order"": 1600}"
+ConfirmationBias__Rag,ConfirmationBias,Rag,accepted,,0,0,0,0,0,"{""buy"": 254, ""hold"": 1135, ""sell"": 211}","{""order"": 1600}"
+CreditCycle__Rule,CreditCycle,Rule,accepted,,0,0,0,0,0,,
+CreditCycle__LLM,CreditCycle,LLM,accepted,,0,0,0,0,0,"{""buy"": 270, ""hold"": 898, ""sell"": 232}","{""order"": 1400}"
+CreditCycle__RuleLLM,CreditCycle,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 47, ""hold"": 1267, ""sell"": 86}","{""order"": 1400}"
+CreditCycle__Rag,CreditCycle,Rag,accepted,,0,0,0,0,0,"{""buy"": 57, ""hold"": 1294, ""sell"": 49}","{""order"": 1400}"
+CurrencyCrisis__Rule,CurrencyCrisis,Rule,accepted,,0,0,0,0,0,,
+CurrencyCrisis__LLM,CurrencyCrisis,LLM,accepted,,0,0,0,0,0,"{""buy"": 147, ""hold"": 607, ""sell"": 646}","{""order"": 1400}"
+CurrencyCrisis__RuleLLM,CurrencyCrisis,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 299, ""hold"": 974, ""sell"": 127}","{""order"": 1400}"
+CurrencyCrisis__Rag,CurrencyCrisis,Rag,accepted,,0,0,0,0,0,"{""buy"": 400, ""hold"": 727, ""sell"": 273}","{""order"": 1400}"
+DispositionEffect__Rule,DispositionEffect,Rule,accepted,,0,0,0,0,0,,
+DispositionEffect__LLM,DispositionEffect,LLM,accepted,,0,0,0,0,0,"{""buy"": 183, ""hold"": 1831, ""sell"": 186}","{""investor_bid"": 2200}"
+DispositionEffect__RuleLLM,DispositionEffect,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 31, ""hold"": 1892, ""sell"": 277}","{""order"": 2200, ""unknown"": 200}"
+DispositionEffect__Rag,DispositionEffect,Rag,accepted,,0,0,76,0,0,"{""buy"": 9, ""hold"": 1902, ""sell"": 289}","{""investor_bid"": 2200}"
+DotComBubble__Rule,DotComBubble,Rule,accepted,,0,0,0,0,0,,
+DotComBubble__LLM,DotComBubble,LLM,accepted,,0,0,0,0,0,"{""buy"": 128, ""hold"": 1236, ""sell"": 236}","{""order"": 1600}"
+DotComBubble__RuleLLM,DotComBubble,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 43, ""hold"": 1518, ""sell"": 39}","{""order"": 1600}"
+DotComBubble__Rag,DotComBubble,Rag,accepted,,0,0,0,0,0,"{""buy"": 78, ""hold"": 1400, ""sell"": 122}","{""order"": 1600}"
+EchoChamber__Rule,EchoChamber,Rule,accepted,,0,0,0,0,0,,
+EchoChamber__LLM,EchoChamber,LLM,accepted,,0,0,0,0,0,"{""depolarize"": 997, ""neutral"": 820, ""polarize"": 2183}","{""social_action"": 4000}"
+EchoChamber__RuleLLM,EchoChamber,RuleLLM,accepted,,0,0,0,0,0,"{""depolarize"": 983, ""neutral"": 1817, ""polarize"": 1200}","{""social_action"": 4000}"
+EchoChamber__Rag,EchoChamber,Rag,accepted,,0,0,0,0,0,"{""depolarize"": 964, ""neutral"": 1835, ""polarize"": 1201}","{""social_action"": 4000}"
+EndowmentEffect__Rule,EndowmentEffect,Rule,accepted,,0,0,0,0,0,,
+EndowmentEffect__LLM,EndowmentEffect,LLM,accepted,,0,0,0,0,0,"{""buy"": 347, ""hold"": 953, ""sell"": 500}","{""order"": 1800}"
+EndowmentEffect__RuleLLM,EndowmentEffect,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 154, ""hold"": 1501, ""sell"": 145}","{""order"": 1800}"
+EndowmentEffect__Rag,EndowmentEffect,Rag,accepted,,0,0,0,0,0,"{""buy"": 288, ""hold"": 1234, ""sell"": 278}","{""order"": 1800}"
+EquityPremium__Rule,EquityPremium,Rule,accepted,,0,0,0,0,0,,
+EquityPremium__LLM,EquityPremium,LLM,accepted,,2,0,0,0,0,{},"{""investor_order"": 2600}"
+EquityPremium__RuleLLM,EquityPremium,RuleLLM,accepted,,0,0,0,0,0,{},"{""investor_order"": 2600}"
+EquityPremium__Rag,EquityPremium,Rag,accepted,,0,0,0,0,0,{},"{""investor_order"": 2600}"
+EuropeanDebtCrisis__Rule,EuropeanDebtCrisis,Rule,accepted,,0,0,0,0,0,,
+EuropeanDebtCrisis__LLM,EuropeanDebtCrisis,LLM,accepted,,0,0,0,0,0,"{""buy"": 356, ""hold"": 410, ""sell"": 634}","{""order"": 1400}"
+EuropeanDebtCrisis__RuleLLM,EuropeanDebtCrisis,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 166, ""hold"": 1172, ""sell"": 62}","{""order"": 1400}"
+EuropeanDebtCrisis__Rag,EuropeanDebtCrisis,Rag,accepted,,0,0,0,0,0,"{""buy"": 131, ""hold"": 1188, ""sell"": 81}","{""order"": 1400}"
+FlashCrash__Rule,FlashCrash,Rule,accepted,,0,0,0,0,0,,
+FlashCrash__LLM,FlashCrash,LLM,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2600}"
+FlashCrash__RuleLLM,FlashCrash,RuleLLM,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2600}"
+FlashCrash__Rag,FlashCrash,Rag,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2600}"
+FlashCrash2010__Rule,FlashCrash2010,Rule,accepted,,0,0,0,0,0,,
+FlashCrash2010__LLM,FlashCrash2010,LLM,accepted,,0,0,0,0,0,"{""buy"": 519, ""hold"": 1784, ""sell"": 97}","{""investor_order"": 2400}"
+FlashCrash2010__RuleLLM,FlashCrash2010,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 289, ""hold"": 1890, ""sell"": 221}","{""investor_order"": 2400}"
+FlashCrash2010__Rag,FlashCrash2010,Rag,accepted,,0,0,0,0,0,"{""buy"": 345, ""hold"": 1797, ""sell"": 258}","{""investor_order"": 2400}"
+FramingEffect__Rule,FramingEffect,Rule,accepted,,0,0,0,0,0,,
+FramingEffect__LLM,FramingEffect,LLM,accepted,,0,0,0,0,0,"{""buy"": 115, ""hold"": 1200, ""sell"": 85}","{""order"": 1400, ""unknown"": 200}"
+FramingEffect__RuleLLM,FramingEffect,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 51, ""hold"": 1328, ""sell"": 21}","{""order"": 1400, ""unknown"": 200}"
+FramingEffect__Rag,FramingEffect,Rag,accepted,,0,0,0,0,0,"{""buy"": 66, ""hold"": 1298, ""sell"": 36}","{""order"": 1400}"
+GFC2008__Rule,GFC2008,Rule,accepted,,0,0,0,0,0,,
+GFC2008__LLM,GFC2008,LLM,accepted,,0,0,0,0,0,"{""buy"": 107, ""hold"": 1114, ""sell"": 379}","{""order"": 1600, ""unknown"": 200}"
+GFC2008__RuleLLM,GFC2008,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 114, ""hold"": 1340, ""sell"": 146}","{""order"": 1600, ""unknown"": 200}"
+GFC2008__Rag,GFC2008,Rag,accepted,,0,0,0,0,0,"{""buy"": 139, ""hold"": 1315, ""sell"": 146}","{""order"": 1600, ""unknown"": 200}"
+GamblerFallacy__Rule,GamblerFallacy,Rule,accepted,,0,0,0,0,0,,
+GamblerFallacy__LLM,GamblerFallacy,LLM,accepted,,0,0,0,0,0,"{""buy"": 198, ""hold"": 1200, ""sell"": 2}","{""order"": 1400, ""unknown"": 200}"
+GamblerFallacy__RuleLLM,GamblerFallacy,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 105, ""hold"": 1234, ""sell"": 61}","{""order"": 1400, ""unknown"": 200}"
+GamblerFallacy__Rag,GamblerFallacy,Rag,accepted,,0,0,0,0,0,"{""buy"": 97, ""hold"": 1261, ""sell"": 42}","{""order"": 1400}"
+GameStopShortSqueeze__Rule,GameStopShortSqueeze,Rule,accepted,,0,0,0,0,0,,
+GameStopShortSqueeze__LLM,GameStopShortSqueeze,LLM,accepted,,0,0,0,0,0,"{""buy"": 123, ""hold"": 1677}","{""order"": 1800, ""unknown"": 200}"
+GameStopShortSqueeze__RuleLLM,GameStopShortSqueeze,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 179, ""hold"": 1621}","{""order"": 1800, ""unknown"": 200}"
+GameStopShortSqueeze__Rag,GameStopShortSqueeze,Rag,accepted,,0,0,0,0,0,"{""buy"": 228, ""hold"": 1570, ""sell"": 2}","{""order"": 1800}"
+HerdEffect__Rule,HerdEffect,Rule,accepted,,0,0,0,0,0,,
+HerdEffect__LLM,HerdEffect,LLM,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2000}"
+HerdEffect__RuleLLM,HerdEffect,RuleLLM,accepted,,0,0,0,0,0,{},"{""order"": 2200, ""unknown"": 200}"
+HerdEffect__Rag,HerdEffect,Rag,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2200}"
+HerdingInformation__Rule,HerdingInformation,Rule,accepted,,0,0,0,0,0,,
+HerdingInformation__LLM,HerdingInformation,LLM,accepted,,0,0,0,0,0,"{""buy"": 194, ""hold"": 1811, ""sell"": 195}","{""order"": 2200, ""unknown"": 200}"
+HerdingInformation__RuleLLM,HerdingInformation,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 167, ""hold"": 1811, ""sell"": 222}","{""order"": 2200, ""unknown"": 200}"
+HerdingInformation__Rag,HerdingInformation,Rag,accepted,,0,0,0,0,0,"{""buy"": 174, ""hold"": 1804, ""sell"": 222}","{""order"": 2200, ""unknown"": 200}"
+HindsightBias__Rule,HindsightBias,Rule,accepted,,0,0,0,0,0,,
+HindsightBias__LLM,HindsightBias,LLM,accepted,,0,0,0,0,0,"{""buy"": 369, ""hold"": 1794, ""sell"": 37}","{""order"": 2200, ""unknown"": 200}"
+HindsightBias__RuleLLM,HindsightBias,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 201, ""hold"": 1800, ""sell"": 199}","{""order"": 2200, ""unknown"": 200}"
+HindsightBias__Rag,HindsightBias,Rag,accepted,,0,0,0,0,0,"{""buy"": 191, ""hold"": 1802, ""sell"": 207}","{""order"": 2200, ""unknown"": 200}"
+LTCMCollapse__Rule,LTCMCollapse,Rule,accepted,,0,0,0,0,0,,
+LTCMCollapse__LLM,LTCMCollapse,LLM,accepted,,0,0,0,0,0,"{""buy"": 210, ""hold"": 1724, ""sell"": 66}","{""order"": 2000, ""unknown"": 200}"
+LTCMCollapse__RuleLLM,LTCMCollapse,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 104, ""hold"": 1743, ""sell"": 153}","{""order"": 2000, ""unknown"": 200}"
+LTCMCollapse__Rag,LTCMCollapse,Rag,accepted,,0,0,0,0,0,"{""buy"": 61, ""hold"": 1618, ""sell"": 321}","{""order"": 2000, ""unknown"": 200}"
+LUNACollapse__Rule,LUNACollapse,Rule,accepted,,0,0,0,0,0,,
+LUNACollapse__LLM,LUNACollapse,LLM,accepted,,0,0,0,0,0,"{""hold"": 2000}","{""order"": 2000, ""unknown"": 200}"
+LUNACollapse__RuleLLM,LUNACollapse,RuleLLM,accepted,,0,0,0,0,0,"{""hold"": 2000}","{""order"": 2000, ""unknown"": 200}"
+LUNACollapse__Rag,LUNACollapse,Rag,accepted,,0,0,0,0,0,"{""hold"": 2000}","{""order"": 2000, ""unknown"": 200}"
+LiquidityDryup__Rule,LiquidityDryup,Rule,accepted,,0,0,0,0,0,,
+LiquidityDryup__LLM,LiquidityDryup,LLM,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2400}"
+LiquidityDryup__RuleLLM,LiquidityDryup,RuleLLM,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2400}"
+LiquidityDryup__Rag,LiquidityDryup,Rag,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2400}"
+LossAversion__Rule,LossAversion,Rule,accepted,,0,0,0,0,0,,
+LossAversion__LLM,LossAversion,LLM,accepted,,0,0,0,0,0,"{""buy"": 18, ""hold"": 2153, ""sell"": 29}","{""order"": 2200}"
+LossAversion__RuleLLM,LossAversion,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 240, ""hold"": 971, ""sell"": 989}","{""order"": 2200}"
+LossAversion__Rag,LossAversion,Rag,accepted,,0,0,0,0,0,"{""buy"": 244, ""hold"": 1027, ""sell"": 929}","{""order"": 2200}"
+MarketCrash__Rule,MarketCrash,Rule,accepted,,0,0,0,0,0,,
+MarketCrash__LLM,MarketCrash,LLM,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2200}"
+MarketCrash__RuleLLM,MarketCrash,RuleLLM,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2200}"
+MarketCrash__Rag,MarketCrash,Rag,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2200}"
+MentalAccounting__Rule,MentalAccounting,Rule,accepted,,0,0,0,0,0,,
+MentalAccounting__LLM,MentalAccounting,LLM,accepted,,0,0,0,0,0,"{""buy"": 238, ""hold"": 1062, ""sell"": 500}","{""order"": 1800}"
+MentalAccounting__RuleLLM,MentalAccounting,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 183, ""hold"": 1500, ""sell"": 117}","{""order"": 1800}"
+MentalAccounting__Rag,MentalAccounting,Rag,accepted,,0,0,0,0,0,"{""buy"": 143, ""hold"": 1480, ""sell"": 177}","{""order"": 1800}"
+MomentumEffect__Rule,MomentumEffect,Rule,accepted,,0,0,0,0,0,,
+MomentumEffect__LLM,MomentumEffect,LLM,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2200}"
+MomentumEffect__RuleLLM,MomentumEffect,RuleLLM,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2200}"
+MomentumEffect__Rag,MomentumEffect,Rag,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2200}"
+OverconfidenceBias__Rule,OverconfidenceBias,Rule,accepted,,0,0,0,0,0,,
+OverconfidenceBias__LLM,OverconfidenceBias,LLM,accepted,,0,0,0,0,0,"{""buy"": 688, ""hold"": 236, ""sell"": 676}","{""order"": 1600}"
+OverconfidenceBias__RuleLLM,OverconfidenceBias,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 513, ""hold"": 405, ""sell"": 682}","{""order"": 1600}"
+OverconfidenceBias__Rag,OverconfidenceBias,Rag,accepted,,0,0,0,0,0,"{""buy"": 399, ""hold"": 437, ""sell"": 764}","{""order"": 1600}"
+RepresentativenessBias__Rule,RepresentativenessBias,Rule,accepted,,0,0,0,0,0,,
+RepresentativenessBias__LLM,RepresentativenessBias,LLM,accepted,,0,0,0,0,0,"{""buy"": 643, ""hold"": 844, ""sell"": 113}","{""order"": 1600, ""unknown"": 200}"
+RepresentativenessBias__RuleLLM,RepresentativenessBias,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 163, ""hold"": 1354, ""sell"": 83}","{""order"": 1600, ""unknown"": 200}"
+RepresentativenessBias__Rag,RepresentativenessBias,Rag,accepted,,0,0,0,0,0,"{""buy"": 186, ""hold"": 1216, ""sell"": 198}","{""order"": 1600, ""unknown"": 200}"
+ReversalEffect__Rule,ReversalEffect,Rule,accepted,,0,0,0,0,0,,
+ReversalEffect__LLM,ReversalEffect,LLM,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2600}"
+ReversalEffect__RuleLLM,ReversalEffect,RuleLLM,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2600}"
+ReversalEffect__Rag,ReversalEffect,Rag,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2600}"
+RumorSpread__Rule,RumorSpread,Rule,accepted,,0,0,0,0,0,,
+RumorSpread__LLM,RumorSpread,LLM,accepted,,0,0,0,0,0,"{""correct"": 993, ""ignore"": 78, ""spread"": 2329}","{""social_action"": 3400}"
+RumorSpread__RuleLLM,RumorSpread,RuleLLM,accepted,,0,0,0,0,0,"{""correct"": 602, ""ignore"": 2791, ""spread"": 7}","{""social_action"": 3400}"
+RumorSpread__Rag,RumorSpread,Rag,accepted,,0,0,0,0,0,"{""correct"": 600, ""ignore"": 2790, ""spread"": 10}","{""social_action"": 3400}"
+SVBBankRun__Rule,SVBBankRun,Rule,accepted,,0,0,0,0,0,,
+SVBBankRun__LLM,SVBBankRun,LLM,accepted,,0,0,0,0,0,"{""buy"": 650, ""hold"": 1040, ""sell"": 510}","{""investor_order"": 2200}"
+SVBBankRun__RuleLLM,SVBBankRun,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 13, ""hold"": 2166, ""sell"": 21}","{""investor_order"": 2200}"
+SVBBankRun__Rag,SVBBankRun,Rag,accepted,,0,0,0,0,0,"{""buy"": 13, ""hold"": 2165, ""sell"": 22}","{""investor_order"": 2200}"
+ShortSqueeze__Rule,ShortSqueeze,Rule,accepted,,0,0,0,0,0,,
+ShortSqueeze__LLM,ShortSqueeze,LLM,accepted,,0,0,0,0,0,"{""buy"": 66, ""hold"": 1497, ""sell"": 837}","{""investor_bid"": 2400}"
+ShortSqueeze__RuleLLM,ShortSqueeze,RuleLLM,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2400}"
+ShortSqueeze__Rag,ShortSqueeze,Rag,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2400}"
+SorosPound__Rule,SorosPound,Rule,accepted,,0,0,0,0,0,,
+SorosPound__LLM,SorosPound,LLM,accepted,,0,0,0,0,0,"{""buy"": 689, ""hold"": 913, ""sell"": 198}","{""investor_order"": 1800}"
+SorosPound__RuleLLM,SorosPound,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 135, ""hold"": 1579, ""sell"": 86}","{""investor_order"": 1800}"
+SorosPound__Rag,SorosPound,Rag,accepted,,0,0,0,0,0,"{""buy"": 928, ""hold"": 85, ""sell"": 787}","{""investor_order"": 1800}"
+SouthSeaBubble__Rule,SouthSeaBubble,Rule,accepted,,0,0,0,0,0,,
+SouthSeaBubble__LLM,SouthSeaBubble,LLM,accepted,,0,0,0,0,0,"{""buy"": 1106, ""hold"": 882, ""sell"": 212}","{""investor_order"": 2200}"
+SouthSeaBubble__RuleLLM,SouthSeaBubble,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 129, ""hold"": 1979, ""sell"": 92}","{""investor_order"": 2200}"
+SouthSeaBubble__Rag,SouthSeaBubble,Rag,accepted,,0,0,0,0,0,"{""buy"": 1633, ""hold"": 257, ""sell"": 310}","{""investor_order"": 2200}"
+StatusQuoBias__Rule,StatusQuoBias,Rule,accepted,,0,0,0,0,0,,
+StatusQuoBias__LLM,StatusQuoBias,LLM,accepted,,0,0,0,0,0,"{""buy"": 826, ""hold"": 915, ""sell"": 659}","{""investor_order"": 2400}"
+StatusQuoBias__RuleLLM,StatusQuoBias,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 416, ""hold"": 1759, ""sell"": 225}","{""investor_order"": 2400}"
+StatusQuoBias__Rag,StatusQuoBias,Rag,accepted,,0,0,0,0,0,"{""buy"": 889, ""hold"": 508, ""sell"": 1003}","{""investor_order"": 2400}"
+SunkCostFallacy__Rule,SunkCostFallacy,Rule,accepted,,0,0,0,0,0,,
+SunkCostFallacy__LLM,SunkCostFallacy,LLM,accepted,,0,0,0,0,0,"{""buy"": 1229, ""hold"": 1039, ""sell"": 132}","{""investor_order"": 2400}"
+SunkCostFallacy__RuleLLM,SunkCostFallacy,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 1302, ""hold"": 928, ""sell"": 170}","{""investor_order"": 2400}"
+SunkCostFallacy__Rag,SunkCostFallacy,Rag,accepted,,0,0,0,0,0,"{""buy"": 1313, ""hold"": 456, ""sell"": 631}","{""investor_order"": 2400}"
+TulipMania__Rule,TulipMania,Rule,accepted,,0,0,0,0,0,,
+TulipMania__LLM,TulipMania,LLM,accepted,,0,0,0,0,0,"{""buy"": 1082, ""hold"": 1470, ""sell"": 48}","{""investor_order"": 2600}"
+TulipMania__RuleLLM,TulipMania,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 135, ""hold"": 2374, ""sell"": 91}","{""investor_order"": 2600}"
+TulipMania__Rag,TulipMania,Rag,accepted,,0,0,0,0,0,"{""buy"": 315, ""hold"": 2041, ""sell"": 244}","{""investor_order"": 2600}"
+VolatilityClustering__Rule,VolatilityClustering,Rule,accepted,,0,0,0,0,0,,
+VolatilityClustering__LLM,VolatilityClustering,LLM,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2000}"
+VolatilityClustering__RuleLLM,VolatilityClustering,RuleLLM,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2000}"
+VolatilityClustering__Rag,VolatilityClustering,Rag,accepted,,0,0,0,0,0,{},"{""investor_bid"": 2000}"
+Volmageddon__Rule,Volmageddon,Rule,accepted,,0,0,0,0,0,,
+Volmageddon__LLM,Volmageddon,LLM,accepted,,0,0,0,0,0,"{""buy"": 74, ""hold"": 1694, ""sell"": 32}","{""investor_order"": 1800}"
+Volmageddon__RuleLLM,Volmageddon,RuleLLM,accepted,,0,0,0,0,0,"{""buy"": 331, ""hold"": 1467, ""sell"": 2}","{""investor_order"": 1800}"
+Volmageddon__Rag,Volmageddon,Rag,accepted,,0,0,0,0,0,"{""buy"": 37, ""hold"": 1748, ""sell"": 15}","{""investor_order"": 1800}"

@@ -1,72 +1,45 @@
-# VolatilityClustering LLM Analysis Methodology
+# Volatility Clustering LLM Analysis Plan
 
-## Overview
+## §1 Objectives
 
-This document describes the evaluation metrics for the **LLM-based volatility clustering** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
+This analysis checks whether persona-driven API investors preserve volatility
+clustering while producing complete structured order records.
 
-For detailed metric definitions and financial theory, see: **`../VolatilityClustering/analysis.md`**
+## §2 Core Metrics
 
----
+| Metric | Function Contract | Source |
+|---|---|---|
+| Rolling volatility | `def compute_rolling_volatility(returns: list[float], window: int) -> list[float]` | `analysis-bases.md §2.1` |
+| Absolute-return autocorrelation | `def compute_abs_return_autocorrelation(returns: list[float], lag: int = 1) -> float` | `analysis-bases.md §2.2` |
+| High-volatility duration | `def compute_high_vol_duration(volatility: list[float], threshold: float) -> int` | `analysis-bases.md §2.3` |
+| Trend amplification share | `def compute_trend_amplification_share(orders: list[dict]) -> float` | `analysis-bases.md §2.4` |
+| Volatility-regime response | `def compute_volatility_regime_response(orders: list[dict], volatility: list[float]) -> float` | `analysis-bases.md §2.5` |
+| Stabilization pressure | `def compute_stabilization_pressure(orders: list[dict], prices: list[float], fundamental: float) -> float` | `analysis-bases.md §2.6` |
+| API and retrieval quality | `def compute_api_and_retrieval_quality(events: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.7` |
 
-## Key Metrics (Summary)
+## §3 Analysis Dimensions
 
-| Metric                           | Purpose                                  |
-|----------------------------------|------------------------------------------|
-| Volatility Persistence           | σ_t depends on σ_{t-1} (GARCH signature) |
-| Return Autocorrelation (squared) |                                          |
-| Regime Detection                 | Identify high/low volatility periods     |
-| GARCH Signature                  | α + β persistence coefficient            |
+Review volatility persistence, role-level order flow, parser retries, fallback
+events, and portfolio constraints.
 
----
+## §4 Phase Analysis
 
-## LLM-Specific Observable Phenomena
+Use the same phase framework as Rule and inspect whether LLM investors interpret
+volatility regimes earlier or later than deterministic thresholds.
 
-### Emergent Behaviors
+## §5 Cross-Variant Comparison
 
-| Phenomenon               | LLM Behavior                                    | Contrast with Rule-Based         |
-|--------------------------|-------------------------------------------------|----------------------------------|
-| **Volatility Awareness** | LLM reasons about "high/low volatility" state   | Rule-based uses fixed threshold  |
-| **Regime Recognition**   | LLM may identify regime changes in reasoning    | Rule-based has no regime concept |
-| **Response Variability** | LLM response variance contributes to clustering | Rule-based is deterministic      |
+Use `analysis-bases.md §5` to compare LLM with Rule and isolate prompt-driven
+stochasticity, then compare with RuleLLM to measure whether explicit rules
+reduce dispersion.
 
-### Round and Agent Scaling
+## §6 Expected Results and Validation Criteria
 
-| Scale          | LLM-Specific Observation                    |
-|----------------|---------------------------------------------|
-| **50 rounds**  | One regime switch visible; noisy ACF        |
-| **100 rounds** | Multiple regimes; GARCH signature clearer   |
-| **5 agents**   | High variance from LLM response variability |
-| **10 agents**  | Emergent clustering from diverse reasoning  |
+A valid full run records 200 rounds, finite prices, structured order fields, and
+low API parse/fallback rates.
 
----
+## §7 Visualization Catalogue
 
-## LLM-Specific Considerations
-
-1. **LLM Response Variability**: LLM-generated investor decisions may introduce additional noise
-2. **Prompt Engineering**: Investor prompts should reference recent volatility
-3. **Emergent Behavior**: LLM may exhibit different clustering patterns than rule-based
-
----
-
-## Using Centralized Evaluation Module
-
-```python
-from masim.evaluation.finance import (
-    calculate_returns,
-    calculate_rolling_volatility,
-    calculate_garch_signature,
-    detect_volatility_regimes,
-    plot_volatility_analysis,
-)
-
-# Same analysis as rule-based version
-prices = {...}
-volatility = calculate_rolling_volatility(prices, window=10)
-signature = calculate_garch_signature(prices)
-```
-
----
-
-## References
-
-See `../VolatilityClustering/analysis.md` for complete academic references.
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_volatilityclustering_dynamics.png`, `02_volatilityclustering_analysis.png`,
+and `03_summary.png`.

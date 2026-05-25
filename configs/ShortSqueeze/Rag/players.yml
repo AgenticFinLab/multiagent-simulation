@@ -86,7 +86,7 @@ ragllm_short_seller:
         sys_message: "examples.ShortSqueeze.Rag.prompts:RAGLLM_SHORT_SELLER_SYS"
         user_message: "examples.ShortSqueeze.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -126,10 +126,10 @@ ragllm_retail_coord:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.ShortSqueeze.Rag.prompts:RAGLLM_RETAIL_COORD_SYS"
+        sys_message: "examples.ShortSqueeze.Rag.prompts:RAGLLM_RETAIL_TRADER_SYS"
         user_message: "examples.ShortSqueeze.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_new_tokens: 600
@@ -169,10 +169,10 @@ ragllm_momentum:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.ShortSqueeze.Rag.prompts:RAGLLM_MOMENTUM_SYS"
+        sys_message: "examples.ShortSqueeze.Rag.prompts:RAGLLM_MOMENTUM_BUYER_SYS"
         user_message: "examples.ShortSqueeze.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -212,10 +212,10 @@ ragllm_value:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.ShortSqueeze.Rag.prompts:RAGLLM_VALUE_SYS"
+        sys_message: "examples.ShortSqueeze.Rag.prompts:RAGLLM_VALUE_INVESTOR_SYS"
         user_message: "examples.ShortSqueeze.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -254,10 +254,10 @@ ragllm_institutional:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.ShortSqueeze.Rag.prompts:RAGLLM_INSTITUTIONAL_SYS"
+        sys_message: "examples.ShortSqueeze.Rag.prompts:RAGLLM_INSTITUTIONAL_HOLDER_SYS"
         user_message: "examples.ShortSqueeze.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600

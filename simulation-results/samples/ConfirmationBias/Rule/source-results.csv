@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,config_path
+8,9,ConfirmationBias,Rule,SUCCESS,0,40.003,2026-05-22T03:48:20,2026-05-22T03:49:00,config/simulation.yml,examples/ConfirmationBias/Rule/run_confirmationbias_rule.py,logs/ConfirmationBias__Rule.log,,200,200,,config/simulation.yml

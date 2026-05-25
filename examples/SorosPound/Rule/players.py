@@ -219,14 +219,9 @@ class BaseInvestor(GeneralPlayer):
 
 
 class MacroHedgeFund(BaseInvestor):
-    """
-    Builds massive short positions against currencies with unsustainable pegs.
+    """Macro speculative attacker.
 
-    Theoretical Basis: Macro speculative attacks (Soros, 2003)
-    Market Role: destabilizing
-
-    Parameters from config extras:
-        - position_size, leverage
+    Theory: simulation-bases.md §4.1
     """
 
     def _make_decision(self) -> Dict[str, Any]:
@@ -250,14 +245,9 @@ class MacroHedgeFund(BaseInvestor):
 
 
 class PegDefender(BaseInvestor):
-    """
-    Attempts to maintain currency peg through interest rate hikes and intervention.
+    """Peg defender.
 
-    Theoretical Basis: Central bank peg defense (Eichengreen & Wyplosz, 1993)
-    Market Role: stabilizing
-
-    Parameters from config extras:
-        - reserve_capacity, rate_hike_limit
+    Theory: simulation-bases.md §4.2
     """
 
     def _make_decision(self) -> Dict[str, Any]:
@@ -281,14 +271,9 @@ class PegDefender(BaseInvestor):
 
 
 class ConvergenceTrader(BaseInvestor):
-    """
-    Takes positions expecting the peg to hold, loses when it breaks.
+    """Convergence trader.
 
-    Theoretical Basis: ERM convergence trade (Eichengreen & Wyplosz, 1993)
-    Market Role: neutral
-
-    Parameters from config extras:
-        - convergence_threshold, position_size
+    Theory: simulation-bases.md §4.3
     """
 
     def _make_decision(self) -> Dict[str, Any]:
@@ -309,14 +294,9 @@ class ConvergenceTrader(BaseInvestor):
 
 
 class OpportunisticTrader(BaseInvestor):
-    """
-    Joins speculative attacks once they begin, amplifying selling pressure.
+    """Opportunistic attack follower.
 
-    Theoretical Basis: Second-generation crisis (Obstfeld, 1996)
-    Market Role: destabilizing
-
-    Parameters from config extras:
-        - attack_join_threshold, position_size
+    Theory: simulation-bases.md §4.4
     """
 
     def _make_decision(self) -> Dict[str, Any]:
@@ -340,14 +320,9 @@ class OpportunisticTrader(BaseInvestor):
 
 
 class NoiseTrader(BaseInvestor):
-    """
-    Random uninformed trader providing baseline liquidity.
+    """Noise trader.
 
-    Theoretical Basis: Noise trader model (Black, 1986)
-    Market Role: neutral
-
-    Parameters from config extras:
-        - trade_probability
+    Theory: simulation-bases.md §4.5
     """
 
     def _make_decision(self) -> Dict[str, Any]:

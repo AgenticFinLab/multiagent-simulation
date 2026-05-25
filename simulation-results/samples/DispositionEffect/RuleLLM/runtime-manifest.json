@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "RuleLLM",
+  "omitted_raw_artifact_bytes": 11453204,
+  "omitted_raw_artifact_files": 1577,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 9961116,
+      "file_count": 1569,
+      "name": "records",
+      "source_path": "samples/DispositionEffect/RuleLLM/artifacts/records"
+    },
+    {
+      "bytes": 1406726,
+      "file_count": 6,
+      "name": "communication",
+      "source_path": "samples/DispositionEffect/RuleLLM/artifacts/communication"
+    },
+    {
+      "bytes": 85362,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/DispositionEffect/RuleLLM/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/DispositionEffect/RuleLLM/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "DispositionEffect__RuleLLM",
+  "scenario": "DispositionEffect",
+  "source_resource_pack_sample_path": "samples/DispositionEffect/RuleLLM",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/DispositionEffect/RuleLLM"
+}

@@ -10,6 +10,7 @@ Usage:
 """
 
 import argparse
+import json
 import os
 from typing import Any, Dict, List
 
@@ -180,6 +181,9 @@ def main() -> None:
     data = _load_data(results)
 
     summary = analyze_anchoring(data, config, output_dir)
+    summary["variant"] = "RuleLLM"
+    with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as fh:
+        json.dump(summary, fh, indent=2)
 
     return summary
 

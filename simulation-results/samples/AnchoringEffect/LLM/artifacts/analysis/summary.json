@@ -1,0 +1,94 @@
+{
+  "scenario": "AnchoringEffect",
+  "variant": "LLM",
+  "total_rounds": 200,
+  "fundamental_value": 100.0,
+  "adjustment_factor": 0.3,
+  "metrics": {
+    "mad_pct": 2.5629,
+    "half_life_rounds": 1.0,
+    "max_drawdown_pct": -10.8901,
+    "return_autocorr_lag1": 0.0229,
+    "mean_rolling_vol_pct": 2.1517,
+    "bias_magnitude_pct": 3.1798
+  },
+  "price": {
+    "initial": 104.5426,
+    "final": 99.9845,
+    "min": 97.0468,
+    "max": 109.4359,
+    "mean": 102.3624
+  },
+  "agent_volumes": {
+    "anchored_trader_1": {
+      "total_buy": 1583.9,
+      "total_sell": 0,
+      "total_volume": 1583.9
+    },
+    "anchored_trader_2": {
+      "total_buy": 1296.5,
+      "total_sell": 0,
+      "total_volume": 1296.5
+    },
+    "historical_anchor_1": {
+      "total_buy": 2500.0,
+      "total_sell": 0,
+      "total_volume": 2500.0
+    },
+    "historical_anchor_2": {
+      "total_buy": 2873.72038124678,
+      "total_sell": 0,
+      "total_volume": 2873.72038124678
+    },
+    "rational_updater": {
+      "total_buy": 11232.0,
+      "total_sell": 0,
+      "total_volume": 11232.0
+    },
+    "momentum_trader_1": {
+      "total_buy": 8131.362628939421,
+      "total_sell": 0,
+      "total_volume": 8131.362628939421
+    },
+    "momentum_trader_2": {
+      "total_buy": 9739.533242513546,
+      "total_sell": 0,
+      "total_volume": 9739.533242513546
+    },
+    "noise_trader_1": {
+      "total_buy": 1878.5174674934988,
+      "total_sell": 0,
+      "total_volume": 1878.5174674934988
+    },
+    "noise_trader_2": {
+      "total_buy": 1536.425063369397,
+      "total_sell": 0,
+      "total_volume": 1536.425063369397
+    }
+  },
+  "validation": {
+    "is_valid": true,
+    "score": 0.5575,
+    "criteria": {
+      "mad": {
+        "value": 2.563,
+        "target": "3\u201310%",
+        "score": 0.869,
+        "passed": true
+      },
+      "half_life": {
+        "value": 1.0,
+        "target": "20\u201360 rounds",
+        "score": 0.025,
+        "passed": false
+      },
+      "max_drawdown": {
+        "value": -10.89,
+        "target": "\u22125% to \u221220%",
+        "score": 1.0,
+        "passed": true
+      }
+    },
+    "interpretation": "=== ANCHORING EFFECT SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 55.8% (threshold: 50%)\n\n[1] MISPRICING MAGNITUDE (MAD)\n    Observed: MAD = 2.56% across all rounds\n    Expected: 3\u201310% (Campbell & Sharpe 2009: analyst forecast errors ~3\u20138%)\n    Score: 86.9%\n    Assessment: WEAK \u2014 Anchoring effect present but below calibration target.\n    Consider reducing adjustment_factor or adding more anchoring agents.\n\n[2] ANCHORING PERSISTENCE (HALF-LIFE)\n    Observed: Deviation decayed to half its initial value in 1 rounds\n    Expected: 20\u201360 rounds (Campbell & Sharpe 2009: quarterly persistence)\n    Score: 2.5%\n    Assessment: TOO FAST \u2014 Near-rational market; anchoring corrects trivially quickly.\n    Possible cause: too many RationalUpdater agents or gamma too high.\n\n[3] CORRECTION DYNAMICS (MAX DRAWDOWN)\n    Observed: Maximum price drawdown of -10.89%\n    Expected: \u22125% to \u221220% (anchoring-driven gradual correction, not a crash)\n    Score: 100.0%\n    Assessment: OPTIMAL \u2014 Gradual correction consistent with anchoring literature.\n    Northcraft & Neale (1987): expert anchoring \u2192 5\u201320% correction from peak.\n\n[SUMMARY]\nThe simulation successfully reproduces anchoring-driven price dynamics:\npersistent mispricing above fundamental followed by gradual mean reversion.\nResults are consistent with Campbell & Sharpe (2009) and Tversky & Kahneman (1974).\nFit Score: 55.8%"
+  }
+}

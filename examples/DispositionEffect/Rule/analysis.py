@@ -26,10 +26,12 @@ Output figures (saved to EXPERIMENT/DispositionEffect/analysis/):
 import argparse
 import json
 import os
+import shutil
+
+from typing import Any, Dict, List
 
 import matplotlib.pyplot as plt
 import numpy as np
-from typing import Any, Dict, List
 
 from masim.evaluation.finance import (
     # Time Series
@@ -42,6 +44,30 @@ from masim.evaluation.finance import (
 from masim.utils import load_config, load_results
 
 
+STANDARD_OUTPUT_FILES = (
+    "summary.json",
+    "00_investor_bids.png",
+    "01_dispositioneffect_dynamics.png",
+    "02_dispositioneffect_analysis.png",
+    "03_summary.png",
+)
+
+
+def _write_standard_named_outputs(output_dir: str) -> None:
+    """Create fixed-name aliases required by the standard output contract."""
+    aliases = {
+        "fig3_trading_activity.png": "00_investor_bids.png",
+        "fig1_price_dynamics.png": "01_dispositioneffect_dynamics.png",
+        "fig2_pgr_plr_comparison.png": "02_dispositioneffect_analysis.png",
+        "fig5_disposition_ratio.png": "03_summary.png",
+    }
+    for source, target in aliases.items():
+        source_path = os.path.join(output_dir, source)
+        if not os.path.exists(source_path):
+            raise FileNotFoundError(f"missing DispositionEffect analysis figure: {source_path}")
+        shutil.copyfile(source_path, os.path.join(output_dir, target))
+
+
 def calculate_pgr_plr(trades: List[Dict], prices: List[float]) -> Dict[str, float]:
     """
     Calculate Proportion of Gains/Losses Realized (PGR/PLR).
@@ -52,7 +78,7 @@ def calculate_pgr_plr(trades: List[Dict], prices: List[float]) -> Dict[str, floa
     Disposition Effect: PGR > PLR
 
     Price used: bid_price from trade record (the price the player observed
-    when making the decision). Falls back to market price by round if absent.
+    when making the decision). Trade payloads must include bid_price and round.
 
     Reference point: fixed at initial_purchase_price for DispositionInvestor
     (move_reference=False on buys — matching players.py behavior).
@@ -67,27 +93,20 @@ def calculate_pgr_plr(trades: List[Dict], prices: List[float]) -> Dict[str, floa
     purchase_price = 100.0  # matches initial_purchase_price — fixed reference
     total_cost = position * purchase_price
 
-    # Build round→market price lookup as fallback
-    use_round_lookup = trades and "round" in trades[0]
-    price_by_round: Dict[int, float] = {}
-    if use_round_lookup and prices:
-        for idx, p in enumerate(prices):
-            price_by_round[idx + 1] = p
+    if not prices:
+        raise ValueError("prices must contain at least one market price")
+
+    price_by_round: Dict[int, float] = {idx + 1: p for idx, p in enumerate(prices)}
 
     for i, trade in enumerate(trades):
-        # Prefer bid_price recorded in trade payload (price player actually observed)
-        bid_price = trade.get("bid_price", 0)
+        bid_price = trade["bid_price"]
+        round_num = trade["round"]
         if bid_price > 0:
             current_price = bid_price
-        elif use_round_lookup:
-            round_num = trade.get("round", i + 1)
-            current_price = price_by_round.get(
-                round_num, prices[min(i, len(prices) - 1)] if prices else 0
-            )
+        elif round_num in price_by_round:
+            current_price = price_by_round[round_num]
         else:
-            if i >= len(prices):
-                break
-            current_price = prices[i]
+            raise ValueError(f"trade round {round_num} is outside price history")
 
         if current_price <= 0 or position <= 0 or purchase_price <= 0:
             continue
@@ -157,6 +176,8 @@ def calculate_pgr_plr(trades: List[Dict], prices: List[float]) -> Dict[str, floa
 def analyze_by_strategy(data: Dict[str, Any]) -> Dict[str, Dict]:
     """Analyze disposition metrics by strategy type."""
     prices = data["prices"]
+    if not prices:
+        raise ValueError("data['prices'] must contain at least one price point")
     results = {}
 
     for player_id, trades in data["trades"].items():
@@ -303,7 +324,7 @@ def plot_fig2_pgr_plr_comparison(
 ) -> None:
     """Fig 2: PGR vs PLR grouped bars + disposition coefficient per strategy."""
     if not strategy_results:
-        return
+        raise ValueError("strategy_results must contain at least one strategy")
 
     colors = _strategy_colors()
     items = [(pid, res) for pid, res in strategy_results.items()]
@@ -313,7 +334,7 @@ def plot_fig2_pgr_plr_comparison(
     dc_vals = [res["pgr"] - res["plr"] for _, res in items]
     _strat_colors = [
         colors.get(res["strategy"], "#7F8C8D") for _, res in items
-    ]  # reserved
+    ]  # matplotlib styling fallback
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
     fig.suptitle(
@@ -417,13 +438,13 @@ def plot_fig3_trading_activity(
 ) -> None:
     """Fig 3: Buy/sell event counts and total traded volume per strategy."""
     if not strategy_results:
-        return
+        raise ValueError("strategy_results must contain at least one strategy")
 
     items = [(pid, res) for pid, res in strategy_results.items()]
     labels = [_strategy_label(res["strategy"]) for _, res in items]
-    buy_counts = [res.get("buy_count", 0) for _, res in items]
-    sell_counts = [res.get("sell_count", 0) for _, res in items]
-    volumes = [res.get("total_volume", 0) for _, res in items]
+    buy_counts = [res["buy_count"] for _, res in items]
+    sell_counts = [res["sell_count"] for _, res in items]
+    volumes = [res["total_volume"] for _, res in items]
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     fig.suptitle("Fig 3: Trading Activity by Strategy", fontsize=13, fontweight="bold")
@@ -567,7 +588,7 @@ def plot_fig5_disposition_ratio(
 ) -> None:
     """Fig 5: PGR/PLR ratio bars + gain/loss pool breakdown per strategy."""
     if not strategy_results:
-        return
+        raise ValueError("strategy_results must contain at least one strategy")
 
     _colors_fig5 = _strategy_colors()  # reserved for per-bar coloring
     items = [(pid, res) for pid, res in strategy_results.items()]
@@ -576,10 +597,10 @@ def plot_fig5_disposition_ratio(
     ratios = [
         min(res["disposition_ratio"], 8.0) if res["plr"] > 0 else 0 for _, res in items
     ]
-    realized_g = [res.get("realized_gains", 0) for _, res in items]
-    realized_l = [res.get("realized_losses", 0) for _, res in items]
-    paper_g = [res.get("paper_gains", 0) for _, res in items]
-    paper_l = [res.get("paper_losses", 0) for _, res in items]
+    realized_g = [res["realized_gains"] for _, res in items]
+    realized_l = [res["realized_losses"] for _, res in items]
+    paper_g = [res["paper_gains"] for _, res in items]
+    paper_l = [res["paper_losses"] for _, res in items]
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     fig.suptitle(
@@ -805,9 +826,9 @@ def plot_fig7_sell_gain_loss(
         for trade in trades:
             if trade["quantity"] < 0:
                 rnd = trade["round"]
-                price_at_sell = price_by_round.get(
-                    rnd, trade.get("bid_price", initial_purchase)
-                )
+                if rnd not in price_by_round:
+                    raise ValueError(f"sell trade round {rnd} is outside price history")
+                price_at_sell = price_by_round[rnd]
                 gain_loss_pct = (
                     (price_at_sell - initial_purchase) / initial_purchase * 100
                 )
@@ -929,25 +950,33 @@ def generate_summary(
 ) -> Dict[str, Any]:
     """Generate summary statistics with validation."""
     prices = np.array(data["prices"])
-    # Calculate returns directly from prices array
-    returns = np.diff(prices) / prices[:-1] if len(prices) > 1 else np.array([])
+    if len(prices) == 0:
+        raise ValueError("data['prices'] must contain at least one price point")
+    if len(prices) < 2:
+        raise ValueError("data['prices'] must contain at least two price points")
+
+    returns = np.diff(prices) / prices[:-1]
     prices_list = list(prices)
-    max_dd, peak_idx, trough_idx = (
-        calculate_max_drawdown(prices_list) if len(prices_list) > 1 else (0, 0, 0)
-    )
+    max_dd, peak_idx, trough_idx = calculate_max_drawdown(prices_list)
 
     # Find disposition investor
     disp_result = None
     rational_result = None
     for pid, res in strategy_results.items():
-        if "disposition" in res["strategy"]:
+        strategy_lower = res["strategy"].lower()
+        if "disposition" in strategy_lower:
             disp_result = res
-        if "rational" in res["strategy"]:
+        if "rational" in strategy_lower:
             rational_result = res
 
+    if disp_result is None:
+        raise ValueError("DispositionInvestor result is required for validation")
+    if rational_result is None:
+        raise ValueError("RationalInvestor result is required for validation")
+
     # Extract PGR and PLR for validation
-    pgr = disp_result["pgr"] if disp_result else 0
-    plr = disp_result["plr"] if disp_result else 0
+    pgr = disp_result["pgr"]
+    plr = disp_result["plr"]
     disposition_coefficient = pgr - plr
 
     # Run validation
@@ -961,11 +990,11 @@ def generate_summary(
         "scenario": "DispositionEffect",
         "total_rounds": len(prices),
         "price_statistics": {
-            "initial_price": float(prices[0]) if len(prices) > 0 else 0,
-            "final_price": float(prices[-1]) if len(prices) > 0 else 0,
-            "max_price": float(np.max(prices)) if len(prices) > 0 else 0,
-            "min_price": float(np.min(prices)) if len(prices) > 0 else 0,
-            "volatility": float(np.std(returns) * 100) if len(returns) > 0 else 0,
+            "initial_price": float(prices[0]),
+            "final_price": float(prices[-1]),
+            "max_price": float(np.max(prices)),
+            "min_price": float(np.min(prices)),
+            "volatility": float(np.std(returns) * 100),
         },
         "metrics": {
             "max_drawdown": round(max_dd, 4),
@@ -978,11 +1007,9 @@ def generate_summary(
             "disposition_coefficient": round(disposition_coefficient, 4),
             "disposition_ratio": round(pgr / plr, 4) if plr > 0 else None,
         },
-        "disposition_investor": disp_result if disp_result else {},
-        "rational_investor": rational_result if rational_result else {},
-        "disposition_effect_detected": (
-            disp_result["disposition_effect"] if disp_result else False
-        ),
+        "disposition_investor": disp_result,
+        "rational_investor": rational_result,
+        "disposition_effect_detected": disp_result["disposition_effect"],
         "strategy_comparison": {
             pid: {
                 "strategy": res["strategy"],
@@ -995,6 +1022,44 @@ def generate_summary(
         },
         "validation": validation.to_dict(),
     }
+
+
+def load_simulation_data(config: Dict[str, Any]) -> Dict[str, Any]:
+    """Load price and trade payloads from a completed DispositionEffect run."""
+    results = load_results(config)
+    coordinators = list(results.players_by_role("coordinator").values())
+    if not coordinators:
+        raise ValueError("No coordinator result found")
+
+    prices = list(coordinators[0].batch("price").all())
+    if not prices:
+        raise ValueError("Coordinator price series is empty")
+
+    trades = {}
+    for pid, player in results.players_by_role("player").items():
+        payloads_by_round = player.turns.payloads()
+        if payloads_by_round:
+            trades[pid] = [
+                {**payload, "round": round_num}
+                for round_num, payload in sorted(payloads_by_round.items())
+            ]
+
+    if not trades:
+        raise ValueError("No player trade payloads found")
+
+    return {"prices": prices, "trades": trades}
+
+
+def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Calculate strategy-level metrics and summary validation."""
+    strategy_results = analyze_by_strategy(data)
+    summary = generate_summary(data, strategy_results)
+    return {"strategy_results": strategy_results, "summary": summary}
+
+
+def create_visualizations(data: Dict[str, Any], metrics: Dict[str, Any], output_dir: str) -> None:
+    """Create DispositionEffect analysis figures."""
+    plot_disposition_analysis(data, metrics["strategy_results"], output_dir)
 
 
 def main():
@@ -1019,29 +1084,14 @@ def main():
     print("DispositionEffect Analysis - Prospect Theory Trading")
     print("=" * 70)
 
-    # Load data via lazy result loader
     print("\n[1] Loading simulation data...")
-    results = load_results(config)
-    # Coordinator batch store 'price' holds the market price time-series
-    coordinators = list(results.players_by_role("coordinator").values())
-    prices = list(coordinators[0].batch("price").all()) if coordinators else []
-    # Each non-coordinator player contributes per-round decision payloads
-    # payload fields: bid_price, quantity, strategy, investor
-    trades = {}
-    for pid, player in results.players_by_role("player").items():
-        payloads_by_round = player.turns.payloads()
-        if payloads_by_round:
-            # Inject round number into each payload for downstream analysis
-            trades[pid] = [
-                {**p, "round": rn} for rn, p in sorted(payloads_by_round.items())
-            ]
-    data = {"prices": prices, "trades": trades}
-    print(f"    Loaded {len(prices)} price points")
-    print(f"    Loaded trades from {len(trades)} players")
+    data = load_simulation_data(config)
+    print(f"    Loaded {len(data['prices'])} price points")
+    print(f"    Loaded trades from {len(data['trades'])} players")
 
-    # Analyze by strategy
     print("\n[2] Calculating PGR/PLR metrics...")
-    strategy_results = analyze_by_strategy(data)
+    metrics = calculate_metrics(data)
+    strategy_results = metrics["strategy_results"]
 
     for _, res in strategy_results.items():
         print(
@@ -1049,14 +1099,13 @@ def main():
             f"Disp={'YES' if res['disposition_effect'] else 'NO'}"
         )
 
-    # Generate plots
     print("\n[3] Generating figures (7 plots)...")
-    plot_disposition_analysis(data, strategy_results, output_dir)
+    create_visualizations(data, metrics, output_dir)
+    _write_standard_named_outputs(output_dir)
     print(f"    All figures saved to: {output_dir}/")
 
-    # Generate summary
     print("\n[4] Generating summary...")
-    summary = generate_summary(data, strategy_results)
+    summary = metrics["summary"]
 
     summary_path = os.path.join(output_dir, "summary.json")
     with open(summary_path, "w", encoding="utf-8") as f:
@@ -1084,3 +1133,15 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+__all__ = [
+    "load_simulation_data",
+    "calculate_metrics",
+    "create_visualizations",
+    "calculate_pgr_plr",
+    "analyze_by_strategy",
+    "plot_disposition_analysis",
+    "generate_summary",
+    "main",
+]

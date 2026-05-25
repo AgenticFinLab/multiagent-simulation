@@ -1,0 +1,117 @@
+# EuropeanDebtCrisis Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.EuropeanDebtCrisis.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      initial_price: 95.0
+      fundamental_value: 100.0
+      core_price: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.01
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+peripherybondseller:
+  name: "PeripheryBondSeller"
+  class: "examples.EuropeanDebtCrisis.Rule.players:PeripheryBondSeller"
+  num_instances: 2
+  config:
+    identity: "peripherybondseller"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      sell_threshold: -0.10       # Deviation threshold to sell (§4.1)
+      base_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+creditorpanicker:
+  name: "CreditorPanicker"
+  class: "examples.EuropeanDebtCrisis.Rule.players:CreditorPanicker"
+  num_instances: 2
+  config:
+    identity: "creditorpanicker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 400
+      panic_threshold: -0.15      # Deviation threshold for panic (§4.2)
+      base_size: 350
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+corebondbuyer:
+  name: "CoreBondBuyer"
+  class: "examples.EuropeanDebtCrisis.Rule.players:CoreBondBuyer"
+  num_instances: 1
+  config:
+    identity: "corebondbuyer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      flight_threshold: -0.08     # Deviation threshold for flight-to-quality (§4.3)
+      base_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+ecbintervenor:
+  name: "ECBIntervenor"
+  class: "examples.EuropeanDebtCrisis.Rule.players:ECBIntervenor"
+  num_instances: 1
+  config:
+    identity: "ecbintervenor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 5000000.0
+      initial_position: 0
+      intervention_threshold: -0.20  # Deviation threshold for ECB intervention (§4.4)
+      intervention_size: 600
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+hedgedfund:
+  name: "HedgedFund"
+  class: "examples.EuropeanDebtCrisis.Rule.players:HedgedFund"
+  num_instances: 1
+  config:
+    identity: "hedgedfund"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      entry_threshold: 0.07       # Deviation threshold for entry (§4.5)
+      base_size: 400
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

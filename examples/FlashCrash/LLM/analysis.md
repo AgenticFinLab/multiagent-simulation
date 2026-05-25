@@ -1,89 +1,36 @@
-# FlashCrash LLM Analysis Methodology
+# Flash Crash LLM Analysis Plan
 
-## Overview
+## §1 Objectives
 
-This document describes the evaluation metrics for the **LLM-based flash crash** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
+This analysis checks whether the LLM variant produces a complete, analyzable Flash Crash trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-For detailed metric definitions and financial theory, see: **`../FlashCrash/analysis.md`**
+## §2 Core Metrics
 
----
+| Metric | Function Contract | Source |
+|---|---|---|
+| Crash Depth | `def crash_depth(price_history: list, fundamental: float) -> float` | `analysis-bases.md §2` |
+| Liquidity Vacuum Duration | `def liquidity_vacuum_duration(liquidity_history: list, low_threshold: float = 50.0) -> int` | `analysis-bases.md §2` |
+| Stop-Loss Cascade Volume | `def stop_loss_cascade_volume(orders_history: list) -> float` | `analysis-bases.md §2` |
+| Recovery Speed | `def recovery_speed(price_history: list, trough_round: int, fundamental: float, recovery_threshold: float = 0.02) -> int` | `analysis-bases.md §2` |
+| Liquidity Provider Withdrawal Fraction | `def liquidity_provider_withdrawal_fraction(provides_liquidity_history: list, crash_start: int, crash_end: int) -> float` | `analysis-bases.md §2` |
+| Price Amplification Ratio | `def price_amplification_ratio(observed_max_drop: float, baseline_max_drop: float) -> float` | `analysis-bases.md §2` |
 
-## LLM-Specific Observable Phenomena
+## §3 Analysis Dimensions
 
-### Emergent Behaviors Unique to LLM Agents
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether LLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-| Phenomenon               | LLM Behavior                             | Contrast with Rule-Based          |
-|--------------------------|------------------------------------------|-----------------------------------|
-| **Stop-Loss Reasoning**  | LLM reasons about loss limits in context | Rule-based uses fixed threshold   |
-| **Panic Narrative**      | LLM may express "fear" in reasoning      | Rule-based has no emotional state |
-| **Liquidity Assessment** | LLM evaluates spread/depth before acting | Rule-based ignores market state   |
-| **Recovery Judgment**    | LLM decides when market is "safe" again  | Rule-based has no recovery logic  |
+## §4 Phase Analysis
 
-### Expected Differences from Rule-Based
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-1. **Cascade Speed**: May be slower (LLM "deliberates")
-2. **Recovery Timing**: More variable (LLM assesses conditions)
-3. **Spread Behavior**: Market maker LLM may quote asymmetrically
-4. **Volatility Response**: LLM may over/under-react to spikes
+## §5 Cross-Variant Comparison
 
----
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
 
-## Round and Agent Scaling (LLM-Specific)
+## §6 Expected Results and Validation Criteria
 
-### Round Scaling
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
 
-| Total Rounds   | LLM-Specific Observation                             |
-|----------------|------------------------------------------------------|
-| **30 rounds**  | Flash crash may occur but recovery may be incomplete |
-| **50 rounds**  | Full V-shape visible; LLM reasoning during recovery  |
-| **100 rounds** | Multiple events possible; LLM "learns" from crashes  |
+## §7 Visualization Catalogue
 
-### Agent Scaling
-
-| Agent Count    | LLM-Specific Observation                          |
-|----------------|---------------------------------------------------|
-| **3-5 agents** | Extreme crashes; single LLM decision can dominate |
-| **6-8 agents** | Realistic cascade dynamics with varied reasoning  |
-| **15+ agents** | More stable; diverse LLM opinions buffer extremes |
-
----
-
-## Key Metrics (Summary)
-
-| Metric           | Purpose                      |
-|------------------|------------------------------|
-| Price Drop       | Maximum crash magnitude      |
-| Recovery Time    | Time to recover from crash   |
-| Liquidity Vacuum | Spread widening during crash |
-| Volatility Spike | σ_crash / σ_normal ratio     |
-
----
-
-## LLM-Specific Considerations
-
-1. **Speed Simulation**: LLM represents algorithmic trading logic
-2. **Stop-Loss Reasoning**: LLM can be prompted with loss thresholds
-3. **Liquidity Withdrawal**: MM agents respond to volatility
-
----
-
-## Using Centralized Evaluation Module
-
-```python
-from masim.evaluation.finance import (
-    calculate_max_drawdown,
-    calculate_rolling_volatility,
-    calculate_liquidity_metrics,
-    plot_price_dynamics,
-)
-
-# Same analysis as rule-based version
-prices = {...}
-drawdown = calculate_max_drawdown(prices)
-```
-
----
-
-## References
-
-See `../FlashCrash/analysis.md` for complete academic references.
+Required outputs are `summary.json`, `00_investor_bids.png`, `01_flashcrash_dynamics.png`, `02_flashcrash_analysis.png`, and `03_summary.png`.

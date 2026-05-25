@@ -1,75 +1,119 @@
-# GamblerFallacy — RuleLLM Variant
+# GamblerFallacy RuleLLM — Implementation Explanation
 
-## §1 Overview
+## §1 Variant Overview
 
-The RuleLLM variant implements the Gambler's Fallacy simulation with rule-embedded LLM reasoning. The embedded rules anchor both biased agents to threshold 0.02 and the same direction logic as Rule; the LLM provides contextualisation and may express some of the §4.1 vs. §4.2 differentiation through quantity modulation.
-
-| Aspect             | Detail                                                        |
-|--------------------|---------------------------------------------------------------|
-| Variant            | RuleLLM                                                       |
-| Simulation         | GamblerFallacy                                                |
-| Decision Mechanism | Rule-embedded LLM: system prompt encodes thresholds + persona |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                               |
-| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`                  |
-| Price Model        | P(t+1) = P(t) + λ × D(t) + γ × (F − P(t)) + ε(t)              |
-
----
+| Item | Description |
+|---|---|
+| Variant | RuleLLM |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | LLM reasoning with persona and embedded decision-rule text |
+| Key Difference from Other Variants | Makes streak-bias rules explicit in prompts while retaining model reasoning. |
+| Primary Research Contribution | Tests whether rule-anchored language reasoning changes streak-bias dynamics relative to Rule. |
+| Files | `players.py`, `prompts.py`, `run_gamblerfallacy_rulellm.py`, `analysis.py`, `explain.md`, `analysis.md` |
 
 ## §2 Theory → Implementation Mapping
 
-### §2.1 RuleLLMStreakReversalTrader (`simulation-bases.md §4.1`)
+### RuleLLMStreakReversalTrader: Theory → Implementation Mapping
 
-| Theory Component                                | Implementation                                                                                                           |
-|-------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| Law of small numbers (Tversky & Kahneman, 1971) | System prompt embeds: "buy when deviation > 0.02; sell when deviation < -0.02; you believe a reversal is coming"         |
-| Embedded threshold                              | `abs(deviation) > 0.02` anchors activation to Rule baseline                                                              |
-| LLM contextualisation                           | LLM may modulate quantity based on perceived streak length — longer streak → smaller quantity (reversal expected sooner) |
+> Theory defined in `simulation-bases.md §4.1`.
 
-### §2.2 RuleLLMHotHandTrader (`simulation-bases.md §4.2`)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.1.2 | Class: `RuleLLMStreakReversalTrader`; docstring cites `simulation-bases.md §4.1`. |
+| Behavioral mechanism → sim-bases §4.1.4.2 | System prompt includes `== PERSONA ==` and `== DECISION RULES ==`. |
+| Mathematical model → sim-bases §4.1.4.3 | Prompt expresses thresholded streak-response guidance. |
+| State variables → sim-bases §4.1.4.3 | User template injects market and portfolio state. |
+| Parameters → sim-bases §6 | Model and portfolio settings are config supplied. |
+| LLM persona → sim-bases §4.1.4.4 | Persona expresses reversal expectation after streaks. |
 
-| Theory Component                         | Implementation                                                                                                     |
-|------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
-| Hot hand fallacy (Gilovich et al., 1985) | System prompt embeds: "buy when deviation > 0.02; sell when deviation < -0.02; you believe the streak continues"   |
-| Embedded threshold                       | Identical threshold to §4.1; LLM provides opposite narrative framing                                               |
-| LLM contextualisation                    | LLM may modulate quantity based on perceived streak strength — stronger streak → larger quantity (hot hand active) |
+### RuleLLMHotHandTrader: Theory → Implementation Mapping
 
-### §2.3 RuleLLMIndependentAssessor (`simulation-bases.md §4.3`)
+> Theory defined in `simulation-bases.md §4.2`.
 
-| Theory Component                     | Implementation                                                                 |
-|--------------------------------------|--------------------------------------------------------------------------------|
-| Independence of events (Rabin, 2002) | System prompt embeds: "buy when deviation < -0.05; sell when deviation > 0.05" |
-| Contrarian logic                     | Embedded contrarian direction; LLM explains statistical independence reasoning |
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.2.2 | Class: `RuleLLMHotHandTrader`; docstring cites `simulation-bases.md §4.2`. |
+| Behavioral mechanism → sim-bases §4.2.4.2 | Prompt embeds hot-hand continuation reasoning. |
+| Mathematical model → sim-bases §4.2.4.3 | Prompt guidance is converted by the LLM into canonical decision JSON. |
+| State variables → sim-bases §4.2.4.3 | Uses current price, fundamental, deviation, cash, and position. |
+| Parameters → sim-bases §6 | Config supplies runtime settings. |
+| LLM persona → sim-bases §4.2.4.4 | Persona emphasizes continuation after perceived streaks. |
 
-### §2.4 RuleLLMArbitrageur (`simulation-bases.md §4.4`)
+### RuleLLMIndependentAssessor: Theory → Implementation Mapping
 
-| Theory Component                              | Implementation                                                        |
-|-----------------------------------------------|-----------------------------------------------------------------------|
-| Limits to arbitrage (Shleifer & Vishny, 1997) | System prompt embeds: "exploit mispricing when abs(deviation) > 0.05" |
-| Arbitrage logic                               | Same embedded threshold and direction as §4.3                         |
+> Theory defined in `simulation-bases.md §4.3`.
 
-### §2.5 RuleLLMNoiseTrader (`simulation-bases.md §4.5`)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.3.2 | Class: `RuleLLMIndependentAssessor`; docstring cites `simulation-bases.md §4.3`. |
+| Behavioral mechanism → sim-bases §4.3.4.2 | Prompt embeds independent-assessment logic. |
+| Mathematical model → sim-bases §4.3.4.3 | Parsed trades remain bounded by portfolio constraints. |
+| State variables → sim-bases §4.3.4.3 | Same market state as Rule and LLM. |
+| Parameters → sim-bases §6 | LLM and portfolio settings are config supplied. |
+| LLM persona → sim-bases §4.3.4.4 | Persona rejects streak superstition. |
 
-| Theory Component           | Implementation                                            |
-|----------------------------|-----------------------------------------------------------|
-| Noise trader (Black, 1986) | No embedded rule; LLM persona of uninformed retail trader |
+### RuleLLMArbitrageur: Theory → Implementation Mapping
 
----
+> Theory defined in `simulation-bases.md §4.4`.
 
-## §3 RuleLLM-Specific Notes
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.4.2 | Class: `RuleLLMArbitrageur`; docstring cites `simulation-bases.md §4.4`. |
+| Behavioral mechanism → sim-bases §4.4.4.2 | Prompt describes correction of streak-driven mispricing. |
+| Mathematical model → sim-bases §4.4.4.3 | LLM action is parsed and capped before order emission. |
+| State variables → sim-bases §4.4.4.3 | Uses injected market and portfolio state. |
+| Parameters → sim-bases §6 | Config controls model and portfolio. |
+| LLM persona → sim-bases §4.4.4.4 | Persona is arbitrage-focused. |
 
-- **SAR ≈ 1.0 expected**: Embedded direction rules mean §4.1 and §4.2 still buy/sell in same direction at default. LLM quantity modulation provides partial differentiation.
-- **Near-Rule baseline**: RuleLLM expected to closely track Rule baseline for all metrics due to embedded thresholds.
-- **Research value**: RuleLLM vs. LLM comparison shows the effect of rule constraints on bias expression.
+### RuleLLMNoiseTrader: Theory → Implementation Mapping
 
----
+> Theory defined in `simulation-bases.md §4.5`.
 
-## §4 Expected Ranges (RuleLLM Variant vs. Rule Baseline)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.5.2 | Class: `RuleLLMNoiseTrader`; docstring cites `simulation-bases.md §4.5`. |
+| Behavioral mechanism → sim-bases §4.5.4.2 | Prompt preserves noisy liquidity behavior. |
+| Mathematical model → sim-bases §4.5.4.3 | Parsed decision is bounded by portfolio constraints. |
+| State variables → sim-bases §4.5.4.3 | Uses market and portfolio fields. |
+| Parameters → sim-bases §6 | Config controls model temperature and portfolio. |
+| LLM persona → sim-bases §4.5.4.4 | Persona remains non-systematic. |
 
-| Metric | RuleLLM Expected Range | Rule Baseline | Direction                                 |
-|--------|------------------------|---------------|-------------------------------------------|
-| GFI    | 0.02–0.08              | 0.02–0.08     | ≈ Similar                                 |
-| SAR    | 0.8–1.2                | ≈ 1.0         | ≈ Similar (slight LLM quantity asymmetry) |
-| HHM    | 140–480 shares         | 150–500       | ≈ Similar                                 |
-| ACI    | 0.35–0.65              | 0.35–0.65     | ≈ Similar                                 |
-| VAF    | 1.4–3.3                | 1.5–3.5       | ≈ Similar                                 |
-| WDI    | 0.09–0.33              | 0.10–0.35     | ≈ Similar                                 |
+## §3 Market Mechanism Implementation
+
+RuleLLM imports the Rule `Market`, so market clearing and broadcasts are unchanged. Differences from Rule come from LLM interpretation of embedded rules.
+
+## §4 RuleLLM Variant-Specific Features
+
+- Prompts use mandatory `== PERSONA ==` and `== DECISION RULES ==` sections.
+- Decision JSON includes `action`, `bid_price`, `quantity`, and `reasoning`.
+- Parsed orders are capped by cash, holdings, and max quantity.
+- Parse failures raise runtime errors rather than silent fallback holds.
+
+## §5 Architecture Diagram
+
+```text
+Market broadcast -> RuleLLM prompt -> LLM response -> parser -> capped order -> Market
+```
+
+## §6 Configuration Reference
+
+| Config File | Runtime Role |
+|---|---|
+| `configs/GamblerFallacy/RuleLLM/simulation.yml` | Full-run settings |
+| `configs/GamblerFallacy/RuleLLM/players.yml` | LLM model, prompt refs, class paths, portfolio values |
+| `configs/GamblerFallacy/RuleLLM/topology.yml` | Star topology |
+| `configs/GamblerFallacy/RuleLLM/persona.yml` | Shared proxy/storage settings |
+
+## §7 Expected Runtime Outputs
+
+Accepted RuleLLM runs should complete 200 rounds with valid decision JSON and no fallback-hold distortion.
+
+## §8 Validation Checklist
+
+- All prompt constants load.
+- Prompt/parser contract checks should report zero issues.
+- Runtime prompt and player semantics should remain stable unless a documented mechanism or contract defect is found.
+
+## §9 Cross-Variant Comparison Notes
+
+RuleLLM is compared against Rule to isolate language-reasoning effects under aligned rules and against LLM to measure the stabilizing value of explicit decision-rule guidance.

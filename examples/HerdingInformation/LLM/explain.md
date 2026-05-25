@@ -1,127 +1,95 @@
-# HerdingInformation LLM — Implementation Explanation
+# Herding Information Cascade LLM Variant Explanation
 
 ## §1 Overview
 
-| Aspect             | Detail                                               |
-|--------------------|------------------------------------------------------|
-| Variant            | LLM (language model reasoning baseline)              |
-| Simulation         | HerdingInformation                                   |
-| Decision Mechanism | LLM prompt-based reasoning with cascade context      |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                      |
-| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`         |
-| Price Model        | `P(t+1) = P(t) + λ × NetDemand + γ × (F − P(t)) + ε` |
+| Field | Value |
+|---|---|
+| Variant | LLM |
+| Simulation | Herding Information Cascade |
+| Decision Mechanism | LLM-generated trading orders with action, bid_price, quantity, and reasoning |
+| Theory Reference | `examples/HerdingInformation/simulation-bases.md` |
+| Market Broadcast | `configs/HerdingInformation/LLM/topology.yml` |
 
-The LLM variant replaces the deterministic threshold formulas of the Rule variant with language model reasoning. Each investor is prompted with cascade theory context and market state; the LLM generates a buy/sell/hold decision and quantity. This introduces reasoning variability: cascades may form later or resolve faster when the LLM contextualises the social signal vs. private information tradeoff.
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-## §2 Theory → Implementation Mapping
+## §2 Theory -> Implementation Mapping
 
 ### §2.1 CascadeFollower (simulation-bases.md §4.1)
 
-| Theory Component                             | Implementation                                                          |
-|----------------------------------------------|-------------------------------------------------------------------------|
-| Bikhchandani et al. (1992) cascade formation | LLM prompted with cascade_count, social_weight, cascade_trigger context |
-| Social signal weighting                      | LLM calibrates order size based on reasoning about cascade strength     |
-| Cascade direction                            | LLM follows deviation direction when reasoning confirms cascade signal  |
-| Pre-cascade                                  | LLM may hold even when cascade_count is below trigger (context-aware)   |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `LLMCascadeFollower` uses `LLM_CASCADE_FOLLOWER_SYS` to express cascade-following behavior from the current deviation signal. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/LLM/players.yml:cascadefollower.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven ARK output parsed into `action`, `bid_price`, `quantity`, and `reasoning`; `players.py` executes the parsed action and quantity. |
 ### §2.2 ReputationHerder (simulation-bases.md §4.2)
 
-| Theory Component                              | Implementation                                                                 |
-|-----------------------------------------------|--------------------------------------------------------------------------------|
-| Scharfstein & Stein (1990) reputation herding | LLM prompted with reputation_concern, career risk framing                      |
-| Lower activation threshold                    | LLM activates at smaller deviations than CascadeFollower due to prompt framing |
-| Career concern amplification                  | LLM scales trade size proportionally to deviation magnitude in reasoning       |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `LLMReputationHerder` uses `LLM_REPUTATION_HERDER_SYS` to model career-concern consensus following. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/LLM/players.yml:reputationherder.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven ARK output parsed into the shared trading schema. |
 ### §2.3 IndependentThinker (simulation-bases.md §4.3)
 
-| Theory Component        | Implementation                                                                                     |
-|-------------------------|----------------------------------------------------------------------------------------------------|
-| Rational Bayesian agent | LLM prompted with signal_precision and private information framing                                 |
-| Contrarian signal       | LLM may reason against deviation when private signal conflicts with social signal                  |
-| Activation threshold    | LLM activation flexible: may act below 0.03 threshold when reasoning strongly indicates mispricing |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `LLMIndependentThinker` uses `LLM_INDEPENDENT_THINKER_SYS` to reason from fundamental value rather than social signals. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/LLM/players.yml:independentthinker.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven ARK output parsed into the shared trading schema. |
 ### §2.4 Contrarian (simulation-bases.md §4.4)
 
-| Theory Component                               | Implementation                                                   |
-|------------------------------------------------|------------------------------------------------------------------|
-| De Bondt & Thaler (1985) deliberate contrarian | LLM prompted with contrarian_threshold framing                   |
-| Higher threshold than IndependentThinker       | LLM requires stronger deviation evidence before contrarian trade |
-| Cascade resistance                             | LLM explicitly prompted to resist herding pressure               |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `LLMContrarian` uses `LLM_CONTRARIAN_SYS` to oppose crowd overreaction. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/LLM/players.yml:contrarian.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven ARK output parsed into the shared trading schema. |
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-| Theory Component                | Implementation                                                                               |
-|---------------------------------|----------------------------------------------------------------------------------------------|
-| Black (1986) uninformed trading | LLM prompted with minimal context; trade_probability governs activity                        |
-| Random direction                | LLM has no fundamental basis; decisions approximate random with slight market-following bias |
-| Accidental cascade initiator    | LLM noise trades still increment cascade_count when                                          |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `LLMNoiseTrader` uses `LLM_NOISE_TRADER_SYS` to produce unsystematic retail-style orders. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/LLM/players.yml:noisetrader.config.extras` supplies portfolio state and ARK model policy. |
+| Variant-specific decision mechanism | Persona-driven ARK output parsed into the shared trading schema. |
 
 ## §3 Market Mechanism
 
-*Formula source: simulation-bases.md §3*
-
-```
-P(t+1) = P(t) + λ × NetDemand(t) + γ × (F − P(t)) + ε(t)
-
-where:
-  λ = price_impact      [default: 0.001]
-  γ = mean_reversion    [default: 0.05]
-  ε ~ N(0, noise_std)   [default: 0.5]
-  NetDemand = Σ signed_quantities
-```
-
-Market broadcasts `{price, fundamental, deviation, round}`. The `deviation = (P − F) / F` signal drives LLM cascade interpretation: agents are prompted with the current deviation and cascade_count to reason about cascade formation.
+The LLM variant reuses the Rule `Market` class. The market broadcasts `price`, `fundamental`, `deviation`, and `round`; LLM investors submit buy/sell/hold orders that are aggregated by the same price equation as the Rule baseline.
 
 ## §4 Variant Architecture
 
-| Component     | Detail                                                     |
-|---------------|------------------------------------------------------------|
-| Base class    | `LLMPlayer`                                                |
-| Inference     | LLM API call per agent per round                           |
-| Context       | `market_data` + `agent_extras` injected into system prompt |
-| Output        | `{"action": "buy"/"sell"/"hold", "quantity": int}`         |
-| Cascade state | `cascade_count` passed via prompt context                  |
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/HerdingInformation/LLM/players.py` |
+| Prompt module | `examples/HerdingInformation/LLM/prompts.py` |
+| Inference | ARK LLM via `LangChainAPIInference` and `ark/doubao-seed-2-0-mini-260428`. |
+| Output parsing | `parse_llm_response_with_thinking()` parses `<analysis>` and `<decision>` blocks; parse failures are retried three times and then fail fast. |
+| Error handling | Deterministic config/schema/API errors fail fast; this variant does not silently fallback after malformed decisions. |
 
 ## §5 Config Reference
 
-Config file: `configs/HerdingInformation/LLM/simulation.yml`
-
-Key extras per investor:
-- `initial_cash`, `initial_position` (all investors)
-- `social_weight`, `cascade_trigger` (CascadeFollower — passed as prompt context)
-- `reputation_concern` (ReputationHerder)
-- `signal_precision` (IndependentThinker)
-- `contrarian_threshold` (Contrarian)
-- `trade_probability` (NoiseTrader)
-- Market: `price_impact`, `mean_reversion`, `noise_std`, `fundamental_value`, `initial_price`
-- LLM: `model`, `temperature`, `max_tokens`
+| Config | Purpose |
+|---|---|
+| `configs/HerdingInformation/LLM/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/HerdingInformation/LLM/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/HerdingInformation/LLM/topology.yml` | Message routing between coordinator and agents. |
+| `configs/HerdingInformation/LLM/persona.yml` | Turn recording and persona metadata. |
 
 ## §6 Running Instructions
 
 ```bash
-python -m examples.HerdingInformation.LLM.run_herding_information \
-    -c configs/HerdingInformation/LLM/simulation.yml
+python examples/HerdingInformation/LLM/run_herdinginformation_llm.py -c configs/HerdingInformation/LLM/simulation.yml
 ```
-
-Or via Streamlit UI: select "HerdingInformation" → "LLM" variant.
 
 ## §7 Expected Behavior
 
-- **Later cascade formation**: LLM reasoning may delay CascadeFollower activation — LLM may interpret pre-cascade market context as insufficient for herding, extending pre-cascade phase
-- **Shorter cascade duration**: CPD expected 2–8 rounds (vs. Rule 3–10): IndependentThinker LLM occasionally breaks cascades through explicit reasoning about overvaluation
-- **Lower CCI**: LLM agents may contextualize cascade risk and reduce herding participation — CCI target 0.35–0.60 (vs. Rule 0.40–0.70)
-- **Variable RHI**: LLM reputation framing may weight career concerns differently each run — RHI variance higher than Rule
-- **Lower ICE**: LLM occasionally acts on private reasoning (not pure cascade) — ICE target 0.10–0.30
-- **Smaller WDI**: Less systematic bias → smaller wealth gap between rational and cascade agents
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
 ## §8 References
 
-See `simulation-bases.md §2` for full DOI citations.
-
-- Bikhchandani, Hirshleifer & Welch (1992) `doi:10.1086/261849` — CascadeFollower
-- Scharfstein & Stein (1990) — ReputationHerder
-- Avery & Zemsky (1998) JSTOR:116851 — information cascade efficiency
+See `examples/HerdingInformation/simulation-bases.md §2` for full DOI citations and mechanism references.
 
 ## §9 Variant Comparison
 
-See `simulation-bases.md §9` for Rule / LLM / RuleLLM / Rag comparison table.
+See `examples/HerdingInformation/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

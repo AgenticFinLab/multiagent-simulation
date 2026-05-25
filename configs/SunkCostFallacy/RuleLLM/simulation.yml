@@ -5,7 +5,7 @@
 setting:
   name: "sunkcostfallacy_rulellm_simulation"
   description: "SunkCostFallacy simulation with RuleLLM agents"
-  total_rounds: 50
+  total_rounds: 200
   round_history_limit: 10
   record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records"
   save_diagram_interval: 10

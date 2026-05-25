@@ -17,8 +17,8 @@ def crash_depth(price_history: List[float], fundamental: float) -> float:
     deviations = [(p - fundamental) / fundamental for p in price_history]
     return abs(min(deviations))
 
-def liquidity_vacuum_duration(liquidity_history: List[int],
-                              low_threshold: int = 2) -> int:
+def liquidity_vacuum_duration(liquidity_history: List[float],
+                              low_threshold: float = 50.0) -> int:
     """Number of rounds in which total_liquidity <= low_threshold.
     Measures how long the market operates in amplified-impact mode."""
     return sum(1 for liq in liquidity_history if liq <= low_threshold)
@@ -42,9 +42,12 @@ def recovery_speed(price_history: List[float], trough_round: int,
             return i - trough_round
     return -1
 
-def hft_withdrawal_fraction(provides_liquidity_history: List[Dict[str, bool]],
-                            crash_start: int, crash_end: int) -> float:
-    """Fraction of HFT/MarketMaker agents with provides_liquidity=False during crash window.
+def liquidity_provider_withdrawal_fraction(
+    provides_liquidity_history: List[Dict[str, bool]],
+    crash_start: int,
+    crash_end: int,
+) -> float:
+    """Fraction of liquidity-eligible agents with provides_liquidity=False during crash window.
     1.0 = complete withdrawal; 0.0 = full provision."""
     crash_rounds = provides_liquidity_history[crash_start:crash_end]
     if not crash_rounds:
@@ -68,7 +71,7 @@ def price_amplification_ratio(observed_max_drop: float,
 | Dimension               | Key questions                                                             |
 |-------------------------|---------------------------------------------------------------------------|
 | **Crash severity**      | How deep does price fall? How fast?                                       |
-| **Liquidity dynamics**  | When does `total_liquidity` collapse? For how long?                       |
+| **Liquidity dynamics**  | When does effective liquidity collapse? For how long?                     |
 | **Cascade mechanics**   | How many stop-loss agents trigger, and in which rounds?                   |
 | **Recovery**            | Who drives recovery? How many rounds to return to fundamental ±2 %?       |
 | **Variant differences** | Do LLM agents withdraw earlier/later? Do RAG agents anticipate the crash? |
@@ -77,9 +80,9 @@ def price_amplification_ratio(observed_max_drop: float,
 
 | Phase    | Rounds (typical) | Key indicators                                     | Analysis focus                     |
 |----------|------------------|----------------------------------------------------|------------------------------------|
-| Normal   | 1–10             | `liquidity` ≥ 3; price ≈ fundamental               | Baseline market activity           |
+| Normal   | 1–10             | `liquidity` high; price near fundamental           | Baseline market activity           |
 | Trigger  | 11–15            | First HFT momentum signal; `liquidity` declining   | HFT contribution to initial drop   |
-| Cascade  | 16–25            | `liquidity` ≤ 2; stop-loss triggers; spread rising | Liquidity vacuum + cascade volume  |
+| Cascade  | 16–25            | `liquidity` low; stop-loss triggers; spread rising | Liquidity vacuum + cascade volume  |
 | Trough   | 26–30            | Min price; max `crash_depth`; FT buying            | Deepest fundamental deviation      |
 | Recovery | 31–50            | `liquidity` recovering; price → fundamental        | `recovery_speed`, FT effectiveness |
 
@@ -91,7 +94,7 @@ def price_amplification_ratio(observed_max_drop: float,
 | `liquidity_vacuum_duration` | Fixed by `volatility_threshold`    | Variable by LLM judgment        | Mixed                            | Shorter if RAG recalls past recoveries  |
 | `stop_loss_cascade_volume`  | Sum of all SL positions            | LLM may delay trigger           | Rule-determined stops            | RAG may inform earlier exit             |
 | `recovery_speed`            | Determined by FT `value_threshold` | LLM "recognises" undervaluation | Hybrid                           | May recover faster                      |
-| `hft_withdrawal_fraction`   | Binary at `volatility_threshold`   | Probabilistic                   | Mostly rule-driven               | Context-dependent                       |
+| `liquidity_provider_withdrawal_fraction` | Binary at `volatility_threshold` | Probabilistic internal-liquidity proxy | Mostly rule-driven | Context-dependent |
 | `price_amplification_ratio` | Highest (no discretion)            | Lower if LLM hesitates          | Intermediate                     | Lowest (anticipatory)                   |
 
 ## §6 Expected Results
@@ -102,16 +105,16 @@ def price_amplification_ratio(observed_max_drop: float,
 | `liquidity_vacuum_duration` | 5–20 rounds          | ~36 minutes            |
 | `stop_loss_cascade_volume`  | 500–3000 shares      | Large but unquantified |
 | `recovery_speed`            | 10–30 rounds         | ~20 minutes            |
-| `hft_withdrawal_fraction`   | 0.6–1.0 during crash | ~80 % (Kirilenko 2017) |
+| `liquidity_provider_withdrawal_fraction` | 0.6–1.0 during crash | ~80 % HFT withdrawal proxy (Kirilenko 2017) |
 | `price_amplification_ratio` | 1.5–4.0 ×            | —                      |
 
 ## §7 Visualization Catalogue
 
-| Plot                               | x-axis             | y-axis                           | Purpose                                  |
-|------------------------------------|--------------------|----------------------------------|------------------------------------------|
-| Price path with phases             | Round              | Price + fundamental line         | Annotate trigger/cascade/trough/recovery |
-| Liquidity time series              | Round              | `total_liquidity` count          | Show vacuum duration                     |
-| Stop-loss cascade waterfall        | Round              | Cumulative stop-loss sell volume | Multi-wave structure                     |
-| HFT provides_liquidity heatmap     | Agent × Round      | provides_liquidity (bool)        | Which MM withdraws first                 |
-| Price amplification scatter        | `liquidity_factor` | `price_impact`                   | Amplification nonlinearity               |
-| Recovery speed box plot (variants) | Variant            | `recovery_speed` (rounds)        | Cross-variant comparison                 |
+| Output | Contents | Purpose |
+|---|---|---|
+| `summary.json` | Core price, liquidity, volume, and scenario metrics | Machine-readable Level-2 audit artifact |
+| `00_investor_bids.png` | Investor order/quantity traces | Inspect cascade participants and order concentration |
+| `01_flashcrash_dynamics.png` | Price, liquidity, volume, and net-demand paths | Identify trigger, cascade, trough, and recovery phases |
+| `02_flashcrash_analysis.png` | Crash-depth, liquidity-vacuum, stop-loss, and recovery diagnostics | Validate scenario mechanism rather than execution only |
+| `03_summary.png` | Compact visual summary of the run | Human review artifact |
+| `rag_stats.json` | Rag-only retrieval coverage and fallback-rate summary | Audit whether retrieved knowledge was available to RAG agents |

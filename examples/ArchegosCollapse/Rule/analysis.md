@@ -1,6 +1,6 @@
 # ArchegosCollapse Rule — Analysis Documentation
 
-## Overview
+## §1 Analysis Objectives
 
 | Item                                | Description                                                                                                                                    |
 |-------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,22 +11,23 @@
 
 ---
 
-## 1. Metric Implementation
+## §2 Metric → Function Mapping
 
 All metrics are defined in `../analysis-bases.md §2`. The Rule variant's `analysis.py` is the authoritative implementation — all other variants import from it.
 
 | Metric                     | Function              | analysis-bases.md Ref | Rule-Specific Notes                                                            |
 |----------------------------|-----------------------|-----------------------|--------------------------------------------------------------------------------|
-| **Price Deviation**        | `calculate_metrics()` | `§2.1`                | Deterministic cascade; deviation follows predictable plunge-then-recovery      |
-| **Maximum Drawdown**       | `calculate_metrics()` | `§2.2`                | Calibration target 20–50%; Rule shows cleanest drawdown matching cascade rules |
-| **Cascade Volatility**     | `calculate_metrics()` | `§2.3`                | Rolling std of returns; expect 2%–8% per round during cascade phase            |
-| **Return Autocorrelation** | `calculate_metrics()` | `§2.4`                | AC1 > 0 during cascade (self-reinforcing); AC1 < 0 during recovery             |
-| **Agent-Type Volume**      | `calculate_metrics()` | `§2.5`                | PrimeBroker1 sells earlier/higher prices than PrimeBroker2; verifiable         |
-| **Cascade Onset Round**    | `calculate_metrics()` | `§2.6`                | First round `deviation < -0.10`; Rule: expected rounds 10–30                   |
+| **Price Deviation**        | `calculate_metrics()` | `analysis-bases.md §2.1` | Deterministic cascade; deviation follows predictable plunge-then-recovery      |
+| **Maximum Drawdown**       | `calculate_metrics()` | `analysis-bases.md §2.2` | Calibration target 20–50%; Rule shows cleanest drawdown matching cascade rules |
+| **Cascade Volatility**     | `calculate_metrics()` | `analysis-bases.md §2.3` | Rolling std of returns; expect 2%–8% per round during cascade phase            |
+| **Return Autocorrelation** | `calculate_metrics()` | `analysis-bases.md §2.4` | AC1 > 0 during cascade (self-reinforcing); AC1 < 0 during recovery             |
+| **Agent-Type Volume**      | `calculate_metrics()` | `analysis-bases.md §2.5` | PrimeBroker1 sells earlier/higher prices than PrimeBroker2; verifiable         |
+| **Cascade Onset Round**    | `calculate_metrics()` | `analysis-bases.md §2.6` | First round `deviation < -0.10`; Rule: expected rounds 10–30                   |
+| **Recovery Half-Life**     | `calculate_metrics()` | `analysis-bases.md §2.7` | Recovery after trough; validates BlockTradeBuyer and mean-reversion dynamics   |
 
 ---
 
-## 2. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Price Cascade Dynamics
 *(Objective from analysis-bases.md §3.1)*
@@ -35,7 +36,7 @@ All metrics are defined in `../analysis-bases.md §2`. The Rule variant's `analy
 - Function: `load_simulation_data()` → loads price and fundamental arrays from `records/market/*.json`
 - Input data: `EXPERIMENT/ArchegosCollapse/Rule/records/market/price/` (HistoryBuffer JSON)
 - Computation: `deviation = (prices − fundamentals) / fundamentals × 100`
-- Output: `archegsoscollapse_analysis.png` (subplot 1: Price vs Fundamental; subplot 2: Deviation)
+- Output: `01_archegoscollapse_dynamics.png` (price vs fundamental and deviation)
 
 **Variant-Specific Interpretation:**
 Rule variant shows a clean, threshold-triggered plunge followed by gradual recovery. The cascade onset round is deterministic (modulo `InformationTrader` detection randomness). If deviation never crosses −10%, check `margin_threshold` and `liquidation_threshold` parameters.
@@ -80,7 +81,7 @@ Rule is the deterministic reference. All other variants are evaluated relative t
 
 ---
 
-## 3. Variant-Specific Observable Phenomena
+## §4 Variant-Specific Observable Phenomena
 
 | Phenomenon                       | Description                                                               | How to Observe                                   | Contrast with LLM/RuleLLM                  |
 |----------------------------------|---------------------------------------------------------------------------|--------------------------------------------------|--------------------------------------------|
@@ -91,7 +92,7 @@ Rule is the deterministic reference. All other variants are evaluated relative t
 
 ---
 
-## 4. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
@@ -121,18 +122,21 @@ Rule is the deterministic reference. All other variants are evaluated relative t
 
 ---
 
-## 5. Output Files Reference
+## §6 Output Files Reference
 
 All outputs written to `EXPERIMENT/ArchegosCollapse/Rule/records/analysis/`.
 
 | Output File                      | Generated By              | Contents                                           | Interpretation                                  |
 |----------------------------------|---------------------------|----------------------------------------------------|-------------------------------------------------|
-| `archegsoscollapse_analysis.png` | `create_visualizations()` | 4-panel: Price, Deviation, Returns, Distribution   | Primary cascade verification                    |
-| `metrics.json`                   | `main()`                  | `price_metrics`, `deviation_metrics`, `volatility` | Machine-readable cross-variant comparison input |
+| `summary.json` | `analyze_archegos_collapse()` | Metrics, validation score, criteria, and interpretation | Machine-readable cross-variant comparison input |
+| `00_investor_bids.png` | `_create_visualizations()` | Market price and investor bid curves | Headline order-path visualization |
+| `01_archegoscollapse_dynamics.png` | `_create_visualizations()` | Price, fundamental value, and deviation | Cascade path verification |
+| `02_archegoscollapse_analysis.png` | `_create_visualizations()` | Rolling volatility and autocorrelation | Self-reinforcement analysis |
+| `03_summary.png` | `_create_visualizations()` | Agent VWAP and volume summary | First-mover advantage and participation check |
 
 ---
 
-## 6. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 This variant is the **ground truth baseline** for all cross-variant comparisons.
 
@@ -145,7 +149,7 @@ Cross-variant comparison protocol: `../analysis-bases.md §5`.
 
 ---
 
-## References
+### References
 
 - `../analysis-bases.md` — master analysis specification (metrics, dimensions, validation targets)
 - `../simulation-bases.md §3.1` — price formula implementation

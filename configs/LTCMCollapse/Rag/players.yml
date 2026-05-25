@@ -78,10 +78,10 @@ convergencearbitrageur:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_CONVERGENCE_ARBITRAGEUR_SYS"
+        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_CONVERGENCEARBITRAGEUR_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -125,10 +125,10 @@ leveragetrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_LEVERAGE_TRADER_SYS"
+        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_LEVERAGETRADER_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_tokens: 600
@@ -171,10 +171,10 @@ riskmanager:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_RISK_MANAGER_SYS"
+        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_RISKMANAGER_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -218,17 +218,17 @@ liquidityprovider:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_LIQUIDITY_PROVIDER_SYS"
+        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_LIQUIDITYPROVIDER_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 600
   persona: !include persona.yml
 
 centralbank:
-  name: "NoiseTrader"
+  name: "CentralBank"
   class: "examples.LTCMCollapse.Rag.players:RagLLMCentralBank"
   num_instances: 2
   config:
@@ -264,10 +264,10 @@ centralbank:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_CENTRALBANK_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.95
           max_tokens: 600

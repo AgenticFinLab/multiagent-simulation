@@ -69,3 +69,14 @@ All functions defined in `Rag/analysis.py`. Inputs sourced from simulation outpu
 - `analysis-bases.md §5` — Cross-variant comparison table
 - Fischhoff (1975) `doi:10.1037/0096-1523.1.3.288` — self-correction baseline
 - Roese & Vohs (2012) `doi:10.1177/1745691612454303` — bias meta-analysis retrieved
+
+## §6 Expected Results and Validation
+
+The accepted RAG sample should complete 200 rounds with clean parse quality and usable retrieval context. Retrieval review should report success rate, fallback rate, and whether retrieved hindsight-bias literature moderates biased-agent behavior.
+
+## §7 Visualization Catalogue
+
+`Rag/analysis.py → main()` uses the standard analysis output contract:
+`summary.json`, `00_investor_bids.png`, `01_hindsightbias_dynamics.png`,
+`02_hindsightbias_analysis.png`, and `03_summary.png`. It also writes
+`rag_stats.json` and adds `rag_knowledge_effect` to `summary.json`.

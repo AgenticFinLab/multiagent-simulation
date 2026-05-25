@@ -22,7 +22,7 @@ YOUR STRATEGY:
 - Never let inventory risk exceed limits
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string, "provides_liquidity": true|false}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
 
@@ -42,7 +42,7 @@ YOUR STRATEGY:
 - Exit immediately when momentum fades
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string, "provides_liquidity": false}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
 
@@ -61,7 +61,7 @@ YOUR STRATEGY:
 - Order size: 100-500 shares based on deviation magnitude
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string, "provides_liquidity": true}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
 
@@ -80,7 +80,7 @@ YOUR RULES (MANDATORY):
 - The stop-loss rule is NON-NEGOTIABLE
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "hold"|"sell", "bid_price": float, "quantity": float, "reasoning": string}
+The decision must be valid JSON: {"action": "hold"|"sell", "bid_price": float, "quantity": float, "reasoning": string, "provides_liquidity": false}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
 
@@ -98,7 +98,7 @@ YOUR STRATEGY:
 - Represent uninformed background order flow
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string, "provides_liquidity": false}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
 
@@ -124,6 +124,7 @@ LLM_USER_TEMPLATE = """
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON:
-{{"action": "buy" | "sell" | "hold", "bid_price": <price as NUMBER>, "quantity": <+buy/-sell as NUMBER>, "reasoning": "<brief>"}}
+{{"action": "buy" | "sell" | "hold", "bid_price": <price as NUMBER>, "quantity": <+buy/-sell as NUMBER>, "reasoning": "<brief>", "provides_liquidity": true|false}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
 """

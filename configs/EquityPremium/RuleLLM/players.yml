@@ -20,15 +20,8 @@ market:
       bond_return: 0.0000397
       # ~15% annual vol / sqrt(252)
       stock_volatility: 0.00945
-      initial_price: 100.0
+      initial_stock_price: 100.0
       custom_state_hot_limit: 3
-      base_liquidity: 50.0
-      base_price_impact: 0.08
-      fundamental_value: 100.0
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
-      mean_reversion: 0.02
-      noise_std: 0.4
   persona: !include persona.yml
 
 rulellm_myopic:
@@ -52,10 +45,10 @@ rulellm_myopic:
       initial_bond_ratio: 0.25
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_MYOPIC_LOSS_AVERSE_SYS"
+        sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_MYOPIC_LOSS_AVERSE_INVESTOR_SYS"
         user_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -80,10 +73,10 @@ rulellm_long_term:
       initial_bond_ratio: 0.25
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_LONG_TERM_SYS"
+        sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_LONG_HORIZON_INVESTOR_SYS"
         user_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -107,10 +100,10 @@ rulellm_institutional:
       initial_bond_ratio: 0.25
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_INSTITUTIONAL_SYS"
+        sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_RISK_NEUTRAL_INVESTOR_SYS"
         user_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -135,10 +128,10 @@ rulellm_risk_averse:
       initial_bond_ratio: 0.25
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_RISK_AVERSE_SYS"
+        sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_CONSERVATIVE_INVESTOR_SYS"
         user_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -163,10 +156,10 @@ rulellm_rational:
       initial_bond_ratio: 0.25
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_RATIONAL_SYS"
+        sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500

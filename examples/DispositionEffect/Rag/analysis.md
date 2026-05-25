@@ -1,43 +1,55 @@
 # DispositionEffect Rag Variant — analysis.md
 
-## §1 Metrics and Functions
+## §1 Overview
 
-| Metric                              | Function                                                                  | analysis-bases.md Ref |
-|-------------------------------------|---------------------------------------------------------------------------|-----------------------|
-| Proportion of Gains Realized (PGR)  | `proportion_of_gains_realized(trades, price_history, purchase_prices)`    | §2.1                  |
-| Proportion of Losses Realized (PLR) | `proportion_of_losses_realized(trades, price_history, purchase_prices)`   | §2.2                  |
-| Disposition Coefficient (DC)        | `disposition_coefficient(pgr, plr)`                                       | §2.3                  |
-| PGR/PLR Ratio                       | `pgr_plr_ratio(pgr, plr)`                                                 | §2.4                  |
-| Holding Period Asymmetry (HPA)      | `holding_period_asymmetry(sell_events)`                                   | §2.5                  |
-| Performance Drag Index (PDI)        | `performance_drag_index(disposition_final_wealth, rational_final_wealth)` | §2.6                  |
-| Tax Reversal Index (TRI)            | `tax_reversal_index(tax_plr, disposition_plr)`                            | §2.7                  |
+The Rag variant reuses the shared DispositionEffect financial metrics from
+`Rule/analysis.py` and adds retrieval-health reporting through
+`Rag/analysis.py::analyze_rag_knowledge_effect()`.
 
-## §2 Rag Variant Notes
+## §2 Metrics and Functions
 
-**Analysis script**: `DispositionEffect/Rag/analysis.py`
+| Metric | Function | analysis-bases.md Ref |
+|---|---|---|
+| Proportion of Gains Realized (PGR) | `Rule.analysis.calculate_pgr_plr()` | §2.1 |
+| Proportion of Losses Realized (PLR) | `Rule.analysis.calculate_pgr_plr()` | §2.2 |
+| Disposition Coefficient (DC) | `Rule.analysis.generate_summary()` | §2.3 |
+| PGR/PLR Ratio | `Rule.analysis.calculate_pgr_plr()` | §2.4 |
+| Bias-awareness effect | `summary.json` comparison against LLM and RuleLLM | §5 |
+| Tax-harvesting comparison | `Rule.analysis.analyze_by_strategy()` | §2.7 |
+| RAG retrieval health | `analyze_rag_knowledge_effect()` | §7 |
 
-Key Rag-variant-specific analysis notes:
+## §3 Data Loading Contract
 
-- **Calibration test**: Compare Rag PGR/PLR to Odean (1998) empirical benchmark (PGR ≈ 0.148, PLR ≈ 0.098); Rag should be closest to empirical values if RAG retrieval succeeds.
-- **Bias awareness effect**: RagDispositionInvestor DC vs. LLMDispositionBiased DC — if RAG reduces DC, academic self-awareness moderates bias.
-- **Retrieved context logging**: Log retrieved chunks per agent per round; analyze which papers were retrieved during high-gain and high-loss rounds.
-- **TRI RAG enhancement**: Check if RagTaxAwareInvestor TRI is higher than LLMTaxAwareInvestor TRI (RAG reinforces tax-harvesting literature).
-- **Note on coverage**: Only 3 investor types (no IndexHolder, InstitutionalInvestor); PDI compares RagDispositionInvestor to RagRationalInvestor.
+`Rag/analysis.py` calls `load_simulation_data(config)` from the Rule analysis
+module. RAG order payloads must contain canonical trading fields and should also
+record `rag_context` so retrieval coverage and fallback rates are auditable.
 
-## §3 Output Files
+## §4 Rag Variant Notes
 
-Rag variant produces the following output files in `outputs/DispositionEffect/Rag/`:
+- Retrieval context is injected into each investor prompt before LLM inference.
+- `rag_context` is recorded in the order payload for post-run retrieval quality
+  analysis; this field does not change market clearing.
+- If no knowledge is retrieved, `_RAG_FALLBACK` records the explicit fallback
+  context string.
+- RAG behavior should be compared with RuleLLM to isolate the effect of external
+  domain knowledge.
 
-| File                   | Content                                              |
-|------------------------|------------------------------------------------------|
-| `price_history.csv`    | Round-by-round price, return, news shock             |
-| `agent_orders.csv`     | Per-agent action, quantity, strategy, round          |
-| `agent_wealth.csv`     | Per-agent cash, position, wealth by round            |
-| `metrics_summary.json` | PGR, PLR, DC, PGR/PLR ratio, HPA, PDI, TRI           |
-| `llm_responses.jsonl`  | Raw LLM outputs with retrieved context and decisions |
-| `retrieval_log.jsonl`  | Per-round retrieved knowledge chunks per agent       |
+## §5 Output Files
 
-## §4 References
+The Rag variant writes the same `summary.json` and seven figures as the Rule
+variant. `summary.json` additionally includes `rag_knowledge_effect`, containing
+payload count, context coverage, fallback count, retrieval rate, fallback rate,
+and whether the 70% retrieval target was met.
 
-All metric definitions with DOI citations: `analysis-bases.md §2`.  
-Investor theory references: `simulation-bases.md §4.1–§4.5`.
+## §6 Validation Criteria
+
+A valid Rag run completes 200 rounds, preserves required trading fields, and
+records auditable retrieval context. Retrieval quality is acceptable when the
+retrieval rate is at least 70% and fallback context does not dominate decisions.
+
+## §7 References
+
+Metric definitions and DOI references are centralized in `analysis-bases.md §2`.
+Investor theory references are centralized in `simulation-bases.md §4.1–§4.5`.
+RAG retrieval expectations follow `simulation-bases.md §9` and the project
+variant construction rules.

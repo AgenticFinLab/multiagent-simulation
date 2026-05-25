@@ -53,7 +53,7 @@ portfolio_insurer:
         sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_PORTFOLIO_INSURER_SYS"
         user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -83,7 +83,7 @@ index_arbitrageur:
         sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_INDEX_ARBITRAGEUR_SYS"
         user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -113,7 +113,7 @@ program_trader:
         sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_PROGRAM_TRADER_SYS"
         user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -142,7 +142,7 @@ value_investor:
         sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_VALUE_INVESTOR_SYS"
         user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_tokens: 512
@@ -172,7 +172,7 @@ noise_trader:
         sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
           max_tokens: 512

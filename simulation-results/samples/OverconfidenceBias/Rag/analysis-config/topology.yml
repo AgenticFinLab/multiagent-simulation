@@ -1,0 +1,29 @@
+# OverconfidenceBias Rag Topology - Star Pattern
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - overconfidenttrader
+    - selfattributor
+    - calibratedtrader
+    - contrarianinvestor
+    - noisetrader
+
+  overconfidenttrader:
+    - market
+
+  selfattributor:
+    - market
+
+  calibratedtrader:
+    - market
+
+  contrarianinvestor:
+    - market
+
+  noisetrader:
+    - market

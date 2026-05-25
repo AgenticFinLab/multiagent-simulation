@@ -1,6 +1,6 @@
 # AnchoringEffect — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                |
 |--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -10,8 +10,50 @@
 | Real-World Origin  | Documented in equity analyst earnings forecasts (Campbell & Sharpe, 2009: ~50% under-revision), real estate appraisal (Northcraft & Neale, 1987: experts anchor to listed prices), IPO aftermarket pricing (Loughran & Ritter, 2002: prices cluster near IPO anchor), and post-earnings announcement drift                                                                                                                                 |
 | Research Relevance | Anchoring is one of the most empirically robust cognitive biases in financial markets. It explains slow price discovery, momentum effects, analyst forecast conservatism, and the well-documented post-earnings drift anomaly — all of which have direct implications for market efficiency, arbitrage profitability, and behavioural finance theory.                                                                                      |
 
+### §1.1 Origin and Source Analysis
 
-## 2. Theoretical Foundation
+#### §1.1.1 Intellectual Lineage
+
+Anchoring entered behavioural decision theory through Tversky and Kahneman's
+1974 account of heuristics under uncertainty. Their central observation was
+that people start numerical estimates from a salient reference value and then
+adjust insufficiently, even when the anchor is arbitrary. This simulation keeps
+that mechanism literal: the first observed market price becomes the
+`AnchoredTrader` reference point, while the true fundamental value is visible
+but underweighted.
+
+The finance-specific lineage comes from expert valuation and forecast-revision
+studies. Northcraft and Neale (1987) show that professional appraisers remain
+pulled toward listing-price anchors, and Campbell and Sharpe (2009) show that
+consensus financial forecasts underreact to new information. These sources
+justify the two primary biased agents: `AnchoredTrader`, which uses the first
+price anchor, and `HistoricalAnchor`, which anchors to a rolling price average.
+
+The model includes `RationalUpdater` to represent the rational-expectations
+counterforce from Muth (1961) and Fama (1970). It also includes
+`MomentumTrader` and `NoiseTrader` to prevent a purely two-agent tug-of-war:
+momentum amplifies local trends, while noise creates realistic background order
+flow. This combination turns an individual cognitive bias into an observable
+market-level slow price-discovery process.
+
+#### §1.1.2 Real-World Event Catalogue
+
+| Event Name | Date(s) | Market / Asset | Trigger | Magnitude | Duration | Correspondence to Simulation | Primary Source |
+|---|---|---|---|---|---|---|---|
+| Consensus forecast anchoring | 1992–2006 | US macro/earnings forecasts | Forecasters revise from prior values after news | Under-revision roughly 30–70%; forecast-error autocorrelation around 0.4 | Quarterly forecast cycles | `AnchoredTrader` and `HistoricalAnchor` under-adjust toward the public fundamental | Campbell & Sharpe (2009), JFQA, https://doi.org/10.1017/S0022109009090127 |
+| Real-estate appraisal anchoring | 1987 study | Residential real estate | Listing price supplied before valuation | Expert valuations shift materially toward the listing price; study reports strong listing-price correlation | Single appraisal task with persistent valuation impact | `HistoricalAnchor` treats past/listed prices as reference values despite valuation evidence | Northcraft & Neale (1987), OBHDP, https://doi.org/10.1016/0749-5978(87)90046-X |
+| IPO aftermarket anchoring | Multi-decade IPO samples | Newly listed equities | Offer price becomes salient public reference | IPO aftermarket prices cluster around offer-price anchors; large first-year effects documented in IPO literature | Months after issuance | `initial_price = 105` seeds a first-price anchor above `fundamental_value = 100` | Loughran & Ritter (2002), RFS, https://doi.org/10.1093/rfs/15.2.413 |
+
+#### §1.1.3 Book and Practitioner Literature
+
+| Title | Author(s) | Year | Publisher | Relevance to This Simulation |
+|---|---|---|---|---|
+| *Thinking, Fast and Slow* | Daniel Kahneman | 2011 | Farrar, Straus and Giroux | Practitioner-readable synthesis of anchoring-and-adjustment experiments and why anchors remain influential even when recognized. |
+| *Irrational Exuberance* | Robert J. Shiller | 2000/2015 | Princeton University Press | Connects salient reference prices and narratives to slow-moving market expectations and behavioural price persistence. |
+| *Behavioral Finance and Wealth Management* | Michael M. Pompian | 2006 | Wiley | Practitioner taxonomy of anchoring and adjustment bias in investment decision-making, useful for persona descriptions. |
+
+
+## §2 Theoretical Foundation
 
 ### Theory: Anchoring and Insufficient Adjustment
 
@@ -74,7 +116,7 @@
 - **Relevance to This Simulation**: `MomentumTrader` amplifies existing trends, including the slow anchoring-driven drift toward or away from fundamental. During the initial overvalued phase, MomentumTrader may briefly extend the mispricing; during correction, it may accelerate it.
 
 
-## 3. Market Design Principles
+## §3 Market Design Principles
 
 ### 3.1 Price Formation Model
 
@@ -128,9 +170,9 @@ Each round, the Market broadcasts to all investors:
 **Design note**: Making `fundamental` visible to all agents (including AnchoredTrader) is the critical design choice that makes this a "cognitive bias" simulation rather than an "information asymmetry" simulation. AnchoredTrader sees that fundamental = 100 but still cannot adjust fully to it — this is the empirically documented nature of the anchoring bias.
 
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
-### Investor: AnchoredTrader
+### §4.1 AnchoredTrader
 
 #### 4.1.1  Summary
 
@@ -271,7 +313,7 @@ directly producing and maintaining the anchoring-driven mispricing.
 
 ---
 
-### Investor: HistoricalAnchor
+### §4.2 HistoricalAnchor
 
 #### 4.2.1  Summary
 
@@ -407,7 +449,7 @@ This illustrates how historical anchoring can support prices even below fundamen
 
 ---
 
-### Investor: RationalUpdater
+### §4.3 RationalUpdater
 
 #### 4.3.1  Summary
 
@@ -427,7 +469,7 @@ RationalUpdater represents the Muth-rational agent who acts optimally on all ava
 - Theory / Study: Informed vs. Uninformed Trader Framework
 - Citation: Grossman, S. J., & Stiglitz, J. E. (1980). On the impossibility of informationally efficient markets. *American Economic Review*, 70(3), 393–408. https://www.jstor.org/stable/1805228
 - Core Insight: For markets to be informationally efficient, informed traders (here, RationalUpdater) must earn returns sufficient to compensate for their information-gathering costs. The ratio of informed to uninformed traders determines the degree of market efficiency.
-- Mathematical Formulation: In this simulation, 3 RationalUpdaters out of 13 total agents = ~23% informed trader proportion; Grossman-Stiglitz predicts incomplete information incorporation proportional to this share.
+- Mathematical Formulation: In this simulation, 1 RationalUpdater out of 9 investor agents = ~11% informed trader proportion; Grossman-Stiglitz predicts incomplete information incorporation proportional to this share.
 - Empirical Evidence: Chordia, Roll & Subrahmanyam (2005) show that informed institutional trading corrects public information-based mispricings in 0–5 days; consistent with RationalUpdater's immediate response to deviations.
 - Relevance to This Investor: With only 3 instances (23% of agents), RationalUpdater provides significant but insufficient corrective force — consistent with the Grossman-Stiglitz prediction that partial efficiency is the equilibrium with costly information.
 
@@ -440,7 +482,7 @@ Activation Scenarios:
 - Price below fundamental by > 2% (price < 98): Buys; prevents over-correction and provides support.
 - Within ±2% of fundamental: Holds; consistent with a 2% minimum threshold required to cover transaction friction.
 
-Market Contribution: **Stabilising** — the only purely corrective agent in the simulation. However, at 3 instances vs. 6 anchoring agents (3 AnchoredTrader + 3 HistoricalAnchor), its corrective force is typically insufficient to fully eliminate the mispricing, consistent with the Grossman-Stiglitz incomplete-efficiency prediction.
+Market Contribution: **Stabilising** — the only purely corrective agent type in the simulation. However, at 1 instance vs. 4 anchoring agents (2 AnchoredTrader + 2 HistoricalAnchor), its corrective force is intentionally weaker than the biased demand block, consistent with the Grossman-Stiglitz incomplete-efficiency prediction.
 
 Interaction with other agents: Directly opposes AnchoredTrader (sells when AT buys) and HistoricalAnchor (sells when HA buys). Aligns with the γ-term mean reversion in the price formula.
 
@@ -537,7 +579,7 @@ persistent deviation zone [100, 104] characteristic of the AnchoringEffect simul
 
 ---
 
-### Investor: MomentumTrader
+### §4.4 MomentumTrader
 
 #### 4.4.1  Summary
 
@@ -642,7 +684,7 @@ amplifying the mean-reversion that RationalUpdater initiated. This is the Barber
 
 ---
 
-### Investor: NoiseTrader
+### §4.5 NoiseTrader
 
 #### 4.5.1  Summary
 
@@ -655,7 +697,7 @@ NoiseTrader represents the uninformed retail participant who trades on impulse, 
 - Citation: Black, F. (1986). Noise. *Journal of Finance*, 41(3), 529–543. https://doi.org/10.1111/j.1540-6261.1986.tb04513.x
 - Core Insight: Noise traders (those who trade on noise rather than information) create liquidity and price volatility. Without noise traders, markets would be too thin — only information-based trades would occur. Noise traders make markets more active but also more volatile; their presence is necessary for market function.
 - Mathematical Formulation: `Q_noise ~ Uniform(min_order, max_order)` with random direction (buy/sell each with probability 0.5); `P(trade) = 0.05` per round.
-- Empirical Evidence: Glosten & Milgrom (1985) estimate that uninformed (noise) trading accounts for 30–60% of total order flow in liquid equity markets. In the 13-agent simulation, 2 NoiseTrader instances with trade_probability = 0.05 produce approximately this proportion of noise volume.
+- Empirical Evidence: Glosten & Milgrom (1985) estimate that uninformed (noise) trading accounts for 30–60% of total order flow in liquid equity markets. In the 9-investor simulation, 2 NoiseTrader instances with trade_probability = 0.05 provide sparse background liquidity without dominating systematic anchoring and rational-updating flows.
 - Relevance to This Investor: Large order size (100–500 shares vs. 20 for anchoring agents) means even occasional trades create significant price volatility, adding realistic noise to the clean anchoring signal.
 
 #### 4.5.3  Design Purpose and Activation Scenarios
@@ -726,7 +768,7 @@ RationalUpdater to hold (price closer to F after shock) or MomentumTrader to sel
 | 2 | Glosten, L. R., & Milgrom, P. R. (1985). Bid, ask and transaction prices in a specialist market with heterogeneously informed traders. *Journal of Financial Economics*, 14(1), 71–100. https://doi.org/10.1016/0304-405X(85)90044-3 | Establishes informed vs. uninformed order flow fractions                        |
 
 
-## 5. Agent Diversity Verification
+## §5 Agent Diversity Verification
 
 ```
 Diversity Check:
@@ -748,11 +790,11 @@ Diversity Check:
     - MomentumTrader amplifies trends in both directions → neutral aggregate effect
 
   Mix of stabilising/destabilising:
-    - Destabilising (×2 types × 3 each = 6 agents): AnchoredTrader, HistoricalAnchor
-    - Stabilising (×1 type × 3 = 3 agents): RationalUpdater
+    - Destabilising (×2 types × 2 each = 4 agents): AnchoredTrader, HistoricalAnchor
+    - Stabilising (×1 type × 1 = 1 agent): RationalUpdater
     - Neutral-amplifying (×1 type × 2 = 2 agents): MomentumTrader
     - Neutral (×1 type × 2 = 2 agents): NoiseTrader
-    Total: 15 agents
+    Total: 9 investor agents plus 1 market coordinator
 
   Different risk tolerances:
     - High: MomentumTrader (trades on 2% price change), NoiseTrader (random large orders)
@@ -760,7 +802,7 @@ Diversity Check:
 ```
 
 
-## 6. Parameter Table
+## §6 Parameter Table
 
 | Parameter            | Value    | Source Citation                                                                 | Description                                           | Sensitivity                                                                                       |
 |----------------------|----------|---------------------------------------------------------------------------------|-------------------------------------------------------|---------------------------------------------------------------------------------------------------|
@@ -779,7 +821,7 @@ Diversity Check:
 | `base_position_size` | 20.0     | Calibrated                                                                      | Max shares per trade (anchoring and rational agents)  | Medium                                                                                            |
 
 
-## 7. Communication and Round Structure
+## §7 Communication and Round Structure
 
 ```
 Round N:
@@ -800,12 +842,12 @@ Round N:
   4. Logging via HistoryBuffer; per-agent portfolio state persisted each round
 ```
 
-Topology: Star — Market at centre broadcasts to all 15 investors; investors send orders back to Market.
+Topology: Star — Market at centre broadcasts to all 9 investors; investors send orders back to Market.
 
 Initialization: Market starts at `initial_price = 105.0` (5% above fundamental 100.0). AnchoredTrader records this as its permanent anchor on round 1, seeding the initial mispricing that the simulation then studies.
 
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
 ### Event: Analyst Earnings Forecast Anchoring (US Equity Markets, 1992–2006)
 
@@ -862,11 +904,11 @@ Initialization: Market starts at `initial_price = 105.0` (5% above fundamental 1
   - Institutional value investors ignoring IPO price → `RationalUpdater`
 - **Lessons for Simulation**:
   - `initial_price = 105.0` (above fundamental 100.0) seeds the IPO-style initial overvaluation
-  - 100-round simulation represents the post-IPO adjustment period
+  - 200-round full experiment represents the post-IPO adjustment period with enough tail rounds to observe slow convergence
   - Source: Loughran, T., & Ritter, J. R. (2002). Why don't issuers get upset about leaving money on the table in IPOs? *Review of Financial Studies*, 15(2), 413–444. https://doi.org/10.1093/rfs/15.2.413
 
 
-## 9. Variant Comparison Preview
+## §9 Variant Comparison Preview
 
 | Aspect                   | Rule                                                                    | LLM                                                            | RuleLLM                                                              | Rag                                                                             |
 |--------------------------|-------------------------------------------------------------------------|----------------------------------------------------------------|----------------------------------------------------------------------|---------------------------------------------------------------------------------|

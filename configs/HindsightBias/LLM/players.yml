@@ -37,13 +37,13 @@ hindsightoverconfident:
       initial_price: 100.0
       fundamental_value: 100.0
       hindsight_inflation: 1.5
-      base_size: 400
+      max_order: 800
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.HindsightBias.LLM.prompts:LLM_HINDSIGHT_OVERCONFIDENT_SYS"
+        sys_message: "examples.HindsightBias.LLM.prompts:LLM_HINDSIGHTOVERCONFIDENT_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
           max_tokens: 600
@@ -66,13 +66,13 @@ outcomelearner:
       initial_price: 100.0
       fundamental_value: 100.0
       success_attribution: 1.3
-      base_size: 350
+      max_order: 800
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.HindsightBias.LLM.prompts:LLM_OUTCOME_LEARNER_SYS"
+        sys_message: "examples.HindsightBias.LLM.prompts:LLM_OUTCOMELEARNER_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.8
           max_tokens: 600
@@ -95,13 +95,13 @@ processevaluator:
       initial_price: 100.0
       fundamental_value: 100.0
       process_weight: 0.8
-      base_size: 300
+      max_order: 500
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.HindsightBias.LLM.prompts:LLM_PROCESS_EVALUATOR_SYS"
+        sys_message: "examples.HindsightBias.LLM.prompts:LLM_PROCESSEVALUATOR_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 600
@@ -124,13 +124,13 @@ contrarianskeptic:
       initial_price: 100.0
       fundamental_value: 100.0
       skepticism_level: 0.6
-      base_size: 250
+      max_order: 500
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.HindsightBias.LLM.prompts:LLM_CONTRARIAN_SKEPTIC_SYS"
+        sys_message: "examples.HindsightBias.LLM.prompts:LLM_CONTRARIANSKEPTIC_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_tokens: 600
@@ -153,13 +153,13 @@ noisetrader:
       initial_price: 100.0
       fundamental_value: 100.0
       trade_probability: 0.3
-      noise_size: 150
+      max_order: 500
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.HindsightBias.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        sys_message: "examples.HindsightBias.LLM.prompts:LLM_NOISETRADER_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.95
           max_tokens: 600

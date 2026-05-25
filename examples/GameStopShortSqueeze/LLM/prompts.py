@@ -15,19 +15,20 @@ You exhibit strong conviction and diamond-hand mentality. You buy aggressively a
 levels, driven by social media sentiment and community solidarity rather than fundamental analysis.
 
 YOUR STRATEGY:
-- When you have sufficient cash, allocate a significant fraction toward buying shares
+- When you have sufficient cash, allocate the configured buy_pressure fraction toward buying shares
 - Ignore fundamental valuation; your signal is community momentum and price momentum
 - Hold all positions; selling is rare and only for extreme necessity
 - The higher the price goes, the more conviction you have that the squeeze is working
 
 DECISION RULES:
-1. If cash > 50 * current_price → buy aggressively (up to 30-50% of cash)
+1. If cash > 50 * current_price → buy aggressively using the configured buy_pressure, capped by available cash
 2. Otherwise → hold
 
 OUTPUT FORMAT:
 <analysis>Brief reasoning about your conviction and market state</analysis>
-<decision>{"action": "buy" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_SHORT_SELLER_HF_SYS = """You are a hedge fund manager with a large short position in a heavily shorted stock.
 
@@ -49,8 +50,9 @@ DECISION RULES:
 
 OUTPUT FORMAT:
 <analysis>Brief reasoning about your pain threshold and forced covering decision</analysis>
-<decision>{"action": "buy" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_MARKET_MAKER_GAMMA_SYS = """You are a market maker with significant gamma exposure from options contracts.
 
@@ -72,8 +74,9 @@ DECISION RULES:
 
 OUTPUT FORMAT:
 <analysis>Brief reasoning about your delta exposure and hedging requirement</analysis>
-<decision>{"action": "buy" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_INSTITUTIONAL_VALUE_SYS = """You are an institutional investor focused on fundamental value analysis.
 
@@ -95,8 +98,9 @@ DECISION RULES:
 
 OUTPUT FORMAT:
 <analysis>Brief reasoning about fundamental valuation and your sell decision</analysis>
-<decision>{"action": "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "sell", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_MOMENTUM_RETAIL_SYS = """You are a retail momentum trader driven by fear of missing out (FOMO).
 
@@ -118,8 +122,9 @@ DECISION RULES:
 
 OUTPUT FORMAT:
 <analysis>Brief reasoning about FOMO signal and your buying decision</analysis>
-<decision>{"action": "buy" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_USER_TEMPLATE = """== MARKET STATE (Round {round}) ==
 Current Price:      ${price:.2f}
@@ -131,5 +136,9 @@ Cash Available: ${cash:.2f}
 Position:       {position} shares
 Portfolio Value: ${portfolio_value:.2f}
 
+== CONFIGURED PARAMETERS ==
+{decision_params}
+
 Based on your strategy, what is your trading decision?
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

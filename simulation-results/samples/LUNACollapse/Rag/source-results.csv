@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
+1,1,LUNACollapse,Rag,SUCCESS,0,1680.304,2026-05-23T19:18:24,2026-05-23T19:46:24,config/simulation.yml,examples/LUNACollapse/Rag/run_lunacollapse_rag.py,logs/LUNACollapse__Rag.log,,200,200,

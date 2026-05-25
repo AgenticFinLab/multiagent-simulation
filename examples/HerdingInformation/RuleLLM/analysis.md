@@ -1,70 +1,36 @@
-# HerdingInformation RuleLLM — Analysis Guide
+# Herding Information Cascade RuleLLM Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-The RuleLLM variant analysis measures the **hybrid effect** of embedding cascade threshold rules into LLM reasoning. The core research question is whether rule-anchored LLM reasoning produces metrics closer to the Rule baseline or the LLM baseline.
+This analysis checks whether the RuleLLM variant produces a complete, analyzable Herding Information Cascade trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-1. Confirm that rule-embedded cascade triggers produce Rule-like CCI and CPD
-2. Measure how much LLM contextual reasoning shifts metrics from the Rule baseline
-3. Validate that the hybrid architecture reduces LLM-introduced variance while preserving contextual nuance
+## §2 Core Metrics
 
-Analysis objectives:
-- CCI target 0.45–0.65: rule anchoring should prevent LLM under-herding
-- CPD target 3–9 rounds: rule thresholds constrain cascade duration
-- RHI similar to Rule (0.50–1.20): reputation threshold rule preserved
-- ICE slightly higher than Rule: LLM private reasoning preserved within rules
-- VAF in 1.4–3.0: intermediate between Rule and LLM
-- WDI similar to Rule: rule-constrained cascade behavior → similar wealth transfer
+| Metric | Function Contract | Source |
+|---|---|---|
+| Cascade Concentration Index | `def cascade_concentration_index(trade_history: list, price_history: list, fundamental: float, activation_threshold: float = 0.02) -> float` | `analysis-bases.md §2.1` |
+| Cascade Persistence Duration | `def cascade_persistence_duration(price_history: list, fundamental: float, activation_threshold: float = 0.02) -> float` | `analysis-bases.md §2.2` |
+| Reputation Herding Index | `def reputation_herding_index(trade_history: list, price_history: list, fundamental: float, activation_threshold: float = 0.02) -> float` | `analysis-bases.md §2.3` |
+| Information Cascade Efficiency | `def information_cascade_efficiency(trade_history: list, price_history: list, fundamental: float) -> float` | `analysis-bases.md §2.4` |
+| Volatility Amplification Factor | `def volatility_amplification_factor(price_history: list, fundamental: float, activation_threshold: float = 0.02, min_obs: int = 5) -> float` | `analysis-bases.md §2.5` |
+| Wealth Distribution Index | `def wealth_distribution_index(agent_states: list, final_price: float) -> float` | `analysis-bases.md §2.6` |
 
----
+## §3 Analysis Dimensions
 
-## §2 Metric → Function Mapping
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether RuleLLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-| Metric | Full Name                       | analysis-bases.md | Python Function                     | Primary Input                             |
-|--------|---------------------------------|-------------------|-------------------------------------|-------------------------------------------|
-| CCI    | Cascade Concentration Index     | §2.1              | `cascade_concentration_index()`     | trade_history, price_history, fundamental |
-| CPD    | Cascade Persistence Duration    | §2.2              | `cascade_persistence_duration()`    | price_history, fundamental                |
-| RHI    | Reputation Herding Index        | §2.3              | `reputation_herding_index()`        | trade_history, price_history, fundamental |
-| ICE    | Information Cascade Efficiency  | §2.4              | `information_cascade_efficiency()`  | trade_history, price_history, fundamental |
-| VAF    | Volatility Amplification Factor | §2.5              | `volatility_amplification_factor()` | price_history, fundamental                |
-| WDI    | Wealth Distribution Index       | §2.6              | `wealth_distribution_index()`       | agent_states, final_price                 |
+## §4 Phase Analysis
 
-All functions defined in `RuleLLM/analysis.py`. Inputs sourced from simulation output JSON.
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
----
+## §5 Cross-Variant Comparison
 
-## §3 RuleLLM-Specific Notes
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
 
-- **Rule threshold preserved for cascade_count**: CascadeFollower cannot activate before cascade_count ≥ cascade_trigger — LLM cannot override this. Monitor CCI to confirm it falls in the Rule-like range (0.45–0.65), not the LLM range (0.35–0.60).
-- **LLM quantity modulation**: LLM may modulate trade quantity ±20% around the rule-calculated quantity. This smooths the step-function order flow of the Rule variant — expect slightly lower VAF than pure Rule.
-- **Multi-seed averaging**: Still required (LLM stochasticity applies to sizing, not thresholds). Run ≥5 seeds.
-- **Hybrid diagnostic**: If RuleLLM metrics are identical to Rule, the LLM is not adding any reasoning value (override/ignore mode). If metrics are identical to LLM, rules are not being respected. Ideal: metrics statistically between Rule and LLM.
-- **CCI vs. Rule comparison**: RuleLLM CCI should be within ±0.05 of Rule CCI; larger divergence indicates LLM is modifying cascade behavior beyond quantity sizing.
+## §6 Expected Results and Validation Criteria
 
----
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
 
-## §4 Expected Ranges
+## §7 Visualization Catalogue
 
-| Metric | RuleLLM Expected | vs. Rule       | vs. LLM         | Notes                                              |
-|--------|------------------|----------------|-----------------|----------------------------------------------------|
-| CCI    | 0.45–0.65        | ≈ Rule         | Higher than LLM | Rule threshold anchors cascade onset               |
-| CPD    | 3–9 rounds       | ≈ Rule         | Longer than LLM | Rule constraints stabilise duration                |
-| RHI    | 0.50–1.20        | ≈ Rule         | More stable     | Reputation threshold rule preserved                |
-| ICE    | 0.15–0.40        | ≈ Rule         | Slightly higher | LLM reasoning adds minor private signal use        |
-| VAF    | 1.4–3.0          | Slightly lower | Higher than LLM | Smoother order flow dampens volatility             |
-| WDI    | 0.10–0.28        | ≈ Rule         | Similar         | Rule-constrained cascade → similar wealth transfer |
-
----
-
-## §5 References
-
-- `analysis-bases.md §2.1` — CCI definition, formula, interpretation
-- `analysis-bases.md §2.2` — CPD definition, formula, interpretation
-- `analysis-bases.md §2.3` — RHI definition, formula, interpretation
-- `analysis-bases.md §2.4` — ICE definition, formula, interpretation
-- `analysis-bases.md §2.5` — VAF definition, formula, interpretation
-- `analysis-bases.md §2.6` — WDI definition, formula, interpretation
-- `simulation-bases.md §4.1–§4.5` — Investor parameter definitions
-- `analysis-bases.md §5` — Cross-variant comparison table
-- Bikhchandani, Hirshleifer & Welch (1992) `doi:10.1086/261849` — Cascade fragility
-- Scharfstein & Stein (1990) JSTOR:2006678 — Reputation herding
+Required outputs are `summary.json`, `00_investor_bids.png`, `01_herdinginformation_dynamics.png`, `02_herdinginformation_analysis.png`, and `03_summary.png`.

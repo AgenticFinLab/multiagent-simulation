@@ -1,46 +1,36 @@
-# FlashCrash2010 RuleLLM — Analysis
+# 2010 Flash Crash RuleLLM Analysis Plan
 
 ## §1 Objectives
 
-Evaluate whether the RuleLLM hybrid:
-1. Preserves the depth-collapse and spread-widening profile relative to Rule baseline
-2. Shows LLM-induced attenuation of crash severity (delayed withdrawal, partial stop-loss)
-3. Correctly sources `provides_liquidity` from LLM response for depth computation
-4. Provides measurable improvement in recovery speed vs pure Rule
+This analysis checks whether the RuleLLM variant produces a complete, analyzable 2010 Flash Crash trajectory while preserving explicit rule guidance and the class-mapped `agent_type` contract required by the order-book depth model.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric                 | Function                                                  | Source               |
-|------------------------|-----------------------------------------------------------|----------------------|
-| Max drawdown           | `max_drawdown(price_history)`                             | analysis-bases.md §2 |
-| Depth collapse ratio   | `depth_collapse_ratio(depth_history, base_depth)`         | analysis-bases.md §2 |
-| Spread widening factor | `spread_widening_factor(spread_history, normal_spread)`   | analysis-bases.md §2 |
-| HFT withdrawal rounds  | `hft_withdrawal_rounds(hft_orders_by_round)`              | analysis-bases.md §2 |
-| Cascade trigger rounds | `cascade_trigger_rounds(stoploss_orders_by_round)`        | analysis-bases.md §2 |
-| Recovery time          | `recovery_time(price_history, trough_round, fundamental)` | analysis-bases.md §2 |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Maximum Drawdown | `def max_drawdown(price_history: list) -> float` | `analysis-bases.md §2` |
+| Depth Collapse Ratio | `def depth_collapse_ratio(depth_history: list, base_depth: float) -> float` | `analysis-bases.md §2` |
+| Spread Widening Factor | `def spread_widening_factor(spread_history: list, normal_spread: float = 0.0001) -> float` | `analysis-bases.md §2` |
+| HFT Withdrawal Rounds | `def hft_withdrawal_rounds(hft_orders_by_round: list, withdrawal_threshold: int = 0) -> int` | `analysis-bases.md §2` |
+| Cascade Trigger Rounds | `def cascade_trigger_rounds(stoploss_orders_by_round: list) -> list` | `analysis-bases.md §2` |
+| Recovery Time | `def recovery_time(price_history: list, trough_round: int, fundamental: float, threshold: float = 0.02) -> int` | `analysis-bases.md §2` |
 
-## §3 Variant-Specific Notes (RuleLLM)
+## §3 Analysis Dimensions
 
-- LLM override of `provides_liquidity` at HFTMarketMaker is the key differentiator vs Rule
-- `provides_liquidity` must come from `decision["provides_liquidity"]` not rule logic
-- LLM hesitation in withdrawal → `hft_withdrawal_rounds` shorter than Rule
-- StopLossTrader LLM hold → `cascade_trigger_rounds` spread over more rounds but total volume smaller
-- Run ≥3 seeds; compare mean and std to Rule baseline
+Analysis is performed by round, by agent type, by market phase, and by variant. RuleLLM review should additionally inspect prompt-rule compliance, parse failures, conservative liquidity defaults, and whether class-mapped HFT orders are present.
 
-## §4 Expected Ranges (RuleLLM)
+## §4 Phase Analysis
 
-| Metric                   | Expected range | vs Rule                       |
-|--------------------------|----------------|-------------------------------|
-| `max_drawdown`           | 0.04–0.10      | Slightly smaller              |
-| `depth_collapse_ratio`   | 0.08–0.25      | Slightly higher minimum depth |
-| `spread_widening_factor` | 4–40 ×         | Slightly lower peak           |
-| `hft_withdrawal_rounds`  | 3–15 rounds    | Shorter                       |
-| Cascade wave count       | 2–4            | Similar structure             |
-| `recovery_time`          | 8–20 rounds    | Faster                        |
+The phase framework follows `analysis-bases.md §4`: normal depth, trigger, cascade, trough, and recovery. Each phase should be measured with state, order-flow, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-- simulation-bases.md §4 — investor taxonomy and parameter definitions
-- analysis-bases.md §2 — metric function signatures
-- Kirilenko et al. (2017) doi:10.1111/jofi.12498
-- Biais et al. (2015) doi:10.1016/j.jfineco.2015.03.004
+Compare Rule, LLM, RuleLLM, and Rag on drawdown, depth collapse, spread widening, HFT withdrawal timing, stop-loss waves, recovery time, and structural quality.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and mechanism-specific behavior consistent with `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png`, `01_flashcrash2010_dynamics.png`, `02_flashcrash2010_analysis.png`, and `03_summary.png`.

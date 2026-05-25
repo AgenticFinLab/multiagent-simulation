@@ -259,17 +259,19 @@ Each investor subsection must use this format:
 
 ---
 
-## §4 `{Variant}/analysis.md` — 5-Section Standard
+## §4 `{Variant}/analysis.md` — 7-Section Standard
 
 ### §4.1 Required Sections (in order)
 
-| Section | Title                     | Minimum Content                                                                                                |
-|---------|---------------------------|----------------------------------------------------------------------------------------------------------------|
-| §1      | Analysis Objectives       | What this variant analysis aims to measure or compare                                                          |
-| §2      | Metric → Function Mapping | Table of all 7 metrics with function name and `analysis-bases.md §2.X` reference                               |
-| §3      | Variant-Specific Notes    | Bullet list of how this variant's mechanism affects each metric                                                |
-| §4      | Expected Ranges           | Table: Metric                                                                                                  |
-| §5      | References                | `See analysis-bases.md §2 for full metric derivations and simulation-bases.md §4 for agent parameter sources.` |
+| Section | Title                                  | Minimum Content                                                                                 |
+|---------|----------------------------------------|-------------------------------------------------------------------------------------------------|
+| §1      | Overview                               | Analysis script, output location, imported functions, and variant-specific considerations       |
+| §2      | Metric Implementation                  | Table of all metrics with function name and `analysis-bases.md §2.X` reference                  |
+| §3      | Dimension-by-Dimension Analysis        | How each `analysis-bases.md §3` dimension is computed and interpreted for this variant          |
+| §4      | Variant-Specific Observable Phenomena  | Phenomena unique to this variant and how to observe them                                        |
+| §5      | Scaling and Sensitivity Analysis       | Round scaling, agent-count scaling when relevant, and parameter sensitivity for this variant    |
+| §6      | Output Files Reference                 | Expected analysis output files, generating functions, contents, and interpretation guidance     |
+| §7      | Cross-Variant Comparison Notes         | This variant's expected position in the `analysis-bases.md §5` cross-variant comparison         |
 
 ### §4.2 Metric → Function Mapping Table (§2)
 
@@ -281,7 +283,23 @@ Each investor subsection must use this format:
 
 All 7 metrics from `analysis-bases.md §2` must appear. The function signature must match exactly what is in `analysis-bases.md §2.N`.
 
-### §4.3 Expected Ranges Table (§4)
+### §4.3 Dimension and Phenomenon Sections (§3–§4)
+
+`§3` must reference the analysis dimensions from `analysis-bases.md §3` and
+describe the concrete implementation and interpretation for this variant.
+`§4` must describe variant-specific observable phenomena, not repeat generic
+root-document theory.
+
+### §4.4 Scaling, Outputs, and Comparison (§5–§7)
+
+`§5` captures how runtime scale and key parameters affect this variant's
+analysis. `§6` names the expected output files and how to interpret them. `§7`
+states how this variant should be compared against Rule, LLM, RuleLLM, and Rag
+using `analysis-bases.md §5`.
+
+Expected metric ranges can appear in `§2`, `§3`, or `§7` as appropriate, but
+they must be concrete and tied to `analysis-bases.md §6`; never use "Varies by
+scenario."
 
 ```markdown
 | Metric | Expected Range | Interpretation                    |
@@ -291,15 +309,19 @@ All 7 metrics from `analysis-bases.md §2` must appear. The function signature m
 
 Must cover all 7 metrics. Never use "Varies by scenario" — provide specific numeric ranges.
 
-### §4.4 Compliance Checklist
+### §4.5 Compliance Checklist
 
 - [ ] File exists at `{Path}/{Variant}/analysis.md`
-- [ ] §1 states concrete analysis objectives
+- [ ] Exactly 7 sections are present (§1–§7)
+- [ ] §1 identifies the analysis script, output location, imports, and variant considerations
 - [ ] §2 table has all 7 metrics from `analysis-bases.md`
 - [ ] §2 table includes `analysis-bases.md §2.X` references for every metric
-- [ ] §3 has variant-specific notes (not just generic bullet points)
-- [ ] §4 expected ranges are numeric, not "varies by scenario"
-- [ ] §5 references both `analysis-bases.md §2` and `simulation-bases.md §4`
+- [ ] §3 maps analysis dimensions to implementation and interpretation
+- [ ] §4 lists variant-specific observable phenomena
+- [ ] §5 includes scaling or sensitivity expectations
+- [ ] §6 lists expected output files
+- [ ] §7 explains cross-variant comparison and cites `analysis-bases.md §5`
+- [ ] Any expected ranges are numeric and grounded in `analysis-bases.md §6`
 
 ---
 

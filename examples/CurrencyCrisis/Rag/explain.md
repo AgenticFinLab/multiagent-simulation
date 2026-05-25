@@ -12,7 +12,7 @@ The Rag variant augments each LLM agent with a retrieval-augmented knowledge sto
 | Theory Reference   | `simulation-bases.md §4.1–§4.5`              |
 | Market Broadcast   | `price`, `fundamental`, `deviation`, `round` |
 | Prompt Location    | `CurrencyCrisis/Rag/prompts.py`              |
-| Knowledge Store    | `CurrencyCrisis/Rag/knowledge/`              |
+| Knowledge Store    | `masim.knowledge.KnowledgeStore` configured through `players.yml` |
 
 ## §2 Theory → Implementation Mapping
 
@@ -29,7 +29,7 @@ The Rag variant augments each LLM agent with a retrieval-augmented knowledge sto
 | Theory Component                          | Rag Implementation                                        |
 |-------------------------------------------|-----------------------------------------------------------|
 | Expectation coordination (Obstfeld, 1996) | RAG retrieves coordination failure case studies           |
-| Momentum signal                           | Historical momentum data from retrieved crisis narratives |
+| Deviation coordination signal             | Historical crisis narratives inform whether weakness may coordinate sellers |
 | Self-fulfilling dynamics                  | RAG provides multiple-equilibria crisis case summaries    |
 
 ### §2.3 RagCentralBankDefender (simulation-bases.md §4.3)
@@ -37,7 +37,7 @@ The Rag variant augments each LLM agent with a retrieval-augmented knowledge sto
 | Theory Component     | Rag Implementation                                                         |
 |----------------------|----------------------------------------------------------------------------|
 | Reserve intervention | RAG retrieves successful and failed peg defense cases (HKD 1998, GBP 1992) |
-| Two-tier defense     | Historical defense escalation patterns inform threshold reasoning          |
+| Peg defense          | Historical defense escalation patterns inform threshold reasoning          |
 | Reserve constraint   | RAG may surface cases where reserve exhaustion led to collapse             |
 
 ### §2.4 RagFundamentalHedger (simulation-bases.md §4.4)
@@ -45,7 +45,7 @@ The Rag variant augments each LLM agent with a retrieval-augmented knowledge sto
 | Theory Component                             | Rag Implementation                                                     |
 |----------------------------------------------|------------------------------------------------------------------------|
 | Global games anchoring (Morris & Shin, 1998) | RAG retrieves PPP and equilibrium exchange rate studies                |
-| 8% threshold reasoning                       | Historical cases of fundamental-anchored FX recovery inform buy timing |
+| 5% threshold reasoning                       | Historical cases of fundamental-anchored FX recovery inform buy timing |
 | Counter-speculation                          | RAG case studies on fundamental-driven currency stabilization          |
 
 ### §2.5 RagNoiseTrader (simulation-bases.md §4.5)
@@ -64,8 +64,7 @@ The Rag variant augments each LLM agent with a retrieval-augmented knowledge sto
 | `{round}`             | Market broadcast         | `22`                           |
 | `{cash}`              | Agent state              | `60000.0`                      |
 | `{position}`          | Agent state              | `2000`                         |
-| `{retrieved_context}` | `KnowledgeStore.query()` | Historical crisis case summary |
-| `{history}`           | `HistoryBuffer`          | Last 5 rounds summary          |
+| `{rag_context}`       | `KnowledgeStore.query()` | Historical crisis case summary or explicit no-context marker |
 
 ## §4 Variant-Specific Features
 
@@ -73,27 +72,31 @@ The Rag variant augments each LLM agent with a retrieval-augmented knowledge sto
 - **Defense informed by precedent**: RagCentralBankDefender may reference successful HKD or failed UK defense to calibrate response.
 - **SFAF moderation**: RAG awareness of coordination failure cases may reduce SFAF relative to pure LLM.
 - **FAS improvement**: RAG fundamental knowledge (PPP studies) expected to improve FundamentalHedger precision.
-- **Knowledge store**: `KnowledgeStore` (`masim.player.knowledge`) retrieves top-K chunks from pre-embedded currency crisis knowledge base.
+- **Knowledge store**: `KnowledgeStore` (`masim.knowledge`) retrieves top-K chunks from pre-embedded currency crisis knowledge base.
 
 ## §5 Architecture
 
 ```
 Market.decide() → broadcast market_data
 RagInvestor.perceive() → store market_data
-RagInvestor.decide() → KnowledgeStore.query(market_context) → retrieved_chunks
-                     → LangChainAPIInference.infer(persona + retrieved_context, user_prompt)
-                     → parse_llm_response_with_thinking() → {action, quantity}
-RagInvestor.act() → update cash/position, submit order
+RagInvestor.decide() → KnowledgeStore.query(market_context) → rag_context
+                     → LangChainAPIInference.infer(system_prompt, user_prompt + rag_context)
+                     → parse_llm_response_with_thinking()
+                     → validate {action, bid_price, quantity, reasoning}
+RagInvestor.act() → submit canonical order containing rag_context
 ```
 
 ## §6 Config Reference
 
-Same `config.yaml` as Rule variant; additional Rag extras: `model_name`, `temperature`, `max_tokens`, `knowledge_store_path`, `top_k`.
+The variant uses `configs/CurrencyCrisis/Rag/players.yml`; additional RAG extras
+include `private_knowledge`, embedding model settings, local/shared index paths,
+and `top_k`.
 
 ## §7 Running Instructions
 
 ```bash
-python -m examples.CurrencyCrisis.Rag.run
+python examples/CurrencyCrisis/Rag/run_currencycrisis_rag.py \
+  -c configs/CurrencyCrisis/Rag/simulation.yml
 ```
 
 ## §8 Expected Behavior

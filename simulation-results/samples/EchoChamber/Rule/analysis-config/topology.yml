@@ -1,0 +1,45 @@
+# =============================================================================
+# EchoChamber Topology - Star Pattern
+# =============================================================================
+# OpinionEnvironment as hub, all agents communicate through environment.
+#
+#         ideologue ────────────────┐
+#         conformist ──────────────┤
+#         critical_thinker ────────┼──▶ environment ──▶ all agents
+#         bridge_builder ──────────┤             (polarization, opinion, cluster data)
+#         passive_follower ────────┘
+#
+# Execution flow per round:
+#   Level 0: environment executes (broadcasts polarization + opinion metrics)
+#   Level 1: all agents execute in parallel (submit polarize/depolarize/neutral actions)
+# =============================================================================
+
+type: "star"
+
+sources:
+  - environment
+
+connections:
+  # Environment → All agents (polarization + opinion data broadcast)
+  environment:
+    - ideologue
+    - conformist
+    - critical_thinker
+    - bridge_builder
+    - passive_follower
+
+  # Each agent → Environment only (action submission)
+  ideologue:
+    - environment
+
+  conformist:
+    - environment
+
+  critical_thinker:
+    - environment
+
+  bridge_builder:
+    - environment
+
+  passive_follower:
+    - environment

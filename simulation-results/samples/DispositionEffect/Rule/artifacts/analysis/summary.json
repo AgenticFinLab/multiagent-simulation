@@ -1,0 +1,409 @@
+{
+  "scenario": "DispositionEffect",
+  "total_rounds": 200,
+  "price_statistics": {
+    "initial_price": 100.79237985769207,
+    "final_price": 96.53606807784695,
+    "max_price": 119.0230129451503,
+    "min_price": 26.931856709616156,
+    "volatility": 8.656344970144023
+  },
+  "metrics": {
+    "max_drawdown": -74.1228,
+    "peak_round": 1,
+    "trough_round": 7
+  },
+  "disposition_metrics": {
+    "pgr": 0.4881,
+    "plr": 0.1447,
+    "disposition_coefficient": 0.3434,
+    "disposition_ratio": 3.3729
+  },
+  "disposition_investor": {
+    "strategy": "DispositionInvestor",
+    "pgr": 0.48807298160153917,
+    "plr": 0.14470297569920623,
+    "disposition_ratio": 3.3729298187764667,
+    "disposition_effect": true,
+    "realized_gains": 1402.0183562617985,
+    "realized_losses": 956.6922731728912,
+    "paper_gains": 1470.5404804541429,
+    "paper_losses": 5654.728594643714,
+    "buy_count": 24,
+    "sell_count": 93,
+    "total_volume": 226.40187658038576
+  },
+  "rational_investor": {
+    "strategy": "RationalInvestor",
+    "pgr": 0.0034485995390871613,
+    "plr": 0.004770370205039539,
+    "disposition_ratio": 0.7229207358883749,
+    "disposition_effect": false,
+    "realized_gains": 146.7465112755358,
+    "realized_losses": 1198.558850436739,
+    "paper_gains": 42405.747511958994,
+    "paper_losses": 250052.1405545175,
+    "buy_count": 6,
+    "sell_count": 5,
+    "total_volume": 151.32132780743052
+  },
+  "disposition_effect_detected": true,
+  "strategy_comparison": {
+    "disposition_investor_1": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_2": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_3": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_4": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_5": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_6": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_7": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_8": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_9": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_10": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_11": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_12": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_13": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_14": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_15": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_16": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_17": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_18": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_19": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_20": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_21": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_22": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_23": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_24": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_25": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_26": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_27": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_28": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_29": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_30": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_31": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_32": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_33": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_34": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_35": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_36": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_37": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_38": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_39": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_40": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_41": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_42": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_43": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_44": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_45": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_46": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_47": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_48": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_49": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "disposition_investor_50": {
+      "strategy": "DispositionInvestor",
+      "pgr": 0.4881,
+      "plr": 0.1447,
+      "disposition_ratio": 3.37
+    },
+    "rational_investor_1": {
+      "strategy": "RationalInvestor",
+      "pgr": 0.0034,
+      "plr": 0.0048,
+      "disposition_ratio": 0.72
+    },
+    "rational_investor_2": {
+      "strategy": "RationalInvestor",
+      "pgr": 0.0034,
+      "plr": 0.0048,
+      "disposition_ratio": 0.72
+    },
+    "tax_aware_investor_1": {
+      "strategy": "TaxAwareInvestor",
+      "pgr": 0.0,
+      "plr": 0.5,
+      "disposition_ratio": 0.0
+    },
+    "tax_aware_investor_2": {
+      "strategy": "TaxAwareInvestor",
+      "pgr": 0.0,
+      "plr": 0.5,
+      "disposition_ratio": 0.0
+    },
+    "index_holder": {
+      "strategy": "IndexHolder",
+      "pgr": 0.0,
+      "plr": 0.0,
+      "disposition_ratio": 99
+    },
+    "institutional_investor": {
+      "strategy": "InstitutionalInvestor",
+      "pgr": 0.0,
+      "plr": 0.4,
+      "disposition_ratio": 0.0
+    }
+  },
+  "validation": {
+    "scenario": "DispositionEffect",
+    "is_valid": true,
+    "score": 1.0,
+    "criteria": {
+      "pgr_vs_plr": {
+        "value": "PGR=0.488, PLR=0.145",
+        "target": "PGR > PLR",
+        "score": 1.0,
+        "passed": true
+      },
+      "disposition_coefficient": {
+        "value": 0.3433700059023329,
+        "target": "> 0.1",
+        "score": 1.0,
+        "passed": true
+      }
+    },
+    "interpretation": "=== DISPOSITION EFFECT SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 100.0% (threshold: 50%)\n\n[1] PROPORTION OF GAINS REALIZED (PGR) ANALYSIS\n    Observed: PGR = 0.4881\n    Expected: PGR > 0.20 (investors sell winners)\n    Score: 100.0%\n\n    Interpretation:\n    PGR measures: (Realized Gains) / (Realized Gains + Paper Gains)\n    HIGH PGR - Investors frequently realize gains.\n    Strong evidence of 'selling winners too early' behavior.\n    Prospect theory explains this: risk-averse in gains,\n    investors lock in profits to avoid potential loss.\n\n[2] PGR vs PLR ASYMMETRY (Core Disposition Test)\n    Observed: PGR = 0.4881, PLR = 0.1447\n    Expected: PGR > PLR (sell winners, hold losers)\n    Score: 100.0%\n\n    Interpretation:\n    The disposition effect = systematic tendency to:\n    - Sell winners too early (high PGR)\n    - Hold losers too long (low PLR)\n    DISPOSITION CONFIRMED - PGR/PLR ratio = 3.37\n    Investors are more likely to realize gains than losses.\n    This matches Kahneman-Tversky prospect theory:\n    - Risk-averse in gains (sell to lock in profit)\n    - Risk-seeking in losses (hold hoping for recovery)\n\n[3] DISPOSITION COEFFICIENT (PGR - PLR)\n    Observed: Coefficient = 0.3434\n    Expected: > 0.05 (meaningful disposition effect)\n    Score: 100.0%\n\n    Interpretation:\n    STRONG EFFECT - Large disposition coefficient.\n    The asymmetry between gain/loss realization is pronounced.\n    This exceeds typical empirical findings and suggests\n    agents exhibit strong loss aversion (\u03bb >> 2).\n\n[SUMMARY]\nThe simulation successfully reproduces disposition effect:\n- PGR > PLR (sell winners, hold losers)\n- Positive disposition coefficient\n- Results align with Shefrin-Statman (1985) and Odean (1998)."
+  }
+}

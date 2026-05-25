@@ -1,0 +1,57 @@
+# =============================================================================
+# ShortSqueezeLLM Simulation Configuration
+# =============================================================================
+# LLM-based Short Squeeze simulation - GameStop Style
+# Tests: Supply-demand imbalance, forced covering, retail coordination
+#
+# Usage:
+#   python examples/ShortSqueeze/LLM/run_squeeze_llm.py -c configs/ShortSqueeze/LLM/simulation.yml
+# =============================================================================
+
+setting:
+  name: "short_squeeze_llm_simulation"
+  description: "LLM-based short squeeze with supply-demand dynamics"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "artifacts/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "short_squeeze_llm"
+  actor_prefix: null
+  # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
+  num_cpus: null
+  num_gpus: null
+  # Derived: 13 players, star topology -> 24 msgs/round
+  #   13 TurnResult + 13 pending_info + 24 Message = 50 Ray objects
+  #   50 obj x 64 KB min-alloc = 3200 KB (3.13 MB) base peak
+  #   LLM TurnResult also carries prompt+response strings (~4-8 KB each) -> extra overhead
+  #   Minimum 512 MB floor for LLM simulations -> 536870912 bytes
+  object_store_memory: 536870912
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "artifacts/communication"
+  record_messages: true
+  message_block_size: 500

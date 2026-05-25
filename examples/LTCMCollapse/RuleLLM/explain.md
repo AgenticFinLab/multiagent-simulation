@@ -1,81 +1,72 @@
-# LTCMCollapse Simulation
+# LTCMCollapse RuleLLM — Implementation Explanation
 
-## Overview
+## §1 Variant Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | August-September 1998 LTCM crisis - Russian default triggered liquidity crisis |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Long-Term Capital Management collapse simulation with convergence arbitrage, leverage cycles, and liquidity crisis |
-| **Academic Value** | Understanding august-september 1998 ltcm crisis - russian default triggered liquidity crisis through multi-agent simulation |
+|---|---|
+| Variant | RuleLLM |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | LLM decisions guided by explicit persona and decision-rule prompts |
+| Key Difference | preserves the Rule mechanism as text while allowing language-model judgement |
+| Files | `players.py`, `prompts.py`, `run_ltcmcollapse_rulellm.py`, `analysis.py`, `explain.md`, `analysis.md` |
 
-## Theoretical Foundation
+## §2 Theory To Implementation Mapping
 
-- Shleifer & Vishny (1997): Limits to arbitrage
-- Long-Term Capital Management (1998): Convergence trades gone wrong
-- Morris & Shin (2004): Liquidity black holes
+| Theory Component | Implementation |
+|---|---|
+| ConvergenceArbitrageur (`simulation-bases.md §4.1`) | `RuleLLMConvergenceArbitrageur` uses `RULELLM_CONVERGENCEARBITRAGEUR_PROMPT`; `== DECISION RULES ==` states ±3% spread trigger and capped leveraged sizing |
+| LeverageTrader (`simulation-bases.md §4.2`) | `RuleLLMLeverageTrader` uses `RULELLM_LEVERAGETRADER_PROMPT`; prompt encodes margin-call deleveraging and undervaluation buying rules |
+| RiskManager (`simulation-bases.md §4.3`) | `RuleLLMRiskManager` uses `RULELLM_RISKMANAGER_PROMPT`; prompt encodes three-times-VaR breach and 50% risk-cut rule |
+| LiquidityProvider (`simulation-bases.md §4.4`) | `RuleLLMLiquidityProvider` uses `RULELLM_LIQUIDITYPROVIDER_PROMPT`; prompt encodes 5% stress withdrawal and normal liquidity provision |
+| CentralBank (`simulation-bases.md §4.5`) | `RuleLLMCentralBank` uses `RULELLM_CENTRALBANK_PROMPT`; prompt encodes -10% systemic stress threshold and buy-only intervention |
 
-## Agent Descriptions
+## §3 Market Mechanism Implementation
 
-### ConvergenceArbitrageur
-**Theoretical Basis**: Convergence arbitrage (LTCM strategy)
-**Market Role**: destabilizing
-**Description**: Bets on spread convergence between related securities
-**Parameters**: entry_spread=0.02, leverage=25, max_position=50000
+The market is imported from the Rule variant, so `Market.perceive()` and price formation are identical to `simulation-bases.md §3.1`.
 
-### LeverageTrader
-**Theoretical Basis**: Leverage cycle (Geanakoplos, 2010)
-**Market Role**: destabilizing
-**Description**: Highly leveraged trader forced to deleverage in crisis
-**Parameters**: leverage_ratio=20, margin_call_threshold=0.1, delever_speed=fast
+## §4 Variant-Specific Features
 
-### RiskManager
-**Theoretical Basis**: VaR-based risk management
-**Market Role**: neutral
-**Description**: Monitors portfolio risk and cuts positions when VaR breached
-**Parameters**: var_limit=0.02, confidence=0.99, lookback=60
+Every system prompt has two required sections:
 
-### LiquidityProvider
-**Theoretical Basis**: Market making under stress
-**Market Role**: stabilizing
-**Description**: Provides liquidity but withdraws when spreads widen
-**Parameters**: normal_spread=0.001, stress_spread=0.01, inventory_limit=5000
+- `== PERSONA ==`: investor role, belief, and risk style from `simulation-bases.md §4.N`.
+- `== DECISION RULES ==`: plain-language version of the Rule decision mechanism.
 
-### CentralBank
-**Theoretical Basis**: Lender of last resort (Bagehot, 1873)
-**Market Role**: stabilizing
-**Description**: Provides emergency liquidity to prevent systemic collapse
-**Parameters**: intervention_threshold=0.10, rescue_probability=0.8
+The rules are guidance for LLM reasoning, not executable code. The parser still requires `<analysis>` and `<decision>` JSON with `action`, `bid_price`, `quantity`, and `reasoning`.
 
+## §5 Architecture Diagram
 
-## Usage
-
-### Rule Variant
-```bash
-python examples/LTCMCollapse/Rule/run_ltcmcollapse.py \
-    -c configs/LTCMCollapse/Rule/simulation.yml
+```text
+Rule market broadcast
+  -> RuleLLMInvestor.perceive()
+  -> RuleLLMInvestor.decide()
+       -> system prompt = PERSONA + DECISION RULES
+       -> user message = current market state
+       -> parse decision JSON
+  -> emit standard order
 ```
 
-### LLM Variant
-```bash
-python examples/LTCMCollapse/LLM/run_ltcmcollapse_llm.py \
-    -c configs/LTCMCollapse/LLM/simulation.yml
-```
+## §6 Configuration Reference
 
-### RuleLLM Variant
-```bash
-python examples/LTCMCollapse/RuleLLM/run_ltcmcollapse_rulellm.py \
-    -c configs/LTCMCollapse/RuleLLM/simulation.yml
-```
+| Config Area | File | Notes |
+|---|---|---|
+| prompts | `examples/LTCMCollapse/RuleLLM/prompts.py` | standardized dual-section prompts |
+| model | `configs/LTCMCollapse/RuleLLM/players.yml` | `ark/doubao-seed-2-0-mini-260428` |
+| rounds | `configs/LTCMCollapse/RuleLLM/simulation.yml` | 200 configured rounds |
 
-### RAG Variant
-```bash
-python examples/LTCMCollapse/Rag/run_ltcmcollapse_rag.py \
-    -c configs/LTCMCollapse/Rag/simulation.yml
-```
+## §7 Expected Behavior Patterns
 
-## References
+RuleLLM should be closer to Rule than the persona-only LLM variant. Deviations are expected from natural-language interpretation and stochastic model output, but the sign and rough scale of decisions should align with the embedded rule descriptions.
 
-- Shleifer & Vishny (1997): Limits to arbitrage
-- Long-Term Capital Management (1998): Convergence trades gone wrong
-- Morris & Shin (2004): Liquidity black holes
+## §8 Validation Checklist
+
+- System prompts contain `== PERSONA ==` and `== DECISION RULES ==`.
+- Prompt/parser contract checks should report zero issues.
+- Full runs should complete 200 rounds with valid decision JSON.
+- Post-run output quality review should pass before outputs are accepted.
+
+## §9 References
+
+- `../simulation-bases.md`
+- `../analysis-bases.md`
+- `prompts.py`
+- `players.py`

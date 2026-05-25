@@ -24,10 +24,10 @@ market:
       record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
       # Market dynamics parameters (identical to Rule variant)
       fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.04        # Low: anchoring effect slows price discovery
-      mean_reversion: 0.02      # Moderate: reasonable reversion
-      noise_std: 0.02           # Low noise: anchoring effect is clearer
+      initial_price: 105.0
+      price_impact: 0.01        # Low: anchoring effect slows price discovery
+      mean_reversion: 0.01      # Low: sustains anchoring persistence
+      noise_std: 0.5            # Moderate price noise
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
@@ -50,7 +50,7 @@ rulellm_anchored:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # Rule parameters (from AnchoringEffect AnchoredTrader)
       anchor_weight: 0.7
@@ -60,7 +60,7 @@ rulellm_anchored:
         sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_ANCHORED_TRADER_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -85,7 +85,7 @@ rulellm_historical:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # Rule parameters (from AnchoringEffect HistoricalAnchor)
       anchor_weight: 0.5
@@ -95,7 +95,7 @@ rulellm_historical:
         sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_HISTORICAL_ANCHOR_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -118,7 +118,7 @@ rulellm_rational:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # Rule parameters (from AnchoringEffect RationalUpdater)
       base_position_size: 25.0
@@ -126,7 +126,7 @@ rulellm_rational:
         sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_RATIONAL_UPDATER_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_tokens: 512
@@ -150,7 +150,7 @@ rulellm_momentum:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # Rule parameters (from AnchoringEffect MomentumTrader)
       entry_threshold: 0.02
@@ -159,7 +159,7 @@ rulellm_momentum:
         sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_MOMENTUM_TRADER_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -183,7 +183,7 @@ rulellm_noise:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # Rule parameters (from AnchoringEffect NoiseTrader)
       trade_probability: 0.05
@@ -193,7 +193,7 @@ rulellm_noise:
         sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
           max_tokens: 512

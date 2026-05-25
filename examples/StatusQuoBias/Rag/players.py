@@ -30,7 +30,7 @@ from masim.knowledge import (
 from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from .prompts import (
     RAGLLM_INERTIAL_HOLDER_SYS,
     RAGLLM_DEFAULT_FOLLOWER_SYS,
@@ -41,6 +41,29 @@ from .prompts import (
 from ..Rule.players import Market  # noqa: F401 — re-exported
 
 logger = logging.getLogger("StatusQuoBias.Rag")
+
+
+def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
+    """Validate canonical RAG trading decision fields before portfolio mutation."""
+    action = decision["action"]
+    if action not in {"buy", "sell", "hold"}:
+        raise ValueError(f"[{identity}] invalid action: {action}")
+    bid_price = float(decision["bid_price"])
+    if bid_price <= 0:
+        raise ValueError(f"[{identity}] invalid bid_price: {bid_price}")
+    quantity = int(decision["quantity"])
+    if quantity < 0:
+        raise ValueError(f"[{identity}] invalid quantity: {quantity}")
+    reasoning = str(decision["reasoning"]).strip()
+    if not reasoning:
+        raise ValueError(f"[{identity}] empty reasoning")
+    return {
+        **decision,
+        "action": action,
+        "bid_price": bid_price,
+        "quantity": quantity,
+        "reasoning": reasoning,
+    }
 
 
 class RagLLMInvestor(GeneralPlayer):
@@ -309,6 +332,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         return (
             f"Round {round_num} — Market Update\n"
@@ -319,7 +343,8 @@ class RagLLMInvestor(GeneralPlayer):
             f"Value: ${portfolio_value:.2f}\n\n"
             "Apply your decision rules, informed by retrieved knowledge, to determine action.\n"
             "Respond with <analysis>...</analysis> then <decision>...</decision> containing "
-            'JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}'
+            'JSON: {"action": "buy" or "sell" or "hold", "bid_price": current price, '
+            '"quantity": integer, "reasoning": "brief rationale"}'
         )
 
     async def decide(self) -> Dict[str, Any]:
@@ -331,31 +356,40 @@ class RagLLMInvestor(GeneralPlayer):
         user_prompt = self._build_prompt()
         system_prompt = self._system_prompt
 
-        decision: Dict[str, Any] = {"action": "hold", "quantity": 0}
+        decision = None
         max_retries = 3
+        last_error: Optional[Exception] = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_output = llm_client.run([infer_input])
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
+                decision = _validate_decision(decision, self.identity)
                 break
-            except (ValueError, KeyError):
-                if attempt == max_retries - 1:
-                    logger.warning(
-                        "[%s] LLM parse failed after %d attempts; holding.",
-                        self.identity,
-                        max_retries,
-                    )
-                    decision = {"action": "hold", "quantity": 0}
+            except Exception as exc:
+                last_error = exc
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if attempt < max_retries - 1 and (parse_error or retryable_api_error):
+                    logger.debug("[%s] LLM call/parse failed, retrying: %s", self.identity, exc)
+                    continue
+                if not parse_error and not retryable_api_error:
+                    raise
+                raise RuntimeError(
+                    f"[{self.identity}] RAG LLM failed after {max_retries} attempts: {last_error}"
+                )
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] RAG LLM produced no decision after {max_retries} attempts"
+            )
 
         action = decision["action"]
+        bid_price = float(decision["bid_price"])
         quantity = int(decision["quantity"])
-
-        valid_actions = ["buy", "sell", "hold"]
-        if action not in valid_actions:
-            action = "hold"
+        if action == "hold":
             quantity = 0
         quantity = max(0, min(quantity, 5000))
 
@@ -387,9 +421,11 @@ class RagLLMInvestor(GeneralPlayer):
 
         order = {
             "action": action,
+            "bid_price": bid_price,
             "quantity": quantity,
             "agent_type": strategy_name,
-            "reasoning": decision["reasoning"][:120],
+            "reasoning": str(decision["reasoning"])[:120],
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
         return {
             **order,
@@ -405,37 +441,38 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMInertialHolder(RagLLMInvestor):
-    """RAG-augmented inertial holder with strong status quo bias."""
+    """RagLLM inertial holder with strong status quo bias. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RAGLLM_INERTIAL_HOLDER_SYS
 
 
 class RagLLMDefaultFollower(RagLLMInvestor):
-    """RAG-augmented default follower avoiding active portfolio decisions."""
+    """RagLLM default follower avoiding active decisions. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RAGLLM_DEFAULT_FOLLOWER_SYS
 
 
 class RagLLMActiveRebalancer(RagLLMInvestor):
-    """RAG-augmented active rebalancer adjusting on new information."""
+    """RagLLM active rebalancer adjusting on new information. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RAGLLM_ACTIVE_REBALANCER_SYS
 
 
 class RagLLMMomentumTrader(RagLLMInvestor):
-    """RAG-augmented momentum trader naturally overcoming status quo."""
+    """RagLLM momentum trader naturally overcoming status quo. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RAGLLM_MOMENTUM_TRADER_SYS
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented noise trader providing random baseline liquidity."""
+    """RagLLM noise trader providing random baseline liquidity. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RAGLLM_NOISE_TRADER_SYS
 
 
 __all__ = [
     "Market",
+    "_validate_decision",
     "RagLLMInvestor",
     "RagLLMInertialHolder",
     "RagLLMDefaultFollower",

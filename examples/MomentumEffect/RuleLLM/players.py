@@ -21,11 +21,11 @@ from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
 from .prompts import (
-    RULELLM_MOMENTUM_TRADER_SYS,
     RULELLM_CONTRARIAN_TRADER_SYS,
-    RULELLM_INDEX_FUND_SYS,
-    RULELLM_MARKET_MAKER_SYS,
+    RULELLM_FUNDAMENTAL_ANCHOR_SYS,
+    RULELLM_MOMENTUM_TRADER_SYS,
     RULELLM_TECHNICAL_TRADER_SYS,
+    RULELLM_TREND_FOLLOWER_SYS,
     RULELLM_USER_TEMPLATE,
 )
 from examples.llm_utils import parse_llm_response_with_thinking
@@ -356,33 +356,33 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMMomentumTrader(RuleLLMInvestor):
-    """Hybrid: MomentumTrader rules + LLM reasoning."""
+    """Hybrid MomentumTrader. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RULELLM_MOMENTUM_TRADER_SYS
 
 
 class RuleLLMContrarianTrader(RuleLLMInvestor):
-    """Hybrid: ContrarianTrader rules + LLM reasoning."""
+    """Hybrid ContrarianTrader. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RULELLM_CONTRARIAN_TRADER_SYS
 
 
 class RuleLLMTechnicalTrader(RuleLLMInvestor):
-    """Hybrid: IndexFund rules + LLM reasoning."""
+    """Hybrid TechnicalTrader. Theory: simulation-bases.md §4.5."""
 
-    _system_prompt = RULELLM_INDEX_FUND_SYS
+    _system_prompt = RULELLM_TECHNICAL_TRADER_SYS
 
 
 class RuleLLMTrendFollower(RuleLLMInvestor):
-    """Hybrid: MarketMaker rules + LLM reasoning."""
+    """Hybrid TrendFollower. Theory: simulation-bases.md §4.7."""
 
-    _system_prompt = RULELLM_MARKET_MAKER_SYS
+    _system_prompt = RULELLM_TREND_FOLLOWER_SYS
 
 
 class RuleLLMFundamentalAnchor(RuleLLMInvestor):
-    """Hybrid: TechnicalTrader rules + LLM reasoning."""
+    """Hybrid FundamentalAnchor. Theory: simulation-bases.md §4.6."""
 
-    _system_prompt = RULELLM_TECHNICAL_TRADER_SYS
+    _system_prompt = RULELLM_FUNDAMENTAL_ANCHOR_SYS
 
 
 __all__ = [

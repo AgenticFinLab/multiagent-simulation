@@ -1,69 +1,97 @@
-# ShortSqueeze LLM - LLM-Powered Short Squeeze Simulation
+# Short Squeeze LLM Variant Explanation
 
-## What is This?
+## §1 Overview
 
-| Item               | Description                                                                               |
-|--------------------|-------------------------------------------------------------------------------------------|
-| **Phenomenon**     | **Short Squeeze (空头挤压)** - LLM-driven supply-demand imbalance forcing shorts to cover |
-| **Model**          | LLM-based traders with short/retail/institutional personalities + Rule-based market       |
-| **Key Feature**    | Investors use LLM reasoning to exhibit coordinated buying and forced short covering       |
-| **Academic Value** | Tests whether LLMs can simulate GameStop-style squeeze dynamics                           |
+| Field | Value |
+|---|---|
+| Variant | LLM |
+| Simulation | ShortSqueeze |
+| Decision Mechanism | Persona-driven API trading orders |
+| Theory Reference | `examples/ShortSqueeze/simulation-bases.md` |
+| Market Broadcast | `configs/ShortSqueeze/LLM/topology.yml` |
 
-## 5 LLM Investor Types
+The LLM variant keeps the Rule market structure and five role families but
+replaces deterministic formulas with persona prompts and structured JSON
+decisions.
 
-### Investor Type Summary
+## §2 Theory -> Implementation Mapping
 
-| Type                 | Strategy              | Market Effect    | System Prompt Focus               |
-|----------------------|-----------------------|------------------|-----------------------------------|
-| **LLMShortSeller**   | Short position holder | ⭐ SQUEEZE TARGET | "If price > $50, MUST cover"      |
-| **LLMRetailCoord**   | Coordinated buying    | ⭐ SQUEEZE DRIVER | "BUY aggressively, diamond hands" |
-| **LLMMomentum**      | Ride the squeeze      | AMPLIFYING       | "Positive returns: BUY"           |
-| **LLMValue**         | Skeptical value       | STABILIZING      | "Squeeze is temporary"            |
-| **LLMInstitutional** | Large holder          | PROFIT-TAKING    | "Price up: Take profits"          |
+### §2.1 ShortSeller (simulation-bases.md §4.1)
 
-### Key Mechanism
+| Theory Component | Implementation |
+|---|---|
+| Forced covering | `LLMShortSeller` interprets short-position risk and may mark buy orders as `is_short_cover=true`. |
+| API contract | Emits `action`, `bid_price`, `quantity`, optional `is_short_cover`, and `reasoning`. |
 
-```
-Short Squeeze Cascade:
-  1. LLMRetailCoord buys aggressively ("diamond hands")
-  2. Price rises → Short interest pressure increases
-  3. LLMShortSeller hits covering threshold
-  4. Forced buying → More price rise → More covering
-  5. LLMInstitutional profit-taking eventually slows squeeze
-```
+### §2.2 MomentumBuyer (simulation-bases.md §4.2)
 
-## Files
+| Theory Component | Implementation |
+|---|---|
+| Positive-feedback demand | `LLMMomentumBuyer` follows price trends through prompt reasoning. |
+| API contract | Parser validates canonical trading fields and records analysis text. |
 
-| File                                                | Purpose                          |
-|-----------------------------------------------------|----------------------------------|
-| `examples/ShortSqueeze/LLM/players.py`               | Market + 5 LLM investor classes  |
-| `examples/ShortSqueeze/LLM/prompts.py`               | System and user prompt templates |
-| `examples/ShortSqueeze/LLM/run_short_squeeze_llm.py` | Entry point                      |
-| `configs/ShortSqueeze/LLM/simulation.yml`            | Main config                      |
-| `configs/ShortSqueeze/LLM/players.yml`               | Player definitions + LLM config  |
-| `configs/ShortSqueeze/LLM/topology.yml`              | Star topology                    |
+### §2.3 RetailTrader (simulation-bases.md §4.3)
 
-## Running
+| Theory Component | Implementation |
+|---|---|
+| Attention-driven bullish flow | `LLMRetailCoordinator` represents bullish retail coordination. |
+| API contract | Stochastic parse fallback is explicit, conservative, logged, and quality-auditable. |
+
+### §2.4 ValueInvestor (simulation-bases.md §4.4)
+
+| Theory Component | Implementation |
+|---|---|
+| Fundamental resistance | `LLMValueInvestor` compares price against fundamental value. |
+| API contract | Reasoning is retained for Level-2 review. |
+
+### §2.5 InstitutionalHolder (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Float scarcity | `LLMInstitutionalHolder` models sticky long supply and possible profit-taking. |
+| API contract | Structured JSON is parsed into signed market orders. |
+
+## §3 Market Mechanism
+
+`Market` in `examples/ShortSqueeze/LLM/players.py` consumes the same signed
+order schema as Rule and treats `is_short_cover` as the forced-covering marker.
+
+## §4 Variant Architecture
+
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/ShortSqueeze/LLM/players.py` |
+| Prompt module | `examples/ShortSqueeze/LLM/prompts.py` |
+| Inference | ARK API model configured in `players.yml` |
+| Output parsing | `_parse_response` validates required fields |
+| Error handling | Bounded retry; conservative logged hold only after stochastic parse failure |
+
+## §5 Config Reference
+
+| Config | Purpose |
+|---|---|
+| `configs/ShortSqueeze/LLM/simulation.yml` | Full simulation entry point |
+| `configs/ShortSqueeze/LLM/players.yml` | LLM investor set and model config |
+| `configs/ShortSqueeze/LLM/topology.yml` | Message routing |
+| `configs/ShortSqueeze/LLM/persona.yml` | Recording/persona metadata |
+
+## §6 Running Instructions
 
 ```bash
-export ARK_API_KEY='your-bytedance-doubao-api-key'
 python examples/ShortSqueeze/LLM/run_short_squeeze_llm.py -c configs/ShortSqueeze/LLM/simulation.yml
 ```
 
-## Expected Behavior Patterns
+## §7 Expected Behavior
 
-| Phase    | Rounds | LLM Behavior                                           |
-|----------|--------|--------------------------------------------------------|
-| Setup    | 1-3    | LLMShortSeller establishes short, retail starts buying |
-| Build-up | 4-7    | LLMRetailCoord coordinates buying, price rises         |
-| Pressure | 8-10   | Short interest > 50%, squeeze pressure builds          |
-| Squeeze  | 11-14  | LLMShortSeller forced to cover, price spikes           |
-| Unwind   | 15-20  | LLMInstitutional takes profits, price stabilizes       |
+LLM should preserve the short-squeeze mechanism while allowing variable
+narrative-driven timing in covering, retail demand, and profit-taking.
 
-## References
+## §8 References
 
-| Theory                  | Application in ShortSqueeze LLM           | Reference        |
-|-------------------------|------------------------------------------|------------------|
-| **Short Squeeze**       | GameStop 2021 dynamics simulation        | (Market Event)   |
-| **Coordinated Trading** | LLMRetailCoord Reddit-style coordination | SEC (2021)       |
-| **Short Interest**      | LLMShortSeller covering triggers         | Market Mechanics |
+See `examples/ShortSqueeze/simulation-bases.md §2` and
+`examples/ShortSqueeze/analysis-bases.md §2`.
+
+## §9 Variant Comparison
+
+Compare LLM against Rule to isolate persona-driven variation and against
+RuleLLM to measure the value of explicit rules.

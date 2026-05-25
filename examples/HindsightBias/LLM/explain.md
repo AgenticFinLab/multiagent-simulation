@@ -11,7 +11,7 @@
 | Market Broadcast   | `price`, `fundamental`, `deviation`, `round`           |
 | Price Model        | `P(t+1) = P(t) + λ × NetDemand + γ × (F − P(t)) + ε`   |
 
-The LLM variant replaces deterministic threshold formulas with language model reasoning. Each investor is prompted with hindsight bias theory context and market state. The LLM generates a buy/sell/hold decision and quantity. This introduces reasoning variability: bias agents may occasionally recognize and resist the "obvious" narrative, reducing HBI; rational agents may act with greater contextual conviction.
+The LLM variant replaces deterministic threshold formulas with persona-only language model reasoning. Each investor receives market state and portfolio state, then returns a canonical buy/sell/hold decision with bid price, quantity, and reasoning. This introduces reasoning variability: bias agents may occasionally recognize and resist the "obvious" narrative, reducing HBI; rational agents may act with greater contextual conviction.
 
 ## §2 Theory → Implementation Mapping
 
@@ -37,7 +37,7 @@ The LLM variant replaces deterministic threshold formulas with language model re
 |------------------------------|-------------------------------------------------------------------------------|
 | Process-oriented rationality | LLM prompted with process vs. outcome evaluation framing                      |
 | Contrarian signal            | LLM acts against deviation when process analysis indicates clear mispricing   |
-| Activation flexibility       | LLM may act below 0.05 threshold when reasoning strongly indicates mispricing |
+| Activation flexibility       | LLM may act whenever persona-based reasoning indicates meaningful mispricing |
 
 ### §2.4 ContrarianSkeptic (simulation-bases.md §4.4)
 
@@ -63,9 +63,9 @@ The LLM variant replaces deterministic threshold formulas with language model re
 P(t+1) = P(t) + λ × NetDemand(t) + γ × (F − P(t)) + ε(t)
 
 where:
-  λ = price_impact      [default: 0.001]
-  γ = mean_reversion    [default: 0.05]
-  ε ~ N(0, noise_std)   [default: 0.5]
+  λ = price_impact      [default: 0.03]
+  γ = mean_reversion    [default: 0.01]
+  ε ~ N(0, noise_std)   [default: 0.015]
   NetDemand = Σ signed_quantities
 ```
 
@@ -78,8 +78,8 @@ Market broadcasts `{price, fundamental, deviation, round}`. LLM agents are promp
 | Base class         | `LLMPlayer`                                                       |
 | Inference          | LLM API call per agent per round                                  |
 | Context            | `market_data` + `agent_extras` injected into system prompt        |
-| Output             | `{"action": "buy"/"sell"/"hold", "quantity": int}`                |
-| Capacity asymmetry | Preserved in prompt constraints: biased max 800; rational max 500 |
+| Output             | Canonical parser JSON with `action`, `bid_price`, `quantity`, and `reasoning` |
+| Capacity asymmetry | Enforced by `max_order` config after parsing |
 
 ## §5 Config Reference
 
@@ -90,8 +90,8 @@ Key extras per investor:
 - `hindsight_inflation`, `prediction_overweight` (HindsightOverconfident — prompt context)
 - `success_attribution`, `failure_discount` (OutcomeLearner)
 - `process_weight`, `outcome_weight` (ProcessEvaluator)
-- `skepticism_level`, `position_size` (ContrarianSkeptic)
-- `trade_probability` (NoiseTrader)
+- `skepticism_level`, `max_order` (ContrarianSkeptic)
+- `trade_probability`, `max_order` (NoiseTrader)
 - Market: `price_impact`, `mean_reversion`, `noise_std`, `fundamental_value`, `initial_price`
 - LLM: `model`, `temperature`, `max_tokens`
 

@@ -1,0 +1,48 @@
+{
+  "ragllm_concentrated_fund_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_concentrated_fund_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_prime_broker1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_prime_broker2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_block_trade_buyer": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_information_trader_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_information_trader_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "aggregate": {
+    "mean_retrieval_failure_rate": 0.0,
+    "max_retrieval_failure_rate": 0.0
+  }
+}

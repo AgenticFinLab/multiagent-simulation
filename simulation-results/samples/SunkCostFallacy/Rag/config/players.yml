@@ -1,0 +1,215 @@
+knowledge:
+  global_resources:
+    MinerU_processed:
+      path: "examples/document-sources/processed"
+  global_index_dir:
+    rag_index:
+      path: "examples/document-sources/rag_index"
+
+market:
+  name: "Market"
+  class: "examples.SunkCostFallacy.Rule.players:Market"
+  num_instances: 1
+  persona: !include ../Rag/persona.yml
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags: [market]
+    extras:
+      record_path: "artifacts/records"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.02
+      mean_reversion: 0.015
+      noise_std: 0.01
+
+sunkcostholder:
+  name: "SunkCostHolder"
+  class: "examples.SunkCostFallacy.Rag.players:RagLLMSunkCostHolder"
+  num_instances: 3
+  persona: !include ../Rag/persona.yml
+  config:
+    identity: "sunkcostholder"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      hold_threshold: 0.1
+      base_size: 200
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 3
+      llm:
+        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_SUNK_COST_HOLDER_SYS"
+        user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+
+commitmentescalator:
+  name: "CommitmentEscalator"
+  class: "examples.SunkCostFallacy.Rag.players:RagLLMCommitmentEscalator"
+  num_instances: 3
+  persona: !include ../Rag/persona.yml
+  config:
+    identity: "commitmentescalator"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1200000.0
+      initial_position: 400
+      initial_price: 100.0
+      fundamental_value: 100.0
+      escalation_threshold: 0.05
+      escalation_size: 400
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 3
+      llm:
+        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_COMMITMENT_ESCALATOR_SYS"
+        user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+
+rationalcutter:
+  name: "RationalCutter"
+  class: "examples.SunkCostFallacy.Rag.players:RagLLMRationalCutter"
+  num_instances: 2
+  persona: !include ../Rag/persona.yml
+  config:
+    identity: "rationalcutter"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1500000.0
+      initial_position: 600
+      initial_price: 100.0
+      fundamental_value: 100.0
+      cut_threshold: 0.05
+      position_size: 350
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 3
+      llm:
+        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_RATIONAL_CUTTER_SYS"
+        user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+
+opportunitycosttrader:
+  name: "OpportunityCostTrader"
+  class: "examples.SunkCostFallacy.Rag.players:RagLLMOpportunityCostTrader"
+  num_instances: 2
+  persona: !include ../Rag/persona.yml
+  config:
+    identity: "opportunitycosttrader"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1300000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      realloc_threshold: 0.08
+      position_size: 300
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 3
+      llm:
+        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_OPPORTUNITY_COST_TRADER_SYS"
+        user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.SunkCostFallacy.Rag.players:RagLLMNoiseTrader"
+  num_instances: 2
+  persona: !include ../Rag/persona.yml
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags: [investors]
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 100
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: ["MinerU_processed"]
+        rag:
+          from_global_index_dir: ["rag_index"]
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 3
+      llm:
+        sys_message: "examples.SunkCostFallacy.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
+        user_message: "examples.SunkCostFallacy.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600

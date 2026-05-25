@@ -1,0 +1,120 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": -5.365547198523802,
+      "max_abs_deviation_pct": 20.076265544357575,
+      "mean_abs_deviation_pct": 6.408707966455447
+    },
+    "price_metrics": {
+      "final": 89.90273016140239,
+      "initial": 99.93569665041555,
+      "max": 111.98798844434448,
+      "mean": 95.59866869752346,
+      "min": 75.9275477328603,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 195.8850699020608,
+      "max_drawdown_pct": -14.834796568496417,
+      "volatility_pct": 12.339599535984673
+    },
+    "volume_metrics": {
+      "mean_volume": 199.355,
+      "total_volume": 39871.0
+    }
+  },
+  "rag_knowledge_effect": {
+    "aggregate": {
+      "max_retrieval_failure_rate": 0.0,
+      "mean_retrieval_failure_rate": 0.0
+    },
+    "convergencetrader_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "convergencetrader_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "macrohedgefund_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "macrohedgefund_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "noisetrader_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "noisetrader_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "opportunistictrader_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "opportunistictrader_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "pegdefender": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "SorosPound",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 20.076
+      },
+      "Volatility Sanity": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 195.885
+      }
+    },
+    "interpretation": "=== SorosPound SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 100.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 20.08%\n    Expected: nonzero but bounded deviation\n    Score: 100.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 195.89%\n    Expected: bounded annualized volatility\n    Score: 100.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe SorosPound run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 100.0%",
+    "is_valid": true,
+    "score": 1.0
+  }
+}

@@ -1,6 +1,6 @@
 # ArchegosCollapse LLM — Analysis Documentation
 
-## Overview
+## §1 Analysis Objectives
 
 | Item                                | Description                                                                                                                                       |
 |-------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 
 ---
 
-## 1. Metric Implementation
+## §2 Metric → Function Mapping
 
 All metrics are defined in `../analysis-bases.md §2`. LLM `analysis.py` imports core functions from `Rule/analysis.py` (DRY pattern) and adds LLM-specific visualization title.
 
@@ -25,16 +25,17 @@ from examples.ArchegosCollapse.Rule.analysis import (
 
 | Metric                     | Function              | analysis-bases.md Ref | LLM-Specific Notes                                                                |
 |----------------------------|-----------------------|-----------------------|-----------------------------------------------------------------------------------|
-| **Price Deviation**        | `calculate_metrics()` | `§2.1`                | Higher variance than Rule; denial phase may delay or flatten cascade onset        |
-| **Maximum Drawdown**       | `calculate_metrics()` | `§2.2`                | More variable across runs; deeper if denial extends selling pressure              |
-| **Cascade Volatility**     | `calculate_metrics()` | `§2.3`                | Expect higher volatility than Rule due to LLM decision unpredictability           |
-| **Return Autocorrelation** | `calculate_metrics()` | `§2.4`                | May show weaker AC1 pattern if LLM decisions disrupt cascade self-reinforcement   |
-| **Agent-Type Volume**      | `calculate_metrics()` | `§2.5`                | ConcentratedFund may hold longer (denial) before large block sell                 |
-| **Cascade Onset Round**    | `calculate_metrics()` | `§2.6`                | Highly variable across runs (LLM denial psychology); compare distribution to Rule |
+| **Price Deviation**        | `calculate_metrics()` | `analysis-bases.md §2.1` | Higher variance than Rule; denial phase may delay or flatten cascade onset        |
+| **Maximum Drawdown**       | `calculate_metrics()` | `analysis-bases.md §2.2` | More variable across runs; deeper if denial extends selling pressure              |
+| **Cascade Volatility**     | `calculate_metrics()` | `analysis-bases.md §2.3` | Expect higher volatility than Rule due to LLM decision unpredictability           |
+| **Return Autocorrelation** | `calculate_metrics()` | `analysis-bases.md §2.4` | May show weaker AC1 pattern if LLM decisions disrupt cascade self-reinforcement   |
+| **Agent-Type Volume**      | `calculate_metrics()` | `analysis-bases.md §2.5` | ConcentratedFund may hold longer (denial) before large block sell                 |
+| **Cascade Onset Round**    | `calculate_metrics()` | `analysis-bases.md §2.6` | Highly variable across runs (LLM denial psychology); compare distribution to Rule |
+| **Recovery Half-Life**     | `calculate_metrics()` | `analysis-bases.md §2.7` | Recovery timing may vary with LLM hesitation and opportunistic-buy timing         |
 
 ---
 
-## 2. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Price Cascade Dynamics
 *(Objective from analysis-bases.md §3.1)*
@@ -42,7 +43,7 @@ from examples.ArchegosCollapse.Rule.analysis import (
 **Implementation in analysis.py:**
 - Functions: `load_simulation_data()` + `calculate_metrics()` (imported from Rule)
 - Input data: `EXPERIMENT/ArchegosCollapse/LLM/records/market/price/`
-- Output: `archegsoscollapse_llm_analysis.png` — 4-panel with LLM-specific title and orange return color
+- Output: `01_archegoscollapse_dynamics.png` and `02_archegoscollapse_analysis.png` — standard cascade path and self-reinforcement views
 
 **Variant-Specific Interpretation:**
 LLM variant may show a delayed cascade onset (denial phase in ConcentratedFund) or a compressed one-round panic sell (if LLM suddenly "capitulates"). Both patterns are valid LLM behaviors. Expect cascade onset to be 5–15 rounds later than Rule baseline on average.
@@ -85,7 +86,7 @@ LLM return distribution should show fatter tails than Rule (due to sudden large 
 
 ---
 
-## 3. Variant-Specific Observable Phenomena
+## §4 Variant-Specific Observable Phenomena
 
 | Phenomenon                 | Description                                                       | How to Observe                                       | Contrast with Rule Baseline            |
 |----------------------------|-------------------------------------------------------------------|------------------------------------------------------|----------------------------------------|
@@ -96,7 +97,7 @@ LLM return distribution should show fatter tails than Rule (due to sudden large 
 
 ---
 
-## 4. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
@@ -123,18 +124,21 @@ LLM return distribution should show fatter tails than Rule (due to sudden large 
 
 ---
 
-## 5. Output Files Reference
+## §6 Output Files Reference
 
 All outputs written to `EXPERIMENT/ArchegosCollapse/LLM/records/analysis/`.
 
 | Output File                          | Generated By | Contents                                                           | Interpretation                    |
 |--------------------------------------|--------------|--------------------------------------------------------------------|-----------------------------------|
-| `archegsoscollapse_llm_analysis.png` | `main()`     | 4-panel: Price, Deviation, Returns (orange), Distribution          | LLM variant cascade visualization |
-| `summary.json`                       | `main()`     | `{"variant": "LLM", price_metrics, deviation_metrics, volatility}` | Cross-variant comparison input    |
+| `summary.json` | `analyze_archegos_collapse()` | Metrics, validation score, criteria, and interpretation | Cross-variant comparison input |
+| `00_investor_bids.png` | `_create_visualizations()` | Market price and LLM investor bid curves | Output-contract and order-path visualization |
+| `01_archegoscollapse_dynamics.png` | `_create_visualizations()` | Price, fundamental value, and deviation | Cascade path verification |
+| `02_archegoscollapse_analysis.png` | `_create_visualizations()` | Rolling volatility and autocorrelation | Self-reinforcement analysis |
+| `03_summary.png` | `_create_visualizations()` | Agent VWAP and volume summary | First-mover advantage and participation check |
 
 ---
 
-## 6. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 - **Phenomenon emergence speed**: LLM onset typically later than Rule (denial phase); occasionally earlier (LLM acts before threshold in panic)
 - **Phenomenon intensity**: Potentially deeper than Rule when denial extends — eventual panic sell amplifies cascade
@@ -145,7 +149,7 @@ Cross-variant comparison protocol: `../analysis-bases.md §5`.
 
 ---
 
-## References
+### References
 
 - `../analysis-bases.md` — master analysis specification
 - `../simulation-bases.md §4 LLM Persona` — denial/panic psychology for each investor type

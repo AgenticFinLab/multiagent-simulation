@@ -1,0 +1,132 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": -0.045957241737980326,
+      "max_abs_deviation_pct": 0.14781396051031948,
+      "mean_abs_deviation_pct": 0.05456855334581242
+    },
+    "price_metrics": {
+      "final": 99.95404275826202,
+      "initial": 99.98744167084143,
+      "max": 100.0716610718626,
+      "mean": 99.96016981040837,
+      "min": 99.85218603948968,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 0.2255666163563642,
+      "max_drawdown_pct": -0.03842188715521246,
+      "volatility_pct": 0.014209361213267954
+    },
+    "volume_metrics": {
+      "mean_volume": 0.0,
+      "total_volume": 0.0
+    }
+  },
+  "rag_knowledge_effect": {
+    "aggregate": {
+      "max_retrieval_failure_rate": 0.0,
+      "mean_retrieval_failure_rate": 0.0
+    },
+    "cascadefollower_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "cascadefollower_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "cascadefollower_3": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "contrarian": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "independentthinker_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "independentthinker_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "noisetrader_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "noisetrader_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "reputationherder_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "reputationherder_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "reputationherder_3": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "HerdingInformation",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 0.148
+      },
+      "Volatility Sanity": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 0.226
+      }
+    },
+    "interpretation": "=== HerdingInformation SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 100.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 0.15%\n    Expected: nonzero but bounded deviation\n    Score: 100.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 0.23%\n    Expected: bounded annualized volatility\n    Score: 100.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe HerdingInformation run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 100.0%",
+    "is_valid": true,
+    "score": 1.0
+  }
+}

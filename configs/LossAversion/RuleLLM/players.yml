@@ -41,10 +41,10 @@ lossaverseinvestor:
       base_size: 400
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_LOSS_AVERSE_INVESTOR_SYS"
+        sys_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_LOSS_AVERSE_PROMPT"
         user_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -70,10 +70,10 @@ breakeventrader:
       base_size: 350
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_BREAK_EVEN_TRADER_SYS"
+        sys_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_BREAK_EVEN_PROMPT"
         user_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.8
           max_tokens: 600
@@ -99,17 +99,17 @@ rationaltrader:
       base_size: 300
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_RATIONAL_TRADER_SYS"
+        sys_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_RATIONAL_PROMPT"
         user_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 600
   persona: !include persona.yml
 
 momentumtrader:
-  name: "DispositionTrader"
+  name: "MomentumTrader"
   class: "examples.LossAversion.RuleLLM.players:RuleLLMMomentumTrader"
   num_instances: 2
   config:
@@ -124,21 +124,21 @@ momentumtrader:
       initial_position: 500
       initial_price: 100.0
       fundamental_value: 100.0
-      profit_trigger: 0.03
+      entry_threshold: 0.03
       base_size: 300
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_DISPOSITION_TRADER_SYS"
+        sys_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_MOMENTUM_PROMPT"
         user_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600
   persona: !include persona.yml
 
 marketmaker:
-  name: "NoiseTrader"
+  name: "MarketMaker"
   class: "examples.LossAversion.RuleLLM.players:RuleLLMMarketMaker"
   num_instances: 2
   config:
@@ -153,14 +153,13 @@ marketmaker:
       initial_position: 200
       initial_price: 100.0
       fundamental_value: 100.0
-      trade_probability: 0.3
-      noise_size: 150
+      inventory_limit: 2000
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
+        sys_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_MARKET_MAKER_PROMPT"
         user_message: "examples.LossAversion.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.95
           max_tokens: 600

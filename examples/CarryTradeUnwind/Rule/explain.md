@@ -1,6 +1,6 @@
 # CarryTradeUnwind Rule Variant — Design Specification
 
-## 1. Overview
+## §1 Overview
 
 | Item               | Detail                                                                                                                                                                                      |
 |--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -13,20 +13,46 @@
 
 ---
 
-## 2. Theory → Implementation Mapping
+## §2 Theory → Implementation Mapping
 
-| Theoretical Concept                               | Agent / Mechanism                                              | Code Location                                    |
-|---------------------------------------------------|----------------------------------------------------------------|--------------------------------------------------|
-| Carry trade borrowing (Brunnermeier et al., 2009) | `CarryTrader` — buys high-yield when deviation > 0.02          | `Rule/players.py: CarryTrader.decide()`          |
-| Forced unwinding under leverage                   | `LeveragedCarryFund` — forced sell when deviation < −stop_loss | `Rule/players.py: LeveragedCarryFund.decide()`   |
-| Safe-haven demand (Menkhoff et al., 2012)         | `FundingCurrencyBuyer` — buys when deviation < −risk_threshold | `Rule/players.py: FundingCurrencyBuyer.decide()` |
-| Volatility-managed carry (Plantin & Shin, 2018)   | `HedgedCarryTrader` — reduces qty when vol > vol_threshold     | `Rule/players.py: HedgedCarryTrader.decide()`    |
-| Noise trader liquidity (Black, 1986)              | `NoiseTrader` — random Uniform[100, 500]                       | `Rule/players.py: NoiseTrader.decide()`          |
-| Price impact + mean reversion                     | Market clearing formula                                        | `Rule/players.py: Market.perceive()`             |
+### §2.1 CarryTrader (simulation-bases.md §4.1)
+
+| Theory Component | Implementation |
+|---|---|
+| Carry-premium accumulation from simulation-bases.md §4.1.4 | `CarryTrader.decide()` buys when deviation > +0.02 and sells when deviation < -0.02. |
+| Quantity model from simulation-bases.md §4.1.4.3 | Uses `min(int(800 * leverage), int(abs(deviation) * 5000))`; `leverage` is loaded from `extras["leverage"]`. |
+
+### §2.2 LeveragedCarryFund (simulation-bases.md §4.2)
+
+| Theory Component | Implementation |
+|---|---|
+| Stop-loss liquidation from simulation-bases.md §4.2.4 | `LeveragedCarryFund.decide()` sells when deviation < -`stop_loss` or the negative-deviation margin-call branch fires. |
+| Forced-sell capacity from simulation-bases.md §4.2.4.3 | Quantity is `min(int(800 * leverage), position)`, making this the dominant cascade amplifier. |
+
+### §2.3 FundingCurrencyBuyer (simulation-bases.md §4.3)
+
+| Theory Component | Implementation |
+|---|---|
+| Safe-haven counterflow from simulation-bases.md §4.3.4 | `FundingCurrencyBuyer.decide()` buys when deviation < -`risk_threshold` and sells when deviation > +`risk_threshold`. |
+| Stabilizer capacity from simulation-bases.md §6 | `position_size` is loaded from config and bounds each stabilizing order. |
+
+### §2.4 HedgedCarryTrader (simulation-bases.md §4.4)
+
+| Theory Component | Implementation |
+|---|---|
+| Volatility-managed carry from simulation-bases.md §4.4.4 | `HedgedCarryTrader.decide()` computes rolling volatility from `price_history` and trades only when the deviation/volatility branch is active. |
+| Hedge-ratio sizing from simulation-bases.md §4.4.4.3 | Uses `adj_qty = int(500 * (1 - hedge_ratio))`, with `hedge_ratio` loaded from config. |
+
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Background FX order flow from simulation-bases.md §4.5.4 | `NoiseTrader.decide()` trades with `trade_probability` and random side/size to provide non-carry liquidity. |
+| Bounded liquidity order from simulation-bases.md §6 | Order size is drawn from 100-500 and then constrained by cash or current position. |
 
 ---
 
-## 3. Market Mechanism
+## §3 Market Mechanism
 
 ### 3.1 Price Update Formula
 
@@ -68,22 +94,22 @@ deviation = (price − fundamental) / fundamental
 
 ---
 
-## 4. Variant-Specific Features
+## §4 Variant-Specific Features
 
 The **Rule** variant is the algorithmic baseline. All agent decisions are
 deterministic given the same `deviation` value:
 
-| Agent                  | Role          | Trigger                  | Quantity               |
-|------------------------|---------------|--------------------------|------------------------|
-| `CarryTrader`          | Destabilizing | `                        | deviation              |
-| `LeveragedCarryFund`   | Destabilizing | `dev < −0.03 OR (        | dev                    |
-| `FundingCurrencyBuyer` | Stabilizing   | `dev < −0.05`            | 500                    |
-| `HedgedCarryTrader`    | Stabilizing   | `dev > 0 AND vol < 0.05` | 350 (hedge_ratio=0.30) |
-| `NoiseTrader`          | Neutral       | p=0.30                   | Uniform[100, 500]      |
+| Agent | Role | Trigger | Quantity |
+|---|---|---|---|
+| `CarryTrader` | Destabilizing | `abs(deviation) > 0.02` | `min(800 * leverage, abs(deviation) * 5000)` |
+| `LeveragedCarryFund` | Destabilizing | `deviation < -stop_loss` or negative margin-call branch | `min(800 * leverage, position)` |
+| `FundingCurrencyBuyer` | Stabilizing | `abs(deviation) > risk_threshold` | `position_size` |
+| `HedgedCarryTrader` | Stabilizing | deviation and rolling-volatility condition | `500 * (1 - hedge_ratio)` |
+| `NoiseTrader` | Neutral | random participation at `trade_probability` | random 100-500, constrained by cash/position |
 
 ---
 
-## 5. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -110,7 +136,7 @@ deterministic given the same `deviation` value:
 
 ---
 
-## 6. Configuration Reference
+## §6 Configuration Reference
 
 From `configs/CarryTradeUnwind/Rule/players.yml`:
 
@@ -162,7 +188,7 @@ From `configs/CarryTradeUnwind/Rule/players.yml`:
 
 ---
 
-## 7. Running Instructions
+## §7 Running Instructions
 
 ```bash
 # Run simulation
@@ -178,7 +204,7 @@ Output: `EXPERIMENT/CarryTradeUnwind/Rule/records/`
 
 ---
 
-## 8. Expected Behavior
+## §8 Expected Behavior
 
 ### Phase 1: Carry Accumulation (rounds 1–N)
 
@@ -202,7 +228,7 @@ Output: `EXPERIMENT/CarryTradeUnwind/Rule/records/`
 
 ---
 
-## 9. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

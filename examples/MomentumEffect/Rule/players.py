@@ -261,6 +261,8 @@ class MomentumTrader(BaseInvestor):
         Buy assets with positive past returns (winners)
         Sell assets with negative past returns (losers)
 
+    Theory: simulation-bases.md §4.1.
+
     Formula:
         signal = weighted average of past N returns
         Q = scale × signal × (max_position - current_position) if signal > threshold
@@ -376,6 +378,8 @@ class ContrarianTrader(BaseInvestor):
         Buy past losers, sell past winners
         Exploits overreaction hypothesis
 
+    Theory: simulation-bases.md §4.2.
+
     Financial Theory:
         - Overreaction: Markets overshoot and correct
         - Mean reversion: Prices return to fundamentals
@@ -484,6 +488,8 @@ class IndexFund(BaseInvestor):
         Maintains fixed allocation regardless of momentum
         Serves as baseline for performance comparison
 
+    Theory: simulation-bases.md §4.3.
+
     Parameters from config extras:
         - target_allocation, rebalance_threshold
     """
@@ -586,6 +592,8 @@ class MarketMaker(BaseInvestor):
     Market Maker providing liquidity.
     Mean-reverts inventory to zero.
 
+    Theory: simulation-bases.md §4.4.
+
     Parameters from config extras:
         - inventory_target, reversion_speed
     """
@@ -680,6 +688,8 @@ class TechnicalTrader(BaseInvestor):
     Technical Analysis: Moving Average Crossover
         Buy when short MA > long MA (golden cross)
         Sell when short MA < long MA (death cross)
+
+    Theory: simulation-bases.md §4.5.
 
     Parameters from config extras:
         - short_window, long_window, scale, max_position
@@ -788,6 +798,8 @@ class FundamentalTrader(BaseInvestor):
     """
     Fundamental Analysis: Trade toward intrinsic value.
     Provides weak stabilizing force against momentum.
+
+    Theory: simulation-bases.md §4.6.
 
     Parameters from config extras:
         - value_threshold, scale, max_position

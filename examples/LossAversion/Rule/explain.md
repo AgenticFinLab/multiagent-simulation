@@ -129,7 +129,7 @@ Configuration file: `configs/LossAversion/Rule/simulation.yml` → `players.yml`
 | `sell_gain_threshold`  | LossAverseInvestor | 0.05    | Gain trigger for winner sale         |
 | `risk_increase_factor` | BreakEvenTrader    | 2.0     | Escalation multiplier in loss domain |
 | `risk_aversion`        | RationalTrader     | 0.5     | EU risk weight                       |
-| `entry_threshold`      | MomentumTrader     | 0.02    | Minimum trend to follow              |
+| `entry_threshold`      | MomentumTrader     | 0.03    | Minimum trend to follow              |
 | `inventory_limit`      | MarketMaker        | 2000    | Max absolute inventory               |
 | `initial_cash`         | All investors      | 100000  | Starting cash                        |
 | `initial_position`     | All investors      | 500     | Starting shares                      |

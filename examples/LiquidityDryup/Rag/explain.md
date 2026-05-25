@@ -1,161 +1,101 @@
-# LiquidityDryup — Rag Variant Explanation
+# Liquidity Dry-up Rag Variant Explanation
 
 ## §1 Overview
 
-| Item               | Description                                                                                                                   |
-|--------------------|-------------------------------------------------------------------------------------------------------------------------------|
-| **Phenomenon**     | Liquidity dry-up with retrieval-augmented generation — agents consult historical crisis episodes before withdrawal decisions  |
-| **Variant**        | Rag: rule threshold triggers; LLM + knowledge base of historical dry-up episodes informs withdrawal depth and recovery timing |
-| **Investor Count** | 5 RAG-augmented classes; MarketMaker may moderate withdrawal when KB provides historical recovery evidence                    |
-| **Key Feature**    | Historical crisis KB enables agents to contextualise current stress within known dry-up patterns; may moderate spiral         |
-| **Academic Value** | Tests whether retrieval of historical precedent reduces liquidity spiral severity and shortens recovery duration              |
+| Field | Value |
+|---|---|
+| Variant | Rag |
+| Simulation | Liquidity Dry-up |
+| Decision Mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema |
+| Theory Reference | `examples/LiquidityDryup/simulation-bases.md` |
+| Market Broadcast | `configs/LiquidityDryup/Rag/topology.yml` |
 
----
+This is a trading-schema scenario. API decisions emit `action`, `bid_price`, `quantity`, numeric `provides_liquidity`, `reasoning`, and recorded `rag_context` for retrieval-quality audit.
 
-## §2 Theory → Implementation Mapping
+## §2 Theory -> Implementation Mapping
 
-### §2.1 Rag MarketMaker (simulation-bases.md §4.1)
+### §2.1 MarketMaker (simulation-bases.md §4.1)
 
-| Theory Element       | Rag Implementation                                                             |
-|----------------------|--------------------------------------------------------------------------------|
-| Withdrawal trigger   | Rule `                                                                         |
-| KB moderation        | If KB shows "spiral reversed after 5 rounds" → LLM may stay partially active   |
-| Historical precedent | Episodes: 1987 Black Monday, 1998 LTCM, 2008 GFC, 2010 Flash Crash, 2020 COVID |
-| Withdrawal depth     | LLM calibrated by KB evidence about typical spiral depths                      |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMMarketMaker` uses `RAGLLM_MARKET_MAKER_SYS` plus retrieved crisis-liquidity knowledge to decide withdrawal and numeric liquidity provision. |
+| Mathematical model from simulation-bases.md §4.1 | Prompt requires withdrawal above 2% absolute return, normal depth around 30, and inventory rebalance around 30% stress / 20% normal. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rag/players.yml:ragllm_market_maker.config.extras` supplies portfolio state, ARK model policy, and RAG config. |
+| Variant-specific decision mechanism | RAG-augmented formula-anchored order plus recorded retrieval context. |
+### §2.2 LiquiditySeeker (simulation-bases.md §4.2)
 
-### §2.2 Rag LiquiditySeeker (simulation-bases.md §4.2)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMLiquidityDemander` uses `RAGLLM_LIQUIDITY_SEEKER_SYS` plus retrieved execution-stress knowledge. |
+| Mathematical model from simulation-bases.md §4.2 | Prompt instructs demand around +/-15 shares, scaled by liquidity / 100, with zero liquidity provision. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rag/players.yml:ragllm_liquidity_demander.config.extras` supplies portfolio state, ARK model policy, and RAG config. |
+| Variant-specific decision mechanism | RAG-augmented constrained-execution order. |
+### §2.3 ValueTrader (simulation-bases.md §4.3)
 
-| Theory Element       | Rag Implementation                                                                       |
-|----------------------|------------------------------------------------------------------------------------------|
-| Execution adjustment | KB retrieves historical execution costs during dry-ups; LLM adjusts order more precisely |
-| Crisis awareness     | Agent may pause entirely when KB confirms full-scale dry-up                              |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMArbitrageur` uses `RAGLLM_VALUE_TRADER_SYS` plus retrieved post-crisis value/liquidity context. |
+| Mathematical model from simulation-bases.md §4.3 | Prompt instructs liquidity around 20 above 5% absolute deviation and quantity about `deviation * 30` above 3%. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rag/players.yml:ragllm_arbitrageur.config.extras` supplies portfolio state, ARK model policy, and RAG config. |
+| Variant-specific decision mechanism | RAG-augmented stabilizing value order. |
+### §2.4 MomentumTrader (simulation-bases.md §4.4)
 
-### §2.3 Rag ValueTrader (simulation-bases.md §4.3)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMValueInvestor` is a legacy class name whose prompt `RAGLLM_MOMENTUM_TRADER_SYS` implements momentum-trader behavior. |
+| Mathematical model from simulation-bases.md §4.4 | Prompt instructs trend-following quantity about `return * 200` above 1% absolute return. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rag/players.yml:ragllm_value.config.extras` supplies portfolio state, ARK model policy, and RAG config. |
+| Variant-specific decision mechanism | RAG-augmented trend-following order. |
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-| Theory Element      | Rag Implementation                                                                  |
-|---------------------|-------------------------------------------------------------------------------------|
-| Crisis entry        | KB retrieves post-crisis recovery data; LLM identifies optimal entry point          |
-| Liquidity provision | Historical evidence of crisis reversals accelerates ValueTrader entry → shorter LPD |
-
-### §2.4 Rag MomentumTrader (simulation-bases.md §4.4)
-
-| Theory Element     | Rag Implementation                                                     |
-|--------------------|------------------------------------------------------------------------|
-| Trend assessment   | KB may retrieve evidence that momentum during dry-ups reverses sharply |
-| Cascade moderation | LLM may reduce momentum qty when KB shows high crash-reversal risk     |
-
-### §2.5 Rag NoiseTrader (simulation-bases.md §4.5)
-
-| Theory Element | Rag Implementation                                               |
-|----------------|------------------------------------------------------------------|
-| Random orders  | KB provides context; LLM may reduce noise during extreme dry-ups |
-
----
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMForcedSeller` is a legacy class name whose prompt `RAGLLM_NOISE_TRADER_SYS` implements noise-trader behavior. |
+| Mathematical model from simulation-bases.md §4.5 | Prompt instructs small noisy orders, quantity below about 15 shares, and zero liquidity provision. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rag/players.yml:ragllm_forced_seller.config.extras` supplies portfolio state, ARK model policy, and RAG config. |
+| Variant-specific decision mechanism | RAG-augmented uninformed order flow. |
 
 ## §3 Market Mechanism
 
-Same rule-based `Market` with liquidity-dependent price impact:
-
-```
-P(t+1) = P(t) + (λ × NetDemand × liquidity_factor) + γ × (F − P(t)) + ε(t)
-liquidity_factor = 100 / max(total_liquidity, 10)
-```
-
-Rag agent flow per round:
-1. Market broadcasts data.
-2. Rule layer computes preliminary signal.
-3. RAG retrieves top-3 most similar historical dry-up episodes by current `|return|` and `LRI`.
-4. Retrieved episodes prepended to LLM prompt as "Historical Precedent".
-5. LLM calibrates withdrawal depth / recovery timing using historical evidence.
-6. `provides_liquidity` feeds back to `total_liquidity`.
-
----
+The Rag market uses the same liquidity-amplified price equation as RuleLLM and sums numeric `order["provides_liquidity"]`. Each investor retrieves top-k liquidity-crisis context through `KnowledgeStore`, injects it into `{rag_context}`, and records the retrieved context in the returned decision payload for `rag_stats.json`.
 
 ## §4 Variant Architecture
 
-```
-Rag Variant Architecture
-─────────────────────────
-Knowledge Base (historical dry-up episodes)
-  ↓ (top-3 retrieval when |return| > threshold OR LRI < 0.5)
-Market (rule-based, liquidity-dependent pricing)
-  │  broadcast {price, return%, liquidity, fundamental}
-  ├─ Rag MarketMaker     │ rule signal + KB[1987,LTCM,GFC,...] → LLM
-  ├─ Rag LiquiditySeeker │ rule scale + KB[execution costs] → LLM
-  ├─ Rag ValueTrader     │ rule gate + KB[recovery timelines] → LLM
-  ├─ Rag MomentumTrader  │ rule gate + KB[reversal risk] → LLM
-  └─ Rag NoiseTrader     │ rule baseline + KB[crisis noise] → LLM
-```
-
-**RAG Architecture**:
-
-| Component          | Details                                                                                                                                  |
-|--------------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| Knowledge Base     | Historical dry-up episodes: 1929 crash, 1987 Black Monday, 1998 LTCM, 2008 GFC (Lehman), 2010 Flash Crash, 2020 COVID-19 liquidity shock |
-| Embedding Model    | Text embedding of episode summaries: trigger, depth, duration, recovery mechanism                                                        |
-| Retrieval Strategy | Top-3 episodes by similarity to current `                                                                                                |
-| Injection Format   | Prepended as "Historical Precedent" in system prompt                                                                                     |
-| Trigger Condition  | Retrieve when `                                                                                                                          |
-
----
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/LiquidityDryup/Rag/players.py` |
+| Prompt module | `examples/LiquidityDryup/Rag/prompts.py` |
+| Inference | ARK LLM via `LangChainAPIInference` and Hunyuan/LiteLLM embedding through `KnowledgeStore`. |
+| Output parsing | `parse_llm_response_with_thinking()` parses `<analysis>` and `<decision>` blocks; malformed responses are retried three times. |
+| Retrieval audit | `RagLLMInvestor._build_prompt()` records `last_rag_context`; `Rag/analysis.py` summarizes retrieval success/failure in `rag_stats.json`. |
+| Error handling | Deterministic config/schema/API errors fail fast; this variant does not silently fallback after malformed decisions. |
 
 ## §5 Config Reference
 
-| Parameter              | Agent       | Default      | Description                    |
-|------------------------|-------------|--------------|--------------------------------|
-| `volatility_threshold` | MarketMaker | 0.03         | Rule trigger                   |
-| `base_liquidity`       | MarketMaker | 30           | Maximum normal liquidity       |
-| `llm.model`            | All RAG     | (configured) | LLM model                      |
-| `llm.temperature`      | All RAG     | 0.3          | Sampling temperature           |
-| `rag.kb_path`          | All RAG     | (configured) | Historical episodes KB         |
-| `rag.top_k`            | All RAG     | 3            | Retrieved episodes             |
-| `rag.trigger_return`   | All RAG     | 0.03         | Return threshold for retrieval |
-| `fundamental_value`    | Market      | 100          | Fundamental anchor             |
-| `price_impact`         | Market      | 0.001        | Base λ                         |
-
----
+| Config | Purpose |
+|---|---|
+| `configs/LiquidityDryup/Rag/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/LiquidityDryup/Rag/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/LiquidityDryup/Rag/topology.yml` | Message routing between coordinator and agents. |
+| `configs/LiquidityDryup/Rag/persona.yml` | Turn recording and persona metadata. |
 
 ## §6 Running Instructions
 
 ```bash
-# Run Rag variant
-python examples/LiquidityDryup/Rag/run_liquidity_dryup_ragllm.py \
-    -c configs/LiquidityDryup/Rag/simulation.yml
+python examples/LiquidityDryup/Rag/run_liquidity_dryup_ragllm.py -c configs/LiquidityDryup/Rag/simulation.yml
 ```
-
-Output written to `records/LiquidityDryup/Rag/`.
-
----
 
 ## §7 Expected Behavior
 
-| Metric      | Expected Range | Rationale                                                              |
-|-------------|----------------|------------------------------------------------------------------------|
-| LRI minimum | 0.10–0.30      | Highest among variants — KB moderates withdrawal depth                 |
-| MWF maximum | 0.4–0.8        | Partial withdrawal — historical evidence of recovery reduces full exit |
-| PAD         | 0.07–0.18      | Smallest dislocation — knowledge-informed position management          |
-| LPD         | 6–15 rounds    | Shortest — ValueTrader KB retrieval accelerates crisis-entry timing    |
-| WDI         | 0.18–0.35      | Lowest redistribution — less extreme spiral                            |
-
-The Rag variant is expected to produce the shortest dry-up (LPD) and highest minimum liquidity (LRI). The key mechanism: `ValueTrader` agents retrieve post-crisis recovery timelines from the KB and enter the market sooner, providing liquidity that arrests the spiral. `MarketMaker` agents that retrieve Black Monday or Flash Crash data showing swift reversals may stay partially active rather than fully withdrawing.
-
----
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
 ## §8 References
 
-- Brunnermeier, M. K., & Pedersen, L. H. (2009). doi:[10.1093/rfs/hhn098](https://doi.org/10.1093/rfs/hhn098)
-- Grossman, S. J., & Miller, M. H. (1988). doi:[10.1111/j.1540-6261.1988.tb04594.x](https://doi.org/10.1111/j.1540-6261.1988.tb04594.x)
-- Amihud, Y. (2002). doi:[10.1016/S1386-4181(01)00024-6](https://doi.org/10.1016/S1386-4181(01)00024-6)
-- simulation-bases.md §4.1–§4.5 (Investor Taxonomy); §8 Historical Case Studies
-
----
+See `examples/LiquidityDryup/simulation-bases.md §2` for full DOI citations and mechanism references.
 
 ## §9 Variant Comparison
 
-| Dimension          | Rule                  | LLM             | RuleLLM          | Rag                                      |
-|--------------------|-----------------------|-----------------|------------------|------------------------------------------|
-| MM withdrawal      | Formula               | LLM social      | Rule + LLM depth | Rule + KB precedent                      |
-| Recovery mechanism | ValueTrader threshold | LLM opportunism | Rule + LLM       | KB-informed early entry                  |
-| Expected LRI min   | 0.05–0.20             | 0.05–0.30       | 0.05–0.25        | **0.10–0.30** (highest)                  |
-| Expected LPD       | 10–25                 | 8–20            | 9–22             | **6–15** (shortest)                      |
-| KB role            | None                  | None            | Partial          | Full — crisis precedents guide decisions |
+See `examples/LiquidityDryup/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

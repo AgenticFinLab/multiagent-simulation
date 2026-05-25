@@ -1,0 +1,60 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": 3.8007006523613382,
+      "max_abs_deviation_pct": 964.2836261815221,
+      "mean_abs_deviation_pct": 106.5116567809313
+    },
+    "price_metrics": {
+      "final": 84.9930070070338,
+      "initial": 100.04080997127686,
+      "max": 110.77904302684182,
+      "mean": 90.17972454698797,
+      "min": 62.33930058181891,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 15.643896436612748,
+      "max_drawdown_pct": -2.132740506920861,
+      "volatility_pct": 0.9854728454125441
+    },
+    "volume_metrics": {
+      "mean_volume": 3.5348317118327732,
+      "total_volume": 706.9663423665544
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "MomentumEffect",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": false,
+        "score": 0.071,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 964.284
+      },
+      "Volatility Sanity": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 15.644
+      }
+    },
+    "interpretation": "=== MomentumEffect SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 81.4% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 964.28%\n    Expected: nonzero but bounded deviation\n    Score: 7.1%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 15.64%\n    Expected: bounded annualized volatility\n    Score: 100.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe MomentumEffect run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 81.4%",
+    "is_valid": true,
+    "score": 0.8142
+  }
+}

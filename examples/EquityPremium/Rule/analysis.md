@@ -42,3 +42,16 @@ Establish the deterministic baseline for the EquityPremium simulation. Key quest
 
 See `analysis-bases.md §2` for full metric derivations and Python function signatures.
 See `simulation-bases.md §2` for theoretical foundations.
+
+## §6 Validation Criteria
+
+The run is valid when all configured rounds complete, `summary.json` contains a
+validation score, and the fixed PNG set is written:
+`00_investor_bids.png`, `01_equitypremium_dynamics.png`,
+`02_equitypremium_analysis.png`, and `03_summary.png`.
+
+## §7 Cross-Variant Use
+
+The Rule analysis is the authoritative structural analysis for the stock-bond
+allocation schema. LLM, RuleLLM, and Rag analysis reuse the same price, return,
+allocation, and validation logic.

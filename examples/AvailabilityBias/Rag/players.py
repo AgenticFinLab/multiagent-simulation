@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -43,6 +43,26 @@ def load_prompt(prompt_path: str) -> str:
     module_path, var_name = prompt_path.rsplit(":", 1)
     module = importlib.import_module(module_path)
     return getattr(module, var_name)
+
+
+def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
+    """Validate the shared RAG/LLM trading decision contract."""
+    action = decision["action"]
+    if action not in ("buy", "sell", "hold"):
+        raise ValueError(f"[{identity}] Invalid LLM action: {action}")
+    bid_price = float(decision["bid_price"])
+    if bid_price <= 0:
+        raise ValueError(f"[{identity}] bid_price must be positive, got {bid_price}")
+    quantity = float(decision["quantity"])
+    if quantity < 0:
+        raise ValueError(f"[{identity}] quantity must be non-negative, got {quantity}")
+    return {
+        "action": action,
+        "bid_price": bid_price,
+        "quantity": quantity,
+        "reasoning": decision["reasoning"],
+        "analysis": decision["analysis"],
+    }
 
 
 class RagLLMInvestor(GeneralPlayer):
@@ -78,7 +98,7 @@ class RagLLMInvestor(GeneralPlayer):
             entry_limit=hot_limit,
         )
 
-        project_root = Path(__file__).parent.parent.parent
+        project_root = Path(__file__).resolve().parents[3]
         load_dotenv(project_root / ".env")
         if not os.getenv("ARK_API_KEY"):
             raise RuntimeError(
@@ -113,17 +133,21 @@ class RagLLMInvestor(GeneralPlayer):
         extras = self.config.extras
         record_path = extras["record_path"]
 
-        knowledge_config = extras["knowledge"]
+        knowledge_config = extras.get("knowledge", {})
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
-                "global_uri": rag_cfg["docs_dir"],
+                "global_uri": "examples/document-sources",
+                "resource_csv": [
+                    "examples/document-sources/books.csv",
+                    "examples/document-sources/source",
+                ],
                 "preprocessing": {
                     "parser": "mineru",
-                    "output_position": rag_cfg["mineru_output_dir"],
+                    "output_position": "MinerU_processed",
                 },
                 "rag": {
-                    "output_position": rag_cfg["shared_rag_index_dir"],
+                    "output_position": "rag_index",
                 },
             }
 
@@ -330,6 +354,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         template = load_prompt(self.config.extras["llm"]["user_message"])
         return template.format(
@@ -361,20 +386,27 @@ class RagLLMInvestor(GeneralPlayer):
         last_error = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_output = llm_client.run([infer_input])
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
+                decision = _validate_decision(decision, self.identity)
                 break
             except Exception as exc:
                 last_error = exc
-                if attempt < max_retries - 1:
-                    logger.debug("[%s] LLM parse failed, retrying...", self.identity)
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if attempt < max_retries - 1 and (parse_error or retryable_api_error):
+                    logger.debug("[%s] LLM call/parse failed, retrying: %s", self.identity, exc)
+                    continue
+                if not parse_error and not retryable_api_error:
+                    raise
 
         if decision is None:
             raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
+                f"[{self.identity}] LLM decision contract failed after "
+                f"{max_retries} retries: {last_error}"
             )
 
         action = decision["action"]
@@ -382,28 +414,33 @@ class RagLLMInvestor(GeneralPlayer):
         quantity = float(decision["quantity"])
 
         if action == "buy":
-            max_affordable = cash / bid_price if bid_price > 0 else 0
+            max_affordable = cash / bid_price
             quantity = min(quantity, max_affordable)
             self.state.custom_state["cash"] -= quantity * bid_price
             self.state.custom_state["position"] += quantity
         elif action == "sell":
-            quantity = max(-position, quantity)
+            quantity = min(quantity, max(position, 0.0))
             self.state.custom_state["cash"] += quantity * bid_price
-            self.state.custom_state["position"] += quantity
+            self.state.custom_state["position"] -= quantity
+        else:
+            quantity = 0.0
 
         logger.info(
             "[%s] R%d (%s): Q=%+.2f", self.identity, round_num, strategy_name, quantity
         )
 
         order = {
+            "type": "order",
+            "from": self.identity,
             "action": action,
             "bid_price": bid_price,
-            "action": action,
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": decision["reasoning"][:100],
-            "analysis": decision["analysis"],
+            "reasoning": str(decision["reasoning"])[:100],
+            "analysis": str(decision["analysis"]),
+            "agent_type": strategy_name,
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
 
         validate_order(order)

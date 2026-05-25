@@ -1,19 +1,25 @@
 #!/usr/bin/env python
-"""LUNACollapse RuleLLM Simulation Analysis
+"""LUNACollapse RuleLLM analysis using the scenario output contract."""
 
-Usage:
-    python examples/LUNACollapse/RuleLLM/analysis.py \
-        -c configs/LUNACollapse/RuleLLM/simulation.yml
-"""
+from examples.standard_rule_analysis import run_standard_analysis
 
 from examples.LUNACollapse.Rule.analysis import (
     calculate_metrics,
     create_visualizations,
     load_simulation_data,
-    main,
 )
 
+SCENARIO = "LUNACollapse"
+DEFAULT_CONFIG = "configs/LUNACollapse/RuleLLM/simulation.yml"
+
+
+def main():
+    """Run RuleLLM analysis with a RuleLLM-specific default config."""
+    return run_standard_analysis(SCENARIO, DEFAULT_CONFIG)
+
+
 __all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations", "main"]
+
 
 if __name__ == "__main__":
     main()

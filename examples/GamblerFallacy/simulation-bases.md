@@ -1,6 +1,6 @@
 # GamblerFallacy — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 |--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -44,7 +44,7 @@ The simulation design choices — specifically the deviation-based activation (u
 
 ---
 
-## 2. Theoretical Foundation
+## §2 Theoretical Foundation
 
 ### Theory 1: Law of Small Numbers / Gambler's Fallacy
 
@@ -213,7 +213,7 @@ where:
 
 ---
 
-## 3. Market Design Principles
+## §3 Market Design Principles
 
 ### 3.1 Price Formation Model
 
@@ -226,9 +226,9 @@ P(t+1) = P(t) + λ · D(t) + γ · [F − P(t)] + ε(t)
 | P(t)   | Current price     | Market price at round t | State variable                                  |
 | D(t)   | Net demand        | Total buy − Total sell  | Driven by streak-based trades                   |
 | F      | Fundamental value | 100.0 (constant)        | Anchor; streaks cause deviation                 |
-| λ      | Price impact      | 0.001                   | Converts demand to price change                 |
-| γ      | Mean reversion    | 0.05                    | Gradually pulls price back to F                 |
-| ε(t)   | Noise             | N(0, σ²)                | Random fluctuations; triggers perceived streaks |
+| λ      | Price impact      | 0.05                    | Converts demand to price change                 |
+| γ      | Mean reversion    | 0.02                    | Gradually pulls price back to F                 |
+| ε(t)   | Noise             | N(0, 0.01²)             | Random fluctuations; triggers perceived streaks |
 
 ### 3.2 Information Broadcast Design
 
@@ -241,47 +241,110 @@ P(t+1) = P(t) + λ · D(t) + γ · [F − P(t)] + ε(t)
 
 ---
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
 ### §4.1 StreakReversalTrader
 
-**Summary**: Represents retail investors and gamblers who apply the gambler's fallacy to financial markets — believing that after consecutive price moves in one direction, a reversal is "overdue." When price is above fundamental (positive deviation interpreted as an upward streak), this trader buys expecting the streak to continue but immediately sells on downward deviation expecting reversal recovery. In practice the decision logic (buying on positive deviation, selling on negative) makes them a trend-follower despite their reversal belief, because they act on the current deviation signal rather than lagged streak data. This agent is mildly destabilizing: it amplifies both upward and downward deviation by trading in the direction of current price position.
+**Summary**: Represents retail investors and gamblers who apply the gambler's fallacy to financial markets — believing that after consecutive price moves in one direction, a reversal is "overdue." In this simplified market encoding, current deviation from fundamental is the observable proxy for perceived streak pressure. The implemented action follows the sign of the deviation, so the agent amplifies the current price state while rationalizing the trade as an overdue-reversal bet.
 
-**Theoretical Foundation**: Tversky & Kahneman (1971) Law of Small Numbers; Rabin (2002) formal model; Croson & Sundali (2005) field validation.
+**Theoretical and Empirical Basis**: Tversky & Kahneman (1971) Law of Small Numbers; Rabin (2002) formal belief model; Croson & Sundali (2005) field validation of streak-conditioned betting distortions.
 
-**Activation**: `|deviation| > 0.02`; buys when deviation > 0, sells when deviation < 0; qty = min(800, int(|deviation| × 5000)).
+**Design Purpose**: Provides the primary biased reversal-belief population. Its trades increase demand when the market is above fundamental and increase sell pressure when below fundamental, making the bias visible in aggregate price paths.
+
+**Behavioral Framework**: Reads `deviation = (price - fundamental) / fundamental`, activates when `abs(deviation)` exceeds `configs/GamblerFallacy/Rule/players.yml → streakreversaltrader.config.extras.activation_threshold`, and sizes orders with `quantity_scale` and `max_order`.
+
+**Decision Process**:
+1. If `abs(deviation) <= activation_threshold`, hold.
+2. If `deviation > 0`, buy `min(max_order, int(abs(deviation) * quantity_scale))`, capped by available cash.
+3. If `deviation < 0`, sell the same capped quantity, capped by current holdings.
+
+**Worked Numerical Example**: With `deviation = 0.04`, `activation_threshold = 0.02`, `quantity_scale = 5000`, and `max_order = 800`, desired quantity is `min(800, int(0.04 * 5000)) = 200`; the trader buys 200 shares if cash permits.
+
+**Academic References**: Tversky & Kahneman (1971), Rabin (2002), Croson & Sundali (2005). See §2.1 and §8.2 for calibration rationale.
 
 ### §4.2 HotHandTrader
 
-**Summary**: Represents momentum investors and retail traders who believe that a market "on a streak" will continue in that direction. Functionally identical to StreakReversalTrader in action direction — both buy on positive deviation, sell on negative — but behaviorally represents the opposite belief: continuation rather than reversal. Together they create co-directional pressure that amplifies deviations from fundamental.
+**Summary**: Represents momentum investors and retail traders who believe that a market "on a streak" will continue in that direction. It is intentionally action-aligned with StreakReversalTrader in the current implementation: positive deviation triggers buying and negative deviation triggers selling, but the interpretation is continuation rather than reversal.
 
-**Theoretical Foundation**: Gilovich, Vallone & Tversky (1985) Hot Hand; Jegadeesh & Titman (1993) documented momentum returns.
+**Theoretical and Empirical Basis**: Gilovich, Vallone & Tversky (1985) Hot Hand belief; Jegadeesh & Titman (1993) momentum returns; Daniel, Hirshleifer & Subrahmanyam (1998) behavioral momentum.
 
-**Activation**: Same logic as StreakReversalTrader; jointly destabilizing.
+**Design Purpose**: Separates the belief narrative from the order-flow direction. Together with StreakReversalTrader, it creates co-directional biased pressure that can dominate rational correction when deviations are salient.
+
+**Behavioral Framework**: Uses the same market state and config-controlled `activation_threshold`, `quantity_scale`, and `max_order` fields under `configs/GamblerFallacy/Rule/players.yml → hothandtrader.config.extras`.
+
+**Decision Process**:
+1. Hold when the deviation magnitude is below the activation threshold.
+2. Buy when price is above fundamental, interpreting the deviation as upward momentum.
+3. Sell when price is below fundamental, interpreting the deviation as downward momentum.
+4. Cap quantity by `max_order`, cash, and current position.
+
+**Worked Numerical Example**: With `deviation = -0.03`, `activation_threshold = 0.02`, `quantity_scale = 5000`, and `max_order = 800`, desired quantity is 150; the trader sells up to 150 shares if it holds enough inventory.
+
+**Academic References**: Gilovich et al. (1985), Jegadeesh & Titman (1993), Daniel et al. (1998). See §2.2 and §8.1.
 
 ### §4.3 IndependentAssessor
 
 **Summary**: Represents quantitative traders or statistically trained investors who correctly treat each price change as independent (no streak fallacy). They trade contrarian to the current deviation — buying when price is below fundamental (deviation < −0.05) and selling when above (deviation > 0.05). Their 5% threshold and 500-share cap reflect both a higher evidence bar for independent-evidence reasoning and the limits to arbitrage constraints.
 
-**Theoretical Foundation**: Rabin (2002) rational benchmark; Shleifer & Vishny (1997) limits to arbitrage.
+**Theoretical and Empirical Basis**: Rabin (2002) rational benchmark; Shleifer & Vishny (1997) limits to arbitrage; De Bondt & Thaler (1985) long-horizon reversal.
 
-**Activation**: `|deviation| > 0.05`; contrarian — buys when deviation < 0, sells when deviation > 0; qty = min(500, int(|deviation| × 3000)).
+**Design Purpose**: Provides the rational stabilizing population. It counters behavioral order flow only when mispricing is large enough to justify action, allowing biased pressure to remain visible.
+
+**Behavioral Framework**: Reads `configs/GamblerFallacy/Rule/players.yml → independentassessor.config.extras.activation_threshold`, `quantity_scale`, and `max_order`.
+
+**Decision Process**:
+1. Hold unless `abs(deviation) > activation_threshold`.
+2. If `deviation < 0`, buy undervalued shares.
+3. If `deviation > 0`, sell overvalued shares.
+4. Cap quantity by `max_order`, cash, and holdings.
+
+**Worked Numerical Example**: With `deviation = -0.08`, `activation_threshold = 0.05`, `quantity_scale = 3000`, and `max_order = 500`, desired quantity is `min(500, 240) = 240`; the assessor buys 240 shares if cash permits.
+
+**Academic References**: Rabin (2002), Shleifer & Vishny (1997), De Bondt & Thaler (1985). See §2.3.
 
 ### §4.4 Arbitrageur
 
 **Summary**: Explicitly targets streak-based mispricing for profit. Functionally identical to IndependentAssessor in decision logic but conceptually represents a dedicated arbitrage strategy rather than passive fundamental investing. Together §4.3 and §4.4 constitute the rational stabilizing force whose combined capacity determines how quickly fallacy-driven deviations correct.
 
-**Theoretical Foundation**: Shleifer & Vishny (1997) limits to arbitrage; De Long et al. (1990) noise trader risk.
+**Theoretical and Empirical Basis**: Shleifer & Vishny (1997) limits to arbitrage; De Long et al. (1990) noise trader risk; Pontiff (2006) arbitrage-cost evidence.
+
+**Design Purpose**: Tests whether a dedicated mispricing exploiter can offset biased streak traders without erasing the phenomenon completely.
+
+**Behavioral Framework**: Uses `configs/GamblerFallacy/Rule/players.yml → arbitrageur.config.extras.activation_threshold`, `quantity_scale`, and `max_order`; these match the IndependentAssessor scale so both rational agents form a capacity-limited correction force.
+
+**Decision Process**:
+1. Hold while mispricing is small.
+2. Buy when price is sufficiently below fundamental.
+3. Sell when price is sufficiently above fundamental.
+4. Cap order size by arbitrage capital and inventory constraints.
+
+**Worked Numerical Example**: With `deviation = 0.07`, `activation_threshold = 0.05`, `quantity_scale = 3000`, and `max_order = 500`, desired quantity is 210; the arbitrageur sells 210 shares if available.
+
+**Academic References**: Shleifer & Vishny (1997), De Long et al. (1990), Pontiff (2006). See §2.3.
 
 ### §4.5 NoiseTrader
 
 **Summary**: Random uninformed trader providing baseline liquidity. Activates with 30% probability each round, trading 100–500 shares in a random direction. Critical role: noise trader's random buys and sells create apparent "streaks" in short price sequences that activate the gambler's fallacy and hot-hand beliefs in §4.1 and §4.2, making this agent the indirect trigger of the phenomenon.
 
-**Theoretical Foundation**: Black (1986) noise traders; De Long et al. (1990) noise trader risk.
+**Theoretical and Empirical Basis**: Black (1986) noise traders; De Long et al. (1990) noise trader risk.
+
+**Design Purpose**: Supplies baseline liquidity and random perturbations so the market does not become a deterministic two-force system.
+
+**Behavioral Framework**: Reads `trade_probability`, `min_order`, and `max_order` from `configs/GamblerFallacy/Rule/players.yml → noisetrader.config.extras`.
+
+**Decision Process**:
+1. Draw a Bernoulli participation signal using `trade_probability`.
+2. If inactive, hold.
+3. If active, choose buy or sell randomly with equal probability.
+4. Draw quantity uniformly from `[min_order, max_order]`, then cap by cash or holdings.
+
+**Worked Numerical Example**: With `trade_probability = 0.3`, `min_order = 100`, and `max_order = 500`, the trader is inactive in roughly 70% of rounds; when active, it submits a random buy or sell order in the configured size range.
+
+**Academic References**: Black (1986), De Long et al. (1990). See §2.3 and §8.2.
 
 ---
 
-## 5. Agent Diversity Verification
+## §5 Agent Diversity Verification
 
 | Diversity Criterion              | Met? | Evidence                                                                                                                 |
 |----------------------------------|------|--------------------------------------------------------------------------------------------------------------------------|
@@ -293,26 +356,29 @@ P(t+1) = P(t) + λ · D(t) + γ · [F − P(t)] + ε(t)
 
 ---
 
-## 6. Parameter Table
+## §6 Parameter Table
 
 | Parameter          | Symbol | Value    | Typical Range | Source                   | Description                                | Sensitivity |
 |--------------------|--------|----------|---------------|--------------------------|--------------------------------------------|-------------|
 | initial_price      | P(0)   | 100.0    | —             | Normalization            | Starting price                             | Low         |
 | fundamental_value  | F      | 100.0    | —             | Normalization            | Fundamental value                          | Medium      |
-| price_impact       | λ      | 0.001    | 0.0001–0.01   | LeBaron (2006)           | Price impact per unit demand               | High        |
-| mean_reversion     | γ      | 0.05     | 0.01–0.15     | Summers (1986)           | Mean reversion speed                       | High        |
-| noise_std          | σ      | 0.5      | 0.1–2.0       | Shiller (1981)           | Random noise std                           | Low         |
-| initial_cash       | —      | 100000.0 | —             | Normalization            | Per-agent cash                             | Low         |
-| initial_position   | —      | 1000     | 500–5000      | Normalization            | Initial shares                             | Medium      |
-| streak_threshold   | 0.02   | 0.02     | 0.01–0.05     | Croson & Sundali (2005)  | Deviation proxy for streak activation      | High        |
-| biased_scale       | —      | 5000     | 3000–8000     | Calibrated               | Biased agents' deviation-to-quantity scale | High        |
-| rational_threshold | 0.05   | 0.05     | 0.03–0.10     | Shleifer & Vishny (1997) | Rational activation threshold              | High        |
-| rational_scale     | —      | 3000     | 2000–5000     | Calibrated               | Rational agents' scale                     | Medium      |
-| trade_probability  | —      | 0.3      | 0.1–0.5       | Black (1986)             | NoiseTrader activation probability         | Low         |
+| price_impact       | λ      | 0.05       | 0.01–0.10     | LeBaron (2006)           | Config path: `market.config.extras.price_impact`; price impact per unit demand | High        |
+| mean_reversion     | γ      | 0.02       | 0.01–0.15     | Summers (1986)           | Config path: `market.config.extras.mean_reversion`; pull toward fundamental | High        |
+| noise_std          | σ      | 0.01       | 0.005–0.05    | Shiller (1981)           | Config path: `market.config.extras.noise_std`; stochastic perturbation | Low         |
+| initial_cash       | —      | 1,000,000; NoiseTrader 500,000 | — | Normalization | Config path: each investor `config.extras.initial_cash` | Low |
+| initial_position   | —      | 0          | 0–5000        | Normalization            | Config path: each investor `config.extras.initial_position` | Medium |
+| activation_threshold (biased) | θ_b | 0.02 | 0.01–0.05 | Croson & Sundali (2005) | Config paths: `streakreversaltrader` and `hothandtrader` extras | High |
+| quantity_scale (biased) | s_b | 5000 | 3000–8000 | Calibrated | Converts deviation magnitude to biased-agent order size | High |
+| max_order (biased) | q_b | 800 | 500–1000 | Pontiff (2006) capacity ratio | Config paths: biased-agent `max_order` | High |
+| activation_threshold (rational) | θ_r | 0.05 | 0.03–0.10 | Shleifer & Vishny (1997) | Config paths: `independentassessor` and `arbitrageur` extras | High |
+| quantity_scale (rational) | s_r | 3000 | 2000–5000 | Calibrated | Converts deviation magnitude to rational-agent order size | Medium |
+| max_order (rational/noise) | q_r | 500 | 300–800 | Pontiff (2006) | Config paths: rational/noise `max_order` | Medium |
+| trade_probability  | —      | 0.3        | 0.1–0.5       | Black (1986)             | Config path: `noisetrader.config.extras.trade_probability` | Low         |
+| min_order          | —      | 100        | 50–200        | Normalization            | Config path: `noisetrader.config.extras.min_order` | Low         |
 
 ---
 
-## 7. Communication and Round Structure
+## §7 Communication and Round Structure
 
 ```
 Round N (t = 1, 2, ..., T):
@@ -326,7 +392,7 @@ Round N (t = 1, 2, ..., T):
     Arbitrageur:          contrarian at |deviation| > 0.05
     NoiseTrader:          random 30% chance
 
-  Phase 3 — Orders: each investor → Market: {action, quantity}
+  Phase 3 — Orders: each investor → Market: {action, bid_price, quantity, reasoning, agent_type, strategy}
   Phase 4 — Clearing: Market computes D(t), price update, broadcast
 ```
 
@@ -334,7 +400,7 @@ Round N (t = 1, 2, ..., T):
 
 ---
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
 ### Case 1: Jegadeesh-Titman Momentum (1965–1989)
 
@@ -369,8 +435,8 @@ Round N (t = 1, 2, ..., T):
 
 | Parameter (§6)   | Historical Value                | Source                                                          | Calibration Implication                                           |
 |------------------|---------------------------------|-----------------------------------------------------------------|-------------------------------------------------------------------|
-| streak_threshold | 0.02 (≈ 2% deviation per round) | Jegadeesh & Titman (1993): momentum requires ≥1% monthly return | 2% deviation per round ≈ threshold for momentum signal activation |
-| mean_reversion   | 0.05 (slow; 3–5 year reversal)  | De Bondt & Thaler (1985)                                        | γ must be small enough to allow multi-round momentum              |
+| activation_threshold (biased) | 0.02 (≈ 2% deviation per round) | Jegadeesh & Titman (1993): momentum requires ≥1% monthly return | 2% deviation per round ≈ threshold for momentum signal activation |
+| mean_reversion   | 0.02 (slow; multi-round reversal) | De Bondt & Thaler (1985)                                      | γ must be small enough to allow multi-round momentum              |
 
 ---
 
@@ -443,7 +509,7 @@ Round N (t = 1, 2, ..., T):
 
 ---
 
-## 9. Variant Comparison Preview
+## §9 Variant Comparison Preview
 
 | Aspect                        | Rule                             | LLM                                 | RuleLLM                | Rag                             |
 |-------------------------------|----------------------------------|-------------------------------------|------------------------|---------------------------------|

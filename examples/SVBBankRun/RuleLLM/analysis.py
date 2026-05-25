@@ -1,17 +1,25 @@
 #!/usr/bin/env python
-"""SVBBankRun RuleLLM Simulation Analysis
+"""SVBBankRun RuleLLM analysis using the standard output contract."""
 
-Usage:
-    python examples/SVBBankRun/RuleLLM/analysis.py \
-        -c configs/SVBBankRun/RuleLLM/simulation.yml
-"""
+from __future__ import annotations
 
+from typing import Any, Dict
+
+from examples.standard_rule_analysis import run_standard_analysis
 from examples.SVBBankRun.Rule.analysis import (
     calculate_metrics,
     create_visualizations,
     load_simulation_data,
-    main,
 )
+
+SCENARIO = "SVBBankRun"
+DEFAULT_CONFIG = "configs/SVBBankRun/RuleLLM/simulation.yml"
+
+
+def main() -> Dict[str, Any]:
+    """Run SVBBankRun RuleLLM analysis."""
+    return run_standard_analysis(SCENARIO, DEFAULT_CONFIG)
+
 
 __all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations", "main"]
 

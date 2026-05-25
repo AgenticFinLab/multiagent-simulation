@@ -28,6 +28,48 @@ from masim.utils.history import HistoryBuffer
 logger = logging.getLogger("RepresentativenessBias")
 
 
+def _info_payload(message: Any) -> Any:
+    if hasattr(message, "payload"):
+        payload = message.payload
+        if isinstance(payload, dict) and "order" in payload:
+            return payload["order"]
+        if isinstance(payload, dict) and "market_data" in payload:
+            return payload["market_data"]
+        return payload
+    if isinstance(message, dict):
+        if "payload" in message:
+            payload = message["payload"]
+            if isinstance(payload, dict) and "order" in payload:
+                return payload["order"]
+            if isinstance(payload, dict) and "market_data" in payload:
+                return payload["market_data"]
+            return payload
+        if "order" in message:
+            return message["order"]
+        if "market_data" in message:
+            return message["market_data"]
+        return message
+    return message
+
+
+def _with_order_message(
+    identity: str, agent_type: str, decision: Dict[str, Any], price: float
+) -> Dict[str, Any]:
+    order = {
+        "type": "order",
+        "from": identity,
+        "action": decision["action"],
+        "bid_price": price,
+        "quantity": decision["quantity"],
+        "agent_type": agent_type,
+        "reasoning": decision["reasoning"],
+    }
+    return {
+        **decision,
+        "outbound_messages": [{"payload": order, "content_type": "order"}],
+    }
+
+
 class Market(GeneralPlayer):
     """
     Market agent for RepresentativenessBias simulation.
@@ -59,8 +101,8 @@ class Market(GeneralPlayer):
     def _extract_orders(self, observation) -> list:
         orders = []
         for msg in observation.inbounds:
-            payload = msg["payload"]
-            if payload["type"] == "order":
+            payload = _info_payload(msg)
+            if isinstance(payload, dict) and payload["type"] == "order":
                 orders.append(
                     {
                         "agent_id": payload["from"],
@@ -105,8 +147,22 @@ class Market(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
-        deviation = (price - fundamental) / fundamental if fundamental > 0 else 0
-        return {"price": price, "fundamental": fundamental, "deviation": deviation}
+        if fundamental <= 0:
+            raise ValueError("fundamental must be positive")
+        deviation = (price - fundamental) / fundamental
+        market_update = {
+            "type": "market_update",
+            "price": price,
+            "fundamental": fundamental,
+            "deviation": deviation,
+            "round": self.state.custom_state["round"],
+        }
+        return {
+            **market_update,
+            "outbound_messages": [
+                {"payload": market_update, "content_type": "market_update"}
+            ],
+        }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
         market_update = {
@@ -130,10 +186,12 @@ class Market(GeneralPlayer):
 
 class PatternMatcher(GeneralPlayer):
     """
-    Matches current price patterns to historical prototypes, ignoring base rates
+    Matches current price patterns to historical prototypes, ignoring base rates.
 
-    Theoretical Basis: Representativeness heuristic (Kahneman & Tversky, 1972)
-    Market Role: destabilizing
+    Theory: simulation-bases.md §4.1 — PatternMatcher
+    Theoretical basis: representativeness heuristic; salient prototypes
+    dominate base-rate reasoning.
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -146,8 +204,8 @@ class PatternMatcher(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg["payload"]
-            if payload["type"] == "market_update":
+            payload = _info_payload(msg)
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -156,7 +214,8 @@ class PatternMatcher(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = self.state.custom_state["deviation"]
-        return self._make_decision(price, fundamental, deviation)
+        decision = self._make_decision(price, fundamental, deviation)
+        return _with_order_message(self.identity, self.__class__.__name__, decision, price)
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -173,12 +232,20 @@ class PatternMatcher(GeneralPlayer):
             if deviation > 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
+                    return {
+                        "action": "buy",
+                        "quantity": buy_qty,
+                        "reasoning": "Prototype match implies bullish continuation.",
+                    }
             else:
                 sell_qty = min(qty, max(position, 0))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                    return {
+                        "action": "sell",
+                        "quantity": sell_qty,
+                        "reasoning": "Prototype match implies bearish continuation.",
+                    }
+        return {"action": "hold", "quantity": 0, "reasoning": "No salient pattern threshold crossed."}
 
     async def act(self, decision_payload: dict) -> Action:
         action = decision_payload["action"]
@@ -188,8 +255,10 @@ class PatternMatcher(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": self.state.custom_state["price"],
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
+            "reasoning": decision_payload["reasoning"],
         }
 
         return Action(
@@ -204,10 +273,11 @@ class PatternMatcher(GeneralPlayer):
 
 class CategoryOvergeneralizer(GeneralPlayer):
     """
-    Overgeneralizes from small samples, treating stocks as belonging to dramatic categories
+    Overgeneralizes from small samples into dramatic stock categories.
 
-    Theoretical Basis: Base rate neglect (Grether, 1980)
-    Market Role: destabilizing
+    Theory: simulation-bases.md §4.2 — CategoryOvergeneralizer
+    Theoretical basis: base-rate neglect and small-sample extrapolation.
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -220,8 +290,8 @@ class CategoryOvergeneralizer(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg["payload"]
-            if payload["type"] == "market_update":
+            payload = _info_payload(msg)
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -230,7 +300,8 @@ class CategoryOvergeneralizer(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = self.state.custom_state["deviation"]
-        return self._make_decision(price, fundamental, deviation)
+        decision = self._make_decision(price, fundamental, deviation)
+        return _with_order_message(self.identity, self.__class__.__name__, decision, price)
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -247,12 +318,20 @@ class CategoryOvergeneralizer(GeneralPlayer):
             if deviation > 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
+                    return {
+                        "action": "buy",
+                        "quantity": buy_qty,
+                        "reasoning": "Small-sample category assignment is bullish.",
+                    }
             else:
                 sell_qty = min(qty, max(position, 0))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                    return {
+                        "action": "sell",
+                        "quantity": sell_qty,
+                        "reasoning": "Small-sample category assignment is bearish.",
+                    }
+        return {"action": "hold", "quantity": 0, "reasoning": "Category evidence is below threshold."}
 
     async def act(self, decision_payload: dict) -> Action:
         action = decision_payload["action"]
@@ -262,8 +341,10 @@ class CategoryOvergeneralizer(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": self.state.custom_state["price"],
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
+            "reasoning": decision_payload["reasoning"],
         }
 
         return Action(
@@ -278,10 +359,11 @@ class CategoryOvergeneralizer(GeneralPlayer):
 
 class BayesianUpdater(GeneralPlayer):
     """
-    Correctly updates beliefs using Bayes rule, weighing base rates and new evidence
+    Correctly updates beliefs using base rates and new evidence.
 
-    Theoretical Basis: Bayesian rationality (Grether, 1980 baseline)
-    Market Role: stabilizing
+    Theory: simulation-bases.md §4.3 — BayesianUpdater
+    Theoretical basis: Bayesian rationality as a stabilizing benchmark.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -294,8 +376,8 @@ class BayesianUpdater(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg["payload"]
-            if payload["type"] == "market_update":
+            payload = _info_payload(msg)
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -304,7 +386,8 @@ class BayesianUpdater(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = self.state.custom_state["deviation"]
-        return self._make_decision(price, fundamental, deviation)
+        decision = self._make_decision(price, fundamental, deviation)
+        return _with_order_message(self.identity, self.__class__.__name__, decision, price)
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -321,12 +404,20 @@ class BayesianUpdater(GeneralPlayer):
             if deviation < 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
+                    return {
+                        "action": "buy",
+                        "quantity": buy_qty,
+                        "reasoning": "Bayesian update identifies undervaluation.",
+                    }
             else:
                 sell_qty = min(qty, max(position, 0))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                    return {
+                        "action": "sell",
+                        "quantity": sell_qty,
+                        "reasoning": "Bayesian update identifies overvaluation.",
+                    }
+        return {"action": "hold", "quantity": 0, "reasoning": "Evidence does not overcome the base rate."}
 
     async def act(self, decision_payload: dict) -> Action:
         action = decision_payload["action"]
@@ -336,8 +427,10 @@ class BayesianUpdater(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": self.state.custom_state["price"],
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
+            "reasoning": decision_payload["reasoning"],
         }
 
         return Action(
@@ -352,10 +445,11 @@ class BayesianUpdater(GeneralPlayer):
 
 class ContrarianStatistical(GeneralPlayer):
     """
-    Trades against pattern-matching mispricing by exploiting base rate deviations
+    Trades against pattern-matching mispricing and base-rate deviations.
 
-    Theoretical Basis: Contrarian strategy (Barberis et al., 1998)
-    Market Role: stabilizing
+    Theory: simulation-bases.md §4.4 — ContrarianStatistical
+    Theoretical basis: statistical arbitrage against biased beliefs.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -368,8 +462,8 @@ class ContrarianStatistical(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg["payload"]
-            if payload["type"] == "market_update":
+            payload = _info_payload(msg)
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -378,7 +472,8 @@ class ContrarianStatistical(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = self.state.custom_state["deviation"]
-        return self._make_decision(price, fundamental, deviation)
+        decision = self._make_decision(price, fundamental, deviation)
+        return _with_order_message(self.identity, self.__class__.__name__, decision, price)
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -395,12 +490,20 @@ class ContrarianStatistical(GeneralPlayer):
             if deviation < 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
+                    return {
+                        "action": "buy",
+                        "quantity": buy_qty,
+                        "reasoning": "Contrarian signal identifies underpricing.",
+                    }
             else:
                 sell_qty = min(qty, max(position, 0))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                    return {
+                        "action": "sell",
+                        "quantity": sell_qty,
+                        "reasoning": "Contrarian signal identifies overpricing.",
+                    }
+        return {"action": "hold", "quantity": 0, "reasoning": "Mispricing is below contrarian threshold."}
 
     async def act(self, decision_payload: dict) -> Action:
         action = decision_payload["action"]
@@ -410,8 +513,10 @@ class ContrarianStatistical(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": self.state.custom_state["price"],
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
+            "reasoning": decision_payload["reasoning"],
         }
 
         return Action(
@@ -426,10 +531,11 @@ class ContrarianStatistical(GeneralPlayer):
 
 class NoiseTrader(GeneralPlayer):
     """
-    Random uninformed trader providing baseline liquidity
+    Random uninformed trader providing baseline liquidity.
 
-    Theoretical Basis: Noise trader model (Black, 1986)
-    Market Role: neutral
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+    Theoretical basis: noise-trader models of uninformed order flow.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     async def perceive(self, observation, prev_result=None) -> None:
@@ -442,8 +548,8 @@ class NoiseTrader(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
 
         for msg in observation.inbounds:
-            payload = msg["payload"]
-            if payload["type"] == "market_update":
+            payload = _info_payload(msg)
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -452,7 +558,8 @@ class NoiseTrader(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = self.state.custom_state["deviation"]
-        return self._make_decision(price, fundamental, deviation)
+        decision = self._make_decision(price, fundamental, deviation)
+        return _with_order_message(self.identity, self.__class__.__name__, decision, price)
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -463,7 +570,7 @@ class NoiseTrader(GeneralPlayer):
         position = self.state.custom_state["position"]
         _trade_probability = extras["trade_probability"]
 
-        if random.random() < 0.3:
+        if random.random() < _trade_probability:
             qty = random.randint(100, 500)
             action = "buy" if random.random() > 0.5 else "sell"
             if action == "buy":
@@ -471,8 +578,12 @@ class NoiseTrader(GeneralPlayer):
             else:
                 qty = min(qty, max(position, 0))
             if qty > 0:
-                return {"action": action, "quantity": qty}
-        return {"action": "hold", "quantity": 0}
+                return {
+                    "action": action,
+                    "quantity": qty,
+                    "reasoning": "Random liquidity trade from configured probability.",
+                }
+        return {"action": "hold", "quantity": 0, "reasoning": "Random draw produced no trade."}
 
     async def act(self, decision_payload: dict) -> Action:
         action = decision_payload["action"]
@@ -482,8 +593,10 @@ class NoiseTrader(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": self.state.custom_state["price"],
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
+            "reasoning": decision_payload["reasoning"],
         }
 
         return Action(

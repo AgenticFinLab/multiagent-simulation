@@ -52,7 +52,7 @@ rulellm_carry_trader:
         sys_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_CARRY_TRADER_SYS"
         user_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -82,7 +82,7 @@ rulellm_leveraged_carry_fund:
         sys_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_LEVERAGED_CARRY_FUND_SYS"
         user_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -112,7 +112,7 @@ rulellm_funding_currency_buyer:
         sys_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_FUNDING_CURRENCY_BUYER_SYS"
         user_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -138,10 +138,10 @@ rulellm_hedged_carry_trader:
       initial_position: 0.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_CENTRAL_BANK_INTERVENER_SYS"
+        sys_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_HEDGED_CARRY_TRADER_SYS"
         user_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.2
           max_tokens: 512
@@ -171,7 +171,7 @@ rulellm_noise_trader:
         sys_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.CarryTradeUnwind.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
           max_tokens: 512

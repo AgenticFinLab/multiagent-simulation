@@ -1,0 +1,128 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": -0.021707885455910514,
+      "max_abs_deviation_pct": 0.13527289497392303,
+      "mean_abs_deviation_pct": 0.037990291994439145
+    },
+    "price_metrics": {
+      "final": 99.97829211454409,
+      "initial": 100.01202843483013,
+      "max": 100.13527289497392,
+      "mean": 100.03471566184919,
+      "min": 99.97454239484944,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 0.18086726335155998,
+      "max_drawdown_pct": -0.031218481175031676,
+      "volatility_pct": 0.01139356664621558
+    },
+    "volume_metrics": {
+      "mean_volume": 0.0,
+      "total_volume": 0.0
+    }
+  },
+  "rag_knowledge_effect": {
+    "aggregate": {
+      "retrieval_fallback_rate": 0.0,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_success_rounds": 1600,
+      "target_met": true,
+      "total_rag_rounds": 1600
+    },
+    "per_agent": {
+      "bayesianupdater": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "categoryovergeneralizer_1": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "categoryovergeneralizer_2": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "contrarianstatistical": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "noisetrader_1": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "noisetrader_2": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "patternmatcher_1": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      },
+      "patternmatcher_2": {
+        "retrieval_fallback_rate": 0.0,
+        "retrieval_fallback_rounds": 0,
+        "retrieval_success_rate": 1.0,
+        "retrieval_success_rounds": 200,
+        "total_rag_rounds": 200
+      }
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "RepresentativenessBias",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 0.135
+      },
+      "Volatility Sanity": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 0.181
+      }
+    },
+    "interpretation": "=== RepresentativenessBias SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 100.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 0.14%\n    Expected: nonzero but bounded deviation\n    Score: 100.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 0.18%\n    Expected: bounded annualized volatility\n    Score: 100.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe RepresentativenessBias run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 100.0%",
+    "is_valid": true,
+    "score": 1.0
+  }
+}

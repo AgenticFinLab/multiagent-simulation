@@ -180,13 +180,14 @@ def _compute_agent_vwap(
         total_sell = 0.0
         for rnd, payload in round_payloads.items():
             qty = float(payload["quantity"])
+            action = payload["action"]
             price = market_prices[rnd]
             abs_qty = abs(qty)
             price_volume_sum += abs_qty * price
             total_vol += abs_qty
-            if qty > 0:
+            if action == "buy":
                 total_buy += qty
-            else:
+            elif action == "sell":
                 total_sell += abs_qty
         vwap_data[aid] = {
             "vwap": price_volume_sum / total_vol if total_vol > 0 else 0.0,
@@ -506,8 +507,8 @@ def _create_visualizations(
     Plots
     -----
     00_investor_bids.png   : Investor Bidding Curves (headline chart)
-    01_price_dynamics.png  : Price vs Fundamental + Deviation %
-    02_crash_dynamics.png  : Rolling Volatility + Return Autocorrelation
+    01_blackmonday1987_dynamics.png  : Price vs Fundamental + Deviation %
+    02_blackmonday1987_analysis.png  : Rolling Volatility + Return Autocorrelation
     03_summary.png         : Agent VWAP comparison + Volume
     """
     rounds_sorted = sorted(market_prices.keys())
@@ -614,7 +615,7 @@ def _create_visualizations(
 
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "01_price_dynamics.png"),
+        os.path.join(output_dir, "01_blackmonday1987_dynamics.png"),
         dpi=150,
         bbox_inches="tight",
     )
@@ -652,7 +653,7 @@ def _create_visualizations(
 
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "02_crash_dynamics.png"),
+        os.path.join(output_dir, "02_blackmonday1987_analysis.png"),
         dpi=150,
         bbox_inches="tight",
     )

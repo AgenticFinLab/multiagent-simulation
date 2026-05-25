@@ -10,14 +10,14 @@ market:
   name: "Market"
   class: "examples.SVBBankRun.Rule.players:Market"
   num_instances: 1
+  persona: !include ../Rag/persona.yml
   config:
     identity: "market"
     role: market
     steps_per_turn: 1
     group_tags: [market]
-    record_path: "EXPERIMENT/SVBBankRun/Rag/records/market"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/SVBBankRun/Rag/records/market"
       initial_price: 100.0
       fundamental_value: 100.0
       price_impact: 0.025
@@ -28,14 +28,14 @@ depositor:
   name: "Depositor"
   class: "examples.SVBBankRun.Rag.players:RagLLMDepositor"
   num_instances: 4
+  persona: !include ../Rag/persona.yml
   config:
     identity: "depositor"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/Rag/records/depositor"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/SVBBankRun/Rag/records/depositor"
       initial_cash: 1000000.0
       initial_position: 600
       initial_price: 100.0
@@ -49,12 +49,16 @@ depositor:
         rag:
           from_global_index_dir: ["rag_index"]
           embed_type: "litellm"
-          embed_model: "hunyuan/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
-        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_DEPOSITOR_SYS"
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_DEPOSITOR_SYS"
         user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -63,14 +67,14 @@ socialmediainfluencer:
   name: "SocialMediaInfluencer"
   class: "examples.SVBBankRun.Rag.players:RagLLMSocialMediaInfluencer"
   num_instances: 2
+  persona: !include ../Rag/persona.yml
   config:
     identity: "socialmediainfluencer"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/Rag/records/socialmediainfluencer"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/SVBBankRun/Rag/records/socialmediainfluencer"
       initial_cash: 800000.0
       initial_position: 500
       initial_price: 100.0
@@ -83,12 +87,16 @@ socialmediainfluencer:
         rag:
           from_global_index_dir: ["rag_index"]
           embed_type: "litellm"
-          embed_model: "hunyuan/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
-        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_SOCIAL_MEDIA_INFLUENCER_SYS"
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_SOCIAL_MEDIA_INFLUENCER_SYS"
         user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -97,14 +105,14 @@ bankmanager:
   name: "BankManager"
   class: "examples.SVBBankRun.Rag.players:RagLLMBankManager"
   num_instances: 2
+  persona: !include ../Rag/persona.yml
   config:
     identity: "bankmanager"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/Rag/records/bankmanager"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/SVBBankRun/Rag/records/bankmanager"
       initial_cash: 3000000.0
       initial_position: 800
       initial_price: 100.0
@@ -117,12 +125,16 @@ bankmanager:
         rag:
           from_global_index_dir: ["rag_index"]
           embed_type: "litellm"
-          embed_model: "hunyuan/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
-        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_BANK_MANAGER_SYS"
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_BANK_MANAGER_SYS"
         user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -131,14 +143,14 @@ regulator:
   name: "Regulator"
   class: "examples.SVBBankRun.Rag.players:RagLLMRegulator"
   num_instances: 1
+  persona: !include ../Rag/persona.yml
   config:
     identity: "regulator"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/Rag/records/regulator"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/SVBBankRun/Rag/records/regulator"
       initial_cash: 10000000.0
       initial_position: 0
       initial_price: 100.0
@@ -152,12 +164,16 @@ regulator:
         rag:
           from_global_index_dir: ["rag_index"]
           embed_type: "litellm"
-          embed_model: "hunyuan/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
-        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_REGULATOR_SYS"
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_REGULATOR_SYS"
         user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -166,14 +182,14 @@ bondtrader:
   name: "BondTrader"
   class: "examples.SVBBankRun.Rag.players:RagLLMBondTrader"
   num_instances: 2
+  persona: !include ../Rag/persona.yml
   config:
     identity: "bondtrader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SVBBankRun/Rag/records/bondtrader"
-    persona: !include ../Rag/persona.yml
     extras:
+      record_path: "EXPERIMENT/SVBBankRun/Rag/records/bondtrader"
       initial_cash: 2000000.0
       initial_position: 400
       initial_price: 100.0
@@ -186,13 +202,16 @@ bondtrader:
         rag:
           from_global_index_dir: ["rag_index"]
           embed_type: "litellm"
-          embed_model: "hunyuan/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          chunk_size: 512
+          chunk_overlap: 64
           top_k: 3
       llm:
-        sys_message: "examples.SVBBankRun.Rag.prompts:RAG_BOND_TRADER_SYS"
+        sys_message: "examples.SVBBankRun.Rag.prompts:RAGLLM_BOND_TRADER_SYS"
         user_message: "examples.SVBBankRun.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600
-

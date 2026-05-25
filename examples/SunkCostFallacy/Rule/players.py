@@ -53,13 +53,16 @@ class Market(GeneralPlayer):
         orders = []
         if observation.inbounds:
             for inb in observation.inbounds:
-                payload = inb.payload
+                payload = inb.payload if hasattr(inb, "payload") else inb
+                content_type = getattr(inb, "content_type", None)
                 if (
                     isinstance(payload, dict)
-                    and payload["content_type"] == "investor_order"
+                    and (
+                        content_type == "investor_order"
+                        or payload.get("type") == "order"
+                        or "action" in payload
+                    )
                 ):
-                    orders.append(payload)
-                elif isinstance(payload, dict) and "action" in payload:
                     orders.append(payload)
 
         price = self.state.custom_state["price"]
@@ -120,7 +123,12 @@ class BaseInvestor(GeneralPlayer):
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
     ) -> Dict[str, Any]:
-        return {"action": "hold", "quantity": 0}
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "No configured sunk-cost or reallocation trigger fired.",
+        }
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None
@@ -133,8 +141,8 @@ class BaseInvestor(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
         if observation.inbounds:
             for inb in observation.inbounds:
-                market_data = inb.payload
-                if isinstance(market_data, dict):
+                market_data = inb.payload if hasattr(inb, "payload") else inb
+                if isinstance(market_data, dict) and "price" in market_data:
                     self.state.custom_state["price"] = market_data["price"]
                     self.state.custom_state["fundamental"] = market_data["fundamental"]
                     self.state.custom_state["deviation"] = market_data["deviation"]
@@ -143,10 +151,11 @@ class BaseInvestor(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = self.state.custom_state["deviation"]
-        order = self._make_decision(price, fundamental, deviation)
+        decision = self._make_decision(price, fundamental, deviation)
 
-        action = order["action"]
-        quantity = order["quantity"]
+        action = decision["action"]
+        bid_price = float(decision["bid_price"])
+        quantity = int(decision["quantity"])
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         if action == "buy" and quantity > 0:
@@ -156,9 +165,17 @@ class BaseInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
+        order = {
+            "type": "order",
+            "from": self.identity,
+            "action": action,
+            "bid_price": bid_price,
+            "quantity": quantity,
+            "agent_type": self.__class__.__name__,
+            "reasoning": str(decision["reasoning"])[:120],
+        }
         return {
             **order,
-            "agent_type": self.__class__.__name__,
             "outbound_messages": [{"payload": order, "content_type": "investor_order"}],
         }
 
@@ -173,58 +190,87 @@ class BaseInvestor(GeneralPlayer):
 class SunkCostHolder(BaseInvestor):
     """Holds losing positions because of prior investment, refuses to cut losses.
 
-    Theoretical Basis: Sunk cost escalation (Arkes & Blumer, 1985)
-    Market Role: destabilizing
+    Theory: simulation-bases.md §4.1 — SunkCostHolder
+    Theoretical basis: sunk cost escalation (Arkes & Blumer, 1985).
+    See simulation-bases.md §4.1 for mathematical model.
     """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
     ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
-        position = self.state.custom_state["position"]
-        if abs(deviation) > 0.02:
-            qty = min(800, int(abs(deviation) * 5000))
-            if deviation > 0:
-                buy_qty = min(qty, int(cash / price) if price > 0 else 0)
-                if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
-            else:
-                sell_qty = min(qty, int(position))
-                if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+        extras = self.config.extras
+        hold_threshold = float(extras["hold_threshold"])
+        base_size = int(extras["base_size"])
+
+        if deviation > hold_threshold:
+            qty = max(1, int(base_size * deviation / hold_threshold))
+            buy_qty = min(qty, int(cash / price) if price > 0 else 0)
+            if buy_qty > 0:
+                return {
+                    "action": "buy",
+                    "bid_price": price,
+                    "quantity": buy_qty,
+                    "reasoning": "Positive performance reinforces attachment to the prior investment.",
+                }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Sunk-cost attachment prevents selling the losing position.",
+        }
 
 
 class CommitmentEscalator(BaseInvestor):
     """Doubles down on losing positions, increasing exposure to justify prior commitment.
 
-    Theoretical Basis: Escalation of commitment (Staw, 1976)
-    Market Role: destabilizing
+    Theory: simulation-bases.md §4.2 — CommitmentEscalator
+    Theoretical basis: escalation of commitment (Staw, 1976).
+    See simulation-bases.md §4.2 for mathematical model.
     """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
     ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
-        position = self.state.custom_state["position"]
-        if abs(deviation) > 0.02:
-            qty = min(800, int(abs(deviation) * 5000))
-            if deviation > 0:
-                buy_qty = min(qty, int(cash / price) if price > 0 else 0)
-                if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
-            else:
-                sell_qty = min(qty, int(position))
-                if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+        extras = self.config.extras
+        threshold = float(extras["escalation_threshold"])
+        escalation_size = int(extras["escalation_size"])
+
+        if deviation < -threshold:
+            qty = max(1, int(escalation_size * abs(deviation) / threshold))
+            buy_qty = min(qty, int(cash / price) if price > 0 else 0)
+            if buy_qty > 0:
+                return {
+                    "action": "buy",
+                    "bid_price": price,
+                    "quantity": buy_qty,
+                    "reasoning": "Escalation of commitment buys more after losses to average down.",
+                }
+        if deviation > threshold:
+            qty = max(1, int(escalation_size * 0.5 * deviation / threshold))
+            buy_qty = min(qty, int(cash / price) if price > 0 else 0)
+            if buy_qty > 0:
+                return {
+                    "action": "buy",
+                    "bid_price": price,
+                    "quantity": buy_qty,
+                    "reasoning": "Prior commitment is reinforced by favorable price movement.",
+                }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Commitment remains high but deviation is below escalation threshold.",
+        }
 
 
 class RationalCutter(BaseInvestor):
     """Cuts losses based on forward-looking assessment, ignores past investment.
 
-    Theoretical Basis: Forward-looking rationality (Dawes, 1998 baseline)
-    Market Role: stabilizing
+    Theory: simulation-bases.md §4.3 — RationalCutter
+    Theoretical basis: forward-looking rationality.
+    See simulation-bases.md §4.3 for mathematical model.
     """
 
     def _make_decision(
@@ -232,24 +278,44 @@ class RationalCutter(BaseInvestor):
     ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        if abs(deviation) > 0.05:
-            qty = min(500, int(abs(deviation) * 3000))
+        extras = self.config.extras
+        threshold = float(extras["cut_threshold"])
+        position_size = int(extras["position_size"])
+
+        if abs(deviation) > threshold:
+            qty = max(1, int(position_size * abs(deviation) / threshold))
             if deviation < 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
+                    return {
+                        "action": "buy",
+                        "bid_price": price,
+                        "quantity": buy_qty,
+                        "reasoning": "Forward-looking value signal dominates sunk-cost emotions.",
+                    }
             else:
                 sell_qty = min(qty, int(position))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                    return {
+                        "action": "sell",
+                        "bid_price": price,
+                        "quantity": sell_qty,
+                        "reasoning": "Forward-looking overvaluation signal justifies cutting exposure.",
+                    }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Forward-looking signal is inside the rational cut band.",
+        }
 
 
 class OpportunityCostTrader(BaseInvestor):
     """Evaluates positions by opportunity cost, reallocates capital from underperformers.
 
-    Theoretical Basis: Opportunity cost analysis (Thaler, 1980 baseline)
-    Market Role: stabilizing
+    Theory: simulation-bases.md §4.4 — OpportunityCostTrader
+    Theoretical basis: opportunity cost analysis.
+    See simulation-bases.md §4.4 for mathematical model.
     """
 
     def _make_decision(
@@ -257,24 +323,44 @@ class OpportunityCostTrader(BaseInvestor):
     ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        if abs(deviation) > 0.05:
-            qty = min(500, int(abs(deviation) * 3000))
+        extras = self.config.extras
+        threshold = float(extras["realloc_threshold"])
+        position_size = int(extras["position_size"])
+
+        if abs(deviation) > threshold:
+            qty = max(1, int(position_size * abs(deviation) / threshold))
             if deviation < 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
+                    return {
+                        "action": "buy",
+                        "bid_price": price,
+                        "quantity": buy_qty,
+                        "reasoning": "Opportunity-cost screen reallocates capital into undervalued value.",
+                    }
             else:
                 sell_qty = min(qty, int(position))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                    return {
+                        "action": "sell",
+                        "bid_price": price,
+                        "quantity": sell_qty,
+                        "reasoning": "Opportunity-cost screen reallocates away from overvalued exposure.",
+                    }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Current position remains acceptable relative to alternatives.",
+        }
 
 
 class NoiseTrader(BaseInvestor):
     """Random uninformed trader providing baseline liquidity.
 
-    Theoretical Basis: Noise trader model (Black, 1986)
-    Market Role: neutral
+    Theory: simulation-bases.md §4.5 — NoiseTrader
+    Theoretical basis: noise-trader model.
+    See simulation-bases.md §4.5 for mathematical model.
     """
 
     def _make_decision(
@@ -282,16 +368,30 @@ class NoiseTrader(BaseInvestor):
     ) -> Dict[str, Any]:
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        if random.random() < 0.3:
-            qty = random.randint(100, 500)
+        extras = self.config.extras
+        trade_probability = float(extras["trade_probability"])
+        noise_size = int(extras["noise_size"])
+
+        if random.random() < trade_probability:
+            qty = random.randint(1, noise_size)
             action = "buy" if random.random() > 0.5 else "sell"
             if action == "buy":
                 qty = min(qty, int(cash / price) if price > 0 else 0)
             else:
                 qty = min(qty, int(position))
             if qty > 0:
-                return {"action": action, "quantity": qty}
-        return {"action": "hold", "quantity": 0}
+                return {
+                    "action": action,
+                    "bid_price": price,
+                    "quantity": qty,
+                    "reasoning": "Random noise-trader liquidity order.",
+                }
+        return {
+            "action": "hold",
+            "bid_price": price,
+            "quantity": 0,
+            "reasoning": "Noise trader did not activate this round.",
+        }
 
 
 __all__ = [

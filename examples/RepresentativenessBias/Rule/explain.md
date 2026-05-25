@@ -1,52 +1,95 @@
-# RepresentativenessBias Simulation
+# RepresentativenessBias Rule — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | Representativeness heuristic causes traders to judge probability by similarity to prototypes rather than base rates |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | RepresentativenessBias simulation with PatternMatcher, CategoryOvergeneralizer, BayesianUpdater |
-| **Academic Value** | Understanding representativenessbias through multi-agent simulation |
+|---|---|
+| Variant | Rule |
+| Simulation | RepresentativenessBias |
+| Decision Mechanism | Deterministic prototype, category, Bayesian, contrarian, and noise rules |
+| Theory Reference | `simulation-bases.md §2` and `§4` |
+| Market Broadcast | `price`, `fundamental`, `deviation`, `round` |
 
-## Theoretical Foundation
+## §2 Theory → Implementation Mapping
 
-- Kahneman & Tversky (1972): Subjective probability - A judgment of representativeness
-- Grether (1980): Bayes rule as a descriptive model
-- Barberis, Shleifer & Vishny (1998): A model of investor sentiment
-## Agent Descriptions
+### §2.1 PatternMatcher (simulation-bases.md §4.1)
 
-### PatternMatcher
-**Theoretical Basis**: Representativeness heuristic (Kahneman & Tversky, 1972)
-**Market Role**: destabilizing
-**Description**: Matches current price patterns to historical prototypes, ignoring base rates
-**Parameters**: pattern_sensitivity=0.8, base_rate_ignore=0.7
+| Theory Component | Implementation |
+|---|---|
+| Prototype matching | `PatternMatcher._make_decision()` trades when `abs(deviation) > 0.02` |
+| Base-rate neglect | Trades in the same direction as salient deviation rather than against fundamental |
+| Quantity scaling | `min(800, int(abs(deviation) * 5000))` |
 
-### CategoryOvergeneralizer
-**Theoretical Basis**: Base rate neglect (Grether, 1980)
-**Market Role**: destabilizing
-**Description**: Overgeneralizes from small samples, treating stocks as belonging to dramatic categories
-**Parameters**: category_weight=2.0, sample_bias=0.6
+### §2.2 CategoryOvergeneralizer (simulation-bases.md §4.2)
 
-### BayesianUpdater
-**Theoretical Basis**: Bayesian rationality (Grether, 1980 baseline)
-**Market Role**: stabilizing
-**Description**: Correctly updates beliefs using Bayes rule, weighing base rates and new evidence
-**Parameters**: base_rate_weight=1.0, evidence_weight=1.0
+| Theory Component | Implementation |
+|---|---|
+| Small-sample category extrapolation | `CategoryOvergeneralizer._make_decision()` uses the same deviation trigger as PatternMatcher |
+| Category narrative strength | Config exposes `category_weight` and `sample_bias` for scenario documentation and prompt parity |
+| Order cap | Quantity is capped by cash or current position |
 
-### ContrarianStatistical
-**Theoretical Basis**: Contrarian strategy (Barberis et al., 1998)
-**Market Role**: stabilizing
-**Description**: Trades against pattern-matching mispricing by exploiting base rate deviations
-**Parameters**: contrarian_threshold=0.1, position_size=450
+### §2.3 BayesianUpdater (simulation-bases.md §4.3)
 
-### NoiseTrader
-**Theoretical Basis**: Noise trader model (Black, 1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader providing baseline liquidity
-**Parameters**: trade_probability=0.3
+| Theory Component | Implementation |
+|---|---|
+| Base-rate disciplined correction | `BayesianUpdater._make_decision()` activates only when `abs(deviation) > 0.05` |
+| Undervaluation / overvaluation | Buys negative deviations and sells positive deviations |
+| Quantity scaling | `min(500, int(abs(deviation) * 3000))` |
 
+### §2.4 ContrarianStatistical (simulation-bases.md §4.4)
 
-## Market Dynamics
+| Theory Component | Implementation |
+|---|---|
+| Arbitrage against biased beliefs | `ContrarianStatistical._make_decision()` trades against large deviations |
+| Capital discipline | Quantity capped at 500 and then by cash or position |
+| Correction threshold | Uses the same 5% activation band as the Bayesian benchmark |
 
-Price follows: P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Uninformed liquidity | `NoiseTrader._make_decision()` uses `trade_probability` from config |
+| Random direction | Buy/sell chosen by random draw |
+| Order size | Random integer between 100 and 500, capped by state |
+
+## §3 Market Mechanism
+
+`Market._clear_market()` implements the root price equation:
+
+```text
+P_{t+1} = max(0.01, P_t + price_impact * NetDemand_t + mean_reversion * (F - P_t) + noise_t)
+```
+
+## §4 Variant Architecture
+
+Rule agents receive market state, compute deterministic actions, emit canonical
+orders with `action`, `bid_price`, `quantity`, `agent_type`, and `reasoning`,
+and update cash/position during `act()`.
+
+## §5 Config Reference
+
+Primary config: `configs/RepresentativenessBias/Rule/players.yml`.
+Key extras include `pattern_sensitivity`, `base_rate_ignore`, `category_weight`,
+`sample_bias`, `base_rate_weight`, `evidence_weight`, `contrarian_threshold`,
+and `trade_probability`.
+
+## §6 Running Instructions
+
+```bash
+python examples/RepresentativenessBias/Rule/run_representativenessbias.py \
+  -c configs/RepresentativenessBias/Rule/simulation.yml
+```
+
+## §7 Expected Behavior
+
+PatternMatcher and CategoryOvergeneralizer should create early directional
+pressure from salient deviations. BayesianUpdater and ContrarianStatistical
+should offset deviations after larger mispricing appears.
+
+## §8 References
+
+See `simulation-bases.md §2` for full citations.
+
+## §9 Variant Comparison
+
+See `simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison.

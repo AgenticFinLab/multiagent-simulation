@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "Rag",
+  "omitted_raw_artifact_bytes": 86974400,
+  "omitted_raw_artifact_files": 1692,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 64991099,
+      "file_count": 1680,
+      "name": "records",
+      "source_path": "samples/MomentumEffect/Rag/artifacts/records"
+    },
+    {
+      "bytes": 21897595,
+      "file_count": 10,
+      "name": "communication",
+      "source_path": "samples/MomentumEffect/Rag/artifacts/communication"
+    },
+    {
+      "bytes": 85706,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/MomentumEffect/Rag/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/MomentumEffect/Rag/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "MomentumEffect__Rag",
+  "scenario": "MomentumEffect",
+  "source_resource_pack_sample_path": "samples/MomentumEffect/Rag",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/MomentumEffect/Rag"
+}

@@ -34,8 +34,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your pattern matching analysis of current market conditions</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_CATEGORY_OVERGENERALIZER_PROMPT = """You are a category-overgeneralizing investor in financial markets.
 
@@ -65,8 +66,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your category-based reasoning about current market conditions</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_BAYESIAN_UPDATER_PROMPT = """You are a rational Bayesian investor in financial markets.
 
@@ -96,8 +98,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your Bayesian reasoning incorporating prior probabilities and evidence weights</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_CONTRARIAN_STATISTICAL_PROMPT = """You are a contrarian statistical arbitrageur in financial markets.
 
@@ -127,8 +130,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your contrarian statistical reasoning about current mispricing</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_NOISE_TRADER_PROMPT = """You are a noise trader in financial markets.
 
@@ -157,8 +161,9 @@ CONSTRAINTS:
 
 OUTPUT FORMAT:
 <analysis>Your random noise-based trading impulse</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_USER_TEMPLATE = """Current Market State (Round {round_num}):
 - Current Price: ${price:.2f}
@@ -171,4 +176,6 @@ LLM_USER_TEMPLATE = """Current Market State (Round {round_num}):
 Based on your trading strategy and current market conditions, what action do you take?
 
 <analysis>Analyze the market state from your perspective</analysis>
-<decision>{{"action": "buy" or "sell" or "hold", "quantity": integer}}</decision>"""
+<decision>{{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

@@ -1,0 +1,160 @@
+# =============================================================================
+# ArchegosCollapse Rule Players Configuration
+# =============================================================================
+# 1 Market (rule-based coordinator) + 5 rule-based agent types
+#
+# Scenario: March 2021 - Archegos Capital Management collapse ($20B loss)
+# Agents: ConcentratedFund (TRS leverage) + PrimeBroker1/2 (liquidation race)
+#         + BlockTradeBuyer (discount buyer) + InformationTrader (front-runner)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based price formation
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.ArchegosCollapse.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      # Price formation: P(t+1) = P(t) + λ×NetDemand + γ×(F-P(t)) + ε
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.03         # Low: Archegos market had deep liquidity
+      mean_reversion: 0.01       # Very low: forced sellers overwhelm mean reversion
+      noise_std: 0.015           # Background noise
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# ConcentratedFund — TRS-leveraged position holder (Archegos-style)
+# Theory: Total Return Swap Leverage (Becketti, 2021)
+# -----------------------------------------------------------------------------
+concentrated_fund:
+  name: "Concentrated Fund"
+  class: "examples.ArchegosCollapse.Rule.players:ConcentratedFund"
+  # Expander → concentrated_fund_1, concentrated_fund_2
+  num_instances: 2
+  config:
+    identity: "concentrated_fund"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 5000.0     # Large concentrated position via TRS
+      # Rule parameters
+      margin_threshold: -0.15      # Margin call when price drops 15%
+      trs_sell_ratio: 0.50         # Forced: sell 50% of position on margin call
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# PrimeBroker1 — First-mover liquidator (creates cascade)
+# Theory: Prime broker liquidation race (information asymmetry)
+# -----------------------------------------------------------------------------
+prime_broker1:
+  name: "Prime Broker 1"
+  class: "examples.ArchegosCollapse.Rule.players:PrimeBroker1"
+  num_instances: 1
+  config:
+    identity: "prime_broker1"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 200000.0
+      initial_position: 4000.0     # Holds client collateral to liquidate
+      # Rule parameters
+      liquidation_threshold: -0.10 # Acts when price drops 10%
+      liquidation_sell_ratio: 0.40 # Sells 40% of position per round
+      # First mover: receives full market price
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# PrimeBroker2 — Second-mover liquidator (delayed, worse prices)
+# Theory: Prime broker competition; cascade amplification
+# -----------------------------------------------------------------------------
+prime_broker2:
+  name: "Prime Broker 2"
+  class: "examples.ArchegosCollapse.Rule.players:PrimeBroker2"
+  num_instances: 1
+  config:
+    identity: "prime_broker2"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 200000.0
+      initial_position: 3500.0     # Slightly smaller collateral block
+      # Rule parameters
+      liquidation_threshold: -0.15 # Acts when price drops 15% (higher threshold)
+      liquidation_sell_ratio: 0.35 # Sells 35% per round (slower)
+      price_penalty: 0.97          # Receives 97% of market (3% worse)
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# BlockTradeBuyer — Opportunistic discount buyer
+# Theory: Opportunistic block trading; stabilizing force
+# -----------------------------------------------------------------------------
+block_trade_buyer:
+  name: "Block Trade Buyer"
+  class: "examples.ArchegosCollapse.Rule.players:BlockTradeBuyer"
+  num_instances: 1
+  config:
+    identity: "block_trade_buyer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0     # Deep pockets for block buying
+      initial_position: 0.0
+      # Rule parameters
+      discount_threshold: -0.10   # Buys when price drops 10% (attractive discount)
+      buy_ratio: 0.30             # Deploys 30% of cash per round
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# InformationTrader — Front-runner detecting liquidation signals
+# Theory: Information-based trading; detection of order flow
+# -----------------------------------------------------------------------------
+information_trader:
+  name: "Information Trader"
+  class: "examples.ArchegosCollapse.Rule.players:InformationTrader"
+  # Expander → information_trader_1, information_trader_2
+  num_instances: 2
+  config:
+    identity: "information_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 300000.0
+      initial_position: 1000.0
+      # Rule parameters
+      detection_ability: 0.50     # 50% probability of detecting cascade signal
+      detection_threshold: -0.05  # Trigger when price drops 5%
+      front_run_size: 1000        # Sell up to 1000 shares when detected
+      cover_threshold: -0.03      # Cover short when deviation > -3%
+      cover_size: 500             # Buy back up to 500 shares to cover
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

@@ -1,6 +1,6 @@
 # AsianFinancialCrisis — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                                                                                                                                            |
 |--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 | Research Relevance | The Asian crisis exemplifies how sudden reversals of short-term capital flows, combined with cross-border contagion, can produce self-fulfilling currency collapses that destroy fundamentally sound economies. It tests whether IMF-style interventions with conditionality can arrest feedback loops, and whether contagion is fundamentally driven or panic-driven. |
 
 
-## 2. Theoretical Foundation
+## §2 Theoretical Foundation
 
 ### Theory: Hot Money Reversal and the Sudden Stop Problem
 
@@ -76,7 +76,7 @@
 - **Calibration Implication**: `oversold_threshold = −0.08` (requires deeper discount than IMF); `overbought_threshold = +0.10` (sells when recovered significantly above fundamental, capturing crisis-recovery premium); `buy_ratio = sell_ratio = 0.20` (conservative capital deployment).
 
 
-## 3. Market Design Principles
+## §3 Market Design Principles
 
 ### 3.1 Price Formation Model
 
@@ -128,9 +128,9 @@ Each round, the Market broadcasts to all investors:
 | `round`       | int   | Round number; used for phase tracking                                                                  |
 
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
-### Investor: HotMoneyFunder
+### §4.1 HotMoneyFunder
 
 #### 4.1.1  Summary
 
@@ -265,7 +265,7 @@ capital outflow documented by Radelet & Sachs (1998).
 
 ---
 
-### Investor: ContagionTrader
+### §4.2 ContagionTrader
 
 #### 4.2.1  Summary
 
@@ -399,7 +399,7 @@ executing the Kaminsky-Reinhart common creditor rebalancing cascade.
 
 ---
 
-### Investor: IMFRescuer
+### §4.3 IMFRescuer
 
 #### 4.3.1  Summary
 
@@ -494,7 +494,7 @@ modelling the IMF's tranche disbursement structure documented by Corsetti et al.
 
 ---
 
-### Investor: ValueContrarian
+### §4.4 ValueContrarian
 
 #### 4.4.1  Summary
 
@@ -564,7 +564,7 @@ Decision: sell 640 shares; prevents post-crisis overvaluation above fundamental 
 
 ---
 
-### Investor: NoiseTrader
+### §4.5 NoiseTrader
 
 #### 4.5.1  Summary
 
@@ -634,7 +634,7 @@ prevents the crisis path from being a smooth monotonic decline.
 | 2 | Glosten, L. R., & Milgrom, P. R. (1985). Bid, ask and transaction prices. *JFE*, 14(1), 71–100. https://doi.org/10.1016/0304-405X(85)90044-3 | Establishes informed vs. uninformed order flow fractions                        |
 
 
-## 5. Agent Diversity Verification
+## §5 Agent Diversity Verification
 
 ```
 Diversity Check:
@@ -661,7 +661,7 @@ Diversity Check:
 ```
 
 
-## 6. Parameter Table
+## §6 Parameter Table
 
 | Parameter                  | Value      | Source Citation                                                | Description                                   | Sensitivity                                                 |
 |----------------------------|------------|----------------------------------------------------------------|-----------------------------------------------|-------------------------------------------------------------|
@@ -683,7 +683,7 @@ Diversity Check:
 | `trade_probability` (NT)   | 0.30       | Black (1986): higher noise in crisis markets                   | NoiseTrader activity rate                     | Low                                                         |
 
 
-## 7. Communication and Round Structure
+## §7 Communication and Round Structure
 
 ```
 Round N:
@@ -708,7 +708,7 @@ Topology: Star — Market broadcasts to all 10 investors; investors respond to M
 Initialization: All agents start at equilibrium (price = fundamental = 100.0). HotMoneyFunder's large initial position creates crisis vulnerability that activates on the first negative shock (via noise term ε or deliberate initial shock).
 
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
 ### Event: 1997 Asian Financial Crisis
 
@@ -744,7 +744,7 @@ Initialization: All agents start at equilibrium (price = fundamental = 100.0). H
   - Source: Corsetti, G., Pesenti, P., & Roubini, N. (1999); Kaminsky, G. L., & Reinhart, C. M. (1999)
 
 
-## 9. Variant Comparison Preview
+## §9 Variant Comparison Preview
 
 | Aspect                 | Rule                                     | LLM                                         | RuleLLM                          | Rag                                                   |
 |------------------------|------------------------------------------|---------------------------------------------|----------------------------------|-------------------------------------------------------|

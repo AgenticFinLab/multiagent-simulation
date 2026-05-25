@@ -1,0 +1,311 @@
+# =============================================================================
+# BlackMonday1987 Rag Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 RAG-augmented LLM Investor types
+#
+# Knowledge Architecture:
+#   The shared knowledge: block is defined at the TOP of this file, before the
+#   market definition. The config loader automatically detects "knowledge" inside
+#   the players dict and promotes it to config top-level.
+#
+#   Each agent has private_knowledge for agent-specific resources:
+#     - from_global_resources: List of global resource sub-dirs to inherit
+#     - local_resources: Agent-specific local directory + resources
+#     - rag: Per-agent RAG configuration (MUST be nested inside private_knowledge)
+# =============================================================================
+
+# =============================================================================
+# Shared Knowledge Configuration (processed once, accessible by all agents)
+# =============================================================================
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+    top_k: 5
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based, identical to Rule variant
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.BlackMonday1987.Rag.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      fundamental_value: 250.0
+      initial_price: 250.0
+      price_impact: 0.05
+      mean_reversion: 0.01
+      noise_std: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Portfolio Insurers — mechanical hedger + rules + RAG
+# Theory: Leland & Rubinstein (1976), Brady Commission (1988)
+# -----------------------------------------------------------------------------
+ragllm_portfolio_insurer:
+  name: "RAG Portfolio Insurer"
+  class: "examples.BlackMonday1987.Rag.players:RagLLMPortfolioInsurer"
+  # Expander → ragllm_portfolio_insurer_1, ragllm_portfolio_insurer_2
+  num_instances: 2
+  config:
+    identity: "ragllm_portfolio_insurer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 1000.0
+      custom_state_hot_limit: 3
+      # Rule parameters
+      rebalance_threshold: 0.02
+      hedge_ratio: 0.5
+      base_size: 100.0
+      # Private Knowledge
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      # LLM Configuration
+      llm:
+        sys_message: "examples.BlackMonday1987.Rag.prompts:RAG_PORTFOLIO_INSURER_SYS"
+        user_message: "examples.BlackMonday1987.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Index Arbitrageurs — futures-spot spread + rules + RAG
+# Theory: Brady Commission (1988)
+# -----------------------------------------------------------------------------
+ragllm_index_arbitrageur:
+  name: "RAG Index Arbitrageur"
+  class: "examples.BlackMonday1987.Rag.players:RagLLMIndexArbitrageur"
+  # Expander → ragllm_index_arbitrageur_1, ragllm_index_arbitrageur_2
+  num_instances: 2
+  config:
+    identity: "ragllm_index_arbitrageur"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 500.0
+      custom_state_hot_limit: 3
+      arb_threshold: 0.01
+      arb_strength: 0.8
+      base_size: 80.0
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.BlackMonday1987.Rag.prompts:RAG_INDEX_ARBITRAGEUR_SYS"
+        user_message: "examples.BlackMonday1987.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Program Traders — automated sell programs + rules + RAG
+# Theory: Brady Commission (1988)
+# -----------------------------------------------------------------------------
+ragllm_program_trader:
+  name: "RAG Program Trader"
+  class: "examples.BlackMonday1987.Rag.players:RagLLMProgramTrader"
+  # Expander → ragllm_program_trader_1, ragllm_program_trader_2
+  num_instances: 2
+  config:
+    identity: "ragllm_program_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 800.0
+      custom_state_hot_limit: 3
+      trigger_threshold: 0.01
+      feedback_strength: 1.2
+      base_size: 60.0
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.BlackMonday1987.Rag.prompts:RAG_PROGRAM_TRADER_SYS"
+        user_message: "examples.BlackMonday1987.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Value Investors — fundamental buyer + rules + RAG
+# Theory: Graham (1949)
+# -----------------------------------------------------------------------------
+ragllm_value_investor:
+  name: "RAG Value Investor"
+  class: "examples.BlackMonday1987.Rag.players:RagLLMValueInvestor"
+  num_instances: 1
+  config:
+    identity: "ragllm_value_investor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      value_discount: 0.15
+      base_size: 40.0
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.BlackMonday1987.Rag.prompts:RAG_VALUE_INVESTOR_SYS"
+        user_message: "examples.BlackMonday1987.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Noise Traders — random background trading + RAG (mostly ignored)
+# Theory: Black (1986)
+# -----------------------------------------------------------------------------
+ragllm_noise_trader:
+  name: "RAG Noise Trader"
+  class: "examples.BlackMonday1987.Rag.players:RagLLMNoiseTrader"
+  # Expander → ragllm_noise_trader_1, ragllm_noise_trader_2
+  num_instances: 2
+  config:
+    identity: "ragllm_noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 100000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      trade_probability: 0.05
+      min_order: 50.0
+      max_order: 200.0
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.BlackMonday1987.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        user_message: "examples.BlackMonday1987.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.9
+          max_new_tokens: 600
+  persona: !include persona.yml

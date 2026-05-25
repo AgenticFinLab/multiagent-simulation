@@ -1,52 +1,58 @@
-# TulipMania Simulation
+# Tulip Mania Rule Variant Explanation
 
-## Overview
+## §1 Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | 1637 Dutch tulip bubble where speculative frenzy drove tulip prices to extraordinary levels before catastrophic collapse |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | TulipMania simulation with TrendChaser, SocialProofFollower, IntrinsicValueTrader |
-| **Academic Value** | Understanding tulipmania through multi-agent simulation |
+The Rule variant is the deterministic baseline for the TulipMania current-market
+quantity schema. It preserves the market mechanism and investor formulas
+defined in `simulation-bases.md`.
 
-## Theoretical Foundation
+## §2 Theory -> Implementation Mapping
 
-- Garber (2000): Famous first bubbles
-- Mackay (1841): Extraordinary popular delusions and the madness of crowds
-- Thompson (2007): The tulip mania - Fact or artifact?
-## Agent Descriptions
+| Investor | Theory Component | Implementation |
+|---|---|---|
+| `TrendChaser` | `simulation-bases.md §4.1` positive-feedback demand | `TrendChaser._make_decision` buys positive deviation and sells negative deviation. |
+| `SocialProofFollower` | `simulation-bases.md §4.2` social-proof demand | `SocialProofFollower._make_decision` uses the same formula interpreted as crowd validation. |
+| `IntrinsicValueTrader` | `simulation-bases.md §4.3` intrinsic-value resistance | `IntrinsicValueTrader._make_decision` buys discounts and sells overvaluation. |
+| `EarlyExitTrader` | `simulation-bases.md §4.4` strategic early exit | `EarlyExitTrader._make_decision` sells large overvaluation as peak-exit pressure. |
+| `NoiseTrader` | `simulation-bases.md §4.5` stochastic liquidity | `NoiseTrader._make_decision` samples occasional random buy/sell orders. |
 
-### TrendChaser
-**Theoretical Basis**: Greater fool theory (Mackay, 1841)
-**Market Role**: destabilizing
-**Description**: Buys assets purely because prices are rising, regardless of intrinsic value
-**Parameters**: momentum_strength=0.8, max_position=1000
+## §3 Market Mechanism
 
-### SocialProofFollower
-**Theoretical Basis**: Social proof and crowd psychology (Mackay, 1841)
-**Market Role**: destabilizing
-**Description**: Follows crowd into speculative positions because everyone else is doing it
-**Parameters**: herd_weight=0.7, entry_threshold=0.05
+`Market` in `examples/TulipMania/Rule/players.py` aggregates buy and sell
+quantities and updates price through price impact, mean reversion, and Gaussian
+noise. It consumes only `action` and `quantity`; no `bid_price` field is used.
 
-### IntrinsicValueTrader
-**Theoretical Basis**: Fundamental value discipline (Garber, 2000)
-**Market Role**: stabilizing
-**Description**: Values assets by intrinsic utility, sells when price far exceeds use value
-**Parameters**: value_threshold=3.0, position_size=400
+## §4 Variant Architecture
 
-### EarlyExitTrader
-**Theoretical Basis**: Rational bubble riding (Thompson, 2007)
-**Market Role**: stabilizing
-**Description**: Recognizes speculative excess early and exits before the crash
-**Parameters**: exit_threshold=0.2, timing_sensitivity=0.6
+The coordinator is `Market`; investors inherit `BaseInvestor`; deterministic
+decisions are constructed directly in Python. The output order is a
+current-market quantity order sent through `investor_order` messages.
 
-### NoiseTrader
-**Theoretical Basis**: Noise trader model (Black, 1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader providing baseline liquidity
-**Parameters**: trade_probability=0.3
+## §5 Config Reference
 
+`configs/TulipMania/Rule/simulation.yml` sets the 200-round experiment entry.
+`players.yml` binds player classes and initial portfolios. `topology.yml`
+routes market broadcasts to investors and investor orders back to the market.
 
-## Market Dynamics
+## §6 Running Instructions
 
-Price follows: P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
+```bash
+python examples/TulipMania/Rule/run_tulipmania.py -c configs/TulipMania/Rule/simulation.yml
+```
+
+## §7 Expected Behavior
+
+Trend and social-proof demand should lift prices when positive deviation grows.
+Intrinsic-value and early-exit traders should generate selling pressure when
+prices are materially above the intrinsic anchor. Noise traders add background
+volume.
+
+## §8 References
+
+The theoretical basis is listed in `simulation-bases.md §2`; investor-specific
+references are mapped in `simulation-bases.md §4`.
+
+## §9 Variant Comparison
+
+This variant is the baseline for comparing stochastic LLM, RuleLLM, and Rag
+decision mechanisms under the same market and order schema.

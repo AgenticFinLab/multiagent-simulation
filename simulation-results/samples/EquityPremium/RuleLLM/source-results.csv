@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
+1,1,EquityPremium,RuleLLM,SUCCESS,0,5130.401,2026-05-23T01:12:04,2026-05-23T02:37:34,config/simulation.yml,examples/EquityPremium/RuleLLM/run_equity_premium_rulellm.py,logs/EquityPremium__RuleLLM.log,,200,200,

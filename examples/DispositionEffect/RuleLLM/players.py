@@ -43,6 +43,14 @@ from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("DispositionEffectRuleLLM")
+_DECISION_PARAM_SKIP_KEYS = {
+    "record_path",
+    "initial_cash",
+    "initial_position",
+    "initial_purchase_price",
+    "custom_state_hot_limit",
+    "llm",
+}
 
 from examples.llm_utils import (
     parse_llm_response_with_thinking,
@@ -56,6 +64,18 @@ def load_prompt(prompt_path: str) -> str:
     module_path, var_name = prompt_path.rsplit(":", 1)
     module = importlib.import_module(module_path)
     return getattr(module, var_name)
+
+
+def format_decision_params(extras: Dict[str, Any]) -> str:
+    """Format configured rule parameters for prompt injection."""
+    params = {
+        key: value
+        for key, value in extras.items()
+        if key not in _DECISION_PARAM_SKIP_KEYS
+    }
+    if not params:
+        return "None."
+    return "\n".join(f"- {key}: {value}" for key, value in sorted(params.items()))
 
 
 # =============================================================================
@@ -290,18 +310,16 @@ class BaseLLMInvestor(GeneralPlayer):
         net_demand = market_data["net_demand"]
         news_shock = market_data["news_shock"]
 
-        # Compute gain/loss
-        if purchase_price > 0:
-            gain_loss = (price - purchase_price) / purchase_price
-        else:
-            gain_loss = 0
+        if purchase_price <= 0:
+            raise ValueError("purchase_price must be positive")
+        gain_loss = (price - purchase_price) / purchase_price
 
         # Build prompt - resolve module paths to actual prompt content
         sys_msg_path = llm_config["sys_message"]
         user_msg_path = llm_config["user_message"]
 
-        sys_msg = load_prompt(sys_msg_path) if sys_msg_path else ""
-        user_template = load_prompt(user_msg_path) if user_msg_path else ""
+        sys_msg = load_prompt(sys_msg_path)
+        user_template = load_prompt(user_msg_path)
 
         # Format user message
         user_msg = user_template.format(
@@ -317,6 +335,7 @@ class BaseLLMInvestor(GeneralPlayer):
             purchase_price=purchase_price,
             gain_loss_pct=gain_loss * 100,
             portfolio_value=cash + position * price,
+            decision_params=format_decision_params(extras),
         )
 
         messages = build_messages(sys_msg, user_msg)
@@ -336,6 +355,12 @@ class BaseLLMInvestor(GeneralPlayer):
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
+                if decision["action"] not in ("buy", "sell", "hold"):
+                    raise ValueError(f"invalid action: {decision['action']}")
+                if float(decision["bid_price"]) <= 0:
+                    raise ValueError(f"invalid bid_price: {decision['bid_price']}")
+                if not str(decision["reasoning"]).strip():
+                    raise ValueError("missing reasoning")
                 break
             except (json.JSONDecodeError, ValueError, KeyError) as e:
                 last_error = e
@@ -353,6 +378,13 @@ class BaseLLMInvestor(GeneralPlayer):
         quantity = float(decision["quantity"])
         reasoning = decision["reasoning"]
         analysis = decision["analysis"]
+
+        if action == "sell":
+            quantity = -abs(quantity)
+        elif action == "buy":
+            quantity = abs(quantity)
+        else:
+            quantity = 0.0
 
         # Determine move_reference based on agent type
         move_reference = "DispositionBiased" not in strategy_name
@@ -386,6 +418,7 @@ class BaseLLMInvestor(GeneralPlayer):
         )
 
         return {
+            "action": action,
             "bid_price": bid_price,
             "quantity": quantity,
             "strategy": strategy_name,
@@ -396,6 +429,7 @@ class BaseLLMInvestor(GeneralPlayer):
                     "payload": {
                         "bid_price": bid_price,
                         "quantity": quantity,
+                        "action": action,
                         "strategy": strategy_name,
                         "reasoning": reasoning[:100],
                         "analysis": analysis,
@@ -409,6 +443,7 @@ class BaseLLMInvestor(GeneralPlayer):
         return {
             "bid_price": 0,
             "quantity": 0,
+            "action": "hold",
             "strategy": strategy_name,
             "reasoning": reason[:120] if reason else "hold",
             "analysis": "",
@@ -417,6 +452,7 @@ class BaseLLMInvestor(GeneralPlayer):
                     "payload": {
                         "bid_price": 0,
                         "quantity": 0,
+                        "action": "hold",
                         "strategy": strategy_name,
                         "reasoning": reason[:100] if reason else "hold",
                         "analysis": "",

@@ -1,6 +1,6 @@
 # ConfirmationBias RuleLLM Variant — Design Specification
 
-## 1. Overview
+## §1 Overview
 
 | Item            | Detail                                                                                         |
 |-----------------|------------------------------------------------------------------------------------------------|
@@ -13,19 +13,49 @@
 
 ---
 
-## 2. Theory → Implementation Mapping
+## §2 Theory → Implementation Mapping
 
 | Theoretical Concept                 | Agent / Mechanism                                                      | Code Location                                       |
 |-------------------------------------|------------------------------------------------------------------------|-----------------------------------------------------|
-| Belief anchoring with explicit rule | `RuleLLMBeliefAnchor` — persona + rule: buy when deviation > 0         | `RuleLLM/prompts.py: RULELLM_BELIEF_ANCHOR_SYS`     |
-| Selective scanning with threshold   | `RuleLLMSelectiveScanner` — persona + rule: buy when deviation > 0.02  | `RuleLLM/prompts.py: RULELLM_SELECTIVE_SCANNER_SYS` |
-| Rational Bayesian with threshold    | `RuleLLMBalancedAnalyst` — persona + rule: buy when deviation < −0.05  | `RuleLLM/prompts.py: RULELLM_BALANCED_ANALYST_SYS`  |
-| Contrarian with threshold           | `RuleLLMContrarianTrader` — persona + rule: sell when deviation > 0.05 | `RuleLLM/prompts.py: RULELLM_CONTRARIAN_TRADER_SYS` |
-| Noise with probability              | `RuleLLMNoiseTrader` — persona + rule: random at p=0.30                | `RuleLLM/prompts.py: RULELLM_NOISE_TRADER_SYS`      |
+| Belief anchoring with explicit rule (`simulation-bases.md §4.1`) | `RuleLLMBeliefAnchor` — persona + rule: buy when deviation confirms belief | `RuleLLM/prompts.py: RULELLM_BELIEF_ANCHOR_SYS`     |
+| Selective scanning with threshold (`simulation-bases.md §4.2`)   | `RuleLLMSelectiveScanner` — persona + rule: buy when deviation > 0.02  | `RuleLLM/prompts.py: RULELLM_SELECTIVE_SCANNER_SYS` |
+| Rational Bayesian with threshold (`simulation-bases.md §4.3`)    | `RuleLLMBalancedAnalyst` — persona + rule: buy when deviation < -0.05  | `RuleLLM/prompts.py: RULELLM_BALANCED_ANALYST_SYS`  |
+| Contrarian with threshold (`simulation-bases.md §4.4`)           | `RuleLLMContrarianTrader` — persona + rule: sell when deviation > 0.05 | `RuleLLM/prompts.py: RULELLM_CONTRARIAN_TRADER_SYS` |
+| Noise with probability (`simulation-bases.md §4.5`)              | `RuleLLMNoiseTrader` — persona + rule: random at p=0.30                | `RuleLLM/prompts.py: RULELLM_NOISE_TRADER_SYS`      |
+
+### §2.1 RuleLLMBeliefAnchor (`simulation-bases.md §4.1`)
+
+| Theory Component | Implementation |
+|---|---|
+| Prior-belief anchoring | `== PERSONA ==` defines conviction; `== DECISION RULES ==` maps confirming deviation to constrained orders. |
+
+### §2.2 RuleLLMSelectiveScanner (`simulation-bases.md §4.2`)
+
+| Theory Component | Implementation |
+|---|---|
+| Selective search | Persona protects its current view; decision rules use the +0.02/-0.02 asymmetric threshold. |
+
+### §2.3 RuleLLMBalancedAnalyst (`simulation-bases.md §4.3`)
+
+| Theory Component | Implementation |
+|---|---|
+| Rational benchmark | Persona is objective; decision rules trade symmetrically at the 5% threshold. |
+
+### §2.4 RuleLLMContrarianTrader (`simulation-bases.md §4.4`)
+
+| Theory Component | Implementation |
+|---|---|
+| Bias correction | Persona is skeptical; decision rules fade deviations larger than 5%. |
+
+### §2.5 RuleLLMNoiseTrader (`simulation-bases.md §4.5`)
+
+| Theory Component | Implementation |
+|---|---|
+| Noise liquidity | Persona and decision rules produce occasional random buy/sell orders. |
 
 ---
 
-## 3. Market Mechanism
+## §3 Market Mechanism
 
 Identical to Rule variant. Market broadcasts per round:
 
@@ -35,7 +65,7 @@ Identical to Rule variant. Market broadcasts per round:
 
 ---
 
-## 4. Variant-Specific Features
+## §4 Variant-Specific Features
 
 ### 4.1 Dual-Section System Prompt Structure
 
@@ -50,7 +80,7 @@ continue buying when signals confirm your bullish position.
 - If deviation < -0.5: consider SELL, quantity = {order_size}
 - Otherwise: HOLD
 
-Always output JSON: {"action": "buy|sell|hold", "quantity": N}
+Always output JSON with `action`, `bid_price`, `quantity`, and `reasoning`.
 ```
 
 The `== DECISION RULES ==` section provides the LLM with explicit
@@ -82,7 +112,7 @@ Rule and LLM.
 
 ---
 
-## 5. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -107,21 +137,21 @@ Rule and LLM.
 
 ---
 
-## 6. Configuration Reference
+## §6 Configuration Reference
 
 Config: `configs/ConfirmationBias/RuleLLM/simulation.yml`
 
 | Parameter          | Value                   | Description             |
 |--------------------|-------------------------|-------------------------|
-| `llm.model`        | `gpt-4o-mini` (default) | LLM model name          |
-| `llm.temperature`  | 0.3                     | Decision randomness     |
+| `llm.model`        | `ark/doubao-seed-2-0-mini-260428` | LLM model name          |
+| `llm.temperature`  | 0.2–0.9 by agent        | Decision randomness     |
 | `llm.max_tokens`   | 512                     | Max response length     |
-| `initial_cash`     | 100000                  | Starting cash per agent |
+| `initial_cash`     | 50000 for core agents; 20000 for noise traders | Starting cash per agent |
 | `initial_position` | 0                       | Starting holdings       |
 
 ---
 
-## 7. Running Instructions
+## §7 Running Instructions
 
 ```bash
 python examples/ConfirmationBias/RuleLLM/run_confirmationbias_rulellm.py \
@@ -133,7 +163,7 @@ python examples/ConfirmationBias/RuleLLM/analysis.py \
 
 ---
 
-## 8. Expected Behavior
+## §8 Expected Behavior
 
 - All agents should achieve ≥ 80% rule adherence if prompts are well-designed
 - `bias_amplitude_pct` between Rule (highest) and LLM (lowest)
@@ -143,7 +173,7 @@ python examples/ConfirmationBias/RuleLLM/analysis.py \
 
 ---
 
-## 9. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

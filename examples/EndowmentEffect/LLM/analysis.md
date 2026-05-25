@@ -41,3 +41,18 @@ Measure how LLM persona-driven investor behavior affects the endowment effect re
 
 See `analysis-bases.md §2` for full metric derivations and Python function signatures.
 See `simulation-bases.md §2` for theoretical foundations.
+
+## §6 Output Artifacts
+
+`LLM/analysis.py` reuses the Rule analysis pipeline and writes the same
+`summary.json`, validation console report, helper plots, and fixed PNG contract:
+`00_investor_bids.png`, `01_endowmenteffect_dynamics.png`,
+`02_endowmenteffect_analysis.png`, and `03_summary.png`. LLM response artifacts
+and order `reasoning` fields should be inspected for persona-consistent
+explanations.
+
+## §7 Validation Criteria
+
+A valid LLM analysis run must complete 200 rounds, preserve canonical trading
+fields in order payloads, and show interpretable endowment-effect dynamics
+without relying on analysis-time field defaults.

@@ -1,0 +1,24 @@
+# SouthSeaBubble Rag Topology Configuration
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - insideradvantaged
+    - narrativebeliever
+    - skepticalanalyst
+    - arbitrageur
+    - noisetrader
+  insideradvantaged:
+    - market
+  narrativebeliever:
+    - market
+  skepticalanalyst:
+    - market
+  arbitrageur:
+    - market
+  noisetrader:
+    - market

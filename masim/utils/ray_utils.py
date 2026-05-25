@@ -38,9 +38,24 @@ def _resolve_num_cpus(cfg_value) -> int:
         null  → leave 1 CPU for OS, use rest for Ray
         int   → use exactly that many
         float → fraction of logical CPUs (e.g. 0.5 = half)
+
+    Environment:
+        MASIM_RAY_NUM_CPUS caps auto-detected null configs. Explicit YAML values
+        still win.
     """
     total = os.cpu_count() or 1
     if cfg_value is None:
+        env_value = os.getenv("MASIM_RAY_NUM_CPUS")
+        if env_value:
+            try:
+                requested = int(env_value)
+            except ValueError:
+                logger.warning("Ignoring invalid MASIM_RAY_NUM_CPUS=%r", env_value)
+            else:
+                if requested > 0:
+                    return max(1, min(requested, total))
+                logger.warning("Ignoring non-positive MASIM_RAY_NUM_CPUS=%r", env_value)
+
         # Leave 1 CPU for OS/other processes
         return max(1, total - 1)
     if isinstance(cfg_value, float) and cfg_value < 1.0:

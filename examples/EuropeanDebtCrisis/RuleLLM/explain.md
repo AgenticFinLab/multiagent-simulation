@@ -71,8 +71,8 @@ Market class shared with Rule variant. All RuleLLM investors send orders to the 
 | Base class       | `RuleLLMInvestor` → `GeneralPlayer`                                       |
 | Inference        | `LangChainAPIInference` (3-attempt retry)                                 |
 | Context          | `price`, `fundamental`, `deviation`, `cash`, `position`, `round`          |
-| Output parsing   | `parse_llm_response_with_thinking()` → `{"action": ..., "quantity": ...}` |
-| Rule enforcement | All thresholds embedded in prompt; LLM violation → retry fallback         |
+| Output parsing   | `parse_llm_response_with_thinking()` → canonical `action`, `bid_price`, `quantity`, `reasoning` |
+| Rule enforcement | All thresholds embedded in prompt; malformed or rule-violating output fails after bounded retry |
 
 ## §5 Config Reference
 

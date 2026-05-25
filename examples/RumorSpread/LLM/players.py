@@ -40,7 +40,8 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error
+from examples.RumorSpread.llm_parser import parse_rumor_response
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -52,6 +53,8 @@ from .prompts import (
     LLM_FACTCHECKER_SYS,
     LLM_BYSTANDER_SYS,
 )
+
+logger = logging.getLogger("RumorSpread.LLM")
 
 
 class InformationEnvironment(GeneralPlayer):
@@ -249,7 +252,7 @@ class LLMSocialAgent(GeneralPlayer):
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with thinking and decision sections."""
-        return parse_llm_response_with_thinking(response_text)
+        return parse_rumor_response(response_text)
 
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
@@ -264,41 +267,31 @@ class LLMSocialAgent(GeneralPlayer):
         decision = None
         last_error = None
         for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
+                infer_output = llm_client.run([infer_input])
                 decision = self._parse_llm_response(infer_output.outputs[0].response)
                 break
-            except ValueError as e:
-                last_error = e
+            except Exception as exc:  # pylint: disable=broad-except
+                last_error = exc
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if not parse_error and not retryable_api_error:
+                    raise
                 if attempt < max_retries - 1:
                     logger.debug(
                         f"[{self.identity}] LLM parse failed, retrying..."
                     )  # pylint: disable=logging-fstring-interpolation
 
         if decision is None:
-            logger.warning(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}. "
-                f"Skipping action this round."
+            raise RuntimeError(
+                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
             )
-            action = {
-                "action_type": "ignore",
-                "intensity": 0.0,
-                "agent_role": strategy_name,
-                "agent_id": self.identity,
-                "reasoning": "LLM parse failed: held position",
-                "analysis": "",
-            }
-            return {
-                **action,
-                "outbound_messages": [
-                    {"payload": action, "content_type": "social_action"}
-                ],
-            }
 
         action_type = decision["action_type"]
         intensity = float(decision["intensity"])
-        intensity = max(0.0, min(1.0, intensity))
+        reasoning = str(decision.pop("reasoning"))[:100]
+        analysis = str(decision.pop("analysis"))
 
         # Update personal belief based on action
         my_belief = self.state.custom_state["my_belief"]
@@ -319,8 +312,8 @@ class LLMSocialAgent(GeneralPlayer):
             "intensity": intensity,
             "agent_role": strategy_name,
             "agent_id": self.identity,
-            "reasoning": decision["reasoning"][:100],
-            "analysis": decision["analysis"],
+            "reasoning": reasoning,
+            "analysis": analysis,
         }
 
         return {
@@ -337,31 +330,46 @@ class LLMSocialAgent(GeneralPlayer):
 
 
 class LLMGullibleSpreader(LLMSocialAgent):
-    """LLM Gullible Spreader."""
+    """LLM gullible spreader.
+
+    Theory: simulation-bases.md §4.1
+    """
 
     _system_prompt = LLM_GULLIBLE_SYS
 
 
 class LLMDistortingRelayer(LLMSocialAgent):
-    """LLM Distorting Relayer."""
+    """LLM distorting relayer.
+
+    Theory: simulation-bases.md §4.2
+    """
 
     _system_prompt = LLM_DISTORTING_SYS
 
 
 class LLMSkepticalEvaluator(LLMSocialAgent):
-    """LLM Skeptical Evaluator."""
+    """LLM skeptical evaluator.
+
+    Theory: simulation-bases.md §4.3
+    """
 
     _system_prompt = LLM_SKEPTICAL_SYS
 
 
 class LLMFactChecker(LLMSocialAgent):
-    """LLM Fact Checker."""
+    """LLM fact checker.
+
+    Theory: simulation-bases.md §4.4
+    """
 
     _system_prompt = LLM_FACTCHECKER_SYS
 
 
 class LLMUninformedBystander(LLMSocialAgent):
-    """LLM Uninformed Bystander."""
+    """LLM uninformed bystander.
+
+    Theory: simulation-bases.md §4.5
+    """
 
     _system_prompt = LLM_BYSTANDER_SYS
 

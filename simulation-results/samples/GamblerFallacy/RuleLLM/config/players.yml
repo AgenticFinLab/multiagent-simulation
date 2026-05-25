@@ -1,0 +1,161 @@
+# GamblerFallacy RuleLLM Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.GamblerFallacy.RuleLLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.01
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+streakreversaltrader:
+  name: "StreakReversalTrader"
+  class: "examples.GamblerFallacy.RuleLLM.players:RuleLLMStreakReversalTrader"
+  num_instances: 2
+  config:
+    identity: "streakreversaltrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      max_order: 800
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_STREAK_REVERSAL_TRADER_SYS"
+        user_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
+
+hothandtrader:
+  name: "HotHandTrader"
+  class: "examples.GamblerFallacy.RuleLLM.players:RuleLLMHotHandTrader"
+  num_instances: 2
+  config:
+    identity: "hothandtrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      max_order: 800
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_HOT_HAND_TRADER_SYS"
+        user_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
+
+independentassessor:
+  name: "IndependentAssessor"
+  class: "examples.GamblerFallacy.RuleLLM.players:RuleLLMIndependentAssessor"
+  num_instances: 1
+  config:
+    identity: "independentassessor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      max_order: 500
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_INDEPENDENT_ASSESSOR_SYS"
+        user_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+arbitrageur:
+  name: "Arbitrageur"
+  class: "examples.GamblerFallacy.RuleLLM.players:RuleLLMArbitrageur"
+  num_instances: 1
+  config:
+    identity: "arbitrageur"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      max_order: 500
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_ARBITRAGEUR_SYS"
+        user_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.GamblerFallacy.RuleLLM.players:RuleLLMNoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 0
+      initial_price: 100.0
+      fundamental_value: 100.0
+      max_order: 500
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
+        user_message: "examples.GamblerFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml

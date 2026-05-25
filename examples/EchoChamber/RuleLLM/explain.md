@@ -1,102 +1,53 @@
-# EchoChamber RuleLLM Variant — explain.md
+# EchoChamber RuleLLM Variant Explanation
 
 ## §1 Overview
 
-The RuleLLM variant implements EchoChamber with hybrid Rule+LLM agents. Each agent's system prompt embeds BOTH the behavioral persona description AND the exact quantitative formulas from the Rule variant. The LLM reasons about how to apply these rules given the current opinion environment context, maintaining rule compliance while adding qualitative judgment.
+The RuleLLM variant gives each model both a social persona and explicit
+formula-like decision rules derived from the Rule implementation. It preserves
+the EchoChamber `social_action` schema.
 
-| Aspect             | Detail                                                                                                                                                                           |
-|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Variant            | RuleLLM                                                                                                                                                                          |
-| Simulation         | EchoChamber                                                                                                                                                                      |
-| Decision Mechanism | LLM applies embedded formulas + persona reasoning; outputs `{action_type, intensity, reasoning, analysis}`                                                                       |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                                                                                                                                                  |
-| Market Broadcast   | `polarization`, `prev_polarization`, `mean_opinion`, `cluster_separation`, `cross_cutting_exposure`, `num_polarizers`, `num_depolarizers`, `net_polarization_intensity`, `round` |
+## §2 Theory -> Implementation Mapping
 
-## §2 Theory → Implementation Mapping
+| Social Role | Theory Component | Implementation |
+|---|---|---|
+| `RuleLLMIdeologue` | `simulation-bases.md §4.1` | Prompt states the in-group/out-group update formula and polarize threshold. |
+| `RuleLLMConformist` | `simulation-bases.md §4.2` | Prompt states local-group mean and conformity update rules. |
+| `RuleLLMCriticalThinker` | `simulation-bases.md §4.3` | Prompt states evidence signal and depolarization rule. |
+| `RuleLLMBridgeBuilder` | `simulation-bases.md §4.4` | Prompt states centering and cluster-separation rules. |
+| `RuleLLMPassiveFollower` | `simulation-bases.md §4.5` | Prompt states drift and low-engagement rules. |
 
-### §2.1 RuleLLMIdeologue (simulation-bases.md §4.1)
+## §3 Environment Mechanism
 
-| Theory Component                        | Implementation                                                                                                                                  |
-|-----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
-| In-group amplification (Sunstein, 2001) | System prompt states: "When mean_opinion is same sign as your opinion, apply `in_group_weight * (mean_opinion * extremity_boost − my_opinion)`" |
-| Out-group rejection formula             | System prompt states: "For opposing signals, apply `out_group_discount * (mean_opinion − my_opinion)`"                                          |
-| Polarizing intensity rule               | System prompt states: "Polarize when `                                                                                                          |
-
-### §2.2 RuleLLMConformist (simulation-bases.md §4.2)
-
-| Theory Component                | Implementation                                                                        |
-|---------------------------------|---------------------------------------------------------------------------------------|
-| Conformity formula (Asch, 1951) | System prompt embeds: `opinion_update = conformity * (local_group_mean − my_opinion)` |
-| Polarize threshold              | System prompt: "Polarize when `                                                       |
-
-### §2.3 RuleLLMCriticalThinker (simulation-bases.md §4.3)
-
-| Theory Component                  | Implementation                                                                              |
-|-----------------------------------|---------------------------------------------------------------------------------------------|
-| Evidence formula (Isenberg, 1986) | System prompt embeds: `evidence_signal = −my_opinion * evidence_sensitivity * polarization` |
-| Depolarize threshold              | System prompt: "Depolarize when `polarization > 0.3`"                                       |
-
-### §2.4 RuleLLMBridgeBuilder (simulation-bases.md §4.4)
-
-| Theory Component             | Implementation                                                                                                  |
-|------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| Centering formula            | System prompt embeds: `opinion_update = bridge_weight * (0 − my_opinion) * centering_tendency`                  |
-| Cluster-based depolarization | System prompt: "Depolarize when `cluster_separation > 0.5`; intensity = `bridge_strength * cluster_separation`" |
-
-### §2.5 RuleLLMPassiveFollower (simulation-bases.md §4.5)
-
-| Theory Component                 | Implementation                                                             |
-|----------------------------------|----------------------------------------------------------------------------|
-| Drift formula (Lazarsfeld, 1954) | System prompt embeds: `drift = drift_rate * (mean_opinion − my_opinion)`   |
-| Engagement probability           | System prompt: "Engage randomly with probability `engagement_probability`" |
-
-## §3 Market Mechanism
-
-Same as Rule variant. OpinionEnvironment is shared from `examples.EchoChamber.Rule.players`:
-
-```
-P(t+1) = P(t) + alpha * NetPolarization(t) + beta * CentripetalForce(t) + epsilon(t)
-```
+The environment consumes the same `social_action` payload as Rule. RuleLLM
+changes only how action type and intensity are chosen.
 
 ## §4 Variant Architecture
 
-| Component      | Detail                                                                                                       |
-|----------------|--------------------------------------------------------------------------------------------------------------|
-| Base class     | `RuleLLMSocialAgent(GeneralPlayer)`                                                                          |
-| Inference      | `LangChainAPIInference(lm_name=..., generation_config=...)`                                                  |
-| Context        | `env_data`; system prompt with embedded formulas + persona                                                   |
-| Output parsing | `parse_llm_response_with_thinking(response)` → `{action_type, intensity, reasoning, analysis}`               |
-| Retry logic    | Up to 3 attempts; on persistent failure → neutral action with `reasoning="LLM parse failed: stayed neutral"` |
-| Ray support    | `__getstate__`/`__setstate__` in `RuleLLMSocialAgent` excludes `llm_client` from pickle                      |
+`RuleLLMSocialAgent` loads role prompts, calls the API model, validates
+`action_type`, `intensity`, and `reasoning`, updates personal opinion, and emits
+the special-schema action.
 
 ## §5 Config Reference
 
-Config file: `configs/EchoChamber/RuleLLM/simulation.yml`
-
-Key LLM extras per agent:
-- `llm.lm_name`: LLM model identifier
-- `llm.generation_config`: `{temperature, max_new_tokens}`
-- `llm.sys_message`: Module path to system prompt (e.g., `examples.EchoChamber.RuleLLM.prompts:RULELLM_IDEOLOGUE_SYS`)
-- `llm.user_message`: Module path to user template (e.g., `examples.EchoChamber.RuleLLM.prompts:RULELLM_USER_TEMPLATE`)
+`configs/EchoChamber/RuleLLM/players.yml` binds RuleLLM role classes and prompt
+paths. It uses the same environment parameters and topology as Rule.
 
 ## §6 Running Instructions
 
 ```bash
-export ARK_API_KEY=<your_key>
 python examples/EchoChamber/RuleLLM/run_echo_chamber_rulellm.py -c configs/EchoChamber/RuleLLM/simulation.yml
 ```
 
-## §7 Output Artifacts
+## §7 Expected Behavior
 
-Same as LLM variant. Reasoning field includes explicit formula application descriptions.
+RuleLLM should follow Rule-style thresholds more closely than persona-only LLM
+while still producing auditable natural-language analysis.
 
-## §8 Known Limitations
+## §8 References
 
-- System prompts with embedded formulas are longer — higher token cost per round
-- LLM may interpret formula thresholds loosely under ambiguous environmental conditions
-- Opinion update is hardcoded in code: LLM controls only `action_type` and `intensity`
+See `simulation-bases.md §2` and role formulas in `simulation-bases.md §4`.
 
-## §9 References
+## §9 Variant Comparison
 
-See `simulation-bases.md §4` for agent parameter sources and theoretical derivations.
-See `analysis-bases.md §2` for metric definitions and Python function signatures.
+Compare RuleLLM against Rule for formula adherence and against LLM for reduced
+behavioral dispersion.

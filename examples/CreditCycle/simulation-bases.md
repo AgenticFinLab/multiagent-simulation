@@ -4,6 +4,22 @@
 
 The credit cycle describes the endogenous expansion and contraction of credit availability across the business cycle. During economic upturns, rising asset prices reduce perceived risk, loosening lending standards and enabling higher leverage. This pro-cyclical lending amplifies booms. Conversely, during downturns, falling collateral values trigger credit contraction and forced deleveraging, amplifying busts. The Minsky trajectory (hedge → speculative → Ponzi finance) captures how prolonged stability breeds fragility, ultimately culminating in a "Minsky moment" of sudden credit seizure and asset price collapse.
 
+### §1.1 Origin and Source Analysis
+
+**Intellectual lineage**: The scenario combines Minsky's financial instability hypothesis, the Geanakoplos leverage-cycle model, Adrian and Shin's intermediary balance-sheet channel, and Brunnermeier and Pedersen's funding-liquidity spiral. The simulation is intentionally not an exogenous-shock model: the boom and bust are produced by interacting investor rules, balance-sheet constraints, and price impact.
+
+**Real-world event catalogue**:
+
+| Event | Core credit-cycle mechanism | Scenario mapping |
+|---|---|---|
+| US savings-and-loan crisis, 1980s | Deregulated lending expanded into real estate and reversed when asset quality deteriorated. | ProCyclicalLender expands in booms and withdraws in busts. |
+| Japan asset bubble, 1986-1991 | Bank credit expansion supported land/equity prices, then collateral values collapsed. | ProCyclicalLender and MinskyBorrower reinforce rising prices before deleveraging. |
+| LTCM crisis, 1998 | Leverage accumulated during calm markets and unwound rapidly under margin stress. | MinskyBorrower accumulates exposure after stable rounds and sells in crisis. |
+| Global financial crisis, 2007-2009 | Mortgage credit expansion, collateral feedback, and forced deleveraging drove a systemic contraction. | Full five-agent taxonomy generates boom, fragility, contraction, and stabilization. |
+| Euro-area sovereign crisis, 2010-2012 | Bank-sovereign feedback tightened credit in stressed countries. | CounterCyclicalLender tests whether stabilizing liquidity can offset withdrawal. |
+
+**Book and practitioner literature**: Kindleberger's *Manias, Panics, and Crashes* provides the mania-distress-revulsion sequence; Reinhart and Rogoff document recurring credit booms and post-crisis deleveraging; Graham's value-investing discipline motivates the fundamental anchor; Basel III counter-cyclical capital buffer guidance motivates the stabilizer role.
+
 ## §2 Theory
 
 | Reference                                                                                                                             | Contribution                                                                                   | DOI                                       |
@@ -13,6 +29,30 @@ The credit cycle describes the endogenous expansion and contraction of credit av
 | Adrian, T., & Shin, H.S. (2010). Liquidity and leverage. *Journal of Financial Intermediation*, 19(3), 418–437.                       | Pro-cyclical leverage of financial intermediaries; balance sheet expansion with rising prices  | https://doi.org/10.1016/j.jfi.2008.12.002 |
 | Brunnermeier, M.K., & Pedersen, L.H. (2009). Market liquidity and funding liquidity. *Review of Financial Studies*, 22(6), 2201–2238. | Liquidity spiral; margin constraints link market and funding liquidity                         | https://doi.org/10.1093/rfs/hhn098        |
 | Reinhart, C.M., & Rogoff, K.S. (2009). *This Time Is Different: Eight Centuries of Financial Folly*. Princeton University Press.      | Cross-country credit boom/bust evidence; "this time is different" syndrome                     | N/A (book)                                |
+
+### §2.1 Financial Instability Hypothesis
+
+**Mechanism**: Stability changes financing composition from hedge finance to speculative and Ponzi finance. The formal simulation proxy is the `stable_rounds` state of `MinskyBorrower`: calm markets increase leverage demand; crisis deviations trigger forced selling.
+
+**Empirical relevance**: The LTCM and 2007-2009 cases show that low-volatility periods can precede concentrated leverage and abrupt deleveraging.
+
+**Investor link**: `MinskyBorrower` (§4.2) is the direct implementation; `ProCyclicalLender` (§4.1) supplies the credit that makes the Minsky path system-wide.
+
+### §2.2 Leverage Cycle and Collateral Feedback
+
+**Mechanism**: Endogenous leverage rises with collateral values and collapses when collateral values decline. In the simulation, `price_impact` transmits net demand into asset prices while pro-cyclical lending changes demand direction with deviation.
+
+**Formal link**: The market equation `P(t+1) = P(t) + lambda * D(t) + gamma * [F(t)-P(t)] + epsilon(t)` is the reduced-form feedback channel between order flow, collateral valuation, and mean reversion.
+
+**Investor link**: `ProCyclicalLender` (§4.1) amplifies the leverage cycle; `CounterCyclicalLender` (§4.3) is the test of institutional dampening.
+
+### §2.3 Funding-Liquidity Spiral
+
+**Mechanism**: Falling prices reduce funding capacity and force sales, which further depresses prices. The simulation expresses this through crisis-triggered selling by destabilizers and crisis buying by stabilizers.
+
+**Empirical relevance**: Brunnermeier and Pedersen (2009) document the interaction between market liquidity and funding liquidity; Adrian and Shin (2010) document pro-cyclical intermediary leverage.
+
+**Investor link**: `MinskyBorrower` and `ProCyclicalLender` create the spiral; `CounterCyclicalLender` and `ValueInvestor` provide offsetting demand.
 
 ## §3 Market Design
 
@@ -25,11 +65,11 @@ P(t+1) = P(t) + λ·D(t) + γ·[F(t)−P(t)] + ε(t)
 ```
 
 Where:
-- `λ` = price impact coefficient (0.01)
+- `λ` = price impact coefficient (0.05)
 - `D(t)` = net demand = buy volume − sell volume
-- `γ` = mean-reversion speed (0.03)
+- `γ` = mean-reversion speed (0.02)
 - `F(t)` = fundamental value (100.0)
-- `ε(t)` ~ N(0, σ²), σ = 0.5
+- `ε(t)` ~ N(0, σ²), σ = 0.02
 
 **Deviation measure**: `δ(t) = [P(t) − F(t)] / F(t)` — positive signals credit boom, negative signals credit bust.
 
@@ -51,7 +91,7 @@ qty(t) = order_size                        if δ(t) < −expansion_threshold [se
 qty(t) = 0                                otherwise
 ```
 
-Parameters: `expansion_threshold` = 0.03, `credit_multiplier` = 2.0, `order_size` = 600.
+Parameters: `expansion_threshold` = 0.01, `contraction_threshold` = -0.015, `credit_multiplier` = 2.0, `order_size` = 600.
 
 **4.1.4 Calibration Targets**: Peak buy volume ≈ 1,200 units/round during boom phase; sell volume ≈ 600 during bust onset.
 
@@ -106,7 +146,7 @@ qty(t) = order_size   if δ(t) > boom_sell_threshold     [sell/build reserves]
 qty(t) = 0            otherwise
 ```
 
-Parameters: `crisis_buy_threshold` = −0.05, `boom_sell_threshold` = 0.05, `order_size` = 500.
+Parameters: `crisis_buy_threshold` = -0.05, `boom_sell_threshold` = 0.05, `order_size` = 500.
 
 **4.3.4 Calibration Targets**: Buying during crisis phases limits peak price decline; reserve build during booms reduces excess credit.
 
@@ -185,17 +225,18 @@ The simulation achieves diversity along three axes: (1) pro- vs. counter-cyclica
 |------------------------|-----------------------|-------|------------------------------------|
 | `initial_price`        | Market                | 100.0 | Calibration                        |
 | `fundamental_value`    | Market                | 100.0 | Calibration                        |
-| `price_impact` (λ)     | Market                | 0.01  | Adrian & Shin (2010)               |
-| `mean_reversion` (γ)   | Market                | 0.03  | Calibration                        |
-| `noise_std`            | Market                | 0.5   | Calibration                        |
-| `expansion_threshold`  | ProCyclicalLender     | 0.03  | Geanakoplos (2010) calibration     |
+| `price_impact` (λ)     | Market                | 0.05  | Config path: `market.config.extras.price_impact`; calibrated to make order-flow feedback visible in 200 rounds |
+| `mean_reversion` (γ)   | Market                | 0.02  | Config path: `market.config.extras.mean_reversion`; slow reversion for persistent credit cycles |
+| `noise_std`            | Market                | 0.02  | Config path: `market.config.extras.noise_std`; small background noise relative to endogenous demand |
+| `expansion_threshold`  | ProCyclicalLender     | 0.01  | Config path: `procyclicallender.config.extras.expansion_threshold`; Geanakoplos-style collateral sensitivity |
+| `contraction_threshold`| ProCyclicalLender     | -0.015| Config path: `procyclicallender.config.extras.contraction_threshold`; asymmetric credit tightening trigger |
 | `credit_multiplier`    | ProCyclicalLender     | 2.0   | Adrian & Shin (2010)               |
 | `order_size`           | ProCyclicalLender     | 600   | Calibration                        |
 | `max_leverage`         | MinskyBorrower        | 5.0   | Minsky (1986) Ponzi-finance regime |
 | `crisis_threshold`     | MinskyBorrower        | −0.05 | Calibration                        |
 | `order_size`           | MinskyBorrower        | 500   | Calibration                        |
-| `crisis_buy_threshold` | CounterCyclicalLender | −0.05 | Basel III CCyB trigger             |
-| `boom_sell_threshold`  | CounterCyclicalLender | 0.05  | Calibration                        |
+| `crisis_buy_threshold` | CounterCyclicalLender | −0.05 | Config path: `countercyclicallender.config.extras.crisis_buy_threshold`; Basel III CCyB trigger |
+| `boom_sell_threshold`  | CounterCyclicalLender | 0.05  | Config path: `countercyclicallender.config.extras.boom_sell_threshold`; reserve build in booms |
 | `order_size`           | CounterCyclicalLender | 500   | Calibration                        |
 | `value_discount`       | ValueInvestor         | 0.10  | Graham (1949) margin of safety     |
 | `order_size`           | ValueInvestor         | 400   | Calibration                        |
@@ -218,13 +259,13 @@ Each round proceeds as follows:
 
 ## §8 Historical Cases
 
-| Event                     | Year      | Key Feature                                                        | ProCyclicalLender analog | MinskyBorrower analog             |
-|---------------------------|-----------|--------------------------------------------------------------------|--------------------------|-----------------------------------|
-| US S&L Crisis             | 1980s     | Pro-cyclical bank lending deregulation; thrift boom-bust           | S&L institutions         | Speculative real estate borrowers |
-| Japanese Asset Bubble     | 1986–1991 | Bank credit expansion into real estate; Minsky trajectory complete | Japanese city banks      | Corporate real estate borrowers   |
-| LTCM Crisis               | 1998      | Leverage build-up during low-vol environment; sudden deleveraging  | Prime brokers tightening | LTCM (Minsky Ponzi phase)         |
-| Global Financial Crisis   | 2007–2009 | Subprime credit expansion; structured product leverage             | US/European banks        | Household mortgagors; hedge funds |
-| European Sovereign Crisis | 2010–2012 | Bank-sovereign doom loop; credit contraction in periphery          | Core European banks      | Peripheral sovereign borrowers    |
+| Event                     | Year      | Quantitative evidence | Key Feature                                                        | Agent/mechanism mapping |
+|---------------------------|-----------|---|--------------------------------------------------------------------|---|
+| US S&L Crisis             | 1980s     | Over 1,000 thrift failures and large taxpayer resolution costs | Pro-cyclical bank lending deregulation; thrift boom-bust           | ProCyclicalLender expansion and withdrawal; MinskyBorrower real-estate leverage |
+| Japanese Asset Bubble     | 1986-1991 | Nikkei 225 peaked near 38,916 in 1989 before a multi-year collapse | Bank credit expansion into real estate; Minsky trajectory complete | ProCyclicalLender bank-credit channel; ValueInvestor as missing/weak fundamental anchor |
+| LTCM Crisis               | 1998      | Fund leverage commonly reported above 25x before rescue | Leverage build-up during low-vol environment; sudden deleveraging  | MinskyBorrower stable-round accumulation and forced selling |
+| Global Financial Crisis   | 2007-2009 | US house prices and structured-credit losses triggered global deleveraging | Subprime credit expansion; structured product leverage             | Full pro-cyclical lender, Minsky borrower, and counter-cyclical stabilizer interaction |
+| European Sovereign Crisis | 2010-2012 | Peripheral sovereign spreads widened sharply relative to core Europe | Bank-sovereign doom loop; credit contraction in periphery          | CounterCyclicalLender stress test against withdrawal pressure |
 
 ## §9 Variant Comparison
 

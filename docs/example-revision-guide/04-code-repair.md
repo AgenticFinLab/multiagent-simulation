@@ -503,7 +503,7 @@ Pattern: `__getstate__` pops `llm_client` from `custom_state` before pickling; `
 
 ### §7.8 LLM Call Pattern
 
-Key steps: load system prompt via `load_prompt(self.config.extras["llm"]["sys_message"])`, build user prompt, call `llm_client.run([InferInput(system_msg=..., user_msg=...)])`, parse with `parse_llm_response_with_thinking(infer_output.outputs[0].response)`, retry up to 3 times, fallback to `hold` on persistent failure.
+Key steps: load system prompt via `load_prompt(self.config.extras["llm"]["sys_message"])`, build user prompt, call `llm_client.run([InferInput(system_msg=..., user_msg=...)])`, parse with `parse_llm_response_with_thinking(infer_output.outputs[0].response)`, retry bounded transient API failures, and either raise on deterministic contract/config errors or use an explicit counted stochastic API fallback on persistent malformed model output.
 
 ### §7.9 Prompt Loading
 
@@ -543,7 +543,7 @@ All system prompts (LLM, RuleLLM, Rag variants) must instruct the LLM to produce
 
 ### §7.14 No Field Derivation from LLM Output
 
-The `decide()` method in LLM/RuleLLM/Rag variants MUST read all fields (`action`, `bid_price`, `quantity`, `reasoning`) directly from the LLM response via `decision["key"]`. NEVER derive or infer a missing field from another field (e.g., deriving `action` from the sign of `quantity`). If any field is missing, it must fail-fast via `KeyError`.
+The `decide()` method in LLM/RuleLLM/Rag variants MUST read all fields (`action`, `bid_price`, `quantity`, `reasoning`) directly from the LLM response via `decision["key"]`. NEVER derive or infer a missing field from another field (e.g., deriving `action` from the sign of `quantity`). If any field is missing because the prompt/parser contract is wrong, it must fail-fast via `KeyError`; if the contract is correct and stochastic malformed API output remains, use only the explicit counted fallback policy.
 
 **WRONG** — deriving action from quantity sign and normalizing:
 ```python
@@ -601,9 +601,11 @@ Do not use `dict.get(key, default)` for any known dictionary key. Use direct `di
 # WRONG — masks LLM failures as valid trading decisions
 if decision is None:
     action, quantity = "hold", 0
-# CORRECT — fails loudly
+# CORRECT — fails loudly for deterministic project bugs
 if decision is None:
     raise RuntimeError(f"LLM parse failed after {retries} retries")
+# ALSO ALLOWED — stochastic API fallback after prompt/parser/player contract is fixed:
+# log fallback reason/count, return every required field, and audit fallback rate.
 
 # PATTERN 2: .get() on LLM response dict
 # WRONG
@@ -1364,7 +1366,7 @@ See §7.13 for the full wrong/correct code examples for each pattern.
 
 | # | Pattern                         | Detection Regex                       | Typical Location                           |
 |---|---------------------------------|---------------------------------------|--------------------------------------------|
-| 1 | LLM parse failure → silent hold | `decision is None` followed by `hold` | LLM/RuleLLM/Rag `players.py` decide()      |
+| 1 | LLM parse failure → silent hold | `decision is None` followed by unlogged/untracked `hold` | LLM/RuleLLM/Rag `players.py` decide()      |
 | 2 | `.get()` on LLM response        | `decision\.get\(`                     | LLM/RuleLLM/Rag `players.py` decide()      |
 | 3 | `.get()` on message payload     | `decision_payload\.get\(`             | LLM/RuleLLM/Rag `players.py` decide()      |
 | 4 | `.get()` on coordinator data    | `fundamentals\.get\(`                 | Rule `players.py` coordinator, analysis.py |
@@ -1407,12 +1409,16 @@ grep -rn 'if .* else [0-9]' examples/<Scenario>/*/players.py examples/<Scenario>
   | grep -v 'plt\.' | grep -v '#' | grep -v 'color'
 ```
 
-#### Detect silent hold on LLM failure
+#### Detect fallback on LLM failure
 
 ```bash
 grep -rn 'decision is None' examples/<Scenario>/*/players.py \
   | grep -v 'raise'
 ```
+
+Every hit must either be removed or classified as an explicit stochastic API
+fallback with logged reason/count, complete required fields, and post-run
+fallback-rate review.
 
 ### §12.4 Fix Patterns
 
@@ -1423,6 +1429,12 @@ grep -rn 'decision is None' examples/<Scenario>/*/players.py \
 | `decision is None → hold`  | `raise RuntimeError(...)`                                             |
 | `if rates else 0.0`        | `if not rates: raise ValueError(...)` then compute without ternary    |
 | Chained `.get().get()`     | Replace outermost first: `d.get("a", {}).get("b", 0)` → `d["a"]["b"]` |
+
+Stochastic API exception: after the prompt/parser/player contract is correct,
+malformed external LLM output or transient provider errors may use an explicit,
+conservative, counted fallback. The fallback must be visible in logs/artifacts,
+must return all required fields, and must be quality-reviewed. Fallback caused
+by config/schema/topology/auth/quota/missing-key bugs is never valid.
 
 **Important**: When replacing chained `.get()` calls (e.g., `self.state.custom_state.get("market_data", {}).get("price", 100.0)`), always replace the FULL chained expression first before replacing standalone `.get()` patterns, to avoid partial replacements.
 

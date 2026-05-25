@@ -1,0 +1,153 @@
+# =============================================================================
+# ShortSqueezeLLM Players Configuration
+# =============================================================================
+
+market:
+  name: "Market with Short Interest Tracking"
+  class: "examples.ShortSqueeze.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      fundamental_value: 50.0
+      initial_price: 30.0
+      price_impact: 0.1
+      mean_reversion: 0.005
+      noise_std: 0.5
+      initial_short_interest: 80.0
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+llm_short_seller:
+  name: "LLM Short Seller"
+  class: "examples.ShortSqueeze.LLM.players:LLMShortSeller"
+  # Expander → llm_short_seller_1, llm_short_seller_2, llm_short_seller_3
+  num_instances: 3
+  config:
+    identity: "llm_short_seller"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: -50.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_SHORT_SELLER_SYS"
+        user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_retail_coord:
+  name: "LLM Retail Coordinator"
+  class: "examples.ShortSqueeze.LLM.players:LLMRetailCoordinator"
+  # Expander → llm_retail_coord_1, llm_retail_coord_2, llm_retail_coord_3
+  num_instances: 3
+  config:
+    identity: "llm_retail_coord"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_RETAIL_COORD_SYS"
+        user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_momentum:
+  name: "LLM Momentum Buyer"
+  class: "examples.ShortSqueeze.LLM.players:LLMMomentumBuyer"
+  # Expander → llm_momentum_1, llm_momentum_2, llm_momentum_3
+  num_instances: 3
+  config:
+    identity: "llm_momentum"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_MOMENTUM_SYS"
+        user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_value:
+  name: "LLM Value Investor"
+  class: "examples.ShortSqueeze.LLM.players:LLMValueInvestor"
+  # Expander → llm_value_1, llm_value_2
+  num_instances: 2
+  config:
+    identity: "llm_value"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_VALUE_SYS"
+        user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_institutional:
+  name: "LLM Institutional Holder"
+  class: "examples.ShortSqueeze.LLM.players:LLMInstitutionalHolder"
+  num_instances: 1
+  config:
+    identity: "llm_institutional"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_INSTITUTIONAL_SYS"
+        user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml

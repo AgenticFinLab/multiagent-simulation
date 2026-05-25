@@ -1,0 +1,301 @@
+# =============================================================================
+# FlashCrashRag Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 RAG-augmented LLM Investors
+#
+# Knowledge Architecture:
+#   The shared knowledge: block is defined at the TOP of this file, before the
+#   market definition. The config loader automatically detects "knowledge" inside
+#   the players dict and promotes it to config top-level.
+# =============================================================================
+
+# =============================================================================
+# Shared Knowledge Configuration
+# =============================================================================
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    timeout_per_page: 30
+    max_pages: 250
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+
+# =============================================================================
+# Market (rule-based, identical to FlashCrash)
+# =============================================================================
+market:
+  name: "Market"
+  class: "examples.FlashCrash.Rag.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      base_price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.3
+      low_liquidity_threshold: 50.0
+      high_impact_multiplier: 3.0
+      base_liquidity: 50.0
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# =============================================================================
+# RAG HFT (Momentum detection + LLM + RAG)
+# =============================================================================
+ragllm_hft:
+  name: "RAG HFT"
+  class: "examples.FlashCrash.Rag.players:RagLLMHighFrequencyTrader"
+  num_instances: 3
+  config:
+    identity: "ragllm_hft"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      lookback: 2
+      momentum_sensitivity: 3.0
+      base_position_size: 40.0
+      speed_advantage: 1.5
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.FlashCrash.Rag.prompts:RAGLLM_HFT_SYS"
+        user_message: "examples.FlashCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# =============================================================================
+# RAG Market Maker (Liquidity provision + LLM + RAG)
+# =============================================================================
+ragllm_market_maker:
+  name: "RAG Market Maker"
+  class: "examples.FlashCrash.Rag.players:RagLLMMarketMaker"
+  num_instances: 3
+  config:
+    identity: "ragllm_market_maker"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      volatility_threshold: 0.02
+      base_liquidity: 30.0
+      spread_sensitivity: 0.5
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.FlashCrash.Rag.prompts:RAGLLM_MARKET_MAKER_SYS"
+        user_message: "examples.FlashCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# =============================================================================
+# RAG Algorithmic Trader (Trend-following + LLM + RAG)
+# =============================================================================
+ragllm_algo:
+  name: "RAG Algorithmic Trader"
+  class: "examples.FlashCrash.Rag.players:RagLLMAlgorithmicTrader"
+  num_instances: 2
+  config:
+    identity: "ragllm_algo"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      lookback: 3
+      trend_sensitivity: 2.0
+      base_position_size: 25.0
+      trend_multiplier: 10
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.FlashCrash.Rag.prompts:RAGLLM_ALGO_SYS"
+        user_message: "examples.FlashCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.2
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# =============================================================================
+# RAG Stop-Loss Trader (Cascade rules + LLM + RAG)
+# =============================================================================
+ragllm_stop_loss:
+  name: "RAG Stop-Loss Trader"
+  class: "examples.FlashCrash.Rag.players:RagLLMStopLossTrader"
+  num_instances: 3
+  config:
+    identity: "ragllm_stop_loss"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      custom_state_hot_limit: 3
+      stop_loss_percent: 0.05
+      initial_buy_price: 100.0
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.FlashCrash.Rag.prompts:RAGLLM_STOP_LOSS_SYS"
+        user_message: "examples.FlashCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.2
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# =============================================================================
+# RAG Fundamental Trader (Value deviation + LLM + RAG)
+# =============================================================================
+ragllm_fundamental:
+  name: "RAG Fundamental Trader"
+  class: "examples.FlashCrash.Rag.players:RagLLMFundamentalTrader"
+  num_instances: 2
+  config:
+    identity: "ragllm_fundamental"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      value_threshold: 0.10
+      base_position_size: 30.0
+      value_sensitivity: 1.0
+      value_multiplier: 10
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.FlashCrash.Rag.prompts:RAGLLM_FUNDAMENTAL_SYS"
+        user_message: "examples.FlashCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml

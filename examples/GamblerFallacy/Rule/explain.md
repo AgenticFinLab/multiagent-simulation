@@ -1,84 +1,124 @@
-# GamblerFallacy — Rule Variant
+# GamblerFallacy Rule — Implementation Explanation
 
-## §1 Overview
+## §1 Variant Overview
 
-The Rule variant implements the Gambler's Fallacy simulation using deterministic threshold-based rules from `simulation-bases.md §4`. Each investor applies fixed conditions on price deviation to generate the two competing biases: the Gambler's Fallacy (StreakReversalTrader §4.1 — expects reversal) and the Hot Hand Fallacy (HotHandTrader §4.2 — expects continuation). Both are implemented as momentum-following at default extras; differentiation requires non-default `streak_threshold`/`hot_streak_threshold` calibration.
-
-| Aspect             | Detail                                             |
-|--------------------|----------------------------------------------------|
-| Variant            | Rule                                               |
-| Simulation         | GamblerFallacy                                     |
-| Decision Mechanism | Threshold rules on deviation δ(t) = (P(t) − F) / F |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                    |
-| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`       |
-| Price Model        | P(t+1) = P(t) + λ × D(t) + γ × (F − P(t)) + ε(t)   |
-
----
+| Item | Description |
+|---|---|
+| Variant | Rule |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | Deterministic threshold rules over deviation from fundamental value |
+| Key Difference from Other Variants | No LLM or retrieval calls; all orders come from fixed formulas in `players.py`. |
+| Primary Research Contribution | Establishes the baseline for streak-based bias, hot-hand momentum, and rational correction. |
+| Files | `players.py`, `run_gamblerfallacy.py`, `analysis.py`, `explain.md`, `analysis.md` |
 
 ## §2 Theory → Implementation Mapping
 
-### §2.1 StreakReversalTrader (`simulation-bases.md §4.1`)
+### StreakReversalTrader: Theory → Implementation Mapping
 
-| Theory Component                                 | Implementation                                                                                                                         |
-|--------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| Law of small numbers (Tversky & Kahneman, 1971)  | `if abs(deviation) > 0.02: qty = min(800, int(abs(deviation) * 5000))`                                                                 |
-| Gambler's fallacy: expects reversal after streak | At default extras: `if deviation > 0: buy` (paradoxically buys on upward deviation, expecting this streak to continue before reversal) |
-| Streak continuation bias                         | `if deviation < 0: sell` — sells into downward streaks expecting further reversal                                                      |
-| Position cap                                     | 800 shares max; `int(cash/price)` buy constraint; `max(position, 0)` sell constraint                                                   |
+> Theory defined in `simulation-bases.md §4.1`.
 
-**Note**: At default extras, StreakReversalTrader and HotHandTrader have identical logic — both buy when deviation > 0. The gambler's fallacy (betting on reversal) requires non-default `reversal_bias`/`continuation_bias` extras to activate the opposing direction logic. At default, both are destabilizing momentum followers.
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.1.2 | Class: `StreakReversalTrader`; docstring cites `simulation-bases.md §4.1`. |
+| Behavioral mechanism → sim-bases §4.1.4.2 | `decide()` activates when `abs(deviation) > 0.02`. |
+| Mathematical model → sim-bases §4.1.4.3 | Quantity is `min(800, int(abs(deviation) * 5000))`; trades are bounded by cash and position. |
+| State variables → sim-bases §4.1.4.3 | `cash`, `position`, `price`, `fundamental`, and `deviation` are initialized in `perceive()`. |
+| Parameters → sim-bases §6 | Portfolio and market baselines are loaded from `players.yml`. |
+| Activation scenarios → sim-bases §4.1.3 | Activates when a streak-like deviation becomes salient. |
 
-### §2.2 HotHandTrader (`simulation-bases.md §4.2`)
+### HotHandTrader: Theory → Implementation Mapping
 
-| Theory Component                         | Implementation                                                                                                      |
-|------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
-| Hot hand fallacy (Gilovich et al., 1985) | `if abs(deviation) > 0.02: qty = min(800, int(abs(deviation) * 5000))`                                              |
-| Streak continuation: buys winners        | `if deviation > 0: buy` — buys on positive deviation expecting hot streak to continue                               |
-| Streak abandonment                       | `if deviation < 0: sell` — sells on negative deviation                                                              |
-| Identical to §4.1 at default             | Both biases produce the same momentum-following behavior at default extras; GFI captures this as expected SAR = 1.0 |
+> Theory defined in `simulation-bases.md §4.2`.
 
-### §2.3 IndependentAssessor (`simulation-bases.md §4.3`)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.2.2 | Class: `HotHandTrader`; docstring cites `simulation-bases.md §4.2`. |
+| Behavioral mechanism → sim-bases §4.2.4.2 | Uses the same deviation-triggered structure to represent continuation belief. |
+| Mathematical model → sim-bases §4.2.4.3 | Uses 2% activation, deviation-proportional sizing, and 800-share cap. |
+| State variables → sim-bases §4.2.4.3 | Reads current market and portfolio fields from `custom_state`. |
+| Parameters → sim-bases §6 | Initial portfolio and market reference values are config supplied. |
+| Activation scenarios → sim-bases §4.2.3 | Activates in streak-active states rather than near-fundamental quiet states. |
 
-| Theory Component                                | Implementation                                                                          |
-|-------------------------------------------------|-----------------------------------------------------------------------------------------|
-| Independence of sequential events (Rabin, 2002) | `if abs(deviation) > 0.05: qty = min(500, int(abs(deviation) * 3000))`                  |
-| Contrarian mean reversion                       | `if deviation < 0: buy` (buys undervalued); `if deviation > 0: sell` (sells overvalued) |
-| Higher activation threshold                     | 0.05 > 0.02; rational agent waits for statistically meaningful deviation signal         |
-| Smaller position cap                            | 500 shares (vs. 800 for biased agents); Shleifer & Vishny (1997) limits to arbitrage    |
+### IndependentAssessor: Theory → Implementation Mapping
 
-### §2.4 Arbitrageur (`simulation-bases.md §4.4`)
+> Theory defined in `simulation-bases.md §4.3`.
 
-| Theory Component                              | Implementation                                                                         |
-|-----------------------------------------------|----------------------------------------------------------------------------------------|
-| Limits to arbitrage (Shleifer & Vishny, 1997) | `if abs(deviation) > 0.05: qty = min(500, int(abs(deviation) * 3000))`                 |
-| Exploit streak-based mispricing               | `if deviation < 0: buy`; `if deviation > 0: sell` — identical contrarian logic to §4.3 |
-| Combined correction force                     | §4.3 + §4.4 together provide 2× rational correction pressure at same threshold         |
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.3.2 | Class: `IndependentAssessor`; docstring cites `simulation-bases.md §4.3`. |
+| Behavioral mechanism → sim-bases §4.3.4.2 | Treats sequential outcomes as independent and trades against mispricing. |
+| Mathematical model → sim-bases §4.3.4.3 | Activates at `abs(deviation) > 0.05` with a 500-share cap. |
+| State variables → sim-bases §4.3.4.3 | Uses current price, fundamental, deviation, cash, and position. |
+| Parameters → sim-bases §6 | Runtime values come from `players.yml`. |
+| Activation scenarios → sim-bases §4.3.3 | Waits for larger deviations before rational correction. |
 
-### §2.5 NoiseTrader (`simulation-bases.md §4.5`)
+### Arbitrageur: Theory → Implementation Mapping
 
-| Theory Component                 | Implementation                                        |
-|----------------------------------|-------------------------------------------------------|
-| Noise trader model (Black, 1986) | `if random.random() < trade_probability (0.3): trade` |
-| Random direction                 | `action = "buy" if random.random() > 0.5 else "sell"` |
-| Random quantity                  | `qty = random.randint(100, 500)`                      |
+> Theory defined in `simulation-bases.md §4.4`.
 
----
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.4.2 | Class: `Arbitrageur`; docstring cites `simulation-bases.md §4.4`. |
+| Behavioral mechanism → sim-bases §4.4.4.2 | Exploits streak-driven mispricing through contrarian trades. |
+| Mathematical model → sim-bases §4.4.4.3 | Uses the same 5% threshold and 500-share cap as the rational correction force. |
+| State variables → sim-bases §4.4.4.3 | Reads broadcast market deviation directly. |
+| Parameters → sim-bases §6 | Portfolio calibration is config supplied. |
+| Activation scenarios → sim-bases §4.4.3 | Activates when arbitrage opportunity exceeds noise-trader risk. |
 
-## §3 Rule-Specific Notes
+### NoiseTrader: Theory → Implementation Mapping
 
-- **Default extras SAR = 1.0**: At default calibration, StreakReversalTrader and HotHandTrader have exactly identical logic — Streak Asymmetry Ratio = 1.0 is expected, not a bug. Differentiation requires non-default `reversal_bias`/`continuation_bias` parameters.
-- **Activation gap**: Biased agents at |δ| > 0.02; rational agents at |δ| > 0.05 — same asymmetric structure as FramingEffect.
-- **Hot Hand Momentum**: Even with identical direction logic, combined biased agents produce strong demand at |δ| > 0.02, captured by HHM metric.
+> Theory defined in `simulation-bases.md §4.5`.
 
----
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.5.2 | Class: `NoiseTrader`; docstring cites `simulation-bases.md §4.5`. |
+| Behavioral mechanism → sim-bases §4.5.4.2 | Randomly supplies background liquidity. |
+| Mathematical model → sim-bases §4.5.4.3 | Random direction and size are bounded by cash and holdings. |
+| State variables → sim-bases §4.5.4.3 | Uses portfolio constraints in `custom_state`. |
+| Parameters → sim-bases §6 | Initial values are config supplied. |
+| Activation scenarios → sim-bases §4.5.3 | Can trade in any round independently of streak signal. |
 
-## §4 Expected Ranges (Rule Variant)
+## §3 Market Mechanism Implementation
 
-| Metric                                | Rule Expected Range     | Interpretation                                                       |
-|---------------------------------------|-------------------------|----------------------------------------------------------------------|
-| GFI (Gambler's Fallacy Index)         | 0.02–0.08               | Mean absolute deviation; both biased agents amplify deviation        |
-| SAR (Streak Asymmetry Ratio)          | ≈ 1.0 at default extras | Equal positive/negative deviation mean; both biased agents symmetric |
-| HHM (Hot Hand Momentum)               | 150–500 shares/round    | Mean demand magnitude during                                         |
-| ACI (Arbitrage Correction Index)      | 0.35–0.65               | Fraction of large deviations corrected 50% within 5 rounds           |
-| VAF (Volatility Amplification Factor) | 1.5–3.5                 | Biased-active rounds 1.5–3.5× more volatile than quiet rounds        |
-| WDI (Wealth Distribution Index)       | 0.10–0.35               | Moderate inequality; rational agents outperform biased agents        |
+Formula source: `simulation-bases.md §3.1`.
+
+```text
+P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
+```
+
+Implemented in `players.py → Market.decide()`. The market broadcasts `price`, `fundamental`, `deviation`, and `round`; investors return `order` payloads with `action`, `bid_price`, `quantity`, `reasoning`, `agent_type`, `strategy`, and sender identity.
+
+## §4 Rule Variant-Specific Features
+
+- Streak-biased agents activate at smaller deviations than rational correction agents.
+- Legacy inline thresholds are documented as current runtime truth rather than silently redesigned.
+
+## §5 Architecture Diagram
+
+```text
+Market broadcast -> Rule investors -> order payloads -> Market.clear_market() -> next broadcast
+```
+
+## §6 Configuration Reference
+
+| Config File | Runtime Role |
+|---|---|
+| `configs/GamblerFallacy/Rule/simulation.yml` | 200-round run and Ray settings |
+| `configs/GamblerFallacy/Rule/players.yml` | Market and investor class paths plus portfolio settings |
+| `configs/GamblerFallacy/Rule/topology.yml` | Star topology |
+| `configs/GamblerFallacy/Rule/persona.yml` | Shared storage/proxy settings |
+
+## §7 Expected Runtime Outputs
+
+Full runs should produce 200 rounds, market price history, and canonical order records for all configured investors.
+
+## §8 Validation Checklist
+
+- `players.py` and `analysis.py` compile.
+- Dry-run discovers `GamblerFallacy__Rule`.
+- Preflight validates class paths, runner, total rounds, and topology.
+- Runtime logic should remain stable unless a documented mechanism or contract defect is found.
+
+## §9 Cross-Variant Comparison Notes
+
+Rule provides the baseline for comparing whether LLM reasoning, rule-embedded prompts, or RAG context changes streak asymmetry, momentum demand, correction efficiency, and wealth distribution.

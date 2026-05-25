@@ -1,6 +1,6 @@
 # CarryTradeUnwind — Analysis Methodology Basis
 
-## 1. Analysis Objectives
+## §1 Analysis Objectives
 
 | Objective | Research Question                                                            | Metric(s)                                    | Expected Finding                                                               |
 |-----------|------------------------------------------------------------------------------|----------------------------------------------|--------------------------------------------------------------------------------|
@@ -12,13 +12,15 @@
 | O6        | How does cross-variant carry crash behavior compare?                         | All core metrics by variant                  | Rule most deterministic; Rag potentially shows altered leveraged exit behavior |
 
 
-## 2. Core Metrics Catalogue
+## §2 Core Metrics Catalogue
 
 ### Metric 1: Maximum Drawdown (%)
 
 - **Category**: Price Dynamics / Crash Severity
 - **Definition**: Largest peak-to-trough decline in the FX rate as a percentage
 - **Formula**: max_drawdown = max_{t1 < t2} [(P(t1) − P(t2)) / P(t1)] × 100
+- **Python function**:
+  `def _compute_max_drawdown(prices_list: list[float]) -> float`
 
 **Derivation Rationale**: In an FX carry crash, the peak-to-trough decline directly measures the total loss experienced by a fully invested carry trader from the optimal entry to the worst point. This is the canonical carry crash severity metric. Brunnermeier et al. (2009) document historical carry crash drawdowns of 10–25% for JPY carry positions; the 2008 USD/JPY carry unwind produced a 29% peak-to-trough decline. Chekhlov et al. (2005) establish max drawdown as the preferred risk measure for leveraged strategies with heavy left tail.
 
@@ -39,6 +41,8 @@
 - **Category**: Phenomenon-Specific / Cascade Speed
 - **Definition**: Maximum absolute price change in a single simulation round; captures the explosive nature of forced carry liquidation
 - **Formula**: unwind_velocity = max_t |P(t+1) − P(t)|
+- **Python function**:
+  `def _compute_unwind_velocity(prices_list: list[float]) -> float`
 
 **Derivation Rationale**: Carry crashes are characterized by sudden, violent price discontinuities — the "elevator down" dynamic. Velocity measures how explosive the cascade is at its peak. A high velocity spike (> 10× noise_std per round) indicates forced liquidation dominates rather than gradual selling. Brady Commission (1988) and Brunnermeier et al. (2009) both document intraday price moves 5–10× normal during cascade peaks. With noise_std = 0.02 per round, a velocity > 0.20 indicates cascade dominance.
 
@@ -58,6 +62,8 @@
 - **Category**: Phenomenon-Specific / Persistence
 - **Definition**: Number of simulation rounds during which deviation is below the crisis threshold (−5%)
 - **Formula**: unwind_duration = count{t : deviation(t) < −0.05}
+- **Python function**:
+  `def _compute_unwind_duration(prices_list: list[float], fundamental: float, threshold: float = -0.05) -> int`
 
 **Derivation Rationale**: The duration of the carry crash measures how long the FX rate remains below the crisis threshold — a measure of the stabilization challenge. Brunnermeier et al. (2009) document that JPY carry crashes typically last days to weeks (consistent with 5–30 simulation rounds); shorter crashes indicate stronger stabilization (FCB + mean reversion); longer crashes indicate the cascade overwhelms recovery forces. The crisis threshold of −5% is calibrated to the level at which FundingCurrencyBuyer activates and the crisis is clearly in progress.
 
@@ -77,6 +83,8 @@
 - **Category**: Phenomenon-Specific / Timing
 - **Definition**: First round in which deviation crosses the −5% crisis threshold; measures how quickly the cascade escalates from the initial trigger
 - **Formula**: t_onset = min{t : deviation(t) < −0.05}; t_onset = −1 if no crisis
+- **Python function**:
+  `def _compute_cascade_onset(prices_list: list[float], fundamental: float, threshold: float = -0.05) -> int | None`
 
 **Derivation Rationale**: The crisis onset round provides the timeline reference for all phase transitions. Early onset (round < 15) indicates the initial noise trigger quickly escalates; late onset (round > 40) suggests the simulation spends significant time in the pre-crisis accumulation phase, more realistically modeling multi-period carry build-up. The onset round also separates pre-crisis from crisis for agent volume attribution analysis.
 
@@ -96,6 +104,8 @@
 - **Category**: Price Dynamics / Recovery
 - **Definition**: Fraction of the maximum deviation that is recovered by the end of the simulation
 - **Formula**: recovery_ratio = (|dev_min| − |dev_final|) / |dev_min|, where dev_min = min deviation, dev_final = final-round deviation
+- **Python function**:
+  `def _compute_recovery_ratio(prices_list: list[float]) -> float`
 
 **Derivation Rationale**: Recovery ratio captures how much of the crash is reversed by the simulation end — testing the combined effectiveness of PPP mean-reversion (γ) and FundingCurrencyBuyer buying. Brunnermeier et al. (2009) document that carry crashes partially reverse within months (recovery_ratio = 0.3–0.7 over a few weeks). Full recovery to PPP fundamental requires years in FX markets. recovery_ratio = 0.3–0.7 within the simulation run length is the empirically consistent target.
 
@@ -115,6 +125,8 @@
 - **Category**: Behavioral / Dynamics
 - **Definition**: Lag-1 autocorrelation of per-round FX returns; captures cascade momentum vs. mean-reversion regime
 - **Formula**: AC1 = Corr(r(t), r(t−1)) where r(t) = [P(t) − P(t−1)] / P(t−1)
+- **Python function**:
+  `def _compute_autocorrelation(prices_list: list[float], lag: int = 1) -> float`
 
 **Derivation Rationale**: During carry crashes, returns show negative autocorrelation at very high frequency (rapid reversal) but positive autocorrelation at the cascade scale (each forced sell triggers more forced sells). At the simulation round level, AC1 measures whether the cascade is self-reinforcing (AC1 > 0, momentum phase) or mean-reverting (AC1 < 0, recovery phase). Burnside et al. (2011) document negative return autocorrelation following carry crash events, consistent with the reversal of excess carry returns. Lo & MacKinlay (1988) provide the statistical framework.
 
@@ -134,6 +146,8 @@
 - **Category**: Market Quality / Risk
 - **Definition**: Annualized standard deviation of FX returns, scaled to per-round returns
 - **Formula**: annualized_vol = std(r(t)) × √252 × 100, where r(t) = per-round return
+- **Python function**:
+  `def _compute_peak_rolling_volatility(prices_list: list[float], window: int = 10) -> float`
 
 **Derivation Rationale**: FX volatility is the primary risk metric for carry trade sustainability. Menkhoff et al. (2012) show that carry trade capacity is inversely related to FX volatility — high volatility periods produce carry unwinds. The annualized volatility metric tests whether the simulation generates realistic volatility regimes: low during accumulation (< 10%), high during cascade (> 20%), declining during recovery.
 
@@ -148,7 +162,7 @@
 - **Red Flag**: Volatility < 5% throughout → cascade never occurring; noise too low or LCF never triggering.
 
 
-## 3. Analysis Dimensions
+## §3 Analysis Dimensions
 
 ### Dimension 1: Crash Severity and Cascade Dynamics
 
@@ -186,7 +200,7 @@
 **Expected Pattern**: Rule most deterministic (lowest std); LLM may show delayed exit (persona deliberation before forced sell) or earlier exit (anticipatory behavior); Rag potentially modified by 2008 JPY or 2015 CHF historical context
 
 
-## 4. Phase Analysis Framework
+## §4 Phase Analysis Framework
 
 ### Phase Detection Rules
 
@@ -219,7 +233,7 @@
 | Recovery       | Inactive or small buy | Exhausted (zero volume)  | Possibly re-entering  | Still active         | −0.2 to 0         |
 
 
-## 5. Cross-Variant Comparison Framework
+## §5 Cross-Variant Comparison Framework
 
 ### Comparison Protocol
 
@@ -241,7 +255,7 @@
 | HedgedCarryTrader vol exit      | Exact dual condition       | LLM may better articulate the volatility rationale but may also hesitate | Near-exact                   | May use historical volatility spikes as reference      |
 
 
-## 6. Expected Results and Validation
+## §6 Expected Results and Validation
 
 ### Expected Stylized Facts (Literature-Sourced)
 
@@ -274,7 +288,7 @@ Sensitivity: If FCB position_size is increased to 2000, cascade condition become
 | FCB never activates | FCB volume = 0       | risk_threshold too high; crash not reaching −5% | Reduce risk_threshold to 0.03; verify cascade depth  |
 
 
-## 7. Visualization Catalogue
+## §7 Visualization Catalogue
 
 | Plot Name                         | Type        | X-axis     | Y-axis                          | Overlays / Annotations                                | Purpose                                                           |
 |-----------------------------------|-------------|------------|---------------------------------|-------------------------------------------------------|-------------------------------------------------------------------|

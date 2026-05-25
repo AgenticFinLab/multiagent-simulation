@@ -1,0 +1,221 @@
+# =============================================================================
+# AssetBubbleRuleLLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 Hybrid Rule+LLM Investors
+# Each LLM agent's system prompt embeds:
+#   - Personal profile: identity, style, risk attitude (from LLM variant)
+#   - Quantitative rules: exact financial/mathematical principles (from rule-based)
+# =============================================================================
+
+# Market (rule-based, identical to AssetBubble)
+market:
+  name: "Market"
+  class: "examples.AssetBubble.RuleLLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      # Market parameters (aligned with AssetBubble rule-based)
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.15
+      mean_reversion: 0.005
+      fundamental_growth: 0.001
+      noise_std: 0.3
+      short_cost_rate: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# Hybrid Momentum Speculator (Greater Fool Theory + LLM reasoning)
+rulellm_momentum:
+  name: "RuleLLM Momentum Speculator"
+  class: "examples.AssetBubble.RuleLLM.players:RuleLLMMomentumSpeculator"
+  # Expander → rulellm_momentum_1 .. rulellm_momentum_5
+  num_instances: 5
+  config:
+    identity: "rulellm_momentum"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AssetBubble MomentumSpeculator)
+      lookback_short: 5
+      aggressiveness: 2.0
+      base_position_size: 20.0
+      leverage_multiplier: 2.0
+      llm:
+        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_MOMENTUM_SYS"
+        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# Hybrid Rational Arbitrageur (Limits to Arbitrage + LLM reasoning)
+rulellm_arbitrageur:
+  name: "RuleLLM Rational Arbitrageur"
+  class: "examples.AssetBubble.RuleLLM.players:RuleLLMRationalArbitrageur"
+  # Expander → rulellm_arbitrageur_1, rulellm_arbitrageur_2, rulellm_arbitrageur_3
+  num_instances: 3
+  config:
+    identity: "rulellm_arbitrageur"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AssetBubble RationalArbitrageur)
+      deviation_threshold: 0.05
+      base_position_size: 20.0
+      max_short_position: 30.0
+      short_cost_sensitivity: 2.0
+      llm:
+        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_ARBITRAGEUR_SYS"
+        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# Hybrid Noise Trader (Sentiment herding + LLM reasoning)
+rulellm_noise:
+  name: "RuleLLM Noise Trader"
+  class: "examples.AssetBubble.RuleLLM.players:RuleLLMNoiseTrader"
+  # Expander → rulellm_noise_1, rulellm_noise_2
+  num_instances: 2
+  config:
+    identity: "rulellm_noise"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AssetBubble NoiseTrader)
+      sentiment_volatility: 0.3
+      herding_weight: 0.7
+      base_position_size: 15.0
+      llm:
+        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_NOISE_SYS"
+        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# Hybrid Value Investor (Fundamental value + LLM reasoning)
+rulellm_value:
+  name: "RuleLLM Value Investor"
+  class: "examples.AssetBubble.RuleLLM.players:RuleLLMValueInvestor"
+  # Expander → rulellm_value_1, rulellm_value_2, rulellm_value_3, rulellm_value_4
+  num_instances: 4
+  config:
+    identity: "rulellm_value"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AssetBubble FundamentalInvestor)
+      trade_frequency: 5
+      value_sensitivity: 1.5
+      base_position_size: 10.0
+      llm:
+        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_VALUE_SYS"
+        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# Hybrid Leveraged Buyer (Margin amplification + LLM reasoning)
+rulellm_leveraged:
+  name: "RuleLLM Leveraged Buyer"
+  class: "examples.AssetBubble.RuleLLM.players:RuleLLMLeveragedBuyer"
+  # Expander → rulellm_leveraged_1, rulellm_leveraged_2, rulellm_leveraged_3
+  num_instances: 3
+  config:
+    identity: "rulellm_leveraged"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AssetBubble LeveragedBuyer)
+      leverage_ratio: 3.0
+      margin_call_threshold: 0.7
+      base_position_size: 20.0
+      initial_equity: 10000.0
+      llm:
+        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_LEVERAGED_SYS"
+        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# Hybrid Conservative Holder (Strategic allocation + LLM reasoning)
+rulellm_conservative:
+  name: "RuleLLM Conservative Holder"
+  class: "examples.AssetBubble.RuleLLM.players:RuleLLMConservativeHolder"
+  # Expander -> rulellm_conservative_1, rulellm_conservative_2
+  num_instances: 2
+  config:
+    identity: "rulellm_conservative"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AssetBubble ConservativeHolder)
+      target_position: 20.0
+      rebalance_frequency: 10
+      rebalance_rate: 0.2
+      llm:
+        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_CONSERVATIVE_SYS"
+        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.2
+          max_new_tokens: 500
+  persona: !include persona.yml

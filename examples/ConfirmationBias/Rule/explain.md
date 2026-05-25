@@ -1,6 +1,6 @@
 # ConfirmationBias Rule Variant — Design Specification
 
-## 1. Overview
+## §1 Overview
 
 | Item               | Detail                                                                                                                              |
 |--------------------|-------------------------------------------------------------------------------------------------------------------------------------|
@@ -13,20 +13,51 @@
 
 ---
 
-## 2. Theory → Implementation Mapping
+## §2 Theory → Implementation Mapping
 
 | Theoretical Concept                               | Agent / Mechanism                                                      | Code Location                                |
 |---------------------------------------------------|------------------------------------------------------------------------|----------------------------------------------|
-| Belief anchoring (Nickerson, 1998)                | `BeliefAnchor` — internal belief state; overweights confirming signals | `Rule/players.py: BeliefAnchor.decide()`     |
-| Biased assimilation (Lord et al., 1979)           | `SelectiveScanner` — full buy on confirm, half sell on disconfirm      | `Rule/players.py: SelectiveScanner.decide()` |
-| Bayesian rational baseline (Rabin & Schrag, 1999) | `BalancedAnalyst` — equal weight both signals; mean-reverts            | `Rule/players.py: BalancedAnalyst.decide()`  |
-| Contrarian exploitation of bias                   | `ContrarianTrader` — fades biased consensus                            | `Rule/players.py: ContrarianTrader.decide()` |
-| Noise trader liquidity (Black, 1986)              | `NoiseTrader` — random Uniform[100, 500]                               | `Rule/players.py: NoiseTrader.decide()`      |
-| Price impact + mean reversion                     | Market clearing formula                                                | `Rule/players.py: Market.perceive()`         |
+| Belief anchoring (`simulation-bases.md §4.1`)     | `BeliefAnchor` — internal belief state; overweights confirming signals | `Rule/players.py: BeliefAnchor.decide()`     |
+| Biased assimilation (`simulation-bases.md §4.2`)  | `SelectiveScanner` — full buy on confirm, half sell on disconfirm      | `Rule/players.py: SelectiveScanner.decide()` |
+| Bayesian rational baseline (`simulation-bases.md §4.3`) | `BalancedAnalyst` — equal weight both signals; mean-reverts            | `Rule/players.py: BalancedAnalyst.decide()`  |
+| Contrarian exploitation (`simulation-bases.md §4.4`) | `ContrarianTrader` — fades biased consensus                            | `Rule/players.py: ContrarianTrader.decide()` |
+| Noise trader liquidity (`simulation-bases.md §4.5`) | `NoiseTrader` — random Uniform[100, 500]                               | `Rule/players.py: NoiseTrader.decide()`      |
+| Price impact + mean reversion (`simulation-bases.md §3.1`) | Market clearing formula                                                | `Rule/players.py: Market.perceive()`         |
+
+### §2.1 BeliefAnchor (`simulation-bases.md §4.1`)
+
+| Theory Component | Implementation |
+|---|---|
+| Persistent prior belief | `BeliefAnchor` stores and updates `belief` across rounds. |
+| Confirmatory updating | Confirming deviation multiplies belief; disconfirming deviation decays it slowly. |
+
+### §2.2 SelectiveScanner (`simulation-bases.md §4.2`)
+
+| Theory Component | Implementation |
+|---|---|
+| Selective information processing | Buys full size on confirming positive deviation and sells half size on disconfirming negative deviation. |
+
+### §2.3 BalancedAnalyst (`simulation-bases.md §4.3`)
+
+| Theory Component | Implementation |
+|---|---|
+| Rational evidence weighting | Trades symmetrically around the fundamental value when `|deviation| > 0.05`. |
+
+### §2.4 ContrarianTrader (`simulation-bases.md §4.4`)
+
+| Theory Component | Implementation |
+|---|---|
+| Bias correction | Fades overvaluation and undervaluation once the deviation exceeds the contrarian threshold. |
+
+### §2.5 NoiseTrader (`simulation-bases.md §4.5`)
+
+| Theory Component | Implementation |
+|---|---|
+| Noise liquidity | Trades randomly with probability 0.30 and quantity from 100 to 500 shares. |
 
 ---
 
-## 3. Market Mechanism
+## §3 Market Mechanism
 
 ### 3.1 Price Update Formula
 
@@ -68,7 +99,7 @@ deviation = (price − fundamental) / fundamental
 
 ---
 
-## 4. Variant-Specific Features
+## §4 Variant-Specific Features
 
 ### 4.1 BeliefAnchor Internal State
 
@@ -112,15 +143,15 @@ elif deviation < -0.02 and position >= 0:
 
 | Agent              | Role          | Trigger                   | Quantity          |
 |--------------------|---------------|---------------------------|-------------------|
-| `BeliefAnchor`     | Destabilizing | `belief > 0.5` / `< −0.5` | 500               |
-| `SelectiveScanner` | Destabilizing | `                         | dev               |
-| `BalancedAnalyst`  | Stabilizing   | `                         | dev               |
-| `ContrarianTrader` | Stabilizing   | `                         | dev               |
+| `BeliefAnchor`     | Destabilizing | `belief > 0.5` / `< -0.5` | 500               |
+| `SelectiveScanner` | Destabilizing | `deviation > 0.02` / `< -0.02` | 600 / 300         |
+| `BalancedAnalyst`  | Stabilizing   | `|deviation| > 0.05`      | 400               |
+| `ContrarianTrader` | Stabilizing   | `|deviation| > 0.05`      | 500               |
 | `NoiseTrader`      | Neutral       | p=0.30                    | Uniform[100, 500] |
 
 ---
 
-## 5. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -148,7 +179,7 @@ elif deviation < -0.02 and position >= 0:
 
 ---
 
-## 6. Configuration Reference
+## §6 Configuration Reference
 
 From `configs/ConfirmationBias/Rule/players.yml`:
 
@@ -199,7 +230,7 @@ From `configs/ConfirmationBias/Rule/players.yml`:
 
 ---
 
-## 7. Running Instructions
+## §7 Running Instructions
 
 ```bash
 # Run simulation
@@ -215,7 +246,7 @@ Output: `EXPERIMENT/ConfirmationBias/Rule/records/`
 
 ---
 
-## 8. Expected Behavior
+## §8 Expected Behavior
 
 ### Phase 1: Bias Establishment (rounds 1–~30)
 
@@ -241,7 +272,7 @@ Output: `EXPERIMENT/ConfirmationBias/Rule/records/`
 
 ---
 
-## 9. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

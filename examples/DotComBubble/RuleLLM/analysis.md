@@ -39,3 +39,18 @@ Evaluate whether rule boundaries reduce metric variance relative to pure LLM whi
 ## §5 References
 
 See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md §4` for agent parameter sources.
+
+## §6 Cross-Variant Comparison
+
+| Comparison | Interpretation |
+|---|---|
+| RuleLLM vs Rule | Measures LLM reasoning effects under fixed rule guidance. |
+| RuleLLM vs LLM | Measures whether explicit rules reduce narrative overreaction. |
+| RuleLLM vs Rag | Isolates the effect of retrieved bubble-history knowledge. |
+
+## §7 Quality Checks
+
+- Confirm the run completed 200 configured rounds.
+- Confirm prompts contain both `== PERSONA ==` and `== DECISION RULES ==` sections.
+- Confirm parse failures fail fast after bounded retries rather than silently producing hidden hold actions.
+- Confirm accepted decisions preserve valid order payloads.

@@ -1,71 +1,45 @@
-# MarketCrash LLM Analysis Methodology
+# Market Crash LLM Analysis Plan
 
-## Overview
+## §1 Objectives
 
-This document describes the evaluation metrics for the **LLM-based market crash** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
+Verify that the persona-driven API variant still produces a structurally
+coherent crash despite stochastic decision-making and a reduced five-archetype
+investor set.
 
-For detailed metric definitions and financial theory, see: **`../MarketCrash/analysis.md`**
+## §2 Core Metrics
 
----
+| Metric | Function Contract | Source |
+|---|---|---|
+| Maximum drawdown | `def compute_maximum_drawdown(prices: list[float]) -> float` | `analysis-bases.md §2.1` |
+| Largest one-round drop | `def compute_largest_one_round_drop(prices: list[float]) -> float` | `analysis-bases.md §2.2` |
+| Volatility spike | `def compute_volatility_spike(returns: list[float], window: int) -> float` | `analysis-bases.md §2.3` |
+| Forced-selling pressure | `def compute_forced_selling_pressure(orders: list[dict]) -> float` | `analysis-bases.md §2.4` |
+| Liquidity withdrawal | `def compute_liquidity_withdrawal(orders: list[dict], liquidity: list[float]) -> float` | `analysis-bases.md §2.5` |
+| Panic contribution | `def compute_panic_contribution(orders: list[dict], returns: list[float]) -> float` | `analysis-bases.md §2.6` |
+| Bottom-fisher absorption | `def compute_bottom_fisher_absorption(orders: list[dict]) -> float` | `analysis-bases.md §2.7` |
 
-## Key Metrics (Summary)
+## §3 Analysis Dimensions
 
-| Metric           | Purpose                         |
-|------------------|---------------------------------|
-| Crash Depth      | Maximum price decline from peak |
-| Crash Speed      | Rate of decline (ΔP / Δt)       |
-| Panic Cascade    | Sequential selling by agents    |
-| Recovery Pattern | Post-crash price behavior       |
+Analyze market path, investor-type order flow, liquidity state, and parse or
+fallback quality together.
 
----
+## §4 Phase Analysis
 
-## LLM-Specific Observable Phenomena
+Pre-stress positioning, early selloff, crash cascade, liquidity thinning, and
+attempted recovery.
 
-### Emergent Behaviors
+## §5 Cross-Variant Comparison
 
-| Phenomenon            | LLM Behavior                               | Contrast with Rule-Based             |
-|-----------------------|--------------------------------------------|--------------------------------------|
-| **Panic Narrative**   | LLM expresses fear/urgency in reasoning    | Rule-based has no emotional modeling |
-| **Contagion Effect**  | LLM responds to observed selling by others | Rule-based ignores other agents      |
-| **Risk Reassessment** | LLM dynamically updates risk perception    | Rule-based uses fixed parameters     |
+Use `analysis-bases.md §5` to compare against Rule for mechanism shape and
+against RuleLLM for the effect of explicit rule text.
 
-### Round and Agent Scaling
+## §6 Expected Results And Validation Criteria
 
-| Scale          | LLM-Specific Observation                       |
-|----------------|------------------------------------------------|
-| **50 rounds**  | Crash develops; LLM panic reasoning visible    |
-| **100 rounds** | Full crash cycle with stabilization            |
-| **5 agents**   | Individual LLM panic dominates                 |
-| **10 agents**  | Realistic panic cascade with diverse reasoning |
+A valid sample should complete 200 rounds, avoid hidden structural breakage,
+show non-trivial order flow, and preserve a recognizable crash mechanism.
 
----
+## §7 Visualization Catalogue
 
-## LLM-Specific Considerations
-
-1. **Panic Modeling**: LLM prompts can include fear/panic sentiment
-2. **Social Contagion**: LLM may respond to other agents' selling
-3. **Risk Perception**: Dynamic risk assessment in prompts
-
----
-
-## Using Centralized Evaluation Module
-
-```python
-from masim.evaluation.finance import (
-    calculate_max_drawdown,
-    calculate_returns,
-    calculate_rolling_volatility,
-    plot_price_dynamics,
-)
-
-# Same analysis as rule-based version
-prices = {...}
-drawdown = calculate_max_drawdown(prices)
-volatility = calculate_rolling_volatility(prices, window=5)
-```
-
----
-
-## References
-
-See `../MarketCrash/analysis.md` for complete academic references.
+Outputs must include `summary.json`, `00_investor_bids.png`,
+`01_marketcrash_dynamics.png`, `02_marketcrash_analysis.png`, and
+`03_summary.png`.

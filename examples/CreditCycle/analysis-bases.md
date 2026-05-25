@@ -129,7 +129,7 @@ def noise_trader_contamination(noise_orders, deviations):
 **Definition**: Difference in terminal wealth between destabilizing agents (ProCyclicalLender + MinskyBorrower) and stabilizing agents (CounterCyclicalLender + ValueInvestor), normalized by initial wealth.
 
 ```python
-def wealth_redistribution_index(agent_final_states, initial_wealth=100000):
+def wealth_redistribution_index(agent_final_states, final_price, initial_wealth=100000):
     destabilizing = sum(
         s["cash"] + s["position"] * final_price
         for k, s in agent_final_states.items()
@@ -218,13 +218,11 @@ def wealth_redistribution_index(agent_final_states, initial_wealth=100000):
 
 ## §7 Visualization Catalogue
 
-| Chart                    | X-axis           | Y-axis                          | Purpose                    |
-|--------------------------|------------------|---------------------------------|----------------------------|
-| Price trajectory         | Round            | Price                           | Visualize boom-bust cycles |
-| Deviation heatmap        | Round            | δ(t)                            | Identify phase transitions |
-| Agent volume bar         | Round (selected) | Buy/Sell volume by agent        | Phase attribution          |
-| LAI distribution         | Simulation run   | LAI value                       | Cross-variant comparison   |
-| Minsky fragility path    | Round            | stable_rounds (MinskyBorrower)  | Fragility accumulation     |
-| Counter-cyclical offset  | Phase (bust)     | CCOR per bust event             | Stabilizer effectiveness   |
-| Wealth evolution         | Round            | Cumulative wealth by agent type | WRI dynamics               |
-| Phase duration histogram | Phase type       | Number of rounds                | PDR distribution           |
+| Output | Content | Purpose |
+|---|---|---|
+| `summary.json` | Total rounds, price extrema, deviation metrics, LAI, MFS, CCS, CCOR, PDR, max drawdown, volatility, autocorrelation, agent VWAP, validation result | Machine-readable Level-2 structural quality and scenario-validity summary |
+| `00_investor_bids.png` | Investor bid/decision paths when bid fields are recorded | Headline agent behavior plot |
+| `01_creditcycle_dynamics.png` | Price, fundamental, deviation, rolling volatility, and phase markers | Visualize boom-bust dynamics and phase timing |
+| `02_creditcycle_analysis.png` | Scenario metric dashboard including LAI, MFS, CCS, CCOR, PDR, WRI, and validation score | Connect simulation outputs to §2 metrics |
+| `03_summary.png` | Agent VWAP, total buy/sell volume, and terminal behavior summary | Cross-agent comparison for the final run |
+| `rag_stats.json` | Rag only: retrieval success/failure counts by agent and aggregate retrieval failure rate | Verify that RAG decisions had inspectable knowledge context |

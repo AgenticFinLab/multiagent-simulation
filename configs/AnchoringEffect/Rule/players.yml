@@ -29,10 +29,10 @@ market:
       record_path: "EXPERIMENT/AnchoringEffect/Rule/records"
       # Market dynamics parameters
       fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.04        # Low: anchoring effect slows price discovery
-      mean_reversion: 0.02      # Moderate: reasonable reversion
-      noise_std: 0.02           # Low noise: anchoring effect is clearer
+      initial_price: 105.0
+      price_impact: 0.01        # Low: anchoring effect slows price discovery
+      mean_reversion: 0.01      # Low: sustains anchoring persistence
+      noise_std: 0.5            # Moderate price noise
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
@@ -55,7 +55,7 @@ anchored_trader:
       record_path: "EXPERIMENT/AnchoringEffect/Rule/records"
       # Investor base parameters
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # AnchoredTrader specific parameters (Tversky & Kahneman, 1974)
       anchor_weight: 0.7        # High: strong anchor influence
@@ -82,7 +82,7 @@ historical_anchor:
       record_path: "EXPERIMENT/AnchoringEffect/Rule/records"
       # Investor base parameters
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # HistoricalAnchor specific parameters (Northcraft & Neale, 1987)
       anchor_weight: 0.5        # Moderate: some weight on historical average
@@ -107,7 +107,7 @@ rational_updater:
       record_path: "EXPERIMENT/AnchoringEffect/Rule/records"
       # Investor base parameters
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # RationalUpdater specific parameters
       base_position_size: 25.0
@@ -132,7 +132,7 @@ momentum_trader:
       record_path: "EXPERIMENT/AnchoringEffect/Rule/records"
       # Investor base parameters
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # MomentumTrader specific parameters
       entry_threshold: 0.02     # Minimum return to trigger trade
@@ -158,7 +158,7 @@ noise_trader:
       record_path: "EXPERIMENT/AnchoringEffect/Rule/records"
       # Investor base parameters
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # NoiseTrader specific parameters (Black, 1986)
       trade_probability: 0.05   # Low: rarely trades

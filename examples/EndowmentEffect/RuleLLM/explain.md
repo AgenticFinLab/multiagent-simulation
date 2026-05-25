@@ -2,13 +2,13 @@
 
 ## §1 Overview
 
-The RuleLLM variant embeds explicit numerical trading rules directly into the LLM system prompts. The LLM cannot override the encoded thresholds, but provides contextual reasoning about market conditions within the rule constraints. This hybrid approach combines the consistency of Rule-based thresholds with LLM's capacity for nuanced market narrative.
+The RuleLLM variant embeds explicit numerical trading rules directly into the LLM system prompts. The LLM receives the same market state as the LLM variant plus strict persona/rule guidance, then returns canonical trading JSON. Runtime code validates parser structure, action vocabulary, cash limits, and position limits; the threshold rules are prompt-level guidance rather than a separate executable rule engine.
 
 | Aspect             | Detail                                                                         |
 |--------------------|--------------------------------------------------------------------------------|
 | Variant            | RuleLLM (rule-embedded LLM)                                                    |
 | Simulation         | EndowmentEffect                                                                |
-| Decision Mechanism | Numerical thresholds embedded in system prompt; LLM reasons within constraints |
+| Decision Mechanism | Numerical thresholds embedded in `== DECISION RULES ==`; LLM reasons under prompt guidance |
 | Theory Reference   | `simulation-bases.md §4.1–§4.5`                                                |
 | Market Broadcast   | `price`, `fundamental`, `deviation`, `cash`, `position`, `round`               |
 
@@ -20,7 +20,7 @@ The RuleLLM variant embeds explicit numerical trading rules directly into the LL
 |-------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
 | Endowment premium (Kahneman et al., 1990) | System prompt embeds: "Sell only when deviation > endowment_premium + 0.05; otherwise hold or buy on undervaluation" |
 | Sell reluctance factor                    | Rule instructs use of `sell_reluctance` parameter; LLM selects quantity within that constraint                       |
-| LLM contextualisation                     | LLM reasons about narrative strength of attachment but cannot override the sell threshold                            |
+| LLM contextualisation                     | LLM reasons about narrative strength of attachment while the prompt instructs the sell threshold                     |
 
 ### §2.2 RuleLLMStatusQuoSeller (simulation-bases.md §4.2)
 
@@ -35,7 +35,7 @@ The RuleLLM variant embeds explicit numerical trading rules directly into the LL
 | Theory Component                             | Implementation                                                                               |
 |----------------------------------------------|----------------------------------------------------------------------------------------------|
 | Rational expectations benchmark (Muth, 1961) | System prompt embeds: "Buy if deviation < −arb_threshold; sell if deviation > arb_threshold" |
-| Symmetric arbitrage                          | Rules enforce symmetric response; LLM reasons about market depth and timing                  |
+| Symmetric arbitrage                          | Prompt instructs symmetric response; LLM reasons about market depth and timing              |
 | No endowment distortion                      | Prompt explicitly states no ownership bias; LLM confirms arbitrage logic                     |
 
 ### §2.4 RuleLLMNewBuyer (simulation-bases.md §4.4)
@@ -71,8 +71,8 @@ Market class is imported from `Rule/players.py` (shared). All RuleLLM investors 
 | Base class       | `RuleLLMInvestor` → `GeneralPlayer`                                                 |
 | Inference        | `LangChainAPIInference` (3-attempt retry)                                           |
 | Context          | `price`, `fundamental`, `deviation`, `cash`, `position`, `portfolio_value`, `round` |
-| Output parsing   | `parse_llm_response_with_thinking()` → `{"action": ..., "quantity": ...}`           |
-| Rule enforcement | Thresholds in system prompt; LLM cannot violate without failing retry               |
+| Output parsing   | `parse_llm_response_with_thinking()` → `{"action": ..., "bid_price": ..., "quantity": ..., "reasoning": ..., "analysis": ...}` |
+| Rule guidance    | Thresholds in `== DECISION RULES ==`; parser retries only enforce valid JSON/action fields |
 
 ## §5 Config Reference
 
@@ -91,7 +91,7 @@ python -m examples.EndowmentEffect.RuleLLM.run_endowment_effect \
 
 ## §7 Expected Behavior
 
-- **More consistent than pure LLM**: Embedded thresholds prevent LLM from overriding key rules; MAD closer to Rule baseline
+- **More consistent than pure LLM**: Embedded thresholds guide the LLM toward Rule-like timing; MAD should be closer to Rule baseline
 - **More nuanced than pure Rule**: LLM selects quantities more adaptively within threshold constraints
 - **MAD target**: 0.03–0.12 (similar to Rule; see analysis-bases.md §2.2)
 - **VSR**: Similar to Rule (0.40–0.65); RuleLLM EndowedHolder holds due to encoded threshold

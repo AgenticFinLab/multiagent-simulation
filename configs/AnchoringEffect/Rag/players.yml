@@ -84,10 +84,10 @@ market:
       record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
       # Market dynamics parameters (identical to Rule variant)
       fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.04        # Low: anchoring effect slows price discovery
-      mean_reversion: 0.02      # Moderate: reasonable reversion
-      noise_std: 0.02           # Low noise: anchoring effect is clearer
+      initial_price: 105.0
+      price_impact: 0.01        # Low: anchoring effect slows price discovery
+      mean_reversion: 0.01      # Low: sustains anchoring persistence
+      noise_std: 0.5            # Moderate price noise
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
@@ -109,12 +109,13 @@ ragllm_anchored:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect AnchoredTrader)
       # ------------------------------------------------------------------
-      anchor_adjustment_factor: 0.3     # 30% adjustment from anchor to fundamental
+      adjustment_factor: 0.3            # 30% adjustment from anchor to fundamental
+      anchor_weight: 0.7                # Same anchor influence label as Rule/RuleLLM
       trade_threshold: 0.03             # |deviation| > 3% triggers trade
       base_position_size: 20.0          # Base shares per trade
       # ------------------------------------------------------------------
@@ -144,7 +145,7 @@ ragllm_anchored:
         sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_ANCHORED_TRADER_SYS"
         user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -168,16 +169,15 @@ ragllm_historical:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect HistoricalAnchor)
       # ------------------------------------------------------------------
-      history_window: 5                 # Rolling average window for historical anchor
-      history_weight: 0.6               # 60% weight to historical average price
-      current_weight: 0.4               # 40% weight to current fundamental
-      trade_threshold: 0.04             # |deviation| > 4% triggers trade
-      base_position_size: 15.0
+      anchor_weight: 0.5                # Dampens perceived deviation
+      lookback: 60                      # Rolling average window for historical anchor
+      trade_threshold: 0.03             # |deviation| > 3% triggers trade
+      base_position_size: 20.0
       # ------------------------------------------------------------------
       # Private Knowledge
       # ------------------------------------------------------------------
@@ -205,7 +205,7 @@ ragllm_historical:
         sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_HISTORICAL_ANCHOR_SYS"
         user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -228,7 +228,7 @@ ragllm_rational:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect RationalUpdater)
@@ -262,7 +262,7 @@ ragllm_rational:
         sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_RATIONAL_UPDATER_SYS"
         user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -286,12 +286,12 @@ ragllm_momentum:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect MomentumTrader)
       # ------------------------------------------------------------------
-      momentum_threshold: 0.02          # |return| > 2% triggers momentum trade
+      entry_threshold: 0.02             # |return| > 2% triggers momentum trade
       base_position_size: 20.0
       # ------------------------------------------------------------------
       # Private Knowledge
@@ -320,7 +320,7 @@ ragllm_momentum:
         sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_MOMENTUM_TRADER_SYS"
         user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_new_tokens: 600
@@ -344,14 +344,14 @@ ragllm_noise:
     extras:
       record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
       initial_cash: 10000.0
-      initial_position: 0.0
+      initial_position: 100.0
       custom_state_hot_limit: 3
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect NoiseTrader)
       # ------------------------------------------------------------------
       trade_probability: 0.05           # 5% chance of random trade per round
-      min_quantity: 100.0               # Min random trade size
-      max_quantity: 500.0               # Max random trade size
+      min_order: 100.0                  # Min random trade size
+      max_order: 500.0                  # Max random trade size
       # ------------------------------------------------------------------
       # Private Knowledge
       # ------------------------------------------------------------------
@@ -379,7 +379,7 @@ ragllm_noise:
         sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
           max_new_tokens: 600

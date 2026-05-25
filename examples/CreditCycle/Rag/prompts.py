@@ -21,11 +21,15 @@ RAG_USER_TEMPLATE = """Current Market State (Round {round}):
 - Your Cash: ${cash:.2f}
 - Your Position: {position} shares
 - Portfolio Value: ${portfolio_value:.2f}
+- Maximum Single-Order Quantity: {max_order_size} shares
 
 Relevant Domain Knowledge:
 {rag_context}
 
 Apply your trading rules and the domain knowledge above to decide your action.
-Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "quantity": integer}}</decision>."""
+Your quantity must be an integer from 0 to {max_order_size}, and must also be affordable with your cash or covered by your current position.
+Respond with exactly one <analysis>...</analysis> block and exactly one <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f}, "quantity": integer, "reasoning": "brief rationale"}}</decision> block. Do not omit the <decision> block; if uncertain, choose {{"action": "hold", "bid_price": {price:.2f}, "quantity": 0, "reasoning": "uncertain"}}.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
+"""
 
 LLM_USER_TEMPLATE = RAG_USER_TEMPLATE

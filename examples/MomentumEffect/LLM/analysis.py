@@ -1,52 +1,17 @@
-"""MomentumEffectLLM Analysis - Price Continuation Evaluation (LLM Version)
+#!/usr/bin/env python
+"""Momentum Effect LLM Simulation Analysis.
 
-Analyzes momentum effect in LLM-driven agents.
-Uses same methodology as rule-based MomentumEffect.
-
-Usage:
-    python examples/MomentumEffect/LLM/analysis.py -c configs/MomentumEffect/LLM/simulation.yml
-
-See examples/MomentumEffect/Rule/analysis.py for detailed documentation.
+Produces the standardized output set required by create-example-skill:
+summary.json, 00_investor_bids.png, 01_momentumeffect_dynamics.png,
+02_momentumeffect_analysis.png, and 03_summary.png.
 """
 
-import argparse
-import os
-
-from masim.utils import load_config, load_results
-
-from examples.MomentumEffect.Rule.analysis import (
-    analyze_momentum,
-    _load_data,
-)
+from examples.standard_rule_analysis import run_standard_analysis
 
 
 def main():
-    """Run momentum analysis for LLM version."""
-    parser = argparse.ArgumentParser(description="Analyze MomentumEffectLLM simulation")
-    parser.add_argument(
-        "-c",
-        "--config",
-        type=str,
-        required=True,
-        help="Path to simulation configuration file (YAML)",
-    )
-    args = parser.parse_args()
-
-    # Load config and derive paths
-    config = load_config(args.config)
-    record_dir = config["setting"]["record_path"]
-    base_dir = os.path.dirname(record_dir)
-    output_dir = os.path.join(base_dir, "analysis")
-    os.makedirs(output_dir, exist_ok=True)
-
-    print("=" * 70)
-    print("MomentumEffectLLM Analysis - Price Continuation (LLM Agents)")
-    print("=" * 70)
-
-    results = load_results(config)
-    data = _load_data(results)
-    summary = analyze_momentum(data, output_dir)
-    return summary
+    """Run the standard analysis output contract for this variant."""
+    return run_standard_analysis("MomentumEffect", "configs/MomentumEffect/LLM/simulation.yml")
 
 
 if __name__ == "__main__":

@@ -1,75 +1,122 @@
-# GamblerFallacy — Rag Variant
+# GamblerFallacy Rag — Implementation Explanation
 
-## §1 Overview
+## §1 Variant Overview
 
-The Rag variant implements the Gambler's Fallacy simulation using RAG-augmented LLM reasoning. Retrieved documents about gambling studies, streak statistics, and historical market episodes reinforce each agent's behavioral bias. Unlike Rule/RuleLLM, the Rag variant can potentially retrieve evidence that either reinforces or challenges each agent's streak beliefs.
-
-| Aspect             | Detail                                                         |
-|--------------------|----------------------------------------------------------------|
-| Variant            | Rag                                                            |
-| Simulation         | GamblerFallacy                                                 |
-| Decision Mechanism | RAG-augmented LLM: retrieved documents + persona system prompt |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                                |
-| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`                   |
-| Price Model        | P(t+1) = P(t) + λ × D(t) + γ × (F − P(t)) + ε(t)               |
-
----
+| Item | Description |
+|---|---|
+| Variant | Rag |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | RuleLLM-style prompts augmented with retrieved knowledge |
+| Key Difference from Other Variants | Each investor queries a `KnowledgeStore` and injects `{rag_context}` into the user prompt. |
+| Primary Research Contribution | Tests whether domain knowledge changes gambler's-fallacy, hot-hand, and arbitrage behavior. |
+| Files | `players.py`, `prompts.py`, `run_gamblerfallacy_rag.py`, `analysis.py`, `explain.md`, `analysis.md` |
 
 ## §2 Theory → Implementation Mapping
 
-### §2.1 RagLLMStreakReversalTrader (`simulation-bases.md §4.1`)
+### RagLLMStreakReversalTrader: Theory → Implementation Mapping
 
-| Theory Component                                | Implementation                                                                                             |
-|-------------------------------------------------|------------------------------------------------------------------------------------------------------------|
-| Law of small numbers (Tversky & Kahneman, 1971) | System prompt: reversal-expecting persona; RAG retrieves Tversky & Kahneman (1971) on law of small numbers |
-| Historical reinforcement                        | Retrieved documents on gambler's fallacy cases (e.g., casino streak data) reinforce reversal expectation   |
-| Potential moderation                            | If retrieved documents show streak persistence (hot hand evidence), may reduce reversal conviction         |
+> Theory defined in `simulation-bases.md §4.1`.
 
-### §2.2 RagLLMHotHandTrader (`simulation-bases.md §4.2`)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.1.2 | Class: `RagLLMStreakReversalTrader`; docstring cites `simulation-bases.md §4.1`. |
+| Behavioral mechanism → sim-bases §4.1.4.2 | Imports RuleLLM prompt and augments reversal reasoning with retrieved context. |
+| Mathematical model → sim-bases §4.1.4.3 | Uses the same canonical trading decision schema as LLM and RuleLLM. |
+| State variables → sim-bases §4.1.4.3 | Stores market, portfolio, LLM client, and RAG store state. |
+| Parameters → sim-bases §6 | LLM, embedding, and portfolio values are config supplied. |
+| Historical case → sim-bases §8 | Query text searches for gambler's-fallacy and streak-trading knowledge around current deviation. |
 
-| Theory Component                         | Implementation                                                                                       |
-|------------------------------------------|------------------------------------------------------------------------------------------------------|
-| Hot hand fallacy (Gilovich et al., 1985) | System prompt: continuation-expecting persona; RAG retrieves Gilovich et al. (1985) hot hand studies |
-| Historical reinforcement                 | Retrieved momentum trading studies reinforce streak-following; NBA shooting data analogy             |
-| RAG differentiation                      | Different retrieval corpus from §4.1 creates genuine behavioral differentiation                      |
+### RagLLMHotHandTrader: Theory → Implementation Mapping
 
-### §2.3 RagLLMIndependentAssessor (`simulation-bases.md §4.3`)
+> Theory defined in `simulation-bases.md §4.2`.
 
-| Theory Component                       | Implementation                                                                   |
-|----------------------------------------|----------------------------------------------------------------------------------|
-| Statistical independence (Rabin, 2002) | System prompt: rational persona; RAG retrieves statistical independence evidence |
-| Evidence-based contrarian              | Retrieved regression-to-mean studies strengthen contrarian conviction            |
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.2.2 | Class: `RagLLMHotHandTrader`; docstring cites `simulation-bases.md §4.2`. |
+| Behavioral mechanism → sim-bases §4.2.4.2 | Retrieved context can reinforce or moderate continuation beliefs. |
+| Mathematical model → sim-bases §4.2.4.3 | Parsed orders are capped by cash, holdings, and max order size. |
+| State variables → sim-bases §4.2.4.3 | Uses market fields plus RAG state. |
+| Parameters → sim-bases §6 | Embedding and model settings are in `players.yml`. |
+| Historical case → sim-bases §8 | Retrieval can surface hot-hand studies and market episodes. |
 
-### §2.4 RagLLMArbitrageur (`simulation-bases.md §4.4`)
+### RagLLMIndependentAssessor: Theory → Implementation Mapping
 
-| Theory Component                              | Implementation                                                              |
-|-----------------------------------------------|-----------------------------------------------------------------------------|
-| Limits to arbitrage (Shleifer & Vishny, 1997) | System prompt: arbitrageur; RAG retrieves historical arbitrage case studies |
-| Historical grounding                          | Retrieved examples of streak-driven mispricings and correction timelines    |
+> Theory defined in `simulation-bases.md §4.3`.
 
-### §2.5 RagLLMNoiseTrader (`simulation-bases.md §4.5`)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.3.2 | Class: `RagLLMIndependentAssessor`; docstring cites `simulation-bases.md §4.3`. |
+| Behavioral mechanism → sim-bases §4.3.4.2 | Retrieved evidence should support independence of sequential outcomes. |
+| Mathematical model → sim-bases §4.3.4.3 | Uses canonical action JSON and portfolio caps. |
+| State variables → sim-bases §4.3.4.3 | Reads price, fundamental, deviation, cash, position, and RAG state. |
+| Parameters → sim-bases §6 | Config supplies lower-temperature model settings. |
+| Historical case → sim-bases §8 | Retrieval can support rational correction. |
 
-| Theory Component           | Implementation                                                     |
-|----------------------------|--------------------------------------------------------------------|
-| Noise trader (Black, 1986) | System prompt: uninformed retail; RAG retrieves random market news |
+### RagLLMArbitrageur: Theory → Implementation Mapping
 
----
+> Theory defined in `simulation-bases.md §4.4`.
 
-## §3 Rag-Specific Notes
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.4.2 | Class: `RagLLMArbitrageur`; docstring cites `simulation-bases.md §4.4`. |
+| Behavioral mechanism → sim-bases §4.4.4.2 | Retrieved knowledge informs exploitation of streak-driven mispricing. |
+| Mathematical model → sim-bases §4.4.4.3 | Model output is parsed and capped before order emission. |
+| State variables → sim-bases §4.4.4.3 | Uses current market, portfolio, and RAG fields. |
+| Parameters → sim-bases §6 | Config controls LLM and embedding settings. |
+| Historical case → sim-bases §8 | Retrieval can provide correction timing examples. |
 
-- **Retrieval differentiation**: §4.1 and §4.2 retrieve from different document corpora (reversal vs. continuation evidence), creating genuine behavioral differentiation — key advantage over Rule variant.
-- **SAR divergence expected**: RAG retrieval reinforces each bias independently; §4.1 may show SAR < 1 while §4.2 shows SAR > 1.
-- **HHM vs. Rag**: If retrieved documents reinforce both biases simultaneously, HHM may be similar to Rule. If they differentiate (as expected), HHM may be lower due to partial cancellation.
+### RagLLMNoiseTrader: Theory → Implementation Mapping
 
----
+> Theory defined in `simulation-bases.md §4.5`.
 
-## §4 Expected Ranges (Rag Variant vs. Rule Baseline)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.5.2 | Class: `RagLLMNoiseTrader`; docstring cites `simulation-bases.md §4.5`. |
+| Behavioral mechanism → sim-bases §4.5.4.2 | Prompt remains noisy but receives external context. |
+| Mathematical model → sim-bases §4.5.4.3 | Valid decision JSON is bounded by portfolio limits. |
+| State variables → sim-bases §4.5.4.3 | Same state fields as other RAG investors. |
+| Parameters → sim-bases §6 | Higher temperature preserves noisy behavior. |
+| Historical case → sim-bases §8 | Retrieved context may make the nominally noisy agent partially informed. |
 
-| Metric | Rag Expected Range | Rule Baseline | Direction               | Basis                                                            |
-|--------|--------------------|---------------|-------------------------|------------------------------------------------------------------|
-| GFI    | 0.018–0.08         | 0.02–0.08     | Similar/slightly lower  | Opposing bias reinforcement partially cancels                    |
-| SAR    | 0.4–2.0            | ≈ 1.0         | More variable           | Retrieved evidence reinforces opposite biases independently      |
-| HHM    | 120–450 shares     | 150–500       | Slightly lower          | Partial cancellation when biases oppose                          |
-| ACI    | 0.35–0.70          | 0.35–0.65     | Similar/slightly higher | Retrieved mean-reversion evidence strengthens rational agents    |
-| VAF    | 1.3–3.2            | 1.5–3.5       | Slightly lower          | Bias cancellation reduces net volatility amplification           |
-| WDI    | 0.08–0.30          | 0.10–0.35     | Slightly lower          | Less systematic exploitation with opposing Rag-reinforced biases |
+## §3 Market Mechanism Implementation
+
+Rag imports the Rule `Market`, preserving identical price formation and message topology. RAG changes only investor prompt construction and RAG state management.
+
+## §4 Rag Variant-Specific Features
+
+- Per-agent knowledge is resolved through `ResourceManager`.
+- Indexes are loaded locally, copied from shared storage, or built from processed documents.
+- `{rag_context}` is injected before market state.
+- Empty retrieval uses `"(No relevant knowledge retrieved this round.)"`.
+- Optional `extras["knowledge"]` is read through the project-allowed RAG config-resolution path; if it is absent, the shared `examples/document-sources` layout is used.
+
+## §5 Architecture Diagram
+
+```text
+Market broadcast -> RagLLMInvestor -> KnowledgeStore.query() -> RAG prompt -> LLM -> parser -> capped order -> Market
+```
+
+## §6 Configuration Reference
+
+| Config File | Runtime Role |
+|---|---|
+| `configs/GamblerFallacy/Rag/simulation.yml` | Full-run and Ray settings |
+| `configs/GamblerFallacy/Rag/players.yml` | LLM model, embedding config, knowledge resources, class paths |
+| `configs/GamblerFallacy/Rag/topology.yml` | Star topology |
+| `configs/GamblerFallacy/Rag/persona.yml` | Shared proxy/storage settings |
+
+## §7 Expected Runtime Outputs
+
+Accepted RAG runs should complete 200 rounds, produce valid order records with
+`rag_context`, and expose `rag_stats.json` for retrieval-quality review.
+
+## §8 Validation Checklist
+
+- RAG embed config uses `litellm` and `openai/hunyuan-embedding`.
+- Prompt contains `{rag_context}` and canonical decision JSON.
+- Preflight validates class paths and config load.
+- Runtime prompt and retrieval semantics should remain stable unless a documented mechanism or contract defect is found.
+
+## §9 Cross-Variant Comparison Notes
+
+RAG is compared primarily against RuleLLM to isolate the effect of retrieved knowledge on streak-bias and hot-hand dynamics.

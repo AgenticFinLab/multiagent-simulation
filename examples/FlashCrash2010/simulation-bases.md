@@ -215,14 +215,14 @@ agent_type: "noise"
 |------------------------|---------|----------------|---------------------------------|
 | `initial_price`        | 40.0    | 35–50          | Starting price level            |
 | `fundamental_value`    | 40.0    | 38–42          | Mean-reversion anchor           |
-| `base_depth`           | 5000    | 2000–10000     | Order-book depth baseline       |
-| `price_impact` (λ)     | 0.0001  | 0.00005–0.0005 | Price sensitivity to order flow |
-| `mean_reversion` (γ)   | 0.05    | 0.02–0.10      | Speed of fundamental pull       |
-| `noise_std`            | 0.02    | 0.005–0.05     | Market noise                    |
-| `withdrawal_threshold` | 0.01    | 0.005–0.03     | HFT stress velocity             |
+| `base_depth`           | 10000   | 2000–10000     | Order-book depth baseline       |
+| `price_impact` (lambda) | 0.05   | 0.00005–0.05   | Price sensitivity to order flow |
+| `mean_reversion`       | 0.02    | 0.02–0.10      | Speed of fundamental pull       |
+| `noise_std`            | 0.01    | 0.005–0.05     | Market noise                    |
+| `withdrawal_threshold` | 0.02    | 0.005–0.03     | HFT stress velocity             |
 | `stop_percentage`      | 0.03    | 0.02–0.08      | Stop-loss level                 |
 | `value_trigger`        | 0.05    | 0.03–0.10      | FT entry deviation              |
-| `entry_threshold` (MC) | 0.01    | 0.005–0.02     | Momentum-chaser trigger         |
+| `entry_threshold` (MC) | 0.001   | 0.001–0.02     | Momentum-chaser trigger         |
 
 ## §7 Round Structure
 
@@ -235,12 +235,12 @@ Round t:
   5. Investors.decide()    — compute quantity, agent_type, provides_liquidity
   6. Investors.act()       — send order to Market
 
-Phase mapping (typical 50-round run):
-  Normal      rounds  1–10   : HFT provides liquidity; depth ≈ base_depth
-  Trigger     rounds 11–15   : MomentumChasers detect trend; first HFT stress
-  Cascade     rounds 16–25   : HFT withdrawal; depth collapses; stop-losses fire
-  Trough      rounds 26–30   : minimum depth; maximum spread; FT buying begins
-  Recovery    rounds 31–50   : HFT returns; depth rebuilds; price → fundamental
+Phase mapping (illustrative 200-round full run):
+  Normal      early rounds          : HFT provides liquidity; depth near base_depth
+  Trigger     after a directional move: MomentumChasers detect trend; first HFT stress
+  Cascade     stress window         : HFT withdrawal; depth collapses; stop-losses fire
+  Trough      crash minimum         : minimum depth; maximum spread; FT buying begins
+  Recovery    post-trough rounds    : HFT returns; depth rebuilds; price moves toward fundamental
 ```
 
 ## §8 Historical Cases
@@ -257,7 +257,7 @@ Phase mapping (typical 50-round run):
 | Dimension              | Rule                                    | LLM                                 | RuleLLM                       | Rag                         |
 |------------------------|-----------------------------------------|-------------------------------------|-------------------------------|-----------------------------|
 | HFT withdrawal trigger | Fixed velocity > `withdrawal_threshold` | LLM judges "stressed" qualitatively | Rule threshold + LLM override | RAG historical case + LLM   |
-| Depth dynamics         | Deterministic formula                   | LLM order sizes modulate depth      | Rule depth + LLM timing       | History-informed            |
+| Depth dynamics         | Deterministic formula                   | LLM order sizes and class-mapped `agent_type` modulate depth | Rule depth + LLM timing and class-mapped `agent_type` | History-informed with class-mapped `agent_type` |
 | MomentumChaser entry   | Fixed threshold + multiplier            | LLM momentum assessment             | Rule signal + LLM size        | RAG-augmented               |
 | Stop-loss cascade      | Fixed stop levels, one-shot             | LLM decides cut-loss timing         | Predefined + LLM override     | Historical pattern guidance |
 | Recovery               | Fixed FT `value_trigger`                | LLM "undervalued" perception        | Rule entry + LLM size         | RAG-guided entry            |

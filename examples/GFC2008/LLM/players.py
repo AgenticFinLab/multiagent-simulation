@@ -13,7 +13,7 @@ from lmbase.inference.base import InferInput
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 
-from examples.GFC2008.Rule.players import Market
+from examples.GFC2008.Rule.players import Market, _build_order
 from examples.llm_utils import parse_llm_response_with_thinking
 from examples.GFC2008.LLM.prompts import LLM_USER_TEMPLATE
 
@@ -107,6 +107,12 @@ class LLMInvestor(GeneralPlayer):
                 infer_input = InferInput(system_msg=system_msg, user_msg=user_msg)
                 response = self._llm_client.run([infer_input]).outputs[0].response
                 decision = parse_llm_response_with_thinking(response)
+                if decision["action"] not in ("buy", "sell", "hold"):
+                    raise ValueError(f"Invalid action: {decision['action']}")
+                if float(decision["bid_price"]) <= 0:
+                    raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
+                if not str(decision["reasoning"]).strip():
+                    raise ValueError("Missing reasoning")
                 break
             except Exception as exc:
                 last_error = exc
@@ -135,7 +141,13 @@ class LLMInvestor(GeneralPlayer):
             quantity = 0
 
         quantity = max(0, quantity)
-        return {"action": action, "quantity": quantity}
+        return _build_order(
+            self,
+            action,
+            quantity,
+            float(decision["bid_price"]),
+            str(decision["reasoning"]),
+        )
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order."""
@@ -150,13 +162,13 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            float(decision_payload["bid_price"]),
+            str(decision_payload["reasoning"]),
+        )
         return Action(
             action_type="order",
             payload={

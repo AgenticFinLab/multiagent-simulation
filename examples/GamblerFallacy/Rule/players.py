@@ -168,9 +168,13 @@ class StreakReversalTrader(GeneralPlayer):
         deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
+        extras = self.config.extras
+        activation_threshold = extras["activation_threshold"]
+        quantity_scale = extras["quantity_scale"]
+        max_order = extras["max_order"]
 
-        if abs(deviation) > 0.02:
-            qty = min(800, int(abs(deviation) * 5000))
+        if abs(deviation) > activation_threshold:
+            qty = min(max_order, int(abs(deviation) * quantity_scale))
             if deviation > 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
@@ -198,8 +202,11 @@ class StreakReversalTrader(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": "streak-reversal threshold rule",
             "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
         }
         return Action(
             action_type="order",
@@ -246,9 +253,13 @@ class HotHandTrader(GeneralPlayer):
         deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
+        extras = self.config.extras
+        activation_threshold = extras["activation_threshold"]
+        quantity_scale = extras["quantity_scale"]
+        max_order = extras["max_order"]
 
-        if abs(deviation) > 0.02:
-            qty = min(800, int(abs(deviation) * 5000))
+        if abs(deviation) > activation_threshold:
+            qty = min(max_order, int(abs(deviation) * quantity_scale))
             if deviation > 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
@@ -276,8 +287,11 @@ class HotHandTrader(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": "hot-hand momentum threshold rule",
             "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
         }
         return Action(
             action_type="order",
@@ -324,9 +338,13 @@ class IndependentAssessor(GeneralPlayer):
         deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
+        extras = self.config.extras
+        activation_threshold = extras["activation_threshold"]
+        quantity_scale = extras["quantity_scale"]
+        max_order = extras["max_order"]
 
-        if abs(deviation) > 0.05:
-            qty = min(500, int(abs(deviation) * 3000))
+        if abs(deviation) > activation_threshold:
+            qty = min(max_order, int(abs(deviation) * quantity_scale))
             if deviation < 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
@@ -354,8 +372,11 @@ class IndependentAssessor(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": "independent fundamental-value rule",
             "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
         }
         return Action(
             action_type="order",
@@ -402,9 +423,13 @@ class Arbitrageur(GeneralPlayer):
         deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
+        extras = self.config.extras
+        activation_threshold = extras["activation_threshold"]
+        quantity_scale = extras["quantity_scale"]
+        max_order = extras["max_order"]
 
-        if abs(deviation) > 0.05:
-            qty = min(500, int(abs(deviation) * 3000))
+        if abs(deviation) > activation_threshold:
+            qty = min(max_order, int(abs(deviation) * quantity_scale))
             if deviation < 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
@@ -432,8 +457,11 @@ class Arbitrageur(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": "streak-mispricing arbitrage rule",
             "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
         }
         return Action(
             action_type="order",
@@ -476,12 +504,14 @@ class NoiseTrader(GeneralPlayer):
         """Random 30% chance to trade 100-500 shares."""
         extras = self.config.extras
         trade_probability = extras["trade_probability"]
+        min_order = extras["min_order"]
+        max_order = extras["max_order"]
         price = self.state.custom_state["price"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
 
         if random.random() < trade_probability:
-            qty = random.randint(100, 500)
+            qty = random.randint(min_order, max_order)
             action = "buy" if random.random() > 0.5 else "sell"
             if action == "buy":
                 qty = min(qty, int(cash / price) if price > 0 else 0)
@@ -508,8 +538,11 @@ class NoiseTrader(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": "noise-trader random liquidity rule",
             "agent_type": self.__class__.__name__,
+            "strategy": self.__class__.__name__,
         }
         return Action(
             action_type="order",

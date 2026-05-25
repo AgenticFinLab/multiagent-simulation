@@ -184,6 +184,49 @@ Run the full checklist from `07-validation-checklist.md`.
 
 ---
 
+### Phase 7 — Runtime Drift And Rerun Decision
+
+**Goal**: decide whether existing full-round success samples can be inherited or
+whether affected scenario-mode rows must be rerun after repair.
+
+This phase is mandatory whenever a simulation already has experiment artifacts.
+It prevents unnecessary reruns after docs-only repairs while also preventing
+stale samples from representing changed runtime inputs.
+
+**Default principle**: preserve existing runtime semantics whenever the original
+implementation does not violate this guide or `docs/create-example-skill`.
+
+**Steps**:
+
+1. List every changed file for the simulation.
+2. Classify each change:
+   - `docs-only`: `simulation-bases.md`, `analysis-bases.md`,
+     `{Variant}/explain.md`, `{Variant}/analysis.md` only.
+   - `runtime-input`: `players.py`, `prompts.py`, `configs/`, parser/fallback
+     logic, market/order construction, topology, model id, RAG embedding/index
+     configuration, or player counts.
+3. For docs-only repairs, existing clean samples may be inherited. Mark the
+   row `docs-inherited`.
+4. For runtime-input repairs, mark affected modes
+   `rerun-required-runtime-change`.
+5. For prompt-rule alignment repairs in `RuleLLM`, mark both `RuleLLM` and
+   `Rag` affected if Rag aliases the RuleLLM prompts.
+6. Keep clean old samples as `legacy-clean` evidence for the branch/commit that
+   produced them. Do not mark them failed solely because the standardized branch
+   now differs.
+7. Record the decision in the experiment ledger before launching any rerun.
+
+**Examples**:
+
+- Adding missing root docs and variant docs only: no simulation rerun.
+- Adding required LLM output fields that `players.py` reads: rerun affected API
+  modes.
+- Changing RuleLLM prompt formulas or numeric parameters to match Rule/config:
+  rerun affected `RuleLLM`; rerun `Rag` too if Rag imports those prompts.
+- Adding class docstrings only: no simulation rerun.
+
+---
+
 ## §3 Task Type Execution Profiles
 
 ### Patch-only

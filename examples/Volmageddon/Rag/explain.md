@@ -1,81 +1,108 @@
-# Volmageddon Simulation
+# Volmageddon Rag Variant Explanation
 
-## Overview
+## §1 Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | February 5, 2018 - VIX spiked 115%, XIV ETN lost 90%+ in after-hours trading |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Volmageddon simulation with VIX ETN blowup, short volatility crowd, and reverse feedback loop |
-| **Academic Value** | Understanding february 5, 2018 - vix spiked 115%, xiv etn lost 90%+ in after-hours trading through multi-agent simulation |
+| Field | Value |
+|---|---|
+| Variant | Rag |
+| Simulation | Volmageddon |
+| Decision Mechanism | Retrieved domain knowledge plus API reasoning over current-market volatility quantities |
+| Theory Reference | `examples/Volmageddon/simulation-bases.md` |
+| Market Broadcast | `configs/Volmageddon/Rag/topology.yml` |
 
-## Theoretical Foundation
+Rag keeps Volmageddon's current-market quantity schema and adds per-round
+retrieval context. Investor payloads include `rag_context` so Level-2 review can
+verify whether retrieved knowledge was available rather than assuming RAG was
+effective.
 
-- Volatility product feedback (Bergsma & Jiang, 2022)
-- Short volatility crowding (Culp et al., 2018)
-- Inverse VIX ETN dynamics
+## §2 Theory -> Implementation Mapping
 
-## Agent Descriptions
+### §2.1 ShortVolTrader (simulation-bases.md §4.1)
 
-### ShortVolTrader
-**Theoretical Basis**: Short volatility strategy
-**Market Role**: destabilizing
-**Description**: Sells VIX futures/ETNs, profits from contango but faces tail risk
-**Parameters**: short_size=10000, stop_loss=0.5, rebalance_frequency=daily
+| Theory Component | Implementation |
+|---|---|
+| Short-vol carry and stop-loss covering | `RagLLMShortVolTrader` combines retrieved volatility-product context with the short-carry persona. |
+| Required config | Portfolio initialization, knowledge config, private RAG config, and `agent_type: short_vol_trader`. |
+| Output contract | Quantity-only decision plus `rag_context` and parser fallback metadata. |
 
-### VolETNManager
-**Theoretical Basis**: Inverse ETN rebalancing mechanics
-**Market Role**: destabilizing
-**Description**: Must buy VIX futures when VIX rises, creating positive feedback
-**Parameters**: leverage=-1.0, rebalance_threshold=0.05, rebalance_size=50000
+### §2.2 VolETNManager (simulation-bases.md §4.2)
 
-### LongVolHedger
-**Theoretical Basis**: Portfolio insurance via volatility
-**Market Role**: stabilizing
-**Description**: Holds long VIX positions as portfolio hedge
-**Parameters**: hedge_ratio=0.1, target_vol=0.15
+| Theory Component | Implementation |
+|---|---|
+| Mechanical inverse-product rebalance | `RagLLMVolETNManager` retrieves knowledge about ETN mechanics and applies it to rebalance urgency. |
+| Required config | Knowledge/RAG config and `agent_type: vol_e_t_n_manager`. |
+| Output contract | `action`, `quantity`, `reasoning`, `analysis`, and `rag_context`; no `bid_price`. |
 
-### VolArbitrageur
-**Theoretical Basis**: VIX futures term structure arbitrage
-**Market Role**: neutral
-**Description**: Trades VIX term structure dislocations
-**Parameters**: entry_threshold=0.02, position_size=5000
+### §2.3 LongVolHedger (simulation-bases.md §4.3)
 
-### EquityTrader
-**Theoretical Basis**: Equity market participant
-**Market Role**: neutral
-**Description**: Trades equities, affected by volatility spike
-**Parameters**: position_size=1000, risk_limit=0.02
+| Theory Component | Implementation |
+|---|---|
+| Hedge accumulation and spike profit-taking | `RagLLMLongVolHedger` retrieves historical context on hedging and volatility stress. |
+| Required config | Knowledge/RAG config and `agent_type: long_vol_hedger`. |
+| Output contract | Quantity-only order constrained by current cash/inventory. |
 
+### §2.4 VolArbitrageur (simulation-bases.md §4.4)
 
-## Usage
+| Theory Component | Implementation |
+|---|---|
+| Volatility dislocation arbitrage | `RagLLMVolArbitrageur` retrieves term-structure and arbitrage context. |
+| Required config | Knowledge/RAG config and `agent_type: vol_arbitrageur`. |
+| Output contract | Current-market quantity order plus retrieval audit fields. |
 
-### Rule Variant
+### §2.5 EquityTrader (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Volatility-linked equity de-risking | `RagLLMEquityTrader` retrieves context on equity stress and volatility feedback. |
+| Required config | Knowledge/RAG config and `agent_type: equity_trader`. |
+| Output contract | Structured API decision with `rag_context` for quality audit. |
+
+## §3 Market Mechanism
+
+The Rag variant reuses the Rule market. Retrieval affects investor reasoning
+only; market clearing remains the same net-demand update over `action` and
+`quantity`.
+
+## §4 Variant Architecture
+
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/Volmageddon/Rag/players.py` |
+| Prompt module | `examples/Volmageddon/Rag/prompts.py` |
+| Inference | Project ARK model policy plus Hunyuan/LiteLLM embedding policy |
+| Retrieval | `KnowledgeStore` over configured document sources with `top_k: 5` |
+| Output parsing | Required `action`, `quantity`, and `reasoning` validation |
+| Error handling | Missing documents/index failures fail; parse fallback is explicit and auditable |
+
+## §5 Config Reference
+
+| Config | Purpose |
+|---|---|
+| `configs/Volmageddon/Rag/simulation.yml` | 200-round simulation entry point and record path |
+| `configs/Volmageddon/Rag/players.yml` | Class paths, portfolio initialization, LLM config, and RAG config |
+| `configs/Volmageddon/Rag/topology.yml` | Market update and investor order routing |
+| `configs/Volmageddon/Rag/persona.yml` | Persona and recording metadata |
+
+## §6 Running Instructions
+
 ```bash
-python examples/Volmageddon/Rule/run_volmageddon.py \
-    -c configs/Volmageddon/Rule/simulation.yml
+python examples/Volmageddon/Rag/run_volmageddon_rag.py -c configs/Volmageddon/Rag/simulation.yml
 ```
 
-### LLM Variant
-```bash
-python examples/Volmageddon/LLM/run_volmageddon_llm.py \
-    -c configs/Volmageddon/LLM/simulation.yml
-```
+## §7 Expected Behavior
 
-### RuleLLM Variant
-```bash
-python examples/Volmageddon/RuleLLM/run_volmageddon_rulellm.py \
-    -c configs/Volmageddon/RuleLLM/simulation.yml
-```
+- RAG decisions should preserve the Volmageddon quantity schema.
+- `rag_context` should be recorded for every investor decision after
+  initialization.
+- `rag_stats.json` should report retrieval success/failure rates by agent.
+- Full samples require both execution success and retrieval-quality review.
 
-### RAG Variant
-```bash
-python examples/Volmageddon/Rag/run_volmageddon_rag.py \
-    -c configs/Volmageddon/Rag/simulation.yml
-```
+## §8 References
 
-## References
+See `examples/Volmageddon/simulation-bases.md §2` and `§8`.
 
-- Volatility product feedback (Bergsma & Jiang, 2022)
-- Short volatility crowding (Culp et al., 2018)
-- Inverse VIX ETN dynamics
+## §9 Variant Comparison
+
+Rag is compared with RuleLLM to test whether retrieved historical volatility
+knowledge changes urgency or quantity while preserving the same rule-constrained
+schema.

@@ -66,7 +66,7 @@ P(t+1) = P(t) + λ·NetDemand(t) + γ·[F(t)−P(t)] + ε(t)
 
 ## §5 Config Reference
 
-Config file: `DotComBubble/Rule/config.yaml`
+Config files: `configs/DotComBubble/Rule/{simulation.yml,players.yml,topology.yml,persona.yml}`
 
 Key extras: `initial_price`, `fundamental_value`, `price_impact`, `mean_reversion`, `noise_std`, `order_size`, `flip_threshold`, `momentum_threshold`, `value_buy_threshold`, `value_sell_threshold`, `short_threshold`, `cover_threshold`.
 
@@ -87,3 +87,13 @@ python -m examples.DotComBubble.Rule.run_dotcombubble
 ## §8 References
 
 See `simulation-bases.md §2` for full DOI citations.
+
+## §9 Cross-Variant Role
+
+Rule output is the deterministic baseline for:
+
+| Comparison | Purpose |
+|---|---|
+| Rule vs LLM | Test whether persona-only LLM agents reproduce narrative-driven bubble dynamics. |
+| Rule vs RuleLLM | Test whether explicit rule guidance preserves the deterministic bubble mechanism under LLM reasoning. |
+| RuleLLM vs Rag | Test whether retrieved bubble-history knowledge changes valuation discipline, momentum following, or short-seller behavior. |

@@ -62,13 +62,13 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
-from .prompts import RAGLLM_USER_TEMPLATE
-from examples.MomentumEffect.RuleLLM.prompts import (
-    RULELLM_MOMENTUM_TRADER_SYS,
-    RULELLM_CONTRARIAN_TRADER_SYS,
-    RULELLM_INDEX_FUND_SYS,
-    RULELLM_MARKET_MAKER_SYS,
-    RULELLM_TECHNICAL_TRADER_SYS,
+from .prompts import (
+    RAGLLM_CONTRARIAN_TRADER_SYS,
+    RAGLLM_FUNDAMENTAL_ANCHOR_SYS,
+    RAGLLM_MOMENTUM_TRADER_SYS,
+    RAGLLM_TECHNICAL_TRADER_SYS,
+    RAGLLM_TREND_FOLLOWER_SYS,
+    RAGLLM_USER_TEMPLATE,
 )
 
 logger = logging.getLogger("MomentumEffectRag")
@@ -602,8 +602,8 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
-        llm_config = self.config.extras["llm"]
         template = RAGLLM_USER_TEMPLATE
         return template.format(
             round=round_num,
@@ -674,7 +674,7 @@ class RagLLMInvestor(GeneralPlayer):
                         f"[{self.identity}] LLM failed after {max_retries} attempts: {e}"
                     )
                 logger.debug(
-                    "[%s] LLM parse failed (attempt %d), retrying…",
+                    "[%s] LLM parse failed (attempt %d), retrying...",
                     self.identity,
                     attempt + 1,
                 )
@@ -709,6 +709,7 @@ class RagLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
             "provides_liquidity": decision["provides_liquidity"],
+            "rag_context": self.state.custom_state.get("last_rag_context"),
         }
 
         return {
@@ -730,33 +731,33 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMMomentumTrader(RagLLMInvestor):
-    """RAG-augmented: MomentumTrader rules + LLM + retrieved knowledge."""
+    """RAG MomentumTrader. Theory: simulation-bases.md §4.1."""
 
-    _system_prompt = RULELLM_MOMENTUM_TRADER_SYS
+    _system_prompt = RAGLLM_MOMENTUM_TRADER_SYS
 
 
 class RagLLMContrarianTrader(RagLLMInvestor):
-    """RAG-augmented: ContrarianTrader rules + LLM + retrieved knowledge."""
+    """RAG ContrarianTrader. Theory: simulation-bases.md §4.2."""
 
-    _system_prompt = RULELLM_CONTRARIAN_TRADER_SYS
+    _system_prompt = RAGLLM_CONTRARIAN_TRADER_SYS
 
 
 class RagLLMTechnicalTrader(RagLLMInvestor):
-    """RAG-augmented: TechnicalTrader rules + LLM + retrieved knowledge."""
+    """RAG TechnicalTrader. Theory: simulation-bases.md §4.5."""
 
-    _system_prompt = RULELLM_INDEX_FUND_SYS
+    _system_prompt = RAGLLM_TECHNICAL_TRADER_SYS
 
 
 class RagLLMTrendFollower(RagLLMInvestor):
-    """RAG-augmented: TrendFollower rules + LLM + retrieved knowledge."""
+    """RAG TrendFollower. Theory: simulation-bases.md §4.7."""
 
-    _system_prompt = RULELLM_MARKET_MAKER_SYS
+    _system_prompt = RAGLLM_TREND_FOLLOWER_SYS
 
 
 class RagLLMFundamentalAnchor(RagLLMInvestor):
-    """RAG-augmented: FundamentalAnchor rules + LLM + retrieved knowledge."""
+    """RAG FundamentalAnchor. Theory: simulation-bases.md §4.6."""
 
-    _system_prompt = RULELLM_TECHNICAL_TRADER_SYS
+    _system_prompt = RAGLLM_FUNDAMENTAL_ANCHOR_SYS
 
 
 __all__ = [

@@ -1,0 +1,30 @@
+# =============================================================================
+# CarryTradeUnwind RuleLLM Topology - Star Pattern
+# =============================================================================
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - rulellm_carry_trader
+    - rulellm_leveraged_carry_fund
+    - rulellm_funding_currency_buyer
+    - rulellm_hedged_carry_trader
+    - rulellm_noise_trader
+
+  rulellm_carry_trader:
+    - market
+
+  rulellm_leveraged_carry_fund:
+    - market
+
+  rulellm_funding_currency_buyer:
+    - market
+
+  rulellm_hedged_carry_trader:
+    - market
+
+  rulellm_noise_trader:
+    - market

@@ -1,81 +1,92 @@
-# OverconfidenceBias Simulation
+# OverconfidenceBias Rule — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | Overconfidence bias causes traders to overestimate their precision, trade too much, and increase volatility |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Overconfidence bias simulation showing how excessive self-confidence leads to excessive trading and market instability |
-| **Academic Value** | Understanding overconfidence bias causes traders to overestimate their precision, trade too much, and increase volatility through multi-agent simulation |
+|---|---|
+| Variant | Rule |
+| Simulation | OverconfidenceBias |
+| Decision Mechanism | Deterministic formulas and config thresholds |
+| Theory Reference | `simulation-bases.md §2` and `simulation-bases.md §4` |
+| Market Broadcast | `price`, `fundamental`, `deviation`, `round` |
 
-## Theoretical Foundation
+## §2 Theory → Implementation Mapping
 
-- Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
-- Odean (1998): Volume, volatility, price, and profit when all traders are above average
-- Barber & Odean (2001): Boys will be boys: Gender, overconfidence, and common stock investment
+### §2.1 OverconfidentTrader (simulation-bases.md §4.1)
 
-## Agent Descriptions
+| Theory Component | Implementation |
+|---|---|
+| Signal overprecision | `_make_decision()` computes `signal = deviation * precision_overestimate`. |
+| Excess turnover | Small perceived signals can trigger bounded buy/sell orders. |
+| Order discipline | Quantity is capped by `base_size`, cash, and inventory. |
 
-### OverconfidentTrader
-**Theoretical Basis**: Overconfidence bias (Daniel et al., 1998)
-**Market Role**: destabilizing
-**Description**: Overestimates signal precision, trades too frequently
-**Parameters**: precision_overestimate=2.0, trade_frequency=high, position_size=800
+### §2.2 SelfAttributor (simulation-bases.md §4.2)
 
-### SelfAttributor
-**Theoretical Basis**: Self-attribution bias
-**Market Role**: destabilizing
-**Description**: Attributes success to skill, failure to bad luck
-**Parameters**: attribution_bias=0.7, confidence_boost=0.3
+| Theory Component | Implementation |
+|---|---|
+| Success attribution | Positive deviation with inventory increases buying by `confidence_boost`. |
+| Loss response | Negative deviation can trigger exposure trimming. |
+| Path dependence | Current position gates favorable-state reinforcement. |
 
-### CalibratedTrader
-**Theoretical Basis**: Rational expectations
-**Market Role**: stabilizing
-**Description**: Correctly estimates signal precision, trades appropriately
-**Parameters**: signal_precision=0.6, trade_threshold=0.02, position_size=500
+### §2.3 CalibratedTrader (simulation-bases.md §4.3)
 
-### ContrarianInvestor
-**Theoretical Basis**: Contrarian strategy
-**Market Role**: stabilizing
-**Description**: Trades against overconfident moves
-**Parameters**: contrarian_threshold=0.05, patience=high
+| Theory Component | Implementation |
+|---|---|
+| Rational benchmark | Trades only when `abs(deviation) > trade_threshold`. |
+| Signal discipline | Quantity scales with `signal_precision`. |
+| Stabilization | Buys undervaluation and sells overvaluation. |
 
-### NoiseTrader
-**Theoretical Basis**: Black (1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader
-**Parameters**: trade_probability=0.05, min_order=100, max_order=500
+### §2.4 ContrarianInvestor (simulation-bases.md §4.4)
 
+| Theory Component | Implementation |
+|---|---|
+| Overreaction correction | Activates when deviation crosses `contrarian_threshold`. |
+| Counter-trend trading | Sells overvaluation and buys undervaluation. |
+| Stabilizing pressure | Uses bounded size and portfolio constraints. |
 
-## Usage
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-### Rule Variant
+| Theory Component | Implementation |
+|---|---|
+| Background liquidity | Trades with configured `trade_probability`. |
+| Random flow | Randomly selects buy or sell when active. |
+| Bounded uncertainty | Uses `noise_size` and portfolio constraints. |
+
+## §3 Market Mechanism
+
+The market implements `P(t+1) = max(0.01, P(t) + lambda * net_demand + gamma * (F - P(t)) + epsilon)`. It records price, fundamental value, and volume histories for standard analysis.
+
+## §4 Variant Architecture
+
+| Component | Implementation |
+|---|---|
+| Coordinator | `Market` in `Rule/players.py` |
+| Investors | Five deterministic investor classes |
+| Order Schema | Canonical order with `type`, `from`, `action`, `bid_price`, `quantity`, `reasoning`, `agent_type`, `strategy` |
+| Failure Policy | Required scalar and config errors raise immediately. |
+
+## §5 Config Reference
+
+Primary config: `configs/OverconfidenceBias/Rule/simulation.yml`. Investor parameters live in `configs/OverconfidenceBias/Rule/players.yml`.
+
+## §6 Running Instructions
+
 ```bash
 python examples/OverconfidenceBias/Rule/run_overconfidencebias.py \
-    -c configs/OverconfidenceBias/Rule/simulation.yml
+  -c configs/OverconfidenceBias/Rule/simulation.yml
 ```
 
-### LLM Variant
-```bash
-python examples/OverconfidenceBias/LLM/run_overconfidencebias_llm.py \
-    -c configs/OverconfidenceBias/LLM/simulation.yml
-```
+## §7 Expected Behavior
 
-### RuleLLM Variant
-```bash
-python examples/OverconfidenceBias/RuleLLM/run_overconfidencebias_rulellm.py \
-    -c configs/OverconfidenceBias/RuleLLM/simulation.yml
-```
+- Overconfident and self-attributing agents generate more aggressive flow than calibrated agents.
+- Contrarian and calibrated agents provide stabilizing pressure.
+- NoiseTrader supplies background liquidity.
+- Analysis outputs expose excess turnover, price deviation, and volatility.
 
-### RAG Variant
-```bash
-python examples/OverconfidenceBias/Rag/run_overconfidencebias_rag.py \
-    -c configs/OverconfidenceBias/Rag/simulation.yml
-```
+## §8 References
 
-## References
+See `simulation-bases.md §2` for full DOI citations.
 
-- Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
-- Odean (1998): Volume, volatility, price, and profit when all traders are above average
-- Barber & Odean (2001): Boys will be boys: Gender, overconfidence, and common stock investment
+## §9 Variant Comparison
+
+See `simulation-bases.md §9` for Rule / LLM / RuleLLM / Rag comparison.

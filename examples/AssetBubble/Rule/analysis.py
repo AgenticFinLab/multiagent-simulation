@@ -28,6 +28,7 @@ from masim.evaluation.finance import (
     validate_asset_bubble,
 )
 from masim.utils import load_config, load_results
+from examples.standard_rule_analysis import _market_data_from_payload, _market_players
 
 
 def _batch_to_rounds(values: list) -> Dict[int, float]:
@@ -56,13 +57,24 @@ def _load_data(results) -> Dict[str, Any]:
     market_prices: Dict[int, float] = {}
     fundamentals: Dict[int, float] = {}
     volumes: Dict[int, float] = {}
-    for player in results.players_by_role("coordinator").values():
+    for player in _market_players(results).values():
         if "price" in player.batch_store_names:
             market_prices.update(_batch_to_rounds(player.batch("price").all()))
         if "fundamental" in player.batch_store_names:
             fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
         if "volume" in player.batch_store_names:
             volumes.update(_batch_to_rounds(player.batch("volume").all()))
+        for round_num, payload in player.turns.payloads().items():
+            market_data = _market_data_from_payload(payload)
+            if round_num not in market_prices and "price" in market_data:
+                market_prices[round_num] = float(market_data["price"])
+            if round_num not in fundamentals:
+                if "fundamental" in market_data:
+                    fundamentals[round_num] = float(market_data["fundamental"])
+                elif "fundamental_value" in market_data:
+                    fundamentals[round_num] = float(market_data["fundamental_value"])
+            if round_num not in volumes and "volume" in market_data:
+                volumes[round_num] = float(market_data["volume"])
 
     # --- non-coordinator (investor) players: read from turn decision_payloads ---
     # payload fields: bid_price (submitted order price), quantity (signed order size)
@@ -229,13 +241,13 @@ def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     plot_price_dynamics(
         market_prices,
         fundamental=fundamental_value,
-        output_path=os.path.join(output_dir, "01_price_dynamics.png"),
+        output_path=os.path.join(output_dir, "01_assetbubble_dynamics.png"),
     )
 
     plot_bubble_crash_analysis(
         market_prices,
         fundamental=fundamental_value,
-        output_path=os.path.join(output_dir, "02_bubble_analysis.png"),
+        output_path=os.path.join(output_dir, "02_assetbubble_analysis.png"),
     )
 
     plot_multi_panel_summary(

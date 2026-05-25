@@ -1,27 +1,51 @@
-# OverconfidenceBias Analysis Guide
+# OverconfidenceBias Rag — Analysis Specification
 
-## Metrics
+## §1 Overview
 
-| Metric | Description | Expected Range |
-|--------|-------------|----------------|
-| Price deviation | Deviation from fundamental | Varies by scenario |
-| Max drawdown | Largest peak-to-trough decline | Varies by scenario |
-| Volatility | Annualized return volatility | Varies by scenario |
+The Rag analysis extends the standard OverconfidenceBias metric pipeline with retrieval coverage diagnostics from recorded `rag_context` payloads.
 
-## Visualization Guide
+## §2 Metric Implementation
 
-1. **Price vs Fundamental**: Shows whether agents create mispricings
-2. **Deviation Plot**: Magnitude and persistence of mispricings
-3. **Return Distribution**: Should show fat tails for behavioral scenarios
+| Metric | Function / Source | Root Reference |
+|---|---|---|
+| Excess Turnover (ET) | `calculate_metrics(data)` | `analysis-bases.md §2 Metric: Excess Turnover` |
+| Signal Overreaction (SO) | `calculate_metrics(data)` | `analysis-bases.md §2 Metric: Signal Overreaction` |
+| Confidence Reinforcement Activity (CRA) | `calculate_metrics(data)` | `analysis-bases.md §2 Metric: Confidence Reinforcement Activity` |
+| Rational Benchmark Deviation (RBD) | `calculate_metrics(data)` | `analysis-bases.md §2 Metric: Rational Benchmark Deviation` |
+| Return Volatility (RV) | `calculate_metrics(data)` | `analysis-bases.md §2 Metric: Return Volatility` |
+| Portfolio Performance Gap (PPG) | `calculate_metrics(data)` | `analysis-bases.md §2 Metric: Portfolio Performance Gap` |
+| Retrieval Coverage | `analyze_rag_knowledge_effect(investor_payloads)` | `analysis-bases.md §5 Cross-Variant Comparison` |
 
-## Troubleshooting
+## §3 Analysis Dimensions
 
-- **No phenomenon observed**: Adjust agent parameters
-- **Too extreme**: Add more stabilizing agents or increase mean reversion
-- **Too stable**: Increase destabilizing agent parameters
+Rag analysis compares market metrics, role-level order flow, reasoning text, retrieval coverage, and canonical order validity.
 
-## References
+## §4 Phase Analysis
 
-- Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
-- Odean (1998): Volume, volatility, price, and profit when all traders are above average
-- Barber & Odean (2001): Boys will be boys: Gender, overconfidence, and common stock investment
+The run is read as initialization, index availability, retrieved-context decisions, and market feedback.
+
+## §5 Cross-Variant Comparison
+
+Rag should preserve RuleLLM action schema while adding auditable knowledge traces.
+
+## §6 Expected Results
+
+### §6.1 Stylised Facts
+
+Valid Rag runs should show non-empty retrieval traces, parseable decisions, and standard overconfidence market metrics.
+
+### §6.2 Calibration Targets
+
+Core targets follow `analysis-bases.md §6.2`; retrieval coverage should be visible in `rag_stats.json`.
+
+### §6.3 Cross-Variant Predictions
+
+Rag may produce more historically grounded reasoning than RuleLLM while keeping comparable action schemas.
+
+### §6.4 Validation Failure Signs
+
+Missing `rag_context`, absent `rag_stats.json`, invalid decisions, unavailable documents, or broken market histories indicate failure.
+
+## §7 Visualization Catalogue
+
+The analysis writes `summary.json`, `00_investor_bids.png`, `01_overconfidencebias_dynamics.png`, `02_overconfidencebias_analysis.png`, `03_summary.png`, and `rag_stats.json`.

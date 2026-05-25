@@ -212,7 +212,7 @@ ragllm_momentum:
         # Language model type: "api" = remote API call
         lm_type: "api"
         # Model identifier for Doubao via ARK (VolcEngine)
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           # Sampling temperature; lower = more deterministic
           temperature: 0.3
@@ -305,7 +305,7 @@ ragllm_arbitrageur:
         # Language model type: "api" = remote API call
         lm_type: "api"
         # Model identifier for Doubao via ARK
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           # Sampling temperature; lower = more deterministic
           temperature: 0.3
@@ -396,7 +396,7 @@ ragllm_noise:
         # Language model type: "api" = remote API call
         lm_type: "api"
         # Model identifier for Doubao via ARK
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           # Sampling temperature; slightly higher for noisier, more varied output
           temperature: 0.5
@@ -487,7 +487,7 @@ ragllm_value:
         # Language model type: "api" = remote API call
         lm_type: "api"
         # Model identifier for Doubao via ARK
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           # Sampling temperature; lower = more deterministic, disciplined output
           temperature: 0.3
@@ -580,10 +580,99 @@ ragllm_leveraged:
         # Language model type: "api" = remote API call
         lm_type: "api"
         # Model identifier for Doubao via ARK
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           # Sampling temperature; lower = more deterministic
           temperature: 0.3
+          # Maximum number of new tokens in generated response
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# =============================================================================
+# RAG Conservative Holder (Strategic allocation + LLM + RAG)
+# =============================================================================
+# Trading style: Maintains stable allocation and rebalances slowly
+# RAG knowledge: Long-horizon allocation, portfolio discipline, stabilizing demand
+# =============================================================================
+ragllm_conservative:
+  name: "RAG Conservative Holder"
+  class: "examples.AssetBubble.Rag.players:RagLLMConservativeHolder"
+  # Number of agent instances (expanded to ragllm_conservative_1 .. ragllm_conservative_2)
+  num_instances: 2
+  config:
+    identity: "ragllm_conservative"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      # Output directory for experiment records
+      record_path: "EXPERIMENT/AssetBubble/Rag/records"
+      # Starting cash endowment
+      initial_cash: 10000.0
+      # Starting position (shares held); 0 = flat
+      initial_position: 0.0
+      # Maximum number of consecutive periods a state variable is "hot"
+      custom_state_hot_limit: 3
+      # -----------------------------------------------------------------
+      # Rule parameters (from AssetBubble ConservativeHolder)
+      # -----------------------------------------------------------------
+      # Target strategic long holding
+      target_position: 20.0
+      # How often (in periods) this investor rebalances toward target
+      rebalance_frequency: 10
+      # Fraction of position gap closed on each rebalance date
+      rebalance_rate: 0.2
+      # -----------------------------------------------------------------
+      # Private Knowledge: agent-specific resources and RAG configuration
+      # -----------------------------------------------------------------
+      private_knowledge:
+        # List of global resources to inherit; code filters by identity=ragllm_conservative
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          # Per-agent local directory; auto-generated if empty
+          local_uri: ""
+          # Agent-specific local resource paths (files, URLs not in global CSV)
+          local_resources: []
+        # -----------------------------------------------------------------
+        # RAG Configuration (per-agent, overrides knowledge.rag defaults)
+        # -----------------------------------------------------------------
+        rag:
+          # Shared index directories to reference/copy from, relative to global_uri/
+          from_global_index_dir:
+            - "rag_index"
+          # Per-agent local index directory; auto-generated if empty: <local_uri>/rag_index/
+          local_index_dir: ""
+          # Embedding provider type: "litellm" for LiteLLM-based embedding
+          embed_type: "litellm"
+          # Embedding model name; Hunyuan via OpenAI-compatible API
+          embed_model: "openai/hunyuan-embedding"
+          # API key for embedding service; resolved from environment variable
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          # API base URL for Hunyuan embedding
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          # Chunk size in tokens for document splitting
+          chunk_size: 512
+          # Overlap in tokens between consecutive chunks
+          chunk_overlap: 64
+          # Number of top-k chunks to retrieve per query
+          top_k: 5
+      # -----------------------------------------------------------------
+      # LLM Configuration
+      # -----------------------------------------------------------------
+      llm:
+        # System prompt for Conservative Holder persona
+        sys_message: "examples.AssetBubble.Rag.prompts:RAGLLM_CONSERVATIVE_SYS"
+        # User message template
+        user_message: "examples.AssetBubble.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        # Language model type: "api" = remote API call
+        lm_type: "api"
+        # Model identifier for Doubao via ARK
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          # Sampling temperature; lower = more stable allocation decisions
+          temperature: 0.2
           # Maximum number of new tokens in generated response
           max_new_tokens: 600
   persona: !include persona.yml

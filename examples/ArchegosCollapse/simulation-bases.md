@@ -1,6 +1,6 @@
 # ArchegosCollapse — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 |--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 | Research Relevance | Archegos exposed how TRS-based leverage creates hidden systemic risk invisible to both regulators and counterparties. It illustrates the first-mover advantage incentive in creditor cascades, a mechanism with direct implications for systemic risk regulation, prime broker risk management, and the design of disclosure requirements for synthetic equity instruments.                                                                                                                                                                                           |
 
 
-## 2. Theoretical Foundation
+## §2 Theoretical Foundation
 
 ### Theory: Total Return Swap (TRS) Leverage and Hidden Systemic Risk
 
@@ -64,7 +64,7 @@
 - **Calibration Implication**: discount_threshold = 0.10 based on Grossman & Miller's distressed market estimates; cash_deployment = 0.30 represents conservative capital allocation by institutional buyers.
 
 
-## 3. Market Design Principles
+## §3 Market Design Principles
 
 ### 3.1 Price Formation Model
 
@@ -129,9 +129,9 @@ Each round, the Market broadcasts to all investors:
 **Design Note**: `return_pct` is NOT broadcast separately — agents that need price change compute it from `price` and `prev_price`. The central signal is `deviation` (not raw price level), consistent with how prime brokers monitor collateral quality relative to fair value.
 
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
-### Investor: ConcentratedFund
+### §4.1 ConcentratedFund
 
 #### 4.1.1 Summary
 
@@ -317,7 +317,7 @@ This −45.3% deviation far exceeds both PrimeBroker thresholds (−0.10, −0.1
 
 ---
 
-### Investor: PrimeBroker1
+### §4.2 PrimeBroker1
 
 #### 4.2.1 Summary
 
@@ -429,7 +429,7 @@ This deepens deviation well beyond PrimeBroker2's threshold (−0.15), ensuring 
 
 ---
 
-### Investor: PrimeBroker2
+### §4.3 PrimeBroker2
 
 #### 4.3.1 Summary
 
@@ -514,7 +514,7 @@ P(t+1) ≈ 43.15 − 10.50 + 0.01×(100−43.15) = 43.15 − 10.50 + 0.569 = $33
 
 ---
 
-### Investor: BlockTradeBuyer
+### §4.4 BlockTradeBuyer
 
 #### 4.4.1 Summary
 
@@ -601,7 +601,7 @@ Recovery begins.
 
 ---
 
-### Investor: InformationTrader
+### §4.5 InformationTrader
 
 #### 4.5.1 Summary
 
@@ -694,7 +694,7 @@ This accelerates the cascade by pushing price below PrimeBroker1 threshold soone
 | 3 | Glosten, L. R., & Harris, L. E. (1988). Estimating the components of the bid/ask spread. *Journal of Finance*, 43(1), 123–142. https://doi.org/10.1111/j.1540-6261.1988.tb02591.x | Kyle lambda empirical estimates for individual stocks            |
 
 
-## 5. Agent Diversity Verification
+## §5 Agent Diversity Verification
 
 | Diversity Criterion              | Met? | Evidence                                                                                                                                                                                                                                |
 |----------------------------------|------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -708,7 +708,7 @@ This accelerates the cascade by pushing price below PrimeBroker1 threshold soone
 **Critical mass check**: The cascade requires: (1) ConcentratedFund to initiate, (2) at least one broker to amplify, (3) BlockTradeBuyer to eventually halt the decline. Removing ConcentratedFund → no cascade (no initiator). Removing BlockTradeBuyer → prices may collapse to floor without recovery. The 2-broker asymmetry (different thresholds) is essential to model the timing spread observed in Archegos.
 
 
-## 6. Parameter Table
+## §6 Parameter Table
 
 | Parameter                   | Symbol | Value | Typical Range | Source Citation                                                                                                                                                                               | Description                                 | Sensitivity                                                 |
 |-----------------------------|--------|-------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|-------------------------------------------------------------|
@@ -729,7 +729,7 @@ This accelerates the cascade by pushing price below PrimeBroker1 threshold soone
 | detection_ability (IT)      | p_det  | 0.50  | 0.30–0.70     | Boehmer et al. (2008) informed short seller frequency                                                                                                                                         | Probability of detecting cascade signal     | Low — affects variance of onset timing                      |
 
 
-## 7. Communication and Round Structure
+## §7 Communication and Round Structure
 
 ```
 Round N (t = 1, 2, ..., 200):
@@ -761,7 +761,7 @@ Round N (t = 1, 2, ..., 200):
 **Round duration interpretation**: Each round approximates one trading day in the cascade context. The 200-round simulation covers approximately 40 trading weeks, providing enough time for cascade onset (~rounds 10–25), trough (~rounds 15–30), and recovery (~rounds 30–80).
 
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
 ### Event: Archegos Capital Management Collapse
 
@@ -812,7 +812,7 @@ Round N (t = 1, 2, ..., 200):
 - Credit Suisse Group AG. (2021). *Annual Report 2021*. Zurich.
 
 
-## 9. Variant Comparison Preview
+## §9 Variant Comparison Preview
 
 | Aspect                    | Rule                                            | LLM                                                                                                      | RuleLLM                                                           | Rag                                                                                              |
 |---------------------------|-------------------------------------------------|----------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|

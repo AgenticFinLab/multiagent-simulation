@@ -24,6 +24,7 @@ from typing import Any, Dict, List, Optional
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
+from masim.format.order import validate_order
 from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("ArchegosCollapse")
@@ -84,7 +85,9 @@ class Market(GeneralPlayer):
         )
         new_price = max(new_price, 0.01)
 
-        deviation = (new_price - fundamental) / fundamental if fundamental > 0 else 0.0
+        if fundamental <= 0:
+            raise ValueError("fundamental_value must be positive")
+        deviation = (new_price - fundamental) / fundamental
         prev_price = current_price
 
         self.state.custom_state["price"] = new_price
@@ -190,10 +193,13 @@ class ConcentratedFund(GeneralPlayer):
 
         order = {
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
             "investor": self.identity,
             "strategy": "ConcentratedFund",
+            "reasoning": "TRS margin threshold rule",
         }
+        validate_order(order)
 
         return {
             **order,
@@ -277,12 +283,16 @@ class PrimeBroker1(GeneralPlayer):
             if quantity > 0:
                 action = "sell"
 
+        price = market_data["price"]
         order = {
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
             "investor": self.identity,
             "strategy": "PrimeBroker1",
+            "reasoning": "first-mover liquidation threshold rule",
         }
+        validate_order(order)
 
         return {
             **order,
@@ -371,12 +381,15 @@ class PrimeBroker2(GeneralPlayer):
 
         order = {
             "action": action,
+            "bid_price": price * price_penalty,
             "quantity": quantity,
             "price_penalty": price_penalty,
             "effective_price": price * price_penalty,
             "investor": self.identity,
             "strategy": "PrimeBroker2",
+            "reasoning": "second-mover liquidation threshold rule",
         }
+        validate_order(order)
 
         return {
             **order,
@@ -451,17 +464,22 @@ class BlockTradeBuyer(GeneralPlayer):
         quantity = 0.0
 
         if deviation < discount_threshold:
+            if price <= 0:
+                raise ValueError("market price must be positive")
             deploy = cash * buy_ratio
-            quantity = deploy / price if price > 0 else 0
+            quantity = deploy / price
             if quantity > 0:
                 action = "buy"
 
         order = {
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
             "investor": self.identity,
             "strategy": "BlockTradeBuyer",
+            "reasoning": "fire-sale discount buying rule",
         }
+        validate_order(order)
 
         return {
             **order,
@@ -554,7 +572,9 @@ class InformationTrader(GeneralPlayer):
                 quantity = sell_qty
         elif deviation > cover_threshold and short_position > 0:
             buy_qty = min(cover_size, short_position)
-            affordable = cash / price if price > 0 else 0
+            if price <= 0:
+                raise ValueError("market price must be positive")
+            affordable = cash / price
             buy_qty = min(buy_qty, affordable)
             if buy_qty > 0:
                 action = "buy"
@@ -562,10 +582,13 @@ class InformationTrader(GeneralPlayer):
 
         order = {
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
             "investor": self.identity,
             "strategy": "InformationTrader",
+            "reasoning": "probabilistic liquidation-signal rule",
         }
+        validate_order(order)
 
         return {
             **order,
@@ -580,6 +603,7 @@ class InformationTrader(GeneralPlayer):
         if action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
+            self.state.custom_state["short_position"] += quantity
         elif action == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity

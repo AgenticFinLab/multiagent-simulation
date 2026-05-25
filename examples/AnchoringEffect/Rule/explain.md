@@ -1,6 +1,6 @@
 # AnchoringEffect Rule — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                                   | Description                                                                                                                                            |
 |----------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,10 +12,10 @@
 
 ---
 
-## 1. How Theoretical Design Is Implemented
+## §2 How Theoretical Design Is Implemented
 
 ### AnchoredTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — AnchoredTrader)*
+*(Theory defined in simulation-bases.md §4.1 — AnchoredTrader)*
 
 | Theoretical Design Element                                                | Implementation                                                                                 |
 |---------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
@@ -27,7 +27,7 @@
 | Position sizing → sim-bases §6                                            | `quantity = min(base_position_size, abs(perceived_dev) × 1000)` constrained by cash/position   |
 
 ### HistoricalAnchor: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — HistoricalAnchor)*
+*(Theory defined in simulation-bases.md §4.2 — HistoricalAnchor)*
 
 | Theoretical Design Element                                     | Implementation                                                                                    |
 |----------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
@@ -38,7 +38,7 @@
 | Parameters from config → sim-bases §6                          | `anchor_weight`, `lookback`, `base_position_size` from `extras`                                   |
 
 ### RationalUpdater: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — RationalUpdater)*
+*(Theory defined in simulation-bases.md §4.3 — RationalUpdater)*
 
 | Theoretical Design Element                             | Implementation                                                                           |
 |--------------------------------------------------------|------------------------------------------------------------------------------------------|
@@ -48,7 +48,7 @@
 | Position sizing → sim-bases §6                         | `quantity = min(base_position_size, abs(deviation) × 1000)` constrained by cash/position |
 
 ### MomentumTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — MomentumTrader)*
+*(Theory defined in simulation-bases.md §4.4 — MomentumTrader)*
 
 | Theoretical Design Element                     | Implementation                                                                            |
 |------------------------------------------------|-------------------------------------------------------------------------------------------|
@@ -58,7 +58,7 @@
 | Position sizing → sim-bases §6                 | `quantity = min(base_position_size, abs(return_pct) × 1000)` constrained by cash/position |
 
 ### NoiseTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — NoiseTrader)*
+*(Theory defined in simulation-bases.md §4.5 — NoiseTrader)*
 
 | Theoretical Design Element                    | Implementation                                                                                    |
 |-----------------------------------------------|---------------------------------------------------------------------------------------------------|
@@ -69,7 +69,7 @@
 
 ---
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 *Formula source: simulation-bases.md §3.1*
 
@@ -102,7 +102,7 @@ Deviations from simulation-bases.md design: None. All formula variables map dire
 
 ---
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 *(Reference: simulation-bases.md §9 — Rule variant entry)*
 
@@ -118,7 +118,7 @@ This variant establishes the deterministic ground truth for the anchoring phenom
 
 ---
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ╔══════════════════════════════════════════════════════════════╗
@@ -145,7 +145,7 @@ This variant establishes the deterministic ground truth for the anchoring phenom
 
 ---
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 Key Configuration Parameters (`configs/AnchoringEffect/Rule/players.yml`):
 
@@ -163,7 +163,7 @@ Key Configuration Parameters (`configs/AnchoringEffect/Rule/players.yml`):
 
 ---
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 python examples/AnchoringEffect/Rule/run_anchoringeffect.py \
@@ -172,13 +172,13 @@ python examples/AnchoringEffect/Rule/run_anchoringeffect.py \
 
 Required environment variables: None (Rule variant requires no API keys)
 
-Expected runtime: ~10–30 seconds for 100 rounds (pure Python, no LLM calls)
+Expected runtime: ~30–90 seconds for the 200-round full experiment (pure Python, no LLM calls)
 
 Output location: `EXPERIMENT/AnchoringEffect/Rule/`
 
 ---
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase              | Rounds | Expected Agent Behavior                                                | Expected Price Dynamics                                        |
 |--------------------|--------|------------------------------------------------------------------------|----------------------------------------------------------------|
@@ -189,7 +189,7 @@ Output location: `EXPERIMENT/AnchoringEffect/Rule/`
 
 ---
 
-## 8. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

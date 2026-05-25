@@ -2,14 +2,14 @@ market:
   name: "Market"
   class: "examples.SunkCostFallacy.Rule.players:Market"
   num_instances: 1
+  persona: !include ../RuleLLM/persona.yml
   config:
     identity: "market"
-    role: market
+    role: coordinator
     steps_per_turn: 1
     group_tags: [market]
-    record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records/market"
-    persona: !include ../RuleLLM/persona.yml
     extras:
+      record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records/market"
       initial_price: 100.0
       fundamental_value: 100.0
       price_impact: 0.02
@@ -20,14 +20,14 @@ sunkcostholder:
   name: "SunkCostHolder"
   class: "examples.SunkCostFallacy.RuleLLM.players:RuleLLMSunkCostHolder"
   num_instances: 3
+  persona: !include ../RuleLLM/persona.yml
   config:
     identity: "sunkcostholder"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records/sunkcostholder"
-    persona: !include ../RuleLLM/persona.yml
     extras:
+      record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records/sunkcostholder"
       initial_cash: 1000000.0
       initial_position: 500
       initial_price: 100.0
@@ -38,7 +38,7 @@ sunkcostholder:
       llm:
         sys_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_SUNK_COST_HOLDER_SYS"
         user_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -47,14 +47,14 @@ commitmentescalator:
   name: "CommitmentEscalator"
   class: "examples.SunkCostFallacy.RuleLLM.players:RuleLLMCommitmentEscalator"
   num_instances: 3
+  persona: !include ../RuleLLM/persona.yml
   config:
     identity: "commitmentescalator"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records/commitmentescalator"
-    persona: !include ../RuleLLM/persona.yml
     extras:
+      record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records/commitmentescalator"
       initial_cash: 1200000.0
       initial_position: 400
       initial_price: 100.0
@@ -65,7 +65,7 @@ commitmentescalator:
       llm:
         sys_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_COMMITMENT_ESCALATOR_SYS"
         user_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -74,14 +74,14 @@ rationalcutter:
   name: "RationalCutter"
   class: "examples.SunkCostFallacy.RuleLLM.players:RuleLLMRationalCutter"
   num_instances: 2
+  persona: !include ../RuleLLM/persona.yml
   config:
     identity: "rationalcutter"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records/rationalcutter"
-    persona: !include ../RuleLLM/persona.yml
     extras:
+      record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records/rationalcutter"
       initial_cash: 1500000.0
       initial_position: 600
       initial_price: 100.0
@@ -92,7 +92,7 @@ rationalcutter:
       llm:
         sys_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_RATIONAL_CUTTER_SYS"
         user_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -101,14 +101,14 @@ opportunitycosttrader:
   name: "OpportunityCostTrader"
   class: "examples.SunkCostFallacy.RuleLLM.players:RuleLLMOpportunityCostTrader"
   num_instances: 2
+  persona: !include ../RuleLLM/persona.yml
   config:
     identity: "opportunitycosttrader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records/opportunitycosttrader"
-    persona: !include ../RuleLLM/persona.yml
     extras:
+      record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records/opportunitycosttrader"
       initial_cash: 1300000.0
       initial_position: 500
       initial_price: 100.0
@@ -119,7 +119,7 @@ opportunitycosttrader:
       llm:
         sys_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_OPPORTUNITY_COST_TRADER_SYS"
         user_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -128,14 +128,14 @@ noisetrader:
   name: "NoiseTrader"
   class: "examples.SunkCostFallacy.RuleLLM.players:RuleLLMNoiseTrader"
   num_instances: 2
+  persona: !include ../RuleLLM/persona.yml
   config:
     identity: "noisetrader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
-    record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records/noisetrader"
-    persona: !include ../RuleLLM/persona.yml
     extras:
+      record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records/noisetrader"
       initial_cash: 500000.0
       initial_position: 200
       initial_price: 100.0
@@ -146,7 +146,7 @@ noisetrader:
       llm:
         sys_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.SunkCostFallacy.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512

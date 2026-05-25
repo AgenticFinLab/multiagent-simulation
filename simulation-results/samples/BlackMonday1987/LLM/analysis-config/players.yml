@@ -1,0 +1,179 @@
+# =============================================================================
+# BlackMonday1987 LLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 LLM Investor types with Black Monday 1987 personas.
+# Each LLM agent uses a system prompt persona from prompts.py.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based, identical to Rule variant
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.BlackMonday1987.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      # Market dynamics parameters (identical to Rule variant)
+      fundamental_value: 250.0
+      initial_price: 250.0
+      price_impact: 0.05
+      mean_reversion: 0.01
+      noise_std: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Portfolio Insurers — LLM with mechanical hedger persona
+# Theory: Leland & Rubinstein (1976), Brady Commission (1988)
+# -----------------------------------------------------------------------------
+portfolio_insurer:
+  name: "Portfolio Insurer"
+  class: "examples.BlackMonday1987.LLM.players:LLMPortfolioInsurer"
+  # Expander → portfolio_insurer_1, portfolio_insurer_2
+  num_instances: 2
+  config:
+    identity: "portfolio_insurer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 1000.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_PORTFOLIO_INSURER_SYS"
+        user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Index Arbitrageurs — LLM with futures-spot spread persona
+# Theory: Brady Commission (1988)
+# -----------------------------------------------------------------------------
+index_arbitrageur:
+  name: "Index Arbitrageur"
+  class: "examples.BlackMonday1987.LLM.players:LLMIndexArbitrageur"
+  # Expander → index_arbitrageur_1, index_arbitrageur_2
+  num_instances: 2
+  config:
+    identity: "index_arbitrageur"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 500.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_INDEX_ARBITRAGEUR_SYS"
+        user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Program Traders — LLM with automated sell program persona
+# Theory: Brady Commission (1988)
+# -----------------------------------------------------------------------------
+program_trader:
+  name: "Program Trader"
+  class: "examples.BlackMonday1987.LLM.players:LLMProgramTrader"
+  # Expander → program_trader_1, program_trader_2
+  num_instances: 2
+  config:
+    identity: "program_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 800.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_PROGRAM_TRADER_SYS"
+        user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Value Investors — LLM with fundamental analysis persona (benchmark)
+# Theory: Graham (1949)
+# -----------------------------------------------------------------------------
+value_investor:
+  name: "Value Investor"
+  class: "examples.BlackMonday1987.LLM.players:LLMValueInvestor"
+  num_instances: 1
+  config:
+    identity: "value_investor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_VALUE_INVESTOR_SYS"
+        user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Noise Traders — LLM with casual random-trader persona
+# Theory: Black (1986)
+# -----------------------------------------------------------------------------
+noise_trader:
+  name: "Noise Trader"
+  class: "examples.BlackMonday1987.LLM.players:LLMNoiseTrader"
+  # Expander → noise_trader_1, noise_trader_2
+  num_instances: 2
+  config:
+    identity: "noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 100000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml

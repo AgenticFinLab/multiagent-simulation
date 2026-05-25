@@ -613,6 +613,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         return (
             f"Round {round_num}\n"
@@ -634,7 +635,8 @@ class RagLLMInvestor(GeneralPlayer):
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with analysis and decision sections."""
-        return parse_llm_response_with_thinking(response_text)
+        decision = parse_llm_response_with_thinking(response_text)
+        return decision
 
     # ------------------------------------------------------------------
     # Portfolio constraints
@@ -681,7 +683,7 @@ class RagLLMInvestor(GeneralPlayer):
                         f"[{self.identity}] LLM failed after {max_retries} attempts: {e}"
                     )
                 logger.debug(
-                    "[%s] LLM parse failed (attempt %d), retrying…",
+                    "[%s] LLM parse failed (attempt %d), retrying...",
                     self.identity,
                     attempt + 1,
                 )
@@ -714,9 +716,10 @@ class RagLLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
-            "reasoning": decision["reasoning"][:120],
-            "analysis": decision["analysis"],
-            "provides_liquidity": decision["provides_liquidity"],
+            "reasoning": str(decision["reasoning"])[:120],
+            "analysis": str(decision["analysis"]),
+            "provides_liquidity": bool(decision.get("provides_liquidity", False)),
+            "rag_context": self.state.custom_state.get("last_rag_context"),
         }
 
         return {
@@ -738,31 +741,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMContrarianInvestor(RagLLMInvestor):
-    """RAG-augmented: ContrarianInvestor rules + LLM + retrieved knowledge."""
+    """RAG ContrarianInvestor. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RAGLLM_CONTRARIAN_INVESTOR_SYS
 
 
 class RagLLMOverconfidentTrader(RagLLMInvestor):
-    """RAG-augmented: OverconfidentTrader rules + LLM + retrieved knowledge."""
+    """RAG OverconfidentTrader. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RAGLLM_OVERCONFIDENT_TRADER_SYS
 
 
 class RagLLMValueInvestor(RagLLMInvestor):
-    """RAG-augmented: ValueInvestor rules + LLM + retrieved knowledge."""
+    """RAG ValueInvestor. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RAGLLM_VALUE_INVESTOR_SYS
 
 
 class RagLLMMomentumChaser(RagLLMInvestor):
-    """RAG-augmented: MomentumChaser rules + LLM + retrieved knowledge."""
+    """RAG MomentumInvestor. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RAGLLM_MOMENTUM_CHASER_SYS
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented: NoiseTrader rules + LLM + retrieved knowledge."""
+    """RAG NoiseTrader. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RAGLLM_NOISE_TRADER_SYS
 

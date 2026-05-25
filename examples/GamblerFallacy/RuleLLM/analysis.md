@@ -1,45 +1,42 @@
-# GamblerFallacy — RuleLLM Variant Analysis
+# GamblerFallacy RuleLLM — Analysis Guide
 
-## §1 Overview
+## §1 Analysis Objectives
 
-Analysis for the **RuleLLM variant** of GamblerFallacy. Metric definitions from `../analysis-bases.md §2`. Expected near-Rule baseline due to embedded thresholds.
-
-| Aspect         | Detail                 |
-|----------------|------------------------|
-| Variant        | RuleLLM                |
-| Simulation     | GamblerFallacy         |
-| Analysis basis | `../analysis-bases.md` |
-
----
+RuleLLM analysis follows `../analysis-bases.md §1` and asks whether embedded rule text keeps LLM behavior close to the deterministic baseline while preserving useful reasoning traces.
 
 ## §2 Metric → Function Mapping
 
-| Metric | Function                                                                           | analysis-bases.md ref |
-|--------|------------------------------------------------------------------------------------|-----------------------|
-| GFI    | `gambler_fallacy_index(price_history, fundamental)`                                | §2.1                  |
-| SAR    | `streak_asymmetry_ratio(price_history, fundamental)`                               | §2.2                  |
-| HHM    | `hot_hand_momentum(trade_history, price_history, fundamental, threshold=0.02)`     | §2.3                  |
-| ACI    | `arbitrage_correction_index(price_history, fundamental, threshold=0.05, window=5)` | §2.4                  |
-| VAF    | `volatility_amplification_factor(price_history, fundamental, threshold=0.02)`      | §2.5                  |
-| WDI    | `wealth_distribution_index(agent_states, final_price)`                             | §2.6                  |
+| Metric | Function | analysis-bases.md Reference |
+|---|---|---|
+| Gambler's Fallacy Index | `gambler_fallacy_index(price_history, fundamental)` | §2.1 |
+| Streak Asymmetry Ratio | `streak_asymmetry_ratio(price_history, fundamental)` | §2.2 |
+| Hot Hand Momentum | `hot_hand_momentum(net_demand_history, dev_history, threshold=0.02)` | §2.3 |
+| Arbitrage Correction Index | `arbitrage_correction_index(dev_history, lookahead=5, threshold=0.05)` | §2.4 |
+| Volatility Amplification Factor | `volatility_amplification_factor(price_history, dev_history, threshold=0.02)` | §2.5 |
+| Wealth Distribution Index | `wealth_distribution_index(agent_wealth)` | §2.6 |
 
----
+## §3 Data Loading and Structural Checks
 
-## §3 RuleLLM-Specific Notes
+`RuleLLM/analysis.py → main()` uses the shared standard analysis contract for
+`summary.json`, structured validation output, and fixed PNG outputs. Quality
+review should additionally inspect rule-adherence in reasoning and parse-quality
+counters.
 
-- **Near-Rule behavior**: Embedded rules maintain same activation logic as Rule; LLM adds quantity variation only. GFI, SAR, HHM should closely track Rule baseline.
-- **SAR may deviate slightly**: LLM quantity modulation based on perceived streak length creates partial differentiation between §4.1 and §4.2 even with same direction logic.
-- **Research value**: RuleLLM vs. LLM isolates rule-constraint effect. RuleLLM vs. Rule isolates LLM-reasoning effect with rules held constant.
+## §4 Phase Analysis
 
----
+Use the same phases as Rule: streak emergence, biased amplification, arbitrage correction, and redistribution. RuleLLM-specific review checks whether reasoning changes trade size or direction despite embedded rules.
 
-## §4 Expected Ranges (RuleLLM Variant)
+## §5 Cross-Variant Comparison
 
-| Metric | RuleLLM Expected Range | vs. Rule Baseline          | Interpretation                               |
-|--------|------------------------|----------------------------|----------------------------------------------|
-| GFI    | 0.02–0.08              | ≈ Rule                     | Embedded threshold anchors to Rule level     |
-| SAR    | 0.8–1.2                | ≈ Rule (±0.2 LLM variance) | Slight quantity asymmetry from LLM reasoning |
-| HHM    | 140–480 shares         | ≈ Rule                     | Near-identical demand magnitude              |
-| ACI    | 0.35–0.65              | ≈ Rule                     | Same correction efficiency                   |
-| VAF    | 1.4–3.3                | ≈ Rule                     | Marginal dampening from LLM                  |
-| WDI    | 0.09–0.33              | ≈ Rule                     | Near-identical wealth distribution           |
+RuleLLM should sit between Rule and LLM. Close alignment with Rule indicates strong rule anchoring; drift toward LLM indicates persona or model reasoning dominates.
+
+## §6 Expected Results and Validation
+
+Valid RuleLLM outputs complete 200 rounds with clean parse quality.
+
+## §7 Visualization Catalogue
+
+The fixed PNG output set is primary: `00_investor_bids.png`,
+`01_gamblerfallacy_dynamics.png`, `02_gamblerfallacy_analysis.png`, and
+`03_summary.png`. Reports may add rule-adherence and action-distribution
+summaries.

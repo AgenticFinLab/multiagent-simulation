@@ -1,109 +1,99 @@
-# FlashCrash2010 Rule — Explain
+# 2010 Flash Crash Rule Variant Explanation
 
 ## §1 Overview
 
-| Item             | Description                                                                                                                             |
-|------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| **Variant**      | Rule                                                                                                                                    |
-| **Scenario**     | FlashCrash2010                                                                                                                          |
-| **Phenomenon**   | May 6, 2010 Flash Crash — order-book depth collapse, HFT withdrawal, stop-loss cascade                                                  |
-| **Agent count**  | 5 types: HFTMarketMaker, MomentumChaser, FundamentalTrader, StopLossTrader, NoiseTrader                                                 |
-| **Market model** | Order-book depth model: `P(t+1) = P(t) + λ × NetFlow / Depth(t) + γ × (F − P) + ε`; `Depth` driven by volatility and HFT participation  |
-| **Key feature**  | `HFTMarketMaker.agent_type = "hft"` drives `hft_participation`; withdrawal collapses `stress_factor` → `Depth` → amplified price impact |
-| **Determinism**  | High — all thresholds and formulae are fixed                                                                                            |
+| Field | Value |
+|---|---|
+| Variant | Rule |
+| Simulation | 2010 Flash Crash |
+| Decision Mechanism | deterministic order-book-depth and agent-type rules |
+| Theory Reference | `examples/FlashCrash2010/simulation-bases.md` |
+| Market Broadcast | `configs/FlashCrash2010/Rule/topology.yml` |
 
-## §2 Theory → Implementation Mapping
+This is the deterministic baseline for the May 6, 2010 flash-crash mechanism. Orders emit `bid_price`, `quantity`, `strategy`, `agent_type`, and `provides_liquidity`; the coordinator uses `agent_type == "hft"` to compute HFT participation and depth stress.
 
-| Theory construct       | simulation-bases.md reference | Rule implementation                                                                                                                     |
-|------------------------|-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| HFT stress withdrawal  | §4.1 HFTMarketMaker           | `velocity = mean(                                                                                                                       |
-| Momentum amplification | §4.2 MomentumChaser           | `velocity = (price[-1] - price[-lookback]) / price[-lookback]; quantity = int(min(abs(velocity) × position_multiplier, 1000))`          |
-| Value stabilisation    | §4.3 FundamentalTrader        | `deviation = (price - fundamental) / fundamental; if deviation < -trigger: buy(order_size); elif deviation > trigger: sell(order_size)` |
-| Stop-loss cascade      | §4.4 StopLossTrader           | `stop_level = entry_price × (1 - stop_percentage); if price <= stop_level: sell(-position); stopped=True`                               |
-| Noise background       | §4.5 NoiseTrader              | `if random() > trade_probability: qty=0 else: qty = ±randint(min_order, max_order)`                                                     |
-| Order-book depth       | §3 Market Design              | `stress_factor` depressed by `volatility > 0.01` and `hft_participation < 0.30`; `Depth = base_depth × max(stress_factor, 0.1)`         |
-| Spread widening        | §3 Market Design              | `spread = base_spread + volatility × 0.5; if hft_participation < 0.30: spread × 3; if volatility > 0.02: spread × 5`                    |
+## §2 Theory -> Implementation Mapping
 
-## §3 Agent Interaction Flow
+### §2.1 HFTMarketMaker
 
-```
-Round t:
-  Market.perceive() — collect all orders; compute hft_participation
-  Market.decide()   — compute volatility, stress_factor, Depth, spread, new_price
-  Market.act()      — broadcast: price, prev_price, return_pct, fundamental, deviation,
-                                  spread, depth, volume, volatility, round
-  Investors.perceive() — read market_data; update price_history
-  Investors.decide()   — compute quantity, agent_type, provides_liquidity
-  Investors.act()      — send order to Market
-```
+| Theory Component | Implementation |
+|---|---|
+| HFT liquidity withdrawal | `HFTMarketMaker.decide()` computes recent velocity and switches from `provides_liquidity=True` quantity to zero-quantity withdrawal when velocity exceeds `withdrawal_threshold`. |
+| Market effect | Its `agent_type="hft"` controls the market's HFT participation ratio and depth-collapse multiplier. |
+| Config source | `configs/FlashCrash2010/Rule/players.yml` extras for `withdrawal_threshold`, spreads, and `mm_qty`. |
 
-## §4 Crash Mechanism (Rule Logic)
+### §2.2 MomentumChaser
 
-```
-Phase 1 (Normal):
-  HFTMarketMaker.velocity < withdrawal_threshold → provides_liquidity=True, quantity=500
-  hft_participation ≈ 0.6–0.7 → stress_factor = 1.0 → Depth ≈ base_depth
+| Theory Component | Implementation |
+|---|---|
+| Positive-feedback trading | `MomentumChaser.decide()` computes lookback-window velocity and trades in the direction of the move when `abs(velocity) > entry_threshold`. |
+| Market effect | It keeps HFT participation active while adding directional flow during the cascade. |
+| Config source | `configs/FlashCrash2010/Rule/players.yml` extras for `entry_threshold`, `lookback_window`, and `position_multiplier`. |
 
-Phase 2 (Trigger):
-  MomentumChaser.velocity > entry_threshold → sell (quantity ∝ velocity)
-  price drops → HFTMarketMaker.velocity rises toward withdrawal_threshold
+### §2.3 FundamentalTrader
 
-Phase 3 (Cascade):
-  velocity > withdrawal_threshold → HFTMarketMaker withdraws (quantity=0)
-  hft_participation drops < 0.30 → stress_factor × 0.5 → Depth collapses
-  spread × 3 or × 5 → amplified impact
-  StopLossTrader: price <= stop_level → sell entire position
+| Theory Component | Implementation |
+|---|---|
+| Value-based stabilization | `FundamentalTrader.decide()` buys undervaluation or sells overvaluation once deviation exceeds `value_trigger`. |
+| Market effect | It supplies recovery demand after price falls below fundamental value. |
+| Config source | `configs/FlashCrash2010/Rule/players.yml` extras for `value_trigger` and `order_size`. |
 
-Phase 4 (Recovery):
-  FundamentalTrader: deviation < -value_trigger → buy(order_size)
-  HFTMarketMaker velocity drops → returns gradually
-```
+### §2.4 StopLossTrader
 
-## §5 Key Parameters
+| Theory Component | Implementation |
+|---|---|
+| Stop-loss cascade | `StopLossTrader.decide()` sells the whole position once price breaches `entry_price * (1 - stop_percentage)`. |
+| Market effect | One-shot liquidation adds concentrated sell pressure during the crash. |
+| Config source | `configs/FlashCrash2010/Rule/players.yml` extras for `entry_price`, `stop_percentage`, and `position_size`. |
 
-| Parameter              | Location                 | Effect on crash                           |
-|------------------------|--------------------------|-------------------------------------------|
-| `withdrawal_threshold` | HFTMarketMaker extras    | Lower → earlier withdrawal → deeper crash |
-| `base_depth`           | Market extras            | Lower → more severe price impact          |
-| `price_impact` (λ)     | Market extras            | Higher → more sensitive to order flow     |
-| `stop_percentage`      | StopLossTrader extras    | Lower → triggers earlier in cascade       |
-| `entry_threshold`      | MomentumChaser extras    | Lower → earlier momentum entry            |
-| `value_trigger`        | FundamentalTrader extras | Lower → earlier recovery entry            |
+### §2.5 NoiseTrader
 
-## §6 Files
+| Theory Component | Implementation |
+|---|---|
+| Background order flow | `NoiseTrader.decide()` trades randomly with configured probability and bounded order size. |
+| Market effect | It adds low-volume background flow without driving the crash mechanism. |
+| Config source | `configs/FlashCrash2010/Rule/players.yml` extras for `trade_probability`, `min_order`, and `max_order`. |
 
-| File                                         | Purpose                                |
-|----------------------------------------------|----------------------------------------|
-| `players.py`                                 | Market + 5 rule-based investor classes |
-| `run_flashcrash2010.py`                      | Entry point                            |
-| `configs/FlashCrash2010/Rule/simulation.yml` | Main simulation config                 |
-| `configs/FlashCrash2010/Rule/players.yml`    | Agent parameter definitions            |
-| `configs/FlashCrash2010/Rule/topology.yml`   | Star topology                          |
-| `simulation-bases.md`                        | Full theoretical foundations           |
-| `analysis-bases.md`                          | Metrics and analysis guide             |
+## §3 Market Mechanism
 
-## §7 Running
+`Market.decide()` computes net order flow, HFT participation, rolling volatility, stress factor, depth, spread, and the next price. Missing required order fields should fail fast because the depth model depends on `quantity` and `agent_type`.
+
+## §4 Variant Architecture
+
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/FlashCrash2010/Rule/players.py` |
+| Prompt module | Not applicable for Rule baseline |
+| Inference | No remote model call is used in the Rule baseline. |
+| Output parsing | Direct deterministic decision construction |
+| Error handling | Deterministic config/schema errors fail fast. |
+
+## §5 Config Reference
+
+| Config | Purpose |
+|---|---|
+| `configs/FlashCrash2010/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/FlashCrash2010/Rule/players.yml` | Player class paths and rule parameters. |
+| `configs/FlashCrash2010/Rule/topology.yml` | Message routing between coordinator and agents. |
+| `configs/FlashCrash2010/Rule/persona.yml` | Turn recording and persona metadata. |
+
+## §6 Running Instructions
 
 ```bash
 python examples/FlashCrash2010/Rule/run_flashcrash2010.py -c configs/FlashCrash2010/Rule/simulation.yml
 ```
 
-## §8 Expected Behaviour
+## §7 Expected Behavior
 
-| Phase    | Rounds | Key observable                                       |
-|----------|--------|------------------------------------------------------|
-| Normal   | 1–10   | `depth` ≈ `base_depth`; HFT active; spread tight     |
-| Trigger  | 11–15  | MomentumChaser selling; HFT first stress             |
-| Cascade  | 16–25  | `depth` < 20 % base; spread × 5–50; stop-losses fire |
-| Trough   | 26–30  | Min price; max spread; FT buying begins              |
-| Recovery | 31–50  | `depth` rebuilds; price → fundamental                |
+- HFT market makers withdraw when recent velocity crosses threshold.
+- Momentum chasers reinforce directional moves.
+- Stop-loss traders create cascade selling.
+- Fundamental traders provide recovery demand.
 
-## §9 References
+## §8 References
 
-1. Kirilenko, A., Kyle, A. S., Samadi, M., & Tuzun, T. (2017). *Journal of Finance*, 72(3), 967-998. doi:10.1111/jofi.12498
-2. CFTC-SEC Joint Report (2010). *Findings Regarding the Market Events of May 6, 2010.*
-3. Biais, B., Foucault, T., & Moinas, S. (2015). *Journal of Financial Economics*, 116(2), 292-313. doi:10.1016/j.jfineco.2015.03.004
-4. De Long, J. B., Shleifer, A., Summers, L. H., & Waldmann, R. J. (1990). *Journal of Finance*, 45(2), 379-395.
-5. Brunnermeier, M. K., & Pedersen, L. H. (2005). *Journal of Finance*, 60(4), 1825-1863.
-6. Shiller, R. J. (1981). *American Economic Review*, 71(3), 421-436.
-7. Black, F. (1986). *Journal of Finance*, 41(3), 529-543.
+See `examples/FlashCrash2010/simulation-bases.md §2` for the cited market microstructure and May 6, 2010 sources.
+
+## §9 Variant Comparison
+
+See `examples/FlashCrash2010/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

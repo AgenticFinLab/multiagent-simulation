@@ -1,79 +1,132 @@
-# FramingEffect — Rag Variant
+# FramingEffect Rag — Implementation Explanation
 
-## §1 Overview
+## §1 Variant Overview
 
-The Rag variant implements the Framing Effect simulation using RAG-augmented LLM reasoning. Each investor inherits from `RagLLMInvestor` and retrieves relevant historical documents (framing effect studies, market episodes) to inform its decisions alongside the persona-defining system prompt. Retrieved documents may reinforce or moderate the framing bias described in `simulation-bases.md §4`.
-
-| Aspect             | Detail                                                         |
-|--------------------|----------------------------------------------------------------|
-| Variant            | Rag                                                            |
-| Simulation         | FramingEffect                                                  |
-| Decision Mechanism | RAG-augmented LLM: retrieved documents + persona system prompt |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                                |
-| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`                   |
-| Price Model        | P(t+1) = P(t) + λ × D(t) + γ × (F − P(t)) + ε(t)               |
-
----
+| Item | Description |
+|---|---|
+| Variant | Rag |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | RuleLLM-style prompts augmented with per-agent retrieved knowledge |
+| Key Difference from Other Variants | Each investor builds or loads a local `KnowledgeStore` and injects retrieved context into the user prompt. |
+| Primary Research Contribution | Tests whether external behavioral-finance knowledge changes framing susceptibility. |
+| Files | `players.py`, `prompts.py`, `run_framingeffect_rag.py`, `analysis.py`, `explain.md`, `analysis.md` |
 
 ## §2 Theory → Implementation Mapping
 
-### §2.1 RagLLMGainFrameFollower (`simulation-bases.md §4.1`)
+### RagLLMGainFrameFollower: Theory → Implementation Mapping
 
-| Theory Component                                        | Implementation                                                                                                        |
-|---------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
-| Prospect theory gain framing (Tversky & Kahneman, 1981) | System prompt: gain-frame-sensitive persona; RAG retrieves Tversky & Kahneman (1981) passages on gain framing         |
-| Historical reinforcement                                | Retrieved documents provide historical examples of gain-frame-driven market behavior, reinforcing buying impulse      |
-| RAG moderation                                          | If retrieved documents include crash evidence, agent may moderate buying — introducing framing correction via context |
+> Theory defined in `simulation-bases.md §4.1`.
 
-### §2.2 RagLLMLossFrameReactor (`simulation-bases.md §4.2`)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.1.2 | Class: `RagLLMGainFrameFollower`; docstring cites `simulation-bases.md §4.1`. |
+| Behavioral mechanism → sim-bases §4.1.4.2 | Imports RuleLLM persona/rule prompt and augments it with retrieved framing knowledge. |
+| Mathematical model → sim-bases §4.1.4.3 | Decision JSON is parsed through the same trading schema as LLM/RuleLLM. |
+| State variables → sim-bases §4.1.4.3 | `RagLLMInvestor` stores market, portfolio, LLM client, and RAG store state. |
+| Parameters → sim-bases §6 | LLM, embedding, and portfolio values are supplied through `players.yml`. |
+| Historical case → sim-bases §8 | Query text searches for framing-effect trading knowledge around current deviation. |
 
-| Theory Component                                        | Implementation                                                                                                       |
-|---------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
-| Prospect theory loss framing (Tversky & Kahneman, 1981) | System prompt: loss-frame-reactive persona; RAG retrieves loss aversion studies and panic selling episodes           |
-| Historical grounding                                    | Retrieved panic-selling episodes (e.g., 1987 Black Monday, 2008 crash) reinforce loss-frame reaction                 |
-| RAG differentiation from §4.1                           | Different retrieval corpus (loss vs. gain focused) creates empirical differentiation absent in Rule/RuleLLM variants |
+### RagLLMLossFrameReactor: Theory → Implementation Mapping
 
-### §2.3 RagLLMFrameInvariantTrader (`simulation-bases.md §4.3`)
+> Theory defined in `simulation-bases.md §4.2`.
 
-| Theory Component                                 | Implementation                                                                                                           |
-|--------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| Frame-invariant rationality (Levin et al., 1998) | System prompt: rational persona; RAG retrieves studies showing frame equivalence and rational valuation examples         |
-| Evidence-based contrarian                        | Retrieved evidence strengthens contrarian resolve — historical data shows mean reversion after framing-driven deviations |
-| RAG advantage                                    | Access to fundamental analysis documents enables more sophisticated valuation reasoning                                  |
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.2.2 | Class: `RagLLMLossFrameReactor`; docstring cites `simulation-bases.md §4.2`. |
+| Behavioral mechanism → sim-bases §4.2.4.2 | Retrieved loss-aversion and framing context is injected before the market state. |
+| Mathematical model → sim-bases §4.2.4.3 | Parsed actions are bounded by cash, holdings, and max order size. |
+| State variables → sim-bases §4.2.4.3 | Uses current price, fundamental, deviation, cash, position, and RAG state. |
+| Parameters → sim-bases §6 | Embedding and model parameters are configured per agent. |
+| Historical case → sim-bases §8 | Retrieval can surface historical loss-frame episodes that affect reasoning. |
 
-### §2.4 RagLLMArbitrageFramer (`simulation-bases.md §4.4`)
+### RagLLMFrameInvariantTrader: Theory → Implementation Mapping
 
-| Theory Component                    | Implementation                                                                                                 |
-|-------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| Framing arbitrage (Kuhberger, 1998) | System prompt: arbitrageur persona; RAG retrieves framing arbitrage case studies and Kuhberger (1998) findings |
-| Historical arbitrage grounding      | Retrieved documents provide examples of framing-induced mispricings and correction timelines                   |
-| RAG advantage                       | Historical correction timelines from retrieved documents help calibrate timing of arbitrage entry              |
+> Theory defined in `simulation-bases.md §4.3`.
 
-### §2.5 RagLLMNoiseTrader (`simulation-bases.md §4.5`)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.3.2 | Class: `RagLLMFrameInvariantTrader`; docstring cites `simulation-bases.md §4.3`. |
+| Behavioral mechanism → sim-bases §4.3.4.2 | Retrieval should support frame-invariant valuation and correction. |
+| Mathematical model → sim-bases §4.3.4.3 | Uses the same market state and parser contract as other RAG investors. |
+| State variables → sim-bases §4.3.4.3 | Market and RAG state are kept in `custom_state`. |
+| Parameters → sim-bases §6 | Config uses a lower temperature for more stable reasoning. |
+| Historical case → sim-bases §8 | Retrieved evidence may strengthen rational correction behavior. |
 
-| Theory Component                 | Implementation                                                                                                            |
-|----------------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| Noise trader model (Black, 1986) | System prompt: uninformed retail persona; RAG retrieves random news snippets (generic market news)                        |
-| RAG effect                       | Retrieved documents may introduce partial information that makes noise trader slightly less random than Rule/LLM variants |
+### RagLLMArbitrageFramer: Theory → Implementation Mapping
 
----
+> Theory defined in `simulation-bases.md §4.4`.
 
-## §3 Rag-Specific Notes
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.4.2 | Class: `RagLLMArbitrageFramer`; docstring cites `simulation-bases.md §4.4`. |
+| Behavioral mechanism → sim-bases §4.4.4.2 | Retrieved historical correction evidence informs framing-arbitrage decisions. |
+| Mathematical model → sim-bases §4.4.4.3 | Prompt and parser use the canonical trading action schema. |
+| State variables → sim-bases §4.4.4.3 | Reads price deviation and portfolio state before querying knowledge. |
+| Parameters → sim-bases §6 | Config controls model, embedding, chunking, and top-k retrieval. |
+| Historical case → sim-bases §8 | Knowledge query references current deviation and price/fundamental gap. |
 
-- **Retrieval corpus**: Rag variant retrieves from a domain knowledge base containing behavioral finance research, historical market episodes, and framing effect studies.
-- **Retrieval reinforcement**: For biased agents (§4.1, §4.2), retrieved framing studies typically reinforce the bias, potentially increasing FDI and FPI vs. pure LLM variant.
-- **Retrieval moderation**: For rational agents (§4.3, §4.4), retrieved evidence of mean reversion may strengthen contrarian conviction, increasing ACC for rational agents.
-- **Corpus dependency**: Metric values depend on which documents are retrieved — if retrieval corpus is poor, Rag may resemble LLM variant.
+### RagLLMNoiseTrader: Theory → Implementation Mapping
 
----
+> Theory defined in `simulation-bases.md §4.5`.
 
-## §4 Expected Ranges (Rag Variant vs. Rule Baseline)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.5.2 | Class: `RagLLMNoiseTrader`; docstring cites `simulation-bases.md §4.5`. |
+| Behavioral mechanism → sim-bases §4.5.4.2 | Prompt remains an uninformed liquidity-provider persona but receives retrieved context. |
+| Mathematical model → sim-bases §4.5.4.3 | Valid decision JSON is capped by portfolio constraints. |
+| State variables → sim-bases §4.5.4.3 | Same market and RAG state as other RAG investors. |
+| Parameters → sim-bases §6 | Config uses higher LLM temperature for noisier behavior. |
+| Historical case → sim-bases §8 | Retrieved context may partially inform the nominally noisy agent. |
 
-| Metric          | Rag Expected Range | Rule Baseline | Direction       | Basis                                                             |
-|-----------------|--------------------|---------------|-----------------|-------------------------------------------------------------------|
-| FDI             | 0.02–0.09          | 0.02–0.08     | Slightly higher | Historical framing examples reinforce bias in retrieved documents |
-| FPI             | 3–13 rounds        | 3–12          | Slightly longer | Retrieved cascade evidence reinforces persistence                 |
-| ACC (§4.1+§4.2) | 50–72%             | 50–70%        | Slightly higher | Retrieval reinforces biased agent decisions                       |
-| VAF             | 1.5–3.8            | 1.5–3.5       | Slightly higher | Biased retrieval amplifies cascade volatility slightly            |
-| OWP             | 0.05–0.22          | 0.05–0.20     | Slightly higher | Biased agents lose more due to retrieval-reinforced errors        |
-| WDI             | 0.10–0.32          | 0.10–0.30     | Slightly higher | More systematic wealth redistribution                             |
+## §3 Market Mechanism Implementation
+
+Rag imports `Market` from the Rule implementation. Market clearing is therefore unchanged from Rule; only investor prompt construction changes through retrieval.
+
+## §4 Rag Variant-Specific Features
+
+- Each agent resolves private knowledge through `ResourceManager`.
+- The RAG store loads local index files, copies shared index files, or builds from processed documents.
+- `RAG_USER_TEMPLATE` injects `{rag_context}` before market state.
+- If retrieval returns no text, the prompt receives `"(No relevant knowledge retrieved this round.)"`.
+- The RAG config read in `players.py` accepts optional `extras["knowledge"]` and otherwise uses the shared `examples/document-sources` resource layout.
+
+## §5 Architecture Diagram
+
+```text
+Market broadcast -> RagLLMInvestor
+        |
+        v
+KnowledgeQuery(price, fundamental, deviation, round)
+        |
+        v
+KnowledgeStore.query(top_k) -> rag_context
+        |
+        v
+RAG prompt -> LLM -> parser -> capped order -> Market
+```
+
+## §6 Configuration Reference
+
+| Config File | Runtime Role |
+|---|---|
+| `configs/FramingEffect/Rag/simulation.yml` | Full-run and Ray settings |
+| `configs/FramingEffect/Rag/players.yml` | LLM model, embedding config, knowledge resources, class paths |
+| `configs/FramingEffect/Rag/topology.yml` | Market/investor star topology |
+| `configs/FramingEffect/Rag/persona.yml` | Shared storage and proxy settings |
+
+## §7 Expected Runtime Outputs
+
+Accepted RAG runs should complete 200 rounds, produce valid order records with
+`rag_context`, and expose `rag_stats.json` for quality review. Missing processed
+documents or bad embedding credentials should fail before a sample is accepted.
+
+## §8 Validation Checklist
+
+- RAG config resolves `embed_type=litellm` and `embed_model=openai/hunyuan-embedding`.
+- `RAG_USER_TEMPLATE` contains `{rag_context}` and the canonical decision schema.
+- Dry-run discovers `FramingEffect__Rag`.
+- Runtime prompt and retrieval semantics should remain stable unless a documented mechanism or contract defect is found.
+
+## §9 Cross-Variant Comparison Notes
+
+RAG is compared primarily against RuleLLM to isolate the effect of retrieved domain knowledge. Differences from RuleLLM should be interpreted together with retrieval success rate and fallback rate.

@@ -438,30 +438,36 @@ Respond with ONLY valid JSON:
 
 
 class LLMGreaterFoolSpeculator(LLMInvestor):
-    """LLM Aggressive Momentum Trader. Theory: simulation-bases.md §4 — MomentumSpeculator."""
+    """LLM aggressive momentum trader. Theory: simulation-bases.md §4.1 — MomentumSpeculator."""
 
     pass
 
 
 class LLMRationalArbitrageur(LLMInvestor):
-    """LLM Fundamental Analyst. Theory: simulation-bases.md §4 — RationalArbitrageur."""
+    """LLM fundamental analyst. Theory: simulation-bases.md §4.2 — RationalArbitrageur."""
 
     pass
 
 
 class LLMSentimentTrader(LLMInvestor):
-    """LLM Sentiment Trader. Theory: simulation-bases.md §4 — NoiseTrader."""
+    """LLM sentiment trader. Theory: simulation-bases.md §4.3 — NoiseTrader."""
 
     pass
 
 
 class LLMValueInvestor(LLMInvestor):
-    """LLM Value Investor. Theory: simulation-bases.md §4 — FundamentalInvestor."""
+    """LLM value investor. Theory: simulation-bases.md §4.4 — FundamentalInvestor."""
 
     pass
 
 
 class LLMLeveragedSpeculator(LLMInvestor):
-    """LLM Leveraged Trader. Theory: simulation-bases.md §4 — LeveragedBuyer."""
+    """LLM leveraged speculator. Theory: simulation-bases.md §4.5 — LeveragedBuyer."""
+
+    pass
+
+
+class LLMConservativeHolder(LLMInvestor):
+    """LLM conservative holder. Theory: simulation-bases.md §4.6 — ConservativeHolder."""
 
     pass

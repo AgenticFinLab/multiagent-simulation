@@ -1,6 +1,6 @@
 # ArchegosCollapse Rule — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                                   | Description                                                                                                                                   |
 |----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,12 +12,12 @@
 
 ---
 
-## 1. How Theoretical Design Is Implemented
+## §2 Theory → Implementation Mapping
 
 ### ConcentratedFund: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — ConcentratedFund)*
+*(Theory defined in simulation-bases.md §4.1 — ConcentratedFund)*
 
-| Theoretical Design Element                                            | Implementation                                                                                    |
+| Theory Component                                                      | Implementation                                                                                    |
 |-----------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
 | TRS Leverage → simulation-bases.md §2 (TRS Leverage Theory)           | Class docstring cites Becketti (2021); `players.py` `ConcentratedFund` class                      |
 | Margin call trigger: `deviation < -leverage_trigger` → sim-bases §4   | `if deviation < margin_threshold:` in `decide()`; `margin_threshold = extras["margin_threshold"]` |
@@ -27,9 +27,9 @@
 | Cash update on execution → sim-bases §4                               | `self.state.custom_state["cash"] += quantity * price` in `act()`                                  |
 
 ### PrimeBroker1: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — PrimeBroker1)*
+*(Theory defined in simulation-bases.md §4.2 — PrimeBroker1)*
 
-| Theoretical Design Element                                               | Implementation                                                                                          |
+| Theory Component                                                         | Implementation                                                                                          |
 |--------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
 | First-mover liquidation race → simulation-bases.md §2 (Liquidation Race) | Class docstring cites Gorton & Metrick (2012)                                                           |
 | Lower threshold (acts first): `deviation < -0.10` → sim-bases §4         | `if deviation < liquidation_threshold:` where `liquidation_threshold = extras["liquidation_threshold"]` |
@@ -37,18 +37,18 @@
 | Receives full market price (first-mover advantage) → sim-bases §4        | No `price_penalty` applied; `cash += quantity * price` directly in `act()`                              |
 
 ### PrimeBroker2: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — PrimeBroker2)*
+*(Theory defined in simulation-bases.md §4.3 — PrimeBroker2)*
 
-| Theoretical Design Element                                                   | Implementation                                                                       |
+| Theory Component                                                             | Implementation                                                                       |
 |------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
 | Second-mover disadvantage → simulation-bases.md §2 (Liquidation Race)        | Class docstring; higher `liquidation_threshold` = 0.15 vs PrimeBroker1's 0.10        |
 | Price penalty: effective_price = market_price × price_penalty → sim-bases §4 | `effective_price = price * price_penalty`; `price_penalty = extras["price_penalty"]` |
 | Cash update at effective price → sim-bases §4                                | `cash += quantity * effective_price` in `act()` (vs PrimeBroker1 using full price)   |
 
 ### BlockTradeBuyer: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — BlockTradeBuyer)*
+*(Theory defined in simulation-bases.md §4.4 — BlockTradeBuyer)*
 
-| Theoretical Design Element                                                | Implementation                                                                                 |
+| Theory Component                                                          | Implementation                                                                                 |
 |---------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
 | Opportunistic buying at discount → simulation-bases.md §2 (Block Trading) | Class docstring cites Grossman & Miller (1988)                                                 |
 | Buy condition: `deviation < -discount_threshold` → sim-bases §4           | `if deviation < discount_threshold:` where `discount_threshold = extras["discount_threshold"]` |
@@ -56,18 +56,18 @@
 | Cash constraint → sim-bases §6                                            | Quantity naturally bounded by cash; `cash -= quantity * price` in `act()`                      |
 
 ### InformationTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — InformationTrader)*
+*(Theory defined in simulation-bases.md §4.5 — InformationTrader)*
 
-| Theoretical Design Element                                                       | Implementation                                                                                    |
+| Theory Component                                                                 | Implementation                                                                                    |
 |----------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
 | Information-based front-running → simulation-bases.md §2 (Kyle, 1985)            | Class docstring; probabilistic detection simulates partial information advantage                  |
 | Detection: `deviation < -detection_threshold` AND `random() < detection_ability` | `if deviation < detection_threshold and random.random() < detection_ability:` in `decide()`       |
 | Front-run size = min(front_run_size, position) → sim-bases §4                    | `sell_qty = min(front_run_size, max(position, 0.0))`; `front_run_size = extras["front_run_size"]` |
-| Cover short when recovery: `deviation > cover_threshold` → sim-bases §4          | `elif deviation > cover_threshold and short_position > 0:` branch in `decide()`                   |
+| Short-cover ledger → sim-bases §4                                                | `short_position` increments after front-run sells and decrements when recovery-cover buys execute |
 
 ---
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 *Formula source: simulation-bases.md §3.1*
 
@@ -100,7 +100,7 @@ Deviations from simulation-bases.md design: None — all formula variables map d
 
 ---
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 *(Reference: simulation-bases.md §9 — Rule variant entry)*
 
@@ -116,7 +116,7 @@ Deviations from simulation-bases.md design: None — all formula variables map d
 
 ---
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
@@ -144,7 +144,7 @@ Deviations from simulation-bases.md design: None — all formula variables map d
 
 ---
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 Key Configuration Parameters (`configs/ArchegosCollapse/Rule/players.yml`):
 
@@ -163,7 +163,7 @@ Key Configuration Parameters (`configs/ArchegosCollapse/Rule/players.yml`):
 
 ---
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 python examples/ArchegosCollapse/Rule/run_archegsoscollapse.py \
@@ -172,13 +172,13 @@ python examples/ArchegosCollapse/Rule/run_archegsoscollapse.py \
 
 Required environment variables: None (Rule variant requires no API keys)
 
-Expected runtime: ~10–30 seconds for 100 rounds (pure Python, no LLM calls)
+Expected runtime: ~10–30 seconds for 200 rounds (pure Python, no LLM calls)
 
 Output location: `EXPERIMENT/ArchegosCollapse/Rule/`
 
 ---
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase         | Rounds | Expected Agent Behavior                                                               | Expected Price Dynamics                            |
 |---------------|--------|---------------------------------------------------------------------------------------|----------------------------------------------------|
@@ -189,7 +189,7 @@ Output location: `EXPERIMENT/ArchegosCollapse/Rule/`
 
 ---
 
-## 8. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

@@ -75,7 +75,7 @@ where:
 
 | Symbol           | Definition                                | Calibrated Value | Source                                      |
 |------------------|-------------------------------------------|------------------|---------------------------------------------|
-| λ (lambda_price) | Price aggressiveness of bid               | 1.0              | Jegadeesh & Titman (1993) momentum strength |
+| λ (lambda_price) | Price aggressiveness of bid               | 0.5              | Current Rule configuration                  |
 | β (beta)         | Fraction of cash deployed per unit return | 0.3              | Grinblatt et al. (1995) fund allocation     |
 | ±50 cap          | Max order size                            | Fixed            | Prevents single-agent dominance             |
 
@@ -122,8 +122,8 @@ where:
 | Symbol          | Definition                   | Calibrated Value | Source                        |
 |-----------------|------------------------------|------------------|-------------------------------|
 | F (fundamental) | True fundamental value       | 100.0            | Stable fundamental assumption |
-| β (beta)        | Value-sensitivity allocation | 0.3              | De Bondt & Thaler (1985)      |
-| noise_std       | Bid price noise              | 2.0              | Bid uncertainty               |
+| β (beta)        | Value-sensitivity allocation | 0.5              | Current Rule configuration    |
+| noise_std       | Bid price noise              | 0.5              | Current Rule configuration    |
 
 #### §T2.4 Empirical Evidence
 
@@ -162,7 +162,7 @@ quantity  ∈ [−20, +20]
 
 | Symbol   | Definition                              | Calibrated Value | Source                        |
 |----------|-----------------------------------------|------------------|-------------------------------|
-| k        | Risk tolerance coefficient              | 200              | Markowitz (1952) calibration  |
+| k        | Risk tolerance coefficient              | 0.5              | Current Rule configuration    |
 | lookback | Variance calculation window             | 5 rounds         | Short-term volatility horizon |
 | 0.30     | Gradual position change rate            | Fixed            | Avoids abrupt market impact   |
 | ±20 cap  | Max order size (smallest of all agents) | Fixed            | Risk-averse size constraint   |
@@ -210,8 +210,8 @@ Theory 3 is encoded by RiskAverseInvestor (§4.3). Its gradual exit when volatil
 P(t+1) = P(t) + α × NetDemand(t) + γ × (F − P(t)) + ε(t)
 
 where:
-  α = supply_elasticity   [order-book depth; default 0.001]
-  γ = mean_reversion      [reversion rate; default 0.05]
+  α = supply_elasticity   [order-book depth; default 0.1]
+  γ = mean_reversion      [reversion rate; default 0.02]
   ε ~ N(0, noise_std)     [market noise; default 0.5]
   NetDemand = Σ signed_quantities across all agents
 ```
@@ -245,10 +245,10 @@ where:
 5. Update cash/position in `decide()`: `cash -= bid_price × qty`; `position += qty`
 6. Send order to Market via `act()`
 
-**Worked Example** (lambda_price=1.0, beta=0.3, cash=100,000, P=105, r=+0.05):
-- bid_price = 105 × (1 + 1.0 × 0.05) = 110.25
-- qty = 0.3 × 0.05 × 100,000 / 110.25 = 13.6 → 13 shares
-- Interpretation: Buys 13 shares at 110.25; reinforces upward move
+**Worked Example** (lambda_price=0.5, beta=0.3, cash=10,000, P=105, r=+0.05):
+- bid_price = 105 × (1 + 0.5 × 0.05) = 107.63
+- qty = 0.3 × 0.05 × 10,000 / 107.63 = 1.39 → 1 share
+- Interpretation: Buys 1 share at 107.63; reinforces upward move
 
 **References**: simulation-bases.md §2 Theory 1; `doi:10.2307/2534436`
 
@@ -279,10 +279,10 @@ where:
 4. `qty = beta × (fundamental − P) / P × cash / bid_price`; clip to [−50, +50]
 5. Update cash/position; send order
 
-**Worked Example** (beta=0.3, noise_std=2.0, cash=100,000, F=100, P=115):
-- bid_price = 100 + 1.5 = 101.5
-- qty = 0.3 × (100 − 115) / 115 × 100,000 / 101.5 = −3.87 → −3 shares (sell)
-- Interpretation: Sells 3 shares; resists momentum overvaluation
+**Worked Example** (beta=0.5, noise_std=0.5, cash=10,000, F=100, P=115):
+- bid_price = 100 + 0.4 = 100.4
+- qty = 0.5 × (100 − 115) / 115 × 10,000 / 100.4 = −6.49 → −6 shares (sell)
+- Interpretation: Sells 6 shares; resists momentum overvaluation
 
 **References**: simulation-bases.md §2 Theory 2; `doi:10.1111/j.1540-6261.1985.tb05004.x`
 
@@ -312,10 +312,10 @@ where:
 4. `qty = (target_qty − position) × 0.30`; clip to [−20, +20]
 5. Update cash/position; send order
 
-**Worked Example** (k=200, lookback=5, position=10, P=110, variance=4.0, cash=80,000):
-- target_qty = 200 / 4.0 × 80,000 / 110 = 363.6 → but clipped by ±20
-- (target_qty=20 − position=10) × 0.30 = 3 → buy 3 shares
-- Interpretation: Variance is moderate; still buying toward max; will sell aggressively when variance spikes
+**Worked Example** (k=0.5, lookback=5, position=10, P=110, variance=4.0, cash=10,000):
+- target_qty = 0.5 / 4.0 × 10,000 / 110 = 11.36
+- (target_qty=11.36 − position=10) × 0.30 = 0.41 → hold / small buy after integer rounding
+- Interpretation: Variance is moderate; the investor remains near target exposure and sells as variance rises
 
 **References**: simulation-bases.md §2 Theory 3; `doi:10.1111/j.1540-6261.1952.tb01525.x`
 
@@ -343,9 +343,9 @@ where:
 3. `qty = N(0, qty_noise_std) − position × position_mean_reversion`
 4. Update cash/position; send order
 
-**Worked Example** (price_noise_std=3.0, qty_noise_std=10.0, position_mean_reversion=0.2, P=100, position=5):
-- bid_price = 100 + 2.1 = 102.1
-- qty = 7.3 − 5 × 0.2 = 6.3 → 6 shares
+**Worked Example** (price_noise_std=2.0, qty_noise_std=5.0, position_mean_reversion=0.1, P=100, position=5):
+- bid_price = 100 + 1.4 = 101.4
+- qty = 3.7 − 5 × 0.1 = 3.2 → 3 shares
 - Interpretation: Random positive buy; if r > 0, MomentumInvestor will amplify this next round
 
 **References**: simulation-bases.md §2; De Long et al. (1990) `doi:10.1111/j.1540-6261.1990.tb03695.x`
@@ -377,11 +377,11 @@ where:
 4. `qty = beta × r × cash / bid_price + accel_bonus × acceleration`; clip to [−80, +80]
 5. Update cash/position; send order
 
-**Worked Example** (kappa=2.0, beta=0.4, accel_bonus=1.0, P=108, r=+0.05, acceleration=+0.8, cash=90,000):
-- bid_price = 108 × (1 + 2.0 × 0.05) = 118.8
-- qty_base = 0.4 × 0.05 × 90,000 / 118.8 = 15.1
-- qty_accel = 1.0 × 0.8 = 0.8
-- qty = 15.9 → 15 shares
+**Worked Example** (kappa=1.0, beta=0.5, accel_bonus=0.3, P=108, r=+0.05, acceleration=+0.8, cash=10,000):
+- bid_price = 108 × (1 + 1.0 × 0.05) = 113.4
+- qty_base = 0.5 × 0.05 × 10,000 / 113.4 = 2.20
+- qty_accel = 0.3 × 0.8 = 0.24
+- qty = 2.44 → 2 shares
 - Interpretation: Buys more aggressively than MomentumInvestor; amplifies second-derivative of price
 
 **References**: simulation-bases.md §2; leveraged momentum literature; `doi:10.1111/0022-1082.00188`
@@ -406,24 +406,24 @@ where:
 |-------------------------|--------|---------|------------------|------------------------------|
 | initial_price           | Market | 100.0   | 50–200           | Standard                     |
 | fundamental_value       | Market | 100.0   | 80–120           | Stable fundamental           |
-| supply_elasticity       | Market | 0.001   | 0.0005–0.005     | Order-book depth analog      |
-| mean_reversion          | Market | 0.05    | 0.01–0.10        | Mean-reversion rate          |
+| supply_elasticity       | Market | 0.1     | 0.01–0.20        | Order-book depth analog      |
+| mean_reversion          | Market | 0.02    | 0.01–0.10        | Mean-reversion rate          |
 | noise_std               | Market | 0.5     | 0.1–2.0          | Market noise                 |
-| initial_cash            | All    | 100,000 | Fixed            |                              |
+| initial_cash            | All    | 10,000  | Fixed            |                              |
 | initial_position        | All    | 0       | Fixed            |                              |
-| lambda_price            | §4.1   | 1.0     | 0.5–2.0          | Jegadeesh & Titman (1993)    |
+| lambda_price            | §4.1   | 0.5     | 0.5–2.0          | Jegadeesh & Titman (1993)    |
 | beta                    | §4.1   | 0.3     | 0.1–0.5          | Grinblatt et al. (1995)      |
 | fundamental             | §4.2   | 100.0   | Same as Market   | In agent extras              |
-| noise_std               | §4.2   | 2.0     | 1.0–5.0          | Bid price uncertainty        |
-| beta                    | §4.2   | 0.3     | 0.1–0.5          | De Bondt & Thaler (1985)     |
-| k                       | §4.3   | 200     | 100–500          | Markowitz calibration        |
+| noise_std               | §4.2   | 0.5     | 0.1–5.0          | Bid price uncertainty        |
+| beta                    | §4.2   | 0.5     | 0.1–0.5          | De Bondt & Thaler (1985)     |
+| k                       | §4.3   | 0.5     | 0.1–500          | Markowitz calibration        |
 | lookback                | §4.3   | 5       | 3–10             | Short-term volatility window |
-| price_noise_std         | §4.4   | 3.0     | 1.0–5.0          | De Long et al. (1990)        |
-| qty_noise_std           | §4.4   | 10.0    | 5.0–20.0         | Random quantity noise        |
-| position_mean_reversion | §4.4   | 0.2     | 0.1–0.4          | Position reversion rate      |
-| kappa                   | §4.5   | 2.0     | 1.5–4.0          | Aggressive price factor      |
-| beta                    | §4.5   | 0.4     | 0.2–0.6          | Aggressive allocation        |
-| accel_bonus             | §4.5   | 1.0     | 0.5–2.0          | Acceleration bonus           |
+| price_noise_std         | §4.4   | 2.0     | 1.0–5.0          | De Long et al. (1990)        |
+| qty_noise_std           | §4.4   | 5.0     | 5.0–20.0         | Random quantity noise        |
+| position_mean_reversion | §4.4   | 0.1     | 0.1–0.4          | Position reversion rate      |
+| kappa                   | §4.5   | 1.0     | 1.0–4.0          | Aggressive price factor      |
+| beta                    | §4.5   | 0.5     | 0.2–0.6          | Aggressive allocation        |
+| accel_bonus             | §4.5   | 0.3     | 0.3–2.0          | Acceleration bonus           |
 
 ---
 
@@ -491,7 +491,7 @@ where:
 **Chronological Dynamics**:
 - Oct 2020: PayPal announcement → NoiseTrader analog generates positive price shock
 - Nov 2020 – Apr 2021: MomentumInvestor analog activates on sustained positive returns
-- May–Jun 2021: First crash (−53 %) triggers RiskAverseInvestor exit; contrarianrebuy
+- May-Jun 2021: First crash (-53 %) triggers RiskAverseInvestor exit; contrarian rebuy
 - Jul–Nov 2021: Second rally; AggressiveInvestor acceleration bonus strongest during 3-consecutive-positive-return periods
 - Nov 2021 – Jun 2022: ContrarianInvestor dominates as P/F gap becomes extreme
 
@@ -528,7 +528,7 @@ where:
 - Quarter 1: Initial positive return in high-growth stock from earnings surprise
 - Quarter 2: 3–4 momentum funds independently buy (no coordination); return rises
 - Quarter 3: Signal strengthens; more funds activate momentum strategy → correlated buying wave
-- Quarter 4: Herding episode peaks; contrarianfunds begin countervailing positions
+- Quarter 4: Herding episode peaks; contrarian funds begin countervailing positions
 - Year 2+: Return reversal as overvaluation corrects — De Bondt & Thaler pattern
 
 **Quantitative Data Points**:
@@ -557,4 +557,4 @@ where:
 | Rule    | Hard-coded `calculate_bid()` formulas                        | Baseline emergent herding                                      | Strongest momentum amplitude; pure positive feedback; lowest variance                                     |
 | LLM     | LLM-based bid decision with momentum/contrarian persona      | LLM may dampen momentum based on narrative reasoning           | Weaker emergent herding; ContrarianInvestor more active; higher DPHL variance                             |
 | RuleLLM | Rule `calculate_bid()` + LLM narrative                       | Rule formulas dominate; LLM adds context                       | Near-Rule herding dynamics; moderate variance                                                             |
-| Rag     | LLM + retrieval of positive feedback and momentum literature | Document-grounded decisions reference De Long et al. / Shiller | Most moderate herding amplitude; RiskAverseInvestor may exit sooner based on retrieved volatility signals |
+| Rag     | LLM + retrieval of positive feedback and momentum literature; liquidity-aware market extension records `provides_liquidity` | Document-grounded decisions reference De Long et al. / Shiller and expose retrieval context for audit | Most moderate herding amplitude; RiskAverseInvestor may exit sooner based on retrieved volatility signals; liquidity extension requires separate quality review |

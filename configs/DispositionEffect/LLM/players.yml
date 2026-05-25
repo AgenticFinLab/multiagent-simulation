@@ -42,12 +42,13 @@ llm_disposition_biased:
       record_path: "EXPERIMENT/DispositionEffect/LLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
+      initial_purchase_price: 100.0
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffect.LLM.prompts:LLM_DISPOSITION_BIASED_SYS"
         user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_new_tokens: 500
@@ -68,12 +69,13 @@ llm_rational:
       record_path: "EXPERIMENT/DispositionEffect/LLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
+      initial_purchase_price: 100.0
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffect.LLM.prompts:LLM_RATIONAL_SYS"
         user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -94,12 +96,13 @@ llm_tax_aware:
       record_path: "EXPERIMENT/DispositionEffect/LLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
+      initial_purchase_price: 100.0
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffect.LLM.prompts:LLM_TAX_AWARE_SYS"
         user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -120,12 +123,13 @@ llm_institutional:
       record_path: "EXPERIMENT/DispositionEffect/LLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
+      initial_purchase_price: 100.0
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffect.LLM.prompts:LLM_INSTITUTIONAL_SYS"
         user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -146,12 +150,13 @@ llm_loss_averse:
       record_path: "EXPERIMENT/DispositionEffect/LLM/records"
       initial_cash: 10000.0
       initial_position: 0.0
+      initial_purchase_price: 100.0
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.DispositionEffect.LLM.prompts:LLM_LOSS_AVERSE_SYS"
         user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_new_tokens: 500

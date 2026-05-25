@@ -1,0 +1,23 @@
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - llm_momentum_trader
+    - llm_contrarian
+    - llm_technical
+    - llm_trend_follower
+    - llm_fundamental
+
+  llm_momentum_trader:
+    - market
+  llm_contrarian:
+    - market
+  llm_technical:
+    - market
+  llm_trend_follower:
+    - market
+  llm_fundamental:
+    - market

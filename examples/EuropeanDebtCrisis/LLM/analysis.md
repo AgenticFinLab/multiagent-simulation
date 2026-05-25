@@ -42,3 +42,18 @@ Measure whether LLM persona-driven crisis reasoning produces more or less severe
 
 See `analysis-bases.md §2` for full metric derivations and Python function signatures.
 See `simulation-bases.md §2` for theoretical foundations.
+
+## §6 Cross-Variant Comparison
+
+| Comparison | Interpretation |
+|---|---|
+| LLM vs Rule | Measures persona-only crisis reasoning without explicit thresholds. |
+| LLM vs RuleLLM | Measures the stabilizing effect of embedded rule guidance. |
+| LLM vs Rag | Measures whether retrieved crisis knowledge changes persona-only behavior. |
+
+## §7 Quality Checks
+
+- Confirm the run completed the configured 200 rounds.
+- Audit parse failures and retry counts before acceptance; deterministic parser/provider failures must fail fast.
+- Confirm accepted decisions produce canonical `action`, `bid_price`, `quantity`, and `reasoning`.
+- Review action distribution for excessive holds or one-sided actions.

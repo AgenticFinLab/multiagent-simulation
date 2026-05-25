@@ -63,9 +63,9 @@ The Rag variant augments each investor's LLM reasoning with retrieved behavioral
 P(t+1) = P(t) + λ × NetDemand(t) + γ × (F − P(t)) + ε(t)
 
 where:
-  λ = price_impact      [default: 0.001]
-  γ = mean_reversion    [default: 0.05]
-  ε ~ N(0, noise_std)   [default: 0.5]
+  λ = price_impact      [default: 0.03]
+  γ = mean_reversion    [default: 0.01]
+  ε ~ N(0, noise_std)   [default: 0.015]
   NetDemand = Σ signed_quantities
 ```
 
@@ -79,7 +79,7 @@ Market broadcasts `{price, fundamental, deviation, round}`. RAG retrieval is tri
 | Retrieval  | Vector similarity search on behavioral finance paper embeddings |
 | Inference  | LLM API call with retrieved research context prepended          |
 | Context    | `market_data` + `agent_extras` + retrieved research papers      |
-| Output     | `{"action": "buy"/"sell"/"hold", "quantity": int}`              |
+| Output     | Canonical parser JSON plus order records with `rag_context`     |
 
 ### RAG Architecture
 
@@ -100,11 +100,11 @@ Key extras per investor:
 - `hindsight_inflation`, `prediction_overweight` (HindsightOverconfident)
 - `success_attribution`, `failure_discount` (OutcomeLearner)
 - `process_weight`, `outcome_weight` (ProcessEvaluator)
-- `skepticism_level`, `position_size` (ContrarianSkeptic)
-- `trade_probability` (NoiseTrader)
+- `skepticism_level`, `max_order` (ContrarianSkeptic)
+- `trade_probability`, `max_order` (NoiseTrader)
 - Market: `price_impact`, `mean_reversion`, `noise_std`, `fundamental_value`, `initial_price`
 - LLM: `model`, `temperature`, `max_tokens`
-- RAG: `knowledge_base_path`, `top_k`, `retrieval_threshold`
+- RAG: shared `examples/document-sources` resources, Hunyuan embedding config, `top_k`, and persisted `rag_index`
 
 ## §6 Running Instructions
 

@@ -1,0 +1,162 @@
+# =============================================================================
+# AsianFinancialCrisis Rule Players Configuration
+# =============================================================================
+# 1 Market (rule-based coordinator) + 5 rule-based agent types
+#
+# Scenario: 1997 Asian Financial Crisis — currency collapses spread from Thailand
+# Agents: HotMoneyFunder (reversal) + ContagionTrader (cross-border seller)
+#         + IMFRescuer (stabilizer) + ValueContrarian (contrarian buyer)
+#         + NoiseTrader (background liquidity)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based price formation
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.AsianFinancialCrisis.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      # Price formation: P(t+1) = P(t) + λ×NetDemand + γ×(F-P(t)) + ε
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.04         # Higher: emerging market with thinner liquidity
+      mean_reversion: 0.02       # Low: crisis overwhelms reversion forces
+      noise_std: 0.02            # Background FX noise
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# HotMoneyFunder — short-term capital reversal
+# Theory: Radelet & Sachs (1998): hot money reversal mechanics
+# -----------------------------------------------------------------------------
+hot_money_funder:
+  name: "Hot Money Funder"
+  class: "examples.AsianFinancialCrisis.Rule.players:HotMoneyFunder"
+  # Expander → hot_money_funder_1, hot_money_funder_2
+  num_instances: 2
+  config:
+    identity: "hot_money_funder"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 800000.0
+      initial_position: 3000.0     # Carries a position via short-term loans
+      # Rule parameters
+      reversal_threshold: 0.02     # Reverses when deviation < -2%
+      sell_ratio: 0.60             # Sells 60% of position on reversal
+      buy_ratio: 0.30              # Deploys 30% of cash when rising
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# ContagionTrader — cross-border correlated seller
+# Theory: Kaminsky & Reinhart (1999): contagion transmission across markets
+# -----------------------------------------------------------------------------
+contagion_trader:
+  name: "Contagion Trader"
+  class: "examples.AsianFinancialCrisis.Rule.players:ContagionTrader"
+  # Expander → contagion_trader_1, contagion_trader_2
+  num_instances: 2
+  config:
+    identity: "contagion_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 600000.0
+      initial_position: 4000.0     # Large cross-border position
+      # Rule parameters
+      contagion_weight: 0.60       # Weight on price deviation in signal
+      cross_border_sensitivity: 0.40  # Weight on return momentum
+      contagion_threshold: -0.025  # Signal threshold for contagion sell
+      sell_ratio: 0.50             # Sells 50% on mild contagion
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# IMFRescuer — conditional emergency liquidity provider
+# Theory: Corsetti, Pesenti & Roubini (1999): IMF conditionality effects
+# -----------------------------------------------------------------------------
+imf_rescuer:
+  name: "IMF Rescuer"
+  class: "examples.AsianFinancialCrisis.Rule.players:IMFRescuer"
+  num_instances: 1
+  config:
+    identity: "imf_rescuer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 5000000.0      # Deep pockets for rescue packages
+      initial_position: 0.0
+      # Rule parameters
+      rescue_threshold: -0.05      # Intervenes when deviation < -5%
+      buy_ratio: 0.25              # Deploys 25% of cash per rescue round
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# ValueContrarian — crisis-driven mispricing buyer
+# Theory: Fundamental value investing; long-run mean reversion
+# -----------------------------------------------------------------------------
+value_contrarian:
+  name: "Value Contrarian"
+  class: "examples.AsianFinancialCrisis.Rule.players:ValueContrarian"
+  # Expander → value_contrarian_1, value_contrarian_2
+  num_instances: 2
+  config:
+    identity: "value_contrarian"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 500.0
+      # Rule parameters
+      oversold_threshold: -0.08    # Buys when deviation < -8% (severely oversold)
+      overbought_threshold: 0.10   # Sells when deviation > +10%
+      buy_ratio: 0.20              # Deploys 20% of cash per round
+      sell_ratio: 0.20             # Sells 20% of position when overbought
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# NoiseTrader — background liquidity provider
+# Theory: Noise trader model (Black, 1986)
+# -----------------------------------------------------------------------------
+noise_trader:
+  name: "Noise Trader"
+  class: "examples.AsianFinancialCrisis.Rule.players:NoiseTrader"
+  # Expander → noise_trader_1, noise_trader_2, noise_trader_3
+  num_instances: 3
+  config:
+    identity: "noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 200000.0
+      initial_position: 1000.0
+      # Rule parameters
+      trade_probability: 0.30      # 30% chance of trading per round
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

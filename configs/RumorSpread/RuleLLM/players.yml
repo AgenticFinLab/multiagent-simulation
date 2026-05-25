@@ -55,7 +55,7 @@ rulellm_gullible_spreader:
         sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_GULLIBLE_SYS"
         user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -83,7 +83,7 @@ rulellm_distorting_relayer:
         sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_DISTORTING_SYS"
         user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -111,7 +111,7 @@ rulellm_skeptical_evaluator:
         sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_SKEPTICAL_SYS"
         user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -139,7 +139,7 @@ rulellm_fact_checker:
         sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_FACTCHECKER_SYS"
         user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -167,7 +167,7 @@ rulellm_uninformed_bystander:
         sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_BYSTANDER_SYS"
         user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_new_tokens: 500

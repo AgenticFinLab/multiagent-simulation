@@ -42,3 +42,21 @@ Analysis for the **RuleLLM variant** of GameStopShortSqueeze. Metric definitions
 | SCD    | 2–9 rounds             | ≈ Rule   |
 | IEP    | Rounds 3–11            | ≈ Rule   |
 | WTI    | 0.10–0.42              | ≈ Rule   |
+
+## §5 References
+
+Metric definitions are inherited from `analysis-bases.md §2`; RuleLLM investor
+roles trace to `simulation-bases.md §4.1-§4.5`.
+
+## §6 Cross-Variant Comparison
+
+Compare RuleLLM against Rule to measure language reasoning under fixed rules,
+against LLM to measure the effect of explicit rule constraints, and against RAG
+to measure the marginal effect of retrieved context.
+
+## §7 Quality Checks
+
+- Confirm the run completed the configured 200 rounds.
+- Confirm RuleLLM prompts keep separate persona and decision-rule sections.
+- Audit parse failures and retry counts; deterministic parser/provider failures fail fast.
+- Confirm accepted decisions preserve canonical `action`, `bid_price`, `quantity`, and `reasoning`.

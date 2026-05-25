@@ -1,0 +1,272 @@
+# StatusQuoBias Rag Agent Configuration
+
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+    top_k: 5
+
+market:
+  name: "Market"
+  class: "examples.StatusQuoBias.Rag.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.02
+      mean_reversion: 0.02
+      noise_std: 0.01
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+inertialholder:
+  name: "InertialHolder"
+  class: "examples.StatusQuoBias.Rag.players:RagLLMInertialHolder"
+  num_instances: 3
+  config:
+    identity: "inertialholder"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      inertia_strength: 0.9
+      change_threshold: 0.3
+      base_size: 200
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.StatusQuoBias.Rag.prompts:RAGLLM_INERTIAL_HOLDER_SYS"
+        user_message: "examples.StatusQuoBias.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 600
+  persona: !include persona.yml
+
+defaultfollower:
+  name: "DefaultFollower"
+  class: "examples.StatusQuoBias.Rag.players:RagLLMDefaultFollower"
+  num_instances: 3
+  config:
+    identity: "defaultfollower"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 800000.0
+      initial_position: 400
+      initial_price: 100.0
+      fundamental_value: 100.0
+      default_weight: 0.5
+      active_deviation: 0.15
+      base_size: 250
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.StatusQuoBias.Rag.prompts:RAGLLM_DEFAULT_FOLLOWER_SYS"
+        user_message: "examples.StatusQuoBias.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 600
+  persona: !include persona.yml
+
+activerebalancer:
+  name: "ActiveRebalancer"
+  class: "examples.StatusQuoBias.Rag.players:RagLLMActiveRebalancer"
+  num_instances: 2
+  config:
+    identity: "activerebalancer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1500000.0
+      initial_position: 600
+      initial_price: 100.0
+      fundamental_value: 100.0
+      rebalance_threshold: 0.05
+      position_size: 350
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.StatusQuoBias.Rag.prompts:RAGLLM_ACTIVE_REBALANCER_SYS"
+        user_message: "examples.StatusQuoBias.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.6
+          max_tokens: 600
+  persona: !include persona.yml
+
+momentumtrader:
+  name: "MomentumTrader"
+  class: "examples.StatusQuoBias.Rag.players:RagLLMMomentumTrader"
+  num_instances: 2
+  config:
+    identity: "momentumtrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1200000.0
+      initial_position: 500
+      initial_price: 100.0
+      fundamental_value: 100.0
+      entry_threshold: 0.01
+      position_size: 300
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.StatusQuoBias.Rag.prompts:RAGLLM_MOMENTUM_TRADER_SYS"
+        user_message: "examples.StatusQuoBias.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 600
+  persona: !include persona.yml
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.StatusQuoBias.Rag.players:RagLLMNoiseTrader"
+  num_instances: 2
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 200
+      initial_price: 100.0
+      fundamental_value: 100.0
+      trade_probability: 0.3
+      noise_size: 100
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.StatusQuoBias.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
+        user_message: "examples.StatusQuoBias.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.95
+          max_tokens: 600
+  persona: !include persona.yml

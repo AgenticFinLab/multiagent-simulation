@@ -55,12 +55,13 @@ streakreversaltrader:
       initial_position: 0
       initial_price: 100.0
       fundamental_value: 100.0
+      max_order: 800
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.GamblerFallacy.Rag.prompts:RAG_STREAK_REVERSAL_TRADER_SYS"
+        sys_message: "examples.GamblerFallacy.Rag.prompts:RAGLLM_STREAK_REVERSAL_TRADER_SYS"
         user_message: "examples.GamblerFallacy.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -99,12 +100,13 @@ hothandtrader:
       initial_position: 0
       initial_price: 100.0
       fundamental_value: 100.0
+      max_order: 800
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.GamblerFallacy.Rag.prompts:RAG_HOT_HAND_TRADER_SYS"
+        sys_message: "examples.GamblerFallacy.Rag.prompts:RAGLLM_HOT_HAND_TRADER_SYS"
         user_message: "examples.GamblerFallacy.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -143,12 +145,13 @@ independentassessor:
       initial_position: 0
       initial_price: 100.0
       fundamental_value: 100.0
+      max_order: 500
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.GamblerFallacy.Rag.prompts:RAG_INDEPENDENT_ASSESSOR_SYS"
+        sys_message: "examples.GamblerFallacy.Rag.prompts:RAGLLM_INDEPENDENT_ASSESSOR_SYS"
         user_message: "examples.GamblerFallacy.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -187,12 +190,13 @@ arbitrageur:
       initial_position: 0
       initial_price: 100.0
       fundamental_value: 100.0
+      max_order: 500
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.GamblerFallacy.Rag.prompts:RAG_ARBITRAGEUR_SYS"
+        sys_message: "examples.GamblerFallacy.Rag.prompts:RAGLLM_ARBITRAGEUR_SYS"
         user_message: "examples.GamblerFallacy.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -231,12 +235,13 @@ noisetrader:
       initial_position: 0
       initial_price: 100.0
       fundamental_value: 100.0
+      max_order: 500
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.GamblerFallacy.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.GamblerFallacy.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
         user_message: "examples.GamblerFallacy.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
           max_tokens: 512

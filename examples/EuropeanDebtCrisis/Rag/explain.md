@@ -62,7 +62,7 @@ The Rag variant augments LLM crisis reasoning with RAG-retrieved documents from 
 P(t+1) = P(t) + λ × NetDemand(t) + γ × (F − P(t)) + ε(t)
 ```
 
-Market class shared with Rule variant. All Rag investors send orders with `provides_liquidity` field.
+Market class shared with Rule variant. All Rag investors send canonical order payloads with `type`, `from`, `action`, `bid_price`, `quantity`, `reasoning`, `agent_type`, and `strategy`, plus recorded `rag_context` for retrieval audit.
 
 ## §4 Variant Architecture
 
@@ -71,8 +71,8 @@ Market class shared with Rule variant. All Rag investors send orders with `provi
 | Base class     | `RagLLMInvestor` → `GeneralPlayer`                                                            |
 | Inference      | `LangChainAPIInference` + RAG knowledge retrieval                                             |
 | Context        | `price`, `fundamental`, `deviation`, `cash`, `position`, `round` + retrieved documents        |
-| Output parsing | JSON response with `action`, `quantity`, `reasoning`, `analysis`, `provides_liquidity`        |
-| RAG retrieval  | Query built from market state; documents from EDC knowledge base (De Grauwe, Draghi, Acharya) |
+| Output parsing | JSON response with canonical `action`, `bid_price`, `quantity`, and `reasoning`               |
+| RAG retrieval  | Query built from market state; retrieved context is stored as `rag_context` for analysis       |
 
 ## §5 Config Reference
 

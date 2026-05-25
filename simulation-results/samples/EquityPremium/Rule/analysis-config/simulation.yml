@@ -1,0 +1,36 @@
+setting:
+  name: "equity_premium_simulation"
+  description: "Equity Premium Puzzle with myopic loss aversion"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "artifacts/records"
+  save_diagram_interval: 100
+
+environment: {dotenv_path: .env, workspace: "."}
+
+ray:
+  address: null
+  namespace: "equity_premium"
+  actor_prefix: null
+  # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
+  num_cpus: null
+  num_gpus: null
+  # Derived: 14 players, star topology -> 26 msgs/round
+  #   14 TurnResult + 14 pending_info + 26 Message = 54 Ray objects
+  #   54 obj x 64 KB min-alloc = 3456 KB (3.38 MB)
+  #   10x headroom = 33.8 MB; 128 MB minimum floor -> 134217728 bytes
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options: {max_restarts: 3, max_task_retries: 1, max_concurrency: 4}
+  runtime_env: {working_dir: null, pip: [], env_vars: {}}
+  serialization: {use_arrow: true, register_custom_serializers: true}
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "artifacts/communication"
+  record_messages: true
+  message_block_size: 500

@@ -269,7 +269,29 @@ def plot_equity_premium_analysis(
     ax4.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    save_figure(fig, os.path.join(output_dir, "equity_premium_analysis.png"))
+    save_figure(fig, os.path.join(output_dir, "02_equitypremium_analysis.png"))
+    plt.close()
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(prices, linewidth=2, label="Stock price")
+    ax.set_title("EquityPremium Price Dynamics")
+    ax.set_xlabel("Round")
+    ax.set_ylabel("Stock Price")
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+    save_figure(fig, os.path.join(output_dir, "01_equitypremium_dynamics.png"))
+    plt.close()
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    if allocations:
+        strategies = [a["strategy"][:18] for a in allocations.values()]
+        net_positions = [a["net_position"] for a in allocations.values()]
+        ax.bar(strategies, net_positions, color="steelblue", alpha=0.8)
+        ax.tick_params(axis="x", rotation=45)
+    ax.set_title("EquityPremium Investor Stock Quantity Pressure")
+    ax.set_ylabel("Net Stock Quantity")
+    ax.grid(True, axis="y", alpha=0.3)
+    save_figure(fig, os.path.join(output_dir, "00_investor_bids.png"))
     plt.close()
 
 
@@ -390,7 +412,7 @@ def main():
     coordinators = list(results.players_by_role("coordinator").values())
     prices = list(coordinators[0].batch("stock").all()) if coordinators else []
     # Each non-coordinator player contributes a list of per-round decision payloads
-    # payload fields: bid_price, quantity, strategy, investor
+    # payload fields: stock_qty, strategy, investor
     trades = {}
     for pid, player in results.players_by_role("player").items():
         payloads_by_round = player.turns.payloads()
@@ -448,6 +470,22 @@ def main():
         json.dump(summary, f, indent=2)
     print(f"    Saved to {summary_path}")
 
+    fig, ax = plt.subplots(figsize=(8, 4))
+    validation = summary["validation"]
+    score = validation["score"] if isinstance(validation, dict) else 0
+    ax.axis("off")
+    ax.text(0.05, 0.75, "EquityPremium Summary", fontsize=16, fontweight="bold")
+    ax.text(0.05, 0.50, f"Rounds: {summary['total_rounds']}", fontsize=12)
+    ax.text(
+        0.05,
+        0.35,
+        f"Equity premium: {summary['equity_premium']['equity_premium_pct']:.2f}%",
+        fontsize=12,
+    )
+    ax.text(0.05, 0.20, f"Validation score: {score:.1%}", fontsize=12)
+    save_figure(fig, os.path.join(output_dir, "03_summary.png"))
+    plt.close(fig)
+
     # Print key findings
     print("\n" + "=" * 70)
     print("KEY FINDINGS")
@@ -474,7 +512,7 @@ def _load_data(results) -> Dict[str, Any]:
     Data sources
     ------------
     Coordinator  → batch store 'stock' (flat time-series)
-    Player turns → decision_payload fields bid_price / stock_qty / strategy / investor
+    Player turns → decision_payload fields stock_qty / strategy / investor
 
     Returns
     -------
@@ -527,6 +565,28 @@ def analyze_equity_premium(data: Dict[str, Any], output_dir: str) -> Dict[str, A
     summary_path = os.path.join(output_dir, "summary.json")
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    validation = summary["validation"]
+    score = validation["score"] if isinstance(validation, dict) else 0
+    ax.axis("off")
+    ax.text(
+        0.05,
+        0.75,
+        "EquityPremium Summary",
+        fontsize=16,
+        fontweight="bold",
+    )
+    ax.text(0.05, 0.50, f"Rounds: {summary['total_rounds']}", fontsize=12)
+    ax.text(
+        0.05,
+        0.35,
+        f"Equity premium: {summary['equity_premium']['equity_premium_pct']:.2f}%",
+        fontsize=12,
+    )
+    ax.text(0.05, 0.20, f"Validation score: {score:.1%}", fontsize=12)
+    save_figure(fig, os.path.join(output_dir, "03_summary.png"))
+    plt.close()
 
     return summary
 

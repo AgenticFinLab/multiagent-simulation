@@ -1,0 +1,120 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": 1.529548702012195,
+      "max_abs_deviation_pct": 3.5991667233033793,
+      "mean_abs_deviation_pct": 0.8941801883294641
+    },
+    "price_metrics": {
+      "final": 15.22943230530183,
+      "initial": 14.987033639128631,
+      "max": 15.539875008495507,
+      "mean": 15.12933166512705,
+      "min": 14.916979795260428,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 5.701931952533072,
+      "max_drawdown_pct": -1.3714781554905096,
+      "volatility_pct": 0.3591879509289394
+    },
+    "volume_metrics": {
+      "mean_volume": 0.0,
+      "total_volume": 0.0
+    }
+  },
+  "rag_knowledge_effect": {
+    "aggregate": {
+      "max_retrieval_failure_rate": 0.0,
+      "mean_retrieval_failure_rate": 0.0
+    },
+    "equity_trader_5_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "equity_trader_5_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "long_vol_hedger_3": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "short_vol_trader_1_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "short_vol_trader_1_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "vol_arbitrageur_4_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "vol_arbitrageur_4_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "vol_e_t_n_manager_2_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "vol_e_t_n_manager_2_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "Volmageddon",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 3.599
+      },
+      "Volatility Sanity": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 5.702
+      }
+    },
+    "interpretation": "=== Volmageddon SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 100.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 3.60%\n    Expected: nonzero but bounded deviation\n    Score: 100.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 5.70%\n    Expected: bounded annualized volatility\n    Score: 100.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe Volmageddon run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 100.0%",
+    "is_valid": true,
+    "score": 1.0
+  }
+}

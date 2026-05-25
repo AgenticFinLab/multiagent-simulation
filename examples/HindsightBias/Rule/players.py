@@ -25,6 +25,31 @@ from masim.player.general import GeneralPlayer
 logger = logging.getLogger("HindsightBias")
 
 
+def _build_order(player: GeneralPlayer, decision_payload: dict, reasoning: str) -> dict:
+    """Apply a filled decision to local portfolio state and build canonical order."""
+    action = decision_payload["action"]
+    quantity = decision_payload["quantity"]
+    price = player.state.custom_state["price"]
+
+    if action == "buy" and quantity > 0:
+        player.state.custom_state["cash"] -= quantity * price
+        player.state.custom_state["position"] += quantity
+    elif action == "sell" and quantity > 0:
+        player.state.custom_state["cash"] += quantity * price
+        player.state.custom_state["position"] -= quantity
+
+    return {
+        "type": "order",
+        "from": player.identity,
+        "action": action,
+        "bid_price": price,
+        "quantity": quantity,
+        "reasoning": reasoning,
+        "agent_type": player.__class__.__name__,
+        "strategy": player.__class__.__name__,
+    }
+
+
 class Market(GeneralPlayer):
     """
     Market agent for HindsightBias simulation.
@@ -103,7 +128,19 @@ class Market(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = (price - fundamental) / fundamental if fundamental > 0 else 0
-        return {"price": price, "fundamental": fundamental, "deviation": deviation}
+        market_update = {
+            "type": "market_update",
+            "price": price,
+            "fundamental": fundamental,
+            "deviation": deviation,
+            "round": self.state.custom_state["round"],
+        }
+        return {
+            **market_update,
+            "outbound_messages": [
+                {"payload": market_update, "content_type": "market_update"}
+            ],
+        }
 
     async def act(self, decision_payload: dict) -> Action:
         price = decision_payload["price"]
@@ -166,11 +203,22 @@ class HindsightOverconfident(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _ = extras["hindsight_inflation"]
-        __ = extras["prediction_overweight"]
+        hindsight_inflation = extras["hindsight_inflation"]
+        prediction_overweight = extras["prediction_overweight"]
+        activation_threshold = extras["activation_threshold"]
+        quantity_scale = extras["quantity_scale"]
+        max_order = extras["max_order"]
 
-        if abs(deviation) > 0.02:
-            qty = min(800, int(abs(deviation) * 5000))
+        if abs(deviation) > activation_threshold:
+            qty = min(
+                max_order,
+                int(
+                    abs(deviation)
+                    * quantity_scale
+                    * hindsight_inflation
+                    * prediction_overweight
+                ),
+            )
             if deviation > 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
@@ -182,16 +230,9 @@ class HindsightOverconfident(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload["action"]
-        quantity = decision_payload["quantity"]
-
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
+        order = _build_order(
+            self, decision_payload, "hindsight-overconfidence threshold rule"
+        )
 
         return Action(
             action_type="order",
@@ -241,11 +282,19 @@ class OutcomeLearner(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _ = extras["success_attribution"]
-        __ = extras["failure_discount"]
+        success_attribution = extras["success_attribution"]
+        failure_discount = extras["failure_discount"]
+        activation_threshold = extras["activation_threshold"]
+        quantity_scale = extras["quantity_scale"]
+        max_order = extras["max_order"]
 
-        if abs(deviation) > 0.02:
-            qty = min(800, int(abs(deviation) * 5000))
+        if abs(deviation) > activation_threshold:
+            attribution_scale = (
+                success_attribution if deviation > 0 else failure_discount
+            )
+            qty = min(
+                max_order, int(abs(deviation) * quantity_scale * attribution_scale)
+            )
             if deviation > 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
@@ -257,16 +306,7 @@ class OutcomeLearner(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload["action"]
-        quantity = decision_payload["quantity"]
-
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
+        order = _build_order(self, decision_payload, "outcome-learning threshold rule")
 
         return Action(
             action_type="order",
@@ -316,11 +356,17 @@ class ProcessEvaluator(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _ = extras["process_weight"]
-        __ = extras["outcome_weight"]
+        process_weight = extras["process_weight"]
+        outcome_weight = extras["outcome_weight"]
+        activation_threshold = extras["activation_threshold"]
+        quantity_scale = extras["quantity_scale"]
+        max_order = extras["max_order"]
 
-        if abs(deviation) > 0.05:
-            qty = min(500, int(abs(deviation) * 3000))
+        if abs(deviation) > activation_threshold:
+            qty = min(
+                max_order,
+                int(abs(deviation) * quantity_scale * process_weight * outcome_weight),
+            )
             if deviation < 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
@@ -332,16 +378,9 @@ class ProcessEvaluator(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload["action"]
-        quantity = decision_payload["quantity"]
-
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
+        order = _build_order(
+            self, decision_payload, "process-evaluation contrarian rule"
+        )
 
         return Action(
             action_type="order",
@@ -391,11 +430,15 @@ class ContrarianSkeptic(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _ = extras["skepticism_level"]
-        __ = extras["position_size"]
+        skepticism_level = extras["skepticism_level"]
+        activation_threshold = extras["activation_threshold"]
+        quantity_scale = extras["quantity_scale"]
+        max_order = extras["max_order"]
 
-        if abs(deviation) > 0.05:
-            qty = min(500, int(abs(deviation) * 3000))
+        if abs(deviation) > activation_threshold:
+            qty = min(
+                max_order, int(abs(deviation) * quantity_scale * skepticism_level)
+            )
             if deviation < 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
@@ -407,16 +450,9 @@ class ContrarianSkeptic(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload["action"]
-        quantity = decision_payload["quantity"]
-
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
+        order = _build_order(
+            self, decision_payload, "contrarian-skeptic threshold rule"
+        )
 
         return Action(
             action_type="order",
@@ -466,10 +502,12 @@ class NoiseTrader(GeneralPlayer):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        _ = extras["trade_probability"]
+        trade_probability = extras["trade_probability"]
+        min_order = extras["min_order"]
+        max_order = extras["max_order"]
 
-        if random.random() < 0.3:
-            qty = random.randint(100, 500)
+        if random.random() < trade_probability:
+            qty = random.randint(min_order, max_order)
             action = "buy" if random.random() > 0.5 else "sell"
             if action == "buy":
                 qty = min(qty, int(cash / price) if price > 0 else 0)
@@ -480,16 +518,7 @@ class NoiseTrader(GeneralPlayer):
         return {"action": "hold", "quantity": 0}
 
     async def act(self, decision_payload: dict) -> Action:
-        action = decision_payload["action"]
-        quantity = decision_payload["quantity"]
-
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
+        order = _build_order(self, decision_payload, "noise-trader random liquidity rule")
 
         return Action(
             action_type="order",

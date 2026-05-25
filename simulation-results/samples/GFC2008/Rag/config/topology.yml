@@ -1,0 +1,29 @@
+# GFC2008 Rag Topology - Star Pattern
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - mbsoriginator
+    - leveragedinvestor
+    - ratingagency
+    - distressedbuyer
+    - regulator
+
+  mbsoriginator:
+    - market
+
+  leveragedinvestor:
+    - market
+
+  ratingagency:
+    - market
+
+  distressedbuyer:
+    - market
+
+  regulator:
+    - market

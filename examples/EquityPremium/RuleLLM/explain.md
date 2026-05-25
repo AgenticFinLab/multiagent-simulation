@@ -71,7 +71,7 @@ Market is shared with Rule variant. All RuleLLM investors send `stock_qty` order
 | Base class       | `RuleLLMInvestor` → `GeneralPlayer`                                          |
 | Inference        | `LangChainAPIInference` (3-attempt retry)                                    |
 | Context          | `stock_price`, `stock_return`, `bond_return`, `cash`, `stock`, `round`       |
-| Output parsing   | `parse_llm_response_with_thinking()` → `{"stock_qty": ..., "strategy": ...}` |
+| Output parsing   | `parse_equity_premium_decision()` requires `stock_qty` and `reasoning`; player adds `strategy` |
 | Rule enforcement | Thresholds and limits embedded in prompt; LLM violation → retry fallback     |
 
 ## §5 Config Reference

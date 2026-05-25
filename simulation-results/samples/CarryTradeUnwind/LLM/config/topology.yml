@@ -1,0 +1,43 @@
+# =============================================================================
+# CarryTradeUnwind LLM Topology - Star Pattern
+# =============================================================================
+# Market as hub, all investors communicate through market.
+#
+#    llm_carry_trader         ──────────┐
+#    llm_leveraged_carry_fund ──────────┤
+#    llm_funding_currency_buyer ────────┼──▶ market ──▶ all investors
+#    llm_hedged_carry_trader        ──────────┤             (FX rate, return, deviation)
+#    llm_noise_trader         ──────────┘
+#
+# Execution flow per round:
+#   Level 0: market executes (broadcasts FX rate + dynamics data)
+#   Level 1: all investors execute in parallel
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - llm_carry_trader
+    - llm_leveraged_carry_fund
+    - llm_funding_currency_buyer
+    - llm_hedged_carry_trader
+    - llm_noise_trader
+
+  llm_carry_trader:
+    - market
+
+  llm_leveraged_carry_fund:
+    - market
+
+  llm_funding_currency_buyer:
+    - market
+
+  llm_hedged_carry_trader:
+    - market
+
+  llm_noise_trader:
+    - market

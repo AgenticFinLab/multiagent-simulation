@@ -1,0 +1,60 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": 816.4467595343542,
+      "max_abs_deviation_pct": 3064.315221088193,
+      "mean_abs_deviation_pct": 1960.1582488580298
+    },
+    "price_metrics": {
+      "final": 183.28935190687082,
+      "initial": 19.964234825436407,
+      "max": 632.8630442176386,
+      "mean": 412.0312921198604,
+      "min": 19.964234825436407,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 466.47902765800274,
+      "max_drawdown_pct": -0.9709710308306075,
+      "volatility_pct": 29.385416643102285
+    },
+    "volume_metrics": {
+      "mean_volume": 0.0,
+      "total_volume": 0.0
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "GameStopShortSqueeze",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": false,
+        "score": 0.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 3064.315
+      },
+      "Volatility Sanity": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 466.479
+      }
+    },
+    "interpretation": "=== GameStopShortSqueeze SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 80.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 3064.32%\n    Expected: nonzero but bounded deviation\n    Score: 0.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 466.48%\n    Expected: bounded annualized volatility\n    Score: 100.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe GameStopShortSqueeze run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 80.0%",
+    "is_valid": true,
+    "score": 0.8
+  }
+}

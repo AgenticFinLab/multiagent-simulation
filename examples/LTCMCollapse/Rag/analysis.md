@@ -1,27 +1,45 @@
-# LTCMCollapse Analysis Guide
+# LTCMCollapse Rag — Analysis Documentation
 
-## Metrics
+## §1 Analysis Objectives
 
-| Metric | Description | Expected Range |
-|--------|-------------|----------------|
-| Price deviation | Deviation from fundamental | Varies by scenario |
-| Max drawdown | Largest peak-to-trough decline | Varies by scenario |
-| Volatility | Annualized return volatility | Varies by scenario |
+Rag analysis compares historically informed LLM behavior with Rule, LLM, and RuleLLM baselines. It must verify both simulation dynamics and RAG/API quality.
 
-## Visualization Guide
+## §2 Metric To Function Mapping
 
-1. **Price vs Fundamental**: Shows whether agents create mispricings
-2. **Deviation Plot**: Magnitude and persistence of mispricings
-3. **Return Distribution**: Should show fat tails for behavioral scenarios
+| Metric | analysis-bases Ref | Function | Rag-Specific Note |
+|---|---|---|---|
+| Price deviation | `analysis-bases.md §2.1` | imported `calculate_metrics(data)` | effect of retrieved context on dislocation |
+| Maximum drawdown | `analysis-bases.md §2.2` | imported `calculate_metrics(data)` | crisis severity |
+| Mean absolute deviation | `analysis-bases.md §2.3` | imported `calculate_metrics(data)` | persistence |
+| Volatility | `analysis-bases.md §2.4` | imported `calculate_metrics(data)` | instability |
+| Price trough | `analysis-bases.md §2.5` | imported `calculate_metrics(data)` | lowest RAG price |
+| Final recovery | `analysis-bases.md §2.6` | imported `calculate_metrics(data)` | stabilization |
+| LLM output quality | `analysis-bases.md §2.7` | `audit_llm_output_quality.py` | parse failures, contract failures, action validity |
 
-## Troubleshooting
+## §3 Variant-Specific Notes
 
-- **No phenomenon observed**: Adjust agent parameters
-- **Too extreme**: Add more stabilizing agents or increase mean reversion
-- **Too stable**: Increase destabilizing agent parameters
+RAG success requires more than `exit=0`: embedding access, context injection, parse quality, and retrieval-miss rate must all be reviewed before outputs are accepted.
 
-## References
+## §4 Expected Ranges
 
-- Shleifer & Vishny (1997): Limits to arbitrage
-- Long-Term Capital Management (1998): Convergence trades gone wrong
-- Morris & Shin (2004): Liquidity black holes
+| Metric | Expected Pattern |
+|---|---|
+| completed rounds | 200/200 |
+| parse failures | zero or low |
+| contract failures | reviewed and documented if nonzero |
+| RAG context | present or explicit no-retrieval marker |
+
+## §5 Output Files
+
+The current `analysis.py` imports Rule analysis functions. RAG-specific quality checks are produced by post-run output quality review.
+
+## §6 Cross-Variant Comparison
+
+RAG should be compared primarily against RuleLLM, because both share persona/rule prompts from `simulation-bases.md §4` and differ by retrieved context under the same `analysis-bases.md §2` metric catalogue.
+
+## §7 References
+
+- `../analysis-bases.md`
+- `analysis.py`
+- `prompts.py`
+- `configs/LTCMCollapse/Rag/players.yml`

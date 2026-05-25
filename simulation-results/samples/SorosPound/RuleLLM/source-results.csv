@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
+1,1,SorosPound,RuleLLM,SUCCESS,0,3210.172,2026-05-23T01:57:56,2026-05-23T02:51:26,config/simulation.yml,examples/SorosPound/RuleLLM/run_sorospound_rulellm.py,logs/SorosPound__RuleLLM.log,,200,200,

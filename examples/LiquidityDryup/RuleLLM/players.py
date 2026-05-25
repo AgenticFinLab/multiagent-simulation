@@ -140,9 +140,7 @@ class Market(GeneralPlayer):
         fundamental_value = extras["fundamental_value"]
         noise_std = extras["noise_std"]
 
-        liquidity_provision = sum(
-            abs(o["quantity"]) for o in orders if o["provides_liquidity"]
-        )
+        liquidity_provision = sum(float(o["provides_liquidity"]) for o in orders)
         total_liquidity = base_liquidity + liquidity_provision
 
         total_buy_qty = sum(o["quantity"] for o in orders if o["quantity"] > 0)
@@ -399,13 +397,15 @@ class RuleLLMInvestor(GeneralPlayer):
             self.state.custom_state["position"],
         )
 
+        provides_liquidity = float(decision["provides_liquidity"])
+
         order = {
             "bid_price": bid_price,
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
-            "provides_liquidity": decision["provides_liquidity"],
+            "provides_liquidity": provides_liquidity,
         }
 
         return {

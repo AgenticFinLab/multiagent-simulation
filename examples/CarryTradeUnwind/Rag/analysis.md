@@ -1,116 +1,56 @@
 # CarryTradeUnwind Rag Variant — Analysis Guide
 
-## 1. Analysis Overview
+## §1 Overview
 
-This guide covers interpretation of results from the **CarryTradeUnwind Rag** variant.
-Key question: *Does retrieved carry-trade knowledge improve agent crisis response
-compared to the plain LLM baseline? Does the RAG pipeline retrieve relevant context?*
+| Item | Description |
+|---|---|
+| Analysis script | `examples/CarryTradeUnwind/Rag/analysis.py` |
+| Output location | `EXPERIMENT/CarryTradeUnwind/Rag/records/analysis/` |
+| Imported functions | Reuses `Rule/analysis.py` for core metrics and adds `analyze_rag_knowledge_effect()` |
+| Variant consideration | Interpret market outcomes together with retrieval-hit and retrieval-miss statistics from recorded `rag_context` |
 
----
+## §2 Metric Implementation
 
-## 2. Metric Implementation (`Rag/analysis.py`)
+| Metric | Function | analysis-bases.md ref |
+|---|---|---|
+| Maximum Drawdown | `_compute_max_drawdown(prices_list)` | §2 Metric 1 |
+| Unwind Velocity | `_compute_unwind_velocity(prices_list)` | §2 Metric 2 |
+| Unwind Duration | `_compute_unwind_duration(prices_list, fundamental)` | §2 Metric 3 |
+| Crisis Onset Round | `_compute_cascade_onset(prices_list, fundamental)` | §2 Metric 4 |
+| Recovery Ratio | `_compute_recovery_ratio(prices_list)` | §2 Metric 5 |
+| Return Autocorrelation AC(1) | `_compute_autocorrelation(prices_list, lag=1)` | §2 Metric 6 |
+| Annualized Volatility | `_compute_peak_rolling_volatility(prices_list)` | §2 Metric 7 |
+| Retrieval Coverage | `analyze_rag_knowledge_effect(investor_payloads)` | §5 Cross-Variant Comparison |
 
-Imports `calculate_metrics`, `load_simulation_data`, `create_visualizations` from
-`Rule/analysis.py` (DRY pattern). Adds `analyze_rag_knowledge_effect()`.
+## §3 Dimension-by-Dimension Analysis
 
-All 7 core metrics from analysis-bases.md §2 apply identically.
+| Dimension | Implementation and Interpretation |
+|---|---|
+| Crash Severity and Cascade Dynamics | Compare drawdown, velocity, and volatility with RuleLLM to estimate knowledge-context effects. |
+| Cascade Attribution | Inspect `rag_context` alongside order payloads to see whether retrieved crisis context coincides with leveraged selling or stabilizer buying. |
+| Recovery Analysis | Compare recovery ratio and AC(1) with RuleLLM; useful retrieval should improve stabilization interpretation. |
+| Timing and Sophistication | Compare crisis onset and action timing with RuleLLM to identify earlier recognition of carry-stress analogies. |
+| Cross-Variant Comparison | Use `summary.json` and `rag_stats.json` under `analysis-bases.md §5`. |
 
-### `analyze_rag_knowledge_effect()` — Key Function
+## §4 Variant-Specific Observable Phenomena
 
-```python
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+Rag-specific evidence includes non-empty retrieved context, retrieval-hit rates by agent, explicit retrieval-miss marker rounds, and reasoning traces that use retrieved carry-crisis context without violating the canonical trading schema.
 
-def analyze_rag_knowledge_effect(agent_records):
-    # For each agent record: check rag_context field
-    # success if rag_context != _RAG_FALLBACK
-    # retrieval_success_rate = success_rounds / total_rounds
-    # meets_target = rate >= 0.70
-```
+## §5 Scaling and Sensitivity Analysis
 
-| Metric                   | Target       | Interpretation                                   |
-|--------------------------|--------------|--------------------------------------------------|
-| `retrieval_success_rate` | ≥ 0.70 (70%) | Fraction of rounds with non-fallback RAG context |
-| `meets_target`           | True/False   | Whether knowledge base is adequately populated   |
-| `success_rounds`         | Count        | Rounds where relevant knowledge was found        |
-| `failure_rounds`         | Count        | Rounds returning fallback string                 |
+Runtime scales with API latency, embedding/index load time, retrieval `top_k`, and agent count. Retrieval quality is sensitive to document coverage, embedding availability, and query phrasing. High retrieval-miss rates require quality review even when the simulation exits successfully.
 
----
+## §6 Output Files Reference
 
-## 3. Rag-Specific Output Files
+| File | Contents |
+|---|---|
+| `00_investor_bids.png` | Market price, fundamental value, and per-agent bid traces |
+| `01_carrytradeunwind_dynamics.png` | FX rate, fundamental anchor, deviation, and crisis thresholds |
+| `02_carrytradeunwind_analysis.png` | Rolling volatility and per-round FX returns |
+| `03_summary.png` | Agent VWAP and total trading-volume summary |
+| `summary.json` | Core metrics, validation, and nested `rag_knowledge_effect` |
+| `rag_stats.json` | Per-agent retrieval success and retrieval-miss statistics |
 
-Running `Rag/analysis.py` writes to `EXPERIMENT/CarryTradeUnwind/Rag/records/analysis/`:
+## §7 Cross-Variant Comparison Notes
 
-| File                                 | Contents                                           |
-|--------------------------------------|----------------------------------------------------|
-| `carrytradeunwind_rag_analysis.png`  | 2×2 chart: price, deviation, returns, distribution |
-| `carrytradeunwind_rag_retrieval.png` | Bar chart: retrieval success rate per agent        |
-| `summary.json`                       | `{variant: "Rag", ...metrics}`                     |
-| `rag_knowledge_effect.json`          | Per-agent retrieval statistics                     |
-
----
-
-## 4. Dimension-by-Dimension Interpretation
-
-### 4.1 Price vs Fundamental
-
-- Rag agents with high retrieval success (≥70%) should show more informed carry decisions
-- Compare crisis_onset_round with LLM baseline: RAG knowledge may delay/prevent crisis
-
-### 4.2 Deviation Time Series
-
-- If Rag agents retrieve crisis-relevant knowledge early, expect:
-  - Earlier stabilizing action (FundingCurrencyBuyer activates sooner)
-  - Shallower negative deviation peak
-- If retrieval_success_rate < 70%: Rag behaves like vanilla LLM
-
-### 4.3 RAG Retrieval Rate Plot
-
-- Green bars (≥70%): Agent has sufficient relevant knowledge in KnowledgeStore
-- Red bars (<70%): KnowledgeStore needs more documents on this agent's topic
-
----
-
-## 5. Variant-Specific Phenomena
-
-### 5.1 Knowledge Quality Effect
-
-Retrieval rate alone does not guarantee quality. Check:
-- Does retrieved context mention "carry trade", "deviation", "leverage"?
-- Do agents act differently after retrieval vs fallback rounds?
-
-### 5.2 Fallback Behavior
-
-When `rag_context == _RAG_FALLBACK`, the agent makes a pure LLM decision.
-High fallback rate → Rag ≈ LLM variant. No significant difference expected.
-
-### 5.3 Knowledge Store Requirements
-
-For optimal retrieval (≥70%), the KnowledgeStore should contain documents covering:
-- Carry trade mechanics and unwind scenarios
-- Risk management under leverage
-- Currency crisis historical examples (JPY/CHF appreciation events)
-
----
-
-## 6. Cross-Variant Comparison
-
-| Metric                   | Expected vs LLM                      |
-|--------------------------|--------------------------------------|
-| `max_drawdown_pct`       | Lower if RAG provides crisis context |
-| `crisis_onset_round`     | Later or never if RAG prevents panic |
-| `recovery_ratio`         | Higher (RAG-informed stabilizers)    |
-| `retrieval_success_rate` | Target ≥ 70%                         |
-
-Compare `rag_knowledge_effect.json` between agents to identify which agent benefits
-most from carry-trade knowledge retrieval.
-
----
-
-## 7. Knowledge Improvement Recommendations
-
-If `retrieval_success_rate < 0.70` for any agent:
-
-1. Add more carry-trade documents to `configs/CarryTradeUnwind/Rag/knowledge/`
-2. Check KnowledgeQuery keywords match document terminology
-3. Verify `KnowledgeStore` embedding model handles financial vocabulary
-4. Consider reducing `top_k` threshold to return more diverse contexts
+Rag should be compared primarily against RuleLLM because it keeps the same persona/rule prompt and only adds retrieved knowledge. A valid sample must complete all configured rounds, preserve canonical order fields, record `rag_context`, and report retrieval quality in `rag_stats.json`.

@@ -14,7 +14,7 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 
 from examples.FramingEffect.Rule.players import Market
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from examples.FramingEffect.RuleLLM.prompts import RULELLM_USER_TEMPLATE
 
 logger = logging.getLogger("FramingEffect.RuleLLM")
@@ -100,16 +100,42 @@ class RuleLLMInvestor(GeneralPlayer):
             portfolio_value=portfolio_value,
         )
 
-        try:
-            infer_input = InferInput(system_msg=system_msg, user_msg=user_msg)
-            response = self._llm_client.run([infer_input]).outputs[0].response
-            decision = parse_llm_response_with_thinking(response)
-        except Exception as exc:
+        max_retries = 3
+        decision = None
+        last_error = None
+        for attempt in range(max_retries):
+            try:
+                infer_input = InferInput(system_msg=system_msg, user_msg=user_msg)
+                response = self._llm_client.run([infer_input]).outputs[0].response
+                decision = parse_llm_response_with_thinking(response)
+                break
+            except Exception as exc:
+                last_error = exc
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if attempt < max_retries - 1 and (parse_error or retryable_api_error):
+                    logger.debug(
+                        "[%s] LLM call/parse failed (attempt %d), retrying: %s",
+                        self.identity,
+                        attempt + 1,
+                        exc,
+                    )
+                    continue
+                if not parse_error and not retryable_api_error:
+                    raise
+
+        if decision is None:
             raise RuntimeError(
-                f"[{self.identity}] LLM inference failed: {exc}"
-            ) from exc
+                f"[{self.identity}] LLM decision contract failed after "
+                f"{max_retries} retries: {last_error}"
+            )
 
         action = decision["action"]
+        if action not in ("buy", "sell", "hold"):
+            raise ValueError(f"[{self.identity}] Invalid LLM action: {action}")
+        bid_price = float(decision["bid_price"])
+        reasoning = decision["reasoning"]
+        analysis = decision["analysis"]
         quantity = int(decision["quantity"])
         price_val = self.state.custom_state["price"]
 
@@ -122,7 +148,14 @@ class RuleLLMInvestor(GeneralPlayer):
             quantity = 0
 
         quantity = max(0, quantity)
-        return {"action": action, "quantity": quantity}
+        return {
+            "action": action,
+            "bid_price": bid_price,
+            "quantity": quantity,
+            "reasoning": reasoning,
+            "analysis": analysis,
+            "strategy": self.__class__.__name__,
+        }
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order."""
@@ -141,8 +174,12 @@ class RuleLLMInvestor(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": decision_payload["bid_price"],
             "quantity": quantity,
+            "reasoning": decision_payload["reasoning"],
+            "analysis": decision_payload["analysis"],
             "agent_type": self.__class__.__name__,
+            "strategy": decision_payload["strategy"],
         }
         return Action(
             action_type="order",

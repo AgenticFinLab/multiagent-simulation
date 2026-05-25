@@ -85,7 +85,7 @@ LLMInvestor.act() → update cash/position, submit bid order
 
 ## §6 Config Reference
 
-Same `config.yaml` as Rule variant; LLM extras: `model_name`, `temperature`, `max_tokens`.
+LLM uses `configs/DispositionEffect/LLM/players.yml` for market parameters, initial reference points, and provider settings.
 
 ## §7 Running Instructions
 

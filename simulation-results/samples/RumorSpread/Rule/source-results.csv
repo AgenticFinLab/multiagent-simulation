@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,config_path
+9,9,RumorSpread,Rule,SUCCESS,0,80.006,2026-05-22T03:51:22,2026-05-22T03:52:42,config/simulation.yml,examples/RumorSpread/Rule/run_rumor.py,logs/RumorSpread__Rule.log,,200,200,,config/simulation.yml

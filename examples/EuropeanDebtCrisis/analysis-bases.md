@@ -1,225 +1,396 @@
-# EuropeanDebtCrisis — Analysis Basis
+# EuropeanDebtCrisis — Analysis Methodology Basis
 
 ## §1 Analysis Objectives
 
-Quantify the self-fulfilling crisis dynamics: crisis severity, duration, ECB intervention effectiveness, and sovereign-bank nexus amplification. Primary goals:
-1. Measure crisis depth (price deviation below fundamental) and duration
-2. Quantify the sovereign-bank amplification loop contribution from CreditorPanicker
-3. Measure ECBIntervenor's effectiveness in halting the self-fulfilling spiral
-4. Compare crisis dynamics across Rule / LLM / RuleLLM / Rag variants
+| Objective | Research Question | Metrics | Expected Finding |
+|---|---|---|---|
+| O1 | Does peripheral bond stress become self-fulfilling? | Crisis Depth Index, crisis duration | price falls below fundamental for a sustained period |
+| O2 | Does the sovereign-bank nexus amplify selling? | amplification ratio, sell volume attribution | creditor panic contributes additional sell pressure |
+| O3 | Does ECB intervention stabilize the crisis? | intervention effectiveness, recovery time | intervention rounds coincide with stabilization |
+| O4 | Do arbitrage and flight-to-quality shape the trajectory? | arbitrage profit rate, volume mix | stabilizing agents trade but do not mechanically remove crisis |
+| O5 | Do LLM-family variants preserve valid behavior? | API quality, RAG retrieval stats | decisions are parseable, canonical, and auditable |
 
-## §2 Core Metrics
+## §2 Core Metrics Catalogue
 
-### §2.1 Crisis Depth Index (CDI)
+### Metric: Crisis Depth Index (CDI)
 
-**Definition**: Maximum negative deviation from fundamental during the simulation.
+#### Category
+Price Dynamics / Phenomenon-Specific
+
+#### Definition
+Maximum negative deviation of peripheral bond price from fundamental value, reported as a positive crisis-depth number.
+
+#### Formula
+```
+CDI = max_t max(0, -(P(t) - F(t)) / F(t))
+```
+
+**Computation notes**: CDI is zero if price never falls below fundamental.
 
 **Python function**:
 ```python
-def crisis_depth_index(price_history: List[float], fundamental: float) -> float:
-    """Maximum negative deviation from fundamental (crisis depth).
-
-    Args:
-        price_history: List of bond prices per round
-        fundamental: Fundamental bond price (fiscal sustainability level)
-    Returns:
-        Maximum negative deviation as positive number (e.g., 0.30 = 30% below fundamental)
-    """
+def crisis_depth_index(price_history: list[float], fundamental: float) -> float:
+    """Return maximum negative deviation from fundamental."""
 ```
 
-**Interpretation**:
-- High CDI (> 0.20): Severe crisis; self-fulfilling spiral occurred
-- Moderate CDI (0.10–0.20): Contained crisis; ECB intervention partially effective
-- Low CDI (< 0.10): Mild or no crisis; fundamentals dominating
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| `< 0.10` | mild stress | no major crisis |
+| `0.10 to 0.30` | visible sovereign crisis | self-fulfilling spiral present |
+| `> 0.30` | severe crisis | panic/intervention balance should be inspected |
 
-**Theoretical grounding**: De Grauwe (2011) — crisis depth measures severity of self-fulfilling spiral
-**DOI**: `https://doi.org/10.2139/ssrn.1930063`
+#### Academic Basis
+**Primary source**: De Grauwe (2011), https://doi.org/10.2139/ssrn.1930063. Crisis depth captures the bad-equilibrium price discount.
+**Supporting studies**: De Grauwe & Ji (2013), https://doi.org/10.1016/j.jimonfin.2012.11.003.
 
----
+#### Normal Range (from literature)
+The normalized target is a material price discount, not an exact yield-spread reconstruction.
 
-### §2.2 Crisis Duration (CD)
+#### Red Flag Threshold
+- **Too high** (> 0.60): price impact or panic order size may be excessive.
+- **Too low** (< 0.10): crisis mechanism may not activate.
+- **Zero for all rounds**: check routing and price/fundamental records.
 
-**Definition**: Number of rounds for which `deviation < −0.10` (crisis threshold).
+#### Relationship to Other Metrics
+CDI should precede recovery-time and intervention-effectiveness interpretation.
+
+#### Implementation Notes
+Derived from the market price path in post-run Level-2 analysis; standard summary metrics provide the required price and deviation fields.
+
+### Metric: Crisis Duration (CD)
+
+#### Category
+Persistence / Phenomenon-Specific
+
+#### Definition
+Number of rounds in which peripheral bond price is more than 10% below fundamental.
+
+#### Formula
+```
+CD = count_t [ (P(t) - F(t)) / F(t) < -0.10 ]
+```
 
 **Python function**:
 ```python
-def crisis_duration(price_history: List[float], fundamental: float, crisis_threshold: float = -0.10) -> int:
-    """Number of rounds in crisis state (deviation below threshold).
-
-    Args:
-        price_history: List of bond prices per round
-        fundamental: Fundamental bond price
-        crisis_threshold: Deviation threshold defining crisis state (default −0.10)
-    Returns:
-        Number of rounds spent in crisis state
-    """
+def crisis_duration(price_history: list[float], fundamental: float, crisis_threshold: float = -0.10) -> int:
+    """Count rounds spent in crisis state."""
 ```
 
-**Interpretation**:
-- High CD (> 20 rounds): Persistent crisis; ECB intervention delayed or insufficient
-- Moderate CD (5–20 rounds): Temporary crisis; intervention effective
-- Zero: No crisis episode
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| `0` | no sustained crisis | panic weak or intervention immediate |
+| `5 to 30` | temporary crisis | plausible crisis lifecycle |
+| `> 30` | persistent crisis | backstop or arbitrage weak |
 
-**Theoretical grounding**: De Grauwe & Ji (2012) — crisis duration measures self-fulfilling persistence
-**DOI**: `https://doi.org/10.1016/j.jimonfin.2012.11.003`
+#### Academic Basis
+**Primary source**: De Grauwe & Ji (2013), https://doi.org/10.1016/j.jimonfin.2012.11.003.
 
----
+#### Normal Range (from literature)
+The full 200-round run should allow crisis onset and post-intervention recovery.
 
-### §2.3 Amplification Ratio (AR)
+#### Red Flag Threshold
+- **Too low**: crisis does not persist.
+- **Too high**: recovery mechanism may not work.
 
-**Definition**: Ratio of total sell volume from CreditorPanicker to total sell volume from PeripheryBondSeller; measures sovereign-bank nexus amplification.
+#### Relationship to Other Metrics
+CD rises with CDI and should decline when ECB intervention is effective.
+
+#### Implementation Notes
+Computed from price/fundamental histories.
+
+### Metric: Amplification Ratio (AR)
+
+#### Category
+Agent Activity / Sovereign-Bank Nexus
+
+#### Definition
+Ratio of creditor-panic sell volume to periphery bond seller sell volume.
+
+#### Formula
+```
+AR = creditor_sell_volume / periphery_seller_sell_volume
+```
 
 **Python function**:
 ```python
-def amplification_ratio(creditor_sell_volume: List[float], periphery_sell_volume: List[float]) -> float:
-    """Ratio of CreditorPanicker to PeripheryBondSeller sell volume.
-
-    Args:
-        creditor_sell_volume: Per-round sell quantities from CreditorPanicker
-        periphery_sell_volume: Per-round sell quantities from PeripheryBondSeller
-    Returns:
-        Total volume ratio (> 1 means creditor amplification exceeded initial shock)
-    """
+def amplification_ratio(creditor_sell_volume: list[float], periphery_sell_volume: list[float]) -> float:
+    """Return creditor-panic sell volume relative to initial periphery selling."""
 ```
 
-**Interpretation**:
-- High AR (> 1.0): Creditor panic amplified the initial shock — doom loop active
-- AR ≈ 1.0: Creditor and periphery selling roughly equal
-- Low AR (< 0.5): Creditor panic minimal; initial shock self-contained
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| `< 0.5` | weak doom loop | creditor panic minor |
+| `0.5 to 1.5` | active amplification | sovereign-bank nexus visible |
+| `> 1.5` | panic dominates | inspect panic threshold and size |
 
-**Theoretical grounding**: Acharya et al. (2014) — AR quantifies sovereign-bank nexus
-**DOI**: `https://doi.org/10.1111/jofi.12206`
+#### Academic Basis
+**Primary source**: Acharya, Drechsler, & Schnabl (2014), https://doi.org/10.1111/jofi.12206.
 
----
+#### Normal Range (from literature)
+AR should be nonzero when the doom-loop channel activates.
 
-### §2.4 Intervention Effectiveness Ratio (IER)
+#### Red Flag Threshold
+- **Zero**: creditor panicker inactive or not recorded.
+- **Very high**: second-wave panic overwhelms all other channels.
 
-**Definition**: Fraction of crisis rounds during which ECBIntervenor was actively buying; measures backstop coverage.
+#### Relationship to Other Metrics
+High AR should deepen CDI and lengthen CD unless ECB intervention offsets it.
+
+#### Implementation Notes
+Requires canonical `agent_type` and action payloads in investor records.
+
+### Metric: Intervention Effectiveness Ratio (IER)
+
+#### Category
+Policy / Stabilization
+
+#### Definition
+Fraction of crisis rounds in which the ECB proxy is actively buying.
+
+#### Formula
+```
+IER = ecb_buy_rounds_during_crisis / crisis_rounds
+```
 
 **Python function**:
 ```python
-def intervention_effectiveness_ratio(ecb_buy_rounds: List[bool], crisis_rounds: List[bool]) -> float:
-    """Fraction of crisis rounds with active ECB intervention.
-
-    Args:
-        ecb_buy_rounds: Boolean list — True if ECB bought in that round
-        crisis_rounds: Boolean list — True if price was in crisis state that round
-    Returns:
-        Fraction of crisis rounds covered by ECB buying (0.0–1.0)
-    """
+def intervention_effectiveness_ratio(ecb_buy_rounds: list[bool], crisis_rounds: list[bool]) -> float:
+    """Return the share of crisis rounds covered by ECB buy actions."""
 ```
 
-**Interpretation**:
-- High IER (> 0.80): ECB effectively covered crisis; backstop credible
-- Moderate IER (0.40–0.80): Partial ECB response; crisis outlasted intervention
-- Low IER (< 0.40): ECB intervention ineffective or threshold too negative
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| `< 0.40` | weak or late backstop | intervention may not stop crisis |
+| `0.40 to 0.90` | partial-to-strong backstop | plausible policy response |
+| `> 0.90` | near-continuous support | crisis may be policy-dominated |
 
-**Theoretical grounding**: Draghi (2012) — effective backstop should have IER near 1.0
-**DOI**: N/A (ECB speech)
+#### Academic Basis
+**Primary source**: Draghi (2012) and De Grauwe (2011), https://doi.org/10.2139/ssrn.1930063.
 
----
+#### Normal Range (from literature)
+The model expects intervention only after severe stress, not throughout the full run.
 
-### §2.5 Spread Recovery Time (SRT)
+#### Red Flag Threshold
+- **Zero with high CDI**: ECB threshold or routing problem.
+- **One from the start**: intervention threshold too loose.
 
-**Definition**: Number of rounds for deviation to recover from CDI (crisis bottom) to above −0.05 (near-fundamental).
+#### Relationship to Other Metrics
+Higher IER should shorten recovery time and reduce final deviation.
+
+#### Implementation Notes
+Requires ECB action records and crisis-round classification.
+
+### Metric: Spread Recovery Time (SRT)
+
+#### Category
+Recovery / Policy Effectiveness
+
+#### Definition
+Rounds from the crisis trough until deviation recovers above -5%.
+
+#### Formula
+```
+SRT = min { t > trough : deviation(t) > -0.05 } - trough
+```
 
 **Python function**:
 ```python
-def spread_recovery_time(price_history: List[float], fundamental: float, recovery_threshold: float = -0.05) -> int:
-    """Rounds from crisis bottom to near-fundamental recovery.
-
-    Args:
-        price_history: List of bond prices per round
-        fundamental: Fundamental bond price
-        recovery_threshold: Deviation level considered recovered (default −0.05)
-    Returns:
-        Number of rounds from crisis bottom to recovery; 0 if no crisis; -1 if no recovery
-    """
+def spread_recovery_time(price_history: list[float], fundamental: float, recovery_threshold: float = -0.05) -> int:
+    """Return rounds from crisis trough to near-fundamental recovery."""
 ```
 
-**Interpretation**:
-- Short SRT (< 5 rounds): Rapid recovery; ECB intervention decisive
-- Moderate SRT (5–15 rounds): Gradual recovery; HedgedFund + ECB working together
-- Long SRT (> 15 rounds): Persistent spread; multiple stabilization attempts needed
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| `< 5` | rapid stabilization | strong ECB/arbitrage effect |
+| `5 to 30` | gradual stabilization | plausible crisis resolution |
+| no recovery | incomplete lifecycle | inspect intervention and mean reversion |
 
-**Theoretical grounding**: De Grauwe & Ji (2012) — recovery speed measures ECB credibility
-**DOI**: `https://doi.org/10.1016/j.jimonfin.2012.11.003`
+#### Academic Basis
+**Primary source**: De Grauwe & Ji (2013), https://doi.org/10.1016/j.jimonfin.2012.11.003.
 
----
+#### Normal Range (from literature)
+Recovery should be observable within 200 rounds if the backstop works.
 
-### §2.6 Arbitrage Profit Rate (APR)
+#### Red Flag Threshold
+- **No recovery**: crisis unresolved.
+- **Immediate recovery**: crisis too shallow.
 
-**Definition**: Terminal portfolio value relative to initial value for HedgedFund; measures profit from spread exploitation.
+#### Relationship to Other Metrics
+SRT should fall when IER is high and rise when AR is high.
+
+#### Implementation Notes
+Computed from deviation series.
+
+### Metric: Arbitrage Profit Rate (APR)
+
+#### Category
+Portfolio / Limits To Arbitrage
+
+#### Definition
+Terminal portfolio return for the `HedgedFund` relative to initial wealth.
+
+#### Formula
+```
+APR = (terminal_wealth - initial_wealth) / initial_wealth
+terminal_wealth = cash(T) + position(T) * P(T)
+```
 
 **Python function**:
 ```python
 def arbitrage_profit_rate(hf_terminal_wealth: float, hf_initial_wealth: float) -> float:
-    """HedgedFund terminal profit rate.
-
-    Args:
-        hf_terminal_wealth: HedgedFund final portfolio value (cash + position × final_price)
-        hf_initial_wealth: HedgedFund initial portfolio value
-    Returns:
-        Profit rate (e.g., 0.15 = 15% profit; negative = loss)
-    """
+    """Return HedgedFund terminal profit rate."""
 ```
 
-**Interpretation**:
-- High APR (> 0.10): HedgedFund profited significantly from spread dislocation; crisis was deep and long
-- Low APR (0–0.10): Modest spread exploitation; crisis quickly resolved
-- Negative APR: HedgedFund was caught wrong-way during the crisis
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| negative | arbitrageur caught wrong-way | limits to arbitrage visible |
+| `0 to 0.20` | profitable spread compression | stabilizing arbitrage works |
+| high positive | large dislocation exploited | inspect crisis depth |
 
-**Theoretical grounding**: Shleifer & Vishny (1997) — APR measures arbitrageur ability to exploit crisis
-**DOI**: `https://doi.org/10.1111/j.1540-6261.1997.tb03807.x`
+#### Academic Basis
+**Primary source**: Shleifer & Vishny (1997), https://doi.org/10.1111/j.1540-6261.1997.tb03807.x.
 
----
+#### Normal Range (from literature)
+APR is diagnostic rather than a hard validity condition.
+
+#### Red Flag Threshold
+- **Unavailable**: investor cash/position records missing.
+- **Extreme**: order sizing may dominate market.
+
+#### Relationship to Other Metrics
+APR tends to rise with crisis depth if arbitrage survives funding stress.
+
+#### Implementation Notes
+Requires final cash/position state and final price.
+
+### Metric: API And RAG Quality (AQR)
+
+#### Category
+API Quality / RAG Diagnostics
+
+#### Definition
+Parse/contract quality for API variants and retrieval coverage for Rag.
+
+#### Formula
+```
+retrieval_failure_rate = retrieval_failure_rounds / total_rag_rounds
+api_contract_issue_rate = malformed_or_retry_exhausted_decisions / total_api_decisions
+```
+
+**Python function**:
+```python
+def analyze_rag_knowledge_effect(rag_contexts: dict[str, dict[int, object]]) -> dict[str, object]:
+    """Calculate retrieval coverage from recorded RAG contexts."""
+```
+
+#### Interpretation
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| clean | valid behavioral evidence | preferred state |
+| low retry-only issue rate | stochastic API noise recovered by retry | attach quality note |
+| any exhausted contract failure | incomplete behavioral sample | repair or rerun before acceptance |
+
+#### Academic Basis
+**Primary source**: Project Level-2 quality standard. API outputs must be structurally valid before economic interpretation.
+
+#### Normal Range (from literature)
+Not applicable; project quality gate is used.
+
+#### Red Flag Threshold
+- **Any exhausted parser/provider contract failure**: incomplete run; repair or rerun.
+- **Missing `rag_stats.json`**: RAG output is not auditable.
+
+#### Relationship to Other Metrics
+Economic metrics are not trusted if API behavior is malformed.
+
+#### Implementation Notes
+RAG stats are produced by `Rag/analysis.py`; broader API quality is checked by experiment audit tools.
 
 ## §3 Analysis Dimensions
 
-| Dimension          | What to Measure                          | Key Metric |
-|--------------------|------------------------------------------|------------|
-| Crisis severity    | How far below fundamental did price fall | CDI        |
-| Crisis persistence | How long did crisis last                 | CD         |
-| Doom loop          | Did creditor panic amplify initial shock | AR         |
-| ECB effectiveness  | Did ECB intervention cover crisis rounds | IER        |
-| Recovery speed     | How fast did price recover after crisis  | SRT        |
-| Arbitrage profit   | Did HedgedFund profit from dislocation   | APR        |
+| Dimension | Primary Metrics | Interpretation |
+|---|---|---|
+| Crisis severity | CDI, CD | whether self-fulfilling crisis emerges |
+| Doom loop | AR, sell volume | creditor amplification of initial stress |
+| Policy response | IER, SRT | ECB effectiveness |
+| Arbitrage channel | APR, action volume | stabilizing relative-value behavior |
+| API quality | AQR | validity of LLM-family samples |
 
-## §4 Phase Analysis
+## §4 Phase Analysis Framework
 
-| Phase         | Rounds | Key Events                                            | Metrics to Monitor           |
-|---------------|--------|-------------------------------------------------------|------------------------------|
-| Pre-crisis    | 1–5    | Mild negative deviation; PeripheryBondSeller inactive | CDI near 0                   |
-| Crisis onset  | 6–10   | PeripheryBondSeller triggers; CreditorPanicker begins | CDI rising, AR building      |
-| Crisis peak   | 11–20  | Maximum spread; doom loop active; ECB activating      | CDI peak, IER rising         |
-| Stabilization | 21–30  | ECB buying offsets panickers; spread stabilizing      | SRT shortening               |
-| Recovery      | 31–50  | HedgedFund + ECB driving recovery; spread compressing | CD stabilizing, APR positive |
+| Phase | Entry Condition | Expected Indicators | Metrics |
+|---|---|---|---|
+| Pre-crisis | early rounds and mild deviation | price near fundamental | CDI |
+| Crisis onset | deviation crosses sell threshold | periphery selling begins | CDI, CD |
+| Doom loop | deviation crosses panic threshold | creditor selling amplifies | AR |
+| Intervention | deviation crosses intervention threshold | ECB buy actions | IER |
+| Recovery | deviation rises toward -5% or better | hedge fund and ECB stabilization | SRT, APR |
 
-## §5 Cross-Variant Analysis
+## §5 Cross-Variant Comparison Framework
 
-| Metric | Rule         | LLM         | RuleLLM      | Rag         |
-|--------|--------------|-------------|--------------|-------------|
-| CDI    | 0.15–0.35    | 0.10–0.45   | 0.14–0.32    | 0.12–0.38   |
-| CD     | 10–30 rounds | 5–40 rounds | 10–28 rounds | 8–35 rounds |
-| AR     | 0.8–1.5      | 0.5–2.0     | 0.8–1.4      | 0.7–1.8     |
-| IER    | 0.70–0.95    | 0.50–1.00   | 0.72–0.95    | 0.65–0.98   |
-| SRT    | 5–20 rounds  | 3–25 rounds | 5–18 rounds  | 4–22 rounds |
+| Variant | Baseline Role | Comparison Question | Quality Gate |
+|---|---|---|---|
+| Rule | deterministic threshold baseline | does fixed-threshold interaction produce crisis/recovery? | full output contract |
+| LLM | persona-only crisis reasoning | do discretionary agents panic or intervene differently? | API output audit |
+| RuleLLM | explicit rules plus persona | does rule grounding keep behavior near baseline? | API output audit |
+| Rag | historical crisis context plus LLM | does retrieved eurozone knowledge alter panic or backstop timing? | API output audit and `rag_stats.json` |
 
-## §6 Expected Results
+## §6 Expected Results And Validation
 
-| Agent Type          | Metric      | Expected Value            | Condition                         |
-|---------------------|-------------|---------------------------|-----------------------------------|
-| PeripheryBondSeller | Sell volume | 600 units/round in crisis | deviation < sell_threshold        |
-| CreditorPanicker    | AR          | 0.8–1.5                   | panic_threshold more negative     |
-| ECBIntervenor       | IER         | 0.75–0.95                 | intervention_threshold calibrated |
-| HedgedFund          | APR         | 0.05–0.20                 | Deep crisis, limits to arbitrage  |
-| Market aggregate    | CDI         | 0.15–0.30                 | Rule variant calibration          |
+### §6.1 Stylised Facts
+
+| Stylised Fact | Target | Source | Verification Method | Failure Indicator |
+|---|---|---|---|---|
+| Periphery stress appears | CDI above 0.10 | De Grauwe (2011) | price deviation | no negative deviation |
+| Crisis persists before recovery | CD above zero | De Grauwe & Ji (2013) | crisis duration | one-round-only shock |
+| Creditor panic amplifies selling | nonzero AR | Acharya et al. (2014) | agent action audit | creditor inactive |
+| ECB support stabilizes | finite SRT when intervention active | Draghi (2012) | recovery after trough | no recovery |
+| RAG/API output is auditable | low API issue rate; `rag_stats.json` for Rag | project quality gate | audit scripts | malformed output or missing retrieval stats |
+
+### §6.2 Calibration Targets
+
+| Metric | Target | Diagnostic Bound |
+|---|---|---|
+| CDI | `0.10 to 0.30` preferred | `>0.60` review calibration |
+| CD | `5 to 30` rounds preferred | `0` means no sustained crisis |
+| AR | `0.5 to 1.5` preferred | `0` means doom-loop inactive |
+| IER | nonzero during severe crisis | `1.0` throughout means policy dominates |
+| SRT | finite within 200 rounds | no recovery requires review |
+| AQR | clean preferred; `<=1%` issue rate with note | `>1%` review before acceptance |
+
+Calibration protocol: verify full 200 rounds, compute price path metrics, audit canonical order fields and agent attribution, run API/RAG quality checks, and compare variants only after structural quality passes.
+
+### §6.3 Cross-Variant Predictions
+
+| Variant | Expected Metric Direction | Basis |
+|---|---|---|
+| Rule | reproducible CDI/CD/SRT from thresholds | deterministic rules |
+| LLM | wider CDI and IER variance | discretionary crisis interpretation |
+| RuleLLM | closer to Rule than LLM | explicit threshold grounding |
+| Rag | potentially earlier ECB response or lower panic | retrieved eurozone history |
+
+### §6.4 Validation Failure Signs
+
+| Symptom | Diagnosis | Root Cause | Corrective Action |
+|---|---|---|---|
+| missing fundamental history | analysis invalid | market does not record `fundamental_history` | repair Market record writes |
+| no crisis | self-fulfilling mechanism underpowered | thresholds/order sizes/routing | inspect configs and market orders |
+| no recovery | backstop or mean reversion ineffective | intervention threshold too low or ECB inactive | inspect ECB actions |
+| missing `agent_type` | volume attribution impossible | non-canonical order payload | repair order construction |
+| missing `rag_stats.json` | retrieval not auditable | `rag_context` not recorded or Rag analysis incomplete | repair Rag player/analysis |
 
 ## §7 Visualization Catalogue
 
-1. **Bond price time series**: Line chart with fundamental baseline; shows crisis depth and recovery
-2. **Net demand decomposition**: Stacked bar by investor type per round; shows amplification sources
-3. **CDI and CD heatmap**: Across parameter sweep (sell_threshold × intervention_threshold)
-4. **IER vs. CDI scatter**: ECB effectiveness vs. crisis severity across 4 variants
-5. **HedgedFund APR bar chart**: Profit rate by variant
-6. **Variant comparison radar**: CDI, CD, AR, IER, SRT, APR across 4 variants
+| Plot | Generated By | Purpose |
+|---|---|---|
+| `00_investor_bids.png` | `create_standard_visualizations()` | investor bidding curves against bond price |
+| `01_europeandebtcrisis_dynamics.png` | `create_standard_visualizations()` | peripheral price and fundamental dynamics |
+| `02_europeandebtcrisis_analysis.png` | `create_standard_visualizations()` | deviation, volume, and returns |
+| `03_summary.png` | `create_standard_visualizations()` | standard scenario summary panel |
+| `rag_stats.json` | `Rag/analysis.py::analyze_rag_knowledge_effect()` | RAG retrieval coverage audit |

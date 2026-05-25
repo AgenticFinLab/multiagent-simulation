@@ -262,6 +262,7 @@ class GullibleSpreader(BaseSocialAgent):
     """
     Gullible rumor spreader who readily believes and amplifies unverified claims.
 
+    Theory: simulation-bases.md §4.1 — GullibleSpreader
     Theory: Allport & Postman (1947) — Leveling
         Uncritical transmitters simplify and spread information without verification.
         They are the primary channel through which rumor content spreads.
@@ -340,6 +341,7 @@ class DistortingRelayer(BaseSocialAgent):
     """
     Distorting relayer who introduces systematic errors during retransmission.
 
+    Theory: simulation-bases.md §4.2 — DistortingRelayer
     Theory: Allport & Postman (1947) — Sharpening and Assimilation
         Serial transmission introduces leveling (detail loss), sharpening
         (salient detail exaggeration), and assimilation (bias-driven distortion).
@@ -421,6 +423,7 @@ class SkepticalEvaluator(BaseSocialAgent):
     """
     Skeptical evaluator who critically assesses information before accepting.
 
+    Theory: simulation-bases.md §4.3 — SkepticalEvaluator
     Theory: Bordia & Rosnow (1998) — Rumor as communication
         Skeptical agents serve as informational gatekeepers. They evaluate
         source credibility, cross-check claims, and resist social pressure.
@@ -497,6 +500,7 @@ class FactChecker(BaseSocialAgent):
     """
     Fact-checker who actively investigates claims and broadcasts corrections.
 
+    Theory: simulation-bases.md §4.4 — FactChecker
     Theory: DiFonzo & Bordia (2004, 2007) — Rumor correction and denial
         Effective rumor control requires active, credible denial. Fact-checking
         reduces belief by providing verified counter-information. However,
@@ -580,6 +584,7 @@ class UninformedBystander(BaseSocialAgent):
     """
     Uninformed bystander with random, low-engagement participation.
 
+    Theory: simulation-bases.md §4.5 — UninformedBystander
     Theory: Shibutani (1966) — Rumor as collective problem-solving
         Many people in a rumor's path are minimally engaged. They neither
         actively spread nor correct, but occasionally participate based on

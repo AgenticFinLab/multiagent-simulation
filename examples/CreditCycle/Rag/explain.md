@@ -1,98 +1,95 @@
-# CreditCycle Rag Variant — explain.md
+# Credit Cycle Rag Variant Explanation
 
 ## §1 Overview
 
-The Rag variant augments LLM inference with retrieved knowledge from a per-agent private knowledge store. Before each decision, the agent queries its knowledge store with the current market context and receives relevant passages that are injected into the prompt as `{rag_context}`. This allows agents to draw on credit-cycle theory, historical cases, and Minsky literature during reasoning.
+| Field | Value |
+|---|---|
+| Variant | Rag |
+| Simulation | Credit Cycle |
+| Decision Mechanism | RAG-augmented trading orders using retrieved domain knowledge and the canonical order schema |
+| Theory Reference | `examples/CreditCycle/simulation-bases.md` |
+| Market Broadcast | `configs/CreditCycle/Rag/topology.yml` |
 
-| Aspect             | Detail                                                 |
-|--------------------|--------------------------------------------------------|
-| Variant            | Rag                                                    |
-| Simulation         | CreditCycle                                            |
-| Decision Mechanism | LLM persona + RAG-retrieved context                    |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                        |
-| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`           |
-| RAG Architecture   | Per-agent `KnowledgeStore`; per-round `KnowledgeQuery` |
-| Prompt Location    | `CreditCycle/Rag/prompts.py`                           |
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-## §2 Theory → Implementation Mapping
+## §2 Theory -> Implementation Mapping
 
-### §2.1 RagLLMProCyclicalLender (simulation-bases.md §4.1)
+### §2.1 ProCyclicalLender (simulation-bases.md §4.1)
 
-| Theory Component                            | Rag Implementation                                        |
-|---------------------------------------------|-----------------------------------------------------------|
-| Pro-cyclical leverage (Adrian & Shin, 2010) | Persona + retrieved passages on leverage cycles           |
-| RAG query                                   | `KnowledgeQuery("pro-cyclical lending credit expansion")` |
-| Context injection                           | `{rag_context}` slot in user prompt                       |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `RagLLMProCyclicalLender` uses the RuleLLM pro-cyclical system prompt plus retrieved credit-cycle context. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rag/players.yml:procyclicallender.config.extras` supplies cash/position, order caps, ARK policy, and private knowledge settings. |
+| Variant-specific decision mechanism | RAG context is injected into `RAG_USER_TEMPLATE`; ARK output is parsed by `decide_with_llm_contract()` and recorded with `rag_context`. |
+### §2.2 MinskyBorrower (simulation-bases.md §4.2)
 
-### §2.2 RagLLMMinskyBorrower (simulation-bases.md §4.2)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMMinskyBorrower` uses the RuleLLM Minsky prompt plus retrieved leverage-cycle context. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rag/players.yml:minskyborrower.config.extras` supplies cash/position, order caps, ARK policy, and private knowledge settings. |
+| Variant-specific decision mechanism | RAG context is injected into `RAG_USER_TEMPLATE`; parsed decisions are logged with fallback and retrieval-quality fields. |
+### §2.3 CounterCyclicalLender (simulation-bases.md §4.3)
 
-| Theory Component                 | Rag Implementation                                            |
-|----------------------------------|---------------------------------------------------------------|
-| Minsky trajectory (Minsky, 1986) | RAG may retrieve Minsky's hedge/speculative/Ponzi taxonomy    |
-| RAG query                        | `KnowledgeQuery("Minsky fragility leverage accumulation")`    |
-| Unique benefit                   | RAG-retrieved Minsky theory may improve fragility recognition |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMCounterCyclicalLender` uses the RuleLLM counter-cyclical prompt plus retrieved credit-stabilization context. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rag/players.yml:countercyclicallender.config.extras` supplies cash/position, order caps, ARK policy, and private knowledge settings. |
+| Variant-specific decision mechanism | Retrieved context should help calibrate crisis liquidity and reserve-building decisions. |
+### §2.4 ValueInvestor (simulation-bases.md §4.4)
 
-### §2.3 RagLLMCounterCyclicalLender (simulation-bases.md §4.3)
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMValueInvestor` uses the RuleLLM value-investor prompt plus retrieved valuation and crisis-context evidence. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rag/players.yml:valueinvestor.config.extras` supplies cash/position, order caps, ARK policy, and private knowledge settings. |
+| Variant-specific decision mechanism | Retrieved context should refine fundamental-value reasoning without changing the canonical order schema. |
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-| Theory Component         | Rag Implementation                                                |
-|--------------------------|-------------------------------------------------------------------|
-| Counter-cyclical buffers | RAG retrieves Basel CCyB rationale and historical cases           |
-| RAG query                | `KnowledgeQuery("counter-cyclical capital buffer credit crisis")` |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMNoiseTrader` uses the RuleLLM noise-trader prompt plus retrieved context, but remains a stochastic liquidity source. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/CreditCycle/Rag/players.yml:noisetrader.config.extras` supplies cash/position, order caps, ARK policy, and private knowledge settings. |
+| Variant-specific decision mechanism | RAG context is available for inspection, but the persona remains intentionally weakly informed. |
 
-### §2.4 RagLLMValueInvestor (simulation-bases.md §4.4)
+## §3 Market Mechanism
 
-| Theory Component | Rag Implementation                                              |
-|------------------|-----------------------------------------------------------------|
-| Margin of safety | RAG retrieves Graham-style distressed credit analysis           |
-| RAG query        | `KnowledgeQuery("value investing credit discount fundamental")` |
+The coordinator market is inherited from the Rule implementation. `RagLLMInvestor._initialize_rag()` resolves local or shared indexes from `private_knowledge`, `_build_prompt()` queries top-k credit-cycle passages, and `decide()` emits canonical orders with the retrieved `rag_context` preserved for analysis.
 
-### §2.5 RagLLMNoiseTrader (simulation-bases.md §4.5)
+## §4 Variant Architecture
 
-| Theory Component | Rag Implementation                            |
-|------------------|-----------------------------------------------|
-| Random trading   | RAG context minimally used; persona dominates |
-
-## §3 RAG Architecture
-
-```
-RagLLMInvestor._initialize_rag():
-    KnowledgeStore(agent_id) → loads agent-specific documents
-    shared fallback store → general credit-cycle knowledge
-
-RagLLMInvestor.decide():
-    query = KnowledgeQuery(market_context_summary)
-    rag_context = KnowledgeStore.retrieve(query, top_k=3)
-    user_prompt = template.format(..., rag_context=rag_context)
-    response = LangChainAPIInference.infer(system_prompt, user_prompt)
-```
-
-Per-agent private index ensures persona-relevant passages are prioritized.
-
-## §4 Variant-Specific Features
-
-- **Minsky theory retrieval**: RagLLMMinskyBorrower uniquely benefits from retrieved Minsky passages — may exhibit more accurate hedge→Ponzi trajectory.
-- **Historical case grounding**: Counter-cyclical decisions grounded in retrieved GFC / Basel CCyB case studies.
-- **Dynamic context**: Different market conditions trigger different RAG queries; boom vs. bust phases retrieve different passages.
-- **`{rag_context}` slot**: Injected between system context and decision request in user prompt.
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/CreditCycle/Rag/players.py` |
+| Prompt module | `examples/CreditCycle/Rag/prompts.py` |
+| Inference | ARK LLM via `LangChainAPIInference`; embeddings use Hunyuan/LiteLLM through the project RAG configuration. |
+| Output parsing | `examples/CreditCycle/llm_decision.py:decide_with_llm_contract()` parses and clamps canonical order JSON. |
+| Error handling | Missing knowledge documents or deterministic schema errors fail fast; stochastic API parse-contract failures become explicit logged hold fallbacks and are quality-audited. |
 
 ## §5 Config Reference
 
-Same as Rule variant; adds `rag_store_path`, `top_k_retrieval`, LLM model config.
+| Config | Purpose |
+|---|---|
+| `configs/CreditCycle/Rag/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/CreditCycle/Rag/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/CreditCycle/Rag/topology.yml` | Message routing between coordinator and agents. |
+| `configs/CreditCycle/Rag/persona.yml` | Turn recording and persona metadata. |
 
 ## §6 Running Instructions
 
 ```bash
-cd multiagent-simulation
-python -m examples.CreditCycle.Rag.run
+python examples/CreditCycle/Rag/run_creditcycle_rag.py -c configs/CreditCycle/Rag/simulation.yml
 ```
 
 ## §7 Expected Behavior
 
-- MinskyBorrower: Earlier fragility recognition from Minsky theory retrieval
-- CounterCyclicalLender: More precise crisis timing from historical case retrieval
-- Overall: LAI and CCS may be more moderate than LLM variant (RAG grounds decisions)
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
 ## §8 References
 
-See `simulation-bases.md §2` for full DOI citations.  
-RAG architecture: `masim` KnowledgeStore / KnowledgeQuery / ResourceManager.
+See `examples/CreditCycle/simulation-bases.md §2` for full DOI citations and mechanism references.
+
+## §9 Variant Comparison
+
+See `examples/CreditCycle/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

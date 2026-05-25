@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "Rag",
+  "omitted_raw_artifact_bytes": 28685994,
+  "omitted_raw_artifact_files": 1575,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 27360073,
+      "file_count": 1567,
+      "name": "records",
+      "source_path": "samples/HerdingInformation/Rag/artifacts/records"
+    },
+    {
+      "bytes": 1242584,
+      "file_count": 6,
+      "name": "communication",
+      "source_path": "samples/HerdingInformation/Rag/artifacts/communication"
+    },
+    {
+      "bytes": 83337,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/HerdingInformation/Rag/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/HerdingInformation/Rag/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "HerdingInformation__Rag",
+  "scenario": "HerdingInformation",
+  "source_resource_pack_sample_path": "samples/HerdingInformation/Rag",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/HerdingInformation/Rag"
+}

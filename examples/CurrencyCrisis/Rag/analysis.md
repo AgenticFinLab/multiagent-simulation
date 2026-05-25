@@ -1,43 +1,71 @@
 # CurrencyCrisis Rag Variant — analysis.md
 
-## §1 Metrics and Functions
+## §1 Analysis Overview
 
-| Metric                                      | Function                                                                      | analysis-bases.md Ref |
-|---------------------------------------------|-------------------------------------------------------------------------------|-----------------------|
-| Attack Intensity Index (AII)                | `attack_intensity_index(price_history, fundamental)`                          | §2.1                  |
-| Peg Survival Duration (PSD)                 | `peg_survival_duration(price_history, fundamental, breach_threshold=-0.05)`   | §2.2                  |
-| Defense Exhaustion Rate (DER)               | `defense_exhaustion_rate(defender_cash_history, initial_cash, crisis_rounds)` | §2.3                  |
-| Self-Fulfilling Amplification Factor (SFAF) | `self_fulfilling_amplification_factor(agent_volume_by_type)`                  | §2.4                  |
-| Fundamental Anchor Strength (FAS)           | `fundamental_anchor_strength(hedger_orders, attack_phase_rounds)`             | §2.5                  |
-| Recovery Speed (RS)                         | `recovery_speed(price_history, fundamental, recovery_threshold=0.03)`         | §2.6                  |
-| Wealth Transfer Index (WTI)                 | `wealth_transfer_index(agent_final_states, final_price, initial_wealth)`      | §2.7                  |
+The RAG analysis evaluates whether retrieved FX-crisis knowledge changes
+RuleLLM-style currency-crisis behavior. It uses the same market metrics as the
+Rule baseline and adds retrieval-health review for per-agent knowledge use.
 
-## §2 Rag Variant Notes
+## §2 Metric Implementation
 
-**Analysis script**: `CurrencyCrisis/Rag/analysis.py`
+`Rag/analysis.py` imports the Rule analysis functions and can add RAG-specific
+knowledge-effect checks:
 
-Key Rag-variant-specific analysis notes:
+| Function | Purpose | Root reference |
+|---|---|---|
+| `_load_data(results)` | Load market and canonical order records | `analysis-bases.md §2` |
+| `_compute_attack_intensity_index(...)` | Compute attack depth from maximum negative deviation | `analysis-bases.md §2.1` |
+| `_compute_peg_survival_duration(...)` | Compute rounds until peg breach | `analysis-bases.md §2.2` |
+| `_compute_defense_exhaustion_rate(...)` | Compute central-bank intervention spending during crisis rounds | `analysis-bases.md §2.3` |
+| `_compute_self_fulfilling_amplification_factor(...)` | Compare self-fulfilling sell flow with attacker sell flow | `analysis-bases.md §2.4` |
+| `_compute_fundamental_anchor_strength(...)` | Compute stabilizing hedger buy activity during attack rounds | `analysis-bases.md §2.5` |
+| `_compute_recovery_speed(...)` | Compute rounds from trough back toward the peg | `analysis-bases.md §2.6` |
+| `analyze_rag_knowledge_effect(...)` | Inspect recorded `rag_context` availability and retrieval failure rates | `analysis-bases.md §5` |
 
-- **RAG moderation of AII**: Compare AII(Rag) vs. AII(LLM); lower AII in Rag confirms historical case retrieval moderates attack aggressiveness.
-- **FAS enhancement**: Rag FAS expected highest across variants; lower FAS in Rag than LLM indicates knowledge store retrieval is not improving anchor strength.
-- **SFAF knowledge effect**: Rag SFAF < LLM SFAF confirms RAG coordination failure cases reduce self-fulfilling amplification.
-- **DER historical patterns**: Plot DER curve; Rag DER may show gradual exhaustion matching retrieved historical patterns rather than step-function (Rule) or irregular (LLM).
-- **Retrieved context logging**: Log `retrieved_context` per agent per round; analyze which historical cases were retrieved during attack and crisis phases.
+## §3 Dimension-by-Dimension Interpretation
 
-## §3 Output Files
+| Dimension | RAG-specific interpretation |
+|---|---|
+| Attack depth | Retrieved historical crisis context may moderate or intensify attacks. |
+| Peg survival | Longer survival can indicate better recognition of defense conditions. |
+| Defense exhaustion | Knowledge of reserve depletion can change central-bank timing. |
+| Self-fulfilling amplification | Retrieved contagion examples may alter coordination behavior. |
+| Fundamental anchor | PPP and fundamentals context should support stabilizing hedger behavior. |
+| Recovery | Historical recovery references may improve post-trough decisions. |
+| Wealth transfer | Shows whether RAG knowledge benefits attackers or defenders. |
 
-Rag variant produces the following output files in `outputs/CurrencyCrisis/Rag/`:
+## §4 Variant-Specific Phenomena
 
-| File                   | Content                                              |
-|------------------------|------------------------------------------------------|
-| `price_history.csv`    | Round-by-round price and deviation                   |
-| `agent_orders.csv`     | Per-agent order action, quantity, round              |
-| `agent_wealth.csv`     | Per-agent cash, position, wealth by round            |
-| `metrics_summary.json` | AII, PSD, DER, SFAF, FAS, RS, WTI                    |
-| `llm_responses.jsonl`  | Raw LLM outputs with retrieved context and decisions |
-| `retrieval_log.jsonl`  | Per-round retrieved knowledge chunks per agent       |
+The RAG prompt extends the RuleLLM contract with `{rag_context}`. If retrieval
+returns no content, the runtime injects
+`(No relevant knowledge retrieved this round.)` so the prompt remains explicit
+and auditable.
 
-## §4 References
+## §5 Output Files
 
-All metric definitions with DOI citations: `analysis-bases.md §2`.  
-Investor theory references: `simulation-bases.md §4.1–§4.5`.
+Running `Rag/analysis.py` writes:
+
+| File | Contents |
+|---|---|
+| `00_investor_bids.png` | Market price, peg line, and investor bid curves |
+| `01_currencycrisis_dynamics.png` | Exchange rate vs. peg and deviation thresholds |
+| `02_currencycrisis_analysis.png` | Rolling volatility and per-round returns |
+| `03_summary.png` | Agent VWAP and total volume summary |
+| `summary.json` | Metrics, validation criteria, agent VWAP data, and `rag_knowledge_effect` |
+| `rag_stats.json` | Per-agent retrieval success/failure statistics |
+
+## §6 Cross-Variant Comparison
+
+| Comparison | Interpretation |
+|---|---|
+| Rag vs RuleLLM | Measures the effect of retrieved FX-crisis knowledge. |
+| Rag vs LLM | Separates persona-only reasoning from knowledge-augmented reasoning. |
+| Rag vs Rule | Shows whether knowledge improves or weakens baseline mechanism emergence. |
+
+## §7 Quality Checks
+
+- Confirm 200 configured rounds completed.
+- Confirm RAG assets and embedding config were available at run time.
+- Confirm `{rag_context}` was populated or explicitly replaced by the no-context marker.
+- Audit LLM parse failures, retries, fallback holds, and RAG retrieval-health records
+  before accepting a sample.

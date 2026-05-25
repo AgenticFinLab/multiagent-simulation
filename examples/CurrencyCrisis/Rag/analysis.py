@@ -79,6 +79,10 @@ def analyze_rag_knowledge_effect(
             "mean_retrieval_failure_rate": float(np.mean(failure_rates)),
             "max_retrieval_failure_rate": float(np.max(failure_rates)),
         }
+    else:
+        raise ValueError(
+            "No rag_context values found in investor payloads; Rag records are incomplete"
+        )
 
     return rag_stats
 
@@ -113,8 +117,17 @@ def main() -> None:
 
     # RAG knowledge effect analysis
     rag_stats = analyze_rag_knowledge_effect(data["investor_payloads"])
+    summary["rag_knowledge_effect"] = rag_stats
     with open(os.path.join(output_dir, "rag_stats.json"), "w", encoding="utf-8") as f:
         json.dump(rag_stats, f, indent=2)
+    with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2)
+
+    agg = rag_stats["aggregate"]
+    print(
+        f"Mean RAG retrieval failure rate: "
+        f"{agg['mean_retrieval_failure_rate']:.1%}"
+    )
 
     return summary
 

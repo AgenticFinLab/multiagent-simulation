@@ -7,11 +7,11 @@ Design principle:
        counterpart (ReversalEffect), written as plain-text formulas and thresholds.
 
 Agents:
-    - RuleLLMContrarianInvestor → ContrarianInvestor rules
-    - RuleLLMOverconfidentTrader → MomentumInvestor rules
-    - RuleLLMValueInvestor → OverconfidentTrader rules
-    - RuleLLMMomentumChaser → NoiseTrader rules
-    - RuleLLMNoiseTrader → ValueInvestor rules
+    - RagLLMContrarianInvestor → ContrarianInvestor rules
+    - RagLLMOverconfidentTrader → OverconfidentTrader rules
+    - RagLLMValueInvestor → ValueInvestor rules
+    - RagLLMMomentumChaser → MomentumInvestor rules
+    - RagLLMNoiseTrader → NoiseTrader rules
 """
 
 # =============================================================================
@@ -38,7 +38,8 @@ Apply the quantitative decision rules from the ContrarianInvestor strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
+Set provides_liquidity to true only when the order is intended to add passive market liquidity; otherwise set it to false.
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -67,7 +68,8 @@ Apply the quantitative decision rules from the MomentumInvestor strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
+Set provides_liquidity to true only when the order is intended to add passive market liquidity; otherwise set it to false.
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -96,7 +98,8 @@ Apply the quantitative decision rules from the OverconfidentTrader strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
+Set provides_liquidity to true only when the order is intended to add passive market liquidity; otherwise set it to false.
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -125,7 +128,8 @@ Apply the quantitative decision rules from the NoiseTrader strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
+Set provides_liquidity to true only when the order is intended to add passive market liquidity; otherwise set it to false.
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -154,7 +158,8 @@ Apply the quantitative decision rules from the ValueInvestor strategy:
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": true|false}}
+Set provides_liquidity to true only when the order is intended to add passive market liquidity; otherwise set it to false.
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
 """
 
@@ -184,6 +189,8 @@ RAGLLM_USER_TEMPLATE = """
 Apply your DECISION RULES, informed by the relevant knowledge above and output your trade decision.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <NUMBER>, "quantity": <NUMBER, +buy/-sell>, "reasoning": "<brief>"}}
+The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <NUMBER>, "quantity": <NUMBER, +buy/-sell>, "reasoning": "<brief>", "provides_liquidity": true|false}}
+Set provides_liquidity to true only when the order is intended to add passive market liquidity; otherwise set it to false.
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
 """

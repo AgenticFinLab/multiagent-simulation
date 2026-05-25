@@ -26,7 +26,9 @@ RAG_USER_TEMPLATE = """== RELEVANT KNOWLEDGE ==
 Using the retrieved knowledge and current market state, apply your decision rules.
 
 <analysis>Integrate retrieved knowledge with current market conditions to determine action</analysis>
-<decision>{{"action": "buy" or "sell" or "hold", "quantity": integer}}</decision>"""
+<decision>{{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 __all__ = [
     "RULELLM_PATTERN_MATCHER_SYS",

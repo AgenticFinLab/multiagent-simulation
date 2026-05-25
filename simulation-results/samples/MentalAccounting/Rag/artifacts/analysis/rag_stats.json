@@ -1,0 +1,60 @@
+{
+  "mentalaccountant_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "mentalaccountant_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "housemoneytrader_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "housemoneytrader_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "rationalportfoliomanager": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "sunkcostholder_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "sunkcostholder_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "noisetrader_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "noisetrader_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "aggregate": {
+    "mean_retrieval_failure_rate": 0.0,
+    "max_retrieval_failure_rate": 0.0
+  }
+}

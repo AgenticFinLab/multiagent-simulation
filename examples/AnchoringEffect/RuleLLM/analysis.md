@@ -1,6 +1,6 @@
 # AnchoringEffect RuleLLM — Analysis Documentation
 
-## Overview
+## §1 Overview
 
 | Item                            | Description                                                                                                                                           |
 |---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 
 ---
 
-## 2. Metric Implementation
+## §2 Metric Implementation
 
 All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is implemented in the RuleLLM variant.
 
@@ -26,7 +26,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Mean Absolute Deviation (MAD)
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_mean_abs_deviation()`
+- Implemented in: `Rule/analysis.py → _compute_mad()`
 - Data source: market price records + fundamental value from config
 - Variant-specific notes: Expected to be within 1–2 percentage points of Rule MAD in most runs. Validation criterion: if RuleLLM MAD differs from Rule by >5 percentage points, check rule adherence rate.
 - Expected range for this variant: [2.5%, 12%]
@@ -34,7 +34,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Anchoring Persistence (Half-Life)
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_anchoring_persistence()`
+- Implemented in: `Rule/analysis.py → _compute_half_life()`
 - Data source: deviation time series
 - Variant-specific notes: Half-life should be close to Rule variant. LLM quantity adjustments (±20%) can modestly extend or shorten the half-life by altering cumulative anchoring demand. Large deviations from Rule half-life indicate rule override events.
 - Expected range for this variant: [18, 65] rounds — slight expansion of Rule [20, 60]
@@ -42,7 +42,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Rolling Volatility
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_rolling_volatility()`
+- Implemented in: `Rule/analysis.py → _compute_rolling_volatility()`
 - Data source: price return series
 - Variant-specific notes: Expect slightly higher volatility than Rule when LLM adjusts quantity upward (+20%), and slightly lower when it adjusts downward (−20%). Volatility spikes may coincide with rule override events.
 - Expected range for this variant: [0.5%, 2.2%] per round
@@ -50,7 +50,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Return Autocorrelation
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_autocorrelation()`
+- Implemented in: `Rule/analysis.py → _compute_autocorrelation()`
 - Data source: price return series
 - Variant-specific notes: Autocorrelation pattern should mirror Rule variant closely. Rule override events may slightly reduce autocorrelation by injecting uncorrelated price moves.
 - Expected range for this variant: lag-1 AC in [0.05, 0.25]
@@ -58,7 +58,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Max Drawdown
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_max_drawdown()`
+- Implemented in: `Rule/analysis.py → _compute_max_drawdown()`
 - Data source: cumulative price series
 - Variant-specific notes: Similar to Rule; LLM sell-side quantity amplification (+20%) may deepen occasional drawdown events. If max drawdown significantly exceeds Rule, check for rule override concentrated in sell direction.
 - Expected range for this variant: [4%, 21%]
@@ -66,7 +66,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Agent-Type Trading Volume
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_agent_volumes()`
+- Implemented in: `Rule/analysis.py → calculate_metrics()`
 - Data source: `EXPERIMENT/AnchoringEffect/RuleLLM/records/{agent_id}/*.json`
 - Variant-specific notes: Total volume per agent type should be within ±20% of Rule baseline (reflecting the allowed quantity adjustment). Larger departures indicate rule override events affecting quantity scale.
 - Expected range for this variant: ±20% of Rule baseline volumes
@@ -74,24 +74,24 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Anchoring Bias Magnitude
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_anchoring_bias_magnitude()`
+- Implemented in: `Rule/analysis.py → _compute_bias_magnitude()`
 - Data source: LLM agent records (price, perceived_target derived from reasoning, bid_price)
 - Variant-specific notes: Anchoring bias should be close to Rule since DECISION RULES embed the exact `adjustment_factor = 0.3` formula. If LLM's stated reasoning shows different adjustment factors, this indicates prompt-rule drift.
 - Expected range for this variant: [0.1, 0.55] — similar to Rule [0.1, 0.6]
 
 ---
 
-## 3. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Price Dynamics Analysis
 
 Objective (from analysis-bases.md): Measure how anchoring-induced demand creates and sustains price deviations from fundamental value.
 
 Implementation in analysis.py:
-- Function: `analyze_price_dynamics()`
+- Function: `analyze_anchoring()`
 - Input data: market price records, fundamental value from config
 - Computation: deviation series, MAD, half-life, rolling volatility; overlay Rule baseline for direct comparison
-- Output: `price_dynamics.png`, contribution to `summary.json`
+- Output: `01_price_dynamics.png`, contribution to `summary.json`
 
 Variant-Specific Interpretation:
 - The primary question: do embedded DECISION RULES successfully reproduce Rule-variant price dynamics?
@@ -111,10 +111,10 @@ Expected: near-overlap with occasional small divergences; deviation path similar
 Objective: Measure directional alignment between LLM decisions and Rule-variant decisions at each round. Target: ≥80% directional alignment.
 
 Implementation in analysis.py:
-- Function: `analyze_rule_adherence()`
+- Function: `analyze_anchoring()` plus post-run Level-2 LLM output audit
 - Input data: RuleLLM agent decision records + Rule simulation records (both must be available)
 - Computation: for each round and agent, compare RuleLLM action (buy/sell/hold) to Rule action for same market state; compute adherence rate = matching_rounds / total_rounds
-- Output: `rule_adherence.png`, `adherence_stats.json`
+- Output: post-run Level-2 LLM quality audit report outside this analysis module
 
 Variant-Specific Interpretation:
 - Rule adherence rate ≥80% validates the RuleLLM design (embedded rules are followed).
@@ -134,10 +134,10 @@ Expected: ≥80% aligned (green) across all 5 agent types.
 Objective (from analysis-bases.md): Characterize how each investor type's decisions contribute to anchoring dynamics.
 
 Implementation in analysis.py:
-- Function: `analyze_investor_behavior()`
+- Function: `calculate_metrics()`
 - Input data: per-agent decision records
 - Computation: buy/sell/hold counts; portfolio value; reasoning keyword analysis
-- Output: `investor_behavior.png`
+- Output: `00_investor_bids.png`, plus `agent_volumes` in `summary.json`
 
 Variant-Specific Interpretation:
 - RuleLLM agents' reasoning traces should show explicit rule application (e.g., "computed perceived_target = 105 + (100 − 105) × 0.3 = 103.5").
@@ -151,9 +151,9 @@ Variant-Specific Interpretation:
 Objective (from analysis-bases.md): Position RuleLLM results relative to Rule, LLM, and Rag.
 
 Implementation in analysis.py:
-- Function: `generate_comparison_table()`
+- Function: Cross-variant comparison consumes this variant's `summary.json`
 - Input data: RuleLLM summary.json + Rule/LLM/Rag summary.json (if available)
-- Output: `cross_variant_comparison.png`, updated `summary.json`
+- Output: `summary.json` for external cross-variant comparison
 
 Variant-Specific Interpretation:
 - RuleLLM vs. Rule: the central research comparison. Small differences → rules are sufficient to drive anchoring dynamics; LLM reasoning adds minimal value. Large differences → LLM reasoning meaningfully modulates the phenomenon.
@@ -161,7 +161,7 @@ Variant-Specific Interpretation:
 
 ---
 
-## 4. Variant-Specific Observable Phenomena
+## §4 Variant-Specific Observable Phenomena
 
 Phenomena unique to the RuleLLM variant not present in other variants:
 
@@ -175,21 +175,21 @@ Phenomena unique to the RuleLLM variant not present in other variants:
 
 ---
 
-## 5. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
 | Total Rounds          | Expected Observable                                                                 | Phenomenon Clarity                                                     |
 |-----------------------|-------------------------------------------------------------------------------------|------------------------------------------------------------------------|
 | 50 rounds             | Rule adherence measurable; insufficient for half-life                               | Partial — adherence rate meaningful but persistence metrics incomplete |
-| 100 rounds (standard) | Full anchoring lifecycle; rule adherence statistics stable                          | Good — all 8 metrics + adherence dimension computable                  |
+| 100 rounds | Full anchoring lifecycle begins; rule adherence can be inspected                    | Good for canary analysis but not the full experiment                   |
 | 200 rounds            | Longitudinal rule adherence drift detectable (does LLM drift from rules over time?) | Excellent — enables temporal analysis of rule-following behavior       |
 
 ### Agent Count Scaling
 
 | Agent Count            | Expected Observable                                       | Market Dynamics                                        |
 |------------------------|-----------------------------------------------------------|--------------------------------------------------------|
-| 5 agents (1 per type)  | Clean type-level adherence rates; LLM API cost manageable | Standard — one trace per type                          |
+| 9 investors (default)  | Two anchored, two historical, one rational, two momentum, two noise agents | Full configured market depth                          |
 | 10 agents (2 per type) | Intra-type rule adherence variance visible                | Better statistics — enables per-type variance analysis |
 
 ### Parameter Sensitivity
@@ -203,22 +203,22 @@ Phenomena unique to the RuleLLM variant not present in other variants:
 
 ---
 
-## 6. Output Files Reference
+## §6 Output Files Reference
 
 All outputs written to: `EXPERIMENT/AnchoringEffect/RuleLLM/analysis/`
 
 | Output File                    | Generated By                  | Contents                                                                | Interpretation                                   |
 |--------------------------------|-------------------------------|-------------------------------------------------------------------------|--------------------------------------------------|
-| `price_dynamics.png`           | `analyze_price_dynamics()`    | Price vs. fundamental; deviation series; Rule baseline overlay          | Primary evidence for rule-constrained anchoring  |
-| `rule_adherence.png`           | `analyze_rule_adherence()`    | Adherence rate by agent type and round; override heatmap                | Validates ≥80% directional alignment criterion   |
-| `adherence_stats.json`         | `analyze_rule_adherence()`    | Per-agent adherence rates; override counts; quantity ratio distribution | Quantitative validation of RuleLLM design        |
-| `investor_behavior.png`        | `analyze_investor_behavior()` | Buy/sell/hold counts; portfolio values; rule verbalization rate         | Shows rule application patterns in LLM reasoning |
-| `cross_variant_comparison.png` | `generate_comparison_table()` | Side-by-side metric comparison with Rule/LLM/Rag                        | Positions RuleLLM in variant comparison          |
+| `00_investor_bids.png`         | `create_visualizations()`     | Agent bid and order distribution                                        | Shows rule application patterns in LLM reasoning |
+| `01_price_dynamics.png`        | `create_visualizations()`     | Price vs. fundamental; deviation series                                 | Primary evidence for rule-constrained anchoring  |
+| `02_market_dynamics.png`       | `create_visualizations()`     | Volatility and return distribution                                      | Market-quality diagnostics                       |
+| `03_summary.png`               | `create_visualizations()`     | Summary metrics and persistence                                         | Compact validation overview                      |
+| `summary.json`                 | `main()`                      | Machine-readable metrics with `variant = "RuleLLM"`                     | Cross-variant comparison input                   |
 | `summary.json`                 | `main()`                      | All 8 metrics + adherence rate; variant label                           | Cross-variant comparison input                   |
 
 ---
 
-## 7. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 This variant's expected position in cross-variant comparison (from `analysis-bases.md §5`):
 

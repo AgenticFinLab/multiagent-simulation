@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
+1,1,AvailabilityBias,Rag,SUCCESS,0,5270.391,2026-05-23T01:30:40,2026-05-23T02:58:30,config/simulation.yml,examples/AvailabilityBias/Rag/run_availabilitybias_rag.py,logs/AvailabilityBias__Rag.log,,200,200,

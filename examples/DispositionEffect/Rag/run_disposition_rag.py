@@ -23,8 +23,9 @@ async def main():
     print("-" * 50)
 
     async for status in run_simulation_with_progress(config_path):
+        current_round = getattr(status, "round_num", getattr(status, "current_round", 0))
         print(
-            f"Round {status.round_num}/{status.total_rounds}: "
+            f"Round {current_round}/{status.total_rounds}: "
             f"{status.progress_pct:.1f}% - {status.message}"
         )
 

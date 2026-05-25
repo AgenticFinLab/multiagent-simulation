@@ -1,81 +1,63 @@
-# SVBBankRun Simulation
+# SVBBankRun RuleLLM — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | March 2023 SVB collapse - $42B deposit outflow in one day triggered by social media panic |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Silicon Valley Bank run simulation with social media-accelerated deposit flight and duration risk |
-| **Academic Value** | Understanding march 2023 svb collapse - $42b deposit outflow in one day triggered by social media panic through multi-agent simulation |
+|---|---|
+| Variant | RuleLLM |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | Persona plus explicit decision rules in LLM prompts. |
+| Key Difference from Other Variants | LLM agents receive the deterministic Rule logic as natural-language rules. |
+| Primary Research Contribution | Tests whether rule-anchored language reasoning stays aligned with the Rule baseline. |
+| Files | `players.py`, `prompts.py`, `run_svbbankrun_rulellm.py`, `analysis.py`, `explain.md`, `analysis.md` |
 
-## Theoretical Foundation
+## §2 Theory To Implementation Mapping
 
-- Diamond & Dybvig (1983): Bank runs, deposit insurance, and liquidity
-- Iyer & Puri (2012): Social networks in bank runs
-- Duffie et al. (2023): SVB failure analysis
+| Theory Component | Implementation |
+|---|---|
+| Depositor -> `simulation-bases.md §4.1` | `RULELLM_DEPOSITOR_SYS` includes withdrawal threshold logic. |
+| SocialMediaInfluencer -> `simulation-bases.md §4.2` | `RULELLM_SOCIAL_MEDIA_INFLUENCER_SYS` embeds the amplification formula. |
+| BankManager -> `simulation-bases.md §4.3` | `RULELLM_BANK_MANAGER_SYS` embeds the support-buy rule. |
+| Regulator -> `simulation-bases.md §4.4` | `RULELLM_REGULATOR_SYS` embeds threshold and probability intervention. |
+| BondTrader -> `simulation-bases.md §4.5` | `RULELLM_BOND_TRADER_SYS` embeds the deviation-sensitive rates rule. |
 
-## Agent Descriptions
+## §3 Market Mechanism Implementation
 
-### Depositor
-**Theoretical Basis**: Diamond-Dybvig bank run model
-**Market Role**: destabilizing
-**Description**: Decides whether to withdraw deposits based on bank health and others' actions
-**Parameters**: deposit_amount=1000000, withdrawal_threshold=0.1, social_influence=0.6
+The market is imported from `Rule.players:Market`. RuleLLM agents use the same
+proxy order contract and the same market broadcast as the Rule variant.
 
-### SocialMediaInfluencer
-**Theoretical Basis**: Social media amplification
-**Market Role**: destabilizing
-**Description**: Amplifies panic signals to accelerate bank run
-**Parameters**: follower_count=10000, amplification_factor=3.0, panic_threshold=0.05
+## §4 Variant-Specific Features
 
-### BankManager
-**Theoretical Basis**: Asset-liability management
-**Market Role**: neutral
-**Description**: Manages bank's duration risk and attempts to stabilize
-**Parameters**: duration_gap=6.0, htm_ratio=0.6, capital_ratio=0.08
+Every system prompt has `== PERSONA ==` and `== DECISION RULES ==`. The decision
+JSON is `action`, `quantity`, and `reasoning`; `bid_price` is intentionally not
+part of the SVBBankRun proxy market.
 
-### Regulator
-**Theoretical Basis**: Deposit insurance and lender of last resort
-**Market Role**: stabilizing
-**Description**: May intervene with guarantees or liquidity support
-**Parameters**: intervention_threshold=0.3, guarantee_probability=0.7
+## §5 Architecture Diagram
 
-### BondTrader
-**Theoretical Basis**: Fixed income trading
-**Market Role**: neutral
-**Description**: Trades bonds based on interest rate expectations
-**Parameters**: duration_target=5.0, position_size=10000
-
-
-## Usage
-
-### Rule Variant
-```bash
-python examples/SVBBankRun/Rule/run_svbbankrun.py \
-    -c configs/SVBBankRun/Rule/simulation.yml
+```text
+Market -> state prompt -> RuleLLMInvestor(persona + rules) -> proxy order -> Market
 ```
 
-### LLM Variant
+## §6 Configuration Contract
+
+`configs/SVBBankRun/RuleLLM/players.yml` binds each investor to its prompt
+constant and LLM model. Cash, position, and role-specific parameters mirror the
+Rule baseline.
+
+## §7 Run Command
+
 ```bash
-python examples/SVBBankRun/LLM/run_svbbankrun_llm.py \
-    -c configs/SVBBankRun/LLM/simulation.yml
+python examples/SVBBankRun/RuleLLM/run_svbbankrun_rulellm.py -c configs/SVBBankRun/RuleLLM/simulation.yml
 ```
 
-### RuleLLM Variant
-```bash
-python examples/SVBBankRun/RuleLLM/run_svbbankrun_rulellm.py \
-    -c configs/SVBBankRun/RuleLLM/simulation.yml
-```
+## §8 Validation Checklist
 
-### RAG Variant
-```bash
-python examples/SVBBankRun/Rag/run_svbbankrun_rag.py \
-    -c configs/SVBBankRun/Rag/simulation.yml
-```
+- Prompt sections use exact `== PERSONA ==` and `== DECISION RULES ==` labels.
+- Parser contract matches the proxy market fields.
+- Fallback is explicit and recorded if stochastic API output remains invalid.
 
-## References
+## §9 Expected Variant Behavior
 
-- Diamond & Dybvig (1983): Bank runs, deposit insurance, and liquidity
-- Iyer & Puri (2012): Social networks in bank runs
-- Duffie et al. (2023): SVB failure analysis
+The RuleLLM variant should stay directionally close to the Rule baseline because
+the prompt contains explicit decision rules, while still allowing natural-language
+reasoning to modulate action size.

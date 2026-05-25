@@ -1,0 +1,44 @@
+{
+  "validation": {
+    "is_valid": false,
+    "score": 0.4951,
+    "criteria": {
+      "peak_deviation": {
+        "observed": 21.7,
+        "target_range": "[5%, 15%]",
+        "score": 0.554,
+        "weight": 0.3,
+        "citation": "Baker & Wurgler 2007"
+      },
+      "bias_persistence": {
+        "observed": 0.1327,
+        "target_range": ">= 0.10 (10%+ rounds)",
+        "score": 1.0,
+        "weight": 0.25,
+        "citation": "Tetlock 2007"
+      },
+      "ac1_bias_episode": {
+        "observed": 0.6735,
+        "target_range": "[0.20, 0.40]",
+        "score": 0.316,
+        "weight": 0.25,
+        "citation": "De Bondt & Thaler 1985"
+      },
+      "stabilization_ratio": {
+        "observed": 4.0364,
+        "target_range": "[0.40, 0.80]",
+        "score": 0.0,
+        "weight": 0.2,
+        "citation": "Baker & Wurgler 2007; Shleifer & Vishny 1997"
+      }
+    },
+    "interpretation": "=== AVAILABILITY BIAS SIMULATION VALIDATION: INVALID ===\nOverall Fit Score: 49.5% (threshold: 50%)\n\n[1] BIAS EPISODE DEPTH (PEAK DEVIATION)\n    Observed: 21.7%   Expected: 5\u201315% (Baker & Wurgler 2007)\n    Score: 0.554   Assessment: PASS \u2014 deviation within calibrated range (Baker & Wurgler 2007: 5\u201315%)\n\n[2] BIAS PERSISTENCE (SUSTAINED EPISODE FRACTION)\n    Observed: 13.27%   Expected: >= 10% (Tetlock 2007)\n    Score: 1.000   Assessment: PASS \u2014 sustained bias episodes detected (Tetlock 2007: \u2265 10% of rounds)\n\n[3] OVERREACTION MOMENTUM (AC1 DURING BIAS EPISODE)\n    Observed: 0.6735   Expected: 0.20\u20130.40 (De Bondt & Thaler 1985)\n    Score: 0.316   Assessment: PASS \u2014 overreaction momentum detected (De Bondt & Thaler 1985)\n\n[4] STABILIZATION RATIO (RATIONAL / BIASED VOLUME)\n    Observed: 4.0364   Expected: 0.40\u20130.80 (Baker & Wurgler 2007)\n    Score: 0.000   Assessment: MARGINAL \u2014 rational agents may be over-correcting bias\n\n[SUMMARY]\n    Peak Deviation Score:     0.554 \u00d7 0.30\n    Bias Persistence Score:   1.000 \u00d7 0.25\n    AC1 Score:                0.316 \u00d7 0.25\n    Stabilization Score:      0.000 \u00d7 0.20\n    Fit Score: 49.5%\n    Status: INVALID \u2014 calibration targets not met"
+  },
+  "metrics": {
+    "peak_deviation_pct": 21.697,
+    "bias_persistence": 0.1327,
+    "ac1_bias_episode": 0.6735,
+    "stabilization_ratio": 4.0364,
+    "total_rounds": 200
+  }
+}

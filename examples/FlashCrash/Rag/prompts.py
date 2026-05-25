@@ -62,7 +62,7 @@ scale MUST follow the decision rule above.
 First, think through your analysis step by step inside <analysis>...</analysis> tags.
 Then, output your final decision inside <decision>...</decision> tags.
 
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>", "provides_liquidity": false}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 
 Example format:
@@ -71,7 +71,7 @@ Short momentum is +0.02 (2% up), signal = 0.02 × 3.0 = 0.06. quantity = 0.06 ×
 </analysis>
 
 <decision>
-{"action": "buy", "bid_price": 100.00, "quantity": 3.6, "reasoning": "Positive momentum detected"}
+{"action": "buy", "bid_price": 100.00, "quantity": 3.6, "reasoning": "Positive momentum detected", "provides_liquidity": false}
 </decision>
 
 Output BOTH the analysis and decision sections in your response.
@@ -201,7 +201,7 @@ Step 2 — Decide action:
         provides_liquidity = False
     ELSE:
         quantity = 0  → hold (no trigger)
-        bid_price = 0.0
+        bid_price = current_price
 
 Step 3 — Apply portfolio constraints:
     If selling: quantity ≥ -current_position
@@ -257,7 +257,7 @@ Step 2 — Decide action:
         provides_liquidity = True
     ELSE  (within ±10% of fundamental — no clear opportunity):
         quantity = 0 → hold
-        bid_price = 0.0
+        bid_price = current_price
 
 Step 3 — Apply portfolio constraints:
     If buying: quantity ≤ available_cash / bid_price
@@ -303,4 +303,5 @@ Apply your DECISION RULES, informed by the relevant knowledge above, and output 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <your price as NUMBER>, "quantity": <shares as NUMBER, +buy/-sell>, "reasoning": "<brief>", "provides_liquidity": <true|false>}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
 """

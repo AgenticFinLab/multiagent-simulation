@@ -1,6 +1,6 @@
 # CarryTradeUnwind Rule Variant — Analysis Guide
 
-## 1. Analysis Overview
+## §1 Analysis Overview
 
 This guide covers how to interpret results from the **CarryTradeUnwind Rule** simulation.
 The Rule variant uses fully deterministic algorithmic agents — no LLM calls —
@@ -11,31 +11,32 @@ stabilizing agents reproduce the empirical carry-crash pattern?*
 
 ---
 
-## 2. Metric Implementation (`Rule/analysis.py`)
+## §2 Metric Implementation (`Rule/analysis.py`)
 
-`analysis.py` exports three public functions via `__all__`:
+`analysis.py` exports the scenario data loader, validation helpers, and
+`analyze_carry_trade_unwind()` via `__all__`:
 
-| Function                                     | Purpose                                                                    |
-|----------------------------------------------|----------------------------------------------------------------------------|
-| `load_simulation_data(config)`               | Reads per-round Market JSON records → `{prices, fundamentals, deviations}` |
-| `calculate_metrics(data)`                    | Computes all metrics in §2 of analysis-bases.md                            |
-| `create_visualizations(data, path, variant)` | Saves 2×2 PNG chart                                                        |
+| Function | Purpose |
+|---|---|
+| `_load_data(results)` | Reads market batch stores and investor turn payloads from `masim.utils.load_results()` |
+| `_validate_carry_trade_unwind(...)` | Scores results against `analysis-bases.md §6` calibration targets |
+| `analyze_carry_trade_unwind(data, config, output_dir)` | Computes metrics, writes fixed output artifacts, and returns `summary.json` content |
 
 ### Metric reference
 
-| Metric                       | Formula                        | Target                |
-|------------------------------|--------------------------------|-----------------------|
-| `max_drawdown_pct`           | `max((peak−P)/peak)×100`       | Observe; crisis > 10% |
-| `unwind_velocity`            | `max(                          | ΔP_t                  |
-| `unwind_duration_rounds`     | count(deviation < −0.05)       | Observe               |
-| `crisis_onset_round`         | first t with deviation < −0.05 | Observe               |
-| `recovery_ratio`             | `(                             | dev_min               |
-| `return_autocorrelation_ac1` | `corr(r_t, r_{t+1})`           | Negative during crash |
-| `annualized_vol_pct`         | `std(r)×√252×100`              | Observe               |
+| Metric | Function | analysis-bases.md ref |
+|---|---|---|
+| Maximum Drawdown | `_compute_max_drawdown(prices_list)` | §2 Metric 1 |
+| Unwind Velocity | `_compute_unwind_velocity(prices_list)` | §2 Metric 2 |
+| Unwind Duration | `_compute_unwind_duration(prices_list, fundamental)` | §2 Metric 3 |
+| Crisis Onset Round | `_compute_cascade_onset(prices_list, fundamental)` | §2 Metric 4 |
+| Recovery Ratio | `_compute_recovery_ratio(prices_list)` | §2 Metric 5 |
+| Return Autocorrelation AC(1) | `_compute_autocorrelation(prices_list, lag=1)` | §2 Metric 6 |
+| Annualized Volatility | `_compute_peak_rolling_volatility(prices_list)` | §2 Metric 7 |
 
 ---
 
-## 3. Dimension-by-Dimension Interpretation
+## §3 Dimension-by-Dimension Interpretation
 
 ### 3.1 Price vs Fundamental Plot
 
@@ -59,11 +60,11 @@ stabilizing agents reproduce the empirical carry-crash pattern?*
 ### 3.4 Return Distribution
 
 - Fat left tail in carry-crash environments (negative skewness).
-- Compare standard deviation with annualized_vol_pct in metrics.json.
+- Compare standard deviation with `summary.json → metrics.peak_rolling_vol_pct`.
 
 ---
 
-## 4. Variant-Specific Phenomena
+## §4 Variant-Specific Phenomena
 
 ### 4.1 CarryTrader Trigger
 
@@ -108,7 +109,7 @@ circuit breaker. Observe reduced unwind_velocity in runs with this agent active.
 
 ---
 
-## 5. Scaling and Sensitivity
+## §5 Scaling and Sensitivity
 
 | Parameter               | Effect                                                   |
 |-------------------------|----------------------------------------------------------|
@@ -120,18 +121,21 @@ circuit breaker. Observe reduced unwind_velocity in runs with this agent active.
 
 ---
 
-## 6. Output Files
+## §6 Output Files
 
 Running `Rule/analysis.py` writes to `EXPERIMENT/CarryTradeUnwind/Rule/records/analysis/`:
 
-| File                                 | Contents                                           |
-|--------------------------------------|----------------------------------------------------|
-| `carrytradeunwind_rule_analysis.png` | 2×2 chart: price, deviation, returns, distribution |
-| `metrics.json`                       | Full metric dict from `calculate_metrics()`        |
+| File | Contents |
+|---|---|
+| `00_investor_bids.png` | Market price, fundamental value, and per-agent bid traces |
+| `01_carrytradeunwind_dynamics.png` | FX rate, fundamental anchor, deviation, and crisis thresholds |
+| `02_carrytradeunwind_analysis.png` | Rolling volatility and per-round FX returns |
+| `03_summary.png` | Agent VWAP and total trading-volume summary |
+| `summary.json` | Metrics, price summary, agent VWAP, and nested validation result |
 
 ---
 
-## 7. Cross-Variant Comparison
+## §7 Cross-Variant Comparison
 
 | Dimension              | Rule            | LLM                         | RuleLLM            | Rag               |
 |------------------------|-----------------|-----------------------------|--------------------|-------------------|

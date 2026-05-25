@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
+1,1,TulipMania,LLM,SUCCESS,0,3540.253,2026-05-23T16:19:23,2026-05-23T17:18:24,config/simulation.yml,examples/TulipMania/LLM/run_tulipmania_llm.py,logs/TulipMania__LLM.log,,200,200,

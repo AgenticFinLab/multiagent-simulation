@@ -88,7 +88,7 @@ ragllm_panic_seller:
         sys_message: "examples.MarketCrash.Rag.prompts:RAGLLM_PANIC_SELLER_SYS"
         user_message: "examples.MarketCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_new_tokens: 600
@@ -128,10 +128,10 @@ ragllm_risk_parity:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.MarketCrash.Rag.prompts:RAGLLM_RISK_PARITY_SYS"
+        sys_message: "examples.MarketCrash.Rag.prompts:RAGLLM_RISK_PARITY_FUND_SYS"
         user_message: "examples.MarketCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -171,10 +171,10 @@ ragllm_leveraged_fund:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.MarketCrash.Rag.prompts:RAGLLM_LEVERAGED_FUND_SYS"
+        sys_message: "examples.MarketCrash.Rag.prompts:RAGLLM_LEVERAGED_HEDGE_FUND_SYS"
         user_message: "examples.MarketCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -217,7 +217,7 @@ ragllm_market_maker:
         sys_message: "examples.MarketCrash.Rag.prompts:RAGLLM_MARKET_MAKER_SYS"
         user_message: "examples.MarketCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600
@@ -259,7 +259,7 @@ ragllm_bottom_fisher:
         sys_message: "examples.MarketCrash.Rag.prompts:RAGLLM_BOTTOM_FISHER_SYS"
         user_message: "examples.MarketCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 600

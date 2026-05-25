@@ -7,11 +7,19 @@ Usage:
 """
 
 from examples.GameStopShortSqueeze.Rule.analysis import (
+    SCENARIO,
     calculate_metrics,
     create_visualizations,
     load_simulation_data,
-    main,
 )
+from examples.standard_rule_analysis import run_standard_analysis
+
+DEFAULT_CONFIG = "configs/GameStopShortSqueeze/RuleLLM/simulation.yml"
+
+
+def main():
+    """Run GameStopShortSqueeze RuleLLM analysis."""
+    return run_standard_analysis(SCENARIO, DEFAULT_CONFIG)
 
 __all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations", "main"]
 

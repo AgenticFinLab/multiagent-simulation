@@ -215,31 +215,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMAnchoredTrader(LLMInvestor):
-    """LLM-driven anchored trader — anchors to initial price, adjusts insufficiently. Theory: simulation-bases.md §4 — AnchoredTrader."""
+    """LLM-driven anchored trader — anchors to initial price, adjusts insufficiently. Theory: simulation-bases.md §4.1 — AnchoredTrader."""
 
     pass
 
 
 class LLMHistoricalAnchor(LLMInvestor):
-    """LLM-driven historical anchor — anchors to historical average price. Theory: simulation-bases.md §4 — HistoricalAnchor."""
+    """LLM-driven historical anchor — anchors to historical average price. Theory: simulation-bases.md §4.2 — HistoricalAnchor."""
 
     pass
 
 
 class LLMRationalUpdater(LLMInvestor):
-    """LLM-driven rational updater — Bayesian, no anchoring bias (benchmark). Theory: simulation-bases.md §4 — RationalUpdater."""
+    """LLM-driven rational updater — Bayesian, no anchoring bias (benchmark). Theory: simulation-bases.md §4.3 — RationalUpdater."""
 
     pass
 
 
 class LLMMomentumTrader(LLMInvestor):
-    """LLM-driven momentum trader — follows price trends. Theory: simulation-bases.md §4 — MomentumTrader."""
+    """LLM-driven momentum trader — follows price trends. Theory: simulation-bases.md §4.4 — MomentumTrader."""
 
     pass
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven noise trader — uninformed random participant. Theory: simulation-bases.md §4 — NoiseTrader."""
+    """LLM-driven noise trader — uninformed random participant. Theory: simulation-bases.md §4.5 — NoiseTrader."""
 
     pass
 

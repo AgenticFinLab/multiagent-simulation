@@ -1,0 +1,183 @@
+# =============================================================================
+# AvailabilityBias RuleLLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 Hybrid Rule+LLM Investors
+# System prompts encode both rich persona AND explicit quantitative rules.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (rule-based, identical to Rule variant)
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.AvailabilityBias.RuleLLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.02
+      mean_reversion: 0.03
+      noise_std: 0.5
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RuleLLM Recent Event Overweighter
+# -----------------------------------------------------------------------------
+rulellm_recent_event_overweighter:
+  name: "RuleLLM Recent Event Overweighter"
+  class: "examples.AvailabilityBias.RuleLLM.players:RuleLLMRecentEventOverweighter"
+  num_instances: 2
+  config:
+    identity: "rulellm_recent_event_overweighter"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters embedded in prompt
+      recency_weight: 0.70
+      salience_threshold: 0.02
+      llm:
+        sys_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_RECENT_EVENT_OVERWEIGHTER_SYS"
+        user_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RuleLLM Media Influenced Trader
+# -----------------------------------------------------------------------------
+rulellm_media_influenced_trader:
+  name: "RuleLLM Media Influenced Trader"
+  class: "examples.AvailabilityBias.RuleLLM.players:RuleLLMMediaInfluencedTrader"
+  num_instances: 2
+  config:
+    identity: "rulellm_media_influenced_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters embedded in prompt
+      media_weight: 0.80
+      social_amplification: 1.50
+      llm:
+        sys_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_MEDIA_INFLUENCED_TRADER_SYS"
+        user_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RuleLLM Systematic Analyst
+# -----------------------------------------------------------------------------
+rulellm_systematic_analyst:
+  name: "RuleLLM Systematic Analyst"
+  class: "examples.AvailabilityBias.RuleLLM.players:RuleLLMSystematicAnalyst"
+  num_instances: 1
+  config:
+    identity: "rulellm_systematic_analyst"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters embedded in prompt
+      weight_decay: 0.80
+      evidence_threshold: 0.03
+      llm:
+        sys_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_SYSTEMATIC_ANALYST_SYS"
+        user_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RuleLLM Value Trader
+# -----------------------------------------------------------------------------
+rulellm_value_trader:
+  name: "RuleLLM Value Trader"
+  class: "examples.AvailabilityBias.RuleLLM.players:RuleLLMValueTrader"
+  num_instances: 2
+  config:
+    identity: "rulellm_value_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters embedded in prompt
+      deviation_threshold: 0.05
+      position_size: 300.0
+      llm:
+        sys_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_VALUE_TRADER_SYS"
+        user_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RuleLLM Noise Trader
+# -----------------------------------------------------------------------------
+rulellm_noise_trader:
+  name: "RuleLLM Noise Trader"
+  class: "examples.AvailabilityBias.RuleLLM.players:RuleLLMNoiseTrader"
+  num_instances: 3
+  config:
+    identity: "rulellm_noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # Rule parameters embedded in prompt
+      trade_probability: 0.30
+      llm:
+        sys_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
+        user_message: "examples.AvailabilityBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 500
+  persona: !include persona.yml

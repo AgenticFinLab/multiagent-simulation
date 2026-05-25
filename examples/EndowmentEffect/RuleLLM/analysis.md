@@ -41,3 +41,17 @@ Measure whether embedded rule constraints in the RuleLLM variant preserve the Ru
 
 See `analysis-bases.md §2` for full metric derivations and Python function signatures.
 See `simulation-bases.md §2` for theoretical foundations.
+
+## §6 Output Artifacts
+
+`RuleLLM/analysis.py` reuses the Rule analysis pipeline and writes the same
+`summary.json`, validation console report, helper plots, and fixed PNG contract:
+`00_investor_bids.png`, `01_endowmenteffect_dynamics.png`,
+`02_endowmenteffect_analysis.png`, and `03_summary.png`. The `reasoning` and
+`analysis` fields in order payloads support rule-guidance interpretation.
+
+## §7 Validation Criteria
+
+A valid RuleLLM analysis run must complete 200 rounds, preserve canonical trading
+fields in order payloads, and remain close enough to Rule metrics to support
+formula-guidance comparison.

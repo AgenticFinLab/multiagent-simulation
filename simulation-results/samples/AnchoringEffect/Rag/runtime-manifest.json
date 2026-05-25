@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "Rag",
+  "omitted_raw_artifact_bytes": 73281161,
+  "omitted_raw_artifact_files": 1406,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 54898700,
+      "file_count": 1395,
+      "name": "records",
+      "source_path": "samples/AnchoringEffect/Rag/artifacts/records"
+    },
+    {
+      "bytes": 18298041,
+      "file_count": 9,
+      "name": "communication",
+      "source_path": "samples/AnchoringEffect/Rag/artifacts/communication"
+    },
+    {
+      "bytes": 84420,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/AnchoringEffect/Rag/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/AnchoringEffect/Rag/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "AnchoringEffect__Rag",
+  "scenario": "AnchoringEffect",
+  "source_resource_pack_sample_path": "samples/AnchoringEffect/Rag",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/AnchoringEffect/Rag"
+}

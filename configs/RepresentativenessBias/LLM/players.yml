@@ -40,10 +40,10 @@ patternmatcher:
       base_size: 400
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_PATTERN_MATCHER_SYS"
+        sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_PATTERN_MATCHER_PROMPT"
         user_message: "examples.RepresentativenessBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.8
           max_tokens: 512
@@ -69,10 +69,10 @@ categoryovergeneralizer:
       base_size: 350
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_CATEGORY_OVERGENERALIZER_SYS"
+        sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_CATEGORY_OVERGENERALIZER_PROMPT"
         user_message: "examples.RepresentativenessBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -98,10 +98,10 @@ bayesianupdater:
       base_size: 300
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_BAYESIAN_UPDATER_SYS"
+        sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_BAYESIAN_UPDATER_PROMPT"
         user_message: "examples.RepresentativenessBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -127,10 +127,10 @@ contrarianstatistical:
       base_size: 350
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_CONTRARIAN_STATISTICAL_SYS"
+        sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_CONTRARIAN_STATISTICAL_PROMPT"
         user_message: "examples.RepresentativenessBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -156,10 +156,10 @@ noisetrader:
       noise_size: 150
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_NOISE_TRADER_PROMPT"
         user_message: "examples.RepresentativenessBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
           max_tokens: 512

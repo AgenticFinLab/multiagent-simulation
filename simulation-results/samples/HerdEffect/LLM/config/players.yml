@@ -1,0 +1,174 @@
+# =============================================================================
+# HerdEffectLLM Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 LLM Investors
+#
+# LLM Provider: ByteDance Doubao (via lmbase)
+# Environment Variable: ARK_API_KEY
+#
+# LLM Investor Strategies (defined via system prompts):
+#   - LLMMomentum:   Trend following, buys rising prices (destabilizing)
+#   - LLMContrarian: Value investing, mean reversion (stabilizing)
+#   - LLMRiskAverse: Volatility sensitive, early exit (crash trigger)
+#   - LLMAggressive: Leveraged momentum, acceleration (extreme amplifier)
+#   - LLMNoise:      Random/uninformed trading (liquidity/trigger)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (rule-based, NOT LLM)
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.HerdEffect.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      # Market parameters
+      initial_price: 100.0
+      fundamental_value: 100.0
+      supply_elasticity: 0.1
+      mean_reversion: 0.02
+      noise_std: 0.5
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Investors (5 types with different personalities)
+# Using lmbase with ByteDance Doubao
+# -----------------------------------------------------------------------------
+
+llm_momentum:
+  name: "LLM Momentum Investor"
+  class: "examples.HerdEffect.LLM.players:LLMMomentumInvestor"
+  # Expander → llm_momentum_1, llm_momentum_2
+  num_instances: 2
+  config:
+    identity: "llm_momentum"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.HerdEffect.LLM.prompts:LLM_MOMENTUM_SYS"
+        user_message: "examples.HerdEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_contrarian:
+  name: "LLM Contrarian Investor"
+  class: "examples.HerdEffect.LLM.players:LLMContrarianInvestor"
+  # Expander → llm_contrarian_1, llm_contrarian_2
+  num_instances: 2
+  config:
+    identity: "llm_contrarian"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.HerdEffect.LLM.prompts:LLM_CONTRARIAN_SYS"
+        user_message: "examples.HerdEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_risk_averse:
+  name: "LLM Risk Averse Investor"
+  class: "examples.HerdEffect.LLM.players:LLMRiskAverseInvestor"
+  # Expander → llm_risk_averse_1, llm_risk_averse_2
+  num_instances: 2
+  config:
+    identity: "llm_risk_averse"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.HerdEffect.LLM.prompts:LLM_RISK_AVERSE_SYS"
+        user_message: "examples.HerdEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_aggressive:
+  name: "LLM Aggressive Investor"
+  class: "examples.HerdEffect.LLM.players:LLMAggressiveInvestor"
+  # Expander → llm_aggressive_1, llm_aggressive_2
+  num_instances: 2
+  config:
+    identity: "llm_aggressive"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.HerdEffect.LLM.prompts:LLM_AGGRESSIVE_SYS"
+        user_message: "examples.HerdEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_noise:
+  name: "LLM Noise Trader"
+  class: "examples.HerdEffect.LLM.players:LLMNoiseTrader"
+  # Expander → llm_noise_1, llm_noise_2
+  num_instances: 2
+  config:
+    identity: "llm_noise"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.HerdEffect.LLM.prompts:LLM_NOISE_SYS"
+        user_message: "examples.HerdEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 500
+  persona: !include persona.yml

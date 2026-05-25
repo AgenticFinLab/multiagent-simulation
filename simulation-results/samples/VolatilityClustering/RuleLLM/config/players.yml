@@ -1,0 +1,187 @@
+# =============================================================================
+# VolatilityClusteringLLM Players Configuration
+# =============================================================================
+# LLM-powered Heterogeneous Agent Model for GARCH-like Volatility Clustering
+#
+# LLM Investor Types:
+#   - Market:               Rule-based coordinator with GARCH volatility
+#   - LLMFundamentalist:    Slow mean reversion (stabilizing, delayed)
+#   - LLMTrendFollower:     Fast momentum, vol-sensitive (destabilizing)
+#   - LLMNoiseTrader:       Random liquidity (neutral)
+#   - LLMSlowAdapter:       Conservative, delayed (weak stabilizing)
+#   - LLMVolatilityTrader:  Trades vol regime (weak stabilizing)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) - Rule-Based with GARCH Volatility
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.VolatilityClustering.RuleLLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      base_price_impact: 0.05
+      mean_reversion: 0.02
+      garch_omega: 0.0001
+      garch_alpha: 0.15
+      garch_beta: 0.80
+      min_volatility: 0.5
+      max_volatility: 10.0
+      custom_state_hot_limit: 3
+      base_liquidity: 50.0
+      high_impact_multiplier: 3.0
+      low_liquidity_threshold: 30.0
+      noise_std: 0.4
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Fundamentalist - Slow Mean Reversion
+# -----------------------------------------------------------------------------
+rulellm_fundamentalist:
+  name: "RuleLLM Fundamentalist"
+  class: "examples.VolatilityClustering.RuleLLM.players:RuleLLMFundamentalist"
+  # Expander → rulellm_fundamentalist_1, rulellm_fundamentalist_2
+  num_instances: 2
+  config:
+    identity: "rulellm_fundamentalist"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.VolatilityClustering.RuleLLM.prompts:RULELLM_FUNDAMENTALIST_SYS"
+        user_message: "examples.VolatilityClustering.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Trend Followers (Multiple for stronger effect)
+# -----------------------------------------------------------------------------
+rulellm_trend_follower:
+  name: "RuleLLM Trend Follower"
+  class: "examples.VolatilityClustering.RuleLLM.players:RuleLLMTrendFollower"
+  # Expander → rulellm_trend_follower_1, rulellm_trend_follower_2, rulellm_trend_follower_3
+  num_instances: 3
+  config:
+    identity: "rulellm_trend_follower"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.VolatilityClustering.RuleLLM.prompts:RULELLM_TREND_FOLLOWER_SYS"
+        user_message: "examples.VolatilityClustering.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Noise Trader
+# -----------------------------------------------------------------------------
+rulellm_noise_trader:
+  name: "RuleLLM Noise Trader"
+  class: "examples.VolatilityClustering.RuleLLM.players:RuleLLMNoiseTrader"
+  # Expander → rulellm_noise_trader_1, rulellm_noise_trader_2, rulellm_noise_trader_3
+  num_instances: 3
+  config:
+    identity: "rulellm_noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.VolatilityClustering.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
+        user_message: "examples.VolatilityClustering.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Slow Adapter
+# -----------------------------------------------------------------------------
+rulellm_slow_adapter:
+  name: "RuleLLM Slow Adapter"
+  class: "examples.VolatilityClustering.RuleLLM.players:RuleLLMSlowAdapter"
+  num_instances: 1
+  config:
+    identity: "rulellm_slow_adapter"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.VolatilityClustering.RuleLLM.prompts:RULELLM_SLOW_ADAPTER_SYS"
+        user_message: "examples.VolatilityClustering.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.2
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# LLM Volatility Trader
+# -----------------------------------------------------------------------------
+rulellm_volatility_trader:
+  name: "RuleLLM Volatility Trader"
+  class: "examples.VolatilityClustering.RuleLLM.players:RuleLLMVolatilityTrader"
+  num_instances: 1
+  config:
+    identity: "rulellm_volatility_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.VolatilityClustering.RuleLLM.prompts:RULELLM_VOLATILITY_TRADER_SYS"
+        user_message: "examples.VolatilityClustering.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml

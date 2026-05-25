@@ -1,0 +1,89 @@
+{
+  "aggregate": {
+    "total_rag_rounds": 2200,
+    "retrieval_success_rounds": 2200,
+    "retrieval_fallback_rounds": 0,
+    "retrieval_success_rate": 1.0,
+    "retrieval_fallback_rate": 0.0,
+    "target_met": true
+  },
+  "per_agent": {
+    "lossaverseinvestor_1": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "lossaverseinvestor_2": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "lossaverseinvestor_3": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "breakeventrader_1": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "breakeventrader_2": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "rationaltrader_1": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "rationaltrader_2": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "momentumtrader_1": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "momentumtrader_2": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "marketmaker_1": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    },
+    "marketmaker_2": {
+      "total_rag_rounds": 200,
+      "retrieval_success_rounds": 200,
+      "retrieval_fallback_rounds": 0,
+      "retrieval_success_rate": 1.0,
+      "retrieval_fallback_rate": 0.0
+    }
+  }
+}

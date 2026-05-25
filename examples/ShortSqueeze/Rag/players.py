@@ -113,6 +113,8 @@ class Market(GeneralPlayer):
             hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price"] = extras["initial_price"]
+            self.state.custom_state["short_interest"] = extras["initial_short_interest"]
+            self.state.custom_state["buying_pressure"] = 0.0
             self.state.custom_state["liquidity"] = 100.0
             self.state.custom_state["_random"] = random
 
@@ -150,6 +152,7 @@ class Market(GeneralPlayer):
 
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
+        short_interest = self.state.custom_state["short_interest"]
         orders = self.state.custom_state["orders"]
 
         base_liquidity = extras["base_liquidity"]
@@ -167,6 +170,11 @@ class Market(GeneralPlayer):
 
         total_buy_qty = sum(o["quantity"] for o in orders if o["quantity"] > 0)
         total_sell_qty = abs(sum(o["quantity"] for o in orders if o["quantity"] < 0))
+        cover_buying = sum(
+            o["quantity"]
+            for o in orders
+            if o["quantity"] > 0 and "ShortSeller" in o["strategy"]
+        )
         net_demand = total_buy_qty - total_sell_qty
         total_volume = total_buy_qty + total_sell_qty
 
@@ -183,8 +191,12 @@ class Market(GeneralPlayer):
 
         new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
         price_return = (new_price - current_price) / current_price
+        short_interest = max(0.0, short_interest - cover_buying * 0.5)
+        squeeze_pressure = max(0.0, (new_price / extras["initial_price"] - 1) * 100)
 
         self.state.custom_state["price"] = new_price
+        self.state.custom_state["short_interest"] = short_interest
+        self.state.custom_state["buying_pressure"] = squeeze_pressure
         self.state.custom_state["liquidity"] = total_liquidity
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["volume_history"].append(total_volume)
@@ -209,6 +221,8 @@ class Market(GeneralPlayer):
             "volume": total_volume,
             "net_demand": net_demand,
             "liquidity": total_liquidity,
+            "short_interest": short_interest,
+            "squeeze_pressure": squeeze_pressure,
             "round": round_num,
             "fundamental": fundamental_value,
         }
@@ -610,6 +624,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         return (
             f"Round {round_num}\n"
@@ -623,7 +638,8 @@ class RagLLMInvestor(GeneralPlayer):
             f"Portfolio: cash={cash:.2f}  position={position:.4f}"
             f"  value={cash + position * market_data['price']:.2f}\n"
             "Respond with <analysis>...</analysis> then "
-            '<decision>{"bid_price":...,"quantity":...,"reasoning":"...","provides_liquidity":false}</decision>'
+            '<decision>{"action":"buy"|"sell"|"hold","bid_price":...,"quantity":...,'
+            '"reasoning":"...","provides_liquidity":false}</decision>'
         )
 
     # ------------------------------------------------------------------
@@ -632,7 +648,10 @@ class RagLLMInvestor(GeneralPlayer):
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with analysis and decision sections."""
-        return parse_llm_response_with_thinking(response_text)
+        decision = parse_llm_response_with_thinking(response_text)
+        if "provides_liquidity" not in decision or decision["provides_liquidity"] is None:
+            raise ValueError("Fields missing or null in LLM response: ['provides_liquidity']")
+        return decision
 
     # ------------------------------------------------------------------
     # Portfolio constraints
@@ -715,6 +734,7 @@ class RagLLMInvestor(GeneralPlayer):
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
             "provides_liquidity": decision["provides_liquidity"],
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
 
         return {
@@ -736,31 +756,46 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMShortSeller(RagLLMInvestor):
-    """RAG-augmented short seller."""
+    """RAG-augmented short seller.
+
+    Theory: simulation-bases.md §4.1
+    """
 
     _system_prompt = RAGLLM_SHORT_SELLER_SYS
 
 
 class RagLLMRetailCoordinator(RagLLMInvestor):
-    """RAG-augmented retail coordinator."""
+    """RAG-augmented retail coordinator.
+
+    Theory: simulation-bases.md §4.3
+    """
 
     _system_prompt = RAGLLM_RETAIL_TRADER_SYS
 
 
 class RagLLMMomentumBuyer(RagLLMInvestor):
-    """RAG-augmented momentum buyer."""
+    """RAG-augmented momentum buyer.
+
+    Theory: simulation-bases.md §4.2
+    """
 
     _system_prompt = RAGLLM_MOMENTUM_BUYER_SYS
 
 
 class RagLLMValueInvestor(RagLLMInvestor):
-    """RAG-augmented value investor."""
+    """RAG-augmented value investor.
+
+    Theory: simulation-bases.md §4.4
+    """
 
     _system_prompt = RAGLLM_VALUE_INVESTOR_SYS
 
 
 class RagLLMInstitutionalHolder(RagLLMInvestor):
-    """RAG-augmented institutional holder."""
+    """RAG-augmented institutional holder.
+
+    Theory: simulation-bases.md §4.5
+    """
 
     _system_prompt = RAGLLM_INSTITUTIONAL_HOLDER_SYS
 

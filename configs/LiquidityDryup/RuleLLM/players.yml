@@ -45,7 +45,7 @@ rulellm_market_maker:
         sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_MARKET_MAKER_SYS"
         user_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -68,10 +68,10 @@ rulellm_liquidity_demander:
       initial_position: 50.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_LIQUIDITY_DEMANDER_SYS"
+        sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_LIQUIDITY_SEEKER_SYS"
         user_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -94,10 +94,10 @@ rulellm_arbitrageur:
       initial_position: 50.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_ARBITRAGEUR_SYS"
+        sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_VALUE_TRADER_SYS"
         user_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -120,10 +120,10 @@ rulellm_value:
       initial_position: 50.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_VALUE_SYS"
+        sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_MOMENTUM_TRADER_SYS"
         user_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -146,10 +146,10 @@ rulellm_forced_seller:
       initial_position: 100.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_FORCED_SELLER_SYS"
+        sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.2
           max_new_tokens: 500

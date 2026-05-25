@@ -39,6 +39,7 @@ Usage:
     await simulator.shutdown()
 """
 
+import copy
 import logging
 import json
 import os
@@ -127,8 +128,12 @@ class GeneralSimulator(BaseSimulator):
 
         for player_id, player_cfg in self.config.players.items():
             player_class = load_class(player_cfg["class"])
+            config_data = copy.deepcopy(player_cfg["config"])
+            if self.config.knowledge:
+                extras = config_data.setdefault("extras", {})
+                extras.setdefault("knowledge", copy.deepcopy(self.config.knowledge))
             player_config = PlayerConfig(
-                name=player_cfg["name"], **player_cfg["config"]
+                name=player_cfg["name"], **config_data
             )
 
             actor_name = get_actor_name(self.config.setting["name"], player_id)

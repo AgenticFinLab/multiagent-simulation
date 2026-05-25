@@ -144,10 +144,21 @@ class LLMInvestor(GeneralPlayer):
         elif action_str == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"action": action_str, "quantity": quantity}
+        order = {
+            "action": action_str,
+            "bid_price": price,
+            "quantity": quantity,
+            "reasoning": decision["reasoning"],
+            "analysis": decision["analysis"],
+            "strategy": self.__class__.__name__,
+        }
         return {
             "action": action_str,
+            "bid_price": price,
             "quantity": quantity,
+            "reasoning": decision["reasoning"],
+            "analysis": decision["analysis"],
+            "strategy": self.__class__.__name__,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 

@@ -18,7 +18,7 @@ ray:
   actor_prefix: null
   num_cpus: null
   num_gpus: null
-  object_store_memory: 134217728
+  object_store_memory: 536870912
   include_dashboard: false
   logging_level: "warning"
   log_to_driver: false

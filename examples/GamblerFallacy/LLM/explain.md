@@ -1,75 +1,120 @@
-# GamblerFallacy — LLM Variant
+# GamblerFallacy LLM — Implementation Explanation
 
-## §1 Overview
+## §1 Variant Overview
 
-The LLM variant implements the Gambler's Fallacy simulation using LLM persona reasoning. Each investor applies a persona-defining system prompt encoding the behavioral bias from `simulation-bases.md §4`. A key advantage of LLM over Rule: the two biased agents (§4.1 StreakReversalTrader, §4.2 HotHandTrader) can express genuinely opposite strategies through their prompt personas, unlike the default Rule variant where both have identical logic.
-
-| Aspect             | Detail                                           |
-|--------------------|--------------------------------------------------|
-| Variant            | LLM                                              |
-| Simulation         | GamblerFallacy                                   |
-| Decision Mechanism | LLM persona reasoning via system prompt          |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                  |
-| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`     |
-| Price Model        | P(t+1) = P(t) + λ × D(t) + γ × (F − P(t)) + ε(t) |
-
----
+| Item | Description |
+|---|---|
+| Variant | LLM |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | Persona-only LLM reasoning over current market and portfolio state |
+| Key Difference from Other Variants | Bias expression comes from prompts rather than deterministic rule branches. |
+| Primary Research Contribution | Tests whether LLM personas reproduce gambler's-fallacy and hot-hand behavior without executable rules. |
+| Files | `players.py`, `prompts.py`, `run_gamblerfallacy_llm.py`, `analysis.py`, `explain.md`, `analysis.md` |
 
 ## §2 Theory → Implementation Mapping
 
-### §2.1 LLMStreakReversalTrader (`simulation-bases.md §4.1`)
+### LLMStreakReversalTrader: Theory → Implementation Mapping
 
-| Theory Component                                | Implementation                                                                                            |
-|-------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
-| Law of small numbers (Tversky & Kahneman, 1971) | System prompt: "you believe that streaks must end; after several up moves you feel a reversal is overdue" |
-| Gambler's fallacy reversal belief               | Prompt encodes: "the longer a streak has run, the more strongly you believe a reversal is imminent"       |
-| LLM differentiation from §4.2                   | LLM can express genuine contrarian-to-streak behavior; SAR may deviate from 1.0 unlike Rule variant       |
+> Theory defined in `simulation-bases.md §4.1`.
 
-### §2.2 LLMHotHandTrader (`simulation-bases.md §4.2`)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.1.2 | Class: `LLMStreakReversalTrader`; docstring cites `simulation-bases.md §4.1`. |
+| Behavioral mechanism → sim-bases §4.1.4.2 | System prompt defines a streak-reversal-oriented persona. |
+| Mathematical model → sim-bases §4.1.4.3 | User prompt supplies price, fundamental, deviation, cash, position, and portfolio value. |
+| State variables → sim-bases §4.1.4.3 | `LLMInvestor.perceive()` stores market and portfolio fields. |
+| Parameters → sim-bases §6 | LLM model, temperature, and portfolio settings are loaded from `players.yml`. |
+| LLM persona → sim-bases §4.1.4.4 | Prompt expresses belief that streaks are due for reversal. |
 
-| Theory Component                         | Implementation                                                                                                  |
-|------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| Hot hand fallacy (Gilovich et al., 1985) | System prompt: "you believe winning streaks persist; you follow momentum and buy rising prices"                 |
-| Streak continuation belief               | Prompt encodes: "a stock that's been going up has momentum — ride the wave"                                     |
-| LLM genuine differentiation              | Opposite psychological framing from §4.1; LLM produces divergent decisions, enabling meaningful SAR measurement |
+### LLMHotHandTrader: Theory → Implementation Mapping
 
-### §2.3 LLMIndependentAssessor (`simulation-bases.md §4.3`)
+> Theory defined in `simulation-bases.md §4.2`.
 
-| Theory Component                                | Implementation                                                                                        |
-|-------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| Independence of sequential events (Rabin, 2002) | System prompt: "each price move is statistically independent; you do not see patterns in random data" |
-| Contrarian reasoning                            | Prompt: "when price deviates significantly from fundamental, you trade toward fair value"             |
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.2.2 | Class: `LLMHotHandTrader`; docstring cites `simulation-bases.md §4.2`. |
+| Behavioral mechanism → sim-bases §4.2.4.2 | Prompt describes continuation belief after recent streaks. |
+| Mathematical model → sim-bases §4.2.4.3 | Parsed decision is bounded by portfolio constraints. |
+| State variables → sim-bases §4.2.4.3 | Uses the same market fields as Rule. |
+| Parameters → sim-bases §6 | Config supplies LLM and portfolio settings. |
+| LLM persona → sim-bases §4.2.4.4 | Persona emphasizes hot-hand continuation. |
 
-### §2.4 LLMArbitrageur (`simulation-bases.md §4.4`)
+### LLMIndependentAssessor: Theory → Implementation Mapping
 
-| Theory Component                              | Implementation                                                                                        |
-|-----------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| Limits to arbitrage (Shleifer & Vishny, 1997) | System prompt: arbitrageur who identifies and exploits streak-driven mispricing                       |
-| Exploit bias                                  | Prompt: "you recognize that streak-believers create predictable mispricings that you can profit from" |
+> Theory defined in `simulation-bases.md §4.3`.
 
-### §2.5 LLMNoiseTrader (`simulation-bases.md §4.5`)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.3.2 | Class: `LLMIndependentAssessor`; docstring cites `simulation-bases.md §4.3`. |
+| Behavioral mechanism → sim-bases §4.3.4.2 | Prompt instructs independent probability assessment. |
+| Mathematical model → sim-bases §4.3.4.3 | Decision JSON expresses buy/sell/hold and quantity under current state. |
+| State variables → sim-bases §4.3.4.3 | Reads market broadcast and portfolio values. |
+| Parameters → sim-bases §6 | Config provides model and portfolio values. |
+| LLM persona → sim-bases §4.3.4.4 | Persona rejects sequential-pattern superstition. |
 
-| Theory Component           | Implementation                                                |
-|----------------------------|---------------------------------------------------------------|
-| Noise trader (Black, 1986) | System prompt: uninformed retail trader acting on gut feeling |
+### LLMArbitrageur: Theory → Implementation Mapping
 
----
+> Theory defined in `simulation-bases.md §4.4`.
 
-## §3 LLM-Specific Notes
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.4.2 | Class: `LLMArbitrageur`; docstring cites `simulation-bases.md §4.4`. |
+| Behavioral mechanism → sim-bases §4.4.4.2 | Prompt describes exploiting streak-driven mispricing. |
+| Mathematical model → sim-bases §4.4.4.3 | Model output is parsed and capped before order emission. |
+| State variables → sim-bases §4.4.4.3 | Uses current price, fundamental, deviation, cash, and position. |
+| Parameters → sim-bases §6 | Config supplies runtime settings. |
+| LLM persona → sim-bases §4.4.4.4 | Persona is arbitrage-focused and skeptical of streak bias. |
 
-- **Genuine bias differentiation**: Key LLM advantage — §4.1 and §4.2 can express genuinely opposite biases through prompt personas, unlike the Rule default where both are identical momentum followers.
-- **SAR ≠ 1.0 expected**: LLM variant should produce SAR ≠ 1.0 because §4.1 (reversal) and §4.2 (continuation) should trade in opposite directions more often than the Rule default.
-- **Stochasticity**: Multi-run averaging required; LLM variance is higher than Rule variant.
+### LLMNoiseTrader: Theory → Implementation Mapping
 
----
+> Theory defined in `simulation-bases.md §4.5`.
 
-## §4 Expected Ranges (LLM Variant vs. Rule Baseline)
+| Design Element | Implementation in This Variant |
+|---|---|
+| Theoretical basis → sim-bases §4.5.2 | Class: `LLMNoiseTrader`; docstring cites `simulation-bases.md §4.5`. |
+| Behavioral mechanism → sim-bases §4.5.4.2 | Prompt describes gut-feel liquidity provision. |
+| Mathematical model → sim-bases §4.5.4.3 | Valid decision JSON is constrained by portfolio limits. |
+| State variables → sim-bases §4.5.4.3 | Same market/portfolio fields as other LLM agents. |
+| Parameters → sim-bases §6 | Higher temperature preserves noisier decisions. |
+| LLM persona → sim-bases §4.5.4.4 | Persona avoids systematic probability reasoning. |
 
-| Metric | LLM Expected Range | Rule Baseline | Direction               | Basis                                                         |
-|--------|--------------------|---------------|-------------------------|---------------------------------------------------------------|
-| GFI    | 0.015–0.07         | 0.02–0.08     | Lower                   | Opposite biases partially cancel; net deviation reduced       |
-| SAR    | 0.5–1.8            | ≈ 1.0         | More variable           | Genuine bias differentiation: §4.1 and §4.2 trade differently |
-| HHM    | 100–400 shares     | 150–500       | Lower                   | Partial cancellation reduces net demand magnitude             |
-| ACI    | 0.35–0.70          | 0.35–0.65     | Similar/slightly higher | LLM rational agents may correct more efficiently              |
-| VAF    | 1.2–3.0            | 1.5–3.5       | Lower                   | Reduced net bias effect; cancelling biases dampen volatility  |
-| WDI    | 0.08–0.28          | 0.10–0.35     | Lower                   | Less systematic wealth redistribution with cancelling biases  |
+## §3 Market Mechanism Implementation
+
+LLM imports `Market` from the Rule variant, so price formation and market broadcasts are unchanged. This isolates the effect of prompt-based investor decisions.
+
+## §4 LLM Variant-Specific Features
+
+- Prompts require `<analysis>` and `<decision>` tags.
+- Decision JSON includes `action`, `bid_price`, `quantity`, and `reasoning`.
+- `LLMInvestor.decide()` parses responses and caps quantities by cash, holdings, and max order size.
+- Parse failures raise errors rather than becoming silent fallback holds.
+
+## §5 Architecture Diagram
+
+```text
+Market broadcast -> LLMInvestor prompt -> LLM response -> parser -> capped order -> Market
+```
+
+## §6 Configuration Reference
+
+| Config File | Runtime Role |
+|---|---|
+| `configs/GamblerFallacy/LLM/simulation.yml` | Full-run settings |
+| `configs/GamblerFallacy/LLM/players.yml` | LLM model, prompt refs, class paths, portfolio values |
+| `configs/GamblerFallacy/LLM/topology.yml` | Star topology |
+| `configs/GamblerFallacy/LLM/persona.yml` | Shared proxy/storage settings |
+
+## §7 Expected Runtime Outputs
+
+Accepted LLM runs should complete 200 rounds with parseable decisions and no fallback-hold distortion.
+
+## §8 Validation Checklist
+
+- Prompt constants load through `_system_prompt_path`.
+- User template contains the full market and portfolio state.
+- Prompt/parser contract checks should report zero mismatches.
+- Runtime code and prompts should remain stable unless a documented mechanism or contract defect is found.
+
+## §9 Cross-Variant Comparison Notes
+
+LLM is compared against Rule to estimate the effect of unconstrained language reasoning on streak asymmetry, momentum demand, and correction efficiency.

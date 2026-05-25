@@ -30,6 +30,51 @@ from masim.utils.history import HistoryBuffer
 logger = logging.getLogger("AvailabilityBias")
 
 
+def _require_positive(value: float, label: str) -> None:
+    """Fail fast when a required positive market scalar is invalid."""
+    if value <= 0:
+        raise ValueError(f"{label} must be positive, got {value}")
+
+
+def _build_order(
+    player: GeneralPlayer,
+    action: str,
+    quantity: float,
+    price: float,
+    reasoning: str,
+    strategy: str,
+) -> Dict[str, Any]:
+    """Build the canonical order schema consumed by the market and record loaders."""
+    if action not in ("buy", "sell", "hold"):
+        raise ValueError(f"{player.identity} emitted invalid action: {action}")
+    _require_positive(price, "bid_price")
+    return {
+        "type": "order",
+        "from": player.identity,
+        "action": action,
+        "bid_price": price,
+        "quantity": max(0.0, float(quantity)),
+        "reasoning": reasoning,
+        "agent_type": player.__class__.__name__,
+        "strategy": strategy,
+        "investor": player.identity,
+    }
+
+
+def _apply_order(player: GeneralPlayer, order: Dict[str, Any]) -> None:
+    """Apply a filled canonical order to local portfolio state."""
+    action = order["action"]
+    quantity = float(order["quantity"])
+    price = float(order["bid_price"])
+    _require_positive(price, "bid_price")
+    if action == "buy" and quantity > 0:
+        player.state.custom_state["cash"] -= quantity * price
+        player.state.custom_state["position"] += quantity
+    elif action == "sell" and quantity > 0:
+        player.state.custom_state["cash"] += quantity * price
+        player.state.custom_state["position"] -= quantity
+
+
 class Market(GeneralPlayer):
     """
     Central market for AvailabilityBias simulation.
@@ -60,14 +105,28 @@ class Market(GeneralPlayer):
                 folder=os.path.join(record_path, "market", "price"),
                 entry_limit=hot_limit,
             )
+            self.state.custom_state["fundamental_history"] = HistoryBuffer(
+                folder=os.path.join(record_path, "market", "fundamental"),
+                entry_limit=hot_limit,
+            )
+            self.state.custom_state["volume_history"] = HistoryBuffer(
+                folder=os.path.join(record_path, "market", "volume"),
+                entry_limit=hot_limit,
+            )
 
         orders = []
         if observation.inbounds:
             for inb in observation.inbounds:
-                orders.append(inb.payload)
+                payload = inb.payload
+                if isinstance(payload, dict) and "order" in payload:
+                    payload = payload["order"]
+                if isinstance(payload, dict) and payload["type"] == "order":
+                    orders.append(payload)
 
         current_price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
+        _require_positive(current_price, "current_price")
+        _require_positive(fundamental, "fundamental")
         price_impact = self.state.custom_state["price_impact"]
         mean_reversion = self.state.custom_state["mean_reversion"]
         noise_std = self.state.custom_state["noise_std"]
@@ -75,6 +134,7 @@ class Market(GeneralPlayer):
         buy_qty = sum(o["quantity"] for o in orders if o["action"] == "buy")
         sell_qty = sum(o["quantity"] for o in orders if o["action"] == "sell")
         net_demand = buy_qty - sell_qty
+        volume = buy_qty + sell_qty
 
         noise = random.gauss(0, noise_std)
         new_price = (
@@ -85,15 +145,19 @@ class Market(GeneralPlayer):
         )
         new_price = max(new_price, 0.01)
 
-        deviation = (new_price - fundamental) / fundamental if fundamental > 0 else 0.0
+        deviation = (new_price - fundamental) / fundamental
         prev_price = current_price
-        return_pct = (new_price - prev_price) / prev_price if prev_price > 0 else 0.0
+        _require_positive(prev_price, "prev_price")
+        return_pct = (new_price - prev_price) / prev_price
 
         self.state.custom_state["price"] = new_price
         self.state.custom_state["prev_price"] = prev_price
         self.state.custom_state["deviation"] = deviation
         self.state.custom_state["return_pct"] = return_pct
+        self.state.custom_state["volume"] = volume
         self.state.custom_state["price_history"].append(new_price)
+        self.state.custom_state["fundamental_history"].append(fundamental)
+        self.state.custom_state["volume_history"].append(volume)
 
         logger.debug(
             "Round %d: price=%.2f deviation=%+.2f%%",
@@ -116,6 +180,7 @@ class Market(GeneralPlayer):
             "fundamental": fundamental,
             "deviation": deviation,
             "return_pct": return_pct,
+            "volume": self.state.custom_state["volume"],
             "round": round_num,
         }
 
@@ -162,6 +227,8 @@ class RecentEventOverweighter(GeneralPlayer):
             self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["recency_weight"] = extras["recency_weight"]
             self.state.custom_state["salience_threshold"] = extras["salience_threshold"]
+            self.state.custom_state["max_order"] = extras["max_order"]
+            self.state.custom_state["quantity_scale"] = extras["quantity_scale"]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(record_path, self.config.identity, "price"),
                 entry_limit=hot_limit,
@@ -179,8 +246,11 @@ class RecentEventOverweighter(GeneralPlayer):
         position = self.state.custom_state["position"]
         recency_weight = self.state.custom_state["recency_weight"]
         salience_threshold = self.state.custom_state["salience_threshold"]
+        max_order = self.state.custom_state["max_order"]
+        quantity_scale = self.state.custom_state["quantity_scale"]
 
         price = market_data["price"]
+        _require_positive(price, "market price")
         deviation = market_data["deviation"]
         return_pct = market_data["return_pct"]
 
@@ -192,9 +262,9 @@ class RecentEventOverweighter(GeneralPlayer):
         quantity = 0.0
 
         if abs(perceived_signal) > salience_threshold:
-            quantity = min(300.0, abs(perceived_signal) * 5000)
+            quantity = min(max_order, abs(perceived_signal) * quantity_scale)
             if perceived_signal > 0:
-                affordable = cash / price if price > 0 else 0
+                affordable = cash / price
                 quantity = min(quantity, affordable)
                 if quantity > 0:
                     action = "buy"
@@ -205,12 +275,14 @@ class RecentEventOverweighter(GeneralPlayer):
                 else:
                     quantity = 0.0
 
-        order = {
-            "action": action,
-            "quantity": quantity,
-            "investor": self.identity,
-            "strategy": "RecentEventOverweighter",
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            f"perceived_signal={perceived_signal:+.4f}",
+            "RecentEventOverweighter",
+        )
 
         return {
             **order,
@@ -218,16 +290,7 @@ class RecentEventOverweighter(GeneralPlayer):
         }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        action = decision_payload["action"]
-        quantity = decision_payload["quantity"]
-        price = self.state.custom_state["market_data"]["price"]
-
-        if action == "buy" and quantity > 0:
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
+        _apply_order(self, decision_payload)
 
         return Action(
             action_type="investor_bid",
@@ -266,6 +329,9 @@ class MediaInfluencedTrader(GeneralPlayer):
             self.state.custom_state["social_amplification"] = extras[
                 "social_amplification"
             ]
+            self.state.custom_state["media_threshold"] = extras["media_threshold"]
+            self.state.custom_state["max_order"] = extras["max_order"]
+            self.state.custom_state["quantity_scale"] = extras["quantity_scale"]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(record_path, self.config.identity, "price"),
                 entry_limit=hot_limit,
@@ -283,8 +349,12 @@ class MediaInfluencedTrader(GeneralPlayer):
         position = self.state.custom_state["position"]
         media_weight = self.state.custom_state["media_weight"]
         social_amplification = self.state.custom_state["social_amplification"]
+        media_threshold = self.state.custom_state["media_threshold"]
+        max_order = self.state.custom_state["max_order"]
+        quantity_scale = self.state.custom_state["quantity_scale"]
 
         price = market_data["price"]
+        _require_positive(price, "market price")
         deviation = market_data["deviation"]
 
         amplified_signal = media_weight * deviation * social_amplification
@@ -292,10 +362,10 @@ class MediaInfluencedTrader(GeneralPlayer):
         action = "hold"
         quantity = 0.0
 
-        if abs(amplified_signal) > 0.03:
-            quantity = min(300.0, abs(amplified_signal) * 5000)
+        if abs(amplified_signal) > media_threshold:
+            quantity = min(max_order, abs(amplified_signal) * quantity_scale)
             if amplified_signal > 0:
-                affordable = cash / price if price > 0 else 0
+                affordable = cash / price
                 quantity = min(quantity, affordable)
                 if quantity > 0:
                     action = "buy"
@@ -306,12 +376,14 @@ class MediaInfluencedTrader(GeneralPlayer):
                 else:
                     quantity = 0.0
 
-        order = {
-            "action": action,
-            "quantity": quantity,
-            "investor": self.identity,
-            "strategy": "MediaInfluencedTrader",
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            f"amplified_signal={amplified_signal:+.4f}",
+            "MediaInfluencedTrader",
+        )
 
         return {
             **order,
@@ -319,16 +391,7 @@ class MediaInfluencedTrader(GeneralPlayer):
         }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        action = decision_payload["action"]
-        quantity = decision_payload["quantity"]
-        price = self.state.custom_state["market_data"]["price"]
-
-        if action == "buy" and quantity > 0:
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
+        _apply_order(self, decision_payload)
 
         return Action(
             action_type="investor_bid",
@@ -362,6 +425,11 @@ class SystematicAnalyst(GeneralPlayer):
 
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["evidence_threshold"] = extras[
+                "evidence_threshold"
+            ]
+            self.state.custom_state["max_order"] = extras["max_order"]
+            self.state.custom_state["quantity_scale"] = extras["quantity_scale"]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(record_path, self.config.identity, "price"),
                 entry_limit=hot_limit,
@@ -377,17 +445,21 @@ class SystematicAnalyst(GeneralPlayer):
         market_data = self.state.custom_state["market_data"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
+        evidence_threshold = self.state.custom_state["evidence_threshold"]
+        max_order = self.state.custom_state["max_order"]
+        quantity_scale = self.state.custom_state["quantity_scale"]
 
         price = market_data["price"]
+        _require_positive(price, "market price")
         deviation = market_data["deviation"]
 
         action = "hold"
         quantity = 0.0
 
-        if abs(deviation) > 0.03:
-            quantity = min(300.0, abs(deviation) * 5000)
+        if abs(deviation) > evidence_threshold:
+            quantity = min(max_order, abs(deviation) * quantity_scale)
             if deviation < 0:
-                affordable = cash / price if price > 0 else 0
+                affordable = cash / price
                 quantity = min(quantity, affordable)
                 if quantity > 0:
                     action = "buy"
@@ -398,12 +470,14 @@ class SystematicAnalyst(GeneralPlayer):
                 else:
                     quantity = 0.0
 
-        order = {
-            "action": action,
-            "quantity": quantity,
-            "investor": self.identity,
-            "strategy": "SystematicAnalyst",
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            f"deviation={deviation:+.4f}",
+            "SystematicAnalyst",
+        )
 
         return {
             **order,
@@ -411,16 +485,7 @@ class SystematicAnalyst(GeneralPlayer):
         }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        action = decision_payload["action"]
-        quantity = decision_payload["quantity"]
-        price = self.state.custom_state["market_data"]["price"]
-
-        if action == "buy" and quantity > 0:
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
+        _apply_order(self, decision_payload)
 
         return Action(
             action_type="investor_bid",
@@ -477,13 +542,14 @@ class ValueTrader(GeneralPlayer):
         position_size = self.state.custom_state["position_size"]
 
         price = market_data["price"]
+        _require_positive(price, "market price")
         deviation = market_data["deviation"]
 
         action = "hold"
         quantity = 0.0
 
         if deviation < -deviation_threshold:
-            affordable = cash / price if price > 0 else 0
+            affordable = cash / price
             quantity = min(position_size, affordable)
             if quantity > 0:
                 action = "buy"
@@ -492,12 +558,14 @@ class ValueTrader(GeneralPlayer):
             if quantity > 0:
                 action = "sell"
 
-        order = {
-            "action": action,
-            "quantity": quantity,
-            "investor": self.identity,
-            "strategy": "ValueTrader",
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            f"deviation={deviation:+.4f}",
+            "ValueTrader",
+        )
 
         return {
             **order,
@@ -505,16 +573,7 @@ class ValueTrader(GeneralPlayer):
         }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        action = decision_payload["action"]
-        quantity = decision_payload["quantity"]
-        price = self.state.custom_state["market_data"]["price"]
-
-        if action == "buy" and quantity > 0:
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
+        _apply_order(self, decision_payload)
 
         return Action(
             action_type="investor_bid",
@@ -549,6 +608,8 @@ class NoiseTrader(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
             self.state.custom_state["trade_probability"] = extras["trade_probability"]
+            self.state.custom_state["min_order"] = extras["min_order"]
+            self.state.custom_state["max_order"] = extras["max_order"]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(record_path, self.config.identity, "price"),
                 entry_limit=hot_limit,
@@ -565,16 +626,19 @@ class NoiseTrader(GeneralPlayer):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         trade_prob = self.state.custom_state["trade_probability"]
+        min_order = self.state.custom_state["min_order"]
+        max_order = self.state.custom_state["max_order"]
 
         price = market_data["price"]
+        _require_positive(price, "market price")
 
         action = "hold"
         quantity = 0.0
 
         if random.random() < trade_prob:
-            quantity = random.uniform(100, 500)
+            quantity = random.uniform(min_order, max_order)
             if random.random() > 0.5:
-                affordable = cash / price if price > 0 else 0
+                affordable = cash / price
                 quantity = min(quantity, affordable)
                 if quantity > 0:
                     action = "buy"
@@ -586,12 +650,14 @@ class NoiseTrader(GeneralPlayer):
                     action = "hold"
                     quantity = 0.0
 
-        order = {
-            "action": action,
-            "quantity": quantity,
-            "investor": self.identity,
-            "strategy": "NoiseTrader",
-        }
+        order = _build_order(
+            self,
+            action,
+            quantity,
+            price,
+            f"random_trade_probability={trade_prob:.2f}",
+            "NoiseTrader",
+        )
 
         return {
             **order,
@@ -599,16 +665,7 @@ class NoiseTrader(GeneralPlayer):
         }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        action = decision_payload["action"]
-        quantity = decision_payload["quantity"]
-        price = self.state.custom_state["market_data"]["price"]
-
-        if action == "buy" and quantity > 0:
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
+        _apply_order(self, decision_payload)
 
         return Action(
             action_type="investor_bid",

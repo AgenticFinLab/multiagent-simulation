@@ -1,46 +1,36 @@
-# FlashCrash Rule — Analysis
+# Flash Crash Rule Analysis Plan
 
 ## §1 Objectives
 
-Evaluate whether the rule-based flash crash simulation reproduces:
-1. A distinct crash-cascade-recovery profile
-2. Liquidity vacuum driven by MarketMaker withdrawal
-3. Multi-wave stop-loss cascade
-4. Fundamental-trader-led recovery
+This analysis checks whether the Rule variant produces a complete, analyzable Flash Crash trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric                    | Function                                                                      | Source               |
-|---------------------------|-------------------------------------------------------------------------------|----------------------|
-| Crash depth               | `crash_depth(price_history, fundamental)`                                     | analysis-bases.md §2 |
-| Liquidity vacuum duration | `liquidity_vacuum_duration(liquidity_history, low_threshold=2)`               | analysis-bases.md §2 |
-| Stop-loss cascade volume  | `stop_loss_cascade_volume(orders_history)`                                    | analysis-bases.md §2 |
-| Recovery speed            | `recovery_speed(price_history, trough_round, fundamental)`                    | analysis-bases.md §2 |
-| HFT withdrawal fraction   | `hft_withdrawal_fraction(provides_liquidity_history, crash_start, crash_end)` | analysis-bases.md §2 |
-| Price amplification ratio | `price_amplification_ratio(observed_max_drop, baseline_max_drop)`             | analysis-bases.md §2 |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Crash Depth | `def crash_depth(price_history: list, fundamental: float) -> float` | `analysis-bases.md §2` |
+| Liquidity Vacuum Duration | `def liquidity_vacuum_duration(liquidity_history: list, low_threshold: float = 50.0) -> int` | `analysis-bases.md §2` |
+| Stop-Loss Cascade Volume | `def stop_loss_cascade_volume(orders_history: list) -> float` | `analysis-bases.md §2` |
+| Recovery Speed | `def recovery_speed(price_history: list, trough_round: int, fundamental: float, recovery_threshold: float = 0.02) -> int` | `analysis-bases.md §2` |
+| Liquidity Provider Withdrawal Fraction | `def liquidity_provider_withdrawal_fraction(provides_liquidity_history: list, crash_start: int, crash_end: int) -> float` | `analysis-bases.md §2` |
+| Price Amplification Ratio | `def price_amplification_ratio(observed_max_drop: float, baseline_max_drop: float) -> float` | `analysis-bases.md §2` |
 
-## §3 Variant-Specific Notes (Rule)
+## §3 Analysis Dimensions
 
-- All thresholds are fixed → `crash_depth` and `recovery_speed` are reproducible given the same config
-- `liquidity_vacuum_duration` is determined entirely by `volatility_threshold` distribution across MarketMaker instances
-- Stop-loss cascade waves are discrete: each `StopLossTrader` with a different `stop_loss_percent` fires at a predictable price level
-- `price_amplification_ratio` is highest in Rule variant (no agent can override the multiplier)
-- Recovery onset is deterministic: FundamentalTrader entry fires when `deviation > value_threshold`
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether Rule preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-## §4 Expected Ranges (Rule)
+## §4 Phase Analysis
 
-| Metric                      | Expected range       |
-|-----------------------------|----------------------|
-| `crash_depth`               | 0.05–0.12 (5–12 %)   |
-| `liquidity_vacuum_duration` | 5–20 rounds          |
-| `stop_loss_cascade_volume`  | 500–3000 shares      |
-| `recovery_speed`            | 10–30 rounds         |
-| `hft_withdrawal_fraction`   | 0.6–1.0 during crash |
-| `price_amplification_ratio` | 1.5–4.0 ×            |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-- simulation-bases.md §4 — investor taxonomy and parameter definitions
-- analysis-bases.md §2 — metric function signatures
-- Kirilenko et al. (2017) doi:10.1111/jofi.12498
-- Grossman & Miller (1988) doi:10.1111/j.1540-6261.1988.tb02607.x
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png`, `01_flashcrash_dynamics.png`, `02_flashcrash_analysis.png`, and `03_summary.png`.

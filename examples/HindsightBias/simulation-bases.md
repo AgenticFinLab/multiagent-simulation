@@ -194,7 +194,7 @@ Theory 3 explains why even with two rational stabilizing agents (§4.3, §4.4) t
 | Price formation   | P(t+1) = P(t) + λ × D(t) + γ × (F − P(t)) + ε(t)               | Standard Walrasian ABM market (Farmer & Foley, 2009)    |
 | Fundamental value | Constant F                                                     | Isolates hindsight bias as the sole source of deviation |
 | Market broadcast  | `{type, price, fundamental, deviation, round}`                 | Provides all signals needed for hindsight-based trading |
-| Order format      | buy / sell / hold with quantity                                | Standard asymmetric order flow                          |
+| Order format      | buy / sell / hold with `bid_price`, `quantity`, `reasoning`, `agent_type`, and `strategy` | Canonical auditable order flow |
 | Agent capacity    | Biased agents: max 800 shares; rational agents: max 500 shares | Implements limits to arbitrage (Theory 3)               |
 
 ---
@@ -205,7 +205,7 @@ Theory 3 explains why even with two rational stabilizing agents (§4.3, §4.4) t
 
 **Summary**: Implements Fischhoff (1975) hindsight bias — the agent interprets price moves as "obviously" predictable in retrospect, amplifying momentum by buying when deviation > 0.02 and selling when deviation < −0.02.
 
-**Foundation**: Fischhoff, B. (1975). "Hindsight ≠ Foresight." *JEP:HPP*, 1(3), 288–299. `doi:10.1037/0096-1523.1.3.288`; Daniel, Hirshleifer & Subrahmanyam (1998). `doi:10.1111/0022-1082.00077`
+**Theoretical and Empirical Basis**: Fischhoff, B. (1975). "Hindsight ≠ Foresight." *JEP:HPP*, 1(3), 288–299. `doi:10.1037/0096-1523.1.3.288`; Daniel, Hirshleifer & Subrahmanyam (1998). `doi:10.1111/0022-1082.00077`
 
 **Design Purpose**: Encode the "knew-it-all-along" effect in position sizing — each perceived success inflates confidence via `hindsight_inflation` and `prediction_overweight`, creating a momentum amplifier that drives price away from fundamental.
 
@@ -219,7 +219,7 @@ Theory 3 explains why even with two rational stabilizing agents (§4.3, §4.4) t
 | Cash constraint     | Cannot buy more than cash allows                                  | `buy_qty = min(qty, int(cash / price))`                                        |
 | Position constraint | Cannot sell more than held                                        | `sell_qty = min(qty, max(position, 0))`                                        |
 
-**Decision Walkthrough**:
+**Decision Process**:
 1. Receive market broadcast: `{price, fundamental, deviation, round}`
 2. Check `abs(deviation) > 0.02` — if not, hold
 3. If deviation > 0: bias triggers "this move was obvious" → buy order
@@ -228,13 +228,13 @@ Theory 3 explains why even with two rational stabilizing agents (§4.3, §4.4) t
 
 **Worked Example**: fundamental = 100, price = 103.5, deviation = +0.035, hindsight_inflation = 1.2, prediction_overweight = 1.0 → qty = min(800, int(0.035 × 5000 × 1.2 × 1.0)) = min(800, 210) = 210 shares buy order.
 
-**References**: `simulation-bases.md §2 Theory 1`; `doi:10.1037/0096-1523.1.3.288`; `doi:10.1111/0022-1082.00077`
+**Academic References**: `simulation-bases.md §2 Theory 1`; `doi:10.1037/0096-1523.1.3.288`; `doi:10.1111/0022-1082.00077`
 
 ### §4.2 OutcomeLearner
 
 **Summary**: Implements Fischhoff & Beyth (1975) outcome bias and Odean (1998) selective attribution — the agent attributes gains to skill and losses to bad luck, producing asymmetric momentum that is stronger in bull phases.
 
-**Foundation**: Fischhoff & Beyth (1975). "'I Knew It Would Happen'." *OBHP*, 13(1), 1–16. `doi:10.1016/0030-5073(75)90002-1`; Odean (1998). `doi:10.1111/0022-1082.00259`
+**Theoretical and Empirical Basis**: Fischhoff & Beyth (1975). "'I Knew It Would Happen'." *OBHP*, 13(1), 1–16. `doi:10.1016/0030-5073(75)90002-1`; Odean (1998). `doi:10.1111/0022-1082.00259`
 
 **Design Purpose**: Encode selective attribution — `success_attribution` scales up confidence after gains, `failure_discount` reduces the downward update after losses, creating an asymmetric confidence trajectory that generates bull-phase momentum dominance (OBI > 1.0).
 
@@ -248,7 +248,7 @@ Theory 3 explains why even with two rational stabilizing agents (§4.3, §4.4) t
 | Cash constraint     | Cannot exceed available cash                             | `buy_qty = min(qty, int(cash / price))`                                   |
 | Position constraint | Cannot sell beyond held shares                           | `sell_qty = min(qty, max(position, 0))`                                   |
 
-**Decision Walkthrough**:
+**Decision Process**:
 1. Receive market broadcast: `{price, fundamental, deviation, round}`
 2. Check `abs(deviation) > 0.02` — if not, hold
 3. If deviation > 0: success attribution active → buy with amplified confidence
@@ -257,15 +257,15 @@ Theory 3 explains why even with two rational stabilizing agents (§4.3, §4.4) t
 
 **Worked Example**: fundamental = 100, price = 103.5, deviation = +0.035, success_attribution = 1.5, failure_discount = 0.5 → qty = min(800, int(0.035 × 5000 × 1.5)) = min(800, 262) = 262 shares buy order. (In loss round: qty = min(800, int(0.035 × 5000 × 0.5)) = min(800, 87) = 87 shares sell order.)
 
-**References**: `simulation-bases.md §2 Theory 2`; `doi:10.1016/0030-5073(75)90002-1`; Barber & Odean (2000) `doi:10.1111/0022-1082.00226`
+**Academic References**: `simulation-bases.md §2 Theory 2`; `doi:10.1016/0030-5073(75)90002-1`; Barber & Odean (2000) `doi:10.1111/0022-1082.00226`
 
-**Note**: §4.1 and §4.2 have identical logic at default extras (both parameters = 1.0). Differentiation requires non-default extras calibration; the design captures that both biases produce the same first-order market behavior.
+**Note**: §4.1 and §4.2 share the same directional rule, but branch-current defaults differentiate their scale: §4.1 uses `hindsight_inflation = 1.5`, while §4.2 uses `success_attribution = 1.3` for positive deviations and `failure_discount = 1.0` for negative deviations.
 
 ### §4.3 ProcessEvaluator
 
 **Summary**: Implements Roese & Vohs (2012) process-oriented rationality — the agent evaluates decisions on process quality independent of outcome narratives, acting as a contrarian stabilizer at larger deviations (|deviation| > 0.05).
 
-**Foundation**: Roese, N.J. & Vohs, K.D. (2012). "Hindsight Bias." *Perspectives on Psychological Science*, 7(5), 411–426. `doi:10.1177/1745691612454303`; Shleifer & Vishny (1997). `doi:10.1111/j.1540-6261.1997.tb03807.x`
+**Theoretical and Empirical Basis**: Roese, N.J. & Vohs, K.D. (2012). "Hindsight Bias." *Perspectives on Psychological Science*, 7(5), 411–426. `doi:10.1177/1745691612454303`; Shleifer & Vishny (1997). `doi:10.1111/j.1540-6261.1997.tb03807.x`
 
 **Design Purpose**: Encode the rational baseline that focuses on process rather than outcome — when deviation exceeds 0.05, the agent concludes the process-based analysis indicates mispricing regardless of whether the narrative makes the move seem "obvious", acting as a contrarian correction force.
 
@@ -278,7 +278,7 @@ Theory 3 explains why even with two rational stabilizing agents (§4.3, §4.4) t
 | Quantity          | Scaled by deviation magnitude and process/outcome weight parameters | `min(500, int(abs(dev) × 3000 × process_weight × outcome_weight))` |
 | Cash constraint   | Cannot exceed available cash                                        | `buy_qty = min(qty, int(cash / price))`                            |
 
-**Decision Walkthrough**:
+**Decision Process**:
 1. Receive market broadcast: `{price, fundamental, deviation, round}`
 2. Check `abs(deviation) > 0.05` — if not, hold
 3. If deviation > 0.05: price above fundamental → sell order (correcting overpricing)
@@ -287,13 +287,13 @@ Theory 3 explains why even with two rational stabilizing agents (§4.3, §4.4) t
 
 **Worked Example**: fundamental = 100, price = 106, deviation = +0.06, process_weight = 1.0, outcome_weight = 1.0 → qty = min(500, int(0.06 × 3000 × 1.0)) = min(500, 180) = 180 shares sell order.
 
-**References**: `simulation-bases.md §2 Theory 3`; `doi:10.1177/1745691612454303`; Pontiff (2006) `doi:10.1016/j.jfineco.2005.09.001`
+**Academic References**: `simulation-bases.md §2 Theory 3`; `doi:10.1177/1745691612454303`; Pontiff (2006) `doi:10.1016/j.jfineco.2005.09.001`
 
 ### §4.4 ContrarianSkeptic
 
 **Summary**: Implements Roese & Vohs (2012) narrative skepticism — the agent resists post-hoc consensus narratives and trades against deviations with a higher threshold, acting as a second rational stabilizer at |deviation| > 0.05.
 
-**Foundation**: Roese, N.J. & Vohs, K.D. (2012). *Perspectives on Psychological Science*, 7(5), 411–426. `doi:10.1177/1745691612454303`; De Bondt & Thaler (1985). `doi:10.1111/j.1540-6261.1985.tb05004.x`
+**Theoretical and Empirical Basis**: Roese, N.J. & Vohs, K.D. (2012). *Perspectives on Psychological Science*, 7(5), 411–426. `doi:10.1177/1745691612454303`; De Bondt & Thaler (1985). `doi:10.1111/j.1540-6261.1985.tb05004.x`
 
 **Design Purpose**: Encode skepticism of "obvious in hindsight" narratives — the agent refuses to be swept into consensus momentum and instead acts on the fundamental signal alone, providing a second correction force alongside ProcessEvaluator.
 
@@ -303,25 +303,24 @@ Theory 3 explains why even with two rational stabilizing agents (§4.3, §4.4) t
 |--------------------|--------------------------------------------------------|---------------------------------------------------------------------|
 | Activation         | Same threshold as ProcessEvaluator                     | `abs(deviation) > 0.05`                                             |
 | Direction          | Contrarian — trades against deviation                  | buy if dev < −0.05; sell if dev > 0.05                              |
-| Quantity           | Scaled by deviation and skepticism/position parameters | `min(500, int(abs(dev) × 3000 × skepticism_level)) + position_size` |
-| Position size base | Fixed base quantity added to formula                   | `position_size` (default: 100)                                      |
+| Quantity           | Scaled by deviation and skepticism parameter | `min(max_order, int(abs(dev) × quantity_scale × skepticism_level))` |
 
-**Decision Walkthrough**:
+**Decision Process**:
 1. Receive market broadcast: `{price, fundamental, deviation, round}`
 2. Check `abs(deviation) > 0.05` — if not, hold
 3. If deviation > 0.05: narrative skeptic concludes "this isn't as obvious as market thinks" → sell order
 4. If deviation < −0.05: similarly → buy order
-5. Quantity = `min(500, int(abs(dev) × 3000 × skepticism_level)) + position_size`
+5. Quantity = `min(max_order, int(abs(dev) × quantity_scale × skepticism_level))`
 
-**Worked Example**: fundamental = 100, price = 107, deviation = +0.07, skepticism_level = 1.2, position_size = 100 → qty = min(500, int(0.07 × 3000 × 1.2)) + 100 = min(500, 252) + 100 = 352 shares sell order.
+**Worked Example**: fundamental = 100, price = 107, deviation = +0.07, skepticism_level = 0.6, quantity_scale = 3000, max_order = 500 → qty = min(500, int(0.07 × 3000 × 0.6)) = 126 shares sell order.
 
-**References**: `simulation-bases.md §2 Theory 3`; `doi:10.1177/1745691612454303`; Shleifer & Vishny (1997) `doi:10.1111/j.1540-6261.1997.tb03807.x`
+**Academic References**: `simulation-bases.md §2 Theory 3`; `doi:10.1177/1745691612454303`; Shleifer & Vishny (1997) `doi:10.1111/j.1540-6261.1997.tb03807.x`
 
 ### §4.5 NoiseTrader
 
 **Summary**: Implements Black (1986) uninformed noise trading — the agent trades randomly with no fundamental signal, providing baseline liquidity and ensuring non-trivial price volatility even in the absence of bias agents.
 
-**Foundation**: Black, F. (1986). "Noise." *Journal of Finance*, 41(3), 529–543. `doi:10.1111/j.1540-6261.1986.tb04513.x`
+**Theoretical and Empirical Basis**: Black, F. (1986). "Noise." *Journal of Finance*, 41(3), 529–543. `doi:10.1111/j.1540-6261.1986.tb04513.x`
 
 **Design Purpose**: Provide stochastic baseline trading that prevents trivially clean price series; the random trades occasionally push prices across bias agent thresholds (0.02, 0.05), creating natural variation in bias onset timing across seeds.
 
@@ -331,17 +330,17 @@ Theory 3 explains why even with two rational stabilizing agents (§4.3, §4.4) t
 |-------------------|--------------------------|-------------------------------------------------|
 | Activity          | Trades on a random basis | `if random.random() < trade_probability: trade` |
 | Direction         | Uniformly random         | 50% buy, 50% sell                               |
-| Quantity          | Random within range      | `random.randint(100, 500)` shares               |
+| Quantity          | Random within config range | `random.randint(min_order, max_order)` shares |
 
-**Decision Walkthrough**:
+**Decision Process**:
 1. Receive market broadcast: `{price, fundamental, deviation, round}`
 2. Draw uniform random number; if < `trade_probability` (default 0.30): execute trade
 3. Draw uniform random direction: buy or sell
-4. Draw random quantity from [100, 500]
+4. Draw random quantity from `[min_order, max_order]`
 
 **Worked Example**: trade_probability = 0.30 → 30% chance of trading each round. If trading: 50% buy 100–500 shares, 50% sell 100–500 shares. Expected net contribution to NetDemand: 0.
 
-**References**: Black (1986) `doi:10.1111/j.1540-6261.1986.tb04513.x`; De Long et al. (1990) `doi:10.1086/261703`
+**Academic References**: Black (1986) `doi:10.1111/j.1540-6261.1986.tb04513.x`; De Long et al. (1990) `doi:10.1086/261703`
 
 ---
 
@@ -362,20 +361,26 @@ Theory 3 explains why even with two rational stabilizing agents (§4.3, §4.4) t
 |-----------------------|---------------|---------|------------------|--------------------------------------|
 | initial_price         | Market        | 100.0   | 50–200           | Standard ABM initialization          |
 | fundamental_value     | Market        | 100.0   | 80–120           | Stable fundamental assumption        |
-| price_impact (λ)      | Market        | 0.001   | 0.0005–0.005     | Farmer & Foley (2009)                |
-| mean_reversion (γ)    | Market        | 0.05    | 0.01–0.10        | Mean-reversion ABM literature        |
-| noise_std             | Market        | 0.5     | 0.1–2.0          | Black (1986) noise calibration       |
-| initial_cash          | All investors | 100000  | Fixed            | Standard ABM                         |
-| initial_position      | All investors | 0       | Fixed            | No initial position bias             |
-| hindsight_inflation   | §4.1          | 1.0     | 1.0–2.0          | Roese & Vohs (2012) δ ≈ 0.15–0.40    |
+| price_impact (λ)      | Market        | 0.03    | 0.01–0.10        | Config path: `market.config.extras.price_impact`; Farmer & Foley (2009) |
+| mean_reversion (γ)    | Market        | 0.01    | 0.01–0.10        | Config path: `market.config.extras.mean_reversion`; mean-reversion ABM literature |
+| noise_std             | Market        | 0.015   | 0.005–0.05       | Config path: `market.config.extras.noise_std`; Black (1986) noise calibration |
+| initial_cash          | Investors     | 500,000–2,000,000 | Fixed | Config path: each investor `config.extras.initial_cash`; capacity normalization |
+| initial_position      | Investors     | 0–500   | Fixed            | Config path: each investor `config.extras.initial_position` |
+| activation_threshold  | §4.1/§4.2     | 0.02    | 0.01–0.05        | Config path: biased investor `activation_threshold`; Roese & Vohs (2012) |
+| quantity_scale        | §4.1/§4.2     | 5000    | 3000–8000        | Config path: biased investor `quantity_scale`; calibrated order sensitivity |
+| max_order             | §4.1/§4.2     | 800     | 500–1000         | Config path: biased investor `max_order`; limits-to-arbitrage capacity asymmetry |
+| hindsight_inflation   | §4.1          | 1.5     | 1.0–2.0          | Roese & Vohs (2012) δ ≈ 0.15–0.40    |
 | prediction_overweight | §4.1          | 1.0     | 1.0–2.0          | Daniel et al. (1998) overconfidence  |
-| success_attribution   | §4.2          | 1.0     | 1.0–2.5          | Barber & Odean (2000)                |
+| success_attribution   | §4.2          | 1.3     | 1.0–2.5          | Barber & Odean (2000)                |
 | failure_discount      | §4.2          | 1.0     | 0.2–1.0          | Odean (1998) disposition effect      |
-| process_weight        | §4.3          | 1.0     | 0.5–2.0          | Roese & Vohs (2012) process focus    |
+| activation_threshold  | §4.3/§4.4     | 0.05    | 0.03–0.10        | Config path: rational investor `activation_threshold`; Shleifer & Vishny (1997) |
+| quantity_scale        | §4.3/§4.4     | 3000    | 2000–5000        | Config path: rational investor `quantity_scale`; calibrated correction capacity |
+| max_order             | §4.3/§4.4/§4.5 | 500    | 300–800          | Config path: rational/noise `max_order`; capacity asymmetry |
+| process_weight        | §4.3          | 0.8     | 0.5–2.0          | Roese & Vohs (2012) process focus    |
 | outcome_weight        | §4.3          | 1.0     | 0.5–2.0          | Rational baseline                    |
-| skepticism_level      | §4.4          | 1.0     | 0.5–3.0          | Narrative skepticism scaling         |
-| position_size         | §4.4          | 100     | 50–300           | Base trading unit                    |
+| skepticism_level      | §4.4          | 0.6     | 0.5–3.0          | Narrative skepticism scaling         |
 | trade_probability     | §4.5          | 0.30    | 0.10–0.50        | Black (1986) noise trader literature |
+| min_order             | §4.5          | 100     | 50–200           | Config path: `noisetrader.config.extras.min_order`; baseline liquidity floor |
 
 ---
 
@@ -436,7 +441,7 @@ Theory 3 explains why even with two rational stabilizing agents (§4.3, §4.4) t
 
 | Variant | Investor Logic                                 | Key Difference from Rule                              | Expected Outcome                                            |
 |---------|------------------------------------------------|-------------------------------------------------------|-------------------------------------------------------------|
-| Rule    | Hard-coded deviation thresholds                | Baseline                                              | Strongest hindsight momentum                                |
+| Rule    | Config-driven deviation thresholds             | Baseline                                              | Strongest hindsight momentum                                |
 | LLM     | LLM prompt with hindsight/outcome bias persona | Language model may partially recognize hindsight trap | Reduced momentum; higher ACI                                |
 | RuleLLM | Rule logic + LLM narrative generation          | Rule logic dominates; LLM adds context                | Near-Rule behavior                                          |
 | Rag     | LLM + retrieval of behavioral finance papers   | Retrieves Fischhoff (1975), Daniel et al. (1998)      | Most moderate; may self-correct after retrieving literature |

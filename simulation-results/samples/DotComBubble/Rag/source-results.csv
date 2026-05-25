@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
+1,1,DotComBubble,Rag,SUCCESS,0,6750.476,2026-05-23T17:26:44,2026-05-23T19:19:15,config/simulation.yml,examples/DotComBubble/Rag/run_dotcombubble_rag.py,logs/DotComBubble__Rag.log,,200,200,

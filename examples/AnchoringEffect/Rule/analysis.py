@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
+from examples.standard_rule_analysis import _market_data_from_payload, _market_players
 
 # ---------------------------------------------------------------------------
 # Data loading
@@ -45,11 +46,20 @@ def _load_data(results) -> Dict[str, Any]:
     market_prices: Dict[int, float] = {}
     fundamentals: Dict[int, float] = {}
 
-    for player in results.players_by_role("coordinator").values():
+    for player in _market_players(results).values():
         if "price" in player.batch_store_names:
             market_prices.update(_batch_to_rounds(player.batch("price").all()))
         if "fundamental" in player.batch_store_names:
             fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
+        for round_num, payload in player.turns.payloads().items():
+            market_data = _market_data_from_payload(payload)
+            if round_num not in market_prices and "price" in market_data:
+                market_prices[round_num] = float(market_data["price"])
+            if round_num not in fundamentals:
+                if "fundamental" in market_data:
+                    fundamentals[round_num] = float(market_data["fundamental"])
+                elif "fundamental_value" in market_data:
+                    fundamentals[round_num] = float(market_data["fundamental_value"])
 
     investor_quantities: Dict[str, Dict[int, float]] = {}
     investor_bids: Dict[str, Dict[int, float]] = {}
@@ -81,9 +91,31 @@ def _load_data(results) -> Dict[str, Any]:
 
 def _compute_mad(prices_list: List[float], fundamental: float) -> float:
     """Mean Absolute Deviation: mean(|P(t) - F| / F)."""
-    if not prices_list or fundamental == 0:
-        return 0.0
+    if not prices_list:
+        raise ValueError("Cannot compute MAD without market prices.")
+    if fundamental == 0:
+        raise ValueError("Cannot compute MAD with zero fundamental value.")
     return float(np.mean(np.abs(np.array(prices_list) - fundamental) / fundamental))
+
+
+def calculate_price_deviation(
+    market_prices: Dict[int, float],
+    fundamentals: Dict[int, float],
+) -> List[float]:
+    """Return signed price deviations aligned by round."""
+    if not market_prices:
+        raise ValueError("Cannot compute price deviation without market prices.")
+    if not fundamentals:
+        raise ValueError("Cannot compute price deviation without fundamentals.")
+
+    deviations: List[float] = []
+    for round_num in sorted(market_prices.keys()):
+        price = market_prices[round_num]
+        fundamental = fundamentals[round_num]
+        if fundamental == 0:
+            raise ValueError(f"Fundamental value is zero at round {round_num}.")
+        deviations.append((price - fundamental) / fundamental)
+    return deviations
 
 
 def _compute_half_life(prices_list: List[float], fundamental: float) -> float:
@@ -91,8 +123,10 @@ def _compute_half_life(prices_list: List[float], fundamental: float) -> float:
 
     Returns total_rounds if the deviation never decays to half.
     """
-    if not prices_list or fundamental == 0:
-        return float(len(prices_list))
+    if not prices_list:
+        raise ValueError("Cannot compute half-life without market prices.")
+    if fundamental == 0:
+        raise ValueError("Cannot compute half-life with zero fundamental value.")
 
     devs = np.abs((np.array(prices_list) - fundamental) / fundamental)
     initial_dev = float(devs[0])
@@ -110,17 +144,17 @@ def _compute_autocorrelation(prices_list: List[float], lag: int = 1) -> float:
     """Lag-1 autocorrelation of returns."""
     arr = np.array(prices_list)
     if len(arr) < lag + 2:
-        return 0.0
+        raise ValueError("Cannot compute autocorrelation with insufficient prices.")
     returns = np.diff(arr) / arr[:-1]
     n = len(returns)
     if n <= lag:
-        return 0.0
+        raise ValueError("Cannot compute autocorrelation with insufficient returns.")
     mu = np.mean(returns)
     centered = returns - mu
     autocov = np.mean(centered[: n - lag] * centered[lag:])
     var = np.var(centered)
     if var < 1e-12:
-        return 0.0
+        raise ValueError("Cannot compute autocorrelation with zero return variance.")
     return float(autocov / var)
 
 
@@ -128,7 +162,7 @@ def _compute_max_drawdown(prices_list: List[float]) -> float:
     """Maximum peak-to-trough drawdown (%, negative value)."""
     arr = np.array(prices_list)
     if len(arr) < 2:
-        return 0.0
+        raise ValueError("Cannot compute max drawdown with fewer than two prices.")
     peak = arr[0]
     max_dd = 0.0
     for price in arr:
@@ -146,7 +180,7 @@ def _compute_rolling_volatility(
     """Rolling volatility of returns (std dev per window)."""
     arr = np.array(prices_list)
     if len(arr) < 2:
-        return []
+        raise ValueError("Cannot compute rolling volatility with fewer than two prices.")
     returns = np.diff(arr) / arr[:-1] * 100
     vols = []
     for i in range(len(returns)):
@@ -159,10 +193,24 @@ def _compute_bias_magnitude(
     prices_list: List[float], fundamental: float, adjustment_factor: float
 ) -> float:
     """Mean anchoring bias magnitude: (1-α) × |anchor - F| / F."""
-    if not prices_list or fundamental == 0:
-        return 0.0
+    if not prices_list:
+        raise ValueError("Cannot compute bias magnitude without market prices.")
+    if fundamental == 0:
+        raise ValueError("Cannot compute bias magnitude with zero fundamental value.")
     anchor = prices_list[0]
     return float(abs(1 - adjustment_factor) * abs(anchor - fundamental) / fundamental)
+
+
+def _get_adjustment_factor(config: dict) -> float:
+    """Read the AnchoredTrader adjustment factor from a variant config."""
+    players = config["players"]
+    for player_cfg in players.values():
+        if "config" not in player_cfg:
+            continue
+        extras = player_cfg["config"]["extras"]
+        if "adjustment_factor" in extras:
+            return float(extras["adjustment_factor"])
+    raise ValueError("No adjustment_factor found in AnchoringEffect player configs.")
 
 
 # ---------------------------------------------------------------------------
@@ -732,6 +780,64 @@ def _create_visualizations(
 
 
 # ---------------------------------------------------------------------------
+# Public analysis contract
+# ---------------------------------------------------------------------------
+
+
+def load_simulation_data(config: dict) -> Dict[str, Any]:
+    """Load persisted simulation records into the standard analysis data dict."""
+    return _load_data(load_results(config))
+
+
+def calculate_metrics(data: Dict[str, Any], config: dict) -> Dict[str, Any]:
+    """Calculate AnchoringEffect scalar metrics without writing plots."""
+    market_prices = data["market_prices"]
+    fundamentals = data["fundamentals"]
+
+    if not market_prices:
+        raise ValueError("No market price data found. Run the simulation first.")
+    if not fundamentals:
+        raise ValueError("No fundamental value data found in market records.")
+
+    rounds_sorted = sorted(market_prices.keys())
+    prices_list = [market_prices[r] for r in rounds_sorted]
+    fund_value = sum(fundamentals.values()) / len(fundamentals)
+    adjustment_factor = _get_adjustment_factor(config)
+
+    rolling_vols = _compute_rolling_volatility(prices_list)
+    return {
+        "mad_pct": _compute_mad(prices_list, fund_value) * 100,
+        "half_life_rounds": _compute_half_life(prices_list, fund_value),
+        "max_drawdown_pct": _compute_max_drawdown(prices_list),
+        "return_autocorr_lag1": _compute_autocorrelation(prices_list),
+        "mean_rolling_vol_pct": float(np.mean(rolling_vols)),
+        "bias_magnitude_pct": (
+            _compute_bias_magnitude(prices_list, fund_value, adjustment_factor) * 100
+        ),
+    }
+
+
+def create_visualizations(
+    data: Dict[str, Any],
+    config: dict,
+    output_dir: str,
+) -> None:
+    """Write the fixed AnchoringEffect analysis PNG set."""
+    metrics = calculate_metrics(data, config)
+    _create_visualizations(
+        market_prices=data["market_prices"],
+        fundamentals=data["fundamentals"],
+        investor_bids=data["investor_bids"],
+        investor_payloads=data["investor_payloads"],
+        rolling_vols=_compute_rolling_volatility(
+            [data["market_prices"][r] for r in sorted(data["market_prices"].keys())]
+        ),
+        half_life=metrics["half_life_rounds"],
+        output_dir=output_dir,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Main analysis function
 # ---------------------------------------------------------------------------
 
@@ -747,25 +853,17 @@ def analyze_anchoring(
     investor_payloads = data["investor_payloads"]
 
     if not market_prices:
-        print("No market price data found. Run simulation first.")
-        return {}
+        raise ValueError("No market price data found. Run simulation first.")
+    if not fundamentals:
+        raise ValueError("No fundamental value data found in market records.")
 
     rounds_sorted = sorted(market_prices.keys())
     prices_list = [market_prices[r] for r in rounds_sorted]
     total_rounds = len(prices_list)
 
     # Fundamental value — constant in AnchoringEffect (F = 100.0)
-    fund_value = (
-        sum(fundamentals.values()) / len(fundamentals)
-        if fundamentals
-        else prices_list[0]
-    )
-
-    adjustment_factor = (
-        config["extras"]["adjustment_factor"]
-        if "extras" in config and "adjustment_factor" in config["extras"]
-        else 0.3
-    )
+    fund_value = sum(fundamentals.values()) / len(fundamentals)
+    adjustment_factor = _get_adjustment_factor(config)
 
     # --- Compute metrics ---
     mad_pct = _compute_mad(prices_list, fund_value) * 100
@@ -889,3 +987,12 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+__all__ = [
+    "load_simulation_data",
+    "calculate_metrics",
+    "calculate_price_deviation",
+    "create_visualizations",
+    "analyze_anchoring",
+]

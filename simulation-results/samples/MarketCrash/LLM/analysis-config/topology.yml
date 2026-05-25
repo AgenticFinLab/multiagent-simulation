@@ -1,0 +1,23 @@
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - llm_panic_seller
+    - llm_risk_parity
+    - llm_leveraged_fund
+    - llm_market_maker
+    - llm_bottom_fisher
+
+  llm_panic_seller:
+    - market
+  llm_risk_parity:
+    - market
+  llm_leveraged_fund:
+    - market
+  llm_market_maker:
+    - market
+  llm_bottom_fisher:
+    - market

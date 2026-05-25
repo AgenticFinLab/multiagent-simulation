@@ -29,11 +29,13 @@ Relevant Domain Knowledge:
 {rag_context}
 
 Apply your trading rules to this market state, incorporating the domain knowledge above.
-Show your calculations in the thinking section.
-Respond with your thinking in <analysis>...</analysis> tags followed by your decision in \
-<decision>...</decision> tags.
-The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
-quantity (float, positive), and reasoning (string).
+Show your calculations in the analysis section.
+
+Required output:
+<analysis>brief calculation, retrieved-knowledge use, and rationale</analysis>
+<decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f},
+"quantity": non-negative number, "reasoning": "brief rationale"}}</decision>
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
 """
 
 LLM_USER_TEMPLATE = RAG_USER_TEMPLATE

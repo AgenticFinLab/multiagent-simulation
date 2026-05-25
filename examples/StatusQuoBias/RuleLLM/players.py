@@ -17,7 +17,7 @@ from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from .prompts import (
     RULELLM_INERTIAL_HOLDER_SYS,
     RULELLM_DEFAULT_FOLLOWER_SYS,
@@ -28,6 +28,29 @@ from .prompts import (
 from ..Rule.players import Market  # noqa: F401 — re-exported
 
 logger = logging.getLogger("StatusQuoBias.RuleLLM")
+
+
+def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
+    """Validate canonical trading decision fields before portfolio mutation."""
+    action = decision["action"]
+    if action not in {"buy", "sell", "hold"}:
+        raise ValueError(f"[{identity}] invalid action: {action}")
+    bid_price = float(decision["bid_price"])
+    if bid_price <= 0:
+        raise ValueError(f"[{identity}] invalid bid_price: {bid_price}")
+    quantity = int(decision["quantity"])
+    if quantity < 0:
+        raise ValueError(f"[{identity}] invalid quantity: {quantity}")
+    reasoning = str(decision["reasoning"]).strip()
+    if not reasoning:
+        raise ValueError(f"[{identity}] empty reasoning")
+    return {
+        **decision,
+        "action": action,
+        "bid_price": bid_price,
+        "quantity": quantity,
+        "reasoning": reasoning,
+    }
 
 
 class RuleLLMInvestor(GeneralPlayer):
@@ -92,7 +115,8 @@ class RuleLLMInvestor(GeneralPlayer):
             f"Value: ${portfolio_value:.2f}\n\n"
             "Apply your decision rules to the data above, then output your decision.\n"
             "Respond with <analysis>...</analysis> then <decision>...</decision> containing "
-            'JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}'
+            'JSON: {"action": "buy" or "sell" or "hold", "bid_price": current price, '
+            '"quantity": integer, "reasoning": "brief rationale"}'
         )
 
     async def decide(self) -> Dict[str, Any]:
@@ -104,31 +128,40 @@ class RuleLLMInvestor(GeneralPlayer):
         user_prompt = self._build_prompt()
         system_prompt = self._system_prompt
 
-        decision: Dict[str, Any] = {"action": "hold", "quantity": 0}
+        decision = None
         max_retries = 3
+        last_error: Optional[Exception] = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_output = llm_client.run([infer_input])
                 decision = parse_llm_response_with_thinking(
                     infer_output.outputs[0].response
                 )
+                decision = _validate_decision(decision, self.identity)
                 break
-            except (ValueError, KeyError):
-                if attempt == max_retries - 1:
-                    logger.warning(
-                        "[%s] LLM parse failed after %d attempts; holding.",
-                        self.identity,
-                        max_retries,
-                    )
-                    decision = {"action": "hold", "quantity": 0}
+            except Exception as exc:
+                last_error = exc
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if attempt < max_retries - 1 and (parse_error or retryable_api_error):
+                    logger.debug("[%s] LLM call/parse failed, retrying: %s", self.identity, exc)
+                    continue
+                if not parse_error and not retryable_api_error:
+                    raise
+                raise RuntimeError(
+                    f"[{self.identity}] RuleLLM failed after {max_retries} attempts: {last_error}"
+                )
+
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] RuleLLM produced no decision after {max_retries} attempts"
+            )
 
         action = decision["action"]
+        bid_price = float(decision["bid_price"])
         quantity = int(decision["quantity"])
-
-        valid_actions = ["buy", "sell", "hold"]
-        if action not in valid_actions:
-            action = "hold"
+        if action == "hold":
             quantity = 0
         quantity = max(0, min(quantity, 5000))
 
@@ -160,9 +193,10 @@ class RuleLLMInvestor(GeneralPlayer):
 
         order = {
             "action": action,
+            "bid_price": bid_price,
             "quantity": quantity,
             "agent_type": strategy_name,
-            "reasoning": decision["reasoning"][:120],
+            "reasoning": str(decision["reasoning"])[:120],
         }
         return {
             **order,
@@ -178,37 +212,38 @@ class RuleLLMInvestor(GeneralPlayer):
 
 
 class RuleLLMInertialHolder(RuleLLMInvestor):
-    """Rule+LLM inertial holder with strong status quo bias."""
+    """RuleLLM inertial holder with strong status quo bias. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RULELLM_INERTIAL_HOLDER_SYS
 
 
 class RuleLLMDefaultFollower(RuleLLMInvestor):
-    """Rule+LLM default follower avoiding active portfolio decisions."""
+    """RuleLLM default follower avoiding active decisions. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RULELLM_DEFAULT_FOLLOWER_SYS
 
 
 class RuleLLMActiveRebalancer(RuleLLMInvestor):
-    """Rule+LLM active rebalancer adjusting on new information."""
+    """RuleLLM active rebalancer adjusting on new information. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RULELLM_ACTIVE_REBALANCER_SYS
 
 
 class RuleLLMMomentumTrader(RuleLLMInvestor):
-    """Rule+LLM momentum trader naturally overcoming status quo."""
+    """RuleLLM momentum trader naturally overcoming status quo. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RULELLM_MOMENTUM_TRADER_SYS
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """Rule+LLM noise trader providing random baseline liquidity."""
+    """RuleLLM noise trader providing random baseline liquidity. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RULELLM_NOISE_TRADER_SYS
 
 
 __all__ = [
     "Market",
+    "_validate_decision",
     "RuleLLMInvestor",
     "RuleLLMInertialHolder",
     "RuleLLMDefaultFollower",

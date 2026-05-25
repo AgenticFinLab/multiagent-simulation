@@ -1,9 +1,21 @@
 auto_checkpoint: false
+debug_mode: true
 
 proxy:
-  record_path: "EXPERIMENT/SunkCostFallacy/LLM/records"
-  communication:
-    store_path: "EXPERIMENT/SunkCostFallacy/LLM/communication"
+  storage:
+    checkpoint_dir: "EXPERIMENT/SunkCostFallacy/LLM/checkpoints"
+    record_path: "EXPERIMENT/SunkCostFallacy/LLM/records"
+    record_rounds: true
+    turn_block_size: 3
+
   monitoring:
-    metrics_path: "EXPERIMENT/SunkCostFallacy/LLM/monitoring/metrics"
-    events_path: "EXPERIMENT/SunkCostFallacy/LLM/monitoring/events"
+    record_path: "EXPERIMENT/SunkCostFallacy/LLM/monitoring"
+    monitor_hot_limit: 3
+
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
+
+  resource:
+    mcp_servers: []
+    enable_caching: false

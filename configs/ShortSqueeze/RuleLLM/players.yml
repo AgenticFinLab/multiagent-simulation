@@ -46,7 +46,7 @@ rulellm_short_seller:
         sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_SHORT_SELLER_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -69,10 +69,10 @@ rulellm_retail_coord:
       initial_position: 0.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_RETAIL_COORD_SYS"
+        sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_RETAIL_TRADER_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_new_tokens: 500
@@ -95,10 +95,10 @@ rulellm_momentum:
       initial_position: 0.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_MOMENTUM_SYS"
+        sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_MOMENTUM_BUYER_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -121,10 +121,10 @@ rulellm_value:
       initial_position: 0.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_VALUE_SYS"
+        sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_VALUE_INVESTOR_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -146,10 +146,10 @@ rulellm_institutional:
       initial_position: 100.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_INSTITUTIONAL_SYS"
+        sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_INSTITUTIONAL_HOLDER_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500

@@ -1,71 +1,44 @@
-# MomentumEffect LLM Analysis Methodology
+# Momentum Effect LLM Analysis Plan
 
-## Overview
+## §1 Objectives
 
-This document describes the evaluation metrics for the **LLM-based momentum effect** simulation. The analysis methodology is identical to the rule-based version, as both simulate the same financial phenomenon.
+Verify that persona-driven API decisions preserve a coherent momentum effect
+with the five-role API population.
 
-For detailed metric definitions and financial theory, see: **`../MomentumEffect/analysis.md`**
+## §2 Core Metrics
 
----
+| Metric | Function Contract | Source |
+|---|---|---|
+| Return autocorrelation | `def compute_return_autocorrelation(returns: list[float], lag: int = 1) -> float` | `analysis-bases.md §2.1` |
+| Momentum order imbalance | `def compute_momentum_order_imbalance(orders: list[dict]) -> float` | `analysis-bases.md §2.2` |
+| Contrarian offset | `def compute_contrarian_offset(orders: list[dict]) -> float` | `analysis-bases.md §2.3` |
+| Trend duration | `def compute_trend_duration(prices: list[float]) -> int` | `analysis-bases.md §2.4` |
+| Fundamental deviation | `def compute_fundamental_deviation(prices: list[float], fundamentals: list[float]) -> list[float]` | `analysis-bases.md §2.5` |
+| Agent volume share | `def compute_agent_volume_share(orders: list[dict]) -> dict[str, float]` | `analysis-bases.md §2.6` |
+| Retrieval coverage | `def compute_rag_retrieval_coverage(rag_payloads: dict[str, dict[int, dict]]) -> dict` | `analysis-bases.md §2.7`; reported as not applicable for LLM |
 
-## Key Metrics (Summary)
+## §3 Analysis Dimensions
 
-| Metric                 | Purpose                            |
-|------------------------|------------------------------------|
-| Return Autocorrelation | corr(r_t, r_{t-k}) for short lags  |
-| Winner-Loser Spread    | Winners outperform losers          |
-| Momentum Profitability | Momentum strategy returns          |
-| Underreaction          | Price continues in trend direction |
+Analyze market path, role-level order flow, parser quality, fallback rate, and
+whether TrendFollower amplifies continuation.
 
----
+## §4 Phase Analysis
 
-## LLM-Specific Observable Phenomena
+Signal formation, API trend conviction, crowded continuation, offset, and
+stabilization or reversal.
 
-### Emergent Behaviors
+## §5 Cross-Variant Comparison
 
-| Phenomenon             | LLM Behavior                                   | Contrast with Rule-Based                   |
-|------------------------|------------------------------------------------|--------------------------------------------|
-| **Trend Narrative**    | LLM explicitly discusses "trend" in reasoning  | Rule-based uses fixed momentum coefficient |
-| **Recency Weighting**  | LLM may naturally overweight recent prices     | Rule-based uses fixed lookback window      |
-| **Gradual Adjustment** | LLM reasoning shows incremental belief updates | Rule-based jumps to new estimate           |
+Use `analysis-bases.md §5` to compare against Rule for mechanism shape and
+against RuleLLM for the value of explicit rules.
 
-### Round and Agent Scaling
+## §6 Expected Results And Validation Criteria
 
-| Scale          | LLM-Specific Observation                      |
-|----------------|-----------------------------------------------|
-| **50 rounds**  | 1-2 trends; LLM reasoning evolution visible   |
-| **100 rounds** | Multiple trends; ACF patterns emerge          |
-| **5 agents**   | Individual LLM trend recognition dominates    |
-| **10 agents**  | Diverse trend interpretations create momentum |
+A valid LLM sample should complete 200 rounds, retain finite market state, and
+avoid excessive fallback holds under the project fallback policy.
 
----
+## §7 Visualization Catalogue
 
-## LLM-Specific Considerations
-
-1. **Trend Recognition**: LLM may naturally recognize price trends
-2. **Recency Bias**: LLM responses may weight recent information heavily
-3. **Underreaction**: LLM may exhibit gradual adjustment to news
-
----
-
-## Using Centralized Evaluation Module
-
-```python
-from masim.evaluation.finance import (
-    calculate_returns,
-    calculate_autocorrelation,
-    calculate_rolling_autocorrelation,
-    plot_returns_analysis,
-)
-
-# Same analysis as rule-based version
-prices = {...}
-returns = calculate_returns(prices)
-ac = calculate_autocorrelation(returns, lag=5)  # Positive = momentum
-```
-
----
-
-## References
-
-See `../MomentumEffect/analysis.md` for complete academic references.
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_momentumeffect_dynamics.png`, `02_momentumeffect_analysis.png`, and
+`03_summary.png`.

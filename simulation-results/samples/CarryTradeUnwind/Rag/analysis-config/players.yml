@@ -1,0 +1,284 @@
+# =============================================================================
+# CarryTradeUnwind Rag Players Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 RAG-augmented LLM Investor types
+# =============================================================================
+
+# =============================================================================
+# Shared Knowledge Configuration
+# =============================================================================
+knowledge:
+  backend: "local"
+  global_uri: "examples/document-sources"
+  resource_csv:
+    - "examples/document-sources/books.csv"
+    - "examples/document-sources/source"
+  preprocessing:
+    parser: "mineru"
+    output_position: "MinerU_processed"
+  rag:
+    output_position: "rag_index"
+    embed_type: "litellm"
+    embed_model: "openai/hunyuan-embedding"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    chunk_size: 512
+    chunk_overlap: 64
+    top_k: 5
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator) — rule-based, identical to Rule variant
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.CarryTradeUnwind.Rag.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      fundamental_value: 1.0
+      initial_price: 1.0
+      price_impact: 0.003
+      mean_reversion: 0.02
+      noise_std: 0.005
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Carry Traders — carry-trade persona + RAG knowledge retrieval
+# Theory: Brunnermeier, Nagel & Pedersen (2009)
+# -----------------------------------------------------------------------------
+ragllm_carry_trader:
+  name: "RAG Carry Trader"
+  class: "examples.CarryTradeUnwind.Rag.players:RagLLMCarryTrader"
+  # Expander → ragllm_carry_trader_1, ragllm_carry_trader_2
+  num_instances: 2
+  config:
+    identity: "ragllm_carry_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 500.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_CARRY_TRADER_SYS"
+        user_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Leveraged Carry Funds — high-leverage persona + RAG
+# Theory: Plantin & Shin (2018)
+# -----------------------------------------------------------------------------
+ragllm_leveraged_carry_fund:
+  name: "RAG Leveraged Carry Fund"
+  class: "examples.CarryTradeUnwind.Rag.players:RagLLMLeveragedCarryFund"
+  # Expander → ragllm_leveraged_carry_fund_1, ragllm_leveraged_carry_fund_2
+  num_instances: 2
+  config:
+    identity: "ragllm_leveraged_carry_fund"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 800.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_LEVERAGED_CARRY_FUND_SYS"
+        user_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Funding Currency Buyers — safe-haven persona + RAG
+# Theory: Menkhoff et al. (2012)
+# -----------------------------------------------------------------------------
+ragllm_funding_currency_buyer:
+  name: "RAG Funding Currency Buyer"
+  class: "examples.CarryTradeUnwind.Rag.players:RagLLMFundingCurrencyBuyer"
+  # Expander → ragllm_funding_currency_buyer_1, ragllm_funding_currency_buyer_2
+  num_instances: 2
+  config:
+    identity: "ragllm_funding_currency_buyer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 300000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_FUNDING_CURRENCY_BUYER_SYS"
+        user_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Hedged Carry Trader — FX stability mandate + RAG
+# Theory: Menkhoff et al. (2012)
+# -----------------------------------------------------------------------------
+ragllm_hedged_carry_trader:
+  name: "RAG Hedged Carry Trader"
+  class: "examples.CarryTradeUnwind.Rag.players:RagLLMHedgedCarryTrader"
+  num_instances: 1
+  config:
+    identity: "ragllm_hedged_carry_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 2000000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_HEDGED_CARRY_TRADER_SYS"
+        user_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.2
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Noise Traders — random background + RAG (mostly ignored)
+# Theory: Black (1986)
+# -----------------------------------------------------------------------------
+ragllm_noise_trader:
+  name: "RAG Noise Trader"
+  class: "examples.CarryTradeUnwind.Rag.players:RagLLMNoiseTrader"
+  # Expander → ragllm_noise_trader_1, ragllm_noise_trader_2
+  num_instances: 2
+  config:
+    identity: "ragllm_noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 100000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        user_message: "examples.CarryTradeUnwind.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.9
+          max_new_tokens: 600
+  persona: !include persona.yml

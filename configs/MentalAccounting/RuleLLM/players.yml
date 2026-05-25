@@ -44,7 +44,7 @@ mentalaccountant:
         sys_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_MENTAL_ACCOUNTANT_SYS"
         user_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_tokens: 512
@@ -68,13 +68,14 @@ housemoneytrader:
       fundamental_value: 100.0
       gain_risk_multiplier: 2.0
       loss_risk_multiplier: 0.5
+      deviation_threshold: 0.02
       base_size: 400
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_HOUSE_MONEY_TRADER_SYS"
+        sys_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_HOUSE_MONEY_SYS"
         user_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -97,13 +98,15 @@ rationalportfoliomanager:
       initial_price: 100.0
       fundamental_value: 100.0
       risk_aversion: 0.7
+      deviation_threshold: 0.02
+      quantity_scale: 3000
       base_size: 300
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_RATIONAL_PORTFOLIO_MANAGER_SYS"
+        sys_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_RATIONAL_PORTFOLIO_SYS"
         user_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -129,10 +132,10 @@ sunkcostholder:
       base_size: 350
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_SUNK_COST_HOLDER_SYS"
+        sys_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_SUNK_COST_SYS"
         user_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -161,7 +164,7 @@ noisetrader:
         sys_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.MentalAccounting.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
           max_tokens: 512

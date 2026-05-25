@@ -1,126 +1,95 @@
-# HerdingInformation Rule — Implementation Explanation
+# Herding Information Cascade Rule Variant Explanation
 
 ## §1 Overview
 
-| Aspect             | Detail                                               |
-|--------------------|------------------------------------------------------|
-| Variant            | Rule (deterministic baseline)                        |
-| Simulation         | HerdingInformation                                   |
-| Decision Mechanism | Deterministic rule-based cascade threshold formulas  |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                      |
-| Market Broadcast   | `price`, `fundamental`, `deviation`, `round`         |
-| Price Model        | `P(t+1) = P(t) + λ × NetDemand + γ × (F − P(t)) + ε` |
+| Field | Value |
+|---|---|
+| Variant | Rule |
+| Simulation | Herding Information Cascade |
+| Decision Mechanism | deterministic rule-based trading orders |
+| Theory Reference | `examples/HerdingInformation/simulation-bases.md` |
+| Market Broadcast | `configs/HerdingInformation/Rule/topology.yml` |
 
-The Rule variant is the deterministic baseline for HerdingInformation. All five investors apply fixed threshold formulas to the broadcast `deviation` signal. This provides the cleanest signal for measuring information cascade dynamics: cascade formation, reputation herding, and the limits of independent correction.
+This is a trading-schema scenario. API decisions emit action, bid_price, quantity, and reasoning fields consumed by players.py.
 
-## §2 Theory → Implementation Mapping
+## §2 Theory -> Implementation Mapping
 
 ### §2.1 CascadeFollower (simulation-bases.md §4.1)
 
-| Theory Component                             | Implementation                                           |
-|----------------------------------------------|----------------------------------------------------------|
-| Bikhchandani et al. (1992) cascade formation | Counts rounds with `                                     |
-| Social signal weighting                      | `qty = min(800, int(                                     |
-| Cascade direction                            | Follows deviation: buys when dev > 0; sells when dev < 0 |
-| Pre-cascade                                  | Holds until cascade_count threshold reached              |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `CascadeFollower.decide()` increments `cascade_count` when `abs(deviation) > 0.03`; once `cascade_count >= cascade_trigger`, it follows deviation direction. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rule/players.yml:cascadefollower.config.extras` supplies `social_weight`, `cascade_trigger`, cash, and position state. |
+| Variant-specific decision mechanism | Deterministic buy/sell/hold quantity from `min(800, int(abs(deviation) * social_weight * 5000))`. |
 ### §2.2 ReputationHerder (simulation-bases.md §4.2)
 
-| Theory Component                              | Implementation                                      |
-|-----------------------------------------------|-----------------------------------------------------|
-| Scharfstein & Stein (1990) reputation herding | `qty = min(600, int(                                |
-| Lower activation threshold                    | Activates at `                                      |
-| Career concern amplification                  | `reputation_concern` ∈ [1.0, 3.0] scales trade size |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `ReputationHerder.decide()` follows deviation direction whenever `abs(deviation) > 0.02`. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rule/players.yml:reputationherder.config.extras` supplies `reputation_concern`, cash, and position state. |
+| Variant-specific decision mechanism | Deterministic quantity from `min(600, int(abs(deviation) * reputation_concern * 4000))`. |
 ### §2.3 IndependentThinker (simulation-bases.md §4.3)
 
-| Theory Component        | Implementation                                                   |
-|-------------------------|------------------------------------------------------------------|
-| Rational Bayesian agent | `qty = min(500, int(                                             |
-| Contrarian signal       | Buys when dev < 0 (undervalued); sells when dev > 0 (overvalued) |
-| Activation threshold    | `                                                                |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `IndependentThinker.decide()` trades against deviation when `abs(deviation) > 0.03`. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rule/players.yml:independentthinker.config.extras` supplies `signal_precision`, cash, and position state. |
+| Variant-specific decision mechanism | Deterministic contrarian quantity from `min(500, int(abs(deviation) * signal_precision * 3000))`. |
 ### §2.4 Contrarian (simulation-bases.md §4.4)
 
-| Theory Component                               | Implementation                                                     |
-|------------------------------------------------|--------------------------------------------------------------------|
-| De Bondt & Thaler (1985) deliberate contrarian | `qty = min(400, int(                                               |
-| Higher threshold than IndependentThinker       | Activates at `                                                     |
-| Cascade resistance                             | Sells when dev > 0; buys when dev < 0 — mirrors IndependentThinker |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `Contrarian.decide()` trades against deviation when `abs(deviation) > contrarian_threshold * 0.05`. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rule/players.yml:contrarian.config.extras` supplies `contrarian_threshold`, cash, and position state. |
+| Variant-specific decision mechanism | Deterministic quantity from `min(400, int(abs(deviation) * 2000))`. |
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-| Theory Component                | Implementation                                                    |
-|---------------------------------|-------------------------------------------------------------------|
-| Black (1986) uninformed trading | `if random() < trade_probability: qty = random.randint(100, 500)` |
-| Random direction                | Coin flip for buy/sell — cascade trigger and baseline liquidity   |
-| Accidental cascade initiator    | Random deviations increment CascadeFollower's cascade_count       |
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `NoiseTrader.decide()` trades randomly with probability `trade_probability`. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/HerdingInformation/Rule/players.yml:noisetrader.config.extras` supplies `trade_probability`, cash, and position state. |
+| Variant-specific decision mechanism | Random buy/sell quantity from 100 to 500 shares subject to affordability and holdings. |
 
 ## §3 Market Mechanism
 
-*Formula source: simulation-bases.md §3*
-
-```
-P(t+1) = P(t) + λ × NetDemand(t) + γ × (F − P(t)) + ε(t)
-
-where:
-  λ = price_impact      [default: 0.001]
-  γ = mean_reversion    [default: 0.05]
-  ε ~ N(0, noise_std)   [default: 0.5]
-  NetDemand = Σ signed_quantities
-```
-
-Market broadcasts `{price, fundamental, deviation, round}`. The `deviation = (P − F) / F` signal is what CascadeFollower counts — rounds where `|deviation| > 0.03` increment cascade_count.
+`Market.decide()` in `examples/HerdingInformation/Rule/players.py` broadcasts `price`, `fundamental`, `deviation`, and `round`. `Market.perceive()` aggregates buy/sell order quantities and updates price with `price + price_impact * net_demand + mean_reversion * (fundamental - price) + noise`.
 
 ## §4 Variant Architecture
 
-| Component     | Detail                                             |
-|---------------|----------------------------------------------------|
-| Base class    | `GeneralPlayer`                                    |
-| Inference     | None (deterministic formulas)                      |
-| Context       | `market_data` from broadcast                       |
-| Output        | `{"action": "buy"/"sell"/"hold", "quantity": int}` |
-| Cascade state | `cascade_count` maintained in `custom_state`       |
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/HerdingInformation/Rule/players.py` |
+| Prompt module | Not applicable for Rule baseline |
+| Inference | No remote model call is used in the Rule baseline. |
+| Output parsing | Direct deterministic decision construction |
+| Error handling | Deterministic Rule logic has no API fallback path; config/schema errors fail fast. |
 
 ## §5 Config Reference
 
-Config file: `configs/HerdingInformation/Rule/simulation.yml`
-
-Key extras per investor:
-- `initial_cash`, `initial_position` (all investors)
-- `social_weight`, `cascade_trigger` (CascadeFollower)
-- `reputation_concern` (ReputationHerder)
-- `signal_precision` (IndependentThinker)
-- `contrarian_threshold` (Contrarian)
-- `trade_probability` (NoiseTrader)
-- Market: `price_impact`, `mean_reversion`, `noise_std`, `fundamental_value`, `initial_price`
+| Config | Purpose |
+|---|---|
+| `configs/HerdingInformation/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/HerdingInformation/Rule/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/HerdingInformation/Rule/topology.yml` | Message routing between coordinator and agents. |
+| `configs/HerdingInformation/Rule/persona.yml` | Turn recording and persona metadata. |
 
 ## §6 Running Instructions
 
 ```bash
-python -m examples.HerdingInformation.Rule.run_herding_information \
-    -c configs/HerdingInformation/Rule/simulation.yml
+python examples/HerdingInformation/Rule/run_herdinginformation.py -c configs/HerdingInformation/Rule/simulation.yml
 ```
-
-Or via Streamlit UI: select "HerdingInformation" → "Rule" variant.
 
 ## §7 Expected Behavior
 
-- **Cascade formation**: CascadeFollower activates after `cascade_trigger` rounds of |deviation| > 0.03 — deterministic cascade lock-in
-- **Pre-cascade reputation herding**: ReputationHerder fires at any |deviation| > 0.02 — earlier than CascadeFollower
-- **Capacity asymmetry**: Combined herding capacity (1,400) > correction capacity (900) — cascades cannot be immediately broken
-- **CCI target**: 0.40–0.70 (cascade agents' share of total volume during cascade rounds)
-- **Rule provides tightest MAD band**: Deterministic cascade_trigger → consistent cascade formation timing
-- **No LLM variability**: Cascade onset round is deterministic given same random seed
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
 ## §8 References
 
-See `simulation-bases.md §2` for full DOI citations.
-
-- Bikhchandani, Hirshleifer & Welch (1992) `doi:10.1086/261849` — CascadeFollower
-- Scharfstein & Stein (1990) — ReputationHerder
-- Shleifer & Vishny (1997) `doi:10.1111/j.1540-6261.1997.tb03807.x` — capacity asymmetry
+See `examples/HerdingInformation/simulation-bases.md §2` for full DOI citations and mechanism references.
 
 ## §9 Variant Comparison
 
-See `simulation-bases.md §9` for Rule / LLM / RuleLLM / Rag comparison table.
+See `examples/HerdingInformation/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

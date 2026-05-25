@@ -63,3 +63,38 @@ The Rag variant implements the short squeeze with RAG-augmented LLM reasoning. R
 | SCD    | 1–6 rounds         | Shorter  | Faster covering due to retrieved fear evidence      |
 | IEP    | Rounds 2–8         | Earlier  | Retrieved fundamental analysis prompts earlier sell |
 | WTI    | 0.15–0.50          | Higher   | Larger wealth transfer in amplified squeeze         |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity,
+retrieval health, LLM parse/retry logs, and squeeze-phase patterns.
+
+## §6 Running Instructions
+
+```bash
+python examples/GameStopShortSqueeze/Rag/run_gamestopshortsqueeze_rag.py \
+  -c configs/GameStopShortSqueeze/Rag/simulation.yml
+```
+
+## §7 Expected Behavior
+
+RAG should preserve the RuleLLM action schema while adding retrieved short
+squeeze context to each decision round. Retrieved GME and squeeze material may
+increase buying conviction for retail and short-covering agents, while
+fundamental context may strengthen institutional selling.
+
+## §8 Cross-Variant Role
+
+The RAG variant measures whether external squeeze literature changes behavior
+relative to RuleLLM prompts with the same embedded decision rules.
+
+## §9 Implementation Traceability
+
+`Rag/prompts.py` imports RuleLLM system prompts and adds `{rag_context}` in the
+user template. `Rag/players.py` records `rag_context` with each decision and
+`Rag/analysis.py` writes `rag_stats.json` alongside the standard analysis
+outputs. Accepted decisions must keep the same canonical order schema as
+RuleLLM. The RAG user prompt includes the agent's configured decision parameters
+alongside retrieved context.

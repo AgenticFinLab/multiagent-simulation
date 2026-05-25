@@ -1,27 +1,50 @@
-# OverconfidenceBias Analysis Guide
+# OverconfidenceBias LLM — Analysis Specification
 
-## Metrics
+## §1 Overview
 
-| Metric | Description | Expected Range |
-|--------|-------------|----------------|
-| Price deviation | Deviation from fundamental | Varies by scenario |
-| Max drawdown | Largest peak-to-trough decline | Varies by scenario |
-| Volatility | Annualized return volatility | Varies by scenario |
+The LLM analysis uses the standard OverconfidenceBias metric pipeline while checking model reasoning and decision-contract validity.
 
-## Visualization Guide
+## §2 Metric Implementation
 
-1. **Price vs Fundamental**: Shows whether agents create mispricings
-2. **Deviation Plot**: Magnitude and persistence of mispricings
-3. **Return Distribution**: Should show fat tails for behavioral scenarios
+| Metric | Function / Source | Root Reference |
+|---|---|---|
+| Excess Turnover (ET) | `calculate_metrics(data)` | `analysis-bases.md §2 Metric: Excess Turnover` |
+| Signal Overreaction (SO) | `calculate_metrics(data)` | `analysis-bases.md §2 Metric: Signal Overreaction` |
+| Confidence Reinforcement Activity (CRA) | `calculate_metrics(data)` | `analysis-bases.md §2 Metric: Confidence Reinforcement Activity` |
+| Rational Benchmark Deviation (RBD) | `calculate_metrics(data)` | `analysis-bases.md §2 Metric: Rational Benchmark Deviation` |
+| Return Volatility (RV) | `calculate_metrics(data)` | `analysis-bases.md §2 Metric: Return Volatility` |
+| Portfolio Performance Gap (PPG) | `calculate_metrics(data)` | `analysis-bases.md §2 Metric: Portfolio Performance Gap` |
 
-## Troubleshooting
+## §3 Analysis Dimensions
 
-- **No phenomenon observed**: Adjust agent parameters
-- **Too extreme**: Add more stabilizing agents or increase mean reversion
-- **Too stable**: Increase destabilizing agent parameters
+Analysis compares persona consistency, parse quality, canonical order fields, turnover, price deviation, volatility, and portfolio outcomes.
 
-## References
+## §4 Phase Analysis
 
-- Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
-- Odean (1998): Volume, volatility, price, and profit when all traders are above average
-- Barber & Odean (2001): Boys will be boys: Gender, overconfidence, and common stock investment
+LLM phases include initialization, persona-conditioned decisions, repeated market feedback, and stabilization or amplification.
+
+## §5 Cross-Variant Comparison
+
+LLM is compared with Rule to determine whether persona-only reasoning preserves overconfidence without hidden fallback behavior.
+
+## §6 Expected Results
+
+### §6.1 Stylised Facts
+
+Valid runs should show parseable reasoning, nonzero biased activity, and bounded market histories.
+
+### §6.2 Calibration Targets
+
+Targets follow `analysis-bases.md §6.2` with additional review of parse failures and decision quality.
+
+### §6.3 Cross-Variant Predictions
+
+LLM should show more variable order timing than Rule while preserving role-level direction.
+
+### §6.4 Validation Failure Signs
+
+Invalid JSON, missing `bid_price`, absent reasoning, zero volume, or broken price histories indicate failure.
+
+## §7 Visualization Catalogue
+
+The analysis writes `summary.json`, `00_investor_bids.png`, `01_overconfidencebias_dynamics.png`, `02_overconfidencebias_analysis.png`, and `03_summary.png`.

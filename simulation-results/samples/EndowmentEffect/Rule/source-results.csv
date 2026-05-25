@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,config_path
+5,9,EndowmentEffect,Rule,SUCCESS,0,60.005,2026-05-22T03:50:22,2026-05-22T03:51:22,config/simulation.yml,examples/EndowmentEffect/Rule/run_endowmenteffect.py,logs/EndowmentEffect__Rule.log,,200,200,,config/simulation.yml

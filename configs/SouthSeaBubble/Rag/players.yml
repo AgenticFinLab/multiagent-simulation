@@ -76,10 +76,10 @@ insideradvantaged:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.SouthSeaBubble.Rag.prompts:RAG_INSIDER_ADVANTAGED_SYS"
+        sys_message: "examples.SouthSeaBubble.Rag.prompts:RAGLLM_INSIDER_ADVANTAGED_SYS"
         user_message: "examples.SouthSeaBubble.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.8
           max_tokens: 600
@@ -122,10 +122,10 @@ narrativebeliever:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.SouthSeaBubble.Rag.prompts:RAG_NARRATIVE_BELIEVER_SYS"
+        sys_message: "examples.SouthSeaBubble.Rag.prompts:RAGLLM_NARRATIVE_BELIEVER_SYS"
         user_message: "examples.SouthSeaBubble.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
           max_tokens: 600
@@ -168,10 +168,10 @@ skepticalanalyst:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.SouthSeaBubble.Rag.prompts:RAG_SKEPTICAL_ANALYST_SYS"
+        sys_message: "examples.SouthSeaBubble.Rag.prompts:RAGLLM_SKEPTICAL_ANALYST_SYS"
         user_message: "examples.SouthSeaBubble.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -214,10 +214,10 @@ arbitrageur:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.SouthSeaBubble.Rag.prompts:RAG_ARBITRAGEUR_SYS"
+        sys_message: "examples.SouthSeaBubble.Rag.prompts:RAGLLM_ARBITRAGEUR_SYS"
         user_message: "examples.SouthSeaBubble.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 600
@@ -260,10 +260,10 @@ noisetrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.SouthSeaBubble.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.SouthSeaBubble.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
         user_message: "examples.SouthSeaBubble.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.95
           max_tokens: 600

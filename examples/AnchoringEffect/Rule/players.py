@@ -148,10 +148,10 @@ class AnchoredTrader(GeneralPlayer):
     """
     Anchors to initial price, adjusts insufficiently toward fundamental.
 
-    Implements simulation-bases.md §4 — AnchoredTrader.
+    Implements simulation-bases.md §4.1 — AnchoredTrader.
     Theoretical basis: simulation-bases.md §2.1 (Tversky & Kahneman, 1974).
 
-    Decision rule (simulation-bases.md §4 AnchoredTrader — Rule-Based Behavior):
+    Decision rule (simulation-bases.md §4.1 — Rule-Based Behavior):
         anchor_price = first market price observed (set on first perceive call)
         perceived_target = anchor_price + (fundamental - anchor_price) * adjustment_factor
         perceived_dev = (price - perceived_target) / perceived_target
@@ -265,10 +265,10 @@ class HistoricalAnchor(GeneralPlayer):
     """
     Anchors to historical average price, adjusts insufficiently.
 
-    Implements simulation-bases.md §4 — HistoricalAnchor.
+    Implements simulation-bases.md §4.2 — HistoricalAnchor.
     Theoretical basis: simulation-bases.md §2.2 (Northcraft & Neale, 1987).
 
-    Decision rule (simulation-bases.md §4 HistoricalAnchor — Rule-Based Behavior):
+    Decision rule (simulation-bases.md §4.2 — Rule-Based Behavior):
         hist_avg = mean of last `lookback` prices (rolling window)
         perceived_dev = (price - hist_avg) / hist_avg * (1 - anchor_weight)
         if abs(perceived_dev) > 0.03: trade in corrective direction
@@ -386,10 +386,10 @@ class RationalUpdater(GeneralPlayer):
     """
     Bayesian updater — trades without anchoring bias (rational benchmark).
 
-    Implements simulation-bases.md §4 — RationalUpdater.
+    Implements simulation-bases.md §4.3 — RationalUpdater.
     Theoretical basis: simulation-bases.md §2.4 (Muth, 1961 — Rational Expectations).
 
-    Decision rule (simulation-bases.md §4 RationalUpdater — Rule-Based Behavior):
+    Decision rule (simulation-bases.md §4.3 — Rule-Based Behavior):
         deviation = (price - fundamental) / fundamental  (from market broadcast)
         if abs(deviation) > 0.02: trade proportionally
         quantity = min(base_position_size, abs(deviation) * 1000)
@@ -487,10 +487,10 @@ class MomentumTrader(GeneralPlayer):
     """
     Follows price trends — buys when price rises, sells when it falls.
 
-    Implements simulation-bases.md §4 — MomentumTrader.
+    Implements simulation-bases.md §4.4 — MomentumTrader.
     Theoretical basis: simulation-bases.md §2.5 (Jegadeesh & Titman, 1993).
 
-    Decision rule (simulation-bases.md §4 MomentumTrader — Rule-Based Behavior):
+    Decision rule (simulation-bases.md §4.4 — Rule-Based Behavior):
         return_pct = (price - prev_price) / prev_price
         if abs(return_pct) > entry_threshold: follow momentum direction
         quantity = min(base_position_size, abs(return_pct) * 1000)
@@ -592,10 +592,10 @@ class NoiseTrader(GeneralPlayer):
     """
     Random uninformed trader providing background market liquidity.
 
-    Implements simulation-bases.md §4 — NoiseTrader.
+    Implements simulation-bases.md §4.5 — NoiseTrader.
     Theoretical basis: simulation-bases.md §2.6 (Black, 1986 — Noise Trader Risk).
 
-    Decision rule (simulation-bases.md §4 NoiseTrader — Rule-Based Behavior):
+    Decision rule (simulation-bases.md §4.5 — Rule-Based Behavior):
         trade with probability trade_probability (0.05) each round
         direction: buy or sell with equal probability (0.5 each)
         quantity: random.uniform(min_order, max_order)

@@ -1,0 +1,51 @@
+# =============================================================================
+# FlashCrashRag Simulation Configuration
+# =============================================================================
+# RAG variant: LLM agents guided by explicit rules (in system prompt) AND
+# real-time knowledge retrieval from a personal RAG library built at init.
+#
+# Usage:
+#   python examples/FlashCrash/Rag/run_flash_crash_ragllm.py -c configs/FlashCrash/Rag/simulation.yml
+# =============================================================================
+
+setting:
+  name: "flash_crash_rag_simulation"
+  description: "RAG-augmented flash crash: agents retrieve knowledge from personal RAG libraries per decision"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "artifacts/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "flash_crash_rag"
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 1073741824
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "artifacts/communication"
+  record_messages: true
+  message_block_size: 500

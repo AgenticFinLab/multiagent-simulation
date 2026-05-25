@@ -1,0 +1,78 @@
+{
+  "ragllm_short_seller_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_short_seller_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_short_seller_3": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_retail_coord_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_retail_coord_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_retail_coord_3": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_momentum_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_momentum_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_momentum_3": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_value_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_value_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ragllm_institutional": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "aggregate": {
+    "mean_retrieval_failure_rate": 0.0,
+    "max_retrieval_failure_rate": 0.0
+  }
+}

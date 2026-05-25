@@ -27,6 +27,7 @@ __all__ = [
     "_validate_confirmation_bias",
     "_build_interpretation",
     "analyze_confirmation_bias",
+    "main",
 ]
 
 
@@ -160,9 +161,10 @@ def _compute_agent_vwap(
             abs_qty = abs(qty)
             price_volume_sum += abs_qty * price
             total_vol += abs_qty
-            if qty > 0:
+            action = payload["action"]
+            if action == "buy":
                 total_buy += qty
-            else:
+            elif action == "sell":
                 total_sell += abs_qty
         vwap_data[aid] = {
             "vwap": price_volume_sum / total_vol if total_vol > 0 else 0.0,
@@ -574,7 +576,7 @@ def _create_visualizations(
 
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "01_price_dynamics.png"),
+        os.path.join(output_dir, "01_confirmationbias_dynamics.png"),
         dpi=150,
         bbox_inches="tight",
     )
@@ -608,7 +610,7 @@ def _create_visualizations(
 
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "02_bias_dynamics.png"),
+        os.path.join(output_dir, "02_confirmationbias_analysis.png"),
         dpi=150,
         bbox_inches="tight",
     )
@@ -667,6 +669,12 @@ def analyze_confirmation_bias(
     output_dir: str,
 ) -> Dict[str, Any]:
     """Run full ConfirmationBias analysis pipeline."""
+    setting_name = str(config["setting"]["name"])
+    variant = "Rule"
+    for candidate in ("RuleLLM", "LLM", "Rag"):
+        if candidate.lower() in setting_name.lower():
+            variant = candidate
+            break
     market_prices = data["market_prices"]
     fundamentals = data["fundamentals"]
     investor_payloads = data["investor_payloads"]
@@ -711,7 +719,7 @@ def analyze_confirmation_bias(
     # Summary
     summary = {
         "scenario": "ConfirmationBias",
-        "variant": "Rule",
+        "variant": variant,
         "total_rounds": total_rounds,
         "fundamental_value": round(fund_value, 4),
         "metrics": {

@@ -1,0 +1,170 @@
+# =============================================================================
+# CreditCycle RuleLLM Agent Configuration
+# =============================================================================
+# 1 Market (rule-based) + 5 RuleLLM investor types.
+# Prompts embed explicit quantitative credit-cycle rules.
+# =============================================================================
+
+market:
+  name: "Market"
+  class: "examples.CreditCycle.RuleLLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      initial_price: 100.0
+      fundamental_value: 100.0
+      price_impact: 0.05
+      mean_reversion: 0.02
+      noise_std: 0.02
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+procyclicallender:
+  name: "ProCyclicalLender"
+  class: "examples.CreditCycle.RuleLLM.players:RuleLLMProCyclicalLender"
+  num_instances: 2
+  config:
+    identity: "procyclicallender"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      leverage_expansion_rate: 0.3
+      leverage_contraction_rate: 0.4
+      expansion_threshold: 0.01
+      contraction_threshold: -0.015
+      base_size: 500
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_PRO_CYCLICAL_LENDER_SYS"
+        user_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+  persona: !include persona.yml
+
+minskyborrower:
+  name: "MinskyBorrower"
+  class: "examples.CreditCycle.RuleLLM.players:RuleLLMMinskyBorrower"
+  num_instances: 2
+  config:
+    identity: "minskyborrower"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 0
+      hedge_rounds: 20
+      speculative_rounds: 40
+      ponzi_rounds: 80
+      hedge_size: 100
+      speculative_size: 300
+      ponzi_size: 600
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_MINSKY_BORROWER_SYS"
+        user_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.4
+          max_tokens: 512
+  persona: !include persona.yml
+
+countercyclicallender:
+  name: "CounterCyclicalLender"
+  class: "examples.CreditCycle.RuleLLM.players:RuleLLMCounterCyclicalLender"
+  num_instances: 1
+  config:
+    identity: "countercyclicallender"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 2000000.0
+      initial_position: 0
+      buy_threshold: -0.05
+      sell_threshold: 0.10
+      counter_cycle_size: 400
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_COUNTER_CYCLICAL_LENDER_SYS"
+        user_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+valueinvestor:
+  name: "ValueInvestor"
+  class: "examples.CreditCycle.RuleLLM.players:RuleLLMValueInvestor"
+  num_instances: 1
+  config:
+    identity: "valueinvestor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 1000000.0
+      initial_position: 0
+      value_discount: 0.10
+      value_premium: 0.10
+      value_size: 300
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_VALUE_INVESTOR_SYS"
+        user_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_tokens: 512
+  persona: !include persona.yml
+
+noisetrader:
+  name: "NoiseTrader"
+  class: "examples.CreditCycle.RuleLLM.players:RuleLLMNoiseTrader"
+  num_instances: 1
+  config:
+    identity: "noisetrader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 0
+      trade_probability: 0.3
+      noise_size: 100
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
+        user_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml

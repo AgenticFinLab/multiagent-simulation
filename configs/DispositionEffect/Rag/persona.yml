@@ -1,33 +1,25 @@
-# -----------------------------------------------------------------------------
-# MARKET
-# -----------------------------------------------------------------------------
-market:
-  type: proxy
-  checkpoint_dir: "EXPERIMENT/DispositionEffect/Rag/checkpoints"
-  record_path: "EXPERIMENT/DispositionEffect/Rag/records"
-  monitoring:
-    record_path: "EXPERIMENT/DispositionEffect/Rag/monitoring"
+# =============================================================================
+# DispositionEffect Rag Persona Configuration
+# =============================================================================
 
-# -----------------------------------------------------------------------------
-# RAG INVESTORS
-# -----------------------------------------------------------------------------
-rag_disposition:
-  type: player
-  checkpoint_dir: "EXPERIMENT/DispositionEffect/Rag/checkpoints"
-  record_path: "EXPERIMENT/DispositionEffect/Rag/records"
-  monitoring:
-    record_path: "EXPERIMENT/DispositionEffect/Rag/monitoring"
+auto_checkpoint: false
+debug_mode: true
 
-rag_rational:
-  type: player
-  checkpoint_dir: "EXPERIMENT/DispositionEffect/Rag/checkpoints"
-  record_path: "EXPERIMENT/DispositionEffect/Rag/records"
-  monitoring:
-    record_path: "EXPERIMENT/DispositionEffect/Rag/monitoring"
+proxy:
+  storage:
+    checkpoint_dir: "EXPERIMENT/DispositionEffect/Rag/checkpoints"
+    record_path: "EXPERIMENT/DispositionEffect/Rag/records"
+    record_rounds: true
+    turn_block_size: 3
 
-rag_tax_aware:
-  type: player
-  checkpoint_dir: "EXPERIMENT/DispositionEffect/Rag/checkpoints"
-  record_path: "EXPERIMENT/DispositionEffect/Rag/records"
   monitoring:
     record_path: "EXPERIMENT/DispositionEffect/Rag/monitoring"
+    monitor_hot_limit: 3
+
+  communication:
+    message_timeout_ms: 30000
+    enable_compression: true
+
+  resource:
+    mcp_servers: []
+    enable_caching: false

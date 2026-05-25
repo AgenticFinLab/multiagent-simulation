@@ -76,10 +76,10 @@ stablecoinholder:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_STABLECOIN_HOLDER_SYS"
+        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_STABLECOINHOLDER_PROMPT"
         user_message: "examples.LUNACollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.6
           max_tokens: 600
@@ -122,10 +122,10 @@ arbitrageur:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_ARBITRAGEUR_SYS"
+        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_ARBITRAGEUR_PROMPT"
         user_message: "examples.LUNACollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_tokens: 600
@@ -168,10 +168,10 @@ defilender:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_DEFI_LENDER_SYS"
+        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_DEFILENDER_PROMPT"
         user_message: "examples.LUNACollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -193,7 +193,7 @@ anchordepositor:
       initial_position: 600
       initial_price: 100.0
       fundamental_value: 100.0
-      exit_threshold: 0.03
+      yield_threshold: 0.05
       base_size: 350
       custom_state_hot_limit: 3
       private_knowledge:
@@ -214,10 +214,10 @@ anchordepositor:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_ANCHOR_DEPOSITOR_SYS"
+        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_ANCHORDEPOSITOR_PROMPT"
         user_message: "examples.LUNACollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.6
           max_tokens: 600
@@ -260,10 +260,10 @@ valuebuyer:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_VALUE_BUYER_SYS"
+        sys_message: "examples.LUNACollapse.Rag.prompts:RAG_VALUEBUYER_PROMPT"
         user_message: "examples.LUNACollapse.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5
           max_tokens: 600

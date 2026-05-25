@@ -1,81 +1,86 @@
-# LTCMCollapse Simulation
+# LTCMCollapse LLM — Implementation Explanation
 
-## Overview
+## §1 Variant Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | August-September 1998 LTCM crisis - Russian default triggered liquidity crisis |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Long-Term Capital Management collapse simulation with convergence arbitrage, leverage cycles, and liquidity crisis |
-| **Academic Value** | Understanding august-september 1998 ltcm crisis - russian default triggered liquidity crisis through multi-agent simulation |
+|---|---|
+| Variant | LLM |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | persona-only LLM decisions using current market state |
+| Key Difference | tests whether language agents reproduce LTCM-style stress behavior without executable rule formulas |
+| Files | `players.py`, `prompts.py`, `run_ltcmcollapse_llm.py`, `analysis.py`, `explain.md`, `analysis.md` |
 
-## Theoretical Foundation
+## §2 Theory To Implementation Mapping
 
-- Shleifer & Vishny (1997): Limits to arbitrage
-- Long-Term Capital Management (1998): Convergence trades gone wrong
-- Morris & Shin (2004): Liquidity black holes
+| Theory Component | Implementation |
+|---|---|
+| ConvergenceArbitrageur (`simulation-bases.md §4.1`) | `LLMConvergenceArbitrageur` uses `LLM_CONVERGENCEARBITRAGEUR_PROMPT`; persona emphasizes spread convergence and leveraged sizing |
+| LeverageTrader (`simulation-bases.md §4.2`) | `LLMLeverageTrader` uses `LLM_LEVERAGETRADER_PROMPT`; persona emphasizes margin calls and forced deleveraging |
+| RiskManager (`simulation-bases.md §4.3`) | `LLMRiskManager` uses `LLM_RISKMANAGER_PROMPT`; persona emphasizes VaR/risk-limit cuts |
+| LiquidityProvider (`simulation-bases.md §4.4`) | `LLMLiquidityProvider` uses `LLM_LIQUIDITYPROVIDER_PROMPT`; persona emphasizes market making and stress withdrawal |
+| CentralBank (`simulation-bases.md §4.5`) | `LLMCentralBank` uses `LLM_CENTRALBANK_PROMPT`; persona emphasizes lender-of-last-resort support |
 
-## Agent Descriptions
+The LLM variant intentionally does not execute the Rule formulas. It supplies market state and personality instructions, then parses the returned decision JSON.
 
-### ConvergenceArbitrageur
-**Theoretical Basis**: Convergence arbitrage (LTCM strategy)
-**Market Role**: destabilizing
-**Description**: Bets on spread convergence between related securities
-**Parameters**: entry_spread=0.02, leverage=25, max_position=50000
+## §3 Market Mechanism Implementation
 
-### LeverageTrader
-**Theoretical Basis**: Leverage cycle (Geanakoplos, 2010)
-**Market Role**: destabilizing
-**Description**: Highly leveraged trader forced to deleverage in crisis
-**Parameters**: leverage_ratio=20, margin_call_threshold=0.1, delever_speed=fast
+The market is imported from `examples.LTCMCollapse.Rule.players:Market`, so price formation is identical to Rule and follows `simulation-bases.md §3.1`.
 
-### RiskManager
-**Theoretical Basis**: VaR-based risk management
-**Market Role**: neutral
-**Description**: Monitors portfolio risk and cuts positions when VaR breached
-**Parameters**: var_limit=0.02, confidence=0.99, lookback=60
+Investor `decide()` builds a user message from:
 
-### LiquidityProvider
-**Theoretical Basis**: Market making under stress
-**Market Role**: stabilizing
-**Description**: Provides liquidity but withdraws when spreads widen
-**Parameters**: normal_spread=0.001, stress_spread=0.01, inventory_limit=5000
+- `round`
+- `price`
+- `fundamental`
+- `deviation`
+- `cash`
+- `position`
+- `portfolio_value`
 
-### CentralBank
-**Theoretical Basis**: Lender of last resort (Bagehot, 1873)
-**Market Role**: stabilizing
-**Description**: Provides emergency liquidity to prevent systemic collapse
-**Parameters**: intervention_threshold=0.10, rescue_probability=0.8
+## §4 Variant-Specific Features
 
+LLM prompts define investor psychology without naming the historical event in the system prompt header. The output parser expects:
 
-## Usage
-
-### Rule Variant
-```bash
-python examples/LTCMCollapse/Rule/run_ltcmcollapse.py \
-    -c configs/LTCMCollapse/Rule/simulation.yml
+```xml
+<analysis>...</analysis>
+<decision>{"action": "buy|sell|hold", "bid_price": 100.0, "quantity": 1, "reasoning": "..."}</decision>
 ```
 
-### LLM Variant
-```bash
-python examples/LTCMCollapse/LLM/run_ltcmcollapse_llm.py \
-    -c configs/LTCMCollapse/LLM/simulation.yml
+The actor retries parse failures up to three times and raises `RuntimeError` if no valid decision is produced. It does not substitute a hidden hold decision.
+
+## §5 Architecture Diagram
+
+```text
+Market broadcast
+  -> LLMInvestor.perceive()
+  -> LLMInvestor.decide()
+       -> LangChainAPIInference(system_prompt, user_message)
+       -> parse_llm_response_with_thinking()
+  -> LLMInvestor.act()
+       -> emit standard order
 ```
 
-### RuleLLM Variant
-```bash
-python examples/LTCMCollapse/RuleLLM/run_ltcmcollapse_rulellm.py \
-    -c configs/LTCMCollapse/RuleLLM/simulation.yml
-```
+## §6 Configuration Reference
 
-### RAG Variant
-```bash
-python examples/LTCMCollapse/Rag/run_ltcmcollapse_rag.py \
-    -c configs/LTCMCollapse/Rag/simulation.yml
-```
+| Config Area | File | Notes |
+|---|---|---|
+| model | `configs/LTCMCollapse/LLM/players.yml` | `ark/doubao-seed-2-0-mini-260428` |
+| prompts | `examples/LTCMCollapse/LLM/prompts.py` | persona-only system prompts |
+| rounds | `configs/LTCMCollapse/LLM/simulation.yml` | 200 configured rounds |
 
-## References
+## §7 Expected Behavior Patterns
 
-- Shleifer & Vishny (1997): Limits to arbitrage
-- Long-Term Capital Management (1998): Convergence trades gone wrong
-- Morris & Shin (2004): Liquidity black holes
+LLM agents may be more conservative or inconsistent than Rule agents, but valid samples should still show coherent stress responses: arbitrage opportunity recognition, margin caution, risk cuts, liquidity withdrawal, or intervention reasoning.
+
+## §8 Validation Checklist
+
+- Prompt references resolve from `players.yml`.
+- Prompt/parser contract checks should report no missing fields.
+- Post-run LLM output quality review should report low or zero parse or contract failures.
+- Prompts and player code should remain stable unless a documented mechanism or contract defect is found.
+
+## §9 References
+
+- `../simulation-bases.md`
+- `../analysis-bases.md`
+- `prompts.py`
+- `players.py`

@@ -1,6 +1,6 @@
 # BlackMonday1987 LLM — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                                   | Description                                                                                                                                                                                |
 |----------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,10 +12,10 @@
 
 ---
 
-## 1. How Theoretical Design Is Implemented
+## §2 Theory → Implementation Mapping
 
 ### PortfolioInsurer: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — PortfolioInsurer)*
+*(Theory defined in simulation-bases.md §4.1 — PortfolioInsurer)*
 
 | Theoretical Design Element                                       | Implementation                                                                                                          |
 |------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
@@ -26,7 +26,7 @@
 | Prompt constant                                                  | `LLM_PORTFOLIO_INSURER_SYS` in `prompts.py`                                                                             |
 
 ### IndexArbitrageur: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — IndexArbitrageur)*
+*(Theory defined in simulation-bases.md §4.2 — IndexArbitrageur)*
 
 | Theoretical Design Element                                    | Implementation                                                         |
 |---------------------------------------------------------------|------------------------------------------------------------------------|
@@ -35,7 +35,7 @@
 | Position size range 50–800 → sim-bases §4 LLM Persona         | Prompt: "large opportunity: 400–800 shares"; "small signal: 50–200"    |
 
 ### ProgramTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — ProgramTrader)*
+*(Theory defined in simulation-bases.md §4.3 — ProgramTrader)*
 
 | Theoretical Design Element                                  | Implementation                                                                        |
 |-------------------------------------------------------------|---------------------------------------------------------------------------------------|
@@ -44,7 +44,7 @@
 | Large position sizes → sim-bases §4 LLM Persona             | "you are designed for impact, not precision"; "800–1500 shares" for strong signal     |
 
 ### ValueInvestor: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — ValueInvestor)*
+*(Theory defined in simulation-bases.md §4.4 — ValueInvestor)*
 
 | Theoretical Design Element                                  | Implementation                                                                                |
 |-------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
@@ -53,7 +53,7 @@
 | Position size range 50–1000 → sim-bases §4 LLM Persona      | "extreme discount: 600–1000 shares"; "slight discount: 50–200"                                |
 
 ### NoiseTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — NoiseTrader)*
+*(Theory defined in simulation-bases.md §4.5 — NoiseTrader)*
 
 | Theoretical Design Element                                | Implementation                                                                            |
 |-----------------------------------------------------------|-------------------------------------------------------------------------------------------|
@@ -63,7 +63,7 @@
 
 ---
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 *Formula source: simulation-bases.md §3.1*
 
@@ -81,7 +81,7 @@ Deviations from simulation-bases.md design: None in market mechanics. Investor d
 
 ---
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 *(Reference: simulation-bases.md §9 — LLM variant entry)*
 
@@ -95,7 +95,7 @@ Deviations from simulation-bases.md design: None in market mechanics. Investor d
 
 ---
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
@@ -119,20 +119,20 @@ Deviations from simulation-bases.md design: None in market mechanics. Investor d
 
 ---
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 Key Configuration Parameters (`configs/BlackMonday1987/LLM/players.yml`):
 
 | Parameter         | Config Path              | Value                                            | Design Justification                                    |
 |-------------------|--------------------------|--------------------------------------------------|---------------------------------------------------------|
-| `price_impact`    | `extras.price_impact`    | 0.002                                            | Same as Rule — comparable crash mechanics               |
+| `price_impact`    | `extras.price_impact`    | 0.05                                             | Same as Rule — comparable crash mechanics               |
 | `mean_reversion`  | `extras.mean_reversion`  | 0.02                                             | Same as Rule — comparable recovery dynamics             |
 | `sys_prompt_path` | `extras.sys_prompt_path` | `examples.BlackMonday1987.LLM.prompts:LLM_*_SYS` | Module path for LLM personas                            |
 | `llm.temperature` | `extras.llm.temperature` | 0.7                                              | Moderate stochasticity — reproduces persona variability |
 
 ---
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 export ARK_API_KEY="your-bytedance-ark-api-key"
@@ -143,17 +143,17 @@ python examples/BlackMonday1987/LLM/run_blackmonday1987_llm.py \
 Required environment variables:
 - `ARK_API_KEY`: ByteDance Doubao API key
 
-Expected runtime: ~5–20 minutes for 100 rounds (5 LLM calls per round)
+Expected runtime: ~10–40 minutes for 200 rounds (5 LLM calls per round)
 
 Output location: `EXPERIMENT/BlackMonday1987/LLM/`
 
 ---
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase            | Rounds | Expected Agent Behavior                                                             | Expected Price Dynamics                                       |
 |------------------|--------|-------------------------------------------------------------------------------------|---------------------------------------------------------------|
-| Pre-Crash        | 1–15   | All agents hold or make small adjustments; ProgramTrader may have early triggers    | Price near 100; normal LLM-noise variation                    |
+| Pre-Crash        | 1–15   | All agents hold or make small adjustments; ProgramTrader may have early triggers    | Price near 250; normal LLM-noise variation                    |
 | Feedback Onset   | 5–20   | PortfolioInsurer begins selling; IndexArbitrageur joins; ProgramTrader may hesitate | First wave of selling; more gradual than Rule if hesitation   |
 | Crash Escalation | 15–30  | ProgramTrader "algorithm fires"; PortfolioInsurer sells larger quantities           | Sharp decline; crash depth variable across runs               |
 | Crash Peak       | 25–45  | ValueInvestor "excited by discount"; begins buying; NoiseTrader reacts variably     | Maximum drawdown; variable depth vs Rule                      |
@@ -161,7 +161,7 @@ Output location: `EXPERIMENT/BlackMonday1987/LLM/`
 
 ---
 
-## 8. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

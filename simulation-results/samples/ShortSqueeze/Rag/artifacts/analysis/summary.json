@@ -1,0 +1,138 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": 97.00814283031741,
+      "max_abs_deviation_pct": 267.1303806790955,
+      "mean_abs_deviation_pct": 179.76815195853413
+    },
+    "price_metrics": {
+      "final": 98.5040714151587,
+      "initial": 29.089137751456374,
+      "max": 183.56519033954774,
+      "mean": 139.67496735678162,
+      "min": 29.089137751456374,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 564.9766525534668,
+      "max_drawdown_pct": -1.4179013850288222,
+      "volatility_pct": 35.59018379081472
+    },
+    "volume_metrics": {
+      "mean_volume": 15.304587218801116,
+      "total_volume": 3060.9174437602233
+    }
+  },
+  "rag_knowledge_effect": {
+    "aggregate": {
+      "max_retrieval_failure_rate": 0.0,
+      "mean_retrieval_failure_rate": 0.0
+    },
+    "ragllm_institutional": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_momentum_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_momentum_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_momentum_3": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_retail_coord_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_retail_coord_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_retail_coord_3": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_short_seller_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_short_seller_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_short_seller_3": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_value_1": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    },
+    "ragllm_value_2": {
+      "retrieval_failure_rate": 0.0,
+      "retrieval_failure_rounds": 0,
+      "retrieval_success_rounds": 200,
+      "total_rag_rounds": 200
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "ShortSqueeze",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 267.13
+      },
+      "Volatility Sanity": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 564.977
+      }
+    },
+    "interpretation": "=== ShortSqueeze SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 100.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 267.13%\n    Expected: nonzero but bounded deviation\n    Score: 100.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 564.98%\n    Expected: bounded annualized volatility\n    Score: 100.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe ShortSqueeze run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 100.0%",
+    "is_valid": true,
+    "score": 1.0
+  }
+}

@@ -1,0 +1,23 @@
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - llm_short_seller
+    - llm_retail_coord
+    - llm_momentum
+    - llm_value
+    - llm_institutional
+
+  llm_short_seller:
+    - market
+  llm_retail_coord:
+    - market
+  llm_momentum:
+    - market
+  llm_value:
+    - market
+  llm_institutional:
+    - market

@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
+1,1,FlashCrash2010,RuleLLM,SUCCESS,0,5810.477,2026-05-23T01:16:21,2026-05-23T02:53:12,config/simulation.yml,examples/FlashCrash2010/RuleLLM/run_flashcrash2010_rulellm.py,logs/FlashCrash2010__RuleLLM.log,,200,200,

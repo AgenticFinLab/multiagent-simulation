@@ -127,7 +127,7 @@ def main() -> None:
     with open(rag_stats_path, "w", encoding="utf-8") as fh:
         json.dump(rag_stats, fh, indent=2)
 
-    agg = rag_stats["aggregate"]
+    agg = rag_stats["aggregate"] if "aggregate" in rag_stats else {}
     if agg:
         print(
             f"Mean RAG retrieval failure rate: "

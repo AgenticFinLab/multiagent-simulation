@@ -36,7 +36,7 @@ All functions defined in `LLM/analysis.py`. Inputs sourced from simulation outpu
 ## §3 LLM-Specific Notes
 
 - **Multi-seed averaging required**: Run ≥5 seeds; report mean ± std for each metric.
-- **§4.1 vs. §4.2 differentiation**: Unlike the Rule variant where both agents are identical at default extras, LLM prompts produce distinct personas. Monitor whether HindsightOverconfident and OutcomeLearner trade volumes diverge — divergence is a research finding.
+- **§4.1 vs. §4.2 differentiation**: The Rule variant already differentiates scale through configured attribution parameters; LLM prompts add persona-level variation. Monitor whether HindsightOverconfident and OutcomeLearner trade volumes diverge — divergence is a research finding.
 - **LLM narrative resistance**: LLM agents occasionally step out of bias persona when the LLM "notices" the obvious narrative fallacy. This produces lower HBI than Rule on some seeds. Document the frequency of "narrative resistance" events.
 - **NCE interpretation**: LLM NCE may be higher than Rule NCE if ProcessEvaluator and ContrarianSkeptic apply contextual reasoning to identify and trade against mispricings earlier. Track the average round of first correction action.
 - **Temperature effect**: Higher temperature → more narrative resistance → lower HBI; lower temperature → closer to Rule baseline.
@@ -68,3 +68,14 @@ All functions defined in `LLM/analysis.py`. Inputs sourced from simulation outpu
 - `analysis-bases.md §5` — Cross-variant comparison table
 - Fischhoff (1975) `doi:10.1037/0096-1523.1.3.288` — HBI empirical basis
 - Daniel et al. (1998) `doi:10.1111/0022-1082.00077` — overconfidence and momentum
+
+## §6 Expected Results and Validation
+
+Valid LLM outputs should complete 200 rounds with parseable decision JSON and no fallback-hold distortion. Post-run quality review should confirm clean parse quality and then compare HBI, OBI, NCE, VAF, OWP, and WDI against the Rule baseline.
+
+## §7 Visualization Catalogue
+
+`LLM/analysis.py → main()` uses the standard analysis output contract:
+`summary.json`, `00_investor_bids.png`, `01_hindsightbias_dynamics.png`,
+`02_hindsightbias_analysis.png`, and `03_summary.png`. LLM reports may add
+action-distribution, parse-quality, and narrative-resistance summaries.

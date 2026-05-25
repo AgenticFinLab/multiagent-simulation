@@ -35,8 +35,9 @@ Your Portfolio:
 
 Apply your DECISION RULES, informed by the relevant knowledge above.
 
-First output your reasoning inside <analysis>...</analysis> tags.
-Then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" or "sell" or "hold", "quantity": integer}}
-IMPORTANT: quantity must be a non-negative integer.
+Required output:
+<analysis>brief calculation, retrieved-knowledge use, and rationale</analysis>
+<decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f},
+"quantity": non-negative integer, "reasoning": "brief rationale"}}</decision>
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
 """

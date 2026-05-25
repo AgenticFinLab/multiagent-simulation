@@ -31,6 +31,7 @@ Both guides share the same compliance standard — the difference is direction: 
 | `05-config-repair.md`        | Repair     | How to audit and fix YAML config files for all four variants                              |
 | `06-execution-order.md`      | Execution  | The per-simulation step-by-step workflow: one simulation at a time                        |
 | `07-validation-checklist.md` | Validation | Final verification gates before marking a simulation complete                             |
+| `08-runtime-failure-patterns.md` | Runtime | Empirical failure patterns discovered during full-round experiment execution              |
 
 ---
 
@@ -63,6 +64,15 @@ Follow the execution order file, working through simulations one at a time. For 
 
 After each simulation is repaired, run the validation checklist to confirm all gates pass before moving to the next simulation.
 
+### Step 5 — Runtime lessons (`08-runtime-failure-patterns.md`)
+
+After a scenario reaches structural compliance, use the runtime failure
+patterns to decide whether a failed full-round run indicates:
+- a config/schema bug that must be fixed before rerun,
+- a prompt/parser contract bug that should be audited across related modes,
+- an API/quota/runtime contamination that invalidates the batch evidence, or
+- a Level-2/Level-3 quality issue that can only be judged after execution.
+
 ---
 
 ## Key Principles
@@ -91,6 +101,28 @@ When a runtime error occurs (e.g., `KeyError`, `AttributeError: module has no at
 
 **FORBIDDEN**: `.get(key, default)` fallbacks, `try/except` to skip missing keys, renaming design-defined class names to match wrong configs, or any other workaround that masks the underlying inconsistency.
 
+**Runtime exception for stochastic API modes**: external LLM responses and
+network/API calls are not authoritative config data. A scenario may add a
+scenario-local fallback for malformed LLM output or transient provider errors
+only if all conditions hold:
+- the prompt/parser/player contract has already been fixed at the source;
+- fallback is explicit in code, never silent;
+- fallback counts or reasons are recorded in logs/artifacts;
+- auth, quota, missing-key, config, parser-reference, and framework schema
+  errors still fail loudly;
+- the final sample is later reviewed for fallback rate and scenario quality.
+
+Post-run quality gates:
+- `0` fallback decisions: clean.
+- `>0` and `<=1%` of API decisions: acceptable with a quality note if scenario
+  metrics remain coherent.
+- `>1%`: quality-review required; rerun or repair unless a scenario-specific
+  design note justifies acceptance.
+- Any fallback caused by deterministic project bugs: invalid output.
+
+This exception does not weaken the root-cause rule. It separates deterministic
+project bugs from stochastic provider behavior.
+
 #### 6.1 Strict No-Default, No-Defensive-Programming Policy
 
 Beyond root-cause error handling, **all simulation code** (`players.py` and `analysis.py` across all four variants) must follow strict fail-fast principles. This is a universal, non-negotiable constraint.
@@ -99,7 +131,7 @@ Beyond root-cause error handling, **all simulation code** (`players.py` and `ana
 
 | # | Pattern                            | Wrong                                          | Correct                                                |
 |---|------------------------------------|------------------------------------------------|--------------------------------------------------------|
-| 1 | LLM parse failure → silent hold    | `if decision is None: action, qty = "hold", 0` | `raise RuntimeError("LLM parse failed after retries")` |
+| 1 | LLM parse failure → silent hold    | `if decision is None: action, qty = "hold", 0` | Fix the prompt/parser contract; if stochastic malformed output remains, use an explicit counted fallback |
 | 2 | `.get()` on LLM response           | `decision.get("action", "hold")`               | `decision["action"]`                                   |
 | 3 | `.get()` on message payload        | `decision_payload.get("quantity", 0)`          | `decision_payload["quantity"]`                         |
 | 4 | `.get()` on coordinator data       | `fundamentals.get(r, 100.0)`                   | `fundamentals[r]`                                      |
@@ -149,7 +181,7 @@ Full details are in `02-remediation-standard.md`. Quick reference:
 | `simulation-bases.md`   | 9 sections        | §4 investor entries must use 7-part standard; no variant-specific content |
 | `analysis-bases.md`     | 7 sections        | §2 metrics must include Python function signatures                        |
 | `{Variant}/explain.md`  | 9 sections        | §2 Theory→Implementation mapping tables; cites `simulation-bases.md §4.N` |
-| `{Variant}/analysis.md` | 5 sections        | §2 Metric→Function mapping; variant-specific notes in §3                  |
+| `{Variant}/analysis.md` | 7 sections        | §2 Metric→Function mapping; §3–§7 map dimensions, phenomena, outputs, and cross-variant comparison |
 | `players.py` docstrings | Class-level       | Each investor class must cite `Theory: simulation-bases.md §4.N`          |
 
 ---

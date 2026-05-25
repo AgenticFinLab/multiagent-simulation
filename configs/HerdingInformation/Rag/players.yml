@@ -77,10 +77,10 @@ cascadefollower:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.HerdingInformation.Rag.prompts:RAG_CASCADE_FOLLOWER_SYS"
+        sys_message: "examples.HerdingInformation.Rag.prompts:RAGLLM_CASCADE_FOLLOWER_SYS"
         user_message: "examples.HerdingInformation.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.8
           max_tokens: 600
@@ -123,10 +123,10 @@ reputationherder:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.HerdingInformation.Rag.prompts:RAG_REPUTATION_HERDER_SYS"
+        sys_message: "examples.HerdingInformation.Rag.prompts:RAGLLM_REPUTATION_HERDER_SYS"
         user_message: "examples.HerdingInformation.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -169,10 +169,10 @@ independentthinker:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.HerdingInformation.Rag.prompts:RAG_INDEPENDENT_THINKER_SYS"
+        sys_message: "examples.HerdingInformation.Rag.prompts:RAGLLM_INDEPENDENT_THINKER_SYS"
         user_message: "examples.HerdingInformation.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 600
@@ -215,10 +215,10 @@ contrarian:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.HerdingInformation.Rag.prompts:RAG_CONTRARIAN_SYS"
+        sys_message: "examples.HerdingInformation.Rag.prompts:RAGLLM_CONTRARIAN_SYS"
         user_message: "examples.HerdingInformation.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 600
@@ -261,10 +261,10 @@ noisetrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.HerdingInformation.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.HerdingInformation.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
         user_message: "examples.HerdingInformation.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
           max_tokens: 600

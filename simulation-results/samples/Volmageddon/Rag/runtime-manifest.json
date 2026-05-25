@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "Rag",
+  "omitted_raw_artifact_bytes": 61946810,
+  "omitted_raw_artifact_files": 1384,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 46302328,
+      "file_count": 1373,
+      "name": "records",
+      "source_path": "samples/Volmageddon/Rag/artifacts/records"
+    },
+    {
+      "bytes": 15559671,
+      "file_count": 9,
+      "name": "communication",
+      "source_path": "samples/Volmageddon/Rag/artifacts/communication"
+    },
+    {
+      "bytes": 84811,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/Volmageddon/Rag/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/Volmageddon/Rag/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "Volmageddon__Rag",
+  "scenario": "Volmageddon",
+  "source_resource_pack_sample_path": "samples/Volmageddon/Rag",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/Volmageddon/Rag"
+}

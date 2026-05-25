@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
+1,1,AvailabilityBias,RuleLLM,SUCCESS,0,24481.426,2026-05-23T18:17:19,2026-05-24T01:05:21,config/simulation.yml,examples/AvailabilityBias/RuleLLM/run_availabilitybias_rulellm.py,logs/AvailabilityBias__RuleLLM.log,,200,200,

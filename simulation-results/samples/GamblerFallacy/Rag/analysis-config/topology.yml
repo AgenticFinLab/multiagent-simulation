@@ -1,0 +1,29 @@
+# GamblerFallacy Rag Topology - Star Pattern
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - streakreversaltrader
+    - hothandtrader
+    - independentassessor
+    - arbitrageur
+    - noisetrader
+
+  streakreversaltrader:
+    - market
+
+  hothandtrader:
+    - market
+
+  independentassessor:
+    - market
+
+  arbitrageur:
+    - market
+
+  noisetrader:
+    - market

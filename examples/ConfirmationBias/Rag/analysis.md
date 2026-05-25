@@ -1,6 +1,6 @@
 # ConfirmationBias Rag Variant — Analysis Guide
 
-## 1. Analysis Overview
+## §1 Analysis Overview
 
 This guide covers interpretation of results from the **ConfirmationBias Rag** variant.
 Key questions:
@@ -10,10 +10,22 @@ Key questions:
 
 ---
 
-## 2. Metric Implementation (`Rag/analysis.py`)
+## §2 Metric Implementation (`Rag/analysis.py`)
 
-Imports `calculate_metrics`, `load_simulation_data` from `Rule/analysis.py` (DRY pattern).
-Adds `analyze_rag_knowledge_effect()` — the primary Rag-specific metric.
+Imports the shared metric and visualization functions from `Rule/analysis.py`
+(DRY pattern). Adds `analyze_rag_knowledge_effect()` as the primary
+Rag-specific metric, while base market metrics map to `analysis-bases.md §2.1`
+through `analysis-bases.md §2.7`.
+
+| Metric | Implementation | Reference |
+|---|---|---|
+| `bias_amplitude_pct` | `analyze_confirmation_bias()` | `analysis-bases.md §2.1` |
+| `bias_persistence` | `analyze_confirmation_bias()` | `analysis-bases.md §2.2` |
+| `mean_absolute_deviation_pct` | Shared price-deviation calculations | `analysis-bases.md §2.3` |
+| `belief_flip_count` | RAG reasoning/action proxy interpretation | `analysis-bases.md §2.4` |
+| `correction_ratio` | `analyze_confirmation_bias()` | `analysis-bases.md §2.5` |
+| `return_autocorrelation_ac1` | `analyze_confirmation_bias()` | `analysis-bases.md §2.6` |
+| `annualized_vol_pct` | Shared return-volatility calculations | `analysis-bases.md §2.7` |
 
 ### `analyze_rag_knowledge_effect()` — Key Function
 
@@ -36,19 +48,22 @@ def analyze_rag_knowledge_effect(agent_records):
 
 ---
 
-## 3. Rag-Specific Output Files
+## §3 Rag-Specific Output Files
 
 Running `Rag/analysis.py` writes to `EXPERIMENT/ConfirmationBias/Rag/records/analysis/`:
 
-| File                                | Contents                                                    |
-|-------------------------------------|-------------------------------------------------------------|
-| `confirmationbias_rag_analysis.png` | 2×2 chart with RAG retrieval bar                            |
-| `summary.json`                      | `{variant: "Rag", ...metrics, rag_knowledge_effect: {...}}` |
-| `rag_knowledge_effect.json`         | Per-agent retrieval statistics                              |
+| File                               | Contents                                  |
+|------------------------------------|-------------------------------------------|
+| `summary.json`                     | Metrics, validation, and RAG stats        |
+| `00_investor_bids.png`             | Market price and per-agent bid traces     |
+| `01_confirmationbias_dynamics.png` | Price/fundamental and deviation dynamics  |
+| `02_confirmationbias_analysis.png` | Volatility and cumulative bias diagnostics|
+| `03_summary.png`                   | Agent VWAP and trading-volume summary     |
+| `rag_stats.json`                   | Per-agent retrieval statistics            |
 
 ---
 
-## 4. Dimension-by-Dimension Interpretation
+## §4 Dimension-by-Dimension Interpretation
 
 ### 4.1 Price vs Fundamental
 
@@ -73,11 +88,11 @@ Running `Rag/analysis.py` writes to `EXPERIMENT/ConfirmationBias/Rag/records/ana
 
 ---
 
-## 5. Variant-Specific Phenomena
+## §5 Variant-Specific Phenomena
 
 ### 5.1 Knowledge Quality vs Quantity
 
-High retrieval rate ≠ high quality. Inspect `rag_knowledge_effect.json`
+High retrieval rate is not the same as high quality. Inspect `rag_stats.json`
 and also manually check a few retrieved contexts:
 - Does retrieved text mention "confirmation bias" explicitly?
 - Is retrieved text actionable for the agent's decision?
@@ -100,7 +115,7 @@ In this case, focus improvements on KnowledgeStore content, not agent prompts.
 
 ---
 
-## 6. Knowledge Store Requirements
+## §6 Knowledge Store Requirements
 
 For `retrieval_success_rate ≥ 70%`, add documents to `configs/ConfirmationBias/Rag/knowledge/`:
 
@@ -115,7 +130,7 @@ For `retrieval_success_rate ≥ 70%`, add documents to `configs/ConfirmationBias
 
 ---
 
-## 7. Cross-Variant Comparison
+## §7 Cross-Variant Comparison
 
 | Metric                    | Expected vs LLM                       |
 |---------------------------|---------------------------------------|
@@ -124,5 +139,5 @@ For `retrieval_success_rate ≥ 70%`, add documents to `configs/ConfirmationBias
 | `correction_ratio`        | Higher (more effective stabilization) |
 | `retrieval_success_rate`  | Target ≥ 70%                          |
 
-Use `rag_knowledge_effect.json` to rank agents by retrieval quality.
+Use `rag_stats.json` to rank agents by retrieval quality.
 Agents with lowest retrieval are the highest priority for KnowledgeStore improvement.

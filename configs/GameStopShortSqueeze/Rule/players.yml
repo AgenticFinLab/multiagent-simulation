@@ -55,7 +55,7 @@ shortsellerhf:
     extras:
       record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"
       initial_cash: 2000000.0
-      initial_position: 1000
+      initial_position: -1000
       initial_price: 20.0
       fundamental_value: 20.0
       cover_threshold: 0.05

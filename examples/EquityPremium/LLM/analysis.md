@@ -41,3 +41,14 @@ Measure whether LLM personas reproduce myopic loss aversion and the equity premi
 
 See `analysis-bases.md §2` for full metric derivations and Python function signatures.
 See `simulation-bases.md §2` for theoretical foundations.
+
+## §6 Validation Criteria
+
+LLM samples must preserve the `stock_qty` allocation schema and should have no
+unrecorded parser fallback. Accepted outputs must include `summary.json` and the
+four fixed PNG files from the Rule analysis contract.
+
+## §7 Cross-Variant Use
+
+Compare LLM against Rule to isolate persona-only reasoning effects while holding
+the stock-bond market mechanism constant.

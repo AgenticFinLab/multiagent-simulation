@@ -1,0 +1,60 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": 0.10171166539602439,
+      "max_abs_deviation_pct": 0.15407256800639857,
+      "mean_abs_deviation_pct": 0.04959514357083584
+    },
+    "price_metrics": {
+      "final": 100.10171166539602,
+      "initial": 99.99955183106059,
+      "max": 100.1540725680064,
+      "mean": 100.0180267380839,
+      "min": 99.8884479569477,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 0.22665052105031772,
+      "max_drawdown_pct": -0.037035115752689196,
+      "volatility_pct": 0.014277640791008349
+    },
+    "volume_metrics": {
+      "mean_volume": 0.0,
+      "total_volume": 0.0
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "LUNACollapse",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 0.154
+      },
+      "Volatility Sanity": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 0.227
+      }
+    },
+    "interpretation": "=== LUNACollapse SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 100.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 0.15%\n    Expected: nonzero but bounded deviation\n    Score: 100.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 0.23%\n    Expected: bounded annualized volatility\n    Score: 100.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe LUNACollapse run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 100.0%",
+    "is_valid": true,
+    "score": 1.0
+  }
+}

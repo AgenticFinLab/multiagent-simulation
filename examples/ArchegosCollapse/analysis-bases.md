@@ -1,6 +1,6 @@
 # ArchegosCollapse — Analysis Methodology Basis
 
-## 1. Analysis Objectives
+## §1 Analysis Objectives
 
 | Objective | Research Question                                                         | Metric(s)                                                                      | Expected Finding                                                                |
 |-----------|---------------------------------------------------------------------------|--------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
@@ -12,7 +12,7 @@
 | O6        | Does InformationTrader's front-running generate measurable excess return? | InformationTrader PnL vs ConcentratedFund PnL                                  | InformationTrader captures ≥2× per-share return relative to ConcentratedFund    |
 
 
-## 2. Core Metrics Catalogue
+## §2 Core Metrics Catalogue
 
 ### Metric: Price Deviation from Fundamental
 
@@ -22,6 +22,7 @@
   ```
   deviation(t) = (P(t) − F) / F × 100
   ```
+- **Python Function Signature**: `def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]`
   where F = 100.0 (ArchegosCollapse baseline fundamental value, per §6 parameter table).
 - **Derivation Rationale**: Normalising by F removes the dependency on absolute price levels and produces a scale-invariant measure of dislocation. The percentage form matches the standard mispricing measure used in the behavioural finance literature (Shiller, 2000; DeLong et al., 1990) and directly maps to margin maintenance thresholds, which are typically stated as percentage-of-notional.
 - **Academic Calibration Source**:
@@ -46,6 +47,7 @@
   ```
   max_drawdown = max_{t₁ < t₂} [(P(t₁) − P(t₂)) / P(t₁)] × 100
   ```
+- **Python Function Signature**: `def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]`
 - **Derivation Rationale**: Maximum drawdown is the canonical measure of tail-risk severity for leveraged liquidation events because it captures the worst-case realized loss without averaging away the extremes. For systemic risk analysis, the severity of the cascade peak matters more than its average magnitude.
 - **Academic Calibration Source**:
   - Chekhlov, A., Uryasev, S., & Zabarankin, M. (2005). Drawdown measure in portfolio optimization. *International Journal of Theoretical and Applied Finance*, 8(1), 13–58. https://doi.org/10.1142/S0219024905002767 — establishes maximum drawdown as a coherent risk measure with superior tail sensitivity compared to VaR.
@@ -69,6 +71,7 @@
   r(t)     = (P(t) − P(t−1)) / P(t−1)
   vol(t)   = std({r(t−9), r(t−8), …, r(t)})
   ```
+- **Python Function Signature**: `def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]`
 - **Derivation Rationale**: A 10-round rolling window balances responsiveness to changing conditions against noise; it roughly corresponds to two trading days of intraday observations if one simulation round maps to a 48-minute interval. Realized volatility is the standard empirical measure of market stress (Andersen et al., 2003).
 - **Academic Calibration Source**:
   - Garman, M. B., & Klass, M. J. (1980). On the estimation of security price volatilities from historical data. *Journal of Business*, 53(1), 67–78. https://doi.org/10.1086/296072 — establishes the theoretical basis for realized volatility estimation from historical price sequences.
@@ -91,6 +94,7 @@
   ```
   AC1 = corr(r(t), r(t−1))   computed over all rounds in the analysis window
   ```
+- **Python Function Signature**: `def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]`
 - **Derivation Rationale**: In a cascade driven by feedback loops (selling → lower prices → more margin calls → more selling), successive returns should be positively correlated during the cascade phase. When stabilizing forces (BlockTradeBuyer, mean-reversion term γ) dominate, autocorrelation should turn negative. This phase-shift in AC1 sign is a direct signature of the two regimes.
 - **Academic Calibration Source**:
   - Lo, A. W., & MacKinlay, A. C. (1988). Stock market prices do not follow random walks: Evidence from a simple specification test. *Review of Financial Studies*, 1(1), 41–66. https://doi.org/10.1093/rfs/1.1.41 — establishes that positive autocorrelation (AC1 ≈ 0.17–0.35 at weekly intervals) is the empirical signature of momentum in equity markets.
@@ -114,6 +118,7 @@
   VWAP_type        = Σ_t Σ_{i ∈ type} [|quantity_i(t)| × P(t)] / volume_type
   price_gap        = VWAP_PrimeBroker1 − VWAP_PrimeBroker2   (should be > 0)
   ```
+- **Python Function Signature**: `def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]`
 - **Derivation Rationale**: The first-mover advantage hypothesis (Gorton & Metrick, 2012) specifically predicts that PrimeBroker1 should liquidate at higher prices than PrimeBroker2 because it acts when prices are less depressed. VWAP is the correct measure because simple volume comparisons do not capture the price quality difference.
 - **Academic Calibration Source**:
   - Gorton, G., & Metrick, A. (2012). Securitized banking and the run on repo. *Journal of Financial Economics*, 104(3), 425–451. https://doi.org/10.1016/j.jfineco.2011.03.016 — establishes that first-moving creditors recover 5–15% more per unit of collateral in repo run scenarios.
@@ -133,6 +138,7 @@
   t_onset = min { t : deviation(t) < −0.10 }
   If no such t exists, t_onset = NaN (cascade did not occur)
   ```
+- **Python Function Signature**: `def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]`
 - **Derivation Rationale**: The −10% threshold mirrors PrimeBroker1's `liquidation_threshold = 0.10` parameter in the simulation config. Using the broker's own trigger as the cascade onset definition ensures the metric directly measures when the creditor race mechanism begins, rather than a model-free price threshold.
 - **Academic Calibration Source**:
   - Archegos timeline: Forced liquidations began March 25–26, 2021 (approximately 1–2 trading days after ViacomCBS first declined significantly on March 22–23). With 50 simulation rounds per run and an initial position-building phase, rounds 10–30 correspond to the first 1–3 trading days of the event.
@@ -152,6 +158,7 @@
   dev_min       = min_t { deviation(t) }   (peak cascade round t_peak)
   half_life     = min { t > t_peak : deviation(t) ≥ dev_min / 2 } − t_peak
   ```
+- **Python Function Signature**: `def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]`
 - **Derivation Rationale**: The half-life captures the pace of mean reversion after the cascade floor, which depends on the balance between the mean-reversion parameter γ and residual selling pressure. A short half-life indicates γ is strong; a long half-life indicates that selling pressure persists.
 - **Academic Calibration Source**:
   - Fama, E. F., & French, K. R. (1988). Permanent and temporary components of stock prices. *Journal of Political Economy*, 96(2), 246–273. https://doi.org/10.1086/261535 — estimates the half-life of mean reversion in equity prices at 3–5 years for fundamental-driven deviations; short-horizon cascade recoveries are faster (days to weeks).
@@ -160,7 +167,7 @@
 - **Red Flag**: half_life < 3 rounds → γ (mean_reversion) too high; recovery unrealistically fast. half_life > 40 rounds → γ too low; recovery never occurs within simulation window
 
 
-## 3. Analysis Dimensions
+## §3 Analysis Dimensions
 
 ### Dimension 1: Price Cascade Dynamics
 
@@ -200,7 +207,7 @@
 - **Expected Pattern**: Rule is most predictable; LLM introduces timing variability (onset ± 5 rounds); RuleLLM near-Rule (onset ± 2 rounds); Rag modified by historical knowledge (LTCM/Archegos precedents may alter BlockTradeBuyer timing)
 
 
-## 4. Phase Analysis Framework
+## §4 Phase Analysis Framework
 
 ### Phase Detection Rules
 
@@ -238,7 +245,7 @@
 | Phase 4 never starts | deviation stays < −0.20 indefinitely              | BlockTradeBuyer not activating; γ too low               | Check discount_threshold; increase mean_reversion γ |
 
 
-## 5. Cross-Variant Comparison Framework
+## §5 Cross-Variant Comparison Framework
 
 ### Comparison Protocol
 
@@ -257,7 +264,7 @@
 4. **Reporting format**: Table with mean ± std of each core metric across all variants; flag any variant where a metric falls outside the Normal Range defined in §2
 
 
-## 6. Expected Results and Validation
+## §6 Expected Results and Validation
 
 ### Calibration Targets from Literature
 
@@ -288,7 +295,7 @@
 | max_drawdown > 60%                       | Cascade too extreme; λ or initial_position too high                  | Reduce λ; validate position fractions sum to < 3× total liquidity |
 
 
-## 7. Visualization Catalogue
+## §7 Visualization Catalogue
 
 | Plot Name                        | Type         | X-axis     | Y-axis            | Overlays                                                     | Purpose                                                       |
 |----------------------------------|--------------|------------|-------------------|--------------------------------------------------------------|---------------------------------------------------------------|

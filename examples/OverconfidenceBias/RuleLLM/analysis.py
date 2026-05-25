@@ -1,19 +1,37 @@
 #!/usr/bin/env python
-"""OverconfidenceBias RuleLLM Simulation Analysis
+"""OverconfidenceBias RuleLLM analysis using the standard output contract."""
 
-Usage:
-    python examples/OverconfidenceBias/RuleLLM/analysis.py \
-        -c configs/OverconfidenceBias/RuleLLM/simulation.yml
-"""
+from __future__ import annotations
+
+import argparse
+from typing import Any, Dict
 
 from examples.OverconfidenceBias.Rule.analysis import (
+    analyze_overconfidencebias,
     calculate_metrics,
     create_visualizations,
     load_simulation_data,
-    main,
 )
+from masim.utils import load_config
+
+DEFAULT_CONFIG = "configs/OverconfidenceBias/RuleLLM/simulation.yml"
+
+
+def main(config_path: str | None = None) -> Dict[str, Any]:
+    """Run OverconfidenceBias RuleLLM analysis."""
+    if config_path is None:
+        parser = argparse.ArgumentParser(description="OverconfidenceBias RuleLLM analysis")
+        parser.add_argument("-c", "--config", default=DEFAULT_CONFIG)
+        args = parser.parse_args()
+        config_path = args.config
+    config = load_config(config_path)
+    data = load_simulation_data(config)
+    output_dir = config["setting"]["record_path"].rsplit("/", 1)[0] + "/analysis"
+    return analyze_overconfidencebias(data, config, output_dir)
+
 
 __all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations", "main"]
+
 
 if __name__ == "__main__":
     main()

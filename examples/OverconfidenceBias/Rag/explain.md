@@ -1,81 +1,93 @@
-# OverconfidenceBias Simulation
+# OverconfidenceBias Rag — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | Overconfidence bias causes traders to overestimate their precision, trade too much, and increase volatility |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Overconfidence bias simulation showing how excessive self-confidence leads to excessive trading and market instability |
-| **Academic Value** | Understanding overconfidence bias causes traders to overestimate their precision, trade too much, and increase volatility through multi-agent simulation |
+|---|---|
+| Variant | Rag |
+| Simulation | OverconfidenceBias |
+| Decision Mechanism | RuleLLM-style decisions augmented with retrieved behavioral-finance context |
+| Theory Reference | `simulation-bases.md §2` and `simulation-bases.md §4` |
+| Market Broadcast | `price`, `fundamental`, `deviation`, `round` |
 
-## Theoretical Foundation
+## §2 Theory → Implementation Mapping
 
-- Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
-- Odean (1998): Volume, volatility, price, and profit when all traders are above average
-- Barber & Odean (2001): Boys will be boys: Gender, overconfidence, and common stock investment
+### §2.1 OverconfidentTrader (simulation-bases.md §4.1)
 
-## Agent Descriptions
+| Theory Component | Implementation |
+|---|---|
+| Signal overprecision | Uses RuleLLM prompt plus retrieved overconfidence context. |
+| Excess trading | Order schema remains canonical and comparable. |
+| Context trace | Accepted orders record `rag_context`. |
 
-### OverconfidentTrader
-**Theoretical Basis**: Overconfidence bias (Daniel et al., 1998)
-**Market Role**: destabilizing
-**Description**: Overestimates signal precision, trades too frequently
-**Parameters**: precision_overestimate=2.0, trade_frequency=high, position_size=800
+### §2.2 SelfAttributor (simulation-bases.md §4.2)
 
-### SelfAttributor
-**Theoretical Basis**: Self-attribution bias
-**Market Role**: destabilizing
-**Description**: Attributes success to skill, failure to bad luck
-**Parameters**: attribution_bias=0.7, confidence_boost=0.3
+| Theory Component | Implementation |
+|---|---|
+| Self-attribution | Retrieved context may inform the model's explanation of confidence. |
+| Reinforcement | Explicit rules still define directional logic. |
+| Auditability | RAG statistics record retrieval coverage. |
 
-### CalibratedTrader
-**Theoretical Basis**: Rational expectations
-**Market Role**: stabilizing
-**Description**: Correctly estimates signal precision, trades appropriately
-**Parameters**: signal_precision=0.6, trade_threshold=0.02, position_size=500
+### §2.3 CalibratedTrader (simulation-bases.md §4.3)
 
-### ContrarianInvestor
-**Theoretical Basis**: Contrarian strategy
-**Market Role**: stabilizing
-**Description**: Trades against overconfident moves
-**Parameters**: contrarian_threshold=0.05, patience=high
+| Theory Component | Implementation |
+|---|---|
+| Benchmark discipline | Uses calibrated RuleLLM prompt. |
+| Knowledge use | Retrieval can support cautious reasoning. |
+| Schema validity | Player validates all decision fields. |
 
-### NoiseTrader
-**Theoretical Basis**: Black (1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader
-**Parameters**: trade_probability=0.05, min_order=100, max_order=500
+### §2.4 ContrarianInvestor (simulation-bases.md §4.4)
 
+| Theory Component | Implementation |
+|---|---|
+| Overreaction fading | Retrieved context can justify contrarian correction. |
+| Stabilization | Orders enter the shared Rule market. |
+| Context trace | `rag_context` is stored with each order. |
 
-## Usage
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-### Rule Variant
-```bash
-python examples/OverconfidenceBias/Rule/run_overconfidencebias.py \
-    -c configs/OverconfidenceBias/Rule/simulation.yml
-```
+| Theory Component | Implementation |
+|---|---|
+| Background liquidity | Uses noisy RuleLLM prompt. |
+| Weak information | Retrieved context is available but not a schema substitute. |
+| Bounded action | Quantity remains non-negative and constrained. |
 
-### LLM Variant
-```bash
-python examples/OverconfidenceBias/LLM/run_overconfidencebias_llm.py \
-    -c configs/OverconfidenceBias/LLM/simulation.yml
-```
+## §3 Market Mechanism
 
-### RuleLLM Variant
-```bash
-python examples/OverconfidenceBias/RuleLLM/run_overconfidencebias_rulellm.py \
-    -c configs/OverconfidenceBias/RuleLLM/simulation.yml
-```
+Rag reuses the Rule market. Retrieval affects only investor reasoning and action choice, not the price equation.
 
-### RAG Variant
+## §4 Variant Architecture
+
+| Component | Implementation |
+|---|---|
+| Coordinator | Rule market |
+| Investors | `RagLLMInvestor` subclasses |
+| Retrieval | `ResourceManager`, `KnowledgeStore`, and per-round `KnowledgeQuery` |
+| Prompt Structure | RuleLLM system prompt plus `RAG_USER_TEMPLATE` with `{rag_context}` |
+| Output Contract | Required `action`, `bid_price`, `quantity`, `reasoning`, `analysis`, and recorded `rag_context` |
+| Error Policy | Missing documents or invalid final decision contracts raise; provider retries are bounded. |
+
+## §5 Config Reference
+
+Primary config: `configs/OverconfidenceBias/Rag/simulation.yml`. Embedding and document-source settings use the project RAG configuration convention.
+
+## §6 Running Instructions
+
 ```bash
 python examples/OverconfidenceBias/Rag/run_overconfidencebias_rag.py \
-    -c configs/OverconfidenceBias/Rag/simulation.yml
+  -c configs/OverconfidenceBias/Rag/simulation.yml
 ```
 
-## References
+## §7 Expected Behavior
 
-- Daniel, Hirshleifer & Subrahmanyam (1998): Investor psychology and security market under/overreactions
-- Odean (1998): Volume, volatility, price, and profit when all traders are above average
-- Barber & Odean (2001): Boys will be boys: Gender, overconfidence, and common stock investment
+- Retrieved context is recorded in accepted orders.
+- `Rag/analysis.py` writes standard outputs plus `rag_stats.json`.
+- Market dynamics remain comparable with RuleLLM.
+
+## §8 References
+
+See `simulation-bases.md §2` for full DOI citations.
+
+## §9 Variant Comparison
+
+See `simulation-bases.md §9` for Rule / LLM / RuleLLM / Rag comparison.

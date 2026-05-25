@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
+1,1,EuropeanDebtCrisis,LLM,SUCCESS,0,6260.435,2026-05-23T18:20:17,2026-05-23T20:04:37,config/simulation.yml,examples/EuropeanDebtCrisis/LLM/run_europeandebtcrisis_llm.py,logs/EuropeanDebtCrisis__LLM.log,,200,200,

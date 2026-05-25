@@ -1,0 +1,60 @@
+{
+  "metrics": {
+    "deviation_metrics": {
+      "final_deviation_pct": -1.1115635852260795,
+      "max_abs_deviation_pct": 26.293940341024978,
+      "mean_abs_deviation_pct": 6.9591328514156805
+    },
+    "price_metrics": {
+      "final": 98.88843641477392,
+      "initial": 100.83825660350377,
+      "max": 126.29394034102498,
+      "mean": 106.37511046427473,
+      "min": 97.85813855312412,
+      "total_rounds": 200
+    },
+    "return_metrics": {
+      "annualized_volatility_pct": 15.933897216318258,
+      "max_drawdown_pct": -1.0370922851958806,
+      "volatility_pct": 1.003741177391487
+    },
+    "volume_metrics": {
+      "mean_volume": 4.555924137193227,
+      "total_volume": 911.1848274386451
+    }
+  },
+  "record_path": "artifacts/records",
+  "scenario": "VolatilityClustering",
+  "total_rounds": 200,
+  "validation": {
+    "criteria": {
+      "Finite Price Path": {
+        "passed": true,
+        "score": 1.0,
+        "target": "all price summary values finite",
+        "value": true
+      },
+      "Full-Round Completion": {
+        "passed": true,
+        "score": 1.0,
+        "target": ">=150 recorded market rounds; 200 expected for full experiments",
+        "value": 200
+      },
+      "Observable Price Deviation": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0.01% to 500% absolute deviation",
+        "value": 26.294
+      },
+      "Volatility Sanity": {
+        "passed": true,
+        "score": 1.0,
+        "target": "0% to 1000% annualized volatility",
+        "value": 15.934
+      }
+    },
+    "interpretation": "=== VolatilityClustering SIMULATION VALIDATION: VALID ===\nOverall Fit Score: 100.0% (threshold: 50%)\n\n[1] Full-Round Completion\n    Observed: 200 rounds\n    Expected: >=150 recorded market rounds (200 for full experiments)\n    Score: 100.0%\n    Assessment: OPTIMAL - market records are present.\n\n[2] Finite Price Path\n    Observed: True\n    Expected: all price summaries finite\n    Score: 100.0%\n    Assessment: OPTIMAL - price series is numeric.\n\n[3] Observable Price Deviation\n    Observed: 26.29%\n    Expected: nonzero but bounded deviation\n    Score: 100.0%\n    Assessment: structural deviation check completed.\n\n[4] Volatility Sanity\n    Observed: 15.93%\n    Expected: bounded annualized volatility\n    Score: 100.0%\n    Assessment: structural volatility check completed.\n\n[SUMMARY]\nThe VolatilityClustering run produced a structurally analyzable market path.\nScenario-specific mechanism validity should be assessed with the metrics in analysis-bases.md.\nFit Score: 100.0%",
+    "is_valid": true,
+    "score": 1.0
+  }
+}

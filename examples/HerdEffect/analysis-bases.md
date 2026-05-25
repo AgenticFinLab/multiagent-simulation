@@ -6,7 +6,7 @@
 |-----------|--------------------------------------------------------------------------------------------------------------|-----------------------|------------------------------------------------------------------------------------|---------------------------------------------------|
 | O1        | Does the emergent herding mechanism produce momentum episodes that clearly exceed noise-driven fluctuations? | EMI, MDD              | Price shows sustained momentum runs (EMI high) without any explicit imitator       | Price is indistinguishable from random walk       |
 | O2        | Do MomentumInvestor and AggressiveInvestor activate together to create herding, or is one agent sufficient?  | ACC (§4.1, §4.5), EMI | Both momentum agents activate simultaneously during peak episodes (ACC each > 20%) | One agent accounts for > 90% of momentum volume   |
-| O3        | Does RiskAverseInvestor exit early, before the momentum peak, validating the mean-variance mechanism?        | RVI                   | §4.3 position reduces before price peaks in ≥50% of episodes                       | §4.3 never changes position throughout simulation |
+| O3        | Does RiskAverseInvestor exit early, before the momentum peak, validating the mean-variance mechanism?        | REI                   | §4.3 position reduces before price peaks in ≥50% of episodes                       | §4.3 never changes position throughout simulation |
 | O4        | How does LLM/RAG variant reduce emergent herding intensity vs. rule baseline?                                | EMI, MDD              | LLM/RAG produces lower EMI and smaller drawdown                                    | Identical dynamics across variants                |
 
 ---
@@ -367,13 +367,13 @@ WDI of 0.05–0.25 expected; ContrarianInvestor should modestly outperform, but 
 
 ## §4 Phase Analysis Framework
 
-| Phase | Name                  | Entry Condition                                    | Exit Condition                                     | Key Indicators                                         |
-|-------|-----------------------|----------------------------------------------------|----------------------------------------------------|--------------------------------------------------------|
-| 1     | Noise Baseline        | Round 1;                                           | r                                                  | ≤ 0.01                                                 |
-| 2     | Momentum Initiation   | r > 0.01 for 2+ consecutive rounds                 | §4.5 acceleration triggers                         | MomentumInvestor (§4.1) buying; EMI accumulating       |
-| 3     | Herding Amplification | §4.5 acceleration active                           | RiskAverseInvestor (§4.3) begins reducing position | ACC_§4.5 rises; HVR rising; REI events                 |
-| 4     | Peak and Reversal     | §4.3 position at minimum; price near local maximum | r < 0                                              | ContrarianInvestor (§4.2) dominant selling; MDD begins |
-| 5     | Correction            | r < 0; ContrarianInvestor buying                   |                                                    | r                                                      |
+| Phase | Name                  | Entry Condition                    | Exit Condition                                     | Key Indicators                                         |
+|-------|-----------------------|------------------------------------|----------------------------------------------------|--------------------------------------------------------|
+| 1     | Noise Baseline        | Early rounds; \|r\| <= 0.01        | r > 0.01 for 2+ consecutive rounds                 | NoiseTrader orders dominate; EMI near zero             |
+| 2     | Momentum Initiation   | r > 0.01 for 2+ consecutive rounds | AggressiveInvestor acceleration triggers           | MomentumInvestor (§4.1) buying; EMI accumulating       |
+| 3     | Herding Amplification | §4.5 acceleration active           | RiskAverseInvestor (§4.3) begins reducing position | ACC_§4.5 rises; HVR rising; REI events                 |
+| 4     | Peak and Reversal     | Price near local maximum           | r < 0                                              | ContrarianInvestor (§4.2) dominant selling; MDD begins |
+| 5     | Correction            | r < 0; ContrarianInvestor buying   | Return path stabilizes near fundamental            | MDD trough, lower HVR, stabilizer volume dominates     |
 
 ---
 
@@ -404,10 +404,10 @@ WDI of 0.05–0.25 expected; ContrarianInvestor should modestly outperform, but 
 | Metric | Target Range | Lower Bound Source         | Upper Bound Source | Adj if Below                         | Adj if Above            |
 |--------|--------------|----------------------------|--------------------|--------------------------------------|-------------------------|
 | EMI    | [0.08, 0.20] | Jegadeesh-Titman 1%/month  | Dot-com +271%      | Increase lambda_price or kappa       | Decrease kappa          |
-| MDD    | [0.10, 0.30] | De Bondt & Thaler reversal | Dot-com −78%       | Increase fundamental contrarion beta | Decrease mean_reversion |
+| MDD    | [0.10, 0.30] | De Bondt & Thaler reversal | Dot-com −78%       | Increase fundamental contrarian beta | Decrease mean_reversion |
 | HVR    | [1.5, 3.0]   | Nofsinger & Sias 1.5×      | Extreme momentum   | Increase lambda_price                | Decrease accel_bonus    |
 
-**Calibration protocol**: 1. Run Rule variant 10 seeds. 2. Compute EMI, MDD, ACC, REI, HVR. 3. Compare against targets. 4. Adjust kappa (highest sensitivity for EMI) and contrarion beta. 5. Re-run before LLM/RuleLLM/Rag.
+**Calibration protocol**: 1. Run Rule variant 10 seeds. 2. Compute EMI, MDD, ACC, REI, HVR. 3. Compare against targets. 4. Adjust kappa (highest sensitivity for EMI) and contrarian beta. 5. Re-run before LLM/RuleLLM/Rag.
 
 ### 6.3 Cross-Variant Predictions
 
@@ -431,12 +431,11 @@ WDI of 0.05–0.25 expected; ContrarianInvestor should modestly outperform, but 
 
 ## §7 Visualization Catalogue
 
-| Plot Name               | Type         | X-axis          | Y-axis                | Overlays                                   | Purpose                                  |
-|-------------------------|--------------|-----------------|-----------------------|--------------------------------------------|------------------------------------------|
-| price_momentum_episodes | Line         | Round           | Price                 | Momentum episode shading; fundamental line | Shows emergent herding runs              |
-| return_timeseries       | Line         | Round           | r(t)                  | ±1%, ±2% thresholds                        | Shows momentum episode amplitude         |
-| agent_quantity_stacked  | Stacked area | Round           | \|quantity\|          | By agent type                              | Shows convergence attribution (ACC)      |
-| risk_averse_position    | Line         | Round           | §4.3 position         | Price overlay (secondary axis)             | Shows REI early-exit pattern             |
-| emi_mdd_pairs           | Scatter      | EMI per episode | MDD following episode | —                                          | Validates momentum-reversal relationship |
-| wealth_by_agent         | Bar          | Agent type      | Final wealth          | —                                          | Shows wealth distribution outcome        |
-| cross_variant_emi       | Bar          | Variant         | EMI mean ± std        | Jegadeesh-Titman reference                 | Research comparison                      |
+| Output | Content | Purpose |
+|---|---|---|
+| `summary.json` | Total rounds, price/deviation/return/volume metrics, validation score, and Rag retrieval stats when applicable | Machine-readable Level-2 structural quality summary |
+| `00_investor_bids.png` | Investor bid paths when bid fields are recorded | Headline investor behavior plot |
+| `01_herdeffect_dynamics.png` | Price path, fundamental path, deviations, returns, and volume | Shows emergent herding runs and reversal dynamics |
+| `02_herdeffect_analysis.png` | Structural metric dashboard for price, deviation, volatility, and volume | Links run outputs to the analysis metric catalogue |
+| `03_summary.png` | Agent bid/quantity/summary comparison | Cross-agent behavior review |
+| `rag_stats.json` | Rag only: retrieval success/failure counts by agent and aggregate retrieval failure rate | RAG knowledge-quality validation |

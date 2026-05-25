@@ -23,6 +23,7 @@ RAG_USER_TEMPLATE = (
     + """
 == RELEVANT KNOWLEDGE (from RAG retrieval) ==
 {rag_context}
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
 """
 )
 

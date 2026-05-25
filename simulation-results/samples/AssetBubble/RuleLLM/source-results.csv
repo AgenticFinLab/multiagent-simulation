@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
+4,9,AssetBubble,RuleLLM,SUCCESS,0,30781.708,2026-05-22T09:30:17,2026-05-22T18:03:19,config/simulation.yml,examples/AssetBubble/RuleLLM/run_bubble_rulellm.py,logs/AssetBubble__RuleLLM.log,,200,200,,

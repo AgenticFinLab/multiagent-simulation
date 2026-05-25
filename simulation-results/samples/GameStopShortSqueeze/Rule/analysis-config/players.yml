@@ -1,0 +1,131 @@
+# GameStopShortSqueeze Rule Agent Configuration
+
+market:
+  name: "Market"
+  class: "examples.GameStopShortSqueeze.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      initial_price: 20.0
+      fundamental_value: 20.0
+      price_impact: 0.04
+      mean_reversion: 0.01
+      noise_std: 0.02
+      initial_short_interest: 1.5
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+retailcoordinated:
+  name: "RetailCoordinated"
+  class: "examples.GameStopShortSqueeze.Rule.players:RetailCoordinated"
+  num_instances: 3
+  config:
+    identity: "retailcoordinated"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 100
+      initial_price: 20.0
+      fundamental_value: 20.0
+      buy_pressure: 0.12
+      base_size: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+shortsellerhf:
+  name: "ShortSellerHF"
+  class: "examples.GameStopShortSqueeze.Rule.players:ShortSellerHF"
+  num_instances: 2
+  config:
+    identity: "shortsellerhf"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 2000000.0
+      initial_position: -1000
+      initial_price: 20.0
+      fundamental_value: 20.0
+      cover_threshold: 0.05
+      cover_fraction: 0.15
+      cover_size: 200
+      short_size: 150
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+marketmakergamma:
+  name: "MarketMakerGamma"
+  class: "examples.GameStopShortSqueeze.Rule.players:MarketMakerGamma"
+  num_instances: 1
+  config:
+    identity: "marketmakergamma"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 3000000.0
+      initial_position: 0
+      initial_price: 20.0
+      fundamental_value: 20.0
+      gamma_exposure: 0.3
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+institutionalvalue:
+  name: "InstitutionalValue"
+  class: "examples.GameStopShortSqueeze.Rule.players:InstitutionalValue"
+  num_instances: 1
+  config:
+    identity: "institutionalvalue"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 2000000.0
+      initial_position: 2000
+      initial_price: 20.0
+      fundamental_value: 20.0
+      sell_threshold: 0.30
+      buy_threshold: -0.10
+      base_size: 400
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+momentumretail:
+  name: "MomentumRetail"
+  class: "examples.GameStopShortSqueeze.Rule.players:MomentumRetail"
+  num_instances: 2
+  config:
+    identity: "momentumretail"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 300000.0
+      initial_position: 0
+      initial_price: 20.0
+      fundamental_value: 20.0
+      trade_probability: 0.3
+      fomo_threshold: 0.05        # FOMO activation deviation threshold (§4.5)
+      min_order: 50
+      max_order: 300
+      custom_state_hot_limit: 3
+  persona: !include persona.yml

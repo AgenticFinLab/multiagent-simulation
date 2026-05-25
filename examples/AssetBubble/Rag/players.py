@@ -700,6 +700,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         llm_config = self.config.extras["llm"]
         template = load_prompt(llm_config["user_message"])
@@ -789,6 +790,8 @@ class RagLLMInvestor(GeneralPlayer):
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
+        if bid_price <= 0:
+            bid_price = market_data["price"]
         quantity = self._apply_constraints(bid_price, quantity)
 
         # Execute trade
@@ -817,15 +820,19 @@ class RagLLMInvestor(GeneralPlayer):
         )
 
         order = {
+            "action": decision["action"],
             "bid_price": bid_price,
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
+            "rag_context": self.state.custom_state["last_rag_context"],
             "cash": self.state.custom_state["cash"],
             "position": self.state.custom_state["position"],
         }
+
+        validate_order(order)
 
         return {
             **order,
@@ -846,30 +853,36 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMMomentumSpeculator(RagLLMInvestor):
-    """RAG-augmented: Greater Fool Theory momentum rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4 — MomentumSpeculator."""
+    """RAG-augmented momentum rules with retrieved knowledge. Theory: simulation-bases.md §4.1 — MomentumSpeculator."""
 
     pass
 
 
 class RagLLMRationalArbitrageur(RagLLMInvestor):
-    """RAG-augmented: Limits to Arbitrage deviation formula + LLM + retrieved knowledge. Theory: simulation-bases.md §4 — RationalArbitrageur."""
+    """RAG-augmented deviation rules with retrieved knowledge. Theory: simulation-bases.md §4.2 — RationalArbitrageur."""
 
     pass
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented: Noise Trader Risk sentiment formula + LLM + retrieved knowledge. Theory: simulation-bases.md §4 — NoiseTrader."""
+    """RAG-augmented sentiment rules with retrieved knowledge. Theory: simulation-bases.md §4.3 — NoiseTrader."""
 
     pass
 
 
 class RagLLMValueInvestor(RagLLMInvestor):
-    """RAG-augmented: Value investing frequency + deviation rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4 — FundamentalInvestor."""
+    """RAG-augmented value rules with retrieved knowledge. Theory: simulation-bases.md §4.4 — FundamentalInvestor."""
 
     pass
 
 
 class RagLLMLeveragedBuyer(RagLLMInvestor):
-    """RAG-augmented: Leverage amplification + margin call rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4 — LeveragedBuyer."""
+    """RAG-augmented leverage rules with retrieved knowledge. Theory: simulation-bases.md §4.5 — LeveragedBuyer."""
+
+    pass
+
+
+class RagLLMConservativeHolder(RagLLMInvestor):
+    """RAG-augmented rebalancing rules with retrieved knowledge. Theory: simulation-bases.md §4.6 — ConservativeHolder."""
 
     pass

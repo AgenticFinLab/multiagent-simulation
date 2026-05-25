@@ -1,0 +1,54 @@
+{
+  "neweconomyevangelist_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "neweconomyevangelist_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ipoflipper_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "ipoflipper_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "momentumfollower_1": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "momentumfollower_2": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "skepticalvalueinvestor": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "shortseller": {
+    "total_rag_rounds": 200,
+    "retrieval_success_rounds": 200,
+    "retrieval_failure_rounds": 0,
+    "retrieval_failure_rate": 0.0
+  },
+  "aggregate": {
+    "mean_retrieval_failure_rate": 0.0,
+    "max_retrieval_failure_rate": 0.0
+  }
+}

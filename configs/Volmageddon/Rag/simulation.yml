@@ -24,12 +24,6 @@ environment:
   dotenv_path: ".env"
   workspace: "."
 
-llm:
-  model: "doubao-pro-32k"
-  temperature: 0.3
-  max_tokens: 500
-  timeout: 30
-
 ray:
   namespace: "volmageddon_rag"
   ignore_reinit_error: true

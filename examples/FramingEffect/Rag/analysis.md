@@ -1,49 +1,44 @@
-# FramingEffect — Rag Variant Analysis
+# FramingEffect Rag — Analysis Guide
 
-## §1 Overview
+## §1 Analysis Objectives
 
-Analysis methodology for the **Rag variant** of the FramingEffect simulation. Metric definitions from `../analysis-bases.md §2`. Rag is expected to show slightly higher bias amplification than Rule due to retrieved documents reinforcing framing-consistent behavior.
-
-| Aspect             | Detail                 |
-|--------------------|------------------------|
-| Variant            | Rag                    |
-| Simulation         | FramingEffect          |
-| Analysis basis     | `../analysis-bases.md` |
-| Decision mechanism | RAG-augmented LLM      |
-
----
+RAG analysis follows `../analysis-bases.md §1` and adds retrieval-quality review: whether retrieved knowledge is present, whether fallback context is common, and whether RAG changes framing intensity relative to RuleLLM.
 
 ## §2 Metric → Function Mapping
 
-| Metric                                | Function                                                                      | analysis-bases.md ref |
-|---------------------------------------|-------------------------------------------------------------------------------|-----------------------|
-| FDI (Framing Deviation Index)         | `framing_deviation_index(price_history, fundamental)`                         | §2.1                  |
-| FPI (Framing Persistence Index)       | `framing_persistence_index(price_history, fundamental, threshold=0.02)`       | §2.2                  |
-| ACC (Agent Contribution Coefficient)  | `agent_contribution_coefficient(trade_history, price_history, fundamental)`   | §2.3                  |
-| VAF (Volatility Amplification Factor) | `volatility_amplification_factor(price_history, fundamental, threshold=0.02)` | §2.4                  |
-| OWP (Overconfidence Wealth Penalty)   | `overconfidence_wealth_penalty(agent_states, final_price)`                    | §2.5                  |
-| WDI (Wealth Distribution Index)       | `wealth_distribution_index(agent_states, final_price)`                        | §2.6                  |
+| Metric | Function | analysis-bases.md Reference |
+|---|---|---|
+| Framing Deviation Index | `framing_deviation_index(price_history, fundamental)` | §2.1 |
+| Framing Asymmetry Ratio | `framing_asymmetry_ratio(price_history, fundamental)` | §2.2 |
+| Framing Volume Impact | `framing_volume_impact(net_demand_history, dev_history, threshold=0.02)` | §2.3 |
+| Rational Correction Efficiency | `rational_correction_efficiency(dev_history, lookahead=5, threshold=0.05)` | §2.4 |
+| Volatility Amplification Factor | `volatility_amplification_factor(price_history, dev_history, threshold=0.02)` | §2.5 |
+| Wealth Distribution Index | `wealth_distribution_index(agent_wealth)` | §2.6 |
+| RAG Knowledge Effect | `analyze_rag_knowledge_effect(records)` | RAG extension to §5 comparison |
 
----
+## §3 Data Loading and Structural Checks
 
-## §3 Rag-Specific Notes
+`Rag/analysis.py → main()` imports the standard Rule analysis contract and adds
+`_RAG_FALLBACK`, `analyze_rag_knowledge_effect()`, and `rag_stats.json`.
+Quality review must verify full round count, valid order schema, parse quality,
+and presence of `rag_context` observations.
 
-- **RagLLMGainFrameFollower (§4.1)**: Retrieved framing studies typically confirm bias; FDI contribution from this agent expected to be higher than LLM variant. Retrieval of crash evidence can produce sudden position reversal.
-- **RagLLMLossFrameReactor (§4.2)**: Different retrieval corpus (loss-framing studies, panic-selling episodes) creates empirically grounded differentiation from §4.1 — a key Rag advantage over Rule/LLM variants.
-- **RagLLMFrameInvariantTrader (§4.3)**: Retrieval of mean-reversion evidence strengthens contrarian conviction; ACC for rational agents may be slightly higher than Rule baseline.
-- **RagLLMArbitrageFramer (§4.4)**: Historical arbitrage correction timelines from retrieval may lead to earlier or more precise contrarian entries.
-- **RagLLMNoiseTrader (§4.5)**: Partial information from retrieved news may introduce slight systematic bias in nominally random trading.
-- **Corpus quality**: All Rag metrics depend on retrieval corpus quality; run retrieval audit before interpreting cross-variant comparisons.
+## §4 Phase Analysis
 
----
+Use the same framing phases as Rule and RuleLLM, then inspect whether retrieved context appears more often during high-deviation periods and whether it reinforces or moderates frame-sensitive behavior.
 
-## §4 Expected Ranges (Rag Variant)
+## §5 Cross-Variant Comparison
 
-| Metric          | Rag Expected Range | vs. Rule Baseline                 | Interpretation                                                     |
-|-----------------|--------------------|-----------------------------------|--------------------------------------------------------------------|
-| FDI             | 0.02–0.09          | Slightly higher (+5 to +15%)      | Retrieved framing evidence reinforces biased agent deviations      |
-| FPI             | 3–13 rounds        | Slightly longer (+0 to +2 rounds) | Retrieval reinforces cascade persistence                           |
-| ACC (§4.1+§4.2) | 50–72%             | Slightly higher (+0 to +5%)       | Retrieval amplifies biased agent volume                            |
-| VAF             | 1.5–3.8            | Slightly higher                   | Retrieval-reinforced biases create slightly more excess volatility |
-| OWP             | 0.05–0.22          | Slightly higher                   | Biased agents lose slightly more due to reinforced errors          |
-| WDI             | 0.10–0.32          | Slightly higher                   | Slightly more inequality due to stronger retrieval-driven bias     |
+RAG should be compared first to RuleLLM because both use rule-embedded personas. Any RAG-only difference should be interpreted alongside retrieval success rate and fallback rate.
+
+## §6 Expected Results and Validation
+
+Valid RAG samples should complete 200 rounds, have low fallback context rate, and avoid parse-failure-driven hold substitutions. A clean process exit is not sufficient if retrieval is absent or malformed.
+
+## §7 Visualization Catalogue
+
+The fixed PNG set remains the primary structural visualization output:
+`00_investor_bids.png`, `01_framingeffect_dynamics.png`,
+`02_framingeffect_analysis.png`, and `03_summary.png`. RAG reports should also
+include `rag_stats.json` with retrieval success rate, fallback rate, and count
+of RAG context observations.

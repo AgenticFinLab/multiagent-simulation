@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "Rag",
+  "omitted_raw_artifact_bytes": 92165544,
+  "omitted_raw_artifact_files": 1690,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 68875928,
+      "file_count": 1678,
+      "name": "records",
+      "source_path": "samples/HerdEffect/Rag/artifacts/records"
+    },
+    {
+      "bytes": 23204931,
+      "file_count": 10,
+      "name": "communication",
+      "source_path": "samples/HerdEffect/Rag/artifacts/communication"
+    },
+    {
+      "bytes": 84685,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/HerdEffect/Rag/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/HerdEffect/Rag/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "HerdEffect__Rag",
+  "scenario": "HerdEffect",
+  "source_resource_pack_sample_path": "samples/HerdEffect/Rag",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/HerdEffect/Rag"
+}

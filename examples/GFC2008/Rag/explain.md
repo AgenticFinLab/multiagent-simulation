@@ -71,3 +71,33 @@
 | RRI    | 0.25–0.70          | Higher   | Retrieved bailout data improves Regulator calibration      |
 | OSP    | 0.60–0.92          | Similar  | Origination driven by historical origination cases         |
 | WDI    | 0.12–0.35          | Higher   | Larger crisis → more wealth transfer                       |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity,
+retrieval health, LLM parse and retry rates, and crisis-phase patterns before
+acceptance.
+
+## §6 Running Instructions
+
+```bash
+python examples/GFC2008/Rag/run_gfc2008_rag.py \
+  -c configs/GFC2008/Rag/simulation.yml
+```
+
+## §7 Expected Behavior
+
+RAG agents should preserve RuleLLM-style decision rules while retrieved crisis
+context changes confidence, intervention timing, and distressed-buyer behavior.
+
+## §8 Cross-Variant Role
+
+RAG isolates the marginal effect of external financial-crisis knowledge relative
+to RuleLLM.
+
+## §9 Implementation Traceability
+
+The user prompt must inject `{rag_context}` or the no-context marker, and
+acceptance requires `rag_stats.json`, retrieval-health review, and parse-quality review.

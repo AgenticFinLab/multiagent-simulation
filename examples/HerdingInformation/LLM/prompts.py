@@ -26,8 +26,9 @@ DECISION RULES:
 
 OUTPUT FORMAT:
 <analysis>Brief reasoning about cascade formation and your decision to follow or hold</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_REPUTATION_HERDER_SYS = """You are a professional fund manager concerned about your reputation.
 
@@ -51,8 +52,9 @@ DECISION RULES:
 
 OUTPUT FORMAT:
 <analysis>Brief reasoning about peer comparison pressure and your herding decision</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_INDEPENDENT_THINKER_SYS = """You are a disciplined rational investor who processes private signals without social influence.
 
@@ -76,8 +78,9 @@ DECISION RULES:
 
 OUTPUT FORMAT:
 <analysis>Brief reasoning about fundamental value and your contrarian rational decision</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_CONTRARIAN_SYS = """You are a contrarian investor who deliberately trades against the crowd.
 
@@ -101,8 +104,9 @@ DECISION RULES:
 
 OUTPUT FORMAT:
 <analysis>Brief reasoning about crowd overreaction and your contrarian stance</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_NOISE_TRADER_SYS = """You are an uninformed retail investor trading on gut feelings and random impulses.
 
@@ -124,8 +128,9 @@ DECISION RULES:
 
 OUTPUT FORMAT:
 <analysis>Brief gut-feeling reasoning (make it sound random and informal)</analysis>
-<decision>{"action": "buy" or "sell" or "hold", "quantity": integer}</decision>
-"""
+<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_USER_TEMPLATE = """== MARKET STATE (Round {round}) ==
 Current Price:      ${price:.2f}
@@ -138,4 +143,5 @@ Position:       {position} shares
 Portfolio Value: ${portfolio_value:.2f}
 
 Based on your strategy, what is your trading decision?
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

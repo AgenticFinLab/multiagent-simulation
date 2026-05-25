@@ -39,3 +39,19 @@ Assess whether RAG-retrieved historical bubble knowledge moderates bubble amplit
 ## §5 References
 
 See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md §4` for agent parameter sources.
+
+## §6 Cross-Variant Comparison
+
+| Comparison | Interpretation |
+|---|---|
+| Rag vs RuleLLM | Measures the marginal effect of retrieved bubble/crash context. |
+| Rag vs LLM | Separates persona-only narrative behavior from knowledge-augmented behavior. |
+| Rag vs Rule | Tests whether RAG knowledge improves or weakens baseline mechanism emergence. |
+
+## §7 Quality Checks
+
+- Confirm the run completed 200 configured rounds.
+- Confirm RAG assets and embedding configuration were available.
+- Confirm `{rag_context}` was populated or explicitly replaced by the no-context marker.
+- Audit parse failures, retry counts, and retrieval-health records before acceptance; deterministic parser or provider failures should fail fast rather than become hidden holds.
+- Confirm `rag_stats.json` is written and includes retrieval success/failure rates from recorded `rag_context` fields.

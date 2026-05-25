@@ -72,8 +72,8 @@ Market class is imported from or shared with Rule/players.py. All LLM investors 
 | Base class     | `LLMInvestor` → `GeneralPlayer`                                                            |
 | Inference      | `LangChainAPIInference` (3-attempt retry)                                                  |
 | Context        | `stock_price`, `prev_stock_price`, `stock_return`, `bond_return`, `cash`, `stock`, `round` |
-| Output parsing | `parse_llm_response_with_thinking()` → `{"stock_qty": ..., "strategy": ...}`               |
-| Retry logic    | 3 attempts; falls back to hold (stock_qty = 0) on failure                                  |
+| Output parsing | `LLMInvestor._parse_response()` requires `stock_qty` and `reasoning`; player adds `strategy` |
+| Retry logic    | 3 attempts; persistent parse failure raises a runtime error                                |
 
 ## §5 Config Reference
 

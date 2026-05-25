@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "Rule",
+  "omitted_raw_artifact_bytes": 4882818,
+  "omitted_raw_artifact_files": 1107,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 3483079,
+      "file_count": 1098,
+      "name": "records",
+      "source_path": "samples/CreditCycle/Rule/artifacts/records"
+    },
+    {
+      "bytes": 1387160,
+      "file_count": 7,
+      "name": "communication",
+      "source_path": "samples/CreditCycle/Rule/artifacts/communication"
+    },
+    {
+      "bytes": 12579,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/CreditCycle/Rule/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/CreditCycle/Rule/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "CreditCycle__Rule",
+  "scenario": "CreditCycle",
+  "source_resource_pack_sample_path": "samples/CreditCycle/Rule",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/CreditCycle/Rule"
+}

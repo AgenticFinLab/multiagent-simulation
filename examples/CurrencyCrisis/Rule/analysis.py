@@ -640,8 +640,8 @@ def _create_visualizations(
     Plots
     -----
     00_investor_bids.png     : Investor Bidding Curves (headline chart)
-    01_price_dynamics.png    : Exchange rate vs Peg + Deviation %
-    02_crisis_dynamics.png   : Rolling Volatility + Attack phase attribution
+    01_currencycrisis_dynamics.png    : Exchange rate vs Peg + Deviation %
+    02_currencycrisis_analysis.png    : Rolling Volatility + Attack phase attribution
     03_summary.png           : Agent VWAP comparison + Volume
     """
     rounds_sorted = sorted(market_prices.keys())
@@ -757,7 +757,9 @@ def _create_visualizations(
 
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "01_price_dynamics.png"), dpi=150, bbox_inches="tight"
+        os.path.join(output_dir, "01_currencycrisis_dynamics.png"),
+        dpi=150,
+        bbox_inches="tight",
     )
     plt.close()
 
@@ -804,7 +806,9 @@ def _create_visualizations(
 
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "02_crisis_dynamics.png"), dpi=150, bbox_inches="tight"
+        os.path.join(output_dir, "02_currencycrisis_analysis.png"),
+        dpi=150,
+        bbox_inches="tight",
     )
     plt.close()
 
@@ -923,9 +927,10 @@ def analyze_currency_crisis(
     )
 
     # Summary
+    variant = os.path.basename(os.path.dirname(config["setting"]["record_path"]))
     summary = {
         "scenario": "CurrencyCrisis",
-        "variant": "Rule",
+        "variant": variant,
         "total_rounds": total_rounds,
         "fundamental_value": round(fund_value, 4),
         "metrics": {

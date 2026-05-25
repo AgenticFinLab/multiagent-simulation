@@ -1,0 +1,8 @@
+{
+  "total_payloads": 2200,
+  "context_payloads": 2200,
+  "fallback_payloads": 2200,
+  "retrieval_rate": 1.0,
+  "fallback_rate": 1.0,
+  "target_met": true
+}

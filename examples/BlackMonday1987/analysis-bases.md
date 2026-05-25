@@ -1,6 +1,6 @@
 # BlackMonday1987 — Analysis Methodology Basis
 
-## 1. Analysis Objectives
+## §1 Analysis Objectives
 
 | Objective | Research Question                                                                                 | Metric(s)                                                  | Expected Finding                                                               |
 |-----------|---------------------------------------------------------------------------------------------------|------------------------------------------------------------|--------------------------------------------------------------------------------|
@@ -12,15 +12,16 @@
 | O6        | How does cross-variant crash timing and depth compare?                                            | All core metrics by variant                                | Rule most deterministic; LLM may delay onset; Rag modifies with 1987 knowledge |
 
 
-## 2. Core Metrics Catalogue
+## §2 Core Metrics Catalogue
 
-### Metric 1: Price Deviation from Fundamental
+### §2.1 Metric: Price Deviation from Fundamental
 
+- **Python Function Signature**: `def analyze_black_monday(data: Dict[str, Any], config: Dict[str, Any], output_dir: str) -> Dict[str, Any]` records price, fundamental, and derived deviation in `summary["price"]` and validation text.
 - **Category**: Price Dynamics / Phenomenon Core
 - **Definition**: Percentage difference between market price and fundamental value at each round
-- **Formula**: deviation(t) = (P(t) − F) / F × 100 where F = 100.0
+- **Formula**: deviation(t) = (P(t) − F) / F × 100 where F = 250.0
 
-**Derivation Rationale**: In a constant-fundamental simulation (F = 100.0 throughout), all price movements are pure endogenous cascade dynamics. Deviation directly measures how far the feedback loop has driven prices from fair value, independent of any fundamental news. This is the most direct quantitative test of the cascade mechanism. The choice of percentage (rather than absolute) deviation follows Shiller (2000)'s price-to-fundamentals ratio framework, making the metric scale-independent and comparable across simulations.
+**Derivation Rationale**: In a constant-fundamental simulation (F = 250.0 throughout), all price movements are pure endogenous cascade dynamics. Deviation directly measures how far the feedback loop has driven prices from fair value, independent of any fundamental news. This is the most direct quantitative test of the cascade mechanism. The choice of percentage (rather than absolute) deviation follows Shiller (2000)'s price-to-fundamentals ratio framework, making the metric scale-independent and comparable across simulations.
 
 **Academic Calibration Source**: Shiller, R. J. (2000). *Irrational Exuberance*. Princeton University Press. Historical analysis of equity price deviations; calibration reference: 1987 Black Monday peak deviation = −22.6% on the Dow Jones Industrial Average. Brady Commission (1988) documents S&P 500 deviation of −20.5% on October 19.
 
@@ -35,8 +36,9 @@
 
 ---
 
-### Metric 2: Maximum Drawdown
+### §2.2 Metric: Maximum Drawdown
 
+- **Python Function Signature**: `def _compute_max_drawdown(prices_list: List[float]) -> float` and `def analyze_black_monday(...) -> Dict[str, Any]` write `metrics.max_drawdown_pct`.
 - **Category**: Price Dynamics / Risk
 - **Definition**: Largest peak-to-trough price decline as a percentage across the full simulation
 - **Formula**: max_drawdown = max_{t1 < t2} [(P(t1) − P(t2)) / P(t1)] × 100
@@ -55,8 +57,9 @@
 
 ---
 
-### Metric 3: Crash Velocity (Peak Decline Rate)
+### §2.3 Metric: Crash Velocity (Peak Decline Rate)
 
+- **Python Function Signature**: `def _compute_crash_velocity(prices_list: List[float]) -> float` and `def analyze_black_monday(...) -> Dict[str, Any]` write `metrics.crash_velocity_pct`.
 - **Category**: Phenomenon-Specific / Cascade Dynamics
 - **Definition**: Maximum per-round rate of price decline during the crash phase; measures how explosive the feedback amplification is
 - **Formula**: max_velocity = max_{t} |deviation(t) − deviation(t−1)| during crash phase (deviation < −0.05)
@@ -71,12 +74,13 @@
     - 2%–5%: Target zone — consistent with intraday Black Monday dynamics
     - > 5%: Very fast cascade; verify noise_std not set too high which could create artificially volatile swings
 - **Normal Range**: 1%–5% per round at peak cascade
-- **Red Flag**: Max velocity < 0.5% → feedback_strength too low or base_sell quantity too small; increase to match Brady Commission order flow estimates.
+- **Red Flag**: Max velocity < 0.5% → feedback_strength too low or base_size quantity too small; increase to match Brady Commission order flow estimates.
 
 ---
 
-### Metric 4: Return Autocorrelation (Momentum Persistence)
+### §2.4 Metric: Return Autocorrelation (Momentum Persistence)
 
+- **Python Function Signature**: `def _compute_autocorrelation(prices_list: List[float], lag: int = 1) -> float` and `def analyze_black_monday(...) -> Dict[str, Any]` write `metrics.return_autocorr_lag1`.
 - **Category**: Behavioral / Feedback Loop Characterization
 - **Definition**: Lag-1 autocorrelation of per-round price returns; captures whether the market is in a momentum (self-reinforcing) or mean-reversion regime
 - **Formula**: AC1 = Corr(r(t), r(t−1)) where r(t) = [P(t) − P(t−1)] / P(t−1)
@@ -94,8 +98,9 @@
 
 ---
 
-### Metric 5: Agent-Type Sell Volume Contribution
+### §2.5 Metric: Agent-Type Sell Volume Contribution
 
+- **Python Function Signature**: `def _compute_agent_vwap(investor_payloads: Dict[str, Dict[int, dict]], market_prices: Dict[int, float]) -> Dict[str, Dict[str, float]]` writes per-agent buy/sell/volume attribution in `summary["agent_vwap"]`.
 - **Category**: Volume / Activity / Attribution
 - **Definition**: Fraction of total sell volume attributable to each agent type; measures which agents dominate the cascade versus which absorb supply
 - **Formula**: sell_fraction_type = Σ_{t=onset}^{peak} Σ_{i ∈ type} max(0, −quantity_i(t)) / Σ_{t=onset}^{peak} Σ_i max(0, −quantity_i(t))
@@ -113,8 +118,9 @@
 
 ---
 
-### Metric 6: Crash Onset Round
+### §2.6 Metric: Crash Onset Round
 
+- **Python Function Signature**: `def _compute_crash_onset(prices_list: List[float], fundamental: float, threshold: float = -0.05) -> Optional[int]` writes `metrics.crash_onset_round`.
 - **Category**: Phenomenon-Specific / Timing
 - **Definition**: The simulation round in which the cascade crosses the −5% deviation threshold for the first time; measures how quickly automated strategies respond to the initial price weakness
 - **Formula**: t_onset = min{t : deviation(t) < −0.05}
@@ -132,8 +138,9 @@
 
 ---
 
-### Metric 7: ValueInvestor Floor Activation and Absorption Ratio
+### §2.7 Metric: ValueInvestor Floor Activation and Absorption Ratio
 
+- **Python Function Signature**: `def _compute_agent_vwap(...) -> Dict[str, Dict[str, float]]` plus order payload records identify ValueInvestor buy activation and absorption; validation interprets the price floor through `agent_vwap` and price minimum.
 - **Category**: Phenomenon-Specific / Stabilization
 - **Definition**: Measures whether and when the ValueInvestor activates, and the fraction of cascade selling it absorbs during the floor formation phase
 - **Formula**: 
@@ -148,14 +155,14 @@
 - **Interpretation**:
     - absorption_ratio < 20%: ValueInvestor provides negligible floor — cascade is overwhelmingly dominant; crash likely to undershoot
     - absorption_ratio = 20%–50%: Target zone — partial floor consistent with limits-of-arbitrage theory
-    - absorption_ratio > 60%: ValueInvestor over-sized relative to cascade agents; floor too strong; reduce order_size
+    - absorption_ratio > 60%: ValueInvestor over-sized relative to cascade agents; floor too strong; reduce base_size
 - **Normal Range**: activation_round between t_onset+10 and t_onset+20; absorption_ratio = 20%–50%
 - **Red Flag**: ValueInvestor never activates (absorption_ratio = 0) → deviation never crosses −15%; cascade too mild; verify feedback_strength and hedge_ratio are calibrated correctly.
 
 
-## 3. Analysis Dimensions
+## §3 Analysis Dimensions
 
-### Dimension 1: Price Crash Dynamics
+### §3.1 Dimension: Price Crash Dynamics
 
 **Purpose**: Verify that the portfolio insurance + program trading feedback produces a measurable, Black Monday-calibrated crash cascade
 **Metrics Used**: Price deviation (Metric 1), max drawdown (Metric 2), crash velocity (Metric 3)
@@ -163,28 +170,28 @@
 **Expected Pattern**: Sharp price decline below fundamental; cascade deepens with each feedback round (velocity > 2% per round at peak); partial recovery after ValueInvestor activates; total drawdown in 15–35% range
 **Comparison Baseline**: Rule variant as deterministic reference; 1987 historical data as external benchmark
 
-### Dimension 2: Feedback Loop Attribution
+### §3.2 Dimension: Feedback Loop Attribution
 
 **Purpose**: Confirm that PortfolioInsurer and ProgramTrader generate the dominant selling pressure during cascade, consistent with Brady Commission empirical findings
 **Metrics Used**: Agent-type volume (Metric 5), crash onset round (Metric 6)
 **Visualization**: Stacked bar chart of cumulative sell volume by agent type; per-round sell volume time series for each agent; bar chart comparing cascade-phase vs. recovery-phase volume distribution
 **Expected Pattern**: PortfolioInsurer + ProgramTrader ≥ 50% of total cascade-phase sell volume; ProgramTrader volume increases convexly with |deviation| (reflecting amplification formula); IndexArbitrageur adds supplementary sell pressure
 
-### Dimension 3: Feedback Loop Intensity and Lifecycle
+### §3.3 Dimension: Feedback Loop Intensity and Lifecycle
 
 **Purpose**: Measure cascade self-reinforcement through autocorrelation and velocity analysis; track the full feedback lifecycle from initiation through peak to recovery
 **Metrics Used**: Return autocorrelation (Metric 4), crash velocity (Metric 3), price deviation phase trajectory
 **Visualization**: Three-panel layout — (a) deviation over time with phase markers; (b) rolling 10-round return autocorrelation; (c) per-round sell volume by agent type
 **Expected Pattern**: Strong positive autocorrelation (AC1 > 0.3) during cascade phase (rounds t_onset to t_peak); shift to negative autocorrelation post-peak (ValueInvestor + mean reversion dominant); velocity peaks at t_peak
 
-### Dimension 4: ValueInvestor Floor Effectiveness
+### §3.4 Dimension: ValueInvestor Floor Effectiveness
 
 **Purpose**: Quantify how effectively a single large value buyer arrests the cascade; test the limits-of-arbitrage prediction
 **Metrics Used**: ValueInvestor floor activation (Metric 7), net demand decomposition during floor phase
 **Visualization**: Net demand time series decomposed by agent type; cumulative buy/sell balance from ValueInvestor vs. cascade agents; scatter plot of absorption_ratio vs. cascade depth across multiple runs
 **Expected Pattern**: ValueInvestor activates at deviation ≈ −15%; absorption_ratio = 20%–50%; price decline slows but does not immediately reverse; eventual floor forms between −15% and −30% depending on cascade magnitude
 
-### Dimension 5: Cross-Variant Comparison
+### §3.5 Dimension: Cross-Variant Comparison
 
 **Purpose**: Compare crash dynamics across Rule, LLM, RuleLLM, Rag variants; quantify behavioral differences induced by variant type
 **Metrics Used**: All core metrics (1–7) compared across variants
@@ -192,9 +199,9 @@
 **Expected Pattern**: Rule variant most deterministic (lowest std across runs); LLM introduces psychological delay or amplification depending on persona interpretation; RuleLLM near-Rule but with ±20% variance; Rag variant potentially shows altered PortfolioInsurer behavior due to 1987 historical knowledge
 
 
-## 4. Phase Analysis Framework
+## §4 Phase Analysis Framework
 
-### Phase Detection Rules
+### §4.1 Phase Detection Rules
 
 | Phase | Name                | Entry Condition                  | Exit Condition                             | Key Indicators                                                                           | Typical Round Range |
 |-------|---------------------|----------------------------------|--------------------------------------------|------------------------------------------------------------------------------------------|---------------------|
@@ -204,7 +211,7 @@
 | 4     | Crash Peak          | deviation(t) = minimum           | deviation(t) rising ≥ 2 consecutive rounds | Maximum drawdown achieved; ValueInvestor absorbing at capacity; net demand near zero     | Rounds 35–50        |
 | 5     | Recovery            | deviation(t) rising from minimum | deviation(t) > −0.05                       | Mean reversion + ValueInvestor dominant; automated sellers largely inactive or reversing | Rounds 45–80        |
 
-### Quantitative Phase Criteria
+### §4.2 Quantitative Phase Criteria
 
 **Phase 1 → Phase 2 Transition**: Triggered when noise or initial selling pushes deviation below −0.05. Diagnostic: is PortfolioInsurer selling at this round? If yes, cascade has begun.
 
@@ -214,7 +221,7 @@
 
 **Phase 4 → Phase 5 Transition**: ValueInvestor absorption ratio > 50% AND deviation turning positive for 2 consecutive rounds. Diagnostic: net_demand turns positive; AC1 turns negative.
 
-### Observable Signatures by Phase
+### §4.3 Observable Signatures by Phase
 
 | Phase              | PortfolioInsurer             | ProgramTrader            | IndexArbitrageur | ValueInvestor   | AC1          |
 |--------------------|------------------------------|--------------------------|------------------|-----------------|--------------|
@@ -225,11 +232,11 @@
 | Recovery           | Inactive or buying           | Inactive                 | Buying           | Active (buying) | −0.2 to 0    |
 
 
-## 5. Cross-Variant Comparison Framework
+## §5 Cross-Variant Comparison Framework
 
-### Comparison Protocol
+### §5.1 Comparison Protocol
 
-1. **Normalize**: Compare all variants using same fundamental value (100.0) and same initial price; ensures deviations are directly comparable.
+1. **Normalize**: Compare all variants using same fundamental value (250.0) and same initial price; ensures deviations are directly comparable.
 2. **Statistical test**: Compare max_drawdown, t_onset, and absorption_ratio across variants using mean ± std over 10 simulation runs per variant.
 3. **Key comparison axes**:
    - **Cascade initiation speed**: Rule vs. LLM vs. RuleLLM vs. Rag — which variant triggers earliest?
@@ -238,7 +245,7 @@
    - **Rag modification**: Does 1987 historical knowledge in RAG context change PortfolioInsurer or ProgramTrader behavior? Expected: Rag variant may show earlier or deeper crash if agents "recall" the 1987 dynamics.
 4. **Reporting format**: Table with mean ± std for each metric across all 4 variants; t-test for Rule vs. LLM significance
 
-### Expected Cross-Variant Behavioral Differences
+### §5.2 Expected Cross-Variant Behavioral Differences
 
 | Behavioral Dimension        | Rule                                                  | LLM                                                                                                   | RuleLLM                           | Rag                                                                                           |
 |-----------------------------|-------------------------------------------------------|-------------------------------------------------------------------------------------------------------|-----------------------------------|-----------------------------------------------------------------------------------------------|
@@ -248,9 +255,9 @@
 | NoiseTrader                 | Purely stochastic (5% probability, uniform direction) | Varied language outputs creating different action distributions                                       | Constrained stochastic            | Potentially biased toward panic behavior if RAG context includes retail investor descriptions |
 
 
-## 6. Expected Results and Validation
+## §6 Expected Results and Validation
 
-### Expected Stylized Facts (Literature-Sourced)
+### §6.1 Expected Stylized Facts (Literature-Sourced)
 
 | Stylized Fact                                  | Target Value   | Literature Source                                | DOI                   |
 |------------------------------------------------|----------------|--------------------------------------------------|-----------------------|
@@ -261,14 +268,14 @@
 | ValueInvestor absorption ratio                 | 20%–50%        | Shleifer & Vishny (1997)                         | 10.2307/2329555       |
 | Crash velocity at peak                         | ≥ 2% per round | Brady Commission (1988) 30-minute interval data  | —                     |
 
-### Sensitivity Discussion
+### §6.2 Sensitivity Discussion
 
 - **Increasing λ (price impact)**: Faster crash onset, deeper trough, higher velocity. Most sensitive parameter for crash depth. Brady Commission estimated λ implicitly from order flow and price movement data.
 - **Increasing feedback_strength**: More convex amplification by ProgramTrader; sharper Phase 2→3 transition; higher velocity at peak. Brunnermeier & Pedersen (2009) calibrate feedback_strength at 0.25–0.40 for liquidity spirals.
 - **Decreasing value_discount**: Earlier ValueInvestor activation; higher absorption ratio; shallower crash floor. Graham's original margin of safety of 20–33% suggests value_discount = 0.15 is already conservative.
 - **Reducing γ (mean reversion)**: Slower recovery; lower recovery autocorrelation (AC1 stays positive longer). Poterba & Summers (1988) estimate γ ≈ 0.01–0.03 for equity markets.
 
-### Validation Failure Diagnostics
+### §6.3 Validation Failure Diagnostics
 
 | Failure Mode                         | Symptom                                        | Likely Cause                                        | Corrective Action                                                                          |
 |--------------------------------------|------------------------------------------------|-----------------------------------------------------|--------------------------------------------------------------------------------------------|
@@ -276,10 +283,10 @@
 | Cascade too shallow                  | Max drawdown < 10%                             | feedback_strength too low; λ too low                | Increase feedback_strength to 0.4; increase λ to 0.003                                     |
 | Recovery too fast                    | Deviation returns to 0 within 5 rounds of peak | γ too high (> 0.05)                                 | Reduce γ to 0.01–0.02                                                                      |
 | ValueInvestor never activates        | Absorption ratio = 0                           | value_discount too high; crash doesn't reach −15%   | Verify cascade agents generate sufficient selling; reduce value_discount to 0.12 if needed |
-| ProgramTrader dominates from round 1 | t_onset = 1; immediate crash                   | trigger_threshold too low                           | Increase trigger_threshold to 0.02; ensure initial price starts at 100.0                   |
+| ProgramTrader dominates from round 1 | t_onset = 1; immediate crash                   | trigger_threshold too low                           | Increase trigger_threshold to 0.02; ensure initial price starts at 250.0                   |
 
 
-## 7. Visualization Catalogue
+## §7 Visualization Catalogue
 
 | Plot Name                         | Type         | X-axis     | Y-axis                     | Overlays / Annotations                           | Purpose                                                        |
 |-----------------------------------|--------------|------------|----------------------------|--------------------------------------------------|----------------------------------------------------------------|

@@ -1,0 +1,182 @@
+# =============================================================================
+# BlackMonday1987 Rule Players Configuration
+# =============================================================================
+# Heterogeneous agents for Black Monday 1987 crash simulation
+#
+# Agent Types (with market impact):
+#   - Market: Rule-based coordinator (price-impact dynamics)
+#   - PortfolioInsurer: Sells mechanically as prices fall (DESTABILIZING)
+#     Theory: Leland & Rubinstein (1976), Brady Commission (1988)
+#   - IndexArbitrageur: Exploits futures-spot spread (DESTABILIZING)
+#     Theory: Brady Commission (1988)
+#   - ProgramTrader: Automated sell programs on price triggers (DESTABILIZING)
+#     Theory: Brady Commission (1988)
+#   - ValueInvestor: Buys at significant discount to fundamental (STABILIZING)
+#     Theory: Graham (1949)
+#   - NoiseTrader: Random uninformed participant (NEUTRAL)
+#     Theory: Black (1986)
+#
+# Market parameters calibrated to 1987 conditions:
+#   initial_price = 250.0 (proxy for DJIA level, normalized)
+#   fundamental_value = 250.0 (fair value pre-crash)
+#   price_impact = 0.05 (high: large institutional order sizes)
+#   mean_reversion = 0.01 (weak: crash dynamics dominate)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator)
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.BlackMonday1987.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      # Market dynamics parameters (calibrated to Black Monday 1987)
+      fundamental_value: 250.0
+      initial_price: 250.0
+      price_impact: 0.05        # High: large institutional order sizes
+      mean_reversion: 0.01      # Weak: crash dynamics override mean reversion
+      noise_std: 0.02           # Moderate noise
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Portfolio Insurers (Primary Crash Amplifiers)
+# Theory: Leland & Rubinstein (1976) — Dynamic delta hedging
+#         Brady Commission (1988) — Portfolio insurance as key amplifier
+# -----------------------------------------------------------------------------
+portfolio_insurer:
+  name: "Portfolio Insurer"
+  class: "examples.BlackMonday1987.Rule.players:PortfolioInsurer"
+  # Expander → portfolio_insurer_1, portfolio_insurer_2
+  num_instances: 2
+  config:
+    identity: "portfolio_insurer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      # Investor base parameters
+      initial_cash: 500000.0
+      initial_position: 1000.0   # Start with large position to insure
+      custom_state_hot_limit: 3
+      # PortfolioInsurer specific parameters (Leland & Rubinstein, 1976)
+      rebalance_threshold: 0.02   # Hedge triggered when return < -2%
+      hedge_ratio: 0.5            # Sell 50% of return-scaled quantity
+      base_size: 100.0            # Base shares per hedge operation
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Index Arbitrageurs (Cross-Market Amplifiers)
+# Theory: Brady Commission (1988) — Index arbitrage transmits futures selling
+# -----------------------------------------------------------------------------
+index_arbitrageur:
+  name: "Index Arbitrageur"
+  class: "examples.BlackMonday1987.Rule.players:IndexArbitrageur"
+  # Expander → index_arbitrageur_1, index_arbitrageur_2
+  num_instances: 2
+  config:
+    identity: "index_arbitrageur"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      # Investor base parameters
+      initial_cash: 500000.0
+      initial_position: 500.0
+      custom_state_hot_limit: 3
+      # IndexArbitrageur specific parameters (Brady Commission, 1988)
+      arb_threshold: 0.01         # Act when |return| > 1%
+      arb_strength: 0.8           # 80% of formula quantity
+      base_size: 80.0             # Base shares per arb operation
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Program Traders (Automated Sell Programs)
+# Theory: Brady Commission (1988) — Program trading amplifies momentum
+# -----------------------------------------------------------------------------
+program_trader:
+  name: "Program Trader"
+  class: "examples.BlackMonday1987.Rule.players:ProgramTrader"
+  # Expander → program_trader_1, program_trader_2
+  num_instances: 2
+  config:
+    identity: "program_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      # Investor base parameters
+      initial_cash: 500000.0
+      initial_position: 800.0
+      custom_state_hot_limit: 3
+      # ProgramTrader specific parameters (Brady Commission, 1988)
+      trigger_threshold: 0.01     # Sell program triggered at -1%
+      feedback_strength: 1.2      # Aggressive momentum following
+      base_size: 60.0             # Base shares per program execution
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Value Investors (Stabilizers — Graham 1949)
+# Theory: Graham (1949) — Margin of safety, buy below intrinsic value
+# -----------------------------------------------------------------------------
+value_investor:
+  name: "Value Investor"
+  class: "examples.BlackMonday1987.Rule.players:ValueInvestor"
+  num_instances: 1
+  config:
+    identity: "value_investor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      # Investor base parameters
+      initial_cash: 1000000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # ValueInvestor specific parameters (Graham, 1949)
+      value_discount: 0.15        # Buy when price < 85% of fundamental
+      base_size: 40.0             # Base shares per value buy
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Noise Traders (Background Liquidity — Black 1986)
+# Theory: Black (1986) — Noise traders provide background random trades
+# -----------------------------------------------------------------------------
+noise_trader:
+  name: "Noise Trader"
+  class: "examples.BlackMonday1987.Rule.players:NoiseTrader"
+  # Expander → noise_trader_1, noise_trader_2
+  num_instances: 2
+  config:
+    identity: "noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      # Investor base parameters
+      initial_cash: 100000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # NoiseTrader specific parameters (Black, 1986)
+      trade_probability: 0.05     # 5% chance of trading per round
+      min_order: 50.0             # Minimum random order size
+      max_order: 200.0            # Maximum random order size
+  persona: !include persona.yml

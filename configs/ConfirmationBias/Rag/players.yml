@@ -90,10 +90,10 @@ ragllm_belief_anchor:
         sys_message: "examples.ConfirmationBias.Rag.prompts:RAG_BELIEF_ANCHOR_SYS"
         user_message: "examples.ConfirmationBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
-          max_new_tokens: 600
+          max_tokens: 600
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -137,10 +137,10 @@ ragllm_selective_scanner:
         sys_message: "examples.ConfirmationBias.Rag.prompts:RAG_SELECTIVE_SCANNER_SYS"
         user_message: "examples.ConfirmationBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
-          max_new_tokens: 600
+          max_tokens: 600
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -183,10 +183,10 @@ ragllm_balanced_analyst:
         sys_message: "examples.ConfirmationBias.Rag.prompts:RAG_BALANCED_ANALYST_SYS"
         user_message: "examples.ConfirmationBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
-          max_new_tokens: 600
+          max_tokens: 600
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -225,13 +225,13 @@ ragllm_contrarian_trader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.ConfirmationBias.Rag.prompts:RAG_CONTRARIAN_SYS"
+        sys_message: "examples.ConfirmationBias.Rag.prompts:RAG_CONTRARIAN_TRADER_SYS"
         user_message: "examples.ConfirmationBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
-          max_new_tokens: 600
+          max_tokens: 600
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -275,8 +275,8 @@ ragllm_noise_trader:
         sys_message: "examples.ConfirmationBias.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.ConfirmationBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
-          max_new_tokens: 600
+          max_tokens: 600
   persona: !include persona.yml

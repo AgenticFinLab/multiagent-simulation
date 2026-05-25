@@ -11,13 +11,14 @@ See examples/EquityPremium/Rule/analysis.py for detailed documentation.
 
 import argparse
 import os
+from typing import Any, Dict
 
 from masim.utils import load_config, load_results
 
 from examples.EquityPremium.Rule.analysis import analyze_equity_premium, _load_data
 
 
-def main():
+def main() -> Dict[str, Any]:
     """Run equity premium analysis for Rule+LLM hybrid version."""
     parser = argparse.ArgumentParser(
         description="Analyze EquityPremiumRuleLLM simulation"
@@ -26,8 +27,7 @@ def main():
         "-c",
         "--config",
         type=str,
-        required=True,
-        help="Path to simulation configuration file (YAML)",
+        default="configs/EquityPremium/RuleLLM/simulation.yml",
     )
     args = parser.parse_args()
 

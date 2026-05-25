@@ -47,16 +47,16 @@
 | Theory Component           | Implementation                                                            |
 |----------------------------|---------------------------------------------------------------------------|
 | Systemic risk monitor      | Triggers when `deviation < -intervention_threshold`                       |
-| Probabilistic intervention | `if random.random() < rescue_probability: buy(3000)` — stochastic bailout |
-| Partial rescue             | Fixed 3000-unit rescue; incomplete correction mirrors real policy delays  |
+| Probabilistic intervention | `if random.random() < rescue_probability: buy(rescue_size)` — stochastic bailout |
+| Partial rescue             | Bounded 500-unit rescue; incomplete correction mirrors real policy delays |
 
 ---
 
 ## §3 Rule-Specific Notes
 
 - **Two-phase crisis pattern**: RatingAgency buys → bubble (BBI > 0); MBSOriginator sells + LeveragedInvestor fire sales → crash (CII large negative).
-- **Cascade trigger sequence**: LeveragedInvestor fires when `deviation < -0.10` (default `margin_call_trigger`); DistressedBuyer activates at `deviation < -0.15`; Regulator at `deviation < -0.20`.
-- **Stochastic Regulator**: `rescue_probability = 0.3` means ~70% of crisis rounds pass without intervention — designed to reflect policy inertia.
+- **Cascade trigger sequence**: LeveragedInvestor fires when `deviation < -0.10` (`margin_call_trigger`); DistressedBuyer activates at `deviation < -0.20`; Regulator at `deviation < -0.50`.
+- **Stochastic Regulator**: `rescue_probability = 0.6` with `rescue_size = 500` means intervention is relatively likely in extreme stress but each order is bounded.
 
 ---
 
@@ -70,3 +70,32 @@
 | RRI    | 0.20–0.60           | Partial stabilization by DistressedBuyer + Regulator         |
 | OSP    | 0.60–0.90           | MBSOriginator origination fraction of total sell volume      |
 | WDI    | 0.10–0.30           | Wealth concentration from DistressedBuyer buying at discount |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity, and
+crisis-phase patterns before acceptance.
+
+## §6 Running Instructions
+
+```bash
+python examples/GFC2008/Rule/run_gfc2008.py \
+  -c configs/GFC2008/Rule/simulation.yml
+```
+
+## §7 Expected Behavior
+
+The Rule variant should produce deterministic bubble build-up, fire-sale
+pressure, partial stabilizer response, and measurable wealth redistribution.
+
+## §8 Cross-Variant Role
+
+Rule output is the baseline for comparing persona-only LLM behavior, explicit
+RuleLLM guidance, and RAG knowledge effects.
+
+## §9 Implementation Traceability
+
+Investor behavior maps to `simulation-bases.md §4.1-§4.5`; metrics map to
+`analysis-bases.md §2`. No LLM calls are made in this variant.

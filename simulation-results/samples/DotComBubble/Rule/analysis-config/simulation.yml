@@ -1,0 +1,43 @@
+# DotComBubble Rule Simulation Configuration
+
+setting:
+  name: "dotcombubble_rule_simulation"
+  description: "Dot-com bubble: narrative-driven tech mania, IPO frenzy, momentum, vs. value skeptics and short sellers"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "artifacts/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "dotcombubble_rule"
+  actor_prefix: null
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 134217728
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 4
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "artifacts/communication"
+  record_messages: true
+  message_block_size: 500

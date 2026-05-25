@@ -362,7 +362,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         rag_context = ""
         if rag_store and rag_store.is_built():
-            top_k = rag_cfg["top_k"] if "top_k" in rag_cfg else 3
+            top_k = rag_cfg["top_k"]
             query = KnowledgeQuery(
                 text=(
                     f"anchoring bias trading strategy when: "
@@ -379,6 +379,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         template = load_prompt(self.config.extras["llm"]["user_message"])
         # Compute price_change for template (not broadcast by Market)
@@ -436,6 +437,8 @@ class RagLLMInvestor(GeneralPlayer):
         action = decision["action"]
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
+        if bid_price <= 0:
+            bid_price = market_data["price"]
 
         if action == "buy":
             max_affordable = cash / bid_price if bid_price > 0 else 0
@@ -464,8 +467,8 @@ class RagLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": decision["reasoning"][:100],
             "analysis": decision["analysis"],
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
-
 
         validate_order(order)
 
@@ -483,31 +486,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMAnchoredTrader(RagLLMInvestor):
-    """RAG-augmented anchored trader — anchors to initial price, adjusts insufficiently. Theory: simulation-bases.md §4 — AnchoredTrader."""
+    """RAG-augmented anchored trader — anchors to initial price, adjusts insufficiently. Theory: simulation-bases.md §4.1 — AnchoredTrader."""
 
     pass
 
 
 class RagLLMHistoricalAnchor(RagLLMInvestor):
-    """RAG-augmented historical anchor — anchors to historical average price. Theory: simulation-bases.md §4 — HistoricalAnchor."""
+    """RAG-augmented historical anchor — anchors to historical average price. Theory: simulation-bases.md §4.2 — HistoricalAnchor."""
 
     pass
 
 
 class RagLLMRationalUpdater(RagLLMInvestor):
-    """RAG-augmented rational updater — Bayesian, no anchoring bias (benchmark). Theory: simulation-bases.md §4 — RationalUpdater."""
+    """RAG-augmented rational updater — Bayesian, no anchoring bias (benchmark). Theory: simulation-bases.md §4.3 — RationalUpdater."""
 
     pass
 
 
 class RagLLMMomentumTrader(RagLLMInvestor):
-    """RAG-augmented momentum trader — follows price trends. Theory: simulation-bases.md §4 — MomentumTrader."""
+    """RAG-augmented momentum trader — follows price trends. Theory: simulation-bases.md §4.4 — MomentumTrader."""
 
     pass
 
 
 class RagLLMNoiseTrader(RagLLMInvestor):
-    """RAG-augmented noise trader — uninformed random participant. Theory: simulation-bases.md §4 — NoiseTrader."""
+    """RAG-augmented noise trader — uninformed random participant. Theory: simulation-bases.md §4.5 — NoiseTrader."""
 
     pass
 

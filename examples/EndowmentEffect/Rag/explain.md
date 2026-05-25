@@ -2,13 +2,13 @@
 
 ## §1 Overview
 
-The Rag variant augments LLM persona-driven decisions with Retrieval-Augmented Generation (RAG). Each investor class retrieves relevant academic passages and historical market data before reasoning. This allows investors to ground their decisions in retrieved evidence, potentially moderating or amplifying the endowment effect depending on the retrieved content.
+The Rag variant augments the RuleLLM prompt structure with Retrieval-Augmented Generation (RAG). Each investor class retrieves relevant domain passages before reasoning, combines that context with the same persona/rule guidance used by RuleLLM, and returns canonical trading JSON. This allows retrieved knowledge to moderate or amplify the endowment effect depending on the retrieved content.
 
 | Aspect             | Detail                                                                    |
 |--------------------|---------------------------------------------------------------------------|
 | Variant            | Rag (RAG-augmented LLM)                                                   |
 | Simulation         | EndowmentEffect                                                           |
-| Decision Mechanism | RAG-retrieved knowledge + LLM persona reasoning — no hardcoded thresholds |
+| Decision Mechanism | RAG-retrieved knowledge + RuleLLM-style persona/rule guidance |
 | Theory Reference   | `simulation-bases.md §4.1–§4.5`                                           |
 | Market Broadcast   | `price`, `fundamental`, `deviation`, `cash`, `position`, `round`          |
 
@@ -28,7 +28,7 @@ The Rag variant augments LLM persona-driven decisions with Retrieval-Augmented G
 |------------------------------------------------|----------------------------------------------------------------------------------------------------------|
 | Status quo bias (Samuelson & Zeckhauser, 1988) | System prompt: inertia persona; RAG retrieves Samuelson & Zeckhauser (1988) passages                     |
 | Knowledge-informed inertia                     | Retrieved passages may strengthen or weaken inertia depending on market context retrieved                |
-| Adaptive threshold                             | No fixed threshold; LLM interprets retrieved knowledge to decide when deviation is "large enough" to act |
+| Adaptive threshold interpretation             | Retrieved passages may influence reasoning and sizing while the prompt still presents RuleLLM-style thresholds |
 
 ### §2.3 RagLLMRationalArbitrageur (simulation-bases.md §4.3)
 
@@ -71,20 +71,21 @@ Market class is imported from `Rule/players.py` (shared). All Rag investors subm
 | Base class     | `RagLLMInvestor` → `GeneralPlayer`                                                      |
 | Inference      | `LangChainAPIInference` + RAG knowledge retrieval                                       |
 | Context        | `price`, `fundamental`, `deviation`, `cash`, `position`, `round` + retrieved documents  |
-| Output parsing | JSON response with `action`, `quantity`, `reasoning`, `analysis`, `provides_liquidity`  |
+| Output parsing | JSON response with `action`, `bid_price`, `quantity`, `reasoning`, `analysis`; payload also records `rag_context` |
 | RAG retrieval  | Query built from market state; documents retrieved from endowment effect knowledge base |
 
 ## §5 Config Reference
 
 Config file: `configs/EndowmentEffect/Rag/simulation.yml`
 
-LLM config under `extras.llm`:
+LLM config under each player's `extras.llm`:
 - `lm_name`: model identifier
 - `generation_config`: temperature, max_tokens etc.
 
-RAG config under `extras.rag` (if present):
-- `knowledge_base`: path to endowment effect documents
-- `top_k`: number of retrieved documents
+RAG config under each player's `extras.private_knowledge.rag`:
+- `from_global_index_dir`: shared index names such as `rag_index`
+- `embed_type`, `embed_model`, `embed_api_key`, `embed_api_base`: embedding client configuration
+- `chunk_size`, `chunk_overlap`, `top_k`: retrieval construction and query settings
 
 ## §6 Running Instructions
 

@@ -1,6 +1,6 @@
 # BlackMonday1987 — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                                         |
 |--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 | Research Relevance | Examines how mechanical rules-based strategies (portfolio insurance, program trading) can collectively destabilize markets even when each individual strategy appears rational; systemic risk from correlated automated strategies                                  |
 
 
-## 2. Theoretical Foundation
+## §2 Theoretical Foundation
 
 ### 2.1 Portfolio Insurance and Dynamic Hedging
 
@@ -33,7 +33,7 @@
 
 - **Citation**: Brady Commission (1988). *Report of the Presidential Task Force on Market Mechanisms*. U.S. Government Printing Office. Washington, D.C. [primary source; no DOI — government report]. Also: Shiller, R. J. (1987). "Investor behavior in the October 1987 stock market crash: Survey evidence." *NBER Working Paper* No. 2446. DOI: 10.3386/w2446
 - **Core Insight**: Automated sell programs, triggered by price-level thresholds, created mechanical cascade waves. Unlike portfolio insurers (who size sells proportionally to deviation), program traders executed large-lot orders at fixed thresholds with amplified size — each successive trigger executed at a worse price, compounding the cascade. The Brady Commission documented that these programs accounted for a disproportionate share of volume during the worst 30-minute intervals.
-- **Mathematical Formulation**: Amplified sell size: Q_program(t) = base_sell × (1 + feedback_strength × |deviation(t)| × 10). The term (feedback_strength × |deviation| × 10) grows with each decline increment, creating convex amplification: a 5% deviation triggers 1.5× base sell; a 10% deviation triggers 2× base sell.
+- **Mathematical Formulation**: Amplified sell size: Q_program(t) = base_size × (1 + feedback_strength × |deviation(t)| × 10). The term (feedback_strength × |deviation| × 10) grows with each decline increment, creating convex amplification: a 5% deviation triggers 1.5× base size; a 10% deviation triggers 2× base size.
 - **Empirical Evidence**: NYSE volume on October 19 was 604 million shares — 2.5× average daily volume. The most intensive program trading was concentrated in 30-minute windows, consistent with discrete threshold-trigger behavior. Feedback_strength estimated at 0.25–0.35 from Brady Commission order flow analysis.
 - **Relevance to Investor Taxonomy**: The ProgramTrader agent implements this convex amplification: it sells increasingly large lots as deviation grows, generating the heaviest per-round selling waves in the simulation — the dominant force during cascade escalation.
 
@@ -41,7 +41,7 @@
 
 - **Citation**: Graham, B., & Dodd, D. (1934). *Security Analysis*, 1st ed. McGraw-Hill; Graham, B. (1949). *The Intelligent Investor*. Harper & Brothers. Also: Greenwald, B., Kahn, J., Sonkin, P. D., & van Biema, M. (2001). *Value Investing: From Graham to Buffett and Beyond*. Wiley.
 - **Core Insight**: Value investors define a "margin of safety" — a discount to intrinsic value below which equities are worth buying regardless of short-term momentum. When prices fall far enough below fundamental value, value investors provide the stabilizing buying pressure that ultimately arrests a crash. The margin of safety threshold (typically 15–30% below intrinsic value for equity portfolios) determines the crash floor.
-- **Mathematical Formulation**: Buy signal: buy if P < F × (1 − margin_of_safety). Sell signal: sell if P > F × (1 + margin_of_safety). With F = 100 and margin_of_safety = 0.15: buy when P < 85, sell when P > 115. Order size is fixed (not proportional to deviation magnitude), reflecting Graham's emphasis on predetermined position sizing.
+- **Mathematical Formulation**: Buy signal: buy if P < F × (1 − margin_of_safety). Sell signal: sell if P > F × (1 + margin_of_safety). With F = 250 and margin_of_safety = 0.15: buy when P < 212.5, sell when P > 287.5. Order size is fixed (not proportional to deviation magnitude), reflecting Graham's emphasis on predetermined position sizing.
 - **Empirical Evidence**: Value investors including Warren Buffett and institutional contrarians were active buyers during and after the 1987 crash. Greenwald et al. (2001) document that deep-value portfolios with 20–30% discount triggers generated significant alpha in post-crash recoveries. The margin of safety concept dates to Graham & Dodd (1934) and is operationalized as a 15% minimum discount in most institutional implementations.
 - **Relevance to Investor Taxonomy**: The ValueInvestor provides the only sustained buying force during the crash, activating when deviation < −0.15. Without this agent, the simulation would produce complete price collapse; with it, a price floor emerges between −15% and −25% deviation.
 
@@ -53,7 +53,7 @@
 - **Relevance to Investor Taxonomy**: The NoiseTrader adds stochastic variation to net demand, preventing the simulation from converging to a deterministic price path and ensuring realistic variance across simulation runs.
 
 
-## 3. Market Design Principles
+## §3 Market Design Principles
 
 ### 3.1 Price Formation Model
 
@@ -61,17 +61,17 @@ Formula: **P(t+1) = P(t) + λ·D(t) + γ·[F − P(t)] + ε(t)**
 
 | Symbol     | Meaning                    | Value           | Economic Justification                                                                                                         | Calibration Source                                 |
 |------------|----------------------------|-----------------|--------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------|
-| P(t)       | Current index price        | starts at 100.0 | Normalized index level; scale-neutral                                                                                          | —                                                  |
+| P(t)       | Current index price        | starts at 250.0 | Normalized index level; scale-neutral                                                                                          | —                                                  |
 | D(t)       | Net demand (buy − sell)    | computed        | Aggregate order imbalance from all agents each round                                                                           | —                                                  |
-| F          | Fundamental value          | 100.0           | Pre-crash intrinsic value; held constant to isolate feedback mechanism from fundamental news                                   | Normalization                                      |
-| λ (lambda) | Price impact coefficient   | 0.002           | HIGH relative to anchoring/bubble sims — represents thin 1987 intraday market with overwhelmed specialists and NYSE DOT delays | Brady Commission (1988) intraday price sensitivity |
-| γ (gamma)  | Mean-reversion coefficient | 0.02            | Moderate — fundamental gravity exists but is overwhelmed by cascade selling during crash phase; controls recovery speed        | Poterba & Summers (1988)                           |
-| ε(t)       | Gaussian noise ~ N(0, σ²)  | σ = 1.0         | Background order flow noise; realistic variance; Roll (1984) bid-ask bounce estimates                                          | Roll (1984)                                        |
+| F          | Fundamental value          | 250.0           | Pre-crash intrinsic value; held constant to isolate feedback mechanism from fundamental news                                   | Normalization                                      |
+| λ (lambda) | Price impact coefficient   | 0.05            | HIGH relative to anchoring/bubble sims — represents thin 1987 intraday market with overwhelmed specialists and NYSE DOT delays | Brady Commission (1988) intraday price sensitivity |
+| γ (gamma)  | Mean-reversion coefficient | 0.01            | Moderate — fundamental gravity exists but is overwhelmed by cascade selling during crash phase; controls recovery speed        | Poterba & Summers (1988)                           |
+| ε(t)       | Gaussian noise ~ N(0, σ²)  | σ = 0.02         | Background order flow noise; realistic variance; Roll (1984) bid-ask bounce estimates                                          | Roll (1984)                                        |
 
 **Design Rationale for Parameter Choices**:
-- λ = 0.002 is calibrated so that net selling of ~500–1,000 shares from PortfolioInsurer + ProgramTrader produces a 1–2% price move per round, consistent with the intraday price dynamics documented in the Brady Commission report.
-- γ = 0.02 is deliberately moderate — strong enough to create eventual mean reversion but insufficient to counteract the cascade during its peak. This asymmetry is essential: the crash is endogenously driven by feedback, not by external shocks.
-- σ = 1.0 is relatively large (as a fraction of the price scale) to model the chaotic intraday conditions of October 19, where background noise from retail investors and smaller institutions was unusually high.
+- λ = 0.05 is calibrated so that net selling of ~50–150 shares from PortfolioInsurer + ProgramTrader produces a 2–8% price move per round, consistent with the intraday price dynamics documented in the Brady Commission report.
+- γ = 0.01 is deliberately moderate — strong enough to create eventual mean reversion but insufficient to counteract the cascade during its peak. This asymmetry is essential: the crash is endogenously driven by feedback, not by external shocks.
+- σ = 0.02 is relatively large (as a fraction of the price scale) to model the chaotic intraday conditions of October 19, where background noise from retail investors and smaller institutions was unusually high.
 
 **Feedback Loop Dynamics**:
 1. Initial decline (ε or weak fundamental news) → deviation < −0.02
@@ -85,7 +85,7 @@ Formula: **P(t+1) = P(t) + λ·D(t) + γ·[F − P(t)] + ε(t)**
 
 - **Price floor**: `max(price, 0.01)` — prevents numerical collapse during extreme crash scenarios.
 - **No circuit breakers**: Deliberately omitted — circuit breakers did not exist in 1987 (NYSE Rule 80B was introduced in 1988). This design choice allows the simulation to reproduce the uninterrupted cascade that occurred on October 19.
-- **Constant fundamental value**: F = 100.0 is held constant throughout. This is a deliberate design decision: the 1987 crash was NOT caused by any deterioration in fundamental earnings or economic value — it was a mechanical feedback crash. A constant fundamental isolates the feedback mechanism cleanly.
+- **Constant fundamental value**: F = 250.0 is held constant throughout. This is a deliberate design decision: the 1987 crash was NOT caused by any deterioration in fundamental earnings or economic value — it was a mechanical feedback crash. A constant fundamental isolates the feedback mechanism cleanly.
 
 ### 3.3 Information Broadcast Design
 
@@ -94,16 +94,16 @@ Each round, the Market sends to all investors:
 | Field         | Value / Formula  | Rationale                                                                                                     |
 |---------------|------------------|---------------------------------------------------------------------------------------------------------------|
 | `price`       | P(t)             | Current market price — primary signal for all agents                                                          |
-| `fundamental` | 100.0 (constant) | Intrinsic value reference; used by ValueInvestor for discount calculation                                     |
+| `fundamental` | 250.0 (constant) | Intrinsic value reference; used by ValueInvestor for discount calculation                                     |
 | `deviation`   | (P(t) − F) / F   | Primary trigger signal for PortfolioInsurer, ProgramTrader, IndexArbitrageur — captures relative misvaluation |
 | `round`       | t                | Simulation round number; used for time-series logging and phase detection                                     |
 
 Note: `prev_price` is not explicitly broadcast — agents use `deviation` rather than price-return as their primary signal. This design is consistent with portfolio insurance and program trading strategies that respond to level-based thresholds rather than momentum signals.
 
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
-### Investor: PortfolioInsurer
+### §4.1 PortfolioInsurer
 
 #### 4.1.1  Summary
 
@@ -178,24 +178,24 @@ The PortfolioInsurer is a large institutional fund manager who has adopted the L
 
 #### 4.1.5  Decision Process Walkthrough
 
-Given: price = 95.0, fundamental = 100.0, deviation = −0.05, position = 3000, cash = 200000
+Given: price = 237.5, fundamental = 250.0, deviation = −0.05, position = 3000, cash = 200000
 
 Step 1: Observe deviation = −0.05. Is −0.05 < −0.02 (rebalance_threshold)? YES → sell.
-Step 2: Compute sell quantity: Q = int(|−0.05| × 0.5 × 3000) = int(0.05 × 0.5 × 3000) = int(75) = 75 shares.
-Step 3: Position after sell: 3000 − 75 = 2925 shares; cash after sell: 200000 + 75 × 95 = 207125.
-Step 4: Send order: action=sell, quantity=75, bid_price=95.
-Step 5: Net market impact: −75 shares added to D(t); partial contribution to downward price pressure of λ × 75 = 0.002 × 75 = 0.15 price units.
+Step 2: Compute sell quantity: Q = int(|−0.05| × 0.5 × 1000) = int(0.05 × 0.5 × 1000) = int(25) = 25 shares.
+Step 3: Position after sell: 1000 − 25 = 975 shares; cash after sell: 500000 + 25 × 237.5 = 505937.5.
+Step 4: Send order: action=sell, quantity=25, bid_price=237.5.
+Step 5: Net market impact: −25 shares added to D(t); partial contribution to downward price pressure of λ × 25 = 0.05 × 25 = 1.25 price units.
 
-Note: At deviation = −0.10 with same position (3000), Q = int(0.10 × 0.5 × 3000) = 150 — double the sell quantity, illustrating the convex amplification.
+Note: At deviation = −0.10 with same position (1000), Q = int(0.10 × 0.5 × 1000) = 50 — double the sell quantity, illustrating the convex amplification.
 
 #### 4.1.6  Worked Numerical Example
 
-Market state: price = 91.0, fundamental = 100.0, deviation = −0.09, position = 2800, cash = 214000
+Market state: price = 227.5, fundamental = 250.0, deviation = −0.09, position = 975, cash = 505937.5
 
 Trigger check: −0.09 < −0.02 → sell condition active.
-Sell quantity: Q = int(|−0.09| × 0.5 × 2800) = int(0.09 × 0.5 × 2800) = int(126) = 126 shares.
-Updated position: 2800 − 126 = 2674. Updated cash: 214000 + 126 × 91 = 214000 + 11466 = 225466.
-Order sent: action=sell, quantity=126, bid_price=91.
+Sell quantity: Q = int(|−0.09| × 0.5 × 975) = int(0.09 × 0.5 × 975) = int(43) = 43 shares.
+Updated position: 975 − 43 = 932. Updated cash: 505937.5 + 43 × 227.5 = 515720.0.
+Order sent: action=sell, quantity=43, bid_price=227.5.
 Rationale: A 9% price decline requires the insurer to reduce equity exposure by ~4.5% of position (hedge_ratio × deviation), consistent with the delta-hedging rule that demands lower equity weight at lower prices.
 
 #### 4.1.7  Academic References
@@ -209,7 +209,7 @@ Rationale: A 9% price decline requires the insurer to reduce equity exposure by 
 
 ---
 
-### Investor: IndexArbitrageur
+### §4.2 IndexArbitrageur
 
 #### 4.2.1  Summary
 
@@ -223,7 +223,7 @@ The IndexArbitrageur is an investment bank or hedge fund desk that exploits pric
 - Core Insight: In normal markets, the futures-spot relationship enforces the cost-of-carry pricing: F* = S·e^{(r−d)T}. Index arbitrageurs keep the two markets aligned by selling the overpriced one and buying the underpriced one simultaneously. During a crash, this linkage becomes a contagion channel: futures crash → futures undervalued → arbitrageurs sell spot → spot crashes too.
 - Mathematical Formulation: Arbitrage trigger (sell spot): P_spot > F_futures + arb_threshold. Arbitrage trigger (buy spot): P_spot < F_futures − arb_threshold. In the simulation, `deviation` proxies the futures-spot discrepancy relative to fundamental: sell when deviation > +arb_threshold; buy when deviation < −arb_threshold.
 - Empirical Evidence: Stoll & Whaley (1990) document that on October 19, the futures-spot price relationship broke down under NYSE DOT system overload, with discrepancies of 2–8% persisting for 10–30 minute intervals. Arbitrage thresholds in practice: 0.3–1.0% (typical) to 2–5% (during 1987 stress).
-- Relevance to This Investor: arb_threshold = 0.005 (0.5%) calibrated to slightly above normal transaction costs; ensures arbitrage is active during even modest mispricings, consistent with institutional desk operations.
+- Relevance to This Investor: arb_threshold = 0.01 (0.5%) calibrated to slightly above normal transaction costs; ensures arbitrage is active during even modest mispricings, consistent with institutional desk operations.
 
 **Theory 2: Market Microstructure and Liquidity**
 - Theory / Study: Liquidity, information, and arbitrage in stressed markets
@@ -254,21 +254,21 @@ The IndexArbitrageur is an investment bank or hedge fund desk that exploits pric
 
 **4.2.4.2  Core Behavioral Mechanism**
 1. Each round, IndexArbitrageur observes `deviation`.
-2. If deviation > +arb_threshold (0.005): spot is overvalued relative to fundamental/futures → sell fixed `position_size` shares. This represents selling the spot market to capture the arbitrage spread.
-3. If deviation < −arb_threshold (−0.005): spot is undervalued → buy fixed `position_size` shares. This represents buying the undervalued spot.
-4. If |deviation| ≤ 0.005: within arbitrage bounds → hold. No action needed.
-5. Position sizing is fixed (position_size ≈ 500 shares) — consistent with institutional desk risk limits and standardized lot sizes.
+2. If deviation > +arb_threshold (0.01): spot is overvalued relative to fundamental/futures → sell up to `base_size` shares. This represents selling the spot market to capture the arbitrage spread.
+3. If deviation < −arb_threshold (−0.01): spot is undervalued → buy up to `base_size` shares. This represents buying the undervalued spot.
+4. If |deviation| ≤ 0.01: within arbitrage bounds → hold. No action needed.
+5. Position sizing is fixed (base_size = 80 shares) — consistent with institutional desk risk limits and standardized lot sizes.
 
 **4.2.4.3  Mathematical Model**
-- Decision variable: fixed trade quantity Q = position_size in shares
-- Trigger function: sell if δ(t) > +ω; buy if δ(t) < −ω; where ω = arb_threshold = 0.005
-- Sizing function: Q*(t) = position_size = 500 (fixed, not deviation-scaled)
+- Decision variable: fixed trade quantity Q = base_size in shares
+- Trigger function: sell if δ(t) > +ω; buy if δ(t) < −ω; where ω = arb_threshold = 0.01
+- Sizing function: Q*(t) = base_size = 80 (fixed, not deviation-scaled)
 - State variables: None persistent — each round is independent (arbitrage is stateless)
 
 | Parameter     | Value | Meaning                                | Config Path                                            | Source                     |
 |---------------|-------|----------------------------------------|--------------------------------------------------------|----------------------------|
-| arb_threshold | 0.005 | Minimum deviation to trigger arbitrage | `BlackMonday1987/Rule/config.yaml → index_arbitrageur` | Stoll & Whaley (1990)      |
-| position_size | 500   | Fixed shares per arbitrage trade       | `BlackMonday1987/Rule/config.yaml → index_arbitrageur` | Normalization (desk scale) |
+| arb_threshold | 0.01  | Minimum deviation to trigger arbitrage | `BlackMonday1987/Rule/config.yaml → index_arbitrageur` | Stoll & Whaley (1990)      |
+| base_size     | 80    | Fixed shares per arbitrage trade       | `BlackMonday1987/Rule/config.yaml → index_arbitrageur` | Normalization (desk scale) |
 
 **4.2.4.4  Behavioral Properties**
 - Time horizon: High-frequency — acts within single round of discrepancy; arbitrage is instantaneous relative to simulation round length
@@ -278,22 +278,22 @@ The IndexArbitrageur is an investment bank or hedge fund desk that exploits pric
 
 #### 4.2.5  Decision Process Walkthrough
 
-Given: price = 97.0, fundamental = 100.0, deviation = −0.03, position_size = 500
+Given: price = 242.5, fundamental = 250.0, deviation = −0.03, base_size = 80
 
-Step 1: Observe deviation = −0.03. Is −0.03 < −0.005 (arb_threshold)? YES → buy (spot undervalued).
-Step 2: Determine quantity: Q = position_size = 500 shares (fixed).
-Step 3: Cash check: cost = 500 × 97 = 48500; confirm cash available.
-Step 4: Send order: action=buy, quantity=500, bid_price=97.
-Step 5: Net market impact: +500 added to D(t); upward price pressure of λ × 500 = 0.002 × 500 = 1.0 price unit.
+Step 1: Observe deviation = −0.03. Is −0.03 < −0.01 (arb_threshold)? YES → buy (spot undervalued).
+Step 2: Determine quantity: Q = base_size = 80 shares (fixed).
+Step 3: Cash check: cost = 80 × 242.5 = 19400; confirm cash available.
+Step 4: Send order: action=buy, quantity=80, bid_price=242.5.
+Step 5: Net market impact: +80 added to D(t); upward price pressure of λ × 80 = 0.05 × 80 = 4.0 price unit.
 
 Note: During a crash with deviation = −0.03, the IndexArbitrageur's buying partially offsets PortfolioInsurer's selling — but with PortfolioInsurer selling 75+ shares (proportional) and ProgramTrader selling 300+ shares (amplified), the net demand remains sharply negative.
 
 #### 4.2.6  Worked Numerical Example
 
-Market state: price = 102.0, fundamental = 100.0, deviation = +0.02, position_size = 500
+Market state: price = 255.0, fundamental = 250.0, deviation = +0.02, base_size = 80
 
-Trigger check: +0.02 > +0.005 → sell condition active (spot overvalued).
-Sell quantity: Q = 500 shares (fixed).
+Trigger check: +0.02 > +0.01 → sell condition active (spot overvalued).
+Sell quantity: Q = 80 shares (fixed).
 Order sent: action=sell, quantity=500, bid_price=102.
 Rationale: Spot is 2% above fundamental (equivalent to futures being at fair value while spot has risen); arbitrage discipline demands selling the overpriced spot market to capture the 2% spread, consistent with Stoll & Whaley (1990) cost-of-carry arbitrage.
 
@@ -308,7 +308,7 @@ Rationale: Spot is 2% above fundamental (equivalent to futures being at fair val
 
 ---
 
-### Investor: ProgramTrader
+### §4.3 ProgramTrader
 
 #### 4.3.1  Summary
 
@@ -320,16 +320,16 @@ The ProgramTrader is an institutional investor running automated execution algor
 - Theory / Study: Automated sell program cascade dynamics
 - Citation: Brady Commission (1988). *Report of the Presidential Task Force on Market Mechanisms*. U.S. Government Printing Office. Washington, D.C. Also: Harris, L. (1989). "The October 1987 S&P 500 stock-futures basis." *Journal of Finance*, 44(1), 77–99. DOI: 10.2307/2328344
 - Core Insight: Automated sell programs created a tiered cascade: different programs were triggered at different price thresholds, with each tier activating at progressively lower prices and executing progressively larger orders. The Brady Commission documented that the most intensive program selling occurred in discrete 30-minute windows when specific price levels were breached, creating sudden step-function increases in sell volume.
-- Mathematical Formulation: Amplified sell size: Q_program(t) = base_sell × (1 + feedback_strength × |deviation(t)| × 10). The multiplier (1 + f × |δ| × 10) creates convex amplification: at |δ| = 0.01, multiplier = 1.3; at |δ| = 0.05, multiplier = 2.5; at |δ| = 0.10, multiplier = 4.0. This is bounded above by position/cash constraints.
+- Mathematical Formulation: Amplified sell size: Q_program(t) = base_size × (1 + feedback_strength × |deviation(t)| × 10). The multiplier (1 + f × |δ| × 10) creates convex amplification: at |δ| = 0.01, multiplier = 1.3; at |δ| = 0.05, multiplier = 2.5; at |δ| = 0.10, multiplier = 4.0. This is bounded above by position/cash constraints.
 - Empirical Evidence: Brady Commission (1988) documents program sell waves of 200–800% above normal trading volume during peak cascade intervals. Feedback strength estimated at 0.25–0.40 from analysis of sequential sell-wave volume escalation. Base sell quantity per institution: 200–1000 shares per trigger event.
-- Relevance to This Investor: feedback_strength = 0.3 and base_sell = 200 calibrated from Brady Commission estimates; trigger_threshold = 0.01 (1% decline) captures the most sensitive tier of program sell triggers.
+- Relevance to This Investor: feedback_strength = 1.2 and base_size = 60 calibrated from Brady Commission estimates; trigger_threshold = 0.01 (1% decline) captures the most sensitive tier of program sell triggers.
 
 **Theory 2: Cascading Failures and Systemic Risk**
 - Theory / Study: Systemic risk and cascade dynamics in financial networks
 - Citation: Brunnermeier, M. K., & Pedersen, L. H. (2009). "Market liquidity and funding liquidity." *Review of Financial Studies*, 22(6), 2201–2238. DOI: 10.1093/rfs/hhn098
 - Core Insight: Brunnermeier & Pedersen's model shows how funding constraints create self-reinforcing liquidity spirals: losses → margin calls → forced selling → further losses. The program trader embodies the funding-liquidity spiral: not because of margin calls per se, but because automated risk-control systems respond to mark-to-market losses with systematic liquidation, regardless of fundamental value. Each sell reduces the mark-to-market value of remaining positions, triggering further automated risk-reduction sells.
 - Mathematical Formulation: Funding liquidity spiral: ΔP = −λ·(ΔM/m) where ΔM is margin shortfall and m is margin rate. In the program trading context: triggered_sells(t) ∝ loss_signal(t) ∝ |deviation(t)|, creating the positive feedback between price falls and sell volumes.
-- Empirical Evidence: Brunnermeier & Pedersen (2009) document that in every major market crash since 1987, funding constraints and mark-to-market accounting create amplified sells. Their model calibrates to feedback coefficients of 0.2–0.4, consistent with the feedback_strength = 0.3 parameter.
+- Empirical Evidence: Brunnermeier & Pedersen (2009) document that in every major market crash since 1987, funding constraints and mark-to-market accounting create amplified sells. Their model calibrates to feedback coefficients of 0.2–0.4, consistent with the feedback_strength = 1.2 parameter.
 - Relevance to This Investor: ProgramTrader's convex amplification is the simulation-level instantiation of the Brunnermeier-Pedersen liquidity spiral — a mechanical, self-reinforcing selling force that grows stronger as the crash deepens.
 
 #### 4.3.3  Design Purpose and Activation Scenarios
@@ -337,9 +337,9 @@ The ProgramTrader is an institutional investor running automated execution algor
 **Purpose**: Generate the escalating cascade waves that transform an initial price decline into a market crash. The ProgramTrader's convex amplification means it contributes disproportionately more selling at precisely the worst moments — when prices are already depressed and the market most needs buyers.
 
 **Activation Scenarios**:
-- Scenario A (Small decline, deviation < −1%): ProgramTrader activates with base sell quantity (multiplier ≈ 1.3×); adds to portfolio insurer selling. Together they generate the first meaningful cascade wave.
-- Scenario B (Moderate decline, deviation < −5%): Multiplier = 2.5×; ProgramTrader now selling 500 shares vs. base 200; dominates net demand calculation; crash escalation phase begins.
-- Scenario C (Severe decline, deviation < −10%): Multiplier = 4.0×; ProgramTrader selling 800 shares; generates crash peak. ValueInvestor begins buying but cannot absorb supply.
+- Scenario A (Small decline, deviation < −1%): ProgramTrader activates with base size quantity (multiplier ≈ 1.3×); adds to portfolio insurer selling. Together they generate the first meaningful cascade wave.
+- Scenario B (Moderate decline, deviation < −5%): Multiplier = 1.6×; ProgramTrader now selling about 96 shares vs. base 60; dominates net demand calculation; crash escalation phase begins.
+- Scenario C (Severe decline, deviation < −10%): Multiplier = 2.2×; ProgramTrader selling about 132 shares; generates crash peak. ValueInvestor begins buying but cannot absorb supply.
 
 **Market Contribution**: Strongly destabilizing — the primary cascade amplifier. During peak crash (deviation ≈ −10% to −20%), ProgramTrader is responsible for the majority of net selling pressure by volume.
 
@@ -350,30 +350,30 @@ The ProgramTrader is an institutional investor running automated execution algor
 **4.3.4.1  Decision Information Set**
 - `deviation`: Both trigger signal and sizing amplifier — two roles, consistent with a system where the same price signal that activates the program also determines the severity of its response.
 - `price`: Used for buy sizing (cash/price); not for sell trigger.
-- Does NOT use position directly for sell sizing (uses base_sell × amplifier rather than position fraction); consistent with lot-based automated execution rather than portfolio-fraction-based execution.
+- Does NOT use position directly for sell sizing (uses base_size × amplifier rather than position fraction); consistent with lot-based automated execution rather than portfolio-fraction-based execution.
 
 **4.3.4.2  Core Behavioral Mechanism**
 1. Each round, ProgramTrader observes `deviation`.
 2. If deviation < −trigger_threshold (−0.01): sell — compute amplified sell quantity. The amplification grows convexly with |deviation|.
-3. Sell quantity: `amplified_sell = int(base_sell × (1 + feedback_strength × |deviation| × 10))`. This ensures larger deviations produce disproportionately larger sells.
-4. If deviation > +trigger_threshold (+0.01): buy — fixed base_sell quantity (no amplification on upside; asymmetric design reflecting asymmetric program trigger behavior).
+3. Sell quantity: `amplified_sell = int(base_size × (1 + feedback_strength × |deviation| × 10))`. This ensures larger deviations produce disproportionately larger sells.
+4. If deviation > +trigger_threshold (+0.01): buy — fixed base_size quantity (no amplification on upside; asymmetric design reflecting asymmetric program trigger behavior).
 5. Position and cash constraints apply: cannot sell below zero shares; cannot buy beyond cash.
 6. Hold if |deviation| ≤ 0.01.
 
 **4.3.4.3  Mathematical Model**
 - Decision variable: Q*(t) = amplified sell or fixed buy quantity
 - Trigger function: sell if δ(t) < −τ; buy if δ(t) > +τ; where τ = trigger_threshold = 0.01
-- Sell sizing: Q*_sell(t) = int(base_sell × (1 + f × |δ(t)| × 10)), where f = feedback_strength = 0.3
-- Buy sizing: Q*_buy(t) = base_sell (fixed; no amplification on upside)
+- Sell sizing: Q*_sell(t) = int(base_size × (1 + f × |δ(t)| × 10)), where f = feedback_strength = 1.2
+- Buy sizing: Q*_buy(t) = base_size (fixed; no amplification on upside)
 - State variables: position (shares), cash (updated each trade)
 
 | Parameter         | Value  | Meaning                                      | Config Path                                         | Source                                                  |
 |-------------------|--------|----------------------------------------------|-----------------------------------------------------|---------------------------------------------------------|
 | trigger_threshold | 0.01   | Deviation below which sell cascade activates | `BlackMonday1987/Rule/config.yaml → program_trader` | Brady Commission (1988)                                 |
-| feedback_strength | 0.3    | Amplification factor per unit deviation      | `BlackMonday1987/Rule/config.yaml → program_trader` | Brady Commission (1988); Brunnermeier & Pedersen (2009) |
-| base_sell         | 200    | Base lot size before amplification           | `BlackMonday1987/Rule/config.yaml → program_trader` | Brady Commission (1988) order flow data                 |
-| initial_position  | 5000   | Starting share position                      | `BlackMonday1987/Rule/config.yaml → program_trader` | Normalization (larger than insurer)                     |
-| initial_cash      | 300000 | Starting cash reserves                       | `BlackMonday1987/Rule/config.yaml → program_trader` | Normalization                                           |
+| feedback_strength | 1.2    | Amplification factor per unit deviation      | `BlackMonday1987/Rule/config.yaml → program_trader` | Brady Commission (1988); Brunnermeier & Pedersen (2009) |
+| base_size         | 60     | Base lot size before amplification           | `BlackMonday1987/Rule/config.yaml → program_trader` | Brady Commission (1988) order flow data                 |
+| initial_position  | 800    | Starting share position                      | `BlackMonday1987/Rule/config.yaml → program_trader` | Normalization (larger than insurer)                     |
+| initial_cash      | 500000 | Starting cash reserves                       | `BlackMonday1987/Rule/config.yaml → program_trader` | Normalization                                           |
 
 **4.3.4.4  Behavioral Properties**
 - Time horizon: High-frequency — reacts immediately at each threshold trigger; equivalent to same-session automated execution
@@ -383,39 +383,39 @@ The ProgramTrader is an institutional investor running automated execution algor
 
 #### 4.3.5  Decision Process Walkthrough
 
-Given: price = 92.0, fundamental = 100.0, deviation = −0.08, base_sell = 200, feedback_strength = 0.3
+Given: price = 230.0, fundamental = 250.0, deviation = −0.08, base_size = 60, feedback_strength = 1.2
 
 Step 1: Observe deviation = −0.08. Is −0.08 < −0.01 (trigger_threshold)? YES → sell.
-Step 2: Compute amplifier: multiplier = 1 + 0.3 × 0.08 × 10 = 1 + 0.24 = 1.24.
-Step 3: Compute sell quantity: Q = int(200 × 1.24) = int(248) = 248 shares.
-Step 4: Send order: action=sell, quantity=248, bid_price=92.
-Step 5: Net market impact: −248 shares in D(t); price pressure = −λ × 248 = −0.002 × 248 = −0.496 price units from ProgramTrader alone.
+Step 2: Compute amplifier: multiplier = 1 + 1.2 × 0.08 × 10 = 1 + 0.96 = 1.96.
+Step 3: Compute sell quantity: Q = int(60 × 1.96) = int(117) = 117 shares.
+Step 4: Send order: action=sell, quantity=117, bid_price=230.0.
+Step 5: Net market impact: −117 shares in D(t); price pressure = −λ × 117 = −0.05 × 117 = −5.85 price units from ProgramTrader alone.
 
-Note: In the same round with PortfolioInsurer selling 126 shares (from §4.1.6 example), combined D_sell = 248 + 126 = 374 shares → combined price pressure = −0.002 × 374 = −0.748 price units. This is the cascade amplification mechanism in action.
+Note: In the same round with PortfolioInsurer selling 43 shares (from §4.1.6 example), combined D_sell = 117 + 43 = 160 shares → combined price pressure = −0.05 × 160 = −8.0 price units. This is the cascade amplification mechanism in action.
 
 #### 4.3.6  Worked Numerical Example
 
-Market state: price = 85.0, fundamental = 100.0, deviation = −0.15, base_sell = 200, feedback_strength = 0.3, position = 4200
+Market state: price = 212.5, fundamental = 250.0, deviation = −0.15, base_size = 60, feedback_strength = 1.2, position = 800
 
 Trigger check: −0.15 < −0.01 → sell condition active.
-Amplifier: multiplier = 1 + 0.3 × 0.15 × 10 = 1 + 0.45 = 1.45.
-Sell quantity: Q = int(200 × 1.45) = int(290) = 290 shares.
-Position check: 4200 − 290 = 3910 (> 0) — order valid.
-Order sent: action=sell, quantity=290, bid_price=85.
-Rationale: A 15% decline activates the most aggressive tier of automated selling (multiplier = 1.45×), consistent with the Brady Commission's documentation that program sell volume escalated dramatically as the S&P 500 passed successive price floors on October 19.
+Amplifier: multiplier = 1 + 1.2 × 0.15 × 10 = 1 + 1.80 = 2.80.
+Sell quantity: Q = int(60 × 2.80) = int(168) = 168 shares.
+Position check: 800 − 168 = 632 (> 0) — order valid.
+Order sent: action=sell, quantity=168, bid_price=212.5.
+Rationale: A 15% decline activates the most aggressive tier of automated selling (multiplier = 2.80×), consistent with the Brady Commission's documentation that program sell volume escalated dramatically as the S&P 500 passed successive price floors on October 19.
 
 #### 4.3.7  Academic References
 
 | # | Citation                                                                                                                                                          | Notes                                                                                                       |
 |---|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
-| 1 | Brady Commission (1988). *Report of the Presidential Task Force on Market Mechanisms*. U.S. Government Printing Office.                                           | Primary source for trigger_threshold, feedback_strength, base_sell calibration; program trading volume data |
+| 1 | Brady Commission (1988). *Report of the Presidential Task Force on Market Mechanisms*. U.S. Government Printing Office.                                           | Primary source for trigger_threshold, feedback_strength, base_size calibration; program trading volume data |
 | 2 | Harris, L. (1989). "The October 1987 S&P 500 stock-futures basis." *Journal of Finance*, 44(1), 77–99. DOI: 10.2307/2328344                                       | Intraday price dynamics; program trading amplification evidence                                             |
 | 3 | Brunnermeier, M. K., & Pedersen, L. H. (2009). "Market liquidity and funding liquidity." *Review of Financial Studies*, 22(6), 2201–2238. DOI: 10.1093/rfs/hhn098 | Theoretical basis for convex amplification; funding liquidity spiral model                                  |
 
 
 ---
 
-### Investor: ValueInvestor
+### §4.4 ValueInvestor
 
 #### 4.4.1  Summary
 
@@ -427,9 +427,9 @@ The ValueInvestor is a patient institutional buyer — modeled on Graham-style v
 - Theory / Study: Security Analysis — margin of safety concept
 - Citation: Graham, B., & Dodd, D. (1934). *Security Analysis*. McGraw-Hill. Also: Graham, B. (1949). *The Intelligent Investor*. Harper & Brothers. Full theoretical treatment: Greenwald, B., Kahn, J., Sonkin, P. D., & van Biema, M. (2001). *Value Investing: From Graham to Buffett and Beyond*. Wiley.
 - Core Insight: Graham's margin of safety principle states that an investment should only be made when the purchase price is sufficiently below the estimated intrinsic value to provide a buffer against estimation error. For equity portfolios, Graham recommended 20–33% discount to intrinsic value for common stock purchases. This principle creates a price floor: when a sufficient fraction of market participants share value-investing discipline, prices cannot fall indefinitely below fundamental value.
-- Mathematical Formulation: Buy signal: P < F × (1 − MoS), where MoS = margin_of_safety. With F = 100 and MoS = 0.15: buy when P < 85. Sell signal: P > F × (1 + MoS), i.e., P > 115. Fixed order size: Q = order_size (not deviation-scaled), reflecting Graham's emphasis on predetermined, non-speculative position sizing.
+- Mathematical Formulation: Buy signal: P < F × (1 − MoS), where MoS = margin_of_safety. With F = 250 and MoS = 0.15: buy when P < 212.5. Sell signal: P > F × (1 + MoS), i.e., P > 287.5. Fixed order size: Q = base_size (not deviation-scaled), reflecting Graham's emphasis on predetermined, non-speculative position sizing.
 - Empirical Evidence: Historical studies of value investing returns document that buying at 15–25% discounts to NAV generates significantly positive risk-adjusted returns. Greenwald et al. (2001) document average excess return of 6–8% annualized for deep-value strategies with 15%+ discount triggers. Warren Buffett publicly disclosed major equity purchases during and after the 1987 crash, consistent with MoS = 15–20%.
-- Relevance to This Investor: value_discount = 0.15, order_size = 800 calibrated to model a single large institutional buyer who activates at the Graham margin of safety threshold and buys fixed-size lots.
+- Relevance to This Investor: value_discount = 0.15, base_size = 40 calibrated to model a single large institutional buyer who activates at the Graham margin of safety threshold and buys fixed-size lots.
 
 **Theory 2: Limits of Arbitrage and Stabilizing Speculation**
 - Theory / Study: Rational destabilization vs. stabilizing arbitrage
@@ -445,10 +445,10 @@ The ValueInvestor is a patient institutional buyer — modeled on Graham-style v
 
 **Activation Scenarios**:
 - Scenario A (Moderate decline, −5% to −14%): ValueInvestor inactive — deviation does not yet meet the margin of safety threshold. This models Graham's discipline: buying too early (at only a 5% discount) is not value investing.
-- Scenario B (Threshold crossed, deviation < −15%): ValueInvestor activates — buys fixed order_size (800 shares) each round. Provides sustained buying that partially offsets cascade selling. At peak crash (deviation ≈ −20%), net D(t) is still negative but less extreme.
+- Scenario B (Threshold crossed, deviation < −15%): ValueInvestor activates — buys fixed base_size (40 shares) each round. Provides sustained buying that partially offsets cascade selling. At peak crash (deviation ≈ −20%), net D(t) is still negative but less extreme.
 - Scenario C (Recovery, deviation > +15%): ValueInvestor begins selling — takes profit at the same margin of safety threshold above fair value. This is the symmetric realization of the value investing principle.
 
-**Market Contribution**: Stabilizing — the only consistent buyer during the crash. Activates at deviation < −15%, creating a floor effect. At order_size = 800, ValueInvestor adds +800 to D(t) per round — partially offsetting the combined PortfolioInsurer + ProgramTrader selling but typically insufficient to fully reverse the cascade.
+**Market Contribution**: Stabilizing — the only consistent buyer during the crash. Activates at deviation < −15%, creating a floor effect. At base_size = 40, ValueInvestor adds up to +40 to D(t) per round — partially offsetting the combined PortfolioInsurer + ProgramTrader selling but typically insufficient to fully reverse the cascade.
 
 **Interaction with other agents**: Directly opposes PortfolioInsurer and ProgramTrader (buys what they sell); IndexArbitrageur may also buy at deep discounts, creating an alliance of stabilizing buyers; NoiseTrader's random buying occasionally reinforces the floor.
 
@@ -462,22 +462,22 @@ The ValueInvestor is a patient institutional buyer — modeled on Graham-style v
 
 **4.4.4.2  Core Behavioral Mechanism**
 1. Each round, ValueInvestor observes `deviation`.
-2. If deviation < −value_discount (−0.15): price is at or below the margin of safety → buy `order_size` shares. Cash-constrained: if cost = order_size × price > cash, buy min(order_size, int(cash / price)) shares.
-3. If deviation > +value_discount (+0.15): price is above the sell-at-premium threshold → sell `order_size` shares from position.
+2. If deviation < −value_discount (−0.15): price is at or below the margin of safety → buy `base_size` shares. Cash-constrained: if cost = base_size × price > cash, buy min(base_size, int(cash / price)) shares.
+3. If deviation > +value_discount (+0.15): price is above the sell-at-premium threshold → sell `base_size` shares from position.
 4. If |deviation| ≤ 0.15: price is within fair value range → hold. No action needed.
-5. Order size is fixed (800 shares) — not deviation-scaled. This reflects Graham's predetermined position sizing rather than dynamic sizing.
+5. Order size is fixed by `base_size` (40 shares) — not deviation-scaled. This reflects Graham's predetermined position sizing rather than dynamic sizing.
 
 **4.4.4.3  Mathematical Model**
-- Decision variable: Q*(t) = fixed order_size or cash-constrained minimum
+- Decision variable: Q*(t) = fixed base_size or cash-constrained minimum
 - Trigger function: buy if δ(t) < −m; sell if δ(t) > +m; where m = value_discount = 0.15
-- Buy sizing: Q*_buy = min(order_size, floor(cash / price))
-- Sell sizing: Q*_sell = min(order_size, position)
+- Buy sizing: Q*_buy = min(base_size, floor(cash / price))
+- Sell sizing: Q*_sell = min(base_size, position)
 - State variables: cash, position (updated each trade)
 
 | Parameter      | Value  | Meaning                                        | Config Path                                         | Source                              |
 |----------------|--------|------------------------------------------------|-----------------------------------------------------|-------------------------------------|
 | value_discount | 0.15   | Margin of safety threshold (deviation trigger) | `BlackMonday1987/Rule/config.yaml → value_investor` | Graham (1949); Graham & Dodd (1934) |
-| order_size     | 800    | Fixed shares per value buy/sell                | `BlackMonday1987/Rule/config.yaml → value_investor` | Normalization (institutional scale) |
+| base_size     | 40     | Fixed shares per value buy/sell                | `BlackMonday1987/Rule/config.yaml → value_investor` | Normalization (institutional scale) |
 | initial_cash   | 500000 | Cash reserves for crash buying                 | `BlackMonday1987/Rule/config.yaml → value_investor` | Normalization (large reserve)       |
 
 **4.4.4.4  Behavioral Properties**
@@ -488,40 +488,40 @@ The ValueInvestor is a patient institutional buyer — modeled on Graham-style v
 
 #### 4.4.5  Decision Process Walkthrough
 
-Given: price = 83.0, fundamental = 100.0, deviation = −0.17, order_size = 800, cash = 450000
+Given: price = 207.5, fundamental = 250.0, deviation = −0.17, base_size = 40, cash = 450000
 
 Step 1: Observe deviation = −0.17. Is −0.17 < −0.15 (value_discount)? YES → buy.
-Step 2: Compute cost: 800 × 83 = 66400. Is 66400 ≤ 450000 cash? YES → full order.
-Step 3: Buy quantity: Q = 800 shares.
-Step 4: Send order: action=buy, quantity=800, bid_price=83.
-Step 5: Net market impact: +800 shares in D(t); upward price pressure of λ × 800 = 0.002 × 800 = 1.6 price units.
+Step 2: Compute cost: 40 × 207.5 = 8300. Is 8300 ≤ 450000 cash? YES → full order.
+Step 3: Buy quantity: Q = 40 shares.
+Step 4: Send order: action=buy, quantity=40, bid_price=207.5.
+Step 5: Net market impact: +40 shares in D(t); upward price pressure of λ × 40 = 0.05 × 40 = 2.0 price units.
 
-Note: In the same round, PortfolioInsurer might sell 125 + ProgramTrader 260 = 385 combined. ValueInvestor's +800 exceeds their combined −385, creating net positive demand and partial price stabilization. This is the price floor mechanism operating.
+Note: In the same round, PortfolioInsurer might sell 125 + ProgramTrader 260 = 385 combined. ValueInvestor's +40 partially offsets the combined automated selling, creating net positive demand and partial price stabilization. This is the price floor mechanism operating.
 
 #### 4.4.6  Worked Numerical Example
 
-Market state: price = 78.0, fundamental = 100.0, deviation = −0.22, order_size = 800, cash = 384000, position = 2400
+Market state: price = 195.0, fundamental = 250.0, deviation = −0.22, base_size = 40, cash = 384000, position = 2400
 
 Trigger check: −0.22 < −0.15 → buy condition active.
-Cost: 800 × 78 = 62400. Is 62400 ≤ 384000? YES.
-Buy quantity: Q = 800.
-Updated cash: 384000 − 62400 = 321600. Updated position: 2400 + 800 = 3200.
-Order sent: action=buy, quantity=800, bid_price=78.
-Rationale: A 22% discount to fundamental (below the 15% margin of safety) triggers the Graham-style buy. The fixed order_size reflects predetermined position sizing discipline — buying the same quantity regardless of how extreme the discount is, avoiding the behavioral trap of "doubling down" during panic.
+Cost: 40 × 195 = 7800. Is 7800 ≤ 384000? YES.
+Buy quantity: Q = 40.
+Updated cash: 384000 − 7800 = 376200. Updated position: 2400 + 40 = 2440.
+Order sent: action=buy, quantity=40, bid_price=195.0.
+Rationale: A 22% discount to fundamental (below the 15% margin of safety) triggers the Graham-style buy. The fixed base_size reflects predetermined position sizing discipline — buying the same quantity regardless of how extreme the discount is, avoiding the behavioral trap of "doubling down" during panic.
 
 #### 4.4.7  Academic References
 
 | # | Citation                                                                                                                     | Notes                                                                                       |
 |---|------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
 | 1 | Graham, B., & Dodd, D. (1934). *Security Analysis*. McGraw-Hill.                                                             | Original formulation of margin of safety concept; basis for value_discount = 0.15           |
-| 2 | Graham, B. (1949). *The Intelligent Investor*. Harper & Brothers.                                                            | Popularization of margin of safety for equity portfolios; order_size fixed sizing principle |
+| 2 | Graham, B. (1949). *The Intelligent Investor*. Harper & Brothers.                                                            | Popularization of margin of safety for equity portfolios; base_size fixed sizing principle |
 | 3 | Shleifer, A., & Vishny, R. W. (1997). "The limits of arbitrage." *Journal of Finance*, 52(1), 35–55. DOI: 10.2307/2329555    | Why ValueInvestor provides partial but incomplete floor; capital constraint analysis        |
 | 4 | Greenwald, B., Kahn, J., Sonkin, P. D., & van Biema, M. (2001). *Value Investing: From Graham to Buffett and Beyond*. Wiley. | Empirical documentation of value_discount calibration; historical return evidence           |
 
 
 ---
 
-### Investor: NoiseTrader
+### §4.5 NoiseTrader
 
 #### 4.5.1  Summary
 
@@ -602,12 +602,12 @@ Alternative (hold round): r = 0.72 ≥ 0.05 → no trade; D_noise contribution =
 
 #### 4.5.6  Worked Numerical Example
 
-Market state: price = 95.0, fundamental = 100.0, deviation = −0.05, random_r = 0.024
+Market state: price = 237.5, fundamental = 250.0, deviation = −0.05, random_r = 0.024
 
 Trade trigger: r = 0.024 < 0.05 → trade.
 Direction: random = buy.
 Quantity: random = 180 shares.
-Order sent: action=buy, quantity=180, bid_price=95.
+Order sent: action=buy, quantity=180, bid_price=237.5.
 Rationale: This is noise — the NoiseTrader has no view on the −5% deviation. The trade is purely random. It happens to add to D(t) as a buy (+180), partially counteracting selling from PortfolioInsurer, but this is coincidental. Over many rounds, NoiseTrader's net contribution to D(t) averages to zero.
 
 #### 4.5.7  Academic References
@@ -619,7 +619,7 @@ Rationale: This is noise — the NoiseTrader has no view on the −5% deviation.
 | 3 | Barber, B. M., & Odean, T. (2000). "Trading is hazardous to your wealth." *Journal of Finance*, 55(2), 773–806. DOI: 10.1111/j.1540-6261.2000.tb04002.x | Retail investor trading behavior; overtrading and random direction evidence    |
 
 
-## 5. Agent Diversity Verification
+## §5 Agent Diversity Verification
 
 Diversity Check:
 - Different time horizons: PortfolioInsurer/IndexArbitrageur/ProgramTrader (high-frequency, mechanical) vs. ValueInvestor (long-term, patient) vs. NoiseTrader (random)
@@ -630,26 +630,26 @@ Diversity Check:
 - Asymmetric sizing: ProgramTrader has convex amplification (grows with |deviation|); PortfolioInsurer has proportional sizing; ValueInvestor has fixed sizing; IndexArbitrageur has fixed sizing — ensures no two agents have identical response functions
 
 
-## 6. Parameter Table
+## §6 Parameter Table
 
 | Parameter           | Value | Source Citation                                         | Description                                          | Sensitivity                                                    |
 |---------------------|-------|---------------------------------------------------------|------------------------------------------------------|----------------------------------------------------------------|
-| initial_price       | 100.0 | Normalization                                           | Starting index price                                 | Low — only sets scale                                          |
-| fundamental_value   | 100.0 | Normalization                                           | Pre-crash intrinsic value; constant throughout       | Medium — determines deviation magnitude                        |
-| price_impact (λ)    | 0.002 | Brady Commission (1988) intraday estimates              | Price response per unit net demand                   | High — determines crash speed; increase → faster crash         |
-| mean_reversion (γ)  | 0.02  | Poterba & Summers (1988)                                | Fundamental gravity strength                         | Medium — determines recovery speed; increase → faster recovery |
-| noise_std (σ)       | 1.0   | Roll (1984)                                             | Background order flow noise                          | Low — adds realism; increase → more variance across runs       |
+| initial_price       | 250.0 | Normalization                                           | Starting index price                                 | Low — only sets scale                                          |
+| fundamental_value   | 250.0 | Normalization                                           | Pre-crash intrinsic value; constant throughout       | Medium — determines deviation magnitude                        |
+| price_impact (λ)    | 0.05  | Brady Commission (1988) intraday estimates              | Price response per unit net demand                   | High — determines crash speed; increase → faster crash         |
+| mean_reversion (γ)  | 0.01  | Poterba & Summers (1988)                                | Fundamental gravity strength                         | Medium — determines recovery speed; increase → faster recovery |
+| noise_std (σ)       | 0.02   | Roll (1984)                                             | Background order flow noise                          | Low — adds realism; increase → more variance across runs       |
 | rebalance_threshold | 0.02  | Leland (1980); Brady Commission (1988)                  | Portfolio insurance trigger level (PortfolioInsurer) | High — decrease → earlier cascade initiation                   |
 | hedge_ratio         | 0.5   | Brady Commission (1988)                                 | Portfolio insurance sell fraction per deviation unit | High — increase → larger cascade per decline step              |
-| arb_threshold       | 0.005 | Stoll & Whaley (1990)                                   | Index arbitrage entry level (IndexArbitrageur)       | Medium — decrease → more frequent arbitrage activity           |
+| arb_threshold       | 0.01  | Stoll & Whaley (1990)                                   | Index arbitrage entry level (IndexArbitrageur)       | Medium — decrease → more frequent arbitrage activity           |
 | trigger_threshold   | 0.01  | Brady Commission (1988)                                 | Program trading activation threshold                 | High — decrease → earlier and larger program sells             |
-| feedback_strength   | 0.3   | Brady Commission (1988); Brunnermeier & Pedersen (2009) | Program trading amplification factor                 | High — increase → more severe cascade depth                    |
-| base_sell           | 200   | Brady Commission (1988) order flow data                 | Program trader base lot size                         | Medium — proportional to cascade magnitude                     |
+| feedback_strength   | 1.2   | Brady Commission (1988); Brunnermeier & Pedersen (2009) | Program trading amplification factor                 | High — increase → more severe cascade depth                    |
+| program_base_size   | 60    | Brady Commission (1988) order flow data                 | Program trader base lot size                         | Medium — proportional to cascade magnitude                     |
 | value_discount      | 0.15  | Graham (1949); Graham & Dodd (1934)                     | ValueInvestor margin of safety trigger level         | Medium — decrease → earlier floor activation                   |
-| order_size          | 800   | Normalization (institutional scale)                     | ValueInvestor fixed trade size                       | Medium — increase → stronger price floor                       |
+| value_base_size     | 40    | Normalization (institutional scale)                     | ValueInvestor fixed trade size                       | Medium — increase → stronger price floor                       |
 
 
-## 7. Communication and Round Structure
+## §7 Communication and Round Structure
 
 ```
 Round N:
@@ -667,9 +667,9 @@ Round N:
 ```
 
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
-### Event 1: Black Monday — October 19, 1987
+### §8.1 Event 1: Black Monday — October 19, 1987
 
 **Date**: October 19, 1987
 **Market**: US equities (Dow Jones Industrial Average, S&P 500, NYSE) and index futures (CME S&P 500 futures)
@@ -704,7 +704,7 @@ Round N:
 3. Value investors provided partial but insufficient stabilization: their capital was overwhelmed by institutional selling volume during the peak. Recovery required external intervention (Fed liquidity guarantee) — not modeled in the simulation.
 4. Circuit breakers were absent in 1987 and were specifically identified as a missing safeguard by the Brady Commission; their absence is preserved in this simulation design by not implementing any price-limit mechanism.
 
-### Event 2: Flash Crash — May 6, 2010
+### §8.2 Event 2: Flash Crash — May 6, 2010
 
 **Date**: May 6, 2010
 **Market**: US equities and futures; Dow Jones fell ~1000 points (9%) in 20 minutes before recovering almost entirely within the same session
@@ -721,12 +721,12 @@ Round N:
 
 **Lesson for Simulation**: The 2010 Flash Crash demonstrates that the 1987 feedback mechanism remained relevant in the HFT era, with the time scale compressed from hours to minutes. The simulation's discrete round structure captures the same cascade logic at a different resolution.
 
-### Event 3: Portfolio Insurance and the Asian Financial Crisis (1997–1998) Context
+### §8.3 Event 3: Portfolio Insurance and the Asian Financial Crisis (1997–1998) Context
 
 Though the Asian Financial Crisis is modeled separately in another simulation (AsianFinancialCrisis), the dynamic portfolio insurance mechanism contributed to the Thai baht attack and subsequent regional contagion. Currency hedgers using dynamic strategies mechanically increased USD buying (THB selling) as the baht fell, creating the same positive-feedback spiral as 1987 equity portfolio insurance. This cross-market connection demonstrates that the BlackMonday1987 feedback mechanism is not historically isolated — it is a general property of any market where a sufficient fraction of participants follow mechanical risk-reduction rules.
 
 
-## 9. Variant Comparison Preview
+## §9 Variant Comparison Preview
 
 | Aspect               | Rule                                          | LLM                                                 | RuleLLM                                    | Rag                                                            |
 |----------------------|-----------------------------------------------|-----------------------------------------------------|--------------------------------------------|----------------------------------------------------------------|

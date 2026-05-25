@@ -47,7 +47,7 @@ rulellm_momentum_trader:
         sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_MOMENTUM_TRADER_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -70,10 +70,10 @@ rulellm_contrarian:
       initial_position: 50.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_CONTRARIAN_SYS"
+        sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_CONTRARIAN_TRADER_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -96,10 +96,10 @@ rulellm_technical:
       initial_position: 50.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_TECHNICAL_SYS"
+        sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_TECHNICAL_TRADER_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500
@@ -125,7 +125,7 @@ rulellm_trend_follower:
         sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_TREND_FOLLOWER_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_new_tokens: 500
@@ -148,10 +148,10 @@ rulellm_fundamental:
       initial_position: 50.0
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_FUNDAMENTAL_SYS"
+        sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_FUNDAMENTAL_ANCHOR_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_new_tokens: 500

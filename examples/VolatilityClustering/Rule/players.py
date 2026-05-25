@@ -288,6 +288,8 @@ class Fundamentalist(BaseInvestor):
     """
     Fundamentalist investor with slow mean reversion behavior.
 
+    Theory: simulation-bases.md §4.1.
+
     Parameters from config extras:
         - trade_frequency, value_sensitivity, base_position_size, value_noise_std
     """
@@ -353,6 +355,8 @@ class Fundamentalist(BaseInvestor):
 class TrendFollower(BaseInvestor):
     """
     Trend-following investor with high volatility sensitivity.
+
+    Theory: simulation-bases.md §4.2.
 
     Parameters from config extras:
         - lookback_window, base_position_size, volatility_sensitivity
@@ -428,6 +432,8 @@ class NoiseTrader(BaseInvestor):
     """
     Noise trader providing random liquidity.
 
+    Theory: simulation-bases.md §4.3.
+
     Parameters from config extras:
         - position_volatility, mean_reversion_speed
     """
@@ -483,6 +489,8 @@ class NoiseTrader(BaseInvestor):
 class SlowAdapter(BaseInvestor):
     """
     Conservative investor with slow information processing.
+
+    Theory: simulation-bases.md §4.4.
 
     Parameters from config extras:
         - lookback_window, update_weight, base_position_size
@@ -553,6 +561,8 @@ class SlowAdapter(BaseInvestor):
 class VolatilityTrader(BaseInvestor):
     """
     Volatility regime trader - sells in high vol, buys in low vol.
+
+    Theory: simulation-bases.md §4.5.
 
     Parameters from config extras:
         - vol_lookback, high_vol_threshold, low_vol_threshold, base_position_size

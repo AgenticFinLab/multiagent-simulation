@@ -536,7 +536,7 @@ def _create_visualizations(
     ax2.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    p01 = os.path.join(output_dir, "01_price_dynamics.png")
+    p01 = os.path.join(output_dir, "01_availability_bias_dynamics.png")
     plt.savefig(p01, dpi=150, bbox_inches="tight")
     plt.close()
     paths.append(p01)
@@ -620,7 +620,7 @@ def _create_visualizations(
         ax2.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    p02 = os.path.join(output_dir, "02_bias_dynamics.png")
+    p02 = os.path.join(output_dir, "02_availability_bias_analysis.png")
     plt.savefig(p02, dpi=150, bbox_inches="tight")
     plt.close()
     paths.append(p02)
@@ -749,7 +749,7 @@ def analyze_availability_bias(
         output_dir=output_dir,
     )
 
-    summary = result.to_dict()
+    summary = {"validation": result.to_dict()}
     summary["metrics"] = {
         "peak_deviation_pct": round(peak_deviation_pct, 3),
         "bias_persistence": round(bias_persistence, 4),

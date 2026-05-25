@@ -80,6 +80,8 @@ def analyze_rag_knowledge_effect(
         }
 
     agents_with_data = [v for v in rag_stats.values() if "retrieval_failure_rate" in v]
+    if not agents_with_data:
+        raise ValueError("No recorded RAG contexts found for ArchegosCollapse Rag analysis")
     if agents_with_data:
         failure_rates = [v["retrieval_failure_rate"] for v in agents_with_data]
         rag_stats["aggregate"] = {
@@ -126,13 +128,14 @@ def main() -> None:
     rag_stats_path = os.path.join(output_dir, "rag_stats.json")
     with open(rag_stats_path, "w", encoding="utf-8") as fh:
         json.dump(rag_stats, fh, indent=2)
+    with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as fh:
+        json.dump(summary, fh, indent=2)
 
     agg = rag_stats["aggregate"]
-    if agg:
-        print(
-            f"Mean RAG retrieval failure rate: "
-            f"{agg['mean_retrieval_failure_rate']:.1%}"
-        )
+    print(
+        f"Mean RAG retrieval failure rate: "
+        f"{agg['mean_retrieval_failure_rate']:.1%}"
+    )
 
     return summary
 

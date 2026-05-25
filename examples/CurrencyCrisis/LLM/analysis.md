@@ -1,42 +1,80 @@
 # CurrencyCrisis LLM Variant — analysis.md
 
-## §1 Metrics and Functions
+## §1 Analysis Overview
 
-| Metric                                      | Function                                                                      | analysis-bases.md Ref |
-|---------------------------------------------|-------------------------------------------------------------------------------|-----------------------|
-| Attack Intensity Index (AII)                | `attack_intensity_index(price_history, fundamental)`                          | §2.1                  |
-| Peg Survival Duration (PSD)                 | `peg_survival_duration(price_history, fundamental, breach_threshold=-0.05)`   | §2.2                  |
-| Defense Exhaustion Rate (DER)               | `defense_exhaustion_rate(defender_cash_history, initial_cash, crisis_rounds)` | §2.3                  |
-| Self-Fulfilling Amplification Factor (SFAF) | `self_fulfilling_amplification_factor(agent_volume_by_type)`                  | §2.4                  |
-| Fundamental Anchor Strength (FAS)           | `fundamental_anchor_strength(hedger_orders, attack_phase_rounds)`             | §2.5                  |
-| Recovery Speed (RS)                         | `recovery_speed(price_history, fundamental, recovery_threshold=0.03)`         | §2.6                  |
-| Wealth Transfer Index (WTI)                 | `wealth_transfer_index(agent_final_states, final_price, initial_wealth)`      | §2.7                  |
+The LLM analysis evaluates whether persona-only language agents can reproduce
+currency-crisis dynamics without explicit trading formulas. The same core
+metrics from `analysis-bases.md §2` are used so results remain comparable with
+the Rule baseline.
 
-## §2 LLM Variant Notes
+## §2 Metric Implementation
 
-**Analysis script**: `CurrencyCrisis/LLM/analysis.py`
+`LLM/analysis.py` imports the core Rule analysis functions:
 
-Key LLM-variant-specific analysis notes:
+| Function | Purpose | Root reference |
+|---|---|---|
+| `_load_data(results)` | Load market and canonical order records | `analysis-bases.md §2` |
+| `_compute_attack_intensity_index(...)` | Compute attack depth from maximum negative deviation | `analysis-bases.md §2.1` |
+| `_compute_peg_survival_duration(...)` | Compute rounds until peg breach | `analysis-bases.md §2.2` |
+| `_compute_defense_exhaustion_rate(...)` | Compute central-bank intervention spending during crisis rounds | `analysis-bases.md §2.3` |
+| `_compute_self_fulfilling_amplification_factor(...)` | Compare self-fulfilling sell flow with attacker sell flow | `analysis-bases.md §2.4` |
+| `_compute_fundamental_anchor_strength(...)` | Compute stabilizing hedger buy activity during attack rounds | `analysis-bases.md §2.5` |
+| `_compute_recovery_speed(...)` | Compute rounds from trough back toward the peg | `analysis-bases.md §2.6` |
+| `_create_visualizations(...)` | Generate the fixed CurrencyCrisis diagnostic plots | `analysis-bases.md §7` |
 
-- **AII variance**: LLM attack depth is non-deterministic; run AII across multiple seeds and report mean ± std.
-- **SFAF narrative analysis**: Compare SFAF to Rule baseline (≈ 0.6–0.9); SFAF > 1.5 in LLM indicates emergent expectation coordination.
-- **DER adaptive defence**: LLMCentralBankDefender may not follow two-tier rule; DER may be smoother or front-loaded depending on LLM reasoning.
-- **FAS consistency**: Check FAS across runs; if LLMFundamentalHedger breaks persona and sells during attacks, FAS < Rule baseline signals persona fragility.
-- **WTI attacker advantage**: LLM SpeculativeAttacker may reason more aggressively and produce positive WTI (attackers profit) more often.
+LLM-specific review adds action-distribution and output-quality checks over raw
+LLM decision records.
 
-## §3 Output Files
+## §3 Dimension-by-Dimension Interpretation
 
-LLM variant produces the following output files in `outputs/CurrencyCrisis/LLM/`:
+| Dimension | LLM-specific interpretation |
+|---|---|
+| Attack depth | Higher variance than Rule indicates persona-driven crisis intensity. |
+| Peg survival | Longer survival can indicate central-bank caution or delayed attack coordination. |
+| Defense exhaustion | Smooth spending indicates adaptive intervention; abrupt spending indicates urgent peg defense. |
+| Self-fulfilling amplification | High SFAF indicates LLM traders coordinated on crisis expectations. |
+| Fundamental anchor | Low FAS indicates the fundamental hedger abandoned stabilizing behavior. |
+| Recovery | Recovery speed reflects whether LLM agents recognize stabilization opportunities. |
+| Wealth transfer | Positive WTI indicates LLM speculators profited from devaluation. |
 
-| File                   | Content                                            |
-|------------------------|----------------------------------------------------|
-| `price_history.csv`    | Round-by-round price and deviation                 |
-| `agent_orders.csv`     | Per-agent order action, quantity, round            |
-| `agent_wealth.csv`     | Per-agent cash, position, wealth by round          |
-| `metrics_summary.json` | AII, PSD, DER, SFAF, FAS, RS, WTI                  |
-| `llm_responses.jsonl`  | Raw LLM outputs with thinking and parsed decisions |
+## §4 Variant-Specific Phenomena
 
-## §4 References
+The LLM variant should not embed the deterministic formulas from the Rule
+variant. Its quality depends on whether persona-only prompts produce coherent
+trading actions and whether those actions generate the same crisis channels:
+speculative attack, self-fulfilling selling, peg defense, and fundamental
+anchoring.
 
-All metric definitions with DOI citations: `analysis-bases.md §2`.  
-Investor theory references: `simulation-bases.md §4.1–§4.5`.
+## §5 Output Files
+
+Running `LLM/analysis.py` writes the standard analysis artifacts under the
+configured experiment output directory:
+
+| File | Contents |
+|---|---|
+| `00_investor_bids.png` | Market price, peg line, and investor bid curves |
+| `01_currencycrisis_dynamics.png` | Exchange rate vs. peg and deviation thresholds |
+| `02_currencycrisis_analysis.png` | Rolling volatility and per-round returns |
+| `03_summary.png` | Agent VWAP and total volume summary |
+| `summary.json` | Metrics, validation criteria, and agent VWAP data |
+
+## §6 Cross-Variant Comparison
+
+Compare LLM metrics against Rule:
+
+| Metric | Expected reading |
+|---|---|
+| AII | Higher dispersion than Rule because crisis reasoning is stochastic |
+| PSD | Later or earlier breach depending on attacker/defender reasoning |
+| SFAF | Can exceed Rule if LLMs infer crowd coordination |
+| FAS | Should remain positive if the fundamental persona is preserved |
+| WTI | Captures whether language reasoning shifts gains toward attackers or defenders |
+
+## §7 Quality Checks
+
+- Confirm the run completed 200 configured rounds.
+- Audit LLM parse failures, retry counts, and fallback behavior before accepting
+  the sample.
+- Treat any silent fallback hold as a quality failure unless explicitly
+  documented and justified.
+- Confirm all accepted orders preserve valid `action`, numeric `bid_price`, numeric `quantity`, and non-empty `reasoning`.

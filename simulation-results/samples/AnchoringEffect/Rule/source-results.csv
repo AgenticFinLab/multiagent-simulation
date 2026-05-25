@@ -1,0 +1,2 @@
+index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,config_path
+1,9,AnchoringEffect,Rule,SUCCESS,0,40.002,2026-05-22T03:43:00,2026-05-22T03:43:40,config/simulation.yml,examples/AnchoringEffect/Rule/run_anchoringeffect.py,logs/AnchoringEffect__Rule.log,,200,200,,config/simulation.yml

@@ -21,11 +21,39 @@ import os
 import random
 from typing import Any, Dict, List, Optional
 
+from masim.format.order import validate_order
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger(__name__)
+
+
+def _require_positive_price(price: float, identity: str) -> None:
+    """Fail fast on impossible market prices before sizing trades."""
+    if price <= 0:
+        raise ValueError(f"[{identity}] market price must be positive, got {price}")
+
+
+def _build_order(
+    identity: str,
+    strategy: str,
+    action: str,
+    quantity: float,
+    bid_price: float,
+    reasoning: str,
+) -> Dict[str, Any]:
+    """Build the canonical investor order emitted by every rule agent."""
+    order = {
+        "action": action,
+        "bid_price": float(bid_price),
+        "quantity": float(quantity),
+        "investor": identity,
+        "strategy": strategy,
+        "reasoning": reasoning,
+    }
+    validate_order(order)
+    return order
 
 
 class Market(GeneralPlayer):
@@ -61,6 +89,8 @@ class Market(GeneralPlayer):
 
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
+        if fundamental <= 0:
+            raise ValueError("fundamental_value must be positive")
         buy_vol = sum(o["quantity"] for o in orders if o["action"] == "buy")
         sell_vol = sum(o["quantity"] for o in orders if o["action"] == "sell")
         net_demand = buy_vol - sell_vol
@@ -73,7 +103,7 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["fundamental_history"].append(fundamental)
 
-        deviation = (new_price - fundamental) / fundamental if fundamental > 0 else 0.0
+        deviation = (new_price - fundamental) / fundamental
         self.state.custom_state["deviation"] = deviation
         logger.debug(
             "Round %d: price=%.2f deviation=%.4f",
@@ -137,6 +167,7 @@ class PortfolioInsurer(GeneralPlayer):
     async def decide(self) -> Dict:
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
+        _require_positive_price(price, self.identity)
         deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
@@ -152,22 +183,22 @@ class PortfolioInsurer(GeneralPlayer):
                 if sell_qty > 0:
                     action, quantity = "sell", sell_qty
             else:
-                buy_qty = (
-                    int(deviation * hedge_ratio * cash / price) if price > 0 else 0
-                )
+                buy_qty = int(deviation * hedge_ratio * cash / price)
                 buy_qty = min(buy_qty, 500)
                 if buy_qty > 0:
                     action, quantity = "buy", buy_qty
 
+        order = _build_order(
+            self.identity,
+            "PortfolioInsurer",
+            action,
+            quantity,
+            price,
+            "Dynamic portfolio insurance hedge-ratio rule",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
-            "outbound_messages": [
-                {
-                    "payload": {"action": action, "quantity": quantity},
-                    "content_type": "order",
-                }
-            ],
+            **order,
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
     async def act(self, decision_payload: Dict) -> Action:
@@ -215,6 +246,7 @@ class IndexArbitrageur(GeneralPlayer):
     async def decide(self) -> Dict:
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
+        _require_positive_price(price, self.identity)
         deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
@@ -229,19 +261,21 @@ class IndexArbitrageur(GeneralPlayer):
                 if sell_qty > 0:
                     action, quantity = "sell", sell_qty
             else:
-                buy_qty = min(position_size, int(cash / price) if price > 0 else 0)
+                buy_qty = min(position_size, int(cash / price))
                 if buy_qty > 0:
                     action, quantity = "buy", buy_qty
 
+        order = _build_order(
+            self.identity,
+            "IndexArbitrageur",
+            action,
+            quantity,
+            price,
+            "Index arbitrage threshold rule",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
-            "outbound_messages": [
-                {
-                    "payload": {"action": action, "quantity": quantity},
-                    "content_type": "order",
-                }
-            ],
+            **order,
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
     async def act(self, decision_payload: Dict) -> Action:
@@ -289,6 +323,7 @@ class ProgramTrader(GeneralPlayer):
     async def decide(self) -> Dict:
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
+        _require_positive_price(price, self.identity)
         deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
@@ -304,19 +339,21 @@ class ProgramTrader(GeneralPlayer):
             if sell_qty > 0:
                 action, quantity = "sell", sell_qty
         elif deviation > trigger_threshold:
-            buy_qty = min(sell_size, int(cash / price) if price > 0 else 0)
+            buy_qty = min(sell_size, int(cash / price))
             if buy_qty > 0:
                 action, quantity = "buy", buy_qty
 
+        order = _build_order(
+            self.identity,
+            "ProgramTrader",
+            action,
+            quantity,
+            price,
+            "Program-trading trigger and feedback rule",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
-            "outbound_messages": [
-                {
-                    "payload": {"action": action, "quantity": quantity},
-                    "content_type": "order",
-                }
-            ],
+            **order,
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
     async def act(self, decision_payload: Dict) -> Action:
@@ -364,6 +401,7 @@ class ValueInvestor(GeneralPlayer):
     async def decide(self) -> Dict:
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
+        _require_positive_price(price, self.identity)
         deviation = market_data["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
@@ -373,7 +411,7 @@ class ValueInvestor(GeneralPlayer):
 
         action, quantity = "hold", 0
         if deviation < -value_discount:
-            buy_qty = min(order_size, int(cash / price) if price > 0 else 0)
+            buy_qty = min(order_size, int(cash / price))
             if buy_qty > 0:
                 action, quantity = "buy", buy_qty
         elif deviation > value_discount:
@@ -381,15 +419,17 @@ class ValueInvestor(GeneralPlayer):
             if sell_qty > 0:
                 action, quantity = "sell", sell_qty
 
+        order = _build_order(
+            self.identity,
+            "ValueInvestor",
+            action,
+            quantity,
+            price,
+            "Value-investing discount threshold rule",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
-            "outbound_messages": [
-                {
-                    "payload": {"action": action, "quantity": quantity},
-                    "content_type": "order",
-                }
-            ],
+            **order,
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
     async def act(self, decision_payload: Dict) -> Action:
@@ -437,6 +477,7 @@ class NoiseTrader(GeneralPlayer):
     async def decide(self) -> Dict:
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
+        _require_positive_price(price, self.identity)
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
@@ -449,21 +490,23 @@ class NoiseTrader(GeneralPlayer):
             qty = random.randint(min_order, max_order)
             side = "buy" if random.random() > 0.5 else "sell"
             if side == "buy":
-                qty = min(qty, int(cash / price) if price > 0 else 0)
+                qty = min(qty, int(cash / price))
             else:
                 qty = min(qty, max(position, 0))
             if qty > 0:
                 action, quantity = side, qty
 
+        order = _build_order(
+            self.identity,
+            "NoiseTrader",
+            action,
+            quantity,
+            price,
+            "Noise-trader random liquidity rule",
+        )
         return {
-            "action": action,
-            "quantity": quantity,
-            "outbound_messages": [
-                {
-                    "payload": {"action": action, "quantity": quantity},
-                    "content_type": "order",
-                }
-            ],
+            **order,
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
     async def act(self, decision_payload: Dict) -> Action:

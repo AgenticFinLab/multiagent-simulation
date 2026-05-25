@@ -1,11 +1,10 @@
 """RepresentativenessBias LLM-Driven Simulation Players."""
 
-import json
 import logging
-import re
 from typing import Any, Dict, Optional
 
-from lmbase import InferInput, LangChainAPIInference
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
@@ -19,9 +18,21 @@ from .prompts import (
     LLM_PATTERN_MATCHER_PROMPT,
     LLM_USER_TEMPLATE,
 )
-from examples.RepresentativenessBias.Rule.players import Market
+from examples.RepresentativenessBias.Rule.players import Market, _info_payload
 
 logger = logging.getLogger("RepresentativenessBias.LLM")
+
+
+def _validate_decision(decision: Dict[str, Any]) -> None:
+    """Validate canonical trading decision JSON."""
+    if decision["action"] not in ("buy", "sell", "hold"):
+        raise ValueError(f"Invalid action: {decision['action']}")
+    if float(decision["bid_price"]) <= 0:
+        raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
+    if int(decision["quantity"]) < 0:
+        raise ValueError(f"Invalid quantity: {decision['quantity']}")
+    if not str(decision["reasoning"]).strip():
+        raise ValueError("Missing reasoning")
 
 
 class LLMInvestor(GeneralPlayer):
@@ -56,8 +67,8 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
-            payload = msg["payload"]
-            if payload["type"] == "market_update":
+            payload = _info_payload(msg)
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -81,11 +92,26 @@ class LLMInvestor(GeneralPlayer):
         )
         llm = self._get_llm()
         infer_input = InferInput(system_msg=self._system_prompt, user_msg=user_prompt)
-        try:
-            response = llm.run([infer_input]).outputs[0].response
-            decision = parse_llm_response_with_thinking(response)
-        except Exception:
-            decision = {"action": "hold", "quantity": 0}
+        decision = None
+        last_error = None
+        for attempt in range(3):
+            try:
+                response = llm.run([infer_input]).outputs[0].response
+                decision = parse_llm_response_with_thinking(response)
+                _validate_decision(decision)
+                break
+            except Exception as exc:
+                last_error = exc
+                if attempt < 2:
+                    logger.debug(
+                        "[%s] LLM parse failed on attempt %d; retrying",
+                        self.identity,
+                        attempt + 1,
+                    )
+        if decision is None:
+            raise RuntimeError(
+                f"[{self.identity}] LLM parse failed after 3 attempts: {last_error}"
+            )
 
         action = decision["action"]
         quantity = int(decision["quantity"])
@@ -94,8 +120,15 @@ class LLMInvestor(GeneralPlayer):
             quantity = min(quantity, max_qty)
         elif action == "sell":
             quantity = min(quantity, max(position, 0))
+        else:
+            quantity = 0
         quantity = max(0, min(quantity, 1000))
-        return {"action": action, "quantity": quantity}
+        return {
+            "action": action,
+            "bid_price": float(decision["bid_price"]),
+            "quantity": quantity,
+            "reasoning": str(decision["reasoning"]),
+        }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
         action = decision_payload["action"]
@@ -111,8 +144,10 @@ class LLMInvestor(GeneralPlayer):
             "type": "order",
             "from": self.identity,
             "action": action,
+            "bid_price": float(decision_payload["bid_price"]),
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
+            "reasoning": decision_payload["reasoning"],
         }
         return Action(
             action_type="order",
@@ -125,31 +160,31 @@ class LLMInvestor(GeneralPlayer):
 
 
 class LLMPatternMatcher(LLMInvestor):
-    """LLM-driven PatternMatcher — matches price patterns to historical prototypes."""
+    """LLM-driven pattern matcher — prototype-based trading. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = LLM_PATTERN_MATCHER_PROMPT
 
 
 class LLMCategoryOvergeneralizer(LLMInvestor):
-    """LLM-driven CategoryOvergeneralizer — overgeneralizes from small samples."""
+    """LLM-driven category generalizer — small-sample extrapolation. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = LLM_CATEGORY_OVERGENERALIZER_PROMPT
 
 
 class LLMBayesianUpdater(LLMInvestor):
-    """LLM-driven BayesianUpdater — correctly updates beliefs using Bayes rule."""
+    """LLM-driven Bayesian updater — base-rate disciplined benchmark. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = LLM_BAYESIAN_UPDATER_PROMPT
 
 
 class LLMContrarianStatistical(LLMInvestor):
-    """LLM-driven ContrarianStatistical — exploits base rate mispricing."""
+    """LLM-driven contrarian arbitrageur — exploits biased mispricing. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = LLM_CONTRARIAN_STATISTICAL_PROMPT
 
 
 class LLMNoiseTrader(LLMInvestor):
-    """LLM-driven NoiseTrader — random uninformed trader providing liquidity."""
+    """LLM-driven noise trader — uninformed liquidity baseline. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = LLM_NOISE_TRADER_PROMPT
 

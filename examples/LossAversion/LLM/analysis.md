@@ -56,3 +56,11 @@ LLM variant should show all metrics between Rule and Rag in magnitude (Rule most
 - Kahneman, D., & Tversky, A. (1979). doi:[10.2307/1914185](https://doi.org/10.2307/1914185)
 - Odean, T. (1998). doi:[10.1111/0022-1082.00072](https://doi.org/10.1111/0022-1082.00072)
 - Barberis, N., & Xiong, W. (2009). doi:[10.1111/j.1540-6261.2009.01448.x](https://doi.org/10.1111/j.1540-6261.2009.01448.x)
+
+## §6 Expected Results and Validation
+
+Valid LLM outputs should complete 200 rounds with clean parse quality and no fallback-hold distortion. Metrics should generally show weaker bias than Rule while preserving correct directionality: LAI > 1.0 and DEI > 1.0.
+
+## §7 Visualization Catalogue
+
+`LLM/analysis.py` reuses the Rule analysis pipeline and writes `summary.json`, `00_investor_bids.png`, `01_lossaversion_dynamics.png`, `02_lossaversion_analysis.png`, and `03_summary.png`. LLM reports may add action-distribution, parse-quality, and narrative-correction summaries.

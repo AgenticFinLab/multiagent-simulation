@@ -32,6 +32,8 @@ from examples.CarryTradeUnwind.Rule.players import Market  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
 
 def load_prompt(prompt_path: str) -> str:
     """Load a prompt constant from 'module:VAR' path."""
@@ -305,7 +307,8 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
+        self.state.custom_state["last_rag_context"] = rag_context
 
         template = load_prompt(
             "examples.CarryTradeUnwind.Rag.prompts:RAG_USER_TEMPLATE"
@@ -339,9 +342,13 @@ class RagLLMInvestor(GeneralPlayer):
                 response = result.outputs[0].response
                 parsed = parse_llm_response_with_thinking(response)
                 action_str = parsed["action"]
-                quantity = int(parsed["quantity"])
                 if action_str not in ("buy", "sell", "hold"):
-                    action_str = "hold"
+                    raise ValueError(f"Invalid LLM action: {action_str}")
+                quantity = int(parsed["quantity"])
+                bid_price = float(parsed["bid_price"])
+                if bid_price <= 0:
+                    raise ValueError(f"Invalid bid_price: {bid_price}")
+                _ = str(parsed["reasoning"])
                 quantity = max(0, quantity)
                 if action_str == "buy":
                     quantity = min(quantity, int(cash / price) if price > 0 else 0)
@@ -363,10 +370,16 @@ class RagLLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
-        order = {"action": action_str, "quantity": quantity}
-        return {
+        order = {
             "action": action_str,
+            "bid_price": bid_price,
             "quantity": quantity,
+            "reasoning": str(parsed["reasoning"]),
+            "analysis": str(parsed["analysis"]),
+            "rag_context": self.state.custom_state["last_rag_context"],
+        }
+        return {
+            **order,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 

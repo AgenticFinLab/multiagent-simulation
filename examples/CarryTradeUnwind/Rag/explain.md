@@ -1,6 +1,6 @@
 # CarryTradeUnwind Rag — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                              | Description                                                                                                                                         |
 |-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,32 +12,46 @@
 
 ---
 
-## 1. How Theoretical Design Is Implemented
+## §2 Theory → Implementation Mapping
 
-### Shared Architecture with RuleLLM
-*(All agent formulas and rule embedding identical to RuleLLM variant — see `RuleLLM/explain.md §1`)*
+### §2.1 RagLLMCarryTrader (simulation-bases.md §4.1)
 
-The Rag variant extends RuleLLM by adding:
-1. `_initialize_rag()` — builds per-agent KnowledgeStore from `docs_dir` on first run
-2. `_build_prompt()` — queries store at decision time, injects top-k chunks as `{rag_context}`
-3. `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"` — always populated
+| Theory Component | Implementation |
+|---|---|
+| Carry-premium investor from simulation-bases.md §4.1 | Reuses `RULELLM_CARRY_TRADER_SYS` and injects `{rag_context}` from carry-trade literature before the decision. |
+| Historical cases from simulation-bases.md §8 | `_build_prompt()` queries the KnowledgeStore with price, fundamental, and deviation terms relevant to carry-trade unwinds. |
 
-### Knowledge Base Content Design
-*(Source: simulation-bases.md §8 — Historical Cases)*
+### §2.2 RagLLMLeveragedCarryFund (simulation-bases.md §4.2)
 
-Each agent's knowledge store contains documents relevant to its role:
+| Theory Component | Implementation |
+|---|---|
+| Forced liquidation from simulation-bases.md §4.2 | Reuses the RuleLLM forced-exit prompt and augments it with retrieved stop-loss, margin, and liquidation context. |
+| Historical cases from simulation-bases.md §8 | Knowledge retrieval emphasizes 1998, 2008, 2015, and 2022/2024 leverage-unwind episodes. |
 
-| Agent                   | Knowledge Base Focus                                                    |
-|-------------------------|-------------------------------------------------------------------------|
-| RagCarryTrader          | JPY carry crash papers, UIP deviation studies, carry-to-risk ratios     |
-| RagLeveragedCarryFund   | Plantin & Shin (2018), forced liquidation mechanics, stop-loss dynamics |
-| RagFundingCurrencyBuyer | Safe-haven demand papers, CHF/JPY appreciation during crises            |
-| RagHedgedCarryTrader    | Volatility-adjusted carry literature, Menkhoff et al. (2012)            |
-| RagNoiseTrader          | General market noise and liquidity provision                            |
+### §2.3 RagLLMFundingCurrencyBuyer (simulation-bases.md §4.3)
+
+| Theory Component | Implementation |
+|---|---|
+| Safe-haven counterflow from simulation-bases.md §4.3 | Reuses the RuleLLM safe-haven prompt and augments it with retrieved JPY/CHF risk-off context. |
+| RAG audit trail | `RagLLMInvestor.decide()` records `rag_context` in each order payload for retrieval-quality analysis. |
+
+### §2.4 RagLLMHedgedCarryTrader (simulation-bases.md §4.4)
+
+| Theory Component | Implementation |
+|---|---|
+| Volatility-managed carry from simulation-bases.md §4.4 | Reuses the RuleLLM hedged-carry prompt and augments it with retrieved volatility/carry-risk evidence. |
+| Knowledge quality gate | `Rag/analysis.py` reports retrieval-hit and retrieval-miss rates in `rag_stats.json`. |
+
+### §2.5 RagLLMNoiseTrader (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Background FX order flow from simulation-bases.md §4.5 | Reuses the RuleLLM noise-trader prompt while still receiving the same `{rag_context}` slot for observability. |
+| Schema contract | The decision JSON remains the trading schema: `action`, `bid_price`, `quantity`, and `reasoning`. |
 
 ---
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 *Identical to Rule and RuleLLM variants — see `Rule/explain.md §2`.*
 
@@ -45,7 +59,7 @@ Broadcast: `{price, fundamental, deviation, round}` — no `return_pct`.
 
 ---
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 *(Reference: simulation-bases.md §9 — Rag variant entry)*
 
@@ -55,7 +69,7 @@ Broadcast: `{price, fundamental, deviation, round}` — no `return_pct`.
 1. Formulates a query based on current market state (deviation, round)
 2. Retrieves top-k documents from its KnowledgeStore
 3. Injects retrieved text as `{rag_context}` block in user prompt
-4. If no relevant documents: injects fallback string
+4. If no relevant documents are retrieved: injects the explicit retrieval-miss marker
 
 **User prompt structure (Rag extension)**:
 ```
@@ -69,11 +83,11 @@ Based on the above market conditions and relevant knowledge, make your decision.
 
 **Index persistence**: On first run, vector index is built and saved to `rag_persist_dir`. Subsequent runs load from disk (fast startup).
 
-**RAG fallback handling**: `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"` — always set so prompt template never has empty `{rag_context}`.
+**RAG retrieval-miss handling**: `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"` — always set so prompt template never has empty `{rag_context}`. This marker is recorded in the order payload for audit; it is not an LLM decision fallback.
 
 ---
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
@@ -102,7 +116,7 @@ Based on the above market conditions and relevant knowledge, make your decision.
 
 ---
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 Key Rag-specific parameters (`configs/CarryTradeUnwind/Rag/players.yml`):
 
@@ -117,7 +131,7 @@ Key Rag-specific parameters (`configs/CarryTradeUnwind/Rag/players.yml`):
 
 ---
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 # First run: builds RAG index (may take a few minutes)
@@ -141,7 +155,7 @@ Output location: `EXPERIMENT/CarryTradeUnwind/Rag/records/`
 
 ---
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase        | Rounds | Expected Rag Agent Behavior                                               | Expected Price Dynamics                                  |
 |--------------|--------|---------------------------------------------------------------------------|----------------------------------------------------------|
@@ -154,12 +168,12 @@ Output location: `EXPERIMENT/CarryTradeUnwind/Rag/records/`
 
 ---
 
-## 8. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 
 - Historical carry events used as knowledge base content → `simulation-bases.md §8`
 - RuleLLM base (rules embedded in prompts) → `RuleLLM/explain.md §3`
 - RAG architecture → `examples/CarryTradeUnwind/Rag/players.py`
-- Fallback string handling → `analysis.py → _RAG_FALLBACK`
+- Retrieval-miss marker handling → `players.py → _RAG_FALLBACK` and `analysis.py → _RAG_FALLBACK`
 - Retrieval success target (≥ 70%) → `analysis-bases.md §6`

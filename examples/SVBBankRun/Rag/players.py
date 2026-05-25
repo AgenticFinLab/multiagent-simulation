@@ -30,7 +30,10 @@ from masim.knowledge import (
 from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.SVBBankRun.decision import (
+    fallback_hold_decision,
+    parse_svbbankrun_decision,
+)
 from .prompts import (
     RAGLLM_DEPOSITOR_SYS,
     RAGLLM_SOCIAL_MEDIA_INFLUENCER_SYS,
@@ -309,6 +312,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         return (
             f"Round {round_num} — Market Update\n"
@@ -319,7 +323,8 @@ class RagLLMInvestor(GeneralPlayer):
             f"Value: ${portfolio_value:.2f}\n\n"
             "Apply your decision rules, informed by retrieved knowledge, to determine action.\n"
             "Respond with <analysis>...</analysis> then <decision>...</decision> containing "
-            'JSON: {"action": "buy" or "sell" or "hold", "quantity": integer}'
+            'JSON: {"action": "buy" or "sell" or "hold", '
+            '"quantity": integer, "reasoning": "brief rationale"}'
         )
 
     async def decide(self) -> Dict[str, Any]:
@@ -331,25 +336,31 @@ class RagLLMInvestor(GeneralPlayer):
         user_prompt = self._build_prompt()
         system_prompt = self._system_prompt
 
-        decision: Dict[str, Any] = {"action": "hold", "quantity": 0}
+        decision: Optional[Dict[str, Any]] = None
+        last_error = ""
         max_retries = 3
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             infer_output = llm_client.run([infer_input])
             try:
-                decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
+                decision = parse_svbbankrun_decision(infer_output.outputs[0].response)
                 break
-            except (ValueError, KeyError):
+            except (ValueError, KeyError) as exc:
+                last_error = str(exc)
                 if attempt == max_retries - 1:
                     logger.warning(
-                        "[%s] LLM parse failed after %d attempts; holding.",
+                        "[%s] LLM parse failed after %d attempts; explicit fallback hold: %s",
                         self.identity,
                         max_retries,
+                        last_error,
                     )
-                    decision = {"action": "hold", "quantity": 0}
+                    decision = fallback_hold_decision(last_error)
 
+        if decision is None:
+            raise RuntimeError(f"[{self.identity}] Rag decision failed without fallback")
+
+        llm_fallback = bool(decision.pop("llm_fallback"))
+        fallback_reason = str(decision.pop("fallback_reason"))
         action = decision["action"]
         quantity = int(decision["quantity"])
 
@@ -390,6 +401,10 @@ class RagLLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "agent_type": strategy_name,
             "reasoning": decision["reasoning"][:120],
+            "analysis": decision["analysis"],
+            "llm_fallback": llm_fallback,
+            "fallback_reason": fallback_reason,
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
         return {
             **order,
@@ -405,31 +420,31 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMDepositor(RagLLMInvestor):
-    """RAG-augmented depositor with withdrawal rules + retrieved knowledge."""
+    """RAG-augmented depositor with withdrawal rules and retrieved knowledge. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RAGLLM_DEPOSITOR_SYS
 
 
 class RagLLMSocialMediaInfluencer(RagLLMInvestor):
-    """RAG-augmented social media influencer with amplification rules + retrieved knowledge."""
+    """RAG-augmented social media influencer with amplification rules and retrieved knowledge. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RAGLLM_SOCIAL_MEDIA_INFLUENCER_SYS
 
 
 class RagLLMBankManager(RagLLMInvestor):
-    """RAG-augmented bank manager with ALM rules + retrieved knowledge."""
+    """RAG-augmented bank manager with ALM rules and retrieved knowledge. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RAGLLM_BANK_MANAGER_SYS
 
 
 class RagLLMRegulator(RagLLMInvestor):
-    """RAG-augmented regulator with intervention rules + retrieved knowledge."""
+    """RAG-augmented regulator with intervention rules and retrieved knowledge. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RAGLLM_REGULATOR_SYS
 
 
 class RagLLMBondTrader(RagLLMInvestor):
-    """RAG-augmented bond trader with fixed income rules + retrieved knowledge."""
+    """RAG-augmented bond trader with fixed income rules and retrieved knowledge. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RAGLLM_BOND_TRADER_SYS
 

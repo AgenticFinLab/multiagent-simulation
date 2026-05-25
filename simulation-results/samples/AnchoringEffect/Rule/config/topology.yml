@@ -1,0 +1,49 @@
+# =============================================================================
+# AnchoringEffect Topology - Star Pattern
+# =============================================================================
+# Market as hub, all investors communicate through market.
+#
+# Note: player keys with num_instances > 1 use their base key here.
+# The simulator expander resolves them to foo_1, foo_2, ... before building
+# the TopologyGraph, so all edge rules apply to every instance automatically.
+#
+#         anchored_trader ────────────┐
+#         historical_anchor ──────────┤
+#         rational_updater ───────────┼──▶ market ──▶ all investors
+#         momentum_trader ────────────┤             (market data: price, deviation)
+#         noise_trader ───────────────┘
+#
+# Execution flow per round:
+#   Level 0: market executes (broadcasts price + deviation metrics)
+#   Level 1: all investors execute in parallel (submit P,Q orders)
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  # Market → All investors (price + deviation data broadcast)
+  market:
+    - anchored_trader
+    - historical_anchor
+    - rational_updater
+    - momentum_trader
+    - noise_trader
+
+  # Each investor → Market only (order submission)
+  anchored_trader:
+    - market
+
+  historical_anchor:
+    - market
+
+  rational_updater:
+    - market
+
+  momentum_trader:
+    - market
+
+  noise_trader:
+    - market

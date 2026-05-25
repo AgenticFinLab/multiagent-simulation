@@ -41,6 +41,35 @@ from examples.LossAversion.Rag.prompts import RAG_USER_TEMPLATE
 from examples.LossAversion.Rule.players import Market  # noqa: F401
 
 logger = logging.getLogger("LossAversion.Rag")
+RAG_FALLBACK_CONTEXT = "(No relevant knowledge retrieved this round.)"
+
+
+def _decision_parameters_text(extras: Dict[str, Any], agent_class: str) -> str:
+    """Format required Rule-variant parameters for prompt grounding."""
+    parameter_keys = {
+        "RagLLMLossAverseInvestor": (
+            "loss_aversion_lambda",
+            "sell_gain_threshold",
+        ),
+        "RagLLMBreakEvenTrader": ("risk_increase_factor",),
+        "RagLLMRationalTrader": ("risk_aversion",),
+        "RagLLMMomentumTrader": ("entry_threshold",),
+        "RagLLMMarketMaker": ("inventory_limit",),
+    }
+    keys = parameter_keys[agent_class]
+    return "\n".join(f"- {key}: {extras[key]}" for key in keys)
+
+
+def _validate_decision(decision: Dict[str, Any]) -> None:
+    """Validate the canonical trading decision contract."""
+    if decision["action"] not in ("buy", "sell", "hold"):
+        raise ValueError(f"Invalid action: {decision['action']}")
+    if float(decision["bid_price"]) <= 0:
+        raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
+    if int(decision["quantity"]) < 0:
+        raise ValueError(f"Invalid quantity: {decision['quantity']}")
+    if not str(decision["reasoning"]).strip():
+        raise ValueError("Missing reasoning")
 
 
 class RagLLMInvestor(GeneralPlayer):
@@ -226,7 +255,8 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = RAG_FALLBACK_CONTEXT
+        self.state.custom_state["last_rag_context"] = rag_context
 
         user_msg = RAG_USER_TEMPLATE.format(
             rag_context=rag_context,
@@ -236,7 +266,12 @@ class RagLLMInvestor(GeneralPlayer):
             deviation=deviation * 100,
             cash=cash,
             position=position,
+            entry_price=self.state.custom_state["entry_price"],
             portfolio_value=cash + position * price,
+            decision_parameters=_decision_parameters_text(
+                self.config.extras,
+                self.__class__.__name__,
+            ),
         )
 
         decision = None
@@ -247,6 +282,7 @@ class RagLLMInvestor(GeneralPlayer):
                     [InferInput(system_msg=self._system_prompt, user_msg=user_msg)]
                 )
                 decision = parse_llm_response_with_thinking(output.outputs[0].response)
+                _validate_decision(decision)
                 break
             except Exception as exc:
                 last_error = exc
@@ -284,9 +320,11 @@ class RagLLMInvestor(GeneralPlayer):
         order = {
             "type": "order",
             "action": action,
+            "bid_price": float(decision["bid_price"]),
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
             "reasoning": decision["reasoning"][:120],
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
         return {
             **order,

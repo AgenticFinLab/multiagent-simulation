@@ -70,14 +70,20 @@ class Market(GeneralPlayer):
         orders = []
         if observation.inbounds:
             for inb in observation.inbounds:
-                msg = inb.payload
-                if msg["type"] == "order":
+                msg = inb.payload if hasattr(inb, "payload") else inb
+                content_type = getattr(inb, "content_type", None)
+                if (
+                    isinstance(msg, dict)
+                    and (msg.get("type") == "order" or content_type == "investor_order")
+                    and "action" in msg
+                    and "quantity" in msg
+                ):
                     orders.append(
                         {
-                            "agent_id": msg["from"],
+                            "agent_id": msg.get("from", getattr(inb, "sender_id", None)),
                             "action": msg["action"],
                             "quantity": msg["quantity"],
-                            "agent_type": msg["agent_type"],
+                            "agent_type": msg.get("agent_type", "unknown"),
                         }
                     )
         return orders
@@ -176,10 +182,11 @@ class BaseInvestor(GeneralPlayer):
 
         if observation.inbounds:
             for inb in observation.inbounds:
-                market_data = inb.payload
-                self.state.custom_state["price"] = market_data["price"]
-                self.state.custom_state["fundamental"] = market_data["fundamental"]
-                self.state.custom_state["deviation"] = market_data["deviation"]
+                market_data = inb.payload if hasattr(inb, "payload") else inb
+                if isinstance(market_data, dict) and "price" in market_data:
+                    self.state.custom_state["price"] = market_data["price"]
+                    self.state.custom_state["fundamental"] = market_data["fundamental"]
+                    self.state.custom_state["deviation"] = market_data["deviation"]
 
     async def decide(self) -> Dict[str, Any]:
         price = self.state.custom_state["price"]
@@ -210,6 +217,7 @@ class BaseInvestor(GeneralPlayer):
 
         order = {
             "type": "order",
+            "from": self.identity,
             "action": action,
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
@@ -228,7 +236,10 @@ class BaseInvestor(GeneralPlayer):
 
 
 class ShortVolTrader(BaseInvestor):
-    """Short volatility trader: sells VIX futures/ETNs, profits from contango but faces tail risk."""
+    """Short volatility trader.
+
+    Theory: simulation-bases.md §4.1
+    """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -250,7 +261,10 @@ class ShortVolTrader(BaseInvestor):
 
 
 class VolETNManager(BaseInvestor):
-    """Inverse VIX ETN manager: must buy VIX futures when VIX rises, creating positive feedback."""
+    """Inverse VIX ETN manager.
+
+    Theory: simulation-bases.md §4.2
+    """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -271,7 +285,10 @@ class VolETNManager(BaseInvestor):
 
 
 class LongVolHedger(BaseInvestor):
-    """Long vol hedger: holds long VIX positions as portfolio insurance."""
+    """Long volatility hedger.
+
+    Theory: simulation-bases.md §4.3
+    """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -293,7 +310,10 @@ class LongVolHedger(BaseInvestor):
 
 
 class VolArbitrageur(BaseInvestor):
-    """Volatility arbitrageur: trades VIX term structure dislocations."""
+    """Volatility arbitrageur.
+
+    Theory: simulation-bases.md §4.4
+    """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float
@@ -317,7 +337,10 @@ class VolArbitrageur(BaseInvestor):
 
 
 class EquityTrader(BaseInvestor):
-    """Equity trader: trades equities, affected by volatility spike."""
+    """Equity trader.
+
+    Theory: simulation-bases.md §4.5
+    """
 
     def _make_decision(
         self, price: float, fundamental: float, deviation: float

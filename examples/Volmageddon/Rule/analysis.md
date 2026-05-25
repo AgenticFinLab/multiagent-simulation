@@ -1,27 +1,50 @@
-# Volmageddon Analysis Guide
+# Volmageddon Rule Analysis Plan
 
-## Metrics
+## §1 Objectives
 
-| Metric | Description | Expected Range |
-|--------|-------------|----------------|
-| Price deviation | Deviation from fundamental | Varies by scenario |
-| Max drawdown | Largest peak-to-trough decline | Varies by scenario |
-| Volatility | Annualized return volatility | Varies by scenario |
+The Rule analysis checks whether the deterministic threshold baseline produces a
+complete Volmageddon trajectory: volatility spike, inverse-ETN rebalance
+pressure, short-vol covering, equity de-risking, and partial stabilization from
+long-vol and arbitrage roles.
 
-## Visualization Guide
+## §2 Core Metrics
 
-1. **Price vs Fundamental**: Shows whether agents create mispricings
-2. **Deviation Plot**: Magnitude and persistence of mispricings
-3. **Return Distribution**: Should show fat tails for behavioral scenarios
+| Metric | Function Contract | Source |
+|---|---|---|
+| Volatility spike magnitude | `def compute_vol_spike_magnitude(vol_series: list[float]) -> float` | `analysis-bases.md §2.1` |
+| Rebalance pressure | `def compute_rebalance_pressure(orders: list[dict]) -> float` | `analysis-bases.md §2.2` |
+| Short-vol covering | `def compute_short_vol_covering(orders: list[dict]) -> float` | `analysis-bases.md §2.3` |
+| Equity de-risking volume | `def compute_equity_derisking_volume(orders: list[dict]) -> float` | `analysis-bases.md §2.4` |
+| Arbitrage stabilization | `def compute_arbitrage_stabilization(orders: list[dict], deviation_series: list[float]) -> float` | `analysis-bases.md §2.5` |
+| Spike onset round | `def compute_spike_onset(vol_series: list[float], threshold: float) -> int` | `analysis-bases.md §2.6` |
+| Feedback intensity | `def compute_feedback_intensity(vol_series: list[float], orders: list[dict]) -> float` | `analysis-bases.md §2.7` |
 
-## Troubleshooting
+## §3 Analysis Dimensions
 
-- **No phenomenon observed**: Adjust agent parameters
-- **Too extreme**: Add more stabilizing agents or increase mean reversion
-- **Too stable**: Increase destabilizing agent parameters
+Review shock severity, mechanical feedback, crowded short-vol unwind,
+cross-market equity de-risking, stabilizing arbitrage/hedging flow, and
+structural completeness of the recorded quantity-order payloads.
 
-## References
+## §4 Phase Analysis
 
-- Volatility product feedback (Bergsma & Jiang, 2022)
-- Short volatility crowding (Culp et al., 2018)
-- Inverse VIX ETN dynamics
+Use the four-phase framework in `analysis-bases.md §4`: calm/carry, trigger,
+feedback, and stabilization or persistence. The deterministic Rule run should
+make phase boundaries easier to interpret than API variants.
+
+## §5 Cross-Variant Comparison
+
+Rule is the baseline for comparing LLM, RuleLLM, and Rag. The primary question
+is whether API variants preserve the direction and timing of the feedback
+mechanism while changing order size dispersion or reasoning.
+
+## §6 Expected Results and Validation Criteria
+
+A full Rule sample should record 200 rounds, finite non-negative proxy prices,
+non-trivial role activity, observable procyclical buy pressure during stress,
+and standardized analysis artifacts defined in `analysis-bases.md §7`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png`,
+`01_volmageddon_dynamics.png`, `02_volmageddon_analysis.png`, and
+`03_summary.png`.

@@ -1,6 +1,6 @@
 # ConfirmationBias Rag Variant — Design Specification
 
-## 1. Overview
+## §1 Overview
 
 | Item            | Detail                                                                                                      |
 |-----------------|-------------------------------------------------------------------------------------------------------------|
@@ -13,20 +13,50 @@
 
 ---
 
-## 2. Theory → Implementation Mapping
+## §2 Theory → Implementation Mapping
 
 | Theoretical Concept            | Agent / Mechanism                                             | Code Location                               |
 |--------------------------------|---------------------------------------------------------------|---------------------------------------------|
-| Belief anchoring + knowledge   | `RagBeliefAnchor` — retrieves docs on confirmation bias       | `Rag/prompts.py: RAG_BELIEF_ANCHOR_SYS`     |
-| Selective scanning + knowledge | `RagSelectiveScanner` — retrieves docs on selective attention | `Rag/prompts.py: RAG_SELECTIVE_SCANNER_SYS` |
-| Rational analysis + knowledge  | `RagBalancedAnalyst` — retrieves docs on rational updating    | `Rag/prompts.py: RAG_BALANCED_ANALYST_SYS`  |
-| Contrarian + knowledge         | `RagContrarianTrader` — retrieves docs on market correction   | `Rag/prompts.py: RAG_CONTRARIAN_TRADER_SYS` |
-| Noise + knowledge              | `RagNoiseTrader` — retrieves docs, minimal effect expected    | `Rag/prompts.py: RAG_NOISE_TRADER_SYS`      |
-| Price dynamics                 | `Market` agent (Rule-based, unchanged)                        | `Rule/players.py: Market`                   |
+| Belief anchoring + knowledge (`simulation-bases.md §4.1`)   | `RagLLMBeliefAnchor` — retrieves docs on confirmation bias       | `Rag/prompts.py: RAG_BELIEF_ANCHOR_SYS`     |
+| Selective scanning + knowledge (`simulation-bases.md §4.2`) | `RagLLMSelectiveScanner` — retrieves docs on selective attention | `Rag/prompts.py: RAG_SELECTIVE_SCANNER_SYS` |
+| Rational analysis + knowledge (`simulation-bases.md §4.3`)  | `RagLLMBalancedAnalyst` — retrieves docs on rational updating    | `Rag/prompts.py: RAG_BALANCED_ANALYST_SYS`  |
+| Contrarian + knowledge (`simulation-bases.md §4.4`)         | `RagLLMContrarianTrader` — retrieves docs on market correction   | `Rag/prompts.py: RAG_CONTRARIAN_TRADER_SYS` |
+| Noise + knowledge (`simulation-bases.md §4.5`)              | `RagLLMNoiseTrader` — retrieves docs, minimal effect expected    | `Rag/prompts.py: RAG_NOISE_TRADER_SYS`      |
+| Price dynamics (`simulation-bases.md §3.1`)                 | `Market` agent (Rule-based, unchanged)                        | `Rule/players.py: Market`                   |
+
+### §2.1 RagLLMBeliefAnchor (`simulation-bases.md §4.1`)
+
+| Theory Component | Implementation |
+|---|---|
+| Prior-belief anchoring with knowledge | RAG injects retrieved confirmation-bias context into the RuleLLM-style decision prompt. |
+
+### §2.2 RagLLMSelectiveScanner (`simulation-bases.md §4.2`)
+
+| Theory Component | Implementation |
+|---|---|
+| Selective search with knowledge | RAG context can either moderate or rationalize selective scanning decisions. |
+
+### §2.3 RagLLMBalancedAnalyst (`simulation-bases.md §4.3`)
+
+| Theory Component | Implementation |
+|---|---|
+| Rational updating with knowledge | Retrieved literature may strengthen objective evaluation of deviations. |
+
+### §2.4 RagLLMContrarianTrader (`simulation-bases.md §4.4`)
+
+| Theory Component | Implementation |
+|---|---|
+| Bias correction with knowledge | Retrieved context supports contrarian fading of biased price extremes. |
+
+### §2.5 RagLLMNoiseTrader (`simulation-bases.md §4.5`)
+
+| Theory Component | Implementation |
+|---|---|
+| Noise liquidity with knowledge | RAG context is recorded, though the agent remains mostly stochastic. |
 
 ---
 
-## 3. Market Mechanism
+## §3 Market Mechanism
 
 Identical to Rule variant. Market broadcasts per round:
 
@@ -36,7 +66,7 @@ Identical to Rule variant. Market broadcasts per round:
 
 ---
 
-## 4. Variant-Specific Features
+## §4 Variant-Specific Features
 
 ### 4.1 RAG Pipeline
 
@@ -77,7 +107,7 @@ but this time the evidence really is confirming"). Track BeliefAnchor's
 
 ---
 
-## 5. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -107,24 +137,23 @@ but this time the evidence really is confirming"). Track BeliefAnchor's
 
 ---
 
-## 6. Configuration Reference
+## §6 Configuration Reference
 
 Config: `configs/ConfirmationBias/Rag/simulation.yml`
 
 | Parameter         | Value                                     | Description                   |
 |-------------------|-------------------------------------------|-------------------------------|
-| `llm.model`       | `gpt-4o-mini` (default)                   | LLM model name                |
+| `llm.model`       | `ark/doubao-seed-2-0-mini-260428`         | LLM model name                |
 | `llm.temperature` | 0.3                                       | Decision randomness           |
-| `llm.max_tokens`  | 512                                       | Max response length           |
-| `knowledge_path`  | `configs/ConfirmationBias/Rag/knowledge/` | Document directory            |
-| `top_k`           | 2                                         | Documents retrieved per query |
+| `llm.max_tokens`  | 600                                       | Max response length           |
+| `global_uri`      | `examples/document-sources`               | Shared document directory     |
+| `top_k`           | 5                                         | Documents retrieved per query |
 
 ---
 
-## 7. Running Instructions
+## §7 Running Instructions
 
 ```bash
-# Ensure knowledge documents exist in configs/ConfirmationBias/Rag/knowledge/
 python examples/ConfirmationBias/Rag/run_confirmationbias_rag.py \
     -c configs/ConfirmationBias/Rag/simulation.yml
 
@@ -135,7 +164,7 @@ python examples/ConfirmationBias/Rag/analysis.py \
 
 ---
 
-## 8. Expected Behavior
+## §8 Expected Behavior
 
 - `retrieval_success_rate` ≥ 70% requires KnowledgeStore populated with
   documents about confirmation bias, cognitive biases, and market behavior
@@ -147,7 +176,7 @@ python examples/ConfirmationBias/Rag/analysis.py \
 
 ---
 
-## 9. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

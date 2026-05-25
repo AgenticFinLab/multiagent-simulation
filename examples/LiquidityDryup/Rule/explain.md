@@ -1,185 +1,100 @@
-# LiquidityDryup — Rule Variant Explanation
+# Liquidity Dry-up Rule Variant Explanation
 
 ## §1 Overview
 
-| Item               | Description                                                                                                                           |
-|--------------------|---------------------------------------------------------------------------------------------------------------------------------------|
-| **Phenomenon**     | Liquidity dry-up — market makers withdraw under volatility stress, triggering a self-reinforcing price-impact spiral                  |
-| **Variant**        | Rule-based: all agents use deterministic formulas; market maker withdrawal triggered by volatility threshold                          |
-| **Investor Count** | 5 classes: MarketMaker, LiquiditySeeker, ValueTrader, MomentumTrader, NoiseTrader                                                     |
-| **Key Feature**    | Endogenous liquidity amplification: `liquidity_factor = 100 / max(total_liquidity, 10)` raises price impact as market makers withdraw |
-| **Academic Value** | Replicates Brunnermeier–Pedersen (2009) liquidity spiral through agent-based interactions                                             |
+| Field | Value |
+|---|---|
+| Variant | Rule |
+| Simulation | Liquidity Dry-up |
+| Decision Mechanism | deterministic rule-based trading orders |
+| Theory Reference | `examples/LiquidityDryup/simulation-bases.md` |
+| Market Broadcast | `configs/LiquidityDryup/Rule/topology.yml` |
 
----
+This is a trading-schema scenario. Rule decisions emit `bid_price`, `quantity`, `strategy`, and numeric `provides_liquidity` fields consumed by the market coordinator.
 
-## §2 Theory → Implementation Mapping
+## §2 Theory -> Implementation Mapping
 
 ### §2.1 MarketMaker (simulation-bases.md §4.1)
 
-Implements Grossman–Miller (1988) immediacy provider with endogenous withdrawal.
-
-| Theory Element           | Rule Implementation                                                            |
-|--------------------------|--------------------------------------------------------------------------------|
-| Inventory risk threshold | `if                                                                            |
-| Withdrawal               | `provides_liquidity = 0; quantity = −position × withdraw_rebalance`            |
-| Normal provision         | `provides_liquidity = base_liquidity; quantity = −position × normal_rebalance` |
-| Quantity cap             | `max(−25, min(25, quantity))`                                                  |
-
-Activation: `|return| > volatility_threshold` for withdrawal.
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.1 | `MarketMaker.decide()` computes `volatility = abs(market_data["return"])`; if volatility exceeds `extras["volatility_threshold"]`, it withdraws liquidity. |
+| Mathematical model from simulation-bases.md §4.1 | `provides_liquidity = 0` in stress; otherwise `provides_liquidity = extras["base_liquidity"]`; inventory rebalance uses `withdraw_rebalance` or `normal_rebalance`. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rule/players.yml:market_maker.config.extras` supplies threshold, base liquidity, and rebalance fractions. |
+| Variant-specific decision mechanism | Deterministic numeric liquidity-provision order. |
 ### §2.2 LiquiditySeeker (simulation-bases.md §4.2)
 
-Brunnermeier–Pedersen demand-side liquidity constraint.
-
-| Theory Element    | Rule Implementation                                        |
-|-------------------|------------------------------------------------------------|
-| Random trade need | `target = N(0, target_volatility)`                         |
-| Liquidity scaling | `quantity = target × min(1.0, liquidity / liquidity_base)` |
-| Quantity cap      | `max(−20, min(20, quantity))`                              |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.2 | `LiquiditySeeker.decide()` samples desired order flow from `N(0, target_volatility)`. |
+| Mathematical model from simulation-bases.md §4.2 | Order size is scaled by `min(1.0, liquidity / liquidity_base)`, modelling constrained execution when liquidity dries up. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rule/players.yml:liquidity_seeker.config.extras` supplies `target_volatility` and `liquidity_base`. |
+| Variant-specific decision mechanism | Deterministic execution rule with stochastic target order draw. |
 ### §2.3 ValueTrader (simulation-bases.md §4.3)
 
-Fundamental-anchored crisis liquidity provider.
-
-| Theory Element      | Rule Implementation            |
-|---------------------|--------------------------------|
-| Deviation trigger   | `                              |
-| Quantity            | `deviation × value_multiplier` |
-| Liquidity provision | `base_liquidity_provision if   |
-| Cap                 | `max(−25, min(25, quantity))`  |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.3 | `ValueTrader.decide()` computes `deviation = (fundamental - price) / fundamental`. |
+| Mathematical model from simulation-bases.md §4.3 | It provides `base_liquidity_provision` when `abs(deviation) > liquidity_threshold` and trades `deviation * value_multiplier` when `abs(deviation) > trade_threshold`. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rule/players.yml:value_trader.config.extras` supplies thresholds, liquidity provision, and value multiplier. |
+| Variant-specific decision mechanism | Deterministic stabilizing liquidity provision and value trade. |
 ### §2.4 MomentumTrader (simulation-bases.md §4.4)
 
-Positive-feedback cascade amplifier.
-
-| Theory Element   | Rule Implementation            |
-|------------------|--------------------------------|
-| Trend activation | `                              |
-| Quantity         | `return × momentum_multiplier` |
-| Cap              | `max(−35, min(35, quantity))`  |
-
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.4 | `MomentumTrader.decide()` reads the current market return. |
+| Mathematical model from simulation-bases.md §4.4 | If `abs(return) > momentum_threshold`, order quantity is `return * momentum_multiplier`; otherwise it holds. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rule/players.yml:momentum_trader.config.extras` supplies threshold and multiplier. |
+| Variant-specific decision mechanism | Deterministic trend-following amplifier. |
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
-Random Gaussian order flow.
-
-| Theory Element     | Rule Implementation           |
-|--------------------|-------------------------------|
-| Trade size         | `N(0, noise_volatility)`      |
-| Cap                | `max(−15, min(15, quantity))` |
-| Liquidity provided | Always 0                      |
-
----
+| Theory Component | Implementation |
+|---|---|
+| Investor role and activation rule from simulation-bases.md §4.5 | `NoiseTrader.decide()` samples order quantity from `N(0, noise_volatility)`. |
+| Mathematical model from simulation-bases.md §4.5 | It never provides liquidity and caps quantity to +/-15 shares. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rule/players.yml:noise_trader.config.extras` supplies `noise_volatility`. |
+| Variant-specific decision mechanism | Stochastic uninformed order flow around the deterministic market contract. |
 
 ## §3 Market Mechanism
 
-Price formation with endogenous liquidity amplification:
-
-```
-P(t+1) = P(t) + (λ × NetDemand × liquidity_factor) + γ × (F − P(t)) + ε(t)
-
-liquidity_factor = 100 / max(total_liquidity, 10)
-total_liquidity = base_liquidity + Σ provides_liquidity_i
-```
-
-The spiral mechanism:
-1. High volatility → MarketMaker withdraws (`provides_liquidity = 0`).
-2. `total_liquidity` drops → `liquidity_factor` rises.
-3. Next round's price impact is amplified → larger price moves.
-4. Larger moves → more MarketMaker withdrawals → further amplification.
-5. ValueTrader eventually provides corrective liquidity when `|deviation| > trade_threshold`.
-
----
+The Rule `Market` uses `P(t+1) = P(t) + price_impact * net_demand * liquidity_factor + mean_reversion * (fundamental - P(t)) + noise`. `liquidity_factor = 100 / max(total_liquidity, 10)`, and `total_liquidity = base_liquidity + sum(order["provides_liquidity"])`.
 
 ## §4 Variant Architecture
 
-```
-Rule Variant Architecture
-─────────────────────────
-Market (liquidity-dependent pricing)
-  │  broadcast {price, return, liquidity, fundamental}
-  ├─ MarketMaker        │ volatility threshold → withdraw / provide
-  ├─ LiquiditySeeker    │ random need × liquidity adjustment
-  ├─ ValueTrader        │ deviation trigger → value + liquidity
-  ├─ MomentumTrader     │ return × multiplier (cascade amplifier)
-  └─ NoiseTrader        │ N(0, noise_volatility)
-```
-
-All agents are purely deterministic rule-based.
-
----
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/LiquidityDryup/Rule/players.py` |
+| Prompt module | Not applicable for Rule baseline |
+| Inference | No remote model call is used in the Rule baseline. |
+| Output parsing | Direct deterministic decision construction |
+| Error handling | Deterministic config/schema errors fail fast; no API fallback is used. |
 
 ## §5 Config Reference
 
-| Parameter                  | Agent           | Default | Description                              |
-|----------------------------|-----------------|---------|------------------------------------------|
-| `volatility_threshold`     | MarketMaker     | 0.03    |                                          |
-| `base_liquidity`           | MarketMaker     | 30      | Liquidity units in normal conditions     |
-| `withdraw_rebalance`       | MarketMaker     | 0.5     | Inventory offload fraction during stress |
-| `normal_rebalance`         | MarketMaker     | 0.1     | Normal inventory rebalancing             |
-| `target_volatility`        | LiquiditySeeker | 10      | σ of trade size distribution             |
-| `liquidity_base`           | LiquiditySeeker | 100     | Liquidity normalisation                  |
-| `liquidity_threshold`      | ValueTrader     | 0.03    | Deviation for liquidity provision        |
-| `trade_threshold`          | ValueTrader     | 0.05    | Deviation for value trading              |
-| `base_liquidity_provision` | ValueTrader     | 20      | Crisis liquidity units                   |
-| `value_multiplier`         | ValueTrader     | 100     | Trade size scaling                       |
-| `momentum_threshold`       | MomentumTrader  | 0.02    | Minimum return to follow                 |
-| `momentum_multiplier`      | MomentumTrader  | 500     | Trend intensity                          |
-| `noise_volatility`         | NoiseTrader     | 5       | σ of noise order                         |
-| `fundamental_value`        | Market          | 100     | Fundamental anchor                       |
-| `price_impact`             | Market          | 0.001   | Base λ                                   |
-| `mean_reversion`           | Market          | 0.05    | γ                                        |
-| `noise_std`                | Market          | 0.01    | Market noise                             |
-
----
+| Config | Purpose |
+|---|---|
+| `configs/LiquidityDryup/Rule/simulation.yml` | Full simulation entry point with 200-round full experiment setting. |
+| `configs/LiquidityDryup/Rule/players.yml` | Player class paths, extras, and model or retrieval configuration. |
+| `configs/LiquidityDryup/Rule/topology.yml` | Message routing between coordinator and agents. |
+| `configs/LiquidityDryup/Rule/persona.yml` | Turn recording and persona metadata. |
 
 ## §6 Running Instructions
 
 ```bash
-# Run Rule variant
-python examples/LiquidityDryup/Rule/run_liquidity.py \
-    -c configs/LiquidityDryup/Rule/simulation.yml
-
-# Run with more aggressive withdrawal
-python examples/LiquidityDryup/Rule/run_liquidity.py \
-    -c configs/LiquidityDryup/Rule/simulation.yml \
-    --extras volatility_threshold=0.02
+python examples/LiquidityDryup/Rule/run_liquidity.py -c configs/LiquidityDryup/Rule/simulation.yml
 ```
-
-Output written to `records/LiquidityDryup/Rule/`.
-
----
 
 ## §7 Expected Behavior
 
-| Metric         | Expected Range | Rationale                                     |
-|----------------|----------------|-----------------------------------------------|
-| LRI minimum    | 0.05–0.20      | Strong spiral — all MMs withdraw at threshold |
-| MWF maximum    | 0.7–1.0        | Most MMs withdraw during dry-up               |
-| PAD            | 0.10–0.25      | Significant dislocation from fundamental      |
-| LPD            | 10–25 rounds   | Moderate-to-sustained dry-up                  |
-| WDI            | 0.25–0.45      | Significant wealth redistribution             |
-| MPI multiplier | 3–8×           | Price impact amplification during dry-up      |
-
-Rule variant produces the most mechanically consistent dry-up cascade. It is the baseline against which LLM, RuleLLM, and Rag variants are compared.
-
----
+- The run records the full scenario state path for the configured round count.
+- Agent decisions should exercise the mechanism defined in `simulation-bases.md §4`.
+- API variants may show greater behavioral dispersion than the deterministic Rule baseline while preserving the same scenario contract.
+- A successful full experiment must pass Level-1 execution review and then Level-2 structural quality review.
 
 ## §8 References
 
-- Grossman, S. J., & Miller, M. H. (1988). doi:[10.1111/j.1540-6261.1988.tb04594.x](https://doi.org/10.1111/j.1540-6261.1988.tb04594.x)
-- Brunnermeier, M. K., & Pedersen, L. H. (2009). doi:[10.1093/rfs/hhn098](https://doi.org/10.1093/rfs/hhn098)
-- Kyle, A. S. (1985). doi:[10.2307/1913210](https://doi.org/10.2307/1913210)
-- De Long, J. B., et al. (1990). doi:[10.1111/j.1540-6261.1990.tb03695.x](https://doi.org/10.1111/j.1540-6261.1990.tb03695.x)
-- simulation-bases.md §4.1–§4.5 (Investor Taxonomy)
-
----
+See `examples/LiquidityDryup/simulation-bases.md §2` for full DOI citations and mechanism references.
 
 ## §9 Variant Comparison
 
-| Dimension             | Rule                         | LLM                       | RuleLLM                     | Rag                        |
-|-----------------------|------------------------------|---------------------------|-----------------------------|----------------------------|
-| MM withdrawal trigger | Volatility threshold formula | LLM observes stress       | Rule threshold + LLM timing | Rule + KB crisis precedent |
-| Spiral mechanism      | Automatic liquidity_factor   | Emergent LLM coordination | Rule-anchored spiral        | RAG moderates recovery     |
-| Expected LRI min      | 0.05–0.20                    | 0.05–0.30                 | 0.05–0.25                   | 0.10–0.30                  |
-| Expected LPD          | 10–25 rounds                 | 8–20 rounds               | 9–22 rounds                 | 6–15 rounds                |
-| Stochasticity         | Minimal                      | High                      | Moderate                    | Moderate                   |
+See `examples/LiquidityDryup/simulation-bases.md §9` for the Rule / LLM / RuleLLM / Rag comparison table.

@@ -305,7 +305,7 @@ class MomentumTrader(BaseInvestor):
 
     Theory: simulation-bases.md §4.4
     Foundation: Jegadeesh & Titman (1993) doi:10.1111/j.1540-6261.1993.tb04702.x
-    Activation: |deviation| > entry_threshold (0.02)
+    Activation: |deviation| > entry_threshold (0.03)
     Formula: qty = min(500, int(|deviation| × 3000))
     """
 

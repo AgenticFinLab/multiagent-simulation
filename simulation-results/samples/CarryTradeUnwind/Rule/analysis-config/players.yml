@@ -1,0 +1,173 @@
+# =============================================================================
+# CarryTradeUnwind Rule Players Configuration
+# =============================================================================
+# Heterogeneous agents for carry trade unwind simulation
+#
+# Price = funding currency exchange rate (normalized, fundamental = 1.0)
+# Price > 1.0 = funding currency appreciated (carry unwind in progress)
+# Price < 1.0 = carry trade open (target currency strong)
+#
+# Agent Types:
+#   - Market: Rule-based FX rate coordinator
+#   - CarryTrader: UIP deviation trader, forced unwind (DESTABILIZING)
+#     Theory: Brunnermeier, Nagel & Pedersen (2009)
+#   - LeveragedCarryFund: High leverage with stop-loss (DESTABILIZING)
+#     Theory: Plantin & Shin (2018)
+#   - FundingCurrencyBuyer: Safe-haven demand amplifier (DESTABILIZING)
+#     Theory: Menkhoff et al. (2012)
+#   - HedgedCarryTrader: Volatility-adjusted carry (STABILIZING)
+#     Theory: Menkhoff et al. (2012), Burnside et al. (2011)
+#   - NoiseTrader: Random background liquidity (NEUTRAL)
+#     Theory: Black (1986)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator)
+# -----------------------------------------------------------------------------
+market:
+  name: "Market"
+  class: "examples.CarryTradeUnwind.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      # FX market dynamics (funding currency rate, normalized fundamental = 1.0)
+      fundamental_value: 1.0
+      initial_price: 1.0
+      price_impact: 0.003         # Low: FX market is deep
+      mean_reversion: 0.02        # Moderate: long-run PPP reversion
+      noise_std: 0.005            # Low noise
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Carry Traders (Primary Destabilizers)
+# Theory: Brunnermeier, Nagel & Pedersen (2009) — UIP deviation / carry crash
+# -----------------------------------------------------------------------------
+carry_trader:
+  name: "Carry Trader"
+  class: "examples.CarryTradeUnwind.Rule.players:CarryTrader"
+  # Expander → carry_trader_1, carry_trader_2
+  num_instances: 2
+  config:
+    identity: "carry_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 500.0     # Start with carry position (short funding currency)
+      custom_state_hot_limit: 3
+      # CarryTrader specific parameters (Brunnermeier et al., 2009)
+      unwind_threshold: 0.02      # Unwind when return > 2%
+      carry_size: 100.0           # Base carry units
+      leverage: 5.0               # Leverage multiplier (Brunnermeier et al., 2009)
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Leveraged Carry Funds (High-Leverage Destabilizers)
+# Theory: Plantin & Shin (2018) — Leverage and forced liquidation
+# -----------------------------------------------------------------------------
+leveraged_carry_fund:
+  name: "Leveraged Carry Fund"
+  class: "examples.CarryTradeUnwind.Rule.players:LeveragedCarryFund"
+  # Expander → leveraged_carry_fund_1, leveraged_carry_fund_2
+  num_instances: 2
+  config:
+    identity: "leveraged_carry_fund"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 500000.0
+      initial_position: 800.0
+      custom_state_hot_limit: 3
+      # LeveragedCarryFund parameters (Plantin & Shin, 2018)
+      stop_loss: 0.03             # Stop-loss trigger at 3% funding appreciation
+      leverage: 5.0               # 5× leverage amplifier
+      base_size: 80.0             # Base units per trade
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Funding Currency Buyers (Safe-Haven Amplifiers)
+# Theory: Menkhoff et al. (2012) — Safe-haven demand during FX volatility
+# -----------------------------------------------------------------------------
+funding_currency_buyer:
+  name: "Funding Currency Buyer"
+  class: "examples.CarryTradeUnwind.Rule.players:FundingCurrencyBuyer"
+  # Expander → funding_currency_buyer_1, funding_currency_buyer_2
+  num_instances: 2
+  config:
+    identity: "funding_currency_buyer"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 300000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # FundingCurrencyBuyer parameters (Menkhoff et al., 2012)
+      risk_threshold: 0.015       # Flight-to-safety triggered at 1.5% return
+      position_size: 60           # Fixed safe-haven buy units (Ranaldo & Söderlind, 2010)
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Hedged Carry Trader (Volatility-Aware)
+# Theory: Menkhoff et al. (2012) — Volatility-adjusted carry
+#         Burnside et al. (2011) — Hedged carry trade strategies
+# -----------------------------------------------------------------------------
+hedged_carry_trader:
+  name: "Hedged Carry Trader"
+  class: "examples.CarryTradeUnwind.Rule.players:HedgedCarryTrader"
+  num_instances: 1
+  config:
+    identity: "hedged_carry_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 2000000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # HedgedCarryTrader parameters (Menkhoff et al., 2012; Burnside et al., 2011)
+      hedge_ratio: 0.30              # 30% of position hedged (reduces net exposure)
+      vol_threshold: 0.05            # FX volatility threshold for position adjustment
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Noise Traders (Background Liquidity — Black 1986)
+# -----------------------------------------------------------------------------
+noise_trader:
+  name: "Noise Trader"
+  class: "examples.CarryTradeUnwind.Rule.players:NoiseTrader"
+  # Expander → noise_trader_1, noise_trader_2
+  num_instances: 2
+  config:
+    identity: "noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 100000.0
+      initial_position: 0.0
+      custom_state_hot_limit: 3
+      # NoiseTrader parameters (Black, 1986)
+      trade_probability: 0.05
+      min_order: 20.0
+      max_order: 100.0
+  persona: !include persona.yml

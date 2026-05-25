@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
+from examples.standard_rule_analysis import _market_data_from_payload, _market_players
 
 # ---------------------------------------------------------------------------
 # Data loading
@@ -44,11 +45,20 @@ def _load_data(results) -> Dict[str, Any]:
     market_prices: Dict[int, float] = {}
     fundamentals: Dict[int, float] = {}
 
-    for player in results.players_by_role("coordinator").values():
+    for player in _market_players(results).values():
         if "price" in player.batch_store_names:
             market_prices.update(_batch_to_rounds(player.batch("price").all()))
         if "fundamental" in player.batch_store_names:
             fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
+        for round_num, payload in player.turns.payloads().items():
+            market_data = _market_data_from_payload(payload)
+            if round_num not in market_prices and "price" in market_data:
+                market_prices[round_num] = float(market_data["price"])
+            if round_num not in fundamentals:
+                if "fundamental" in market_data:
+                    fundamentals[round_num] = float(market_data["fundamental"])
+                elif "fundamental_value" in market_data:
+                    fundamentals[round_num] = float(market_data["fundamental_value"])
 
     investor_bids: Dict[str, Dict[int, float]] = {}
     investor_payloads: Dict[str, Dict[int, dict]] = {}
@@ -169,9 +179,10 @@ def _compute_agent_vwap(
             abs_qty = abs(qty)
             price_volume_sum += abs_qty * price
             total_vol += abs_qty
-            if qty > 0:
-                total_buy += qty
-            else:
+            action = payload["action"]
+            if action == "buy":
+                total_buy += abs_qty
+            elif action == "sell":
                 total_sell += abs_qty
         vwap_data[aid] = {
             "vwap": price_volume_sum / total_vol if total_vol > 0 else 0.0,
@@ -497,8 +508,8 @@ def _create_visualizations(
     Plots
     -----
     00_investor_bids.png   : Investor Bidding Curves (headline chart)
-    01_price_dynamics.png  : Price vs Fundamental + Deviation %
-    02_cascade_dynamics.png: Rolling Volatility + Return Autocorrelation
+    01_archegoscollapse_dynamics.png: Price vs Fundamental + Deviation %
+    02_archegoscollapse_analysis.png : Rolling Volatility + Return Autocorrelation
     03_summary.png         : Agent VWAP comparison + Cascade onset annotation
     """
     rounds_sorted = sorted(market_prices.keys())
@@ -614,7 +625,9 @@ def _create_visualizations(
 
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "01_price_dynamics.png"), dpi=150, bbox_inches="tight"
+        os.path.join(output_dir, "01_archegoscollapse_dynamics.png"),
+        dpi=150,
+        bbox_inches="tight",
     )
     plt.close()
 
@@ -683,7 +696,7 @@ def _create_visualizations(
 
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "02_cascade_dynamics.png"),
+        os.path.join(output_dir, "02_archegoscollapse_analysis.png"),
         dpi=150,
         bbox_inches="tight",
     )

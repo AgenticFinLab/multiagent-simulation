@@ -1,6 +1,6 @@
 # ConfirmationBias — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                               |
 |--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 | Research Relevance | Isolates the belief-updating distortion from other biases (availability, anchoring); tests whether a self-reinforcing belief state produces measurable, persistent mispricing that rational mean-reversion and contrarian trading cannot fully correct    |
 
 
-## 2. Theoretical Foundation
+## §2 Theoretical Foundation
 
 ### 2.1 Confirmation Bias — Selective Information Processing (Nickerson)
 
@@ -51,7 +51,7 @@
 - **Empirical Evidence**: trade_probability = 0.30 is calibrated identically to AvailabilityBias and CarryTradeUnwind simulations, representing background retail participation.
 
 
-## 3. Market Design Principles
+## §3 Market Design Principles
 
 ### 3.1 Price Formation Model
 
@@ -93,9 +93,9 @@ Each round, the Market sends to all investors:
 Note: Crucially, the deviation signal is the same for all agents — confirmation bias is NOT about different agents receiving different information. It is about the same signal being processed differently by biased agents (BeliefAnchor, SelectiveScanner) vs. rational agents (BalancedAnalyst, ContrarianTrader).
 
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
-### Investor: BeliefAnchor
+### §4.1 BeliefAnchor
 
 #### 4.1.1  Summary
 
@@ -204,7 +204,7 @@ Rationale: The 2.5% positive deviation confirms BeliefAnchor's bullish prior; be
 
 ---
 
-### Investor: SelectiveScanner
+### §4.2 SelectiveScanner
 
 #### 4.2.1  Summary
 
@@ -303,7 +303,7 @@ Confirming buy: Q = 600. Order: buy 600. Rationale: Market confirming SelectiveS
 
 ---
 
-### Investor: BalancedAnalyst
+### §4.3 BalancedAnalyst
 
 #### 4.3.1  Summary
 
@@ -374,7 +374,7 @@ Market state: price = 93.5, deviation = −0.065. Trigger: −0.065 < −0.05 �
 
 ---
 
-### Investor: ContrarianTrader
+### §4.4 ContrarianTrader
 
 #### 4.4.1  Summary
 
@@ -434,7 +434,7 @@ Market state: deviation = +0.08. Trigger: sell. Q = 500. Rationale: 8% overvalua
 
 ---
 
-### Investor: NoiseTrader
+### §4.5 NoiseTrader
 
 #### 4.5.1  Summary
 
@@ -445,7 +445,14 @@ Random, uninformed background trader — provides stochastic variation and backg
 - Citation: Black, F. (1986). "Noise." *Journal of Finance*, 41(3), 529–543. DOI: 10.2307/2328481
 - trade_probability = 0.30 calibrated to retail participation in behavioral markets.
 
-#### 4.5.3  Behavioral Framework
+#### 4.5.3  Design Purpose and Activation Scenarios
+
+The NoiseTrader supplies non-informational order flow so confirmation-bias dynamics
+are not a perfectly deterministic interaction between biased and stabilizing
+agents. It activates independently of market fundamentals and keeps the market
+microstructure comparable with other behavioral-bias scenarios.
+
+#### 4.5.4  Behavioral Framework
 
 P(trade) = 0.30; direction 50/50; Q ~ Uniform(100, 500).
 
@@ -455,8 +462,29 @@ P(trade) = 0.30; direction 50/50; Q ~ Uniform(100, 500).
 | min_order         | 100   | Convention   |
 | max_order         | 500   | Convention   |
 
+#### 4.5.5  Decision Process Walkthrough
 
-## 5. Agent Diversity Verification
+1. Draw a Bernoulli trade decision with probability 0.30.
+2. If no trade is drawn, submit a hold order with zero quantity.
+3. If a trade is drawn, choose buy or sell with equal probability.
+4. Draw quantity uniformly from 100 to 500 shares, then apply cash or position
+   limits before submitting the order.
+
+#### 4.5.6  Worked Numerical Example
+
+Given price = 100, cash = 20,000, position = 0, and a buy draw with quantity
+350, the NoiseTrader submits `action=buy`, `quantity=200` after applying the
+cash constraint. If the draw is sell with zero position, quantity is constrained
+to zero and the order becomes hold-equivalent.
+
+#### 4.5.7  Academic References
+
+| # | Reference | Use |
+|---|-----------|-----|
+| 1 | Black, F. (1986). "Noise." *Journal of Finance*, 41(3), 529–543. DOI: 10.2307/2328481 | Uninformed trading and background liquidity |
+
+
+## §5 Agent Diversity Verification
 
 Diversity Check:
 - Different bias mechanisms: BeliefAnchor (belief-state compounding); SelectiveScanner (asymmetric position-based response); BalancedAnalyst (rational baseline); ContrarianTrader (active bias-fader); NoiseTrader (random)
@@ -466,7 +494,7 @@ Diversity Check:
 - Unique feature: BeliefAnchor is the only agent in the entire simulation suite with a persistent cross-round internal state variable (belief), making ConfirmationBias the most psychologically realistic simulation
 
 
-## 6. Parameter Table
+## §6 Parameter Table
 
 | Parameter                             | Value | Source Citation                          | Description                                             | Sensitivity                                         |
 |---------------------------------------|-------|------------------------------------------|---------------------------------------------------------|-----------------------------------------------------|
@@ -485,7 +513,7 @@ Diversity Check:
 | NoiseTrader trade_probability         | 0.30  | Black (1986)                             | Per-round trade probability                             | Low                                                 |
 
 
-## 7. Communication and Round Structure
+## §7 Communication and Round Structure
 
 ```
 Round N:
@@ -505,7 +533,7 @@ Round N:
 Key difference: BeliefAnchor's `perceive()` step also updates the internal `belief` state based on deviation — belief updating happens BEFORE `decide()`, meaning the trade decision in each round reflects the fully updated belief.
 
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
 ### Event 1: Analyst Forecast Clustering and Confirmation Bias (Hong & Kubik, 2003)
 
@@ -525,7 +553,7 @@ Key difference: BeliefAnchor's `perceive()` step also updates the internal `beli
 **Lesson for Simulation**: The housing bubble demonstrates that when BeliefAnchor agents dominate (and initial_belief is uniformly positive across the population), the combined confirmation bias creates systemic mispricing that persists for years. The simulation's single BeliefAnchor represents a "representative biased agent" — in reality, much of the financial system played this role in 2004–2007.
 
 
-## 9. Variant Comparison Preview
+## §9 Variant Comparison Preview
 
 | Aspect            | Rule                                                   | LLM                                                                              | RuleLLM                                           | Rag                                                                     |
 |-------------------|--------------------------------------------------------|----------------------------------------------------------------------------------|---------------------------------------------------|-------------------------------------------------------------------------|

@@ -76,10 +76,10 @@ patternmatcher:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_PATTERN_MATCHER_SYS"
+        sys_message: "examples.RepresentativenessBias.Rag.prompts:RULELLM_PATTERN_MATCHER_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.8
           max_tokens: 600
@@ -122,10 +122,10 @@ categoryovergeneralizer:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_CATEGORY_OVERGENERALIZER_SYS"
+        sys_message: "examples.RepresentativenessBias.Rag.prompts:RULELLM_CATEGORY_OVERGENERALIZER_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 600
@@ -168,10 +168,10 @@ bayesianupdater:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_BAYESIAN_UPDATER_SYS"
+        sys_message: "examples.RepresentativenessBias.Rag.prompts:RULELLM_BAYESIAN_UPDATER_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 600
@@ -214,10 +214,10 @@ contrarianstatistical:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_CONTRARIAN_STATISTICAL_SYS"
+        sys_message: "examples.RepresentativenessBias.Rag.prompts:RULELLM_CONTRARIAN_STATISTICAL_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 600
@@ -260,10 +260,10 @@ noisetrader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.RepresentativenessBias.Rag.prompts:RAG_NOISE_TRADER_SYS"
+        sys_message: "examples.RepresentativenessBias.Rag.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.RepresentativenessBias.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.95
           max_tokens: 600

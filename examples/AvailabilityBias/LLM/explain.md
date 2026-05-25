@@ -1,182 +1,93 @@
-# AvailabilityBias LLM — Simulation Documentation
+# AvailabilityBias LLM — Implementation Explanation
 
-## Overview
+## §1 Overview
 
-| Item                      | Description                                                                                                                                   |
-|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| **Variant**               | LLM                                                                                                                                           |
-| **Implements**            | `../simulation-bases.md`                                                                                                                      |
-| **Decision Logic**        | Persona-only LLM prompts; no embedded quantitative rules; availability bias archetypes drive decisions through behavioral reasoning           |
-| **Key Difference**        | Agents exhibit psychological availability bias (recency effects, media influence, analytical discipline) without formula constraints          |
-| **Research Contribution** | Tests whether pure behavioral personas reproduce availability bias dynamics (overreaction, partial correction) through emergent LLM reasoning |
+| Item | Description |
+|---|---|
+| Variant | LLM |
+| Simulation | AvailabilityBias |
+| Decision Mechanism | Persona-only LLM prompts with the shared trading JSON parser |
+| Theory Reference | `simulation-bases.md §2` and investor designs in `simulation-bases.md §4` |
+| Market Broadcast | `price`, `prev_price`, `fundamental`, `deviation`, `return_pct`, `volume`, `round` |
 
+## §2 Theory → Implementation Mapping
 
-## 1. How Theoretical Design Is Implemented
+### §2.1 LLMRecentEventOverweighter (simulation-bases.md §4.1)
 
-### LLMRecentEventOverweighter: Theory → Implementation Mapping
+| Theory Component | Implementation |
+|---|---|
+| Salient recent events dominate attention | `LLM_RECENT_EVENT_OVERWEIGHTER_SYS` describes vivid recent moves as the main decision influence. |
+| No explicit formula in LLM mode | Prompt remains persona-only; it receives `return_pct` and `deviation` but no fixed threshold. |
+| Bounded trading | `players.py` enforces cash and inventory limits after parsing the decision. |
 
-*(Theory defined in simulation-bases.md §4.1 — Tversky & Kahneman, 1973)*
+### §2.2 LLMMediaInfluencedTrader (simulation-bases.md §4.2)
 
-| Theoretical Design Element              | Implementation                                                                                     |
-|-----------------------------------------|----------------------------------------------------------------------------------------------------|
-| Recency amplification of salient events | Prompt: "Recent dramatic price moves feel vivid and representative — you act on them strongly"     |
-| Overweights return_pct vs. deviation    | Prompt context includes `{return_pct}` prominently; agent trained to over-interpret recent returns |
-| Symmetric bias (up and down)            | Prompt: "Whether prices just spiked up or crashed, you react strongly to the recent move"          |
-| Fades as event recedes                  | Prompt: "As time passes without new dramatic moves, your urgency gradually fades"                  |
+| Theory Component | Implementation |
+|---|---|
+| Media salience affects judgment | `LLM_MEDIA_INFLUENCED_TRADER_SYS` makes headlines and social narratives the qualitative driver. |
+| Narrative amplification | Prompt asks the agent to reason about whether deviation would attract broad media attention. |
+| Bounded trading | Parsed action is constrained by cash or position. |
 
-### LLMMediaInfluencedTrader: Theory → Implementation Mapping
+### §2.3 LLMSystematicAnalyst (simulation-bases.md §4.3)
 
-*(Theory defined in simulation-bases.md §4.2 — Schwarz et al., 1991; Tetlock, 2007)*
+| Theory Component | Implementation |
+|---|---|
+| Objective evidence weighting | `LLM_SYSTEMATIC_ANALYST_SYS` emphasizes price, fundamental value, and deviation. |
+| Availability resistance | Prompt explicitly resists vivid stories and recent moves. |
+| Stabilizing role | Parsed buy/sell decisions are applied against the current market state. |
 
-| Theoretical Design Element          | Implementation                                                                                     |
-|-------------------------------------|----------------------------------------------------------------------------------------------------|
-| Social amplification of deviation   | Prompt: "You track what financial media and social networks would be saying about this price move" |
-| Herding under media narrative       | Prompt: "If the story is compelling, you follow the narrative even if fundamentals say otherwise"  |
-| Amplified by magnitude of deviation | Prompt: "The bigger the deviation, the louder the media narrative you imagine"                     |
-| Fades when narrative reverses       | Prompt: "When media coverage shifts, you follow the new narrative with equal conviction"           |
+### §2.4 LLMValueTrader (simulation-bases.md §4.4)
 
-### LLMSystematicAnalyst: Theory → Implementation Mapping
+| Theory Component | Implementation |
+|---|---|
+| Fundamental-value discipline | `LLM_VALUE_TRADER_SYS` prioritizes margin of safety and patient contrarian behavior. |
+| Narrative resistance | Prompt instructs the trader to ignore short-lived narratives. |
+| Bounded trading | Parsed quantity is limited by cash or inventory. |
 
-*(Theory defined in simulation-bases.md §4.3 — Mullainathan, 2002)*
+### §2.5 LLMNoiseTrader (simulation-bases.md §4.5)
 
-| Theoretical Design Element   | Implementation                                                                                      |
-|------------------------------|-----------------------------------------------------------------------------------------------------|
-| Bayesian rational processing | Prompt: "You are disciplined and rational — you ignore recent noise and focus only on fundamentals" |
-| Ignores return_pct signal    | Prompt: "You do not react to short-term price moves; only fundamental deviation matters to you"     |
-| Systematic counter-trading   | Prompt: "When prices deviate significantly from fundamental, you trade against the deviation"       |
-| Evidence-based conviction    | Prompt: "You require clear evidence of mispricing before acting — you are not impulsive"            |
+| Theory Component | Implementation |
+|---|---|
+| Uninformed liquidity | `LLM_NOISE_TRADER_SYS` produces weakly motivated buy/sell/hold decisions. |
+| No systematic signal | Prompt does not assign formulaic meaning to return or deviation. |
+| Bounded trading | Shared parser and portfolio constraints still apply. |
 
-### LLMValueTrader: Theory → Implementation Mapping
+## §3 Market Mechanism
 
-*(Theory defined in simulation-bases.md §4.4 — Graham, 1949)*
+The LLM variant reuses the Rule market implementation. Only investor decision logic changes from deterministic formulas to persona-driven LLM output.
 
-| Theoretical Design Element         | Implementation                                                                                         |
-|------------------------------------|--------------------------------------------------------------------------------------------------------|
-| Fundamental value discipline       | Prompt: "You are a value investor — you only trade when deviation from intrinsic value is significant" |
-| Ignores media and recency entirely | Prompt: "You deliberately ignore recent price action and media narratives"                             |
-| Deep discount/premium threshold    | Prompt: "You require a substantial margin of safety before committing capital"                         |
-| Patient accumulation               | Prompt: "You are patient — you do not rush; you wait for compelling value opportunities"               |
+## §4 Variant Architecture
 
-### LLMNoiseTrader: Theory → Implementation Mapping
+| Component | Implementation |
+|---|---|
+| Inference | `LangChainAPIInference` using `lm_name` from config |
+| Prompt Contract | `<analysis>...</analysis>` plus `<decision>{...}</decision>` |
+| Parser | `parse_llm_response_with_thinking` |
+| Retry Logic | Bounded retries for parser or retryable API errors |
+| Failure Policy | After retries, invalid parser output raises; it does not create a silent hold fallback. |
 
-*(Theory defined in simulation-bases.md §4.5 — Black, 1986)*
+## §5 Config Reference
 
-| Theoretical Design Element | Implementation                                                                          |
-|----------------------------|-----------------------------------------------------------------------------------------|
-| Uninformed random trader   | Prompt: "You do not have a clear strategy — you trade on gut feeling and impulse"       |
-| No systematic signal       | Prompt: "Sometimes you buy into rising markets, sometimes into falling ones — randomly" |
+Primary config: `configs/AvailabilityBias/LLM/simulation.yml`.
+Each investor config supplies `llm.sys_message`, `llm.user_message`, `lm_name`, and `generation_config`.
 
-
-## 2. Market Mechanism Implementation
-
-Market mechanism is **identical** to Rule variant — only investor decision logic changes.
-
-*(Full formula: simulation-bases.md §3.1 — P(t+1) = P(t) + 0.01·D + 0.02·(F−P) + ε)*
-
-### LLM User Prompt Variables
-
-| Variable            | Source                  | Format  | Notes                                                     |
-|---------------------|-------------------------|---------|-----------------------------------------------------------|
-| `{round}`           | market_data.round       | integer | Current simulation round                                  |
-| `{price}`           | market_data.price       | float   | Current price                                             |
-| `{prev_price}`      | market_data.prev_price  | float   | Previous round price                                      |
-| `{return_pct}`      | market_data.return_pct  | `+.2%`  | **Unique to AvailabilityBias** — recent return percentage |
-| `{deviation}`       | market_data.deviation   | `+.2%`  | Fundamental deviation signal                              |
-| `{fundamental}`     | market_data.fundamental | float   | Fundamental value reference                               |
-| `{cash}`            | agent state             | float   | Available cash                                            |
-| `{position}`        | agent state             | float   | Current position (shares)                                 |
-| `{portfolio_value}` | cash + pos × price      | float   | Total portfolio value                                     |
-
-### Response Format
-
-LLM must output canonical JSON inside `<decision>` tags:
-```json
-{"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": "string"}
-```
-
-Parsed by `parse_llm_response_with_thinking()` from `examples/llm_utils.py`.
-
-
-## 3. Variant-Specific Features
-
-- **Availability bias through persona**: `LLM_*_SYS` prompts encode the cognitive distortion directly — RecencyOverweighter's persona overweights `return_pct` without numerical formula; effect emerges from persona interpretation
-- **return_pct prominently featured**: Unlike other simulations, prompt includes `{return_pct}` as a key signal; RecencyOverweighter's persona naturally gravitates to it
-- **Dual-channel interaction**: LLMRecentEventOverweighter and LLMMediaInfluencedTrader may interact through price momentum — first amplifies return, second amplifies resulting deviation
-- **Variable bias onset**: LLM agents may begin overreacting before or after the formula threshold; run-to-run variance is higher than Rule
-- **Denial risk**: LLMSystematicAnalyst may be contaminated by availability framing in prompt context; its "rationality" can waver
-
-
-## 4. Architecture Diagram
-
-```
-Round t:
-  ┌─────────────────────────────────────────────────────┐
-  │  Market (Rule — identical to Rule)                  │
-  │  P(t+1) = P(t) + 0.01·D + 0.02·(F−P) + ε          │
-  │  Broadcasts: {price, prev_price, fundamental,       │
-  │               deviation, return_pct, round}         │
-  └─────────────────┬───────────────────────────────────┘
-                    │ market_data (includes return_pct)
-        ┌───────────┼───────────────────────┐
-        ▼           ▼           ▼           ▼
-  ┌──────────────┐ ┌───────────────┐ ┌──────────────┐ ┌──────────────┐
-  │LLMRecent     │ │LLMMedia       │ │LLMSystematic │ │LLMValue      │
-  │Event         │ │Influenced     │ │Analyst        │ │Trader        │
-  │Overweighter  │ │Trader         │ │(rational      │ │(value        │
-  │(recency bias)│ │(media bias)   │ │ benchmark)    │ │ discipline)  │
-  └──────────────┘ └───────────────┘ └──────────────┘ └──────────────┘
-        │                │               │                    │
-        └────────────────┴───────────────┴────────────────────┘
-                         │ investor_bid orders
-                         ▼
-                 Market aggregates
-                 LLMNoise also contributes
-```
-
-
-## 5. Configuration Reference
-
-| Config Path                 | Key Parameter  | Value               | Notes                                                     |
-|-----------------------------|----------------|---------------------|-----------------------------------------------------------|
-| `*.extras.llm.sys_message`  | System prompt  | per agent           | Availability bias persona (no numerical formulas)         |
-| `*.extras.llm.user_message` | User template  | `LLM_USER_TEMPLATE` | Includes `{return_pct}` in addition to standard variables |
-| `*.extras.llm.lm_name`      | LLM model name | configured          | e.g., `doubao-pro-32k`                                    |
-
-Full config: `configs/AvailabilityBias/LLM/players.yml`
-
-
-## 6. Running Instructions
+## §6 Running Instructions
 
 ```bash
-# From project root:
 python examples/AvailabilityBias/LLM/run_availabilitybias_llm.py \
-    -c configs/AvailabilityBias/LLM/simulation.yml
-
-# Run analysis:
-python examples/AvailabilityBias/Rule/analysis.py \
-    -c configs/AvailabilityBias/LLM/simulation.yml
+  -c configs/AvailabilityBias/LLM/simulation.yml
 ```
 
-Output: `EXPERIMENT/AvailabilityBias/LLM/records/`
+## §7 Expected Behavior
 
+- Persona-only agents may express stronger or weaker availability bias than the Rule baseline.
+- SystematicAnalyst should not cite recent salience as a reason to overreact.
+- All successful runs should have parse-valid decisions and no fallback-hold substitutions.
 
-## 7. Expected Behavior Patterns
+## §8 References
 
-| Phase             | Deviation Range  | LLM-Specific Behavior                                                                            |
-|-------------------|------------------|--------------------------------------------------------------------------------------------------|
-| **Pre-Event**     | [−2%, +2%]       | Agents hold; LLM personas recognize stability                                                    |
-| **Event Trigger** | first large move | LLMRecentEventOverweighter reacts to return_pct; may over-react before Rule's salience threshold |
-| **Bias Peak**     | [3%–15%]         | LLMMediaInfluencedTrader amplifies based on deviation narrative; higher amplitude than Rule      |
-| **Correction**    | Declining        | LLMSystematicAnalyst + LLMValueTrader counter-trade; may be delayed by "denial" framing          |
-| **Stabilization** | Near 0%          | High variance; some runs may not fully correct within 100 rounds                                 |
+See `simulation-bases.md §2` for full DOI citations.
 
+## §9 Variant Comparison
 
-## 8. References
-
-*(Theory sections from simulation-bases.md — cross-reference only)*
-
-- `../simulation-bases.md §4.1, §4.2` — RecencyOverweighter and MediaInfluencedTrader archetypes
-- `../simulation-bases.md §4.3, §4.4` — SystematicAnalyst and ValueTrader archetypes
-- `../simulation-bases.md §5` — LLM variant description
-- `../analysis-bases.md §6` — Expected LLM result ranges (higher bias amplitude)
-- `prompts.py → LLM_*_SYS` — Behavioral persona prompts with availability bias encoding
+See `simulation-bases.md §9` for Rule / LLM / RuleLLM / Rag comparison.

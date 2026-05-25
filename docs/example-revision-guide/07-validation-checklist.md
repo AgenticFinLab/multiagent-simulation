@@ -6,6 +6,15 @@ This file defines the **final verification gates** that must all pass before a s
 
 The checklist is organized in four layers — from structure down to cross-consistency. Each layer must pass completely before moving to the next.
 
+For full-round batch execution readiness, also apply
+`docs/experiment-preflight-skill/00-overview.md` and complete
+`docs/experiment-preflight-skill/06-launch-readiness-checklist.md` after this
+checklist passes.
+
+After validation, apply the runtime drift and rerun decision in
+`06-execution-order.md §2 Phase 7` before deciding whether previous experiment
+samples can be inherited.
+
 ---
 
 ## Layer 1 — File Existence
@@ -115,7 +124,7 @@ done
 ```bash
 for variant in Rule LLM RuleLLM Rag; do
   echo "=== $variant/analysis.md ==="
-  # Must have 5 sections
+  # Must have 7 sections
   grep -c "^## §" examples/<Scenario>/$variant/analysis.md
   # Must reference analysis-bases.md
   grep -c "analysis-bases.md §2\." examples/<Scenario>/$variant/analysis.md
@@ -125,12 +134,15 @@ done
 ```
 
 **Checklist** (for each variant):
-- [ ] 5 sections present (§1–§5)
+- [ ] 7 sections present (§1–§7)
 - [ ] §2 metric table has all 7 metrics
 - [ ] Every metric row has `analysis-bases.md §2.X` reference
-- [ ] §3 has variant-specific notes (not generic)
-- [ ] §4 expected ranges are numeric (no "varies by scenario")
-- [ ] §5 references both `analysis-bases.md §2` and `simulation-bases.md §4`
+- [ ] §3 maps analysis dimensions to implementation and interpretation
+- [ ] §4 lists variant-specific observable phenomena
+- [ ] §5 has scaling or sensitivity expectations
+- [ ] §6 lists expected output files
+- [ ] §7 explains cross-variant comparison and cites `analysis-bases.md §5`
+- [ ] Expected ranges are numeric where stated (no "varies by scenario")
 
 ---
 
@@ -290,7 +302,8 @@ print(f'Total violations: {count}')
 grep -rn 'if .* else [0-9]' examples/<Scenario>/*/players.py examples/<Scenario>/*/analysis.py \
   | grep -v 'plt\.' | grep -v '#' | grep -v 'color' | wc -l
 
-# Detect silent hold on LLM failure
+# Detect fallback on LLM failure; each hit must be explicit, counted/logged,
+# and covered by post-run quality review.
 grep -rn 'decision is None' examples/<Scenario>/*/players.py | grep -v 'raise' | wc -l
 ```
 
@@ -298,6 +311,9 @@ grep -rn 'decision is None' examples/<Scenario>/*/players.py | grep -v 'raise' |
 - [ ] `.get(key, default)` violation count: `0`
 - [ ] `if X else fallback` count: `0`
 - [ ] Silent hold on LLM failure count: `0`
+- [ ] Explicit stochastic API fallback count is documented; fallback rate is
+      `0`, or `>0` and `<=1%` with a quality note; `>1%` requires quality
+      review, rerun, repair, or scenario-specific justification.
 
 ---
 
@@ -344,6 +360,38 @@ grep "`[a-z_]*(" examples/<Scenario>/Rule/analysis.md
 
 ---
 
+## Layer 5 — Rerun Decision
+
+Complete this layer before marking a revised simulation ready for experiment
+consolidation.
+
+```bash
+git diff --name-only -- examples/<Scenario> configs/<Scenario>
+```
+
+Classify changed files:
+
+- `docs-inherited`: only docs changed (`simulation-bases.md`,
+  `analysis-bases.md`, `{Variant}/explain.md`, `{Variant}/analysis.md`).
+- `rerun-required-runtime-change`: any runtime input changed (`players.py`,
+  `prompts.py`, `configs/`, parser/fallback logic, market/order construction,
+  topology, model id, RAG embedding/index config, or player counts).
+- `legacy-clean`: previous sample is clean but belongs to an older runtime
+  input set.
+
+**Checklist**:
+- [ ] Every changed file is classified as docs-only or runtime-input.
+- [ ] Existing clean samples are not marked failed solely because of branch
+      drift.
+- [ ] Docs-only repairs inherit existing clean samples with a `docs-inherited`
+      note.
+- [ ] Runtime-input repairs mark only affected modes for rerun.
+- [ ] RuleLLM prompt-rule changes also mark Rag for rerun if Rag aliases
+      RuleLLM prompts.
+- [ ] The decision is recorded in the experiment ledger before rerun launch.
+
+---
+
 ## §5 Validation Pass/Fail Summary
 
 Use this table to track results:
@@ -374,6 +422,7 @@ Use this table to track results:
 | Layer 4 | §4.N numbering consistency    | PASS / FAIL |
 | Layer 4 | Investor count consistency    | PASS / FAIL |
 | Layer 4 | Function name consistency     | PASS / FAIL |
+| Layer 5 | Rerun decision                | PASS / FAIL |
 
 Overall: COMPLETE / INCOMPLETE
 ```

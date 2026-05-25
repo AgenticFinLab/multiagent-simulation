@@ -1,6 +1,6 @@
 # ArchegosCollapse RuleLLM — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                                   | Description                                                                                                                                                             |
 |----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,12 +12,12 @@
 
 ---
 
-## 1. How Theoretical Design Is Implemented
+## §2 Theory → Implementation Mapping
 
 ### ConcentratedFund: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — ConcentratedFund)*
+*(Theory defined in simulation-bases.md §4.1 — ConcentratedFund)*
 
-| Theoretical Design Element                                            | Implementation                                                                                   |
+| Theory Component                                                      | Implementation                                                                                   |
 |-----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
 | TRS leverage / margin call → sim-bases §4 Rule-Based Behavior         | `RULELLM_CONCENTRATED_FUND_SYS` `== DECISION RULES ==`: Step 2 `IF deviation < -0.15 → SELL 50%` |
 | Embedded rule threshold = −0.15 → sim-bases §6                        | Hard-coded in prompt: "IF deviation < -0.15 (price dropped >15% below fundamental)"              |
@@ -26,44 +26,44 @@
 | Prompt constant                                                       | `RULELLM_CONCENTRATED_FUND_SYS` in `prompts.py`                                                  |
 
 ### PrimeBroker1: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — PrimeBroker1)*
+*(Theory defined in simulation-bases.md §4.2 — PrimeBroker1)*
 
-| Theoretical Design Element                              | Implementation                                                                     |
+| Theory Component                                        | Implementation                                                                     |
 |---------------------------------------------------------|------------------------------------------------------------------------------------|
 | Lower threshold (first-mover) = −0.10 → sim-bases §4    | `== DECISION RULES ==`: "IF deviation < -0.10 → SELL 40% of position"              |
 | Sell 40% base, ±20% → sim-bases §4 RuleLLM Hybrid Notes | "Step 3: PERSONA (speed urgency) may adjust quantity ±20% (32%–48%)"               |
 | Aggressive / unsentimental → sim-bases §4 LLM Persona   | `== PERSONA ==`: "decisive, competitive, unsentimental about client relationships" |
 
 ### PrimeBroker2: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — PrimeBroker2)*
+*(Theory defined in simulation-bases.md §4.3 — PrimeBroker2)*
 
-| Theoretical Design Element                                         | Implementation                                                                                   |
+| Theory Component                                                   | Implementation                                                                                   |
 |--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
 | Higher threshold (second-mover) = −0.15 → sim-bases §4             | `== DECISION RULES ==`: "IF deviation < -0.15 → SELL 35%"; "effective_bid_price = market × 0.97" |
 | Price penalty embedded in rule → sim-bases §4 RuleLLM Hybrid Notes | Rule instructs: "effective_bid_price = market_price × 0.97"                                      |
 | Delayed but deliberate persona → sim-bases §4 LLM Persona          | `== PERSONA ==`: "slower and more conservative, but equally unsentimental once you decide"       |
 
 ### BlockTradeBuyer: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — BlockTradeBuyer)*
+*(Theory defined in simulation-bases.md §4.4 — BlockTradeBuyer)*
 
-| Theoretical Design Element                               | Implementation                                                                       |
+| Theory Component                                         | Implementation                                                                       |
 |----------------------------------------------------------|--------------------------------------------------------------------------------------|
 | Buy at −10% discount → sim-bases §4 Rule-Based Behavior  | `== DECISION RULES ==`: "IF deviation < -0.10 → BUY: quantity = 0.30 × cash / price" |
 | Deploy 30% cash base, ±20% → sim-bases §4 RuleLLM Hybrid | "Step 3: PERSONA (deep-pocket buyer) may adjust ±20% (24%–36%)"                      |
 | Deep-pocket patience persona → sim-bases §4 LLM Persona  | `== PERSONA ==`: "you have deep pockets and patience — wait for forced sellers"      |
 
 ### InformationTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — InformationTrader)*
+*(Theory defined in simulation-bases.md §4.5 — InformationTrader)*
 
-| Theoretical Design Element                                        | Implementation                                                                                      |
+| Theory Component                                                  | Implementation                                                                                      |
 |-------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
 | Detect at −0.05, probability 0.50 → sim-bases §4 Rule-Based       | `== DECISION RULES ==`: "IF deviation < -0.05 AND detection probability 0.50 → SELL min(1000, pos)" |
-| Cover at −0.03 → sim-bases §4                                     | Rule: "ELSE IF deviation > -0.03 AND short_position < 0 → BUY min(500,                              |
+| Cover at −0.03 → sim-bases §4                                     | `== DECISION RULES ==`: buy up to 500 shares when recovery conditions indicate prior front-run exposure should be covered |
 | Front-runner / fast analytical persona → sim-bases §4 LLM Persona | `== PERSONA ==`: "fast, analytical, and unafraid of being early"                                    |
 
 ---
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 *Formula source: simulation-bases.md §3.1*
 
@@ -84,7 +84,7 @@ Deviations from simulation-bases.md design: None in market mechanics.
 
 ---
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 *(Reference: simulation-bases.md §9 — RuleLLM variant entry)*
 
@@ -100,7 +100,7 @@ Deviations from simulation-bases.md design: None in market mechanics.
 
 ---
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
@@ -129,20 +129,22 @@ Prompt Structure:
 
 ---
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 Key Configuration Parameters (`configs/ArchegosCollapse/RuleLLM/players.yml`):
 
-| Parameter         | Config Path              | Value                                                 | Design Justification                                     |
-|-------------------|--------------------------|-------------------------------------------------------|----------------------------------------------------------|
-| `price_impact`    | `extras.price_impact`    | 0.03                                                  | Identical to Rule — comparable market dynamics           |
-| `mean_reversion`  | `extras.mean_reversion`  | 0.01                                                  | Same low γ — cascade persistence                         |
-| `sys_prompt_path` | `extras.sys_prompt_path` | `examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_*` | Module path for dual-section prompts                     |
-| `llm.temperature` | `extras.llm.temperature` | 0.3                                                   | Low temperature — closer to deterministic rule-following |
+| Parameter | Config Path | Value | Design Justification |
+|---|---|---|---|
+| `price_impact` | `extras.price_impact` | 0.03 | Identical to Rule — comparable market dynamics |
+| `mean_reversion` | `extras.mean_reversion` | 0.01 | Same low gamma — cascade persistence |
+| `sys_message` | `extras.llm.sys_message` | `examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_*_SYS` | Module path for dual-section prompts |
+| `user_message` | `extras.llm.user_message` | `examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE` | Module path for market-state user template |
+| `lm_name` | `extras.llm.lm_name` | `ark/doubao-seed-2-0-mini-260428` | ByteDance Ark Doubao model |
+| `temperature` | `extras.llm.generation_config.temperature` | 0.4-0.5 | Low temperature — closer to deterministic rule-following |
 
 ---
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 export ARK_API_KEY="your-bytedance-ark-api-key"
@@ -153,13 +155,13 @@ python examples/ArchegosCollapse/RuleLLM/run_archegsoscollapse_rulellm.py \
 Required environment variables:
 - `ARK_API_KEY`: ByteDance Doubao API key
 
-Expected runtime: ~5–20 minutes for 100 rounds
+Expected runtime: ~5–20 minutes for 200 rounds
 
 Output location: `EXPERIMENT/ArchegosCollapse/RuleLLM/`
 
 ---
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase         | Rounds | Expected Agent Behavior                                                             | Expected Price Dynamics                                       |
 |---------------|--------|-------------------------------------------------------------------------------------|---------------------------------------------------------------|
@@ -170,7 +172,7 @@ Output location: `EXPERIMENT/ArchegosCollapse/RuleLLM/`
 
 ---
 
-## 8. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

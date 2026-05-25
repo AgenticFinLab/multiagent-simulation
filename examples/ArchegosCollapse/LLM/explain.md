@@ -1,6 +1,6 @@
 # ArchegosCollapse LLM — Implementation Explanation
 
-## Overview
+## §1 Overview
 
 | Item                                   | Description                                                                                                                                                        |
 |----------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -12,23 +12,23 @@
 
 ---
 
-## 1. How Theoretical Design Is Implemented
+## §2 Theory → Implementation Mapping
 
 ### ConcentratedFund: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — ConcentratedFund)*
+*(Theory defined in simulation-bases.md §4.1 — ConcentratedFund)*
 
-| Theoretical Design Element                                    | Implementation                                                                          |
+| Theory Component                                              | Implementation                                                                          |
 |---------------------------------------------------------------|-----------------------------------------------------------------------------------------|
 | TRS leverage psychology → simulation-bases.md §4 LLM Persona  | `LLM_CONCENTRATED_FUND_SYS` in `prompts.py`; "denial is your first response"            |
 | Denial response to margin pressure → sim-bases §4 LLM Persona | Prompt: "you are slow to react to margin pressure — denial is your first response"      |
 | Large abrupt selling when unavoidable → sim-bases §4          | Prompt: "when margin calls become unavoidable, your forced selling is large and abrupt" |
 | Position size range 40%–60% → sim-bases §4 LLM Persona        | No hardcoded rule; LLM must infer sell size from context and persona framing            |
-| Prompt constant → `prompts.py`                                | `LLM_CONCENTRATED_FUND_SYS` loaded via `extras.sys_prompt_path` in `players.yml`        |
+| Prompt constant → `prompts.py`                                | `LLM_CONCENTRATED_FUND_SYS` loaded via `extras.llm.sys_message` in `players.yml`        |
 
 ### PrimeBroker1: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — PrimeBroker1)*
+*(Theory defined in simulation-bases.md §4.2 — PrimeBroker1)*
 
-| Theoretical Design Element                                    | Implementation                                                                         |
+| Theory Component                                              | Implementation                                                                         |
 |---------------------------------------------------------------|----------------------------------------------------------------------------------------|
 | First-mover competitive psychology → sim-bases §4 LLM Persona | `LLM_PRIME_BROKER1_SYS`: "speed is paramount"; "first to act preserves the most value" |
 | Aggressive, decisive action → sim-bases §4 LLM Persona        | "you liquidate aggressively and quickly"; "act decisively when risk thresholds breach" |
@@ -36,35 +36,35 @@
 | Prompt constant                                               | `LLM_PRIME_BROKER1_SYS` in `prompts.py`                                                |
 
 ### PrimeBroker2: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — PrimeBroker2)*
+*(Theory defined in simulation-bases.md §4.3 — PrimeBroker2)*
 
-| Theoretical Design Element                         | Implementation                                                          |
+| Theory Component                                   | Implementation                                                          |
 |----------------------------------------------------|-------------------------------------------------------------------------|
 | Second-mover reluctance → sim-bases §4 LLM Persona | `LLM_PRIME_BROKER2_SYS`: "slower decision process, reluctant initially" |
 | Accepts price penalty → sim-bases §4 LLM Persona   | "accepts price penalties to complete liquidation quickly"               |
 | Amplifying role → sim-bases §4                     | "your selling accelerates the cascade triggered by the first broker"    |
 
 ### BlockTradeBuyer: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — BlockTradeBuyer)*
+*(Theory defined in simulation-bases.md §4.4 — BlockTradeBuyer)*
 
-| Theoretical Design Element                                | Implementation                                                                            |
+| Theory Component                                          | Implementation                                                                            |
 |-----------------------------------------------------------|-------------------------------------------------------------------------------------------|
 | Opportunistic discount-seeking → sim-bases §4 LLM Persona | `LLM_BLOCK_TRADE_BUYER_SYS`: "wait for dislocations — when forced sellers must unload"    |
 | Deploy fixed capital ratio → sim-bases §4 LLM Persona     | "deploy capital aggressively"; LLM decides actual ratio based on perceived discount depth |
 | Stabilizing force → sim-bases §4                          | "you are the stabilizing force that ultimately limits the cascade"                        |
 
 ### InformationTrader: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4 — InformationTrader)*
+*(Theory defined in simulation-bases.md §4.5 — InformationTrader)*
 
-| Theoretical Design Element                                 | Implementation                                                                          |
+| Theory Component                                           | Implementation                                                                          |
 |------------------------------------------------------------|-----------------------------------------------------------------------------------------|
 | Order-flow detection capability → sim-bases §4 LLM Persona | `LLM_INFORMATION_TRADER_SYS`: "you specialize in reading unusual order flow patterns"   |
-| Short-then-cover pattern → sim-bases §4 LLM Persona        | "sell quickly to profit from the decline"; "cover your short positions when stabilized" |
+| Front-run then rebuild pattern → sim-bases §4 LLM Persona  | "sell exposure ahead of the selling wave"; "buy back exposure when stabilized"          |
 | Amplifies then aids price discovery → sim-bases §4         | "your front-running amplifies the initial decline but helps price discovery"            |
 
 ---
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 *Formula source: simulation-bases.md §3.1*
 
@@ -95,7 +95,7 @@ Deviations from simulation-bases.md design: None in market mechanics. Investor d
 
 ---
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 *(Reference: simulation-bases.md §9 — LLM variant entry)*
 
@@ -105,13 +105,16 @@ Deviations from simulation-bases.md design: None in market mechanics. Investor d
 
 **Stochastic cascade timing**: Each LLM call is independent; the ConcentratedFund persona may "hold" several rounds after margin pressure appears (denial phase) before finally selling. This makes cascade onset variable across runs.
 
-**JSON parsing failure handling**: If LLM response fails JSON parse, `parse_llm_response_with_thinking()` returns a default hold action to prevent simulation crash.
+**JSON parsing failure handling**: `LLMInvestor.decide()` retries malformed or
+transient failures up to three times. If no valid canonical decision is
+available after retries, the row fails loudly with `RuntimeError`; it does not
+silently substitute a hold action.
 
 **API key**: `ARK_API_KEY` (ByteDance Doubao) must be set as environment variable; loaded via `load_dotenv()` in `perceive()`.
 
 ---
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
@@ -134,14 +137,14 @@ Deviations from simulation-bases.md design: None in market mechanics. Investor d
 ║  PrimeBroker1:      speed urgency → SELL aggressively                ║
 ║  PrimeBroker2:      delayed but ultimately SELL at worse price       ║
 ║  BlockTradeBuyer:   discount-seeking → BUY on dislocation            ║
-║  InformationTrader: signal detection → SELL / cover → BUY            ║
+║  InformationTrader: signal detection → SELL / rebuild exposure → BUY ║
 ║         │                                                             ║
 ║         └──── send orders → Market [next round]                       ║
 ╚══════════════════════════════════════════════════════════════════════╝
 
 LLM API Call Flow:
   LLMInvestor.decide()
-    ├── sys_prompt = load_prompt(extras["sys_prompt_path"])
+    ├── sys_prompt = load_prompt(extras["llm"]["sys_message"])
     ├── user_msg  = LLM_USER_TEMPLATE.format(**state)
     └── InferInput(sys=sys_prompt, user=user_msg)
           → LangChainAPIInference → API → response
@@ -151,21 +154,22 @@ LLM API Call Flow:
 
 ---
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 Key Configuration Parameters (`configs/ArchegosCollapse/LLM/players.yml`):
 
-| Parameter         | Config Path              | Value                                             | Design Justification                                    |
-|-------------------|--------------------------|---------------------------------------------------|---------------------------------------------------------|
-| `price_impact`    | `extras.price_impact`    | 0.03                                              | Same as Rule — comparable cascade mechanics             |
-| `mean_reversion`  | `extras.mean_reversion`  | 0.01                                              | Same as Rule — enables cascade persistence              |
-| `sys_prompt_path` | `extras.sys_prompt_path` | `examples.ArchegosCollapse.LLM.prompts:LLM_*_SYS` | Module path for LLM persona; loaded by `load_prompt()`  |
-| `llm.model`       | `extras.llm.model`       | `ep-*` (Doubao model endpoint)                    | ByteDance Doubao LLM endpoint                           |
-| `llm.temperature` | `extras.llm.temperature` | 0.7                                               | Moderate stochasticity — reproduces persona variability |
+| Parameter | Config Path | Value | Design Justification |
+|---|---|---|---|
+| `price_impact` | `extras.price_impact` | 0.03 | Same as Rule — comparable cascade mechanics |
+| `mean_reversion` | `extras.mean_reversion` | 0.01 | Same as Rule — enables cascade persistence |
+| `sys_message` | `extras.llm.sys_message` | `examples.ArchegosCollapse.LLM.prompts:LLM_*_SYS` | Module path for LLM persona; loaded by `load_prompt()` |
+| `user_message` | `extras.llm.user_message` | `examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE` | Module path for market-state user template |
+| `lm_name` | `extras.llm.lm_name` | `ark/doubao-seed-2-0-mini-260428` | ByteDance Ark Doubao model |
+| `temperature` | `extras.llm.generation_config.temperature` | 0.4-0.7 | Agent-specific stochasticity — reproduces persona variability |
 
 ---
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 export ARK_API_KEY="your-bytedance-ark-api-key"
@@ -176,13 +180,13 @@ python examples/ArchegosCollapse/LLM/run_archegsoscollapse_llm.py \
 Required environment variables:
 - `ARK_API_KEY`: ByteDance Doubao API key (required for all LLM calls)
 
-Expected runtime: ~5–20 minutes for 100 rounds (depends on API latency, 5 LLM calls per round)
+Expected runtime: ~5–20 minutes for 200 rounds (depends on API latency, 5 LLM calls per round)
 
 Output location: `EXPERIMENT/ArchegosCollapse/LLM/`
 
 ---
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase        | Rounds | Expected Agent Behavior                                                                    | Expected Price Dynamics                                         |
 |--------------|--------|--------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
@@ -194,7 +198,7 @@ Output location: `EXPERIMENT/ArchegosCollapse/LLM/`
 
 ---
 
-## 8. References
+## §9 References
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 

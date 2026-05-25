@@ -1,6 +1,6 @@
 # AsianFinancialCrisis Rule — Simulation Documentation
 
-## Overview
+## §1 Overview
 
 | Item                      | Description                                                                                                         |
 |---------------------------|---------------------------------------------------------------------------------------------------------------------|
@@ -11,13 +11,13 @@
 | **Research Contribution** | Establishes the theoretical minimum behavioral complexity needed to reproduce Asian-crisis-style contagion dynamics |
 
 
-## 1. How Theoretical Design Is Implemented
+## §2 Theory to Implementation Mapping
 
 ### HotMoneyFunder: Theory → Implementation Mapping
 
-*(Theory defined in simulation-bases.md §2.1 — Radelet & Sachs, 1998)*
+Theory citation: `simulation-bases.md §4.1`.
 
-| Theoretical Design Element         | Implementation                                                                  |
+| Theory Component         | Implementation                                                                  |
 |------------------------------------|---------------------------------------------------------------------------------|
 | Hot money reversal at first stress | `if deviation < -reversal_threshold (0.02): sell sell_ratio (0.60) of position` |
 | Momentum entry on rising markets   | `if deviation > reversal_threshold (0.02): buy buy_ratio (0.30) of cash`        |
@@ -26,9 +26,9 @@
 
 ### ContagionTrader: Theory → Implementation Mapping
 
-*(Theory defined in simulation-bases.md §2.2 — Kaminsky & Reinhart, 1999)*
+Theory citation: `simulation-bases.md §4.2`.
 
-| Theoretical Design Element        | Implementation                                                                      |
+| Theory Component        | Implementation                                                                      |
 |-----------------------------------|-------------------------------------------------------------------------------------|
 | Dual-signal contagion detection   | `signal = contagion_weight × deviation + cross_border_sensitivity × price_return`   |
 | Regional crisis front-running     | `if signal < contagion_threshold (-0.025): sell sell_ratio (0.50) of position`      |
@@ -37,9 +37,9 @@
 
 ### IMFRescuer: Theory → Implementation Mapping
 
-*(Theory defined in simulation-bases.md §2.3 — Corsetti et al., 1999)*
+Theory citation: `simulation-bases.md §4.3`.
 
-| Theoretical Design Element     | Implementation                                                          |
+| Theory Component     | Implementation                                                          |
 |--------------------------------|-------------------------------------------------------------------------|
 | Patient emergency intervention | `if deviation < rescue_threshold (-0.05): buy buy_ratio (0.25) of cash` |
 | Deep pockets rescue packages   | `initial_cash = 5,000,000` (largest cash reserve of all agents)         |
@@ -48,9 +48,9 @@
 
 ### ValueContrarian: Theory → Implementation Mapping
 
-*(Theory defined in simulation-bases.md §2.4)*
+Theory citation: `simulation-bases.md §4.4`.
 
-| Theoretical Design Element | Implementation                                                                     |
+| Theory Component | Implementation                                                                     |
 |----------------------------|------------------------------------------------------------------------------------|
 | Buy deep discounts         | `if deviation < oversold_threshold (-0.08): buy buy_ratio (0.20) of cash`          |
 | Sell overbought            | `if deviation > overbought_threshold (+0.10): sell sell_ratio (0.20) of position`  |
@@ -58,15 +58,15 @@
 
 ### NoiseTrader: Theory → Implementation Mapping
 
-*(Theory defined in simulation-bases.md §2 — Black, 1986 baseline)*
+Theory citation: `simulation-bases.md §4.5`.
 
-| Theoretical Design Element | Implementation                                                        |
+| Theory Component | Implementation                                                        |
 |----------------------------|-----------------------------------------------------------------------|
 | Random uninformed trading  | `if random.random() < trade_probability (0.30): randomly buy or sell` |
 | Small position sizes       | `qty = random.randint(100, 500)` — smaller than institutional agents  |
 
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 ### Price Formation Formula
 
@@ -85,7 +85,7 @@
 Note: λ = 0.04 is significantly higher than typical developed-market simulations (0.001–0.005), reflecting the thin liquidity of 1997 East Asian currency/equity markets where moderate selling creates large price moves.
 
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 - **Pure threshold logic**: All agent decisions reduce to threshold comparisons on `deviation` or composite signals; no stochastic behavior beyond NoiseTrader
 - **Contagion signal uniqueness**: ContagionTrader is the only agent that uses `prev_price` (for `price_return`); this requires `Market.decide()` to broadcast `prev_price` in addition to other fields
@@ -93,7 +93,7 @@ Note: λ = 0.04 is significantly higher than typical developed-market simulation
 - **Two destabilizing agent pairs**: Both HotMoneyFunder (2 instances) and ContagionTrader (2 instances) are destabilizing; their combined selling dominates early-crisis dynamics
 
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 Round t:
@@ -121,7 +121,7 @@ Round t:
 ```
 
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 | Config Path                                   | Key Parameter    | Value  | Notes                            |
 |-----------------------------------------------|------------------|--------|----------------------------------|
@@ -136,7 +136,7 @@ Round t:
 Full config: `configs/AsianFinancialCrisis/Rule/players.yml`
 
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 # From project root:
@@ -151,7 +151,7 @@ python examples/AsianFinancialCrisis/Rule/analysis.py \
 Output: `EXPERIMENT/AsianFinancialCrisis/Rule/records/`
 
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase              | Deviation Range    | Dominant Agents                                | Observable Signal                                                            |
 |--------------------|--------------------|------------------------------------------------|------------------------------------------------------------------------------|
@@ -162,7 +162,7 @@ Output: `EXPERIMENT/AsianFinancialCrisis/Rule/records/`
 | **Recovery**       | Stabilizing > −20% | IMFRescuer + ValueContrarian                   | Mean reversion gradually restores; contagion sellers have exhausted position |
 
 
-## 8. References
+## §9 References
 
 *(Theory sections from simulation-bases.md — do not re-state; cross-reference only)*
 

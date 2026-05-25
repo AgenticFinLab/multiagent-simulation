@@ -1,43 +1,36 @@
-# HerdEffect RuleLLM — Analysis Documentation
+# Herd Effect RuleLLM Analysis Plan
 
-## §1 Analysis Objectives
+## §1 Objectives
 
-This variant tests whether the Rule+LLM hybrid preserves the emergent herding dynamics of the Rule baseline while adding narrative interpretability. Objectives:
-1. Confirm EMI and HVR remain within Rule baseline range (formula backbone preserved)
-2. Test if LLM overlay meaningfully affects REI (ContrarianInvestor qualitative judgment)
-3. Validate that RuleLLM provides explainable reasoning for each herding episode
-4. Measure residual variance from LLM component vs. pure Rule determinism
+This analysis checks whether the RuleLLM variant produces a complete, analyzable Herd Effect trajectory. It maps recorded price, fundamental, and volume series to the metric catalogue in `analysis-bases.md` and supports cross-variant comparison against the Rule baseline.
 
-## §2 Metric → Function Mapping
+## §2 Core Metrics
 
-| Metric                               | Function                                                           | analysis-bases.md ref |
-|--------------------------------------|--------------------------------------------------------------------|-----------------------|
-| Emergent Momentum Index (EMI)        | `emergent_momentum_index(price_history)`                           | §2.1                  |
-| Maximum Drawdown (MDD)               | `maximum_drawdown(price_history)`                                  | §2.2                  |
-| Agent Convergence Contribution (ACC) | `agent_convergence_contribution(agent_quantities, return_history)` | §2.3                  |
-| Risk-Averse Early Exit Index (REI)   | `risk_averse_early_exit_index(ra_position_history, price_history)` | §2.4                  |
-| Herding Volatility Ratio (HVR)       | `herding_volatility_ratio(return_history)`                         | §2.5                  |
-| Wealth Distribution Index (WDI)      | `wealth_distribution_index(agent_wealth)`                          | §2.6                  |
+| Metric | Function Contract | Source |
+|---|---|---|
+| Emergent Momentum Index | `def emergent_momentum_index(price_history: list) -> float` | `analysis-bases.md §2.1` |
+| Maximum Drawdown | `def maximum_drawdown(price_history: list) -> float` | `analysis-bases.md §2.2` |
+| Agent Convergence Contribution | `def agent_convergence_contribution(agent_quantities: dict, return_history: list, threshold: float = 0.01) -> dict` | `analysis-bases.md §2.3` |
+| Risk-Averse Early Exit Index | `def risk_averse_early_exit_index(ra_position_history: list, price_history: list, min_episode_length: int = 3) -> float` | `analysis-bases.md §2.4` |
+| Herding Volatility Ratio | `def herding_volatility_ratio(return_history: list, momentum_threshold: float = 0.01, quiet_threshold: float = 0.005) -> float` | `analysis-bases.md §2.5` |
+| Wealth Distribution Index | `def wealth_distribution_index(agent_wealth: list) -> float` | `analysis-bases.md §2.6` |
 
-## §3 RuleLLM-Specific Notes
+## §3 Analysis Dimensions
 
-- **Formula backbone**: RuleLLM formulas dominate → EMI should be close to Rule baseline (within ±20 %); deviations > 40 % indicate LLM override is too strong.
-- **ContrarianInvestor**: Reads `fundamental` from own `extras` (same as Rule) → REI should be similar; LLM narrative may slightly increase REI by adding qualitative overvaluation judgment.
-- **AggressiveInvestor**: Rule ±80 cap preserved → MDD bounded; no unbounded quantity risk as in pure LLM.
-- **Variance**: Lower run-to-run variance than LLM; higher than Rule; expect 3–7 seeds for convergence.
-- **Research use**: Compare RuleLLM reasoning traces against Rule behavior to identify where LLM adds value beyond formula.
+Analysis is performed by round, by agent type, by market phase, and by variant. The main comparison is whether RuleLLM preserves price deviation and mechanism intensity while changing the distribution of order flow relative to the deterministic baseline.
 
-## §4 Expected Ranges
+## §4 Phase Analysis
 
-| Metric            | RuleLLM Expected Range | vs. Rule Baseline | Interpretation                               |
-|-------------------|------------------------|-------------------|----------------------------------------------|
-| EMI               | 0.07 – 0.25            | Similar           | Formula backbone preserves momentum dynamics |
-| MDD               | 0.09 – 0.30            | Similar           | Rule ±80 cap bounds maximum drawdown         |
-| ACC (§4.1 + §4.5) | ≥ 48 % during momentum | Similar           | Formula drives momentum agent contribution   |
-| REI               | 0.38 – 0.72            | Slightly higher   | LLM may reinforce early exit narratively     |
-| HVR               | 1.4 – 4.0              | Similar           | Rule formula preserves volatility regime     |
-| WDI               | 0.05 – 0.25            | Similar           | Wealth distribution mirrors Rule arc         |
+The phase framework follows `analysis-bases.md §4`: initialization, mechanism activation, amplification or correction, and terminal stabilization. Each phase should be measured with state, activity, and dispersion metrics listed in §2.
 
-## §5 References
+## §5 Cross-Variant Comparison
 
-See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md §4` for agent parameter sources.
+Compare Rule, LLM, RuleLLM, and Rag on mechanism timing, peak intensity, final state, activity level, and structural quality. LLM-family variants should be reviewed for parse failures, explicit fallback counts, and whether stochastic decisions remain coherent.
+
+## §6 Expected Results and Validation Criteria
+
+Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and scenario-specific behavior consistent with the mechanism in `simulation-bases.md`.
+
+## §7 Visualization Catalogue
+
+Required outputs are `summary.json`, `00_investor_bids.png`, `01_herdeffect_dynamics.png`, `02_herdeffect_analysis.png`, and `03_summary.png`.

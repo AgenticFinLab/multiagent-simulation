@@ -1,6 +1,6 @@
 # AnchoringEffect Rag — Analysis Documentation
 
-## Overview
+## §1 Overview
 
 | Item                            | Description                                                                                                                                                                          |
 |---------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 
 ---
 
-## 2. Metric Implementation
+## §2 Metric Implementation
 
 All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is implemented in the Rag variant.
 
@@ -26,7 +26,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Mean Absolute Deviation (MAD)
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_mean_abs_deviation()`
+- Implemented in: `Rule/analysis.py → _compute_mad()`
 - Data source: market price records + fundamental value from config
 - Variant-specific notes: The delta between Rag MAD and RuleLLM MAD is the primary quantification of the RAG knowledge effect. Positive delta = knowledge reinforces anchoring; negative delta = knowledge aids price discovery.
 - Expected range for this variant: [2%, 13%]
@@ -34,7 +34,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Anchoring Persistence (Half-Life)
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_anchoring_persistence()`
+- Implemented in: `Rule/analysis.py → _compute_half_life()`
 - Data source: deviation time series
 - Variant-specific notes: If retrieved documents contain historical examples of anchoring persisting, half-life may increase vs. RuleLLM. If documents contain examples of anchoring being corrected, half-life may decrease.
 - Expected range for this variant: [15, 70] rounds
@@ -42,7 +42,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Rolling Volatility
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_rolling_volatility()`
+- Implemented in: `Rule/analysis.py → _compute_rolling_volatility()`
 - Data source: price return series
 - Variant-specific notes: Similar to RuleLLM baseline. Knowledge staleness effects may appear — if retrieved chunks reference outdated market conditions, agents may make inconsistent decisions, increasing volatility.
 - Expected range for this variant: [0.4%, 2.5%] per round
@@ -50,7 +50,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Return Autocorrelation
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_autocorrelation()`
+- Implemented in: `Rule/analysis.py → _compute_autocorrelation()`
 - Data source: price return series
 - Variant-specific notes: Knowledge-reinforced anchoring may produce higher autocorrelation than RuleLLM. Knowledge-aided correction may produce lower autocorrelation and faster mean-reversion.
 - Expected range for this variant: lag-1 AC in [0.03, 0.30]
@@ -58,7 +58,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Max Drawdown
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_max_drawdown()`
+- Implemented in: `Rule/analysis.py → _compute_max_drawdown()`
 - Data source: cumulative price series
 - Variant-specific notes: If retrieved knowledge reinforces sell signals during drawdown (historical crash narratives), Rag may show deeper drawdowns than RuleLLM. This is a testable hypothesis for RAG knowledge design.
 - Expected range for this variant: [3%, 24%]
@@ -66,7 +66,7 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Agent-Type Trading Volume
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_agent_volumes()`
+- Implemented in: `Rule/analysis.py → calculate_metrics()`
 - Data source: `EXPERIMENT/AnchoringEffect/Rag/records/{agent_id}/*.json`
 - Variant-specific notes: RAG retrieval may increase volume for agents whose knowledge base contains high-activity examples. Compare per-type volume to RuleLLM to isolate knowledge effects.
 - Expected range for this variant: similar to RuleLLM ±30%
@@ -74,24 +74,24 @@ All 8 metrics are defined in `analysis-bases.md §2`. Below: how each is impleme
 ### Metric: Anchoring Bias Magnitude
 
 - Defined in: `analysis-bases.md §2`
-- Implemented in: `analysis.py → calculate_anchoring_bias_magnitude()`
+- Implemented in: `Rule/analysis.py → _compute_bias_magnitude()`
 - Data source: Rag agent records (price, perceived_target from reasoning, bid_price)
 - Variant-specific notes: If anchoring-reinforcing documents are retrieved, bias magnitude may be higher than RuleLLM. If correction-supporting documents are retrieved, bias magnitude may be lower. Tracking retrieval query → retrieved document → bias magnitude enables knowledge effect attribution.
 - Expected range for this variant: [0.0, 0.6]
 
 ---
 
-## 3. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Price Dynamics Analysis
 
 Objective (from analysis-bases.md): Measure how anchoring-induced demand creates and sustains price deviations, with additional focus on knowledge retrieval effects on price discovery speed.
 
 Implementation in analysis.py:
-- Function: `analyze_price_dynamics()`
+- Function: `analyze_anchoring()`
 - Input data: market price records; fundamental value from config
 - Computation: deviation series, MAD, half-life, rolling volatility; overlay Rule and RuleLLM baselines for comparison
-- Output: `price_dynamics.png`, contribution to `summary.json`
+- Output: `01_price_dynamics.png`, contribution to `summary.json`
 
 Variant-Specific Interpretation:
 - Three-way overlay recommended: Rag (solid), RuleLLM (dashed), Rule (dotted)
@@ -118,7 +118,7 @@ Implementation in analysis.py:
   2. Classify retrieved chunks as: anchoring-reinforcing / correction-supporting / neutral
   3. Correlate chunk classification with subsequent agent decision (buy/sell/hold)
   4. Compute Rag MAD minus RuleLLM MAD as knowledge effect magnitude
-- Output: `rag_knowledge_effect.png`, `rag_retrieval_stats.json`
+- Output: `rag_stats.json`, plus `rag_knowledge_effect` in `summary.json`
 
 Variant-Specific Interpretation:
 - Positive MAD difference (Rag > RuleLLM): anchoring-reinforcing knowledge dominates retrieval.
@@ -139,10 +139,10 @@ per agent type. Scatter plot: retrieved chunk relevance score vs. decision chang
 Objective (from analysis-bases.md): Characterize how knowledge retrieval modifies investor decisions compared to RuleLLM.
 
 Implementation in analysis.py:
-- Function: `analyze_investor_behavior()`
+- Function: `calculate_metrics()`
 - Input data: per-agent decision records; rag_context content
 - Computation: buy/sell/hold counts; portfolio value; reasoning keyword analysis for RAG influence markers
-- Output: `investor_behavior.png`
+- Output: `00_investor_bids.png`, plus `agent_volumes` in `summary.json`
 
 Variant-Specific Interpretation:
 - Look for "knowledge-influenced" rounds: rounds where agent reasoning explicitly references retrieved content.
@@ -155,9 +155,9 @@ Variant-Specific Interpretation:
 Objective (from analysis-bases.md): Position Rag results relative to Rule, LLM, and RuleLLM to isolate the knowledge contribution.
 
 Implementation in analysis.py:
-- Function: `generate_comparison_table()`
+- Function: Cross-variant comparison consumes this variant's `summary.json`
 - Input data: Rag summary.json + Rule/LLM/RuleLLM summary.json (if available)
-- Output: `cross_variant_comparison.png`, updated `summary.json`
+- Output: `summary.json` for external cross-variant comparison
 
 Variant-Specific Interpretation:
 - Primary comparison: Rag vs. RuleLLM (isolates knowledge effect)
@@ -166,7 +166,7 @@ Variant-Specific Interpretation:
 
 ---
 
-## 4. Variant-Specific Observable Phenomena
+## §4 Variant-Specific Observable Phenomena
 
 Phenomena unique to the Rag variant not present in other variants:
 
@@ -180,21 +180,21 @@ Phenomena unique to the Rag variant not present in other variants:
 
 ---
 
-## 5. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
 | Total Rounds          | Expected Observable                                                                       | Phenomenon Clarity                                               |
 |-----------------------|-------------------------------------------------------------------------------------------|------------------------------------------------------------------|
 | 50 rounds             | RAG index warm-up; knowledge effect may not stabilize                                     | Partial — insufficient for reliable knowledge effect attribution |
-| 100 rounds (standard) | Full anchoring lifecycle; RAG retrieval patterns stable after ~10 rounds                  | Good — all 8 metrics + knowledge effect dimension computable     |
+| 100 rounds | Full anchoring lifecycle begins; RAG retrieval patterns stable after ~10 rounds           | Good for canary analysis but not the full experiment             |
 | 200 rounds            | Long-run knowledge staleness detectable; potential knowledge reinforcement feedback loops | Excellent — enables longitudinal RAG quality analysis            |
 
 ### Agent Count Scaling
 
 | Agent Count            | Expected Observable                                                                        | Market Dynamics                                  |
 |------------------------|--------------------------------------------------------------------------------------------|--------------------------------------------------|
-| 5 agents (1 per type)  | One knowledge store per type; clear individual-level retrieval analysis                    | Standard — sufficient for RAG effect measurement |
+| 9 investors (default)  | One knowledge store per agent; two-agent samples for anchored, historical, momentum, and noise types | Full configured market depth |
 | 10 agents (2 per type) | Intra-type retrieval variance; two agents of same type may retrieve different top-k chunks | Better statistics; higher API and index cost     |
 
 ### Parameter Sensitivity
@@ -208,22 +208,22 @@ Phenomena unique to the Rag variant not present in other variants:
 
 ---
 
-## 6. Output Files Reference
+## §6 Output Files Reference
 
 All outputs written to: `EXPERIMENT/AnchoringEffect/Rag/analysis/`
 
 | Output File                    | Generated By                     | Contents                                                                                  | Interpretation                                     |
 |--------------------------------|----------------------------------|-------------------------------------------------------------------------------------------|----------------------------------------------------|
-| `price_dynamics.png`           | `analyze_price_dynamics()`       | Price vs. fundamental; Rag, RuleLLM, Rule overlay                                         | Primary evidence for RAG effect on price discovery |
-| `rag_knowledge_effect.png`     | `analyze_rag_knowledge_effect()` | Chunk classification distribution; retrieval relevance scores; MAD delta vs. RuleLLM      | Quantifies knowledge retrieval contribution        |
-| `rag_retrieval_stats.json`     | `analyze_rag_knowledge_effect()` | Per-round per-agent retrieval metadata; chunk relevance scores; fallback rate             | RAG pipeline quality audit                         |
-| `investor_behavior.png`        | `analyze_investor_behavior()`    | Buy/sell/hold counts; portfolio values; knowledge-influenced round markers                | Shows how RAG modifies agent decisions             |
-| `cross_variant_comparison.png` | `generate_comparison_table()`    | Side-by-side metric comparison with Rule/LLM/RuleLLM                                      | Positions Rag in variant comparison matrix         |
-| `summary.json`                 | `main()`                         | All 8 metrics + RAG-specific metadata (fallback rate, avg retrieval score); variant label | Cross-variant comparison input                     |
+| `00_investor_bids.png`         | `create_visualizations()`        | Agent bid and order distribution                                                          | Shows how RAG modifies agent decisions             |
+| `01_price_dynamics.png`        | `create_visualizations()`        | Price vs. fundamental and deviation series                                                 | Primary evidence for RAG effect on price discovery |
+| `02_market_dynamics.png`       | `create_visualizations()`        | Volatility and return distribution                                                         | Market-quality diagnostics                         |
+| `03_summary.png`               | `create_visualizations()`        | Summary metrics and persistence                                                            | Compact validation overview                        |
+| `rag_stats.json`               | `analyze_rag_knowledge_effect()` | Retrieval success/failure counts and fallback rate                                         | RAG pipeline quality review                        |
+| `summary.json`                 | `main()`                         | All metrics plus `rag_knowledge_effect`; `variant = "Rag"`                                 | Cross-variant comparison input                     |
 
 ---
 
-## 7. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 This variant's expected position in cross-variant comparison (from `analysis-bases.md §5`):
 

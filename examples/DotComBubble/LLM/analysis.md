@@ -39,3 +39,18 @@ Measure how LLM persona-driven decision-making shapes bubble amplitude, duration
 ## §5 References
 
 See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md §4` for agent parameter sources.
+
+## §6 Cross-Variant Comparison
+
+| Comparison | Interpretation |
+|---|---|
+| LLM vs Rule | Measures narrative-only reasoning effects without embedded formulas. |
+| LLM vs RuleLLM | Measures the stabilizing effect of explicit decision rules. |
+| LLM vs Rag | Measures whether retrieved historical knowledge changes persona-only behavior. |
+
+## §7 Quality Checks
+
+- Confirm the run completed the configured 200 rounds.
+- Audit parse failures and retry counts before acceptance; deterministic parser or provider failures should fail fast rather than become hidden holds.
+- Confirm accepted decisions produce valid `action` and numeric `quantity` fields.
+- Review action distribution for excessive holds that would indicate unusable output quality.

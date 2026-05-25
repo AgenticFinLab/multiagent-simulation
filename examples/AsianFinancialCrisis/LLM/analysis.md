@@ -1,6 +1,6 @@
 # AsianFinancialCrisis LLM — Analysis Documentation
 
-## Overview
+## §1 Overview
 
 | Item                                | Description                                                                                                                                             |
 |-------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,29 +11,30 @@
 
 ---
 
-## 1. Metric Implementation
+## §2 Metric Implementation
 
 LLM `analysis.py` imports core functions from `Rule/analysis.py` — all metrics are identical; only outcome values differ.
 
-| Metric                     | Function              | analysis-bases.md Ref | LLM-Specific Notes                                                                      |
+| Metric                     | Function              | Root Metric Reference | LLM-Specific Notes                                                                      |
 |----------------------------|-----------------------|-----------------------|-----------------------------------------------------------------------------------------|
-| **Price Deviation**        | `calculate_metrics()` | `§2.1`                | High variance; LLM persona panic may cause deeper deviation than Rule                   |
-| **Maximum Drawdown**       | `calculate_metrics()` | `§2.2`                | Expected 30%–70%; wider range than Rule; behavioral panic amplifies or inhibits         |
-| **Crisis Velocity**        | `calculate_metrics()` | `§2.3`                | Variable; LLMHotMoneyFunder may exit faster or slower than Rule                         |
-| **Return Autocorrelation** | `calculate_metrics()` | `§2.4`                | Positive AC1 possible if behavioral panic creates momentum; may be weaker than Rule     |
-| **Agent-Type Volume**      | `calculate_metrics()` | `§2.5`                | Volumes stochastic; LLM personas may trade different quantities than rule-based targets |
-| **Crisis Onset Round**     | `calculate_metrics()` | `§2.6`                | Highly variable (8–30 rounds); LLM persona sensitivity varies by run                    |
+| **Price Deviation**        | `def analyze_asian_financial_crisis(...)` | `analysis-bases.md §2.1`                | High variance; LLM persona panic may cause deeper deviation than Rule                   |
+| **Maximum Drawdown**       | `def _compute_max_drawdown(prices)` | `analysis-bases.md §2.2`                | Expected 30%–70%; wider range than Rule; behavioral panic amplifies or inhibits         |
+| **Crisis Velocity**        | `def _compute_crisis_velocity(prices)` | `analysis-bases.md §2.3`                | Variable; LLMHotMoneyFunder may exit faster or slower than Rule                         |
+| **Return Autocorrelation** | `def _compute_rolling_ac1(returns, window=10)` | `analysis-bases.md §2.4`                | Positive AC1 possible if behavioral panic creates momentum; may be weaker than Rule     |
+| **Agent-Type Volume**      | `def _load_data(results)` | `analysis-bases.md §2.5`                | Volumes stochastic; LLM personas may trade different quantities than rule-based targets |
+| **Crisis Onset Round**     | `def _compute_crisis_onset(prices, fundamentals)` | `analysis-bases.md §2.6`                | Highly variable (8–30 rounds); LLM persona sensitivity varies by run                    |
+| **IMF Rescue Activation**  | `def analyze_asian_financial_crisis(...)` | `analysis-bases.md §2.7`                | Policy-response timing may vary with LLM interpretation of crisis severity              |
 
 ---
 
-## 2. Dimension-by-Dimension Analysis
+## §3 Dimension-by-Dimension Analysis
 
 ### Dimension 1: Price Crisis Dynamics
 *(Objective from analysis-bases.md §3.1)*
 
 **Implementation in analysis.py:**
 - Function: `load_simulation_data()` → loads price/fundamental from `records/market/*.json`
-- Output: `asianfinancialcrisis_llm_analysis.png` (4-panel: Price, Deviation, Returns, Distribution)
+- Output: `01_asianfinancialcrisis_dynamics.png` and `02_asianfinancialcrisis_analysis.png`
 
 **Variant-Specific Interpretation:**
 LLM shows wider crisis variability. If deviation fails to reach −30%, check LLMHotMoneyFunder reasoning field — the agent may be rationalizing a hold ("temporary noise"). If deviation exceeds −60%, behavioral panic amplification is dominant.
@@ -45,7 +46,7 @@ LLM shows wider crisis variability. If deviation fails to reach −30%, check LL
 
 **Implementation in analysis.py:**
 - Computation: per-agent volume from order records; `reasoning` field logs LLM decision rationale
-- Output: `summary.json` with volume breakdown
+- Output: `summary.json` with nested validation and volume diagnostics
 
 **Variant-Specific Interpretation:**
 Check LLMIMFRescuer `reasoning` field — does it cite "emergency" or "threshold breach"? Does LLMContagionTrader explicitly mention "contagion spreading across borders" in its reasoning? These qualitative signals validate persona-fidelity.
@@ -71,7 +72,7 @@ LLM is the high-variance behavioral reference. RuleLLM and Rag should stay close
 
 ---
 
-## 3. Variant-Specific Observable Phenomena
+## §4 Variant-Specific Observable Phenomena
 
 | Phenomenon                         | Description                                                                  | How to Observe                                      | Contrast with Rule                        |
 |------------------------------------|------------------------------------------------------------------------------|-----------------------------------------------------|-------------------------------------------|
@@ -82,7 +83,7 @@ LLM is the high-variance behavioral reference. RuleLLM and Rag should stay close
 
 ---
 
-## 4. Scaling and Sensitivity Analysis
+## §5 Scaling and Sensitivity Analysis
 
 ### Round Scaling
 
@@ -101,18 +102,21 @@ LLM is the high-variance behavioral reference. RuleLLM and Rag should stay close
 
 ---
 
-## 5. Output Files Reference
+## §6 Output Files Reference
 
 All outputs written to `EXPERIMENT/AsianFinancialCrisis/LLM/records/analysis/`.
 
 | Output File                             | Generated By | Contents                                         | Interpretation                  |
 |-----------------------------------------|--------------|--------------------------------------------------|---------------------------------|
-| `asianfinancialcrisis_llm_analysis.png` | `main()`     | 4-panel: Price, Deviation, Returns, Distribution | Primary LLM crisis verification |
-| `summary.json`                          | `main()`     | `{"variant": "LLM", metrics}`                    | Cross-variant comparison input  |
+| `00_investor_bids.png` | `Rule.analysis._create_visualizations()` | Market price and per-agent bid traces | Primary order-quality check |
+| `01_asianfinancialcrisis_dynamics.png` | `Rule.analysis._create_visualizations()` | Price/fundamental and deviation bands | Primary LLM crisis verification |
+| `02_asianfinancialcrisis_analysis.png` | `Rule.analysis._create_visualizations()` | Returns and rolling volatility | Crisis velocity and volatility check |
+| `03_summary.png` | `Rule.analysis._create_visualizations()` | Agent volume and validation score summary | Compact scenario diagnosis |
+| `summary.json` | `analyze_asian_financial_crisis()` | `metrics` and nested `validation` object | Cross-variant comparison input |
 
 ---
 
-## 6. Cross-Variant Comparison Notes
+## §7 Cross-Variant Comparison Notes
 
 - **Crash emergence speed**: Variable; persona sensitivity determines onset round
 - **Crash intensity**: Highest variance; LLM panic can deepen or weaken crisis vs. Rule

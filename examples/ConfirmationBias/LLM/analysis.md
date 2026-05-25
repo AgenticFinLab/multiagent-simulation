@@ -1,6 +1,6 @@
 # ConfirmationBias LLM Variant — Analysis Guide
 
-## 1. Analysis Overview
+## §1 Analysis Overview
 
 This guide covers interpretation of results from the **ConfirmationBias LLM** variant.
 Key question: *Do LLM agents with confirmation bias personas spontaneously produce
@@ -8,29 +8,40 @@ bias-like behavior without an explicit belief state variable?*
 
 ---
 
-## 2. Metric Implementation (`LLM/analysis.py`)
+## §2 Metric Implementation (`LLM/analysis.py`)
 
-Imports `calculate_metrics`, `load_simulation_data`, `create_visualizations` from
-`Rule/analysis.py` (DRY pattern). Adds LLM-specific action-distribution plot.
-
-All 7 core metrics from analysis-bases.md §2 apply identically.
+Imports the shared metric and visualization functions from `Rule/analysis.py`
+(DRY pattern). All 7 core metrics from `analysis-bases.md §2.1` through
+`analysis-bases.md §2.7` apply identically.
 See `Rule/analysis.md §2` for metric formulas.
+
+| Metric | Implementation | Reference |
+|---|---|---|
+| `bias_amplitude_pct` | `analyze_confirmation_bias()` | `analysis-bases.md §2.1` |
+| `bias_persistence` | `analyze_confirmation_bias()` | `analysis-bases.md §2.2` |
+| `mean_absolute_deviation_pct` | Shared price-deviation calculations | `analysis-bases.md §2.3` |
+| `belief_flip_count` | LLM reasoning/action proxy interpretation | `analysis-bases.md §2.4` |
+| `correction_ratio` | `analyze_confirmation_bias()` | `analysis-bases.md §2.5` |
+| `return_autocorrelation_ac1` | `analyze_confirmation_bias()` | `analysis-bases.md §2.6` |
+| `annualized_vol_pct` | Shared return-volatility calculations | `analysis-bases.md §2.7` |
 
 ---
 
-## 3. LLM-Specific Output Files
+## §3 LLM-Specific Output Files
 
 Running `LLM/analysis.py` writes to `EXPERIMENT/ConfirmationBias/LLM/records/analysis/`:
 
-| File                                | Contents                                           |
-|-------------------------------------|----------------------------------------------------|
-| `confirmationbias_llm_analysis.png` | 2×2 chart: price, deviation, returns, distribution |
-| `confirmationbias_llm_actions.png`  | Bar chart: buy/sell/hold counts per agent          |
-| `summary.json`                      | `{variant: "LLM", ...metrics}`                     |
+| File                               | Contents                                  |
+|------------------------------------|-------------------------------------------|
+| `summary.json`                     | Metrics and validation result             |
+| `00_investor_bids.png`             | Market price and per-agent bid traces     |
+| `01_confirmationbias_dynamics.png` | Price/fundamental and deviation dynamics  |
+| `02_confirmationbias_analysis.png` | Volatility and cumulative bias diagnostics|
+| `03_summary.png`                   | Agent VWAP and trading-volume summary     |
 
 ---
 
-## 4. Dimension-by-Dimension Interpretation
+## §4 Dimension-by-Dimension Interpretation
 
 ### 4.1 Price vs Fundamental
 
@@ -52,7 +63,7 @@ Running `LLM/analysis.py` writes to `EXPERIMENT/ConfirmationBias/LLM/records/ana
 
 ---
 
-## 5. Variant-Specific Phenomena
+## §5 Variant-Specific Phenomena
 
 ### 5.1 Temperature Effect
 
@@ -76,7 +87,7 @@ they see the "right answer" in the prompt (fundamental = 100.0).
 
 ---
 
-## 6. Cross-Variant Comparison
+## §6 Cross-Variant Comparison
 
 | Metric                    | Expected vs Rule                             |
 |---------------------------|----------------------------------------------|
@@ -87,3 +98,12 @@ they see the "right answer" in the prompt (fundamental = 100.0).
 | `annualized_vol_pct`      | Similar or slightly higher                   |
 
 Use `summary.json` from each variant to build comparison table.
+
+---
+
+## §7 References
+
+- Base metric definitions: `analysis-bases.md §2`.
+- Phase interpretation and expected calibration ranges: `analysis-bases.md §3` and `analysis-bases.md §6`.
+- Shared implementation: `examples/ConfirmationBias/Rule/analysis.py`.
+- LLM-specific observable behavior: `examples/ConfirmationBias/LLM/players.py` and `examples/ConfirmationBias/LLM/prompts.py`.

@@ -27,8 +27,9 @@ CONSTRAINTS:
 - Cannot sell more shares than held
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy" or "sell" or "hold", "quantity": integer, "reasoning": string}
-"""
+The decision must be valid JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 # =============================================================================
 # Break Even Trader
@@ -53,8 +54,9 @@ CONSTRAINTS:
 - Cannot sell more shares than held
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy" or "sell" or "hold", "quantity": integer, "reasoning": string}
-"""
+The decision must be valid JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 # =============================================================================
 # Rational Trader
@@ -79,8 +81,9 @@ CONSTRAINTS:
 - Cannot sell more shares than held
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy" or "sell" or "hold", "quantity": integer, "reasoning": string}
-"""
+The decision must be valid JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 # =============================================================================
 # Momentum Trader
@@ -105,8 +108,9 @@ CONSTRAINTS:
 - Cannot sell more shares than held
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy" or "sell" or "hold", "quantity": integer, "reasoning": string}
-"""
+The decision must be valid JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 # =============================================================================
 # Market Maker
@@ -133,8 +137,9 @@ CONSTRAINTS:
 - Respect inventory limits
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy" or "sell" or "hold", "quantity": integer, "reasoning": string}
-"""
+The decision must be valid JSON: {"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 # =============================================================================
 # Shared User Message Template
@@ -146,10 +151,12 @@ LLM_USER_TEMPLATE = """Current Market State (Round {round_num}):
 - Price Deviation: {deviation:+.2f}%
 - Your Cash: ${cash:.2f}
 - Your Position: {position} shares
+- Your Entry Price Reference: ${entry_price:.2f}
 - Portfolio Value: ${portfolio_value:.2f}
 
 Based on your trading strategy and current market conditions, what action do you take?
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" or "sell" or "hold", "quantity": integer, "reasoning": string}}
-"""
+The decision must be valid JSON: {{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""

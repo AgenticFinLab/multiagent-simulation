@@ -1,155 +1,106 @@
-# ReversalEffect LLM - LLM-Powered Reversal Effect Simulation
+# Reversal Effect LLM Variant Explanation
 
-## What is This?
+## §1 Overview
 
-| Item               | Description                                                                        |
-|--------------------|------------------------------------------------------------------------------------|
-| **Phenomenon**     | **Reversal Effect (反转效应)** - LLM-driven overreaction correction in prices      |
-| **Model**          | LLM-based investors with contrarian/overreaction personalities + Rule-based market |
-| **Key Feature**    | Investors use LLM reasoning to detect overreaction and trade reversals             |
-| **Academic Value** | Tests whether LLMs can simulate De Bondt & Thaler's overreaction hypothesis        |
+| Field | Value |
+|---|---|
+| Variant | LLM |
+| Decision Mechanism | API-generated trading orders |
+| Scenario Contract | `action`, `bid_price`, `quantity`, `reasoning` |
+| Theory Reference | `examples/ReversalEffect/simulation-bases.md` |
 
-## Rule-Based vs LLM-Based Comparison
+The LLM variant keeps the same mean-reverting market structure as the Rule
+baseline but replaces deterministic investor formulas with persona prompts and
+structured JSON decisions.
 
-| Aspect             | ReversalEffect (Rule-Based)       | ReversalEffect LLM (LLM-Based)               |
-|--------------------|-----------------------------------|---------------------------------------------|
-| **Decision Logic** | Fixed cumulative return formulas  | LLM interprets performance patterns         |
-| **Investor Types** | 5 types with hardcoded strategies | 5 types with personality-defining prompts   |
-| **Behavior**       | Deterministic reversal signals    | Stochastic contrarian reasoning             |
-| **Market**         | Rule-based order clearing         | **Same** rule-based order clearing          |
-| **Overreaction**   | From mathematical thresholds      | From LLM "market overreacted" reasoning     |
-| **Research Value** | Mechanism validation              | LLM contrarian realism + emergent reversals |
+## §2 Theory -> Implementation Mapping
 
-## 5 LLM Investor Types
+### §2.1 ContrarianInvestor (simulation-bases.md §4.1)
 
-### Investor Type Summary
+| Theory Component | Implementation |
+|---|---|
+| Contrarian reversal pressure | `LLMContrarianInvestor` uses the mean-reversion persona and a structured order parser. |
+| API contract | Emits `action`, `bid_price`, `quantity`, and `reasoning`. |
 
-| Type                  | Strategy            | Market Effect          | System Prompt Focus                 |
-|-----------------------|---------------------|------------------------|-------------------------------------|
-| **LLMContrarian**     | Long-term reversal  | ⭐ REVERSAL DRIVER      | "Past losers become future winners" |
-| **LLMOverconfident**  | Extrapolation       | ⭐ CREATES OVERREACTION | "I know where this is going"        |
-| **LLMValue**          | Fundamental anchor  | STABILIZING            | "Price should reflect fundamentals" |
-| **LLMMomentumChaser** | Short-term momentum | DESTABILIZING          | "Follow recent returns"             |
-| **LLMNoise**          | Random trading      | NEUTRAL LIQUIDITY      | "Trade on gut feelings"             |
+### §2.2 MomentumInvestor (simulation-bases.md §4.2)
 
-### 1. LLMContrarian (⭐ Reversal Driver)
+| Theory Component | Implementation |
+|---|---|
+| Continuation pressure | `LLMMomentumChaser` follows recent short-term direction. |
+| API contract | Parser converts canonical JSON into signed market orders. |
 
-**Theory**: De Bondt & Thaler (1985) - Markets overreact, losers outperform winners.
+### §2.3 OverconfidentTrader (simulation-bases.md §4.3)
 
-| Aspect       | Description                           |
-|--------------|---------------------------------------|
-| **Effect**   | REVERSAL DRIVER - buys past losers    |
-| **Strategy** | Cumulative return < -10% → BUY        |
-| **Behavior** | Bets against extreme past performance |
+| Theory Component | Implementation |
+|---|---|
+| Signal overweighting | `LLMOverconfidentTrader` extrapolates recent returns. |
+| API contract | Bounded retries handle stochastic parse errors; deterministic schema errors fail fast. |
 
-### 2. LLMOverconfident (⭐ Creates Overreaction)
+### §2.4 NoiseTrader (simulation-bases.md §4.4)
 
-**Theory**: Overconfidence leads to extrapolation and overreaction.
+| Theory Component | Implementation |
+|---|---|
+| Stochastic background flow | `LLMNoiseTrader` represents low-conviction retail order flow. |
+| API contract | Emits canonical trading JSON rather than special-schema actions. |
 
-| Aspect         | Description                              |
-|----------------|------------------------------------------|
-| **Effect**     | CREATES OVERREACTION                     |
-| **Behavior**   | Positive return → Extrapolate → Buy More |
-| **Psychology** | Overweights recent information           |
+### §2.5 ValueInvestor (simulation-bases.md §4.5)
 
-### 3. LLMValue (Stabilizing)
+| Theory Component | Implementation |
+|---|---|
+| Fundamental anchoring | `LLMValueInvestor` compares price to fundamental value. |
+| API contract | Reasoning text is recorded for post-run quality review. |
 
-**Theory**: Value investing - price should reflect fundamentals.
+### §2.6 IndexTracker (simulation-bases.md §4.6)
 
-| Aspect       | Description                           |
-|--------------|---------------------------------------|
-| **Effect**   | STABILIZING - anchors to fundamentals |
-| **Behavior** | Buy < 95% fund; Sell > 105% fund      |
-| **Focus**    | Patient, ignores short-term noise     |
+| Theory Component | Implementation |
+|---|---|
+| Passive rebalancing | Not instantiated in the API variants. |
+| Variant scope | The passive role is retained only in Rule. |
 
-### 4. LLMMomentumChaser (Short-Term)
+## §3 Market Mechanism
 
-**Theory**: Short-term momentum - recent returns continue briefly.
+The LLM market broadcasts price, previous price, return, cumulative return,
+performance label, and fundamental value. Parsed LLM orders update portfolio
+state before the market aggregates demand and applies mean reversion and noise.
 
-| Aspect       | Description                           |
-|--------------|---------------------------------------|
-| **Effect**   | DESTABILIZING - follows recent trends |
-| **Behavior** | Recent return > 0 → Buy               |
-| **Focus**    | Short-term price movements            |
+## §4 Variant Architecture
 
-### 5. LLMNoiseTrader (Liquidity)
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/ReversalEffect/LLM/players.py` |
+| Prompt module | `examples/ReversalEffect/LLM/prompts.py` |
+| Inference | Project ARK LLM policy from config extras |
+| Output parsing | `<analysis>` plus `<decision>` JSON |
+| Error handling | Explicit conservative API fallback only after parse/runtime retries |
 
-**Theory**: Uninformed trading provides liquidity and randomness.
+## §5 Config Reference
 
-| Aspect       | Description                          |
-|--------------|--------------------------------------|
-| **Effect**   | NEUTRAL LIQUIDITY                    |
-| **Behavior** | Somewhat random "gut feeling" trades |
-| **Focus**    | Small positions, no conviction       |
+| Config | Purpose |
+|---|---|
+| `configs/ReversalEffect/LLM/simulation.yml` | Full 200-round entry point. |
+| `configs/ReversalEffect/LLM/players.yml` | Market and five API investor definitions. |
+| `configs/ReversalEffect/LLM/topology.yml` | Broadcast and order routing. |
+| `configs/ReversalEffect/LLM/persona.yml` | Recording/persona metadata. |
 
-## Market Clearing (Rule-Based)
-
-```
-Price Model:
-
-  P(t+1) = P(t) + λ×D(t) + γ×[F - P(t)] + ε
-  
-  Reversal emerges from interaction:
-    1. LLMOverconfident creates initial overreaction
-    2. LLMContrarian detects overreaction, trades against it
-    3. Price eventually reverts toward fundamental
-```
-
-## Topology (Star Network)
-
-```
-                         ┌───────────────────┐
-                         │      market       │ ◄── Level 0
-                         └─────────┬─────────┘
-                                   │
-         ┌───────────┬─────────────┼─────────────┬───────────┐
-         ▼           ▼             ▼             ▼           ▼
-   llm_contrarian llm_overconf   llm_value    llm_momentum  llm_noise
-   (⭐ reversal)  (⭐ overreact) (stabilize)  (destabilize) (liquidity)
-```
-
-## Files
-
-| File                                             | Purpose                          |
-|--------------------------------------------------|----------------------------------|
-| `examples/ReversalEffect/LLM/players.py`          | Market + 5 LLM investor classes  |
-| `examples/ReversalEffect/LLM/prompts.py`          | System and user prompt templates |
-| `examples/ReversalEffect/LLM/run_reversal_llm.py` | Entry point                      |
-| `configs/ReversalEffect/LLM/simulation.yml`       | Main config                      |
-| `configs/ReversalEffect/LLM/players.yml`          | Player definitions + LLM config  |
-| `configs/ReversalEffect/LLM/topology.yml`         | Star topology                    |
-
-## Running
+## §6 Running Instructions
 
 ```bash
-export ARK_API_KEY='your-bytedance-doubao-api-key'
 python examples/ReversalEffect/LLM/run_reversal_llm.py -c configs/ReversalEffect/LLM/simulation.yml
 ```
 
-## Expected LLM Behavior Patterns
+## §7 Expected Behavior
 
-| Phase          | Rounds | LLM Behavior                                               |
-|----------------|--------|------------------------------------------------------------|
-| Initial        | 1-5    | Random shocks, normal trading                              |
-| Overreaction   | 6-10   | LLMOverconfident extrapolates, drives price away from fund |
-| Peak           | 11-13  | Price deviation reaches extreme (>10% from fundamental)    |
-| Reversal       | 14-17  | LLMContrarian detects overreaction, bets against trend     |
-| Mean Reversion | 18-20  | Price reverts toward fundamental value                     |
+The run should preserve reversal pressure while allowing variation in timing and
+order size. Any fallback decisions must be visible in logs or post-run quality
+audit and must not mask deterministic schema bugs.
 
-## Research Questions
+## §8 References
 
-| Question                                           | How to Test                                           |
-|----------------------------------------------------|-------------------------------------------------------|
-| Can LLMs detect market overreaction?               | Track LLMContrarian's detection of extreme deviations |
-| Does overconfidence create overreaction in LLMs?   | Monitor LLMOverconfident's extrapolation behavior     |
-| Is LLM reversal timing realistic?                  | Compare reversal patterns with De Bondt & Thaler      |
-| Can LLM contrarians profit from reversal strategy? | Track contrarian portfolio returns                    |
+See `examples/ReversalEffect/simulation-bases.md §2` for theory and
+`analysis-bases.md §2.7` for API quality checks.
 
-## References
+## §9 Variant Comparison
 
-| Theory                      | Application in ReversalEffect LLM              | Reference                |
-|-----------------------------|-----------------------------------------------|--------------------------|
-| **Overreaction Hypothesis** | LLMContrarian trades reversal patterns        | De Bondt & Thaler (1985) |
-| **Overconfidence**          | LLMOverconfident creates initial overreaction | Daniel et al. (1998)     |
-| **Mean Reversion**          | Price eventually returns to fundamental       | Fama & French (1988)     |
-| **Contrarian Strategy**     | Buy losers, sell winners                      | (Investment Strategy)    |
+LLM differs from Rule by replacing formulas with persona prompts. It does not
+use liquidity-depth fields or RAG retrieval, so it should be compared primarily
+on reversal timing, order dispersion, and API quality.

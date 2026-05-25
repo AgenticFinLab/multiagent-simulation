@@ -1,27 +1,47 @@
-# LUNACollapse Analysis Guide
+# LUNACollapse Rag — Analysis Guide
 
-## Metrics
+## §1 Objectives
 
-| Metric | Description | Expected Range |
-|--------|-------------|----------------|
-| Price deviation | Deviation from fundamental | Varies by scenario |
-| Max drawdown | Largest peak-to-trough decline | Varies by scenario |
-| Volatility | Annualized return volatility | Varies by scenario |
+This guide traces Rag analysis to `../analysis-bases.md`. Rag tests whether
+retrieved stablecoin and DeFi crisis context changes action timing, panic
+intensity, or stabilization relative to RuleLLM.
 
-## Visualization Guide
+## §2 Metric Mapping
 
-1. **Price vs Fundamental**: Shows whether agents create mispricings
-2. **Deviation Plot**: Magnitude and persistence of mispricings
-3. **Return Distribution**: Should show fat tails for behavioral scenarios
+| analysis-bases.md Metric | Implementation |
+|---|---|
+| §2.1 Price Deviation | `analysis.py` reuses Rule `calculate_metrics()` on the Rag record path |
+| §2.2 Maximum Drawdown | `calculate_metrics()` records the largest one-round return drop |
+| §2.3 Crash Velocity | Interpreted from the most negative one-round return |
+| §2.4 Sell Pressure Share | Post-run order aggregation attributes sell orders to Rag agent identities |
+| §2.5 Stabilization Ratio | Post-run aggregation compares ValueBuyer demand against destabilizing sell volume |
+| §2.6 Collapse Onset Round | Derived from the first material negative-deviation round |
+| §2.7 Volume Acceleration | Post-run checks whether volume accelerates with crisis context |
 
-## Troubleshooting
+## §3 Analysis Dimensions
 
-- **No phenomenon observed**: Adjust agent parameters
-- **Too extreme**: Add more stabilizing agents or increase mean reversion
-- **Too stable**: Increase destabilizing agent parameters
+Assess retrieval health, prompt-output validity, parser retry/failure quality,
+sell-pressure timing, and whether retrieved context amplifies or dampens
+RuleLLM behavior.
 
-## References
+## §4 Phase Analysis
 
-- Algorithmic stablecoin mechanism design (Klages-Mundt et al., 2020)
-- Death spiral dynamics (Levy, 2022)
-- DeFi contagion (Werner et al., 2022)
+Rag should follow stable, peg-stress, death-spiral, stabilization-attempt, and
+late recovery/collapse phases. Retrieved context should be inspected when phase
+timing differs sharply from RuleLLM.
+
+## §5 Cross-Variant Comparison
+
+Compare Rag first against RuleLLM to isolate the knowledge effect, then against
+Rule and LLM for market-level consequences.
+
+## §6 Expected Results
+
+Valid RAG outputs must complete full rounds, use valid RAG assets and embedding
+config, preserve canonical decision JSON, write `rag_stats.json`, and report any
+malformed-output or retrieval-miss events in post-run quality notes.
+
+## §7 Visualization Catalogue
+
+Plot price/fundamental, deviation, retrieval-miss counts, agent sell-pressure
+shares, stabilization ratio, and cross-variant drawdown.

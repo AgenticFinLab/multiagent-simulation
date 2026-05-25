@@ -1,6 +1,6 @@
 # FramingEffect — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                                                                                                                                                                                                          |
 |--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -43,7 +43,7 @@ The specific design choices in this simulation — the 2% activation threshold f
 
 ---
 
-## 2. Theoretical Foundation
+## §2 Theoretical Foundation
 
 ### Theory 1: Prospect Theory and the Value Function
 
@@ -237,7 +237,7 @@ where ρ(t) = misperception of biased traders at time t, μ = mean reversion spe
 
 ---
 
-## 3. Market Design Principles
+## §3 Market Design Principles
 
 ### 3.1 Price Formation Model
 
@@ -268,7 +268,7 @@ P(t+1) = P(t) + λ · D(t) + γ · [F − P(t)] + ε(t)
 
 ---
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
 ### §4.1 GainFrameFollower
 
@@ -335,7 +335,7 @@ P(t+1) = P(t) + λ · D(t) + γ · [F − P(t)] + ε(t)
 
 ---
 
-## 5. Agent Diversity Verification
+## §5 Agent Diversity Verification
 
 | Diversity Criterion              | Met? | Evidence                                                                                                                                       |
 |----------------------------------|------|------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -347,7 +347,7 @@ P(t+1) = P(t) + λ · D(t) + γ · [F − P(t)] + ε(t)
 
 ---
 
-## 6. Parameter Table
+## §6 Parameter Table
 
 | Parameter          | Symbol | Value    | Typical Range | Source Citation                         | Description                                   | Sensitivity      |
 |--------------------|--------|----------|---------------|-----------------------------------------|-----------------------------------------------|------------------|
@@ -366,7 +366,7 @@ P(t+1) = P(t) + λ · D(t) + γ · [F − P(t)] + ε(t)
 
 ---
 
-## 7. Communication and Round Structure
+## §7 Communication and Round Structure
 
 ```
 Round N (t = 1, 2, ..., T):
@@ -392,7 +392,7 @@ Round N (t = 1, 2, ..., T):
 
 ---
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
 ### Case 1: Asian Disease Problem — Foundational Laboratory Demonstration
 
@@ -509,7 +509,7 @@ Round N (t = 1, 2, ..., T):
 
 ---
 
-## 9. Variant Comparison Preview
+## §9 Variant Comparison Preview
 
 | Aspect                        | Rule                           | LLM                                         | RuleLLM                   | Rag                                 |
 |-------------------------------|--------------------------------|---------------------------------------------|---------------------------|-------------------------------------|

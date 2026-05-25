@@ -554,7 +554,7 @@ def _create_visualizations(
     ax2.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    p01 = os.path.join(output_dir, "01_price_dynamics.png")
+    p01 = os.path.join(output_dir, "01_asianfinancialcrisis_dynamics.png")
     plt.savefig(p01, dpi=150, bbox_inches="tight")
     plt.close()
     paths.append(p01)
@@ -609,7 +609,7 @@ def _create_visualizations(
         ax2.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    p02 = os.path.join(output_dir, "02_crisis_dynamics.png")
+    p02 = os.path.join(output_dir, "02_asianfinancialcrisis_analysis.png")
     plt.savefig(p02, dpi=150, bbox_inches="tight")
     plt.close()
     paths.append(p02)
@@ -627,12 +627,12 @@ def _create_visualizations(
             b = sum(
                 p["quantity"]
                 for p in investor_payloads[aid].values()
-                if p["quantity"] > 0
+                if p["action"] == "buy"
             )
             s = sum(
                 abs(p["quantity"])
                 for p in investor_payloads[aid].values()
-                if p["quantity"] < 0
+                if p["action"] == "sell"
             )
             buy_vols.append(b)
             sell_vols.append(s)
@@ -787,13 +787,19 @@ def analyze_asian_financial_crisis(
         output_dir=output_dir,
     )
 
-    summary = result.to_dict()
-    summary["metrics"] = {
+    metrics = {
         "max_drawdown_pct": round(max_drawdown_pct, 3),
         "crisis_onset_round": crisis_onset_round,
         "crisis_velocity_pct": round(crisis_velocity_pct, 3),
         "ac1_crisis_phase": round(ac1_crisis, 4),
         "total_rounds": total_rounds,
+    }
+    summary = {
+        "scenario": "AsianFinancialCrisis",
+        "record_path": config["setting"]["record_path"],
+        "total_rounds": total_rounds,
+        "metrics": metrics,
+        "validation": result.to_dict(),
     }
 
     summary_path = os.path.join(output_dir, "summary.json")

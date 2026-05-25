@@ -1,81 +1,55 @@
-# LUNACollapse Simulation
+# LUNACollapse RuleLLM — Implementation Explanation
 
-## Overview
+## §1 Variant Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | May 2022 Terra/LUNA crash - $40B wiped out in algorithmic stablecoin death spiral |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Terra/LUNA collapse simulation with algorithmic stablecoin death spiral and DeFi contagion |
-| **Academic Value** | Understanding may 2022 terra/luna crash - $40b wiped out in algorithmic stablecoin death spiral through multi-agent simulation |
+|---|---|
+| Variant | RuleLLM |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | LLM prompts with `== PERSONA ==` and `== DECISION RULES ==` |
+| Key Difference | Tests language reasoning under explicit death-spiral rules |
 
-## Theoretical Foundation
+## §2 Theory To Implementation Mapping
 
-- Algorithmic stablecoin mechanism design (Klages-Mundt et al., 2020)
-- Death spiral dynamics (Levy, 2022)
-- DeFi contagion (Werner et al., 2022)
+| Design Element | Implementation |
+|---|---|
+| StablecoinHolder (`simulation-bases.md §4.1`) | `RULELLM_STABLECOINHOLDER_PROMPT` states -5% confidence-break sell rule |
+| Arbitrageur (`simulation-bases.md §4.2`) | `RULELLM_ARBITRAGEUR_PROMPT` states ±2% arbitrage trigger and 5000 cap |
+| DeFiLender (`simulation-bases.md §4.3`) | `RULELLM_DEFILENDER_PROMPT` states -15% liquidation sell rule |
+| AnchorDepositor (`simulation-bases.md §4.4`) | `RULELLM_ANCHORDEPOSITOR_PROMPT` states -5% yield-exit sell rule |
+| ValueBuyer (`simulation-bases.md §4.5`) | `RULELLM_VALUEBUYER_PROMPT` states -30% deep-discount buy rule |
 
-## Agent Descriptions
+## §3 Market Mechanism Implementation
 
-### StablecoinHolder
-**Theoretical Basis**: Stablecoin redemption pressure
-**Market Role**: destabilizing
-**Description**: Redeems UST for LUNA, creating selling pressure on LUNA
-**Parameters**: holdings=100000, redemption_threshold=0.98, panic_speed=fast
+RuleLLM imports the same `Market` class as Rule. Investors call the LLM with
+persona and explicit rule prompts, then submit canonical trading orders.
 
-### Arbitrageur
-**Theoretical Basis**: UST-LUNA arbitrage
-**Market Role**: destabilizing
-**Description**: Arbitrage between UST and LUNA amplifies death spiral
-**Parameters**: arb_threshold=0.01, position_size=50000, speed=HFT
+## §4 Variant-Specific Features
 
-### DeFiLender
-**Theoretical Basis**: DeFi liquidation cascade
-**Market Role**: destabilizing
-**Description**: Forced liquidations create additional selling pressure
-**Parameters**: liquidation_threshold=0.8, cascade_speed=fast
+RuleLLM keeps the death-spiral rules explicit while allowing natural-language
+reasoning. It retries malformed output and fails loudly if no valid decision is
+returned after three attempts.
 
-### AnchorDepositor
-**Theoretical Basis**: Yield farming exit
-**Market Role**: destabilizing
-**Description**: Withdraws from Anchor protocol when confidence drops
-**Parameters**: deposit_amount=500000, yield_threshold=0.15, exit_speed=moderate
+## §5 Architecture Diagram
 
-### ValueBuyer
-**Theoretical Basis**: Contrarian buying
-**Market Role**: stabilizing
-**Description**: Attempts to buy at deep discount but gets overwhelmed
-**Parameters**: discount_threshold=0.5, position_limit=100000
-
-
-## Usage
-
-### Rule Variant
-```bash
-python examples/LUNACollapse/Rule/run_lunacollapse.py \
-    -c configs/LUNACollapse/Rule/simulation.yml
+```text
+Market state -> persona + decision rules -> LLM decision JSON -> order -> Market
 ```
 
-### LLM Variant
-```bash
-python examples/LUNACollapse/LLM/run_lunacollapse_llm.py \
-    -c configs/LUNACollapse/LLM/simulation.yml
-```
+## §6 Configuration Reference
 
-### RuleLLM Variant
-```bash
-python examples/LUNACollapse/RuleLLM/run_lunacollapse_rulellm.py \
-    -c configs/LUNACollapse/RuleLLM/simulation.yml
-```
+Primary config: `configs/LUNACollapse/RuleLLM/players.yml`.
 
-### RAG Variant
-```bash
-python examples/LUNACollapse/Rag/run_lunacollapse_rag.py \
-    -c configs/LUNACollapse/Rag/simulation.yml
-```
+## §7 Expected Behavior Patterns
 
-## References
+RuleLLM should stay closer to Rule than LLM because thresholds are prompt
+anchored, while still varying explanation and possibly quantity.
 
-- Algorithmic stablecoin mechanism design (Klages-Mundt et al., 2020)
-- Death spiral dynamics (Levy, 2022)
-- DeFi contagion (Werner et al., 2022)
+## §8 Validation Checklist
+
+Review full-round completion, parse quality, rule adherence, and
+price/portfolio sanity.
+
+## §9 References
+
+See `../simulation-bases.md §4` and `../analysis-bases.md §2`.

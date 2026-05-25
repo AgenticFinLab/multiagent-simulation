@@ -64,3 +64,14 @@ All functions defined in `RuleLLM/analysis.py`. Inputs sourced from simulation o
 - `analysis-bases.md §5` — Cross-variant comparison table
 - Fischhoff (1975) `doi:10.1037/0096-1523.1.3.288` — HBI empirical basis
 - Shleifer & Vishny (1997) `doi:10.1111/j.1540-6261.1997.tb03807.x` — limits to arbitrage
+
+## §6 Expected Results and Validation
+
+The accepted RuleLLM sample should complete 200 rounds with clean parse quality and metrics close to Rule but not necessarily identical. Rule-adherence review should inspect whether LLM reasoning follows the embedded decision rules.
+
+## §7 Visualization Catalogue
+
+`RuleLLM/analysis.py → main()` uses the standard analysis output contract:
+`summary.json`, `00_investor_bids.png`, `01_hindsightbias_dynamics.png`,
+`02_hindsightbias_analysis.png`, and `03_summary.png`. Reports may add
+rule-adherence tables and action-distribution summaries.

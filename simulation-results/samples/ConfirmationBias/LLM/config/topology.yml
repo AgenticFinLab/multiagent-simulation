@@ -1,0 +1,30 @@
+# =============================================================================
+# ConfirmationBias LLM Topology - Star Pattern
+# =============================================================================
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - llm_belief_anchor
+    - llm_selective_scanner
+    - llm_balanced_analyst
+    - llm_contrarian_trader
+    - llm_noise_trader
+
+  llm_belief_anchor:
+    - market
+
+  llm_selective_scanner:
+    - market
+
+  llm_balanced_analyst:
+    - market
+
+  llm_contrarian_trader:
+    - market
+
+  llm_noise_trader:
+    - market

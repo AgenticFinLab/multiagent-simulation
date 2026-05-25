@@ -41,3 +41,19 @@ Measure how RAG-retrieved knowledge affects the endowment effect relative to Rul
 
 See `analysis-bases.md §2` for full metric derivations and Python function signatures.
 See `simulation-bases.md §2` for theoretical foundations.
+
+## §6 Output Artifacts
+
+`Rag/analysis.py` reuses the Rule analysis pipeline and adds
+`rag_knowledge_effect` metrics when RAG context is present in order payloads.
+Expected artifacts are `summary.json`, `rag_stats.json`, a structured validation
+console report, the helper plots `price_path.png` and `strategy_volume.png`, and
+the fixed PNG contract: `00_investor_bids.png`,
+`01_endowmenteffect_dynamics.png`, `02_endowmenteffect_analysis.png`, and
+`03_summary.png`.
+
+## §7 Validation Criteria
+
+A valid Rag analysis run must complete 200 rounds, preserve canonical trading
+fields, record `rag_context`, and report retrieval coverage so the RAG mechanism
+can be audited separately from market-price outcomes.

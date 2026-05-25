@@ -40,10 +40,10 @@ overconfidenttrader:
       base_size: 400
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_OVERCONFIDENT_TRADER_SYS"
+        sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_OVERCONFIDENT_TRADER_PROMPT"
         user_message: "examples.OverconfidenceBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.8
           max_tokens: 512
@@ -69,10 +69,10 @@ selfattributor:
       base_size: 400
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_SELF_ATTRIBUTOR_SYS"
+        sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_SELF_ATTRIBUTOR_PROMPT"
         user_message: "examples.OverconfidenceBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.7
           max_tokens: 512
@@ -98,10 +98,10 @@ calibratedtrader:
       base_size: 300
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_CALIBRATED_TRADER_SYS"
+        sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_CALIBRATED_TRADER_PROMPT"
         user_message: "examples.OverconfidenceBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -127,10 +127,10 @@ contrarianinvestor:
       base_size: 350
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_CONTRARIAN_INVESTOR_SYS"
+        sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_CONTRARIAN_INVESTOR_PROMPT"
         user_message: "examples.OverconfidenceBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -156,10 +156,10 @@ noisetrader:
       noise_size: 150
       custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_NOISE_TRADER_PROMPT"
         user_message: "examples.OverconfidenceBias.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
           max_tokens: 512

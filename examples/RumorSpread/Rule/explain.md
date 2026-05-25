@@ -1,61 +1,64 @@
-# RumorSpread Simulation
+# RumorSpread Rule Variant Explanation
 
-## Overview
+## §1 Overview
 
-| Item               | Description                                                                                     |
-|--------------------|-------------------------------------------------------------------------------------------------|
-| **Phenomenon**     | Rumor propagation through populations via serial transmission with distortion and amplification |
-| **Model**          | Rule-based / LLM / RuleLLM / RAG                                                                |
-| **Key Feature**    | RumorSpread simulation with GullibleSpreader, DistortingRelayer, SkepticalEvaluator             |
-| **Academic Value** | Understanding how unverified information spreads and distorts through social networks           |
+| Item | Description |
+|---|---|
+| Variant | Rule |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | Deterministic formulas over public belief, distortion, and truth value |
+| Schema | Special `social_action`: `action_type`, `intensity`, `agent_role`, `agent_id` |
+| Files | `players.py`, `run_rumor.py`, `analysis.py`, `explain.md`, `analysis.md` |
 
-## Theoretical Foundation
+## §2 Theory To Implementation Mapping
 
-- Allport & Postman (1947): Psychology of Rumor — leveling, sharpening, assimilation
-- Bordia & Rosnow (1998): Rumor as communication — content analysis approach
-- DiFonzo & Bordia (2007): Rumor psychology — how rumors help make sense of ambiguity
-- Shibutani (1966): Improvised news — rumor as collective problem-solving
+| Role | Theory Component | Implementation |
+|---|---|---|
+| `GullibleSpreader` | `simulation-bases.md §4.1` | `decide()` updates belief by `credulity` and emits `spread` when `my_belief > 0.2`. |
+| `DistortingRelayer` | `simulation-bases.md §4.2` | `decide()` applies sharpening and leveling before relaying with `relay_eagerness`. |
+| `SkepticalEvaluator` | `simulation-bases.md §4.3` | `decide()` anchors belief to truth and emits `correct` below `belief_threshold`. |
+| `FactChecker` | `simulation-bases.md §4.4` | `decide()` applies professional truth pull and discounted correction intensity. |
+| `UninformedBystander` | `simulation-bases.md §4.5` | `decide()` weakly drifts toward public belief and stochastically spreads or ignores. |
 
-## Agent Descriptions
+## §3 Environment Mechanism
 
-### GullibleSpreader
-**Theoretical Basis**: Uncritical transmission — Leveling (Allport & Postman, 1947)
-**Market Role**: destabilizing
-**Description**: Easily believes and actively spreads rumors with high intensity, amplifying distortion through uncritical retransmission
-**Parameters**: credulity=0.8, spread_eagerness=0.9, distortion_amplification=0.3
+`InformationEnvironment` consumes `social_action` payloads and updates belief
+and distortion using the equations in `simulation-bases.md §3`. It records
+`belief`, `distortion`, `spread_count`, and `correction_count`.
 
-### DistortingRelayer
-**Theoretical Basis**: Serial distortion — Sharpening & Assimilation (Allport & Postman, 1947)
-**Market Role**: destabilizing
-**Description**: Introduces systematic errors during relay — exaggerates dramatic elements (sharpening), drops nuance (leveling), adapts to biases (assimilation)
-**Parameters**: credulity=0.5, relay_eagerness=0.7, sharpening_factor=0.4, leveling_factor=0.2
+## §4 Variant Architecture
 
-### SkepticalEvaluator
-**Theoretical Basis**: Critical evaluation (Bordia & Rosnow, 1998)
-**Market Role**: stabilizing
-**Description**: Critically assesses information before accepting, demands evidence, resists social proof
-**Parameters**: skepticism=0.7, correction_eagerness=0.6, belief_threshold=0.4
+Every rule agent initializes state from `configs/RumorSpread/Rule/players.yml`,
+reads the latest environment broadcast from `observation.inbounds`, computes one
+action, and returns it as `content_type="social_action"`.
 
-### FactChecker
-**Theoretical Basis**: Active rumor denial (DiFonzo & Bordia, 2007)
-**Market Role**: stabilizing
-**Description**: Actively investigates and debunks false claims with verified counter-information, though corrections spread slower than rumors
-**Parameters**: fact_check_strength=0.8, credibility_discount=0.6, distortion_sensitivity=0.5
+## §5 Config Reference
 
-### UninformedBystander
-**Theoretical Basis**: Minimal engagement (Shibutani, 1966)
-**Market Role**: neutral
-**Description**: Random, low-engagement participant providing baseline activity level
-**Parameters**: engagement_probability=0.3, spread_probability=0.4
+Key config paths are `environment.extras.spread_impact`,
+`environment.extras.truth_correction`, `gullible_spreader.extras.credulity`,
+`distorting_relayer.extras.sharpening_factor`,
+`skeptical_evaluator.extras.skepticism`,
+`fact_checker.extras.credibility_discount`, and
+`uninformed_bystander.extras.engagement_probability`.
 
-## Information Environment Dynamics
+## §6 Running Instructions
 
-Belief follows: B(t+1) = B(t) + alpha * NetSpread + beta * (Truth - B(t)) + epsilon
+```bash
+python examples/RumorSpread/Rule/run_rumor.py -c configs/RumorSpread/Rule/simulation.yml
+```
 
-Distortion dynamics: D(t+1) = D(t) - leveling_rate * D(t) + sharpening_rate * num_spreaders * (1 - truth)
+## §7 Expected Behavior
 
-Key feedback loops:
-- GullibleSpreader and DistortingRelayer amplify belief and distortion (destabilizing)
-- SkepticalEvaluator and FactChecker correct belief toward truth (stabilizing)
-- Corrections travel slower than rumors (credibility_discount < 1.0)
-- Higher distortion makes fact-checking more effective (easier to debunk)
+Belief should initially rise under spreader pressure, distortion should
+accumulate while spread activity dominates, and correction should appear after a
+lag through skeptical and fact-checking roles.
+
+## §8 References
+
+See `simulation-bases.md §2` for theory references and `analysis-bases.md §2`
+for metric definitions.
+
+## §9 Variant Comparison
+
+Rule is the deterministic baseline used to compare LLM, RuleLLM, and Rag
+reasoning effects without changing the special social-action schema.

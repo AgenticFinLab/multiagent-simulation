@@ -1,6 +1,6 @@
 # GFC2008 — Analysis Methodology Basis
 
-## 1. Analysis Objectives
+## §1 Analysis Objectives
 
 | Objective | Research Question                                                                                                           | Primary Metric(s) | Expected Finding                                                                            | Failure Indicator                              |
 |-----------|-----------------------------------------------------------------------------------------------------------------------------|-------------------|---------------------------------------------------------------------------------------------|------------------------------------------------|
@@ -11,7 +11,7 @@
 
 ---
 
-## 2. Core Metrics Catalogue
+## §2 Core Metrics Catalogue
 
 ### Metric: Bubble Build Index (BBI)
 
@@ -252,7 +252,7 @@ TARP + Fed QE eventually stabilized markets, but the process took 6–18 months.
 | Acharya et al. (2009). *AER* 99(2) | TARP evaluation                 | TARP succeeded in preventing bank failures but slow recovery      | Sets RRI ≈ 0.30–0.50 for Regulator probabilistic intervention      |
 
 #### Normal Range
-RRI of 0.20–0.55 expected; rescue_probability = 0.30 implies Regulator activates ≈ 30% of eligible rounds, contributing to ≈ 30–40% stabilization rate.
+RRI of 0.20–0.55 expected; `rescue_probability = 0.60` implies the Regulator activates in most eligible extreme-stress rounds, while `rescue_size = 500` keeps each intervention bounded.
 
 #### Red Flag Threshold
 - **RRI = 0**: No stabilization ever succeeds; fire-sale speed too high for recovery within 3 rounds
@@ -296,10 +296,51 @@ def origination_supply_pressure(initial_pos_mbs: float, final_pos_mbs: float) ->
 | > 0.70       | High origination     | Most MBS distributed before crash; maximum bubble buildup |
 
 #### Normal Range
-OSP ≈ origination_rate × T for a linear distribution. With origination_rate = 0.10 and T = 20 rounds: OSP ≈ 0.87 (most position distributed).
+OSP is nonlinear because quantity is computed from remaining position. With `origination_rate = 0.08`, the originator distributes most inventory over a long full-round run while each round's sell quantity decays as inventory falls.
 
 #### Red Flag Threshold
 - **OSP = 0**: MBSOriginator never sells; position always = 0 → check initialization
+
+---
+
+### Metric: API and RAG Quality (AQR)
+
+#### Category
+API Quality / RAG Diagnostics
+
+#### Definition
+Structural quality of LLM-family decisions and retrieval coverage in the Rag variant. Economic metrics should be interpreted only after API decisions are parseable, canonical, and auditable.
+
+#### Formula
+```
+retrieval_failure_rate = retrieval_failure_rounds / total_rag_rounds
+api_contract_issue_rate = malformed_or_retry_exhausted_decisions / total_api_decisions
+```
+
+**Python function**:
+```python
+def analyze_rag_knowledge_effect(rag_contexts: dict[str, dict[int, object]]) -> dict:
+    """Calculate retrieval coverage from recorded RAG contexts."""
+```
+
+#### Interpretation
+
+| Range | Economic Meaning | Simulation Interpretation |
+|---|---|---|
+| clean | valid behavioral evidence | preferred state |
+| low retry-only issue rate | stochastic API noise recovered by retry | attach quality note |
+| any exhausted contract failure | incomplete behavioral sample | repair or rerun before acceptance |
+
+#### Academic Basis
+
+**Primary source**: Project Level-2 quality standard. API outputs must be structurally valid before economic interpretation.
+
+#### Red Flag Threshold
+- **Any exhausted parser/provider contract failure**: incomplete run; repair or rerun.
+- **Missing `rag_stats.json`**: RAG retrieval behavior is not auditable.
+
+#### Relationship to Other Metrics
+AQR gates interpretation of BBI, CII, FSI, RRI, OSP, and WDI for LLM-family variants.
 
 ---
 
@@ -333,7 +374,7 @@ WDI of 0.20–0.50 expected; LeveragedInvestor loss (fire sale at deeply depress
 
 ---
 
-## 3. Analysis Dimensions
+## §3 Analysis Dimensions
 
 ### Dimension 1: Bubble-to-Crash Cycle
 
@@ -376,7 +417,7 @@ WDI of 0.20–0.50 expected; LeveragedInvestor loss (fire sale at deeply depress
 
 ---
 
-## 4. Phase Analysis Framework
+## §4 Phase Analysis Framework
 
 | Phase | Name                  | Entry Condition            | Exit Condition                        | Key Indicators                                                      |
 |-------|-----------------------|----------------------------|---------------------------------------|---------------------------------------------------------------------|
@@ -388,7 +429,7 @@ WDI of 0.20–0.50 expected; LeveragedInvestor loss (fire sale at deeply depress
 
 ---
 
-## 5. Cross-Variant Comparison Framework
+## §5 Cross-Variant Comparison Framework
 
 | Axis                        | Measurement | Expected Ordering          |
 |-----------------------------|-------------|----------------------------|
@@ -399,7 +440,7 @@ WDI of 0.20–0.50 expected; LeveragedInvestor loss (fire sale at deeply depress
 
 ---
 
-## 6. Expected Results and Validation
+## §6 Expected Results and Validation
 
 ### 6.1 Expected Stylised Facts
 
@@ -441,7 +482,7 @@ WDI of 0.20–0.50 expected; LeveragedInvestor loss (fire sale at deeply depress
 
 ---
 
-## 7. Visualization Catalogue
+## §7 Visualization Catalogue
 
 | Plot Name             | Type        | X-axis     | Y-axis                 | Overlays                             | Purpose                            |
 |-----------------------|-------------|------------|------------------------|--------------------------------------|------------------------------------|
@@ -452,3 +493,4 @@ WDI of 0.20–0.50 expected; LeveragedInvestor loss (fire sale at deeply depress
 | stabilizer_volume     | Bar         | Round      | §4.4 + §4.5 buy volume | RRI events                           | Stabilizer contribution            |
 | wealth_final          | Bar         | Agent type | Final wealth           | —                                    | Wealth redistribution from crisis  |
 | cross_variant_cii     | Bar         | Variant    | CII                    | GFC −57% reference                   | Research comparison                |
+| rag_stats.json        | JSON        | Agent/Round | Retrieval coverage     | no-context marker counts             | RAG retrieval quality audit         |

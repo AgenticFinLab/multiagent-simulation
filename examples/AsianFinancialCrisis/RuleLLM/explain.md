@@ -1,6 +1,6 @@
 # AsianFinancialCrisis RuleLLM — Simulation Documentation
 
-## Overview
+## §1 Overview
 
 | Item                      | Description                                                                                                                                                                            |
 |---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,13 +11,13 @@
 | **Research Contribution** | Tests whether embedding quantitative rules into LLM prompts constrains behavioral variance while preserving adaptive reasoning (intermediate between Rule determinism and LLM freedom) |
 
 
-## 1. How Theoretical Design Is Implemented
+## §2 Theory to Implementation Mapping
 
 ### RuleLLMHotMoneyFunder: Theory → Implementation Mapping
 
 *(Theory defined in simulation-bases.md §4.1 — Radelet & Sachs, 1998)*
 
-| Theoretical Design Element         | Implementation                                                                                                |
+| Theory Component         | Implementation                                                                                                |
 |------------------------------------|---------------------------------------------------------------------------------------------------------------|
 | Hot money reversal at first stress | System prompt: "If deviation < −0.02: you MUST sell at least 60% of your position"                            |
 | Momentum entry on rising markets   | System prompt: "If deviation > +0.02: you SHOULD deploy up to 30% of cash into buying"                        |
@@ -28,7 +28,7 @@
 
 *(Theory defined in simulation-bases.md §4.2 — Kaminsky & Reinhart, 1999)*
 
-| Theoretical Design Element      | Implementation                                                                                                     |
+| Theory Component      | Implementation                                                                                                     |
 |---------------------------------|--------------------------------------------------------------------------------------------------------------------|
 | Dual-signal contagion detection | System prompt: "Compute signal = 0.60 × deviation + 0.40 × price_return; if signal < −0.025: sell 50% of position" |
 | Regional crisis front-running   | Prompt: "Once the contagion signal crosses threshold, act immediately — first-mover advantage matters"             |
@@ -39,7 +39,7 @@
 
 *(Theory defined in simulation-bases.md §4.3 — Corsetti et al., 1999)*
 
-| Theoretical Design Element     | Implementation                                                                                   |
+| Theory Component     | Implementation                                                                                   |
 |--------------------------------|--------------------------------------------------------------------------------------------------|
 | Patient emergency intervention | System prompt: "You deploy capital ONLY when deviation < −0.05 (5% below fundamental)"           |
 | Deep pockets rescue packages   | Prompt context: "You have $5M in rescue funds — deploy 25% of remaining cash per rescue round"   |
@@ -50,7 +50,7 @@
 
 *(Theory defined in simulation-bases.md §4.4)*
 
-| Theoretical Design Element | Implementation                                                                                              |
+| Theory Component | Implementation                                                                                              |
 |----------------------------|-------------------------------------------------------------------------------------------------------------|
 | Buy deep discounts         | System prompt: "When deviation < −0.08: deploy 20% of cash into buying — value is compelling at this level" |
 | Sell overbought            | Prompt: "When deviation > +0.10: sell 20% of position — this level exceeds fair value"                      |
@@ -60,13 +60,13 @@
 
 *(Theory defined in simulation-bases.md §4.5 — Black, 1986 baseline)*
 
-| Theoretical Design Element | Implementation                                                                       |
+| Theory Component | Implementation                                                                       |
 |----------------------------|--------------------------------------------------------------------------------------|
 | Random uninformed trading  | System prompt: "You trade randomly; there is a 30% probability you trade each round" |
 | Small position sizes       | Prompt: "Trade 100–500 shares per round — you are a small retail participant"        |
 
 
-## 2. Market Mechanism Implementation
+## §3 Market Mechanism Implementation
 
 Market mechanism is **identical** to Rule variant — only investor decision logic changes.
 
@@ -95,7 +95,7 @@ LLM must output canonical JSON inside `<decision>` tags:
 Parsed by `parse_llm_response_with_thinking()` from `examples/llm_utils.py`.
 
 
-## 3. Variant-Specific Features
+## §4 Variant-Specific Features
 
 - **Rule-anchored prompts**: `RULELLM_*_SYS` prompts contain exact threshold numbers (−0.02, −0.025, −0.05, −0.08) embedded as strong directives, unlike pure LLM variant which has no numerical references
 - **Constrained behavioral variance**: LLM agent may still deviate from the rule ("this looks like a structural crisis beyond the threshold") but the rule creates a strong gravitational pull
@@ -104,7 +104,7 @@ Parsed by `parse_llm_response_with_thinking()` from `examples/llm_utils.py`.
 - **Max retries = 3**: If LLM parse fails, agent holds position; ensures simulation completion
 
 
-## 4. Architecture Diagram
+## §5 Architecture Diagram
 
 ```
 Round t:
@@ -133,7 +133,7 @@ Round t:
 ```
 
 
-## 5. Configuration Reference
+## §6 Configuration Reference
 
 | Config Path                 | Key Parameter  | Value                   | Notes                                                                          |
 |-----------------------------|----------------|-------------------------|--------------------------------------------------------------------------------|
@@ -144,7 +144,7 @@ Round t:
 Full config: `configs/AsianFinancialCrisis/RuleLLM/players.yml`
 
 
-## 6. Running Instructions
+## §7 Running Instructions
 
 ```bash
 # From project root:
@@ -159,7 +159,7 @@ python examples/AsianFinancialCrisis/Rule/analysis.py \
 Output: `EXPERIMENT/AsianFinancialCrisis/RuleLLM/records/`
 
 
-## 7. Expected Behavior Patterns
+## §8 Expected Behavior Patterns
 
 | Phase              | Deviation Range | RuleLLM-Specific Behavior                                                                 |
 |--------------------|-----------------|-------------------------------------------------------------------------------------------|
@@ -170,7 +170,7 @@ Output: `EXPERIMENT/AsianFinancialCrisis/RuleLLM/records/`
 | **Recovery**       | Stabilizing     | RuleLLMValueContrarian buys at approximately −8%; tighter variance than LLM variant       |
 
 
-## 8. References
+## §9 References
 
 *(Theory sections from simulation-bases.md — cross-reference only)*
 

@@ -1,0 +1,33 @@
+# =============================================================================
+# FlashCrashRag - Topology Configuration
+# =============================================================================
+# Star topology: Market broadcasts to all RAG+LLM investors
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  market:
+    - ragllm_hft
+    - ragllm_market_maker
+    - ragllm_algo
+    - ragllm_stop_loss
+    - ragllm_fundamental
+
+  ragllm_hft:
+    - market
+
+  ragllm_market_maker:
+    - market
+
+  ragllm_algo:
+    - market
+
+  ragllm_stop_loss:
+    - market
+
+  ragllm_fundamental:
+    - market

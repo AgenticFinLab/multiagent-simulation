@@ -1,52 +1,101 @@
-# SouthSeaBubble Simulation
+# SouthSeaBubble Rule Variant Explanation
 
-## Overview
+## §1 Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | 1720 South Sea Company bubble where insider advantages and political connections drove stock to impossible valuations |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | SouthSeaBubble simulation with InsiderAdvantaged, NarrativeBeliever, SkepticalAnalyst |
-| **Academic Value** | Understanding southseabubble through multi-agent simulation |
+| Field | Value |
+|---|---|
+| Variant | Rule |
+| Simulation | SouthSeaBubble |
+| Decision Mechanism | Deterministic current-market equity quantity orders |
+| Theory Reference | `examples/SouthSeaBubble/simulation-bases.md` |
+| Market Broadcast | `configs/SouthSeaBubble/Rule/topology.yml` |
 
-## Theoretical Foundation
+SouthSeaBubble uses current-market quantity orders: `action`, `quantity`, and
+`agent_type`. The market aggregates net demand and does not consume limit prices.
 
-- Temin & Voth (2004): Riding the South Sea Bubble
-- Carswell (1960): The South Sea Bubble
-- Dale (2004): The first crash - Lessons from the South Sea Bubble
-## Agent Descriptions
+## §2 Theory -> Implementation Mapping
 
-### InsiderAdvantaged
-**Theoretical Basis**: Insider trading advantage (Temin & Voth, 2004)
-**Market Role**: destabilizing
-**Description**: Exploits privileged information and political connections to front-run the market
-**Parameters**: information_advantage=0.7, front_run_size=600
+### §2.1 InsiderAdvantaged (simulation-bases.md §4.1)
 
-### NarrativeBeliever
-**Theoretical Basis**: Narrative-driven speculation (Carswell, 1960)
-**Market Role**: destabilizing
-**Description**: Believes promotional narratives about monopolistic trading privileges without verification
-**Parameters**: narrative_weight=2.0, skepticism_level=0.1
+| Theory Component | Implementation |
+|---|---|
+| Insider timing advantage | `InsiderAdvantaged` activates when `abs(deviation) > 0.02`. |
+| Quantity rule | `min(800, int(abs(deviation) * 5000))`, constrained by cash/inventory. |
+| Config link | Portfolio fields plus insider metadata from `configs/SouthSeaBubble/Rule/players.yml`. |
 
-### SkepticalAnalyst
-**Theoretical Basis**: Cash flow analysis (Dale, 2004)
-**Market Role**: stabilizing
-**Description**: Analyzes actual cash flows and trading prospects, ignoring promotional narratives
-**Parameters**: cash_flow_weight=1.0, narrative_discount=0.8
+### §2.2 NarrativeBeliever (simulation-bases.md §4.2)
 
-### Arbitrageur
-**Theoretical Basis**: Limits to arbitrage (Shleifer & Vishny, 1997)
-**Market Role**: stabilizing
-**Description**: Exploits the gap between narrative-driven prices and fundamental value
-**Parameters**: spread_threshold=0.15, position_size=450
+| Theory Component | Implementation |
+|---|---|
+| Narrative-driven bubble demand | `NarrativeBeliever` follows the same 2% deviation trigger and 800-unit cap. |
+| Quantity rule | Buys positive deviation and sells negative deviation after constraints. |
+| Config link | Portfolio fields plus narrative metadata. |
 
-### NoiseTrader
-**Theoretical Basis**: Noise trader model (Black, 1986)
-**Market Role**: neutral
-**Description**: Random uninformed trader providing baseline liquidity
-**Parameters**: trade_probability=0.3
+### §2.3 SkepticalAnalyst (simulation-bases.md §4.3)
 
+| Theory Component | Implementation |
+|---|---|
+| Fundamental skepticism | `SkepticalAnalyst` activates when `abs(deviation) > 0.05`. |
+| Quantity rule | `min(500, int(abs(deviation) * 3000))`, leaning against mispricing. |
+| Config link | Portfolio fields plus cash-flow metadata. |
 
-## Market Dynamics
+### §2.4 Arbitrageur (simulation-bases.md §4.4)
 
-Price follows: P(t+1) = P(t) + lambda * NetDemand + gamma * (F - P(t)) + epsilon
+| Theory Component | Implementation |
+|---|---|
+| Mispricing correction | `Arbitrageur` uses the same 5% activation and 500-unit cap as skeptical analysts. |
+| Quantity rule | Buys underpricing and sells overpricing subject to constraints. |
+| Config link | Portfolio fields plus spread/arbitrage metadata. |
+
+### §2.5 NoiseTrader (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Background liquidity | `NoiseTrader` trades randomly in about 30% of rounds. |
+| Quantity rule | Random direction and quantity 100-500. |
+| Config link | Portfolio fields plus noise metadata. |
+
+## §3 Market Mechanism
+
+The Rule market broadcasts price/fundamental state and clears current-market
+quantity orders through net-demand impact, mean reversion, and noise.
+
+## §4 Variant Architecture
+
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/SouthSeaBubble/Rule/players.py` |
+| Prompt module | Not applicable |
+| Inference | No remote model call |
+| Output parsing | Deterministic decision construction |
+| Error handling | Deterministic config/topology/schema errors fail fast |
+
+## §5 Config Reference
+
+| Config | Purpose |
+|---|---|
+| `configs/SouthSeaBubble/Rule/simulation.yml` | 200-round simulation entry point |
+| `configs/SouthSeaBubble/Rule/players.yml` | Market, portfolio, and role parameters |
+| `configs/SouthSeaBubble/Rule/topology.yml` | Message routing |
+| `configs/SouthSeaBubble/Rule/persona.yml` | Recording/persona metadata |
+
+## §6 Running Instructions
+
+```bash
+python examples/SouthSeaBubble/Rule/run_southseabubble.py -c configs/SouthSeaBubble/Rule/simulation.yml
+```
+
+## §7 Expected Behavior
+
+Narrative and insider roles should contribute bubble pressure; skeptical and
+arbitrage roles should oppose mispricing; noise traders should add stochastic
+background flow.
+
+## §8 References
+
+See `examples/SouthSeaBubble/simulation-bases.md §2` and `§8`.
+
+## §9 Variant Comparison
+
+Rule is the baseline for API variants on bubble magnitude, attribution, crash
+timing, and quality metrics.

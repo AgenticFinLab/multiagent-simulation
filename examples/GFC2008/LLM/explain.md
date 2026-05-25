@@ -70,3 +70,32 @@
 | RRI    | 0.15–0.70          | Variable | LLM Regulator may intervene more actively           |
 | OSP    | 0.50–0.90          | Similar  | Origination pattern LLM-modulated                   |
 | WDI    | 0.08–0.35          | Similar  | Wealth transfer depends on crisis arc               |
+
+## §5 References and Quality Review
+
+This variant traces to `../simulation-bases.md §4` for investor design and
+`../analysis-bases.md §2` for metric definitions. Post-run review should verify
+full round count, order schema completeness, price and portfolio sanity, LLM
+parse and retry rates, and crisis-phase patterns before acceptance.
+
+## §6 Running Instructions
+
+```bash
+python examples/GFC2008/LLM/run_gfc2008_llm.py \
+  -c configs/GFC2008/LLM/simulation.yml
+```
+
+## §7 Expected Behavior
+
+LLM agents should preserve the investor-role direction while allowing more
+variation in timing, quantities, and crisis reasoning than the Rule baseline.
+
+## §8 Cross-Variant Role
+
+The LLM variant tests whether persona-only language agents reproduce GFC crisis
+dynamics without explicit formula instructions.
+
+## §9 Implementation Traceability
+
+Prompts and parsed orders must remain consistent with `players.py`; acceptance
+requires canonical order fields and clean parse-quality logs.

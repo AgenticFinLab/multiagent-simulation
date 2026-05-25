@@ -111,13 +111,11 @@ def recovery_time(price_history: List[float], trough_round: int,
 
 ## §7 Visualization Catalogue
 
-| Plot                              | x-axis  | y-axis                              | Purpose                        |
-|-----------------------------------|---------|-------------------------------------|--------------------------------|
-| Price vs fundamental              | Round   | Price (line) + fundamental (dashed) | Full crash-recovery profile    |
-| Order-book depth time series      | Round   | `Depth`                             | Show collapse and rebuild      |
-| Spread evolution                  | Round   | `spread`                            | Stress widening pattern        |
-| HFT participation fraction        | Round   | HFT order count / total orders      | Withdrawal timing              |
-| Stop-loss cascade timeline        | Round   | Number of SL triggers per round     | Multi-wave cascade             |
-| Depth vs spread scatter           | `depth` | `spread`                            | Non-linear stress relationship |
-| Variant comparison: max drawdown  | Variant | `max_drawdown`                      | Cross-variant severity         |
-| Variant comparison: recovery time | Variant | `recovery_time` (rounds)            | Cross-variant resilience       |
+| Output | Contents | Purpose |
+|---|---|---|
+| `summary.json` | Core price, volume, drawdown, volatility, and validation metrics | Machine-readable Level-2 audit artifact |
+| `00_investor_bids.png` | Investor order and bid traces | Inspect HFT, stop-loss, fundamental, and noise-trader order flow |
+| `01_flashcrash2010_dynamics.png` | Price, fundamental, deviation, return, and volume paths | Review the crash-recovery trajectory |
+| `02_flashcrash2010_analysis.png` | Drawdown, volatility, activity, and scenario diagnostics | Validate mechanism intensity and structural quality |
+| `03_summary.png` | Compact run summary | Human review artifact |
+| `rag_stats.json` | Rag-only retrieval coverage and fallback-rate summary | Audit whether retrieved knowledge was available to RAG agents |

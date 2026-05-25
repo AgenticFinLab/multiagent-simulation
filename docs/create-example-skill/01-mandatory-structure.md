@@ -108,7 +108,7 @@ This constraint applies to **ALL four variants** equally. Every `players.py` and
 
 - **No `.get(key, default)`** on simulation data dicts (config extras, message payloads, LLM responses, coordinator data, analysis records). Use direct `dict["key"]` access.
 - **No `if X else fallback`** for required data fields (e.g., `if fundamentals else 1.0` is forbidden — use `if not fundamentals: raise ValueError(...)`).
-- **No silent error recovery** — when an LLM returns `None` or an unparseable response, code must `raise RuntimeError(...)`, never silently substitute `{"action": "hold", "quantity": 0}`.
+- **No silent error recovery** — when an LLM returns `None` or an unparseable response, code must either `raise RuntimeError(...)` or use the explicit stochastic API fallback policy in `00-overview.md` Principle #6. It must never silently substitute `{"action": "hold", "quantity": 0}`.
 - **No `if rates else 0.0`** for computed metrics — if no data was collected, raise `ValueError`, do not fabricate a zero.
 
 Legitimate exceptions: RAG config resolution (`resolved_rag.get()`), `__getstate__`/`__setstate__` serialization, truly optional config sections (`extras.get("private_knowledge", {})`), and matplotlib styling defaults.

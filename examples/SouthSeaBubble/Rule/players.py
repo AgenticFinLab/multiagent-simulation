@@ -219,14 +219,9 @@ class BaseInvestor(GeneralPlayer):
 
 
 class InsiderAdvantaged(BaseInvestor):
-    """
-    Exploits privileged information and political connections to front-run the market.
+    """Insider-advantaged trader.
 
-    Theoretical Basis: Insider trading advantage (Temin & Voth, 2004)
-    Market Role: destabilizing
-
-    Parameters from config extras:
-        - information_advantage, front_run_size
+    Theory: simulation-bases.md §4.1
     """
 
     def _make_decision(self) -> Dict[str, Any]:
@@ -249,14 +244,9 @@ class InsiderAdvantaged(BaseInvestor):
 
 
 class NarrativeBeliever(BaseInvestor):
-    """
-    Believes promotional narratives about monopolistic trading privileges without verification.
+    """Narrative believer.
 
-    Theoretical Basis: Narrative-driven speculation (Carswell, 1960)
-    Market Role: destabilizing
-
-    Parameters from config extras:
-        - narrative_weight, skepticism_level
+    Theory: simulation-bases.md §4.2
     """
 
     def _make_decision(self) -> Dict[str, Any]:
@@ -279,14 +269,9 @@ class NarrativeBeliever(BaseInvestor):
 
 
 class SkepticalAnalyst(BaseInvestor):
-    """
-    Analyzes actual cash flows and trading prospects, ignoring promotional narratives.
+    """Skeptical fundamental analyst.
 
-    Theoretical Basis: Cash flow analysis (Dale, 2004)
-    Market Role: stabilizing
-
-    Parameters from config extras:
-        - cash_flow_weight, narrative_discount
+    Theory: simulation-bases.md §4.3
     """
 
     def _make_decision(self) -> Dict[str, Any]:
@@ -309,14 +294,9 @@ class SkepticalAnalyst(BaseInvestor):
 
 
 class Arbitrageur(BaseInvestor):
-    """
-    Exploits the gap between narrative-driven prices and fundamental value.
+    """Arbitrageur against narrative mispricing.
 
-    Theoretical Basis: Limits to arbitrage (Shleifer & Vishny, 1997)
-    Market Role: stabilizing
-
-    Parameters from config extras:
-        - spread_threshold, position_size
+    Theory: simulation-bases.md §4.4
     """
 
     def _make_decision(self) -> Dict[str, Any]:
@@ -339,14 +319,9 @@ class Arbitrageur(BaseInvestor):
 
 
 class NoiseTrader(BaseInvestor):
-    """
-    Random uninformed trader providing baseline liquidity.
+    """Noise trader.
 
-    Theoretical Basis: Noise trader model (Black, 1986)
-    Market Role: neutral
-
-    Parameters from config extras:
-        - trade_probability
+    Theory: simulation-bases.md §4.5
     """
 
     def _make_decision(self) -> Dict[str, Any]:

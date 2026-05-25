@@ -62,9 +62,11 @@ from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
-from examples.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import is_retryable_llm_error
+from examples.RumorSpread.llm_parser import parse_rumor_response
 
 from .prompts import (
+    RAG_USER_TEMPLATE,
     RAG_GULLIBLE_SYS,
     RAG_DISTORTING_SYS,
     RAG_SKEPTICAL_SYS,
@@ -543,24 +545,25 @@ class RagLLMSocialAgent(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
-        return (
-            f"Round {round_num}\n"
-            f"RAG Context:\n{rag_context}\n\n"
-            f"Population Belief: {env_data['belief']:.3f}  prev={env_data['prev_belief']:.3f}"
-            f"  change={env_data['belief_change']:.3f}  distortion={env_data['distortion']:.3f}\n"
-            f"Truth Value: {env_data['truth_value']:.3f}\n"
-            f"Spreaders: {env_data['num_spreaders']}  Correctors: {env_data['num_correctors']}"
-            f"  net_spread={env_data['net_spread_intensity']:.3f}\n"
-            f"Your Personal Belief: {my_belief:.3f}\n"
-            "Respond with <analysis>...</analysis> then "
-            '<decision>{"action_type":"spread"|"ignore"|"correct","intensity":<0-1>,"reasoning":"..."}'
-            "</decision>"
+        return RAG_USER_TEMPLATE.format(
+            rag_context=rag_context,
+            round=round_num,
+            belief=env_data["belief"],
+            prev_belief=env_data["prev_belief"],
+            belief_change=env_data["belief_change"],
+            distortion=env_data["distortion"],
+            truth_value=env_data["truth_value"],
+            num_spreaders=env_data["num_spreaders"],
+            num_correctors=env_data["num_correctors"],
+            net_spread_intensity=env_data["net_spread_intensity"],
+            my_belief=my_belief,
         )
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with analysis and decision sections."""
-        return parse_llm_response_with_thinking(response_text)
+        return parse_rumor_response(response_text)
 
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
@@ -575,41 +578,29 @@ class RagLLMSocialAgent(GeneralPlayer):
         decision = None
         last_error = None
         for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
             try:
+                infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
+                infer_output = llm_client.run([infer_input])
                 decision = self._parse_llm_response(infer_output.outputs[0].response)
                 break
-            except ValueError as e:
-                last_error = e
+            except Exception as exc:  # pylint: disable=broad-except
+                last_error = exc
+                parse_error = isinstance(exc, (ValueError, KeyError))
+                retryable_api_error = is_retryable_llm_error(exc)
+                if not parse_error and not retryable_api_error:
+                    raise
                 if attempt < max_retries - 1:
                     logger.debug("[%s] LLM parse failed, retrying...", self.identity)
 
         if decision is None:
-            logger.warning(
-                "[%s] LLM failed after %d attempts: %s",
-                self.identity,
-                max_retries,
-                last_error,
+            raise RuntimeError(
+                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
             )
-            action = {
-                "action_type": "ignore",
-                "intensity": 0.0,
-                "agent_role": strategy_name,
-                "agent_id": self.identity,
-                "reasoning": "LLM parse failed",
-                "analysis": "",
-            }
-            return {
-                **action,
-                "outbound_messages": [
-                    {"payload": action, "content_type": "social_action"}
-                ],
-            }
 
         action_type = decision["action_type"]
         intensity = float(decision["intensity"])
-        intensity = max(0.0, min(1.0, intensity))
+        reasoning = str(decision.pop("reasoning"))[:120]
+        analysis = str(decision.pop("analysis"))
 
         # Update personal belief based on action
         my_belief = self.state.custom_state["my_belief"]
@@ -635,8 +626,9 @@ class RagLLMSocialAgent(GeneralPlayer):
             "intensity": intensity,
             "agent_role": strategy_name,
             "agent_id": self.identity,
-            "reasoning": decision["reasoning"][:120],
-            "analysis": decision["analysis"],
+            "reasoning": reasoning,
+            "analysis": analysis,
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
 
         return {
@@ -658,31 +650,46 @@ class RagLLMSocialAgent(GeneralPlayer):
 
 
 class RagLLMGullibleSpreader(RagLLMSocialAgent):
-    """RAG-augmented gullible spreader."""
+    """RAG-augmented gullible spreader.
+
+    Theory: simulation-bases.md §4.1
+    """
 
     _system_prompt = RAG_GULLIBLE_SYS
 
 
 class RagLLMDistortingRelayer(RagLLMSocialAgent):
-    """RAG-augmented distorting relayer."""
+    """RAG-augmented distorting relayer.
+
+    Theory: simulation-bases.md §4.2
+    """
 
     _system_prompt = RAG_DISTORTING_SYS
 
 
 class RagLLMSkepticalEvaluator(RagLLMSocialAgent):
-    """RAG-augmented skeptical evaluator."""
+    """RAG-augmented skeptical evaluator.
+
+    Theory: simulation-bases.md §4.3
+    """
 
     _system_prompt = RAG_SKEPTICAL_SYS
 
 
 class RagLLMFactChecker(RagLLMSocialAgent):
-    """RAG-augmented fact checker."""
+    """RAG-augmented fact checker.
+
+    Theory: simulation-bases.md §4.4
+    """
 
     _system_prompt = RAG_FACTCHECKER_SYS
 
 
 class RagLLMUninformedBystander(RagLLMSocialAgent):
-    """RAG-augmented uninformed bystander."""
+    """RAG-augmented uninformed bystander.
+
+    Theory: simulation-bases.md §4.5
+    """
 
     _system_prompt = RAG_BYSTANDER_SYS
 

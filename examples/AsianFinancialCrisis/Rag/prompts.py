@@ -19,7 +19,7 @@ RAG_IMF_RESCUER_SYS = RULELLM_IMF_RESCUER_SYS
 RAG_VALUE_CONTRARIAN_SYS = RULELLM_VALUE_CONTRARIAN_SYS
 RAG_NOISE_TRADER_SYS = RULELLM_NOISE_TRADER_SYS
 
-RAG_USER_TEMPLATE = """Current Market State (Round {round}):
+RAG_USER_TEMPLATE = """Current Market State (Round {round_num}):
 - Current Price: ${price:.2f}
 - Previous Price: ${prev_price:.2f}
 - Price Deviation from Fundamental: {deviation:+.2%}
@@ -36,7 +36,8 @@ Show your calculations in the thinking section.
 Respond with your thinking in <analysis>...</analysis> tags followed by your decision in \
 <decision>...</decision> tags.
 The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
-quantity (float, positive), and reasoning (string).
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0.
+quantity (float, non-negative), and reasoning (string).
 """
 
 LLM_USER_TEMPLATE = RAG_USER_TEMPLATE

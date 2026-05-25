@@ -1,0 +1,44 @@
+{
+  "full_resource_pack": "GitHub Release asset",
+  "mechanism": "Rule",
+  "omitted_raw_artifact_bytes": 8627049,
+  "omitted_raw_artifact_files": 1241,
+  "omitted_raw_artifacts": [
+    {
+      "bytes": 6710559,
+      "file_count": 1231,
+      "name": "records",
+      "source_path": "samples/RepresentativenessBias/Rule/artifacts/records"
+    },
+    {
+      "bytes": 1903764,
+      "file_count": 8,
+      "name": "communication",
+      "source_path": "samples/RepresentativenessBias/Rule/artifacts/communication"
+    },
+    {
+      "bytes": 12726,
+      "file_count": 2,
+      "name": "monitoring",
+      "source_path": "samples/RepresentativenessBias/Rule/artifacts/monitoring"
+    },
+    {
+      "bytes": 0,
+      "file_count": 0,
+      "name": "checkpoints",
+      "source_path": "samples/RepresentativenessBias/Rule/artifacts/checkpoints"
+    }
+  ],
+  "sample_id": "RepresentativenessBias__Rule",
+  "scenario": "RepresentativenessBias",
+  "source_resource_pack_sample_path": "samples/RepresentativenessBias/Rule",
+  "tracked_contents": [
+    "sample.json",
+    "source-results.csv",
+    "config/",
+    "analysis-config/",
+    "artifacts/analysis/summary.json",
+    "artifacts/analysis/rag_stats.json (Rag only)"
+  ],
+  "tracked_sample_path": "samples/RepresentativenessBias/Rule"
+}

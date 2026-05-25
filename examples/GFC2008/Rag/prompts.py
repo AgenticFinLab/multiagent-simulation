@@ -25,6 +25,7 @@ Shares Held: {position}
 Portfolio Value: ${portfolio_value:.2f}
 
 Using the retrieved knowledge and your trading rules, provide your decision.
-"""
+
+Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
 
 LLM_USER_TEMPLATE = RAG_USER_TEMPLATE

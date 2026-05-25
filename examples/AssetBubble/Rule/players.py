@@ -297,7 +297,7 @@ class BaseInvestor(GeneralPlayer):
 class MomentumSpeculator(BaseInvestor):
     """
     Momentum speculator that drives bubble formation.
-    → simulation-bases.md §4 — MomentumSpeculator
+    Theory: simulation-bases.md §4.1 — MomentumSpeculator
 
     Theory: Greater Fool Theory
         Buy even if overvalued, expecting to sell to a "greater fool."
@@ -314,7 +314,7 @@ class MomentumSpeculator(BaseInvestor):
     Formula:
         momentum = (price - MA_short) / MA_short
         quantity = aggressiveness × momentum × base_size
-        → simulation-bases.md §4 — MomentumSpeculator (Rule-Based Behavior)
+        → simulation-bases.md §4.1 — MomentumSpeculator (Rule-Based Behavior)
 
     Parameters from config extras:
         - lookback_short, aggressiveness, base_position_size, leverage_multiplier
@@ -388,7 +388,7 @@ class MomentumSpeculator(BaseInvestor):
 class RationalArbitrageur(BaseInvestor):
     """
     Rational arbitrageur attempting to correct mispricings.
-    → simulation-bases.md §4 — RationalArbitrageur
+    Theory: simulation-bases.md §4.2 — RationalArbitrageur
 
     Theory: Limits to Arbitrage (Shleifer & Vishny, 1997)
         - Arbitrageurs face constraints: short-selling costs, margin requirements
@@ -408,7 +408,7 @@ class RationalArbitrageur(BaseInvestor):
         deviation = (price - fundamental) / fundamental
         If deviation > threshold: short (with cost penalty)
         If deviation < -threshold: buy
-        → simulation-bases.md §4 — RationalArbitrageur (Rule-Based Behavior)
+        → simulation-bases.md §4.2 — RationalArbitrageur (Rule-Based Behavior)
 
     Parameters from config extras:
         - deviation_threshold, base_position_size, max_short_position, short_cost_sensitivity
@@ -488,7 +488,7 @@ class RationalArbitrageur(BaseInvestor):
 class NoiseTrader(BaseInvestor):
     """
     Noise trader driven by sentiment and crowd behavior.
-    → simulation-bases.md §4 — NoiseTrader
+    Theory: simulation-bases.md §4.3 — NoiseTrader
 
     Theory: De Long et al. (1990) - Noise Trader Risk
         Uninformed traders who create systematic deviations from fundamental value.
@@ -504,7 +504,7 @@ class NoiseTrader(BaseInvestor):
 
     Formula:
         total_sentiment = random_sentiment + herding_weight × price_return × 10
-        → simulation-bases.md §4 — NoiseTrader (Rule-Based Behavior)
+        → simulation-bases.md §4.3 — NoiseTrader (Rule-Based Behavior)
 
     Parameters from config extras:
         - sentiment_volatility, herding_weight, base_position_size
@@ -573,7 +573,7 @@ class NoiseTrader(BaseInvestor):
 class FundamentalInvestor(BaseInvestor):
     """
     Fundamental investor anchoring to intrinsic value.
-    → simulation-bases.md §4 — FundamentalInvestor
+    Theory: simulation-bases.md §4.4 — FundamentalInvestor
 
     Theory: Traditional value investing
         → simulation-bases.md §2 (context: slow correction vs momentum forces)
@@ -589,7 +589,7 @@ class FundamentalInvestor(BaseInvestor):
     Formula:
         deviation = (fundamental - price) / price
         quantity = value_sensitivity × deviation × base_position_size  (every N rounds)
-        → simulation-bases.md §4 — FundamentalInvestor (Rule-Based Behavior)
+        → simulation-bases.md §4.4 — FundamentalInvestor (Rule-Based Behavior)
 
     Parameters from config extras:
         - trade_frequency, value_sensitivity, base_position_size
@@ -653,7 +653,7 @@ class FundamentalInvestor(BaseInvestor):
 class LeveragedBuyer(BaseInvestor):
     """
     Leveraged buyer using margin to amplify positions.
-    → simulation-bases.md §4 — LeveragedBuyer
+    Theory: simulation-bases.md §4.5 — LeveragedBuyer
 
     Theory: Leverage amplifies both gains and losses
         During bubbles, leveraged buyers amplify upside
@@ -671,7 +671,7 @@ class LeveragedBuyer(BaseInvestor):
         equity_ratio = portfolio_value / initial_equity
         If equity_ratio < margin_call_threshold: forced deleverage (sell 50%)
         Else: quantity = price_return × base_position_size × leverage_ratio
-        → simulation-bases.md §4 — LeveragedBuyer (Rule-Based Behavior)
+        → simulation-bases.md §4.5 — LeveragedBuyer (Rule-Based Behavior)
 
     Parameters from config extras:
         - leverage_ratio, margin_call_threshold, base_position_size, initial_equity
@@ -747,7 +747,7 @@ class LeveragedBuyer(BaseInvestor):
 class ConservativeHolder(BaseInvestor):
     """
     Conservative long-term holder providing stability.
-    → simulation-bases.md §4 — ConservativeHolder
+    Theory: simulation-bases.md §4.6 — ConservativeHolder
 
     Behavior:
         - Holds steady position
@@ -760,7 +760,7 @@ class ConservativeHolder(BaseInvestor):
     Formula:
         gap = target_position - position
         quantity = gap × rebalance_rate  (every N rounds, capped at ±10)
-        → simulation-bases.md §4 — ConservativeHolder (Rule-Based Behavior)
+        → simulation-bases.md §4.6 — ConservativeHolder (Rule-Based Behavior)
 
     Parameters from config extras:
         - target_position, rebalance_frequency, rebalance_rate

@@ -314,7 +314,7 @@ Recent Prices: {recent_prices}
 Portfolio → Cash: ${cash:.2f} | Position: {position:.2f} | Value: ${cash + position * market_data['price']:.2f}
 
 Respond with ONLY valid JSON:
-{{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float, +buy/-sell>, "reasoning": "<brief>"}}
+{{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float, +buy/-sell>, "reasoning": "<brief>", "provides_liquidity": true|false}}
 """
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
@@ -322,7 +322,10 @@ Respond with ONLY valid JSON:
 
         Delegates to shared utility in examples/llm_utils.py
         """
-        return parse_llm_response_with_thinking(response_text)
+        decision = parse_llm_response_with_thinking(response_text)
+        if "provides_liquidity" not in decision or decision["provides_liquidity"] is None:
+            raise ValueError("Fields missing or null in LLM response: ['provides_liquidity']")
+        return decision
 
     def _apply_constraints(
         self, bid_price: float, quantity: float, current_price: float
@@ -438,31 +441,31 @@ Respond with ONLY valid JSON:
 
 
 class RuleLLMContrarianInvestor(RuleLLMInvestor):
-    """Hybrid: ContrarianInvestor rules + LLM reasoning."""
+    """Hybrid ContrarianInvestor. Theory: simulation-bases.md §4.1."""
 
     _system_prompt = RULELLM_CONTRARIAN_INVESTOR_SYS
 
 
 class RuleLLMOverconfidentTrader(RuleLLMInvestor):
-    """Hybrid: OverconfidentTrader rules + LLM reasoning."""
+    """Hybrid OverconfidentTrader. Theory: simulation-bases.md §4.3."""
 
     _system_prompt = RULELLM_OVERCONFIDENT_TRADER_SYS
 
 
 class RuleLLMValueInvestor(RuleLLMInvestor):
-    """Hybrid: ValueInvestor rules + LLM reasoning."""
+    """Hybrid ValueInvestor. Theory: simulation-bases.md §4.5."""
 
     _system_prompt = RULELLM_VALUE_INVESTOR_SYS
 
 
 class RuleLLMMomentumChaser(RuleLLMInvestor):
-    """Hybrid: MomentumInvestor rules + LLM reasoning."""
+    """Hybrid MomentumInvestor. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RULELLM_MOMENTUM_INVESTOR_SYS
 
 
 class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """Hybrid: NoiseTrader rules + LLM reasoning."""
+    """Hybrid NoiseTrader. Theory: simulation-bases.md §4.4."""
 
     _system_prompt = RULELLM_NOISE_TRADER_SYS
 

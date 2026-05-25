@@ -554,9 +554,9 @@ class RagLLMInvestor(GeneralPlayer):
                 )
             if "rag_cfg" in custom and "rag_store" not in custom:
                 rag_cfg = custom["rag_cfg"]
-                local_rag_dir = rag_cfg["local_index_dir"]
+                local_rag_dir = rag_cfg.get("local_index_dir", "")
                 if not local_rag_dir:
-                    local_workspace_dir = rag_cfg["local_workspace_dir"]
+                    local_workspace_dir = rag_cfg.get("local_workspace_dir", "")
                     if local_workspace_dir:
                         local_rag_dir = os.path.join(local_workspace_dir, "rag_index")
 
@@ -566,8 +566,8 @@ class RagLLMInvestor(GeneralPlayer):
                     )
                     return
 
-                embed_type = rag_cfg["embed_type"]
-                embed_api_key = rag_cfg["embed_api_key"]
+                embed_type = rag_cfg.get("embed_type", "litellm")
+                embed_api_key = rag_cfg.get("embed_api_key", "")
                 if not embed_api_key:
                     if embed_type == "litellm":
                         embed_api_key = os.getenv("HUNYUAN_API_KEY", "")
@@ -575,13 +575,13 @@ class RagLLMInvestor(GeneralPlayer):
                         embed_api_key = os.getenv("ARK_API_KEY", "")
 
                 rag_store = KnowledgeStore(
-                    embed_model_name=rag_cfg["embed_model"],
+                    embed_model_name=rag_cfg.get("embed_model", "openai/hunyuan-embedding"),
                     embed_api_key=embed_api_key,
-                    embed_api_base=rag_cfg["embed_api_base"],
+                    embed_api_base=rag_cfg.get("embed_api_base", ""),
                     embed_type=embed_type,
                     persist_dir=local_rag_dir,
-                    chunk_size=int(rag_cfg["chunk_size"]),
-                    chunk_overlap=int(rag_cfg["chunk_overlap"]),
+                    chunk_size=int(rag_cfg.get("chunk_size", 512)),
+                    chunk_overlap=int(rag_cfg.get("chunk_overlap", 64)),
                 )
                 if os.path.isdir(local_rag_dir):
                     try:
@@ -631,6 +631,7 @@ class RagLLMInvestor(GeneralPlayer):
 
         if not rag_context:
             rag_context = "(No relevant knowledge retrieved this round.)"
+        self.state.custom_state["last_rag_context"] = rag_context
 
         llm_config = self.config.extras["llm"]
         template = load_prompt(llm_config["user_message"])
@@ -743,6 +744,7 @@ class RagLLMInvestor(GeneralPlayer):
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
             "provides_liquidity": decision["provides_liquidity"],
+            "rag_context": self.state.custom_state["last_rag_context"],
         }
 
         return {

@@ -37,6 +37,20 @@ def load_prompt(prompt_path: str) -> str:
     return getattr(module, var_name)
 
 
+def agent_type_for_strategy(strategy_name: str) -> str:
+    """Map LLM class names to the market agent types used by Rule mode."""
+    lowered = strategy_name.lower()
+    if "hft" in lowered or "momentum" in lowered:
+        return "hft"
+    if "fundamental" in lowered:
+        return "fundamental"
+    if "stoploss" in lowered or "stop_loss" in lowered:
+        return "stoploss"
+    if "noise" in lowered:
+        return "noise"
+    return "llm"
+
+
 class LLMInvestor(GeneralPlayer):
     """Base class for LLM-powered FlashCrash2010 investors."""
 
@@ -177,17 +191,24 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["position"] += quantity
 
         strategy_name = self.__class__.__name__
+        liquidity_field_missing = decision.get("provides_liquidity") is None
+        if liquidity_field_missing:
+            logger.warning(
+                "[%s] LLM decision omitted provides_liquidity; using conservative false",
+                self.identity,
+            )
+
         order = {
             "action": action,
             "bid_price": bid_price,
-            "action": action,
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
             "reasoning": str(decision["reasoning"])[:120],
             "analysis": str(decision["analysis"]),
-            "agent_type": "llm",
-            "provides_liquidity": False,
+            "agent_type": agent_type_for_strategy(strategy_name),
+            "provides_liquidity": bool(decision.get("provides_liquidity", False)),
+            "liquidity_field_missing": liquidity_field_missing,
         }
         validate_order(order)
         return {
@@ -236,6 +257,7 @@ class LLMNoiseTrader(LLMInvestor):
 __all__ = [
     "Market",
     "LLMInvestor",
+    "agent_type_for_strategy",
     "LLMHFTMarketMaker",
     "LLMMomentumChaser",
     "LLMFundamentalTrader",

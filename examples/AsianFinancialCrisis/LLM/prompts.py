@@ -190,7 +190,7 @@ on vague market impression — just feeling like participating today"}
 </decision>
 """
 
-LLM_USER_TEMPLATE = """Current Market State (Round {round}):
+LLM_USER_TEMPLATE = """Current Market State (Round {round_num}):
 - Current Price: ${price:.2f}
 - Previous Price: ${prev_price:.2f}
 - Price Deviation from Fundamental: {deviation:+.2%}
@@ -204,5 +204,6 @@ Based on your trading philosophy and current market conditions, what is your tra
 Respond with your thinking in <analysis>...</analysis> tags followed by your decision in \
 <decision>...</decision> tags.
 The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
-quantity (float, positive), and reasoning (string).
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0.
+quantity (float, non-negative), and reasoning (string).
 """

@@ -126,7 +126,7 @@ A competitive market maker earns the bid-ask spread to compensate for adverse se
 `RationalTrader` uses expected-utility logic: trade when `|deviation| > 0.03`, sizing `min(500, int(|dev| × risk_aversion × 3000))`. `MarketMaker` provides contrarian liquidity capped at `inventory_limit`, earning spread by selling into deviations. Together they set a rational-agent baseline against which loss-averse wealth penalties are measured.
 
 #### §T5.4 Key Parameters
-`risk_aversion` (0.5), `inventory_limit` (2000), deviation threshold 0.03
+`risk_aversion` (0.7), `inventory_limit` (2000), deviation threshold 0.03
 
 #### §T5.5 Limitations
 Neither agent models adverse selection explicitly; spread is a fixed emergent property of price impact, not a strategic bid-ask quote.
@@ -194,7 +194,7 @@ The simulation contains 5 agent types plus a rule-based Market:
 |----------------------|--------------------------------------|---------------------------------------|
 | `pnl_pct`            | Floating PnL relative to entry price | `(price − entry_price) / entry_price` |
 | Activation threshold | Enters loss-domain convex region     | `pnl_pct < −0.05`                     |
-| Risky quantity       | Escalates with loss depth            | `min(int(                             |
+| Risky quantity       | Escalates with loss depth            | `min(int(abs(pnl_pct) × risk_increase_factor × 5000), int(cash / price))` |
 | Cash constraint      | Cannot exceed available cash         | `int(cash / price)`                   |
 
 **Decision Walkthrough**:
@@ -222,8 +222,8 @@ The simulation contains 5 agent types plus a rule-based Market:
 
 | Decision Variable          | Logic                            | Formula                                     |
 |----------------------------|----------------------------------|---------------------------------------------|
-| Deviation threshold        | Minimum mispricing to act        | `                                           |
-| Quantity                   | Proportional to mispricing       | `min(500, int(                              |
+| Deviation threshold        | Minimum mispricing to act        | `abs(deviation) > 0.03`                     |
+| Quantity                   | Proportional to mispricing       | `min(500, int(abs(deviation) × risk_aversion × 3000))` |
 | Direction                  | Buy underpriced, sell overpriced | `deviation < 0 → buy; deviation > 0 → sell` |
 | Cash / position constraint | Cannot exceed holdings           | Standard min caps                           |
 
@@ -252,8 +252,8 @@ The simulation contains 5 agent types plus a rule-based Market:
 
 | Decision Variable | Logic                       | Formula                                     |
 |-------------------|-----------------------------|---------------------------------------------|
-| Entry threshold   | Minimum trend to follow     | `                                           |
-| Quantity          | Proportional to deviation   | `min(500, int(                              |
+| Entry threshold   | Minimum trend to follow     | `abs(deviation) > entry_threshold`          |
+| Quantity          | Proportional to deviation   | `min(500, int(abs(deviation) × 3000))`      |
 | Direction         | Buy uptrend, sell downtrend | `deviation > 0 → buy; deviation < 0 → sell` |
 | Constraint        | Cash / position bounded     | Standard min caps                           |
 
@@ -282,7 +282,7 @@ The simulation contains 5 agent types plus a rule-based Market:
 
 | Decision Variable | Logic                      | Formula                                     |
 |-------------------|----------------------------|---------------------------------------------|
-| Inventory check   | Only act when not at limit | `                                           |
+| Inventory check   | Only act when not at limit | `abs(position) < inventory_limit`           |
 | Fixed trade size  | 300 shares per round       | `qty = 300`                                 |
 | Direction         | Contrarian to deviation    | `deviation > 0 → sell; deviation < 0 → buy` |
 | Constraint        | Cash / position bounded    | Standard min caps                           |
@@ -329,7 +329,7 @@ Key `extras` fields in `players.yml`:
 | `sell_gain_threshold`  | LossAverseInvestor | Gain threshold for winner sell (default 0.05)   |
 | `risk_increase_factor` | BreakEvenTrader    | Loss-escalation multiplier (default 2.0)        |
 | `risk_aversion`        | RationalTrader     | Expected-utility risk weight (default 0.5)      |
-| `entry_threshold`      | MomentumTrader     | Minimum deviation to enter trend (default 0.02) |
+| `entry_threshold`      | MomentumTrader     | Minimum deviation to enter trend (default 0.03) |
 | `inventory_limit`      | MarketMaker        | Max absolute position (default 2000)            |
 | `initial_cash`         | All investors      | Starting cash endowment                         |
 | `initial_position`     | All investors      | Starting share endowment                        |
@@ -446,7 +446,7 @@ Each round:
 | Dimension                    | Rule                             | LLM                                           | RuleLLM                                      | Rag                                            |
 |------------------------------|----------------------------------|-----------------------------------------------|----------------------------------------------|------------------------------------------------|
 | Loss-aversion encoding       | Deterministic λ = 2.25 threshold | Narrative system prompt emphasising loss pain | Rule thresholds + LLM narrative confirmation | Rule thresholds + KB of Prospect Theory papers |
-| Break-even behaviour         | Fixed formula: `                 | pnl                                           | × risk_increase × 5000`                      | LLM may escalate or resist based on context    |
+| Break-even behaviour         | Fixed formula: `abs(pnl_pct) × risk_increase_factor × 5000` | Narrative break-even persona | Rule formula plus LLM quantity modulation | Same RuleLLM formula plus retrieved loss-escalation evidence |
 | Rational arbitrage           | Fixed deviation threshold 0.03   | LLM infers fair value from prompt             | Rule threshold + LLM confirmation            | KB-assisted fundamental estimation             |
 | Disposition effect intensity | Maximal (pure rule)              | Lower (LLM adds contextual resistance)        | Intermediate                                 | Lowest (KB self-correction)                    |
 | Key diagnostic metric        | LAI, DEI                         | LAI, SRR                                      | LAI, DEI                                     | NCE, LAI                                       |

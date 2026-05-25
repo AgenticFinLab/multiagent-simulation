@@ -1,0 +1,153 @@
+# =============================================================================
+# ReversalEffectLLM Players Configuration
+# =============================================================================
+
+market:
+  name: "Market with Mean Reversion"
+  class: "examples.ReversalEffect.LLM.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "artifacts/records"
+      fundamental_value: 100.0
+      initial_price: 100.0
+      price_impact: 0.08
+      mean_reversion: 0.01
+      noise_std: 0.5
+      custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+llm_contrarian:
+  name: "LLM Contrarian Investor"
+  class: "examples.ReversalEffect.LLM.players:LLMContrarianInvestor"
+  # Expander → llm_contrarian_1, llm_contrarian_2, llm_contrarian_3
+  num_instances: 3
+  config:
+    identity: "llm_contrarian"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_CONTRARIAN_SYS"
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_overconfident:
+  name: "LLM Overconfident Trader"
+  class: "examples.ReversalEffect.LLM.players:LLMOverconfidentTrader"
+  # Expander → llm_overconfident_1, llm_overconfident_2, llm_overconfident_3
+  num_instances: 3
+  config:
+    identity: "llm_overconfident"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_OVERCONFIDENT_SYS"
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_value:
+  name: "LLM Value Investor"
+  class: "examples.ReversalEffect.LLM.players:LLMValueInvestor"
+  # Expander → llm_value_1, llm_value_2
+  num_instances: 2
+  config:
+    identity: "llm_value"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_VALUE_SYS"
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_momentum_chaser:
+  name: "LLM Momentum Chaser"
+  class: "examples.ReversalEffect.LLM.players:LLMMomentumChaser"
+  # Expander → llm_momentum_chaser_1, llm_momentum_chaser_2, llm_momentum_chaser_3
+  num_instances: 3
+  config:
+    identity: "llm_momentum_chaser"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_MOMENTUM_CHASER_SYS"
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.4
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_noise:
+  name: "LLM Noise Trader"
+  class: "examples.ReversalEffect.LLM.players:LLMNoiseTrader"
+  # Expander → llm_noise_1, llm_noise_2
+  num_instances: 2
+  config:
+    identity: "llm_noise"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      record_path: "artifacts/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_NOISE_SYS"
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_new_tokens: 500
+  persona: !include persona.yml

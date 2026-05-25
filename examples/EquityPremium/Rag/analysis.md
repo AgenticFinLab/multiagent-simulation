@@ -42,3 +42,14 @@ Measure how RAG-retrieved behavioral finance knowledge affects the simulated equ
 
 See `analysis-bases.md §2` for full metric derivations and Python function signatures.
 See `simulation-bases.md §2` for theoretical foundations.
+
+## §6 Validation Criteria
+
+Rag samples must preserve the `stock_qty` allocation schema, record `rag_context`
+on each investor order, write `rag_stats.json`, and produce the fixed PNG output
+set from the Rule analysis contract.
+
+## §7 Cross-Variant Use
+
+Compare Rag against RuleLLM to isolate the effect of retrieved equity-premium and
+loss-aversion knowledge while holding the allocation schema constant.

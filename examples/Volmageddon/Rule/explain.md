@@ -1,81 +1,109 @@
-# Volmageddon Simulation
+# Volmageddon Rule Variant Explanation
 
-## Overview
+## §1 Overview
 
-| Item | Description |
-|------|-------------|
-| **Phenomenon** | February 5, 2018 - VIX spiked 115%, XIV ETN lost 90%+ in after-hours trading |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Volmageddon simulation with VIX ETN blowup, short volatility crowd, and reverse feedback loop |
-| **Academic Value** | Understanding february 5, 2018 - vix spiked 115%, xiv etn lost 90%+ in after-hours trading through multi-agent simulation |
+| Field | Value |
+|---|---|
+| Variant | Rule |
+| Simulation | Volmageddon |
+| Decision Mechanism | Deterministic current-market volatility quantity orders |
+| Theory Reference | `examples/Volmageddon/simulation-bases.md` |
+| Market Broadcast | `configs/Volmageddon/Rule/topology.yml` |
 
-## Theoretical Foundation
+Volmageddon is a special trading schema scenario. It does not use limit-order
+`bid_price` fields. The market consumes `action`, `quantity`, and `agent_type`,
+then updates a volatility proxy from aggregate net demand at the current proxy
+level.
 
-- Volatility product feedback (Bergsma & Jiang, 2022)
-- Short volatility crowding (Culp et al., 2018)
-- Inverse VIX ETN dynamics
+## §2 Theory -> Implementation Mapping
 
-## Agent Descriptions
+### §2.1 ShortVolTrader (simulation-bases.md §4.1)
 
-### ShortVolTrader
-**Theoretical Basis**: Short volatility strategy
-**Market Role**: destabilizing
-**Description**: Sells VIX futures/ETNs, profits from contango but faces tail risk
-**Parameters**: short_size=10000, stop_loss=0.5, rebalance_frequency=daily
+| Theory Component | Implementation |
+|---|---|
+| Short-vol carry and stop-loss covering | `ShortVolTrader` in `examples/Volmageddon/Rule/players.py` sells volatility when deviation is below -2% and buys to cover when `deviation > stop_loss`. |
+| Required config | `stop_loss`, `initial_cash`, `initial_position`, `initial_price`, `fundamental_value` from `configs/Volmageddon/Rule/players.yml`. |
+| Quantity schema | Emits `action` and non-negative `quantity`; no `bid_price` is used by the market. |
 
-### VolETNManager
-**Theoretical Basis**: Inverse ETN rebalancing mechanics
-**Market Role**: destabilizing
-**Description**: Must buy VIX futures when VIX rises, creating positive feedback
-**Parameters**: leverage=-1.0, rebalance_threshold=0.05, rebalance_size=50000
+### §2.2 VolETNManager (simulation-bases.md §4.2)
 
-### LongVolHedger
-**Theoretical Basis**: Portfolio insurance via volatility
-**Market Role**: stabilizing
-**Description**: Holds long VIX positions as portfolio hedge
-**Parameters**: hedge_ratio=0.1, target_vol=0.15
+| Theory Component | Implementation |
+|---|---|
+| Inverse-volatility product rebalancing | `VolETNManager` buys volatility proxy exposure when deviation exceeds `rebalance_threshold`. |
+| Required config | `rebalance_threshold` and `rebalance_size` from `configs/Volmageddon/Rule/players.yml`. |
+| Quantity schema | Buy quantity is `int(deviation * rebalance_size)` subject to cash constraints. |
 
-### VolArbitrageur
-**Theoretical Basis**: VIX futures term structure arbitrage
-**Market Role**: neutral
-**Description**: Trades VIX term structure dislocations
-**Parameters**: entry_threshold=0.02, position_size=5000
+### §2.3 LongVolHedger (simulation-bases.md §4.3)
 
-### EquityTrader
-**Theoretical Basis**: Equity market participant
-**Market Role**: neutral
-**Description**: Trades equities, affected by volatility spike
-**Parameters**: position_size=1000, risk_limit=0.02
+| Theory Component | Implementation |
+|---|---|
+| Long-volatility insurance and profit-taking | `LongVolHedger` buys when the proxy is cheap and sells when volatility spikes. |
+| Required config | `hedge_ratio` plus portfolio initialization fields. |
+| Quantity schema | Orders are capped at 500 units and constrained by cash or inventory. |
 
+### §2.4 VolArbitrageur (simulation-bases.md §4.4)
 
-## Usage
+| Theory Component | Implementation |
+|---|---|
+| Term-structure dislocation arbitrage | `VolArbitrageur` trades only when `abs(deviation) > entry_threshold`. |
+| Required config | `entry_threshold` from `configs/Volmageddon/Rule/players.yml`. |
+| Quantity schema | Quantity is `min(5000, int(abs(deviation) * 20000))` before cash/inventory constraints. |
 
-### Rule Variant
+### §2.5 EquityTrader (simulation-bases.md §4.5)
+
+| Theory Component | Implementation |
+|---|---|
+| Volatility-linked equity de-risking | `EquityTrader` trades only when `abs(deviation) > 2 * risk_limit`. |
+| Required config | `risk_limit` from `configs/Volmageddon/Rule/players.yml`. |
+| Quantity schema | Quantity is `min(1000, int(abs(deviation) * 3000))` before constraints. |
+
+## §3 Market Mechanism
+
+`Market` is imported from `examples/Volmageddon/Rule/players.py`. It extracts
+orders with `action` and `quantity`, computes net demand, applies
+`price_impact`, `mean_reversion`, and `noise_std`, and broadcasts the next
+round's `price`, `fundamental`, and `deviation`.
+
+## §4 Variant Architecture
+
+| Component | Implementation |
+|---|---|
+| Player classes | `examples/Volmageddon/Rule/players.py` |
+| Prompt module | Not applicable |
+| Inference | No remote model call |
+| Output parsing | Direct deterministic decision construction |
+| Error handling | Deterministic config/schema errors fail fast |
+
+## §5 Config Reference
+
+| Config | Purpose |
+|---|---|
+| `configs/Volmageddon/Rule/simulation.yml` | 200-round simulation entry point and record path |
+| `configs/Volmageddon/Rule/players.yml` | Market parameters and five investor archetypes |
+| `configs/Volmageddon/Rule/topology.yml` | Market update and investor order routing |
+| `configs/Volmageddon/Rule/persona.yml` | Persona and recording metadata |
+
+## §6 Running Instructions
+
 ```bash
-python examples/Volmageddon/Rule/run_volmageddon.py \
-    -c configs/Volmageddon/Rule/simulation.yml
+python examples/Volmageddon/Rule/run_volmageddon.py -c configs/Volmageddon/Rule/simulation.yml
 ```
 
-### LLM Variant
-```bash
-python examples/Volmageddon/LLM/run_volmageddon_llm.py \
-    -c configs/Volmageddon/LLM/simulation.yml
-```
+## §7 Expected Behavior
 
-### RuleLLM Variant
-```bash
-python examples/Volmageddon/RuleLLM/run_volmageddon_rulellm.py \
-    -c configs/Volmageddon/RuleLLM/simulation.yml
-```
+- Short-volatility covering and inverse-ETN rebalancing should create
+  procyclical buy pressure during positive deviation episodes.
+- Long-vol and arbitrage roles should provide partial stabilization.
+- Equity traders should connect volatility stress to risk reduction.
+- A full accepted sample must complete 200 rounds and pass structural quality
+  review against `analysis-bases.md`.
 
-### RAG Variant
-```bash
-python examples/Volmageddon/Rag/run_volmageddon_rag.py \
-    -c configs/Volmageddon/Rag/simulation.yml
-```
+## §8 References
 
-## References
+See `examples/Volmageddon/simulation-bases.md §2` for theory references and
+`§8` for historical anchors.
 
-- Volatility product feedback (Bergsma & Jiang, 2022)
-- Short volatility crowding (Culp et al., 2018)
-- Inverse VIX ETN dynamics
+## §9 Variant Comparison
+
+Rule is the deterministic baseline used to compare the LLM, RuleLLM, and Rag
+variants on spike magnitude, timing, feedback attribution, and quality metrics.

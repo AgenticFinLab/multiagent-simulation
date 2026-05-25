@@ -1,9 +1,21 @@
 auto_checkpoint: false
+debug_mode: true
 
 proxy:
-  record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records"
-  communication:
-    store_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/communication"
+  storage:
+    checkpoint_dir: "EXPERIMENT/SunkCostFallacy/RuleLLM/checkpoints"
+    record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/records"
+    record_rounds: true
+    turn_block_size: 3
+
   monitoring:
-    metrics_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/monitoring/metrics"
-    events_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/monitoring/events"
+    record_path: "EXPERIMENT/SunkCostFallacy/RuleLLM/monitoring"
+    monitor_hot_limit: 3
+
+  communication:
+    message_timeout_ms: 5000
+    enable_compression: true
+
+  resource:
+    mcp_servers: []
+    enable_caching: false

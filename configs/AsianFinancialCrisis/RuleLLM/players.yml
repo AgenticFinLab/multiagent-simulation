@@ -56,7 +56,7 @@ hot_money_funder:
         sys_message: "examples.AsianFinancialCrisis.RuleLLM.prompts:RULELLM_HOT_MONEY_FUNDER_SYS"
         user_message: "examples.AsianFinancialCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -88,7 +88,7 @@ contagion_trader:
         sys_message: "examples.AsianFinancialCrisis.RuleLLM.prompts:RULELLM_CONTAGION_TRADER_SYS"
         user_message: "examples.AsianFinancialCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -119,7 +119,7 @@ imf_rescuer:
         sys_message: "examples.AsianFinancialCrisis.RuleLLM.prompts:RULELLM_IMF_RESCUER_SYS"
         user_message: "examples.AsianFinancialCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -151,7 +151,7 @@ value_contrarian:
         sys_message: "examples.AsianFinancialCrisis.RuleLLM.prompts:RULELLM_VALUE_CONTRARIAN_SYS"
         user_message: "examples.AsianFinancialCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
           max_tokens: 512
@@ -183,7 +183,7 @@ noise_trader:
         sys_message: "examples.AsianFinancialCrisis.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.AsianFinancialCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
-        lm_name: "ark/doubao-seed-1-6-251015"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.8
           max_tokens: 512

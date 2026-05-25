@@ -1,6 +1,6 @@
 # GFC2008 — Simulation Design Basis
 
-## 1. Phenomenon Definition
+## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 |--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -44,7 +44,7 @@ Keys, Mukherjee, Seru and Vig (2010) provided empirical evidence for the origina
 
 ---
 
-## 2. Theoretical Foundation
+## §2 Theoretical Foundation
 
 ### Theory 1: Originate-to-Distribute Moral Hazard
 
@@ -185,7 +185,7 @@ Theory 3 is the primary mechanism for the crisis phase (negative deviation). Lev
 
 ---
 
-## 3. Market Design
+## §3 Market Design
 
 | Component             | Design Choice                                    | Justification                                           |
 |-----------------------|--------------------------------------------------|---------------------------------------------------------|
@@ -198,63 +198,201 @@ Theory 3 is the primary mechanism for the crisis phase (negative deviation). Lev
 
 ---
 
-## 4. Investor Taxonomy
+## §4 Investor Taxonomy
 
 ### §4.1 MBSOriginator
 
-| Attribute          | Value                                                                         |
-|--------------------|-------------------------------------------------------------------------------|
-| Theoretical Basis  | Keys et al. (2010) originate-to-distribute; Gorton (2010) securitized banking |
-| Market Role        | Destabilizing — provides constant overpriced supply                           |
-| Action             | Always sells: int(position × origination_rate) shares per round               |
-| `origination_rate` | 0.05–0.20 (fraction of position per round)                                    |
-| Activation         | Every round (price-insensitive)                                               |
+#### §4.1.1 Summary
+
+`MBSOriginator` represents the originate-to-distribute pipeline that steadily sells securitized mortgage exposure. It supplies the market with risky securities even when prices weaken, reflecting fee-income incentives rather than long-horizon asset performance.
+
+#### §4.1.2 Theoretical and Empirical Foundation
+
+The agent is grounded in Keys et al. (2010) on securitization and lax screening, and in Gorton (2010) on securitized banking fragility. The agent's supply behavior creates the raw inventory that rating-driven demand and leveraged holdings absorb.
+
+#### §4.1.3 Design Purpose and Activation Scenarios
+
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| every round with positive inventory | sell `int(position * origination_rate)` | persistent MBS supply | §2 Theory 1 |
+| inventory depleted | hold | distribution channel exhausted | §2 Theory 1 |
+
+#### §4.1.4 Behavioral Framework
+
+```
+sell_qty = int(position * origination_rate)
+if position > 0 and sell_qty > 0: sell
+else: hold
+```
+
+#### §4.1.5 Decision Process Walkthrough
+
+With 3,000 securities and `origination_rate = 0.08`, the originator sells 240 securities in the first round regardless of price. The quantity shrinks as inventory is distributed.
+
+#### §4.1.6 Worked Numerical Example
+
+At price 100, selling 240 units raises 24,000 in cash and reduces inventory to 2,760.
+
+#### §4.1.7 Academic References
+
+Keys et al. (2010); Gorton (2010).
 
 ### §4.2 RatingAgency
 
-| Attribute         | Value                                                             |
-|-------------------|-------------------------------------------------------------------|
-| Theoretical Basis | Bolton et al. (2012) conflict of interest; Pagano & Volpin (2012) |
-| Market Role       | Destabilizing — artificial demand based on inflated fundamental   |
-| Activation        | price < F × (1 + overrating_bias) × 0.95                          |
-| Trade Size        | min(300, int(cash / price))                                       |
-| `overrating_bias` | 0.10–0.40 (inflation of perceived fundamental)                    |
+#### §4.2.1 Summary
+
+`RatingAgency` represents the issuer-pays rating distortion that treats structured securities as safer than their true collateral warrants. In the market model, it becomes a demand source for overpriced MBS exposure.
+
+#### §4.2.2 Theoretical and Empirical Foundation
+
+The basis is Bolton, Freixas, and Shapiro (2012) on rating inflation and issuer-pays incentives, supported by CDO-rating evidence from the GFC. The agent's perceived fundamental is higher than the true fundamental.
+
+#### §4.2.3 Design Purpose and Activation Scenarios
+
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| `price < F * (1 + overrating_bias) * 0.95` | buy | sustains bubble demand | §2 Theory 2 |
+| otherwise | hold | inflated-value demand is exhausted | §2 Theory 2 |
+
+#### §4.2.4 Behavioral Framework
+
+```
+perceived_fundamental = fundamental * (1 + overrating_bias)
+if price < perceived_fundamental * 0.95:
+    buy min(300, cash / price)
+else:
+    hold
+```
+
+#### §4.2.5 Decision Process Walkthrough
+
+With fundamental 100 and `overrating_bias = 0.20`, perceived fundamental is 120. A price below 114 triggers buy demand, even though the true fundamental is 100.
+
+#### §4.2.6 Worked Numerical Example
+
+At price 100 and cash 1,500,000, the cap binds and the agent buys 300 units.
+
+#### §4.2.7 Academic References
+
+Bolton, Freixas, & Shapiro (2012); Pagano & Volpin (2012); Griffin & Tang (2012).
 
 ### §4.3 LeveragedInvestor
 
-| Attribute             | Value                                                                             |
-|-----------------------|-----------------------------------------------------------------------------------|
-| Theoretical Basis     | Brunnermeier & Pedersen (2009) margin spiral; Adrian & Shin (2010) leverage cycle |
-| Market Role           | Destabilizing — fire-sale cascade amplifies price decline                         |
-| Activation            | deviation < −margin_call_trigger AND position > 0                                 |
-| Trade Size            | int(position × 0.50) fire-sale (50% of position per activation)                   |
-| `margin_call_trigger` | 0.05–0.20 (deviation threshold for margin call)                                   |
+#### §4.3.1 Summary
+
+`LeveragedInvestor` represents highly leveraged balance sheets funded against structured-credit collateral. When price deviation breaches the margin trigger, it sells part of its position and amplifies the fall.
+
+#### §4.3.2 Theoretical and Empirical Foundation
+
+The basis is Brunnermeier and Pedersen (2009) on funding-liquidity spirals and Adrian and Shin (2010) on procyclical leverage. The agent is the central fire-sale amplifier.
+
+#### §4.3.3 Design Purpose and Activation Scenarios
+
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| `deviation < -margin_call_trigger` and position > 0 | sell half current position | forced deleveraging | §2 Theory 3 |
+| otherwise | hold | leverage remains funded | §2 Theory 3 |
+
+#### §4.3.4 Behavioral Framework
+
+```
+if deviation < -margin_call_trigger:
+    sell int(position * 0.50)
+else:
+    hold
+```
+
+#### §4.3.5 Decision Process Walkthrough
+
+With deviation -12% and `margin_call_trigger = 0.10`, the investor is forced to sell. The sale lowers price further through market impact.
+
+#### §4.3.6 Worked Numerical Example
+
+With 1,500 securities, the first fire-sale order is 750 units.
+
+#### §4.3.7 Academic References
+
+Brunnermeier & Pedersen (2009); Adrian & Shin (2010).
 
 ### §4.4 DistressedBuyer
 
-| Attribute            | Value                                                                         |
-|----------------------|-------------------------------------------------------------------------------|
-| Theoretical Basis    | Griffin & Xu (2009) distressed investing; Oaktree Capital deep-value strategy |
-| Market Role          | Stabilizing — partial bottom-fishing at deep discounts                        |
-| Activation           | deviation < −discount_threshold                                               |
-| Trade Size           | min(1000, int(cash × 0.30 / price)) — 30% of cash per activation              |
-| `discount_threshold` | 0.10–0.30 (deeper than margin trigger)                                        |
+#### §4.4.1 Summary
+
+`DistressedBuyer` represents capital prepared to buy deeply discounted structured-credit assets after forced selling. It is stabilizing but activates only after severe discounts.
+
+#### §4.4.2 Theoretical and Empirical Foundation
+
+The basis is distressed-investing evidence and crisis-era recovery trading. The agent partially absorbs fire-sale supply, but its cash deployment is capped.
+
+#### §4.4.3 Design Purpose and Activation Scenarios
+
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| `deviation < -discount_threshold` | buy with 30% of cash, capped at 1,000 units | stabilizes deep discounts | §2 Theory 3 |
+| otherwise | hold | waits for margin of safety | §2 Theory 3 |
+
+#### §4.4.4 Behavioral Framework
+
+```
+if deviation < -discount_threshold:
+    buy min(1000, int(cash * 0.30 / price))
+else:
+    hold
+```
+
+#### §4.4.5 Decision Process Walkthrough
+
+With deviation -25% and `discount_threshold = 0.20`, the buyer deploys capital because the discount is deep enough to compensate for crisis risk.
+
+#### §4.4.6 Worked Numerical Example
+
+With cash 5,000,000 and price 75, 30% cash could buy far above 1,000 units, so the cap binds at 1,000.
+
+#### §4.4.7 Academic References
+
+Griffin & Xu (2009); Bernanke (2015) for crisis-recovery context.
 
 ### §4.5 Regulator
 
-| Attribute                | Value                                                                 |
-|--------------------------|-----------------------------------------------------------------------|
-| Theoretical Basis        | Bernanke (2015) TARP; Bagehot's lender of last resort principle       |
-| Market Role              | Stabilizing — large probabilistic intervention                        |
-| Activation               | deviation < −intervention_threshold AND random() < rescue_probability |
-| Trade Size               | Fixed 3,000 shares (large intervention analog)                        |
-| `intervention_threshold` | 0.15–0.30 (deeper than margin trigger)                                |
-| `rescue_probability`     | 0.20–0.50 (policy uncertainty about intervention)                     |
-| Initial cash             | $10,000,000 (fiscal capacity of regulator)                            |
+#### §4.5.1 Summary
+
+`Regulator` represents public-sector backstop capacity. It is stabilizing, probabilistic, and deliberately late: intervention occurs only when systemic stress is extremely deep.
+
+#### §4.5.2 Theoretical and Empirical Foundation
+
+The basis is Bagehot-style lender-of-last-resort logic and Bernanke's crisis-account of TARP/Fed interventions. Policy is uncertain because intervention depends on political and institutional constraints.
+
+#### §4.5.3 Design Purpose and Activation Scenarios
+
+| Market Condition | Response | Economic Effect | Theory |
+|---|---|---|---|
+| `deviation < -intervention_threshold` and random gate passes | buy `rescue_size` units | public backstop | §2 Theory 3 |
+| otherwise | hold | no market distortion | §2 Theory 3 |
+
+#### §4.5.4 Behavioral Framework
+
+```
+if deviation < -intervention_threshold and random() < rescue_probability:
+    buy rescue_size
+else:
+    hold
+```
+
+#### §4.5.5 Decision Process Walkthrough
+
+With deviation -55%, `intervention_threshold = 0.50`, and a successful probability draw, the regulator buys 500 units.
+
+#### §4.5.6 Worked Numerical Example
+
+At price 45, a 500-unit intervention costs 22,500, well within the regulator's 10,000,000 cash endowment.
+
+#### §4.5.7 Academic References
+
+Bernanke (2015); Bagehot's lender-of-last-resort principle.
 
 ---
 
-## 5. Agent Diversity Rationale
+## §5 Agent Diversity Rationale
 
 | Agent Pair               | Diversity Purpose                                                                               |
 |--------------------------|-------------------------------------------------------------------------------------------------|
@@ -267,28 +405,34 @@ Theory 3 is the primary mechanism for the crisis phase (negative deviation). Lev
 
 ---
 
-## 6. Parameter Reference Table
+## §6 Parameter Reference Table
 
 | Parameter              | Agent                  | Default  | Calibrated Range | Source                                      |
 |------------------------|------------------------|----------|------------------|---------------------------------------------|
 | initial_price          | Market                 | 100.0    | 80–120           | MBS par value                               |
 | fundamental_value      | Market                 | 100.0    | 60–100           | True underlying collateral value            |
-| price_impact (λ)       | Market                 | 0.002    | 0.001–0.010      | Higher for illiquid MBS market              |
-| mean_reversion (γ)     | Market                 | 0.02     | 0.005–0.05       | Slow mean-reversion in crisis               |
-| noise_std              | Market                 | 1.0      | 0.5–3.0          | High noise during crisis                    |
-| initial_cash           | All (except Regulator) | 100000   | Fixed            |                                             |
+| price_impact (λ)       | Market                 | 0.04     | 0.001–0.050      | Illiquid structured-credit market impact    |
+| mean_reversion (γ)     | Market                 | 0.005    | 0.005–0.05       | Slow mean-reversion in crisis               |
+| noise_std              | Market                 | 0.015    | 0.005–0.030      | Low round noise relative to order impact    |
+| initial_cash           | MBSOriginator          | 500000   | Fixed            | originator operating cash                   |
+| initial_cash           | RatingAgency           | 1500000  | Fixed            | rating-driven buyer balance sheet           |
+| initial_cash           | LeveragedInvestor      | 2000000  | Fixed            | leveraged institution balance sheet         |
+| initial_cash           | DistressedBuyer        | 5000000  | Fixed            | distressed-capital capacity                 |
 | initial_cash           | Regulator              | 10000000 | Fixed            | Fiscal capacity                             |
-| initial_position       | MBSOriginator          | 5000     | 2000–10000       | MBS inventory                               |
-| origination_rate       | §4.1                   | 0.10     | 0.05–0.20        | Keys et al. (2010)                          |
+| initial_position       | MBSOriginator          | 3000     | 2000–10000       | MBS inventory                               |
+| initial_position       | RatingAgency           | 500      | Fixed            | accumulated rated-asset exposure            |
+| initial_position       | LeveragedInvestor      | 1500     | Fixed            | leveraged MBS exposure                      |
+| origination_rate       | §4.1                   | 0.08     | 0.05–0.20        | Keys et al. (2010)                          |
 | overrating_bias        | §4.2                   | 0.20     | 0.10–0.40        | Bolton et al. (2012); Griffin & Tang (2012) |
 | margin_call_trigger    | §4.3                   | 0.10     | 0.05–0.20        | Brunnermeier & Pedersen (2009)              |
-| discount_threshold     | §4.4                   | 0.15     | 0.10–0.30        | Griffin & Xu (2009)                         |
-| intervention_threshold | §4.5                   | 0.20     | 0.15–0.30        | TARP trigger: systemic threat               |
-| rescue_probability     | §4.5                   | 0.30     | 0.20–0.50        | Political uncertainty of intervention       |
+| discount_threshold     | §4.4                   | 0.20     | 0.10–0.30        | Griffin & Xu (2009)                         |
+| intervention_threshold | §4.5                   | 0.50     | 0.15–0.60        | very severe systemic stress trigger         |
+| rescue_size            | §4.5                   | 500      | 100–3000         | bounded public backstop order size          |
+| rescue_probability     | §4.5                   | 0.60     | 0.20–0.60        | political uncertainty of intervention       |
 
 ---
 
-## 7. Round Structure
+## §7 Round Structure
 
 | Step | Agent                                                                      | Action                                                | Output                |
 |------|----------------------------------------------------------------------------|-------------------------------------------------------|-----------------------|
@@ -301,7 +445,7 @@ Theory 3 is the primary mechanism for the crisis phase (negative deviation). Lev
 
 ---
 
-## 8. Historical Case Studies
+## §8 Historical Case Studies
 
 ### Case 1: Lehman Brothers Bankruptcy — The Cascade Trigger
 
@@ -341,7 +485,7 @@ Theory 3 is the primary mechanism for the crisis phase (negative deviation). Lev
 
 ---
 
-## 9. Variant Comparison
+## §9 Variant Comparison
 
 | Variant | Investor Logic                              | Key Difference from Rule                                         | Expected Outcome                                                        |
 |---------|---------------------------------------------|------------------------------------------------------------------|-------------------------------------------------------------------------|

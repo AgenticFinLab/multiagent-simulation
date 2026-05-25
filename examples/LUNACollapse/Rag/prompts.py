@@ -1,14 +1,15 @@
-"""LUNACollapse Rag Prompts
+"""LUNACollapse RAG prompts.
 
-System prompts for RAG-augmented agents in the LUNACollapse simulation.
+RAG uses the RuleLLM persona/rule prompts and injects retrieved stablecoin
+crisis knowledge into the user message through ``{rag_context}``.
 """
 
-from examples.LUNACollapse.LLM.prompts import (
-    LLM_STABLECOINHOLDER_PROMPT as RAG_STABLECOINHOLDER_PROMPT,
-    LLM_ARBITRAGEUR_PROMPT as RAG_ARBITRAGEUR_PROMPT,
-    LLM_DEFILENDER_PROMPT as RAG_DEFILENDER_PROMPT,
-    LLM_ANCHORDEPOSITOR_PROMPT as RAG_ANCHORDEPOSITOR_PROMPT,
-    LLM_VALUEBUYER_PROMPT as RAG_VALUEBUYER_PROMPT,
+from examples.LUNACollapse.RuleLLM.prompts import (
+    RULELLM_ANCHORDEPOSITOR_PROMPT as RAG_ANCHORDEPOSITOR_PROMPT,
+    RULELLM_ARBITRAGEUR_PROMPT as RAG_ARBITRAGEUR_PROMPT,
+    RULELLM_DEFILENDER_PROMPT as RAG_DEFILENDER_PROMPT,
+    RULELLM_STABLECOINHOLDER_PROMPT as RAG_STABLECOINHOLDER_PROMPT,
+    RULELLM_VALUEBUYER_PROMPT as RAG_VALUEBUYER_PROMPT,
 )
 
 RAG_USER_TEMPLATE = """Relevant background knowledge:
@@ -17,13 +18,15 @@ RAG_USER_TEMPLATE = """Relevant background knowledge:
 Current Market State (Round {round_num}):
 - Current Price: ${price:.2f}
 - Fundamental Value: ${fundamental:.2f}
-- Price Deviation: {deviation:+.2f}%
+- Price Deviation: {deviation:+.2%}
 - Your Cash: ${cash:.2f}
 - Your Position: {position} shares
 - Portfolio Value: ${portfolio_value:.2f}
 
-Based on your trading strategy and the background knowledge above, what action do you take?
-Provide your analysis and decision in the specified format."""
+Apply your persona, decision rules, and retrieved knowledge to choose one trading action.
+Respond with <analysis>...</analysis> and <decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f}, "quantity": non-negative integer, "reasoning": "brief rationale"}}</decision>.
+IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
+"""
 
 __all__ = [
     "RAG_STABLECOINHOLDER_PROMPT",

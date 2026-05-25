@@ -1,81 +1,56 @@
-# LUNACollapse Simulation
+# LUNACollapse Rag — Implementation Explanation
 
-## Overview
+## §1 Variant Overview
 
 | Item | Description |
-|------|-------------|
-| **Phenomenon** | May 2022 Terra/LUNA crash - $40B wiped out in algorithmic stablecoin death spiral |
-| **Model** | Rule-based / LLM / RuleLLM / RAG |
-| **Key Feature** | Terra/LUNA collapse simulation with algorithmic stablecoin death spiral and DeFi contagion |
-| **Academic Value** | Understanding may 2022 terra/luna crash - $40b wiped out in algorithmic stablecoin death spiral through multi-agent simulation |
+|---|---|
+| Variant | Rag |
+| Implements | `../simulation-bases.md` |
+| Decision Logic | RuleLLM prompts plus retrieved stablecoin/depeg context |
+| Key Difference | Tests whether crisis knowledge changes death-spiral behavior |
 
-## Theoretical Foundation
+## §2 Theory To Implementation Mapping
 
-- Algorithmic stablecoin mechanism design (Klages-Mundt et al., 2020)
-- Death spiral dynamics (Levy, 2022)
-- DeFi contagion (Werner et al., 2022)
+| Design Element | Implementation |
+|---|---|
+| StablecoinHolder (`simulation-bases.md §4.1`) | `RagLLMStablecoinHolder` uses RuleLLM stablecoin prompt plus retrieved context |
+| Arbitrageur (`simulation-bases.md §4.2`) | `RagLLMArbitrageur` uses RuleLLM arbitrage prompt plus retrieved context |
+| DeFiLender (`simulation-bases.md §4.3`) | `RagLLMDeFiLender` uses RuleLLM liquidation prompt plus retrieved context |
+| AnchorDepositor (`simulation-bases.md §4.4`) | `RagLLMAnchorDepositor` uses RuleLLM yield-exit prompt plus retrieved context |
+| ValueBuyer (`simulation-bases.md §4.5`) | `RagLLMValueBuyer` uses RuleLLM value-buyer prompt plus retrieved context |
 
-## Agent Descriptions
+## §3 Market Mechanism Implementation
 
-### StablecoinHolder
-**Theoretical Basis**: Stablecoin redemption pressure
-**Market Role**: destabilizing
-**Description**: Redeems UST for LUNA, creating selling pressure on LUNA
-**Parameters**: holdings=100000, redemption_threshold=0.98, panic_speed=fast
+Rag imports the same `Market` class as Rule. Investors build a prompt from the
+RuleLLM system prompt and `RAG_USER_TEMPLATE`, which injects `{rag_context}`.
 
-### Arbitrageur
-**Theoretical Basis**: UST-LUNA arbitrage
-**Market Role**: destabilizing
-**Description**: Arbitrage between UST and LUNA amplifies death spiral
-**Parameters**: arb_threshold=0.01, position_size=50000, speed=HFT
+## §4 Variant-Specific Features
 
-### DeFiLender
-**Theoretical Basis**: DeFi liquidation cascade
-**Market Role**: destabilizing
-**Description**: Forced liquidations create additional selling pressure
-**Parameters**: liquidation_threshold=0.8, cascade_speed=fast
+Rag resolves local or shared knowledge indexes through `ResourceManager`, queries
+`KnowledgeStore` each round, records `rag_context` on every accepted order, and
+fails loudly if the LLM response cannot satisfy the decision contract after
+bounded retries.
 
-### AnchorDepositor
-**Theoretical Basis**: Yield farming exit
-**Market Role**: destabilizing
-**Description**: Withdraws from Anchor protocol when confidence drops
-**Parameters**: deposit_amount=500000, yield_threshold=0.15, exit_speed=moderate
+## §5 Architecture Diagram
 
-### ValueBuyer
-**Theoretical Basis**: Contrarian buying
-**Market Role**: stabilizing
-**Description**: Attempts to buy at deep discount but gets overwhelmed
-**Parameters**: discount_threshold=0.5, position_limit=100000
-
-
-## Usage
-
-### Rule Variant
-```bash
-python examples/LUNACollapse/Rule/run_lunacollapse.py \
-    -c configs/LUNACollapse/Rule/simulation.yml
+```text
+Market state -> retrieve context -> RuleLLM-style prompt -> LLM decision JSON -> order
 ```
 
-### LLM Variant
-```bash
-python examples/LUNACollapse/LLM/run_lunacollapse_llm.py \
-    -c configs/LUNACollapse/LLM/simulation.yml
-```
+## §6 Configuration Reference
 
-### RuleLLM Variant
-```bash
-python examples/LUNACollapse/RuleLLM/run_lunacollapse_rulellm.py \
-    -c configs/LUNACollapse/RuleLLM/simulation.yml
-```
+Primary config: `configs/LUNACollapse/Rag/players.yml`.
 
-### RAG Variant
-```bash
-python examples/LUNACollapse/Rag/run_lunacollapse_rag.py \
-    -c configs/LUNACollapse/Rag/simulation.yml
-```
+## §7 Expected Behavior Patterns
 
-## References
+Retrieved context may amplify panic, liquidation urgency, or value-buyer caution.
+The action schema should remain the same as RuleLLM.
 
-- Algorithmic stablecoin mechanism design (Klages-Mundt et al., 2020)
-- Death spiral dynamics (Levy, 2022)
-- DeFi contagion (Werner et al., 2022)
+## §8 Validation Checklist
+
+Review full-round completion, retrieval health, parser retry/failure quality,
+`rag_stats.json`, and scenario metrics.
+
+## §9 References
+
+See `../simulation-bases.md §4` and `../analysis-bases.md §2`.
