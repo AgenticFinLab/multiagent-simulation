@@ -1,5 +1,37 @@
 # AnchoringEffect — Simulation Design Basis
 
+---
+
+## Table of Contents
+
+| §  | Section                           | Subsections                                                                                                                                                                                             |
+|----|-----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| §1 | Phenomenon Definition             | §1.1 Origin and Source Analysis (Intellectual Lineage, Real-World Events, Practitioner Literature)                                                                                                      |
+| §2 | Theoretical Foundation            | Anchoring & Insufficient Adjustment; Expert Anchoring; Consensus Forecasts; Rational Expectations; Momentum & Trend Following                                                                           |
+| §3 | Market Design Principles          | 3.0 Idealised Market Type; 3.1 Price Formation Model; 3.2 Additional Mechanisms; 3.3 Information Broadcast                                                                                              |
+| §4 | Investor Taxonomy (9 types)       | §4.1 AnchoredTrader; §4.2 HistoricalAnchor; §4.3 RationalUpdater; §4.4 MomentumTrader; §4.5 NoiseTrader; §4.6 DispositionTrader; §4.7 ContrarianTrader; §4.8 FundamentalAnalyst; §4.9 LiquidityProvider |
+| §5 | Agent Diversity Verification      | Time-horizon matrix, information-set coverage, strategy taxonomy                                                                                                                                        |
+| §6 | Parameter Table                   | All configurable parameters with default values and academic calibration sources                                                                                                                        |
+| §7 | Communication and Round Structure | Star topology, message format, round lifecycle                                                                                                                                                          |
+| §8 | Historical Case Studies           | Analyst Earnings Anchoring; Real Estate Appraisal Anchoring; IPO Aftermarket Anchoring                                                                                                                  |
+| §9 | Variant Comparison Preview        | Rule vs LLM vs RuleLLM vs Rag — expected behavioural differences                                                                                                                                        |
+
+**Agent Design Summary (§4)**:
+
+| #   | Agent              | Role in Ecosystem         | Theoretical Basis                       | Bias / Strategy           |
+|-----|--------------------|---------------------------|-----------------------------------------|---------------------------|
+| 4.1 | AnchoredTrader     | Primary anchoring source  | Tversky & Kahneman (1974)               | Insufficient adjustment   |
+| 4.2 | HistoricalAnchor   | Path-dependent anchor     | Kahneman (2011); De Bondt (1993)        | Moving-average anchoring  |
+| 4.3 | RationalUpdater    | Corrective arbitrage      | Fama (1970); Grossman & Stiglitz (1980) | Fundamental-driven        |
+| 4.4 | MomentumTrader     | Trend amplifier           | Jegadeesh & Titman (1993)               | Short-term momentum       |
+| 4.5 | NoiseTrader        | Liquidity / entropy       | Black (1986); DeLong et al. (1990)      | Random                    |
+| 4.6 | DispositionTrader  | Prospect-theory bias      | Shefrin & Statman (1985)                | Sell winners, hold losers |
+| 4.7 | ContrarianTrader   | Overreaction corrector    | De Bondt & Thaler (1985)                | Mean-reversion betting    |
+| 4.8 | FundamentalAnalyst | Conservative learner      | Barberis, Shleifer & Vishny (1998)      | Slow belief updating      |
+| 4.9 | LiquidityProvider  | Market maker / stabilizer | Glosten & Milgrom (1985)                | Two-sided quoting         |
+
+---
+
 ## §1 Phenomenon Definition
 
 | Item               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                |

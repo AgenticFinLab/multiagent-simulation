@@ -1,5 +1,57 @@
 # AnchoringEffect — Analysis Methodology Basis
 
+---
+
+## Table of Contents
+
+| §  | Section                                   | Content Summary                                                                              |
+|----|-------------------------------------------|----------------------------------------------------------------------------------------------|
+| §1 | Analysis Objectives                       | 6 research questions (O1–O6) with expected findings and metric mappings                      |
+| §2 | Core Metrics Catalogue                    | 18 metrics with full specifications (formula, calibration source, interpretation, red flags) |
+| §3 | Analysis Dimensions                       | 7 orthogonal analysis perspectives with visualization plans                                  |
+| §4 | Phase Analysis Framework                  | 4-phase lifecycle detection rules, quantitative criteria, failure diagnostics                |
+| §5 | Cross-Variant Comparison Framework        | Protocol for Rule vs LLM vs RuleLLM vs Rag statistical comparison                            |
+| §6 | Expected Results and Validation           | Literature calibration targets, sensitivity grids, failure signs                             |
+| §7 | Visualization Catalogue                   | 10 plot types with axes, overlays, and purpose specifications                                |
+| §8 | Registered Metrics Catalogue (extensible) | 44 metrics × 9 categories; validation gates; 11-panel dashboard set                          |
+
+**§2 Metrics Overview (18 detailed specifications)**:
+
+| #  | Metric                            | Category               | Key Calibration Target            |
+|----|-----------------------------------|------------------------|-----------------------------------|
+| 1  | Price Deviation from Fundamental  | Price Dynamics         |                                   |
+| 2  | Mean Absolute Deviation (MAD)     | Anchoring-Specific     | [3, 10]% (Campbell & Sharpe 2009) |
+| 3  | Anchoring Persistence (Half-Life) | Temporal Dynamics      | [20, 60] rounds                   |
+| 4  | Rolling Volatility                | Market Quality         | [0.5, 2.0]% per round             |
+| 5  | Return Autocorrelation (Lag-1)    | Market Dynamics        | [0.0, 0.30]                       |
+| 6  | Anchoring Bias Magnitude          | Behavioural            | [2, 5]%                           |
+| 7  | Max Drawdown                      | Risk                   | [5, 20]%                          |
+| 8  | Agent-Type Trading Volume         | Mechanism Attribution  | Non-zero for all active agents    |
+| 9  | Agent Terminal Wealth             | Wealth Dynamics        | Dispersal ratio [1.05, 1.50]      |
+| 10 | Gini Coefficient                  | Wealth Inequality      | [0.03, 0.30]                      |
+| 11 | Wealth Transfer Direction         | Wealth Redistribution  | transfer > 0                      |
+| 12 | Price Efficiency Ratio            | Information Efficiency | Starts < 0.3, rises toward 1.0    |
+| 13 | Forecast Error Persistence        | Learning Speed         | [0.7, 0.95]                       |
+| 14 | Deviation Decay Slope             | Convergence Rate       | [−0.005, −0.0005] per round       |
+| 15 | Information Share by Strategy     | Mechanism Attribution  | RU share 40–60%                   |
+| 16 | Value-at-Risk (95%)               | Tail Risk              | [−4, −1]% per round               |
+| 17 | Conditional VaR (CVaR-95)         | Expected Shortfall     | [−6, −1.5]% per round             |
+| 18 | Herfindahl Concentration (HHI)    | Market Concentration   | [0.07, 0.20]                      |
+
+**§3 Dimensions at a Glance**:
+
+| Dim | Focus                              | Primary Metrics                                  |
+|-----|------------------------------------|--------------------------------------------------|
+| 1   | Price Dynamics & Persistence       | Deviation, MAD, Half-life                        |
+| 2   | Anchoring Bias Lifecycle           | Deviation TS, Phase assignment, Rolling AC1      |
+| 3   | Agent Behaviour & Portfolios       | Volume by type, Wealth, Sharpe                   |
+| 4   | Volatility & Market Quality        | Rolling vol, AC1, Max drawdown                   |
+| 5   | Cross-Variant Comparison           | MAD, Half-life across Rule/LLM/RuleLLM/Rag       |
+| 6   | Wealth Dynamics & Redistribution   | Terminal wealth, Gini, Wealth transfer           |
+| 7   | Information Efficiency & Tail Risk | PER, VaR, CVaR, HHI, Strategy correlation matrix |
+
+---
+
 ## §1 Analysis Objectives
 
 | Objective | Research Question                                                                        | Metric(s)                                          | Expected Finding                                                                       |
