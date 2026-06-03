@@ -58,7 +58,6 @@ anchored_trader:
       initial_position: 100.0
       custom_state_hot_limit: 3
       # AnchoredTrader specific parameters (Tversky & Kahneman, 1974)
-      anchor_weight: 0.7        # High: strong anchor influence
       adjustment_factor: 0.3    # Low: insufficient adjustment from anchor
       base_position_size: 20.0
   persona: !include persona.yml
@@ -164,4 +163,108 @@ noise_trader:
       trade_probability: 0.05   # Low: rarely trades
       min_order: 100.0
       max_order: 500.0
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Disposition Traders (Prospect Theory Asymmetric)
+# Theory: Shefrin & Statman (1985) — Disposition Effect; Kahneman & Tversky (1979)
+# -----------------------------------------------------------------------------
+disposition_trader:
+  name: "Disposition Trader"
+  class: "examples.AnchoringEffect.Rule.players:DispositionTrader"
+  # Expander → disposition_trader_1, disposition_trader_2
+  num_instances: 2
+  config:
+    identity: "disposition_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"
+      # Investor base parameters
+      initial_cash: 10000.0
+      initial_position: 100.0
+      custom_state_hot_limit: 3
+      # DispositionTrader specific parameters (Shefrin & Statman, 1985)
+      gain_threshold: 0.04        # 4% gain triggers profit-taking
+      loss_aversion_mult: 2.5     # Loss aversion multiplier (Kahneman & Tversky 1979)
+      base_position_size: 15.0
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Contrarian Trader (Statistical Mean Reversion)
+# Theory: De Bondt & Thaler (1985) — Market Overreaction; Jegadeesh (1990)
+# -----------------------------------------------------------------------------
+contrarian_trader:
+  name: "Contrarian Trader"
+  class: "examples.AnchoringEffect.Rule.players:ContrarianTrader"
+  num_instances: 1
+  config:
+    identity: "contrarian_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"
+      # Investor base parameters
+      initial_cash: 10000.0
+      initial_position: 100.0
+      custom_state_hot_limit: 3
+      # ContrarianTrader specific parameters (De Bondt & Thaler, 1985)
+      lookback_window: 10         # 10-round cumulative return window
+      entry_threshold: 0.05       # 5% cumulative return triggers contrarian trade
+      base_position_size: 20.0
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Fundamental Analyst (Conservative Institutional Updater)
+# Theory: Barberis, Shleifer & Vishny (1998) — Conservatism Bias
+# -----------------------------------------------------------------------------
+fundamental_analyst:
+  name: "Fundamental Analyst"
+  class: "examples.AnchoringEffect.Rule.players:FundamentalAnalyst"
+  num_instances: 1
+  config:
+    identity: "fundamental_analyst"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"
+      # Investor base parameters
+      initial_cash: 10000.0
+      initial_position: 100.0
+      custom_state_hot_limit: 3
+      # FundamentalAnalyst specific parameters (Barberis et al., 1998)
+      learning_rate: 0.05         # Slow belief convergence toward F
+      base_position_size: 25.0
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Liquidity Provider (Passive Market Maker)
+# Theory: Glosten & Milgrom (1985); Hendershott et al. (2011)
+# -----------------------------------------------------------------------------
+liquidity_provider:
+  name: "Liquidity Provider"
+  class: "examples.AnchoringEffect.Rule.players:LiquidityProvider"
+  num_instances: 1
+  config:
+    identity: "liquidity_provider"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"
+      # Investor base parameters
+      initial_cash: 15000.0
+      initial_position: 150.0
+      custom_state_hot_limit: 3
+      # LiquidityProvider specific parameters (Glosten & Milgrom, 1985)
+      ema_window: 20              # 20-round EMA for fair quote
+      half_spread: 0.015          # 1.5% half-spread
+      base_position_size: 30.0
   persona: !include persona.yml

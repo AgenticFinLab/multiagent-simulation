@@ -87,6 +87,7 @@ class MarketBroadcast:
     stock_price: Optional[float] = None
     prev_stock_price: Optional[float] = None
     stock_return: Optional[float] = None
+    fundamental: Optional[float] = None
 
     @classmethod
     def from_content(cls, round_num: int, content: Dict[str, Any]) -> "MarketBroadcast":
@@ -95,6 +96,7 @@ class MarketBroadcast:
             stock_price=content.get("stock_price", content.get("price")),
             prev_stock_price=content.get("prev_stock_price"),
             stock_return=content.get("stock_return"),
+            fundamental=content.get("fundamental"),
         )
 
 

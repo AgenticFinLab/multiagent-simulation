@@ -9,13 +9,19 @@
 #
 #         anchored_trader ────────────┐
 #         historical_anchor ──────────┤
-#         rational_updater ───────────┼──▶ market ──▶ all investors
-#         momentum_trader ────────────┤             (market data: price, deviation)
-#         noise_trader ───────────────┘
+#         rational_updater ───────────┤
+#         momentum_trader ────────────┤
+#         noise_trader ───────────────┼──▶ market ──▶ all investors
+#         disposition_trader ──────────┤             (market data: price, deviation)
+#         contrarian_trader ───────────┤
+#         fundamental_analyst ─────────┤
+#         liquidity_provider ──────────┘
 #
 # Execution flow per round:
 #   Level 0: market executes (broadcasts price + deviation metrics)
 #   Level 1: all investors execute in parallel (submit P,Q orders)
+#
+# Total: 14 investors + 1 market coordinator = 15 players
 # =============================================================================
 
 type: "star"
@@ -31,6 +37,10 @@ connections:
     - rational_updater
     - momentum_trader
     - noise_trader
+    - disposition_trader
+    - contrarian_trader
+    - fundamental_analyst
+    - liquidity_provider
 
   # Each investor → Market only (order submission)
   anchored_trader:
@@ -46,4 +56,16 @@ connections:
     - market
 
   noise_trader:
+    - market
+
+  disposition_trader:
+    - market
+
+  contrarian_trader:
+    - market
+
+  fundamental_analyst:
+    - market
+
+  liquidity_provider:
     - market

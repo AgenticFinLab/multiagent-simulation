@@ -38,19 +38,19 @@ market-level slow price-discovery process.
 
 #### §1.1.2 Real-World Event Catalogue
 
-| Event Name | Date(s) | Market / Asset | Trigger | Magnitude | Duration | Correspondence to Simulation | Primary Source |
-|---|---|---|---|---|---|---|---|
-| Consensus forecast anchoring | 1992–2006 | US macro/earnings forecasts | Forecasters revise from prior values after news | Under-revision roughly 30–70%; forecast-error autocorrelation around 0.4 | Quarterly forecast cycles | `AnchoredTrader` and `HistoricalAnchor` under-adjust toward the public fundamental | Campbell & Sharpe (2009), JFQA, https://doi.org/10.1017/S0022109009090127 |
-| Real-estate appraisal anchoring | 1987 study | Residential real estate | Listing price supplied before valuation | Expert valuations shift materially toward the listing price; study reports strong listing-price correlation | Single appraisal task with persistent valuation impact | `HistoricalAnchor` treats past/listed prices as reference values despite valuation evidence | Northcraft & Neale (1987), OBHDP, https://doi.org/10.1016/0749-5978(87)90046-X |
-| IPO aftermarket anchoring | Multi-decade IPO samples | Newly listed equities | Offer price becomes salient public reference | IPO aftermarket prices cluster around offer-price anchors; large first-year effects documented in IPO literature | Months after issuance | `initial_price = 105` seeds a first-price anchor above `fundamental_value = 100` | Loughran & Ritter (2002), RFS, https://doi.org/10.1093/rfs/15.2.413 |
+| Event Name                      | Date(s)                  | Market / Asset              | Trigger                                         | Magnitude                                                                                                        | Duration                                               | Correspondence to Simulation                                                                | Primary Source                                                                 |
+|---------------------------------|--------------------------|-----------------------------|-------------------------------------------------|------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|---------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| Consensus forecast anchoring    | 1992–2006                | US macro/earnings forecasts | Forecasters revise from prior values after news | Under-revision roughly 30–70%; forecast-error autocorrelation around 0.4                                         | Quarterly forecast cycles                              | `AnchoredTrader` and `HistoricalAnchor` under-adjust toward the public fundamental          | Campbell & Sharpe (2009), JFQA, https://doi.org/10.1017/S0022109009090127      |
+| Real-estate appraisal anchoring | 1987 study               | Residential real estate     | Listing price supplied before valuation         | Expert valuations shift materially toward the listing price; study reports strong listing-price correlation      | Single appraisal task with persistent valuation impact | `HistoricalAnchor` treats past/listed prices as reference values despite valuation evidence | Northcraft & Neale (1987), OBHDP, https://doi.org/10.1016/0749-5978(87)90046-X |
+| IPO aftermarket anchoring       | Multi-decade IPO samples | Newly listed equities       | Offer price becomes salient public reference    | IPO aftermarket prices cluster around offer-price anchors; large first-year effects documented in IPO literature | Months after issuance                                  | `initial_price = 105` seeds a first-price anchor above `fundamental_value = 100`            | Loughran & Ritter (2002), RFS, https://doi.org/10.1093/rfs/15.2.413            |
 
 #### §1.1.3 Book and Practitioner Literature
 
-| Title | Author(s) | Year | Publisher | Relevance to This Simulation |
-|---|---|---|---|---|
-| *Thinking, Fast and Slow* | Daniel Kahneman | 2011 | Farrar, Straus and Giroux | Practitioner-readable synthesis of anchoring-and-adjustment experiments and why anchors remain influential even when recognized. |
-| *Irrational Exuberance* | Robert J. Shiller | 2000/2015 | Princeton University Press | Connects salient reference prices and narratives to slow-moving market expectations and behavioural price persistence. |
-| *Behavioral Finance and Wealth Management* | Michael M. Pompian | 2006 | Wiley | Practitioner taxonomy of anchoring and adjustment bias in investment decision-making, useful for persona descriptions. |
+| Title                                      | Author(s)          | Year      | Publisher                  | Relevance to This Simulation                                                                                                     |
+|--------------------------------------------|--------------------|-----------|----------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+| *Thinking, Fast and Slow*                  | Daniel Kahneman    | 2011      | Farrar, Straus and Giroux  | Practitioner-readable synthesis of anchoring-and-adjustment experiments and why anchors remain influential even when recognized. |
+| *Irrational Exuberance*                    | Robert J. Shiller  | 2000/2015 | Princeton University Press | Connects salient reference prices and narratives to slow-moving market expectations and behavioural price persistence.           |
+| *Behavioral Finance and Wealth Management* | Michael M. Pompian | 2006      | Wiley                      | Practitioner taxonomy of anchoring and adjustment bias in investment decision-making, useful for persona descriptions.           |
 
 
 ## §2 Theoretical Foundation
@@ -117,6 +117,45 @@ market-level slow price-discovery process.
 
 
 ## §3 Market Design Principles
+
+### 3.0 Idealised Market Type and Real-World Mapping
+
+**Market type**: single-asset, single-venue, USD-denominated equity-style spot market with continuous quote-driven price formation. The simulation is deliberately abstract — there is no derivatives layer, no leverage, no credit risk, no cross-asset effect, no FX rate, no funding cost. All scenarios in this codebase share this canonical abstraction; scenarios whose real-world phenomenon lives in another asset class (FX, credit, rates, commodities) **map** the empirical dynamic onto this abstraction rather than modelling its native microstructure.
+
+**Why a single abstraction**: Empirical anchoring evidence (Tversky & Kahneman 1974; Northcraft & Neale 1987; Campbell & Sharpe 2009) is asset-class-invariant — the cognitive bias appears in equity, real estate, FX, and analyst forecast settings. A unified abstraction enables direct cross-scenario comparison without conflating mechanism heterogeneity with bias heterogeneity. This is the standard practice in agent-based finance:
+
+- Brock, W. A., & Hommes, C. H. (1998). Heterogeneous beliefs and routes to chaos in a simple asset pricing model. *Journal of Economic Dynamics and Control*, 22(8-9), 1235-1274. https://doi.org/10.1016/S0165-1889(98)00011-6
+- LeBaron, B. (2006). Agent-based computational finance. In *Handbook of Computational Economics, Vol. 2*, 1187-1233. North-Holland. https://doi.org/10.1016/S1574-0021(05)02024-1
+- Lux, T., & Marchesi, M. (1999). Scaling and criticality in a stochastic multi-agent model of a financial market. *Nature*, 397(6719), 498-500. https://doi.org/10.1038/17290
+
+**Mapping table**:
+
+| Symbol | Real-world counterpart                                | Abstraction in this scenario                           |
+|--------|-------------------------------------------------------|--------------------------------------------------------|
+| `P(t)` | Quoted last price of any tradable asset               | Scalar equity-like price, USD per share                |
+| `F`    | Consensus fair value (DCF, comparable, model-implied) | Constant scalar, USD per share                         |
+| `D(t)` | Net order flow at the venue                           | Net signed quantity from all investors                 |
+| `λ`    | Kyle's lambda / market impact coefficient             | Calibrated to keep round-over-round price moves modest |
+| `γ`    | Mean-reversion intensity (slow arbitrage)             | Calibrated to allow persistence over 20-60 rounds      |
+| `ε(t)` | Microstructure noise, liquidity shocks                | Gaussian, σ ≈ 0.5                                      |
+
+**Explicit non-features** (intentionally absent from the model):
+
+- No FX rates — all prices are quoted in a single numéraire (USD).
+- No yield curves, term structure, or duration risk.
+- No credit spreads, default risk, or recovery rates.
+- No leverage, margin, or funding cost.
+- Single venue — no fragmentation, no latency arbitrage.
+- No options, futures, or other derivatives.
+- No transaction cost, no bid-ask spread (continuous quote-driven price).
+
+**Mapping examples for non-equity scenarios**:
+
+- *LTCMCollapse* — `P(t)` represents the spread between on-the-run and off-the-run treasury bonds; `F` represents the long-run no-arbitrage spread. Investor decision rules (anchor, momentum, rational arbitrage) retain their qualitative meaning without claiming faithful microstructure of the bond repo market.
+- *CarryTradeUnwind* — `P(t)` represents the carry-currency exchange rate; `F` represents the interest-rate-parity-implied rate.
+- *ArchegosCollapse* — `P(t)` represents a synthetic equity exposure price; collateral and leverage dynamics are absent and replaced by abstract demand pressure.
+
+**For AnchoringEffect specifically**: the asset stands for any single equity whose consensus fair value is anchored by analysts to a stale reference (Campbell & Sharpe 2009 study analyst forecasts; Northcraft & Neale 1987 study real-estate appraisal anchoring — the simulation is faithful to the *cognitive* mechanism in both, regardless of asset class). All dollar amounts in the simulation are abstract numéraire units.
 
 ### 3.1 Price Formation Model
 
@@ -767,6 +806,580 @@ RationalUpdater to hold (price closer to F after shock) or MomentumTrader to sel
 | 1 | Black, F. (1986). Noise. *Journal of Finance*, 41(3), 529–543. https://doi.org/10.1111/j.1540-6261.1986.tb04513.x                                                                                                                    | Foundational rationale for noise trading; establishes trade_probability concept |
 | 2 | Glosten, L. R., & Milgrom, P. R. (1985). Bid, ask and transaction prices in a specialist market with heterogeneously informed traders. *Journal of Financial Economics*, 14(1), 71–100. https://doi.org/10.1016/0304-405X(85)90044-3 | Establishes informed vs. uninformed order flow fractions                        |
 
+---
+
+### §4.6 DispositionTrader
+
+#### 4.6.1  Summary
+
+DispositionTrader represents the retail investor who systematically sells winning positions too early and holds losing positions too long. This agent models the Disposition Effect (Shefrin & Statman, 1985) — a behavioural pattern rooted in Prospect Theory (Kahneman & Tversky, 1979) where the asymmetric value function makes realised gains feel less painful to lock in while realised losses feel disproportionately aversive. In the AnchoringEffect simulation, DispositionTrader introduces asymmetric liquidity: when prices are elevated above its cost basis (a gain scenario), it sells quickly, adding downward pressure that partially offsets anchoring-driven overvaluation. When prices fall below cost basis (a loss scenario), it refuses to sell, removing potential liquidity and allowing mispricings to persist with less corrective flow.
+
+#### 4.6.2  Theoretical and Empirical Foundation
+
+**The Disposition Effect**:
+- Theory / Study: Disposition to Sell Winners Too Early and Ride Losers Too Long
+- Citation: Shefrin, H., & Statman, M. (1985). The disposition to sell winners too early and ride losers too long: Theory and evidence. *Journal of Finance*, 40(3), 777–790. https://doi.org/10.1111/j.1540-6261.1985.tb05002.x
+- Core Insight: Investors are approximately 1.5–2.5× more likely to sell a position showing a gain than one showing a loss of equal magnitude. This asymmetry is a direct consequence of Prospect Theory's S-shaped value function and reference-point dependence. The reference point is the purchase price (cost basis).
+- Mathematical Formulation:
+  ```
+  gain_pct(t) = (P(t) − cost_basis) / cost_basis
+  If gain_pct > gain_threshold (+4%): sell (lock in profit)
+  If gain_pct < −gain_threshold / loss_aversion_mult (< −1.6%): buy ("average down" into perceived bargain)
+  Else: hold (loss aversion prevents selling losers; no trigger for winners)
+  ```
+- Empirical Evidence: Odean (1998, *Journal of Finance*) documents that individual investors at a large brokerage realise gains at 1.68× the rate of losses. Weber & Camerer (1998, *Journal of Economic Behavior and Organization*) confirm disposition effects in controlled experiments. The asymmetry ratio 1.5–2.5× calibrates the `loss_aversion_mult = 2.5` parameter.
+- Relevance to This Investor: DispositionTrader's cost basis starts near the initial_price (≈105) because it holds position from round 1. As anchoring keeps prices elevated (101–105), the trader remains near breakeven and is inactive. Once prices rise above cost basis by 4%, it sells — providing temporary downward pressure that partially counteracts anchoring-driven overvaluation.
+
+**Prospect Theory Foundation**:
+- Theory / Study: Asymmetric Value Function and Reference-Point Dependence
+- Citation: Kahneman, D., & Tversky, A. (1979). Prospect theory: An analysis of decision under risk. *Econometrica*, 47(2), 263–292. https://doi.org/10.2307/1914185
+- Core Insight: The value function is concave for gains (risk averse) and convex for losses (risk seeking), with losses weighted approximately 2.25× more heavily than equivalent gains. This creates the disposition effect: the disutility of realising a $X loss exceeds the utility of realising a $X gain by factor ~2.25.
+- Mathematical Formulation: `V(x) = x^α if x ≥ 0; −λ(−x)^β if x < 0` where α ≈ 0.88, β ≈ 0.88, λ ≈ 2.25 (Tversky & Kahneman 1992).
+- Relevance to This Investor: The `loss_aversion_mult = 2.5` parameter approximates λ = 2.25 from cumulative prospect theory, controlling the asymmetry between gain-triggered selling and loss-triggered inaction.
+
+#### 4.6.3  Design Purpose and Activation Scenarios
+
+Purpose: DispositionTrader introduces realistic asymmetric liquidity provision that interacts with the anchoring lifecycle in a phase-dependent manner. During the overvaluation phase (Phase 2), when prices hover above fundamental but near cost basis, the agent is largely inactive. During rallies above cost basis, it sells — providing temporary downward pressure. During corrections below cost basis, it holds — removing potential selling flow and allowing mispricings to persist on the downside.
+
+Activation Scenarios:
+- Price above cost basis by > 4% (gain zone): Sells to lock in profit. Adds downward pressure that partially offsets anchoring-driven overvaluation.
+- Price below cost basis by > 1.6% (loss_threshold = gain_threshold / loss_aversion_mult): Buys ("averaging down" — the disposition investor's tendency to reinforce losing positions). Adds upward pressure.
+- Price within ±4% / ±1.6% of cost basis: Holds — the asymmetric inaction zone where neither gain-taking nor loss-aversion-driven buying is triggered.
+
+Market Contribution: **Asymmetrically destabilizing** — accelerates profit-taking when prices are elevated, but removes liquidity during corrections. The asymmetry interacts with anchoring to create sharper peaks and slower troughs.
+
+Interaction with other agents: Partially offsets AnchoredTrader's upward support (by selling winners above cost basis); reinforces HistoricalAnchor's inertia during declines (both refuse to sell into falling markets, though for different reasons).
+
+#### 4.6.4  Behavioral Framework
+
+**4.6.4.1  Decision Information Set**
+
+| Signal       | Type             | Rationale                                                                                |
+|--------------|------------------|------------------------------------------------------------------------------------------|
+| `price`      | Continuous       | Current market price; compared to cost_basis reference point                             |
+| `cost_basis` | Persistent state | Running weighted-average purchase price; updated on each buy; the Prospect Theory anchor |
+
+Does NOT use: `fundamental`, `deviation`, `prev_price`. DispositionTrader's reference is its own purchase history, not any external fundamental or momentum signal.
+
+**4.6.4.2  Core Behavioral Mechanism**
+
+1. Maintains `cost_basis` = weighted average of all historical purchase prices (initial = initial_price at round 1).
+2. Each round: computes `gain_pct = (price − cost_basis) / cost_basis`.
+3. If `gain_pct > gain_threshold (+0.04)`: sells — disposition effect profit-taking.
+4. If `gain_pct < −gain_threshold / loss_aversion_mult (−0.016)`: buys — averaging down into perceived bargain.
+5. Otherwise: holds — the asymmetric inaction zone.
+6. On each buy, `cost_basis` updates: `cost_basis = (old_cost_basis × old_position + price × quantity) / (old_position + quantity)`.
+
+**4.6.4.3  Mathematical Model**
+
+- Decision variable: Trade quantity Q*(t)
+- Trigger function:
+  ```
+  gain_pct(t) = (P(t) − cost_basis) / cost_basis
+  Sell: gain_pct(t) > gain_threshold = 0.04
+  Buy:  gain_pct(t) < −gain_threshold / loss_aversion_mult = −0.016
+  Hold: otherwise
+  ```
+- Sizing function:
+  ```
+  Q*(t) = min(base_position_size, abs(gain_pct(t)) × 500)
+  Bounded by cash (buy) or position (sell)
+  ```
+- State variables: `cost_basis` — updated on every buy trade
+- Parameter definitions:
+
+| Symbol                    | Meaning                               | Config Path                     | Source                                                               |
+|---------------------------|---------------------------------------|---------------------------------|----------------------------------------------------------------------|
+| gain_threshold = 0.04     | Minimum gain to trigger profit-taking | players.yml → DispositionTrader | Odean (1998): median disposition investors realise gains at 4–8%     |
+| loss_aversion_mult = 2.5  | Loss aversion asymmetry multiplier    | players.yml → DispositionTrader | Kahneman & Tversky (1979): λ ≈ 2.25; rounded to 2.5 for conservatism |
+| base_position_size = 15.0 | Maximum trade size                    | players.yml → DispositionTrader | Smaller than anchoring agents; retail scale                          |
+
+**4.6.4.4  Behavioral Properties**
+
+- Time horizon: Medium — reference point is static (cost basis); unchanged until next trade
+- Risk tolerance: Asymmetric — risk-averse for gains (quick selling), risk-seeking for losses (holding)
+- Information asymmetry: None about fundamentals; unique private reference (cost basis)
+- Psychological profile: Prospect Theory (Kahneman & Tversky 1979); Disposition Effect (Shefrin & Statman 1985); Mental Accounting (Thaler 1985)
+
+#### 4.6.5  Decision Process Walkthrough
+
+```
+Given:  price = 108.0,  cost_basis = 103.5,  gain_threshold = 0.04,  loss_aversion_mult = 2.5
+
+Step 1: Compute gain percentage
+        gain_pct = (108.0 − 103.5) / 103.5 = +0.0435
+
+Step 2: Compare to thresholds
+        +0.0435 > +0.04 → sell condition satisfied (profit-taking)
+
+Step 3: Compute quantity
+        Q* = min(15.0, 0.0435 × 500) = min(15.0, 21.7) = 15 shares (capped)
+
+Result: action = sell, quantity = 15, bid_price = 108.0
+Rationale: Price 4.35% above cost basis triggers disposition-effect profit-taking.
+This selling adds downward pressure during the anchoring overvaluation phase.
+```
+
+#### 4.6.6  Worked Numerical Example
+
+```
+Market state:  price = 97.0,  cost_basis = 105.0,  position = 100 shares
+
+Calculation:
+  gain_pct = (97.0 − 105.0) / 105.0 = −0.0762  (7.6% loss)
+  Compare: −0.0762 < −0.016 → buy condition (averaging down)
+  Q* = min(15.0, 0.0762 × 500) = min(15.0, 38.1) = 15 shares (capped)
+  Cash check: 15 × 97.0 = $1,455 (sufficient from initial $10,000)
+
+Decision: action = buy, quantity = 15, bid_price = 97.0
+Update: cost_basis = (105.0 × 100 + 97.0 × 15) / 115 = 103.96
+
+Rationale: Despite price being 3% below fundamental (100), DispositionTrader buys because it
+perceives a loss relative to cost basis and "averages down" — the classic disposition-effect
+behaviour of reinforcing losing positions. This buying adds upward price support at levels
+where rational agents would hold or sell.
+```
+
+#### 4.6.7  Academic References
+
+| # | Citation                                                                                                                                                                                         | Notes                                                                                     |
+|---|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
+| 1 | Shefrin, H., & Statman, M. (1985). The disposition to sell winners too early and ride losers too long. *Journal of Finance*, 40(3), 777–790. https://doi.org/10.1111/j.1540-6261.1985.tb05002.x  | Core theoretical foundation; establishes gain/loss asymmetry in individual investors      |
+| 2 | Kahneman, D., & Tversky, A. (1979). Prospect theory. *Econometrica*, 47(2), 263–292. https://doi.org/10.2307/1914185                                                                             | Grounds the disposition effect in value function asymmetry; calibrates λ ≈ 2.25           |
+| 3 | Odean, T. (1998). Are investors reluctant to realize their losses? *Journal of Finance*, 53(5), 1775–1798. https://doi.org/10.1111/0022-1082.00072                                               | Empirical confirmation: gains realised 1.68× more frequently than losses; large brokerage |
+| 4 | Weber, M., & Camerer, C. F. (1998). The disposition effect in securities trading. *Journal of Economic Behavior and Organization*, 33(2), 167–184. https://doi.org/10.1016/S0167-2681(97)00089-9 | Controlled experiment confirming disposition effect magnitude                             |
+
+---
+
+### §4.7 ContrarianTrader
+
+#### 4.7.1  Summary
+
+ContrarianTrader represents the disciplined mean-reversion investor who bets against recent trends without reference to fundamental value. Unlike RationalUpdater (who exploits the price-fundamental gap), ContrarianTrader uses purely statistical reasoning: when cumulative 10-round returns exceed ±5%, it trades in the opposite direction expecting mean reversion. This agent models the empirically documented overreaction-correction cycle (De Bondt & Thaler, 1985) and provides a correction mechanism distinct from fundamental arbitrage — one that would operate even if F were unknown.
+
+#### 4.7.2  Theoretical and Empirical Foundation
+
+**Market Overreaction and Contrarian Profits**:
+- Theory / Study: Long-Run Stock Market Overreaction
+- Citation: De Bondt, W. F. M., & Thaler, R. H. (1985). Does the stock market overreact? *Journal of Finance*, 40(3), 793–805. https://doi.org/10.1111/j.1540-6261.1985.tb05004.x
+- Core Insight: Stocks that have performed extremely well ("winners") over 3–5 years subsequently underperform, while extreme "losers" subsequently outperform. This reversal pattern is consistent with investors overreacting to recent information and prices eventually mean-reverting. Contrarian strategies exploit this predictable overreaction.
+- Mathematical Formulation:
+  ```
+  cumulative_return(t) = (P(t) − P(t−lookback)) / P(t−lookback)
+  Sell if cumulative_return > +entry_threshold (+5%)
+  Buy  if cumulative_return < −entry_threshold (−5%)
+  ```
+- Empirical Evidence: De Bondt & Thaler (1985) document 25% cumulative excess return to contrarian portfolios over 3 years; Jegadeesh (1990, *Journal of Finance*) confirms short-horizon reversals at 1-month intervals; Bondt (1993) and Chopra, Lakonishok & Ritter (1992) extend to multiple horizons.
+- Relevance to This Investor: In the AnchoringEffect simulation, anchoring agents create a slow upward drift followed by correction. ContrarianTrader detects the cumulative upward drift and sells against it, providing an additional correction force beyond RationalUpdater. During the correction phase, it may buy the dip, partially cushioning the decline.
+
+**Short-Horizon Mean Reversion**:
+- Theory / Study: Evidence of Predictable Behavior of Security Returns
+- Citation: Jegadeesh, N. (1990). Evidence of predictable behavior of security returns. *Journal of Finance*, 45(3), 881–898. https://doi.org/10.1111/j.1540-6261.1990.tb05110.x
+- Core Insight: At short horizons (1–4 weeks), stock returns exhibit negative serial correlation — reversals rather than momentum. This justifies a 10-round contrarian lookback window as the simulation-compressed equivalent of a 2-week reversal horizon.
+- Relevance to This Investor: The `lookback_window = 10` parameter maps to Jegadeesh's documented short-horizon reversal window.
+
+#### 4.7.3  Design Purpose and Activation Scenarios
+
+Purpose: Provide a correction mechanism that is distinct from RationalUpdater. ContrarianTrader does not know or use the fundamental value — it trades on pure price-path statistics. This tests whether price corrections in the simulation require fundamental knowledge or can emerge from statistical mean-reversion beliefs alone.
+
+Activation Scenarios:
+- 10-round cumulative return > +5%: Sells (expects reversal from overextension).
+- 10-round cumulative return < −5%: Buys (expects bounce from oversold condition).
+- Within ±5%: Holds — insufficient trend to trigger contrarian response.
+
+Market Contribution: **Stabilizing** — provides correction force distinct from fundamental arbitrage; dampens both upward overextension and downward overshooting.
+
+Interaction with other agents: Opposes MomentumTrader directly (when momentum signal is strong, contrarian signal fires in opposite direction); complements RationalUpdater during correction phase (both sell into overvaluation, but for different reasons); may temporarily oppose RationalUpdater during rapid corrections (ContrarianTrader buys the dip while RationalUpdater holds).
+
+#### 4.7.4  Behavioral Framework
+
+**4.7.4.1  Decision Information Set**
+
+| Signal                           | Type       | Rationale                                               |
+|----------------------------------|------------|---------------------------------------------------------|
+| `price`                          | Continuous | Current price; end-point of lookback return calculation |
+| `price_history` (last 10 rounds) | Series     | Required for cumulative return over lookback window     |
+
+Does NOT use: `fundamental`, `deviation`. ContrarianTrader ignores fundamental value entirely — its signal is purely statistical (price-path based).
+
+**4.7.4.2  Core Behavioral Mechanism**
+
+1. Maintains a rolling list of recent prices (up to `lookback_window = 10` rounds).
+2. Each round: computes `cum_return = (price − price_10_rounds_ago) / price_10_rounds_ago`.
+3. If `cum_return > entry_threshold (+0.05)`: sells — expects mean reversion from upward overextension.
+4. If `cum_return < −entry_threshold (−0.05)`: buys — expects bounce from oversold.
+5. Otherwise: holds.
+
+**4.7.4.3  Mathematical Model**
+
+- Decision variable: Trade quantity Q*(t)
+- Trigger function:
+  ```
+  P_ref = price_history[max(0, t − lookback_window)]
+  cum_return(t) = (P(t) − P_ref) / P_ref
+  Sell: cum_return(t) > +0.05
+  Buy:  cum_return(t) < −0.05
+  ```
+- Sizing function:
+  ```
+  Q*(t) = min(base_position_size, abs(cum_return(t)) × 400)
+  Bounded by cash (buy) or position (sell)
+  ```
+- State variables: `price_history` — rolling list of last 10 prices
+- Parameter definitions:
+
+| Symbol                    | Meaning                                               | Config Path                    | Source                                                         |
+|---------------------------|-------------------------------------------------------|--------------------------------|----------------------------------------------------------------|
+| lookback_window = 10      | Number of rounds for cumulative return                | players.yml → ContrarianTrader | Jegadeesh (1990): short-horizon reversal at 1–4 week intervals |
+| entry_threshold = 0.05    | Minimum cumulative return to trigger contrarian trade | players.yml → ContrarianTrader | De Bondt & Thaler (1985): ~5% overreaction threshold           |
+| base_position_size = 20.0 | Maximum trade size                                    | players.yml → ContrarianTrader | Standardised                                                   |
+
+**4.7.4.4  Behavioral Properties**
+
+- Time horizon: Short-to-medium (10-round lookback; ~2 weeks compressed)
+- Risk tolerance: Medium — 5% threshold provides buffer against false signals
+- Information asymmetry: None about fundamentals; uses only public price history
+- Psychological profile: Statistical mean-reversion belief; contrarian temperament; De Bondt & Thaler (1985) overreaction hypothesis
+
+#### 4.7.5  Decision Process Walkthrough
+
+```
+Given:  price = 107.5,  price_10_rounds_ago = 102.0,  entry_threshold = 0.05
+
+Step 1: Compute cumulative return
+        cum_return = (107.5 − 102.0) / 102.0 = +0.0539
+
+Step 2: Compare to threshold
+        +0.0539 > +0.05 → sell condition (contrarian reversal bet)
+
+Step 3: Compute quantity
+        Q* = min(20.0, 0.0539 × 400) = min(20.0, 21.6) = 20 shares (capped)
+
+Result: action = sell, quantity = 20, bid_price = 107.5
+Rationale: Cumulative 10-round return exceeded +5%; ContrarianTrader bets on mean reversion.
+This sells into the anchoring-driven overvaluation, adding corrective pressure from a
+purely statistical (non-fundamental) perspective.
+```
+
+#### 4.7.6  Worked Numerical Example
+
+```
+Market state:  price = 96.5,  price_10_rounds_ago = 103.0
+
+Calculation:
+  cum_return = (96.5 − 103.0) / 103.0 = −0.0631  (6.3% decline over 10 rounds)
+  −0.0631 < −0.05 → buy condition (contrarian buy-the-dip)
+  Q* = min(20.0, 0.0631 × 400) = min(20.0, 25.2) = 20 shares (capped)
+
+Decision: action = buy, quantity = 20, bid_price = 96.5
+Rationale: 10-round cumulative return is −6.3%, exceeding the 5% reversal threshold.
+ContrarianTrader bets that the decline is an overreaction and prices will bounce.
+Note: unlike RationalUpdater who buys because price < F, ContrarianTrader buys purely
+because the decline is "too large" statistically — a fundamentally different information set.
+```
+
+#### 4.7.7  Academic References
+
+| # | Citation                                                                                                                                                                           | Notes                                                        |
+|---|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------|
+| 1 | De Bondt, W. F. M., & Thaler, R. H. (1985). Does the stock market overreact? *Journal of Finance*, 40(3), 793–805. https://doi.org/10.1111/j.1540-6261.1985.tb05004.x              | Core foundation; documents 25% reversal profits over 3 years |
+| 2 | Jegadeesh, N. (1990). Evidence of predictable behavior of security returns. *Journal of Finance*, 45(3), 881–898. https://doi.org/10.1111/j.1540-6261.1990.tb05110.x               | Short-horizon reversals; calibrates lookback_window = 10     |
+| 3 | Chopra, N., Lakonishok, J., & Ritter, J. R. (1992). Measuring abnormal performance. *Journal of Financial Economics*, 31(2), 235–268. https://doi.org/10.1016/0304-405X(92)90005-I | Cross-validates overreaction effects across market caps      |
+
+---
+
+### §4.8 FundamentalAnalyst
+
+#### 4.8.1  Summary
+
+FundamentalAnalyst represents the institutional investor who knows the true fundamental value exists but incorporates it only gradually — modelling the conservatism bias documented by Barberis, Shleifer & Vishny (1998). Unlike RationalUpdater (who uses F directly with no delay), FundamentalAnalyst maintains a `belief` that exponentially smooths toward F at rate λ_b = 0.05 per round. This means it takes approximately 40–60 rounds for FundamentalAnalyst's belief to converge within 90% of the true fundamental. The result is a gradually strengthening correction force that is weak early in the simulation (when anchoring dominates) but increasingly effective in later rounds — modelling how institutional research slowly incorporates new information.
+
+#### 4.8.2  Theoretical and Empirical Foundation
+
+**Conservatism Bias and Slow Belief Updating**:
+- Theory / Study: Conservatism and Underreaction in Investor Beliefs
+- Citation: Barberis, N., Shleifer, A., & Vishny, R. (1998). A model of investor sentiment. *Journal of Financial Economics*, 49(3), 307–343. https://doi.org/10.1016/S0304-405X(98)00027-0
+- Core Insight: Investors update beliefs too slowly in response to new information (conservatism), especially when the information is statistical or abstract. This leads to systematic underreaction to earnings surprises and slow price adjustment. The BSV model shows that conservatism causes prices to initially underreact, then drift as information gradually incorporates — matching the post-earnings announcement drift anomaly.
+- Mathematical Formulation:
+  ```
+  belief(t) = (1 − λ_b) × belief(t−1) + λ_b × F
+  where λ_b = 0.05 (learning rate); belief(0) = initial_price = 105.0
+  Convergence: belief approaches F exponentially with half-life = −ln(2)/ln(1−λ_b) ≈ 13.5 rounds
+  90% convergence: ≈ 45 rounds (well within 200-round simulation)
+  ```
+- Empirical Evidence: Bernard & Thomas (1989, *Journal of Accounting and Economics*) document post-earnings announcement drift lasting 60–90 trading days; Barberis, Shleifer & Vishny (1998) attribute this to conservative belief updating with effective λ_b ≈ 0.03–0.08.
+- Relevance to This Investor: FundamentalAnalyst's λ_b = 0.05 means its belief converges from 105 toward 100 over approximately 45 rounds — matching the documented speed of institutional information incorporation. Early on, it is nearly as "anchored" as AnchoredTrader; late in the simulation, it is nearly as rational as RationalUpdater.
+
+**Institutional Investor Conservatism**:
+- Theory / Study: Limits to Arbitrage and Gradual Information Processing
+- Citation: Shleifer, A., & Vishny, R. W. (1997). The limits of arbitrage. *Journal of Finance*, 52(1), 35–55. https://doi.org/10.1111/j.1540-6261.1997.tb03807.x
+- Core Insight: Even when institutional investors recognise mispricing, they adjust portfolios gradually due to career concerns, benchmark tracking, and risk limits. This creates "limits to arbitrage" where correct fundamental information is priced in slowly rather than instantaneously.
+- Relevance to This Investor: FundamentalAnalyst's gradual belief convergence models these institutional constraints — even though F is known, the agent cannot instantly move to full fundamental trading.
+
+#### 4.8.3  Design Purpose and Activation Scenarios
+
+Purpose: FundamentalAnalyst fills the gap between AnchoredTrader (permanently biased) and RationalUpdater (instantly rational). It models the realistic middle ground: an investor who is correct eventually but slow to arrive. This creates a richer phase structure — early rounds are dominated by anchoring, middle rounds see FundamentalAnalyst gradually joining RationalUpdater in correcting, and late rounds show strong convergence pressure.
+
+Activation Scenarios:
+- Price above belief by > 2%: Sells — interprets price as overvalued relative to gradually-learned fair value.
+- Price below belief by > 2%: Buys — interprets price as undervalued relative to belief.
+- Within ±2% of belief: Holds.
+
+Market Contribution: **Weakly stabilizing → increasingly stabilizing** — correction force strengthens over time as belief converges to F. Creates a natural bridge between the persistence phase and correction phase of the anchoring lifecycle.
+
+Interaction with other agents: In early rounds, may align with AnchoredTrader (both have elevated beliefs); in later rounds, aligns with RationalUpdater (both drive price toward F); provides a gradual transition between bias and rationality that smooths the correction path.
+
+#### 4.8.4  Behavioral Framework
+
+**4.8.4.1  Decision Information Set**
+
+| Signal        | Type             | Rationale                                                                         |
+|---------------|------------------|-----------------------------------------------------------------------------------|
+| `price`       | Continuous       | Current market price; compared to evolving belief                                 |
+| `fundamental` | Continuous       | True F; used for belief update each round                                         |
+| `belief`      | Persistent state | Exponentially-smoothed estimate of fair value; starts at initial_price, converges |
+
+**4.8.4.2  Core Behavioral Mechanism**
+
+1. Initialises `belief = initial_price = 105.0` (starts biased, like AnchoredTrader).
+2. Each round: updates belief: `belief = (1 − learning_rate) × belief + learning_rate × fundamental`.
+3. Computes `dev_from_belief = (price − belief) / belief`.
+4. If `dev_from_belief > +0.02`: sells (price above what FA believes is fair).
+5. If `dev_from_belief < −0.02`: buys (price below FA's fair value belief).
+6. Otherwise: holds.
+
+**4.8.4.3  Mathematical Model**
+
+- Decision variable: Trade quantity Q*(t)
+- Belief evolution:
+  ```
+  belief(t) = 0.95 × belief(t−1) + 0.05 × F
+  belief(0) = 105.0; belief(∞) → 100.0
+  Half-life of belief convergence: ln(2)/ln(1/0.95) ≈ 13.5 rounds
+  ```
+- Trigger function:
+  ```
+  dev(t) = (P(t) − belief(t)) / belief(t)
+  Sell: dev(t) > +0.02
+  Buy:  dev(t) < −0.02
+  ```
+- Sizing function:
+  ```
+  Q*(t) = min(base_position_size, abs(dev(t)) × 1000)
+  Bounded by cash (buy) or position (sell)
+  ```
+- Parameter definitions:
+
+| Symbol                    | Meaning                                  | Config Path                      | Source                                                                    |
+|---------------------------|------------------------------------------|----------------------------------|---------------------------------------------------------------------------|
+| learning_rate = 0.05      | Exponential smoothing rate toward F      | players.yml → FundamentalAnalyst | Barberis et al. (1998): institutional learning over ~45 rounds (≈60 days) |
+| base_position_size = 25.0 | Maximum trade size (institutional scale) | players.yml → FundamentalAnalyst | Slightly larger than retail agents                                        |
+
+**4.8.4.4  Behavioral Properties**
+
+- Time horizon: Long — belief evolves slowly; full convergence in ~45 rounds
+- Risk tolerance: Medium — 2% threshold; institutional-scale position limits
+- Information asymmetry: Has access to F but processes it with conservatism (slow incorporation)
+- Psychological profile: Conservatism bias (Barberis et al. 1998); limits to arbitrage (Shleifer & Vishny 1997); institutional inertia
+
+#### 4.8.5  Decision Process Walkthrough
+
+```
+Given:  round = 30,  price = 102.0,  fundamental = 100.0
+        belief(29) = 102.8 (has partially converged from 105.0)
+
+Step 1: Update belief
+        belief(30) = 0.95 × 102.8 + 0.05 × 100.0 = 97.66 + 5.0 = 102.66
+
+Step 2: Compute deviation from belief
+        dev = (102.0 − 102.66) / 102.66 = −0.0064
+
+Step 3: Compare to threshold
+        |−0.0064| < 0.02 → below threshold; HOLD
+
+Result: Despite price being 2% above true fundamental, FundamentalAnalyst holds because
+        its belief (102.66) is still elevated — it has not yet fully learned that F = 100.
+        By round 60, belief ≈ 100.25, and the same price would trigger selling.
+```
+
+#### 4.8.6  Worked Numerical Example
+
+```
+Market state:  round = 60,  price = 103.0,  fundamental = 100.0
+               belief(59) = 100.75 (nearly converged after 60 rounds)
+
+Calculation:
+  belief(60) = 0.95 × 100.75 + 0.05 × 100.0 = 95.71 + 5.0 = 100.71
+  dev = (103.0 − 100.71) / 100.71 = +0.0227  (>+0.02 → sell)
+  Q* = min(25.0, 0.0227 × 1000) = min(25.0, 22.7) = 22 shares
+
+Decision: action = sell, quantity = 22, bid_price = 103.0
+Rationale: After 60 rounds of exponential smoothing, FundamentalAnalyst's belief has nearly
+converged to F = 100. It now detects that price = 103 is 2.3% above its fair value estimate
+and sells — adding correction pressure that was absent in early rounds. This demonstrates
+the time-varying stabilization force that distinguishes FA from RationalUpdater.
+```
+
+#### 4.8.7  Academic References
+
+| # | Citation                                                                                                                                                                        | Notes                                                                                |
+|---|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| 1 | Barberis, N., Shleifer, A., & Vishny, R. (1998). A model of investor sentiment. *Journal of Financial Economics*, 49(3), 307–343. https://doi.org/10.1016/S0304-405X(98)00027-0 | Core foundation; conservatism → slow belief updating → post-announcement drift       |
+| 2 | Bernard, V. L., & Thomas, J. K. (1989). Post-earnings-announcement drift. *Journal of Accounting and Economics*, 11(1), 1–36. https://doi.org/10.1016/0165-4101(89)90013-8      | Empirical: drift lasts 60–90 days; calibrates λ_b ≈ 0.05                             |
+| 3 | Shleifer, A., & Vishny, R. W. (1997). The limits of arbitrage. *Journal of Finance*, 52(1), 35–55. https://doi.org/10.1111/j.1540-6261.1997.tb03807.x                           | Institutional constraints explaining why convergence is slow despite correct beliefs |
+
+---
+
+### §4.9 LiquidityProvider
+
+#### 4.9.1  Summary
+
+LiquidityProvider represents the passive market-maker or algorithmic liquidity provider that quotes around a short-term exponential moving average (EMA), supplying two-sided liquidity without any fundamental view. It buys when price dips below its fair quote minus a half-spread, and sells when price rises above fair quote plus half-spread. This agent smooths price volatility, dampens short-term oscillations, and provides the continuous liquidity that allows other agents' strategies to execute without excessive slippage. In the anchoring lifecycle, LiquidityProvider dampens noise-driven spikes while having no systematic effect on the direction of mispricing.
+
+#### 4.9.2  Theoretical and Empirical Foundation
+
+**Market Making and Bid-Ask Dynamics**:
+- Theory / Study: Bid-Ask Spread and Market Making
+- Citation: Glosten, L. R., & Milgrom, P. R. (1985). Bid, ask and transaction prices in a specialist market with heterogeneously informed traders. *Journal of Financial Economics*, 14(1), 71–100. https://doi.org/10.1016/0304-405X(85)90044-3
+- Core Insight: Market makers quote bid and ask prices around their expectation of fair value, earning the spread as compensation for adverse selection risk. The spread widens when information asymmetry increases. In this simulation, LiquidityProvider uses an EMA as its fair-value estimate (agnostic to true fundamental) and quotes with a fixed half-spread.
+- Mathematical Formulation:
+  ```
+  ema(t) = α_ema × P(t) + (1 − α_ema) × ema(t−1),  α_ema = 2 / (ema_window + 1)
+  fair_quote(t) = 0.5 × (P(t) + ema(t))
+  Buy:  P(t) < fair_quote(t) − half_spread × fair_quote(t)
+  Sell: P(t) > fair_quote(t) + half_spread × fair_quote(t)
+  ```
+- Empirical Evidence: Huang & Stoll (1997, *Review of Financial Studies*) estimate effective half-spreads of 0.5–2% for actively traded stocks. Comerton-Forde et al. (2010, *Journal of Financial Economics*) document that algorithmic market makers reduce intraday volatility by 15–25% through liquidity provision.
+- Relevance to This Investor: LiquidityProvider with `half_spread = 0.015` (1.5%) provides realistic two-sided quoting that dampens NoiseTrader-driven price spikes and smooths the anchoring-driven drift path without directionally biasing the market.
+
+**Volatility Dampening and Price Stabilization**:
+- Theory / Study: Algorithmic Market Making and Volatility
+- Citation: Hendershott, T., Jones, C. M., & Menkveld, A. J. (2011). Does algorithmic trading improve liquidity? *Journal of Finance*, 66(1), 1–33. https://doi.org/10.1111/j.1540-6261.2010.01624.x
+- Core Insight: Algorithmic liquidity providers narrow spreads and reduce short-term volatility by providing continuous two-sided liquidity. They do not speculate on direction — they profit from the spread between buy and sell executions.
+- Relevance to This Investor: LiquidityProvider absorbs NoiseTrader shocks and MomentumTrader-driven spikes, reducing rolling volatility without altering the fundamental correction process.
+
+#### 4.9.3  Design Purpose and Activation Scenarios
+
+Purpose: Provide realistic two-sided liquidity that smooths the price path; model the institutional/algorithmic market-making layer that exists in all modern equity markets; prevent NoiseTrader large orders from creating unrealistically large price dislocations.
+
+Activation Scenarios:
+- Price below fair_quote − 1.5% spread: Buys (provides bid-side liquidity).
+- Price above fair_quote + 1.5% spread: Sells (provides ask-side liquidity).
+- Within ±1.5% spread of fair_quote: Holds (no profit opportunity within spread).
+
+Market Contribution: **Neutral/stabilizing** — reduces price volatility; does not systematically correct toward F (agnostic to fundamental); absorbs demand shocks.
+
+Interaction with other agents: Absorbs NoiseTrader random orders (dampens their price impact); partially offsets MomentumTrader trend-following (provides counter-side liquidity); does not interact with anchoring mechanism directly (no fundamental view).
+
+#### 4.9.4  Behavioral Framework
+
+**4.9.4.1  Decision Information Set**
+
+| Signal  | Type             | Rationale                                                   |
+|---------|------------------|-------------------------------------------------------------|
+| `price` | Continuous       | Current market price; compared to fair_quote                |
+| `ema`   | Persistent state | 20-round exponential moving average; basis for fair quoting |
+
+Does NOT use: `fundamental`, `deviation`. LiquidityProvider is fundamentals-agnostic — it quotes around recent price average, not intrinsic value.
+
+**4.9.4.2  Core Behavioral Mechanism**
+
+1. Maintains `ema` with decay factor `α = 2 / (ema_window + 1) = 2/21 ≈ 0.095`.
+2. Each round: updates `ema = α × price + (1 − α) × ema`.
+3. Computes `fair_quote = 0.5 × (price + ema)` (midpoint of current and smoothed).
+4. Computes `spread_band = half_spread × fair_quote`.
+5. If `price < fair_quote − spread_band`: buys (price is below bid threshold).
+6. If `price > fair_quote + spread_band`: sells (price is above ask threshold).
+7. Otherwise: holds (price within no-trade spread zone).
+
+**4.9.4.3  Mathematical Model**
+
+- Decision variable: Trade quantity Q*(t)
+- EMA evolution:
+  ```
+  α = 2 / (20 + 1) = 0.0952
+  ema(t) = α × P(t) + (1 − α) × ema(t−1)
+  ema(0) = initial_price = 105.0
+  ```
+- Trigger function:
+  ```
+  fair_quote(t) = 0.5 × (P(t) + ema(t))
+  band(t) = half_spread × fair_quote(t) = 0.015 × fair_quote(t)
+  Buy:  P(t) < fair_quote(t) − band(t)
+  Sell: P(t) > fair_quote(t) + band(t)
+  ```
+- Sizing function:
+  ```
+  deviation_from_band = abs(P(t) − fair_quote(t)) / fair_quote(t)
+  Q*(t) = min(base_position_size, deviation_from_band × 2000)
+  Bounded by cash (buy) or position (sell)
+  ```
+- Parameter definitions:
+
+| Symbol                    | Meaning                                  | Config Path                     | Source                                                                |
+|---------------------------|------------------------------------------|---------------------------------|-----------------------------------------------------------------------|
+| ema_window = 20           | EMA lookback window                      | players.yml → LiquidityProvider | Hendershott et al. (2011): algorithmic MM update window ~20 intervals |
+| half_spread = 0.015       | Half-spread as fraction of fair quote    | players.yml → LiquidityProvider | Huang & Stoll (1997): 0.5–2% effective half-spread for mid-caps       |
+| base_position_size = 30.0 | Maximum trade size (high liquidity role) | players.yml → LiquidityProvider | Larger than other agents; reflects MM capital commitment              |
+
+**4.9.4.4  Behavioral Properties**
+
+- Time horizon: Very short — responds to current price vs. EMA; no long-term view
+- Risk tolerance: Low directional risk — earns spread, not directional gains; large position capacity
+- Information asymmetry: None — uses only public price data; fundamentals-agnostic
+- Psychological profile: No cognitive bias — pure mechanical market-making; models the algorithmic/institutional liquidity layer
+
+#### 4.9.5  Decision Process Walkthrough
+
+```
+Given:  price = 102.0,  ema(prev) = 103.5,  half_spread = 0.015
+
+Step 1: Update EMA
+        α = 0.0952
+        ema = 0.0952 × 102.0 + 0.9048 × 103.5 = 9.71 + 93.65 = 103.36
+
+Step 2: Compute fair quote
+        fair_quote = 0.5 × (102.0 + 103.36) = 102.68
+
+Step 3: Compute spread band
+        band = 0.015 × 102.68 = 1.54
+
+Step 4: Compare
+        lower = 102.68 − 1.54 = 101.14
+        upper = 102.68 + 1.54 = 104.22
+        price = 102.0 → within band [101.14, 104.22]; HOLD
+
+Result: Price is within the no-trade spread zone. LiquidityProvider does not trade.
+```
+
+#### 4.9.6  Worked Numerical Example
+
+```
+Market state:  price = 99.0 (sharp drop from NoiseTrader sell),  ema = 103.2
+
+Calculation:
+  ema_new = 0.0952 × 99.0 + 0.9048 × 103.2 = 9.42 + 93.38 = 102.80
+  fair_quote = 0.5 × (99.0 + 102.80) = 100.90
+  band = 0.015 × 100.90 = 1.51
+  lower = 100.90 − 1.51 = 99.39
+  price = 99.0 < 99.39 → buy condition (price below bid threshold)
+  deviation = abs(99.0 − 100.90) / 100.90 = 0.0188
+  Q* = min(30.0, 0.0188 × 2000) = min(30.0, 37.6) = 30 shares (capped)
+
+Decision: action = buy, quantity = 30, bid_price = 99.0
+Rationale: A NoiseTrader sell pushed price below LiquidityProvider's bid threshold.
+LP buys 30 shares, absorbing the shock and dampening the drop. This is the
+classic liquidity-provision role — buying into short-term dislocations.
+```
+
+#### 4.9.7  Academic References
+
+| # | Citation                                                                                                                                                                                 | Notes                                                                           |
+|---|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| 1 | Glosten, L. R., & Milgrom, P. R. (1985). Bid, ask and transaction prices. *Journal of Financial Economics*, 14(1), 71–100. https://doi.org/10.1016/0304-405X(85)90044-3                  | Core market-making theory; spread as adverse selection compensation             |
+| 2 | Huang, R. D., & Stoll, H. R. (1997). The components of the bid-ask spread. *Review of Financial Studies*, 10(4), 995–1034. https://doi.org/10.1093/rfs/10.4.995                          | Calibrates half_spread = 0.015 from empirical spread decomposition              |
+| 3 | Hendershott, T., Jones, C. M., & Menkveld, A. J. (2011). Does algorithmic trading improve liquidity? *Journal of Finance*, 66(1), 1–33. https://doi.org/10.1111/j.1540-6261.2010.01624.x | Algorithmic MMs reduce volatility 15–25%; motivates LiquidityProvider dampening |
+
 
 ## §5 Agent Diversity Verification
 
@@ -774,31 +1387,49 @@ RationalUpdater to hold (price closer to F after shock) or MomentumTrader to sel
 Diversity Check:
   Different time horizons:
     - Instantaneous: MomentumTrader (1-round return), NoiseTrader (random each round)
-    - Medium-term: AnchoredTrader (permanent first-price anchor)
-    - Long-term: HistoricalAnchor (60-round rolling average), RationalUpdater (immediate but fundamental-based)
+    - Short-term: ContrarianTrader (10-round cumulative return), LiquidityProvider (EMA-based)
+    - Medium-term: AnchoredTrader (permanent first-price anchor), DispositionTrader (cost-basis reference)
+    - Long-term: HistoricalAnchor (60-round rolling average), FundamentalAnalyst (exponential belief convergence)
+    - Fundamental-instant: RationalUpdater (immediate deviation from F)
 
   Different information sets:
     - First-price anchor: AnchoredTrader (anchor + fundamental; biased update)
     - Historical average: HistoricalAnchor (rolling 60-round average; ignores fundamental)
     - True fundamental: RationalUpdater (pure deviation from F)
+    - Gradual fundamental: FundamentalAnalyst (exponentially-smoothed belief toward F)
     - Price momentum: MomentumTrader (prev_price vs. current price only)
+    - Cumulative returns: ContrarianTrader (10-round return; no fundamental)
+    - Purchase price: DispositionTrader (cost basis; no fundamental or market signal)
+    - Short-term EMA: LiquidityProvider (20-round EMA; fundamentals-agnostic)
     - None: NoiseTrader (random; no systematic information)
 
   Conflicting incentives:
     - AnchoredTrader buys at 98–104 (biased buying zone) → RationalUpdater sells above 102 (corrective)
     - HistoricalAnchor buys below rolling average → may buy even below fundamental
     - MomentumTrader amplifies trends in both directions → neutral aggregate effect
+    - ContrarianTrader opposes MomentumTrader directly (sells when cum_ret > 5%)
+    - DispositionTrader sells winners (above cost basis) ↔ AnchoredTrader may still be buying
+    - FundamentalAnalyst initially aligned with AnchoredTrader (belief ≈ 105), later aligned with RationalUpdater
+    - LiquidityProvider absorbs NoiseTrader shocks without directional bias
 
   Mix of stabilising/destabilising:
     - Destabilising (×2 types × 2 each = 4 agents): AnchoredTrader, HistoricalAnchor
-    - Stabilising (×1 type × 1 = 1 agent): RationalUpdater
+    - Asymmetrically destabilising (×1 type × 2 = 2 agents): DispositionTrader
+    - Stabilising-instant (×1 type × 1 = 1 agent): RationalUpdater
+    - Stabilising-gradual (×1 type × 1 = 1 agent): FundamentalAnalyst
+    - Stabilising-statistical (×1 type × 1 = 1 agent): ContrarianTrader
     - Neutral-amplifying (×1 type × 2 = 2 agents): MomentumTrader
-    - Neutral (×1 type × 2 = 2 agents): NoiseTrader
-    Total: 9 investor agents plus 1 market coordinator
+    - Neutral-liquidity (×1 type × 1 = 1 agent): LiquidityProvider
+    - Neutral-noise (×1 type × 2 = 2 agents): NoiseTrader
+    Total: 14 investor agents plus 1 market coordinator = 15 players
 
   Different risk tolerances:
     - High: MomentumTrader (trades on 2% price change), NoiseTrader (random large orders)
-    - Medium: AnchoredTrader (3% biased threshold), HistoricalAnchor (3% dampened threshold), RationalUpdater (2% true threshold)
+    - Medium: AnchoredTrader (3% biased threshold), HistoricalAnchor (3% dampened threshold),
+             RationalUpdater (2% true threshold), FundamentalAnalyst (2% from belief),
+             ContrarianTrader (5% cumulative return)
+    - Asymmetric: DispositionTrader (4% gain / 1.6% loss asymmetry)
+    - Low directional: LiquidityProvider (1.5% spread; large position capacity)
 ```
 
 
@@ -819,6 +1450,13 @@ Diversity Check:
 | `initial_cash`       | 10,000.0 | Standard                                                                        | Starting cash                                         | Low                                                                                               |
 | `initial_position`   | 100.0    | Standard                                                                        | Starting share position                               | Low                                                                                               |
 | `base_position_size` | 20.0     | Calibrated                                                                      | Max shares per trade (anchoring and rational agents)  | Medium                                                                                            |
+| `gain_threshold`     | 0.04     | Odean (1998): median gain-realisation at 4–8%                                   | Disposition sell trigger (DispositionTrader)          | Medium — lower value increases profit-taking frequency                                            |
+| `loss_aversion_mult` | 2.5      | Kahneman & Tversky (1979): λ ≈ 2.25                                             | Asymmetry between gain/loss thresholds                | **High** — controls disposition asymmetry; 1.0 = symmetric agent                                  |
+| `lookback_window`    | 10       | Jegadeesh (1990): short-horizon reversal window                                 | Contrarian cumulative-return window                   | Medium — shorter = more frequent trading                                                          |
+| `ct_entry_threshold` | 0.05     | De Bondt & Thaler (1985): 5% overreaction threshold                             | Contrarian trigger level (ContrarianTrader)           | Medium                                                                                            |
+| `learning_rate`      | 0.05     | Barberis et al. (1998): institutional learning speed                            | Belief convergence rate (FundamentalAnalyst)          | **High** — controls how fast FA joins RU as correction force                                      |
+| `ema_window`         | 20       | Hendershott et al. (2011): algorithmic MM update interval                       | EMA lookback for fair quote (LiquidityProvider)       | Low                                                                                               |
+| `half_spread`        | 0.015    | Huang & Stoll (1997): effective half-spread 0.5–2%                              | LiquidityProvider quoting half-spread                 | Medium — tighter spread = more active LP                                                          |
 
 
 ## §7 Communication and Round Structure
@@ -842,9 +1480,9 @@ Round N:
   4. Logging via HistoryBuffer; per-agent portfolio state persisted each round
 ```
 
-Topology: Star — Market at centre broadcasts to all 9 investors; investors send orders back to Market.
+Topology: Star — Market at centre broadcasts to all 14 investors; investors send orders back to Market.
 
-Initialization: Market starts at `initial_price = 105.0` (5% above fundamental 100.0). AnchoredTrader records this as its permanent anchor on round 1, seeding the initial mispricing that the simulation then studies.
+Initialization: Market starts at `initial_price = 105.0` (5% above fundamental 100.0). AnchoredTrader records this as its permanent anchor on round 1; DispositionTrader records its cost basis; FundamentalAnalyst initialises belief to 105.0; LiquidityProvider initialises EMA to 105.0. These initialise the mispricing that the simulation then studies.
 
 
 ## §8 Historical Case Studies

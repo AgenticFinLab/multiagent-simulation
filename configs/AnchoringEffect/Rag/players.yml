@@ -115,7 +115,6 @@ ragllm_anchored:
       # Rule parameters (from AnchoringEffect AnchoredTrader)
       # ------------------------------------------------------------------
       adjustment_factor: 0.3            # 30% adjustment from anchor to fundamental
-      anchor_weight: 0.7                # Same anchor influence label as Rule/RuleLLM
       trade_threshold: 0.03             # |deviation| > 3% triggers trade
       base_position_size: 20.0          # Base shares per trade
       # ------------------------------------------------------------------

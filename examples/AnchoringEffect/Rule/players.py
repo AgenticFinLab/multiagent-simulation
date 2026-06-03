@@ -178,7 +178,6 @@ class AnchoredTrader(GeneralPlayer):
 
             self.state.custom_state["cash"] = extras["initial_cash"]
             self.state.custom_state["position"] = extras["initial_position"]
-            self.state.custom_state["anchor_weight"] = extras["anchor_weight"]
             self.state.custom_state["adjustment_factor"] = extras["adjustment_factor"]
             self.state.custom_state["base_position_size"] = extras["base_position_size"]
             self.state.custom_state["anchor_price"] = None
@@ -233,6 +232,7 @@ class AnchoredTrader(GeneralPlayer):
         order = {
             "action": action,
             "quantity": quantity,
+            "bid_price": float(price),
             "investor": self.identity,
             "strategy": "AnchoredTrader",
         }
@@ -354,6 +354,7 @@ class HistoricalAnchor(GeneralPlayer):
         order = {
             "action": action,
             "quantity": quantity,
+            "bid_price": float(price),
             "investor": self.identity,
             "strategy": "HistoricalAnchor",
         }
@@ -455,6 +456,7 @@ class RationalUpdater(GeneralPlayer):
         order = {
             "action": action,
             "quantity": quantity,
+            "bid_price": float(price),
             "investor": self.identity,
             "strategy": "RationalUpdater",
         }
@@ -560,6 +562,7 @@ class MomentumTrader(GeneralPlayer):
         order = {
             "action": action,
             "quantity": quantity,
+            "bid_price": float(price),
             "investor": self.identity,
             "strategy": "MomentumTrader",
         }
@@ -665,8 +668,503 @@ class NoiseTrader(GeneralPlayer):
         order = {
             "action": action,
             "quantity": quantity,
+            "bid_price": float(price),
             "investor": self.identity,
             "strategy": "NoiseTrader",
+        }
+
+        return {
+            **order,
+            "outbound_messages": [{"payload": order, "content_type": "investor_bid"}],
+        }
+
+    async def act(self, decision_payload: Dict[str, Any]) -> Action:
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["market_data"]["price"]
+
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
+
+        return Action(
+            action_type="investor_bid",
+            payload=decision_payload,
+            source_id=self.identity,
+        )
+
+
+class DispositionTrader(GeneralPlayer):
+    """
+    Sells winners too early, holds losers too long — Prospect Theory asymmetry.
+
+    Implements simulation-bases.md §4.6 — DispositionTrader.
+    Theoretical basis: Shefrin & Statman (1985); Kahneman & Tversky (1979).
+
+    Decision rule:
+        gain_pct = (price - cost_basis) / cost_basis
+        if gain_pct > gain_threshold: sell (lock profit)
+        if gain_pct < -(gain_threshold / loss_aversion_mult): buy (average down)
+        else: hold
+
+    Parameters (simulation-bases.md §6):
+        gain_threshold: 0.04
+        loss_aversion_mult: 2.5
+        base_position_size: 15.0
+    """
+
+    async def perceive(
+        self,
+        observation: Observation,
+        prev_result: Optional[StepResult] = None,
+    ) -> None:
+        round_num = observation.round
+        self.state.custom_state["round"] = round_num
+
+        if "cash" not in self.state.custom_state:
+            extras = self.config.extras
+            record_path = extras["record_path"]
+            hot_limit = extras["custom_state_hot_limit"]
+
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["gain_threshold"] = extras["gain_threshold"]
+            self.state.custom_state["loss_aversion_mult"] = extras["loss_aversion_mult"]
+            self.state.custom_state["base_position_size"] = extras["base_position_size"]
+            # Cost basis starts at initial_price (first observed)
+            self.state.custom_state["cost_basis"] = None
+            self.state.custom_state["price_history"] = HistoryBuffer(
+                folder=os.path.join(record_path, self.config.identity, "price"),
+                entry_limit=hot_limit,
+            )
+
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                market_data = inb.payload
+                self.state.custom_state["market_data"] = market_data
+                self.state.custom_state["price_history"].append(market_data["price"])
+                if self.state.custom_state["cost_basis"] is None:
+                    self.state.custom_state["cost_basis"] = market_data["price"]
+
+    async def decide(self) -> Dict[str, Any]:
+        market_data = self.state.custom_state["market_data"]
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
+        gain_threshold = self.state.custom_state["gain_threshold"]
+        loss_aversion_mult = self.state.custom_state["loss_aversion_mult"]
+        base_size = self.state.custom_state["base_position_size"]
+        cost_basis = self.state.custom_state["cost_basis"]
+
+        price = market_data["price"]
+
+        gain_pct = (price - cost_basis) / cost_basis if cost_basis > 0 else 0.0
+        loss_threshold = -(gain_threshold / loss_aversion_mult)
+
+        action = "hold"
+        quantity = 0.0
+
+        if gain_pct > gain_threshold:
+            # Sell winners — disposition profit-taking
+            quantity = min(base_size, abs(gain_pct) * 500)
+            quantity = min(quantity, max(position, 0.0))
+            if quantity > 0:
+                action = "sell"
+            else:
+                quantity = 0.0
+        elif gain_pct < loss_threshold:
+            # Buy losers — averaging down
+            quantity = min(base_size, abs(gain_pct) * 500)
+            affordable = cash / price if price > 0 else 0
+            quantity = min(quantity, affordable)
+            if quantity > 0:
+                action = "buy"
+            else:
+                quantity = 0.0
+
+        order = {
+            "action": action,
+            "quantity": quantity,
+            "bid_price": float(price),
+            "investor": self.identity,
+            "strategy": "DispositionTrader",
+        }
+
+        return {
+            **order,
+            "outbound_messages": [{"payload": order, "content_type": "investor_bid"}],
+        }
+
+    async def act(self, decision_payload: Dict[str, Any]) -> Action:
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["market_data"]["price"]
+
+        if action == "buy" and quantity > 0:
+            # Update cost basis on purchase
+            old_pos = self.state.custom_state["position"]
+            old_cost = self.state.custom_state["cost_basis"]
+            new_pos = old_pos + quantity
+            if new_pos > 0:
+                self.state.custom_state["cost_basis"] = (
+                    old_cost * old_pos + price * quantity
+                ) / new_pos
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] = new_pos
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
+
+        return Action(
+            action_type="investor_bid",
+            payload=decision_payload,
+            source_id=self.identity,
+        )
+
+
+class ContrarianTrader(GeneralPlayer):
+    """
+    Bets against recent trends — sells after cumulative gains, buys after declines.
+
+    Implements simulation-bases.md §4.7 — ContrarianTrader.
+    Theoretical basis: De Bondt & Thaler (1985); Jegadeesh (1990).
+
+    Decision rule:
+        cum_return = (price - price_N_rounds_ago) / price_N_rounds_ago
+        if cum_return > entry_threshold: sell (expect reversal)
+        if cum_return < -entry_threshold: buy (expect bounce)
+
+    Parameters (simulation-bases.md §6):
+        lookback_window: 10
+        entry_threshold: 0.05
+        base_position_size: 20.0
+    """
+
+    async def perceive(
+        self,
+        observation: Observation,
+        prev_result: Optional[StepResult] = None,
+    ) -> None:
+        round_num = observation.round
+        self.state.custom_state["round"] = round_num
+
+        if "cash" not in self.state.custom_state:
+            extras = self.config.extras
+            record_path = extras["record_path"]
+            hot_limit = extras["custom_state_hot_limit"]
+
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["lookback_window"] = extras["lookback_window"]
+            self.state.custom_state["entry_threshold"] = extras["entry_threshold"]
+            self.state.custom_state["base_position_size"] = extras["base_position_size"]
+            self.state.custom_state["recent_prices"] = []
+            self.state.custom_state["price_history"] = HistoryBuffer(
+                folder=os.path.join(record_path, self.config.identity, "price"),
+                entry_limit=hot_limit,
+            )
+
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                market_data = inb.payload
+                self.state.custom_state["market_data"] = market_data
+                self.state.custom_state["price_history"].append(market_data["price"])
+                recent = self.state.custom_state["recent_prices"]
+                recent.append(market_data["price"])
+                lookback = self.state.custom_state["lookback_window"]
+                if len(recent) > lookback + 1:
+                    self.state.custom_state["recent_prices"] = recent[-(lookback + 1):]
+
+    async def decide(self) -> Dict[str, Any]:
+        market_data = self.state.custom_state["market_data"]
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
+        entry_threshold = self.state.custom_state["entry_threshold"]
+        base_size = self.state.custom_state["base_position_size"]
+        lookback = self.state.custom_state["lookback_window"]
+        recent = self.state.custom_state["recent_prices"]
+
+        price = market_data["price"]
+
+        action = "hold"
+        quantity = 0.0
+
+        if len(recent) > lookback:
+            ref_price = recent[-(lookback + 1)]
+            cum_return = (price - ref_price) / ref_price if ref_price > 0 else 0.0
+
+            if abs(cum_return) > entry_threshold:
+                quantity = min(base_size, abs(cum_return) * 400)
+                if cum_return > 0:
+                    # Overextension up — sell contrarian
+                    quantity = min(quantity, max(position, 0.0))
+                    if quantity > 0:
+                        action = "sell"
+                    else:
+                        quantity = 0.0
+                else:
+                    # Oversold — buy contrarian
+                    affordable = cash / price if price > 0 else 0
+                    quantity = min(quantity, affordable)
+                    if quantity > 0:
+                        action = "buy"
+                    else:
+                        quantity = 0.0
+
+        order = {
+            "action": action,
+            "quantity": quantity,
+            "bid_price": float(price),
+            "investor": self.identity,
+            "strategy": "ContrarianTrader",
+        }
+
+        return {
+            **order,
+            "outbound_messages": [{"payload": order, "content_type": "investor_bid"}],
+        }
+
+    async def act(self, decision_payload: Dict[str, Any]) -> Action:
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["market_data"]["price"]
+
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
+
+        return Action(
+            action_type="investor_bid",
+            payload=decision_payload,
+            source_id=self.identity,
+        )
+
+
+class FundamentalAnalyst(GeneralPlayer):
+    """
+    Gradually learns fundamental value via exponential smoothing — conservatism bias.
+
+    Implements simulation-bases.md §4.8 — FundamentalAnalyst.
+    Theoretical basis: Barberis, Shleifer & Vishny (1998); Shleifer & Vishny (1997).
+
+    Decision rule:
+        belief(t) = (1 - learning_rate) * belief(t-1) + learning_rate * F
+        dev = (price - belief) / belief
+        if abs(dev) > 0.02: trade proportionally
+
+    Parameters (simulation-bases.md §6):
+        learning_rate: 0.05
+        base_position_size: 25.0
+    """
+
+    async def perceive(
+        self,
+        observation: Observation,
+        prev_result: Optional[StepResult] = None,
+    ) -> None:
+        round_num = observation.round
+        self.state.custom_state["round"] = round_num
+
+        if "cash" not in self.state.custom_state:
+            extras = self.config.extras
+            record_path = extras["record_path"]
+            hot_limit = extras["custom_state_hot_limit"]
+
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["learning_rate"] = extras["learning_rate"]
+            self.state.custom_state["base_position_size"] = extras["base_position_size"]
+            self.state.custom_state["belief"] = None
+            self.state.custom_state["price_history"] = HistoryBuffer(
+                folder=os.path.join(record_path, self.config.identity, "price"),
+                entry_limit=hot_limit,
+            )
+
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                market_data = inb.payload
+                self.state.custom_state["market_data"] = market_data
+                self.state.custom_state["price_history"].append(market_data["price"])
+                # Initialise belief to first observed price (starts biased)
+                if self.state.custom_state["belief"] is None:
+                    self.state.custom_state["belief"] = market_data["price"]
+
+    async def decide(self) -> Dict[str, Any]:
+        market_data = self.state.custom_state["market_data"]
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
+        learning_rate = self.state.custom_state["learning_rate"]
+        base_size = self.state.custom_state["base_position_size"]
+        belief = self.state.custom_state["belief"]
+
+        price = market_data["price"]
+        fundamental = market_data["fundamental"]
+
+        # Update belief toward fundamental (exponential smoothing)
+        belief = (1.0 - learning_rate) * belief + learning_rate * fundamental
+        self.state.custom_state["belief"] = belief
+
+        dev = (price - belief) / belief if belief > 0 else 0.0
+
+        action = "hold"
+        quantity = 0.0
+
+        if abs(dev) > 0.02:
+            quantity = min(base_size, abs(dev) * 1000)
+            if dev > 0:
+                # Price above belief — sell
+                quantity = min(quantity, max(position, 0.0))
+                if quantity > 0:
+                    action = "sell"
+                else:
+                    quantity = 0.0
+            else:
+                # Price below belief — buy
+                affordable = cash / price if price > 0 else 0
+                quantity = min(quantity, affordable)
+                if quantity > 0:
+                    action = "buy"
+                else:
+                    quantity = 0.0
+
+        order = {
+            "action": action,
+            "quantity": quantity,
+            "bid_price": float(price),
+            "investor": self.identity,
+            "strategy": "FundamentalAnalyst",
+        }
+
+        return {
+            **order,
+            "outbound_messages": [{"payload": order, "content_type": "investor_bid"}],
+        }
+
+    async def act(self, decision_payload: Dict[str, Any]) -> Action:
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["market_data"]["price"]
+
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
+
+        return Action(
+            action_type="investor_bid",
+            payload=decision_payload,
+            source_id=self.identity,
+        )
+
+
+class LiquidityProvider(GeneralPlayer):
+    """
+    Passive market-maker quoting around short-term EMA — two-sided liquidity.
+
+    Implements simulation-bases.md §4.9 — LiquidityProvider.
+    Theoretical basis: Glosten & Milgrom (1985); Hendershott et al. (2011).
+
+    Decision rule:
+        ema = alpha * price + (1-alpha) * ema_prev;  alpha = 2/(ema_window+1)
+        fair_quote = 0.5 * (price + ema)
+        band = half_spread * fair_quote
+        if price < fair_quote - band: buy
+        if price > fair_quote + band: sell
+
+    Parameters (simulation-bases.md §6):
+        ema_window: 20
+        half_spread: 0.015
+        base_position_size: 30.0
+    """
+
+    async def perceive(
+        self,
+        observation: Observation,
+        prev_result: Optional[StepResult] = None,
+    ) -> None:
+        round_num = observation.round
+        self.state.custom_state["round"] = round_num
+
+        if "cash" not in self.state.custom_state:
+            extras = self.config.extras
+            record_path = extras["record_path"]
+            hot_limit = extras["custom_state_hot_limit"]
+
+            self.state.custom_state["cash"] = extras["initial_cash"]
+            self.state.custom_state["position"] = extras["initial_position"]
+            self.state.custom_state["ema_window"] = extras["ema_window"]
+            self.state.custom_state["half_spread"] = extras["half_spread"]
+            self.state.custom_state["base_position_size"] = extras["base_position_size"]
+            self.state.custom_state["ema"] = None
+            self.state.custom_state["price_history"] = HistoryBuffer(
+                folder=os.path.join(record_path, self.config.identity, "price"),
+                entry_limit=hot_limit,
+            )
+
+        if observation.inbounds:
+            for inb in observation.inbounds:
+                market_data = inb.payload
+                self.state.custom_state["market_data"] = market_data
+                self.state.custom_state["price_history"].append(market_data["price"])
+                if self.state.custom_state["ema"] is None:
+                    self.state.custom_state["ema"] = market_data["price"]
+
+    async def decide(self) -> Dict[str, Any]:
+        market_data = self.state.custom_state["market_data"]
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
+        ema_window = self.state.custom_state["ema_window"]
+        half_spread = self.state.custom_state["half_spread"]
+        base_size = self.state.custom_state["base_position_size"]
+        ema = self.state.custom_state["ema"]
+
+        price = market_data["price"]
+
+        # Update EMA
+        alpha = 2.0 / (ema_window + 1)
+        ema = alpha * price + (1.0 - alpha) * ema
+        self.state.custom_state["ema"] = ema
+
+        # Compute fair quote and band
+        fair_quote = 0.5 * (price + ema)
+        band = half_spread * fair_quote
+
+        action = "hold"
+        quantity = 0.0
+
+        if price < fair_quote - band:
+            # Price below bid threshold — provide buy-side liquidity
+            dev_from_band = abs(price - fair_quote) / fair_quote
+            quantity = min(base_size, dev_from_band * 2000)
+            affordable = cash / price if price > 0 else 0
+            quantity = min(quantity, affordable)
+            if quantity > 0:
+                action = "buy"
+            else:
+                quantity = 0.0
+        elif price > fair_quote + band:
+            # Price above ask threshold — provide sell-side liquidity
+            dev_from_band = abs(price - fair_quote) / fair_quote
+            quantity = min(base_size, dev_from_band * 2000)
+            quantity = min(quantity, max(position, 0.0))
+            if quantity > 0:
+                action = "sell"
+            else:
+                quantity = 0.0
+
+        order = {
+            "action": action,
+            "quantity": quantity,
+            "bid_price": float(price),
+            "investor": self.identity,
+            "strategy": "LiquidityProvider",
         }
 
         return {
@@ -700,4 +1198,8 @@ __all__ = [
     "RationalUpdater",
     "MomentumTrader",
     "NoiseTrader",
+    "DispositionTrader",
+    "ContrarianTrader",
+    "FundamentalAnalyst",
+    "LiquidityProvider",
 ]

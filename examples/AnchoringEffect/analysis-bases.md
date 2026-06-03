@@ -182,6 +182,240 @@
 - **Red Flag**: Any intended active agent type has zero total volume across 200 rounds; check initial positions, cash constraints, and thresholds.
 
 
+### Metric: Agent Terminal Wealth
+
+- **Category**: Wealth Dynamics / Redistribution
+- **Definition**: Final portfolio value per agent — cash balance plus mark-to-market position value at the last-round clearing price. Measures who captured value from the anchoring mispricing.
+- **Formula**:
+  ```
+  W_i(T) = cash_i(T) + position_i(T) × P(T)
+  ```
+- **Function Signature**: `def m_agent_wealth_terminal(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Wealth redistribution is the economic payoff of behavioural heterogeneity. In anchoring markets, biased agents overpay during the persistence phase; rational agents sell into the overvaluation and realize gains when prices revert. Tracking terminal wealth by strategy type validates the theoretical prediction that corrective strategies profit at the expense of biased strategies (De Long et al., 1990).
+- **Academic Calibration Source**:
+  - De Long, J. B., Shleifer, A., Summers, L. H., & Waldmann, R. J. (1990). Noise trader risk in financial markets. *Journal of Political Economy*, 98(4), 703–738. https://doi.org/10.1086/261703 — establishes that noise/biased traders systematically lose wealth to rational arbitrageurs in expectation.
+  - Shefrin, H., & Statman, M. (1985). The disposition to sell winners too early and ride losers too long. *Journal of Finance*, 40(3), 777–790. — demonstrates that prospect-theory agents may realize intermediate returns through premature gain-taking.
+- **Interpretation**:
+  - RationalUpdater wealth > initial: Rational agents profited from selling overvalued assets
+  - AnchoredTrader wealth < initial: Biased agents overpaid during the persistence phase
+  - DispositionTrader wealth ≈ initial: Gain-taking limits both upside and downside
+- **Normal Range**: Wealth dispersal (max/min ratio) ∈ [1.05, 1.50] for calibrated anchoring
+- **Red Flag**: All agents have identical wealth (no trading occurred) or any agent has negative wealth (unrealistic leverage)
+
+---
+
+### Metric: Gini Coefficient of Terminal Wealth
+
+- **Category**: Wealth Dynamics / Inequality
+- **Definition**: Gini index (0 = perfect equality, 1 = one agent holds all wealth) measuring the degree of wealth concentration induced by the anchoring-driven redistribution.
+- **Formula**:
+  ```
+  Gini = (2 × Σᵢ i × W_sorted(i)) / (N × Σᵢ W_sorted(i)) − (N + 1) / N
+  ```
+- **Function Signature**: `def m_gini_coefficient(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Wealth inequality emerges endogenously from heterogeneous trading strategies. In efficient markets Gini ≈ 0 (no persistent alpha). In behavioural markets with persistent mispricing, rational agents extract rents, increasing inequality. The Gini coefficient quantifies this effect in a scale-invariant manner, allowing cross-simulation comparison.
+- **Academic Calibration Source**:
+  - Levy, M., & Solomon, S. (1997). New evidence for the power-law distribution of wealth. *Physica A*, 242(1–2), 90–94. — agent-based simulations produce wealth distributions with Gini 0.3–0.7 depending on strategy heterogeneity.
+- **Interpretation**:
+  - Gini < 0.05: No meaningful redistribution (market near-efficient or agents identical)
+  - Gini ∈ [0.05, 0.25]: Moderate redistribution — expected for 100-round anchoring scenarios
+  - Gini > 0.40: Extreme concentration — one strategy dominates profits
+- **Normal Range**: [0.03, 0.30] for anchoring-populated 9-agent simulations
+- **Red Flag**: Gini > 0.5 or Gini = 0 exactly (no trading)
+
+---
+
+### Metric: Wealth Transfer Direction
+
+- **Category**: Wealth Dynamics / Mechanism Attribution
+- **Definition**: Net wealth change from biased agents (AnchoredTrader, HistoricalAnchor, DispositionTrader) to corrective agents (RationalUpdater, FundamentalAnalyst, ContrarianTrader), validating the expected wealth flow in anchoring markets.
+- **Formula**:
+  ```
+  transfer = Σ ΔW_corrective − Σ ΔW_biased
+  ```
+- **Function Signature**: `def m_wealth_transfer_direction(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Wealth transfer direction is the ultimate test of whether the anchoring mispricing has real economic consequences: if biased agents lose and rational agents gain, the simulation reproduces the theoretical prediction. A negative transfer would indicate that biased agents are somehow profiting from anchoring, contradicting theory.
+- **Interpretation**:
+  - transfer > 0: Expected direction — corrective agents capture value from mispricing
+  - transfer ≈ 0: No meaningful redistribution (anchoring effect too weak)
+  - transfer < 0: Anomalous — biased strategies outperform (possible overcorrection by rational agents)
+- **Normal Range**: transfer > 0 in all calibrated scenarios
+- **Red Flag**: Persistently negative transfer across multiple runs
+
+---
+
+### Metric: Price Efficiency Ratio
+
+- **Category**: Information Efficiency / Market Quality
+- **Definition**: Ratio of price change variance to mispricing variance — measures how much of the available correction opportunity is actually captured by price movements each round.
+- **Formula**:
+  ```
+  PER = Var(ΔP) / Var(F − P_{t-1})
+  ```
+- **Function Signature**: `def m_price_efficiency_ratio(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: In a perfectly efficient market, PER = 1.0 (every round, price moves exactly to correct the existing mispricing). In an anchoring-dominated market, PER << 1 because price adjustments are sluggish — biased agents resist correction. PER >> 1 indicates over-correction (oscillation). This metric captures the fundamental information processing capacity of the market.
+- **Academic Calibration Source**:
+  - Hasbrouck, J. (1993). Assessing the quality of a security market: A new approach to transaction-cost measurement. *Review of Financial Studies*, 6(1), 191–212. — introduces the information share concept for measuring price discovery efficiency.
+  - Chordia, T., Roll, R., & Subrahmanyam, A. (2008). Liquidity and market efficiency. *Journal of Financial Economics*, 87(2), 249–268. — documents that efficiency ratios below 0.5 indicate significant market frictions.
+- **Interpretation**:
+  - PER < 0.3: Anchoring strongly inhibits price discovery (early persistence phase)
+  - PER ∈ [0.3, 0.7]: Partial efficiency — correction happening but slowly
+  - PER ∈ [0.7, 1.3]: Near-efficient — prices track fundamental changes
+  - PER > 1.5: Over-correction — oscillatory price dynamics
+- **Normal Range**: Starts < 0.3 during anchoring phase, rises toward 1.0 during correction
+- **Red Flag**: PER > 3.0 (unstable oscillation) or PER = 0 (prices frozen)
+
+---
+
+### Metric: Forecast Error Persistence
+
+- **Category**: Information Efficiency / Learning Speed
+- **Definition**: Lag-1 autocorrelation of the deviation (not return) series — measures how persistent forecast errors are, i.e., whether the market "remembers" its mispricing from one round to the next.
+- **Formula**:
+  ```
+  ρ_dev = Corr(dev(t), dev(t−1))
+  ```
+- **Function Signature**: `def m_forecast_error_persistence(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: In rational markets, deviations from fundamental should be unpredictable (random walk around F). High lag-1 autocorrelation of the deviation series indicates that mispricing is persistent and predictable — the defining characteristic of anchoring. As the market corrects, persistence should decline toward zero.
+- **Academic Calibration Source**:
+  - Campbell, S. D., & Sharpe, S. A. (2009): Documents that analyst forecast errors have first-order autocorrelation > 0.8 at quarterly frequency, declining to < 0.3 at annual frequency. This directly motivates the expectation that ρ_dev > 0.8 during anchoring persistence.
+- **Interpretation**:
+  - ρ_dev > 0.9: Very strong anchoring — market not learning at all
+  - ρ_dev ∈ [0.7, 0.9]: High persistence — typical anchoring phase
+  - ρ_dev ∈ [0.3, 0.7]: Moderate persistence — correction underway
+  - ρ_dev < 0.3: Low persistence — market approaching efficiency
+- **Normal Range**: [0.7, 0.95] over full simulation (dominated by persistence phase)
+- **Red Flag**: ρ_dev < 0.3 (anchoring too weak) or ρ_dev = 1.0 exactly (prices frozen)
+
+---
+
+### Metric: Deviation Decay Slope
+
+- **Category**: Information Efficiency / Convergence Rate
+- **Definition**: OLS regression slope of |deviation| on round number — a linear approximation to the convergence rate that complements the exponential half-life estimate.
+- **Formula**:
+  ```
+  |dev(t)| = β₀ + β₁ × t + ε(t)
+  slope = β₁
+  ```
+- **Function Signature**: `def m_deviation_decay_slope(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: The half-life metric assumes exponential decay, which may not hold exactly in multi-agent simulations with phase transitions. The linear slope provides a model-free measure of convergence speed. A negative slope confirms that mispricing is shrinking over time regardless of the functional form.
+- **Interpretation**:
+  - slope < −0.001: Meaningful convergence (mispricing shrinking ~0.1% per round)
+  - slope ≈ 0: No convergence — price permanently deviates (or oscillates)
+  - slope > 0: Divergence — mispricing growing (critical failure)
+- **Normal Range**: [−0.005, −0.0005] per round for calibrated anchoring
+- **Red Flag**: slope > 0 (diverging) or slope < −0.01 (converging too rapidly)
+
+---
+
+### Metric: Information Share by Strategy
+
+- **Category**: Information Efficiency / Mechanism Attribution
+- **Definition**: Fraction of total corrective trading volume contributed by each strategy type — identifies which agents drive price discovery.
+- **Formula**:
+  ```
+  share_s = corrective_vol_s / Σ_s corrective_vol_s
+  ```
+  where corrective volume = selling when P > F, or buying when P < F.
+- **Function Signature**: `def m_information_share_by_strategy(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Not all agents contribute equally to price correction. This metric decomposes the correction process to identify which strategy types are the primary sources of information incorporation, validated against the theoretical expectation that RationalUpdater and FundamentalAnalyst should have the largest corrective shares.
+- **Academic Calibration Source**:
+  - Hasbrouck, J. (1995). One security, many markets: Determining the contributions to price discovery. *Journal of Finance*, 50(4), 1175–1199. — introduces information share decomposition for multi-agent price formation.
+- **Interpretation**:
+  - RationalUpdater share > 50%: Expected primary corrector in anchoring scenario
+  - FundamentalAnalyst share > 20%: Exponential smoothing provides secondary correction
+  - ContrarianTrader share > 10%: Mean-reversion betting contributes to correction
+- **Normal Range**: RationalUpdater dominates with 40–60% share
+- **Red Flag**: No strategy has share > 10% (correction is purely mechanical via γ-term)
+
+---
+
+### Metric: Value-at-Risk (95%)
+
+- **Category**: Tail Risk / Downside Exposure
+- **Definition**: 5th percentile of the return distribution — the worst expected per-round loss at 95% confidence.
+- **Formula**:
+  ```
+  VaR₉₅ = Percentile₅(r(1), r(2), …, r(T))
+  ```
+- **Function Signature**: `def m_value_at_risk_95(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Anchoring creates a specific tail risk profile — moderate left-tail risk (not extreme crashes, but persistent underperformance during correction). VaR quantifies this tail exposure, confirming that the simulation produces realistic risk levels rather than extreme crashes typical of bubble scenarios.
+- **Academic Calibration Source**:
+  - Jorion, P. (2006). *Value at Risk: The New Benchmark for Managing Financial Risk*. McGraw-Hill. — VaR at 95% for major equity indices is typically −1.5% to −3% daily.
+- **Interpretation**:
+  - VaR₉₅ ∈ [−4%, −1%]: Normal moderate risk — expected for anchoring scenarios
+  - VaR₉₅ ∈ [−8%, −4%]: Elevated risk — possible during correction phases
+  - VaR₉₅ < −10%: Extreme risk — more consistent with crash/bubble than anchoring
+- **Normal Range**: [−4%, −1%] per round for calibrated anchoring simulation
+- **Red Flag**: VaR₉₅ < −8% (simulation unstable) or VaR₉₅ > −0.5% (negligible risk)
+
+---
+
+### Metric: Conditional Value-at-Risk (CVaR-95)
+
+- **Category**: Tail Risk / Expected Shortfall
+- **Definition**: Mean of returns below the VaR-95 threshold — the expected loss given that a tail event occurs.
+- **Formula**:
+  ```
+  CVaR₉₅ = E[r | r ≤ VaR₉₅]
+  ```
+- **Function Signature**: `def m_conditional_var_95(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: CVaR (Expected Shortfall) provides a more complete picture of tail risk than VaR alone. In anchoring markets, CVaR should be only moderately worse than VaR (thin tails), unlike crash scenarios where CVaR >> VaR (fat tails). This validates the "moderate correction, not crash" signature of anchoring.
+- **Academic Calibration Source**:
+  - Acerbi, C., & Tasche, D. (2002). On the coherence of expected shortfall. *Journal of Banking & Finance*, 26(7), 1487–1503. — establishes CVaR as a coherent risk measure superior to VaR for tail risk assessment.
+- **Interpretation**:
+  - CVaR/VaR ratio ≈ 1.2–1.5: Thin-tailed (expected for anchoring)
+  - CVaR/VaR ratio > 2.0: Fat-tailed (more consistent with crash dynamics)
+- **Normal Range**: CVaR₉₅ ∈ [−6%, −1.5%] per round
+- **Red Flag**: CVaR₉₅ < −12% (extreme tail events) or CVaR = VaR exactly (insufficient data)
+
+---
+
+### Metric: Herfindahl Volume Concentration (HHI)
+
+- **Category**: Tail Risk / Market Concentration
+- **Definition**: Herfindahl-Hirschman Index of trading volume across agents — measures whether one agent dominates the order book or volume is dispersed.
+- **Formula**:
+  ```
+  HHI = Σᵢ (vol_i / Σ_i vol_i)²
+  ```
+- **Function Signature**: `def m_herfindahl_volume_concentration(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: In a well-calibrated multi-agent simulation, trading volume should be distributed across multiple agent types. High concentration (one agent generates most volume) indicates degenerate dynamics and undermines the ecological validity of the anchoring demonstration. HHI near 1/N (where N = number of agents) indicates healthy dispersal.
+- **Academic Calibration Source**:
+  - Rhoades, S. A. (1993). The Herfindahl-Hirschman Index. *Federal Reserve Bulletin*, 79, 188–189. — standard concentration metric; HHI < 0.15 = unconcentrated, 0.15–0.25 = moderate, > 0.25 = concentrated.
+- **Interpretation**:
+  - HHI ≈ 1/N (= 1/14 ≈ 0.071 for 14 investors): Well-dispersed
+  - HHI ∈ [0.07, 0.20]: Moderate concentration — acceptable
+  - HHI > 0.30: One strategy dominates volume — check agent calibration
+- **Normal Range**: [0.07, 0.20] for 14-agent anchoring simulation
+- **Red Flag**: HHI > 0.40 (single-agent dominance) or all agents have equal volume (unlikely with heterogeneous strategies)
+
+---
+
+### Metric: Strategy Correlation Matrix
+
+- **Category**: Tail Risk / Systemic Risk
+- **Definition**: Pairwise Pearson correlation of net demand (buy − sell) between each strategy type per round — measures whether strategies are herding (correlated) or diversifying (anti-correlated).
+- **Formula**:
+  ```
+  corr(s₁, s₂) = Pearson(demand_s₁(t), demand_s₂(t))
+  ```
+- **Function Signature**: `def m_strategy_correlation_matrix(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: High correlation between strategies indicates herding, which amplifies mispricing and creates systemic risk. Anti-correlation between biased and rational strategies confirms that they provide opposing forces as designed. The correlation matrix is the definitive diagnostic for verifying the intended interaction structure.
+- **Academic Calibration Source**:
+  - Cont, R., & Bouchaud, J.-P. (2000). Herd behavior and aggregate fluctuations in financial markets. *Macroeconomic Dynamics*, 4(2), 170–196. — establishes that herding (correlated strategies) amplifies volatility and mispricing.
+- **Interpretation**:
+  - AT-RU correlation < 0: Expected — anchoring and rational forces oppose each other
+  - AT-HA correlation > 0: Expected — both biased strategies reinforce mispricing
+  - MT-AT correlation > 0: Momentum amplifies anchoring (mild positive expected)
+  - NT-all correlation ≈ 0: Noise is uncorrelated with all strategies (by design)
+- **Normal Range**: |corr| < 0.7 for all pairs (no extreme herding)
+- **Red Flag**: Any pair with |corr| > 0.9 (strategies are virtually identical — redundant)
+
+---
+
+
 ## §3 Analysis Dimensions
 
 ### Dimension 1: Price Dynamics and Anchoring Persistence
@@ -218,6 +452,20 @@
 - **Metrics Used**: MAD, half-life, rolling AC1 across all variants
 - **Visualization**: Multi-panel: deviation time-series for all 4 variants overlaid
 - **Expected Pattern**: Rule shows cleanest anchoring signal (MAD = 3–8%, half-life = 20–60); LLM shows same phenomenon with higher variance; RuleLLM tracks Rule closely (±20%); Rag may show reduced MAD if retrieved knowledge includes anchoring awareness
+
+### Dimension 6: Wealth Dynamics and Redistribution
+
+- **Purpose**: Track how anchoring-induced mispricing redistributes wealth between biased and rational agents
+- **Metrics Used**: Agent terminal wealth, Gini coefficient, wealth transfer direction
+- **Visualization**: Bar chart of terminal wealth by strategy type; Gini annotation; wealth transfer arrow diagram
+- **Expected Pattern**: RationalUpdater and FundamentalAnalyst accumulate wealth by selling into overvaluation; AnchoredTrader and HistoricalAnchor lose wealth by buying at inflated prices; DispositionTrader shows mixed results (profit-taking partially offsets loss-holding); Gini increases from initial equality as rational agents extract value from biased agents
+
+### Dimension 7: Information Efficiency and Tail Risk
+
+- **Purpose**: Quantify how efficiently the market incorporates fundamental information and assess tail risk exposure
+- **Metrics Used**: Price efficiency ratio, forecast error persistence, deviation decay slope, VaR-95, CVaR-95, HHI volume concentration
+- **Visualization**: Efficiency ratio time-series; tail risk histogram with VaR/CVaR annotations; strategy correlation heatmap
+- **Expected Pattern**: Efficiency ratio starts low (< 0.3 during anchoring phase) and rises toward 1.0 during correction; forecast error persistence starts > 0.8 and decays; VaR-95 is moderate (-2% to -4% per round); HHI shows dispersed trading (near 1/N)
 
 
 ## §4 Phase Analysis Framework
@@ -287,14 +535,14 @@
 
 ### Calibration Targets from Literature
 
-| Metric             | Target Range           | Calibration Source                                                                      | Validation Method                                               |
-|--------------------|------------------------|-----------------------------------------------------------------------------------------|-----------------------------------------------------------------|
+| Metric             | Target Range           | Calibration Source                                                                      | Validation Method                                                  |
+|--------------------|------------------------|-----------------------------------------------------------------------------------------|--------------------------------------------------------------------|
 | MAD (%)            | [3%, 10%]              | Campbell & Sharpe (2009): mean analyst forecast error ~5%                               | Compute MAD across all 200 full-round observations; reject if < 1% |
-| Half-life (rounds) | [20, 60]               | Campbell & Sharpe (2009): quarterly persistence → 25–75 trading days                    | Fit exponential decay; extract τ                                |
-| Max drawdown       | [5%, 20%]              | Typical equity correction magnitude; anchoring creates moderate not extreme corrections | Compute across full simulation                                  |
-| Rolling volatility | [0.5%, 2.0%] per round | Black (1986): noise trader background volatility range                                  | Compute rolling std; report mean ± std                          |
-| AC1 (bubble phase) | [0.0, 0.30]            | Lo & MacKinlay (1988): weekly autocorrelation in equities                               | Compute AC1 over rounds 10–60 (persistence phase)               |
-| Bias magnitude     | [2%, 5%]               | Tversky & Kahneman (1974): α = 0.3 with 5% initial anchor → 3.5% bias                   | Compute `(1 − α) × (anchor − F) / F` from simulation parameters |
+| Half-life (rounds) | [20, 60]               | Campbell & Sharpe (2009): quarterly persistence → 25–75 trading days                    | Fit exponential decay; extract τ                                   |
+| Max drawdown       | [5%, 20%]              | Typical equity correction magnitude; anchoring creates moderate not extreme corrections | Compute across full simulation                                     |
+| Rolling volatility | [0.5%, 2.0%] per round | Black (1986): noise trader background volatility range                                  | Compute rolling std; report mean ± std                             |
+| AC1 (bubble phase) | [0.0, 0.30]            | Lo & MacKinlay (1988): weekly autocorrelation in equities                               | Compute AC1 over rounds 10–60 (persistence phase)                  |
+| Bias magnitude     | [2%, 5%]               | Tversky & Kahneman (1974): α = 0.3 with 5% initial anchor → 3.5% bias                   | Compute `(1 − α) × (anchor − F) / F` from simulation parameters    |
 
 ### Sensitivity Discussion
 
@@ -328,3 +576,79 @@
 | Rolling Autocorrelation   | Line                 | Round      | AC1 (lag-1)                   | Zero line; ±0.2 reference lines                       | Phase shift: persistence → correction                 |
 | Bias Magnitude            | Bar (per agent type) | Agent type | bias_magnitude (%)            | True fundamental reference                            | Compare perceived_target to F for each anchoring type |
 | Cross-Variant Comparison  | Bar (4 groups)       | Metric     | Metric value                  | Error bars for stochastic variants                    | Summary cross-variant result                          |
+
+
+## §8 Registered Metrics Catalogue (extensible)
+
+From AnchoringEffect-Analysis-Overhaul (2026-Q1) the analysis pipeline is
+*registry-driven*: every scalar quantity reported by
+`examples/AnchoringEffect/Rule/analysis.py` is produced by a metric function in
+`examples/AnchoringEffect/metrics.py` and registered with the shared
+`MetricsRegistry` (`examples/standard_rule_analysis.py`). Adding a new metric
+requires only two steps:
+
+1. Implement `def m_my_metric(data, config) -> dict[str, Any]:` raising
+   `MetricUnavailable` when its inputs are missing.
+2. Append `REGISTRY.register(Metric(name="my_metric", category=..., fn=m_my_metric, output_keys=(...,)))`.
+
+The driver enumerates the registry; no file edits are required. Output keys
+are *validated*: a metric whose returned dict is missing any declared key
+raises `ValueError` (fail-fast). Metrics that cannot run on a given run are
+reported under `summary.json["metrics_unavailable"]`.
+The dashboard set contains 11 panels (panels 00–10), each rendering one or
+two category groups with annotated reference lines and calibration targets.
+
+### Categories and Default Coverage (44 metrics)
+
+| # | Category                    | Count | Representative metrics                                                                                                                                                                                                                                                 |
+|---|-----------------------------|------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | price_dynamics              |    12 | `price_deviation_ts`, `mad_pct`, `half_life_threshold`, `half_life_fitted`, `rolling_volatility_ts`, `mean_volatility_pct`, `max_drawdown_pct`, `return_skewness`, `return_kurtosis`, `return_autocorr_lag1`, `return_autocorr_profile`, `variance_ratio_lo_mackinlay` |
+| 2 | anchoring_specific          |     5 | `bias_magnitude_pct`, `anchor_dispersion`, `under_revision_ratio`, `regime_transition_lag`, `price_to_anchor_distance_ts`                                                                                                                                              |
+| 3 | agent_behaviour             |     6 | `agent_volume_buy_sell`, `agent_action_frequency`, `agent_net_position_ts`, `agent_pnl_terminal`, `agent_sharpe_terminal`, `silent_agent_count`                                                                                                                        |
+| 4 | microstructure              |     4 | `order_imbalance_ts`, `signed_volume_autocorr`, `corrective_to_biased_volume_ratio`, `momentum_anchoring_coupling`                                                                                                                                                     |
+| 5 | statistical_inference       |     4 | `mad_block_bootstrap_ci_95`, `half_life_block_bootstrap_ci_95`, `ljung_box_returns_pvalue`, `adf_unit_root_pvalue`                                                                                                                                                     |
+| 6 | phase_decomposition         |     2 | `phase_assignment_ts`, `per_phase_metrics_table`                                                                                                                                                                                                                       |
+| 7 | wealth_dynamics             |     3 | `agent_wealth_terminal`, `gini_coefficient`, `wealth_transfer_direction`                                                                                                                                                                                               |
+| 8 | information_efficiency      |     4 | `price_efficiency_ratio`, `forecast_error_persistence`, `deviation_decay_slope`, `information_share_by_strategy`                                                                                                                                                       |
+| 9 | tail_risk_and_concentration |     4 | `value_at_risk_95`, `conditional_var_95`, `herfindahl_volume_concentration`, `strategy_correlation_matrix`                                                                                                                                                             |
+
+### Validation Gates (analysis-bases.md §6 — tightened)
+
+`_validate_anchoring_effect` enforces three component scores plus a weighted
+overall:
+
+| Component      | Target band     | Weight | Hard gate        |
+|----------------|-----------------|-------:|------------------|
+| `mad_pct`      | [3, 10] %       |   0.40 | component ≥ 0.50 |
+| `half_life`    | [20, 60] rounds |   0.40 | component ≥ 0.50 |
+| `max_drawdown` | [5, 20] %       |   0.20 | component ≥ 0.50 |
+| **Weighted**   | —               |      — | overall ≥ 0.60   |
+
+Non-blocking advisories are emitted (but do not flip `is_valid`) when
+`silent_agent_count > 0`, `under_revision_ratio < 0.7`, or
+`|signed_volume_autocorr| > 0.5`.
+
+### Dashboard Set (registry-driven, 11 panels)
+
+| File                           | Content                                                                                                                                |
+|--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `00_investor_bids.png`         | Headline: market price + every investor's bid (one coloured line per investor).                                                        |
+| `01_price_dynamics.png`        | Price vs fundamental with phase shading; signed deviation with ±3/±10 % bands and fitted half-life mark.                               |
+| `02_volatility_returns.png`    | Rolling volatility + return histogram annotated with skewness / excess kurtosis.                                                       |
+| `03_autocorrelation.png`       | Return autocorrelation profile (lags 1..10) + Lo & MacKinlay variance ratios at q ∈ {2, 4, 8}.                                         |
+| `04_anchoring_specific.png`    | Anchoring magnitude table (MAD, bias, alpha, anchor, F, under-revision, regime-transition lag) + price-to-anchor distance time-series. |
+| `05_agent_volume.png`          | Per-agent buy/sell volume + per-agent {buy, sell, hold} action frequency.                                                              |
+| `06_agent_performance.png`     | Per-agent net position over time + terminal PnL & Sharpe bars.                                                                         |
+| `07_microstructure.png`        | Order imbalance time-series + diagnostics table (signed-volume AC, RU/(AT+HA) ratio, MT–AT correlation).                               |
+| `08_inference.png`             | Block-bootstrap 95 % CIs for MAD and half-life + Ljung-Box / ADF table.                                                                |
+| `09_wealth_dynamics.png`       | Terminal wealth bars by strategy type + Gini coefficient annotation + wealth transfer direction arrow.                                 |
+| `10_information_tail_risk.png` | Price efficiency ratio time-series + VaR/CVaR tail histogram + HHI annotation + strategy correlation heatmap.                          |
+
+Cross-variant artefacts are produced by
+`examples/AnchoringEffect/compare_variants.py`:
+
+* `cross_variant_table.json` — per-metric scalar across variants.
+* `cross_variant_metrics.png` — bar grid (one panel per metric).
+* `cross_variant_validation.png` — weighted-score bars vs. 0.60 gate, coloured
+  green (VALID) or red (INVALID).
+

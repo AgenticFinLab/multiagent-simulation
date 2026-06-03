@@ -276,40 +276,33 @@ def _render_price_chart(rounds: list, viewed_idx: int):
                 )
                 return
 
-    # ── Pre-scan ALL rounds for agent IDs (stable trace count) ────────
-    all_agent_ids: set = set()
-    for rd in rounds:
-        for act in rd.agent_actions:
-            if act.price is not None:
-                all_agent_ids.add(act.agent_id)
-
-    # ── Collect data: real values up to viewed_idx, None beyond ───────
+    # ── Collect market price and fundamental up to viewed_idx ─────────
     round_nums: list = []
     market_prices: list = []
-    agent_prices: dict = {aid: {} for aid in all_agent_ids}
+    fundamentals: list = []
 
     for i, rd in enumerate(rounds):
-        rn = rd.round_num
-        round_nums.append(rn)
-        if i <= viewed_idx:
-            mp = None
-            if rd.market_broadcast and rd.market_broadcast.stock_price is not None:
-                mp = float(rd.market_broadcast.stock_price)
+        round_nums.append(rd.round_num)
+        if i <= viewed_idx and rd.market_broadcast is not None:
+            mb = rd.market_broadcast
+            mp = float(mb.stock_price) if mb.stock_price is not None else None
+            fv = float(mb.fundamental) if mb.fundamental is not None else None
             market_prices.append(mp)
-            for act in rd.agent_actions:
-                if act.price is not None:
-                    agent_prices[act.agent_id][rn] = float(act.price)
+            fundamentals.append(fv)
         else:
             market_prices.append(None)
+            fundamentals.append(None)
 
-    if not any(p is not None for p in market_prices) and not all_agent_ids:
+    has_market = any(p is not None for p in market_prices)
+    has_fundamental = any(f is not None for f in fundamentals)
+    if not has_market and not has_fundamental:
         return
 
     # ── Build plotly chart ────────────────────────────────────────────
     try:
         import plotly.graph_objects as go
     except ImportError:
-        _render_price_chart_fallback(round_nums, market_prices, agent_prices)
+        _render_price_chart_fallback(round_nums, market_prices, fundamentals)
         return
 
     fig = go.Figure()
@@ -327,48 +320,17 @@ def _render_price_chart(rounds: list, viewed_idx: int):
         )
     )
 
-    # Investor bid curves
-    _PALETTE = [
-        "#3a86ff",
-        "#ff006e",
-        "#8338ec",
-        "#06d6a0",
-        "#fb5607",
-        "#ff595e",
-        "#1982c4",
-        "#6a4c93",
-        "#ffca3a",
-        "#8ac926",
-        "#e07a5f",
-        "#3d405b",
-        "#81b29a",
-        "#f2cc8f",
-        "#264653",
-        "#e63946",
-        "#457b9d",
-        "#2a9d8f",
-        "#e9c46a",
-        "#f4a261",
-    ]
-
-    for idx, agent_id in enumerate(sorted(all_agent_ids)):
-        prices_map = agent_prices[agent_id]
-        y_vals = [prices_map.get(rn) for rn in round_nums]
-        color = _PALETTE[idx % len(_PALETTE)]
-        label = agent_id.replace("_", " ").title()
-
+    # Fundamental value — dashed reference line
+    if has_fundamental:
         fig.add_trace(
             go.Scatter(
                 x=round_nums,
-                y=y_vals,
-                mode="lines+markers",
-                name=label,
-                line=dict(color=color, width=1.2),
-                marker=dict(size=3),
+                y=fundamentals,
+                mode="lines",
+                name="Fundamental",
+                line=dict(color="#06d6a0", width=2, dash="dash"),
                 connectgaps=False,
-                hovertemplate=(
-                    f"Round %{{x}}<br>Bid: %{{y:.4f}}<extra>{label}</extra>"
-                ),
+                hovertemplate="Round %{x}<br>Fundamental: %{y:.4f}<extra></extra>",
             )
         )
 
@@ -414,15 +376,11 @@ def _render_price_chart(rounds: list, viewed_idx: int):
     st.plotly_chart(fig, use_container_width=True, key="price_dynamics")
 
 
-def _render_price_chart_fallback(round_nums, market_prices, agent_prices):
+def _render_price_chart_fallback(round_nums, market_prices, fundamentals):
     """Minimal fallback chart using st.line_chart when plotly is unavailable."""
     import pandas as pd
 
-    data = {"Market Price": market_prices}
-    for agent_id in sorted(agent_prices):
-        label = agent_id.replace("_", " ").title()
-        data[label] = [agent_prices[agent_id].get(rn) for rn in round_nums]
-
+    data = {"Market Price": market_prices, "Fundamental": fundamentals}
     df = pd.DataFrame(data, index=round_nums)
     df.index.name = "Round"
     st.line_chart(df, height=480)

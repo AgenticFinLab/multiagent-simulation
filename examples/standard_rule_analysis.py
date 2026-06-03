@@ -15,12 +15,145 @@ from dataclasses import dataclass, field
 import argparse
 import json
 import os
-from typing import Any, Dict
+from typing import Any, Callable, Dict, Iterable, List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
+
+
+# ---------------------------------------------------------------------------
+# Extensible metrics registry (used by scenarios such as AnchoringEffect)
+# ---------------------------------------------------------------------------
+#
+# A scenario authors a `metrics.py` module that imports `Metric` and
+# `MetricsRegistry`, defines small computation functions of the form
+# `def fn(data: dict, config: dict) -> dict[str, Any]`, wraps each in a
+# `Metric` instance, and registers it. The analysis CLI then iterates with
+# `registry.compute_all(data, config)` and never has to be edited when a new
+# metric is added.
+#
+# Each metric function MUST return a dict whose keys match its declared
+# `output_keys`. If the metric cannot be computed for the available data
+# (missing series, insufficient rounds, etc.) the function should raise
+# `MetricUnavailable`; the driver records the reason and continues.
+
+
+class MetricUnavailable(Exception):
+    """Raised by a metric function when its inputs are missing or insufficient."""
+
+
+@dataclass(frozen=True)
+class Metric:
+    """Description of a single registered metric.
+
+    Attributes
+    ----------
+    name        : Snake-case identifier, e.g. ``"mad_pct"``.
+    category    : Coarse grouping. Scenarios may define their own categories
+                  but the canonical taxonomy is::
+
+                      price_dynamics, anchoring_specific, agent_behaviour,
+                      microstructure, statistical_inference, phase_decomposition.
+    fn          : Callable ``fn(data, config) -> dict``.
+    output_keys : Tuple of keys the function is expected to populate.
+    references  : Citation strings (academic basis or analysis-bases.md anchor).
+    description : One-line human-readable summary.
+    """
+
+    name: str
+    category: str
+    fn: Callable[[Dict[str, Any], Dict[str, Any]], Dict[str, Any]]
+    output_keys: Tuple[str, ...]
+    references: Tuple[str, ...] = ()
+    description: str = ""
+
+
+class MetricsRegistry:
+    """In-memory registry of `Metric` instances, queryable by category.
+
+    The registry is intentionally simple: scenarios import a single module-level
+    instance, register all metrics at import time, and the analysis driver
+    enumerates them.
+    """
+
+    def __init__(self) -> None:
+        self._metrics: Dict[str, Metric] = {}
+
+    def register(self, metric: Metric) -> None:
+        """Add a metric to the registry. Raises if the name already exists."""
+        if metric.name in self._metrics:
+            raise ValueError(
+                f"Metric '{metric.name}' is already registered. "
+                "Choose a unique name or remove the prior registration."
+            )
+        self._metrics[metric.name] = metric
+
+    def names(self) -> List[str]:
+        return list(self._metrics)
+
+    def by_category(self) -> Dict[str, List[Metric]]:
+        """Group metrics by their declared category, preserving insertion order."""
+        grouped: Dict[str, List[Metric]] = {}
+        for metric in self._metrics.values():
+            grouped.setdefault(metric.category, []).append(metric)
+        return grouped
+
+    def get(self, name: str) -> Metric:
+        return self._metrics[name]
+
+    def compute_all(
+        self,
+        data: Dict[str, Any],
+        config: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """Run every registered metric and return a structured result dict.
+
+        Returns
+        -------
+        dict
+            ``{category: {metric_name: {output_key: value, ...}, ...}, ...}``
+            plus an ``"_unavailable"`` key listing metrics that raised
+            :class:`MetricUnavailable` together with the reason.
+        """
+        results: Dict[str, Dict[str, Any]] = {}
+        unavailable: Dict[str, str] = {}
+        for metric in self._metrics.values():
+            try:
+                output = metric.fn(data, config)
+            except MetricUnavailable as exc:
+                unavailable[metric.name] = str(exc)
+                continue
+            if not isinstance(output, dict):
+                raise TypeError(
+                    f"Metric '{metric.name}' must return a dict, got "
+                    f"{type(output).__name__}."
+                )
+            missing = [key for key in metric.output_keys if key not in output]
+            if missing:
+                raise ValueError(
+                    f"Metric '{metric.name}' did not return declared keys: "
+                    f"{missing}."
+                )
+            results.setdefault(metric.category, {})[metric.name] = output
+        out: Dict[str, Any] = dict(results)
+        if unavailable:
+            out["_unavailable"] = unavailable
+        return out
+
+    def flatten(self, computed: Dict[str, Any]) -> Dict[str, Any]:
+        """Flatten ``compute_all`` output into ``{metric_name: outputs}``."""
+        flat: Dict[str, Any] = {}
+        for category, metrics in computed.items():
+            if category == "_unavailable":
+                continue
+            for name, outputs in metrics.items():
+                flat[name] = outputs
+        return flat
+
+    def iter_metrics(self) -> Iterable[Metric]:
+        return iter(self._metrics.values())
 
 
 _BID_COLORS = [
